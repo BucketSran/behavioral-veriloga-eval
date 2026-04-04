@@ -303,21 +303,33 @@ def check_adpll_lock(rows: list[dict[str, float]]) -> tuple[bool, str]:
 
 
 CHECKS = {
+    # legacy short IDs (example-level names)
     "adc_dac_ideal_4b": check_adc_dac_ideal_4b,
-    "adpll_lock_smoke": check_adpll_lock,
     "clk_burst_gen": check_clk_burst_gen,
-    "clk_div_smoke": check_clk_div,
-    "comparator_smoke": check_comparator,
     "dac_binary_clk_4b": check_dac_binary_clk_4b,
     "dac_therm_16b": check_dac_therm_16b,
-    "ramp_gen_smoke": check_ramp_gen,
-    "d2b_4bit_smoke": check_d2b,
     "digital_basics": check_not_gate,
     "dwa_ptr_gen": check_dwa_ptr_gen,
     "gain_extraction": check_gain_extraction,
     "lfsr": check_lfsr,
     "noise_gen": check_noise_gen,
     "sar_adc_dac_weighted_8b": check_sar_adc_dac_weighted_8b,
+    # formal task IDs (tasks/end-to-end/voltage/)
+    "adpll_lock_smoke": check_adpll_lock,
+    "clk_div_smoke": check_clk_div,
+    "comparator_smoke": check_comparator,
+    "d2b_4bit_smoke": check_d2b,
+    "ramp_gen_smoke": check_ramp_gen,
+    "adc_dac_ideal_4b_smoke": check_adc_dac_ideal_4b,
+    "clk_burst_gen_smoke": check_clk_burst_gen,
+    "dac_binary_clk_4b_smoke": check_dac_binary_clk_4b,
+    "dac_therm_16b_smoke": check_dac_therm_16b,
+    "digital_basics_smoke": check_not_gate,
+    "dwa_ptr_gen_smoke": check_dwa_ptr_gen,
+    "gain_extraction_smoke": check_gain_extraction,
+    "lfsr_smoke": check_lfsr,
+    "noise_gen_smoke": check_noise_gen,
+    "sar_adc_dac_weighted_8b_smoke": check_sar_adc_dac_weighted_8b,
 }
 
 

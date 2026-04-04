@@ -10,10 +10,22 @@ from simulate_evas import has_behavior_check, run_case
 
 
 TASK_BY_EXAMPLE = {
+    # original formalized tasks
     "clk_div": "clk_div_smoke",
     "comparator": "comparator_smoke",
     "ramp_gen": "ramp_gen_smoke",
     "d2b_4b": "d2b_4bit_smoke",
+    # new benchmark seed tasks (2026-04-05)
+    "lfsr": "lfsr_smoke",
+    "clk_burst_gen": "clk_burst_gen_smoke",
+    "digital_basics": "digital_basics_smoke",
+    "dac_binary_clk_4b": "dac_binary_clk_4b_smoke",
+    "adc_dac_ideal_4b": "adc_dac_ideal_4b_smoke",
+    "dwa_ptr_gen": "dwa_ptr_gen_smoke",
+    "noise_gen": "noise_gen_smoke",
+    "dac_therm_16b": "dac_therm_16b_smoke",
+    "sar_adc_dac_weighted_8b": "sar_adc_dac_weighted_8b_smoke",
+    "gain_extraction": "gain_extraction_smoke",
 }
 
 
@@ -37,7 +49,12 @@ def first_ahdl_include(tb_path: Path) -> str | None:
 
 
 def task_dir_for(example_name: str) -> Path:
-    task_id = TASK_BY_EXAMPLE.get(example_name, "clk_div_smoke")
+    task_id = TASK_BY_EXAMPLE.get(example_name)
+    if task_id is None:
+        raise ValueError(
+            f"No task mapping found for example '{example_name}'. "
+            f"Add it to TASK_BY_EXAMPLE in {__file__}."
+        )
     return benchmark_root() / "tasks" / "end-to-end" / "voltage" / task_id
 
 

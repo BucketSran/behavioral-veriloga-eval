@@ -1,0 +1,34 @@
+{
+  "task_id": "noise_gen_smoke",
+  "task_name": "Gaussian Noise Generator Smoke Test",
+  "family": "end-to-end",
+  "category": "stimulus",
+  "domain": "voltage",
+  "difficulty": "easy",
+  "expected_backend": "evas",
+  "source": {
+    "type": "example",
+    "path": "behavioral-veriloga-eval/examples/stimulus/noise_gen"
+  },
+  "tier": "raw",
+  "verification_status": "pending",
+  "owner": "team",
+  "created_at": "2026-04-05",
+  "must_include": ["transition(", "$rdist_normal"],
+  "must_not_include": ["I(", "ddt("],
+  "inputs": ["prompt.md"],
+  "artifacts": ["dut.va", "tb_noise_gen.scs", "tran.csv"],
+  "scoring": ["dut_compile", "tb_compile", "sim_correct"],
+  "checks": {
+    "dut_compile": "required",
+    "tb_compile": "required",
+    "tran_generated": "required",
+    "sim_correct": "required",
+    "parity_required": false
+  },
+  "evidence": {
+    "result_path": "[TODO]",
+    "pr_link": "[TODO]",
+    "notes": "Converted from examples/stimulus/noise_gen; tests $rdist_normal semantic"
+  }
+}
