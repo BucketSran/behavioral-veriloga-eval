@@ -1,0 +1,29 @@
+// Library name: vaEvas
+// Cell name:    tb_gray_counter_4b
+// View name:    schematic
+simulator lang=spectre
+global 0
+
+// Power
+Vvdd (vdd 0) vsource dc=0.9 type=dc
+Vvss (vss 0) vsource dc=0.0 type=dc
+
+// Enable: always on
+Ven (en 0) vsource dc=0.9 type=dc
+
+// Reset: deassert (go high) after 50ns
+Vrstb (rstb 0) vsource type=pwl wave=[0 0 50e-9 0 51e-9 0.9 2e-6 0.9]
+
+// Clock: 100MHz (period=10ns)
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=5n rise=100p fall=100p
+
+// DUT (port order: VDD VSS CLK EN RSTB G3 G2 G1 G0)
+IDUT (vdd vss clk en rstb g3 g2 g1 g0) gray_counter_4b vth=0.45 tedge=100p
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+
+tran tran stop=2u maxstep=500p errpreset=conservative
+
+save clk rstb g3 g2 g1 g0
+
+ahdl_include "./gray_counter_4b.va"

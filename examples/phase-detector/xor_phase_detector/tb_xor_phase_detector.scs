@@ -1,0 +1,26 @@
+// Library name: vaEvas
+// Cell name:    tb_xor_phase_detector
+// View name:    schematic
+simulator lang=spectre
+global 0
+
+// Power
+Vvdd (vdd 0) vsource dc=0.9 type=dc
+Vvss (vss 0) vsource dc=0.0 type=dc
+
+// REF: 50MHz clock
+Vref (ref 0) vsource type=pulse val0=0 val1=0.9 period=20n width=10n rise=100p fall=100p
+
+// DIV: 50MHz clock with 2.5ns (90-degree) phase shift -> XOR output should have ~50% duty cycle
+Vdiv (div 0) vsource type=pulse val0=0 val1=0.9 period=20n delay=2.5n width=10n rise=100p fall=100p
+
+// DUT (port order: VDD VSS REF DIV PD_OUT)
+IDUT (vdd vss ref div pd_out) xor_phase_detector vth=0.45 tedge=50p
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+
+tran tran stop=200n maxstep=100p errpreset=conservative
+
+save ref div pd_out
+
+ahdl_include "./xor_phase_detector.va"

@@ -1,0 +1,52 @@
+// 3-bit Flash ADC (behavioral)
+// 7 comparator levels uniformly spaced between vrefn and vrefp.
+// Thermometer code -> binary encoding.
+// Output latched on rising CLK edge.
+// Pure voltage-domain, EVAS-compatible.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module flash_adc_3b(
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical VIN,
+    input  electrical CLK,
+    output electrical DOUT2,
+    output electrical DOUT1,
+    output electrical DOUT0
+);
+
+parameter real vrefp  = 0.9;
+parameter real vrefn  = 0.0;
+parameter real vth    = 0.45;
+parameter real tedge  = 100p;
+
+real lsb;
+real thermo;    // thermometer code (integer value 0-7)
+integer code;   // binary output (0-7)
+
+analog begin
+    @(initial_step) begin
+        lsb   = (vrefp - vrefn) / 8.0;
+        code  = 0;
+        $strobe("[flash_adc_3b] INIT | lsb=%.4gV vrefp=%.3gV", lsb, vrefp);
+    end
+
+    @(cross(V(CLK) - vth, +1)) begin
+        lsb    = (vrefp - vrefn) / 8.0;
+        thermo = floor((V(VIN) - vrefn) / lsb);
+        if (thermo < 0) thermo = 0;
+        if (thermo > 7) thermo = 7;
+        code = thermo;
+        $strobe("[flash_adc_3b] t=%.3f ns | vin=%.4gV code=%d", $abstime*1e9, V(VIN), code);
+    end
+
+    V(DOUT2) <+ transition((code >> 2) & 1 ? V(VDD) : V(VSS), 0, tedge, tedge);
+    V(DOUT1) <+ transition((code >> 1) & 1 ? V(VDD) : V(VSS), 0, tedge, tedge);
+    V(DOUT0) <+ transition((code >> 0) & 1 ? V(VDD) : V(VSS), 0, tedge, tedge);
+end
+
+endmodule

@@ -1,0 +1,36 @@
+// Sample and Hold
+// Samples V(IN) on rising edge of CLK; holds value at V(OUT) until next sample.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module sample_hold(
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical IN,
+    input  electrical CLK,
+    output electrical OUT
+);
+
+parameter real vth  = 0.45;   // logic threshold (V)
+parameter real tedge = 100p;  // output transition time (s)
+
+real held;
+
+analog begin
+    @(initial_step) begin
+        held = 0.0;
+        $strobe("[sample_hold] INIT | vth=%.3gV", vth);
+    end
+
+    @(cross(V(CLK) - vth, +1)) begin
+        held = V(IN);
+        $strobe("[sample_hold] t=%.3f ns | sampled=%.5gV", $abstime*1e9, held);
+    end
+
+    V(OUT) <+ transition(held, 0, tedge, tedge);
+end
+
+endmodule

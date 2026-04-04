@@ -1,0 +1,26 @@
+// Library name: vaEvas
+// Cell name:    tb_sample_hold
+// View name:    schematic
+simulator lang=spectre
+global 0
+
+// Power
+Vvdd (vdd 0) vsource dc=0.9 type=dc
+Vvss (vss 0) vsource dc=0.0 type=dc
+
+// Analog input: slow ramp 0 -> 0.9V over 1us
+Vin (in 0) vsource type=pwl wave=[0 0 1e-6 0.9]
+
+// Clock: 50MHz (period=20ns), 50% duty cycle
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=20n width=10n rise=200p fall=200p
+
+// DUT (port order: VDD VSS IN CLK OUT)
+IDUT (vdd vss in clk out) sample_hold vth=0.45 tedge=100p
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+
+tran tran stop=1u maxstep=500p errpreset=conservative
+
+save in clk out
+
+ahdl_include "./sample_hold.va"

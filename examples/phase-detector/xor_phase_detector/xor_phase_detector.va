@@ -1,0 +1,50 @@
+// XOR Phase Detector
+// Output is HIGH when REF and DIV are at different logic levels.
+// Average output voltage is proportional to phase difference.
+// Pure voltage-domain, EVAS-compatible.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module xor_phase_detector(
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical REF,
+    input  electrical DIV,
+    output electrical PD_OUT
+);
+
+parameter real vth  = 0.45;
+parameter real tedge = 50p;
+
+integer ref_hi;
+integer div_hi;
+integer xor_out;
+
+analog begin
+    @(initial_step) begin
+        ref_hi  = 0;
+        div_hi  = 0;
+        xor_out = 0;
+    end
+
+    @(cross(V(REF) - vth, +1) or cross(V(REF) - vth, -1)) begin
+        ref_hi = (V(REF) > vth) ? 1 : 0;
+        xor_out = ref_hi ^ div_hi;
+        $strobe("[xor_pd] t=%.3f ns | REF=%d DIV=%d OUT=%d",
+                $abstime*1e9, ref_hi, div_hi, xor_out);
+    end
+
+    @(cross(V(DIV) - vth, +1) or cross(V(DIV) - vth, -1)) begin
+        div_hi = (V(DIV) > vth) ? 1 : 0;
+        xor_out = ref_hi ^ div_hi;
+        $strobe("[xor_pd] t=%.3f ns | REF=%d DIV=%d OUT=%d",
+                $abstime*1e9, ref_hi, div_hi, xor_out);
+    end
+
+    V(PD_OUT) <+ transition(xor_out ? V(VDD) : V(VSS), 0, tedge, tedge);
+end
+
+endmodule

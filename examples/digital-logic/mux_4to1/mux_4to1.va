@@ -1,0 +1,56 @@
+// 4-to-1 Multiplexer
+// Selects one of four data inputs D3..D0 based on 2-bit select SEL1:SEL0.
+// Combinational: output updates whenever any input changes.
+// Pure voltage-domain, EVAS-compatible.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module mux_4to1(
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical D3,
+    input  electrical D2,
+    input  electrical D1,
+    input  electrical D0,
+    input  electrical SEL1,
+    input  electrical SEL0,
+    output electrical Y
+);
+
+parameter real vth   = 0.45;
+parameter real tedge = 100p;
+
+integer sel;
+real    y_val;
+
+analog begin
+    @(initial_step) begin
+        sel   = 0;
+        y_val = 0.0;
+    end
+
+    // Recompute on any input change
+    @(cross(V(SEL1) - vth, +1) or cross(V(SEL1) - vth, -1) or
+      cross(V(SEL0) - vth, +1) or cross(V(SEL0) - vth, -1) or
+      cross(V(D3)   - vth, +1) or cross(V(D3)   - vth, -1) or
+      cross(V(D2)   - vth, +1) or cross(V(D2)   - vth, -1) or
+      cross(V(D1)   - vth, +1) or cross(V(D1)   - vth, -1) or
+      cross(V(D0)   - vth, +1) or cross(V(D0)   - vth, -1)) begin
+
+        sel = ((V(SEL1) > vth) ? 2 : 0) + ((V(SEL0) > vth) ? 1 : 0);
+
+        if      (sel == 3) y_val = V(D3);
+        else if (sel == 2) y_val = V(D2);
+        else if (sel == 1) y_val = V(D1);
+        else               y_val = V(D0);
+
+        $strobe("[mux_4to1] t=%.3f ns | sel=%d Y=%.3gV", $abstime*1e9, sel, y_val);
+    end
+
+    V(Y) <+ transition(y_val, 0, tedge, tedge);
+end
+
+endmodule

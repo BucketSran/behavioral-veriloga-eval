@@ -1,0 +1,71 @@
+// 8-bit Parallel-to-Serial Converter
+// On rising edge of LOAD: latches parallel inputs D7..D0 into shift register.
+// On each rising CLK edge (when LOAD=0): shifts out one bit MSB-first on SOUT.
+// Pure voltage-domain, EVAS-compatible.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module serializer_8b(
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical D7,
+    input  electrical D6,
+    input  electrical D5,
+    input  electrical D4,
+    input  electrical D3,
+    input  electrical D2,
+    input  electrical D1,
+    input  electrical D0,
+    input  electrical LOAD,
+    input  electrical CLK,
+    output electrical SOUT
+);
+
+parameter real vth   = 0.45;
+parameter real tedge = 100p;
+
+integer shreg;   // 8-bit shift register (integer holds value)
+integer bit_cnt; // bits shifted out so far (0-7)
+integer sout_v;  // current output bit
+
+analog begin
+    @(initial_step) begin
+        shreg   = 0;
+        bit_cnt = 0;
+        sout_v  = 0;
+    end
+
+    @(cross(V(LOAD) - vth, +1)) begin
+        // Latch parallel data MSB-first into shift register
+        shreg = ((V(D7) > vth) ? 128 : 0)
+              + ((V(D6) > vth) ?  64 : 0)
+              + ((V(D5) > vth) ?  32 : 0)
+              + ((V(D4) > vth) ?  16 : 0)
+              + ((V(D3) > vth) ?   8 : 0)
+              + ((V(D2) > vth) ?   4 : 0)
+              + ((V(D1) > vth) ?   2 : 0)
+              + ((V(D0) > vth) ?   1 : 0);
+        bit_cnt = 0;
+        sout_v  = (shreg >> 7) & 1;
+        $strobe("[ser8b] t=%.3f ns | LOAD | data=0x%02x | sout=%d",
+                $abstime*1e9, shreg, sout_v);
+    end
+
+    @(cross(V(CLK) - vth, +1)) begin
+        if (V(LOAD) < vth) begin
+            // Shift left, output MSB
+            shreg   = (shreg << 1) & 255;
+            bit_cnt = bit_cnt + 1;
+            sout_v  = (shreg >> 7) & 1;
+            $strobe("[ser8b] t=%.3f ns | SHIFT bit=%d | sout=%d",
+                    $abstime*1e9, bit_cnt, sout_v);
+        end
+    end
+
+    V(SOUT) <+ transition(sout_v ? V(VDD) : V(VSS), 0, tedge, tedge);
+end
+
+endmodule

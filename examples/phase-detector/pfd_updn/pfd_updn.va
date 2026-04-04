@@ -1,0 +1,58 @@
+// Phase-Frequency Detector (UP/DN outputs)
+// Rising edge of REF sets UP high.
+// Rising edge of DIV sets DN high.
+// When both UP and DN are high, both are reset to 0 (with a short reset pulse delay).
+// Output: UP is high when REF leads DIV; DN is high when DIV leads REF.
+// Pure voltage-domain, EVAS-compatible.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module pfd_updn(
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical REF,
+    input  electrical DIV,
+    output electrical UP,
+    output electrical DN
+);
+
+parameter real vth   = 0.45;
+parameter real tedge = 50p;
+
+integer up_state;
+integer dn_state;
+
+analog begin
+    @(initial_step) begin
+        up_state = 0;
+        dn_state = 0;
+    end
+
+    @(cross(V(REF) - vth, +1)) begin
+        up_state = 1;
+        // Reset both if DN was already high
+        if (dn_state) begin
+            up_state = 0;
+            dn_state = 0;
+        end
+        $strobe("[pfd] t=%.3f ns | REF_rise | UP=%d DN=%d", $abstime*1e9, up_state, dn_state);
+    end
+
+    @(cross(V(DIV) - vth, +1)) begin
+        dn_state = 1;
+        // Reset both if UP was already high
+        if (up_state) begin
+            up_state = 0;
+            dn_state = 0;
+        end
+        $strobe("[pfd] t=%.3f ns | DIV_rise | UP=%d DN=%d", $abstime*1e9, up_state, dn_state);
+    end
+
+    V(UP) <+ transition(up_state ? V(VDD) : V(VSS), 0, tedge, tedge);
+    V(DN) <+ transition(dn_state ? V(VDD) : V(VSS), 0, tedge, tedge);
+end
+
+endmodule

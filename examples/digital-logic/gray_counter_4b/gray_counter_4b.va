@@ -1,0 +1,51 @@
+// 4-bit Gray Code Counter
+// On each rising CLK edge (when EN=1), increments a binary counter
+// and drives output as the corresponding 4-bit Gray code.
+// RSTB (active-low reset) resets counter to 0.
+// Pure voltage-domain, EVAS-compatible.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module gray_counter_4b(
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical CLK,
+    input  electrical EN,
+    input  electrical RSTB,
+    output electrical G3,
+    output electrical G2,
+    output electrical G1,
+    output electrical G0
+);
+
+parameter real vth   = 0.45;
+parameter real tedge = 100p;
+
+integer bin_cnt;  // 4-bit binary counter (0-15)
+integer gray;     // Gray-encoded value
+
+analog begin
+    @(initial_step or cross(V(RSTB) - vth, -1)) begin
+        bin_cnt = 0;
+        gray    = 0;
+        $strobe("[gray_cnt] INIT/RST | bin=%d gray=0x%01x", bin_cnt, gray);
+    end
+
+    @(cross(V(CLK) - vth, +1)) begin
+        if (V(RSTB) > vth && V(EN) > vth) begin
+            bin_cnt = (bin_cnt + 1) & 15;
+            gray    = bin_cnt ^ (bin_cnt >> 1);
+            $strobe("[gray_cnt] t=%.3f ns | bin=%d gray=0x%01x", $abstime*1e9, bin_cnt, gray);
+        end
+    end
+
+    V(G3) <+ transition((gray >> 3) & 1 ? V(VDD) : V(VSS), 0, tedge, tedge);
+    V(G2) <+ transition((gray >> 2) & 1 ? V(VDD) : V(VSS), 0, tedge, tedge);
+    V(G1) <+ transition((gray >> 1) & 1 ? V(VDD) : V(VSS), 0, tedge, tedge);
+    V(G0) <+ transition((gray >> 0) & 1 ? V(VDD) : V(VSS), 0, tedge, tedge);
+end
+
+endmodule
