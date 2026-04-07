@@ -247,6 +247,42 @@ def check_prbs7(rows: list[dict[str, float]]) -> tuple[bool, str]:
     return ok, f"serial_transitions={serial_transitions} unique_states={unique_states} state_transitions={state_transitions}"
 
 
+def check_therm2bin(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    therm_bits = [f"therm_{i}" for i in range(15)]
+    bin_bits = [f"bin_{i}" for i in range(4)]
+    required = set(therm_bits + bin_bits)
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing therm_* or bin_* signals"
+
+    def bit(row: dict[str, float], name: str) -> int:
+        return 1 if row[name] > 0.45 else 0
+
+    def thermometer_count(row: dict[str, float]) -> int:
+        return sum(bit(row, name) for name in therm_bits)
+
+    def binary_code(row: dict[str, float]) -> int:
+        return sum(bit(row, f"bin_{idx}") << idx for idx in range(4))
+
+    counts = [thermometer_count(row) for row in rows]
+    codes = [binary_code(row) for row in rows]
+
+    if not counts:
+        return False, "empty therm2bin dataset"
+
+    stable_indices = [
+        idx
+        for idx in range(1, len(rows))
+        if counts[idx] == counts[idx - 1]
+    ]
+    stable_ok = all(codes[idx] == min(counts[idx], 15) for idx in stable_indices)
+    distinct_counts = len(set(counts))
+    bubble_present = any(
+        counts[i] > counts[i + 1]
+        for i in range(len(counts) - 1)
+    )
+    return stable_ok and distinct_counts >= 6 and bubble_present, f"distinct_counts={distinct_counts} bubble_present={bubble_present} stable_points={len(stable_indices)}"
+
+
 def check_dwa_ptr_gen(rows: list[dict[str, float]]) -> tuple[bool, str]:
     if not rows or not {"clk_i", "rst_ni", "cell_en_code", "ptr_code"}.issubset(rows[0]):
         return False, "missing clk_i/rst_ni/cell_en_code/ptr_code"
@@ -315,6 +351,7 @@ CHECKS = {
     "gain_extraction": check_gain_extraction,
     "lfsr": check_lfsr,
     "prbs7": check_prbs7,
+    "therm2bin": check_therm2bin,
     "noise_gen": check_noise_gen,
     "sar_adc_dac_weighted_8b": check_sar_adc_dac_weighted_8b,
 }

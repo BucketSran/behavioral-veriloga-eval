@@ -1,6 +1,9 @@
 syntax:
   must_include:
     - "electrical"
+    - "transition("
+    - "bin_0"
+    - "therm_0"
   must_not_include:
     - "I("
     - "ddt("
@@ -10,4 +13,5 @@ tb_compile:
   backend: "evas"
 sim_correct:
   checks:
-    - "manual_review_expected_output"
+    - "thermometer_population_counts_match_binary"
+    - "bubble_inputs_do_not_break_encoding"
