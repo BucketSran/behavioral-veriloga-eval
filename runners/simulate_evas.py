@@ -327,6 +327,28 @@ def check_multimod_divider(rows: list[dict[str, float]]) -> tuple[bool, str]:
     return ok, f"base={base} pre_count={len(pre)} post_count={len(post)} switch_time_ns={switch_time * 1e9:.3f}"
 
 
+def check_bbpd(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"data", "clk", "retimed_data", "up", "down"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing data/clk/retimed_data/up/down"
+
+    data_edges = [i for i in range(1, len(rows)) if rows[i - 1]["data"] < 0.45 <= rows[i]["data"] or rows[i - 1]["data"] > 0.45 >= rows[i]["data"]]
+    up_edges = [i for i in range(1, len(rows)) if rows[i - 1]["up"] < 0.45 <= rows[i]["up"]]
+    down_edges = [i for i in range(1, len(rows)) if rows[i - 1]["down"] < 0.45 <= rows[i]["down"]]
+
+    if len(data_edges) < 6:
+        return False, "not enough data edges"
+
+    overlap = sum(1 for r in rows if r["up"] > 0.45 and r["down"] > 0.45)
+    overlap_frac = overlap / max(len(rows), 1)
+
+    edge_trigger_ok = len(up_edges) + len(down_edges) >= max(4, len(data_edges) // 4)
+    pulse_presence_ok = len(up_edges) >= 2 and len(down_edges) >= 2
+    non_overlap_ok = overlap_frac < 0.02
+    ok = edge_trigger_ok and pulse_presence_ok and non_overlap_ok
+    return ok, f"data_edges={len(data_edges)} up_edges={len(up_edges)} down_edges={len(down_edges)} overlap_frac={overlap_frac:.4f}"
+
+
 def check_dwa_ptr_gen(rows: list[dict[str, float]]) -> tuple[bool, str]:
     if not rows or not {"clk_i", "rst_ni", "cell_en_code", "ptr_code"}.issubset(rows[0]):
         return False, "missing clk_i/rst_ni/cell_en_code/ptr_code"
@@ -397,6 +419,7 @@ CHECKS = {
     "prbs7": check_prbs7,
     "therm2bin": check_therm2bin,
     "multimod_divider": check_multimod_divider,
+    "bbpd": check_bbpd,
     "noise_gen": check_noise_gen,
     "sar_adc_dac_weighted_8b": check_sar_adc_dac_weighted_8b,
 }
