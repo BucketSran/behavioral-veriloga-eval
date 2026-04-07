@@ -283,6 +283,50 @@ def check_therm2bin(rows: list[dict[str, float]]) -> tuple[bool, str]:
     return stable_ok and distinct_counts >= 6 and bubble_present, f"distinct_counts={distinct_counts} bubble_present={bubble_present} stable_points={len(stable_indices)}"
 
 
+def check_multimod_divider(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"clk_in", "mod", "prescaler_out", "mod_0", "mod_1", "mod_2", "mod_3"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing clk_in/mod/prescaler_out/mod_*"
+
+    times = [r["time"] for r in rows]
+    clk_edges = [i for i in range(1, len(rows)) if rows[i - 1]["clk_in"] < 0.45 <= rows[i]["clk_in"]]
+    out_edges = [i for i in range(1, len(rows)) if rows[i - 1]["prescaler_out"] < 0.45 <= rows[i]["prescaler_out"]]
+    clk_edge_times = [times[idx] for idx in clk_edges]
+
+    if len(clk_edges) < 8 or len(out_edges) < 4:
+        return False, "not enough clock or output edges"
+
+    base = sum((1 if rows[0][f"mod_{idx}"] > 0.45 else 0) << idx for idx in range(4))
+    if base < 1:
+        base = 1
+
+    switch_time = None
+    for idx in range(1, len(rows)):
+        if rows[idx - 1]["mod"] < 0.45 <= rows[idx]["mod"]:
+            switch_time = times[idx]
+            break
+
+    if switch_time is None:
+        return False, "no MOD transition found"
+
+    intervals = []
+    for idx in range(1, len(out_edges)):
+        start_idx = out_edges[idx - 1]
+        end_idx = out_edges[idx]
+        start_t = times[start_idx]
+        end_t = times[end_idx]
+        interval_len = sum(1 for clk_t in clk_edge_times if start_t < clk_t <= end_t)
+        intervals.append((start_t, end_t, interval_len))
+
+    pre = [interval for start_t, end_t, interval in intervals if end_t < switch_time]
+    post = [interval for start_t, end_t, interval in intervals if start_t >= switch_time]
+
+    pre_ok = len(pre) >= 2 and all(interval == base for interval in pre)
+    post_ok = len(post) >= 2 and all(interval == base + 1 for interval in post)
+    ok = pre_ok and post_ok
+    return ok, f"base={base} pre_count={len(pre)} post_count={len(post)} switch_time_ns={switch_time * 1e9:.3f}"
+
+
 def check_dwa_ptr_gen(rows: list[dict[str, float]]) -> tuple[bool, str]:
     if not rows or not {"clk_i", "rst_ni", "cell_en_code", "ptr_code"}.issubset(rows[0]):
         return False, "missing clk_i/rst_ni/cell_en_code/ptr_code"
@@ -352,6 +396,7 @@ CHECKS = {
     "lfsr": check_lfsr,
     "prbs7": check_prbs7,
     "therm2bin": check_therm2bin,
+    "multimod_divider": check_multimod_divider,
     "noise_gen": check_noise_gen,
     "sar_adc_dac_weighted_8b": check_sar_adc_dac_weighted_8b,
 }
