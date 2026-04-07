@@ -215,6 +215,38 @@ def check_lfsr(rows: list[dict[str, float]]) -> tuple[bool, str]:
     return ok, f"transitions={transitions} hi_frac={hi_frac:.3f}"
 
 
+def check_prbs7(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"clk", "rst_n", "en", "serial_out"} | {f"state_{i}" for i in range(7)}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing clk/rst_n/en/serial_out/state_*"
+
+    post = [r for r in rows if r["rst_n"] > 0.45 and r["en"] > 0.45]
+    if len(post) < 2:
+        return False, "no post-reset enabled samples"
+
+    def bit(row: dict[str, float], name: str) -> int:
+        return 1 if row[name] > 0.45 else 0
+
+    def state_code(row: dict[str, float]) -> int:
+        code = 0
+        for idx in range(7):
+            code |= bit(row, f"state_{idx}") << idx
+        return code
+
+    serial = [bit(r, "serial_out") for r in post]
+    states = [state_code(r) for r in post]
+
+    if all(code == 0 for code in states):
+        return False, "state stuck at zero"
+
+    serial_transitions = sum(1 for i in range(len(serial) - 1) if serial[i] != serial[i + 1])
+    unique_states = len(set(states))
+    state_transitions = sum(1 for i in range(len(states) - 1) if states[i] != states[i + 1])
+
+    ok = serial_transitions >= 10 and unique_states >= 8 and state_transitions >= 8
+    return ok, f"serial_transitions={serial_transitions} unique_states={unique_states} state_transitions={state_transitions}"
+
+
 def check_dwa_ptr_gen(rows: list[dict[str, float]]) -> tuple[bool, str]:
     if not rows or not {"clk_i", "rst_ni", "cell_en_code", "ptr_code"}.issubset(rows[0]):
         return False, "missing clk_i/rst_ni/cell_en_code/ptr_code"
@@ -282,6 +314,7 @@ CHECKS = {
     "dwa_ptr_gen": check_dwa_ptr_gen,
     "gain_extraction": check_gain_extraction,
     "lfsr": check_lfsr,
+    "prbs7": check_prbs7,
     "noise_gen": check_noise_gen,
     "sar_adc_dac_weighted_8b": check_sar_adc_dac_weighted_8b,
 }
