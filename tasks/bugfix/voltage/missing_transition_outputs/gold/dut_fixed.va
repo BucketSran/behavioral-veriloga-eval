@@ -1,0 +1,17 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module comp_flag (VDD, VSS, VIN, FLAG);
+    inout VDD, VSS;
+    input VIN;
+    output FLAG;
+    electrical VDD, VSS, VIN, FLAG;
+
+    parameter real vth = 0.45;
+    parameter real td  = 0p;
+    parameter real trf = 20p;
+
+    analog begin
+        V(FLAG) <+ transition((V(VIN) > vth) ? V(VDD) : V(VSS), td, trf, trf);
+    end
+endmodule

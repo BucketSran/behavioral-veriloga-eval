@@ -349,6 +349,106 @@ def check_bbpd(rows: list[dict[str, float]]) -> tuple[bool, str]:
     return ok, f"data_edges={len(data_edges)} up_edges={len(up_edges)} down_edges={len(down_edges)} overlap_frac={overlap_frac:.4f}"
 
 
+def _find_bus_columns(sample: dict[str, float], base: str) -> dict[int, str]:
+    cols: dict[int, str] = {}
+    pattern = re.compile(rf"^{re.escape(base)}(?:_|\[)?(\d+)\]?$", re.IGNORECASE)
+    for name in sample:
+        m = pattern.match(name)
+        if m:
+            cols[int(m.group(1))] = name
+    return cols
+
+
+def _pick_column(sample: dict[str, float], candidates: list[str]) -> str | None:
+    lower_map = {k.lower(): k for k in sample.keys()}
+    for name in candidates:
+        if name in sample:
+            return name
+        if name.lower() in lower_map:
+            return lower_map[name.lower()]
+    return None
+
+
+def check_bad_bus_output_loop(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    if not rows:
+        return False, "empty tran.csv"
+
+    sample = rows[0]
+    code_cols = _find_bus_columns(sample, "CODE")
+    dout_cols = _find_bus_columns(sample, "DOUT")
+    bit_indices = [idx for idx in range(4) if idx in code_cols and idx in dout_cols]
+
+    if len(bit_indices) != 4:
+        return False, "missing CODE_*/DOUT_* bit columns"
+
+    mismatch = 0
+    total = 0
+    code_patterns = set()
+    dout_patterns = set()
+    uniform_rows = 0
+
+    for row in rows:
+        code_vec = []
+        dout_vec = []
+        for idx in bit_indices:
+            code_bit = 1 if row[code_cols[idx]] > 0.45 else 0
+            dout_bit = 1 if row[dout_cols[idx]] > 0.45 else 0
+            code_vec.append(code_bit)
+            dout_vec.append(dout_bit)
+            total += 1
+            if code_bit != dout_bit:
+                mismatch += 1
+        code_tuple = tuple(code_vec)
+        dout_tuple = tuple(dout_vec)
+        code_patterns.add(code_tuple)
+        dout_patterns.add(dout_tuple)
+        if len(set(dout_tuple)) == 1:
+            uniform_rows += 1
+
+    mismatch_frac = mismatch / max(total, 1)
+    uniform_frac = uniform_rows / max(len(rows), 1)
+    ok = mismatch_frac < 0.05 and len(code_patterns) >= 6 and len(dout_patterns) >= 6 and uniform_frac < 0.8
+    return ok, f"mismatch_frac={mismatch_frac:.4f} code_patterns={len(code_patterns)} dout_patterns={len(dout_patterns)} uniform_frac={uniform_frac:.3f}"
+
+
+def check_missing_transition_outputs(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    if not rows:
+        return False, "empty tran.csv"
+
+    sample = rows[0]
+    vin_col = _pick_column(sample, ["VIN", "vin", "vin_i"])
+    flag_col = _pick_column(sample, ["FLAG", "flag", "flag_o", "out_p", "out"])
+    if vin_col is None or flag_col is None:
+        return False, "missing VIN/FLAG columns"
+
+    vins = [r[vin_col] for r in rows]
+    flags = [r[flag_col] for r in rows]
+    vmin = min(vins)
+    vmax = max(vins)
+    if vmax - vmin < 0.2:
+        return False, "VIN does not cross threshold range"
+
+    threshold = 0.5 * (vmax + vmin)
+    margin = max(0.05 * (vmax - vmin), 0.03)
+    stable_indices = [i for i, vin in enumerate(vins) if abs(vin - threshold) > margin]
+    if len(stable_indices) < max(10, len(rows) // 4):
+        return False, "insufficient stable samples away from threshold"
+
+    mismatch = 0
+    for idx in stable_indices:
+        expected = vins[idx] > threshold
+        observed = flags[idx] > 0.45
+        if expected != observed:
+            mismatch += 1
+
+    mismatch_frac = mismatch / len(stable_indices)
+    flag_span = max(flags) - min(flags)
+    high_seen = any(flags[idx] > 0.45 for idx in stable_indices)
+    low_seen = any(flags[idx] <= 0.45 for idx in stable_indices)
+    ok = mismatch_frac < 0.08 and flag_span > 0.4 and high_seen and low_seen
+    return ok, f"mismatch_frac={mismatch_frac:.4f} flag_span={flag_span:.3f} stable_samples={len(stable_indices)}"
+
+
 def check_dwa_ptr_gen(rows: list[dict[str, float]]) -> tuple[bool, str]:
     if not rows or not {"clk_i", "rst_ni", "cell_en_code", "ptr_code"}.issubset(rows[0]):
         return False, "missing clk_i/rst_ni/cell_en_code/ptr_code"
@@ -420,6 +520,8 @@ CHECKS = {
     "therm2bin": check_therm2bin,
     "multimod_divider": check_multimod_divider,
     "bbpd": check_bbpd,
+    "bad_bus_output_loop": check_bad_bus_output_loop,
+    "missing_transition_outputs": check_missing_transition_outputs,
     "noise_gen": check_noise_gen,
     "sar_adc_dac_weighted_8b": check_sar_adc_dac_weighted_8b,
 }
