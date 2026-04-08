@@ -86,6 +86,68 @@ def check_clk_div(rows: list[dict[str, float]]) -> tuple[bool, str]:
     return (3.0 <= ratio <= 5.0), f"edge_ratio={ratio:.2f}"
 
 
+def check_clk_divider(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    if not rows or not {"clk_in", "clk_out", "lock"}.issubset(rows[0]):
+        return False, "missing clk_in/clk_out/lock"
+
+    sample = rows[0]
+    div_cols: list[str] = []
+    for idx in range(8):
+        col = None
+        for candidate in (f"div_code_{idx}", f"div_code[{idx}]"):
+            if candidate in sample:
+                col = candidate
+                break
+        if col is None:
+            return False, "missing div_code_*"
+        div_cols.append(col)
+
+    ratio = 0
+    for idx, col in enumerate(div_cols):
+        if sample[col] > 0.45:
+            ratio |= (1 << idx)
+    if ratio < 1:
+        ratio = 1
+
+    times = [r["time"] for r in rows]
+    clk_vals = [r["clk_in"] for r in rows]
+    out_vals = [r["clk_out"] for r in rows]
+    lock_vals = [r["lock"] for r in rows]
+
+    in_edges = rising_edges(clk_vals, times)
+    out_edges = rising_edges(out_vals, times)
+    lock_seen = any(v > 0.45 for v in lock_vals)
+
+    if ratio == 1:
+        level_match = sum(1 for ci, co in zip(clk_vals, out_vals) if ((ci > 0.45) == (co > 0.45))) / max(len(rows), 1)
+        edge_ratio = len(in_edges) / max(len(out_edges), 1)
+        ok = level_match > 0.9 and 0.8 <= edge_ratio <= 1.25 and lock_seen
+        return ok, f"ratio=1 level_match={level_match:.3f} edge_ratio={edge_ratio:.2f} lock_seen={lock_seen}"
+
+    if len(in_edges) < max(12, ratio * 2) or len(out_edges) < 3:
+        return False, "not enough clock edges"
+
+    intervals: list[int] = []
+    for idx in range(1, len(out_edges)):
+        start_t = out_edges[idx - 1]
+        end_t = out_edges[idx]
+        in_count = sum(1 for t in in_edges if start_t < t <= end_t)
+        intervals.append(in_count)
+
+    if len(intervals) < 2:
+        return False, "insufficient output periods"
+
+    measured = intervals[1:] if len(intervals) > 2 else intervals
+    good = sum(1 for n in measured if abs(n - ratio) <= 1)
+    period_match = good / len(measured)
+
+    high_seen = any(v > 0.45 for v in out_vals)
+    low_seen = any(v <= 0.45 for v in out_vals)
+
+    ok = period_match >= 0.8 and lock_seen and high_seen and low_seen
+    return ok, f"ratio={ratio} period_match={period_match:.3f} periods={len(measured)} lock_seen={lock_seen}"
+
+
 def check_comparator(rows: list[dict[str, float]]) -> tuple[bool, str]:
     if not rows or not {"vinp", "vinn", "out_p"}.issubset(rows[0]):
         return False, "missing vinp/vinn/out_p"
@@ -507,6 +569,7 @@ CHECKS = {
     "adc_dac_ideal_4b": check_adc_dac_ideal_4b,
     "clk_burst_gen": check_clk_burst_gen,
     "clk_div_smoke": check_clk_div,
+    "clk_divider": check_clk_divider,
     "comparator_smoke": check_comparator,
     "dac_binary_clk_4b": check_dac_binary_clk_4b,
     "dac_therm_16b": check_dac_therm_16b,
