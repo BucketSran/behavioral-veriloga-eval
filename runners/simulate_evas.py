@@ -269,8 +269,42 @@ def check_gain_extraction(rows: list[dict[str, float]]) -> tuple[bool, str]:
     return ok, f"diff_gain={gain:.2f}"
 
 
+def check_adpll_lock(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"ref_clk", "fb_clk", "lock", "vctrl_mon"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing ref_clk/fb_clk/lock/vctrl_mon"
+
+    times = [r["time"] for r in rows]
+    ref_edges = rising_edges([r["ref_clk"] for r in rows], times)
+    fb_edges = rising_edges([r["fb_clk"] for r in rows], times)
+    lock_edges = rising_edges([r["lock"] for r in rows], times)
+
+    if len(ref_edges) < 8 or len(fb_edges) < 8:
+        return False, f"not_enough_edges ref={len(ref_edges)} fb={len(fb_edges)}"
+
+    t_end = times[-1]
+    t_start = t_end * 0.8
+    ref_late = [t for t in ref_edges if t_start <= t <= t_end]
+    fb_late = [t for t in fb_edges if t_start <= t <= t_end]
+    if not ref_late or not fb_late:
+        return False, "missing late-window edges"
+
+    ratio = len(fb_late) / max(len(ref_late), 1)
+    lock_ok = bool(lock_edges) and lock_edges[0] <= 1.0e-6
+    vctrl_vals = [r["vctrl_mon"] for r in rows]
+    vctrl_in_range = all(-1e-6 <= v <= 1.2 for v in vctrl_vals)
+    freq_ok = 0.95 <= ratio <= 1.05
+    ok = freq_ok and lock_ok and vctrl_in_range
+    return ok, (
+        f"late_edge_ratio={ratio:.3f} "
+        f"lock_time={(lock_edges[0] if lock_edges else float('nan')):.3e} "
+        f"vctrl_range_ok={vctrl_in_range}"
+    )
+
+
 CHECKS = {
     "adc_dac_ideal_4b": check_adc_dac_ideal_4b,
+    "adpll_lock_smoke": check_adpll_lock,
     "clk_burst_gen": check_clk_burst_gen,
     "clk_div_smoke": check_clk_div,
     "comparator_smoke": check_comparator,
