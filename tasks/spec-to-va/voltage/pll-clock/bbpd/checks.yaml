@@ -2,6 +2,9 @@ syntax:
   must_include:
     - "@(cross("
     - "electrical"
+    - "up"
+    - "down"
+    - "retimed_data"
   must_not_include:
     - "I("
     - "ddt("
@@ -11,4 +14,6 @@ tb_compile:
   backend: "evas"
 sim_correct:
   checks:
-    - "manual_review_expected_output"
+    - "data_edges_trigger_up_or_down"
+    - "up_down_pulses_present"
+    - "up_down_not_high_together"

@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "prbs7_ref.va"
+
+Vclk   (clk 0)    vsource type=pulse val0=0 val1=0.9 period=1n delay=0.1n rise=20p fall=20p width=0.5n
+Vrst_n (rst_n 0)  vsource type=pulse val0=0 val1=0.9 period=300n delay=2n rise=20p fall=20p width=298n
+Ven    (en 0)     vsource dc=0.9
+
+XDUT (clk rst_n en serial_out state_0 state_1 state_2 state_3 state_4 state_5 state_6) prbs7_ref
+
+tran tran stop=120n maxstep=50p
+save clk:2e rst_n:2e en:2e serial_out:2e state_0:2e state_1:2e state_2:2e state_3:2e state_4:2e state_5:2e state_6:2e

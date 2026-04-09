@@ -1,0 +1,69 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+// Reference PRBS-7 generator using a 7-bit LFSR.
+// Serial output is the MSB state bit.
+// Parallel outputs expose all 7 state bits individually.
+module prbs7_ref (
+    input  electrical clk,
+    input  electrical rst_n,
+    input  electrical en,
+    output electrical serial_out,
+    output electrical state_0,
+    output electrical state_1,
+    output electrical state_2,
+    output electrical state_3,
+    output electrical state_4,
+    output electrical state_5,
+    output electrical state_6
+);
+
+parameter real vdd = 0.9;
+parameter real vth = 0.45;
+parameter real trf = 10p;
+parameter real td  = 0p;
+parameter integer seed = 7'b1111111;
+
+integer state[0:6];
+integer next_state[0:6];
+integer i;
+integer feedback;
+integer serial_bit;
+
+analog begin
+    @(initial_step) begin
+        for (i = 0; i < 7; i = i + 1)
+            state[i] = (seed >> i) & 1;
+        if (state[0] == 0 && state[1] == 0 && state[2] == 0 && state[3] == 0 && state[4] == 0 && state[5] == 0 && state[6] == 0)
+            state[6] = 1;
+    end
+
+    @(cross(V(clk) - vth, +1)) begin
+        if (V(rst_n) < vth) begin
+            for (i = 0; i < 7; i = i + 1)
+                state[i] = (seed >> i) & 1;
+            if (state[0] == 0 && state[1] == 0 && state[2] == 0 && state[3] == 0 && state[4] == 0 && state[5] == 0 && state[6] == 0)
+                state[6] = 1;
+        end else if (V(en) > vth) begin
+            feedback = state[6] ^ state[5];
+            next_state[0] = feedback;
+            for (i = 1; i < 7; i = i + 1)
+                next_state[i] = state[i - 1];
+            for (i = 0; i < 7; i = i + 1)
+                state[i] = next_state[i];
+        end
+    end
+
+    serial_bit = state[6];
+
+    V(serial_out) <+ transition(serial_bit ? vdd : 0.0, td, trf, trf);
+    V(state_0)    <+ transition(state[0] ? vdd : 0.0, td, trf, trf);
+    V(state_1)    <+ transition(state[1] ? vdd : 0.0, td, trf, trf);
+    V(state_2)    <+ transition(state[2] ? vdd : 0.0, td, trf, trf);
+    V(state_3)    <+ transition(state[3] ? vdd : 0.0, td, trf, trf);
+    V(state_4)    <+ transition(state[4] ? vdd : 0.0, td, trf, trf);
+    V(state_5)    <+ transition(state[5] ? vdd : 0.0, td, trf, trf);
+    V(state_6)    <+ transition(state[6] ? vdd : 0.0, td, trf, trf);
+end
+
+endmodule

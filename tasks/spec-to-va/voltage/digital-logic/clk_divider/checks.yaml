@@ -1,6 +1,9 @@
 syntax:
   must_include:
     - "electrical"
+    - "@(cross("
+    - "transition("
+    - "lock"
   must_not_include:
     - "I("
     - "ddt("
@@ -10,4 +13,7 @@ tb_compile:
   backend: "evas"
 sim_correct:
   checks:
-    - "manual_review_expected_output"
+    - "ratio_code_clamped_to_1_255"
+    - "synchronous_reset_clears_state"
+    - "output_clock_divides_input"
+    - "lock_asserts_after_first_full_period"

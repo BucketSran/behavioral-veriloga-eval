@@ -1,0 +1,27 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "therm2bin_ref.va"
+
+// Thermometer pattern: monotonic ramp with one bubble on therm_8.
+// Bubble window is offset from neighboring transitions to improve robustness.
+Vt0  (therm_0  0) vsource type=pwl wave=[0 0 0.5n 0.9 20n 0.9]
+Vt1  (therm_1  0) vsource type=pwl wave=[0 0 1.5n 0.9 20n 0.9]
+Vt2  (therm_2  0) vsource type=pwl wave=[0 0 2.5n 0.9 20n 0.9]
+Vt3  (therm_3  0) vsource type=pwl wave=[0 0 3.5n 0.9 20n 0.9]
+Vt4  (therm_4  0) vsource type=pwl wave=[0 0 4.5n 0.9 20n 0.9]
+Vt5  (therm_5  0) vsource type=pwl wave=[0 0 5.5n 0.9 20n 0.9]
+Vt6  (therm_6  0) vsource type=pwl wave=[0 0 6.5n 0.9 20n 0.9]
+Vt7  (therm_7  0) vsource type=pwl wave=[0 0 7.5n 0.9 20n 0.9]
+Vt8  (therm_8  0) vsource type=pwl wave=[0 0 8.5n 0.9 9.5n 0.0 10.5n 0.9 20n 0.9]
+Vt9  (therm_9  0) vsource type=pwl wave=[0 0 9.0n 0.9 20n 0.9]
+Vt10 (therm_10 0) vsource type=pwl wave=[0 0 11.0n 0.9 20n 0.9]
+Vt11 (therm_11 0) vsource type=pwl wave=[0 0 11.5n 0.9 20n 0.9]
+Vt12 (therm_12 0) vsource type=pwl wave=[0 0 12.5n 0.9 20n 0.9]
+Vt13 (therm_13 0) vsource type=pwl wave=[0 0 13.5n 0.9 20n 0.9]
+Vt14 (therm_14 0) vsource type=pwl wave=[0 0 14.5n 0.9 20n 0.9]
+
+XDUT (therm_0 therm_1 therm_2 therm_3 therm_4 therm_5 therm_6 therm_7 therm_8 therm_9 therm_10 therm_11 therm_12 therm_13 therm_14 bin_0 bin_1 bin_2 bin_3) therm2bin_ref
+
+tran tran stop=18n maxstep=50p
+save therm_0:2e therm_1:2e therm_2:2e therm_3:2e therm_4:2e therm_5:2e therm_6:2e therm_7:2e therm_8:2e therm_9:2e therm_10:2e therm_11:2e therm_12:2e therm_13:2e therm_14:2e bin_0:2e bin_1:2e bin_2:2e bin_3:2e

@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "dut_fixed.va"
+
+VVDD (VDD 0) vsource dc=0.9
+VVSS (VSS 0) vsource dc=0
+VVIN (VIN 0) vsource type=pulse val0=0.2 val1=0.7 delay=5n rise=100p fall=100p width=20n period=40n
+
+XDUT (VDD VSS VIN FLAG) comp_flag
+
+tran tran stop=220n maxstep=100p
+save VIN:d FLAG:d
