@@ -26,31 +26,27 @@ parameter real trf = 10p;
 parameter real td  = 0p;
 
 integer ratio;
-integer prev_ratio;
 integer count;
-integer low_len;
-integer high_len;
-integer segment_len;
+integer prev_ratio;
 integer out_state;
 integer lock_state;
-integer out_rise_count;
-integer in_rise_count;
+integer edge_count;
+integer low_len;
+integer high_len;
 
 analog begin
     @(initial_step) begin
         ratio = 1;
-        prev_ratio = 1;
         count = 0;
-        low_len = 1;
-        high_len = 1;
-        segment_len = 1;
+        prev_ratio = 1;
         out_state = 0;
         lock_state = 0;
-        out_rise_count = 0;
-        in_rise_count = 0;
+        edge_count = 0;
+        low_len = 1;
+        high_len = 1;
     end
 
-    @(cross(V(clk_in) - vth, +1) or cross(V(clk_in) - vth, -1)) begin
+    @(cross(V(clk_in) - vth, +1)) begin
         ratio = (V(div_code_0) > vth ? 1 : 0)
               + (V(div_code_1) > vth ? 2 : 0)
               + (V(div_code_2) > vth ? 4 : 0)
@@ -64,65 +60,52 @@ analog begin
             ratio = 1;
 
         if (V(rst_n) < vth) begin
-            prev_ratio = ratio;
             count = 0;
-            low_len = (ratio > 1) ? (ratio / 2) : 1;
-            if (low_len < 1)
-                low_len = 1;
-            high_len = (ratio > 1) ? (ratio - low_len) : 1;
-            segment_len = low_len;
+            prev_ratio = ratio;
             out_state = 0;
             lock_state = 0;
-            out_rise_count = 0;
-            in_rise_count = 0;
+            edge_count = 0;
         end else if (ratio == 1) begin
-            if (prev_ratio != 1) begin
-                prev_ratio = 1;
-                count = 0;
-                out_state = 0;
-                lock_state = 0;
-                out_rise_count = 0;
-                in_rise_count = 0;
-            end
-            if (V(clk_in) > vth) begin
-                out_state = 1;
-                in_rise_count = in_rise_count + 1;
-                if (in_rise_count >= 2)
-                    lock_state = 1;
-            end else begin
-                out_state = 0;
-            end
+            prev_ratio = ratio;
+            edge_count = edge_count + 1;
+            out_state = 1;
+            count = 0;
+            if (edge_count >= 1)
+                lock_state = 1;
         end else begin
-            if (prev_ratio != ratio) begin
+            if (ratio != prev_ratio) begin
                 prev_ratio = ratio;
                 count = 0;
-                low_len = ratio / 2;
-                if (low_len < 1)
-                    low_len = 1;
-                high_len = ratio - low_len;
-                segment_len = low_len;
                 out_state = 0;
                 lock_state = 0;
-                out_rise_count = 0;
+                edge_count = 0;
             end
 
-            // Count only on input rising edges; alternate low/high segment lengths.
-            if (V(clk_in) > vth) begin
-                count = count + 1;
-                if (count >= segment_len) begin
-                    count = 0;
-                    if (out_state == 0) begin
-                        out_state = 1;
-                        segment_len = high_len;
-                        out_rise_count = out_rise_count + 1;
-                        if (out_rise_count >= 2)
-                            lock_state = 1;
-                    end else begin
-                        out_state = 0;
-                        segment_len = low_len;
-                    end
-                end
-            end
+            edge_count = edge_count + 1;
+            if (edge_count >= ratio)
+                lock_state = 1;
+
+            // Use floor(N/2) and ceil(N/2) segment lengths for odd ratios.
+            low_len = ratio >> 1;
+            if (low_len < 1)
+                low_len = 1;
+            high_len = ratio - low_len;
+
+            if (count <= 0)
+                count = (out_state == 0) ? low_len : high_len;
+
+            count = count - 1;
+            if (count <= 0)
+                out_state = (out_state == 0) ? 1 : 0;
+        end
+    end
+
+    @(cross(V(clk_in) - vth, -1)) begin
+        if (V(rst_n) < vth) begin
+            out_state = 0;
+        end else if (ratio == 1) begin
+            out_state = 0;
+            lock_state = 1;
         end
     end
 

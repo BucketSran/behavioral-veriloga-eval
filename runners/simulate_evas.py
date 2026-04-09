@@ -116,13 +116,17 @@ def check_clk_divider(rows: list[dict[str, float]]) -> tuple[bool, str]:
 
     in_edges = rising_edges(clk_vals, times)
     out_edges = rising_edges(out_vals, times)
-    lock_seen = any(v > 0.45 for v in lock_vals)
+    lock_edges = rising_edges(lock_vals, times)
+    final_lock_high = lock_vals[-1] > 0.45
+
+    if len(in_edges) < 8 or len(out_edges) < 2:
+        return False, "not enough clock edges"
 
     if ratio == 1:
         level_match = sum(1 for ci, co in zip(clk_vals, out_vals) if ((ci > 0.45) == (co > 0.45))) / max(len(rows), 1)
         edge_ratio = len(in_edges) / max(len(out_edges), 1)
-        ok = level_match > 0.9 and 0.8 <= edge_ratio <= 1.25 and lock_seen
-        return ok, f"ratio=1 level_match={level_match:.3f} edge_ratio={edge_ratio:.2f} lock_seen={lock_seen}"
+        ok = level_match > 0.98 and 0.95 <= edge_ratio <= 1.05 and final_lock_high
+        return ok, f"ratio_code=1 in_edges={len(in_edges)} out_edges={len(out_edges)} lock_edges={len(lock_edges)} final_lock_high={final_lock_high} level_match={level_match:.3f} edge_ratio={edge_ratio:.3f}"
 
     if len(in_edges) < max(12, ratio * 2) or len(out_edges) < 3:
         return False, "not enough clock edges"
@@ -138,14 +142,18 @@ def check_clk_divider(rows: list[dict[str, float]]) -> tuple[bool, str]:
         return False, "insufficient output periods"
 
     measured = intervals[1:] if len(intervals) > 2 else intervals
-    good = sum(1 for n in measured if abs(n - ratio) <= 1)
-    period_match = good / len(measured)
+    mismatch = [n for n in measured if n != ratio]
+    period_match = 1.0 - (len(mismatch) / len(measured))
+
+    hist: dict[int, int] = {}
+    for n in measured:
+        hist[n] = hist.get(n, 0) + 1
 
     high_seen = any(v > 0.45 for v in out_vals)
     low_seen = any(v <= 0.45 for v in out_vals)
 
-    ok = period_match >= 0.8 and lock_seen and high_seen and low_seen
-    return ok, f"ratio={ratio} period_match={period_match:.3f} periods={len(measured)} lock_seen={lock_seen}"
+    ok = (len(mismatch) == 0) and final_lock_high and high_seen and low_seen
+    return ok, f"ratio_code={ratio} in_edges={len(in_edges)} out_edges={len(out_edges)} lock_edges={len(lock_edges)} final_lock_high={final_lock_high} period_match={period_match:.3f} interval_hist={hist}"
 
 
 def check_comparator(rows: list[dict[str, float]]) -> tuple[bool, str]:
@@ -331,18 +339,37 @@ def check_therm2bin(rows: list[dict[str, float]]) -> tuple[bool, str]:
     if not counts:
         return False, "empty therm2bin dataset"
 
-    stable_indices = [
-        idx
-        for idx in range(1, len(rows))
-        if counts[idx] == counts[idx - 1]
-    ]
-    stable_ok = all(codes[idx] == min(counts[idx], 15) for idx in stable_indices)
+    def far_from_threshold(v: float, lo: float = 0.35, hi: float = 0.55) -> bool:
+        return v <= lo or v >= hi
+
+    stable_indices = []
+    for idx in range(1, len(rows)):
+        if counts[idx] != counts[idx - 1]:
+            continue
+        therm_stable = all(
+            far_from_threshold(rows[idx][name]) and far_from_threshold(rows[idx - 1][name])
+            for name in therm_bits
+        )
+        bin_stable = all(
+            far_from_threshold(rows[idx][name])
+            for name in bin_bits
+        )
+        if therm_stable and bin_stable:
+            stable_indices.append(idx)
+
+    min_stable_points = max(10, len(rows) // 20)
+    if len(stable_indices) < min_stable_points:
+        return False, f"insufficient_strict_stable_points={len(stable_indices)}"
+
+    mismatches = [idx for idx in stable_indices if codes[idx] != min(counts[idx], 15)]
+    stable_ok = len(mismatches) == 0
     distinct_counts = len(set(counts))
     bubble_present = any(
         counts[i] > counts[i + 1]
         for i in range(len(counts) - 1)
     )
-    return stable_ok and distinct_counts >= 6 and bubble_present, f"distinct_counts={distinct_counts} bubble_present={bubble_present} stable_points={len(stable_indices)}"
+    ok = stable_ok and distinct_counts >= 6 and bubble_present
+    return ok, f"distinct_counts={distinct_counts} bubble_present={bubble_present} strict_stable_points={len(stable_indices)} strict_mismatches={len(mismatches)}"
 
 
 def check_multimod_divider(rows: list[dict[str, float]]) -> tuple[bool, str]:
