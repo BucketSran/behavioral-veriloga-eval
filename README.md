@@ -12,11 +12,28 @@ This benchmark is modeled after the strengths of VerilogEval v2:
 
 ## Scope
 
-This benchmark is intentionally **EVAS-only**.
+This benchmark is intentionally **EVAS-first**.
 
 It only covers **pure voltage-domain Verilog-A modules** that can be verified by
 EVAS. Current-domain and mixed-domain modules are out of scope for this
-benchmark.
+benchmark, and the benchmark score itself is still driven by EVAS-oriented task
+checks. When bridge access is available, supported gold-backed tasks may also
+record Spectre parity evidence for engineering closure and regression tracking.
+
+## Current Status
+
+As of 2026-04-18:
+
+1. `end-to-end`: 22 tasks closed
+2. `spec-to-va`: 16 tasks closed
+3. `bugfix`: 4 tasks closed
+4. `tb-generation`: 4 tasks closed for EVAS scoring, with EVAS+Spectre execution evidence recorded
+5. benchmark / closed-loop rows: 24 `dual-validated`
+
+There are currently no open benchmark rows with `verification_status != passed`.
+The remaining project work is now mostly about provenance backfill, workflow
+hardening, warning cleanup, and future benchmark expansion rather than missing
+benchmark functionality.
 
 It is split into four task families:
 
@@ -97,9 +114,31 @@ For end-to-end tasks that already include checked-in `gold/` DUT and testbench
 assets, use `python3 runners/run_gold_suite.py` to generate reusable EVAS
 verification evidence under `results/gold-suite/`.
 
-When Spectre parity is needed, use `python3 runners/run_gold_dual_suite.py`
-with the active `virtuoso-bridge-lite` repo path and `VB_CADENCE_CSHRC` to
-emit EVAS + Spectre reports under `results/gold-dual-suite*/`.
+When Spectre parity is needed, use `./scripts/run_with_bridge.sh python3
+runners/run_gold_dual_suite.py ...` so the SSH tunnel lifetime is tied to the
+command being executed. This wrapper runs `runners/bridge_preflight.py` first,
+starts a temporary local tunnel, and then emits EVAS + Spectre reports under
+`results/gold-dual-suite*/`.
+
+If you want a quick environment check before a longer run, use
+`./scripts/check_bridge_ready.sh` from the repo root. The standalone
+`start_bridge_tunnel.sh` helper still exists for manual debugging, but the
+wrapper is the recommended reproducible workflow in this repo.
+
+## Maintenance Flow
+
+When project status changes, update docs in this order:
+
+1. update `coordination/docs/benchmark/BENCHMARK_RESULT_TABLE.md`
+2. run `python coordination/scripts/sync_task_assignment.py`
+3. run `python coordination/scripts/sync_task_assignment.py --check`
+4. update `WORK_TODO.md` only after the result table and derived summary are in sync
+
+Use the files this way:
+
+1. `WORK_TODO.md`: next-stage roadmap and prioritized backlog
+2. `coordination/docs/benchmark/BENCHMARK_RESULT_TABLE.md`: row-level benchmark facts
+3. `coordination/docs/project/TASK_ASSIGNMENT.md`: auto-generated summary view
 
 ## Initial benchmark strategy
 

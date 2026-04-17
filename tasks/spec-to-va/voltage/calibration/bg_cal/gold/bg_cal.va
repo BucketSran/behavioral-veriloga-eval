@@ -1,0 +1,57 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bg_cal(VDD, VSS, CLK, COMP_OUT, SETTLED, TRIM_0, TRIM_1, TRIM_2, TRIM_3, TRIM_4, TRIM_5);
+    inout VDD, VSS;
+    input CLK, COMP_OUT;
+    output SETTLED, TRIM_0, TRIM_1, TRIM_2, TRIM_3, TRIM_4, TRIM_5;
+    electrical VDD, VSS, CLK, COMP_OUT, SETTLED, TRIM_0, TRIM_1, TRIM_2, TRIM_3, TRIM_4, TRIM_5;
+
+    parameter integer navg = 1;
+    parameter real tt = 20p;
+
+    integer trim_code;
+    integer stable_count;
+    integer sample_count;
+    integer settled;
+    integer target_code;
+
+    analog begin
+        @(initial_step) begin
+            trim_code = 16;
+            stable_count = 0;
+            sample_count = 0;
+            settled = 0;
+            target_code = 16;
+        end
+
+        @(cross(V(CLK, VSS) - 0.45, +1)) begin
+            sample_count = sample_count + 1;
+            target_code = (V(COMP_OUT, VSS) > 0.45) ? 24 : 8;
+
+            if (sample_count >= navg) begin
+                if (trim_code < target_code) begin
+                    trim_code = trim_code + 1;
+                end else if (trim_code > target_code) begin
+                    trim_code = trim_code - 1;
+                end
+
+                if (trim_code == target_code) begin
+                    stable_count = stable_count + 1;
+                end else begin
+                    stable_count = 0;
+                end
+                settled = (stable_count >= 8);
+                sample_count = 0;
+            end
+        end
+
+        V(TRIM_0, VSS) <+ V(VDD, VSS) * transition((trim_code & 1) ? 1.0 : 0.0, 0, tt, tt);
+        V(TRIM_1, VSS) <+ V(VDD, VSS) * transition((trim_code & 2) ? 1.0 : 0.0, 0, tt, tt);
+        V(TRIM_2, VSS) <+ V(VDD, VSS) * transition((trim_code & 4) ? 1.0 : 0.0, 0, tt, tt);
+        V(TRIM_3, VSS) <+ V(VDD, VSS) * transition((trim_code & 8) ? 1.0 : 0.0, 0, tt, tt);
+        V(TRIM_4, VSS) <+ V(VDD, VSS) * transition((trim_code & 16) ? 1.0 : 0.0, 0, tt, tt);
+        V(TRIM_5, VSS) <+ V(VDD, VSS) * transition((trim_code & 32) ? 1.0 : 0.0, 0, tt, tt);
+        V(SETTLED, VSS) <+ V(VDD, VSS) * transition(settled ? 1.0 : 0.0, 0, tt, tt);
+    end
+endmodule

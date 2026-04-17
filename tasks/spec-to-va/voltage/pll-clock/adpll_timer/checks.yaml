@@ -1,0 +1,23 @@
+syntax:
+  must_include:
+    - "@(cross("
+    - "@(timer("
+    - "transition("
+    - "vctrl_mon"
+    - "lock"
+  must_not_include:
+    - "I("
+    - "ddt("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "late_window_feedback_matches_reference"
+    - "lock_asserts_in_transient"
+
+parity:
+  required: true
+  spectre_result_path: "results/gold-dual-suite-pll-2026-04-18/adpll_timer/spectre"
+  tolerance_notes: "Late-window ref/fb edge ratio must remain within 5%; lock should assert within 1us."

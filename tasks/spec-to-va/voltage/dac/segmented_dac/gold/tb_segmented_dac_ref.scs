@@ -1,0 +1,27 @@
+simulator lang=spectre
+global 0
+
+Vvdd (VDD 0) vsource dc=0.9
+Vvss (VSS 0) vsource dc=0
+Vclk (CLK 0) vsource type=pulse val0=0 val1=0.9 delay=1n rise=20p fall=20p width=1n period=4n
+Vd0  (D0 0)  vsource type=pulse val0=0 val1=0.9 delay=2n rise=20p fall=20p width=4n period=8n
+Vd1  (D1 0)  vsource type=pulse val0=0 val1=0.9 delay=2n rise=20p fall=20p width=8n period=16n
+Vd2  (D2 0)  vsource type=pulse val0=0 val1=0.9 delay=2n rise=20p fall=20p width=16n period=32n
+Vd3  (D3 0)  vsource type=pulse val0=0 val1=0.9 delay=2n rise=20p fall=20p width=32n period=64n
+Vd4  (D4 0)  vsource dc=0
+Vd5  (D5 0)  vsource dc=0
+Vd6  (D6 0)  vsource dc=0
+Vd7  (D7 0)  vsource dc=0
+Vd8  (D8 0)  vsource type=pulse val0=0 val1=0.9 delay=12n rise=20p fall=20p width=20n period=40n
+Vd9  (D9 0)  vsource dc=0
+Vd10 (D10 0) vsource dc=0
+Vd11 (D11 0) vsource dc=0
+Vd12 (D12 0) vsource dc=0
+Vd13 (D13 0) vsource dc=0
+
+XDUT (VDD VSS CLK D13 D12 D11 D10 D9 D8 D7 D6 D5 D4 D3 D2 D1 D0 VOUT_P VOUT_N) segmented_dac
+
+tran tran stop=68n maxstep=20p
+save CLK D8 D3 D2 D1 D0 VOUT_P VOUT_N
+
+ahdl_include "segmented_dac.va"

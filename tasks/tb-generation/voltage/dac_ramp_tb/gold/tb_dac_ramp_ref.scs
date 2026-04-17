@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+Vvdd (VDD 0) vsource dc=0.9
+Vvss (VSS 0) vsource dc=0
+Vclk (CLK 0) vsource type=pulse val0=0 val1=0.9 delay=1n rise=20p fall=20p width=1n period=4n
+Vd0 (DIN0 0) vsource type=pulse val0=0 val1=0.9 delay=2n rise=20p fall=20p width=4n period=8n
+Vd1 (DIN1 0) vsource type=pulse val0=0 val1=0.9 delay=2n rise=20p fall=20p width=8n period=16n
+Vd2 (DIN2 0) vsource type=pulse val0=0 val1=0.9 delay=2n rise=20p fall=20p width=16n period=32n
+Vd3 (DIN3 0) vsource type=pulse val0=0 val1=0.9 delay=2n rise=20p fall=20p width=32n period=64n
+
+XDUT (VDD VSS DIN3 DIN2 DIN1 DIN0 CLK AOUT) dac_ramp_ref
+
+tran tran stop=68n maxstep=20p
+save CLK DIN3 DIN2 DIN1 DIN0 AOUT
+
+ahdl_include "dac_ramp_ref.va"

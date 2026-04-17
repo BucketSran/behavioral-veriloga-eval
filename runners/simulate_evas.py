@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
 import re
 import shutil
 import subprocess
@@ -506,6 +507,10 @@ def check_bad_bus_output_loop(rows: list[dict[str, float]]) -> tuple[bool, str]:
     code_patterns = set()
     dout_patterns = set()
     uniform_rows = 0
+    stable_rows = 0
+    prev_code_tuple = None
+    settle_until = float("-inf")
+    settle_s = 0.1e-9
 
     for row in rows:
         code_vec = []
@@ -515,20 +520,39 @@ def check_bad_bus_output_loop(rows: list[dict[str, float]]) -> tuple[bool, str]:
             dout_bit = 1 if row[dout_cols[idx]] > 0.45 else 0
             code_vec.append(code_bit)
             dout_vec.append(dout_bit)
-            total += 1
-            if code_bit != dout_bit:
-                mismatch += 1
         code_tuple = tuple(code_vec)
         dout_tuple = tuple(dout_vec)
+        t = row.get("time", 0.0)
+        if prev_code_tuple is not None and code_tuple != prev_code_tuple:
+            settle_until = max(settle_until, t + settle_s)
+        prev_code_tuple = code_tuple
+
         code_patterns.add(code_tuple)
         dout_patterns.add(dout_tuple)
         if len(set(dout_tuple)) == 1:
             uniform_rows += 1
+        if t <= settle_until:
+            continue
+        stable_rows += 1
+        for code_bit, dout_bit in zip(code_tuple, dout_tuple):
+            total += 1
+            if code_bit != dout_bit:
+                mismatch += 1
 
     mismatch_frac = mismatch / max(total, 1)
     uniform_frac = uniform_rows / max(len(rows), 1)
-    ok = mismatch_frac < 0.05 and len(code_patterns) >= 6 and len(dout_patterns) >= 6 and uniform_frac < 0.8
-    return ok, f"mismatch_frac={mismatch_frac:.4f} code_patterns={len(code_patterns)} dout_patterns={len(dout_patterns)} uniform_frac={uniform_frac:.3f}"
+    ok = (
+        mismatch_frac < 0.05
+        and len(code_patterns) >= 6
+        and len(dout_patterns) >= 6
+        and uniform_frac < 0.8
+        and stable_rows >= 20
+    )
+    return ok, (
+        f"mismatch_frac={mismatch_frac:.4f} code_patterns={len(code_patterns)} "
+        f"dout_patterns={len(dout_patterns)} uniform_frac={uniform_frac:.3f} "
+        f"stable_rows={stable_rows}"
+    )
 
 
 def check_missing_transition_outputs(rows: list[dict[str, float]]) -> tuple[bool, str]:
@@ -550,7 +574,18 @@ def check_missing_transition_outputs(rows: list[dict[str, float]]) -> tuple[bool
 
     threshold = 0.5 * (vmax + vmin)
     margin = max(0.05 * (vmax - vmin), 0.03)
-    stable_indices = [i for i, vin in enumerate(vins) if abs(vin - threshold) > margin]
+    crossing_times = [
+        rows[i]["time"]
+        for i in range(1, len(rows))
+        if (vins[i - 1] - threshold) * (vins[i] - threshold) <= 0 and vins[i - 1] != vins[i]
+    ]
+    settle_s = 0.5e-9
+    stable_indices = [
+        i
+        for i, vin in enumerate(vins)
+        if abs(vin - threshold) > margin
+        and all(abs(rows[i]["time"] - t_cross) > settle_s for t_cross in crossing_times)
+    ]
     if len(stable_indices) < max(10, len(rows) // 4):
         return False, "insufficient stable samples away from threshold"
 
@@ -666,6 +701,52 @@ def check_adpll_lock(rows: list[dict[str, float]]) -> tuple[bool, str]:
         f"late_edge_ratio={ratio:.3f} "
         f"lock_time={(lock_edges[0] if lock_edges else float('nan')):.3e} "
         f"vctrl_range_ok={vctrl_in_range}"
+    )
+
+
+def check_cppll_tracking(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"ref_clk", "fb_clk", "lock", "vctrl_mon"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing ref_clk/fb_clk/lock/vctrl_mon"
+
+    times = [r["time"] for r in rows]
+    ref_edges = rising_edges([r["ref_clk"] for r in rows], times)
+    fb_edges = rising_edges([r["fb_clk"] for r in rows], times)
+    lock_edges = rising_edges([r["lock"] for r in rows], times)
+
+    if len(ref_edges) < 8 or len(fb_edges) < 8:
+        return False, f"not_enough_edges ref={len(ref_edges)} fb={len(fb_edges)}"
+
+    t_end = times[-1]
+    t_start = t_end * 0.8
+    ref_late = [t for t in ref_edges if t_start <= t <= t_end]
+    fb_late = [t for t in fb_edges if t_start <= t <= t_end]
+    if len(ref_late) < 4 or len(fb_late) < 4:
+        return False, "not_enough_late_edges"
+
+    ref_periods = [b - a for a, b in zip(ref_late, ref_late[1:])]
+    fb_periods = [b - a for a, b in zip(fb_late, fb_late[1:])]
+    ref_period = sum(ref_periods) / len(ref_periods)
+    fb_period = sum(fb_periods) / len(fb_periods)
+    if ref_period <= 0.0 or fb_period <= 0.0:
+        return False, "non_positive_period"
+
+    freq_ratio = ref_period / fb_period
+    fb_jitter = max(fb_periods) - min(fb_periods)
+    fb_jitter_frac = fb_jitter / fb_period if fb_period > 0.0 else float("inf")
+    vctrl_vals = [r["vctrl_mon"] for r in rows]
+    vctrl_min = min(vctrl_vals)
+    vctrl_max = max(vctrl_vals)
+    vctrl_in_range = all(-1e-6 <= v <= 0.95 for v in vctrl_vals)
+    freq_ok = 0.97 <= freq_ratio <= 1.03
+    stability_ok = fb_jitter_frac <= 0.10
+    ok = freq_ok and stability_ok and vctrl_in_range
+    return ok, (
+        f"freq_ratio={freq_ratio:.4f} "
+        f"fb_jitter_frac={fb_jitter_frac:.4f} "
+        f"lock_time={(lock_edges[0] if lock_edges else float('nan')):.3e} "
+        f"vctrl_min={vctrl_min:.3f} "
+        f"vctrl_max={vctrl_max:.3f}"
     )
 
 
@@ -884,7 +965,7 @@ def check_prbs7(rows: list[dict[str, float]]) -> tuple[bool, str]:
     """PRBS-7: check serial output has many transitions and ~50% high fraction."""
     if not rows:
         return False, "empty"
-    serial_col = next((k for k in rows[0] if k.lower() in {"prbs_out", "serial", "dout", "q_out", "q"}), None)
+    serial_col = next((k for k in rows[0] if k.lower() in {"prbs_out", "serial", "serial_out", "dout", "q_out", "q"}), None)
     if serial_col is None:
         return False, f"missing serial column; keys={list(rows[0].keys())[:8]}"
     post = [r[serial_col] for r in rows if r["time"] > 2e-8]
@@ -901,9 +982,13 @@ def check_therm2bin(rows: list[dict[str, float]]) -> tuple[bool, str]:
     """Thermometer-to-binary: check all 4 output bits are high in final window (all 15 inputs on)."""
     if not rows:
         return False, "empty"
-    b_cols = [k for k in rows[0] if k.lower() in {"b3", "b2", "b1", "b0"}]
+    b_cols = [k for k in rows[0] if k.lower() in {"b3", "b2", "b1", "b0", "bin_3", "bin_2", "bin_1", "bin_0"}]
     if len(b_cols) < 4:
         return False, f"missing b3..b0; got {list(rows[0].keys())[:12]}"
+    b_cols = sorted(
+        b_cols,
+        key=lambda name: int(re.findall(r"(\d+)$", name)[0]),
+    )[:4]
     t_end = rows[-1]["time"]
     late = [r for r in rows if r["time"] > t_end * 0.75]
     if not late:
@@ -991,6 +1076,183 @@ def check_cdac_cal(rows: list[dict[str, float]]) -> tuple[bool, str]:
     return False, f"no vdac activity in {vdac_cols[:4]}"
 
 
+def check_sc_integrator(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    if not rows:
+        return False, "empty"
+    keys = rows[0].keys()
+    phi2_col = next((k for k in keys if k.lower() == "phi2"), None)
+    vout_col = next((k for k in keys if k.lower() in {"vout", "out"}), None)
+    if phi2_col is None or vout_col is None:
+        return False, f"missing phi2/vout; keys={list(keys)[:10]}"
+
+    edges = [
+        rows[i]["time"]
+        for i in range(1, len(rows))
+        if rows[i - 1][phi2_col] < 0.45 <= rows[i][phi2_col]
+    ]
+    if len(edges) < 3:
+        return False, f"phi2_edges={len(edges)}"
+
+    samples: list[float] = []
+    for t_edge in edges[:5]:
+        window = [
+            r[vout_col]
+            for r in rows
+            if t_edge + 0.5e-9 <= r["time"] <= t_edge + 2.0e-9
+        ]
+        if window:
+            samples.append(sum(window) / len(window))
+    if len(samples) < 3:
+        return False, f"insufficient_vout_samples={len(samples)}"
+
+    monotonic = all(samples[i + 1] >= samples[i] - 2e-3 for i in range(len(samples) - 1))
+    total_step = samples[-1] - samples[0]
+    ok = monotonic and total_step > 0.05
+    return ok, f"monotonic={monotonic} total_step={total_step:.3f}"
+
+
+def check_bg_cal(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    if not rows:
+        return False, "empty"
+    trim_cols = sorted(
+        [k for k in rows[0] if re.fullmatch(r"trim_?[0-5]", k.lower())],
+        key=lambda name: int(re.findall(r"(\d+)$", name)[0]),
+    )
+    settled_col = next((k for k in rows[0] if k.lower() in {"settled", "done", "rdy"}), None)
+    if len(trim_cols) < 6 or settled_col is None:
+        return False, f"missing trim/settled columns; keys={list(rows[0].keys())[:12]}"
+
+    codes = []
+    for row in rows:
+        code = 0
+        for idx, col in enumerate(trim_cols):
+            if row[col] > 0.45:
+                code |= 1 << idx
+        codes.append(code)
+
+    code_span = max(codes) - min(codes)
+    settled_high = any(r[settled_col] > 0.45 for r in rows[int(len(rows) * 0.75):])
+    ok = code_span >= 4 and settled_high
+    return ok, f"code_span={code_span} settled_high={settled_high}"
+
+
+def check_multitone(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    if not rows:
+        return False, "empty"
+    out_col = next((k for k in rows[0] if k.lower() in {"out", "vout"}), None)
+    if out_col is None:
+        return False, f"missing out/vout column; keys={list(rows[0].keys())[:10]}"
+
+    times = [r["time"] for r in rows]
+    vals = [r[out_col] for r in rows]
+
+    def interp(t: float) -> float | None:
+        if not times:
+            return None
+        if t <= times[0]:
+            return vals[0]
+        if t >= times[-1]:
+            return vals[-1]
+        lo = 0
+        hi = len(times) - 1
+        while hi - lo > 1:
+            mid = (lo + hi) // 2
+            if times[mid] <= t:
+                lo = mid
+            else:
+                hi = mid
+        t0 = times[lo]
+        t1 = times[hi]
+        if t1 == t0:
+            return vals[lo]
+        a = (t - t0) / (t1 - t0)
+        return vals[lo] + a * (vals[hi] - vals[lo])
+
+    samples = [
+        (0.125e-6, 0.2 * math.sin(2 * math.pi * 1e6 * 0.125e-6) + 0.1 * math.sin(2 * math.pi * 2e6 * 0.125e-6) + 0.05 * math.sin(2 * math.pi * 3e6 * 0.125e-6)),
+        (0.275e-6, 0.2 * math.sin(2 * math.pi * 1e6 * 0.275e-6) + 0.1 * math.sin(2 * math.pi * 2e6 * 0.275e-6) + 0.05 * math.sin(2 * math.pi * 3e6 * 0.275e-6)),
+        (0.410e-6, 0.2 * math.sin(2 * math.pi * 1e6 * 0.410e-6) + 0.1 * math.sin(2 * math.pi * 2e6 * 0.410e-6) + 0.05 * math.sin(2 * math.pi * 3e6 * 0.410e-6)),
+    ]
+    errs = []
+    for t_check, expected in samples:
+        measured = interp(t_check)
+        if measured is None:
+            errs.append(1.0)
+            continue
+        errs.append(abs(measured - expected))
+    max_err = max(errs)
+    ok = max_err < 0.03
+    return ok, f"max_err={max_err:.4f}"
+
+
+def check_nrz_prbs(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    if not rows:
+        return False, "empty"
+    outp_col = next((k for k in rows[0] if k.lower() in {"outp", "voutp", "out_p"}), None)
+    outn_col = next((k for k in rows[0] if k.lower() in {"outn", "voutn", "out_n"}), None)
+    if outp_col is None or outn_col is None:
+        return False, f"missing differential outputs; keys={list(rows[0].keys())[:12]}"
+
+    outp = [r[outp_col] for r in rows]
+    outn = [r[outn_col] for r in rows]
+    transitions = sum(1 for i in range(1, len(outp)) if (outp[i - 1] - 0.45) * (outp[i] - 0.45) < 0)
+    complement_err = sum(abs((a + b) - 0.9) for a, b in zip(outp, outn)) / len(outp)
+    swing = max(outp) - min(outp)
+    ok = transitions >= 8 and complement_err < 0.08 and swing > 0.2
+    return ok, f"transitions={transitions} complement_err={complement_err:.4f} swing={swing:.3f}"
+
+
+def check_mixed_domain_cdac_bug(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    if not rows:
+        return False, "empty"
+    vout_col = next((k for k in rows[0] if k.lower() in {"vout", "out"}), None)
+    if vout_col is None:
+        return False, f"missing vout column; keys={list(rows[0].keys())[:10]}"
+
+    targets = [
+        (17e-9, 0.2),
+        (37e-9, 0.5),
+        (57e-9, 0.8),
+    ]
+    errs = []
+    for t_check, expected in targets:
+        window = [r[vout_col] for r in rows if abs(r["time"] - t_check) <= 1.5e-9]
+        if not window:
+            errs.append(1.0)
+            continue
+        measured = sum(window) / len(window)
+        errs.append(abs(measured - expected))
+    max_err = max(errs)
+    ok = max_err < 0.05
+    return ok, f"max_err={max_err:.4f}"
+
+
+def check_spectre_port_discipline(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    if not rows:
+        return False, "empty"
+    required = {"a", "b", "y"}
+    keymap = {k.lower(): k for k in rows[0]}
+    if not required.issubset(keymap):
+        return False, f"missing a/b/y; keys={list(rows[0].keys())[:10]}"
+
+    windows = [
+        (10e-9, 0.0, "00"),
+        (30e-9, 0.0, "10"),
+        (50e-9, 0.0, "01"),
+        (70e-9, 0.9, "11"),
+    ]
+    errs: list[str] = []
+    for t_check, expected, label in windows:
+        vals = [r[keymap["y"]] for r in rows if abs(r["time"] - t_check) <= 1.5e-9]
+        if not vals:
+            errs.append(f"{label}_no_samples")
+            continue
+        measured = sum(vals) / len(vals)
+        if abs(measured - expected) > 0.05:
+            errs.append(f"{label}_err={abs(measured - expected):.3f}")
+    return (not errs), ("ok" if not errs else ";".join(errs))
+
+
 def check_mux_4to1(rows: list[dict[str, float]]) -> tuple[bool, str]:
     required = {"d0", "d1", "d2", "d3", "sel1", "sel0", "y", "time"}
     if not rows or not required.issubset(rows[0]):
@@ -1043,8 +1305,10 @@ CHECKS = {
     "sar_adc_dac_weighted_8b": check_sar_adc_dac_weighted_8b,
     # formal task IDs (tasks/end-to-end/voltage/)
     "adpll_lock_smoke": check_adpll_lock,
+    "adpll_timer_smoke": check_adpll_lock,
     "clk_div_smoke": check_clk_div,
     "comparator_smoke": check_comparator,
+    "cppll_tracking_smoke": check_cppll_tracking,
     "d2b_4bit_smoke": check_d2b,
     "ramp_gen_smoke": check_ramp_gen,
     "adc_dac_ideal_4b_smoke": check_adc_dac_ideal_4b,
@@ -1075,6 +1339,14 @@ CHECKS = {
     "sar_12bit":      check_sar_12bit,
     "segmented_dac":  check_segmented_dac,
     "cdac_cal":       check_cdac_cal,
+    "sc_integrator":  check_sc_integrator,
+    "bg_cal":         check_bg_cal,
+    "adpll_timer":    check_adpll_lock,
+    "cppll_timer":    check_cppll_tracking,
+    "multitone":      check_multitone,
+    "nrz_prbs":       check_nrz_prbs,
+    "mixed_domain_cdac_bug": check_mixed_domain_cdac_bug,
+    "spectre_port_discipline": check_spectre_port_discipline,
 }
 
 
@@ -1102,6 +1374,7 @@ def run_case(
 ) -> dict:
     meta = read_meta(task_dir)
     task_id = task_id_override or meta.get("id") or meta.get("task_id") or task_dir.name
+    scoring = set(meta.get("scoring", ["dut_compile", "tb_compile", "sim_correct"]))
 
     temp_ctx = tempfile.TemporaryDirectory(prefix=f"{task_id}_")
     run_dir = Path(temp_ctx.name)
@@ -1123,20 +1396,34 @@ def run_case(
             notes.append("tb_not_executed")
 
         csv_path = out_dir / "tran.csv"
-        if proc.returncode == 0 and csv_path.exists():
+        if "sim_correct" in scoring and proc.returncode == 0 and csv_path.exists():
             sim_correct, behavior_notes = evaluate_behavior(task_id, csv_path)
             notes.extend(behavior_notes)
-        else:
+        elif "sim_correct" in scoring:
             sim_correct = 0.0
             notes.append("tran.csv missing")
+        else:
+            sim_correct = 1.0
+            notes.append("sim_correct not required by scoring")
 
-        weighted_total = round((dut_compile + tb_compile + sim_correct) / 3.0, 4)
+        required_axes: list[tuple[str, float]] = []
+        if "dut_compile" in scoring or "syntax" in scoring:
+            required_axes.append(("dut_compile", dut_compile))
+        if "tb_compile" in scoring or "routing" in scoring or "simulation" in scoring:
+            required_axes.append(("tb_compile", tb_compile))
+        if "sim_correct" in scoring:
+            required_axes.append(("sim_correct", sim_correct))
 
-        if dut_compile < 1.0:
+        if required_axes:
+            weighted_total = round(sum(score for _, score in required_axes) / len(required_axes), 4)
+        else:
+            weighted_total = round((dut_compile + tb_compile + sim_correct) / 3.0, 4)
+
+        if ("dut_compile" in scoring or "syntax" in scoring) and dut_compile < 1.0:
             status = "FAIL_DUT_COMPILE"
-        elif tb_compile < 1.0:
+        elif ("tb_compile" in scoring or "routing" in scoring or "simulation" in scoring) and tb_compile < 1.0:
             status = "FAIL_TB_COMPILE"
-        elif sim_correct < 1.0:
+        elif "sim_correct" in scoring and sim_correct < 1.0:
             status = "FAIL_SIM_CORRECTNESS"
         else:
             status = "PASS"

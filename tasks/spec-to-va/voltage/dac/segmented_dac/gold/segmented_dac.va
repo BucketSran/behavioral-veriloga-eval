@@ -8,14 +8,19 @@
 `include "disciplines.vams"
 `default_transition 100p
 
-module segmented_dac(
-    inout  electrical VDD, VSS,
-    input  electrical CLK,
-    input  electrical D13, D12, D11, D10, D9, D8,   // 6 MSBs (thermometer-decoded internally)
-    input  electrical D7, D6, D5, D4, D3, D2, D1, D0,  // 8 LSBs (binary)
-    output electrical VOUT_P,
-    output electrical VOUT_N
-);
+module segmented_dac(VDD, VSS, CLK, D13, D12, D11, D10, D9, D8, D7, D6, D5, D4, D3, D2, D1, D0, VOUT_P, VOUT_N);
+
+inout VDD, VSS;
+input CLK;
+input D13, D12, D11, D10, D9, D8;
+input D7, D6, D5, D4, D3, D2, D1, D0;
+output VOUT_P, VOUT_N;
+
+electrical VDD, VSS;
+electrical CLK;
+electrical D13, D12, D11, D10, D9, D8;
+electrical D7, D6, D5, D4, D3, D2, D1, D0;
+electrical VOUT_P, VOUT_N;
 
 parameter real vdd   = 0.9;
 parameter real vcm   = 0.45;

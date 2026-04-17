@@ -1,0 +1,28 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dac_ramp_ref(VDD, VSS, DIN3, DIN2, DIN1, DIN0, CLK, AOUT);
+    inout VDD, VSS;
+    input DIN3, DIN2, DIN1, DIN0, CLK;
+    output AOUT;
+    electrical VDD, VSS, DIN3, DIN2, DIN1, DIN0, CLK, AOUT;
+
+    parameter real tt = 20p;
+
+    real aout;
+
+    analog begin
+        @(initial_step) aout = 0.0;
+
+        @(cross(V(CLK, VSS) - 0.45, +1)) begin
+            aout = V(VDD, VSS) * (
+                8 * (V(DIN3, VSS) > 0.45)
+              + 4 * (V(DIN2, VSS) > 0.45)
+              + 2 * (V(DIN1, VSS) > 0.45)
+              + 1 * (V(DIN0, VSS) > 0.45)
+            ) / 16.0;
+        end
+
+        V(AOUT, VSS) <+ transition(aout, 0, tt, tt);
+    end
+endmodule

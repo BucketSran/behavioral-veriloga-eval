@@ -1,0 +1,41 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module clk_div_min(VDD, VSS, CLK, RST_N, CLK_OUT);
+    inout VDD, VSS;
+    input CLK, RST_N;
+    output CLK_OUT;
+    electrical VDD, VSS, CLK, RST_N, CLK_OUT;
+
+    parameter real tt = 20p;
+
+    integer div_state;
+    integer edge_count;
+
+    analog begin
+        @(initial_step) begin
+            div_state = 0;
+            edge_count = 0;
+        end
+
+        @(cross(V(RST_N, VSS) - 0.45, -1)) begin
+            div_state = 0;
+            edge_count = 0;
+        end
+
+        @(cross(V(CLK, VSS) - 0.45, +1)) begin
+            if (V(RST_N, VSS) > 0.45) begin
+                edge_count = edge_count + 1;
+                if (edge_count >= 2) begin
+                    edge_count = 0;
+                    div_state = 1 - div_state;
+                end
+            end else begin
+                div_state = 0;
+                edge_count = 0;
+            end
+        end
+
+        V(CLK_OUT, VSS) <+ V(VDD, VSS) * transition(div_state ? 1.0 : 0.0, 0, tt, tt);
+    end
+endmodule

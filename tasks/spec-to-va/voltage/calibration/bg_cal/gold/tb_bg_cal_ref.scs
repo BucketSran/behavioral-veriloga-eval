@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+Vvdd (VDD 0) vsource dc=0.9
+Vvss (VSS 0) vsource dc=0
+Vclk (CLK 0) vsource type=pulse val0=0 val1=0.9 delay=2n rise=20p fall=20p width=4n period=10n
+Vcomp (COMP_OUT 0) vsource dc=0.9
+
+XDUT (VDD VSS CLK COMP_OUT SETTLED TRIM_0 TRIM_1 TRIM_2 TRIM_3 TRIM_4 TRIM_5) bg_cal navg=1
+
+tran tran stop=700n maxstep=100p
+save CLK COMP_OUT SETTLED TRIM_0 TRIM_1 TRIM_2 TRIM_3 TRIM_4 TRIM_5
+
+ahdl_include "bg_cal.va"

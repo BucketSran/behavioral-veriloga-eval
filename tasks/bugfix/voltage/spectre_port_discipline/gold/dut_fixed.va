@@ -1,0 +1,15 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module and2_gate(VDD, VSS, A, B, Y);
+    inout VDD, VSS;
+    input A, B;
+    output Y;
+    electrical VDD, VSS, A, B, Y;
+    integer y_state;
+
+    analog begin
+        y_state = (V(A, VSS) > 0.45 && V(B, VSS) > 0.45) ? 1 : 0;
+        V(Y, VSS) <+ V(VDD, VSS) * transition(y_state ? 1.0 : 0.0, 0, 10p, 10p);
+    end
+endmodule

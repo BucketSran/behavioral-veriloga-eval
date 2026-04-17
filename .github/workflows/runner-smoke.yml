@@ -1,0 +1,29 @@
+name: Runner Smoke
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test dependency
+        run: python -m pip install pytest
+
+      - name: Syntax check runner modules
+        run: python -m py_compile runners/bridge_preflight.py runners/run_gold_dual_suite.py
+
+      - name: Run runner smoke tests
+        run: python -m pytest -q tests/test_bridge_preflight.py tests/test_run_gold_dual_suite.py tests/test_save_statements.py

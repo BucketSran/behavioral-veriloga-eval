@@ -1,240 +1,606 @@
-# vaEvas 待完成工作清单
+# behavioral-veriloga-eval Next-Stage Roadmap
 
 更新日期: 2026-04-18
 
 ---
 
-## 当前状态
+## 1. 文档定位
 
-| 任务类型 | 总数 | 已验证 | 待验证 | 缺gold |
-|----------|------|--------|--------|--------|
-| end-to-end | 22 | 22 (双验证) | 0 | 0 |
-| spec-to-va | 16 | 0 | 12 | 4 |
-| bugfix | 4 | 0 | 2 | 2 |
-| tb-generation | 4 | 待确认设计 | - | - |
+这份 `WORK_TODO.md` 是后续阶段的正式路线图，面向“接下来还要做什么”。
 
-**重要变更**: 所有任务现在都要求双验证(EVAS + Spectre)，commit `e44f198`。
+它和现有文档的分工如下：
 
----
-
-## 1. 双验证任务详情
-
-### 1.1 spec-to-va 已有gold（12个）- 待运行双验证
-
-| 任务路径 | gold文件 | 行为检查函数 | EVAS结果 | Spectre结果 |
-|----------|----------|--------------|----------|-------------|
-| `adc-sar/sar_logic` | `gold/sar_logic.va`, `gold/tb_sar_logic_ref.scs` | `check_sar_logic` (待确认) | 无 | 无 |
-| `adc-sar/sar_12bit` | `gold/sar_12bit.va`, `gold/tb_sar_12bit_ref.scs` | `check_sar_12bit` (待确认) | 无 | 无 |
-| `adc-sar/d2b_4bit` | `gold/_va_d2b_4b.va`, `gold/tb_d2b_4bit_ref.scs` | `check_d2b_4bit` (待确认) | 无 | 无 |
-| `adc-sar/pipeline_stage` | `gold/pipeline_stage.va`, `gold/tb_pipeline_stage_ref.scs` | `check_pipeline_stage` (待确认) | 无 | 无 |
-| `dac/segmented_dac` | `gold/segmented_dac.va`, `gold/tb_segmented_dac_ref.scs` | `check_segmented_dac` (待确认) | 无 | 无 |
-| `dac/cdac_cal` | `gold/cdac_cal.va`, `gold/tb_cdac_cal_ref.scs` | `check_cdac_cal` (待确认) | 无 | 无 |
-| `digital-logic/clk_divider` | `gold/clk_divider.va`, `gold/tb_clk_divider_ref.scs` | `check_clk_divider` ✅ | 有 | 无 |
-| `digital-logic/prbs7` | `gold/prbs7.va`, `gold/tb_prbs7_ref.scs` | `check_prbs7` ✅ | 有 | 无 |
-| `digital-logic/therm2bin` | `gold/therm2bin.va`, `gold/tb_therm2bin_ref.scs` | `check_therm2bin` ✅ | 有 | 无 |
-| `pll-clock/bbpd` | `gold/bbpd.va`, `gold/tb_bbpd_ref.scs` | `check_bbpd` ✅ | 有 | 无 |
-| `pll-clock/multimod_divider` | `gold/multimod_divider.va`, `gold/tb_multimod_divider_ref.scs` | `check_multimod_divider` ✅ | 有 | 无 |
-| `sar_logic_10b` | `gold/sar_logic_10b.va`, `gold/tb_sar_logic_10b_ref.scs` | `check_sar_logic` ✅ | 无 | 无 |
-
-**执行步骤**:
-```bash
-# 使用 run_gold_dual_suite.py 运行双验证
-python3 runners/run_gold_dual_suite.py --tasks clk_divider,prbs7,therm2bin,bbpd,multimod_divider
-```
-
-### 1.2 spec-to-va 缺gold（4个）- 需先创建gold
-
-| 任务路径 | 需创建内容 | prompt描述 |
-|----------|------------|------------|
-| `amplifier-filter/sc_integrator` | `gold/dut.va`, `gold/tb_ref.scs` | 开关电容积分器 |
-| `calibration/bg_cal` | `gold/dut.va`, `gold/tb_ref.scs` | 后台校准 |
-| `signal-source/multitone` | 待确认目录内容 | 多音信号源 |
-| `signal-source/nrz_prbs` | 待确认目录内容 | NRZ PRBS信号源 |
-
-### 1.3 bugfix 已有gold（2个）- 待运行双验证
-
-| 任务路径 | gold文件 | 行为检查函数 | EVAS结果 | Spectre结果 |
-|----------|----------|--------------|----------|-------------|
-| `bad_bus_output_loop` | `gold/dut_fixed.va`, `gold/tb_bad_bus_output_loop.scs` | `check_bad_bus_output_loop` ✅ | 无 | 无 |
-| `missing_transition_outputs` | `gold/dut_fixed.va`, `gold/tb_missing_transition_outputs.scs` | `check_missing_transition_outputs` ✅ | 无 | 无 |
-
-### 1.4 bugfix 缺gold（2个）- 需先创建gold
-
-| 任务路径 | 需创建内容 | prompt描述 |
-|----------|------------|------------|
-| `mixed_domain_cdac_bug` | `gold/dut_fixed.va`, `gold/tb.scs` | `I()<+`与电压域混用bug修复 |
-| `spectre_port_discipline` | `gold/dut_fixed.va`, `gold/tb.scs` | inout端口共享问题修复 |
+1. `WORK_TODO.md`
+   负责后续工作路线图、优先级和执行清单。
+2. `coordination/docs/benchmark/BENCHMARK_RESULT_TABLE.md`
+   负责逐行事实、结果元数据和 benchmark 状态。
+3. `coordination/docs/project/TASK_ASSIGNMENT.md`
+   负责从结果表自动生成的汇总视图。
 
 ---
 
-## 2. 需确认行为检查函数
+## 2. 当前基线
 
-检查 `runners/simulate_evas.py` 中 `CHECKS` dict 是否包含以下函数：
+截至 2026-04-18，项目主线状态可以概括为：
 
-```python
-# 需确认或创建的函数
-"sar_logic":      check_sar_logic,      # 已存在？
-"sar_12bit":      check_sar_12bit,      # 需创建？
-"pipeline_stage": check_pipeline_stage,  # 需创建？
-"segmented_dac":  check_segmented_dac,  # 需创建？
-"cdac_cal":       check_cdac_cal,       # 需创建？
-"multitone":      check_multitone,      # 需创建？
-"nrz_prbs":       check_nrz_prbs,       # 需创建？
-```
+1. `end-to-end` 22 个任务已闭环。
+2. `spec-to-va` 16 个任务已闭环。
+3. `bugfix` 4 个任务已闭环。
+4. `tb-generation` 4 个任务已完成 EVAS 主验证，并补齐了 EVAS+Spectre 执行证据。
+5. benchmark / closed-loop 共有 24 行 `dual-validated`。
+6. 当前没有 `verification_status != passed` 的 open row。
+7. 当前没有需要单独跟踪的 parity / simulator 例外。
 
-**检查方法**:
-```bash
-grep -n "def check_" runners/simulate_evas.py | grep -E "sar_logic|sar_12bit|pipeline|segmented|cdac_cal|multitone|nrz_prbs"
-```
+因此，后续工作不再是“补 benchmark 功能缺口”，而是以下四类：
 
----
-
-## 3. tb-generation任务（待确认）
-
-| 任务路径 | 当前状态 | 设计意图 |
-|----------|----------|----------|
-| `clk_div_min_tb` | 有gold目录 | 需确认是否需要双验证 |
-| `comparator_offset_tb` | 有gold目录 | 需确认是否需要双验证 |
-| `dac_ramp_tb` | 有gold目录 | 需确认是否需要双验证 |
-| `inl_dnl_probe` | 待确认目录 | 需确认设计 |
-
-**问题**: tb-generation任务的gold是什么？是生成的tb文件还是验证tb的代码？
+1. metadata 和文档治理
+2. bridge / runner 工程化加固
+3. 日志质量、回归保护与可复现性提升
+4. 下一阶段 benchmark 扩展与结果消费
 
 ---
 
-## 4. 分支管理
+## 3. 总体优先级
 
-| 分支 | 状态 | 操作 |
-|------|------|------|
-| `feat/new-benchmark-seeds-2026-04-05` | 冗余（内容已合并） | 删除 |
-| PR #2 (Arcadia-1) | OPEN | 等待合并或关闭 |
+### Phase 1: 必做收尾
 
----
+目标：把当前项目状态从“功能完成”推进到“记录清晰、维护顺手、结论稳定”。
 
-## 5. 执行优先级
+### Phase 2: 工程化加固
 
-### 高优先级 (立即执行)
+目标：降低后续跑 dual-suite 和维护 benchmark 的摩擦。
 
-1. **确认行为检查函数存在**
-   - 检查 simulate_evas.py
-   - 创建缺失的 check_* 函数
+### Phase 3: 质量与自动化
 
-2. **运行shenbufan任务的Spectre验证**
-   - `clk_divider`, `prbs7`, `therm2bin`, `bbpd`, `multimod_divider`
-   - 这些已有EVAS结果，只需补Spectre
+目标：减少未来回归风险，提高日志整洁度和状态一致性。
 
-3. **运行bugfix任务双验证**
-   - `bad_bus_output_loop`, `missing_transition_outputs`
+### Phase 4: 下一轮扩展
 
-### 中优先级
-
-1. **创建4个缺失gold的任务**
-   - `sc_integrator`, `bg_cal`, `mixed_domain_cdac_bug`, `spectre_port_discipline`
-
-2. **运行其余spec-to-va双验证**
-   - `sar_logic`, `sar_12bit`, `d2b_4bit`, `pipeline_stage`, `segmented_dac`, `cdac_cal`, `sar_logic_10b`
-
-3. **确认tb-generation设计意图**
-
-### 低优先级
-
-1. 分支清理
-2. 文档更新 (TASK_ASSIGNMENT.md, BENCHMARK_RESULT_TABLE.md)
+目标：在不破坏当前稳定面的前提下继续扩 benchmark 覆盖面，并为论文/汇报准备消费层材料。
 
 ---
 
-## 6. 关键文件路径
+## 3.5 本轮夜间进展
 
-```
-项目根目录: /Users/bucketsran/Documents/TsingProject/vaEvas/behavioral-veriloga-eval
+截至本轮自动推进结束，下面这些项已经有实质进展：
 
-关键文件:
-- runners/simulate_evas.py          # EVAS运行器 + 行为检查函数
-- runners/run_gold_dual_suite.py    # 双验证运行器
-- schemas/task.schema.json          # 任务schema
-- schemas/result.schema.json        # 结果schema
-- coordination/docs/benchmark/BENCHMARK_RESULT_TABLE.md  # 结果记录表
-- coordination/docs/project/TASK_ASSIGNMENT.md          # 任务分工表
+1. `4.1 补齐 pr_link 元数据`
+   已部分完成。基于本地分支、commit 历史和 worksche 证据，补齐了一批 benchmark / spec-to-va 行的 `pr_link`。剩余 `[TODO]` 主要集中在当前还缺乏已提交 provenance 的行。
+2. `4.3 固化文档分层规则`
+   已完成。`README.md` 已明确说明结果表、syncer 和 `WORK_TODO.md` 的更新顺序与职责分工。
+3. `4.4 写一份项目当前状态总览`
+   已完成。`README.md` 已加入当前 benchmark 基线与剩余工作性质说明。
+4. `5.2 强化 bridge preflight 的错误分类`
+   已部分完成。`bridge_preflight.py` 现在新增了 `issue_codes` / `note_codes`，能更明确地区分手动 tunnel、daemon 断开、Spectre 不可用等情况。
+5. `6.3 给关键 runner 增加最小回归测试`
+   已完成。已新增 `tests/test_bridge_preflight.py` 和 `tests/test_run_gold_dual_suite.py`，并完成本地 smoke 运行。
+6. `6.4 把更多检查接入 CI`
+   已部分完成。`behavioral-veriloga-eval/.github/workflows/runner-smoke.yml` 已新增，覆盖 runner 语法检查、最小 smoke tests，以及 gold testbench `save` 语法守护。
+7. `6.1 清理 Spectre save warning`
+   已完成首轮高收益收敛。现有 gold testbench 中遗留的 `save ... :2e/:3f/:6f/:d` 等旧式限定符已统一清理，并补上 `tests/test_save_statements.py` 防止回归。
 
-任务目录结构:
-tasks/
-├── end-to-end/voltage/{task}/
-│   ├── prompt.md
-│   ├── meta.json
-│   ├── checks.yaml
-│   └── gold/
-│       ├── dut.va
-│       └── tb_ref.scs
-├── spec-to-va/voltage/{category}/{task}/
-├── bugfix/voltage/{task}/
-├── tb-generation/voltage/{task}/
-```
+仍未在本轮完成的高优先级项：
+
+1. `4.2 清理过时 notes`
+   只做了少量顺手收敛，尚未完成全表系统清理。
 
 ---
 
-## 7. 双验证运行命令
+## 4. Phase 1 - 必做收尾
 
-```bash
-# 单任务EVAS验证
-python3 runners/simulate_evas.py tasks/spec-to-va/voltage/digital-logic/clk_divider gold/clk_divider.va gold/tb_clk_divider_ref.scs
+### 4.1 补齐 `pr_link` 元数据
 
-# 批量双验证 (需要virtuoso-bridge-lite配置)
-python3 runners/run_gold_dual_suite.py --tasks clk_divider,prbs7,therm2bin
+优先级：高
 
-# 远程服务器目录
-# /home/jinzhihong/aiProject/evas/behavioral-veriloga-eval/
-```
+目标：
+把结果表中仍为 `[TODO]` 的 `pr_link` 尽可能补齐为真实来源。
+
+具体动作：
+
+1. 逐行检查 benchmark 主表中的 `[TODO]` 行。
+2. 逐行检查 `spec-to-va` 表中的 `[TODO]` 行。
+3. 逐行检查 `pll` 相关行是否已有可引用分支、commit 或 PR。
+4. 仅在本地或远端证据明确时填写；查不到就保留 `[TODO]`。
+
+产出：
+
+1. 更新后的 `coordination/docs/benchmark/BENCHMARK_RESULT_TABLE.md`
+
+验收标准：
+
+1. 所有可确认来源的行都已填写。
+2. 剩余 `[TODO]` 都是真正无法确认，而不是漏查。
+
+依赖：
+
+1. 需要本地 git 历史或远端仓库信息可访问。
 
 ---
 
-## 8. 注意事项
+### 4.2 清理过时 notes
 
-1. **Spectre验证需要virtuoso-bridge-lite**
-   - 确保SSH tunnel正常
-   - 确保VB_CADENCE_CSHRC环境变量设置
+优先级：高
 
-2. **adpll_lock_smoke已知问题**
-   - Spectre idtmod兼容性问题，已记录，不影响其他任务
+目标：
+去掉已经被最新结果覆盖的历史描述，防止后续阅读者被误导。
 
-3. **PR #2状态**
-   - 当前OPEN，等待项目负责人决定是否合并到Arcadia-1
+具体动作：
+
+1. 扫描结果表 notes 中仍带有临时性、过渡态、待补态语气的条目。
+2. 删除与当前闭环状态矛盾的旧表述。
+3. 保留真正有复用价值的背景，比如：
+   - 任务为什么难
+   - 哪个指标被视作 informational
+   - 哪个结果路径是最终证据
+
+产出：
+
+1. 更简洁、更稳定的结果表 notes
+
+验收标准：
+
+1. 不再出现“结果已 closed，但 notes 还写 pending / workaround”的情况。
 
 ---
 
-## 附录: 完整任务列表
+### 4.3 固化文档分层规则
 
-### spec-to-va (16个)
-```
-adc-sar/sar_logic
-adc-sar/sar_12bit
-adc-sar/d2b_4bit
-adc-sar/pipeline_stage
-dac/segmented_dac
-dac/cdac_cal
-digital-logic/clk_divider
-digital-logic/prbs7
-digital-logic/therm2bin
-pll-clock/bbpd
-pll-clock/multimod_divider
-amplifier-filter/sc_integrator (缺gold)
-calibration/bg_cal (缺gold)
-signal-source/multitone (待确认)
-signal-source/nrz_prbs (待确认)
-sar_logic_10b
-```
+优先级：高
 
-### bugfix (4个)
-```
-bad_bus_output_loop (有gold)
-missing_transition_outputs (有gold)
-mixed_domain_cdac_bug (缺gold)
-spectre_port_discipline (缺gold)
-```
+目标：
+避免结果表、自动汇总和后续阶段计划再次轻微失步。
 
-### tb-generation (4个)
-```
-clk_div_min_tb
-comparator_offset_tb
-dac_ramp_tb
-inl_dnl_probe
-```
+具体动作：
+
+1. 在相关文档顶部或 README 中明确每份文档的职责。
+2. 约定状态更新顺序：
+   - 先改 benchmark result table
+   - 再跑 `sync_task_assignment.py`
+   - 最后更新 `WORK_TODO.md` 的路线图状态
+3. 如有需要，在 `README_TASK_REPORT.md` 或协调文档里补一页维护流程说明。
+
+产出：
+
+1. 一套稳定的文档更新顺序
+
+验收标准：
+
+1. 后续更新时不用靠聊天记录记忆“该先改哪份文档”。
+
+---
+
+### 4.4 写一份“项目当前状态总览”
+
+优先级：中
+
+目标：
+让新加入协作者在 5 分钟内理解项目现状。
+
+具体动作：
+
+1. 概括四个 family 当前覆盖情况。
+2. 说明 bridge 推荐用法。
+3. 说明 dual validation 的当前范围。
+4. 说明真正未完成的是什么，明确“不再有 benchmark blocker”。
+
+建议位置：
+
+1. `behavioral-veriloga-eval/README.md` 增补
+2. 或 `coordination/docs/project/` 新增总览页
+
+验收标准：
+
+1. 新同学无需通读整个结果表即可知道项目状态。
+
+---
+
+## 5. Phase 2 - 工程化加固
+
+### 5.1 把 `run_with_bridge.sh` 固化为唯一推荐入口
+
+优先级：高
+
+目标：
+避免继续出现手工 SSH tunnel、端口漂移和 preflight 误判带来的使用摩擦。
+
+具体动作：
+
+1. 在所有涉及 dual-suite 的文档中统一写法。
+2. 在示例命令中只保留 wrapper 版本。
+3. 将手工 `ssh -L ...` 说明降级为“调试模式”。
+
+产出：
+
+1. 更统一的 runner 文档
+2. 更少的人为使用分叉
+
+验收标准：
+
+1. 新用户默认不会直接手搓 tunnel。
+
+---
+
+### 5.2 强化 bridge preflight 的错误分类
+
+优先级：高
+
+目标：
+让失败信息直接指向问题层，而不是只显示一个泛化失败。
+
+建议分类：
+
+1. local listener missing
+2. ssh jump failure
+3. bridge CLI unavailable
+4. Virtuoso daemon unavailable
+5. Spectre unavailable
+6. tunnel exists but bridge status port mismatch
+
+具体动作：
+
+1. 扩充 `runners/bridge_preflight.py` 输出结构。
+2. 让文本模式和 JSON 模式都更稳定。
+3. 在 helper 脚本里保留原始错误上下文。
+
+验收标准：
+
+1. 使用者看到 preflight 输出后能立刻判断该先查网络、SSH、Virtuoso 还是 Spectre。
+
+---
+
+### 5.3 明确 `check_bridge_ready.sh` 的模式语义
+
+优先级：中
+
+目标：
+让这个脚本能同时服务于本地快速检查、CI、以及长任务前的自检。
+
+具体动作：
+
+1. 统一并记录：
+   - `--json`
+   - `--require-daemon`
+   - 安静模式或非零退出码语义
+2. 给出几组标准示例：
+   - 只查 tunnel + spectre
+   - 查 tunnel + daemon + spectre
+   - 仅用于 wrapper 前自检
+
+验收标准：
+
+1. 不同场景下使用方式清晰，不再依赖口头说明。
+
+---
+
+### 5.4 评估 dual runner 是否进一步封装桥接调用
+
+优先级：中
+
+目标：
+减少使用者绕开正确工作流的概率。
+
+可选方向：
+
+1. 保持当前 wrapper-only 约定
+2. 在 runner 帮助信息里显式提醒 wrapper
+3. 再上一步，做一个更高层的 repo 命令入口
+
+验收标准：
+
+1. 后续团队成员默认进入正确工作流，而不是自己拼接命令。
+
+---
+
+## 6. Phase 3 - 质量与自动化
+
+### 6.1 清理 Spectre `save` warning
+
+优先级：高
+
+目标：
+降低日志噪声，让真正的问题更容易被看到。
+
+具体动作：
+
+1. 统计当前常见 warning 模式。
+2. 找出产生 warning 的 testbench `save` 写法。
+3. 尽量改成 Spectre 更稳定接受的写法。
+4. 回归关键任务，确认修改不影响结果。
+
+当前状态：
+
+1. 已完成首轮批量清理，gold testbench 中旧式 `save` 限定符已统一移除。
+2. 已新增 `tests/test_save_statements.py`，把这类写法纳入仓库级回归保护。
+3. 已完成跨 family 代表性双验证 smoke，`adpll_lock_smoke`、`pipeline_stage`、`mixed_domain_cdac_bug`、`clk_div_min_tb` 均通过。
+4. 后续如仍有 warning，需要再判断是否来自 `save` 以外的日志源。
+
+验收标准：
+
+1. warning 数显著下降。
+2. benchmark 结果不回退。
+
+---
+
+### 6.2 建立 warning 分级规则
+
+优先级：中
+
+目标：
+区分 benign warning 和需要阻塞回归的 warning。
+
+建议分级：
+
+1. informational
+2. noisy but tolerated
+3. suspicious
+4. blocking
+
+产出：
+
+1. 一份 warning 处理规则说明
+2. 如果合适，可写进 runner 文档或 coordination 文档
+
+验收标准：
+
+1. 以后看日志时，团队知道哪些 warning 可以忽略，哪些必须处理。
+
+---
+
+### 6.3 给关键 runner 增加最小回归测试
+
+优先级：高
+
+目标：
+保护已经稳定下来的关键逻辑不被后续修改悄悄破坏。
+
+建议覆盖点：
+
+1. `bridge_preflight.py` JSON 输出结构
+2. `run_gold_dual_suite.py` 的 parity policy 分派
+3. `tb-generation` 中 `sim_correct` 非必需时的 `parity=not_required`
+4. syncer 的最小检查路径
+
+验收标准：
+
+1. 核心 runner 逻辑至少有 smoke-level 自动保护。
+
+---
+
+### 6.4 把更多检查接入 CI
+
+优先级：中
+
+当前已完成：
+
+1. `sync_task_assignment.py --check`
+2. `runner-smoke.yml` 中的 runner Python 语法检查
+3. `runner-smoke.yml` 中的最小 pytest smoke tests
+4. `runner-smoke.yml` 中的 gold testbench `save` 语法检查
+
+后续可加：
+
+1. helper 脚本 smoke test
+2. 结果表格式检查
+3. 结果路径存在性检查
+4. 文档职责一致性检查
+
+验收标准：
+
+1. 常见维护错误能在提交阶段被拦下，而不是跑大任务时才发现。
+
+---
+
+### 6.5 记录结果目录 manifest
+
+优先级：中
+
+目标：
+让每个重要 `results/` 目录更像一次可追溯实验，而不是只有一份 summary JSON。
+
+建议记录：
+
+1. 运行日期
+2. 命令
+3. 任务列表
+4. 是否通过 wrapper 运行
+5. 关键结论
+
+验收标准：
+
+1. 后续写报告或追溯结果时，不需要翻聊天记录。
+
+---
+
+## 7. Phase 4 - 结果消费与 benchmark 扩展
+
+### 7.1 做 weekly summary 自动汇总
+
+优先级：中
+
+目标：
+让项目管理和论文准备都能直接消费结果，而不需要手工数表。
+
+建议指标：
+
+1. 每周新增多少 case
+2. 新增多少 verified
+3. 新增多少 dual-validated
+4. family 级别通过率
+5. top failure modes
+
+验收标准：
+
+1. 每周状态能自动汇总，不靠手工维护大段文字。
+
+---
+
+### 7.2 生成 paper-ready 统计表
+
+优先级：中
+
+目标：
+为论文、答辩、组会报告准备稳定的数据导出层。
+
+建议输出：
+
+1. 各 family 数量与通过率
+2. dual validation 覆盖率
+3. category 分布
+4. 代表性 case 清单
+
+验收标准：
+
+1. 结果表能方便导出成 paper table，而不需要每次人工整理。
+
+---
+
+### 7.3 做代表性 case showcase
+
+优先级：中
+
+目标：
+从大表中挑出最能说明项目价值的样例。
+
+建议覆盖：
+
+1. 普通数字逻辑
+2. data-converter
+3. calibration / signal-source
+4. PLL 闭环
+5. tb-generation
+
+验收标准：
+
+1. 对外展示时有短名单，不必直接扔整张结果表。
+
+---
+
+### 7.4 抽象 failure taxonomy
+
+优先级：中
+
+目标：
+把这轮 benchmark 建设中暴露出的 Verilog-A 常见问题总结出来，反哺 skill 和论文叙述。
+
+可总结的方向：
+
+1. 端口 discipline / Cadence 兼容
+2. `transition()` 与连续量混用
+3. PRBS 初始化与状态机边界
+4. `save` 语法兼容
+5. PLL 任务中 generic parity 不适用的问题
+
+验收标准：
+
+1. 能形成一份清晰的问题类型列表，而不仅是零散修复记录。
+
+---
+
+### 7.5 下一轮 benchmark 扩展
+
+优先级：低到中
+
+前提：
+
+1. Phase 1 到 Phase 3 至少大部分完成
+2. 当前结果面稳定
+
+可扩方向：
+
+1. 新的 `end-to-end` 纯电压域模块
+2. 新的 `spec-to-va` 细粒度模块
+3. 新的 `bugfix` 典型错误类型
+4. 新的 `tb-generation` case
+5. 更多 PLL 相关但评分语义清楚的任务
+
+扩展约束：
+
+1. 不要为了凑数量破坏可评分性。
+2. 不要引入需要大量手工判分的 case。
+3. 不要把 benchmark 从 EVAS-primary 漂移成模糊的双 simulator 混合目标。
+
+验收标准：
+
+1. 每个新增任务都有明确 gold、checks、验证路径和表格登记规则。
+
+---
+
+## 8. 反哺 skill / 生成系统的工作
+
+### 8.1 把修复经验写回 prompt / skill
+
+优先级：中
+
+目标：
+减少未来再生成相同错误。
+
+建议回写内容：
+
+1. Cadence 兼容端口声明规范
+2. `transition()` 使用边界
+3. PRBS 初始化策略
+4. PLL case 的 task-aware parity 原则
+5. tb-generation 中何时不要求 `sim_correct`
+
+验收标准：
+
+1. 后续 representative case 的首轮通过率有提升空间。
+
+---
+
+### 8.2 建立新增任务 authoring checklist
+
+优先级：中
+
+目标：
+让以后新加任务不再漏掉 gold、checks、Spectre 兼容项或文档登记。
+
+建议 checklist 内容：
+
+1. task 目录完整性
+2. gold 资产完整性
+3. EVAS 验证是否通过
+4. 是否需要 dual validation
+5. 结果表是否登记
+6. 是否需要 sync task assignment
+
+验收标准：
+
+1. 新任务的接入流程稳定、可复制。
+
+---
+
+## 9. 建议执行顺序
+
+如果按实际推进效率排序，推荐顺序是：
+
+1. 补 `pr_link`
+2. 清理过时 notes
+3. 固化文档分层规则
+4. 统一 bridge wrapper 使用路径
+5. 清理 Spectre warning
+6. 给关键 runner 加 smoke test
+7. 扩展 CI
+8. 做结果 manifest / weekly summary
+9. 整理 paper-ready 表格与 showcase
+10. 再开始下一轮 benchmark 扩展
+
+---
+
+## 10. 完成判据
+
+当下面这些条件同时满足时，可以认为“当前阶段的后续治理工作已完成”：
+
+1. 结果表中的 `pr_link` 已尽可能补齐。
+2. 文档中不再存在明显过时的 pending / temporary 表述。
+3. bridge 工作流已经统一为 wrapper-first。
+4. 核心 runner 至少有最小回归保护。
+5. Spectre warning 噪声已显著下降，或至少完成分级说明。
+6. 周期性 summary 和结果消费路径已经有稳定模板。
+7. 团队能在不依赖历史聊天的情况下继续扩 benchmark。
+
+---
+
+## 11. 一句话版本
+
+这个项目下一阶段最重要的，不是继续“补 case”，而是先把 metadata、bridge 工作流、日志质量、回归保护和结果消费层做扎实；等这些打稳了，再进入下一轮 benchmark 扩展。

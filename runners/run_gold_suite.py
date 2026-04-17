@@ -17,20 +17,40 @@ def task_root() -> Path:
     return benchmark_root() / "tasks" / "end-to-end" / "voltage"
 
 
+def family_task_root(family: str) -> Path:
+    base = benchmark_root() / "tasks"
+    mapping = {
+        "end-to-end": base / "end-to-end" / "voltage",
+        "spec-to-va": base / "spec-to-va" / "voltage",
+        "bugfix": base / "bugfix" / "voltage",
+        "tb-generation": base / "tb-generation" / "voltage",
+    }
+    if family not in mapping:
+        raise ValueError(f"unsupported family: {family}")
+    return mapping[family]
+
+
 def read_meta(task_dir: Path) -> dict:
     return json.loads((task_dir / "meta.json").read_text(encoding="utf-8"))
 
 
-def list_gold_task_dirs(selected: set[str] | None = None) -> list[Path]:
+def list_gold_task_dirs(
+    selected: set[str] | None = None,
+    families: tuple[str, ...] = ("end-to-end",),
+) -> list[Path]:
     task_dirs: list[Path] = []
-    for task_dir in sorted(p for p in task_root().iterdir() if p.is_dir()):
-        gold_dir = task_dir / "gold"
-        if not gold_dir.is_dir():
+    for family in families:
+        root = family_task_root(family)
+        if not root.exists():
             continue
-        task_id = task_dir.name
-        if selected and task_id not in selected:
-            continue
-        task_dirs.append(task_dir)
+        for task_dir in sorted(p.parent for p in root.rglob("meta.json")):
+            gold_dir = task_dir / "gold"
+            if not gold_dir.is_dir():
+                continue
+            task_id = read_meta(task_dir).get("id", task_dir.name)
+            if selected and task_id not in selected:
+                continue
+            task_dirs.append(task_dir)
     return task_dirs
 
 
@@ -101,6 +121,12 @@ def main() -> None:
     )
     ap.add_argument("--timeout-s", type=int, default=180)
     ap.add_argument(
+        "--family",
+        action="append",
+        choices=("end-to-end", "spec-to-va", "bugfix", "tb-generation"),
+        help="Task family to scan for gold assets. Defaults to end-to-end only.",
+    )
+    ap.add_argument(
         "--task",
         action="append",
         default=[],
@@ -109,6 +135,7 @@ def main() -> None:
     args = ap.parse_args()
 
     selected = set(args.task) if args.task else None
+    families = tuple(args.family) if args.family else ("end-to-end",)
     out_root = Path(args.output_root)
     if not out_root.is_absolute():
         out_root = benchmark_root() / out_root
@@ -116,7 +143,7 @@ def main() -> None:
 
     results = [
         run_gold_case(task_dir, out_root, args.timeout_s)
-        for task_dir in list_gold_task_dirs(selected)
+        for task_dir in list_gold_task_dirs(selected, families=families)
     ]
 
     summary = {
@@ -124,6 +151,7 @@ def main() -> None:
         "pass_count": sum(1 for r in results if r["status"] == "PASS"),
         "fail_count": sum(1 for r in results if r["status"] != "PASS"),
         "task_ids": [r["task_id"] for r in results],
+        "families": list(families),
         "results": results,
     }
     (out_root / "summary.json").write_text(

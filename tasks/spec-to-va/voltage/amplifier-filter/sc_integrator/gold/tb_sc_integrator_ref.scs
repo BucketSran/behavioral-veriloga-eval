@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+Vvdd (VDD 0) vsource dc=0.9
+Vvss (VSS 0) vsource dc=0
+Vvin (VIN 0) vsource dc=0.12
+
+Vphi1 (PHI1 0) vsource type=pulse val0=0 val1=0.9 delay=2n rise=20p fall=20p width=7n period=20n
+Vphi2 (PHI2 0) vsource type=pulse val0=0 val1=0.9 delay=12n rise=20p fall=20p width=7n period=20n
+
+XDUT (VDD VSS VIN PHI1 PHI2 VOUT) sc_integrator Cin=1.0 Cfb=1.0
+
+tran tran stop=120n maxstep=100p
+save VIN PHI1 PHI2 VOUT
+
+ahdl_include "sc_integrator.va"

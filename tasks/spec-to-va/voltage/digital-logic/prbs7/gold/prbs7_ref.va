@@ -22,48 +22,67 @@ parameter real vdd = 0.9;
 parameter real vth = 0.45;
 parameter real trf = 10p;
 parameter real td  = 0p;
-parameter integer seed = 7'b1111111;
+// Use a plain decimal integer so EVAS and Spectre agree on the seed value.
+parameter integer seed = 127;
 
-integer state[0:6];
-integer next_state[0:6];
-integer i;
+integer state_0_i;
+integer state_1_i;
+integer state_2_i;
+integer state_3_i;
+integer state_4_i;
+integer state_5_i;
+integer state_6_i;
 integer feedback;
 integer serial_bit;
 
 analog begin
     @(initial_step) begin
-        for (i = 0; i < 7; i = i + 1)
-            state[i] = (seed >> i) & 1;
-        if (state[0] == 0 && state[1] == 0 && state[2] == 0 && state[3] == 0 && state[4] == 0 && state[5] == 0 && state[6] == 0)
-            state[6] = 1;
+        state_0_i = (seed >> 0) & 1;
+        state_1_i = (seed >> 1) & 1;
+        state_2_i = (seed >> 2) & 1;
+        state_3_i = (seed >> 3) & 1;
+        state_4_i = (seed >> 4) & 1;
+        state_5_i = (seed >> 5) & 1;
+        state_6_i = (seed >> 6) & 1;
+        if (state_0_i == 0 && state_1_i == 0 && state_2_i == 0 && state_3_i == 0 &&
+            state_4_i == 0 && state_5_i == 0 && state_6_i == 0)
+            state_6_i = 1;
     end
 
     @(cross(V(clk) - vth, +1)) begin
         if (V(rst_n) < vth) begin
-            for (i = 0; i < 7; i = i + 1)
-                state[i] = (seed >> i) & 1;
-            if (state[0] == 0 && state[1] == 0 && state[2] == 0 && state[3] == 0 && state[4] == 0 && state[5] == 0 && state[6] == 0)
-                state[6] = 1;
+            state_0_i = (seed >> 0) & 1;
+            state_1_i = (seed >> 1) & 1;
+            state_2_i = (seed >> 2) & 1;
+            state_3_i = (seed >> 3) & 1;
+            state_4_i = (seed >> 4) & 1;
+            state_5_i = (seed >> 5) & 1;
+            state_6_i = (seed >> 6) & 1;
+            if (state_0_i == 0 && state_1_i == 0 && state_2_i == 0 && state_3_i == 0 &&
+                state_4_i == 0 && state_5_i == 0 && state_6_i == 0)
+                state_6_i = 1;
         end else if (V(en) > vth) begin
-            feedback = state[6] ^ state[5];
-            next_state[0] = feedback;
-            for (i = 1; i < 7; i = i + 1)
-                next_state[i] = state[i - 1];
-            for (i = 0; i < 7; i = i + 1)
-                state[i] = next_state[i];
+            feedback = state_6_i ^ state_5_i;
+            state_6_i = state_5_i;
+            state_5_i = state_4_i;
+            state_4_i = state_3_i;
+            state_3_i = state_2_i;
+            state_2_i = state_1_i;
+            state_1_i = state_0_i;
+            state_0_i = feedback;
         end
     end
 
-    serial_bit = state[6];
+    serial_bit = state_6_i;
 
     V(serial_out) <+ transition(serial_bit ? vdd : 0.0, td, trf, trf);
-    V(state_0)    <+ transition(state[0] ? vdd : 0.0, td, trf, trf);
-    V(state_1)    <+ transition(state[1] ? vdd : 0.0, td, trf, trf);
-    V(state_2)    <+ transition(state[2] ? vdd : 0.0, td, trf, trf);
-    V(state_3)    <+ transition(state[3] ? vdd : 0.0, td, trf, trf);
-    V(state_4)    <+ transition(state[4] ? vdd : 0.0, td, trf, trf);
-    V(state_5)    <+ transition(state[5] ? vdd : 0.0, td, trf, trf);
-    V(state_6)    <+ transition(state[6] ? vdd : 0.0, td, trf, trf);
+    V(state_0)    <+ transition(state_0_i ? vdd : 0.0, td, trf, trf);
+    V(state_1)    <+ transition(state_1_i ? vdd : 0.0, td, trf, trf);
+    V(state_2)    <+ transition(state_2_i ? vdd : 0.0, td, trf, trf);
+    V(state_3)    <+ transition(state_3_i ? vdd : 0.0, td, trf, trf);
+    V(state_4)    <+ transition(state_4_i ? vdd : 0.0, td, trf, trf);
+    V(state_5)    <+ transition(state_5_i ? vdd : 0.0, td, trf, trf);
+    V(state_6)    <+ transition(state_6_i ? vdd : 0.0, td, trf, trf);
 end
 
 endmodule

@@ -1,0 +1,35 @@
+{
+  "id": "adpll_timer",
+  "family": "spec-to-va",
+  "category": "pll-clock",
+  "domain": "voltage",
+  "difficulty": "medium",
+  "expected_backend": "evas",
+  "must_include": [
+    "@(cross(",
+    "@(timer(",
+    "transition("
+  ],
+  "must_not_include": [
+    "I(",
+    "ddt("
+  ],
+  "inputs": [
+    "prompt.md"
+  ],
+  "artifacts": [
+    "candidate.out"
+  ],
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "source_eval_id": 28,
+  "source_name": "eval-adpll-timer",
+  "expected_output_summary": "A .va file with timer-driven DCO toggling, bang-bang phase correction from ref_clk to divided fb_clk, vctrl monitor output, and a lock indicator that asserts after several small-error cycles.",
+  "source_files": [
+    "gold/adpll_timer_ref.va",
+    "gold/tb_adpll_timer_ref.scs"
+  ]
+}

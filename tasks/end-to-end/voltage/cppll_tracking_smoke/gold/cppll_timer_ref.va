@@ -1,0 +1,141 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cppll_timer_ref (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical ref_clk,
+    output electrical fb_clk,
+    output electrical dco_clk,
+    output electrical vctrl_mon,
+    output electrical lock
+);
+    parameter integer div_ratio = 8 from [1:inf);
+    parameter real f_center = 800.0e6 from (0:inf);
+    parameter real kvco_hz_per_v = 350.0e6 from (0:inf);
+    parameter real f_min = 300.0e6 from (0:inf);
+    parameter real f_max = 1.6e9 from (0:inf);
+    parameter real kp = 8.0e6 from [0:inf);
+    parameter real ki = 1.2e5 from [0:inf);
+    parameter real integ_min = -0.45;
+    parameter real integ_max = 0.45;
+    parameter real vctrl_init = 0.45;
+    parameter real tedge = 20p from (0:inf);
+    parameter real lock_tol = 0.4e-9 from (0:inf);
+    parameter integer lock_count_target = 6 from [1:inf);
+
+    real vh;
+    real vl;
+    real vcm;
+    real vth;
+    real t_ref_prev;
+    real t_ref_last;
+    real t_fb_last;
+    real ref_period;
+    real phase_err;
+    real integ;
+    real vctrl;
+    real dco_freq;
+    real dco_half_period;
+    real t_next_toggle;
+
+    integer dco_state;
+    integer fb_state;
+    integer div_cnt;
+    integer lock_state;
+    integer lock_streak;
+
+    analog begin
+        vh = V(VDD);
+        vl = V(VSS);
+        vcm = 0.5 * (vh + vl);
+        vth = 0.5 * (vh + vl);
+
+        @(initial_step) begin
+            t_ref_prev = -1.0;
+            t_ref_last = -1.0;
+            t_fb_last = -1.0;
+            ref_period = 20e-9;
+            phase_err = 0.0;
+            integ = 0.0;
+            vctrl = vctrl_init;
+            if (vctrl < vl) vctrl = vl;
+            if (vctrl > vh) vctrl = vh;
+
+            dco_state = 0;
+            fb_state = 0;
+            div_cnt = 0;
+            lock_state = 0;
+            lock_streak = 0;
+
+            dco_freq = f_center + kvco_hz_per_v * (vctrl - vcm);
+            if (dco_freq < f_min) dco_freq = f_min;
+            if (dco_freq > f_max) dco_freq = f_max;
+            dco_half_period = 0.5 / dco_freq;
+            t_next_toggle = $abstime + dco_half_period;
+        end
+
+        @(cross(V(ref_clk) - vth, +1)) begin
+            t_ref_prev = t_ref_last;
+            t_ref_last = $abstime;
+
+            if (t_fb_last >= 0.0) begin
+                phase_err = t_ref_last - t_fb_last;
+
+                if (t_ref_prev >= 0.0) begin
+                    ref_period = t_ref_last - t_ref_prev;
+                    if (ref_period > 1e-15) begin
+                        while (phase_err > 0.5 * ref_period) phase_err = phase_err - ref_period;
+                        while (phase_err < -0.5 * ref_period) phase_err = phase_err + ref_period;
+                    end
+                end
+
+                integ = integ + ki * phase_err;
+                if (integ < integ_min) integ = integ_min;
+                if (integ > integ_max) integ = integ_max;
+
+                vctrl = vcm + kp * phase_err + integ;
+                if (vctrl < vl) vctrl = vl;
+                if (vctrl > vh) vctrl = vh;
+
+                if (abs(phase_err) <= lock_tol) begin
+                    lock_streak = lock_streak + 1;
+                end else begin
+                    lock_streak = 0;
+                end
+                lock_state = (lock_streak >= lock_count_target) ? 1 : 0;
+            end
+        end
+
+        @(timer(t_next_toggle)) begin
+            dco_state = 1 - dco_state;
+
+            if (dco_state == 1) begin
+                div_cnt = div_cnt + 1;
+                if (div_cnt >= div_ratio) begin
+                    div_cnt = 0;
+                    fb_state = 1 - fb_state;
+                end
+            end
+
+            dco_freq = f_center + kvco_hz_per_v * (vctrl - vcm);
+            if (dco_freq < f_min) dco_freq = f_min;
+            if (dco_freq > f_max) dco_freq = f_max;
+
+            $bound_step(1.0 / (64.0 * dco_freq));
+
+            dco_half_period = 0.5 / dco_freq;
+            t_next_toggle = t_next_toggle + dco_half_period;
+        end
+
+        @(cross(V(fb_clk) - vth, +1)) begin
+            t_fb_last = $abstime;
+        end
+
+        V(dco_clk) <+ vl + (vh - vl) * transition(dco_state ? 1.0 : 0.0, 0.0, tedge, tedge);
+        V(fb_clk) <+ vl + (vh - vl) * transition(fb_state ? 1.0 : 0.0, 0.0, tedge, tedge);
+        V(vctrl_mon) <+ vctrl;
+        V(lock) <+ vl + (vh - vl) * transition(lock_state ? 1.0 : 0.0, 0.0, tedge, tedge);
+    end
+
+endmodule
