@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "multimod_divider_ref.va"
+
+Vclk (clk_in 0) vsource type=pulse val0=0 val1=0.9 period=1n delay=0.1n rise=20p fall=20p width=0.5n
+Vmod (mod 0) vsource type=pwl wave=[0 0 40n 0 40.5n 0.9 90n 0.9]
+Vb0  (mod_0 0) vsource dc=0.0
+Vb1  (mod_1 0) vsource dc=0.0
+Vb2  (mod_2 0) vsource dc=0.9
+Vb3  (mod_3 0) vsource dc=0.0
+
+// base_count = 4, so target_count is 4 when mod=0 and 5 when mod=1.
+XDUT (clk_in mod mod_0 mod_1 mod_2 mod_3 prescaler_out) multimod_divider_ref
+
+tran tran stop=90n maxstep=50p
+save clk_in:2e mod:2e mod_0:2e mod_1:2e mod_2:2e mod_3:2e prescaler_out:2e

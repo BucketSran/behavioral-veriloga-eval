@@ -100,7 +100,8 @@ def compare_waveforms(
     max_abs_values: list[float] = []
 
     dt = (common_end - common_start) / max(sample_n - 1, 1)
-    max_lag_samples = max(0, int(round(1e-9 / max(dt, 1e-15))))
+    # Keep digital parity strict: do not shift timelines to hide timing skew.
+    max_lag_samples = 0
 
     def infer_digital(vals: list[float]) -> tuple[bool, float, float]:
         if not vals:

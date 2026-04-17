@@ -1,15 +1,24 @@
-// clk_divider gold smoke testbench
-// 10 MHz CLK_IN (period=100ns), div_ratio=4.
-// CLK_OUT should be ~2.5 MHz. LOCK asserts within ~500ns.
 simulator lang=spectre
 global 0
 
-ahdl_include "clk_divider.va"
+ahdl_include "clk_divider_ref.va"
 
-Vclk (clk_in 0) vsource type=pulse val0=0 val1=0.9 period=100n width=50n rise=1n fall=1n
-Vrst (rst_n 0) vsource type=pwl wave=[0 0  14.9n 0  15n 0.9  2u 0.9]
+Vclk  (clk_in 0) vsource type=pulse val0=0 val1=0.9 period=1n delay=0.1n rise=20p fall=20p width=0.5n
+Vrst  (rst_n  0) vsource type=pulse val0=0 val1=0.9 period=200n delay=2n rise=20p fall=20p width=198n
 
-IDUT (clk_in rst_n clk_out lock) clk_divider div_ratio=4 vth=0.45 vdd=0.9 tedge=1n
+// ratio = 5 (00000101)
+Vb0 (div_code_0 0) vsource dc=0.9
+Vb1 (div_code_1 0) vsource dc=0.0
+Vb2 (div_code_2 0) vsource dc=0.9
+Vb3 (div_code_3 0) vsource dc=0.0
+Vb4 (div_code_4 0) vsource dc=0.0
+Vb5 (div_code_5 0) vsource dc=0.0
+Vb6 (div_code_6 0) vsource dc=0.0
+Vb7 (div_code_7 0) vsource dc=0.0
 
-tran tran stop=2u maxstep=5n
-save clk_in:2e clk_out:2e lock:d
+XDUT (clk_in rst_n div_code_0 div_code_1 div_code_2 div_code_3 div_code_4 div_code_5 div_code_6 div_code_7 clk_out lock) clk_divider_ref
+
+tran tran stop=80n maxstep=50p
+save clk_in:2e rst_n:2e clk_out:2e lock:2e \
+	div_code_0:2e div_code_1:2e div_code_2:2e div_code_3:2e \
+	div_code_4:2e div_code_5:2e div_code_6:2e div_code_7:2e
