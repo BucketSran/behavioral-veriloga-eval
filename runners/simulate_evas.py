@@ -752,7 +752,9 @@ def check_serializer_8b(rows: list[dict[str, float]]) -> tuple[bool, str]:
     if len(edges) < 7:
         return False, f"only_{len(edges)}_edges_after_load"
 
-    edge_bits = [int(sout[min(e + 3, len(sout) - 1)] > vth) for e in edges[:8]]
+    # Sample sout after sufficient settle time (20 samples instead of 3)
+    # This accounts for transition() settling time which may take >100ps
+    edge_bits = [int(sout[min(e + 20, len(sout) - 1)] > vth) for e in edges[:8]]
     if len(edge_bits) < 8:
         return False, f"only_{len(edge_bits)}_sampled_bits"
     mismatches = sum(1 for a, b in zip(edge_bits, expected) if a != b)
