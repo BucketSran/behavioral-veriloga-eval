@@ -1,0 +1,39 @@
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 30p
+
+// Ideal 4-bit binary DAC — EVAS-compatible.
+// Converts din[3:0] to analog voltage vout using direct contribution (no transition).
+// Direct <+ contribution is valid for continuously-varying combinational logic.
+
+module dac_ideal_4b (
+    input  electrical [3:0]  din,
+    input  electrical        vdd,
+    input  electrical        vss,
+    input  electrical        rst_n,
+    output electrical        vout
+);
+
+    real    bin_val, vstep, v_supply, vth, v_target;
+    genvar  k;
+
+    analog begin
+        @(initial_step)
+            $strobe("[dac_ideal_4b] INIT | vdd_vss=%.3gV", V(vdd, vss));
+
+        v_supply = V(vdd, vss);
+        vth      = (V(vdd) + V(vss)) / 2.0;
+        vstep    = v_supply / 16.0;
+
+        // Decode: sum bit contributions
+        bin_val = 0.0;
+        for (k = 0; k < 4; k = k + 1)
+            bin_val = bin_val + ((V(din[k], vss) > vth) ? (1 << k) : 0);
+
+        v_target = (V(rst_n, vss) < vth) ? V(vss) : (V(vss) + bin_val * vstep);
+
+        // Direct contribution (no transition) — valid for combinational logic
+        V(vout) <+ v_target;
+    end
+
+endmodule

@@ -1,0 +1,26 @@
+// pipeline_stage gold smoke testbench
+// 50 MHz clock, PHI1/PHI2 non-overlapping (PHI1=first half, PHI2=second half).
+// VIN steps through three regions: above Vcm+Vref/4, between, below Vcm-Vref/4.
+// Run 300ns; check VRES is bounded and D1/D0 vary.
+simulator lang=spectre
+global 0
+
+ahdl_include "pipeline_stage.va"
+
+Vvdd  (vdd  0) vsource dc=0.9
+Vvss  (vss  0) vsource dc=0.0
+Vvref (vref 0) vsource dc=0.9
+// PHI1: high in first half of each 20ns period
+Vphi1 (phi1 0) vsource type=pulse val0=0 val1=0.9 period=20n width=8n rise=200p fall=200p delay=0
+// PHI2: high in second half (non-overlapping)
+Vphi2 (phi2 0) vsource type=pulse val0=0 val1=0.9 period=20n width=8n rise=200p fall=200p delay=11n
+// VIN: steps to exercise all three decision regions
+// VIN = 0.72 (> 0.675, upper region) at 0–100ns
+// VIN = 0.45 (= Vcm, middle region) at 100–200ns
+// VIN = 0.20 (< 0.225, lower region) at 200–300ns
+Vvin (vin 0) vsource type=pwl wave=[0 0.72  99.9n 0.72  100n 0.45  199.9n 0.45  200n 0.20  300n 0.20]
+
+IDUT (vdd vss phi1 phi2 vin vref vres d1 d0) pipeline_stage vth=0.45 vdd=0.9 tedge=200p
+
+tran tran stop=300n maxstep=2n
+save phi1:2e phi2:2e vin:3f vres:3f d1:d d0:d

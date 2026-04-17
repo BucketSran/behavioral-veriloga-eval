@@ -14,6 +14,13 @@ Planned runner split:
 - `run_examples_suite.py`
   Executes the 14 self-contained benchmark examples from `examples/manifest.json`
   with their default testbenches and emits a smoke-suite report
+- `run_gold_suite.py`
+  Auto-discovers formal end-to-end tasks that already have `gold/` DUT/testbench
+  assets and runs them through EVAS to emit reusable verification evidence
+- `run_gold_dual_suite.py`
+  Reuses the gold-backed end-to-end tasks, runs EVAS plus remote Spectre,
+  exports `tran_spectre.csv`, reuses the same behavior checks, and emits
+  waveform-parity summaries for coordination backfill
 - `simulate_openvaf.py`
   Out of scope for this benchmark
 - `score.py`
@@ -44,3 +51,14 @@ Current implemented executable runner:
   Inputs: benchmark `examples/manifest.json`
   Outputs:
   - per-example EVAS smoke result for the 14 default examples
+- `run_gold_suite.py`
+  Inputs: `tasks/end-to-end/voltage/*/gold/`
+  Outputs:
+  - per-task EVAS result for every discoverable gold-backed end-to-end task
+  - `summary.json` in the chosen output directory
+- `run_gold_dual_suite.py`
+  Inputs: `tasks/end-to-end/voltage/*/gold/`, bridge repo path, Cadence cshrc
+  Outputs:
+  - per-task EVAS + Spectre result
+  - `tran_spectre.csv` under each task output directory
+  - waveform parity summary in `summary.json`

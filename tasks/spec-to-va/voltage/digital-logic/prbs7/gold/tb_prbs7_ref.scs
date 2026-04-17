@@ -1,0 +1,16 @@
+// prbs7 gold smoke testbench
+// 100 MHz clock, RSTB deasserts at 15ns.
+// PRBS-7 period = 127 cycles = 1270ns @ 100MHz. Run 2us (~1.5 periods).
+// Check: PRBS_OUT has ≥20 transitions and ~50% high fraction.
+simulator lang=spectre
+global 0
+
+ahdl_include "prbs7.va"
+
+Vclk  (clk  0) vsource type=pulse val0=0 val1=0.9 period=10n width=5n rise=100p fall=100p
+Vrstb (rstb 0) vsource type=pwl wave=[0 0  14.9n 0  15n 0.9  2u 0.9]
+
+IDUT (clk rstb prbs_out s0 s1 s2 s3 s4 s5 s6) prbs7 seed=1 vth=0.45 vdd=0.9 tedge=200p
+
+tran tran stop=2u maxstep=5n
+save clk:2e rstb:d prbs_out:d

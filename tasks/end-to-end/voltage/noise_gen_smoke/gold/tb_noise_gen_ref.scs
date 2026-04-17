@@ -1,0 +1,14 @@
+// noise_gen gold smoke testbench
+// DC input at 1.0V; noise_gen adds Gaussian noise (sigma=0.1V, dt=0.5ns).
+// Runs 500ns. Check: std(noise) > 0.01V, max|noise| > 0.05V.
+simulator lang=spectre
+global 0
+
+ahdl_include "noise_gen_ref.va"
+
+Vvin (vin_i 0) vsource type=dc dc=1.0
+
+IDUT (vin_i vout_o) noise_gen sigma=0.1 dt=0.5n
+
+tran tran stop=500n maxstep=1n
+save vin_i:3f vout_o:3f

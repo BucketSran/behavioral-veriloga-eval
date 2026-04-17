@@ -26,6 +26,10 @@ TASK_BY_EXAMPLE = {
     "dac_therm_16b": "dac_therm_16b_smoke",
     "sar_adc_dac_weighted_8b": "sar_adc_dac_weighted_8b_smoke",
     "gain_extraction": "gain_extraction_smoke",
+    "xor_phase_detector": "xor_pd_smoke",
+    "pfd_updn": "pfd_updn_smoke",
+    "gray_counter_4b": "gray_counter_4b_smoke",
+    "mux_4to1": "mux_4to1_smoke",
 }
 
 

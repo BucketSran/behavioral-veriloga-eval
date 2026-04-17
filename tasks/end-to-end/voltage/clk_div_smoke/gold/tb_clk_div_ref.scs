@@ -1,0 +1,15 @@
+// clk_div gold smoke testbench
+// 100 MHz input clock, divide-by-4 output. Run 300ns.
+// Check: output edge count ≈ input/4 (ratio 3-5).
+simulator lang=spectre
+global 0
+
+ahdl_include "clk_div.va"
+
+Vclk_in (clk_in 0) vsource type=pulse val0=0 val1=0.9 period=10n width=5n rise=100p fall=100p
+Vrst_n  (rst_n  0) vsource type=pwl wave=[0 0  4.9n 0  5n 0.9  300n 0.9]
+
+IDUT (clk_in rst_n clk_out) clk_div vth=0.45 vdd=0.9
+
+tran tran stop=300n maxstep=1n
+save clk_in:2e clk_out:2e

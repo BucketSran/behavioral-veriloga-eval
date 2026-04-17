@@ -1,0 +1,71 @@
+// 14-bit segmented DAC — EVAS-compatible gold
+// Architecture: 6-bit thermometer MSBs + 8-bit binary LSBs = 14 bits total.
+// Differential current-steering output (behavioral model: voltage output Vout_P, Vout_N).
+// INL/DNL-friendly: unary decoding of top 6 bits internally.
+// Total codes: 16384. Output swing: ±Vswing/2 around Vcm.
+
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 100p
+
+module segmented_dac(
+    inout  electrical VDD, VSS,
+    input  electrical CLK,
+    input  electrical D13, D12, D11, D10, D9, D8,   // 6 MSBs (thermometer-decoded internally)
+    input  electrical D7, D6, D5, D4, D3, D2, D1, D0,  // 8 LSBs (binary)
+    output electrical VOUT_P,
+    output electrical VOUT_N
+);
+
+parameter real vdd   = 0.9;
+parameter real vcm   = 0.45;
+parameter real vswing = 0.8;   // full differential output swing
+parameter real vth   = 0.45;
+parameter real tedge = 200p;
+
+integer msb_code;
+integer lsb_code;
+integer total_code;
+real    vout_p_level;
+real    vout_n_level;
+
+analog begin
+    @(initial_step) begin
+        vout_p_level = vcm;
+        vout_n_level = vcm;
+        $strobe("[segmented_dac] INIT | vswing=%.3fV", vswing);
+    end
+
+    @(cross(V(CLK) - vth, +1)) begin
+        // 6-bit MSB: binary-to-thermometer decode (count active cells 0..63)
+        msb_code = 0;
+        if (V(D13) > vth) msb_code = msb_code + 32;
+        if (V(D12) > vth) msb_code = msb_code + 16;
+        if (V(D11) > vth) msb_code = msb_code + 8;
+        if (V(D10) > vth) msb_code = msb_code + 4;
+        if (V(D9)  > vth) msb_code = msb_code + 2;
+        if (V(D8)  > vth) msb_code = msb_code + 1;
+
+        // 8-bit LSB: binary decode
+        lsb_code = 0;
+        if (V(D7) > vth) lsb_code = lsb_code + 128;
+        if (V(D6) > vth) lsb_code = lsb_code + 64;
+        if (V(D5) > vth) lsb_code = lsb_code + 32;
+        if (V(D4) > vth) lsb_code = lsb_code + 16;
+        if (V(D3) > vth) lsb_code = lsb_code + 8;
+        if (V(D2) > vth) lsb_code = lsb_code + 4;
+        if (V(D1) > vth) lsb_code = lsb_code + 2;
+        if (V(D0) > vth) lsb_code = lsb_code + 1;
+
+        total_code = msb_code * 256 + lsb_code;
+
+        // Differential output: centered at vcm, ±vswing/2
+        vout_p_level = vcm + (total_code / 16383.0 - 0.5) * vswing * 0.5;
+        vout_n_level = vcm - (total_code / 16383.0 - 0.5) * vswing * 0.5;
+    end
+
+    V(VOUT_P) <+ transition(vout_p_level, 0, tedge, tedge);
+    V(VOUT_N) <+ transition(vout_n_level, 0, tedge, tedge);
+end
+
+endmodule

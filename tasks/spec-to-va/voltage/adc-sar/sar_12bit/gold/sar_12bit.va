@@ -1,0 +1,99 @@
+// 12-bit SAR ADC logic block with differential comparator — EVAS-compatible gold
+// Differential comparator input: DCOMP_P vs DCOMP_N.
+// CDAC control outputs: DP_CAP_11..DP_CAP_0 (individual ports).
+// End-of-conversion flag: EOC asserts after 12 bit phases.
+
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 50p
+
+module sar_12bit(
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical CLKS,
+    input  electrical DCOMP_P,
+    input  electrical DCOMP_N,
+    output electrical DP_CAP_11,
+    output electrical DP_CAP_10,
+    output electrical DP_CAP_9,
+    output electrical DP_CAP_8,
+    output electrical DP_CAP_7,
+    output electrical DP_CAP_6,
+    output electrical DP_CAP_5,
+    output electrical DP_CAP_4,
+    output electrical DP_CAP_3,
+    output electrical DP_CAP_2,
+    output electrical DP_CAP_1,
+    output electrical DP_CAP_0,
+    output electrical EOC
+);
+
+parameter real vth   = 0.45;
+parameter real vdd   = 0.9;
+parameter real tedge = 100p;
+
+integer state;
+integer cap_reg[11:0];
+real    cap_lev[11:0];
+real    eoc_level;
+integer i;
+
+analog begin
+    @(initial_step) begin
+        state     = 0;
+        eoc_level = 0.0;
+        for (i = 0; i <= 11; i = i + 1) begin
+            cap_reg[i] = 0;
+            cap_lev[i] = 0.0;
+        end
+        cap_reg[11] = 1;
+        cap_lev[11] = vdd;
+        $strobe("[sar_12bit] INIT");
+    end
+
+    @(cross(V(CLKS) - vth, +1)) begin
+        if (V(VDD) > vth) begin
+            if (state < 12) begin
+                // Differential comparator: positive if DCOMP_P > DCOMP_N
+                if (V(DCOMP_P) <= V(DCOMP_N))
+                    cap_reg[11 - state] = 0;
+                cap_lev[11 - state] = cap_reg[11 - state] ? vdd : 0.0;
+
+                state = state + 1;
+
+                if (state < 12) begin
+                    cap_reg[11 - state] = 1;
+                    cap_lev[11 - state] = vdd;
+                end
+                eoc_level = (state >= 12) ? vdd : 0.0;
+
+            end else begin
+                // EOC cycle done — restart
+                eoc_level = 0.0;
+                state     = 0;
+                for (i = 0; i <= 11; i = i + 1) begin
+                    cap_reg[i] = 0;
+                    cap_lev[i] = 0.0;
+                end
+                cap_reg[11] = 1;
+                cap_lev[11] = vdd;
+            end
+        end
+    end
+
+    V(DP_CAP_11) <+ transition(cap_lev[11], 0, tedge, tedge);
+    V(DP_CAP_10) <+ transition(cap_lev[10], 0, tedge, tedge);
+    V(DP_CAP_9)  <+ transition(cap_lev[9],  0, tedge, tedge);
+    V(DP_CAP_8)  <+ transition(cap_lev[8],  0, tedge, tedge);
+    V(DP_CAP_7)  <+ transition(cap_lev[7],  0, tedge, tedge);
+    V(DP_CAP_6)  <+ transition(cap_lev[6],  0, tedge, tedge);
+    V(DP_CAP_5)  <+ transition(cap_lev[5],  0, tedge, tedge);
+    V(DP_CAP_4)  <+ transition(cap_lev[4],  0, tedge, tedge);
+    V(DP_CAP_3)  <+ transition(cap_lev[3],  0, tedge, tedge);
+    V(DP_CAP_2)  <+ transition(cap_lev[2],  0, tedge, tedge);
+    V(DP_CAP_1)  <+ transition(cap_lev[1],  0, tedge, tedge);
+    V(DP_CAP_0)  <+ transition(cap_lev[0],  0, tedge, tedge);
+    V(EOC)       <+ transition(eoc_level,   0, tedge, tedge);
+end
+
+endmodule

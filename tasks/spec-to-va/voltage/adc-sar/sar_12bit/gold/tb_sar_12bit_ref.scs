@@ -1,0 +1,25 @@
+// sar_12bit gold smoke testbench
+// 12-bit SAR logic, 13-cycle conversion (12 bit phases + 1 EOC cycle).
+// CLKS at 10 MHz → 100ns/bit → conversion time = 1.3us.
+// DCOMP_P > DCOMP_N for first 7 bits, then DCOMP_P < DCOMP_N for last 5.
+// Run 6us for 4+ conversions.
+simulator lang=spectre
+global 0
+
+ahdl_include "sar_12bit.va"
+
+Vvdd  (vdd 0) vsource dc=0.9
+Vvss  (vss 0) vsource dc=0.0
+Vclks (clks 0) vsource type=pulse val0=0 val1=0.9 period=100n width=50n rise=1n fall=1n
+// Differential comparator: DCOMP_P=0.7, DCOMP_N=0.45 → P>N (high) for 700ns, then swap
+Vdcomp_p (dcomp_p 0) vsource type=pwl \
+    wave=[0 0.7  699.9n 0.7  700n 0.2  1299.9n 0.2  1300n 0.7  1999.9n 0.7  2000n 0.2  2599.9n 0.2  2600n 0.7  6u 0.7]
+Vdcomp_n (dcomp_n 0) vsource dc=0.45
+
+IDUT (vdd vss clks dcomp_p dcomp_n \
+      dp_cap_11 dp_cap_10 dp_cap_9 dp_cap_8 dp_cap_7 dp_cap_6 \
+      dp_cap_5  dp_cap_4  dp_cap_3 dp_cap_2 dp_cap_1 dp_cap_0 eoc) \
+    sar_12bit vth=0.45 vdd=0.9 tedge=1n
+
+tran tran stop=6u maxstep=5n
+save eoc:d dp_cap_11:d dp_cap_0:d

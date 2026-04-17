@@ -1,0 +1,15 @@
+// clk_divider gold smoke testbench
+// 10 MHz CLK_IN (period=100ns), div_ratio=4.
+// CLK_OUT should be ~2.5 MHz. LOCK asserts within ~500ns.
+simulator lang=spectre
+global 0
+
+ahdl_include "clk_divider.va"
+
+Vclk (clk_in 0) vsource type=pulse val0=0 val1=0.9 period=100n width=50n rise=1n fall=1n
+Vrst (rst_n 0) vsource type=pwl wave=[0 0  14.9n 0  15n 0.9  2u 0.9]
+
+IDUT (clk_in rst_n clk_out lock) clk_divider div_ratio=4 vth=0.45 vdd=0.9 tedge=1n
+
+tran tran stop=2u maxstep=5n
+save clk_in:2e clk_out:2e lock:d

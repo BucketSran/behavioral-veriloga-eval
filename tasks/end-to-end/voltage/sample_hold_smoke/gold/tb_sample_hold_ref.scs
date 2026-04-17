@@ -1,0 +1,19 @@
+// sample_hold gold smoke testbench
+// Ramp input 0->0.9V over 1us, 50MHz clock (period=20ns).
+// Check: output steps at clock edges and holds between them.
+simulator lang=spectre
+global 0
+
+ahdl_include "sample_hold.va"
+
+Vvdd (vdd 0) vsource dc=0.9 type=dc
+Vvss (vss 0) vsource dc=0.0 type=dc
+
+Vin (in 0) vsource type=pwl wave=[0 0 1e-6 0.9]
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=20n width=10n rise=200p fall=200p
+
+IDUT (vdd vss in clk out) sample_hold vth=0.45 tedge=100p
+
+tran tran stop=1u maxstep=2n
+save in:3f clk:2e out:3f

@@ -1,0 +1,36 @@
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+// noise_gen — EVAS-compatible version.
+// Adds Gaussian noise to vin_i using @(timer) sampling so that
+// the transition() target is piecewise-constant as EVAS requires.
+
+module noise_gen (
+    input electrical  vin_i,
+    output electrical vout_o
+);
+
+    parameter real sigma = 0.01;   // Noise std-dev (V)
+    parameter real dt    = 0.5n;   // Sampling interval (s)
+
+    real noise, vout;
+
+    analog begin
+        @(initial_step) begin
+            noise = 0.0;
+            vout  = 0.0;
+            $strobe("[noise_gen] INIT | sigma=%.5gV dt=%.3gns", sigma, dt*1e9);
+        end
+
+        // Resample noise at each timer tick — makes vout piecewise-constant
+        @(timer(dt)) begin
+            noise = sigma * $rdist_normal(0, 0, 1);
+            vout  = V(vin_i) + noise;
+            $strobe("[noise_gen] t=%.3f ns | noise=%.5gV vout=%.5gV", $abstime*1e9, noise, vout);
+        end
+
+        V(vout_o) <+ transition(vout, 0, dt/10, dt/10);
+    end
+
+endmodule

@@ -1,0 +1,18 @@
+// digital_basics gold smoke testbench — NOT gate
+// Input 'a' pulses between 0V and 0.9V at 50 MHz.
+// Check: output 'y' is the complement of 'a' (invert_match_frac > 0.9).
+simulator lang=spectre
+global 0
+
+ahdl_include "not_gate.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0.0
+
+// 50 MHz square wave: 10ns low, 10ns high
+Va (a 0) vsource type=pulse val0=0 val1=0.9 period=20n width=10n rise=200p fall=200p
+
+IDUT (vdd vss a y) not_gate vth=0.45 tedge=100p
+
+tran tran stop=200n maxstep=5n
+save a:2e y:2e

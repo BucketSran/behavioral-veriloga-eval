@@ -1,0 +1,26 @@
+// Library name: vaEvas
+// Cell name:    tb_pfd_updn
+// View name:    schematic
+simulator lang=spectre
+global 0
+
+// Power
+Vvdd (vdd 0) vsource dc=0.9 type=dc
+Vvss (vss 0) vsource dc=0.0 type=dc
+
+// REF: 50MHz clock
+Vref (ref 0) vsource type=pulse val0=0 val1=0.9 period=20n width=10n rise=100p fall=100p
+
+// DIV: 50MHz, 3ns lag behind REF (REF leads -> UP should dominate)
+Vdiv (div 0) vsource type=pulse val0=0 val1=0.9 period=20n delay=3n width=10n rise=100p fall=100p
+
+// DUT (port order: VDD VSS REF DIV UP DN)
+IDUT (vdd vss ref div up dn) pfd_updn vth=0.45 tedge=50p
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+
+tran tran stop=300n maxstep=100p errpreset=conservative
+
+save ref div up dn
+
+ahdl_include "./pfd_updn.va"

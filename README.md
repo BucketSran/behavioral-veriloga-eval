@@ -93,6 +93,14 @@ The self-contained executable assets used by the first benchmark wave live under
 `examples/`. The default 14-group smoke suite is driven from
 `examples/manifest.json`.
 
+For end-to-end tasks that already include checked-in `gold/` DUT and testbench
+assets, use `python3 runners/run_gold_suite.py` to generate reusable EVAS
+verification evidence under `results/gold-suite/`.
+
+When Spectre parity is needed, use `python3 runners/run_gold_dual_suite.py`
+with the active `virtuoso-bridge-lite` repo path and `VB_CADENCE_CSHRC` to
+emit EVAS + Spectre reports under `results/gold-dual-suite*/`.
+
 ## Initial benchmark strategy
 
 Start small and stable:

@@ -1,0 +1,29 @@
+// serializer_8b gold smoke testbench
+// Data=0xA5 (10100101), LOAD at t~5ns, CLK 200MHz from t=10ns.
+// Expected serial output MSB-first: 1,0,1,0,0,1,0,1
+simulator lang=spectre
+global 0
+
+ahdl_include "serializer_8b.va"
+
+Vvdd (vdd 0) vsource dc=0.9 type=dc
+Vvss (vss 0) vsource dc=0.0 type=dc
+
+// 0xA5 = 10100101: D7=1 D6=0 D5=1 D4=0 D3=0 D2=1 D1=0 D0=1
+Vd7 (d7 0) vsource dc=0.9 type=dc
+Vd6 (d6 0) vsource dc=0.0 type=dc
+Vd5 (d5 0) vsource dc=0.9 type=dc
+Vd4 (d4 0) vsource dc=0.0 type=dc
+Vd3 (d3 0) vsource dc=0.0 type=dc
+Vd2 (d2 0) vsource dc=0.9 type=dc
+Vd1 (d1 0) vsource dc=0.0 type=dc
+Vd0 (d0 0) vsource dc=0.9 type=dc
+
+Vload (load 0) vsource type=pulse val0=0 val1=0.9 period=200n delay=5n width=15n rise=100p fall=100p
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=5n width=2.5n rise=100p fall=100p delay=10n
+
+IDUT (vdd vss d7 d6 d5 d4 d3 d2 d1 d0 load clk sout) serializer_8b vth=0.45 tedge=100p
+
+tran tran stop=300n maxstep=1n
+save load:2e clk:2e sout:2e d7:2e d0:2e

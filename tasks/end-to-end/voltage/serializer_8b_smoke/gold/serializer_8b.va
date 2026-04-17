@@ -1,0 +1,86 @@
+// 8-bit Parallel-to-Serial Converter — EVAS/Spectre parity aligned
+// On rising edge of LOAD: latches parallel inputs D7..D0 into shift register.
+// On each rising CLK edge (when LOAD=0): outputs current MSB then shifts.
+// First CLK after LOAD outputs the MSB (bit 7), subsequent CLKs shift and output.
+// sout_level stored as piecewise-constant real so transition() target is valid.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module serializer_8b(
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical D7,
+    input  electrical D6,
+    input  electrical D5,
+    input  electrical D4,
+    input  electrical D3,
+    input  electrical D2,
+    input  electrical D1,
+    input  electrical D0,
+    input  electrical LOAD,
+    input  electrical CLK,
+    output electrical SOUT
+);
+
+parameter real vth   = 0.45;
+parameter real tedge = 100p;
+
+integer shreg;
+integer bit_cnt;
+integer sout_v;
+integer load_pending;  // flag: LOAD occurred, waiting for first CLK
+real    sout_level;   // piecewise-constant output voltage
+
+analog begin
+    @(initial_step) begin
+        shreg     = 0;
+        bit_cnt   = 0;
+        sout_v    = 0;
+        load_pending = 0;
+        sout_level = 0.0;
+    end
+
+    // LOAD rising edge: latch data, mark as pending
+    @(cross(V(LOAD) - vth, +1)) begin
+        shreg = ((V(D7) > vth) ? 128 : 0)
+              + ((V(D6) > vth) ?  64 : 0)
+              + ((V(D5) > vth) ?  32 : 0)
+              + ((V(D4) > vth) ?  16 : 0)
+              + ((V(D3) > vth) ?   8 : 0)
+              + ((V(D2) > vth) ?   4 : 0)
+              + ((V(D1) > vth) ?   2 : 0)
+              + ((V(D0) > vth) ?   1 : 0);
+        bit_cnt   = 0;
+        load_pending = 1;  // Mark: waiting for first CLK to output MSB
+        $strobe("[ser8b] t=%.3f ns | LOAD | data=%0d | pending",
+                $abstime*1e9, shreg);
+    end
+
+    // CLK rising edge: output then shift (when LOAD=0)
+    @(cross(V(CLK) - vth, +1)) begin
+        if (V(LOAD) < vth) begin
+            if (load_pending) begin
+                // First CLK after LOAD: output MSB, no shift yet
+                sout_v = (shreg >> 7) & 1;
+                load_pending = 0;
+                $strobe("[ser8b] t=%.3f ns | FIRST CLK | sout=%d (MSB)",
+                        $abstime*1e9, sout_v);
+            end else begin
+                // Subsequent CLKs: shift then output new MSB
+                shreg = (shreg << 1) & 255;
+                bit_cnt = bit_cnt + 1;
+                sout_v = (shreg >> 7) & 1;
+                $strobe("[ser8b] t=%.3f ns | SHIFT bit=%d | sout=%d",
+                        $abstime*1e9, bit_cnt, sout_v);
+            end
+            sout_level = sout_v ? V(VDD) : V(VSS);
+        end
+    end
+
+    V(SOUT) <+ transition(sout_level, 0, tedge, tedge);
+end
+
+endmodule

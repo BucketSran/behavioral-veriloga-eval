@@ -1,0 +1,37 @@
+// gain_extraction gold smoke testbench
+// 50 MHz clock, ACTUAL_GAIN=8.64, DITHER_AMP=0.014063. Run 200us.
+// Check: std(vamp_diff) / std(vin_diff) > 4.0.
+simulator lang=spectre
+global 0
+
+ahdl_include "vin_src.va"
+ahdl_include "lfsr.va"
+ahdl_include "dither_adder.va"
+ahdl_include "gain_amp_fixed.va"
+
+parameters vdd=0.9 ACTUAL_GAIN=8.64 DITHER_AMP=0.014063 fs=50e6 fin=300e3 VIN_NOISE=0.01
+
+Vvdd (vdd 0) vsource dc=vdd
+Vvss (vss 0) vsource dc=0
+
+// 50 MHz clock
+Vclk (clk 0) vsource type=pulse val0=0 val1=vdd period=20n delay=5n rise=1n fall=1n width=9n
+
+// Reset deasserts at 40ns
+Vrst_n (rst_n 0) vsource type=pwl wave=[0 0  39.5n 0  40n vdd  200u vdd]
+Ven    (en    0) vsource dc=vdd
+
+// Clocked noisy sine input
+IVIN  (clk rst_n vinp vinn) vin_src vdd=vdd vth=0.45 ampl=0.02 freq=fin sigma=VIN_NOISE SEED=0
+
+// LFSR (drives dither)
+ILFSR (dpn vdd vss clk en rst_n) lfsr seed=42
+
+// Dither adder
+IDITH (vinp vinn dpn vdin_p vdin_n) dither_adder vdd=vdd vth=0.45 DITHER_AMP=DITHER_AMP
+
+// Fixed-gain amplifier
+IAMP  (vdin_p vdin_n vamp_p vamp_n) gain_amp_fixed vdd=vdd ACTUAL_GAIN=ACTUAL_GAIN
+
+tran tran stop=200u maxstep=8n
+save vinp:3f vinn:3f vamp_p:3f vamp_n:3f
