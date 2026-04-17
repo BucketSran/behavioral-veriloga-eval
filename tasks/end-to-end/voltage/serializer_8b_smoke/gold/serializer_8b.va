@@ -44,6 +44,7 @@ analog begin
     end
 
     // LOAD rising edge: latch data, mark as pending
+    // Do NOT modify sout_level or sout_v here! MSB must be output on first CLK.
     @(cross(V(LOAD) - vth, +1)) begin
         shreg = ((V(D7) > vth) ? 128 : 0)
               + ((V(D6) > vth) ?  64 : 0)

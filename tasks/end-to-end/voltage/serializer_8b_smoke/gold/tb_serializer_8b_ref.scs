@@ -1,6 +1,8 @@
 // serializer_8b gold smoke testbench
 // Data=0xA5 (10100101), LOAD at t~5ns, CLK 200MHz from t=10ns.
 // Expected serial output MSB-first: 1,0,1,0,0,1,0,1
+// IMPORTANT: LOAD width=12.5n ensures LOAD falls at t=17.5ns (mid-CLK period)
+// This avoids race condition where LOAD fall coincides with CLK rise at t=20ns.
 simulator lang=spectre
 global 0
 
@@ -19,8 +21,10 @@ Vd2 (d2 0) vsource dc=0.9 type=dc
 Vd1 (d1 0) vsource dc=0.0 type=dc
 Vd0 (d0 0) vsource dc=0.9 type=dc
 
-Vload (load 0) vsource type=pulse val0=0 val1=0.9 period=200n delay=5n width=15n rise=100p fall=100p
+// LOAD: 5ns rise, hold 12.5ns, fall at 17.5ns (between CLK edges at 15ns and 20ns)
+Vload (load 0) vsource type=pulse val0=0 val1=0.9 period=200n delay=5n width=12.5n rise=100p fall=100p
 
+// CLK: 200MHz (5ns period) starting at 10ns
 Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=5n width=2.5n rise=100p fall=100p delay=10n
 
 IDUT (vdd vss d7 d6 d5 d4 d3 d2 d1 d0 load clk sout) serializer_8b vth=0.45 tedge=100p

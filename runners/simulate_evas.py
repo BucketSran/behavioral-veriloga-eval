@@ -738,23 +738,39 @@ def check_serializer_8b(rows: list[dict[str, float]]) -> tuple[bool, str]:
     load = [r["load"] for r in rows]
     clk  = [r["clk"]  for r in rows]
     sout = [r["sout"] for r in rows]
+    times = [r["time"] for r in rows]
+
     # find LOAD falling edge
     load_fall = next((i for i in range(1, len(load)) if load[i - 1] > vth > load[i]), None)
     if load_fall is None:
         return False, "LOAD never deasserted"
     expected = [1, 0, 1, 0, 0, 1, 0, 1]  # 0xA5 MSB-first
-    load_fall_t = rows[load_fall]["time"]
+    load_fall_t = times[load_fall]
+
     # collect CLK rising edges strictly after LOAD falls
     edges = [
         i for i in range(max(1, load_fall), len(clk))
-        if clk[i - 1] <= vth < clk[i] and rows[i]["time"] > load_fall_t + 1e-15
+        if clk[i - 1] <= vth < clk[i] and times[i] > load_fall_t + 1e-15
     ]
     if len(edges) < 7:
         return False, f"only_{len(edges)}_edges_after_load"
 
-    # Sample sout after sufficient settle time (20 samples instead of 3)
-    # This accounts for transition() settling time which may take >100ps
-    edge_bits = [int(sout[min(e + 20, len(sout) - 1)] > vth) for e in edges[:8]]
+    # Sample sout at the middle of the next CLK period (wait for transition to settle)
+    # transition() with tedge=100p takes ~100ps to complete, so we need to wait longer
+    # CLK period is 5ns, so middle of period is ~2.5ns after edge
+    # Find sample index at ~1ns after each edge (enough time for transition)
+    edge_bits = []
+    for e in edges[:8]:
+        edge_t = times[e]
+        # Find sample index at edge_t + 1ns (waiting for transition to settle)
+        target_t = edge_t + 1e-9
+        sample_idx = e
+        while sample_idx < len(rows) and times[sample_idx] < target_t:
+            sample_idx += 1
+        sample_idx = min(sample_idx, len(rows) - 1)
+        bit = int(sout[sample_idx] > vth)
+        edge_bits.append(bit)
+
     if len(edge_bits) < 8:
         return False, f"only_{len(edge_bits)}_sampled_bits"
     mismatches = sum(1 for a, b in zip(edge_bits, expected) if a != b)
