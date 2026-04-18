@@ -65,7 +65,7 @@
 截至本轮自动推进结束，下面这些项已经有实质进展：
 
 1. `4.1 补齐 pr_link 元数据`
-   已部分完成。基于本地分支、commit 历史和 worksche 证据，补齐了一批 benchmark / spec-to-va 行的 `pr_link`。剩余 `[TODO]` 主要集中在当前还缺乏已提交 provenance 的行。
+   已进一步完成。基于本地分支、commit 历史和 upstream PR 证据，又补齐了一批 benchmark / spec-to-va / PLL formal-benchmark 行的 `pr_link`。剩余 `[TODO]` 主要集中在 testspace PLL seed 这类尚无独立 PR provenance 的历史参考行。
 2. `4.3 固化文档分层规则`
    已完成。`README.md` 已明确说明结果表、syncer 和 `WORK_TODO.md` 的更新顺序与职责分工。
 3. `4.4 写一份项目当前状态总览`
@@ -80,11 +80,13 @@
    已完成首轮高收益收敛。现有 gold testbench 中遗留的 `save ... :2e/:3f/:6f/:d` 等旧式限定符已统一清理，并补上 `tests/test_save_statements.py` 防止回归。
 8. `7.5 下一轮 benchmark 扩展`
    已完成首轮落实。新增 `inverted_comparator_logic_bug`、`swapped_pfd_outputs_bug`、`wrong_edge_sample_hold_bug`、`gain_step_tb`、`sample_hold_step_tb`、`xor_phase_tb`，并在 `behavioral-veriloga-eval/results/gold-dual-suite-expansion-clean-2026-04-18/` 完成 6/6 clean dual-suite 验证。
+9. `4.2 清理过时 notes`
+   已完成一轮全表收口。PLL seed / formal-benchmark / non-e2e refresh 行里仍带过渡态语气的 notes 已统一改成稳定描述，保留真正有复用价值的技术背景。
 
 仍未在本轮完成的高优先级项：
 
-1. `4.2 清理过时 notes`
-   已完成一轮针对 PLL、bugfix、tb-generation 新闭环行的表述收口，但尚未完成全表系统清理。
+1. `4.1 补齐 pr_link 元数据`
+   仍有少量历史 seed 行保留 `[TODO]`，原因不是漏查，而是当前没有对应的独立 PR/分支 provenance 可引用。
 
 ---
 
@@ -117,6 +119,12 @@
 
 1. 需要本地 git 历史或远端仓库信息可访问。
 
+当前状态：
+
+1. benchmark-backed rows 的可确认 provenance 已再次补齐一轮。
+2. 目前保留的 `[TODO]` 主要是 `testspace` 下的历史 PLL seed 参考行。
+3. 这些剩余项在没有独立 PR 或可稳定引用的分支前，应继续保留 `[TODO]` 而不是猜填。
+
 ---
 
 ### 4.2 清理过时 notes
@@ -142,6 +150,11 @@
 验收标准：
 
 1. 不再出现“结果已 closed，但 notes 还写 pending / workaround”的情况。
+
+当前状态：
+
+1. 已完成一轮全表系统清理。
+2. 目前结果表中的 notes 以稳定事实、关键指标和真正需要保留的技术背景为主。
 
 ---
 
