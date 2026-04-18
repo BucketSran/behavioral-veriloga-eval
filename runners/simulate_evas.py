@@ -942,25 +942,6 @@ def check_gray_counter_4b(rows: list[dict[str, float]]) -> tuple[bool, str]:
     return True, f"unique_codes={len(unique_codes)} bad_transitions={bad_transitions}"
 
 
-def check_clk_divider(rows: list[dict[str, float]]) -> tuple[bool, str]:
-    """Programmable clock divider: check output/input edge ratio ≈ div_ratio and LOCK asserts."""
-    if not rows or "clk_in" not in rows[0] or "clk_out" not in rows[0]:
-        return False, "missing clk_in/clk_out"
-    times = [r["time"] for r in rows]
-    in_edges  = rising_edges([r["clk_in"]  for r in rows], times)
-    out_edges = rising_edges([r["clk_out"] for r in rows], times)
-    if len(in_edges) < 6 or len(out_edges) < 2:
-        return False, f"not_enough_edges in={len(in_edges)} out={len(out_edges)}"
-    ratio = len(in_edges) / max(len(out_edges), 1)
-    lock_ok = True
-    if "lock" in rows[0]:
-        t_end = times[-1]
-        lock_late = [r["lock"] for r in rows if r["time"] > t_end * 0.5]
-        lock_ok = bool(lock_late) and any(v > 0.45 for v in lock_late)
-    ok = 2.0 <= ratio <= 8.0 and lock_ok
-    return ok, f"edge_ratio={ratio:.2f} lock_ok={lock_ok}"
-
-
 def check_prbs7(rows: list[dict[str, float]]) -> tuple[bool, str]:
     """PRBS-7: check serial output has many transitions and ~50% high fraction."""
     if not rows:
