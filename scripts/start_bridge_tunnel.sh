@@ -3,8 +3,9 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PROJECT_ROOT="$(cd "$ROOT_DIR/.." && pwd)"
-BRIDGE_REPO="$PROJECT_ROOT/../iccad/virtuoso-bridge-lite"
-BRIDGE_ENV="$BRIDGE_REPO/.env"
+DEFAULT_BRIDGE_REPO="$PROJECT_ROOT/../iccad/virtuoso-bridge-lite"
+BRIDGE_REPO="${BRIDGE_REPO:-$DEFAULT_BRIDGE_REPO}"
+BRIDGE_ENV="${BRIDGE_ENV:-$BRIDGE_REPO/.env}"
 
 if [[ ! -f "$BRIDGE_ENV" ]]; then
   echo "bridge env not found: $BRIDGE_ENV" >&2
@@ -16,14 +17,14 @@ set -a
 source "$BRIDGE_ENV"
 set +a
 
-: "${VB_REMOTE_HOST:?VB_REMOTE_HOST missing in $BRIDGE_ENV}"
-: "${VB_REMOTE_USER:?VB_REMOTE_USER missing in $BRIDGE_ENV}"
 : "${VB_REMOTE_PORT:=65081}"
 : "${VB_LOCAL_PORT:=65082}"
 
 if lsof -tiTCP:"$VB_LOCAL_PORT" -sTCP:LISTEN -n -P >/dev/null 2>&1; then
   echo "bridge tunnel already listening on localhost:$VB_LOCAL_PORT"
 else
+  : "${VB_REMOTE_HOST:?VB_REMOTE_HOST missing in $BRIDGE_ENV}"
+  : "${VB_REMOTE_USER:?VB_REMOTE_USER missing in $BRIDGE_ENV}"
   SSH_ARGS=(
     -f
     -o BatchMode=yes

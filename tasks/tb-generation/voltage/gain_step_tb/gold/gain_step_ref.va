@@ -1,0 +1,26 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module gain_step_ref(VDD, VSS, vinp, vinn, voutp, voutn);
+    inout VDD, VSS;
+    input vinp, vinn;
+    output voutp, voutn;
+    electrical VDD, VSS, vinp, vinn, voutp, voutn;
+
+    parameter real gain = 4.0;
+    real vdiff;
+    real vclip;
+
+    analog begin
+        vdiff = gain * (V(vinp, VSS) - V(vinn, VSS));
+        if (vdiff > 0.6)
+            vclip = 0.6;
+        else if (vdiff < -0.6)
+            vclip = -0.6;
+        else
+            vclip = vdiff;
+
+        V(voutp, VSS) <+ 0.45 + 0.5 * vclip;
+        V(voutn, VSS) <+ 0.45 - 0.5 * vclip;
+    end
+endmodule

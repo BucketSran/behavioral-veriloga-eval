@@ -90,7 +90,9 @@ Useful preflight variants:
 Current regression protection:
 
 1. `python -m py_compile runners/bridge_preflight.py runners/run_gold_dual_suite.py`
-2. `python -m pytest -q tests/test_bridge_preflight.py tests/test_run_gold_dual_suite.py tests/test_save_statements.py`
+2. `python -m pytest -q tests/test_bridge_preflight.py tests/test_bridge_scripts.py tests/test_run_gold_dual_suite.py tests/test_save_statements.py tests/test_pwl_statements.py`
 
 These smoke tests cover the bridge preflight JSON surface and the
-`tb-generation` `parity=not_required` control path.
+`tb-generation` `parity=not_required` control path, the gold testbench lint
+guards, and helper-script behavior such as bridge-repo overrides plus wrapper
+usage checks.

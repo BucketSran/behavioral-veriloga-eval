@@ -24,16 +24,22 @@ record Spectre parity evidence for engineering closure and regression tracking.
 
 As of 2026-04-18:
 
-1. `end-to-end`: 22 tasks closed
-2. `spec-to-va`: 16 tasks closed
-3. `bugfix`: 4 tasks closed
-4. `tb-generation`: 4 tasks closed for EVAS scoring, with EVAS+Spectre execution evidence recorded
+1. `end-to-end`: 24 tasks closed
+2. `spec-to-va`: 18 tasks closed
+3. `bugfix`: 7 tasks closed
+4. `tb-generation`: 7 tasks closed for EVAS scoring, with EVAS+Spectre execution evidence recorded
 5. benchmark / closed-loop rows: 24 `dual-validated`
 
 There are currently no open benchmark rows with `verification_status != passed`.
 The remaining project work is now mostly about provenance backfill, workflow
 hardening, warning cleanup, and future benchmark expansion rather than missing
 benchmark functionality.
+
+The latest expansion pass on 2026-04-18 added
+`inverted_comparator_logic_bug`, `swapped_pfd_outputs_bug`,
+`wrong_edge_sample_hold_bug`, `gain_step_tb`, `sample_hold_step_tb`, and
+`xor_phase_tb`. A clean EVAS+Spectre rerun for all 6 new tasks now lives under
+`results/gold-dual-suite-expansion-clean-2026-04-18/`.
 
 It is split into four task families:
 

@@ -8,8 +8,9 @@ fi
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PROJECT_ROOT="$(cd "$ROOT_DIR/.." && pwd)"
-BRIDGE_REPO="$PROJECT_ROOT/../iccad/virtuoso-bridge-lite"
-BRIDGE_ENV="$BRIDGE_REPO/.env"
+DEFAULT_BRIDGE_REPO="$PROJECT_ROOT/../iccad/virtuoso-bridge-lite"
+BRIDGE_REPO="${BRIDGE_REPO:-$DEFAULT_BRIDGE_REPO}"
+BRIDGE_ENV="${BRIDGE_ENV:-$BRIDGE_REPO/.env}"
 
 if [[ ! -f "$BRIDGE_ENV" ]]; then
   echo "bridge env not found: $BRIDGE_ENV" >&2

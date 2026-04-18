@@ -23,10 +23,10 @@
 
 截至 2026-04-18，项目主线状态可以概括为：
 
-1. `end-to-end` 22 个任务已闭环。
-2. `spec-to-va` 16 个任务已闭环。
-3. `bugfix` 4 个任务已闭环。
-4. `tb-generation` 4 个任务已完成 EVAS 主验证，并补齐了 EVAS+Spectre 执行证据。
+1. `end-to-end` 24 个任务已闭环。
+2. `spec-to-va` 18 个任务已闭环。
+3. `bugfix` 7 个任务已闭环。
+4. `tb-generation` 7 个任务已完成 EVAS 主验证，并补齐了 EVAS+Spectre 执行证据。
 5. benchmark / closed-loop 共有 24 行 `dual-validated`。
 6. 当前没有 `verification_status != passed` 的 open row。
 7. 当前没有需要单独跟踪的 parity / simulator 例外。
@@ -78,11 +78,13 @@
    已部分完成。`behavioral-veriloga-eval/.github/workflows/runner-smoke.yml` 已新增，覆盖 runner 语法检查、最小 smoke tests，以及 gold testbench `save` 语法守护。
 7. `6.1 清理 Spectre save warning`
    已完成首轮高收益收敛。现有 gold testbench 中遗留的 `save ... :2e/:3f/:6f/:d` 等旧式限定符已统一清理，并补上 `tests/test_save_statements.py` 防止回归。
+8. `7.5 下一轮 benchmark 扩展`
+   已完成首轮落实。新增 `inverted_comparator_logic_bug`、`swapped_pfd_outputs_bug`、`wrong_edge_sample_hold_bug`、`gain_step_tb`、`sample_hold_step_tb`、`xor_phase_tb`，并在 `behavioral-veriloga-eval/results/gold-dual-suite-expansion-clean-2026-04-18/` 完成 6/6 clean dual-suite 验证。
 
 仍未在本轮完成的高优先级项：
 
 1. `4.2 清理过时 notes`
-   只做了少量顺手收敛，尚未完成全表系统清理。
+   已完成一轮针对 PLL、bugfix、tb-generation 新闭环行的表述收口，但尚未完成全表系统清理。
 
 ---
 
@@ -270,6 +272,15 @@
 
 1. 不同场景下使用方式清晰，不再依赖口头说明。
 
+当前状态：
+
+1. 已完成一轮脚本工程化加固：`check_bridge_ready.sh`、`start_bridge_tunnel.sh`、`run_with_bridge.sh` 现在都支持通过环境变量覆写 `BRIDGE_REPO` / `BRIDGE_ENV`，便于测试和跨仓复用。
+2. 已新增 `tests/test_bridge_scripts.py`，覆盖：
+   - `check_bridge_ready.sh --json`
+   - `start_bridge_tunnel.sh` 在 listener 已存在时的行为
+   - `run_with_bridge.sh` 的用法错误路径
+3. 上述 helper script smoke 已接入 `runner-smoke.yml`。
+
 ---
 
 ### 5.4 评估 dual runner 是否进一步封装桥接调用
@@ -364,6 +375,10 @@
 
 1. 核心 runner 逻辑至少有 smoke-level 自动保护。
 
+当前状态补充：
+
+1. 已进一步把 bridge helper scripts 纳入 smoke 保护，避免 wrapper / preflight / tunnel helper 的基本行为在后续修改中悄悄漂移。
+
 ---
 
 ### 6.4 把更多检查接入 CI
@@ -376,6 +391,7 @@
 2. `runner-smoke.yml` 中的 runner Python 语法检查
 3. `runner-smoke.yml` 中的最小 pytest smoke tests
 4. `runner-smoke.yml` 中的 gold testbench `save` 语法检查
+5. `runner-smoke.yml` 中的 helper script smoke tests
 
 后续可加：
 
@@ -500,6 +516,12 @@
 
 优先级：低到中
 
+当前状态：
+
+1. 2026-04-18 已完成第一轮 family 扩展，`bugfix` 与 `tb-generation` 均从 4 个增至 7 个任务。
+2. 本轮新增 6 个任务均已通过 gold validation；统一 clean dual-suite 结果位于 `behavioral-veriloga-eval/results/gold-dual-suite-expansion-clean-2026-04-18/`。
+3. 这轮暴露出的主要工程经验是：gold testbench 中的 PWL 激励要优先使用 Spectre 更稳的单行写法，否则 EVAS 通过后仍可能在 dual-suite 阶段因为 netlist read-in 失败而返工。
+
 前提：
 
 1. Phase 1 到 Phase 3 至少大部分完成
@@ -518,6 +540,12 @@
 1. 不要为了凑数量破坏可评分性。
 2. 不要引入需要大量手工判分的 case。
 3. 不要把 benchmark 从 EVAS-primary 漂移成模糊的双 simulator 混合目标。
+
+下一轮可优先补：
+
+1. 更贴近真实修复流的 `bugfix` 子类型，比如参数极性写反、复位优先级错误、边沿/电平敏感混淆、输出 rail 饱和遗漏。
+2. 更接近测量型 bench 的 `tb-generation` 子类型，比如建立时间/保持时间、迟滞比较器、频率步进、增益扫描、锁定窗口观测。
+3. 评分语义清楚的 PLL 衍生 case，但仍要坚持 task-aware parity，不把 tb-generation 家族强行改成 waveform-perfect 比赛。
 
 验收标准：
 

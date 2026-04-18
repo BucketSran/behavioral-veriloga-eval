@@ -1253,6 +1253,31 @@ def check_spectre_port_discipline(rows: list[dict[str, float]]) -> tuple[bool, s
     return (not errs), ("ok" if not errs else ";".join(errs))
 
 
+def check_inverted_comparator_logic_bug(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    if not rows:
+        return False, "empty"
+    required = {"vinp", "vinn", "out_p"}
+    if not required.issubset(rows[0]):
+        return False, "missing vinp/vinn/out_p"
+
+    windows = [
+        (10e-9, 0.0, "low0"),
+        (30e-9, 0.9, "high1"),
+        (50e-9, 0.0, "low2"),
+        (70e-9, 0.9, "high3"),
+    ]
+    errs: list[str] = []
+    for t_check, expected, label in windows:
+        vals = [r["out_p"] for r in rows if abs(r["time"] - t_check) <= 1.5e-9]
+        if not vals:
+            errs.append(f"{label}_no_samples")
+            continue
+        measured = sum(vals) / len(vals)
+        if abs(measured - expected) > 0.08:
+            errs.append(f"{label}_err={abs(measured - expected):.3f}")
+    return (not errs), ("ok" if not errs else ";".join(errs))
+
+
 def check_mux_4to1(rows: list[dict[str, float]]) -> tuple[bool, str]:
     required = {"d0", "d1", "d2", "d3", "sel1", "sel0", "y", "time"}
     if not rows or not required.issubset(rows[0]):
@@ -1347,6 +1372,9 @@ CHECKS = {
     "nrz_prbs":       check_nrz_prbs,
     "mixed_domain_cdac_bug": check_mixed_domain_cdac_bug,
     "spectre_port_discipline": check_spectre_port_discipline,
+    "wrong_edge_sample_hold_bug": check_sample_hold,
+    "inverted_comparator_logic_bug": check_inverted_comparator_logic_bug,
+    "swapped_pfd_outputs_bug": check_pfd_updn,
 }
 
 

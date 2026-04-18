@@ -1,0 +1,17 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module xor_phase_ref(VDD, VSS, ref, div, pd_out);
+    inout VDD, VSS;
+    input ref, div;
+    output pd_out;
+    electrical VDD, VSS, ref, div, pd_out;
+
+    integer ref_bit, div_bit;
+
+    analog begin
+        ref_bit = (V(ref, VSS) > 0.45) ? 1 : 0;
+        div_bit = (V(div, VSS) > 0.45) ? 1 : 0;
+        V(pd_out, VSS) <+ V(VDD, VSS) * transition((ref_bit ^ div_bit) ? 1.0 : 0.0, 0, 20p, 20p);
+    end
+endmodule

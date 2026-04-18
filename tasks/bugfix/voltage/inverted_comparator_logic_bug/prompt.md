@@ -1,0 +1,22 @@
+The following voltage-domain comparator drives the output with inverted logic.
+Fix it without changing the intended function of reporting whether `vinp` is
+greater than `vinn`.
+
+```verilog
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cmp_polarity_bug (VDD, VSS, vinp, vinn, out_p);
+    inout VDD, VSS;
+    input vinp, vinn;
+    output out_p;
+    electrical VDD, VSS, vinp, vinn, out_p;
+
+    analog begin
+        V(out_p, VSS) <+ V(VDD, VSS) * transition(
+            (V(vinp, VSS) < V(vinn, VSS)) ? 1.0 : 0.0,
+            0, 20p, 20p
+        );
+    end
+endmodule
+```

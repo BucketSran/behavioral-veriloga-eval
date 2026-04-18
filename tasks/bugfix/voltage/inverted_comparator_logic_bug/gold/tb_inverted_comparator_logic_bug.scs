@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+Vvdd (VDD 0) vsource dc=0.9
+Vvss (VSS 0) vsource dc=0.0
+Vvinn (vinn 0) vsource dc=0.45
+Vvinp (vinp 0) vsource type=pwl wave=[ 0 0.20 20n 0.20 22n 0.75 40n 0.75 42n 0.25 60n 0.25 62n 0.80 80n 0.80 ]
+
+XDUT (VDD VSS vinp vinn out_p) cmp_polarity_bug
+
+tran tran stop=80n maxstep=100p
+save vinp vinn out_p
+
+ahdl_include "dut_fixed.va"

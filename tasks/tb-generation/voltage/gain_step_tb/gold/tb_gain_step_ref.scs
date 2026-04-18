@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+Vvdd (VDD 0) vsource dc=0.9
+Vvss (VSS 0) vsource dc=0.0
+Vinp (vinp 0) vsource type=pwl wave=[ 0 0.45 18n 0.45 20n 0.50 58n 0.50 60n 0.40 100n 0.40 ]
+Vinn (vinn 0) vsource dc=0.45
+
+XDUT (VDD VSS vinp vinn voutp voutn) gain_step_ref
+
+tran tran stop=100n maxstep=100p
+save vinp vinn voutp voutn
+
+ahdl_include "gain_step_ref.va"
