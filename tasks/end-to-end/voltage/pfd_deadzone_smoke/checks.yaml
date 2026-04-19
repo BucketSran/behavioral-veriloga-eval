@@ -1,0 +1,17 @@
+syntax:
+  must_include:
+    - "@(cross("
+    - "transition("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "short_up_pulses_present_near_deadzone"
+    - "up_dn_overlap_not_sustained"
+
+parity:
+  required: true
+  spectre_result_path: "behavioral-veriloga-eval/results/gold-dual-suite-expansion-2026-04-19/pfd_deadzone_smoke/spectre/tran_spectre.csv"
+  tolerance_notes: "Requires EVAS/Spectre dual validation on short-pulse near-deadzone PFD behavior."

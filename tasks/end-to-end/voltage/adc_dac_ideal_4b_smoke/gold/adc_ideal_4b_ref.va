@@ -5,7 +5,8 @@
 // Ideal 4-bit clocked ADC — EVAS-compatible.
 // Samples vin on each rising edge of clk -> 4-bit binary code on dout[3:0].
 // Output bits stored as piecewise-constant real vars (b3..b0) so that
-// transition() targets are piecewise-constant as EVAS requires.
+// the gold stays Spectre-clean / low-warning instead of relying on the
+// original continuous-target transition() form.
 
 module adc_ideal_4b (
     input  electrical        vin,
@@ -50,7 +51,7 @@ module adc_ideal_4b (
             $strobe("[adc_ideal_4b] t=%.3f ns | vin=%g | code=%d", $abstime*1e9, v_in, code);
         end
 
-        // Drive outputs — transition() targets are piecewise-constant reals
+        // Drive outputs using the explicit low-warning gold style.
         V(dout[3]) <+ transition(b3, 0, 30p, 30p);
         V(dout[2]) <+ transition(b2, 0, 30p, 30p);
         V(dout[1]) <+ transition(b1, 0, 30p, 30p);

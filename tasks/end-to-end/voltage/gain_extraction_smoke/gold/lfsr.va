@@ -1,10 +1,11 @@
-// 31-bit LFSR — EVAS-compatible (gain_extraction variant)
-// Fixes original by storing DPN output in a piecewise-constant real variable.
+// 31-bit LFSR — gain_extraction benchmark gold.
+// Uses an explicit stored output level for a deterministic, easy-to-read gold
+// style. This choice now sits mostly in benchmark authoring/style territory
+// rather than being required by the current EVAS transition checks.
 
 `include "constants.vams"
 `include "disciplines.vams"
 
-`define N_lfsr 31
 `default_transition 10p
 
 module lfsr(
@@ -18,33 +19,33 @@ module lfsr(
 
 parameter integer seed = 42;
 
-integer lfsr_r[`N_lfsr:0];
-integer tmp_lfsr_r[(`N_lfsr+1):0];
+integer lfsr_r[31:0];
+integer tmp_lfsr_r[32:0];
 integer i;
-real    dpn_level;   // piecewise-constant output voltage
+real    dpn_level;   // explicit stored output voltage for the gold path
 
 analog begin
     @(initial_step or cross(V(RSTB) - 0.5, -1)) begin
-        for (i = 0; i <= `N_lfsr; i = i + 1) begin
+        for (i = 0; i < 32; i = i + 1) begin
             lfsr_r[i] = (seed >> i) & 1;
         end
-        for (i = 0; i <= `N_lfsr; i = i + 5) begin
+        for (i = 0; i < 32; i = i + 5) begin
             lfsr_r[i] = 1;
         end
-        dpn_level = lfsr_r[`N_lfsr] > 0 ? V(VDD) : V(VSS);
-        $strobe("[lfsr] t=%.3f ns | INIT/RST | DPN=%d", $abstime*1e9, lfsr_r[`N_lfsr]);
+        dpn_level = lfsr_r[31] > 0 ? V(VDD) : V(VSS);
+        $strobe("[lfsr] t=%.3f ns | INIT/RST | DPN=%d", $abstime*1e9, lfsr_r[31]);
     end
 
     @(cross(V(CLK) - 0.5, +1)) begin
         if (V(RSTB) > 0.5) begin
-            for (i = 0; i <= `N_lfsr; i = i + 1) begin
+            for (i = 0; i < 32; i = i + 1) begin
                 tmp_lfsr_r[i + 1] = lfsr_r[i];
             end
             tmp_lfsr_r[0] = lfsr_r[31] ^ lfsr_r[21] ^ lfsr_r[1] ^ lfsr_r[0];
-            for (i = 0; i <= `N_lfsr; i = i + 1) begin
+            for (i = 0; i < 32; i = i + 1) begin
                 lfsr_r[i] = tmp_lfsr_r[i];
             end
-            dpn_level = lfsr_r[`N_lfsr] > 0 ? V(VDD) : V(VSS);
+            dpn_level = lfsr_r[31] > 0 ? V(VDD) : V(VSS);
         end
     end
 

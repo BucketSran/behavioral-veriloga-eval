@@ -3,7 +3,6 @@
   "title": "behavioral-va-eval task",
   "type": "object",
   "required": [
-    "id",
     "family",
     "category",
     "domain",
@@ -11,8 +10,23 @@
     "expected_backend",
     "scoring"
   ],
+  "anyOf": [
+    {
+      "required": [
+        "id"
+      ]
+    },
+    {
+      "required": [
+        "task_id"
+      ]
+    }
+  ],
   "properties": {
     "id": {
+      "type": "string"
+    },
+    "task_id": {
       "type": "string"
     },
     "family": {
@@ -76,6 +90,10 @@
       "items": {
         "type": "string",
         "enum": [
+          "syntax",
+          "routing",
+          "simulation",
+          "behavior",
           "dut_compile",
           "tb_compile",
           "sim_correct"

@@ -67,7 +67,8 @@ def interp_at(rows: list[dict[str, float]], sig: str, t: float) -> float:
     return y0 + a * (y1 - y0)
 
 
-ADPLL_TIMER_TASK_IDS = {"adpll_lock_smoke", "adpll_timer", "adpll_timer_smoke"}
+ADPLL_TIMER_TASK_IDS = {"adpll_lock_smoke", "adpll_ratio_hop_smoke", "adpll_timer", "adpll_timer_smoke"}
+CPPLL_REACQUIRE_TASK_IDS = {"cppll_freq_step_reacquire_smoke"}
 CPPLL_TRACKING_TASK_IDS = {"cppll_timer", "cppll_tracking_smoke"}
 
 
@@ -77,6 +78,54 @@ def first_rising_time(rows: list[dict[str, float]], sig: str, threshold: float =
     times = [r["time"] for r in rows]
     edges = rising_edges([r[sig] for r in rows], times, threshold=threshold)
     return edges[0] if edges else float("nan")
+
+
+def first_rising_time_after(
+    rows: list[dict[str, float]],
+    sig: str,
+    start_t: float,
+    threshold: float = 0.45,
+) -> float:
+    if not rows or sig not in rows[0]:
+        return float("nan")
+    times = [r["time"] for r in rows]
+    edges = rising_edges([r[sig] for r in rows], times, threshold=threshold)
+    for edge_t in edges:
+        if edge_t >= start_t:
+            return edge_t
+    return float("nan")
+
+
+def weighted_logic_high_fraction(
+    rows: list[dict[str, float]],
+    signal: str,
+    threshold: float,
+    *,
+    start_t: float | None = None,
+    end_t: float | None = None,
+) -> float:
+    if len(rows) < 2:
+        return 0.0
+    start = rows[0]["time"] if start_t is None else start_t
+    end = rows[-1]["time"] if end_t is None else end_t
+    if end <= start:
+        return 0.0
+
+    total_dt = 0.0
+    high_dt = 0.0
+    for idx in range(1, len(rows)):
+        seg_start = max(rows[idx - 1]["time"], start)
+        seg_end = min(rows[idx]["time"], end)
+        dt = seg_end - seg_start
+        if dt <= 0.0:
+            continue
+        total_dt += dt
+        v_mid = 0.5 * (rows[idx - 1].get(signal, 0.0) + rows[idx].get(signal, 0.0))
+        if v_mid > threshold:
+            high_dt += dt
+    if total_dt <= 0.0:
+        return 0.0
+    return high_dt / total_dt
 
 
 def late_edge_metrics(
@@ -302,6 +351,133 @@ def compare_cppll_tracking_parity(
     }
 
 
+def compare_cppll_reacquire_parity(
+    evas_rows: list[dict[str, float]],
+    spectre_rows: list[dict[str, float]],
+) -> dict:
+    # This task uses a reference-frequency step at 2.0 us. The first meaningful
+    # relock edge can occur shortly after that boundary, so the parity anchor
+    # should guard only against the step transition itself rather than skip deep
+    # into the disturbance window.
+    relock_anchor_t = 2.05e-6
+
+    ev_ref = late_edge_metrics(evas_rows, "ref_clk", start_frac=0.75)
+    ev_fb = late_edge_metrics(evas_rows, "fb_clk", start_frac=0.75)
+    sp_ref = late_edge_metrics(spectre_rows, "ref_clk", start_frac=0.75)
+    sp_fb = late_edge_metrics(spectre_rows, "fb_clk", start_frac=0.75)
+    ev_vctrl = late_window_stats(evas_rows, "vctrl_mon", start_frac=0.75)
+    sp_vctrl = late_window_stats(spectre_rows, "vctrl_mon", start_frac=0.75)
+
+    ev_disturb_lock = weighted_logic_high_fraction(
+        evas_rows, "lock", 0.45, start_t=2.05e-6, end_t=2.8e-6
+    )
+    sp_disturb_lock = weighted_logic_high_fraction(
+        spectre_rows, "lock", 0.45, start_t=2.05e-6, end_t=2.8e-6
+    )
+
+    ev_ratio = ev_fb["late_edge_count"] / max(ev_ref["late_edge_count"], 1.0)
+    sp_ratio = sp_fb["late_edge_count"] / max(sp_ref["late_edge_count"], 1.0)
+    ev_pre_lock = first_rising_time(evas_rows, "lock")
+    sp_pre_lock = first_rising_time(spectre_rows, "lock")
+    ev_relock = first_rising_time_after(evas_rows, "lock", relock_anchor_t)
+    sp_relock = first_rising_time_after(spectre_rows, "lock", relock_anchor_t)
+    ev_post_lock_count = len(
+        [
+            t
+            for t in rising_edges([r["lock"] for r in evas_rows], [r["time"] for r in evas_rows])
+            if relock_anchor_t <= t <= 5.9e-6
+        ]
+    )
+    sp_post_lock_count = len(
+        [
+            t
+            for t in rising_edges([r["lock"] for r in spectre_rows], [r["time"] for r in spectre_rows])
+            if relock_anchor_t <= t <= 5.9e-6
+        ]
+    )
+
+    failures: list[str] = []
+    if ev_ref["late_edge_count"] < 4 or sp_ref["late_edge_count"] < 4:
+        failures.append("insufficient_ref_edges")
+    if ev_fb["late_edge_count"] < 4 or sp_fb["late_edge_count"] < 4:
+        failures.append("insufficient_fb_edges")
+    if abs(ev_ratio - sp_ratio) > 0.03:
+        failures.append(f"late_edge_ratio_delta={abs(ev_ratio - sp_ratio):.4f}")
+    if rel_delta(ev_fb["late_freq_hz"], sp_fb["late_freq_hz"]) > 0.03:
+        failures.append(
+            "late_fb_freq_delta="
+            f"{rel_delta(ev_fb['late_freq_hz'], sp_fb['late_freq_hz']):.4f}"
+        )
+    if abs(ev_disturb_lock - sp_disturb_lock) > 0.20:
+        failures.append(
+            f"disturb_lock_window_delta={abs(ev_disturb_lock - sp_disturb_lock):.4f}"
+        )
+
+    if math.isfinite(ev_pre_lock) != math.isfinite(sp_pre_lock):
+        failures.append("pre_lock_presence_mismatch")
+    pre_lock_delta = (
+        abs(ev_pre_lock - sp_pre_lock)
+        if math.isfinite(ev_pre_lock) and math.isfinite(sp_pre_lock)
+        else float("nan")
+    )
+
+    if math.isfinite(ev_relock) != math.isfinite(sp_relock):
+        failures.append("relock_presence_mismatch")
+        relock_delta = float("inf")
+    elif math.isfinite(ev_relock) and math.isfinite(sp_relock):
+        relock_delta = abs(ev_relock - sp_relock)
+        if relock_delta > 5e-8:
+            failures.append(f"relock_time_delta={relock_delta:.3e}")
+    else:
+        relock_delta = float("nan")
+
+    if not (math.isfinite(ev_vctrl["mean"]) and math.isfinite(sp_vctrl["mean"])):
+        failures.append("missing_vctrl_metrics")
+    elif abs(ev_vctrl["mean"] - sp_vctrl["mean"]) > 0.08:
+        failures.append(
+            f"late_vctrl_mean_delta={abs(ev_vctrl['mean'] - sp_vctrl['mean']):.4f}"
+        )
+    if abs(ev_post_lock_count - sp_post_lock_count) > 6:
+        failures.append(f"post_lock_count_delta={abs(ev_post_lock_count - sp_post_lock_count)}")
+
+    return {
+        "status": "passed" if not failures else "needs_review",
+        "mode": "pll_task_aware",
+        "task_family": "cppll_reacquire",
+        "metrics": {
+            "evas": {
+                "late_edge_ratio": ev_ratio,
+                "late_fb_freq_hz": ev_fb["late_freq_hz"],
+                "disturb_lock_high_frac": ev_disturb_lock,
+                "pre_lock_time_s": ev_pre_lock,
+                "relock_time_s": ev_relock,
+                "post_lock_count": ev_post_lock_count,
+                "late_vctrl_mean_v": ev_vctrl["mean"],
+            },
+            "spectre": {
+                "late_edge_ratio": sp_ratio,
+                "late_fb_freq_hz": sp_fb["late_freq_hz"],
+                "disturb_lock_high_frac": sp_disturb_lock,
+                "pre_lock_time_s": sp_pre_lock,
+                "relock_time_s": sp_relock,
+                "post_lock_count": sp_post_lock_count,
+                "late_vctrl_mean_v": sp_vctrl["mean"],
+            },
+            "late_edge_ratio_delta": abs(ev_ratio - sp_ratio),
+            "late_fb_freq_rel_delta": rel_delta(ev_fb["late_freq_hz"], sp_fb["late_freq_hz"]),
+            "disturb_lock_window_delta": abs(ev_disturb_lock - sp_disturb_lock),
+            "pre_lock_time_delta_s": pre_lock_delta,
+            "relock_time_delta_s": relock_delta,
+            "post_lock_count_delta": abs(ev_post_lock_count - sp_post_lock_count),
+            "late_vctrl_mean_delta_v": abs(ev_vctrl["mean"] - sp_vctrl["mean"]),
+        },
+        "notes": [
+            "ignored_signals=dco_clk"
+        ],
+        "failures": failures,
+    }
+
+
 def compare_waveforms(
     task_id: str,
     evas_csv: Path,
@@ -318,6 +494,8 @@ def compare_waveforms(
 
     if task_id in ADPLL_TIMER_TASK_IDS:
         return compare_adpll_timer_parity(evas_rows, spectre_rows)
+    if task_id in CPPLL_REACQUIRE_TASK_IDS:
+        return compare_cppll_reacquire_parity(evas_rows, spectre_rows)
     if task_id in CPPLL_TRACKING_TASK_IDS:
         return compare_cppll_tracking_parity(evas_rows, spectre_rows)
 
@@ -581,7 +759,15 @@ def run_spectre_case(
             "stdout_tail": ((proc.stdout or "") + "\n" + (proc.stderr or ""))[-4000:],
         }
 
-    result = json.loads(result_json.read_text(encoding="utf-8"))
+    try:
+        result = json.loads(result_json.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        return {
+            "status": "blocked",
+            "ok": False,
+            "notes": [f"spectre_result.json unreadable: {exc}"],
+            "stdout_tail": ((proc.stdout or "") + "\n" + (proc.stderr or ""))[-4000:],
+        }
     result["stdout_tail"] = ((proc.stdout or "") + "\n" + (proc.stderr or ""))[-4000:]
     if proc.returncode != 0 and result.get("status") != "success":
         result["status"] = "error"

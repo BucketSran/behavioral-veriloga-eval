@@ -22,24 +22,62 @@ record Spectre parity evidence for engineering closure and regression tracking.
 
 ## Current Status
 
-As of 2026-04-18:
+As of 2026-04-19:
 
-1. `end-to-end`: 24 tasks closed
+1. `end-to-end`: 35 tasks closed
 2. `spec-to-va`: 18 tasks closed
-3. `bugfix`: 7 tasks closed
-4. `tb-generation`: 7 tasks closed for EVAS scoring, with EVAS+Spectre execution evidence recorded
-5. benchmark / closed-loop rows: 24 `dual-validated`
+3. `bugfix`: 8 tasks closed
+4. `tb-generation`: 10 tasks closed for EVAS scoring, with EVAS+Spectre execution evidence recorded for 7 of them
+5. benchmark / closed-loop rows: 30 `dual-validated`
+6. benchmark / closed-loop rows: 1 passed PLL row with a residual
+   waveform-alignment audit item
 
 There are currently no open benchmark rows with `verification_status != passed`.
-The remaining project work is now mostly about provenance backfill, workflow
-hardening, warning cleanup, and future benchmark expansion rather than missing
-benchmark functionality.
+There is one special tracked waveform-alignment row,
+`cppll_freq_step_reacquire_smoke`. The older `292.5ns` gap was caused by an
+asymmetric comparator anchor, and the canonical
+`results/gold-dual-suite-cppll-initial-step-fix-v2/` rerun now closes the
+task-aware PLL parity metrics. A residual late-`lock` pulse tail difference is
+kept as an EVAS/Virtuoso waveform-perfect alignment audit item rather than a
+benchmark blocker.
 
-The latest expansion pass on 2026-04-18 added
-`inverted_comparator_logic_bug`, `swapped_pfd_outputs_bug`,
-`wrong_edge_sample_hold_bug`, `gain_step_tb`, `sample_hold_step_tb`, and
-`xor_phase_tb`. A clean EVAS+Spectre rerun for all 6 new tasks now lives under
-`results/gold-dual-suite-expansion-clean-2026-04-18/`.
+The latest expansion passes added:
+
+1. on 2026-04-18:
+   `inverted_comparator_logic_bug`, `swapped_pfd_outputs_bug`,
+   `wrong_edge_sample_hold_bug`, `gain_step_tb`, `sample_hold_step_tb`, and
+   `xor_phase_tb`, with clean EVAS+Spectre rerun results under
+   `results/gold-dual-suite-expansion-clean-2026-04-18/`
+2. on 2026-04-19:
+   `comparator_hysteresis_smoke` and `pfd_deadzone_smoke`, with dual-suite
+   results under `results/gold-dual-suite-expansion-2026-04-19/`
+3. later on 2026-04-19:
+   `cppll_freq_step_reacquire_smoke`, with canonical dual-suite results under
+   `results/gold-dual-suite-cppll-initial-step-fix-v2/`; the larger `292.5ns`
+   gap was traced to an asymmetric comparator anchor and the task-aware PLL
+   parity metrics now close, while late `lock` pulse tail alignment remains
+   tracked separately for EVAS/Virtuoso audit work
+4. also on 2026-04-19:
+   `adpll_ratio_hop_smoke`, `pfd_reset_race_smoke`, `dco_gain_step_tb`, and
+   `sample_hold_aperture_tb`, with EVAS gold-suite results under
+   `results/gold-suite-adpll-ratio-hop-2026-04-19/`,
+   `results/gold-suite-pfd-reset-race-2026-04-19/`, and
+   `results/gold-suite-tb-expansion-2026-04-19/`; these P0 expansion cases are
+   now benchmark rows, while bridge-backed dual validation remains deferred by
+   the current no-bridge execution rules
+5. later on 2026-04-19:
+   `strongarm_reset_priority_bug`, `gray_counter_one_bit_change_smoke`,
+   `multimod_divider_ratio_switch_smoke`, `segmented_dac_glitch_tb`, and
+   `comparator_offset_search_smoke`, with EVAS gold-suite results under
+   `results/gold-suite-p1-bugfix-2026-04-19/`,
+   `results/gold-suite-p1-e2e-2026-04-19/`, and
+   `results/gold-suite-p1-tb-2026-04-19/`; `xor_pd_smoke` and
+   `clk_burst_gen_smoke` were also rechecked under EVAS and their task metadata
+   was brought back in sync with the already-closed benchmark table facts
+
+The 2026-04-19 pass also hardened the PFD behavior check in
+`runners/simulate_evas.py` so near-deadzone short pulses use time-weighted duty
+instead of adaptive-step sample density.
 
 It is split into four task families:
 

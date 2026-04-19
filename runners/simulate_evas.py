@@ -9,6 +9,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import warnings
 from pathlib import Path
 
 
@@ -69,10 +70,21 @@ def decode_bus(rows: list[dict[str, float]], bit_names: list[str], threshold: fl
         for bit_name in bit_names:
             bit = 1 if row[bit_name] >= threshold else 0
             m = re.search(r"(\d+)$", bit_name)
+            if m is None:
+                warnings.warn(
+                    f"decode_bus: bit_name {bit_name!r} has no trailing digit; "
+                    "defaulting to bit index 0, result may be incorrect",
+                    stacklevel=2,
+                )
             idx = int(m.group(1)) if m else 0
             code |= bit << idx
         decoded.append(code)
     return decoded
+
+
+def indexed_columns(keys: set[str], prefix: str) -> list[str]:
+    cols = [k for k in keys if re.fullmatch(rf"{re.escape(prefix)}\d+", k)]
+    return sorted(cols, key=lambda name: int(re.search(r"(\d+)$", name).group(1)))
 
 
 def check_clk_div(rows: list[dict[str, float]]) -> tuple[bool, str]:
@@ -166,6 +178,160 @@ def check_comparator(rows: list[dict[str, float]]) -> tuple[bool, str]:
         return False, "insufficient time windows"
     delta = abs(sum(before) / len(before) - sum(after) / len(after))
     return (delta > 0.2), f"output_mean_delta={delta:.3f}"
+
+
+def check_cmp_delay(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"time", "clk", "vinp", "vinn", "out_p"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing time/clk/vinp/vinn/out_p"
+
+    phases = [
+        (0.0e-9, 4.0e-9, 10e-3),
+        (4.0e-9, 8.0e-9, 1e-3),
+        (8.0e-9, 12.0e-9, 0.1e-3),
+        (12.0e-9, 16.0e-9, 0.01e-3),
+    ]
+    threshold = 0.45
+    clk_rise_offset = 0.1e-9
+    times = [r["time"] for r in rows]
+    out_p = [r["out_p"] for r in rows]
+
+    delays_ns: list[float] = []
+    missing_high: list[str] = []
+    for start_t, end_t, diff_v in phases:
+        phase_samples = [r["out_p"] for r in rows if start_t <= r["time"] < end_t]
+        if not phase_samples or max(phase_samples) < threshold:
+            missing_high.append(f"{diff_v * 1e3:.2g}mV")
+            continue
+
+        search_start = start_t + clk_rise_offset
+        crossing_t = None
+        for idx, t in enumerate(times):
+            if t < search_start or t >= min(end_t, search_start + 3.0e-9):
+                continue
+            if out_p[idx] > threshold:
+                crossing_t = t
+                break
+        if crossing_t is None:
+            return False, f"missing_threshold_crossing diff={diff_v * 1e3:.2g}mV"
+        delays_ns.append((crossing_t - search_start) * 1e9)
+
+    if missing_high:
+        return False, f"out_p_never_high phases={','.join(missing_high)}"
+    if len(delays_ns) != len(phases):
+        return False, f"insufficient_delay_measurements count={len(delays_ns)}"
+
+    monotonic = all(delays_ns[i] <= delays_ns[i + 1] + 0.12 for i in range(len(delays_ns) - 1))
+    ok = monotonic
+    return ok, f"delays_ns={[round(v, 3) for v in delays_ns]} monotonic={monotonic}"
+
+
+def check_cmp_strongarm(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"time", "out_p", "out_n"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing time/out_p/out_n"
+
+    threshold = 0.45
+    out_p = [r["out_p"] for r in rows]
+    out_n = [r["out_n"] for r in rows]
+    t_ns = [r["time"] * 1e9 for r in rows]
+
+    out_p_span = max(out_p) - min(out_p)
+    out_n_span = max(out_n) - min(out_n)
+    if out_p_span < threshold or out_n_span < threshold:
+        return False, f"insufficient_toggle out_p_span={out_p_span:.3f} out_n_span={out_n_span:.3f}"
+
+    pre = [out_p[idx] for idx, t in enumerate(t_ns) if 0.6 < t < 2.0]
+    post = [out_p[idx] for idx, t in enumerate(t_ns) if 2.5 < t < 4.0]
+    if not pre or not post:
+        return False, "insufficient_polarity_windows"
+
+    pre_high_frac = sum(1 for v in pre if v > threshold) / len(pre)
+    post_low_frac = sum(1 for v in post if v < threshold) / len(post)
+    ok = pre_high_frac >= 0.4 and post_low_frac >= 0.4
+    return ok, f"pre_high_frac={pre_high_frac:.3f} post_low_frac={post_low_frac:.3f}"
+
+
+def check_strongarm_reset_priority_bug(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"time", "rst", "inp", "inn", "outp", "outn"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing time/rst/inp/inn/outp/outn"
+
+    threshold = 0.45
+    reset_window = [r for r in rows if r["rst"] > threshold]
+    active_window = [r for r in rows if r["time"] >= 24e-9 and r["rst"] < threshold]
+    if not reset_window or not active_window:
+        return False, "insufficient_reset_or_active_window"
+
+    reset_outp_max = max(r["outp"] for r in reset_window)
+    reset_outn_max = max(r["outn"] for r in reset_window)
+
+    high_rows = [r for r in active_window if r["inp"] > r["inn"] + 5e-3]
+    low_rows = [r for r in active_window if r["inp"] + 5e-3 < r["inn"]]
+    if not high_rows or not low_rows:
+        return False, "missing_post_reset_polarity_windows"
+
+    high_outp = sum(1 for r in high_rows if r["outp"] > threshold) / len(high_rows)
+    high_outn = sum(1 for r in high_rows if r["outn"] < threshold) / len(high_rows)
+    low_outp = sum(1 for r in low_rows if r["outp"] < threshold) / len(low_rows)
+    low_outn = sum(1 for r in low_rows if r["outn"] > threshold) / len(low_rows)
+
+    ok = (
+        reset_outp_max < 0.1
+        and reset_outn_max < 0.1
+        and high_outp > 0.75
+        and high_outn > 0.75
+        and low_outp > 0.75
+        and low_outn > 0.75
+    )
+    return ok, (
+        f"reset_outp_max={reset_outp_max:.3f} "
+        f"reset_outn_max={reset_outn_max:.3f} "
+        f"high_outp={high_outp:.3f} high_outn={high_outn:.3f} "
+        f"low_outp={low_outp:.3f} low_outn={low_outn:.3f}"
+    )
+
+
+def check_cmp_hysteresis(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"time", "out_p", "out_n"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing time/out_p/out_n"
+
+    threshold = 0.45
+    times_ns = [r["time"] * 1e9 for r in rows]
+    out_p = [r["out_p"] for r in rows]
+    out_n = [r["out_n"] for r in rows]
+
+    if max(out_p) - min(out_p) < threshold or max(out_n) - min(out_n) < threshold:
+        return False, "outputs_do_not_toggle"
+
+    pre = [out_p[idx] for idx, t in enumerate(times_ns) if t < 20.0]
+    mid = [out_p[idx] for idx, t in enumerate(times_ns) if 35.0 < t < 60.0]
+    post = [out_p[idx] for idx, t in enumerate(times_ns) if t > 75.0]
+    if not pre or not mid or not post:
+        return False, "insufficient_hysteresis_windows"
+
+    pre_low_frac = sum(1 for v in pre if v < threshold) / len(pre)
+    mid_high_frac = sum(1 for v in mid if v > threshold) / len(mid)
+    post_low_frac = sum(1 for v in post if v < threshold) / len(post)
+    if pre_low_frac < 0.95 or mid_high_frac < 0.95 or post_low_frac < 0.95:
+        return False, f"window_fracs pre={pre_low_frac:.3f} mid={mid_high_frac:.3f} post={post_low_frac:.3f}"
+
+    rise_t = None
+    fall_t = None
+    for idx in range(1, len(out_p)):
+        if rise_t is None and out_p[idx - 1] < threshold <= out_p[idx]:
+            rise_t = times_ns[idx]
+        if fall_t is None and out_p[idx - 1] > threshold >= out_p[idx]:
+            fall_t = times_ns[idx]
+
+    if rise_t is None or fall_t is None:
+        return False, "missing_trip_crossings"
+    if not (29.0 <= rise_t <= 31.5):
+        return False, f"rise_t_out_of_range={rise_t:.3f}ns"
+    if not (68.5 <= fall_t <= 71.5):
+        return False, f"fall_t_out_of_range={fall_t:.3f}ns"
+    return True, f"rise_t={rise_t:.3f}ns fall_t={fall_t:.3f}ns"
 
 
 def check_ramp_gen(rows: list[dict[str, float]]) -> tuple[bool, str]:
@@ -448,6 +614,35 @@ def check_multimod_divider(rows: list[dict[str, float]]) -> tuple[bool, str]:
     return ok, f"base={base} pre_count={len(pre)} post_count={len(post)} switch_time_ns={switch_time * 1e9:.3f}"
 
 
+def check_multimod_divider_ratio_switch(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"time", "clk_in", "div_out"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing time/clk_in/div_out"
+
+    times = [r["time"] for r in rows]
+    in_edges = rising_edges([r["clk_in"] for r in rows], times)
+    out_edges = rising_edges([r["div_out"] for r in rows], times)
+    if len(in_edges) < 40 or len(out_edges) < 10:
+        return False, f"not_enough_edges in={len(in_edges)} out={len(out_edges)}"
+
+    windows = [
+        (10e-9, 90e-9, 4, "pre_div4"),
+        (120e-9, 190e-9, 5, "mid_div5"),
+        (220e-9, 300e-9, 4, "post_div4"),
+    ]
+    details: list[str] = []
+    for t0, t1, expected_ratio, label in windows:
+        win_in = [t for t in in_edges if t0 <= t <= t1]
+        win_out = [t for t in out_edges if t0 <= t <= t1]
+        if len(win_in) < expected_ratio * 2 or len(win_out) < 2:
+            return False, f"{label}_insufficient_edges in={len(win_in)} out={len(win_out)}"
+        measured_ratio = len(win_in) / max(len(win_out), 1)
+        details.append(f"{label}={measured_ratio:.2f}")
+        if abs(measured_ratio - expected_ratio) > 0.35:
+            return False, ";".join(details)
+    return True, ";".join(details)
+
+
 def check_bbpd(rows: list[dict[str, float]]) -> tuple[bool, str]:
     required = {"data", "clk", "retimed_data", "up", "down"}
     if not rows or not required.issubset(rows[0]):
@@ -632,6 +827,62 @@ def check_dwa_ptr_gen(rows: list[dict[str, float]]) -> tuple[bool, str]:
     return ok, f"ptr_unique={ptr_unique} max_cell_code={max(cell_codes)}"
 
 
+def check_dwa_ptr_gen_no_overlap(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    if not rows:
+        return False, "no rows"
+
+    keys = set(rows[0].keys())
+    required = {"time", "clk_i", "rst_ni", "ptr_0", "cell_en_0"}
+    if not required.issubset(keys):
+        return False, "missing time/clk_i/rst_ni/ptr_0/cell_en_0"
+
+    ptr_cols = indexed_columns(keys, "ptr_")
+    cell_cols = indexed_columns(keys, "cell_en_")
+    if not ptr_cols or not cell_cols:
+        return False, "missing ptr_* or cell_en_* columns"
+
+    times = [r["time"] for r in rows]
+    clk_vals = [r["clk_i"] for r in rows]
+    rst_vals = [r["rst_ni"] for r in rows]
+    edge_times = rising_edges(clk_vals, times)
+    if not edge_times:
+        return False, "no_clock_edges"
+
+    sampled_rows: list[dict[str, float]] = []
+    for edge_t in edge_times:
+        sample_t = edge_t + 1.0e-9
+        row = next((r for r in rows if r["time"] >= sample_t), None)
+        if row is not None and row["rst_ni"] > 0.45:
+            sampled_rows.append(row)
+
+    if len(sampled_rows) < 2:
+        return False, f"insufficient_post_reset_samples count={len(sampled_rows)}"
+
+    bad_ptr_rows = 0
+    cell_counts: list[int] = []
+    overlap_count = 0
+    prev_active: set[int] | None = None
+
+    for row in sampled_rows:
+        ptr_active = {idx for idx, col in enumerate(ptr_cols) if row[col] > 0.45}
+        if len(ptr_active) not in (0, 1):
+            bad_ptr_rows += 1
+
+        active_cells = {idx for idx, col in enumerate(cell_cols) if row[col] > 0.45}
+        cell_counts.append(len(active_cells))
+
+        if prev_active is not None and prev_active & active_cells:
+            overlap_count += 1
+        prev_active = active_cells
+
+    cell_active = max(cell_counts) > 0
+    ok = bad_ptr_rows == 0 and cell_active and overlap_count == 0
+    return ok, (
+        f"sampled_cycles={len(sampled_rows)} bad_ptr_rows={bad_ptr_rows} "
+        f"max_active_cells={max(cell_counts)} overlap_count={overlap_count}"
+    )
+
+
 def check_clk_burst_gen(rows: list[dict[str, float]]) -> tuple[bool, str]:
     if not rows or not {"CLK", "RST_N", "CLK_OUT"}.issubset(rows[0]):
         return False, "missing CLK/RST_N/CLK_OUT"
@@ -700,6 +951,79 @@ def check_adpll_lock(rows: list[dict[str, float]]) -> tuple[bool, str]:
     return ok, (
         f"late_edge_ratio={ratio:.3f} "
         f"lock_time={(lock_edges[0] if lock_edges else float('nan')):.3e} "
+        f"vctrl_range_ok={vctrl_in_range}"
+    )
+
+
+def edge_frequency_ratio(
+    rows: list[dict[str, float]],
+    num_signal: str,
+    den_signal: str,
+    t_start: float,
+    t_end: float,
+) -> tuple[float, str]:
+    window = time_window(rows, t_start, t_end)
+    if len(window) < 4 or num_signal not in window[0] or den_signal not in window[0]:
+        return float("nan"), "missing_window_or_signals"
+
+    times = [r["time"] for r in window]
+    num_edges = rising_edges([r[num_signal] for r in window], times)
+    den_edges = rising_edges([r[den_signal] for r in window], times)
+    if len(num_edges) < 3 or len(den_edges) < 3:
+        return float("nan"), f"not_enough_edges num={len(num_edges)} den={len(den_edges)}"
+
+    num_freq = (len(num_edges) - 1) / max(num_edges[-1] - num_edges[0], 1e-18)
+    den_freq = (len(den_edges) - 1) / max(den_edges[-1] - den_edges[0], 1e-18)
+    return num_freq / max(den_freq, 1e-18), "ok"
+
+
+def first_threshold_crossing(rows: list[dict[str, float]], signal: str, threshold: float) -> float:
+    if not rows or signal not in rows[0]:
+        return float("nan")
+    prev = rows[0][signal]
+    for row in rows[1:]:
+        cur = row[signal]
+        if prev < threshold <= cur:
+            return row["time"]
+        prev = cur
+    return float("nan")
+
+
+def check_adpll_ratio_hop(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"ref_clk", "vout", "lock", "vctrl_mon", "ratio_ctrl"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing ref_clk/vout/lock/vctrl_mon/ratio_ctrl"
+
+    hop_t = first_threshold_crossing(rows, "ratio_ctrl", 5.0)
+    if not math.isfinite(hop_t):
+        return False, "ratio_hop_not_detected"
+
+    pre_ratio, pre_note = edge_frequency_ratio(rows, "vout", "ref_clk", hop_t - 1.0e-6, hop_t - 2.0e-7)
+    post_ratio, post_note = edge_frequency_ratio(rows, "vout", "ref_clk", hop_t + 1.2e-6, hop_t + 2.5e-6)
+    if pre_note != "ok":
+        return False, f"pre_window_{pre_note}"
+    if post_note != "ok":
+        return False, f"post_window_{post_note}"
+
+    vth = max(r["lock"] for r in rows) * 0.5 if rows else 0.45
+    pre_lock = weighted_logic_high_fraction_window(rows, "lock", vth, hop_t - 4.0e-7, hop_t - 5.0e-8)
+    post_lock = weighted_logic_high_fraction_window(rows, "lock", vth, hop_t + 1.8e-6, hop_t + 2.8e-6)
+    vctrl_vals = [r["vctrl_mon"] for r in rows]
+    vctrl_in_range = all(-1e-6 <= v <= 1.2 for v in vctrl_vals)
+
+    ok = (
+        abs(pre_ratio - 4.0) <= 0.25
+        and abs(post_ratio - 6.0) <= 0.35
+        and pre_lock >= 0.8
+        and post_lock >= 0.8
+        and vctrl_in_range
+    )
+    return ok, (
+        f"hop_t={hop_t:.3e} "
+        f"pre_ratio={pre_ratio:.3f} "
+        f"post_ratio={post_ratio:.3f} "
+        f"pre_lock={pre_lock:.3f} "
+        f"post_lock={post_lock:.3f} "
         f"vctrl_range_ok={vctrl_in_range}"
     )
 
@@ -879,14 +1203,46 @@ def check_xor_pd(rows: list[dict[str, float]]) -> tuple[bool, str]:
     return True, f"duty={hi_frac:.3f} transitions={transitions}"
 
 
+def weighted_logic_high_fraction(rows: list[dict[str, float]], signal: str, threshold: float) -> float:
+    if len(rows) < 2:
+        return 0.0
+    total_dt = rows[-1]["time"] - rows[0]["time"]
+    if total_dt <= 0.0:
+        return 0.0
+
+    high_dt = 0.0
+    for idx in range(1, len(rows)):
+        dt = rows[idx]["time"] - rows[idx - 1]["time"]
+        if dt <= 0.0:
+            continue
+        v_mid = 0.5 * (rows[idx - 1][signal] + rows[idx][signal])
+        if v_mid > threshold:
+            high_dt += dt
+    return high_dt / total_dt
+
+
+def time_window(rows: list[dict[str, float]], t_start: float, t_end: float) -> list[dict[str, float]]:
+    return [r for r in rows if t_start <= r["time"] <= t_end]
+
+
+def weighted_logic_high_fraction_window(
+    rows: list[dict[str, float]],
+    signal: str,
+    threshold: float,
+    t_start: float,
+    t_end: float,
+) -> float:
+    return weighted_logic_high_fraction(time_window(rows, t_start, t_end), signal, threshold)
+
+
 def check_pfd_updn(rows: list[dict[str, float]]) -> tuple[bool, str]:
     if not rows or not {"ref", "div", "up", "dn"}.issubset(rows[0]):
         return False, "missing ref/div/up/dn"
     vth = max(r["ref"] for r in rows) * 0.5
     up = [1 if r["up"] > vth else 0 for r in rows]
     dn = [1 if r["dn"] > vth else 0 for r in rows]
-    up_frac = sum(up) / len(up)
-    dn_frac = sum(dn) / len(dn)
+    up_frac = weighted_logic_high_fraction(rows, "up", vth)
+    dn_frac = weighted_logic_high_fraction(rows, "dn", vth)
     both_hi = [a & b for a, b in zip(up, dn)]
     run_len = 0
     max_run = 0
@@ -906,6 +1262,146 @@ def check_pfd_updn(rows: list[dict[str, float]]) -> tuple[bool, str]:
     if up_pulses < 10:
         return False, f"too_few_up_pulses={up_pulses}"
     return True, f"up_frac={up_frac:.3f} dn_frac={dn_frac:.3f} up_pulses={up_pulses}"
+
+
+def check_pfd_deadzone(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    if not rows or not {"ref", "div", "up", "dn"}.issubset(rows[0]):
+        return False, "missing ref/div/up/dn"
+    vth = max(r["ref"] for r in rows) * 0.5
+    up = [1 if r["up"] > vth else 0 for r in rows]
+    dn = [1 if r["dn"] > vth else 0 for r in rows]
+    up_frac = weighted_logic_high_fraction(rows, "up", vth)
+    dn_frac = weighted_logic_high_fraction(rows, "dn", vth)
+    both_hi = [a & b for a, b in zip(up, dn)]
+
+    run_len = 0
+    max_run = 0
+    for bit in both_hi:
+        if bit:
+            run_len += 1
+            max_run = max(max_run, run_len)
+        else:
+            run_len = 0
+
+    up_pulses = sum(1 for i in range(1, len(up)) if up[i - 1] == 0 and up[i] == 1)
+    if not (0.001 <= up_frac <= 0.03):
+        return False, f"up_frac_out_of_range={up_frac:.4f}"
+    if dn_frac > 0.002:
+        return False, f"dn_frac_too_high={dn_frac:.4f}"
+    if max_run > 6:
+        return False, f"overlap_too_long={max_run}"
+    if up_pulses < 10:
+        return False, f"too_few_up_pulses={up_pulses}"
+    return True, f"up_frac={up_frac:.4f} dn_frac={dn_frac:.4f} up_pulses={up_pulses}"
+
+
+def check_pfd_reset_race(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    if not rows or not {"ref", "div", "up", "dn"}.issubset(rows[0]):
+        return False, "missing ref/div/up/dn"
+
+    vth = max(r["ref"] for r in rows) * 0.5
+    first = time_window(rows, 20e-9, 120e-9)
+    second = time_window(rows, 160e-9, 260e-9)
+    if len(first) < 4 or len(second) < 4:
+        return False, "insufficient_window_samples"
+
+    up_first = weighted_logic_high_fraction(first, "up", vth)
+    dn_first = weighted_logic_high_fraction(first, "dn", vth)
+    up_second = weighted_logic_high_fraction(second, "up", vth)
+    dn_second = weighted_logic_high_fraction(second, "dn", vth)
+
+    first_times = [r["time"] for r in first]
+    second_times = [r["time"] for r in second]
+    up_pulses_first = len(rising_edges([r["up"] for r in first], first_times, threshold=vth))
+    dn_pulses_second = len(rising_edges([r["dn"] for r in second], second_times, threshold=vth))
+
+    overlap_dt = 0.0
+    total_dt = 0.0
+    for idx in range(1, len(rows)):
+        dt = rows[idx]["time"] - rows[idx - 1]["time"]
+        if dt <= 0.0:
+            continue
+        total_dt += dt
+        up_mid = 0.5 * (rows[idx - 1]["up"] + rows[idx]["up"])
+        dn_mid = 0.5 * (rows[idx - 1]["dn"] + rows[idx]["dn"])
+        if up_mid > vth and dn_mid > vth:
+            overlap_dt += dt
+    overlap_frac = overlap_dt / max(total_dt, 1e-18)
+
+    ok = (
+        0.001 <= up_first <= 0.08
+        and dn_first <= 0.01
+        and 0.001 <= dn_second <= 0.08
+        and up_second <= 0.01
+        and up_pulses_first >= 4
+        and dn_pulses_second >= 4
+        and overlap_frac <= 0.01
+    )
+    return ok, (
+        f"up_first={up_first:.4f} dn_first={dn_first:.4f} "
+        f"up_second={up_second:.4f} dn_second={dn_second:.4f} "
+        f"up_pulses_first={up_pulses_first} dn_pulses_second={dn_pulses_second} "
+        f"overlap_frac={overlap_frac:.4f}"
+    )
+
+
+def check_cppll_freq_step_reacquire(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"ref_clk", "fb_clk", "lock", "vctrl_mon"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing ref_clk/fb_clk/lock/vctrl_mon"
+
+    vth = 0.45
+    times = [r["time"] for r in rows]
+    ref_edges = rising_edges([r["ref_clk"] for r in rows], times, threshold=vth)
+    fb_edges = rising_edges([r["fb_clk"] for r in rows], times, threshold=vth)
+    if len(ref_edges) < 12 or len(fb_edges) < 12:
+        return False, f"not_enough_edges ref={len(ref_edges)} fb={len(fb_edges)}"
+
+    ref_late = [t for t in ref_edges if 4.5e-6 <= t <= 5.9e-6]
+    fb_late = [t for t in fb_edges if 4.5e-6 <= t <= 5.9e-6]
+    if len(ref_late) < 4 or len(fb_late) < 4:
+        return False, (
+            f"not_enough_late_edges ref_late={len(ref_late)} fb_late={len(fb_late)}"
+        )
+
+    ref_periods = [b - a for a, b in zip(ref_late, ref_late[1:])]
+    fb_periods = [b - a for a, b in zip(fb_late, fb_late[1:])]
+    ref_period = sum(ref_periods) / len(ref_periods)
+    fb_period = sum(fb_periods) / len(fb_periods)
+    if ref_period <= 0.0 or fb_period <= 0.0:
+        return False, "non_positive_period"
+    freq_ratio = ref_period / fb_period
+
+    lock_edges = rising_edges([r["lock"] for r in rows], times, threshold=vth)
+    pre_lock_edges = [t for t in lock_edges if t < 2.0e-6]
+    post_lock_edges = [t for t in lock_edges if 2.2e-6 <= t <= 5.9e-6]
+    relock_time = post_lock_edges[0] if post_lock_edges else float("nan")
+
+    disturb_low_frac = 1.0 - weighted_logic_high_fraction_window(
+        rows, "lock", vth, 2.05e-6, 2.8e-6
+    )
+
+    vctrl_vals = [r["vctrl_mon"] for r in rows]
+    vctrl_min = min(vctrl_vals)
+    vctrl_max = max(vctrl_vals)
+    vctrl_in_range = all(-1e-6 <= v <= 0.95 for v in vctrl_vals)
+
+    ok = (
+        bool(pre_lock_edges)
+        and disturb_low_frac >= 0.25
+        and bool(post_lock_edges)
+        and 0.97 <= freq_ratio <= 1.03
+        and vctrl_in_range
+    )
+    return ok, (
+        f"pre_lock_edges={len(pre_lock_edges)} "
+        f"disturb_lock_low_frac={disturb_low_frac:.3f} "
+        f"post_lock_edges={len(post_lock_edges)} "
+        f"late_freq_ratio={freq_ratio:.4f} "
+        f"relock_time={(relock_time if post_lock_edges else float('nan')):.3e} "
+        f"vctrl_min={vctrl_min:.3f} "
+        f"vctrl_max={vctrl_max:.3f}"
+    )
 
 
 def check_gray_counter_4b(rows: list[dict[str, float]]) -> tuple[bool, str]:
@@ -936,6 +1432,51 @@ def check_gray_counter_4b(rows: list[dict[str, float]]) -> tuple[bool, str]:
     unique_codes = set(post_reset)
     expected_grays = {i ^ (i >> 1) for i in range(16)}
     if bad_transitions > 0:
+        return False, f"gray_property_violated bad_transitions={bad_transitions}"
+    if not expected_grays.issubset(unique_codes):
+        return False, f"missing_gray_codes count={16 - len(expected_grays & unique_codes)}"
+    return True, f"unique_codes={len(unique_codes)} bad_transitions={bad_transitions}"
+
+
+def check_gray_counter_one_bit_change(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    if not rows:
+        return False, "empty"
+    sample = rows[0]
+    clk_col = _pick_column(sample, ["clk", "CLK"])
+    rst_col = _pick_column(sample, ["rst", "RST", "rstb", "RSTB"])
+    if clk_col is None or rst_col is None:
+        return False, "missing clk/rst"
+
+    g_cols = [_pick_column(sample, [f"g{idx}", f"G{idx}"]) for idx in range(4)]
+    if any(col is None for col in g_cols):
+        return False, "missing g0..g3"
+
+    threshold = 0.45
+    clk = [r[clk_col] for r in rows]
+    edge_idx = [i for i in range(1, len(clk)) if clk[i - 1] <= threshold < clk[i]]
+    if len(edge_idx) < 20:
+        return False, f"not_enough_clk_edges={len(edge_idx)}"
+
+    rst_high_active = any(r[rst_col] > threshold for r in rows[: max(4, len(rows) // 10)])
+    post_reset_codes: list[int] = []
+    for idx in edge_idx:
+        settle = min(idx + 8, len(rows) - 1)
+        rst_val = rows[settle][rst_col]
+        if (rst_high_active and rst_val > threshold) or ((not rst_high_active) and rst_val < threshold):
+            continue
+        code = 0
+        for bit_idx, col in enumerate(g_cols):
+            if rows[settle][col] > threshold:
+                code |= 1 << bit_idx
+        post_reset_codes.append(code)
+
+    if len(post_reset_codes) < 16:
+        return False, f"not_enough_post_reset_codes={len(post_reset_codes)}"
+
+    bad_transitions = sum(1 for a, b in zip(post_reset_codes[:-1], post_reset_codes[1:]) if bin(a ^ b).count("1") != 1)
+    unique_codes = set(post_reset_codes)
+    expected_grays = {i ^ (i >> 1) for i in range(16)}
+    if bad_transitions:
         return False, f"gray_property_violated bad_transitions={bad_transitions}"
     if not expected_grays.issubset(unique_codes):
         return False, f"missing_gray_codes count={16 - len(expected_grays & unique_codes)}"
@@ -1041,6 +1582,35 @@ def check_segmented_dac(rows: list[dict[str, float]]) -> tuple[bool, str]:
     diff_range = max(diff) - min(diff)
     ok = diff_range > 0.1
     return ok, f"diff_range={diff_range:.3f}"
+
+
+def check_comparator_offset_search(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"time", "inp", "inn", "outp"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing time/inp/inn/outp"
+
+    threshold = 0.45
+    outp = [r["outp"] for r in rows]
+    times = [r["time"] for r in rows]
+    rise_t = next((times[idx] for idx in range(1, len(rows)) if outp[idx - 1] < threshold <= outp[idx]), None)
+    if rise_t is None:
+        return False, "no_output_crossing"
+
+    crossing_row = next((r for r in rows if r["time"] >= rise_t), rows[-1])
+    crossing_voltage = crossing_row["inp"]
+    low_window = [r["outp"] for r in rows if r["inp"] <= 0.501]
+    high_window = [r["outp"] for r in rows if r["inp"] >= 0.509]
+    if not low_window or not high_window:
+        return False, "insufficient_offset_windows"
+
+    low_frac = sum(1 for v in low_window if v < threshold) / len(low_window)
+    high_frac = sum(1 for v in high_window if v > threshold) / len(high_window)
+    ok = abs(crossing_voltage - 0.505) <= 0.003 and low_frac > 0.9 and high_frac > 0.9
+    return ok, (
+        f"crossing_voltage={crossing_voltage:.4f} "
+        f"low_frac={low_frac:.3f} "
+        f"high_frac={high_frac:.3f}"
+    )
 
 
 def check_cdac_cal(rows: list[dict[str, float]]) -> tuple[bool, str]:
@@ -1311,9 +1881,15 @@ CHECKS = {
     "sar_adc_dac_weighted_8b": check_sar_adc_dac_weighted_8b,
     # formal task IDs (tasks/end-to-end/voltage/)
     "adpll_lock_smoke": check_adpll_lock,
+    "adpll_ratio_hop_smoke": check_adpll_ratio_hop,
     "adpll_timer_smoke": check_adpll_lock,
     "clk_div_smoke": check_clk_div,
+    "cmp_delay_smoke": check_cmp_delay,
+    "comparator_hysteresis_smoke": check_cmp_hysteresis,
+    "comparator_offset_search_smoke": check_comparator_offset_search,
+    "cmp_strongarm_smoke": check_cmp_strongarm,
     "comparator_smoke": check_comparator,
+    "cppll_freq_step_reacquire_smoke": check_cppll_freq_step_reacquire,
     "cppll_tracking_smoke": check_cppll_tracking,
     "d2b_4bit_smoke": check_d2b,
     "ramp_gen_smoke": check_ramp_gen,
@@ -1323,6 +1899,7 @@ CHECKS = {
     "dac_therm_16b_smoke": check_dac_therm_16b,
     "digital_basics_smoke": check_not_gate,
     "dwa_ptr_gen_smoke": check_dwa_ptr_gen,
+    "dwa_ptr_gen_no_overlap_smoke": check_dwa_ptr_gen_no_overlap,
     "gain_extraction_smoke": check_gain_extraction,
     "lfsr_smoke": check_lfsr,
     "noise_gen_smoke": check_noise_gen,
@@ -1332,7 +1909,11 @@ CHECKS = {
     "serializer_8b_smoke": check_serializer_8b,
     "xor_pd_smoke": check_xor_pd,
     "pfd_updn_smoke": check_pfd_updn,
+    "pfd_deadzone_smoke": check_pfd_deadzone,
+    "pfd_reset_race_smoke": check_pfd_reset_race,
+    "gray_counter_one_bit_change_smoke": check_gray_counter_one_bit_change,
     "gray_counter_4b_smoke": check_gray_counter_4b,
+    "multimod_divider_ratio_switch_smoke": check_multimod_divider_ratio_switch,
     "mux_4to1_smoke": check_mux_4to1,
     # spec-to-va task IDs
     "clk_divider":    check_clk_divider,
@@ -1353,6 +1934,7 @@ CHECKS = {
     "nrz_prbs":       check_nrz_prbs,
     "mixed_domain_cdac_bug": check_mixed_domain_cdac_bug,
     "spectre_port_discipline": check_spectre_port_discipline,
+    "strongarm_reset_priority_bug": check_strongarm_reset_priority_bug,
     "wrong_edge_sample_hold_bug": check_sample_hold,
     "inverted_comparator_logic_bug": check_inverted_comparator_logic_bug,
     "swapped_pfd_outputs_bug": check_pfd_updn,
@@ -1386,11 +1968,10 @@ def run_case(
     scoring = set(meta.get("scoring", ["dut_compile", "tb_compile", "sim_correct"]))
 
     temp_ctx = tempfile.TemporaryDirectory(prefix=f"{task_id}_")
-    run_dir = Path(temp_ctx.name)
-    out_dir = output_root.resolve() if output_root else run_dir / "output"
-    out_dir.mkdir(parents=True, exist_ok=True)
-
     try:
+        run_dir = Path(temp_ctx.name)
+        out_dir = output_root.resolve() if output_root else run_dir / "output"
+        out_dir.mkdir(parents=True, exist_ok=True)
         dut_dst, tb_dst = copy_inputs(run_dir, dut_path, tb_path)
         proc = run_evas(run_dir, tb_dst, out_dir, timeout_s)
         combined = (proc.stdout or "") + "\n" + (proc.stderr or "")

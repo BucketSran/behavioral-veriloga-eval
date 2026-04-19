@@ -1,0 +1,17 @@
+syntax:
+  must_include:
+    - "@(cross("
+    - "transition("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "output_goes_high_in_each_phase"
+    - "clk_to_output_delay_increases_as_diff_shrinks"
+
+parity:
+  required: true
+  spectre_result_path: "behavioral-veriloga-eval/results/gold-dual-suite/cmp_delay_smoke/spectre/tran_spectre.csv"
+  tolerance_notes: "Requires EVAS/Spectre dual validation for the four-phase delay trend."

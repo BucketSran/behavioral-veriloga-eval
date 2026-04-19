@@ -1,0 +1,20 @@
+syntax:
+  must_include:
+    - "transition("
+    - "rst"
+  must_not_include:
+    - "I("
+    - "ddt("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "reset_overrides_output"
+    - "correct_compare_without_rst"
+
+parity:
+  required: false
+  spectre_result_path: "[TODO]"
+  tolerance_notes: "EVAS-first bugfix task."
