@@ -648,7 +648,7 @@
 | end-to-end | 39 | 39 | 32 |
 | spec-to-va | 18 | 18 | 0 |
 | bugfix | 8 | 8 | 7 |
-| tb-generation | 11 | 11 | 7 |
+| tb-generation | 11 | 11 | 9 |
 
 ## 本周新增
 （自动列出 date_added 在最近 7 天的条目）
@@ -686,8 +686,8 @@
 | end-to-end    | 39      | 39 (100%)   | 32             |
 | spec-to-va    | 18      | 18 (100%)   | 0              |
 | bugfix        | 8       | 8 (100%)    | 7              |
-| tb-generation | 11      | 11 (100%)   | 7              |
-| **Total**     | **76**  | **76**      | **46**         |
+| tb-generation | 11      | 11 (100%)   | 9              |
+| **Total**     | **76**  | **76**      | **48**         |
 ```
 
 **Markdown 表 2 — category 分布**
@@ -699,7 +699,7 @@
   "total_tasks": 76,
   "families": {...},
   "categories": {...},
-  "dual_validated_total": 46,
+  "dual_validated_total": 48,
   "generated_at": "2026-04-19"
 }
 ```

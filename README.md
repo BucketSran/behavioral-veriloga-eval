@@ -27,7 +27,7 @@ As of 2026-04-19:
 1. `end-to-end`: 39 tasks closed
 2. `spec-to-va`: 18 tasks closed
 3. `bugfix`: 8 tasks closed
-4. `tb-generation`: 11 tasks closed for EVAS scoring, with EVAS+Spectre execution evidence recorded for 7 of them
+4. `tb-generation`: 11 tasks closed for EVAS scoring, with EVAS+Spectre execution evidence recorded for 9 of them
 5. benchmark / closed-loop rows: 32 `dual-validated`
 6. benchmark / closed-loop rows: 1 passed PLL row with a residual
    waveform-alignment audit item
