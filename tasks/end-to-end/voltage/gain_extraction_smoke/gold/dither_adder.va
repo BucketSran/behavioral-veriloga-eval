@@ -1,5 +1,7 @@
-// Differential dither adder — EVAS-compatible
-// Fixes original by replacing transition(V(VRES_P)+...) with direct contribution.
+// Differential dither adder — benchmark gold style.
+// Keeps a direct contribution instead of the original transition(V(VRES_P)+...)
+// form. This is no longer required for EVAS acceptance; the gold keeps the
+// lower-warning, simpler output style for benchmark stability.
 //
 //   dither_diff = +DITHER_AMP  when DPN > vth
 //   dither_diff = -DITHER_AMP  when DPN < vth
@@ -30,7 +32,7 @@ analog begin
 
     dither_diff = (V(DPN) > vth) ? DITHER_AMP : -DITHER_AMP;
 
-    // Direct contribution (no transition) — avoids continuous-V target restriction
+    // Direct contribution (no transition) — kept as the benchmark gold style.
     V(VOUT_P) <+ V(VRES_P) + dither_diff * 0.5;
     V(VOUT_N) <+ V(VRES_N) - dither_diff * 0.5;
 end

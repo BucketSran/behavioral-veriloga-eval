@@ -1,0 +1,45 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sample_hold_aperture_ref (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical clk,
+    input  electrical vin,
+    output electrical vout
+);
+    parameter real vth = 0.45;
+    parameter real taperture = 200p from [0:inf);
+    parameter real tedge = 50p from (0:inf);
+
+    real vh;
+    real vl;
+    real sampled;
+    real sample_t;
+    integer armed;
+
+    analog begin
+        vh = V(VDD);
+        vl = V(VSS);
+
+        @(initial_step) begin
+            sampled = V(vin);
+            sample_t = -1.0;
+            armed = 0;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            sample_t = $abstime + taperture;
+            armed = 1;
+        end
+
+        @(timer(sample_t)) begin
+            if (armed) begin
+                sampled = V(vin);
+                armed = 0;
+            end
+        end
+
+        V(vout) <+ transition(sampled, 0.0, tedge, tedge);
+    end
+endmodule

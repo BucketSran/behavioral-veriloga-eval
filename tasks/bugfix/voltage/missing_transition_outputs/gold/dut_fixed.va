@@ -12,6 +12,6 @@ module comp_flag (VDD, VSS, VIN, FLAG);
     parameter real trf = 20p;
 
     analog begin
-        V(FLAG) <+ transition((V(VIN) > vth) ? V(VDD) : V(VSS), td, trf, trf);
+        V(FLAG) <+ V(VDD, VSS) * transition((V(VIN) > vth) ? 1.0 : 0.0, td, trf, trf);
     end
 endmodule

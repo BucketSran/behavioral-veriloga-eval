@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+Vvdd (VDD 0) vsource dc=0.9
+Vvss (VSS 0) vsource dc=0.0
+Vref (ref 0) vsource type=pulse val0=0 val1=0.9 delay=1n rise=20p fall=20p width=4n period=10n
+Vdiv (div 0) vsource type=pulse val0=0 val1=0.9 delay=2n rise=20p fall=20p width=4n period=10n
+
+XDUT (VDD VSS ref div up dn) pfd_updn_bug
+
+tran tran stop=120n maxstep=50p
+save ref div up dn
+
+ahdl_include "dut_fixed.va"

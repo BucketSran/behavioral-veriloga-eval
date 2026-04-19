@@ -1,0 +1,48 @@
+{
+  "id": "segmented_dac_glitch_tb",
+  "task_name": "Segmented DAC Glitch Testbench",
+  "family": "tb-generation",
+  "category": "data-converter",
+  "domain": "voltage",
+  "difficulty": "medium",
+  "expected_backend": "evas",
+  "source": {
+    "type": "benchmark-gold",
+    "path": "behavioral-veriloga-eval/tasks/tb-generation/voltage/segmented_dac_glitch_tb/gold"
+  },
+  "tier": "verified",
+  "verification_status": "passed",
+  "owner": "team",
+  "created_at": "2026-04-19",
+  "must_include": [
+    "vsource",
+    "tran"
+  ],
+  "must_not_include": [
+    "I(",
+    "ddt(",
+    "idt("
+  ],
+  "inputs": [
+    "prompt.md"
+  ],
+  "artifacts": [
+    "segmented_dac_glitch_ref.va",
+    "tb_segmented_dac_glitch_ref.scs",
+    "tran.csv"
+  ],
+  "scoring": ["dut_compile", "tb_compile"],
+  "parity_policy": "not_required",
+  "checks": {
+    "dut_compile": "required",
+    "tb_compile": "required",
+    "tran_generated": "required",
+    "sim_correct": "not_required",
+    "parity_required": false
+  },
+  "evidence": {
+    "result_path": "behavioral-veriloga-eval/results/gold-suite-p1-tb-2026-04-19/segmented_dac_glitch_tb",
+    "pr_link": "[TODO]",
+    "notes": "Added on 2026-04-19 as a segmented-DAC glitch-oriented testbench task; EVAS gold validation passes compile/transient generation, and sim_correct is not required for tb-generation scoring."
+  }
+}

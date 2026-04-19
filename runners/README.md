@@ -62,3 +62,37 @@ Current implemented executable runner:
   - per-task EVAS + Spectre result
   - `tran_spectre.csv` under each task output directory
   - waveform parity summary in `summary.json`
+  - bridge preflight diagnostics in `summary.json` so misconfigured tunnel /
+    Virtuoso / Spectre sessions fail fast instead of hanging until subprocess
+    timeout
+
+Recommended Spectre workflow:
+
+1. `./scripts/check_bridge_ready.sh`
+   Quick preflight-only sanity check for bridge, tunnel, and Spectre visibility.
+2. `./scripts/run_with_bridge.sh python3 runners/run_gold_dual_suite.py ...`
+   Recommended reproducible path. The wrapper creates a temporary SSH tunnel for
+   the child command, runs bridge preflight, and cleans the listener up on exit.
+
+Keep `start_bridge_tunnel.sh` and `stop_bridge_tunnel.sh` for manual debugging.
+For routine validation runs, prefer the wrapper so background tunnel state does
+not drift away from the command you actually care about.
+
+Useful preflight variants:
+
+1. `./scripts/check_bridge_ready.sh --json`
+   Machine-readable summary for local debugging or wrapper health checks.
+2. `./scripts/check_bridge_ready.sh --require-daemon`
+   Treat a disconnected Virtuoso CIW daemon as a hard failure.
+3. `./scripts/check_bridge_ready.sh --require-daemon --json`
+   Strict JSON mode for automation that depends on an active Virtuoso session.
+
+Current regression protection:
+
+1. `python -m py_compile runners/bridge_preflight.py runners/run_gold_dual_suite.py`
+2. `python -m pytest -q tests/test_bridge_preflight.py tests/test_bridge_scripts.py tests/test_run_gold_dual_suite.py tests/test_save_statements.py tests/test_pwl_statements.py`
+
+These smoke tests cover the bridge preflight JSON surface and the
+`tb-generation` `parity=not_required` control path, the gold testbench lint
+guards, and helper-script behavior such as bridge-repo overrides plus wrapper
+usage checks.

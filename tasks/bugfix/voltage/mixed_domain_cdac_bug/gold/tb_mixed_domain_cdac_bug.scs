@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+Vvdd (VDD 0) vsource dc=0.9
+Vvss (VSS 0) vsource dc=0
+Vclk (CLK 0) vsource type=pulse val0=0 val1=0.9 delay=15n rise=20p fall=20p width=8n period=20n
+Vvin (VIN 0) vsource type=pwl wave=[0 0.1 20n 0.1 20.1n 0.25 40n 0.25 40.1n 0.4 80n 0.4]
+
+XDUT (VDD VSS CLK VIN VOUT) residue_stage gain=2.0
+
+tran tran stop=80n maxstep=100p
+save CLK VIN VOUT
+
+ahdl_include "dut_fixed.va"

@@ -1,0 +1,32 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module segmented_dac_glitch_ref(vdd, vss, clk, d3, d2, d1, d0, vout);
+    inout vdd, vss;
+    input clk, d3, d2, d1, d0;
+    output vout;
+    electrical vdd, vss, clk, d3, d2, d1, d0, vout;
+
+    parameter real vth = 0.45;
+    parameter real tedge = 20p;
+    parameter real therm_weight = 0.2;
+    parameter real binary_weight = 0.05;
+
+    integer therm_code;
+    integer binary_code;
+    integer total_code;
+    real vout_level;
+
+    analog begin
+        @(initial_step) vout_level = 0.0;
+
+        @(cross(V(clk, vss) - vth, +1)) begin
+            therm_code = (V(d3, vss) > vth ? 2 : 0) + (V(d2, vss) > vth ? 1 : 0);
+            binary_code = (V(d1, vss) > vth ? 2 : 0) + (V(d0, vss) > vth ? 1 : 0);
+            total_code = therm_code * 4 + binary_code;
+            vout_level = total_code * binary_weight + therm_code * therm_weight;
+        end
+
+        V(vout, vss) <+ transition(vout_level, 0, tedge, tedge);
+    end
+endmodule

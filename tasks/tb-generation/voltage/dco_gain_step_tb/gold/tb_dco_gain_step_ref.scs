@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+Vvdd (VDD 0) vsource dc=0.9
+Vvss (VSS 0) vsource dc=0.0
+Vctrl (vctrl 0) vsource type=pwl wave=[ 0 0.0 98n 0.0 100n 0.5 300n 0.5 ]
+
+XDUT (VDD VSS vctrl vout) dco_gain_step_ref
+
+tran tran stop=300n maxstep=100p
+save vctrl vout
+
+ahdl_include "dco_gain_step_ref.va"

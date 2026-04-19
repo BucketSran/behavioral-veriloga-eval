@@ -1,0 +1,46 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module nrz_prbs(VDD, VSS, OUTP, OUTN);
+    inout VDD, VSS;
+    output OUTP, OUTN;
+    electrical VDD, VSS, OUTP, OUTN;
+
+    parameter real data_rate = 1.0e9;
+    parameter real vcm = 0.45;
+    parameter real amp = 0.4;
+    parameter real pre = 0.25;
+    parameter real tt = 20p;
+
+    integer lfsr;
+    integer cur_bit;
+    integer prev_bit;
+    integer feedback;
+    real ui;
+    real level;
+    real next_t;
+
+    analog begin
+        @(initial_step) begin
+            lfsr = 90;
+            cur_bit = (lfsr & 1) ? 1 : -1;
+            prev_bit = cur_bit;
+            ui = 1.0 / data_rate;
+            level = cur_bit;
+            next_t = ui;
+        end
+
+        @(timer(next_t)) begin
+            feedback = ((lfsr >> 6) ^ (lfsr >> 5)) & 1;
+            lfsr = ((lfsr >> 1) & 63) | (feedback << 6);
+            if (lfsr == 0) lfsr = 90;
+            prev_bit = cur_bit;
+            cur_bit = (lfsr & 1) ? 1 : -1;
+            level = cur_bit + pre * (cur_bit - prev_bit);
+            next_t = next_t + ui;
+        end
+
+        V(OUTP, VSS) <+ transition(vcm + 0.5 * amp * level, 0, tt, tt);
+        V(OUTN, VSS) <+ transition(vcm - 0.5 * amp * level, 0, tt, tt);
+    end
+endmodule

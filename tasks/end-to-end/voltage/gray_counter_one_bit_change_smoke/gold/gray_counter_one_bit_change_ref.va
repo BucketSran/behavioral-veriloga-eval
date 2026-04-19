@@ -1,0 +1,43 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module gray_counter_one_bit_change_ref(vdd, vss, clk, rst, g0, g1, g2, g3);
+    inout vdd, vss;
+    input clk, rst;
+    output g0, g1, g2, g3;
+    electrical vdd, vss, clk, rst, g0, g1, g2, g3;
+
+    parameter real vth = 0.45;
+    parameter real tedge = 20p;
+
+    integer bin_count;
+    integer gray_code;
+    real g0_level, g1_level, g2_level, g3_level;
+
+    analog begin
+        @(initial_step or cross(V(rst, vss) - vth, +1)) begin
+            bin_count = 0;
+            gray_code = 0;
+            g0_level = 0.0;
+            g1_level = 0.0;
+            g2_level = 0.0;
+            g3_level = 0.0;
+        end
+
+        @(cross(V(clk, vss) - vth, +1)) begin
+            if (V(rst, vss) < vth) begin
+                bin_count = (bin_count + 1) & 15;
+                gray_code = bin_count ^ (bin_count >> 1);
+                g0_level = ((gray_code >> 0) & 1) ? V(vdd, vss) : 0.0;
+                g1_level = ((gray_code >> 1) & 1) ? V(vdd, vss) : 0.0;
+                g2_level = ((gray_code >> 2) & 1) ? V(vdd, vss) : 0.0;
+                g3_level = ((gray_code >> 3) & 1) ? V(vdd, vss) : 0.0;
+            end
+        end
+
+        V(g0, vss) <+ transition(g0_level, 0, tedge, tedge);
+        V(g1, vss) <+ transition(g1_level, 0, tedge, tedge);
+        V(g2, vss) <+ transition(g2_level, 0, tedge, tedge);
+        V(g3, vss) <+ transition(g3_level, 0, tedge, tedge);
+    end
+endmodule

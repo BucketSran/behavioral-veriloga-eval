@@ -1,0 +1,12 @@
+simulator lang=spectre
+global 0
+
+Vvdd (VDD 0) vsource dc=0.9
+Vvss (VSS 0) vsource dc=0
+
+XDUT (VDD VSS OUTP OUTN) nrz_prbs data_rate=2.0e9 amp=0.4 pre=0.25
+
+tran tran stop=12n maxstep=10p
+save OUTP OUTN
+
+ahdl_include "nrz_prbs.va"

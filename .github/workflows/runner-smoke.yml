@@ -1,0 +1,62 @@
+name: Runner Smoke
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test dependency
+        run: python -m pip install pytest jsonschema
+
+      - name: Syntax check runner modules
+        run: python -m py_compile runners/bridge_preflight.py runners/run_gold_dual_suite.py runners/gen_manifest.py runners/gen_weekly_summary.py runners/gen_paper_stats.py runners/_result_table_utils.py
+
+      - name: Check result paths exist when coordination docs are present
+        run: |
+          python - <<'EOF'
+          import pathlib, re, sys
+          table_path = pathlib.Path("coordination/docs/benchmark/BENCHMARK_RESULT_TABLE.md")
+          if not table_path.exists():
+              print("Skipping result-path check: coordination docs are outside this standalone repo.")
+              raise SystemExit(0)
+          table = table_path.read_text(encoding="utf-8")
+          paths = sorted(set(re.findall(r'behavioral-veriloga-eval/results/[\w\-/\.]+', table)))
+          missing = [p for p in paths if not pathlib.Path(p).exists()]
+          if missing:
+              print("Missing result dirs:")
+              print("\n".join(missing))
+              sys.exit(1)
+          EOF
+
+      - name: Validate task dirs have required files
+        run: |
+          python - <<'EOF'
+          import pathlib, sys
+          bad = []
+          for meta in pathlib.Path("tasks").rglob("meta.json"):
+              task_dir = meta.parent
+              required = {"prompt.md", "meta.json", "checks.yaml"}
+              missing = sorted(required - {child.name for child in task_dir.iterdir()})
+              if missing:
+                  bad.append(f"{task_dir}: missing {missing}")
+          if bad:
+              print("\n".join(bad))
+              sys.exit(1)
+          EOF
+
+      - name: Run runner smoke tests
+        run: python -m pytest -q tests/test_bridge_preflight.py tests/test_bridge_scripts.py tests/test_run_gold_dual_suite.py tests/test_save_statements.py tests/test_pwl_statements.py tests/test_meta_schema.py

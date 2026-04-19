@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0.0
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=1n rise=20p fall=20p width=4n period=10n
+Vrst (rst 0) vsource type=pulse val0=0.9 val1=0.0 delay=15n rise=20p fall=20p width=300n period=400n
+
+XDUT (vdd vss clk rst g0 g1 g2 g3) gray_counter_one_bit_change_ref
+
+tran tran stop=220n maxstep=100p errpreset=conservative
+save clk rst g0 g1 g2 g3
+
+ahdl_include "gray_counter_one_bit_change_ref.va"

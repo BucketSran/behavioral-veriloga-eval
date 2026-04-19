@@ -1,0 +1,22 @@
+simulator lang=spectre
+global 0
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0.0
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=2n rise=20p fall=20p width=2n period=8n
+Vrst (rst 0) vsource type=pulse val0=0.9 val1=0.0 delay=16n rise=20p fall=20p width=100n period=200n
+Vinp (inp 0) vsource type=pwl wave=[ \
+    0    0.48 \
+    24n  0.48 \
+    40n  0.42 \
+    60n  0.42 \
+    80n  0.42 \
+]
+Vinn (inn 0) vsource dc=0.45
+
+XDUT (vdd vss clk rst inp inn outp outn) strongarm_reset_priority_fixed
+
+tran tran stop=80n maxstep=20p errpreset=conservative
+save clk rst inp inn outp outn
+
+ahdl_include "dut_fixed.va"

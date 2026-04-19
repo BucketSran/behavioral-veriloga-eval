@@ -1,0 +1,22 @@
+simulator lang=spectre
+global 0
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0.0
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=0.5n rise=30p fall=30p width=0.9n period=2n
+Venable (enable 0) vsource type=pwl wave=[ \
+  0 0.0 \
+  3n 0.9 \
+  40n 0.9 \
+  40.1n 0.0 \
+  55n 0.0 \
+  55.1n 0.9 \
+  95n 0.9 \
+]
+
+XDUT (vdd vss clk enable sout_p sout_n) nrz_prbs_jitter_ref
+
+tran tran stop=95n maxstep=20p
+save clk enable sout_p sout_n
+
+ahdl_include "nrz_prbs_jitter_ref.va"

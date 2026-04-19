@@ -1,0 +1,79 @@
+simulator lang=spectre
+global 0
+
+Vvdd (vdd 0) vsource dc=0.9 type=dc
+Vvss (vss 0) vsource dc=0.0 type=dc
+
+Vref (ref 0) vsource type=pwl wave=[ \
+    0    0 \
+    20n  0.9 \
+    30n  0 \
+    40n  0.9 \
+    50n  0 \
+    60n  0.9 \
+    70n  0 \
+    80n  0.9 \
+    90n  0 \
+    100n 0.9 \
+    110n 0 \
+    120n 0.9 \
+    130n 0 \
+    140n 0.9 \
+    150n 0 \
+    160n 0.9 \
+    170n 0 \
+    180n 0.9 \
+    190n 0 \
+    200n 0.9 \
+    210n 0 \
+    220n 0.9 \
+    230n 0 \
+    240n 0.9 \
+    250n 0 \
+    260n 0.9 \
+    270n 0 \
+    280n 0.9 \
+    290n 0 \
+    300n 0 \
+]
+Vdiv (div 0) vsource type=pwl wave=[ \
+    0      0 \
+    20.2n  0.9 \
+    30.2n  0 \
+    40.2n  0.9 \
+    50.2n  0 \
+    60.2n  0.9 \
+    70.2n  0 \
+    80.2n  0.9 \
+    90.2n  0 \
+    100.2n 0.9 \
+    110.2n 0 \
+    120.2n 0.9 \
+    130.2n 0 \
+    139.8n 0.9 \
+    149.8n 0 \
+    159.8n 0.9 \
+    169.8n 0 \
+    179.8n 0.9 \
+    189.8n 0 \
+    199.8n 0.9 \
+    209.8n 0 \
+    219.8n 0.9 \
+    229.8n 0 \
+    239.8n 0.9 \
+    249.8n 0 \
+    259.8n 0.9 \
+    269.8n 0 \
+    279.8n 0.9 \
+    289.8n 0 \
+    300n    0 \
+]
+
+IDUT (vdd vss ref div up dn) pfd_updn vth=0.45 tedge=20p
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+
+tran tran stop=300n maxstep=10p errpreset=conservative
+save ref div up dn
+
+ahdl_include "./pfd_updn.va"

@@ -1,0 +1,33 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sc_integrator(VDD, VSS, VIN, PHI1, PHI2, VOUT);
+    inout VDD, VSS;
+    input VIN, PHI1, PHI2;
+    output VOUT;
+    electrical VDD, VSS, VIN, PHI1, PHI2, VOUT;
+
+    parameter real Cin = 1.0;
+    parameter real Cfb = 1.0;
+    parameter real tt = 20p;
+
+    real sampled_vin;
+    real vout_state;
+
+    analog begin
+        @(initial_step) begin
+            sampled_vin = 0.0;
+            vout_state = 0.0;
+        end
+
+        @(cross(V(PHI1, VSS) - 0.45, +1)) begin
+            sampled_vin = V(VIN, VSS);
+        end
+
+        @(cross(V(PHI2, VSS) - 0.45, +1)) begin
+            vout_state = vout_state + (Cin / Cfb) * sampled_vin;
+        end
+
+        V(VOUT, VSS) <+ transition(vout_state, 0, tt, tt);
+    end
+endmodule

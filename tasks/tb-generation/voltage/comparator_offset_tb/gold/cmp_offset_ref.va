@@ -1,0 +1,24 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cmp_offset_ref(VDD, VSS, CLK, VINP, VINN, OUT_P);
+    inout VDD, VSS;
+    input CLK, VINP, VINN;
+    output OUT_P;
+    electrical VDD, VSS, CLK, VINP, VINN, OUT_P;
+
+    parameter real vos = 1m;
+    parameter real tt = 20p;
+
+    integer q;
+
+    analog begin
+        @(initial_step) q = 0;
+
+        @(cross(V(CLK, VSS) - 0.45, +1)) begin
+            q = (V(VINP, VSS) - V(VINN, VSS) > vos) ? 1 : 0;
+        end
+
+        V(OUT_P, VSS) <+ V(VDD, VSS) * transition(q ? 1.0 : 0.0, 0, tt, tt);
+    end
+endmodule

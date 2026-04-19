@@ -8,13 +8,19 @@
 `include "disciplines.vams"
 `default_transition 50p
 
-module pipeline_stage(
-    inout  electrical VDD, VSS,
-    input  electrical PHI1, PHI2,
-    input  electrical VIN, VREF,
-    output electrical VRES,
-    output electrical D1, D0
-);
+module pipeline_stage(VDD, VSS, PHI1, PHI2, VIN, VREF, VRES, D1, D0);
+
+inout VDD, VSS;
+input PHI1, PHI2;
+input VIN, VREF;
+output VRES;
+output D1, D0;
+
+electrical VDD, VSS;
+electrical PHI1, PHI2;
+electrical VIN, VREF;
+electrical VRES;
+electrical D1, D0;
 
 parameter real vth   = 0.45;
 parameter real vdd   = 0.9;

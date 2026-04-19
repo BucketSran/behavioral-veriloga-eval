@@ -1,0 +1,35 @@
+{
+  "id": "cppll_timer",
+  "family": "spec-to-va",
+  "category": "pll-clock",
+  "domain": "voltage",
+  "difficulty": "medium",
+  "expected_backend": "evas",
+  "must_include": [
+    "@(cross(",
+    "@(timer(",
+    "transition("
+  ],
+  "must_not_include": [
+    "I(",
+    "ddt("
+  ],
+  "inputs": [
+    "prompt.md"
+  ],
+  "artifacts": [
+    "candidate.out"
+  ],
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "source_eval_id": 29,
+  "source_name": "eval-cppll-timer",
+  "expected_output_summary": "A .va file with timer-driven DCO toggling, PI-like control that updates on ref/feedback edge phase error, analog vctrl monitor output, and a divided feedback clock that frequency-tracks a 50 MHz reference within a few percent.",
+  "source_files": [
+    "gold/cppll_timer_ref.va",
+    "gold/tb_cppll_timer_ref.scs"
+  ]
+}

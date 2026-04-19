@@ -1,0 +1,23 @@
+syntax:
+  must_include:
+    - "@(cross("
+    - "@(timer("
+    - "transition("
+    - "vctrl_mon"
+    - "lock"
+  must_not_include:
+    - "I("
+    - "ddt("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "late_window_feedback_tracks_reference"
+    - "vctrl_stays_within_supply_range"
+
+parity:
+  required: true
+  spectre_result_path: "results/gold-dual-suite-pll-2026-04-18/cppll_timer/spectre"
+  tolerance_notes: "Late-window frequency ratio must stay within 3%; bounded control voltage is required, lock assertion is optional for this baseline."
