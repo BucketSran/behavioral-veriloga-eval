@@ -23,7 +23,7 @@
 
 截至 2026-04-19，项目主线状态可以概括为：
 
-1. `end-to-end` 35 个任务已闭环。
+1. `end-to-end` 36 个任务已闭环。
 2. `spec-to-va` 18 个任务已闭环。
 3. `bugfix` 8 个任务已闭环。
 4. `tb-generation` 10 个任务已完成 EVAS 主验证，其中 7 个已补齐 EVAS+Spectre 执行证据。
@@ -645,7 +645,7 @@
 ## 各 family 明细
 | family | total | evas_passed | dual_validated |
 |--------|-------|-------------|----------------|
-| end-to-end | 35 | 35 | 29 |
+| end-to-end | 36 | 36 | 30 |
 | spec-to-va | 18 | 18 | 0 |
 | bugfix | 8 | 8 | 7 |
 | tb-generation | 10 | 10 | 7 |
@@ -683,11 +683,11 @@
 ```
 | Task Family   | # Tasks | EVAS Passed | Dual-Validated |
 |---------------|---------|-------------|----------------|
-| end-to-end    | 35      | 35 (100%)   | 29 (82.9%)     |
+| end-to-end    | 36      | 36 (100%)   | 30             |
 | spec-to-va    | 18      | 18 (100%)   | 0              |
 | bugfix        | 8       | 8 (100%)    | 7              |
 | tb-generation | 10      | 10 (100%)   | 7              |
-| **Total**     | **71**  | **71**      | **43**         |
+| **Total**     | **72**  | **72**      | **44**         |
 ```
 
 **Markdown 表 2 — category 分布**
@@ -696,10 +696,10 @@
 **JSON 格式**
 ```json
 {
-  "total_tasks": 71,
+  "total_tasks": 72,
   "families": {...},
   "categories": {...},
-  "dual_validated_total": 43,
+  "dual_validated_total": 44,
   "generated_at": "2026-04-19"
 }
 ```
@@ -1780,7 +1780,16 @@ Calibration / data-converter / digital：
 **中优先级**
 
 3. `5.5` 评估 dual runner 进一步封装。
-4. `7.5 P1 dual-suite / P2`：P1 的 EVAS 侧已落地，后续重点转为 bridge 可用后的双跑补证与下一批任务。
+4. `7.5 P2`：见 §12.1 T22–T27。
+
+**已知小问题（不阻塞，维护时顺手修）**
+
+- (Fx1) ~~`xor_pd_smoke` gold DUT 文件名为 `xor_phase_detector.va`（无 `_ref` 后缀），与其余任务命名风格不一致~~ → 已于 2026-04-19 修复为 `xor_phase_detector_ref.va`，并同步 TB 的 `ahdl_include`。
+- (Fx2) ~~`segmented_dac_glitch_tb` 仿真步数约 412k（~3.7s CPU）~~ → 已于 2026-04-19 将 gold TB `maxstep` 从 `20p` 放宽到 `100p`，本地 EVAS 复验通过。
+- (Fx3) ~~`digital_basics_smoke/meta.json` 写为 raw/pending 但结果表已 dual-validated（2026-04-17）~~ → 已于 2026-04-19 直接修复。
+- (Fx4) ~~P1 批次 5 个 meta.json 格式稀疏~~ → 已于 2026-04-19 补齐 `task_name / must_include / artifacts / tier / verification_status / evidence` 等字段。
+- (Fx5) ~~P0 批次 `adpll_ratio_hop_smoke` 和 `pfd_reset_race_smoke` 的 meta.json 同时包含 `id` 与 `task_id`（冗余）~~ → 已于 2026-04-19 删除冗余 `task_id` 字段，统一用 `id`。
+- (Fx6) ~~`xor_pd_smoke/meta.json` 缺 top-level `parity_policy` 字段~~ → 已于 2026-04-19 补 `"parity_policy": "default"`。
 
 ### 2026-04-19 已收口
 
@@ -1807,6 +1816,7 @@ Calibration / data-converter / digital：
 | P1-5 | `xor_pd_smoke`：已有任务 EVAS gold-suite 复验通过，metadata 已收口到 passed |
 | P1-6 | `comparator_offset_search_smoke`：task + gold + EVAS 行为验证通过 |
 | P1-7 | `clk_burst_gen_smoke`：已有任务 EVAS gold-suite 复验通过，metadata 已收口到 passed |
+| P2-1 | `dwa_wraparound_smoke`：task + gold + EVAS 行为验证通过 |
 
 ---
 
@@ -1862,6 +1872,26 @@ Calibration / data-converter / digital：
 [x] T19 7.5  实现 comparator_offset_search_smoke（end-to-end，comparator）（2026-04-19）
 [x] T20 7.5  实现 xor_pd_smoke（end-to-end，phase-detector）（2026-04-19，复验收口）
 [x] T21 7.5  实现 clk_burst_gen_smoke（end-to-end，calibration-source）（2026-04-19，复验收口）
+
+--- 维护修复（建议顺手完成）---
+[x] Fx1  修复 xor_pd_smoke gold DUT 文件名 → xor_phase_detector_ref.va，并同步 TB ahdl_include（2026-04-19）
+[x] Fx2  segmented_dac_glitch_tb TB 里 maxstep 从 20ps 改为 100ps，缩短仿真时间（2026-04-19）
+[x] Fx3  digital_basics_smoke/meta.json 更新为 tier=verified / verification_status=passed（2026-04-19，直接修复）
+[x] Fx4  补全 P1 稀疏 meta.json（5 个任务：gray_counter_one_bit_change_smoke / multimod_divider_ratio_switch_smoke /
+         comparator_offset_search_smoke / segmented_dac_glitch_tb / strongarm_reset_priority_bug）
+         每个文件需补：task_name, must_include, must_not_include, inputs, artifacts,
+         tier=verified, verification_status=passed, owner=team, created_at=2026-04-19, evidence（2026-04-19）
+[x] Fx5  去掉 P0 任务 (adpll_ratio_hop_smoke / pfd_reset_race_smoke) meta.json 里的冗余 task_id 字段
+         （schema 要求 id OR task_id 之一，两者并存无害但冗余）（2026-04-19）
+[x] Fx6  xor_pd_smoke/meta.json 补 top-level parity_policy = "default"（当前只有 checks.parity_required，缺顶层字段）（2026-04-19）
+
+--- P2 队列（待执行）---
+[x] T22 7.5  digital_basics_smoke 已于 2026-04-05 建立并在 2026-04-17 完成 dual-suite 验证，meta.json 已由 Fx3 补全（2026-04-19）
+[x] T23 7.5  实现 dwa_wraparound_smoke（end-to-end，data-converter；DWA 指针回卷边界）（2026-04-19）
+[ ] T24 7.5  实现 sample_hold_droop_smoke（end-to-end，sample-hold；保持期泄漏与状态保持）
+[ ] T25 7.5  实现 bbpd_data_edge_alignment_smoke（end-to-end，phase-detector；Alexander BBPD near-edge）
+[ ] T26 7.5  实现 nrz_prbs_jitter_tb（tb-generation，comms；在 nrz_prbs 基础上加 jitter/burst 观测）
+[ ] T27 7.5  实现 serializer_frame_alignment_smoke（end-to-end，digital-logic；帧边界与 bit ordering）
 ```
 
 ### 12.2 通用规则

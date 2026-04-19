@@ -883,6 +883,66 @@ def check_dwa_ptr_gen_no_overlap(rows: list[dict[str, float]]) -> tuple[bool, st
     )
 
 
+def check_dwa_wraparound(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    if not rows:
+        return False, "no rows"
+
+    keys = set(rows[0].keys())
+    required = {"time", "clk_i", "rst_ni", "ptr_0", "cell_en_0", "code_0"}
+    if not required.issubset(keys):
+        return False, "missing time/clk_i/rst_ni/ptr_0/cell_en_0/code_0"
+
+    ptr_cols = indexed_columns(keys, "ptr_")
+    cell_cols = indexed_columns(keys, "cell_en_")
+    code_cols = indexed_columns(keys, "code_")
+    if len(ptr_cols) != 16 or len(cell_cols) != 16 or len(code_cols) != 4:
+        return False, "expected ptr_0..15, cell_en_0..15, and code_0..3 columns"
+
+    times = [r["time"] for r in rows]
+    edge_times = rising_edges([r["clk_i"] for r in rows], times)
+    sampled_rows: list[dict[str, float]] = []
+    for edge_t in edge_times:
+        sample_t = edge_t + 1.0e-9
+        row = next((r for r in rows if r["time"] >= sample_t), None)
+        if row is not None and row["rst_ni"] > 0.45:
+            sampled_rows.append(row)
+
+    if len(sampled_rows) < 5:
+        return False, f"insufficient_post_reset_samples count={len(sampled_rows)}"
+
+    expected_ptr = 13
+    bad_ptr_rows = 0
+    bad_count_rows = 0
+    wrap_events = 0
+    split_wrap_rows = 0
+    prev_ptr = expected_ptr
+
+    for row in sampled_rows:
+        code = sum(int(row[col] > 0.45) << int(col[5:]) for col in code_cols)
+        expected_ptr = (expected_ptr + code) % 16
+        if expected_ptr < prev_ptr:
+            wrap_events += 1
+
+        ptr_active = [idx for idx, col in enumerate(ptr_cols) if row[col] > 0.45]
+        active_cells = {idx for idx, col in enumerate(cell_cols) if row[col] > 0.45}
+
+        if ptr_active != [expected_ptr]:
+            bad_ptr_rows += 1
+        if len(active_cells) != code:
+            bad_count_rows += 1
+        if active_cells and (max(active_cells) - min(active_cells) + 1) > len(active_cells):
+            split_wrap_rows += 1
+
+        prev_ptr = expected_ptr
+
+    ok = bad_ptr_rows == 0 and bad_count_rows == 0 and wrap_events >= 2 and split_wrap_rows >= 2
+    return ok, (
+        f"sampled_cycles={len(sampled_rows)} bad_ptr_rows={bad_ptr_rows} "
+        f"bad_count_rows={bad_count_rows} wrap_events={wrap_events} "
+        f"split_wrap_rows={split_wrap_rows}"
+    )
+
+
 def check_clk_burst_gen(rows: list[dict[str, float]]) -> tuple[bool, str]:
     if not rows or not {"CLK", "RST_N", "CLK_OUT"}.issubset(rows[0]):
         return False, "missing CLK/RST_N/CLK_OUT"
@@ -1900,6 +1960,7 @@ CHECKS = {
     "digital_basics_smoke": check_not_gate,
     "dwa_ptr_gen_smoke": check_dwa_ptr_gen,
     "dwa_ptr_gen_no_overlap_smoke": check_dwa_ptr_gen_no_overlap,
+    "dwa_wraparound_smoke": check_dwa_wraparound,
     "gain_extraction_smoke": check_gain_extraction,
     "lfsr_smoke": check_lfsr,
     "noise_gen_smoke": check_noise_gen,

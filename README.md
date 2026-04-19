@@ -24,7 +24,7 @@ record Spectre parity evidence for engineering closure and regression tracking.
 
 As of 2026-04-19:
 
-1. `end-to-end`: 35 tasks closed
+1. `end-to-end`: 36 tasks closed
 2. `spec-to-va`: 18 tasks closed
 3. `bugfix`: 8 tasks closed
 4. `tb-generation`: 10 tasks closed for EVAS scoring, with EVAS+Spectre execution evidence recorded for 7 of them
@@ -74,6 +74,10 @@ The latest expansion passes added:
    `results/gold-suite-p1-tb-2026-04-19/`; `xor_pd_smoke` and
    `clk_burst_gen_smoke` were also rechecked under EVAS and their task metadata
    was brought back in sync with the already-closed benchmark table facts
+6. later on 2026-04-19:
+   `dwa_wraparound_smoke`, with EVAS gold-suite results under
+   `results/gold-suite-p2-dwa-wraparound-2026-04-19/`, covering DWA pointer
+   wraparound and split thermometer selection at the 15 -> 0 boundary
 
 The 2026-04-19 pass also hardened the PFD behavior check in
 `runners/simulate_evas.py` so near-deadzone short pulses use time-weighted duty

@@ -1,14 +1,14 @@
 {
-  "id": "pfd_reset_race_smoke",
-  "task_name": "PFD Reset Race Smoke Test",
+  "id": "dwa_wraparound_smoke",
+  "task_name": "DWA Pointer Wraparound Smoke Test",
   "family": "end-to-end",
-  "category": "phase-detector",
+  "category": "data-converter",
   "domain": "voltage",
   "difficulty": "medium",
   "expected_backend": "evas",
   "source": {
     "type": "benchmark-gold",
-    "path": "behavioral-veriloga-eval/tasks/end-to-end/voltage/pfd_reset_race_smoke/gold"
+    "path": "behavioral-veriloga-eval/tasks/end-to-end/voltage/dwa_wraparound_smoke/gold"
   },
   "tier": "verified",
   "verification_status": "passed",
@@ -27,8 +27,9 @@
     "prompt.md"
   ],
   "artifacts": [
-    "dut.va",
-    "tb_pfd_reset_race.scs",
+    "dwa_code_step_ref.va",
+    "dwa_wraparound_ref.va",
+    "tb_dwa_wraparound_ref.scs",
     "tran.csv"
   ],
   "scoring": [
@@ -42,11 +43,11 @@
     "tb_compile": "required",
     "tran_generated": "required",
     "sim_correct": "required",
-    "parity_required": true
+    "parity_required": false
   },
   "evidence": {
-    "result_path": "behavioral-veriloga-eval/results/gold-suite-pfd-reset-race-2026-04-19/pfd_reset_race_smoke",
+    "result_path": "behavioral-veriloga-eval/results/gold-suite-p2-dwa-wraparound-2026-04-19/dwa_wraparound_smoke",
     "pr_link": "[TODO]",
-    "notes": "Added on 2026-04-19 to stress PFD reset behavior under near-simultaneous ref/div edges whose lead/lag relationship swaps mid-run."
+    "notes": "Added on 2026-04-19 as a P2 DWA pointer wraparound benchmark; EVAS gold validation checks one-hot pointer, active cell count, and split selections across wrap boundaries."
   }
 }
