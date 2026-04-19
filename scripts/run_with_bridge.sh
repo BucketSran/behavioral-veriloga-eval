@@ -52,4 +52,7 @@ fi
 ssh "${SSH_ARGS[@]}" "${VB_REMOTE_USER}@${VB_REMOTE_HOST}" -L "${VB_LOCAL_PORT}:127.0.0.1:${VB_REMOTE_PORT}" -N
 
 python3 "$ROOT_DIR/runners/bridge_preflight.py" --bridge-repo "$BRIDGE_REPO" >/dev/null
+export VAEVAS_BRIDGE_WRAPPER=1
+export VAEVAS_BRIDGE_REPO="$BRIDGE_REPO"
+export VAEVAS_BRIDGE_ENV="$BRIDGE_ENV"
 "$@"

@@ -951,11 +951,30 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Treat a disconnected Virtuoso CIW daemon as a hard blocker.",
     )
+    ap.add_argument(
+        "--allow-direct-run",
+        action="store_true",
+        help="Allow calling this runner directly without scripts/run_with_bridge.sh.",
+    )
     return ap.parse_args()
 
 
 def main() -> int:
     args = parse_args()
+    via_wrapper = os.environ.get("VAEVAS_BRIDGE_WRAPPER") == "1"
+    if not via_wrapper and not args.allow_direct_run:
+        summary = {
+            "status": "blocked",
+            "reason": "direct invocation blocked; use scripts/run_with_bridge.sh",
+            "remediation": [
+                "cd /Users/bucketsran/Documents/TsingProject/vaEvas/behavioral-veriloga-eval",
+                "./scripts/run_with_bridge.sh python3 runners/run_gold_dual_suite.py <args>",
+                "or add --allow-direct-run if you intentionally run without wrapper",
+            ],
+        }
+        print(json.dumps(summary, indent=2))
+        return 2
+
     bridge_repo = Path(args.bridge_repo).resolve()
     if not bridge_repo.exists():
         print(json.dumps({"status": "blocked", "reason": f"bridge repo not found: {bridge_repo}"}, indent=2))

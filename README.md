@@ -28,7 +28,7 @@ As of 2026-04-19:
 2. `spec-to-va`: 18 tasks closed
 3. `bugfix`: 8 tasks closed
 4. `tb-generation`: 11 tasks closed for EVAS scoring, with EVAS+Spectre execution evidence recorded for 7 of them
-5. benchmark / closed-loop rows: 30 `dual-validated`
+5. benchmark / closed-loop rows: 32 `dual-validated`
 6. benchmark / closed-loop rows: 1 passed PLL row with a residual
    waveform-alignment audit item
 
@@ -63,8 +63,8 @@ The latest expansion passes added:
    `results/gold-suite-adpll-ratio-hop-2026-04-19/`,
    `results/gold-suite-pfd-reset-race-2026-04-19/`, and
    `results/gold-suite-tb-expansion-2026-04-19/`; these P0 expansion cases are
-   now benchmark rows, while bridge-backed dual validation remains deferred by
-   the current no-bridge execution rules
+   now benchmark rows, and P0 dual-suite closure is recorded under
+   `results/gold-dual-suite-p0-2026-04-19/`
 5. later on 2026-04-19:
    `strongarm_reset_priority_bug`, `gray_counter_one_bit_change_smoke`,
    `multimod_divider_ratio_switch_smoke`, `segmented_dac_glitch_tb`, and

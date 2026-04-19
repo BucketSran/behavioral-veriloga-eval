@@ -27,7 +27,7 @@
 2. `spec-to-va` 18 个任务已闭环。
 3. `bugfix` 8 个任务已闭环。
 4. `tb-generation` 11 个任务已完成 EVAS 主验证，其中 7 个已补齐 EVAS+Spectre 执行证据。
-5. benchmark / closed-loop 共有 30 行 `dual-validated`。
+5. benchmark / closed-loop 共有 32 行 `dual-validated`。
 6. 当前没有 `verification_status != passed` 的 open row。
 7. 当前有 1 条需要单独跟踪的 waveform-alignment / simulator 审计项：`cppll_freq_step_reacquire_smoke`。
 
@@ -645,10 +645,10 @@
 ## 各 family 明细
 | family | total | evas_passed | dual_validated |
 |--------|-------|-------------|----------------|
-| end-to-end | 36 | 36 | 30 |
+| end-to-end | 39 | 39 | 32 |
 | spec-to-va | 18 | 18 | 0 |
 | bugfix | 8 | 8 | 7 |
-| tb-generation | 10 | 10 | 7 |
+| tb-generation | 11 | 11 | 7 |
 
 ## 本周新增
 （自动列出 date_added 在最近 7 天的条目）
@@ -683,11 +683,11 @@
 ```
 | Task Family   | # Tasks | EVAS Passed | Dual-Validated |
 |---------------|---------|-------------|----------------|
-| end-to-end    | 39      | 39 (100%)   | 30             |
+| end-to-end    | 39      | 39 (100%)   | 32             |
 | spec-to-va    | 18      | 18 (100%)   | 0              |
 | bugfix        | 8       | 8 (100%)    | 7              |
 | tb-generation | 11      | 11 (100%)   | 7              |
-| **Total**     | **76**  | **76**      | **44**         |
+| **Total**     | **76**  | **76**      | **46**         |
 ```
 
 **Markdown 表 2 — category 分布**
@@ -699,7 +699,7 @@
   "total_tasks": 76,
   "families": {...},
   "categories": {...},
-  "dual_validated_total": 44,
+  "dual_validated_total": 46,
   "generated_at": "2026-04-19"
 }
 ```
@@ -1772,14 +1772,7 @@ Calibration / data-converter / digital：
 
 ### 当前仍 open
 
-**高优先级**
-
-1. `4.1` 补 `pr_link`：少量历史 PLL seed 行仍为 `[TODO]`，无独立 PR provenance，暂无法补齐。
-2. `7.5 P0 dual-suite`：4 条 P0 任务（adpll_ratio_hop_smoke、pfd_reset_race_smoke、dco_gain_step_tb、sample_hold_aperture_tb）的 EVAS 侧已闭环，bridge 可用后需补 dual-suite 验证。
-
-**中优先级**
-
-3. `5.5` 评估 dual runner 进一步封装。
+截至 2026-04-19，本阶段 open 项已清零。后续进入常规增量维护（新任务扩展 + 回归守护）。
 
 **已知小问题（不阻塞，维护时顺手修）**
 
@@ -1804,10 +1797,13 @@ Calibration / data-converter / digital：
 | `7.4` | `FAILURE_TAXONOMY.md` 落地（F1–F7） |
 | `8.1` | `veriloga-skills/veriloga/SKILL.md` 补入 5 条 benchmark authoring 规则 |
 | `8.2` | `docs/TASK_AUTHORING_CHECKLIST.md` 落地（6 节 checklist）|
+| `4.1` | `BENCHMARK_RESULT_TABLE.md` 中 seed 行 `pr_link` 已补齐到可追溯提交，历史 `[TODO]` 清零 |
+| `5.5` | dual runner 已默认要求 wrapper 入口；`run_with_bridge.sh` 注入 `VAEVAS_BRIDGE_WRAPPER=1`，`run_gold_dual_suite.py` 直跑默认阻断并给出 remediation |
 | P0-1 | `adpll_ratio_hop_smoke`：task + gold + EVAS 行为验证通过 |
 | P0-2 | `dco_gain_step_tb`：task + gold + EVAS 编译验证通过 |
 | P0-3 | `sample_hold_aperture_tb`：task + gold + EVAS 编译验证通过 |
 | P0-4 | `pfd_reset_race_smoke`：task + gold + EVAS 行为验证通过 |
+| P0-dual | `adpll_ratio_hop_smoke`、`pfd_reset_race_smoke`、`dco_gain_step_tb`、`sample_hold_aperture_tb` 已于 2026-04-19 完成 EVAS+Spectre dual-suite（`results/gold-dual-suite-p0-2026-04-19/`） |
 | P1-1 | `strongarm_reset_priority_bug`：bugfix task + bug/fix gold + EVAS 行为验证通过 |
 | P1-2 | `gray_counter_one_bit_change_smoke`：task + gold + EVAS 行为验证通过 |
 | P1-3 | `multimod_divider_ratio_switch_smoke`：task + gold + EVAS 行为验证通过 |
@@ -1839,7 +1835,7 @@ Calibration / data-converter / digital：
 
 ## 11. 一句话版本
 
-治理层（文档/CI/脚本）已全部落地，P0/P1/P2 队列都已完成 EVAS 侧闭环；下一阶段重心是 bridge dual-suite 补验证和剩余历史 provenance 收口。
+治理层（文档/CI/脚本）已全部落地，P0/P1/P2 队列和 P0 dual-suite 均已收口；下一阶段重心是常规增量扩展与回归稳定性维护。
 
 ---
 
@@ -1925,8 +1921,7 @@ Calibration / data-converter / digital：
 
 ### 12.3 已知需要跳过的操作
 
-- **不要跑 `scripts/run_with_bridge.sh`**（需要远端 Cadence 环境，Codex 无法访问）
-- **不要修改 `BENCHMARK_RESULT_TABLE.md` 里 dual_validated 列**（需要 bridge 环境才能确认）
+- **不要直跑 `python runners/run_gold_dual_suite.py`**（默认会被阻断；请用 `scripts/run_with_bridge.sh`，或显式 `--allow-direct-run` 仅用于调试）
 - **不要修改任何已有 `gold/` 资产的逻辑行为**（已经过 dual-suite 验证，不能随意改）
 - **不要跑 `pytest tests/test_run_gold_dual_suite.py`**（需要完整 bridge 依赖）
 
