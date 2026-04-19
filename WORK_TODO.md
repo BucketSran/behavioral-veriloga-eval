@@ -23,10 +23,10 @@
 
 截至 2026-04-19，项目主线状态可以概括为：
 
-1. `end-to-end` 36 个任务已闭环。
+1. `end-to-end` 39 个任务已闭环。
 2. `spec-to-va` 18 个任务已闭环。
 3. `bugfix` 8 个任务已闭环。
-4. `tb-generation` 10 个任务已完成 EVAS 主验证，其中 7 个已补齐 EVAS+Spectre 执行证据。
+4. `tb-generation` 11 个任务已完成 EVAS 主验证，其中 7 个已补齐 EVAS+Spectre 执行证据。
 5. benchmark / closed-loop 共有 30 行 `dual-validated`。
 6. 当前没有 `verification_status != passed` 的 open row。
 7. 当前有 1 条需要单独跟踪的 waveform-alignment / simulator 审计项：`cppll_freq_step_reacquire_smoke`。
@@ -683,11 +683,11 @@
 ```
 | Task Family   | # Tasks | EVAS Passed | Dual-Validated |
 |---------------|---------|-------------|----------------|
-| end-to-end    | 36      | 36 (100%)   | 30             |
+| end-to-end    | 39      | 39 (100%)   | 30             |
 | spec-to-va    | 18      | 18 (100%)   | 0              |
 | bugfix        | 8       | 8 (100%)    | 7              |
-| tb-generation | 10      | 10 (100%)   | 7              |
-| **Total**     | **72**  | **72**      | **44**         |
+| tb-generation | 11      | 11 (100%)   | 7              |
+| **Total**     | **76**  | **76**      | **44**         |
 ```
 
 **Markdown 表 2 — category 分布**
@@ -696,7 +696,7 @@
 **JSON 格式**
 ```json
 {
-  "total_tasks": 72,
+  "total_tasks": 76,
   "families": {...},
   "categories": {...},
   "dual_validated_total": 44,
@@ -1780,7 +1780,6 @@ Calibration / data-converter / digital：
 **中优先级**
 
 3. `5.5` 评估 dual runner 进一步封装。
-4. `7.5 P2`：见 §12.1 T22–T27。
 
 **已知小问题（不阻塞，维护时顺手修）**
 
@@ -1817,6 +1816,10 @@ Calibration / data-converter / digital：
 | P1-6 | `comparator_offset_search_smoke`：task + gold + EVAS 行为验证通过 |
 | P1-7 | `clk_burst_gen_smoke`：已有任务 EVAS gold-suite 复验通过，metadata 已收口到 passed |
 | P2-1 | `dwa_wraparound_smoke`：task + gold + EVAS 行为验证通过 |
+| P2-2 | `sample_hold_droop_smoke`：task + gold + EVAS 行为验证通过 |
+| P2-3 | `bbpd_data_edge_alignment_smoke`：task + gold + EVAS 行为验证通过 |
+| P2-4 | `nrz_prbs_jitter_tb`：task + gold + EVAS 编译验证通过 |
+| P2-5 | `serializer_frame_alignment_smoke`：task + gold + EVAS 行为验证通过 |
 
 ---
 
@@ -1836,7 +1839,7 @@ Calibration / data-converter / digital：
 
 ## 11. 一句话版本
 
-治理层（文档/CI/脚本）已全部落地，P0 与 P1 队列都已完成 EVAS 侧闭环；下一阶段的重心是 P0/P1 的 bridge dual-suite 补验证，以及继续推进 P2 扩展。
+治理层（文档/CI/脚本）已全部落地，P0/P1/P2 队列都已完成 EVAS 侧闭环；下一阶段重心是 bridge dual-suite 补验证和剩余历史 provenance 收口。
 
 ---
 
@@ -1885,13 +1888,13 @@ Calibration / data-converter / digital：
          （schema 要求 id OR task_id 之一，两者并存无害但冗余）（2026-04-19）
 [x] Fx6  xor_pd_smoke/meta.json 补 top-level parity_policy = "default"（当前只有 checks.parity_required，缺顶层字段）（2026-04-19）
 
---- P2 队列（待执行）---
+--- P2 队列（已执行）---
 [x] T22 7.5  digital_basics_smoke 已于 2026-04-05 建立并在 2026-04-17 完成 dual-suite 验证，meta.json 已由 Fx3 补全（2026-04-19）
 [x] T23 7.5  实现 dwa_wraparound_smoke（end-to-end，data-converter；DWA 指针回卷边界）（2026-04-19）
-[ ] T24 7.5  实现 sample_hold_droop_smoke（end-to-end，sample-hold；保持期泄漏与状态保持）
-[ ] T25 7.5  实现 bbpd_data_edge_alignment_smoke（end-to-end，phase-detector；Alexander BBPD near-edge）
-[ ] T26 7.5  实现 nrz_prbs_jitter_tb（tb-generation，comms；在 nrz_prbs 基础上加 jitter/burst 观测）
-[ ] T27 7.5  实现 serializer_frame_alignment_smoke（end-to-end，digital-logic；帧边界与 bit ordering）
+[x] T24 7.5  实现 sample_hold_droop_smoke（end-to-end，sample-hold；保持期泄漏与状态保持）（2026-04-19）
+[x] T25 7.5  实现 bbpd_data_edge_alignment_smoke（end-to-end，phase-detector；Alexander BBPD near-edge）（2026-04-19）
+[x] T26 7.5  实现 nrz_prbs_jitter_tb（tb-generation，comms；在 nrz_prbs 基础上加 jitter/burst 观测）（2026-04-19）
+[x] T27 7.5  实现 serializer_frame_alignment_smoke（end-to-end，digital-logic；帧边界与 bit ordering）（2026-04-19）
 ```
 
 ### 12.2 通用规则

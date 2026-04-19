@@ -1,0 +1,53 @@
+{
+  "id": "bbpd_data_edge_alignment_smoke",
+  "task_name": "BBPD Data-Edge Alignment Smoke Test",
+  "family": "end-to-end",
+  "category": "phase-detector",
+  "domain": "voltage",
+  "difficulty": "hard",
+  "expected_backend": "evas",
+  "source": {
+    "type": "benchmark-gold",
+    "path": "behavioral-veriloga-eval/tasks/end-to-end/voltage/bbpd_data_edge_alignment_smoke/gold"
+  },
+  "tier": "verified",
+  "verification_status": "passed",
+  "owner": "team",
+  "created_at": "2026-04-19",
+  "must_include": [
+    "@(cross(",
+    "@(timer(",
+    "transition("
+  ],
+  "must_not_include": [
+    "I(",
+    "ddt(",
+    "idt("
+  ],
+  "inputs": [
+    "prompt.md"
+  ],
+  "artifacts": [
+    "bbpd_data_edge_alignment_ref.va",
+    "tb_bbpd_data_edge_alignment_ref.scs",
+    "tran.csv"
+  ],
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "parity_policy": "default",
+  "checks": {
+    "dut_compile": "required",
+    "tb_compile": "required",
+    "tran_generated": "required",
+    "sim_correct": "required",
+    "parity_required": false
+  },
+  "evidence": {
+    "result_path": "behavioral-veriloga-eval/results/gold-suite-p2-2026-04-19/bbpd_data_edge_alignment_smoke",
+    "pr_link": "codex/upstream-complete-pr",
+    "notes": "Added on 2026-04-19 as a P2 phase-detector benchmark that checks lead/lag-dependent UP/DN pulse preference around near-edge data transitions."
+  }
+}

@@ -665,6 +665,55 @@ def check_bbpd(rows: list[dict[str, float]]) -> tuple[bool, str]:
     return ok, f"data_edges={len(data_edges)} up_edges={len(up_edges)} down_edges={len(down_edges)} overlap_frac={overlap_frac:.4f}"
 
 
+def check_bbpd_data_edge_alignment(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"clk", "data", "up", "dn"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing clk/data/up/dn"
+
+    vth = 0.45
+    times = [r["time"] for r in rows]
+    up = [r["up"] for r in rows]
+    dn = [r["dn"] for r in rows]
+    data = [r["data"] for r in rows]
+
+    up_edges = [times[i] for i in range(1, len(rows)) if up[i - 1] <= vth < up[i]]
+    dn_edges = [times[i] for i in range(1, len(rows)) if dn[i - 1] <= vth < dn[i]]
+    data_edges = [
+        times[i]
+        for i in range(1, len(rows))
+        if ((data[i - 1] <= vth < data[i]) or (data[i - 1] >= vth > data[i]))
+    ]
+
+    if len(data_edges) < 6:
+        return False, f"too_few_data_edges={len(data_edges)}"
+    if len(up_edges) + len(dn_edges) < 6:
+        return False, f"too_few_updn_pulses={len(up_edges) + len(dn_edges)}"
+
+    overlap = sum(1 for r in rows if r["up"] > vth and r["dn"] > vth)
+    overlap_frac = overlap / max(len(rows), 1)
+    if overlap_frac > 0.02:
+        return False, f"overlap_frac={overlap_frac:.4f}"
+
+    lead_window_end = 80e-9
+    lag_window_start = 90e-9
+    up_lead = sum(1 for t in up_edges if t <= lead_window_end)
+    dn_lead = sum(1 for t in dn_edges if t <= lead_window_end)
+    up_lag = sum(1 for t in up_edges if t >= lag_window_start)
+    dn_lag = sum(1 for t in dn_edges if t >= lag_window_start)
+
+    if up_lead < 3 or up_lead <= dn_lead:
+        return False, f"lead_window_updn={up_lead}/{dn_lead}"
+    if dn_lag < 3 or dn_lag <= up_lag:
+        return False, f"lag_window_updn={up_lag}/{dn_lag}"
+
+    return True, (
+        f"data_edges={len(data_edges)} "
+        f"lead_updn={up_lead}/{dn_lead} "
+        f"lag_updn={up_lag}/{dn_lag} "
+        f"overlap_frac={overlap_frac:.4f}"
+    )
+
+
 def _find_bus_columns(sample: dict[str, float], base: str) -> dict[int, str]:
     cols: dict[int, str] = {}
     pattern = re.compile(rf"^{re.escape(base)}(?:_|\[)?(\d+)\]?$", re.IGNORECASE)
@@ -1169,6 +1218,68 @@ def check_sample_hold(rows: list[dict[str, float]]) -> tuple[bool, str]:
     return True, f"edges={len(edge_idx)} hold_ok"
 
 
+def check_sample_hold_droop(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"vin", "clk", "vout"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing vin/clk/vout"
+
+    vth = 0.45
+    times = [r["time"] for r in rows]
+    clk = [r["clk"] for r in rows]
+    vin = [r["vin"] for r in rows]
+    vout = [r["vout"] for r in rows]
+    edge_idx = [i for i in range(1, len(clk)) if clk[i - 1] <= vth < clk[i]]
+
+    if len(edge_idx) < 6:
+        return False, f"too_few_clock_edges={len(edge_idx)}"
+
+    sample_mismatch = 0
+    checked_samples = 0
+    for i in range(min(6, len(edge_idx) - 1)):
+        idx = edge_idx[i]
+        t_target = times[idx] + 1.2e-9
+        settle_idx = next((j for j in range(idx, len(rows)) if times[j] >= t_target), len(rows) - 1)
+        err = abs(vout[settle_idx] - vin[idx])
+        checked_samples += 1
+        if err > 0.04:
+            sample_mismatch += 1
+    if checked_samples == 0 or sample_mismatch > 1:
+        return False, f"sample_mismatch={sample_mismatch}/{max(checked_samples, 1)}"
+
+    droop_windows = 0
+    droop_failures = 0
+    for i in range(min(6, len(edge_idx) - 1)):
+        start_i = edge_idx[i]
+        end_i = edge_idx[i + 1]
+        t_start = times[start_i] + 1.5e-9
+        t_end = times[end_i] - 1.5e-9
+        idxs = [j for j in range(start_i, end_i) if t_start <= times[j] <= t_end]
+        if len(idxs) < 6:
+            continue
+        first = vout[idxs[0]]
+        if first < 0.55:
+            continue
+        last = vout[idxs[-1]]
+        droop = first - last
+        upward_steps = sum(1 for a, b in zip(idxs[:-1], idxs[1:]) if (vout[b] - vout[a]) > 0.004)
+        droop_windows += 1
+        if droop < 0.006 or droop > 0.30:
+            droop_failures += 1
+        if upward_steps > max(1, len(idxs) // 8):
+            droop_failures += 1
+
+    if droop_windows < 2:
+        return False, f"insufficient_high_hold_windows={droop_windows}"
+    if droop_failures > 0:
+        return False, f"droop_failures={droop_failures} windows={droop_windows}"
+
+    return True, (
+        f"edges={len(edge_idx)} "
+        f"sample_mismatch={sample_mismatch}/{checked_samples} "
+        f"droop_windows={droop_windows}"
+    )
+
+
 def check_flash_adc_3b(rows: list[dict[str, float]]) -> tuple[bool, str]:
     """3-bit flash ADC: all 8 codes present, monotonic with ramp input."""
     if not rows or not {"vin", "clk", "dout2", "dout1", "dout0"}.issubset(rows[0]):
@@ -1242,6 +1353,81 @@ def check_serializer_8b(rows: list[dict[str, float]]) -> tuple[bool, str]:
     if mismatches > 1:
         return False, f"bit_mismatch expected={expected} got={edge_bits}"
     return True, f"0xA5_serialized_ok mode=edge_only mismatches={mismatches}"
+
+
+def check_serializer_frame_alignment(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"clk", "frame", "sout"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing clk/frame/sout"
+
+    vth = 0.45
+    times = [r["time"] for r in rows]
+    clk = [r["clk"] for r in rows]
+    frame = [r["frame"] for r in rows]
+    sout = [r["sout"] for r in rows]
+
+    clk_edges = [i for i in range(1, len(rows)) if clk[i - 1] <= vth < clk[i]]
+    frame_rise = [i for i in range(1, len(rows)) if frame[i - 1] <= vth < frame[i]]
+    frame_fall = [i for i in range(1, len(rows)) if frame[i - 1] >= vth > frame[i]]
+    if len(frame_rise) < 2:
+        return False, f"frame_rises={len(frame_rise)}"
+    if len(clk_edges) < 16:
+        return False, f"clk_edges={len(clk_edges)}"
+
+    # Estimate bit period from clock edge spacing.
+    periods = [times[clk_edges[i]] - times[clk_edges[i - 1]] for i in range(1, min(len(clk_edges), 10))]
+    periods = [p for p in periods if p > 0.0]
+    if not periods:
+        return False, "invalid_clk_period"
+    period = sorted(periods)[len(periods) // 2]
+
+    expected_words = [0xA5, 0x3C]
+    mismatch_total = 0
+    detail_parts: list[str] = []
+
+    for frame_idx, expected_word in enumerate(expected_words):
+        t_frame = times[frame_rise[frame_idx]]
+        clk_edge_times = [times[idx] for idx in clk_edges]
+        near = [i for i, t_edge in enumerate(clk_edge_times) if abs(t_edge - t_frame) <= 0.6 * period]
+        if near:
+            start_pos = min(near, key=lambda i: abs(clk_edge_times[i] - t_frame))
+        else:
+            start_pos = next((i for i, t_edge in enumerate(clk_edge_times) if t_edge >= t_frame), None)
+            if start_pos is None:
+                return False, f"frame{frame_idx}_no_clk_after_frame"
+        bit_edges = clk_edge_times[start_pos:start_pos + 8]
+        if len(bit_edges) < 8:
+            return False, f"frame{frame_idx}_insufficient_bits={len(bit_edges)}"
+
+        expected_bits = [((expected_word >> bit) & 1) for bit in range(7, -1, -1)]
+        observed_bits: list[int] = []
+        for t_edge in bit_edges:
+            t_sample = t_edge + 0.8e-9
+            sample_idx = next((i for i, t in enumerate(times) if t >= t_sample), len(rows) - 1)
+            observed_bits.append(1 if sout[sample_idx] > vth else 0)
+        mismatches = sum(1 for a, b in zip(observed_bits, expected_bits) if a != b)
+        mismatch_total += mismatches
+        detail_parts.append(f"w{frame_idx}_mm={mismatches}")
+        if mismatches > 1:
+            return False, f"frame{frame_idx}_bit_mismatch exp={expected_bits} got={observed_bits}"
+
+    # Frame pulse width should be around one bit window.
+    pulse_widths: list[float] = []
+    for r_idx in frame_rise[:2]:
+        fall_idx = next((f for f in frame_fall if f > r_idx), None)
+        if fall_idx is None:
+            return False, "frame_without_fall_edge"
+        pulse_widths.append(times[fall_idx] - times[r_idx])
+    if any((w < 0.2 * period or w > 1.6 * period) for w in pulse_widths):
+        return False, f"frame_pulse_widths={pulse_widths}"
+
+    return True, (
+        f"frame_rises={len(frame_rise)} "
+        f"period={period:.3e} "
+        f"pulse_w={[round(w / period, 2) for w in pulse_widths]} "
+        f"{' '.join(detail_parts)} "
+        f"mismatch_total={mismatch_total}"
+    )
 
 
 def check_xor_pd(rows: list[dict[str, float]]) -> tuple[bool, str]:
@@ -1961,13 +2147,16 @@ CHECKS = {
     "dwa_ptr_gen_smoke": check_dwa_ptr_gen,
     "dwa_ptr_gen_no_overlap_smoke": check_dwa_ptr_gen_no_overlap,
     "dwa_wraparound_smoke": check_dwa_wraparound,
+    "bbpd_data_edge_alignment_smoke": check_bbpd_data_edge_alignment,
     "gain_extraction_smoke": check_gain_extraction,
     "lfsr_smoke": check_lfsr,
     "noise_gen_smoke": check_noise_gen,
     "sar_adc_dac_weighted_8b_smoke": check_sar_adc_dac_weighted_8b,
     "sample_hold_smoke": check_sample_hold,
+    "sample_hold_droop_smoke": check_sample_hold_droop,
     "flash_adc_3b_smoke": check_flash_adc_3b,
     "serializer_8b_smoke": check_serializer_8b,
+    "serializer_frame_alignment_smoke": check_serializer_frame_alignment,
     "xor_pd_smoke": check_xor_pd,
     "pfd_updn_smoke": check_pfd_updn,
     "pfd_deadzone_smoke": check_pfd_deadzone,

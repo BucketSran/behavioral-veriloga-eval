@@ -24,10 +24,10 @@ record Spectre parity evidence for engineering closure and regression tracking.
 
 As of 2026-04-19:
 
-1. `end-to-end`: 36 tasks closed
+1. `end-to-end`: 39 tasks closed
 2. `spec-to-va`: 18 tasks closed
 3. `bugfix`: 8 tasks closed
-4. `tb-generation`: 10 tasks closed for EVAS scoring, with EVAS+Spectre execution evidence recorded for 7 of them
+4. `tb-generation`: 11 tasks closed for EVAS scoring, with EVAS+Spectre execution evidence recorded for 7 of them
 5. benchmark / closed-loop rows: 30 `dual-validated`
 6. benchmark / closed-loop rows: 1 passed PLL row with a residual
    waveform-alignment audit item
@@ -78,6 +78,12 @@ The latest expansion passes added:
    `dwa_wraparound_smoke`, with EVAS gold-suite results under
    `results/gold-suite-p2-dwa-wraparound-2026-04-19/`, covering DWA pointer
    wraparound and split thermometer selection at the 15 -> 0 boundary
+7. later on 2026-04-19:
+   `sample_hold_droop_smoke`, `bbpd_data_edge_alignment_smoke`,
+   `nrz_prbs_jitter_tb`, and `serializer_frame_alignment_smoke`, with EVAS
+   gold-suite results under `results/gold-suite-p2-2026-04-19/`, completing the
+   planned P2 queue for sample/hold droop, near-edge BBPD alignment, comms
+   jitter/burst testbench generation, and serializer frame-boundary checks
 
 The 2026-04-19 pass also hardened the PFD behavior check in
 `runners/simulate_evas.py` so near-deadzone short pulses use time-weighted duty
