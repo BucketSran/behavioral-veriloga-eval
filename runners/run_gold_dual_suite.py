@@ -967,7 +967,7 @@ def main() -> int:
             "status": "blocked",
             "reason": "direct invocation blocked; use scripts/run_with_bridge.sh",
             "remediation": [
-                "cd /Users/bucketsran/Documents/TsingProject/vaEvas/behavioral-veriloga-eval",
+                "cd /path/to/behavioral-veriloga-eval",
                 "./scripts/run_with_bridge.sh python3 runners/run_gold_dual_suite.py <args>",
                 "or add --allow-direct-run if you intentionally run without wrapper",
             ],
