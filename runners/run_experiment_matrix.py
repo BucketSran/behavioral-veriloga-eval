@@ -104,6 +104,7 @@ def run_baseline(
     temperature: float,
     top_p: float,
     max_tokens: int,
+    gen_workers: int,
     force: bool,
     dry_run: bool,
 ) -> Path:
@@ -125,6 +126,7 @@ def run_baseline(
         "--temperature", str(temperature),
         "--top-p", str(top_p),
         "--max-tokens", str(max_tokens),
+        "--max-workers", str(gen_workers),
     ]
 
     # Add task IDs
@@ -246,6 +248,8 @@ def main() -> int:
     ap.add_argument("--temperature", type=float, default=0.0)
     ap.add_argument("--top-p", type=float, default=1.0)
     ap.add_argument("--max-tokens", type=int, default=4096)
+    ap.add_argument("--gen-workers", type=int, default=4,
+                    help="Parallel generation workers for baseline conditions A/B/C.")
     ap.add_argument("--timeout-s", type=int, default=180)
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
@@ -289,6 +293,7 @@ def main() -> int:
                 temperature=args.temperature,
                 top_p=args.top_p,
                 max_tokens=args.max_tokens,
+                gen_workers=args.gen_workers,
                 force=args.force,
                 dry_run=args.dry_run,
             )
@@ -322,6 +327,7 @@ def main() -> int:
                     temperature=args.temperature,
                     top_p=args.top_p,
                     max_tokens=args.max_tokens,
+                    gen_workers=args.gen_workers,
                     force=args.force,
                     dry_run=args.dry_run,
                 )
