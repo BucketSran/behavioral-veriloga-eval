@@ -1,0 +1,54 @@
+// D flip-flop with synchronous reset — EVAS-compatible
+// On rising CLK edge: if RST high, Q=0; else Q=D.
+// QB is always complement of Q.
+
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 10p
+
+module dff_rst(
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical D,
+    input  electrical CLK,
+    input  electrical RST,
+    output electrical Q,
+    output electrical QB
+);
+
+parameter real tedge = 10p;
+
+real q_val;
+real qb_val;
+real threshold;
+
+analog begin
+    @(initial_step) begin
+        q_val = V(VSS);
+        threshold = (V(VDD) - V(VSS)) / 2.0 + V(VSS);
+        $strobe("[dff] INIT | q=%.3gV", q_val);
+    end
+
+    // Rising clock edge
+    @(cross(V(CLK) - threshold, +1)) begin
+        threshold = (V(VDD) - V(VSS)) / 2.0 + V(VSS);
+        if (V(RST) > threshold) begin
+            q_val = V(VSS);  // Reset: Q goes LOW
+            $strobe("[dff] t=%.3f ns | RST → Q=0", $abstime*1e9);
+        end else if (V(D) > threshold) begin
+            q_val = V(VDD);
+            $strobe("[dff] t=%.3f ns | D=1 → Q=1", $abstime*1e9);
+        end else begin
+            q_val = V(VSS);
+            $strobe("[dff] t=%.3f ns | D=0 → Q=0", $abstime*1e9);
+        end
+    end
+
+    // QB is always complement of Q
+    qb_val = V(VDD) - q_val + V(VSS);
+
+    V(Q)  <+ transition(q_val,  0, tedge, tedge);
+    V(QB) <+ transition(qb_val, 0, tedge, tedge);
+end
+
+endmodule

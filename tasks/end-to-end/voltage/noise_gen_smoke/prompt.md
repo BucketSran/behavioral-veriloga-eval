@@ -1,3 +1,5 @@
+Write a Verilog-A module named `noise_gen`.
+
 Create a voltage-domain Gaussian noise generator in Verilog-A,
 then produce a minimal EVAS-compatible Spectre testbench and run a smoke simulation.
 
@@ -22,3 +24,7 @@ Minimum simulation goal:
 - `vout_o` mean must be within ±0.5 V of `vin_i` (zero-mean noise)
 - noise standard deviation (std of `vout_o - vin_i`) must be between 0.01 V and 0.5 V
 - `vout_o` must not be identical to `vin_i` (noise must be non-trivial)
+
+Ports:
+- `vin_i`: input electrical
+- `vout_o`: output electrical

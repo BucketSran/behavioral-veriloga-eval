@@ -43,3 +43,32 @@ endmodule
 
 Return a fixed voltage-domain Verilog-A module that preserves the intended
 StrongArm comparison behavior, but gives `rst` unconditional priority.
+
+Expected behavior:
+- Reset should have highest priority over all other signals
+- When rst=high: outp and outn should both be forced to defined state
+- Reset should clear both outputs, not just one
+Ports:
+- `vdd`: electrical
+- `vss`: electrical
+- `clk`: electrical
+- `rst`: electrical
+- `inp`: electrical
+- `inn`: electrical
+- `outp`: electrical
+- `outn`: electrical (power rail)
+- `vss`: inout electrical (power rail)
+- `clk`: input electrical
+- `rst`: input electrical
+- `inp`: input electrical
+- `inn`: input electrical
+- `outp`: output electrical
+- `outn`: output electrical
+
+## Output Contract
+
+- **File name**: output must be saved as `dut_fixed.va`
+- **Module name**: the module must be named `strongarm_reset_priority_fixed` (do not rename it)
+- Return exactly one complete Verilog-A file in a fenced `verilog-a` code block.
+
+Write EVAS-compatible Verilog-A (pure voltage-domain behavioral model, no current contributions).

@@ -1,3 +1,5 @@
+Write a Verilog-A module named `cppll_timer_ref`.
+
 Create a timer-based voltage-domain charge-pump style PLL (CPPLL) behavioral
 model in Verilog-A, then produce a minimal EVAS-compatible Spectre testbench
 and run a smoke simulation.
@@ -26,3 +28,12 @@ Minimum simulation goal:
 - the late-window `fb_clk` frequency should match the reference within a few
   percent
 - `vctrl_mon` should stay bounded by the supply rails throughout the transient
+
+Ports:
+- `VDD`: inout electrical
+- `VSS`: inout electrical
+- `ref_clk`: input electrical
+- `fb_clk`: output electrical
+- `dco_clk`: output electrical
+- `vctrl_mon`: output electrical
+- `lock`: output electrical

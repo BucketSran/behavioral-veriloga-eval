@@ -14,6 +14,7 @@ module nrz_prbs_jitter_ref(vdd, vss, clk, enable, sout_p, sout_n);
     integer lfsr;
     integer edge_count;
     integer bit_now;
+    integer fb;
     real outp_val, outn_val, edge_delay;
     real vdd_now;
 
@@ -34,7 +35,6 @@ module nrz_prbs_jitter_ref(vdd, vss, clk, enable, sout_p, sout_n);
                 if (((edge_count % 20) >= 14) && ((edge_count % 20) <= 16)) begin
                     bit_now = bit_now;
                 end else begin
-                    integer fb;
                     fb = (((lfsr >> 6) & 1) ^ ((lfsr >> 5) & 1));
                     lfsr = (((lfsr << 1) & 126) | fb);
                     bit_now = (lfsr & 1);

@@ -1,0 +1,24 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module transition_branch_target_ref (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical mode,
+    input  electrical clk,
+    output electrical out
+);
+parameter real vhi = 0.9;
+parameter real vlo = 0.0;
+parameter real vth = 0.45;
+parameter real tedge = 500p;
+real target_q;
+analog begin
+    @(initial_step) target_q = vlo;
+    @(cross(V(clk, VSS) - vth, +1)) begin
+        if (V(mode, VSS) > vth) target_q = vhi;
+        else target_q = vlo;
+    end
+    V(out, VSS) <+ transition(target_q, 0.0, tedge, tedge);
+end
+endmodule

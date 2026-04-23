@@ -1,3 +1,5 @@
+Write a Verilog-A module named `dwa_ptr_gen`.
+
 Create a voltage-domain Data Weighted Averaging (DWA) pointer rotation generator
 in Verilog-A, then produce a minimal EVAS-compatible Spectre testbench and run a
 smoke simulation.
@@ -27,3 +29,31 @@ Minimum simulation goal:
 - after reset, `ptr_o` must be one-hot on every sampled clock edge (≥ 95% of samples)
 - `cell_en_o` must have at least one bit asserted after reset
 - pointer must advance correctly: new_ptr = (old_ptr + cell_count) % 16
+
+Expected behavior:
+- Pointer should advance in data-weighted averaging pattern
+- No overlap between consecutive pointer values
+Ports:
+- `clk_i`: input electrical
+- `rst_ni`: input electrical
+- `code_msb_i[3:0]`: input electrical
+- `cell_en_o[15:0]`: output electrical
+- `ptr_o[15:0]`: output electrical- `[3:0]  code_msb_i`: electrical
+- `[15:0] cell_en_o`: electrical
+- `[15:0] ptr_o`: electrical- `[3:0]  code_msb_i`: electrical
+- `[15:0] cell_en_o`: electrical
+- `[15:0] ptr_o`: electrical- `[3:0]  code_msb_i`: electrical
+- `[15:0] cell_en_o`: electrical
+- `[15:0] ptr_o`: electrical- `[3:0]  code_msb_i`: electrical
+- `[15:0] cell_en_o`: electrical
+- `[15:0] ptr_o`: electrical- `[3:0]  code_msb_i`: electrical
+- `[15:0] cell_en_o`: electrical
+- `[15:0] ptr_o`: electrical- `[3:0]  code_msb_i`: electrical
+- `[15:0] cell_en_o`: electrical
+- `[15:0] ptr_o`: electrical- `[3:0]  code_msb_i`: electrical
+- `[15:0] cell_en_o`: electrical
+- `[15:0] ptr_o`: electrical- `[3:0]  code_msb_i`: electrical
+- `[15:0] cell_en_o`: electrical
+- `[15:0] ptr_o`: electrical- `input  electrical [3:0]  code_msb_i`: electrical (electrical)
+- `output electrical [15:0] cell_en_o`: electrical (electrical)
+- `output electrical [15:0] ptr_o`: unknown (electrical)

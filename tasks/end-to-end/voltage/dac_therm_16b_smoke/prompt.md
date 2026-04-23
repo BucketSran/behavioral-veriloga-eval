@@ -1,3 +1,5 @@
+Write a Verilog-A module named `dac_therm_16b`.
+
 Create a voltage-domain 16-bit thermometer-coded DAC in Verilog-A,
 then produce a minimal EVAS-compatible Spectre testbench and run a smoke simulation.
 
@@ -24,3 +26,10 @@ Minimum simulation goal:
   8 ones (8 V), 12 ones (12 V), and 16 ones (16 V), run for 2000 ns
 - at the checkpoint times, `vout` must be within ±0.1 V of the expected level
 - `vout` must be monotonically non-decreasing as the code increases
+
+Ports:
+- `din_therm[15:0]`: input electrical
+- `rst_n`: input electrical
+- `vout`: output electrical
+
+Implement this in Verilog-A behavioral modeling.

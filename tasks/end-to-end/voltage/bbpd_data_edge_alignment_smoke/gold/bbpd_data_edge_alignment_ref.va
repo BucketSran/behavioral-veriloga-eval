@@ -18,6 +18,7 @@ module bbpd_data_edge_alignment_ref(vdd, vss, clk, data, up, dn, retimed_data);
     real up_val, dn_val, retimed_val;
     real t_last_clk;
     real t_up_clear, t_dn_clear;
+    real dist_prev, dist_next;
 
     analog begin
         @(initial_step) begin
@@ -35,7 +36,6 @@ module bbpd_data_edge_alignment_ref(vdd, vss, clk, data, up, dn, retimed_data);
         end
 
         @(cross(V(data, vss) - vth, +1) or cross(V(data, vss) - vth, -1)) begin
-            real dist_prev, dist_next;
             dist_prev = $abstime - t_last_clk;
             dist_next = clk_period - dist_prev;
 

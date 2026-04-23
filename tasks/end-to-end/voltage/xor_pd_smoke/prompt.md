@@ -1,26 +1,41 @@
+Write a Verilog-A module named `xor_phase_detector`.
+
 # Task: xor_pd_smoke
 
 ## Objective
 
-Write a Verilog-A behavioral module for an **XOR Phase Detector**.
+Create an XOR Phase Detector behavioral model in Verilog-A and a minimal EVAS-compatible Spectre testbench.
 
 ## Specification
 
 - **Module name**: `xor_phase_detector`
-- **Ports**: `VDD` (inout), `VSS` (inout), `REF` (input), `DIV` (input), `PD_OUT` (output) — all `electrical`
+- **Ports** (all `electrical`, exactly as named): `vdd`, `vss`, `ref`, `div`, `pd_out`
 - **Parameters**: `vth` (real, default 0.45), `tedge` (real, default 50p)
 - **Behavior**:
-  - `PD_OUT` is HIGH when `REF` and `DIV` are at **different** logic levels (XOR logic).
-  - Updates on every edge of both `REF` and `DIV`.
-  - Average `PD_OUT` duty cycle is proportional to phase difference between the two clocks.
+  - `pd_out` is HIGH when `ref` and `div` are at **different** logic levels (XOR logic).
+  - Updates on every edge of both `ref` and `div`.
+  - Average `pd_out` duty cycle is proportional to phase difference.
+  - Output HIGH = V(vdd), LOW = V(vss) - read dynamically.
 - **Output**: use `transition()` only. No `idt`, `ddt`, or `I() <+`.
 
-## Constraints
+## Testbench requirements
 
-- Pure voltage-domain only.
-- Track both REF and DIV state with integer variables updated on `@(cross(...))`.
-- Use `$strobe` to log state changes.
+Create a minimal Spectre testbench that:
+- Includes `xor_phase_detector.va` via `ahdl_include`
+- Provides vdd=0.9V, vss=0V
+- Generates two clocks (ref and div) with phase offset
+- Saves signals: `ref`, `div`, `pd_out`
+- Runs transient for ~200ns
 
 ## Deliverable
 
-A single `.va` file: `xor_phase_detector.va`.
+Two files:
+1. `xor_phase_detector.va` - the Verilog-A behavioral model
+2. `tb_xor_phase_detector.scs` - the Spectre testbench
+
+Ports:
+- `VDD`: inout electrical
+- `VSS`: inout electrical
+- `REF`: input electrical
+- `DIV`: input electrical
+- `PD_OUT`: output electrical

@@ -1,0 +1,31 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module phase_accumulator_timer_wrap_ref (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    output electrical clk_out,
+    output electrical phase_out
+);
+parameter real dt = 5n from (0:inf);
+parameter real phase_step = 0.25 from (0:1);
+parameter real tedge = 200p from (0:inf);
+real next_t;
+real phase_q;
+integer clk_state;
+analog begin
+    @(initial_step) begin
+        next_t = dt;
+        phase_q = 0.0;
+        clk_state = 0;
+    end
+    @(timer(next_t)) begin
+        phase_q = phase_q + phase_step;
+        if (phase_q >= 1.0) phase_q = phase_q - 1.0;
+        clk_state = (phase_q < 0.5) ? 1 : 0;
+        next_t = next_t + dt;
+    end
+    V(clk_out, VSS) <+ transition(clk_state ? V(VDD, VSS) : 0.0, 0.0, tedge, tedge);
+    V(phase_out, VSS) <+ transition(phase_q * V(VDD, VSS), 0.0, tedge, tedge);
+end
+endmodule

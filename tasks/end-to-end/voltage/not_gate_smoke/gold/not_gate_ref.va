@@ -1,0 +1,42 @@
+// Simple NOT gate — EVAS-compatible
+// Output Y = NOT(A): goes high when A is low and vice versa.
+// Uses cross events to update piecewise-constant output level.
+
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 10p
+
+module not_gate(
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical A,
+    output electrical Y
+);
+
+parameter real vth   = 0.45;
+parameter real tedge = 100p;
+
+real y_level;
+
+analog begin
+    @(initial_step) begin
+        y_level = (V(A) < vth) ? V(VDD) : V(VSS);
+        $strobe("[not] INIT | a=%.3gV y=%.3gV", V(A), y_level);
+    end
+
+    // A rises through vth → Y goes LOW
+    @(cross(V(A) - vth, +1)) begin
+        y_level = V(VSS);
+        $strobe("[not] t=%.3f ns | A_HI → Y=LO", $abstime*1e9);
+    end
+
+    // A falls through vth → Y goes HIGH
+    @(cross(V(A) - vth, -1)) begin
+        y_level = V(VDD);
+        $strobe("[not] t=%.3f ns | A_LO → Y=HI", $abstime*1e9);
+    end
+
+    V(Y) <+ transition(y_level, 0, tedge, tedge);
+end
+
+endmodule

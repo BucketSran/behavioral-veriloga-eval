@@ -1,0 +1,56 @@
+{
+  "id": "cross_sine_precision_smoke",
+  "task_id": "cross_sine_precision_smoke",
+  "task_name": "Cross Sine Event-Time Precision Smoke Test",
+  "family": "end-to-end",
+  "category": "analog-events",
+  "domain": "voltage",
+  "difficulty": "medium",
+  "expected_backend": "evas",
+  "source": {
+    "type": "cross-precision-supplement",
+    "path": "vaEvas/worksche/briefs/2026-04-21_cross-sine-precision.md"
+  },
+  "tier": "verified",
+  "verification_status": "passed",
+  "owner": "codex",
+  "created_at": "2026-04-21",
+  "must_include": [
+    "@(cross(",
+    "$abstime",
+    "transition("
+  ],
+  "must_not_include": [
+    "I(",
+    "ddt(",
+    "idt(",
+    "idtmod(",
+    "time_tol",
+    "expr_tol"
+  ],
+  "inputs": [
+    "prompt.md"
+  ],
+  "artifacts": [
+    "cross_sine_precision_ref.va",
+    "tb_cross_sine_precision_ref.scs",
+    "tran.csv"
+  ],
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "checks": {
+    "dut_compile": "required",
+    "tb_compile": "required",
+    "tran_generated": "required",
+    "sim_correct": "required",
+    "parity_required": true
+  },
+  "evidence": {
+    "result_path": "behavioral-veriloga-eval/results/gold-dual-r026-cross-sine-precision-2026-04-21/cross_sine_precision_smoke",
+    "pr_link": "[TODO]",
+    "notes": "Added on 2026-04-21 as R026 cross-event precision supplement. Nonlinear sine source at 73 MHz with maxstep=2ns; EVAS local PASS with max_abs_err_ps about 3.9e-10 ps, strict Spectre PASS with max_abs_err_ps about 0.010902 ps, parity delta about 0.010902 ps. This measures $abstime inside cross() event bodies rather than exported waveform edge reconstruction."
+  }
+}

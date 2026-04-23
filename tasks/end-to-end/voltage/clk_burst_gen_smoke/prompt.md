@@ -1,3 +1,5 @@
+Write a Verilog-A module named `clk_burst_gen`.
+
 Create a voltage-domain clock burst generator in Verilog-A,
 then produce a minimal EVAS-compatible Spectre testbench and run a smoke simulation.
 
@@ -23,3 +25,8 @@ Minimum simulation goal:
 - after reset, `CLK_OUT` must be present (max voltage > 0.8 V)
 - `CLK_OUT` high fraction over the active window must be less than 50%
   (burst mode: only 2 out of 8 cycles pass through)
+
+Ports:
+- `CLK`: input electrical
+- `RST_N`: input electrical
+- `CLK_OUT`: output electrical

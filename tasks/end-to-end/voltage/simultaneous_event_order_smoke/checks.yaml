@@ -1,0 +1,15 @@
+syntax:
+  must_include:
+    - "@(timer("
+    - "@(cross("
+    - "transition("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "simultaneous_event_order"
+parity:
+  required: true
+  tolerance_notes: "Task-aware parity compares plateau levels that encode same-time event ordering."

@@ -10,3 +10,35 @@ Requirements:
 - include `tran`
 - include explicit `save`
 - place `ahdl_include` last
+
+Ports:
+- `VDD`: inout electrical
+- `VSS`: inout electrical
+- `vctrl`: input electrical
+- `vout`: output electrical
+
+DUT module to instantiate: `dco_gain_step_ref`
+
+DUT module to instantiate: `dco_gain_step_ref`
+
+DUT module to instantiate: `dco_gain_step_ref`
+
+DUT module to instantiate: `dco_gain_step_ref`
+
+DUT module to instantiate: `dco_gain_step_ref`
+
+DUT module to instantiate: `dco_gain_step_ref`
+
+DUT module to instantiate: `dco_gain_step_ref`
+
+DUT module to instantiate: `dco_gain_step_ref`
+
+DUT module to instantiate: `dco_gain_step_ref`
+
+DUT module to instantiate: `dco_gain_step_ref`
+
+DUT module to instantiate: `dco_gain_step_ref`
+
+DUT module to instantiate: `dco_gain_step_ref`
+
+DUT module to instantiate: `dco_gain_step_ref`

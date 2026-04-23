@@ -1,0 +1,25 @@
+// dff_rst gold smoke testbench
+// Test DFF behavior: clocked sampling, synchronous reset, QB complement.
+// 20 ns run at 1 GHz (CLK period=2 ns).
+// Sequence: D=0, D=1, RST=1, verify Q follows expected pattern.
+simulator lang=spectre
+global 0
+
+ahdl_include "dff_rst_ref.va"
+
+Vvdd (vdd 0) vsource dc=1.8
+Vvss (vss 0) vsource dc=0.0
+
+// 1 GHz clock: period=2ns, width=1ns
+Vclk (clk 0) vsource type=pulse val0=0 val1=1.8 period=2n width=1n rise=10p fall=10p
+
+// D sequence: 0->1->0->1->0
+Vd (d 0) vsource type=pwl wave=[0n 0 3n 0 3.1n 1.8 7n 1.8 7.1n 0 11n 0 11.1n 1.8 15n 1.8 15.1n 0 20n 0]
+
+// RST pulse at t=9-10ns (synchronous, sampled at clock edge)
+Vrst (rst 0) vsource type=pwl wave=[0n 0 9n 0 9.1n 1.8 10n 1.8 10.1n 0 20n 0]
+
+IDUT (vdd vss d clk rst q qb) dff_rst tedge=10p
+
+tran tran stop=20n maxstep=50p
+save d clk rst q qb

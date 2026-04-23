@@ -9,3 +9,37 @@ Requirements:
 - include `tran`
 - include explicit `save`
 - place `ahdl_include` last
+
+Ports:
+- `VDD`: inout electrical (power rail)
+- `VSS`: inout electrical (power rail)
+- `vinp`: input electrical
+- `vinn`: input electrical
+- `voutp`: output electrical
+- `voutn`: output electrical
+
+DUT module to instantiate: `gain_step_ref`
+
+DUT module to instantiate: `gain_step_ref`
+
+DUT module to instantiate: `gain_step_ref`
+
+DUT module to instantiate: `gain_step_ref`
+
+DUT module to instantiate: `gain_step_ref`
+
+DUT module to instantiate: `gain_step_ref`
+
+DUT module to instantiate: `gain_step_ref`
+
+DUT module to instantiate: `gain_step_ref`
+
+DUT module to instantiate: `gain_step_ref`
+
+DUT module to instantiate: `gain_step_ref`
+
+DUT module to instantiate: `gain_step_ref`
+
+DUT module to instantiate: `gain_step_ref`
+
+DUT module to instantiate: `gain_step_ref`

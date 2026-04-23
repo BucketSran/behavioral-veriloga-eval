@@ -1,18 +1,42 @@
-// digital_basics gold smoke testbench — NOT gate
-// Input 'a' pulses between 0V and 0.9V at 50 MHz.
-// Check: output 'y' is the complement of 'a' (invert_match_frac > 0.9).
+// digital_basics gold smoke testbench — Multi-module version
+// Tests all 4 modules: NOT gate, AND gate, OR gate, DFF with reset.
+// Signal naming convention: module prefix (not_*, and_*, or_*, dff_*)
 simulator lang=spectre
 global 0
 
+// === NOT gate section ===
 ahdl_include "not_gate.va"
+Vvdd_not (not_vdd 0) vsource dc=0.9
+Vvss_not (not_vss 0) vsource dc=0.0
+Va_not (not_a 0) vsource type=pulse val0=0 val1=0.9 period=20n width=10n rise=200p fall=200p
+I_not (not_vdd not_vss not_a not_y) not_gate vth=0.45 tedge=100p
 
-Vvdd (vdd 0) vsource dc=0.9
-Vvss (vss 0) vsource dc=0.0
+// === AND gate section ===
+ahdl_include "and_gate.va"
+Va_and (and_a 0) vsource type=pwl wave=[0n 0 2n 0 2.1n 1.8 4n 1.8 4.1n 0 6n 0 6.1n 1.8 8n 1.8]
+Vb_and (and_b 0) vsource type=pwl wave=[0n 0 4n 0 4.1n 1.8 8n 1.8]
+I_and (and_a and_b and_y) and_gate vdd=1.8 tedge=10p
 
-// 50 MHz square wave: 10ns low, 10ns high
-Va (a 0) vsource type=pulse val0=0 val1=0.9 period=20n width=10n rise=200p fall=200p
+// === OR gate section ===
+ahdl_include "or_gate.va"
+Va_or (or_a 0) vsource type=pwl wave=[0n 0 2n 0 2.1n 1.8 4n 1.8 4.1n 0 6n 0 6.1n 1.8 8n 1.8]
+Vb_or (or_b 0) vsource type=pwl wave=[0n 0 4n 0 4.1n 1.8 8n 1.8]
+I_or (or_a or_b or_y) or_gate vdd=1.8 tedge=10p
 
-IDUT (vdd vss a y) not_gate vth=0.45 tedge=100p
+// === DFF with reset section ===
+ahdl_include "dff_rst.va"
+Vvdd_dff (dff_vdd 0) vsource dc=1.8
+Vvss_dff (dff_vss 0) vsource dc=0.0
+Vclk_dff (dff_clk 0) vsource type=pulse val0=0 val1=1.8 period=2n width=1n rise=10p fall=10p
+Vd_dff (dff_d 0) vsource type=pwl wave=[0n 0 3n 0 3.1n 1.8 7n 1.8 7.1n 0 11n 0 11.1n 1.8 15n 1.8 15.1n 0 20n 0]
+Vrst_dff (dff_rst 0) vsource type=pwl wave=[0n 0 9n 0 9.1n 1.8 10n 1.8 10.1n 0 20n 0]
+I_dff (dff_vdd dff_vss dff_d dff_clk dff_rst dff_q dff_qb) dff_rst tedge=10p
 
-tran tran stop=200n maxstep=5n
-save a y
+// Single transient analysis covering all modules
+tran tran stop=200n maxstep=100p
+
+// Save all signals with module prefix
+save not_a not_y
+save and_a and_b and_y
+save or_a or_b or_y
+save dff_d dff_clk dff_rst dff_q dff_qb

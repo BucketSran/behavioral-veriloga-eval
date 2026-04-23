@@ -1,0 +1,14 @@
+syntax:
+  must_include:
+    - "@(timer("
+    - "transition("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "phase_accumulator_timer_wrap"
+parity:
+  required: true
+  tolerance_notes: "Task-aware parity compares clk_out edge times and phase wrap count."

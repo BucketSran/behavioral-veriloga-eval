@@ -9,3 +9,36 @@ Requirements:
 - include `tran`
 - include explicit `save`
 - place `ahdl_include` last
+
+Ports:
+- `VDD`: inout electrical (power rail)
+- `VSS`: inout electrical (power rail)
+- `clk`: input electrical
+- `in`: input electrical
+- `out`: output electrical
+
+DUT module to instantiate: `sample_hold_step_ref`
+
+DUT module to instantiate: `sample_hold_step_ref`
+
+DUT module to instantiate: `sample_hold_step_ref`
+
+DUT module to instantiate: `sample_hold_step_ref`
+
+DUT module to instantiate: `sample_hold_step_ref`
+
+DUT module to instantiate: `sample_hold_step_ref`
+
+DUT module to instantiate: `sample_hold_step_ref`
+
+DUT module to instantiate: `sample_hold_step_ref`
+
+DUT module to instantiate: `sample_hold_step_ref`
+
+DUT module to instantiate: `sample_hold_step_ref`
+
+DUT module to instantiate: `sample_hold_step_ref`
+
+DUT module to instantiate: `sample_hold_step_ref`
+
+DUT module to instantiate: `sample_hold_step_ref`

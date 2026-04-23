@@ -1,0 +1,16 @@
+syntax:
+  must_include:
+    - "@(initial_step)"
+    - "@(timer("
+    - "V(outp, outn) <+"
+    - "transition("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "differential_voltage_output"
+parity:
+  required: true
+  tolerance_notes: "Task-aware parity compares common-mode stability, outp window means, and differential branch voltage windows for a true V(outp,outn) contribution."

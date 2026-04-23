@@ -1,3 +1,5 @@
+Write a Verilog-A module named `dither_adder`.
+
 Create a voltage-domain gain extraction system in Verilog-A using dither-based
 cross-correlation, then produce a minimal EVAS-compatible Spectre testbench
 and run a smoke simulation.
@@ -28,3 +30,10 @@ Minimum simulation goal:
 - 50 MHz clock, gain_amp ACTUAL_GAIN=8.64, DITHER_AMP=0.014063, run for at least 200 µs
 - differential gain (std(vamp_diff) / std(vin_diff)) must be > 4.0
 - `vamp_diff` standard deviation must be larger than `vin_diff` standard deviation
+
+Ports:
+- `VRES_P`: input electrical
+- `VRES_N`: input electrical
+- `DPN`: input electrical
+- `VOUT_P`: output electrical
+- `VOUT_N`: output electrical

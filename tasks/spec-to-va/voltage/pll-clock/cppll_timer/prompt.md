@@ -1,5 +1,7 @@
 Write a timer-based charge-pump style PLL (CPPLL) behavioral model in Verilog-A.
 
+Module name: `cppll_timer_ref`.
+
 Behavioral intent:
 
 - one reference clock input `ref_clk`
@@ -23,3 +25,12 @@ Minimum simulation goal for the reference testbench:
 - 50 MHz reference clock
 - divided feedback frequency matches the reference within a few percent in the late simulation window
 - `vctrl_mon` stays within the supply range throughout the transient run
+
+Ports:
+- `VDD`: inout electrical
+- `VSS`: inout electrical
+- `ref_clk`: input electrical
+- `fb_clk`: output electrical
+- `dco_clk`: output electrical
+- `vctrl_mon`: output electrical
+- `lock`: output electrical

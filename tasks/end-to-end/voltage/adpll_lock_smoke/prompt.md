@@ -1,3 +1,5 @@
+Write a Verilog-A module named `adpll_va_idtmod`.
+
 Create a voltage-domain all-digital PLL (ADPLL) behavioral model in Verilog-A,
 then produce a minimal EVAS-compatible Spectre testbench and run a smoke
 simulation.
@@ -28,3 +30,16 @@ Minimum simulation goal:
 - the late-window `fb_clk` edge rate should match `ref_clk` within a small
   tolerance
 - `lock` should assert during the transient run
+
+Expected behavior:
+- ADPLL should lock to reference clock
+- fb_clk frequency should match ref_clk frequency when locked
+- lock signal should go high after lock achieved
+Ports:
+- `VDD`: inout electrical
+- `VSS`: inout electrical
+- `ref_clk`: input electrical
+- `fb_clk`: output electrical
+- `dco_clk`: output electrical
+- `vctrl_mon`: output electrical
+- `lock`: output electrical

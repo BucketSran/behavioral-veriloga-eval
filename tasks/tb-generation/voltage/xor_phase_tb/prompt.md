@@ -9,3 +9,36 @@ Requirements:
 - include `tran`
 - include explicit `save`
 - place `ahdl_include` last
+
+Ports:
+- `VDD`: inout electrical (power rail)
+- `VSS`: inout electrical (power rail)
+- `ref`: input electrical
+- `div`: input electrical
+- `pd_out`: output electrical
+
+DUT module to instantiate: `xor_phase_ref`
+
+DUT module to instantiate: `xor_phase_ref`
+
+DUT module to instantiate: `xor_phase_ref`
+
+DUT module to instantiate: `xor_phase_ref`
+
+DUT module to instantiate: `xor_phase_ref`
+
+DUT module to instantiate: `xor_phase_ref`
+
+DUT module to instantiate: `xor_phase_ref`
+
+DUT module to instantiate: `xor_phase_ref`
+
+DUT module to instantiate: `xor_phase_ref`
+
+DUT module to instantiate: `xor_phase_ref`
+
+DUT module to instantiate: `xor_phase_ref`
+
+DUT module to instantiate: `xor_phase_ref`
+
+DUT module to instantiate: `xor_phase_ref`

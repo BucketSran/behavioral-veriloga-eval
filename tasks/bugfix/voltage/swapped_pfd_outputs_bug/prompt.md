@@ -32,3 +32,22 @@ module pfd_updn_bug (VDD, VSS, ref, div, up, dn);
     end
 endmodule
 ```
+
+Ports:
+- `VDD`: electrical
+- `VSS`: electrical
+- `ref`: electrical
+- `div`: electrical
+- `up`: electrical
+- `dn`: electrical (power rail)
+- `VSS`: inout electrical (power rail)
+- `ref`: input electrical
+- `div`: input electrical
+- `up`: output electrical
+- `dn`: output electrical
+
+## Output Contract
+
+- **File name**: output must be saved as `dut_fixed.va`
+- **Module name**: the module must be named `pfd_updn_bug` (do not rename it)
+- Return exactly one complete Verilog-A file in a fenced `verilog-a` code block.

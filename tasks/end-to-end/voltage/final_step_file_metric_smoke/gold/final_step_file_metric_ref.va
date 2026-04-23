@@ -1,0 +1,31 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module final_step_file_metric_ref (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical ref,
+    output electrical metric_out
+);
+parameter real vth = 0.45;
+parameter real tedge = 200p;
+integer count_q;
+integer fd;
+real metric_q;
+analog begin
+    @(initial_step) begin
+        count_q = 0;
+        metric_q = 0.0;
+    end
+    @(cross(V(ref, VSS) - vth, +1)) begin
+        count_q = count_q + 1;
+        metric_q = count_q / 4.0;
+    end
+    @(final_step) begin
+        fd = $fopen("candidate.out", "w");
+        $fwrite(fd, "count=%0d metric=%.3f", count_q, metric_q);
+        $fclose(fd);
+    end
+    V(metric_out, VSS) <+ transition(metric_q * V(VDD, VSS), 0.0, tedge, tedge);
+end
+endmodule

@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+Vvdd (VDD 0) vsource dc=0.9 type=dc
+Vvss (VSS 0) vsource dc=0.0 type=dc
+
+IDUT (VDD VSS outp outn) differential_voltage_output_ref \
+    vcm=0.2 diff_lo=0.1 diff_hi=0.5 tedge=60p
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+tran tran stop=60n maxstep=20p errpreset=conservative
+save outp outn
+
+ahdl_include "./differential_voltage_output_ref.va"

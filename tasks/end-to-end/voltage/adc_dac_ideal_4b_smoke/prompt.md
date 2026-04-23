@@ -1,3 +1,5 @@
+Write a Verilog-A module named `adc_ideal_4b`.
+
 Create a voltage-domain ideal 4-bit ADC and 4-bit DAC pair in Verilog-A,
 chain them for an ADC→DAC round-trip, then produce a minimal EVAS-compatible
 Spectre testbench and run a smoke simulation.
@@ -31,3 +33,11 @@ Minimum simulation goal:
 - ADC must exercise at least 14 distinct output codes
 - `vout` must stay within [0, vdd]
 - quantization error (code×vstep − vin at sample instants) must be in (−lstep, 0]
+
+Ports:
+- `vin`: input electrical
+- `clk`: input electrical
+- `vdd`: input electrical
+- `vss`: input electrical
+- `rst_n`: input electrical
+- `dout[3:0]`: output electrical- `[3:0]  dout`: electrical- `[3:0]  dout`: electrical- `[3:0]  dout`: electrical- `[3:0]  dout`: electrical- `[3:0]  dout`: electrical- `[3:0]  dout`: electrical- `[3:0]  dout`: electrical- `[3:0]  dout`: electrical- `output electrical [3:0]  dout`: unknown (electrical)

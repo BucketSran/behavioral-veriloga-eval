@@ -1,24 +1,54 @@
-Write a timer-based all-digital PLL (ADPLL) behavioral model in Verilog-A.
+Write exactly one EVAS/Spectre-compatible Verilog-A module named `adpll_timer_ref`.
+
+Required module signature:
+
+```verilog
+module adpll_timer_ref (VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock);
+```
+
+The reference testbench instantiates the DUT as:
+
+```spectre
+IDUT (vdd vss ref_clk fb_clk dco_clk vctrl_mon lock) adpll_timer_ref \
+    div_ratio=8 f_center=760e6 freq_step_hz=5e6 f_min=500e6 f_max=1.2e9 \
+    code_min=0 code_max=63 code_center=32 code_init=40 \
+    tedge=1n lock_tol=12n lock_count_target=4
+```
+
+Interface requirements:
+
+- Keep the exact module name `adpll_timer_ref`.
+- Keep the exact port order: `VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock`.
+- Declare `VDD` and `VSS` as electrical supply/reference nodes.
+- Declare `ref_clk` as an electrical input.
+- Declare `fb_clk`, `dco_clk`, `vctrl_mon`, and `lock` as electrical outputs.
+- Support these exact parameter names: `div_ratio`, `f_center`, `freq_step_hz`, `f_min`, `f_max`, `code_min`, `code_max`, `code_center`, `code_init`, `tedge`, `lock_tol`, and `lock_count_target`.
 
 Behavioral intent:
 
-- one reference clock input `ref_clk`
-- one divided feedback clock output `fb_clk`
-- one oscillator clock output `dco_clk`
-- one monitor output `vctrl_mon` that reflects the digital control code or its normalized analog equivalent
-- one lock indicator output `lock`
-- a bang-bang style correction loop so the divided feedback frequency converges toward the reference clock
+- Implement a timer-based all-digital PLL behavioral model.
+- Use a DCO timing loop based on `@(timer(t_next_toggle))`, not `idtmod()`.
+- Toggle `dco_clk` from the DCO timer.
+- Divide DCO rising edges by `div_ratio` to generate `fb_clk`.
+- 
+- Make the divided feedback frequency converge toward the 50 MHz reference clock in the late simulation window.
+- Assert `lock` during the transient run after enough consecutive phase errors fall within `lock_tol`.
+- Drive `vctrl_mon` as a normalized voltage monitor of the digital control code.
 
-Implementation constraints:
+Compatibility constraints:
 
-- pure voltage-domain Verilog-A only
-- EVAS-compatible syntax
-- use `@(timer(...))` for the DCO timing loop, not `idtmod()`
-- `fb_clk`, `dco_clk`, and `lock` should be driven as voltage outputs using `transition(...)`
-- use `@(cross(...))` on the reference and feedback clocks to update the control state
+- Use pure voltage-domain Verilog-A only.
+- Put initialization inside `@(initial_step)` within an `analog begin` block.
+- Do not use Verilog `initial begin` blocks.
+- Drive `fb_clk`, `dco_clk`, `vctrl_mon`, and `lock` using continuous voltage contributions.
+- Do not place `transition(...)` contributions inside conditionally executed `if/else begin` branches.
+- Clamp frequency and control-code values to their parameter bounds.
 
-Minimum simulation goal for the reference testbench:
-
-- 50 MHz reference clock
-- divided feedback frequency matches the reference in the late simulation window
-- `lock` asserts during the transient run
+Ports:
+- `VDD`: inout electrical
+- `VSS`: inout electrical
+- `ref_clk`: input electrical
+- `fb_clk`: output electrical
+- `dco_clk`: output electrical
+- `vctrl_mon`: output electrical
+- `lock`: output electrical

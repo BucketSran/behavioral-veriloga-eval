@@ -9,3 +9,37 @@ Requirements:
 - include `tran`
 - include explicit `save`
 - place `ahdl_include` last
+
+Ports:
+- `VDD`: inout electrical (power rail)
+- `VSS`: inout electrical (power rail)
+- `CLK`: input electrical
+- `VINP`: input electrical
+- `VINN`: input electrical
+- `OUT_P`: output electrical
+
+DUT module to instantiate: `cmp_offset_ref`
+
+DUT module to instantiate: `cmp_offset_ref`
+
+DUT module to instantiate: `cmp_offset_ref`
+
+DUT module to instantiate: `cmp_offset_ref`
+
+DUT module to instantiate: `cmp_offset_ref`
+
+DUT module to instantiate: `cmp_offset_ref`
+
+DUT module to instantiate: `cmp_offset_ref`
+
+DUT module to instantiate: `cmp_offset_ref`
+
+DUT module to instantiate: `cmp_offset_ref`
+
+DUT module to instantiate: `cmp_offset_ref`
+
+DUT module to instantiate: `cmp_offset_ref`
+
+DUT module to instantiate: `cmp_offset_ref`
+
+DUT module to instantiate: `cmp_offset_ref`

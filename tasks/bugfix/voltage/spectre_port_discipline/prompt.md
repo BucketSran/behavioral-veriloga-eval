@@ -10,3 +10,20 @@ module and2_gate (VDD, VSS, A, B, Y);
     end
 endmodule
 ```
+
+Ports:
+- `VDD`: electrical
+- `VSS`: electrical
+- `A`: electrical
+- `B`: electrical
+- `Y`: electrical (power rail)
+- `VSS`: inout electrical (power rail)
+- `A`: input electrical
+- `B`: input electrical
+- `Y`: output electrical
+
+## Output Contract
+
+- **File name**: output must be saved as `dut_fixed.va`
+- **Module name**: the module must be named `and2_gate` (do not rename it)
+- Return exactly one complete Verilog-A file in a fenced `verilog-a` code block.

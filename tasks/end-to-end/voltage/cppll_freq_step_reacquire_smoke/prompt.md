@@ -1,3 +1,5 @@
+Write a Verilog-A module named `cppll_timer_ref`.
+
 Create a timer-based voltage-domain charge-pump style PLL (CPPLL) behavioral
 model in Verilog-A, then produce a minimal EVAS-compatible Spectre testbench
 that demonstrates unlock and reacquire behavior after a reference-frequency
@@ -31,3 +33,16 @@ Minimum simulation goal:
 - the late-window `fb_clk` frequency should match the stepped reference within a
   few percent
 - `vctrl_mon` should stay bounded by the supply rails throughout the transient
+
+Expected behavior:
+- PLL should achieve lock before disturbance (lock goes high)
+- After disturbance, PLL should re-lock within reasonable time
+- Late frequency ratio (ref_period/fb_period) should be close to 1.0 when locked
+Ports:
+- `VDD`: inout electrical
+- `VSS`: inout electrical
+- `ref_clk`: input electrical
+- `fb_clk`: output electrical
+- `dco_clk`: output electrical
+- `vctrl_mon`: output electrical
+- `lock`: output electrical

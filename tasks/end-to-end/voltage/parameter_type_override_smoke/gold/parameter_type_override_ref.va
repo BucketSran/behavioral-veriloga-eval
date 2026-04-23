@@ -1,0 +1,73 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module parameter_type_override_ref(out, vss);
+    inout out, vss;
+    electrical out, vss;
+
+    parameter real vhi = 0.55;
+    parameter integer reps = 2;
+    parameter real period = 10n from (0:inf);
+    parameter real width = 3n from (0:inf);
+    parameter real trf = 50p from (0:inf);
+
+    integer emitted;
+    real target;
+
+    analog begin
+        @(initial_step) begin
+            emitted = 0;
+            target = 0.0;
+        end
+
+        @(timer(10n)) begin
+            if (emitted < reps)
+                target = vhi;
+        end
+
+        @(timer(13n)) begin
+            if (emitted < reps) begin
+                target = 0.0;
+                emitted = emitted + 1;
+            end
+        end
+
+        @(timer(20n)) begin
+            if (emitted < reps)
+                target = vhi;
+        end
+
+        @(timer(23n)) begin
+            if (emitted < reps) begin
+                target = 0.0;
+                emitted = emitted + 1;
+            end
+        end
+
+        @(timer(30n)) begin
+            if (emitted < reps)
+                target = vhi;
+        end
+
+        @(timer(33n)) begin
+            if (emitted < reps) begin
+                target = 0.0;
+                emitted = emitted + 1;
+            end
+        end
+
+        @(timer(40n)) begin
+            if (emitted < reps)
+                target = vhi;
+        end
+
+        @(timer(43n)) begin
+            if (emitted < reps) begin
+                target = 0.0;
+                emitted = emitted + 1;
+            end
+        end
+
+        V(out, vss) <+ transition(target, 0, trf);
+    end
+endmodule

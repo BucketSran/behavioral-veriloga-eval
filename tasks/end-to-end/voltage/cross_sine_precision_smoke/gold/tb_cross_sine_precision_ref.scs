@@ -1,0 +1,21 @@
+simulator lang=spectre
+global 0
+
+parameters fin=73e6 vth=0.45
+
+Vvdd (VDD 0) vsource type=dc dc=1.0
+Vvss (VSS 0) vsource type=dc dc=0.0
+
+// Nonlinear source: rising threshold crossings after initialization occur at k/fin.
+// With fin=73 MHz, the first three rising crossings are near 13.698630 ns,
+// 27.397260 ns, and 41.095890 ns. maxstep is intentionally coarse relative
+// to the desired ps-level event-time metric.
+Vvin (vin 0) vsource type=sine sinedc=0.45 ampl=0.40 freq=fin
+
+IDUT (VDD VSS vin first_err_out max_err_out count_out) cross_sine_precision_ref fin=fin vth=vth
+
+simulatorOptions options reltol=1e-5 vabstol=1e-8 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+tran tran stop=47n maxstep=1p errpreset=conservative
+save vin first_err_out max_err_out count_out
+
+ahdl_include "./cross_sine_precision_ref.va"

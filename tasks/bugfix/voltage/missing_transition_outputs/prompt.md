@@ -16,3 +16,18 @@ module comp_flag (VDD, VSS, VIN, FLAG);
     end
 endmodule
 ```
+
+Ports:
+- `VDD`: electrical
+- `VSS`: electrical
+- `VIN`: electrical
+- `FLAG`: electrical (power rail)
+- `VSS`: inout electrical (power rail)
+- `VIN`: input electrical
+- `FLAG`: output electrical
+
+## Output Contract
+
+- **File name**: output must be saved as `dut_fixed.va`
+- **Module name**: the module must be named `comp_flag` (do not rename it)
+- Return exactly one complete Verilog-A file in a fenced `verilog-a` code block.
