@@ -11,6 +11,7 @@ Current tracked table files:
 - `TABLE1_EVAS_VS_SPECTRE_GOLD.md`
 - `TABLE2_SUMMARY.md`
 - `TABLE2_FAILURE_ANALYSIS.md`
+- `RUN_REGISTRY.md`
 
 Source of these files:
 - copied from `results/` on 2026-04-24 to preserve important conclusions in a
@@ -20,3 +21,7 @@ Update rule:
 1. refresh table content in `results/` after experiments
 2. copy updated summaries into `tables/`
 3. commit only the tracked `tables/` files for remote sharing
+
+Helper:
+- `scripts/sync_tables_from_results.sh`
+  - syncs table summaries from local `results/` into this tracked folder
