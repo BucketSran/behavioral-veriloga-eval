@@ -153,6 +153,19 @@ behavioral-va-eval/
     README.md
 ```
 
+## Project Docs
+
+Project management and experiment-method documents are centralized under
+`docs/project/`:
+
+- `docs/project/README.md`: index for project-level docs
+- `docs/project/PROJECT_STATUS.md`: current snapshot and next execution plan
+- `docs/project/EXPERIMENT_CONDITIONS_AND_MODEL_MATRIX.md`: official A-F
+  condition semantics and cross-model protocol
+- `docs/project/POST_RUN_PLAYBOOK.md`: standard end-of-run update and upload
+  flow
+- `docs/project/WORK_TODO.md`: longer-horizon roadmap and backlog
+
 Each benchmark case is a directory containing:
 
 - `prompt.md`
@@ -183,16 +196,19 @@ wrapper is the recommended reproducible workflow in this repo.
 
 When project status changes, update docs in this order:
 
-1. update `coordination/docs/benchmark/BENCHMARK_RESULT_TABLE.md`
-2. run `python coordination/scripts/sync_task_assignment.py`
-3. run `python coordination/scripts/sync_task_assignment.py --check`
-4. update `WORK_TODO.md` only after the result table and derived summary are in sync
+1. verify run quality in local `results/`
+2. sync tracked table summaries with `scripts/sync_tables_from_results.sh`
+3. append one run line into `tables/RUN_REGISTRY.md`
+4. update `docs/project/PROJECT_STATUS.md` with current snapshot and next plan
+5. update `docs/project/WORK_TODO.md` only after tracked summaries are in sync
 
 Use the files this way:
 
-1. `WORK_TODO.md`: next-stage roadmap and prioritized backlog
-2. `coordination/docs/benchmark/BENCHMARK_RESULT_TABLE.md`: row-level benchmark facts
-3. `coordination/docs/project/TASK_ASSIGNMENT.md`: auto-generated summary view
+1. `tables/`: paper-facing compact conclusions
+2. `tables/RUN_REGISTRY.md`: compact run history and source path index
+3. `docs/project/PROJECT_STATUS.md`: current status for onboarding
+4. `docs/project/WORK_TODO.md`: next-stage roadmap and prioritized backlog
+5. `docs/project/POST_RUN_PLAYBOOK.md`: standard end-of-run checklist
 
 ## Initial benchmark strategy
 

@@ -28,7 +28,7 @@ Main condition definitions:
 - `F`: three-round EVAS repair (no skill)
 
 Reference:
-- `EXPERIMENT_CONDITIONS_AND_MODEL_MATRIX.md`
+- `docs/project/EXPERIMENT_CONDITIONS_AND_MODEL_MATRIX.md`
 
 Key recorded runs:
 - `kimi-k2.5`, `F`, full92 repair subset: `0.4348`
@@ -43,10 +43,11 @@ Reference:
 ## 4) Where To Look First (5-Minute Onboarding)
 
 1. `README.md` — project overview and core workflow
-2. `EXPERIMENT_CONDITIONS_AND_MODEL_MATRIX.md` — official A-F protocol
+2. `docs/project/EXPERIMENT_CONDITIONS_AND_MODEL_MATRIX.md` — official A-F protocol
 3. `runners/run_experiment_matrix.py` — experiment execution entry
 4. `tables/` — tracked paper-facing table summaries
 5. `docs/EXPERIMENT_ASSET_POLICY.md` — what to keep/push after each run
+6. `docs/project/POST_RUN_PLAYBOOK.md` — post-run update/upload checklist
 
 ## 5) Storage and Versioning Policy (Current)
 

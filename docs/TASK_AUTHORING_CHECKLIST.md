@@ -34,6 +34,6 @@
 - [ ] `MANIFEST.md` 已生成
 
 ### 6. 结果登记
-- [ ] 在 `coordination/docs/benchmark/BENCHMARK_RESULT_TABLE.md` 新增一行
-- [ ] 运行 `python coordination/scripts/sync_task_assignment.py --check` 无报错
-- [ ] `WORK_TODO.md` 的相关状态节已更新
+- [ ] 表格结论已同步到 `tables/`（必要时运行 `scripts/sync_tables_from_results.sh`）
+- [ ] 在 `tables/RUN_REGISTRY.md` 追加本次 run 记录（如适用）
+- [ ] `docs/project/PROJECT_STATUS.md` 与 `docs/project/WORK_TODO.md` 的相关状态节已更新

@@ -21,6 +21,7 @@ Update rule:
 1. refresh table content in `results/` after experiments
 2. copy updated summaries into `tables/`
 3. commit only the tracked `tables/` files for remote sharing
+4. refresh status docs with `docs/project/POST_RUN_PLAYBOOK.md`
 
 Helper:
 - `scripts/sync_tables_from_results.sh`

@@ -10,12 +10,17 @@
 
 它和现有文档的分工如下：
 
-1. `WORK_TODO.md`
+1. `docs/project/WORK_TODO.md`
    负责后续工作路线图、优先级和执行清单。
-2. `coordination/docs/benchmark/BENCHMARK_RESULT_TABLE.md`
-   负责逐行事实、结果元数据和 benchmark 状态。
-3. `coordination/docs/project/TASK_ASSIGNMENT.md`
-   负责从结果表自动生成的汇总视图。
+2. `tables/` 与 `tables/RUN_REGISTRY.md`
+   负责论文可追踪的结果摘要与 run 记录。
+3. `docs/project/PROJECT_STATUS.md`
+   负责对外可读的当前阶段状态总览。
+
+说明：
+本文件包含较早阶段的历史规划文本，部分段落仍引用旧的
+`coordination/...` 路径。当前有效工作流请以
+`docs/project/POST_RUN_PLAYBOOK.md` 和 `README.md` 为准。
 
 ---
 
