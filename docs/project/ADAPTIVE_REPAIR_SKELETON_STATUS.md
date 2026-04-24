@@ -35,6 +35,7 @@ EVAS closed loop progressively expose more actionable diagnostics:
 | Serializer first-clock-pending skeleton | `results/adaptive-serializer-pending-kimi-2026-04-25` | `serializer_8b_smoke` reached `PASS`: `0xA5_serialized_ok mode=edge_only mismatches=0`. |
 | SAR/ADC-DAC runtime skeleton | `results/adaptive-sar-adc-hardened-kimi-2026-04-25` | No PASS yet; new candidates still regressed to TB/runtime failure, so this likely needs a structured code/harness template rather than natural-language-only guidance. |
 | PFD pulse-window skeleton | `results/adaptive-pfd-pulsewidth-kimi-2026-04-25` | No PASS yet; best candidate remains close but fails with `up_first=0.0975` above the checker upper bound `0.08`. New candidates can regress to compile/timeout. |
+| Accumulated skeleton small matrix | `results/adaptive-smallmatrix-kimi-skeleton-v2-2026-04-25` | `9/16` PASS, improved over the previous `5/16` layered-only small matrix. New matrix PASS cases include comparator hysteresis, DWA wraparound, flash ADC, and serializer. |
 
 ## What Changed Conceptually
 
@@ -99,6 +100,47 @@ Implemented in `runners/build_repair_prompt.py` and routed through `runners/diag
 - Long DWA prompts are slow because the model has to regenerate many files and long bus wiring.
 - SAR/ADC-DAC and PFD show that natural-language repair policies are sometimes too soft; these may
   need structured code skeletons or verifier-harness templates.
+- Small-matrix reproducibility depends on the round-0 anchor. For example, sample-hold passed in a
+  targeted single-task run but did not pass in the `16`-task matrix when started from the older matrix
+  round-1 anchor.
+
+## Latest Small-Matrix Result
+
+Run: `results/adaptive-smallmatrix-kimi-skeleton-v2-2026-04-25`
+
+Setup:
+
+- Model: `kimi-k2.5`
+- Tasks: `16`
+- Max repair rounds: `2`
+- Policy: `--layered-only-repair`
+- EVAS only, no Spectre conclusion run
+- Initial result root: `results/adaptive-layered-only-smallmatrix-kimi-2026-04-25/round1`
+
+Outcome:
+
+- PASS: `9/16`
+- Previous comparable layered-only result: `5/16`
+- Net improvement: `+4` PASS on this small matrix
+
+PASS tasks:
+
+- `adc_dac_ideal_4b_smoke`
+- `comparator_hysteresis_smoke`
+- `dac_binary_clk_4b_smoke`
+- `dwa_ptr_gen_no_overlap_smoke`
+- `dwa_wraparound_smoke`
+- `flash_adc_3b_smoke`
+- `gray_counter_4b_smoke`
+- `mux_4to1_smoke`
+- `serializer_8b_smoke`
+
+Remaining failures:
+
+- PLL-like timing/ratio: `adpll_timer_smoke`, `cppll_tracking_smoke`
+- Observable/runtime harness: `dwa_ptr_gen_smoke`, `gain_extraction_smoke`, `sar_adc_dac_weighted_8b_smoke`
+- Pulse-window behavior: `pfd_reset_race_smoke`
+- Anchor-sensitive sample/hold behavior: `sample_hold_droop_smoke`
 
 Update after the first DWA behavior probe:
 
@@ -112,14 +154,15 @@ Update after the first DWA behavior probe:
 
 ## Recommended Next Work
 
-1. Re-run the 16-task Kimi small matrix with the accumulated skeletons.
-2. Compare pass count and failure surfaces against the previous `5/16` small-matrix result.
-3. If the small matrix improves, run the same small matrix on Qwen to test cross-model generality.
-4. For remaining SAR/ADC-DAC and PFD failures, decide whether to add structured code skeletons rather
+1. Run the same `16`-task small matrix on Qwen to test cross-model generality.
+2. For remaining SAR/ADC-DAC and PFD failures, decide whether to add structured code skeletons rather
    than more natural-language guidance.
-5. Re-run the same small validation cases after each skeleton, using failure-surface progress plus PASS
+3. Add a better anchor-selection rule for matrix runs so tasks can start from `best` when available,
+   not only from a fixed `round1` root.
+4. Re-run the same small validation cases after each skeleton, using failure-surface progress plus PASS
    as the acceptance metric.
-6. Only after the small matrix improves, decide whether to promote the method to the full 92-task EVAS-only experiment.
+5. Only after the Qwen small matrix and anchor-selection cleanup, decide whether to promote the method
+   to the full 92-task EVAS-only experiment.
 
 ## Upload Policy
 
