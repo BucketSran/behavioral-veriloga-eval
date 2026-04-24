@@ -11,9 +11,62 @@
 import re
 from pathlib import Path
 from typing import Optional
+from functools import lru_cache
 
 # simulate_evas.py 路径
 SIMULATE_EVAS_PATH = Path(__file__).parent / "simulate_evas.py"
+
+# Task-specific metric alias map (checker variable -> EVAS note metric key).
+# This is model-agnostic and only bridges naming-contract gaps between checker
+# internals and emitted diagnostics.
+TASK_METRIC_ALIASES: dict[str, dict[str, list[str]]] = {
+    "cppll_timer": {
+        "ratio": ["freq_ratio"],
+        "ratio_err": ["freq_ratio"],
+    },
+    "cppll_tracking_smoke": {
+        "ratio": ["freq_ratio"],
+        "ratio_err": ["freq_ratio"],
+    },
+    "cppll_freq_step_reacquire_smoke": {
+        "pre_ratio": ["freq_ratio"],
+        "post_ratio": ["freq_ratio"],
+        "pre_lock": ["final_lock_high"],
+        "post_lock": ["final_lock_high"],
+    },
+    "adpll_lock_smoke": {
+        "freq_ratio": ["freq_ratio", "late_edge_ratio"],
+        "vctrl_span": ["vctrl_range_ok", "vctrl_min", "vctrl_max"],
+    },
+    "adpll_timer": {
+        "freq_ratio": ["freq_ratio", "late_edge_ratio"],
+        "vctrl_span": ["vctrl_range_ok", "vctrl_min", "vctrl_max"],
+    },
+    "adpll_timer_smoke": {
+        "freq_ratio": ["freq_ratio", "late_edge_ratio"],
+        "vctrl_span": ["vctrl_range_ok", "vctrl_min", "vctrl_max"],
+    },
+    "comparator_hysteresis_smoke": {
+        "rise_t": ["rise_t_out_of_range"],
+        "fall_t": ["fall_t_out_of_range"],
+    },
+    "gray_counter_4b_smoke": {
+        "bad_transitions": ["bad_transitions"],
+    },
+    "multimod_divider": {
+        "base": ["base", "pre_count", "post_count"],
+    },
+}
+
+
+def metric_aliases_for_task(task_id: str) -> dict[str, list[str]]:
+    """Return metric alias mapping for a task (checker var -> EVAS metric keys)."""
+    aliases = TASK_METRIC_ALIASES.get(task_id, {})
+    if aliases:
+        return aliases
+    # Fallback to base task id (strip smoke suffix).
+    base = task_id.replace("_smoke", "")
+    return TASK_METRIC_ALIASES.get(base, {})
 
 
 def extract_checker_source(checker_name: str) -> Optional[str]:
@@ -33,90 +86,167 @@ def extract_checker_source(checker_name: str) -> Optional[str]:
     return match.group(0)
 
 
-def parse_expected_conditions(source: str) -> dict:
-    """解析 checker 源码中的期望值条件"""
-    expected = {}
+@lru_cache(maxsize=1)
+def _load_checks_mapping() -> dict[str, str]:
+    """Parse CHECKS mapping from simulate_evas.py as task_id -> checker function name."""
+    if not SIMULATE_EVAS_PATH.exists():
+        return {}
+    content = SIMULATE_EVAS_PATH.read_text(encoding="utf-8")
+    mapping: dict[str, str] = {}
+    for task_id, checker_name in re.findall(r'"([^"]+)"\s*:\s*(check_[A-Za-z0-9_]+)', content):
+        mapping[task_id] = checker_name
+    return mapping
 
-    # 常见条件模式
-    patterns = [
-        # abs(value - expected) <= tolerance
-        (r"abs\((\w+)\s*-\s*([\d.]+)\)\s*<=\s*([\d.]+)",
-         lambda m: {
-             m.group(1): {
-                 "expected": float(m.group(2)),
-                 "tolerance": float(m.group(3)),
-                 "description": f"{m.group(1)} should be ≈ {m.group(2)} (tolerance ±{m.group(3)})"
-             }
-         }),
 
-        # abs(value - expected) < tolerance
-        (r"abs\((\w+)\s*-\s*([\d.]+)\)\s*<\s*([\d.]+)",
-         lambda m: {
-             m.group(1): {
-                 "expected": float(m.group(2)),
-                 "tolerance": float(m.group(3)),
-                 "description": f"{m.group(1)} should be ≈ {m.group(2)} (tolerance ±{m.group(3)})"
-             }
-         }),
+_NUM_RE = r"[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[-+]?\d+)?"
+_OP_TEXT = {
+    ">": ">",
+    ">=": "≥",
+    "<": "<",
+    "<=": "≤",
+    "==": "exactly",
+}
+_INVERT_OP = {
+    ">": "<=",
+    ">=": "<",
+    "<": ">=",
+    "<=": ">",
+}
 
-        # value >= threshold
-        (r"(\w+)\s*>=\s*([\d.]+)",
-         lambda m: {
-             m.group(1): {
-                 "expected": f">= {m.group(2)}",
-                 "description": f"{m.group(1)} should be ≥ {m.group(2)}"
-             }
-         }),
 
-        # value > threshold
-        (r"(\w+)\s*>\s*([\d.]+)",
-         lambda m: {
-             m.group(1): {
-                 "expected": f"> {m.group(2)}",
-                 "description": f"{m.group(1)} should be > {m.group(2)}"
-             }
-         }),
+def _condition_info(var: str, op: str, value: str, *, source_kind: str) -> dict:
+    if op == "==":
+        return {
+            "expected": float(value),
+            "tolerance": 0,
+            "description": f"{var} should be exactly {value}",
+            "source_kind": source_kind,
+        }
+    return {
+        "expected": f"{op} {value}",
+        "description": f"{var} should be {_OP_TEXT.get(op, op)} {value}",
+        "source_kind": source_kind,
+    }
 
-        # value <= threshold
-        (r"(\w+)\s*<=\s*([\d.]+)",
-         lambda m: {
-             m.group(1): {
-                 "expected": f"<= {m.group(2)}",
-                 "description": f"{m.group(1)} should be ≤ {m.group(2)}"
-             }
-         }),
 
-        # value < threshold
-        (r"(\w+)\s*<\s*([\d.]+)",
-         lambda m: {
-             m.group(1): {
-                 "expected": f"< {m.group(2)}",
-                 "description": f"{m.group(1)} should be < {m.group(2)}"
-             }
-         }),
+def _add_condition(expected: dict, var: str, op: str, value: str, *, source_kind: str) -> None:
+    if var not in expected:
+        expected[var] = _condition_info(var, op, value, source_kind=source_kind)
 
-        # value == expected (rare in checkers)
-        (r"(\w+)\s*==\s*([\d.]+)",
-         lambda m: {
-             m.group(1): {
-                 "expected": float(m.group(2)),
-                 "tolerance": 0,
-                 "description": f"{m.group(1)} should be exactly {m.group(2)}"
-             }
-         }),
+
+def _parse_simple_comparisons(expr: str, *, invert: bool, source_kind: str) -> dict:
+    """Parse numeric checker predicates into public contract conditions.
+
+    Checker code often expresses failures as `if metric > threshold: return False`.
+    In that case the public contract is the inverse (`metric <= threshold`).
+    """
+    found: dict = {}
+    text = expr.strip()
+
+    # abs(metric - target) <= tolerance
+    abs_pat = rf"abs\((\w+)\s*-\s*({_NUM_RE})\)\s*(<=|<)\s*({_NUM_RE})"
+    for m in re.finditer(abs_pat, text):
+        if invert:
+            continue
+        var, target, _op, tol = m.groups()
+        found[var] = {
+            "expected": float(target),
+            "tolerance": float(tol),
+            "description": f"{var} should be ≈ {target} (tolerance ±{tol})",
+            "source_kind": source_kind,
+        }
+
+    # lower <= metric <= upper
+    chain_pat = rf"({_NUM_RE})\s*(<=|<)\s*(\w+)\s*(<=|<)\s*({_NUM_RE})"
+    for m in re.finditer(chain_pat, text):
+        if invert:
+            continue
+        lower, lop, var, uop, upper = m.groups()
+        found[var] = {
+            "expected": f"{lower} {lop} x {uop} {upper}",
+            "description": f"{var} should be between {lower} and {upper}",
+            "source_kind": source_kind,
+        }
+
+    comparisons = [
+        (rf"\b(\w+)\s*(>=|<=|>|<|==)\s*({_NUM_RE})", False),
+        (rf"({_NUM_RE})\s*(>=|<=|>|<|==)\s*(\w+)", True),
     ]
-
-    # 提取所有条件
-    for pattern, handler in patterns:
-        for match in re.finditer(pattern, source):
-            try:
-                result = handler(match)
-                for key, value in result.items():
-                    # 避免覆盖已存在的更精确条件
-                    if key not in expected:
-                        expected[key] = value
-            except (ValueError, AttributeError):
+    for pattern, number_first in comparisons:
+        for m in re.finditer(pattern, text):
+            if number_first:
+                value, op, var = m.groups()
+                op = {">": "<", ">=": "<=", "<": ">", "<=": ">=", "==": "=="}[op]
+            else:
+                var, op, value = m.groups()
+            if var in found:
                 continue
+            if invert:
+                op = _INVERT_OP.get(op)
+                if op is None:
+                    continue
+            found[var] = _condition_info(var, op, value, source_kind=source_kind)
+
+    return found
+
+
+def _line_returns_false_soon(lines: list[str], start_idx: int) -> bool:
+    for lookahead in lines[start_idx + 1 : start_idx + 5]:
+        stripped = lookahead.strip()
+        if not stripped:
+            continue
+        if "return False" in stripped:
+            return True
+        # Stop once another peer-level control statement begins.
+        if stripped.startswith(("if ", "elif ", "else:", "ok =", "return True")):
+            return False
+    return False
+
+
+def parse_expected_conditions(source: str) -> dict:
+    """Parse public behavior targets from checker source.
+
+    Conditions that immediately lead to `return False` are inverted before being
+    exposed, so the prompt receives the pass criterion rather than the fail guard.
+    """
+    expected: dict = {}
+    lines = source.splitlines()
+
+    for idx, line in enumerate(lines):
+        stripped = line.strip()
+        if not stripped.startswith(("if ", "elif ")):
+            continue
+        if not _line_returns_false_soon(lines, idx):
+            continue
+        condition = stripped.split(":", 1)[0]
+        condition = re.sub(r"^(?:if|elif)\s+", "", condition)
+        for var, info in _parse_simple_comparisons(
+            condition, invert=True, source_kind="inverted_fail_guard"
+        ).items():
+            if var not in expected:
+                expected[var] = info
+
+    # Direct pass expressions such as `ok = wraps >= 3 and clk_rises >= 3`.
+    ok_blocks = re.findall(r"\bok\s*=\s*(.*?)(?=\n\s*return\s+ok\b)", source, flags=re.DOTALL)
+    for block in ok_blocks:
+        for var, info in _parse_simple_comparisons(
+            block, invert=False, source_kind="pass_expression"
+        ).items():
+            if var not in expected:
+                expected[var] = info
+
+    # Named pass predicates later composed into `ok`, e.g.
+    # `freq_ok = 0.97 <= freq_ratio <= 1.03`.
+    for line in lines:
+        stripped = line.strip()
+        if not re.match(r"^[A-Za-z_][A-Za-z0-9_]*(?:_ok|_in_range)\s*=", stripped):
+            continue
+        rhs = stripped.split("=", 1)[1]
+        for var, info in _parse_simple_comparisons(
+            rhs, invert=False, source_kind="pass_predicate"
+        ).items():
+            if var not in expected:
+                expected[var] = info
 
     return expected
 
@@ -188,31 +318,16 @@ def format_expected_for_prompt(extracted: dict) -> list[str]:
 
 
 def get_checker_name_for_task(task_id: str) -> str:
-    """根据 task_id 确定对应的 checker 函数名"""
-    # CHECKS 映射规则（从 simulate_evas.py）
-    # 大多数 checker 名为 check_<base_task_id>
-
+    """Resolve checker function name directly from simulate_evas.CHECKS mapping."""
+    checks = _load_checks_mapping()
+    if task_id in checks:
+        return checks[task_id]
     base = task_id.replace("_smoke", "")
-
-    # 特殊映射
-    special_mapping = {
-        "clk_divider": "check_clk_divider",
-        "multimod_divider": "check_multimod_divider",
-        "adpll_timer": "check_adpll_lock",
-        "cppll_freq_step_reacquire": "check_cppll_freq_step_reacquire",
-        "bbpd_data_edge_alignment": "check_bbpd_data_edge_alignment",
-        "prbs7": "check_prbs7",
-        "sc_integrator": "check_sc_integrator",
-        "digital_basics": "check_not_gate",
-        "strongarm_reset_priority_bug": "check_strongarm_reset_priority_bug",
-        "inverted_comparator_logic_bug": "check_inverted_comparator_logic_bug",
-        "wrong_edge_sample_hold_bug": "check_wrong_edge_sample_hold_bug",
-    }
-
-    if base in special_mapping:
-        return special_mapping[base]
-
-    # 默认规则
+    if base in checks:
+        return checks[base]
+    smoke_id = f"{base}_smoke"
+    if smoke_id in checks:
+        return checks[smoke_id]
     return f"check_{base}"
 
 

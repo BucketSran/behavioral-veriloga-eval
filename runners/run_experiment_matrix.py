@@ -9,6 +9,7 @@ Experiment Matrix:
 - D (+EVAS): Checker✓, Skill❌, EVAS✓ (single-round) → EVAS diagnosis value
 - E (+Skill+EVAS): Checker✓, Skill✓, EVAS✓ (single-round) → complete system
 - F (+Multi-round EVAS): Checker✓, Skill❌, EVAS✓ (three-round) → current generalized repair condition
+- G (+Multi-round EVAS+Skill): Checker✓, Skill✓, EVAS✓ (three-round) → skill-enabled multi-round repair
 
 Usage:
     python3 runners/run_experiment_matrix.py --model kimi-k2.5 --split dev24 --stage all
@@ -63,6 +64,7 @@ CONDITIONS = {
     "D": {"include_checker": True, "include_skill": False, "repair_mode": "evas-guided-repair-no-skill", "repair_include_skill": False},
     "E": {"include_checker": True, "include_skill": True, "repair_mode": "evas-guided-repair", "repair_include_skill": True},
     "F": {"include_checker": True, "include_skill": False, "repair_mode": "evas-guided-repair-3round", "repair_include_skill": False},
+    "G": {"include_checker": True, "include_skill": True, "repair_mode": "evas-guided-repair-3round-skill", "repair_include_skill": True},
 }
 
 DATE_TAG = "2026-04-22"
@@ -78,6 +80,7 @@ def get_output_dir(condition: str, model: str, split: str) -> Path:
         "D": "repair-with-evas",
         "E": "repair-with-evas-skill",
         "F": "repair-with-evas-3round",
+        "G": "repair-with-evas-3round-skill",
     }
     return ROOT / "results" / f"experiment-{condition_name[condition]}-{model_slug}-{split}-{DATE_TAG}"
 
@@ -273,8 +276,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Run experiment matrix for vaEvas benchmark.")
     ap.add_argument("--model", required=True, help="Model name, e.g. kimi-k2.5")
     ap.add_argument("--split", choices=["dev24", "full86"], default="dev24")
-    ap.add_argument("--condition", choices=["A", "B", "C", "D", "E", "F", "all"], default="all",
-                    help="Experiment condition. 'all' runs all conditions A-F.")
+    ap.add_argument("--condition", choices=["A", "B", "C", "D", "E", "F", "G", "all"], default="all",
+                    help="Experiment condition. 'all' runs all conditions A-G.")
     ap.add_argument("--stage", choices=["baseline", "evas-inner", "repair", "all"], default="all")
     ap.add_argument("--sample-idx", type=int, default=0)
     ap.add_argument("--temperature", type=float, default=0.0)
@@ -287,7 +290,7 @@ def main() -> int:
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
-    conditions = ["A", "B", "C", "D", "E", "F"] if args.condition == "all" else [args.condition]
+    conditions = ["A", "B", "C", "D", "E", "F", "G"] if args.condition == "all" else [args.condition]
 
     print(f"[experiment-matrix] model={args.model} split={args.split} conditions={conditions}")
     print(f"[experiment-matrix] Experiment Matrix:")
@@ -346,8 +349,8 @@ def main() -> int:
                 )
                 evas_result_dirs[condition] = evas_root
 
-        # Repair conditions D, E, F
-        if condition in ("D", "E", "F") and args.stage in ("repair", "all"):
+        # Repair conditions D, E, F, G
+        if condition in ("D", "E", "F", "G") and args.stage in ("repair", "all"):
             # For repair, we need EVAS inner results from condition B baseline
             # (condition B has Checker but no Skill, which is the right baseline for repair)
             if "B" not in baseline_generated_dirs:

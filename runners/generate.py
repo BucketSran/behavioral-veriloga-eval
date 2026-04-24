@@ -112,6 +112,122 @@ def _extract_tb_supply_contract(tb_path: Path, ports: list[str]) -> tuple[str, s
     return vdd_node, vss_node, vdd_value
 
 
+_TRAN_RE = re.compile(r"^\s*tran\s+\w+.*$", re.IGNORECASE | re.MULTILINE)
+_MAXSTEP_RE = re.compile(r"\bmaxstep\s*=", re.IGNORECASE)
+_AHDL_INCLUDE_RE = re.compile(r'ahdl_include\s+"([^"]+\.va)"', re.IGNORECASE)
+
+
+def gold_include_entries(task_dir: Path, tb_text: str | None = None) -> list[dict[str, str]]:
+    """Return verifier include filenames plus the real module declared inside.
+
+    Some verifier files intentionally use a wrapper/reference filename such as
+    `and_gate_ref.va` while declaring `module and_gate(...)`.  Public contracts
+    must use the declared module name; the include filename is only a staging
+    detail for the verifier harness.
+    """
+    gold_dir = task_dir / "gold"
+    if not gold_dir.is_dir():
+        return []
+
+    if tb_text is None:
+        tbs = sorted(gold_dir.glob("tb_*.scs"))
+        if not tbs:
+            return []
+        tb_text = tbs[0].read_text(encoding="utf-8", errors="ignore")
+
+    entries: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for raw_path in _AHDL_INCLUDE_RE.findall(tb_text):
+        filename = Path(raw_path).name
+        stem = Path(filename).stem
+        if filename in seen:
+            continue
+        seen.add(filename)
+        module = stem
+        va_path = gold_dir / filename
+        if va_path.exists():
+            signature = extract_module_signature(va_path)
+            if signature:
+                module = signature[0]
+        entries.append({"filename": filename, "stem": stem, "module": module})
+    return entries
+
+
+def _strict_tran_lines(task_dir: Path) -> list[str]:
+    """Extract public strict transient statements from the verifier harness.
+
+    The returned lines are testbench-level validation settings, not gold DUT
+    implementation details. They are safe to expose as a public contract.
+    """
+    gold_dir = task_dir / "gold"
+    if not gold_dir.is_dir():
+        return []
+
+    lines: list[str] = []
+    seen: set[str] = set()
+    for tb_path in sorted(gold_dir.glob("*.scs")):
+        text = tb_path.read_text(encoding="utf-8", errors="ignore")
+        for match in _TRAN_RE.finditer(text):
+            line = re.sub(r"\s+", " ", match.group(0).strip())
+            if line and line not in seen:
+                seen.add(line)
+                lines.append(line)
+    return lines
+
+
+def _inject_strict_evas_validation_contract(task_dir: Path, family: str) -> list[str]:
+    """Inject the final EVAS validation transient contract.
+
+    This is distinct from adaptive quick-check settings. Quick-check maxstep is
+    an internal runner acceleration and must not be presented as a task target.
+    """
+    tran_lines = _strict_tran_lines(task_dir)
+    if not tran_lines:
+        return []
+
+    prompt_text = (task_dir / "prompt.md").read_text(encoding="utf-8", errors="ignore").lower()
+    if "strict evas validation contract" in prompt_text:
+        return []
+
+    lines = [
+        "",
+        "## Strict EVAS Validation Contract (MANDATORY)",
+        "",
+        "The final EVAS validation uses the following transient analysis setting(s):",
+        "",
+        "```spectre",
+        *tran_lines,
+        "```",
+        "",
+    ]
+
+    any_maxstep = any(_MAXSTEP_RE.search(line) for line in tran_lines)
+    if family in ("end-to-end", "tb-generation"):
+        lines.extend(
+            [
+                "If you generate a Spectre testbench, include the transient statement above exactly.",
+                "Do not shorten the stop time or use a coarser `maxstep` in the final submitted testbench.",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                "A fixed reference testbench will validate your DUT using this timing window.",
+                "You do not need to output a testbench unless the task explicitly asks for one.",
+            ]
+        )
+
+    if any_maxstep:
+        lines.append(
+            "The adaptive runner may use a faster internal quick-check, but the final candidate must pass this strict setting."
+        )
+    else:
+        lines.append(
+            "This reference harness does not specify `maxstep`; preserve the shown final validation timing."
+        )
+    return lines
+
+
 # ---------------------------------------------------------------------------
 # Task discovery
 # ---------------------------------------------------------------------------
@@ -160,13 +276,20 @@ SYSTEM_PROMPT = textwrap.dedent("""\
 """)
 
 
-def build_prompt(task_dir: Path, include_checker: bool = False, include_skill: bool = False) -> str:
+def build_prompt(
+    task_dir: Path,
+    include_checker: bool = False,
+    include_skill: bool = False,
+    include_public_contract: bool = True,
+) -> str:
     """Read prompt.md and optionally include buggy DUT for bugfix tasks.
 
     Args:
         task_dir: Path to the task directory
         include_checker: If True, inject checker source code (condition B)
         include_skill: If True, inject Skill circuit knowledge (condition C)
+        include_public_contract: If True, inject evaluator-aligned public
+            behavioral indicators without exposing gold implementation details.
     """
     prompt_md = (task_dir / "prompt.md").read_text(encoding="utf-8")
     meta = read_meta(task_dir)
@@ -183,7 +306,7 @@ def build_prompt(task_dir: Path, include_checker: bool = False, include_skill: b
                 dut_name = buggy_vas[0].name
                 prompt_md += f"\n\n## Buggy DUT ({dut_name})\n\n```verilog-a\n{buggy_code}\n```\n"
 
-    gold_include_stems: list[str] = []
+    gold_include_entries_list: list[dict[str, str]] = []
     gold_tb_text = ""
     if family in ("spec-to-va", "bugfix", "end-to-end"):
         gold_dir = task_dir / "gold"
@@ -191,10 +314,7 @@ def build_prompt(task_dir: Path, include_checker: bool = False, include_skill: b
             tbs = sorted(gold_dir.glob("tb_*.scs"))
             if tbs:
                 gold_tb_text = tbs[0].read_text(encoding="utf-8", errors="ignore")
-                gold_include_stems = [
-                    Path(path).stem
-                    for path in re.findall(r'ahdl_include\s+"([^"]+\.va)"', gold_tb_text)
-                ]
+                gold_include_entries_list = gold_include_entries(task_dir, gold_tb_text)
 
     if family == "end-to-end":
         prompt_md += """
@@ -207,33 +327,42 @@ You MUST return both deliverables:
 Do not return DUT-only output for this task.
 """
 
+    strict_tran_contract = _inject_strict_evas_validation_contract(task_dir, family)
+    if strict_tran_contract:
+        prompt_md += "\n\n" + "\n".join(strict_tran_contract)
+
     # For spec-to-va / bugfix / end-to-end tasks, inject contract information
     # from the gold testbench. For end-to-end multi-module tasks, inject a
     # multi-module contract instead of forcing a single module name.
-    if family in ("spec-to-va", "bugfix", "end-to-end") and gold_include_stems:
+    if family in ("spec-to-va", "bugfix", "end-to-end") and gold_include_entries_list:
         if family == "bugfix":
-            expected_mod = gold_include_stems[0]
+            first_entry = gold_include_entries_list[0]
+            expected_mod = first_entry["module"]
             m_xdut = re.search(r'\bXDUT\s+\([^)]+\)\s+(\w+)', gold_tb_text)
             if m_xdut:
                 expected_mod = m_xdut.group(1)
             prompt_md += (
                 "\n\n## Module Name Contract\n\n"
                 f"Your module **MUST** be named exactly **`{expected_mod}`**.\n"
-                f"- Your file will be included as `ahdl_include \"{gold_include_stems[0]}.va\"`\n"
+                f"- Your file will be included as `ahdl_include \"{first_entry['filename']}\"`\n"
                 f"- Your module declaration MUST be: `module {expected_mod}(...);`\n"
             )
-        elif family == "spec-to-va" or (family == "end-to-end" and len(gold_include_stems) == 1):
-            expected_mod = gold_include_stems[0]
+        elif family == "spec-to-va" or (family == "end-to-end" and len(gold_include_entries_list) == 1):
+            first_entry = gold_include_entries_list[0]
+            expected_mod = first_entry["module"]
             prompt_md += (
                 "\n\n## Module Name Contract\n\n"
                 f"Your module **MUST** be named exactly **`{expected_mod}`**.\n"
-                f"- Your file will be included as `ahdl_include \"{expected_mod}.va\"`\n"
+                f"- The verifier may include it from `ahdl_include \"{first_entry['filename']}\"`\n"
                 f"- Your module declaration MUST be: `module {expected_mod}(...);`\n"
                 + (f"- Do **not** use `{task_id}` — the correct name is `{expected_mod}`.\n"
                    if expected_mod != task_id else "")
             )
         elif family == "end-to-end":
-            include_list = "\n".join([f"- `{name}.va` (module `{name}`)" for name in gold_include_stems])
+            include_list = "\n".join(
+                f"- `{entry['filename']}` must contain module `{entry['module']}`"
+                for entry in gold_include_entries_list
+            )
             prompt_md += (
                 "\n\n## Multi-Module Contract\n\n"
                 "This task expects multiple Verilog-A modules. Do NOT collapse them into one file.\n"
@@ -314,6 +443,16 @@ endmodule
                     "- Add `global 0` on the second line after `simulator lang=spectre`.\n"
                 )
 
+    # Public behavioral contract: expose must-satisfy evaluator indicators as
+    # task-level contract, without exposing checker source or gold design code.
+    if include_public_contract:
+        public_contract_lines = _inject_public_behavior_contract(task_id)
+        if public_contract_lines:
+            prompt_md += "\n\n" + "\n".join(public_contract_lines)
+        observable_contract_lines = _inject_observable_csv_contract(task_id)
+        if observable_contract_lines:
+            prompt_md += "\n\n" + "\n".join(observable_contract_lines)
+
     # === Experiment Matrix: Inject Checker source (Condition B) ===
     if include_checker:
         checker_lines = _inject_checker_source(task_dir, task_id)
@@ -358,6 +497,174 @@ def _inject_checker_source(task_dir: Path, task_id: str) -> list[str]:
     if circuit_context:
         lines.extend(["", "# Circuit Context", "", circuit_context])
 
+    return lines
+
+
+def _inject_public_behavior_contract(task_id: str) -> list[str]:
+    """Inject non-leaking evaluator-aligned behavioral indicators."""
+    try:
+        from extract_expected_values import extract_expected_values, get_checker_name_for_task
+    except Exception:
+        return []
+
+    checker_name = get_checker_name_for_task(task_id)
+    extracted = extract_expected_values(checker_name)
+    expected = extracted.get("expected_conditions", {})
+    semantic_hints = extracted.get("semantic_hints", [])
+
+    if not expected and not semantic_hints:
+        return []
+
+    lines = [
+        "",
+        "## Public Behavioral Contract (Evaluator-Aligned)",
+        "",
+        "The following indicators are part of the public behavior contract for this task.",
+        "They define what must be satisfied at evaluation time, without revealing any gold implementation.",
+        "",
+    ]
+
+    skipped_metrics = {
+        "v",
+        "i",
+        "j",
+        "k",
+        "x",
+        "y",
+        "z",
+        "a",
+        "b",
+        "t",
+    }
+
+    def _is_contract_worthy(metric: str, description: str) -> bool:
+        name = metric.strip().lower()
+        desc = description.strip().lower()
+        if not name or name in skipped_metrics:
+            return False
+        # Filter out checker internal validity guards that are not behavioral
+        # targets for synthesis/repair.
+        if re.search(r"should be [≤<] 0\.0(?:\s|$)", description):
+            return False
+        if "should be > 0.0" in description and ("period" in name or "dt" in name):
+            return False
+        if "not enough" in desc or "missing" in desc:
+            return False
+        return True
+
+    contract_lines: list[str] = []
+    for metric, info in list(expected.items())[:14]:
+        desc = str(info.get("description", "")).strip()
+        if not _is_contract_worthy(metric, desc):
+            continue
+        if desc:
+            contract_lines.append(f"- `{metric}`: {desc}")
+            continue
+        expected_val = info.get("expected")
+        tolerance = info.get("tolerance")
+        if tolerance is not None:
+            contract_lines.append(f"- `{metric}` should stay near `{expected_val}` with bounded tolerance.")
+        else:
+            contract_lines.append(f"- `{metric}` must satisfy `{expected_val}`.")
+
+    if contract_lines:
+        lines.extend(contract_lines[:10])
+
+    curated_hints: list[str] = []
+    for hint in semantic_hints:
+        lowered = hint.lower()
+        if "required signals" in lowered:
+            curated_hints.append(hint)
+        elif any(
+            token in lowered
+            for token in (
+                "frequency",
+                "ratio",
+                "lock",
+                "overlap",
+                "reset",
+                "delay",
+                "monotonic",
+            )
+        ):
+            curated_hints.append(hint)
+    curated_hints = curated_hints[:4]
+    if curated_hints:
+        lines.extend(["", "Additional evaluator-facing constraints:"])
+        for hint in curated_hints:
+            lines.append(f"- {hint}")
+
+    return lines
+
+
+def _observable_columns_from_checker(task_id: str) -> list[str]:
+    """Return public CSV column names required by the evaluator checker.
+
+    This exposes only observable signal names, not the gold implementation.
+    """
+    try:
+        from extract_expected_values import get_checker_name_for_task
+    except Exception:
+        return []
+
+    source = _extract_checker_source(get_checker_name_for_task(task_id))
+    if not source:
+        return []
+
+    columns: list[str] = []
+    for required_body in re.findall(r"required\s*=\s*\{([^}]+)\}", source, flags=re.DOTALL):
+        columns.extend(re.findall(r'"([^"]+)"', required_body))
+    for literal_body in re.findall(r"not\s+\{([^}]+)\}\.issubset", source, flags=re.DOTALL):
+        columns.extend(re.findall(r'"([^"]+)"', literal_body))
+
+    expanded: list[str] = []
+    seen: set[str] = set()
+
+    def add(name: str) -> None:
+        if name and name not in seen:
+            seen.add(name)
+            expanded.append(name)
+
+    for col in columns:
+        if col == "ptr_0":
+            for idx in range(16):
+                add(f"ptr_{idx}")
+        elif col == "cell_en_0":
+            for idx in range(16):
+                add(f"cell_en_{idx}")
+        elif col == "code_0":
+            for idx in range(4):
+                add(f"code_{idx}")
+        else:
+            add(col)
+
+    return expanded
+
+
+def _inject_observable_csv_contract(task_id: str) -> list[str]:
+    columns = _observable_columns_from_checker(task_id)
+    if not columns:
+        return []
+
+    lines = [
+        "",
+        "## Observable CSV Contract (MANDATORY)",
+        "",
+        "The EVAS checker reads `tran.csv` by exact column names. Your testbench must make these public waveform columns observable:",
+        "",
+    ]
+    for chunk_start in range(0, len(columns), 8):
+        chunk = columns[chunk_start : chunk_start + 8]
+        lines.append("- `" + "`, `".join(chunk) + "`")
+    lines.extend(
+        [
+            "",
+            "Rules:",
+            "- Use plain scalar save names exactly as listed above; do not rely on hierarchical names or instance-qualified names.",
+            "- If the DUT uses vector ports internally, connect or save each bit so the CSV exposes the scalar names above.",
+            "- For DWA-style buses, the checker expects `ptr_0..ptr_15`, `cell_en_0..cell_en_15`, and when applicable `code_0..code_3`; do not rely only on `ptr_o[0]`, `cell_en_o[0]`, or `code_i[0]` CSV headers.",
+        ]
+    )
     return lines
 
 
@@ -469,6 +776,7 @@ def _inject_skill_knowledge(task_id: str) -> list[str]:
         "dff": "digital-logic.md",
         "flip": "digital-logic.md",
         "dac": "dac.md",
+        "dwa": "dac.md",
         "adc": "adc-sar.md",
         "sar": "adc-sar.md",
         "comparator": "comparator.md",
@@ -503,18 +811,27 @@ def _inject_skill_knowledge(task_id: str) -> list[str]:
     filtered_lines = []
     for line in lines:
         filtered_lines.append(line)
-        if len(filtered_lines) > 80:  # 限制行数
+        if len(filtered_lines) > 130:  # keep Spectre-safe patterns and DWA notes visible
             break
 
     filtered_content = "\n".join(filtered_lines)
-    if len(filtered_content) > 2500:
-        filtered_content = filtered_content[:2500] + "\n... (truncated)"
+    if len(filtered_content) > 4000:
+        filtered_content = filtered_content[:4000] + "\n... (truncated)"
 
     return [
         "",
         "# Circuit-Specific Knowledge (from veriloga-skills)",
         "",
         f"Reference: `{matched_ref}`",
+        "",
+        "## Mandatory EVAS+Spectre Compile Contract",
+        "",
+        "- Treat the following skill notes as hard compile constraints.",
+        "- Do not use runtime analog bus indexing such as `integer i; V(bus[i])`.",
+        "- Use fixed bit indices for small input buses and `genvar` loops for output bus contributions.",
+        "- Declare `genvar` at module scope before `analog begin`; never declare it inside `analog begin`.",
+        "- Keep `@(cross(...))` as a top-level event statement; put reset/enable logic inside the event body.",
+        "- Keep `transition()` contributions unconditional; compute target values first.",
         "",
         filtered_content,
     ]
@@ -814,22 +1131,19 @@ def generate_one_task(
             _tbs = sorted(_gold_dir.glob("tb_*.scs"))
             if _tbs:
                 _tb_text = _tbs[0].read_text(encoding="utf-8", errors="ignore")
-                _include_stems = [
-                    Path(path).stem
-                    for path in re.findall(r'ahdl_include\s+"([^"]+\.va)"', _tb_text)
-                ]
-                if _include_stems:
+                _entries = gold_include_entries(task_dir, _tb_text)
+                if _entries:
                     if family == "bugfix":
                         # File must be saved as the ahdl_include name (e.g. dut_fixed.va).
-                        _bugfix_save_stem = _include_stems[0]
+                        _bugfix_save_stem = _entries[0]["stem"]
                         # Module inside must match XDUT (may differ from file stem).
                         _m_xdut = re.search(r'\bXDUT\s+\([^)]+\)\s+(\w+)', _tb_text)
-                        _expected_mod_name = _m_xdut.group(1) if _m_xdut else _bugfix_save_stem
+                        _expected_mod_name = _m_xdut.group(1) if _m_xdut else _entries[0]["module"]
                     elif family == "spec-to-va":
-                        _expected_mod_name = _include_stems[0]
+                        _expected_mod_name = _entries[0]["module"]
                         _force_single_module_name = True
-                    elif family == "end-to-end" and len(_include_stems) == 1:
-                        _expected_mod_name = _include_stems[0]
+                    elif family == "end-to-end" and len(_entries) == 1:
+                        _expected_mod_name = _entries[0]["module"]
                         _force_single_module_name = True
 
     saved_files = []

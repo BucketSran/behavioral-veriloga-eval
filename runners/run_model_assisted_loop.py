@@ -26,7 +26,9 @@ from build_repair_prompt import (
     build_generic_retry_prompt,
     build_skill_only_prompt,
     load_skill_bundle,
+    metric_gap_summary,
 )
+from diagnosis_translation import translate_diagnosis
 from generate import (
     call_model,
     detect_provider,
@@ -75,6 +77,7 @@ MODE_TO_OUTPUT = {
     "evas-guided-repair": "generated-table2-evas-guided-repair",
     "evas-guided-repair-no-skill": "generated-table2-evas-guided-repair-no-skill",
     "evas-guided-repair-3round": "generated-table2-evas-guided-repair-3round",
+    "evas-guided-repair-3round-skill": "generated-table2-evas-guided-repair-3round-skill",
     "skill-only": "generated-table2-skill-only",
     "skill-evas-informed": "generated-table2-skill-evas-informed",
 }
@@ -335,13 +338,76 @@ def _failure_class(result: dict) -> str:
     return "other"
 
 
+def _failure_subtype(task_id: str, result: dict) -> str:
+    status = result.get("status", "FAIL_OTHER")
+    if status == "PASS":
+        return "pass"
+    if status == "FAIL_DUT_COMPILE":
+        return "dut_compile"
+    if status == "FAIL_TB_COMPILE":
+        return "tb_compile"
+    if status == "FAIL_INFRA":
+        return "infra"
+    for note in result.get("evas_notes", []):
+        translation = translate_diagnosis(str(note), task_id=task_id)
+        if translation.get("diagnosis"):
+            return translation.get("failure_type", "behavior_semantic")
+    if status == "FAIL_SIM_CORRECTNESS":
+        return "behavior_semantic"
+    return "other"
+
+
+def _failure_subtype_rank(subtype: str) -> int:
+    # Higher is better when weighted scores tie. A semantic failure usually
+    # means compile/run/observability is working and the loop can optimize
+    # measured behavior. Infra/contract failures are less informative.
+    return {
+        "pass": 6,
+        "behavior_semantic": 5,
+        "observability_contract": 4,
+        "simulation_artifact": 3,
+        "tb_compile": 2,
+        "dut_compile": 1,
+        "infra": 0,
+        "other": 0,
+    }.get(subtype, 0)
+
+
+def _has_evas_note(state: dict, token: str) -> bool:
+    return any(token in str(note) for note in state.get("evas_notes", []))
+
+
+def _compile_stage_rank(state: dict) -> int:
+    """Rank how far a candidate progressed through the compile/sim pipeline.
+
+    The weighted score is still the main reported metric, but the repair loop
+    should not keep a known DUT-compile failure when a later candidate has
+    already passed strict Verilog-A preflight and reached the EVAS runtime.
+    """
+    status = state.get("status", "FAIL_OTHER")
+    if status == "PASS":
+        return 5
+    if status == "FAIL_SIM_CORRECTNESS":
+        return 4
+    if status == "FAIL_INFRA" and _has_evas_note(state, "spectre_strict:preflight_pass"):
+        return 3
+    if status == "FAIL_TB_COMPILE":
+        return 2
+    if status == "FAIL_DUT_COMPILE":
+        return 1
+    return 0
+
+
 def _build_loop_state(
     *,
     round_idx: int,
     sample_dir: Path,
     result: dict,
+    task_id: str,
+    task_dir: Path,
 ) -> dict:
     notes = list(result.get("evas_notes", []))
+    gap = metric_gap_summary(task_dir, result)
     return {
         "round": round_idx,
         "sample_dir": str(sample_dir),
@@ -350,21 +416,44 @@ def _build_loop_state(
         "evas_notes": notes,
         "metrics": _extract_metrics_from_notes(notes),
         "failure_class": _failure_class(result),
+        "failure_subtype": _failure_subtype(task_id, result),
+        "metric_gap": gap,
         "signature": _sample_signature(sample_dir),
     }
 
 
-def _classify_loop_transition(reference_state: dict, candidate_state: dict) -> tuple[str, str]:
-    ranking = _compare_results(
-        {
-            "status": candidate_state.get("status"),
-            "scores": candidate_state.get("scores", {}),
-        },
-        {
-            "status": reference_state.get("status"),
-            "scores": reference_state.get("scores", {}),
-        },
+def _loop_state_rank(state: dict) -> tuple:
+    scores = state.get("scores", {})
+    gap = state.get("metric_gap", {})
+    gap_sum = float(gap.get("gap_sum", 0.0))
+    matched = int(gap.get("matched", 0))
+    violated = int(gap.get("violated", 0))
+    return (
+        int(state.get("status") == "PASS"),
+        _compile_stage_rank(state),
+        float(scores.get("weighted_total", 0.0)),
+        float(scores.get("sim_correct", 0.0)),
+        float(scores.get("tb_compile", 0.0)),
+        float(scores.get("dut_compile", 0.0)),
+        _failure_subtype_rank(str(state.get("failure_subtype", "other"))),
+        matched,
+        -violated,
+        -gap_sum,
     )
+
+
+def _compare_loop_states(candidate_state: dict, reference_state: dict) -> int:
+    candidate_rank = _loop_state_rank(candidate_state)
+    reference_rank = _loop_state_rank(reference_state)
+    if candidate_rank > reference_rank:
+        return 1
+    if candidate_rank < reference_rank:
+        return -1
+    return 0
+
+
+def _classify_loop_transition(reference_state: dict, candidate_state: dict) -> tuple[str, str]:
+    ranking = _compare_loop_states(candidate_state, reference_state)
     ref_scores = reference_state.get("scores", {})
     cand_scores = candidate_state.get("scores", {})
     ref_total = float(ref_scores.get("weighted_total", 0.0))
@@ -387,12 +476,28 @@ def _classify_loop_transition(reference_state: dict, candidate_state: dict) -> t
         != _missing_observable_signal(candidate_state.get("evas_notes", []))
     )
 
+    ref_gap = reference_state.get("metric_gap", {})
+    cand_gap = candidate_state.get("metric_gap", {})
+    ref_gap_sum = float(ref_gap.get("gap_sum", 0.0))
+    cand_gap_sum = float(cand_gap.get("gap_sum", 0.0))
+
     if ranking > 0:
         label = "improved"
-        summary = (
-            f"EVAS score improved from {ref_total:.3f} to {cand_total:.3f}; "
-            "preserve the repaired parts and focus only on the remaining failure."
-        )
+        if cand_total > ref_total:
+            summary = (
+                f"EVAS score improved from {ref_total:.3f} to {cand_total:.3f}; "
+                "preserve the repaired parts and focus only on the remaining failure."
+            )
+        elif cand_gap.get("matched", 0) and cand_gap_sum < ref_gap_sum:
+            summary = (
+                f"Weighted score stayed at {cand_total:.3f}, but checker metric gap improved "
+                f"from {ref_gap_sum:.4g} to {cand_gap_sum:.4g}; preserve this closer candidate."
+            )
+        else:
+            summary = (
+                f"Weighted score stayed at {cand_total:.3f}, but EVAS failure quality improved; "
+                "preserve this candidate and continue with a smaller targeted edit."
+            )
     elif ranking < 0:
         if tb_only_change and toggled_missing_observable:
             label = "oscillating"
@@ -701,7 +806,8 @@ def generate_multi_round_repair(
     The final sample_dir contains the best-so-far artifacts selected by EVAS.
     """
     model_slug = _model_slug(model)
-    generated_root = ROOT / MODE_TO_OUTPUT["evas-guided-repair-3round"]
+    mode_name = "evas-guided-repair-3round-skill" if include_skill else "evas-guided-repair-3round"
+    generated_root = ROOT / MODE_TO_OUTPUT[mode_name]
     generated_model_root = generated_root / model_slug
     generated_model_root.mkdir(parents=True, exist_ok=True)
 
@@ -770,7 +876,7 @@ def generate_multi_round_repair(
                     "task_id": task_id,
                     "family": family,
                     "sample_idx": sample_idx,
-                    "mode": "evas-guided-repair-3round",
+                    "mode": mode_name,
                     "status": "dry_run",
                     "round_completed": 0,
                     "selected_round": 0,
@@ -796,7 +902,7 @@ def generate_multi_round_repair(
                     "task_id": task_id,
                     "family": family,
                     "sample_idx": sample_idx,
-                    "mode": "evas-guided-repair-3round",
+                    "mode": mode_name,
                     "round_completed": 0,
                     "selected_round": 0,
                     "selected_round_label": "baseline",
@@ -813,6 +919,8 @@ def generate_multi_round_repair(
             round_idx=0,
             sample_dir=baseline_dir,
             result=baseline_evas_result,
+            task_id=task_id,
+            task_dir=task_dir,
         )
         history: list[dict] = []
         round_completed = 0
@@ -825,6 +933,8 @@ def generate_multi_round_repair(
                 "best_round": best_state.get("round", 0),
                 "best_status": best_state.get("status"),
                 "best_scores": best_state.get("scores", {}),
+                "best_metric_gap": best_state.get("metric_gap", {}),
+                "best_failure_subtype": best_state.get("failure_subtype"),
                 "last_transition": history[-1].get("progress_label") if history else None,
                 "last_transition_summary": history[-1].get("progress_summary") if history else None,
             }
@@ -850,7 +960,7 @@ def generate_multi_round_repair(
                 "top_p": top_p,
                 "max_tokens": max_tokens,
                 "generated_at": datetime.now(timezone.utc).isoformat(),
-                "mode": "evas-guided-repair-3round",
+                "mode": mode_name,
                 "round": round_idx,
             }
             round_meta_path = round_sample_dir / "generation_meta.json"
@@ -913,6 +1023,8 @@ def generate_multi_round_repair(
                 round_idx=round_idx,
                 sample_dir=round_sample_dir,
                 result=round_evas_result,
+                task_id=task_id,
+                task_dir=task_dir,
             )
             progress_label, progress_summary = _classify_loop_transition(previous_best_state, round_state)
             round_state.update({
@@ -922,7 +1034,7 @@ def generate_multi_round_repair(
             })
             history.append(round_state)
 
-            if _compare_results(round_evas_result, best_evas_result) > 0:
+            if _compare_loop_states(round_state, best_state) > 0:
                 best_evas_result = round_evas_result
                 best_sample_dir = round_sample_dir
                 best_state = round_state
@@ -949,7 +1061,7 @@ def generate_multi_round_repair(
                     "task_id": task_id,
                     "family": family,
                     "sample_idx": sample_idx,
-                    "mode": "evas-guided-repair-3round",
+                    "mode": mode_name,
                     "round_completed": round_completed,
                     "selected_round": best_state.get("round", 0),
                     "selected_round_label": _round_label(int(best_state.get("round", 0))),
@@ -963,6 +1075,8 @@ def generate_multi_round_repair(
                             "progress_label": entry.get("progress_label"),
                             "progress_summary": entry.get("progress_summary"),
                             "weighted_total": entry.get("scores", {}).get("weighted_total"),
+                            "failure_subtype": entry.get("failure_subtype"),
+                            "metric_gap": entry.get("metric_gap", {}),
                         }
                         for entry in history
                     ],
@@ -1027,13 +1141,14 @@ def parse_args() -> argparse.Namespace:
             "evas-guided-repair",
             "evas-guided-repair-no-skill",
             "evas-guided-repair-3round",
+            "evas-guided-repair-3round-skill",
             "skill-only",
             "skill-evas-informed",
             "both",
             "mainline",
         ],
         default="both",
-        help="Mode: evas-guided-repair-3round (condition F: multi-round repair)",
+        help="Mode: evas-guided-repair-3round (F) or evas-guided-repair-3round-skill (G)",
     )
     ap.add_argument("--stage", choices=["plan", "evas-inner", "generate", "spectre-final", "all"], default="plan")
     ap.add_argument("--sample-idx", type=int, default=0)
@@ -1088,7 +1203,7 @@ def main() -> int:
     for model in models:
         raw_evas_inner_root: Path | None = None
         skill_evas_inner_root: Path | None = None
-        if args.stage in ("evas-inner", "generate", "all") and any(mode in {"evas-assisted", "evas-guided-repair", "evas-guided-repair-no-skill", "evas-guided-repair-3round"} for mode in modes):
+        if args.stage in ("evas-inner", "generate", "all") and any(mode in {"evas-assisted", "evas-guided-repair", "evas-guided-repair-no-skill", "evas-guided-repair-3round", "evas-guided-repair-3round-skill"} for mode in modes):
             raw_evas_inner_root = score_baseline_evas(
                 model=model,
                 split=args.split,
@@ -1136,7 +1251,7 @@ def main() -> int:
             for mode in modes:
                 if mode == "skill-only":
                     continue
-                if mode == "evas-guided-repair-3round":
+                if mode in {"evas-guided-repair-3round", "evas-guided-repair-3round-skill"}:
                     if raw_evas_inner_root is None:
                         print(f"[model-assisted] SKIP {mode}: no B baseline EVAS results")
                         continue
@@ -1153,7 +1268,7 @@ def main() -> int:
                         evas_inner_root=raw_evas_inner_root,
                         workers=args.workers,
                         n_rounds=3,
-                        include_skill=False,
+                        include_skill=(mode == "evas-guided-repair-3round-skill"),
                         timeout_s=args.timeout_s,
                     )
                     continue

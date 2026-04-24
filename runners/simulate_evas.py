@@ -197,6 +197,21 @@ def _expanded_row_aliases(row: dict[str, float]) -> dict[str, float]:
                         f"{root.lower()}{idx}",
                     }
                 )
+                # Common generated DWA/vector port names use direction suffixes
+                # (`ptr_o[0]`, `cell_en_o[0]`, `code_i[0]`). The checkers use
+                # scalar observable names (`ptr_0`, `cell_en_0`, `code_0`).
+                stripped_root = root.lower()
+                for suffix in ("_msb_i", "_lsb_i", "_o", "_i"):
+                    if stripped_root.endswith(suffix):
+                        stripped_root = stripped_root[: -len(suffix)]
+                        break
+                if stripped_root in {"ptr", "cell_en", "code"}:
+                    candidates.update(
+                        {
+                            f"{stripped_root}_{idx}",
+                            f"{stripped_root}{idx}",
+                        }
+                    )
 
             dm = re.search(r"(dout|din|div_code|cell_en|ptr|state|code|bin_o|g|d)_?(\d+)$", cand.lower())
             if dm:
@@ -312,6 +327,14 @@ _TASK_ALIAS_CANDIDATES: dict[str, dict[str, tuple[str, ...]]] = {
     "dwa_ptr_gen_no_overlap_smoke": {
         "clk_i": ("clk",),
         "rst_ni": ("rst_n",),
+    },
+    "dwa_wraparound_smoke": {
+        "clk_i": ("clk",),
+        "rst_ni": ("rst_n",),
+        "code_0": ("code0",),
+        "code_1": ("code1",),
+        "code_2": ("code2",),
+        "code_3": ("code3",),
     },
     "noise_gen_smoke": {
         "vin_i": ("vin",),

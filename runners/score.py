@@ -356,7 +356,43 @@ def _has_transition_inside_conditional(va_path: Path) -> bool:
     return bool(pattern.search(text) or single_line.search(text))
 
 
-def _has_dynamic_analog_vector_index(va_path: Path) -> bool:
+def _conditional_cross_hits(va_path: Path) -> list[str]:
+    text = _strip_line_comments(va_path.read_text(encoding="utf-8", errors="ignore"))
+    hits: list[str] = []
+    inline_pattern = re.compile(r"\b(?:if|else)\b[^{;\n]*@\s*\(\s*cross\s*\(")
+    block_pattern = re.compile(
+        r"\b(?:if|else)\b[^{;]*\bbegin\b(?:(?!\bend\b).)*@\s*\(\s*cross\s*\(",
+        flags=re.DOTALL,
+    )
+    if block_pattern.search(text):
+        for lineno, line in enumerate(text.splitlines(), start=1):
+            if re.search(r"\b(?:if|else)\b", line):
+                hits.append(f"{va_path.name}:{lineno}:conditional_block")
+                break
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        if inline_pattern.search(line):
+            compact = re.sub(r"\s+", " ", line.strip())
+            hits.append(f"{va_path.name}:{lineno}:{compact}")
+    return hits
+
+
+def _genvar_inside_analog_hits(va_path: Path) -> list[str]:
+    text = _strip_line_comments(va_path.read_text(encoding="utf-8", errors="ignore"))
+    in_analog = False
+    hits: list[str] = []
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        stripped = line.strip()
+        if re.search(r"\banalog\s+begin\b", stripped):
+            in_analog = True
+        if in_analog and re.search(r"\bgenvar\b", stripped):
+            compact = re.sub(r"\s+", " ", stripped)
+            hits.append(f"{va_path.name}:{lineno}:{compact}")
+        if in_analog and re.match(r"^endmodule\b", stripped):
+            in_analog = False
+    return hits
+
+
+def _dynamic_analog_vector_index_hits(va_path: Path) -> list[str]:
     text = _strip_line_comments(va_path.read_text(encoding="utf-8", errors="ignore"))
     integer_vars = set()
     for decl in re.findall(r"\binteger\s+([^;]+);", text):
@@ -364,10 +400,19 @@ def _has_dynamic_analog_vector_index(va_path: Path) -> bool:
             name = name.strip()
             if re.match(r"^[A-Za-z_][A-Za-z0-9_$]*$", name):
                 integer_vars.add(name)
+    hits: list[str] = []
+    lines = text.splitlines()
     for var in integer_vars:
-        if re.search(rf"\bV\s*\([^)]*\[\s*{re.escape(var)}\s*\]", text):
-            return True
-    return False
+        pattern = re.compile(rf"\bV\s*\(([^)]*\[\s*{re.escape(var)}\s*\][^)]*)\)")
+        for lineno, line in enumerate(lines, start=1):
+            for match in pattern.finditer(line):
+                expr = re.sub(r"\s+", "", match.group(1))
+                hits.append(f"{va_path.name}:{lineno}:{var}:{expr}")
+    return hits
+
+
+def _has_dynamic_analog_vector_index(va_path: Path) -> bool:
+    return bool(_dynamic_analog_vector_index_hits(va_path))
 
 
 def _has_digital_verilog_syntax(va_path: Path) -> list[str]:
@@ -531,9 +576,27 @@ def spectre_strict_preflight(
         if _has_transition_inside_conditional(va_path):
             _record_failure("ahdl_syntax")
             notes.append(f"spectre_strict:conditional_transition={va_path.name}")
-        if _has_dynamic_analog_vector_index(va_path):
+        conditional_cross_hits = _conditional_cross_hits(va_path)
+        if conditional_cross_hits:
             _record_failure("ahdl_syntax")
-            notes.append(f"spectre_strict:dynamic_analog_vector_index={va_path.name}")
+            notes.append(
+                "spectre_strict:conditional_cross="
+                + ",".join(conditional_cross_hits[:8])
+            )
+        genvar_hits = _genvar_inside_analog_hits(va_path)
+        if genvar_hits:
+            _record_failure("ahdl_syntax")
+            notes.append(
+                "spectre_strict:genvar_inside_analog="
+                + ",".join(genvar_hits[:8])
+            )
+        dynamic_hits = _dynamic_analog_vector_index_hits(va_path)
+        if dynamic_hits:
+            _record_failure("ahdl_syntax")
+            notes.append(
+                "spectre_strict:dynamic_analog_vector_index="
+                + ",".join(dynamic_hits[:12])
+            )
         for digital_issue in _has_digital_verilog_syntax(va_path):
             _record_failure("ahdl_syntax")
             notes.append(f"spectre_strict:digital_verilog_syntax={digital_issue} in {va_path.name}")

@@ -1,723 +1,740 @@
 #!/usr/bin/env python3
 """
-Diagnosis Translation System for EVAS Repair Prompt Enhancement.
+Diagnosis translation for EVAS repair prompts.
 
-Translates EVAS checker diagnostic messages into specific repair suggestions.
-
-Usage:
-    from diagnosis_translation import translate_diagnosis
-
-    translation = translate_diagnosis("pre_high_frac=0.000 post_low_frac=1.000")
-    print(translation["repair_suggestions"])
+P0 goals implemented here:
+1. Replace fragile broad substring matching with structured, prioritized matching.
+2. Preserve model-agnostic behavior: all routing is based on EVAS diagnostics only.
+3. Emit typed diagnosis metadata for downstream prompt routing.
 """
 from __future__ import annotations
 
 import re
 from typing import Optional
 
+_KV_RE = re.compile(r"\b([A-Za-z_][A-Za-z0-9_]*)=([^\s,;]+)")
+_BOOKKEEPING_KEYS = {"generated_include", "returncode"}
 
-# Diagnosis pattern -> repair rules mapping
-DIAGNOSIS_RULES = {
-    # === Time window output anomalies ===
-    "_frac=0.0": {
-        "diagnosis": "Output never reached expected level in time window",
-        "causes": [
-            "Missing falling-edge handler (only rising edge exists, no falling-edge reset)",
-            "Clock threshold mismatch, clock edge not triggering",
-            "Initial state overriding subsequent state updates",
-        ],
-        "repair_suggestions": [
-            "Check if there is @(cross(V(clk) - threshold, -1)) for falling edge",
-            "Verify clock threshold matches actual clock amplitude (vdd/2)",
-            "Ensure state update happens inside @(cross) block, not just outside",
-        ],
-        "example_fix": """
-Example fix for clocked comparator:
-```verilog-a
-@(cross(V(CLK) - vdd/2, +1)) begin  // Rising edge: latch decision
-    out_p = (V(VINP) > V(VINN)) ? vdd : 0;
-end
-@(cross(V(CLK) - vdd/2, -1)) begin  // Falling edge: RESET output
-    out_p = 0;
-    out_n = 0;
-end
-```
-""",
-    },
 
-    "insufficient_toggle": {
-        "diagnosis": "Output not toggling, span close to 0",
-        "causes": [
-            "Output stays constant",
-            "Missing state flip logic",
-        ],
-        "repair_suggestions": [
-            "Add state variable and flip logic",
-            "Verify @(cross) triggers correctly",
-        ],
-    },
+def _parse_metrics(note: str) -> dict[str, str]:
+    return {k: v for k, v in _KV_RE.findall(note)}
 
-    "outputs_do_not_toggle": {
-        "diagnosis": "Both outputs stay at same level",
-        "causes": [
-            "No state change triggered",
-            "Threshold logic missing",
-        ],
-        "repair_suggestions": [
-            "Add @(cross) for input threshold detection",
-            "Implement state machine for output switching",
-        ],
-    },
 
-    # === Code count issues ===
-    "unique_codes=": {
-        "diagnosis": "ADC/DAC produces insufficient unique codes",
-        "causes": [
-            "Quantization thresholds not distributed across input range",
-            "LSB calculation error",
-            "floor/clamp logic error",
-        ],
-        "repair_suggestions": [
-            "Ensure LSB = (vrefp - vrefn) / 2^N",
-            "Verify code = floor((vin - vrefn) / LSB), clamped to [0, 2^N-1]",
-            "Check thresholds distributed: each bit needs different reference",
-        ],
-        "example_fix": """
-Flash ADC correct implementation:
-```verilog-a
-lsb = (vrefp - vrefn) / 8.0;
-code = $floor((V(vin) - vrefn) / lsb);
-if (code < 0) code = 0;
-if (code > 7) code = 7;
-// Each bit output:
-V(dout2) <+ transition((code >= 4) ? V(vdd) : V(vss), ...);
-V(dout1) <+ transition((code >= 2) ? V(vdd) : V(vss), ...);
-V(dout0) <+ transition((code >= 1) ? V(vdd) : V(vss), ...);
-```
-""",
-    },
+def _behavior_metrics(metrics: dict[str, str]) -> dict[str, str]:
+    return {k: v for k, v in metrics.items() if k not in _BOOKKEEPING_KEYS}
 
-    "only_": {
-        "diagnosis": "Produces far fewer codes than expected",
-        "causes": [
-            "Quantization function wrong",
-            "All outputs share same threshold",
-        ],
-        "repair_suggestions": [
-            "Flash ADC needs 2^N different comparator thresholds",
-            "Each output bit needs independent judgment condition",
-        ],
-    },
 
-    # === Hysteresis specific ===
-    "window_fracs": {
-        "diagnosis": "Hysteresis window test failed - output didn't change in mid-phase",
-        "causes": [
-            "Only one threshold, missing two @(cross) with opposite directions",
-            "Rising and falling thresholds are same",
-        ],
-        "repair_suggestions": [
-            "Hysteresis requires TWO @(cross) statements:",
-            "  @(cross(V(inp) - V(inn) - vhys/2, +1))  // Rising threshold",
-            "  @(cross(V(inp) - V(inn) + vhys/2, -1))  // Falling threshold",
-            "Threshold directions MUST be opposite: +1 for rising, -1 for falling",
-            "Between thresholds, HOLD previous state (no change)",
-        ],
-        "example_fix": """
-Hysteresis comparator correct implementation:
-```verilog-a
-integer state;  // 0: out_p LOW, 1: out_p HIGH
+def _has_key(note: str, key: str) -> bool:
+    return re.search(rf"\b{re.escape(key)}=", note) is not None
 
-@(cross(V(vinp) - V(vinn) - vhys/2, +1)) begin  // Rising through +vhys/2
-    state = 1;  // out_p goes HIGH
-end
 
-@(cross(V(vinp) - V(vinn) + vhys/2, -1)) begin  // Falling through -vhys/2
-    state = 0;  // out_p goes LOW
-end
+def _returncode_is_nonzero(metrics: dict[str, str]) -> bool:
+    raw = metrics.get("returncode")
+    if raw is None:
+        return False
+    try:
+        return int(float(raw)) != 0
+    except ValueError:
+        return False
 
-V(out_p) <+ transition(state ? V(vdd) : V(vss), ...);
-V(out_n) <+ transition(state ? V(vss) : V(vdd), ...);
-```
-""",
-    },
 
-    "rise_t_out_of_range": {
-        "diagnosis": "Output rise time outside expected hysteresis window",
-        "causes": ["Threshold polarity wrong", "Hysteresis parameter mismatch"],
-        "repair_suggestions": [
-            "Check vhys/2 threshold calculation",
-            "Verify rising edge detection direction (+1)",
-        ],
-    },
-
-    "fall_t_out_of_range": {
-        "diagnosis": "Output fall time outside expected hysteresis window",
-        "causes": ["Threshold polarity wrong", "Hysteresis parameter mismatch"],
-        "repair_suggestions": [
-            "Check -vhys/2 threshold calculation",
-            "Verify falling edge detection direction (-1)",
-        ],
-    },
-
-    # === Edge/timer issues ===
-    "rising_edge_count=": {
-        "diagnosis": "Edge count mismatch",
-        "causes": ["@(timer) used incorrectly", "Time grid calculation wrong"],
-        "repair_suggestions": [
-            "Ensure next_t increments inside each @(timer) block",
-            "Verify tstart and tstep parameters",
-            "Use @(timer(next_t)) not @(timer(delay))",
-        ],
-        "example_fix": """
-Timer on absolute grid:
-```verilog-a
-real next_t;
-@(initial_step) begin
-    next_t = tstart;
-end
-
-@(timer(next_t)) begin
-    // Toggle output
-    state = !state;
-    next_t = next_t + tstep;  // Increment for next event
-end
-```
-""",
-    },
-
-    "not_enough_clk_edges": {
-        "diagnosis": "Insufficient clock edges detected",
-        "causes": ["Clock not generated", "Simulation time too short"],
-        "repair_suggestions": [
-            "Check testbench clock source: vsource type=pulse period=...",
-            "Increase tran stop time to get more clock cycles",
-            "Verify clock amplitude matches threshold",
-        ],
-    },
-
-    "frame_rises=": {
-        "diagnosis": "Frame signal rises fewer times than expected",
-        "causes": ["Frame marker logic missing", "Incorrect frame period"],
-        "repair_suggestions": [
-            "Serializer must output frame marker at each frame period",
-            "Check frame period matches expected cycle count",
-        ],
-    },
-
-    # === Logic gate issues ===
-    "invert_match_frac=": {
-        "diagnosis": "NOT gate inversion match rate low",
-        "causes": [
-            "VDD/VSS not dynamically read",
-            "Threshold setting wrong",
-            "Output level stuck at parameter default",
-        ],
-        "repair_suggestions": [
-            "CRITICAL: Read V(vdd) and V(vss) INSIDE @(cross) block:",
-            "  v_high = V(vdd);  // NOT v_high = vdd_parameter",
-            "  v_low = V(vss);",
-            "Do NOT use static parameter defaults for output levels",
-        ],
-        "example_fix": """
-NOT gate correct:
-```verilog-a
-@(cross(V(a) - vth, +1 or -1)) begin
-    v_high = V(vdd);  // Dynamic read!
-    v_low = V(vss);   // Dynamic read!
-    out_val = (V(a) < vth) ? v_high : v_low;
-end
-V(y) <+ transition(out_val, ...);
-```
-""",
-    },
-
-    "truth_table_match=": {
-        "diagnosis": "Logic gate truth table match rate low",
-        "causes": ["Logic expression wrong", "Output not switching correctly"],
-        "repair_suggestions": [
-            "AND: Y HIGH only when BOTH A AND B HIGH",
-            "OR: Y HIGH when EITHER A OR B HIGH",
-            "Use dynamic level: V(Y) <+ V(vdd) or V(vss)",
-        ],
-    },
-
-    # === Reset issues ===
-    "no post-reset": {
-        "diagnosis": "No valid output after reset release",
-        "causes": ["Reset logic wrong", "State not restored after reset"],
-        "repair_suggestions": [
-            "Check reset triggers correctly",
-            "Reset release should enable normal operation",
-            "Use @(cross(V(rst), -1)) for reset release",
-        ],
-    },
-
-    "reset_": {
-        "diagnosis": "Reset behavior incorrect",
-        "causes": ["Reset not clearing state", "Reset priority wrong"],
-        "repair_suggestions": [
-            "Reset should clear internal state variables",
-            "Reset takes priority over clock sampling",
-        ],
-    },
-
-    # === Missing signals ===
-    "missing": {
-        "diagnosis": "Required signal missing from waveform",
-        "causes": ["Save statement missing signals", "Port name mismatch"],
-        "repair_suggestions": [
-            "Add all required signals to save statement",
-            "Ensure DUT port names match TB save signal names",
-            "Check signal naming: out_p vs outp, clk vs CLK",
-        ],
-    },
-
-    # === ADC/DAC specific ===
-    "vout_span=": {
-        "diagnosis": "DAC output span too small",
-        "causes": ["Transfer function wrong", "Vref not used"],
-        "repair_suggestions": [
-            "DAC: aout = code/2^N * Vref",
-            "Ensure output swings from V(vss) to V(vrefp)",
-        ],
-    },
-
-    "no_samples": {
-        "diagnosis": "No samples in expected selection window",
-        "causes": ["Selection logic wrong", "Simulation time insufficient"],
-        "repair_suggestions": [
-            "Mux: check each selection case has test window",
-            "Extend tran stop time to cover all selection cases",
-        ],
-    },
-
-    # === Serializer issues ===
-    "sel0_err": {
-        "diagnosis": "Mux selection 0 output incorrect",
-        "causes": ["Selection logic case 0 wrong", "Output expression uses wrong input port"],
-        "repair_suggestions": [
-            "SEL=00 should output d0",
-            "Check each case: 00→d0, 01→d1, 10→d2, 11→d3",
-            "Verify the output assignment uses the correct input for each selection",
-        ],
-    },
-
-    # === PLL / Clock issues ===
-    "pre_lock=0": {
-        "diagnosis": "PLL never achieved lock before disturbance",
-        "causes": [
-            "VCTRL not settling to a stable value",
-            "Reference frequency mismatch",
-            "Divider ratio incorrect",
-            "Missing or broken lock detection logic",
-        ],
-        "repair_suggestions": [
-            "Check VCTRL is being updated by charge pump on each UP/DN event",
-            "Verify divider ratio produces frequency matching reference",
-            "Ensure loop filter parameters allow settling within simulation time",
-            "Check PFD is generating UP/DN pulses correctly",
-        ],
-    },
-
-    "post_lock=0": {
-        "diagnosis": "PLL did not re-lock after disturbance",
-        "causes": [
-            "Same as pre_lock causes",
-            "Disturbance too large for loop to recover",
-            "Missing recovery/relock logic",
-        ],
-        "repair_suggestions": [
-            "Same checks as pre_lock",
-            "Verify the loop can recover from the applied disturbance",
-            "Check if VCTRL range is sufficient after disturbance",
-        ],
-    },
-
-    "lock=": {
-        "diagnosis": "PLL lock state incorrect",
-        "causes": ["Lock detection threshold wrong", "Lock counter not incrementing"],
-        "repair_suggestions": [
-            "Check lock detection criteria (e.g., consecutive frequency matches)",
-            "Verify lock signal is asserted when frequency is within tolerance",
-        ],
-    },
-
-    "vctrl_range_ok=True": {
-        "diagnosis": "VCTRL is in valid range but PLL still not locked",
-        "causes": ["VCTRL not at correct value for lock", "Frequency still mismatched despite VCTRL in range"],
-        "repair_suggestions": [
-            "VCTRL being in range does not guarantee lock",
-            "Check actual output frequency vs reference",
-            "Verify divider is working correctly",
-        ],
-    },
-
-    "relock_time=": {
-        "diagnosis": "PLL re-lock time outside expected range",
-        "causes": ["Loop bandwidth too narrow", "Charge pump current too small"],
-        "repair_suggestions": [
-            "Check loop filter bandwidth allows fast settling",
-            "Verify charge pump strength",
-            "Ensure no unnecessary delays in control path",
-        ],
-    },
-
-    "freq_ratio=": {
-        "diagnosis": "Frequency ratio (output/reference) incorrect",
-        "causes": ["Divider ratio wrong", "VCO frequency wrong"],
-        "repair_suggestions": [
-            "Check divider outputs correct frequency",
-            "Verify VCO gain (Kvco) parameter",
-            "Ensure reference frequency is as expected",
-        ],
-    },
-
-    # === Delay / Timing issues ===
-    "delays_ns=": {
-        "diagnosis": "Delay values measured",
-        "causes": ["May indicate correct or incorrect delays"],
-        "repair_suggestions": [
-            "Compare delays against expected values",
-            "If delays vary wildly, check if all instances work correctly",
-        ],
-    },
-
-    "monotonic=False": {
-        "diagnosis": "Delay sequence is NOT monotonic",
-        "causes": [
-            "Some comparator instances bypass measurement (delay ~0)",
-            "Edge timing measurement error",
-            "Only one instance responding correctly",
-        ],
-        "repair_suggestions": [
-            "Check if all parallel instances have correct thresholds",
-            "Verify each instance triggers on the correct input edge",
-            "Ensure no instance is stuck or bypassing the delay path",
-        ],
-    },
-
-    # === BBPD / Edge alignment issues ===
-    "lead_window": {
-        "diagnosis": "Data edge alignment window mismatch",
-        "causes": [
-            "Data signal timing relative to clock edge incorrect",
-            "Timer/cross threshold for window detection wrong",
-            "Sampling edge direction mismatch",
-        ],
-        "repair_suggestions": [
-            "Check data and clock edge timing relationship",
-            "Verify timer timing matches expected window",
-            "Ensure sampling happens at correct edge (rising vs falling)",
-        ],
-    },
-
-    "updn": {
-        "diagnosis": "UP/DN signal pattern incorrect",
-        "causes": ["Phase detector logic wrong", "Edge direction inverted"],
-        "repair_suggestions": [
-            "Check PFD generates correct UP/DN for early/late conditions",
-            "Verify UP when phase early (data leads clock), DN when late",
-        ],
-    },
-
-    # === Reset issues (extended) ===
-    "reset_outp_max=": {
-        "diagnosis": "Reset does not clear output to zero",
-        "causes": [
-            "Reset priority logic incorrect",
-            "Output not forced to zero during reset",
-            "Reset edge detection missing or wrong direction",
-        ],
-        "repair_suggestions": [
-            "Reset should force both outputs to zero immediately",
-            "Check reset condition is checked BEFORE comparison logic",
-            "Verify reset detection uses correct edge (rising for active-high reset)",
-        ],
-        "example_fix": """
-StrongARM reset priority fix:
-```verilog-a
-@(cross(V(clk) - vth, +1)) begin
-    if (V(rst) > vth) begin  // RESET TAKES PRIORITY
-        outp_state = 0;
-        outn_state = 0;
-    end else begin  // Normal comparison only when reset inactive
-        // ... comparison logic
-    end
-end
-```
-""",
-    },
-
-    "high_outp=": {
-        "diagnosis": "Output high/low levels incorrect",
-        "causes": ["Output not reaching expected voltage", "Logic state inverted"],
-        "repair_suggestions": [
-            "Check output levels match VDD/VSS",
-            "Verify output state assignment logic",
-        ],
-    },
-
-    # === ADC/DAC issues (extended) ===
-    "delays": {
-        "diagnosis": "Comparator/ADC delay values",
-        "causes": ["Delays measured for analysis"],
-        "repair_suggestions": [
-            "If delays non-uniform, check comparator thresholds distribution",
-            "Ensure all bits have similar response times",
-        ],
-    },
-}
+def _route_failure_type(note: str, metrics: dict[str, str]) -> str:
+    lowered = note.lower()
+    if (
+        "tran.csv missing" in lowered
+        or "evas_timeout" in lowered
+        or "tb_not_executed" in lowered
+        or _returncode_is_nonzero(metrics)
+    ):
+        return "simulation_artifact"
+    if (
+        "normalized_tb_save_tokens" in lowered
+        or lowered.startswith("missing ")
+        or "missing_" in lowered
+        or "no vdac activity" in lowered
+        or "missing clk_in/clk_out" in lowered
+        or "insufficient_window_samples" in lowered
+        or "insufficient_post_reset_samples" in lowered
+    ):
+        return "observability_contract"
+    return "behavior_semantic"
 
 
 def translate_diagnosis(note: str, task_id: Optional[str] = None) -> dict:
-    """
-    Translate EVAS diagnostic message to repair suggestions.
+    """Translate one EVAS note into structured, actionable repair guidance."""
+    metrics = _parse_metrics(note)
+    failure_type = _route_failure_type(note, metrics)
+    lowered = note.lower()
 
-    Args:
-        note: Diagnostic string from EVAS checker, e.g. "pre_high_frac=0.000"
-        task_id: Optional task ID for circuit-specific context
-
-    Returns:
-        dict with keys:
-        - diagnosis: str, human-readable problem description
-        - causes: list[str], possible root causes
-        - repair_suggestions: list[str], specific fix hints
-        - example_fix: str, example code (if available)
-        - circuit_specific: str, circuit-specific knowledge (if applicable)
-    """
     result = {
         "diagnosis": "",
         "causes": [],
         "repair_suggestions": [],
         "example_fix": "",
         "circuit_specific": "",
+        "failure_type": failure_type,
+        "matched_rule": "",
+        "matched_keys": [],
     }
 
-    # Pattern matching
-    for pattern, rules in DIAGNOSIS_RULES.items():
-        if pattern in note:
-            result["diagnosis"] = rules.get("diagnosis", "")
-            result["causes"] = rules.get("causes", [])
-            result["repair_suggestions"] = rules.get("repair_suggestions", [])
-            result["example_fix"] = rules.get("example_fix", "")
-            break
+    # Priority 1: infra/simulation artifacts.
+    if failure_type == "simulation_artifact":
+        result.update(
+            {
+                "diagnosis": "Simulation artifact failure (output waveform unavailable or invalid)",
+                "matched_rule": "SIM_ARTIFACT",
+                "causes": [
+                    "Transient CSV not produced or simulation timed out",
+                    "Netlist execution failed before behavior checker stage",
+                ],
+                "repair_suggestions": [
+                    "Keep one valid top-level tran setup and avoid tiny maxstep values",
+                    "Ensure DUT/TB include paths and required files are complete",
+                    "Fix compile/runtime errors before semantic tuning",
+                ],
+            }
+        )
+        result["matched_keys"] = sorted(metrics.keys())
+    # Priority 2: observability / contract failures.
+    elif failure_type == "observability_contract":
+        if (
+            "insufficient_post_reset_samples" in lowered
+            or any(_has_key(note, key) for key in ("too_few_clock_edges", "too_few_edges", "no_clock_edges"))
+        ):
+            result.update(
+                {
+                    "diagnosis": "Expected post-reset clock/sample edges are missing",
+                    "matched_rule": "POST_RESET_SAMPLE_BUDGET",
+                    "causes": [
+                        "Reset may deassert too late relative to transient stop time",
+                        "Clock period or clock delay may leave too few sampled edges after reset",
+                        "Stimulus changes may occur outside the checker sampling window",
+                    ],
+                    "repair_suggestions": [
+                        "Repair the testbench timing budget before changing DUT behavior",
+                        "Ensure reset deasserts early and several rising clock edges occur before tran stop",
+                        "If tran stop is fixed, shorten/move the clock/reset/stimulus schedule inside the existing window",
+                    ],
+                }
+            )
+        else:
+            result.update(
+                {
+                    "diagnosis": "Observability or checker-contract mismatch",
+                    "matched_rule": "OBSERVABILITY_CONTRACT",
+                    "causes": [
+                        "Saved waveform columns do not match checker-required names",
+                        "Testbench save statement is incomplete or aliased incorrectly",
+                    ],
+                    "repair_suggestions": [
+                        "Fix save statement names first; match checker-required lowercase signals exactly",
+                        "Avoid colon-instance save syntax and keep one canonical save list",
+                        "After observability is fixed, re-check behavioral metrics",
+                    ],
+                }
+            )
+        result["matched_keys"] = sorted(metrics.keys())
+    # Priority 3: semantic behavioral failures (ordered rules).
+    elif _has_key(note, "freq_ratio"):
+        result.update(
+            {
+                "diagnosis": "PLL frequency tracking ratio is incorrect",
+                "matched_rule": "PLL_FREQ_RATIO",
+                "causes": [
+                    "Divider ratio or DCO period update path is incorrect",
+                    "Lock condition logic does not reflect actual frequency convergence",
+                ],
+                "repair_suggestions": [
+                    "Align divider update and output edge generation with target ratio",
+                    "Compute/observe frequency ratio in the same timing window as checker",
+                    "Gate lock assertion on stable ratio conditions rather than static thresholds",
+                ],
+            }
+        )
+        result["matched_keys"] = ["freq_ratio"] + [k for k in ("lock_time", "fb_jitter_frac") if k in metrics]
+    elif "ratio_hop_not_detected" in lowered:
+        result.update(
+            {
+                "diagnosis": "PLL ratio-hop behavior not detected by checker",
+                "matched_rule": "PLL_RATIO_HOP",
+                "causes": [
+                    "Hop event timing or ratio state transition is missing",
+                    "Reference/hop phase windows do not produce expected edge counts",
+                ],
+                "repair_suggestions": [
+                    "Implement explicit pre-hop and post-hop ratio states",
+                    "Ensure hop trigger occurs in checker-visible simulation window",
+                    "Keep edge counters/lock indicators coherent through the hop",
+                ],
+            }
+        )
+    elif _has_key(note, "relock_time"):
+        result.update(
+            {
+                "diagnosis": "PLL relock time is outside expected range",
+                "matched_rule": "PLL_RELOCK_TIME",
+                "causes": [
+                    "Loop dynamics are too slow after disturbance",
+                    "Charge-pump / control update is too weak or delayed",
+                ],
+                "repair_suggestions": [
+                    "Increase effective loop responsiveness after phase/frequency error",
+                    "Verify relock detection is based on stable post-disturbance behavior",
+                ],
+            }
+        )
+        result["matched_keys"] = ["relock_time"]
+    elif _has_key(note, "unique_codes") or re.search(r"\bonly_\d+_codes\b", lowered):
+        result.update(
+            {
+                "diagnosis": "ADC/DAC code coverage is insufficient",
+                "matched_rule": "ADC_DAC_CODE_COVERAGE",
+                "causes": [
+                    "Quantization thresholds or code mapping collapse to a narrow range",
+                    "Output update logic is stuck or clipped",
+                ],
+                "repair_suggestions": [
+                    "Rebuild code mapping from vin range to full-scale code range",
+                    "Clamp only at boundaries; keep linear region monotonic",
+                    "Verify each bit/output branch uses distinct threshold logic",
+                ],
+            }
+        )
+        result["matched_keys"] = ["unique_codes"] + [k for k in ("vout_span", "vin_span") if k in metrics]
+        if re.search(r"\bonly_\d+_codes\b", lowered):
+            result["matched_keys"].append("only_N_codes")
+    elif _has_key(note, "late_edge_ratio"):
+        result.update(
+            {
+                "diagnosis": "ADPLL late-window edge ratio is incorrect",
+                "matched_rule": "ADPLL_EDGE_RATIO",
+                "causes": [
+                    "Feedback/output edge cadence does not match the expected locked ratio",
+                    "Lock is asserted without the measured edge ratio converging",
+                ],
+                "repair_suggestions": [
+                    "Tie lock behavior to measured edge cadence rather than a static delay",
+                    "Update divider/DCO timing so late-window edge counts match the target ratio",
+                ],
+            }
+        )
+        result["matched_keys"] = [k for k in ("late_edge_ratio", "lock_time", "vctrl_range_ok") if k in metrics]
+    elif _has_key(note, "lead_window_updn"):
+        result.update(
+            {
+                "diagnosis": "BBPD/PFD data-edge alignment window is incorrect",
+                "matched_rule": "BBPD_EDGE_ALIGNMENT",
+                "causes": [
+                    "UP/DN pulse decision is not aligned to the intended data-edge window",
+                    "Pulse generation may be level-sensitive instead of edge-window-sensitive",
+                ],
+                "repair_suggestions": [
+                    "Generate UP/DN pulses from edge ordering in the checker-visible window",
+                    "Keep pulse width finite and reset both outputs between comparisons",
+                ],
+            }
+        )
+        result["matched_keys"] = ["lead_window_updn"]
+    elif _has_key(note, "code_span") or _has_key(note, "settled_high"):
+        result.update(
+            {
+                "diagnosis": "Calibration/code range behavior is not reaching the required span",
+                "matched_rule": "CAL_CODE_SPAN",
+                "causes": [
+                    "Calibration state machine is stuck or stops before covering the code range",
+                    "Settling flag/output does not reflect the final calibrated state",
+                ],
+                "repair_suggestions": [
+                    "Make the calibration code update monotonically through the required range",
+                    "Assert settled only after the final code/range condition is reached",
+                ],
+            }
+        )
+        result["matched_keys"] = [k for k in ("code_span", "settled_high") if k in metrics]
+    elif _has_key(note, "clk_out_hi_frac") or _has_key(note, "rising_edges"):
+        result.update(
+            {
+                "diagnosis": "Clock burst output duty/edge count is incorrect",
+                "matched_rule": "CLOCK_BURST",
+                "causes": [
+                    "Burst enable window or edge counter is too short",
+                    "Output clock is not toggled for the expected number of cycles",
+                ],
+                "repair_suggestions": [
+                    "Drive the output clock only inside the burst window but preserve full toggles",
+                    "Use an explicit edge counter/state machine for burst length",
+                ],
+            }
+        )
+        result["matched_keys"] = [k for k in ("clk_out_hi_frac", "rising_edges") if k in metrics]
+    elif _has_key(note, "ratio_code") or _has_key(note, "period_match") or _has_key(note, "interval_hist"):
+        result.update(
+            {
+                "diagnosis": "Programmable clock divider ratio/period is incorrect",
+                "matched_rule": "CLOCK_DIVIDER_RATIO",
+                "causes": [
+                    "Divider terminal count does not correspond to the programmed ratio",
+                    "Lock/period output is asserted without matching the measured interval",
+                ],
+                "repair_suggestions": [
+                    "Decode ratio_code into an explicit terminal count and toggle only on terminal count",
+                    "Keep lock/high indicators consistent with the period observed in clk_out",
+                ],
+            }
+        )
+        result["matched_keys"] = [k for k in ("ratio_code", "in_edges", "out_edges", "period_match", "interval_hist") if k in metrics]
+    elif "insufficient_toggle" in lowered:
+        result.update(
+            {
+                "diagnosis": "Comparator output does not toggle over the stimulus range",
+                "matched_rule": "COMPARATOR_TOGGLE",
+                "causes": [
+                    "Differential decision threshold or output polarity is wrong",
+                    "Outputs may be stuck because the input comparison is not connected to state update",
+                ],
+                "repair_suggestions": [
+                    "Drive complementary outputs from the sign of the input difference",
+                    "Ensure both high and low decisions are reachable in the test window",
+                ],
+            }
+        )
+        result["matched_keys"] = [k for k in ("out_p_span", "out_n_span") if k in metrics]
+    elif _has_key(note, "seen_out_never_high"):
+        result.update(
+            {
+                "diagnosis": "Crossing/interval output never asserts in the expected window",
+                "matched_rule": "CROSS_INTERVAL_ASSERT",
+                "causes": [
+                    "Event threshold or interval comparison is not reached",
+                    "Output pulse may be too narrow or outside the checker sampling window",
+                ],
+                "repair_suggestions": [
+                    "Use cross-triggered state updates and hold the output long enough to observe",
+                    "Align threshold/time interval constants with the prompt specification",
+                ],
+            }
+        )
+        result["matched_keys"] = ["seen_out_never_high"]
+    elif _has_key(note, "levels") or _has_key(note, "aout_span"):
+        result.update(
+            {
+                "diagnosis": "DAC output level coverage is insufficient",
+                "matched_rule": "DAC_LEVEL_COVERAGE",
+                "causes": [
+                    "Digital input decoding collapses multiple codes to one analog level",
+                    "Output update is not clocked or not connected to the stimulus code",
+                ],
+                "repair_suggestions": [
+                    "Decode every input bit with binary/thermometer weights as specified",
+                    "Update the analog output after the intended clock/sample event",
+                ],
+            }
+        )
+        result["matched_keys"] = [k for k in ("levels", "aout_span") if k in metrics]
+    elif _has_key(note, "max_ones") or _has_key(note, "max_vout"):
+        result.update(
+            {
+                "diagnosis": "Thermometer DAC count-to-voltage behavior is incorrect",
+                "matched_rule": "THERM_DAC_COUNT",
+                "causes": [
+                    "Input ones count or reset handling does not match the expected checkpoints",
+                    "Voltage scaling may not be held stable at checker sampling times",
+                ],
+                "repair_suggestions": [
+                    "Count all 16 thermometer inputs explicitly and multiply by vstep",
+                    "Give transition outputs enough settling time before checkpoint samples",
+                ],
+            }
+        )
+        result["matched_keys"] = [k for k in ("max_ones", "max_vout") if k in metrics]
+    elif any(_has_key(note, k) for k in ("q_mismatch", "qb_mismatch")):
+        result.update(
+            {
+                "diagnosis": "DFF reset/Q-QB behavior is inconsistent with expected samples",
+                "matched_rule": "DFF_RESET_COMPLEMENT",
+                "causes": [
+                    "Reset priority or clocked sampling order is wrong",
+                    "QB is not maintained as the complement of Q",
+                ],
+                "repair_suggestions": [
+                    "Give reset highest priority and sample D only on the intended clock edge",
+                    "Drive QB from the same state variable as Q with opposite polarity",
+                ],
+            }
+        )
+        result["matched_keys"] = [k for k in ("checks", "q_mismatch", "qb_mismatch") if k in metrics]
+    elif any(
+        _has_key(note, key)
+        for key in ("too_few_edges", "too_few_clock_edges", "insufficient_post_reset_samples", "no_clock_edges")
+    ):
+        result.update(
+            {
+                "diagnosis": "Expected post-reset clock/sample edges are missing",
+                "matched_rule": "POST_RESET_SAMPLE_BUDGET",
+                "causes": [
+                    "Reset may deassert too late relative to transient stop time",
+                    "Clock period or clock delay may leave too few sampled edges after reset",
+                    "Stimulus changes may occur outside the checker sampling window",
+                ],
+                "repair_suggestions": [
+                    "Repair the testbench timing budget before changing DUT behavior",
+                    "Ensure reset deasserts early and several rising clock edges occur before tran stop",
+                    "If tran stop is fixed, shorten/move the clock/reset/stimulus schedule inside the existing window",
+                ],
+            }
+        )
+        result["matched_keys"] = [
+            key
+            for key in ("too_few_edges", "too_few_clock_edges", "insufficient_post_reset_samples", "no_clock_edges")
+            if _has_key(note, key)
+        ]
+    elif any(_has_key(note, k) for k in ("transitions", "complement_err", "swing")):
+        result.update(
+            {
+                "diagnosis": "NRZ/PRBS waveform transition behavior is incorrect",
+                "matched_rule": "NRZ_PRBS_TRANSITIONS",
+                "causes": [
+                    "PRBS state may be stuck or not clocked",
+                    "Complement/output swing is present but data transitions are absent",
+                ],
+                "repair_suggestions": [
+                    "Advance the LFSR/PRBS state on every intended clock edge",
+                    "Drive NRZ output from the generated bit state with full voltage swing",
+                ],
+            }
+        )
+        result["matched_keys"] = [k for k in ("transitions", "complement_err", "swing") if k in metrics]
+    elif any(_has_key(note, k) for k in ("up_first", "dn_first", "up_second", "dn_second", "overlap_frac")):
+        result.update(
+            {
+                "diagnosis": "PFD reset-race pulse ordering/window behavior is incorrect",
+                "matched_rule": "PFD_RESET_RACE",
+                "causes": [
+                    "UP/DN pulses are not reset and sequenced according to input edge order",
+                    "Pulse windows leak into the wrong comparison interval",
+                ],
+                "repair_suggestions": [
+                    "Latch which input edge arrived first, emit only the corresponding pulse, then reset both",
+                    "Keep UP/DN non-overlapping and window-local across the first and second intervals",
+                ],
+            }
+        )
+        result["matched_keys"] = [
+            k
+            for k in ("up_first", "dn_first", "up_second", "dn_second", "up_pulses_first", "dn_pulses_second", "overlap_frac")
+            if k in metrics
+        ]
+    elif any(_has_key(note, k) for k in ("wraps", "clk_rises", "phase_span")):
+        result.update(
+            {
+                "diagnosis": "Phase accumulator wrap/clock-rise behavior is incorrect",
+                "matched_rule": "PHASE_ACCUM_WRAP",
+                "causes": [
+                    "Phase increment/wrap logic is not synchronized to clock crossings",
+                    "Accumulator may wrap numerically but not produce checker-visible clock events",
+                ],
+                "repair_suggestions": [
+                    "Update phase exactly once per clock edge and wrap modulo full scale",
+                    "Expose output transitions tied to wrap events so clk_rises and phase_span agree",
+                ],
+            }
+        )
+        result["matched_keys"] = [k for k in ("wraps", "clk_rises", "phase_span") if k in metrics]
+    elif (
+        (task_id and "no_overlap" in task_id.lower())
+        or any(_has_key(note, k) for k in ("max_active_cells", "overlap_count"))
+    ):
+        result.update(
+            {
+                "diagnosis": "DWA no-overlap pointer/window behavior is incorrect",
+                "matched_rule": "DWA_NO_OVERLAP_WINDOW",
+                "causes": [
+                    "Cell enable window is not driven from the decoded code and pointer state",
+                    "Pointer output may be valid while cell-enable outputs remain inactive",
+                    "Consecutive enabled cell sets may be reused instead of rotating to a disjoint set",
+                ],
+                "repair_suggestions": [
+                    "Decode the 4-bit code on each valid clock edge using fixed bit reads",
+                    "Build a fresh active-cell set from ptr_q and code_q on every sampled cycle",
+                    "Drive exactly one pointer bit high and drive at least one cell_en bit high when code_q is nonzero",
+                    "Advance ptr_q so the next enabled set does not overlap the previous active set",
+                ],
+            }
+        )
+        result["matched_keys"] = [
+            k
+            for k in ("sampled_cycles", "bad_ptr_rows", "max_active_cells", "overlap_count")
+            if k in metrics
+        ]
+    elif any(_has_key(note, k) for k in ("bad_count_rows", "wrap_events", "split_wrap_rows")):
+        result.update(
+            {
+                "diagnosis": "DWA wraparound pointer/count behavior is incorrect",
+                "matched_rule": "DWA_WRAPAROUND_WINDOW",
+                "causes": [
+                    "Pointer update order does not match checker expectation from initial pointer 13",
+                    "Pointer output is not one-hot at the expected post-update pointer",
+                    "Active cell count does not equal decoded input code",
+                    "Wraparound selections across cell 15 to cell 0 are missing or malformed",
+                ],
+                "repair_suggestions": [
+                    "Initialize ptr_q to 13 and update expected pointer as `(ptr_q + code_q) % 16` on each rising clock",
+                    "After updating ptr_q, make only `ptr_q` high in ptr outputs",
+                    "Enable exactly `code_q` cells in the rotating window ending at or starting from the updated pointer",
+                    "When the window crosses 15-to-0, split the enabled cells across both ends of the 16-cell array",
+                ],
+            }
+        )
+        result["matched_keys"] = [
+            k
+            for k in ("sampled_cycles", "bad_ptr_rows", "bad_count_rows", "wrap_events", "split_wrap_rows")
+            if k in metrics
+        ]
+    elif _has_key(note, "max_err"):
+        result.update(
+            {
+                "diagnosis": "Analog waveform approximation error is too large",
+                "matched_rule": "ANALOG_MAX_ERR",
+                "causes": [
+                    "Generated waveform coefficients or phase/frequency terms are incorrect",
+                    "Output scaling/offset does not match the specified signal model",
+                ],
+                "repair_suggestions": [
+                    "Recompute the output expression directly from the specified sine/tone components",
+                    "Check amplitude, offset, frequency, and phase units before tuning other logic",
+                ],
+            }
+        )
+        result["matched_keys"] = ["max_err"]
+    elif any(_has_key(note, k) for k in ("base", "pre_count", "post_count")):
+        result.update(
+            {
+                "diagnosis": "Multi-modulus divider pre/post switch counts are incorrect",
+                "matched_rule": "MULTIMOD_DIVIDER_COUNTS",
+                "causes": [
+                    "Divider modulus is not switching at the requested time",
+                    "Pre-switch and post-switch terminal counts are identical or off by one",
+                ],
+                "repair_suggestions": [
+                    "Use separate pre-switch and post-switch modulus states",
+                    "Reset or carry the divider counter deliberately at the switch boundary",
+                ],
+            }
+        )
+        result["matched_keys"] = [k for k in ("base", "pre_count", "post_count", "switch_time_ns") if k in metrics]
+    elif "bit_mismatch" in lowered:
+        result.update(
+            {
+                "diagnosis": "Serializer bit order or sampling phase is incorrect",
+                "matched_rule": "SERIALIZER_BIT_ORDER",
+                "causes": [
+                    "Serializer shifts in the opposite bit order from the expected frame",
+                    "Load/shift timing is off by one bit period",
+                ],
+                "repair_suggestions": [
+                    "Load the parallel word once per frame and shift in the specified MSB/LSB order",
+                    "Align the first serial bit with the first checker sample after frame start",
+                ],
+            }
+        )
+        result["matched_keys"] = ["bit_mismatch"]
+    elif _has_key(note, "frame_rises"):
+        result.update(
+            {
+                "diagnosis": "Serializer frame marker does not rise as expected",
+                "matched_rule": "SERIALIZER_FRAME_ALIGNMENT",
+                "causes": [
+                    "Frame pulse is missing or not aligned to the serialized word boundary",
+                    "Frame marker may be held low/high instead of pulsed once per frame",
+                ],
+                "repair_suggestions": [
+                    "Generate a one-cycle frame pulse at the word boundary",
+                    "Synchronize bit counter reset, word load, and frame marker timing",
+                ],
+            }
+        )
+        result["matched_keys"] = ["frame_rises"]
+    elif "means=" in lowered:
+        result.update(
+            {
+                "diagnosis": "Transition branch target levels are incorrect",
+                "matched_rule": "TRANSITION_BRANCH_LEVELS",
+                "causes": [
+                    "Branch selection never reaches the intended target levels",
+                    "Transition output is stuck at one level across all stimulus phases",
+                ],
+                "repair_suggestions": [
+                    "Map each branch condition to a distinct target voltage",
+                    "Hold each branch long enough for transition settling before the checker window",
+                ],
+            }
+        )
+        result["matched_keys"] = ["means"]
+    elif "gray_property_violated" in lowered or _has_key(note, "bad_transitions"):
+        result.update(
+            {
+                "diagnosis": "Gray-code one-bit transition property is violated",
+                "matched_rule": "GRAY_PROPERTY",
+                "causes": [
+                    "State update does not follow Gray conversion rules",
+                    "Multiple bits change in a single logical step",
+                ],
+                "repair_suggestions": [
+                    "Derive Gray output from a consistent binary counter state",
+                    "Update state once per valid edge and emit Gray-mapped output only",
+                ],
+            }
+        )
+        result["matched_keys"] = [k for k in ("bad_transitions",) if k in metrics]
+    elif any(_has_key(note, k) for k in ("sel0_err", "sel1_err", "sel2_err", "sel3_err")):
+        result.update(
+            {
+                "diagnosis": "MUX selection-to-input mapping is incorrect",
+                "matched_rule": "MUX_SELECTION",
+                "causes": [
+                    "Selection decoding order is wrong",
+                    "One or more selection cases drive incorrect source input",
+                ],
+                "repair_suggestions": [
+                    "Re-check the full truth table for each select code",
+                    "Ensure each output branch references the intended input signal",
+                ],
+            }
+        )
+        result["matched_keys"] = [k for k in ("sel0_err", "sel1_err", "sel2_err", "sel3_err") if k in metrics]
+    elif "window_fracs" in lowered or _has_key(note, "rise_t_out_of_range") or _has_key(note, "fall_t_out_of_range"):
+        result.update(
+            {
+                "diagnosis": "Hysteresis or transition-window behavior is incorrect",
+                "matched_rule": "HYST_WINDOW",
+                "causes": [
+                    "Rising/falling thresholds or edge directions are inconsistent",
+                    "Window hold behavior does not preserve prior state",
+                ],
+                "repair_suggestions": [
+                    "Use two explicit thresholds with opposite cross directions",
+                    "Hold previous state between thresholds and update only at crossings",
+                ],
+            }
+        )
+        result["matched_keys"] = [k for k in ("rise_t_out_of_range", "fall_t_out_of_range") if k in metrics]
+    elif any(_has_key(note, k) for k in ("pre_high_frac", "post_low_frac", "pre_low_frac", "post_high_frac", "mid_frac")):
+        result.update(
+            {
+                "diagnosis": "Time-window output fraction target not met",
+                "matched_rule": "WINDOW_FRAC",
+                "causes": [
+                    "Edge-triggered state updates do not align with checker windows",
+                    "Reset/hold ordering causes output to stay in wrong level",
+                ],
+                "repair_suggestions": [
+                    "Align state update edges with expected window boundaries",
+                    "Verify reset priority and output hold behavior across phases",
+                ],
+            }
+        )
+        result["matched_keys"] = [k for k in ("pre_high_frac", "post_low_frac", "pre_low_frac", "post_high_frac", "mid_frac") if k in metrics]
+    elif _behavior_metrics(metrics):
+        result.update(
+            {
+                "diagnosis": "Behavioral metric mismatch detected",
+                "matched_rule": "GENERIC_METRIC_MISMATCH",
+                "causes": [
+                    "Generated behavior diverges from checker constraints",
+                    "Implementation does not satisfy measured metric targets",
+                ],
+                "repair_suggestions": [
+                    "Prioritize fixing the largest-magnitude metric gaps first",
+                    "Keep interface/testbench stable while adjusting DUT semantics",
+                ],
+                "matched_keys": sorted(_behavior_metrics(metrics).keys()),
+            }
+        )
 
-    # Circuit-specific knowledge injection
     if task_id:
         result["circuit_specific"] = _circuit_specific_knowledge(note, task_id)
-
     return result
 
 
 def _circuit_specific_knowledge(note: str, task_id: str) -> str:
-    """Add circuit-specific repair knowledge based on task context."""
+    lowered_task = task_id.lower()
+    lowered_note = note.lower()
 
-    knowledge = ""
-
-    # StrongARM comparator specific
-    if "strongarm" in task_id.lower() and ("pre_high_frac=0" in note or "frac=0.0" in note or "reset" in note):
-        knowledge = """
-## StrongARM Comparator Specific Knowledge
-
-StrongARM architecture requires output reset on clock **falling edge**:
-
-The characteristic behavior:
-- Rising edge:Latch comparison result
-- **Falling edge: Reset both outputs to 0**
-
-Without falling-edge reset, outputs stay latched and never show the expected pre/post window behavior.
-
-**Reset priority**: Reset signal must force outputs to zero BEFORE any comparison logic.
-"""
-
-    # Hysteresis comparator specific
-    elif "hysteresis" in task_id.lower() and "window_fracs" in note:
-        knowledge = """
-## Hysteresis Comparator Specific Knowledge
-
-Hysteresis creates two different switching thresholds:
-- Rising threshold (+vhys/2): higher than zero
-- Falling threshold (-vhys/2): lower than zero
-
-Key insight: When input is BETWEEN thresholds, output should **hold previous state**, not change.
-"""
-
-    # Flash ADC specific
-    elif "flash_adc" in task_id.lower() and ("unique_codes" in note or "only_" in note):
-        knowledge = """
-## Flash ADC Specific Knowledge
-
-3-bit Flash ADC requires 8 distinct quantization thresholds.
-Each bit represents a different range of input voltage:
-- dout2 (MSB): vin >= 4*LSB
-- dout1: vin >= 2*LSB
-- dout0 (LSB): vin >= 1*LSB
-
-All bits should NOT share the same threshold.
-"""
-
-    # PLL / ADPLL / CPPLL specific
-    elif any(kw in task_id.lower() for kw in ["pll", "adpll", "cppll", "pfd"]):
-        if "lock" in note.lower() or "vctrl" in note.lower():
-            knowledge = """
-## PLL / Clock Generator Specific Knowledge
-
-PLL lock condition:
-- VCTRL stable at a constant value
-- Divider output frequency matches reference frequency
-- Phase error is zero (or within tolerance)
-
-Key components:
-- **PFD (Phase Frequency Detector)**: Generates UP/DN pulses based on phase difference
-- **Charge Pump**: Converts UP/DN to current that charges/discharges VCTRL
-- **VCO/DCO**: Output frequency controlled by VCTRL
-- **Divider**: Divides VCO output to match reference
-
-Common PLL bugs:
-- PFD not generating correct UP/DN polarity
-- Charge pump not updating VCTRL
-- Divider ratio wrong (doesn't match target frequency)
-- Loop bandwidth too narrow (slow settling)
-- Missing lock detection logic
-"""
-        elif "bbpd" in task_id.lower() or "edge" in note.lower():
-            knowledge = """
-## Bang-Bang Phase Detector (BBPD) Specific Knowledge
-
-BBPD is used in clock/data recovery:
-- Samples data on clock edge
-- Determines if data edge leads or lags clock
-- UP pulse when data early, DN pulse when data late
-
-Edge alignment window:
-- Correct alignment: data edge centered in clock window
-- Lead: data edge before clock edge → UP pulse
-- Lag: data edge after clock edge → DN pulse
-"""
-
-    # MUX specific
-    elif "mux" in task_id.lower():
-        knowledge = """
-## MUX (Multiplexer) Specific Knowledge
-
-N-to-1 MUX selects one input based on SEL signal:
-- 2-to-1 MUX: SEL=0 → output d0, SEL=1 → output d1
-- 4-to-1 MUX: SEL=00→d0, SEL=01→d1, SEL=10→d2, SEL=11→d3
-
-Common MUX bugs:
-- SEL to input mapping incorrect
-- Output uses wrong input port
-- SEL bits interpreted in wrong order (LSB vs MSB)
-"""
-
-    # DAC specific
-    elif "dac" in task_id.lower():
-        knowledge = """
-## DAC (Digital-to-Analog Converter) Specific Knowledge
-
-DAC converts digital code to analog voltage:
-- Binary-weighted DAC: each bit has different weight
-- LSB weight = Vref / 2^N
-- Total output = sum of (bit_value * bit_weight)
-
-Common DAC bugs:
-- Bit weights incorrect
-- Missing bit in output sum
-- Output level not matching Vref range
-"""
-
-    # Divider / Counter specific
-    elif any(kw in task_id.lower() for kw in ["divider", "counter", "clk_divider"]):
-        knowledge = """
-## Clock Divider / Counter Specific Knowledge
-
-Clock divider divides input frequency:
-- Div_ratio = N means output frequency = input_freq / N
-- Counter increments on each clock edge
-- Output toggles when counter reaches threshold
-
-Common divider bugs:
-- Counter not incrementing correctly
-- Wrong threshold for division
-- Output not toggling at correct time
-"""
-
-    # Timer specific
-    elif "timer" in task_id.lower() and "rising_edge_count" in note:
-        knowledge = """
-## Absolute Grid Timer Specific Knowledge
-
-Timer on absolute grid uses @(timer(next_t)), not @(timer(delay)).
-Each event must update next_t for the next scheduled event.
-"""
-
-    # NOT gate specific
-    elif "not_gate" in task_id.lower() and "invert_match" in note:
-        knowledge = """
-## NOT Gate Specific Knowledge
-
-Common mistake: Using parameter vdd instead of dynamic V(vdd).
-Parameter vdd is a static default value, not the actual supply voltage.
-Must read V(vdd) dynamically inside @(cross) for correct output levels.
-"""
-
-    return knowledge
+    if any(k in lowered_task for k in ("pll", "adpll", "cppll", "pfd")) and (
+        "freq_ratio" in lowered_note or "lock" in lowered_note or "vctrl" in lowered_note
+    ):
+        return (
+            "## PLL Repair Focus\n"
+            "- Keep divider ratio, DCO update, and lock criteria consistent in the same measurement window.\n"
+            "- Avoid static lock assertions; derive lock from stable frequency/phase behavior."
+        )
+    if "hysteresis" in lowered_task and ("window" in lowered_note or "rise_t" in lowered_note or "fall_t" in lowered_note):
+        return (
+            "## Hysteresis Repair Focus\n"
+            "- Use separate rising/falling thresholds and opposite edge directions.\n"
+            "- Hold state between thresholds instead of recomputing combinationally each sample."
+        )
+    if "flash_adc" in lowered_task and ("unique_codes" in lowered_note or "vout_span" in lowered_note):
+        return (
+            "## Flash ADC Repair Focus\n"
+            "- Ensure full threshold ladder coverage and monotonic code mapping.\n"
+            "- Verify each output bit corresponds to the correct quantization boundary."
+        )
+    if "dwa" in lowered_task:
+        return (
+            "## DWA Repair Focus\n"
+            "- Keep integer state for `ptr_q`, decoded `code_q`, and loop index `j`.\n"
+            "- Use real arrays for `cell_en_val[0:15]` and `ptr_val[0:15]`, then drive bus outputs with module-scope `genvar` contributions.\n"
+            "- Decode input code bits with fixed `V(code[0])`, `V(code[1])`, ... reads inside the clock event.\n"
+            "- Clear all 16 output-state array entries before setting the new pointer and active-cell window."
+        )
+    return ""
 
 
 def format_repair_section(translation: dict) -> str:
-    """Format translation result as markdown section for repair prompt."""
     lines = []
-
-    if translation["diagnosis"]:
-        lines.append(f"**诊断**: {translation['diagnosis']}")
-
-    if translation["causes"]:
-        lines.append("**可能原因**:")
+    if translation.get("failure_type"):
+        lines.append(f"**Failure Type**: {translation['failure_type']}")
+    if translation.get("matched_rule"):
+        lines.append(f"**Rule**: {translation['matched_rule']}")
+    if translation.get("matched_keys"):
+        lines.append(f"**Matched Keys**: {', '.join(translation['matched_keys'])}")
+    if translation.get("diagnosis"):
+        lines.append(f"**Diagnosis**: {translation['diagnosis']}")
+    if translation.get("causes"):
+        lines.append("**Possible Causes**:")
         for cause in translation["causes"]:
             lines.append(f"- {cause}")
-
-    if translation["repair_suggestions"]:
-        lines.append("**修复建议**:")
+    if translation.get("repair_suggestions"):
+        lines.append("**Repair Suggestions**:")
         for suggestion in translation["repair_suggestions"]:
             lines.append(f"- {suggestion}")
-
-    if translation["circuit_specific"]:
+    if translation.get("circuit_specific"):
         lines.append(translation["circuit_specific"])
-
-    if translation["example_fix"]:
+    if translation.get("example_fix"):
         lines.append(translation["example_fix"])
-
     return "\n".join(lines)
 
 
 def translate_all_notes(notes: list[str], task_id: Optional[str] = None) -> str:
-    """Translate all diagnostic notes and format as repair prompt section."""
     sections = []
-
     for note in notes:
         translation = translate_diagnosis(note, task_id)
-        if translation["diagnosis"]:
-            section = f"### 诊断信息: `{note}`\n\n{format_repair_section(translation)}"
-            sections.append(section)
-
+        if translation.get("diagnosis"):
+            sections.append(f"### Diagnostic: `{note}`\n\n{format_repair_section(translation)}")
     if sections:
         return "\n\n---\n\n".join(sections)
     return ""
 
 
-# Self-test
 if __name__ == "__main__":
     test_notes = [
-        "pre_high_frac=0.000 post_low_frac=1.000",
+        "freq_ratio=2.0000 fb_jitter_frac=0.0000 lock_time=nan vctrl_min=1.200 vctrl_max=1.200",
+        "normalized_tb_save_tokens=5",
         "window_fracs pre=1.000 mid=0.000 post=0.752",
-        "unique_codes=1 vout_span=0.000",
-        "invert_match_frac=0.375",
+        "unique_codes=1 vout_span=0.000 vin_span=0.721",
     ]
-
-    for note in test_notes:
-        print(f"\n{'='*60}")
-        print(f"Input: {note}")
-        print(f"{'='*60}")
-        translation = translate_diagnosis(note, "cmp_strongarm_smoke")
-        print(format_repair_section(translation))
+    for n in test_notes:
+        print("=" * 80)
+        print(n)
+        print(format_repair_section(translate_diagnosis(n, "cppll_timer")))
