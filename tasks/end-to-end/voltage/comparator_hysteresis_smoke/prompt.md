@@ -1,47 +1,39 @@
-Write a Verilog-A module named `cmp_hysteresis`.
+Write a Verilog-A module named `cmp_hysteresis` and one minimal EVAS-compatible Spectre testbench.
 
 # Task: comparator_hysteresis_smoke
 
 ## Objective
 
-Create a differential comparator with hysteresis behavioral model in Verilog-A and a minimal EVAS-compatible Spectre testbench.
+Create a pure voltage-domain differential comparator with hysteresis. The testbench must drive the
+differential input through both hysteresis thresholds so both output states are observable.
 
-## Specification
+## DUT Contract
 
-- **Module name**: `cmp_hysteresis`
-- **Ports** (all `electrical`, exactly as named): `vinn`, `vinp`, `out_n`, `out_p`, `vss`, `vdd`
-- **Parameters**:
-  - `vhys` (real, default `10e-3`)
-  - `tedge` (real, default `50p`)
-- **Behavior**:
-  - Rising threshold: when `vinp - vinn` rises above `+vhys/2`, drive `out_p` HIGH and `out_n` LOW.
-  - Falling threshold: when `vinp - vinn` falls below `-vhys/2`, drive `out_p` LOW and `out_n` HIGH.
+- Module name: `cmp_hysteresis`
+- Ports, all `electrical`, exactly in this order: `vinn`, `vinp`, `out_n`, `out_p`, `vss`, `vdd`
+- Parameters:
+  - `vhys` real, default `10e-3`
+  - `tedge` real, default `50p`
+- Behavior:
+  - Rising decision threshold: `V(vinp) - V(vinn) > +vhys/2` drives `out_p` HIGH and `out_n` LOW.
+  - Falling decision threshold: `V(vinp) - V(vinn) < -vhys/2` drives `out_p` LOW and `out_n` HIGH.
   - Between thresholds, hold the previous decision.
-  - Use TWO separate `@(cross(...))` statements for rising and falling thresholds.
+  - Use two separate `@(cross(...))` events for rising and falling thresholds.
+  - Output HIGH should track `V(vdd)` and output LOW should track `V(vss)`.
+  - Drive outputs with `transition(...)`.
 
-## Testbench requirements
+## Testbench Contract
 
-Create a minimal Spectre testbench that:
-- Includes `cmp_hysteresis.va` via `ahdl_include`
-- Provides VDD=1.8V, VSS=0V
-- Generates differential input as a slow ramp from -50mV to +50mV and back
-- Uses vhys=10m parameter on instance
-- Saves signals: `vinn`, `vinp`, `out_n`, `out_p`
-- Runs transient for ~50us (slow ramp to show hysteresis window)
+- Use a 0.9 V supply and 0 V reference.
+- Drive `vinp` and `vinn` so the differential input crosses both `+vhys/2` and `-vhys/2` within the final validation window.
+- Instantiate the DUT by positional ports.
+- Save these exact scalar names: `vinp`, `vinn`, `out_p`, `out_n`.
+- Include the generated DUT file `cmp_hysteresis.va`.
+- Use the final transient setting provided by the injected Strict EVAS Validation Contract.
 
-## Deliverable
+## Deliverables
 
-Two files:
-1. `cmp_hysteresis.va` - the Verilog-A behavioral model
-2. `tb_cmp_hysteresis.scs` - the Spectre testbench
+Return exactly two fenced code blocks:
 
-Expected behavior:
-- Output should toggle when differential input crosses threshold with hysteresis
-- Hysteresis window vhys should prevent chatter on slow ramps
-Ports:
-- `VINN`: input electrical
-- `VINP`: input electrical
-- `OUTN`: output electrical
-- `OUTP`: output electrical
-- `VSS`: inout electrical
-- `VDD`: inout electrical
+1. `cmp_hysteresis.va`
+2. `tb_cmp_hysteresis.scs`

@@ -1,59 +1,55 @@
-Write a Verilog-A module named `dwa_ptr_gen`.
+Write a Verilog-A module named `dwa_ptr_gen` and one minimal EVAS-compatible Spectre testbench.
 
-Create a voltage-domain Data Weighted Averaging (DWA) pointer rotation generator
-in Verilog-A, then produce a minimal EVAS-compatible Spectre testbench and run a
-smoke simulation.
+# Task: dwa_ptr_gen_smoke
 
-Behavioral intent:
+## Objective
 
-- inputs: `clk_i`, `rst_ni` (active-low), and a 4-bit input code bus `code_msb_i[3:0]`
-- outputs: 16-bit cell-enable mask `cell_en_o[15:0]` and 16-bit one-hot pointer `ptr_o[15:0]`
-- on each rising edge of `clk_i`, read the 4-bit MSB code (0..15) and rotate
-  the circular pointer by that many positions
-- `ptr_o` must be one-hot (exactly one bit asserted) after reset
-- `cell_en_o` marks the activated cells spanning from the previous pointer to
-  the current pointer (inclusive)
+Create a pure voltage-domain Data Weighted Averaging (DWA) pointer generator. The testbench must
+drive several input codes and expose a rotating 16-cell pointer and cell-enable window.
 
-Implementation constraints:
+## DUT Contract
 
-- pure voltage-domain Verilog-A only
-- EVAS-compatible syntax
-- use `@(cross(...))` for clock edge detection
-- use `transition(...)` to drive all output bits
-- `clk_i`, `rst_ni`, and representative `ptr_o` bits must appear in the waveform CSV
-- parameter `ptr_init` sets the reset pointer position (default 0)
+- Main module name: `dwa_ptr_gen`
+- If you create an analog-to-4-bit helper module, name it `v2b_4b`.
+- Ports, all `electrical`, exactly in this order:
+  - Inputs: `clk_i`, `rst_ni`, `code_msb_i[3:0]`
+  - Outputs: `cell_en_o[15:0]`, `ptr_o[15:0]`
+- Parameters:
+  - `vdd` real, default `0.9`
+  - `vth` real, default `0.45`
+  - `ptr_init` integer, default `0`
+- Behavior:
+  - Reset is active-low.
+  - On reset, initialize the one-hot pointer to `ptr_init`.
+  - On each rising `clk_i` edge after reset, decode the 4-bit input code and update:
+    - `new_ptr = (old_ptr + code) % 16`
+  - `ptr_o[*]` must be one-hot at the current pointer.
+  - `cell_en_o[*]` must assert at least one selected cell after reset and represent the selected DWA window.
+  - Use `@(cross(V(clk_i) - vth, +1))` and `transition(...)`.
+  - Do not use current contributions, `ddt()`, or `idt()`.
 
-Minimum simulation goal:
+## Testbench Contract
 
-- 100 MHz clock, reset deasserts at 5 ns, drive at least 16 input codes over 175 ns
-- after reset, `ptr_o` must be one-hot on every sampled clock edge (≥ 95% of samples)
-- `cell_en_o` must have at least one bit asserted after reset
-- pointer must advance correctly: new_ptr = (old_ptr + cell_count) % 16
+- Use a 0.9 V supply and 0 V reference.
+- Generate a 100 MHz-class `clk_i` pulse clock and active-low `rst_ni` that deasserts early enough to leave several post-reset clock edges.
+- Drive a sequence of 4-bit input codes that exercises pointer movement over multiple cells.
+- If using `v2b_4b`, expose scalar code nodes `code_3`, `code_2`, `code_1`, `code_0`.
+- Instantiate the DWA DUT by positional scalar ports.
+- Save these exact scalar names:
+  - `clk_i`, `rst_ni`
+  - `cell_en_15` through `cell_en_0`
+  - `ptr_15` through `ptr_0`
+- Use the final transient setting provided by the injected Strict EVAS Validation Contract.
 
-Expected behavior:
-- Pointer should advance in data-weighted averaging pattern
-- No overlap between consecutive pointer values
-Ports:
-- `clk_i`: input electrical
-- `rst_ni`: input electrical
-- `code_msb_i[3:0]`: input electrical
-- `cell_en_o[15:0]`: output electrical
-- `ptr_o[15:0]`: output electrical- `[3:0]  code_msb_i`: electrical
-- `[15:0] cell_en_o`: electrical
-- `[15:0] ptr_o`: electrical- `[3:0]  code_msb_i`: electrical
-- `[15:0] cell_en_o`: electrical
-- `[15:0] ptr_o`: electrical- `[3:0]  code_msb_i`: electrical
-- `[15:0] cell_en_o`: electrical
-- `[15:0] ptr_o`: electrical- `[3:0]  code_msb_i`: electrical
-- `[15:0] cell_en_o`: electrical
-- `[15:0] ptr_o`: electrical- `[3:0]  code_msb_i`: electrical
-- `[15:0] cell_en_o`: electrical
-- `[15:0] ptr_o`: electrical- `[3:0]  code_msb_i`: electrical
-- `[15:0] cell_en_o`: electrical
-- `[15:0] ptr_o`: electrical- `[3:0]  code_msb_i`: electrical
-- `[15:0] cell_en_o`: electrical
-- `[15:0] ptr_o`: electrical- `[3:0]  code_msb_i`: electrical
-- `[15:0] cell_en_o`: electrical
-- `[15:0] ptr_o`: electrical- `input  electrical [3:0]  code_msb_i`: electrical (electrical)
-- `output electrical [15:0] cell_en_o`: electrical (electrical)
-- `output electrical [15:0] ptr_o`: unknown (electrical)
+## Observable CSV Contract
+
+The waveform CSV must expose the exact scalar names listed above. If the DUT uses vector ports
+internally, the testbench must connect or save every bit as a scalar node.
+
+## Deliverables
+
+Return the complete artifact set:
+
+1. `v2b_4b.va`, if you use a helper converter
+2. `dwa_ptr_gen.va`
+3. `tb_dwa_ptr_gen.scs`

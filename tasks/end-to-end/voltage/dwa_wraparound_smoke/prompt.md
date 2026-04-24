@@ -1,47 +1,53 @@
-Write a Verilog-A module named `dwa_wraparound_ref`.
+Write a Verilog-A module named `dwa_wraparound_ref` and a minimal EVAS-compatible Spectre testbench.
 
 # Task: dwa_wraparound_smoke
 
-Write a pure voltage-domain Verilog-A DWA pointer generator that rotates a
-16-cell thermometer selection window by the input 4-bit code on every rising
-clock edge.
+## Objective
 
-The smoke test must stress pointer wraparound. Starting from pointer index 13,
-the first non-reset update must wrap through cell 15 back to cell 0, and later
-updates must include at least one more wraparound. The pointer output must be
-one-hot after reset, and the active cell count must match the requested code on
-each sampled cycle.
+Create a pure voltage-domain DWA pointer generator that rotates a 16-cell thermometer selection window by the input 4-bit code on every rising clock edge. The smoke test must stress pointer wraparound.
 
-Constraints:
+## DUT Contract
 
-- Use only voltage-domain `electrical` ports.
-- .., +1))` for clocked updates.
-- 
+- Main module name: `dwa_wraparound_ref`
+- If you create a helper code-step module, name it `dwa_code_step_ref`.
+- Ports, all `electrical`, exactly as named:
+  - Inputs: `clk_i`, `rst_ni`, `code_i[3:0]`
+  - Outputs: `cell_en_o[15:0]`, `ptr_o[15:0]`
+- Use only voltage-domain Verilog-A constructs.
 - Do not use current contributions, `ddt()`, or `idt()`.
+- Use `@(cross(V(clk_i) - vth, +1))` for clocked updates.
 
-Return a DUT and minimal Spectre-compatible testbench that EVAS can run.
+## Required Behavior
 
-Ports:
-- `clk_i`: input electrical
-- `rst_ni`: input electrical
-- `code_i[3:0]`: input electrical
-- `cell_en_o[15:0]`: output electrical
-- `ptr_o[15:0]`: output electrical- `[3:0]  code_i`: electrical
-- `[15:0] cell_en_o`: electrical
-- `[15:0] ptr_o`: electrical- `[3:0]  code_i`: electrical
-- `[15:0] cell_en_o`: electrical
-- `[15:0] ptr_o`: electrical- `[3:0]  code_i`: electrical
-- `[15:0] cell_en_o`: electrical
-- `[15:0] ptr_o`: electrical- `[3:0]  code_i`: electrical
-- `[15:0] cell_en_o`: electrical
-- `[15:0] ptr_o`: electrical- `[3:0]  code_i`: electrical
-- `[15:0] cell_en_o`: electrical
-- `[15:0] ptr_o`: electrical- `[3:0]  code_i`: electrical
-- `[15:0] cell_en_o`: electrical
-- `[15:0] ptr_o`: electrical- `[3:0]  code_i`: electrical
-- `[15:0] cell_en_o`: electrical
-- `[15:0] ptr_o`: electrical- `[3:0]  code_i`: electrical
-- `[15:0] cell_en_o`: electrical
-- `[15:0] ptr_o`: electrical- `input  electrical [3:0]  code_i`: electrical (electrical)
-- `output electrical [15:0] cell_en_o`: electrical (electrical)
-- `output electrical [15:0] ptr_o`: unknown (electrical)
+- Start from pointer index 13 after reset.
+- The first non-reset update must wrap through cell 15 back to cell 0.
+- Later updates must include at least one additional wraparound.
+- `ptr_o[*]` must be one-hot after reset and on sampled cycles.
+- The active `cell_en_o[*]` count must match the requested input code on each sampled cycle.
+- Split selections across the 15-to-0 boundary are allowed and expected when wrapping.
+
+## Testbench Contract
+
+Create a Spectre-compatible testbench that:
+
+- Includes the generated Verilog-A file(s) via `ahdl_include`.
+- Generates `clk_i` and active-low `rst_ni`.
+- Drives `code_i[3:0]` with values that force wraparound from initial pointer 13.
+- Runs long enough to observe at least five post-reset sampled cycles.
+
+## Observable CSV Contract
+
+The waveform CSV must expose these exact scalar signal names:
+
+- `clk_i`, `rst_ni`
+- `code_0`, `code_1`, `code_2`, `code_3`
+- `cell_en_0`, `cell_en_1`, `cell_en_2`, `cell_en_3`, `cell_en_4`, `cell_en_5`, `cell_en_6`, `cell_en_7`
+- `cell_en_8`, `cell_en_9`, `cell_en_10`, `cell_en_11`, `cell_en_12`, `cell_en_13`, `cell_en_14`, `cell_en_15`
+- `ptr_0`, `ptr_1`, `ptr_2`, `ptr_3`, `ptr_4`, `ptr_5`, `ptr_6`, `ptr_7`
+- `ptr_8`, `ptr_9`, `ptr_10`, `ptr_11`, `ptr_12`, `ptr_13`, `ptr_14`, `ptr_15`
+
+If the DUT uses vector ports internally, the testbench must still save or expose every bit under the scalar names above. Do not rely only on CSV headers such as `code_i[0]`, `cell_en_o[0]`, or `ptr_o[0]`.
+
+## Deliverables
+
+Return the DUT Verilog-A file(s) and one Spectre testbench code block.

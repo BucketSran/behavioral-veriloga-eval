@@ -1,43 +1,42 @@
-Write a Verilog-A module named `flash_adc_3b`.
+Write a Verilog-A module named `flash_adc_3b` and one minimal EVAS-compatible Spectre testbench.
 
 # Task: flash_adc_3b_smoke
 
 ## Objective
 
-Create a 3-bit Flash ADC behavioral model in Verilog-A and a minimal EVAS-compatible Spectre testbench.
+Create a pure voltage-domain 3-bit flash ADC behavioral model. The testbench must sweep the input
+across the full reference range and produce all 8 output codes after clocked sampling.
 
-## Specification
+## DUT Contract
 
-- **Module name**: `flash_adc_3b`
-- **Ports** (all `electrical`, exactly as named): `vdd`, `vss`, `vin`, `clk`, `dout2`, `dout1`, `dout0`
-- **Parameters**: `vrefp` (real, default 0.9), `vrefn` (real, default 0.0), `vth` (real, default 0.45), `tedge` (real, default 100p)
-- **Behavior**:
-  - Full-scale range: `vrefn` to `vrefp`, divided into 8 equal bins (LSB = (vrefp−vrefn)/8).
-  - On rising `clk` edge, compute `code = floor((V(vin) − vrefn) / LSB)`, clamp to [0, 7].
-  - Drive `dout2` (MSB), `dout1`, `dout0` (LSB) with the binary code.
--  No `idt`, `ddt`, or `I() <+`.
+- Module name: `flash_adc_3b`
+- Ports, all `electrical`, exactly in this order: `vdd`, `vss`, `vin`, `clk`, `dout2`, `dout1`, `dout0`
+- Parameters:
+  - `vrefp` real, default `0.9`
+  - `vrefn` real, default `0.0`
+  - `vth` real, default `0.45`
+  - `tedge` real, default `100p`
+- Behavior:
+  - On each rising `clk` edge, compute a 3-bit code from `V(vin)`.
+  - Full-scale range is `vrefn` to `vrefp`, divided into 8 equal bins.
+  - Clamp the code to `[0, 7]`.
+  - Drive `dout2` as MSB, `dout1`, and `dout0` as LSB.
+  - Output HIGH should be `V(vdd)` and output LOW should be `V(vss)`.
+  - Use `@(cross(V(clk) - vth, +1))` and `transition(...)`.
 
-## Testbench requirements
+## Testbench Contract
 
-Create a minimal Spectre testbench that:
-- Includes `flash_adc_3b.va` via `ahdl_include`
-- Provides VDD=0.9V, VSS=0V
-- Generates a clock with period suitable for sampling
-- Creates input voltage sweeping from 0 to 0.9V (full scale)
-- Saves signals: `clk`, `vin`, `dout2`, `dout1`, `dout0`
-- Runs transient long enough to see all 8 codes
+- Use a 0.9 V supply and 0 V reference.
+- Drive `vin` with a monotonic full-scale sweep from near `0` to near `0.9 V` within the final validation window.
+- Drive `clk` with a pulse clock fast enough to sample all 8 ADC codes during the input sweep.
+- Instantiate the DUT by positional ports.
+- Save these exact scalar names: `vin`, `clk`, `dout2`, `dout1`, `dout0`.
+- Include the generated DUT file `flash_adc_3b.va`.
+- Use the final transient setting provided by the injected Strict EVAS Validation Contract.
 
-## Deliverable
+## Deliverables
 
-Two files:
-1. `flash_adc_3b.va` - the Verilog-A behavioral model
-2. `tb_flash_adc_3b.scs` - the Spectre testbench
+Return exactly two fenced code blocks:
 
-Ports:
-- `VDD`: inout electrical
-- `VSS`: inout electrical
-- `VIN`: input electrical
-- `CLK`: input electrical
-- `DOUT2`: output electrical
-- `DOUT1`: output electrical
-- `DOUT0`: output electrical
+1. `flash_adc_3b.va`
+2. `tb_flash_adc_3b.scs`

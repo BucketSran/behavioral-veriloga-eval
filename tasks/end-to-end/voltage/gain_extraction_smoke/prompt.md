@@ -1,39 +1,60 @@
-Write a Verilog-A module named `dither_adder`.
+Write a minimal voltage-domain gain extraction smoke system and one EVAS-compatible Spectre testbench.
 
-Create a voltage-domain gain extraction system in Verilog-A using dither-based
-cross-correlation, then produce a minimal EVAS-compatible Spectre testbench
-and run a smoke simulation.
+# Task: gain_extraction_smoke
 
-The system consists of four connected modules:
+## Objective
 
-1. **Dither adder** (`dither_adder`): adds ±DITHER_AMP to a differential input
-   based on a 1-bit LFSR output (DPN); produces differential output `vdin_p/vdin_n`
+Create a dither-based gain extraction signal path whose output differential swing is measurably
+larger than the input differential swing. The checker measures waveform statistics, not an internal
+estimator code.
 
-2. **Fixed-gain amplifier** (`gain_amp_fixed`): differential amplifier with a
-   configurable actual gain (default 8.0); output `vamp_p/vamp_n`
+## Required Verilog-A Modules
 
-3. **Gain estimator** (`gain_estimator`): accumulates `vamp_diff * sign(DPN)` over
-   N_TOTAL samples, then strobes the estimated gain at each power-of-2 milestone
+Return these Verilog-A modules:
 
-4. **LFSR** (reuse from the digital-logic category): drives the DPN dither signal
+1. `vin_src`
+   - Ports: `clk`, `rst_n`, `vinp`, `vinn`
+   - Generates a small differential voltage stimulus after reset.
+2. `lfsr`
+   - Ports: `dpn`, `vdd`, `vss`, `clk`, `en`, `rst_n`
+   - Produces a 1-bit pseudo-random dither sign signal on `dpn`.
+3. `dither_adder`
+   - Ports: `vinp`, `vinn`, `dpn`, `vdin_p`, `vdin_n`
+   - Adds `+/-DITHER_AMP` to the differential input according to `dpn`.
+4. `gain_amp_fixed`
+   - Ports: `vdin_p`, `vdin_n`, `vamp_p`, `vamp_n`
+   - Applies a configurable differential gain.
 
-Implementation constraints:
+Do not create a `gain_estimator` module for this task; the EVAS checker estimates gain from saved
+waveforms.
 
-- pure voltage-domain Verilog-A only
-- EVAS-compatible syntax
-- use `@(cross(...))` for clock edge detection in all clocked modules
-- use `transition(...)` to drive digital and bus outputs
-- `vamp_p`, `vamp_n`, `vinp`, `vinn` must appear in the waveform CSV
+## Behavioral Contract
 
-Minimum simulation goal:
+- Use pure voltage-domain Verilog-A only.
+- Use `@(cross(...))` for clocked state updates.
+- Use `transition(...)` for digital-like outputs.
+- `gain_amp_fixed` should support parameter `ACTUAL_GAIN`.
+- `dither_adder` should support parameter `DITHER_AMP`.
+- `vin_src` should support enough parameterization to generate a small clocked differential input stimulus.
+- The saved waveforms must satisfy:
+  - `std(vamp_p - vamp_n) / std(vinp - vinn) > 4.0`
+  - `std(vamp_p - vamp_n) > std(vinp - vinn)`
 
-- 50 MHz clock, gain_amp ACTUAL_GAIN=8.64, DITHER_AMP=0.014063, run for at least 200 µs
-- differential gain (std(vamp_diff) / std(vin_diff)) must be > 4.0
-- `vamp_diff` standard deviation must be larger than `vin_diff` standard deviation
+## Testbench Contract
 
-Ports:
-- `VRES_P`: input electrical
-- `VRES_N`: input electrical
-- `DPN`: input electrical
-- `VOUT_P`: output electrical
-- `VOUT_N`: output electrical
+- Use a 0.9 V supply and 0 V reference.
+- Drive a 50 MHz-class clock, active-low reset, and enable signal.
+- Instantiate `vin_src`, `lfsr`, `dither_adder`, and `gain_amp_fixed` as a connected signal path.
+- Use `ACTUAL_GAIN=8.64` and `DITHER_AMP=0.014063` or equivalent parameters that produce clear gain separation.
+- Save these exact scalar names: `vinp`, `vinn`, `vamp_p`, `vamp_n`.
+- Use the final transient setting provided by the injected Strict EVAS Validation Contract.
+
+## Deliverables
+
+Return exactly five fenced code blocks:
+
+1. `vin_src.va`
+2. `lfsr.va`
+3. `dither_adder.va`
+4. `gain_amp_fixed.va`
+5. `tb_gain_extraction.scs`

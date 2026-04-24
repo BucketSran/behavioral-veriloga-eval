@@ -1,45 +1,65 @@
-Write a Verilog-A module named `sar_adc_weighted_8b`.
+Write a voltage-domain 8-bit SAR ADC, matching weighted DAC, sample/hold helper, and one EVAS-compatible Spectre testbench.
 
-Create a voltage-domain 8-bit SAR ADC with binary-weighted successive approximation
-and a matching 8-bit weighted DAC in Verilog-A, chain them for an ADC→DAC round-trip,
-then produce a minimal EVAS-compatible Spectre testbench and run a smoke simulation.
+# Task: sar_adc_dac_weighted_8b_smoke
 
-Behavioral intent (SAR ADC):
+## Objective
 
-- inputs: `vin` (analog), `clks` (sampling clock), `rst_n` (active-low reset)
-- outputs: 8-bit code bus `dout[7:0]` (MSB=dout[7], LSB=dout[0])
-- sampling phase: tracks vin while clks is LOW (sample and hold)
-- conversion: on each rising edge of clks, execute successive approximation MSB-first
-  using binary weights [128, 64, 32, 16, 8, 4, 2, 1], total_sum=255
-- transfer function: code = floor(vin / vdd * 255), clipped to [0, 255]
-- synchronous reset: when rst_n=0, clear all output bits
+Create an ADC-to-DAC round-trip smoke system. The SAR ADC converts a full-swing sine input to an
+8-bit code, the weighted DAC converts the code back to an analog output, and the checker verifies
+code coverage and output range.
 
-Behavioral intent (weighted DAC):
+## Required Verilog-A Modules
 
-- inputs: `din[7:0]`, supply `vdd`
-- output: `vout` (analog, combinatorial)
-- transfer function: vout = sum_of_weighted_bits / 255 * vdd
+Return these Verilog-A modules:
 
-Implementation constraints:
+1. `sar_adc_weighted_8b`
+   - Ports, all `electrical`, exactly in this order:
+     - `vin`, `clks`, `rst_n`, `dout[7:0]`
+   - On each rising `clks` edge after reset, output:
+     - `code = floor(V(vin) / vdd * 255)`, clipped to `[0, 255]`
+   - `dout_7` is MSB and `dout_0` is LSB in the scalar testbench connection.
+2. `dac_weighted_8b`
+   - Ports, all `electrical`, exactly in this order:
+     - `din[7:0]`, `vout`
+   - Output:
+     - `vout = weighted_code / 255 * vdd`
+3. `sh_ideal`
+   - Ports, all `electrical`, exactly in this order:
+     - `vin`, `clks`, `vdd`, `vss`, `rst_n`, `vin_sh`
+   - Tracks or samples `vin` so the checker can observe the sampled input as `vin_sh`.
 
-- pure voltage-domain Verilog-A only
-- EVAS-compatible syntax
-- use `@(cross(...))` for clock rising-edge detection
-- use `transition(...)` for all outputs
-- `vin`, `clks`, `rst_n`, `vout`, and representative `dout` bits must appear in the CSV
+## Behavioral Contract
 
-Minimum simulation goal:
+- Use pure voltage-domain Verilog-A only.
+- Use `@(cross(V(clks) - vth, +1))` for clocked updates.
+- Use `transition(...)` for all driven outputs.
+- Output HIGH should use `vdd`; output LOW should use `0`.
+- The ADC code range should cover most of `[0, 255]` under the testbench sine input.
+- `vout` must stay within `[0, vdd]`.
 
-- vdd=0.9 V, 500 MHz sampling clock, sine input (0.45 V offset, 0.45 V amplitude, 1 MHz),
-  reset deasserts at 20 ns, run for 20 µs
-- at least 200 distinct output codes must appear post-reset
-- output code range must span near [0, 255] (min ≤ 10, max ≥ 245)
-- `vout` must remain within [0, vdd]
+## Testbench Contract
 
-Ports (SAR ADC module `sar_adc_weighted_8b`):
-- `VIN`: input electrical
-- `CLKS`: input electrical
-- `RST_N`: input electrical
-- `DOUT[7:0]`: output electrical (parameterized width)
+- Use a 0.9 V supply and 0 V reference.
+- Drive `clks` with a 50 MHz-class sampling clock.
+- Use active-low `rst_n` and release reset early enough to leave many post-reset samples.
+- Drive `vin` with a full-swing sine input around mid-supply so the sampled input covers most ADC codes.
+- Instantiate `sar_adc_weighted_8b`, `dac_weighted_8b`, and `sh_ideal` by positional scalar ports.
+- Save these exact scalar names:
+  - `vin`, `vin_sh`, `clks`, `rst_n`, `vout`
+  - `dout_7`, `dout_6`, `dout_5`, `dout_4`, `dout_3`, `dout_2`, `dout_1`, `dout_0`
+- Use the final transient setting provided by the injected Strict EVAS Validation Contract.
 
-Implement this in Verilog-A behavioral modeling.
+## Expected Checker-Visible Behavior
+
+- Many distinct post-reset output codes should appear.
+- Code range should span near the endpoints of the 8-bit range.
+- `vout` should follow the code-derived DAC level and remain within the supply range.
+
+## Deliverables
+
+Return exactly four fenced code blocks:
+
+1. `sar_adc_weighted_8b.va`
+2. `dac_weighted_8b.va`
+3. `sh_ideal.va`
+4. `tb_sar_adc_dac_weighted_8b.scs`

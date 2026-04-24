@@ -20,6 +20,14 @@ Implementation constraints:
 - use a `for` loop or `genvar` to iterate over all 16 bits
 - `rst_n` and `vout` must appear in the waveform CSV
 
+Observable contract:
+
+- The waveform CSV must expose these exact signal names: `rst_n`, `d15`, `d14`,
+  `d13`, `d12`, `d11`, `d10`, `d9`, `d8`, `d7`, `d6`, `d5`, `d4`, `d3`, `d2`,
+  `d1`, `d0`, `vout`.
+- If the DUT uses a thermometer bus internally, connect and save the stimulus
+  bits under the scalar names `d15` through `d0`.
+
 Minimum simulation goal:
 
 - vstep=1.0 V, step the thermometer code through 0 ones (0 V), 4 ones (4 V),
