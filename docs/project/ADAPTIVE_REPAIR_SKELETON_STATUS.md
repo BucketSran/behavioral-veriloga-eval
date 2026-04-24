@@ -36,6 +36,7 @@ EVAS closed loop progressively expose more actionable diagnostics:
 | SAR/ADC-DAC runtime skeleton | `results/adaptive-sar-adc-hardened-kimi-2026-04-25` | No PASS yet; new candidates still regressed to TB/runtime failure, so this likely needs a structured code/harness template rather than natural-language-only guidance. |
 | PFD pulse-window skeleton | `results/adaptive-pfd-pulsewidth-kimi-2026-04-25` | No PASS yet; best candidate remains close but fails with `up_first=0.0975` above the checker upper bound `0.08`. New candidates can regress to compile/timeout. |
 | Accumulated skeleton small matrix | `results/adaptive-smallmatrix-kimi-skeleton-v2-2026-04-25` | `9/16` PASS, improved over the previous `5/16` layered-only small matrix. New matrix PASS cases include comparator hysteresis, DWA wraparound, flash ADC, and serializer. |
+| Cross-model Qwen small matrix | `results/adaptive-smallmatrix-qwen-skeleton-v2-2026-04-25` plus `results/adaptive-smallmatrix-qwen-skeleton-v2-remaining-2026-04-25` | `3/16` PASS. PASS cases: `adpll_timer_smoke`, `gain_extraction_smoke`, `mux_4to1_smoke`. Several compile failures improved to observable/behavior but did not reach PASS. |
 
 ## What Changed Conceptually
 
@@ -142,6 +143,31 @@ Remaining failures:
 - Pulse-window behavior: `pfd_reset_race_smoke`
 - Anchor-sensitive sample/hold behavior: `sample_hold_droop_smoke`
 
+## Cross-Model Qwen Probe
+
+Runs:
+
+- Main partial run: `results/adaptive-smallmatrix-qwen-skeleton-v2-2026-04-25`
+- Remaining-task run: `results/adaptive-smallmatrix-qwen-skeleton-v2-remaining-2026-04-25`
+
+Outcome:
+
+- PASS: `3/16`
+- PASS tasks: `adpll_timer_smoke`, `gain_extraction_smoke`, `mux_4to1_smoke`
+- The PFD second repair round became a long-tail run and was manually stopped; the recorded PFD
+  conclusion uses the completed first-round result.
+
+Interpretation:
+
+- The same repair skeletons do transfer partially across models, but Qwen starts with many more
+  compile-layer failures than Kimi on this small matrix.
+- Qwen did solve `adpll_timer_smoke`, which Kimi did not solve in the Kimi matrix. This suggests
+  the limitation is not simply "Qwen is worse"; the two models have different failure profiles.
+- Qwen repeatedly made useful layer progress without reaching PASS, for example compile-to-observable
+  on DWA/SAR-like cases and observable-to-behavior on PFD-like cases.
+- Qwen-specific next work should emphasize stricter compile skeletons and structured testbench
+  templates before behavior-level repair.
+
 Update after the first DWA behavior probe:
 
 - A remaining DWA wraparound failure was traced to the behavior-layer harness freeze policy.
@@ -154,14 +180,15 @@ Update after the first DWA behavior probe:
 
 ## Recommended Next Work
 
-1. Run the same `16`-task small matrix on Qwen to test cross-model generality.
-2. For remaining SAR/ADC-DAC and PFD failures, decide whether to add structured code skeletons rather
+1. For remaining SAR/ADC-DAC and PFD failures, decide whether to add structured code skeletons rather
    than more natural-language guidance.
-3. Add a better anchor-selection rule for matrix runs so tasks can start from `best` when available,
+2. Add a better anchor-selection rule for matrix runs so tasks can start from `best` when available,
    not only from a fixed `round1` root.
+3. Add Qwen-oriented compile repair hardening for dynamic vector indexing, conditional transition,
+   colon-instance save syntax, and invalid testbench control statements.
 4. Re-run the same small validation cases after each skeleton, using failure-surface progress plus PASS
    as the acceptance metric.
-5. Only after the Qwen small matrix and anchor-selection cleanup, decide whether to promote the method
+5. Only after anchor-selection cleanup and one more small-matrix confirmation, decide whether to promote the method
    to the full 92-task EVAS-only experiment.
 
 ## Upload Policy
