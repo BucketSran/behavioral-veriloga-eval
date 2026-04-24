@@ -5,6 +5,7 @@ import argparse
 import csv
 import json
 import math
+import multiprocessing as mp
 import re
 import shutil
 import subprocess
@@ -2774,6 +2775,51 @@ def evaluate_behavior(task_id: str, csv_path: Path) -> tuple[float, list[str]]:
     return (1.0 if ok else 0.0), [note]
 
 
+def _behavior_eval_worker(task_id: str, csv_path: str, queue: mp.Queue) -> None:
+    """Run checker evaluation in a child process so large CSVs cannot hang scoring."""
+    try:
+        queue.put(("ok", evaluate_behavior(task_id, Path(csv_path))))
+    except Exception as exc:  # pragma: no cover - defensive worker boundary
+        queue.put(("error", f"{type(exc).__name__}: {str(exc)[:300]}"))
+
+
+def evaluate_behavior_with_timeout(
+    task_id: str,
+    csv_path: Path,
+    *,
+    timeout_s: int,
+) -> tuple[float, list[str]]:
+    """Evaluate behavior with a watchdog separate from EVAS simulation timeout.
+
+    `evas simulate` can finish successfully while producing a very large CSV.
+    Without a second timeout, Python-side checker parsing can block an entire
+    full92 matrix run. Keep this timeout shorter than simulation timeout so one
+    pathological waveform becomes a normal task failure instead of a matrix hang.
+    """
+    eval_timeout_s = max(10, min(60, max(1, timeout_s // 3)))
+    ctx = mp.get_context("spawn")
+    queue: mp.Queue = ctx.Queue(maxsize=1)
+    proc = ctx.Process(
+        target=_behavior_eval_worker,
+        args=(task_id, str(csv_path), queue),
+    )
+    proc.start()
+    proc.join(eval_timeout_s)
+    if proc.is_alive():
+        proc.terminate()
+        proc.join(5)
+        if proc.is_alive():
+            proc.kill()
+            proc.join(5)
+        return 0.0, [f"behavior_eval_timeout>{eval_timeout_s}s"]
+    if queue.empty():
+        return 0.0, ["behavior_eval_no_result"]
+    status, payload = queue.get()
+    if status == "ok":
+        return payload
+    return 0.0, [f"behavior_eval_error={payload}"]
+
+
 def run_case(
     task_dir: Path,
     dut_path: Path,
@@ -2808,7 +2854,11 @@ def run_case(
 
         csv_path = out_dir / "tran.csv"
         if "sim_correct" in scoring and proc.returncode == 0 and csv_path.exists():
-            sim_correct, behavior_notes = evaluate_behavior(task_id, csv_path)
+            sim_correct, behavior_notes = evaluate_behavior_with_timeout(
+                task_id,
+                csv_path,
+                timeout_s=timeout_s,
+            )
             notes.extend(behavior_notes)
         elif "sim_correct" in scoring:
             sim_correct = 0.0

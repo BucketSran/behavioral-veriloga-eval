@@ -36,7 +36,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from simulate_evas import evaluate_behavior, has_behavior_check, run_case
+from simulate_evas import has_behavior_check, run_case
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -44,7 +44,6 @@ from simulate_evas import evaluate_behavior, has_behavior_check, run_case
 
 ROOT = Path(__file__).resolve().parents[1]
 ALL_FAMILIES = ("end-to-end", "spec-to-va", "bugfix", "tb-generation")
-
 
 def family_task_root(family: str) -> Path:
     base = ROOT / "tasks"
