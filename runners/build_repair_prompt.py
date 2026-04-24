@@ -1396,6 +1396,16 @@ def _repair_policy_contract(task_id: str, notes: list[str], sim_subtype: str) ->
             "- Update the state exactly once per valid clock edge.",
             "- Do not independently toggle output bits.",
         ])
+    elif rule == "SAMPLE_HOLD_DROOP" or "sample_hold" in task_lower:
+        lines.extend([
+            "",
+            "Hard contract for sample-hold droop repair:",
+            "- Modify only sampling aperture, hold state, and droop update logic.",
+            "- On the intended sample edge, capture `vin` into one held state variable and immediately drive `vout` toward that sampled value.",
+            "- During hold windows, do not track `vin`; update `vout` monotonically downward from the held value.",
+            "- Use a small timer-based or state-based droop update so hold windows contain enough smooth samples.",
+            "- Preserve `vin`, `clk`, `vout`, supply names, and transient/save setup.",
+        ])
 
     return lines
 
@@ -1543,6 +1553,27 @@ def _subtype_specific_repair_policy(task_id: str, notes: list[str], status: str)
             "- Derive Gray output from the binary counter: `gray = binary ^ (binary >> 1)`.",
             "- Do not store Gray bits as packed arrays; drive each output bit from fixed arithmetic tests.",
             "- Update the binary counter exactly once per valid rising clock edge after reset.",
+            "",
+        ])
+
+    if (
+        "sample_hold" in task_lower
+        and (
+            "droop_failures=" in lowered
+            or "insufficient_high_hold_windows" in lowered
+            or "sample_mismatch=" in lowered
+        )
+    ):
+        add_header("Behavior: sample-hold droop window")
+        lines.extend([
+            "- The circuit compiles and the checker can observe sample/hold windows. Repair behavior, not the testbench contract.",
+            "- Use one sampled state: capture `V(vin)` on each valid rising `clk` edge.",
+            "- Drive `vout` to the sampled value shortly after the sample edge so `sample_mismatch` stays low.",
+            "- In the hold portion between clock edges, do not read `vin` into `vout`; only evolve the held output state.",
+            "- Droop must be monotonic downward in high hold windows; avoid upward steps caused by re-tracking input or recomputing from `$abstime - t_last` in a way that resets during hold.",
+            "- Use a small periodic timer update during hold, for example `@(timer(0, dt)) if (V(clk)<vth) out_val = out_val * alpha;`.",
+            "- Tune droop magnitude so each high hold window droops visibly but not excessively; EVAS rejects both near-zero droop and huge decay.",
+            "- Preserve the verifier harness, scalar save names, and module ports.",
             "",
         ])
 

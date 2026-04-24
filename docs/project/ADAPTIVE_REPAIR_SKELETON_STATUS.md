@@ -29,6 +29,8 @@ EVAS closed loop progressively expose more actionable diagnostics:
 | Post-reset sample budget skeleton | `results/adaptive-postreset-skeleton-kimi-dwa-2026-04-25` | `dwa_wraparound_smoke`: `insufficient_post_reset_samples count=0` became `sampled_cycles=8 bad_ptr_rows=8 bad_count_rows=7 wrap_events=3 split_wrap_rows=4`. |
 | Post-reset sample budget skeleton | `results/adaptive-postreset-skeleton-kimi-sh-2026-04-25` | `sample_hold_droop_smoke`: `too_few_clock_edges=2` became `droop_failures=3 windows=3`. |
 | DWA behavior + verifier-helper freeze fix | `results/adaptive-dwa-behavior-freezecheck-kimi-2026-04-25` | Existing repaired DWA DUT plus corrected verifier helper/harness reached `PASS`: `sampled_cycles=8 bad_ptr_rows=0 bad_count_rows=0 wrap_events=3 split_wrap_rows=3`. |
+| DWA behavior skeleton through normal adaptive loop | `results/adaptive-dwa-normal-pass-kimi-2026-04-25` | `dwa_wraparound_smoke` reached `PASS` through the normal runner path: `sampled_cycles=8 bad_ptr_rows=0 bad_count_rows=0 wrap_events=3 split_wrap_rows=3`. |
+| Sample-hold behavior skeleton | `results/adaptive-samplehold-behavior-kimi-2026-04-25` | `sample_hold_droop_smoke` reached `PASS`: `edges=9 sample_mismatch=0/6 droop_windows=2`. |
 
 ## What Changed Conceptually
 
@@ -71,8 +73,9 @@ and stimulus timing so enough post-reset samples exist.
 
 ## Current Limitations
 
-- The new skeletons improve failure-surface progress, not final Pass@1 yet.
-- Behavior repair remains the next bottleneck.
+- The observable and post-reset skeletons mostly improve failure-surface progress; final Pass@1 appears only after a targeted behavior skeleton is available.
+- DWA wraparound and sample-hold droop now have positive single-task PASS evidence.
+- Behavior repair remains the next bottleneck for ADC/SAR, serializer, PFD/BBPD, and PLL-like tasks.
 - Long DWA prompts are slow because the model has to regenerate many files and long bus wiring.
 - Some existing code changes are still experimental and should be reviewed before a clean commit.
 
@@ -88,15 +91,14 @@ Update after the first DWA behavior probe:
 
 ## Recommended Next Work
 
-1. Implement a behavior-layer DWA skeleton for `bad_ptr_rows`, `bad_count_rows`, `wrap_events`, and
-   `split_wrap_rows`.
-2. Re-run DWA wraparound through the normal adaptive loop after the verifier-helper freeze fix, not
-   just through the direct freeze-check path.
-3. Implement a sample-hold behavior skeleton for `droop_failures` and `windows`.
+1. Implement ADC/SAR behavior skeletons for code coverage, bit-drive, DAC span, and conversion timing.
+2. Implement serializer behavior skeletons for bit order, first-bit phase, and frame alignment.
+3. Implement PFD/BBPD behavior skeletons for edge-order windows, finite UP/DN pulses, and reset overlap.
 4. Re-run the same small validation cases after each skeleton, using failure-surface progress plus PASS
    as the acceptance metric.
 5. Once the small validation cases show real PASS uplift, run the 16-task small matrix again.
-6. Only after the small matrix improves, promote the method to the full 92-task EVAS-only experiment.
+6. If Kimi improves on the 16-task matrix, run the same small matrix on Qwen to test cross-model generality.
+7. Only after the small matrix improves, decide whether to promote the method to the full 92-task EVAS-only experiment.
 
 ## Upload Policy
 

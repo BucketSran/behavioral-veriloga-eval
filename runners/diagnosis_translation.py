@@ -490,6 +490,29 @@ def translate_diagnosis(note: str, task_id: Optional[str] = None) -> dict:
             for k in ("sampled_cycles", "bad_ptr_rows", "bad_count_rows", "wrap_events", "split_wrap_rows")
             if k in metrics
         ]
+    elif any(_has_key(note, k) for k in ("droop_failures", "insufficient_high_hold_windows", "sample_mismatch")):
+        result.update(
+            {
+                "diagnosis": "Sample-hold droop or aperture behavior is incorrect",
+                "matched_rule": "SAMPLE_HOLD_DROOP",
+                "causes": [
+                    "Output may still track input during hold instead of holding sampled state",
+                    "Droop may be too small, too large, or non-monotonic inside hold windows",
+                    "Sample edge update may not settle to vin quickly enough after the aperture",
+                ],
+                "repair_suggestions": [
+                    "Capture vin once on the intended sample edge into a held state variable",
+                    "During hold, update vout only from the held state with a monotonic downward droop",
+                    "Use timer-based droop updates and avoid re-sampling vin while clk is low",
+                    "Tune droop magnitude so high hold windows show visible but bounded decay",
+                ],
+            }
+        )
+        result["matched_keys"] = [
+            k
+            for k in ("droop_failures", "windows", "insufficient_high_hold_windows", "sample_mismatch")
+            if k in metrics
+        ]
     elif _has_key(note, "max_err"):
         result.update(
             {
