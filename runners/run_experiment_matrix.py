@@ -67,7 +67,7 @@ CONDITIONS = {
     "G": {"include_checker": True, "include_skill": True, "repair_mode": "evas-guided-repair-3round-skill", "repair_include_skill": True},
 }
 
-DATE_TAG = "2026-04-22"
+DATE_TAG = datetime.now().strftime("%Y-%m-%d")
 
 
 def get_output_dir(condition: str, model: str, split: str) -> Path:
@@ -273,6 +273,7 @@ def run_repair(
 
 
 def main() -> int:
+    global DATE_TAG
     ap = argparse.ArgumentParser(description="Run experiment matrix for vaEvas benchmark.")
     ap.add_argument("--model", required=True, help="Model name, e.g. kimi-k2.5")
     ap.add_argument("--split", choices=["dev24", "full86"], default="dev24")
@@ -286,9 +287,12 @@ def main() -> int:
     ap.add_argument("--gen-workers", type=int, default=4,
                     help="Parallel generation workers for baseline conditions A/B/C.")
     ap.add_argument("--timeout-s", type=int, default=180)
+    ap.add_argument("--date-tag", default=DATE_TAG,
+                    help="Tag used in result directory names. Defaults to today's date.")
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
+    DATE_TAG = args.date_tag
 
     conditions = ["A", "B", "C", "D", "E", "F", "G"] if args.condition == "all" else [args.condition]
 
