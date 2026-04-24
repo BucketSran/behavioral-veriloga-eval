@@ -32,6 +32,7 @@ import argparse
 import json
 import re
 import shutil
+import subprocess
 import tempfile
 from pathlib import Path
 
@@ -85,6 +86,31 @@ def list_all_task_dirs(families: tuple[str, ...] = ALL_FAMILIES,
                 continue
             result.append((task_id, task_dir))
     return result
+
+
+def _checks_yaml_declares_sim_correct(task_dir: Path) -> bool:
+    checks_path = task_dir / "checks.yaml"
+    if not checks_path.exists():
+        return False
+    text = checks_path.read_text(encoding="utf-8", errors="ignore")
+    return bool(re.search(r"(?m)^\s*sim_correct\s*:\s*$", text))
+
+
+def _audit_checker_contract(task_list: list[tuple[str, Path]]) -> tuple[list[str], list[str]]:
+    errors: list[str] = []
+    warnings: list[str] = []
+    for task_id, task_dir in task_list:
+        meta = read_meta(task_dir)
+        scoring = meta.get("scoring", ["dut_compile", "tb_compile", "sim_correct"])
+        requires_sim = "sim_correct" in scoring
+        has_check = has_behavior_check(task_id)
+        yaml_has_sim = _checks_yaml_declares_sim_correct(task_dir)
+
+        if requires_sim and not has_check:
+            errors.append(task_id)
+        if yaml_has_sim and not has_check:
+            warnings.append(f"{task_id}: checks.yaml declares sim_correct but CHECKS has no entry")
+    return errors, warnings
 
 
 def find_generated_dir(generated_root: Path, model: str, task_id: str,
@@ -171,6 +197,57 @@ def tb_structure(tb_path: Path) -> dict:
         "save_signals": signals,
         "modules": modules,
     }
+
+
+def normalize_tb_save_signals(tb_path: Path) -> int:
+    """Rewrite hierarchical save tokens to flat node names for stable CSV headers.
+
+    Example:
+      save adpll:ref_clk adpll:fb_clk  -> save ref_clk fb_clk
+      save xdut.clk_in xdut.div_out    -> save clk_in div_out
+    """
+    original_lines = tb_path.read_text(encoding="utf-8", errors="ignore").splitlines()
+    updated_lines: list[str] = []
+    rewrite_count = 0
+
+    for line in original_lines:
+        stripped = line.strip()
+        if not stripped.lower().startswith("save "):
+            updated_lines.append(line)
+            continue
+        indent = line[: len(line) - len(line.lstrip())]
+        parts = stripped.split()
+        if len(parts) <= 1:
+            updated_lines.append(line)
+            continue
+
+        rewritten = [parts[0]]
+        for token in parts[1:]:
+            norm = token
+            low = token.lower()
+            if (
+                token in {"\\", ","}
+                or "*" in token
+                or token.startswith("V(")
+                or token.startswith("I(")
+                or low in {"all", "allpub", "options"}
+                or low.startswith("save=")
+            ):
+                rewritten.append(norm)
+                continue
+            if ":" in norm:
+                norm = norm.split(":")[-1]
+            if "." in norm:
+                norm = norm.split(".")[-1]
+            if norm != token:
+                rewrite_count += 1
+            rewritten.append(norm)
+
+        updated_lines.append(indent + " ".join(rewritten))
+
+    if rewrite_count > 0:
+        tb_path.write_text("\n".join(updated_lines) + "\n", encoding="utf-8")
+    return rewrite_count
 
 
 def _safe_inc_path(stage_dir: Path, inc_name: str) -> Path:
@@ -490,6 +567,9 @@ def stage_candidate_case(
 
     staged_tb = stage_dir / tb_path.name
     _copy_as(tb_path, staged_tb)
+    rewritten_save_tokens = normalize_tb_save_signals(staged_tb)
+    if rewritten_save_tokens > 0:
+        notes.append(f"normalized_tb_save_tokens={rewritten_save_tokens}")
 
     includes = ahdl_includes(tb_path)
     va_includes = [name for name in includes if Path(name).suffix.lower() == ".va"]
@@ -652,15 +732,27 @@ def score_one_task(
                 "notes": strict_notes,
             }
         else:
-            evas_result = run_case(
-                task_dir,
-                tmp_dut,
-                tmp_tb,
-                output_root=output_dir,
-                timeout_s=timeout_s,
-                task_id_override=task_id,
-            )
-            evas_result["notes"] = strict_notes + evas_result.get("notes", [])
+            try:
+                evas_result = run_case(
+                    task_dir,
+                    tmp_dut,
+                    tmp_tb,
+                    output_root=output_dir,
+                    timeout_s=timeout_s,
+                    task_id_override=task_id,
+                )
+                evas_result["notes"] = strict_notes + evas_result.get("notes", [])
+            except subprocess.TimeoutExpired:
+                evas_result = {
+                    "status": "FAIL_INFRA",
+                    "scores": {
+                        "dut_compile": 0.0,
+                        "tb_compile": 0.0,
+                        "sim_correct": 0.0,
+                        "weighted_total": 0.0,
+                    },
+                    "notes": strict_notes + [f"evas_timeout>{timeout_s}s"],
+                }
 
     scores: dict[str, float] = evas_result.get("scores", {})
     status = evas_result.get("status", "FAIL_INFRA")
@@ -858,6 +950,15 @@ def main() -> int:
     if not task_list:
         print("[score] No tasks found.")
         return 1
+    coverage_errors, contract_warnings = _audit_checker_contract(task_list)
+    for warn in contract_warnings:
+        print(f"[score] WARN {warn}")
+    if coverage_errors:
+        print("[score] ERROR missing behavior checker for sim_correct-required tasks:")
+        for task_id in coverage_errors:
+            print(f"  - {task_id}")
+        print("[score] Fix CHECKS mapping in runners/simulate_evas.py before scoring.")
+        return 2
 
     results: list[dict] = []
     for task_id, task_dir in task_list:

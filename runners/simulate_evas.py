@@ -55,12 +55,79 @@ def load_csv(csv_path: Path) -> list[dict[str, float]]:
     return rows
 
 
+def evaluate_noise_gen_csv(csv_path: Path) -> tuple[float, list[str]]:
+    """Fast streaming checker for noise_gen tasks on very large CSV files."""
+    count = 0
+    mean = 0.0
+    m2 = 0.0
+    max_abs = 0.0
+    missing_cols = False
+
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        fields = set(reader.fieldnames or [])
+        if not {"vin_i", "vout_o"}.issubset(fields):
+            missing_cols = True
+        else:
+            for row in reader:
+                try:
+                    x = float(row["vout_o"]) - float(row["vin_i"])
+                except (TypeError, ValueError):
+                    continue
+                count += 1
+                delta = x - mean
+                mean += delta / count
+                m2 += delta * (x - mean)
+                ax = abs(x)
+                if ax > max_abs:
+                    max_abs = ax
+
+    if missing_cols:
+        return 0.0, ["missing vin_i/vout_o"]
+    if count == 0:
+        return 0.0, ["noise_gen_empty_csv"]
+
+    var = m2 / count
+    std = math.sqrt(max(var, 0.0))
+    ok = std > 0.01 and max_abs > 0.05
+    return (1.0 if ok else 0.0), [f"noise_std={std:.4f} max_abs={max_abs:.4f} samples={count}"]
+
+
 def rising_edges(values: list[float], times: list[float], threshold: float = 0.45) -> list[float]:
     edges: list[float] = []
     for i in range(1, len(values)):
         if values[i - 1] < threshold <= values[i]:
             edges.append(times[i])
     return edges
+
+
+def sample_rows_at_or_after_times(
+    rows: list[dict[str, float]],
+    target_times: list[float],
+    *,
+    rst_key: str | None = None,
+    rst_threshold: float = 0.45,
+) -> list[dict[str, float]]:
+    """Return rows whose time is the first sample at/after each target time.
+
+    This function is linear in len(rows) + len(target_times). It replaces
+    repeated per-target full scans that become O(n^2) on large tran.csv files.
+    """
+    if not rows or not target_times:
+        return []
+
+    sampled: list[dict[str, float]] = []
+    row_idx = 0
+    n_rows = len(rows)
+    for t in target_times:
+        while row_idx < n_rows and rows[row_idx]["time"] < t:
+            row_idx += 1
+        if row_idx >= n_rows:
+            break
+        row = rows[row_idx]
+        if rst_key is None or row.get(rst_key, 0.0) > rst_threshold:
+            sampled.append(row)
+    return sampled
 
 
 def decode_bus(rows: list[dict[str, float]], bit_names: list[str], threshold: float = 0.45) -> list[int]:
@@ -85,6 +152,193 @@ def decode_bus(rows: list[dict[str, float]], bit_names: list[str], threshold: fl
 def indexed_columns(keys: set[str], prefix: str) -> list[str]:
     cols = [k for k in keys if re.fullmatch(rf"{re.escape(prefix)}\d+", k)]
     return sorted(cols, key=lambda name: int(re.search(r"(\d+)$", name).group(1)))
+
+
+def _canonical_signal_name(name: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", name.lower())
+
+
+def _set_alias_if_missing(row: dict[str, float], alias: str, value: float) -> None:
+    if alias and alias not in row:
+        row[alias] = value
+
+
+def _expanded_row_aliases(row: dict[str, float]) -> dict[str, float]:
+    expanded = dict(row)
+    original = list(row.items())
+    for raw_key, value in original:
+        key = raw_key.strip()
+        if not key:
+            continue
+
+        candidates = {key, key.lower()}
+        for sep in (":", "."):
+            if sep in key:
+                tail = key.split(sep)[-1]
+                candidates.add(tail)
+                candidates.add(tail.lower())
+
+        vm = re.match(r"(?i)^v\(\s*([^)]+)\s*\)$", key)
+        if vm:
+            inner = vm.group(1).strip()
+            candidates.add(inner)
+            candidates.add(inner.lower())
+
+        for cand in list(candidates):
+            cm = re.match(r"^([A-Za-z_][A-Za-z0-9_$]*)\[(\d+)\]$", cand)
+            if cm:
+                root = cm.group(1)
+                idx = cm.group(2)
+                candidates.update(
+                    {
+                        f"{root}_{idx}",
+                        f"{root}{idx}",
+                        f"{root.lower()}_{idx}",
+                        f"{root.lower()}{idx}",
+                    }
+                )
+
+            dm = re.search(r"(dout|din|div_code|cell_en|ptr|state|code|bin_o|g|d)_?(\d+)$", cand.lower())
+            if dm:
+                root = dm.group(1)
+                idx = dm.group(2)
+                candidates.update(
+                    {
+                        f"{root}_{idx}",
+                        f"{root}{idx}",
+                    }
+                )
+                if root == "d":
+                    candidates.update({f"dout_{idx}", f"dout{idx}"})
+
+        for alias in candidates:
+            _set_alias_if_missing(expanded, alias, value)
+
+    canonical_map: dict[str, str] = {}
+    for key in expanded:
+        canonical_map.setdefault(_canonical_signal_name(key), key)
+
+    for idx in range(16):
+        for target in (
+            f"dout_{idx}",
+            f"dout{idx}",
+            f"din_{idx}",
+            f"din{idx}",
+            f"ptr_{idx}",
+            f"cell_en_{idx}",
+            f"g{idx}",
+            f"state_{idx}",
+            f"div_code_{idx}",
+        ):
+            ckey = _canonical_signal_name(target)
+            if target not in expanded and ckey in canonical_map:
+                expanded[target] = expanded[canonical_map[ckey]]
+
+    for target in (
+        "vin",
+        "vout",
+        "vin_sh",
+        "rst_n",
+        "clk",
+        "clk_in",
+        "clk_out",
+        "lock",
+        "ref_clk",
+        "fb_clk",
+        "vctrl_mon",
+        "vinp",
+        "vinn",
+        "out_p",
+        "out_n",
+        "outp",
+        "outn",
+        "a",
+        "b",
+        "y",
+        "d",
+        "q",
+        "qb",
+        "rst",
+        "ref",
+        "div",
+        "up",
+        "dn",
+        "serial_out",
+        "dpn",
+        "rstb",
+        "en",
+        "phase_out",
+        "guard_out",
+        "delay_out",
+        "seen_out",
+        "first_err_out",
+        "max_err_out",
+        "count_out",
+        "metric_out",
+        "mode",
+        "out",
+        "vin_i",
+        "vout_o",
+    ):
+        ckey = _canonical_signal_name(target)
+        if target not in expanded and ckey in canonical_map:
+            expanded[target] = expanded[canonical_map[ckey]]
+
+    return expanded
+
+
+_TASK_ALIAS_CANDIDATES: dict[str, dict[str, tuple[str, ...]]] = {
+    "digital_basics_smoke": {
+        "a": ("not_a",),
+        "y": ("not_y",),
+    },
+    "and_gate_smoke": {
+        "a": ("and_a",),
+        "b": ("and_b",),
+        "y": ("and_y",),
+    },
+    "or_gate_smoke": {
+        "a": ("or_a",),
+        "b": ("or_b",),
+        "y": ("or_y",),
+    },
+    "dff_rst_smoke": {
+        "d": ("dff_d",),
+        "clk": ("dff_clk",),
+        "rst": ("dff_rst",),
+        "q": ("dff_q",),
+        "qb": ("dff_qb",),
+    },
+    "dwa_ptr_gen_no_overlap_smoke": {
+        "clk_i": ("clk",),
+        "rst_ni": ("rst_n",),
+    },
+    "noise_gen_smoke": {
+        "vin_i": ("vin",),
+        "vout_o": ("vout",),
+    },
+    "sar_adc_dac_weighted_8b_smoke": {
+        "vin_sh": ("vin",),
+    },
+}
+
+
+def normalize_rows_for_task(task_id: str, rows: list[dict[str, float]]) -> list[dict[str, float]]:
+    if not rows:
+        return rows
+    normalized = [_expanded_row_aliases(row) for row in rows]
+    alias_rules = _TASK_ALIAS_CANDIDATES.get(task_id, {})
+    if not alias_rules:
+        return normalized
+    for row in normalized:
+        for target, candidates in alias_rules.items():
+            if target in row:
+                continue
+            for cand in candidates:
+                if cand in row:
+                    row[target] = row[cand]
+                    break
+    return normalized
 
 
 def check_clk_div(rows: list[dict[str, float]]) -> tuple[bool, str]:
@@ -350,7 +604,7 @@ def check_d2b(rows: list[dict[str, float]]) -> tuple[bool, str]:
         codes = decode_bus(rows, ["bin_o_0", "bin_o_1", "bin_o_2", "bin_o_3"])
         stable = len(set(codes)) == 1
         return stable and codes[0] == 9, f"stable_code={codes[0]}"
-    dout_bits = [k for k in rows[0] if re.fullmatch(r"DOUT[_\[]?\d+\]?", k)]
+    dout_bits = [k for k in rows[0] if re.fullmatch(r"dout[_\[]?\d+\]?", k, flags=re.IGNORECASE)]
     vin_col = next((k for k in rows[0] if k.lower().startswith("vin")), None)
     if vin_col and dout_bits:
         codes = decode_bus(rows, dout_bits)
@@ -468,6 +722,74 @@ def check_not_gate(rows: list[dict[str, float]]) -> tuple[bool, str]:
     good = sum(1 for r in check_rows if (r["a"] > 0.4) != (r["y"] > 0.4))
     frac = good / len(check_rows)
     return frac > 0.9, f"invert_match_frac={frac:.3f}"
+
+
+def check_and_gate(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"a", "b", "y"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing a/b/y"
+    check_rows = [r for r in rows if r["time"] >= rows[0]["time"] + 5e-10]
+    if len(check_rows) < 10:
+        check_rows = rows
+    good = 0
+    for r in check_rows:
+        a_hi = r["a"] > 0.45
+        b_hi = r["b"] > 0.45
+        y_hi = r["y"] > 0.45
+        if y_hi == (a_hi and b_hi):
+            good += 1
+    frac = good / len(check_rows)
+    return frac > 0.92, f"and_truth_match_frac={frac:.3f}"
+
+
+def check_or_gate(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"a", "b", "y"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing a/b/y"
+    check_rows = [r for r in rows if r["time"] >= rows[0]["time"] + 5e-10]
+    if len(check_rows) < 10:
+        check_rows = rows
+    good = 0
+    for r in check_rows:
+        a_hi = r["a"] > 0.45
+        b_hi = r["b"] > 0.45
+        y_hi = r["y"] > 0.45
+        if y_hi == (a_hi or b_hi):
+            good += 1
+    frac = good / len(check_rows)
+    return frac > 0.92, f"or_truth_match_frac={frac:.3f}"
+
+
+def check_dff_rst(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"time", "d", "clk", "rst", "q", "qb"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing time/d/clk/rst/q/qb"
+    clk_max = max(r["clk"] for r in rows)
+    vth = 0.45 if clk_max < 0.9 else 0.5 * clk_max
+    edges = [
+        idx
+        for idx in range(1, len(rows))
+        if rows[idx - 1]["clk"] <= vth < rows[idx]["clk"]
+    ]
+    if len(edges) < 6:
+        return False, f"too_few_clk_edges={len(edges)}"
+
+    mismatches = 0
+    qb_mismatches = 0
+    checks = 0
+    for idx in edges:
+        settle = min(idx + 3, len(rows) - 1)
+        r = rows[settle]
+        expected_q_hi = False if r["rst"] > vth else (r["d"] > vth)
+        q_hi = r["q"] > vth
+        qb_hi = r["qb"] > vth
+        checks += 1
+        if q_hi != expected_q_hi:
+            mismatches += 1
+        if qb_hi == q_hi:
+            qb_mismatches += 1
+    ok = checks >= 6 and mismatches <= 1 and qb_mismatches <= 1
+    return ok, f"checks={checks} q_mismatch={mismatches} qb_mismatch={qb_mismatches}"
 
 
 def check_lfsr(rows: list[dict[str, float]]) -> tuple[bool, str]:
@@ -897,12 +1219,8 @@ def check_dwa_ptr_gen_no_overlap(rows: list[dict[str, float]]) -> tuple[bool, st
     if not edge_times:
         return False, "no_clock_edges"
 
-    sampled_rows: list[dict[str, float]] = []
-    for edge_t in edge_times:
-        sample_t = edge_t + 1.0e-9
-        row = next((r for r in rows if r["time"] >= sample_t), None)
-        if row is not None and row["rst_ni"] > 0.45:
-            sampled_rows.append(row)
+    sample_times = [edge_t + 1.0e-9 for edge_t in edge_times]
+    sampled_rows = sample_rows_at_or_after_times(rows, sample_times, rst_key="rst_ni")
 
     if len(sampled_rows) < 2:
         return False, f"insufficient_post_reset_samples count={len(sampled_rows)}"
@@ -949,12 +1267,8 @@ def check_dwa_wraparound(rows: list[dict[str, float]]) -> tuple[bool, str]:
 
     times = [r["time"] for r in rows]
     edge_times = rising_edges([r["clk_i"] for r in rows], times)
-    sampled_rows: list[dict[str, float]] = []
-    for edge_t in edge_times:
-        sample_t = edge_t + 1.0e-9
-        row = next((r for r in rows if r["time"] >= sample_t), None)
-        if row is not None and row["rst_ni"] > 0.45:
-            sampled_rows.append(row)
+    sample_times = [edge_t + 1.0e-9 for edge_t in edge_times]
+    sampled_rows = sample_rows_at_or_after_times(rows, sample_times, rst_key="rst_ni")
 
     if len(sampled_rows) < 5:
         return False, f"insufficient_post_reset_samples count={len(sampled_rows)}"
@@ -2104,6 +2418,222 @@ def check_mux_4to1(rows: list[dict[str, float]]) -> tuple[bool, str]:
     return True, "all_4_select_windows_correct"
 
 
+def check_above_threshold_startup(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"time", "vin", "out"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing time/vin/out"
+    if max(r["vin"] for r in rows) < 0.45:
+        return False, "vin_never_above_threshold"
+    out_vals = [r["out"] for r in rows]
+    out_min = min(out_vals)
+    out_max = max(out_vals)
+    span = out_max - out_min
+    if span < 0.2:
+        return False, f"out_not_latched_high span={span:.3f}"
+    vth = out_min + 0.5 * span
+    first_hi_t = next((r["time"] for r in rows if r["out"] > vth), None)
+    if first_hi_t is None:
+        return False, "out_never_high"
+    late = [r["out"] for r in rows if r["time"] >= rows[-1]["time"] * 0.6]
+    late_hi_frac = sum(1 for v in late if v > vth) / max(len(late), 1)
+    ok = first_hi_t <= 2e-9 and late_hi_frac > 0.95
+    return ok, f"first_hi_t_ns={first_hi_t*1e9:.3f} late_hi_frac={late_hi_frac:.3f}"
+
+
+def check_bound_step_period_guard(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"time", "guard_out", "phase_out"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing time/guard_out/phase_out"
+    g = [r["guard_out"] for r in rows]
+    p = [r["phase_out"] for r in rows]
+    t = [r["time"] for r in rows]
+    gth = 0.5 * (max(g) + min(g))
+    guard_hi_frac = weighted_logic_high_fraction(rows, "guard_out", gth)
+    if not (0.08 <= guard_hi_frac <= 0.30):
+        return False, f"guard_hi_frac_out_of_range={guard_hi_frac:.3f}"
+    wraps = sum(1 for i in range(1, len(p)) if p[i] < p[i - 1] - 0.2)
+    phase_span = max(p) - min(p)
+    guard_rises = len(rising_edges(g, t, threshold=gth))
+    ok = wraps >= 3 and phase_span > 0.5 and guard_rises >= 3
+    return ok, f"guard_rises={guard_rises} wraps={wraps} phase_span={phase_span:.3f} guard_hi_frac={guard_hi_frac:.3f}"
+
+
+def check_cross_hysteresis_window(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"time", "vin", "out"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing time/vin/out"
+    out_vals = [r["out"] for r in rows]
+    lo = min(out_vals)
+    hi = max(out_vals)
+    span = hi - lo
+    if span < 0.3:
+        return False, f"out_span_too_small={span:.3f}"
+    low1 = [r["out"] for r in rows if r["time"] <= 20e-9]
+    high_mid = [r["out"] for r in rows if 35e-9 <= r["time"] <= 55e-9]
+    low2 = [r["out"] for r in rows if r["time"] >= 75e-9]
+    if not low1 or not high_mid or not low2:
+        return False, "insufficient_window_samples"
+    m_low1 = sum(low1) / len(low1)
+    m_high = sum(high_mid) / len(high_mid)
+    m_low2 = sum(low2) / len(low2)
+    ok = (m_high - m_low1) > 0.45 * span and (m_high - m_low2) > 0.45 * span
+    return ok, f"low1={m_low1:.3f} high={m_high:.3f} low2={m_low2:.3f} span={span:.3f}"
+
+
+def check_cross_interval_163p333(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"delay_out", "seen_out"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing delay_out/seen_out"
+    seen_hi = max(r["seen_out"] for r in rows)
+    if seen_hi < 0.3:
+        return False, f"seen_out_never_high={seen_hi:.3f}"
+    tail = [r["delay_out"] for r in rows if r["time"] >= rows[-1]["time"] * 0.7]
+    if not tail:
+        return False, "no_tail_samples"
+    delay_level = sum(tail) / len(tail)
+    vdd_est = max(max(r["seen_out"] for r in rows), 1e-6)
+    delay_ps = delay_level / vdd_est * 200.0
+    ok = 130.0 <= delay_ps <= 190.0
+    return ok, f"delay_ps={delay_ps:.3f} seen_hi={seen_hi:.3f}"
+
+
+def check_cross_sine_precision(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"first_err_out", "max_err_out", "count_out"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing first_err_out/max_err_out/count_out"
+    vdd_est = max(r["count_out"] for r in rows)
+    if vdd_est < 0.2:
+        return False, f"count_out_too_low={vdd_est:.3f}"
+    count_est = max(r["count_out"] for r in rows) / max(vdd_est, 1e-6) * 3.0
+    max_err_ps = max(r["max_err_out"] for r in rows) / max(vdd_est, 1e-6) * 10.0
+    ok = count_est >= 2.5 and max_err_ps < 1.0
+    return ok, f"count_est={count_est:.2f} max_err_ps={max_err_ps:.4f}"
+
+
+def check_differential_voltage_output(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"time", "outp", "outn"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing time/outp/outn"
+    w0 = [r for r in rows if 5e-9 <= r["time"] <= 15e-9]
+    w1 = [r for r in rows if 25e-9 <= r["time"] <= 35e-9]
+    w2 = [r for r in rows if 45e-9 <= r["time"] <= 55e-9]
+    if not w0 or not w1 or not w2:
+        return False, "insufficient_window_samples"
+    m0p = sum(r["outp"] for r in w0) / len(w0)
+    m1p = sum(r["outp"] for r in w1) / len(w1)
+    m2p = sum(r["outp"] for r in w2) / len(w2)
+    m0n = sum(r["outn"] for r in w0) / len(w0)
+    m1n = sum(r["outn"] for r in w1) / len(w1)
+    m2n = sum(r["outn"] for r in w2) / len(w2)
+    outn_span = max(abs(m0n - m1n), abs(m1n - m2n), abs(m0n - m2n))
+    ok = (m1p - m0p) > 0.25 and abs(m2p - m0p) < 0.12 and outn_span < 0.08
+    return ok, f"outp_means=({m0p:.3f},{m1p:.3f},{m2p:.3f}) outn_span={outn_span:.3f}"
+
+
+def check_final_step_file_metric(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"time", "ref", "metric_out"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing time/ref/metric_out"
+    vth = 0.45 if max(r["ref"] for r in rows) < 1.0 else 0.5 * max(r["ref"] for r in rows)
+    ref_edges = rising_edges([r["ref"] for r in rows], [r["time"] for r in rows], threshold=vth)
+    metric_vals = [r["metric_out"] for r in rows]
+    vmax = max(metric_vals)
+    if vmax < 0.2:
+        return False, f"metric_out_too_low={vmax:.3f}"
+    tail = [r["metric_out"] for r in rows if r["time"] >= rows[-1]["time"] * 0.85]
+    final_norm = (sum(tail) / len(tail)) / max(vmax, 1e-6) if tail else 0.0
+    dips = sum(1 for i in range(1, len(metric_vals)) if metric_vals[i] + 0.03 < metric_vals[i - 1])
+    ok = len(ref_edges) >= 4 and final_norm > 0.90 and dips <= 3
+    return ok, f"ref_edges={len(ref_edges)} final_norm={final_norm:.3f} metric_dips={dips}"
+
+
+def check_parameter_type_override(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    if not rows or "out" not in rows[0]:
+        return False, "missing out"
+    out_vals = [r["out"] for r in rows]
+    vhi = max(out_vals)
+    vth = 0.5 * vhi
+    times = [r["time"] for r in rows]
+    pulses = len(rising_edges(out_vals, times, threshold=vth))
+    ok = 3 <= pulses <= 5 and 0.60 <= vhi <= 0.85
+    return ok, f"pulses={pulses} peak={vhi:.3f}"
+
+
+def check_phase_accumulator_timer_wrap(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"time", "clk_out", "phase_out"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing time/clk_out/phase_out"
+    phase_vals = [r["phase_out"] for r in rows]
+    clk_vals = [r["clk_out"] for r in rows]
+    times = [r["time"] for r in rows]
+    phase_span = max(phase_vals) - min(phase_vals)
+    if phase_span < 0.4:
+        return False, f"phase_span_too_small={phase_span:.3f}"
+    wraps = sum(1 for i in range(1, len(phase_vals)) if phase_vals[i] < phase_vals[i - 1] - 0.2 * phase_span)
+    cth = 0.5 * (max(clk_vals) + min(clk_vals))
+    clk_rises = len(rising_edges(clk_vals, times, threshold=cth))
+    ok = wraps >= 3 and clk_rises >= 3
+    return ok, f"wraps={wraps} clk_rises={clk_rises} phase_span={phase_span:.3f}"
+
+
+def check_simultaneous_event_order(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"time", "out"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing time/out"
+    windows = [
+        (12e-9, 18e-9),
+        (32e-9, 38e-9),
+        (52e-9, 58e-9),
+        (72e-9, 78e-9),
+    ]
+    levels: list[float] = []
+    for t0, t1 in windows:
+        vals = [r["out"] for r in rows if t0 <= r["time"] <= t1]
+        if not vals:
+            return False, "insufficient_window_samples"
+        levels.append(sum(vals) / len(vals))
+    monotonic = all(levels[i] <= levels[i + 1] + 0.05 for i in range(len(levels) - 1))
+    span = levels[-1] - levels[0]
+    ok = monotonic and span > 0.15
+    return ok, f"plateau_levels={[round(v,3) for v in levels]} span={span:.3f}"
+
+
+def check_timer_absolute_grid(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"time", "clk_out"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing time/clk_out"
+    clk_vals = [r["clk_out"] for r in rows]
+    times = [r["time"] for r in rows]
+    cth = 0.5 * (max(clk_vals) + min(clk_vals))
+    rises = rising_edges(clk_vals, times, threshold=cth)
+    if len(rises) < 4:
+        return False, f"too_few_rising_edges={len(rises)}"
+    targets = [10.1e-9, 30.1e-9, 50.1e-9, 70.1e-9]
+    errs = [abs(r - t) for r, t in zip(rises[:4], targets)]
+    max_err = max(errs) if errs else float("inf")
+    ok = max_err <= 2.0e-9
+    return ok, f"rises_ns={[round(v*1e9,3) for v in rises[:4]]} max_err_ns={max_err*1e9:.3f}"
+
+
+def check_transition_branch_target(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"time", "mode", "clk", "out"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing time/mode/clk/out"
+    w_low0 = [r["out"] for r in rows if 15e-9 <= r["time"] <= 22e-9]
+    w_high1 = [r["out"] for r in rows if 35e-9 <= r["time"] <= 42e-9]
+    w_high2 = [r["out"] for r in rows if 55e-9 <= r["time"] <= 62e-9]
+    w_low3 = [r["out"] for r in rows if 75e-9 <= r["time"] <= 85e-9]
+    if not (w_low0 and w_high1 and w_high2 and w_low3):
+        return False, "insufficient_window_samples"
+    m0 = sum(w_low0) / len(w_low0)
+    m1 = sum(w_high1) / len(w_high1)
+    m2 = sum(w_high2) / len(w_high2)
+    m3 = sum(w_low3) / len(w_low3)
+    span = max(m1, m2) - min(m0, m3)
+    ok = (m1 - m0) > 0.35 * max(span, 1e-6) and (m2 - m3) > 0.35 * max(span, 1e-6)
+    return ok, f"means=({m0:.3f},{m1:.3f},{m2:.3f},{m3:.3f})"
+
+
 CHECKS = {
     # legacy short IDs (example-level names)
     "adc_dac_ideal_4b": check_adc_dac_ideal_4b,
@@ -2129,6 +2659,22 @@ CHECKS = {
     "adpll_lock_smoke": check_adpll_lock,
     "adpll_ratio_hop_smoke": check_adpll_ratio_hop,
     "adpll_timer_smoke": check_adpll_lock,
+    "above_threshold_startup_smoke": check_above_threshold_startup,
+    "and_gate_smoke": check_and_gate,
+    "or_gate_smoke": check_or_gate,
+    "not_gate_smoke": check_not_gate,
+    "dff_rst_smoke": check_dff_rst,
+    "bound_step_period_guard_smoke": check_bound_step_period_guard,
+    "cross_hysteresis_window_smoke": check_cross_hysteresis_window,
+    "cross_interval_163p333_smoke": check_cross_interval_163p333,
+    "cross_sine_precision_smoke": check_cross_sine_precision,
+    "differential_voltage_output_smoke": check_differential_voltage_output,
+    "final_step_file_metric_smoke": check_final_step_file_metric,
+    "parameter_type_override_smoke": check_parameter_type_override,
+    "phase_accumulator_timer_wrap_smoke": check_phase_accumulator_timer_wrap,
+    "simultaneous_event_order_smoke": check_simultaneous_event_order,
+    "timer_absolute_grid_smoke": check_timer_absolute_grid,
+    "transition_branch_target_smoke": check_transition_branch_target,
     "clk_div_smoke": check_clk_div,
     "cmp_delay_smoke": check_cmp_delay,
     "comparator_hysteresis_smoke": check_cmp_hysteresis,
@@ -2198,7 +2744,9 @@ def has_behavior_check(task_id: str) -> bool:
 def evaluate_behavior(task_id: str, csv_path: Path) -> tuple[float, list[str]]:
     if task_id not in CHECKS:
         return 0.0, [f"no behavior check implemented for {task_id}"]
-    rows = load_csv(csv_path)
+    if task_id in {"noise_gen", "noise_gen_smoke"}:
+        return evaluate_noise_gen_csv(csv_path)
+    rows = normalize_rows_for_task(task_id, load_csv(csv_path))
     ok, note = CHECKS[task_id](rows)
     return (1.0 if ok else 0.0), [note]
 

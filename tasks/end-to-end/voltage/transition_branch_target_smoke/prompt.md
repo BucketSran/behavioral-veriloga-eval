@@ -20,3 +20,11 @@ Ports:
 - `mode`: input electrical
 - `clk`: input electrical
 - `out`: output electrical
+
+## Output Contract (MANDATORY)
+
+- Return exactly two fenced code blocks:
+  - first block: Verilog-A DUT (` ```verilog-a ... ``` `)
+  - second block: Spectre testbench (` ```spectre ... ``` `)
+- The Spectre testbench must include the DUT with `ahdl_include "<module>.va"`.
+- Use a single `tran` analysis and include the required `save` signals for checker evaluation.

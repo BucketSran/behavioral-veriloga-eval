@@ -183,34 +183,69 @@ def build_prompt(task_dir: Path, include_checker: bool = False, include_skill: b
                 dut_name = buggy_vas[0].name
                 prompt_md += f"\n\n## Buggy DUT ({dut_name})\n\n```verilog-a\n{buggy_code}\n```\n"
 
-    # For spec-to-va / bugfix / end-to-end tasks, the gold testbench may expect
-    # a module name that differs from the benchmark task_id (e.g. bugfix always
-    # expects "dut_fixed").  Inject that contract explicitly so the model uses
-    # the correct name.
+    gold_include_stems: list[str] = []
+    gold_tb_text = ""
     if family in ("spec-to-va", "bugfix", "end-to-end"):
         gold_dir = task_dir / "gold"
         if gold_dir.is_dir():
             tbs = sorted(gold_dir.glob("tb_*.scs"))
             if tbs:
-                tb_text = tbs[0].read_text(encoding="utf-8", errors="ignore")
-                match = re.search(r'ahdl_include\s+"([^"]+\.va)"', tb_text)
-                if match:
-                    expected_mod = Path(match.group(1)).stem
-                    # Always inject the module name contract — even when it matches
-                    # task_id — because models tend to pick descriptive names instead
-                    # of using the task identifier as-is.
-                    prompt_md += (
-                        "\n\n## Module Name Contract\n\n"
-                        f"Your module **MUST** be named exactly **`{expected_mod}`**.\n"
-                        f"- Your file will be included as `ahdl_include \"{expected_mod}.va\"`\n"
-                        f"- Your module declaration MUST be: `module {expected_mod}(...);`\n"
-                        + (f"- Do **not** use `{task_id}` — the correct name is `{expected_mod}`.\n"
-                           if expected_mod != task_id else "")
-                    )
-                    # Also inject Verilog-A mandatory syntax rules for DUT generation.
-                    # Models often emit digital Verilog syntax (reg, always @, packed bit-select)
-                    # which Spectre VACOMP rejects.
-                    prompt_md += """
+                gold_tb_text = tbs[0].read_text(encoding="utf-8", errors="ignore")
+                gold_include_stems = [
+                    Path(path).stem
+                    for path in re.findall(r'ahdl_include\s+"([^"]+\.va)"', gold_tb_text)
+                ]
+
+    if family == "end-to-end":
+        prompt_md += """
+## End-To-End Output Contract (MANDATORY)
+
+You MUST return both deliverables:
+1. DUT Verilog-A code block: ```verilog-a ... ```
+2. Spectre testbench code block: ```spectre ... ```
+
+Do not return DUT-only output for this task.
+"""
+
+    # For spec-to-va / bugfix / end-to-end tasks, inject contract information
+    # from the gold testbench. For end-to-end multi-module tasks, inject a
+    # multi-module contract instead of forcing a single module name.
+    if family in ("spec-to-va", "bugfix", "end-to-end") and gold_include_stems:
+        if family == "bugfix":
+            expected_mod = gold_include_stems[0]
+            m_xdut = re.search(r'\bXDUT\s+\([^)]+\)\s+(\w+)', gold_tb_text)
+            if m_xdut:
+                expected_mod = m_xdut.group(1)
+            prompt_md += (
+                "\n\n## Module Name Contract\n\n"
+                f"Your module **MUST** be named exactly **`{expected_mod}`**.\n"
+                f"- Your file will be included as `ahdl_include \"{gold_include_stems[0]}.va\"`\n"
+                f"- Your module declaration MUST be: `module {expected_mod}(...);`\n"
+            )
+        elif family == "spec-to-va" or (family == "end-to-end" and len(gold_include_stems) == 1):
+            expected_mod = gold_include_stems[0]
+            prompt_md += (
+                "\n\n## Module Name Contract\n\n"
+                f"Your module **MUST** be named exactly **`{expected_mod}`**.\n"
+                f"- Your file will be included as `ahdl_include \"{expected_mod}.va\"`\n"
+                f"- Your module declaration MUST be: `module {expected_mod}(...);`\n"
+                + (f"- Do **not** use `{task_id}` — the correct name is `{expected_mod}`.\n"
+                   if expected_mod != task_id else "")
+            )
+        elif family == "end-to-end":
+            include_list = "\n".join([f"- `{name}.va` (module `{name}`)" for name in gold_include_stems])
+            prompt_md += (
+                "\n\n## Multi-Module Contract\n\n"
+                "This task expects multiple Verilog-A modules. Do NOT collapse them into one file.\n"
+                "Generate one module per required include:\n"
+                f"{include_list}\n"
+            )
+
+    # Inject Verilog-A mandatory syntax rules for DUT generation.
+    # Models often emit digital Verilog syntax (reg, always @, packed bit-select)
+    # which Spectre VACOMP rejects.
+    if family in ("spec-to-va", "bugfix", "end-to-end"):
+        prompt_md += """
 ## Verilog-A Syntax Rules (MANDATORY)
 
 Your code must be **pure Verilog-A**, not digital Verilog. Spectre VACOMP will reject:
@@ -765,30 +800,37 @@ def generate_one_task(
     va_blocks = blocks["va"]
     scs_blocks = blocks["scs"]
 
-    # Determine the expected module name for this task.
-    # For spec-to-va / end-to-end: stem of the gold TB's ahdl_include path.
-    # For bugfix: module name from the gold TB's XDUT instantiation (the file is
-    # always dut_fixed.va per ahdl_include, but the module inside must match XDUT).
+    # Determine module-name contract for this task.
+    # - bugfix: file stem follows ahdl_include, module name follows XDUT
+    # - spec-to-va: force single module name from ahdl_include
+    # - end-to-end: force single module name only when gold tb includes one VA;
+    #   for multi-module tasks, do not force-rename to one module.
     _expected_mod_name: str | None = None
     _bugfix_save_stem: str | None = None  # bugfix only: stem to save the .va as
+    _force_single_module_name = False
     if family in ("spec-to-va", "bugfix", "end-to-end"):
         _gold_dir = task_dir / "gold"
         if _gold_dir.is_dir():
             _tbs = sorted(_gold_dir.glob("tb_*.scs"))
             if _tbs:
                 _tb_text = _tbs[0].read_text(encoding="utf-8", errors="ignore")
-                _m_inc = re.search(r'ahdl_include\s+"([^"]+\.va)"', _tb_text)
-                if _m_inc:
+                _include_stems = [
+                    Path(path).stem
+                    for path in re.findall(r'ahdl_include\s+"([^"]+\.va)"', _tb_text)
+                ]
+                if _include_stems:
                     if family == "bugfix":
                         # File must be saved as the ahdl_include name (e.g. dut_fixed.va).
-                        _bugfix_save_stem = Path(_m_inc.group(1)).stem
+                        _bugfix_save_stem = _include_stems[0]
                         # Module inside must match XDUT (may differ from file stem).
                         _m_xdut = re.search(r'\bXDUT\s+\([^)]+\)\s+(\w+)', _tb_text)
-                        _expected_mod_name = (
-                            _m_xdut.group(1) if _m_xdut else _bugfix_save_stem
-                        )
-                    else:
-                        _expected_mod_name = Path(_m_inc.group(1)).stem
+                        _expected_mod_name = _m_xdut.group(1) if _m_xdut else _bugfix_save_stem
+                    elif family == "spec-to-va":
+                        _expected_mod_name = _include_stems[0]
+                        _force_single_module_name = True
+                    elif family == "end-to-end" and len(_include_stems) == 1:
+                        _expected_mod_name = _include_stems[0]
+                        _force_single_module_name = True
 
     saved_files = []
     if family in ("spec-to-va", "bugfix", "end-to-end") and va_blocks:
@@ -812,7 +854,7 @@ def generate_one_task(
                 # Post-process: if the gold TB expects a specific module name and the
                 # model used a different one, rename it in both the source text and the
                 # output filename so that ahdl_include always finds the right module.
-                if _expected_mod_name and module_name != _expected_mod_name:
+                if _force_single_module_name and _expected_mod_name and module_name != _expected_mod_name:
                     va_code = re.sub(
                         r'\bmodule\s+' + re.escape(module_name) + r'\b',
                         f'module {_expected_mod_name}',

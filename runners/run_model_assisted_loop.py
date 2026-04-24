@@ -8,6 +8,7 @@ arguments; doing so would leak them into shell history and experiment logs.
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import hashlib
 import json
 import os
@@ -500,6 +501,7 @@ def generate_mode(
     max_tokens: int,
     force: bool,
     dry_run: bool,
+    workers: int,
     evas_inner_root: Path | None,
     skill_bundle_text: str | None,
     skill_bundle_path: Path | None,
@@ -509,7 +511,7 @@ def generate_mode(
     generated_model_root = generated_root / model_slug
     generated_model_root.mkdir(parents=True, exist_ok=True)
 
-    for task_id, task_dir in tasks:
+    def _process_task(task_id: str, task_dir: Path) -> None:
         meta = read_meta(task_dir)
         family = meta.get("family", "end-to-end")
         baseline_dir: Path | None
@@ -520,22 +522,25 @@ def generate_mode(
             baseline_dir = _baseline_sample_dir(model, task_id, sample_idx)
             if baseline_dir is None:
                 print(f"[generate:{mode}] SKIP {model_slug}/{task_id}: missing raw sample")
-                continue
+                return
         elif mode == "skill-evas-informed":
             baseline_dir = _mode_sample_dir("skill-only", model, task_id, sample_idx)
             if baseline_dir is None:
                 print(f"[generate:{mode}] SKIP {model_slug}/{task_id}: missing skill-only sample")
-                continue
+                return
         else:
             baseline_dir = None
         if meta_path.exists() and not force:
             old = _json_read(meta_path)
+            old_status = old.get("status", "unknown")
             if dry_run and old.get("status") != "dry_run":
                 print(f"[generate:{mode}] REUSE {model_slug}/{task_id}: {old.get('status', 'unknown')} (skip dry-run overwrite)")
-                continue
-            if not dry_run and old.get("status") != "dry_run":
-                print(f"[generate:{mode}] REUSE {model_slug}/{task_id}: {old.get('status', 'unknown')}")
-                continue
+                return
+            if not dry_run and old_status not in ("dry_run", "api_error"):
+                print(f"[generate:{mode}] REUSE {model_slug}/{task_id}: {old_status}")
+                return
+            if not dry_run and old_status == "api_error":
+                print(f"[generate:{mode}] RETRY {model_slug}/{task_id}: previous api_error")
 
         if mode == "raw-generic-retry":
             assert baseline_dir is not None
@@ -548,7 +553,7 @@ def generate_mode(
             evas_result_path = evas_inner_root / task_id / "result.json"
             if not evas_result_path.exists():
                 print(f"[generate:{mode}] SKIP {model_slug}/{task_id}: missing EVAS result")
-                continue
+                return
             assert baseline_dir is not None
             prompt = build_evas_assisted_prompt(task_dir, baseline_dir, _json_read(evas_result_path))
             prompt_source = "evas_targeted_repair"
@@ -558,7 +563,7 @@ def generate_mode(
             evas_result_path = evas_inner_root / task_id / "result.json"
             if not evas_result_path.exists():
                 print(f"[generate:{mode}] SKIP {model_slug}/{task_id}: missing EVAS result")
-                continue
+                return
             assert baseline_dir is not None
             prompt = build_evas_guided_repair_prompt(task_dir, baseline_dir, _json_read(evas_result_path), include_skill=True)
             prompt_source = "evas_guided_targeted_repair_with_skill"
@@ -569,7 +574,7 @@ def generate_mode(
             evas_result_path = evas_inner_root / task_id / "result.json"
             if not evas_result_path.exists():
                 print(f"[generate:{mode}] SKIP {model_slug}/{task_id}: missing EVAS result")
-                continue
+                return
             assert baseline_dir is not None
             prompt = build_evas_guided_repair_prompt(task_dir, baseline_dir, _json_read(evas_result_path), include_skill=False)
             prompt_source = "evas_guided_targeted_repair_no_skill"
@@ -582,7 +587,7 @@ def generate_mode(
         elif mode == "skill-evas-informed":
             if evas_inner_root is None and dry_run:
                 print(f"[generate:{mode}] SKIP {model_slug}/{task_id}: dry-run has no skill EVAS inner results")
-                continue
+                return
             if evas_inner_root is None:
                 raise RuntimeError("skill-evas-informed generation requires skill EVAS inner results")
             if not skill_bundle_text:
@@ -590,7 +595,7 @@ def generate_mode(
             evas_result_path = evas_inner_root / task_id / "result.json"
             if not evas_result_path.exists():
                 print(f"[generate:{mode}] SKIP {model_slug}/{task_id}: missing skill EVAS result")
-                continue
+                return
             assert baseline_dir is not None
             prompt = build_evas_assisted_prompt(
                 task_dir,
@@ -625,7 +630,7 @@ def generate_mode(
         if dry_run:
             _json_write(meta_path, {**base_meta, "status": "dry_run", "saved_files": []})
             print(f"[generate:{mode}] DRY {model_slug}/{task_id}")
-            continue
+            return
 
         print(f"[generate:{mode}] CALL {model_slug}/{task_id} ... ", end="", flush=True)
         try:
@@ -656,6 +661,17 @@ def generate_mode(
             })
             print(f"api_error: {type(exc).__name__}")
 
+    if workers > 1 and len(tasks) > 1:
+        worker_count = min(workers, len(tasks))
+        print(f"[generate:{mode}] parallel dispatch with {worker_count} workers")
+        with ThreadPoolExecutor(max_workers=worker_count) as executor:
+            futures = [executor.submit(_process_task, task_id, task_dir) for task_id, task_dir in tasks]
+            for fut in as_completed(futures):
+                fut.result()
+    else:
+        for task_id, task_dir in tasks:
+            _process_task(task_id, task_dir)
+
     return generated_root
 
 
@@ -671,6 +687,7 @@ def generate_multi_round_repair(
     force: bool,
     dry_run: bool,
     evas_inner_root: Path,
+    workers: int = 1,
     n_rounds: int = 3,
     include_skill: bool = False,
     timeout_s: int = 180,
@@ -691,6 +708,34 @@ def generate_multi_round_repair(
     round_results_root = ROOT / "results" / f"experiment-condition-F-rounds-{model_slug}-{split}"
     round_results_root.mkdir(parents=True, exist_ok=True)
 
+    if workers > 1 and len(tasks) > 1:
+        worker_count = min(workers, len(tasks))
+        print(f"[multi-repair] parallel dispatch with {worker_count} workers")
+        with ThreadPoolExecutor(max_workers=worker_count) as executor:
+            futures = [
+                executor.submit(
+                    generate_multi_round_repair,
+                    model=model,
+                    split=split,
+                    tasks=[(task_id, task_dir)],
+                    sample_idx=sample_idx,
+                    temperature=temperature,
+                    top_p=top_p,
+                    max_tokens=max_tokens,
+                    force=force,
+                    dry_run=dry_run,
+                    evas_inner_root=evas_inner_root,
+                    workers=1,
+                    n_rounds=n_rounds,
+                    include_skill=include_skill,
+                    timeout_s=timeout_s,
+                )
+                for task_id, task_dir in tasks
+            ]
+            for fut in as_completed(futures):
+                fut.result()
+        return generated_root
+
     for task_id, task_dir in tasks:
         meta = read_meta(task_dir)
         family = meta.get("family", "end-to-end")
@@ -710,13 +755,56 @@ def generate_multi_round_repair(
             continue
         baseline_evas_result = _json_read(baseline_evas_path)
 
-        if baseline_evas_result.get("status") == "PASS":
-            print(f"[multi-repair] BASELINE_PASS {task_id}: skip repair")
-            continue
-
         baseline_dir = _baseline_sample_dir(model, task_id, sample_idx)
         if baseline_dir is None:
             print(f"[multi-repair] SKIP {task_id}: no B baseline sample")
+            continue
+
+        if baseline_evas_result.get("status") == "PASS":
+            print(f"[multi-repair] BASELINE_PASS {task_id}: reuse baseline sample")
+            if dry_run:
+                final_sample_dir.mkdir(parents=True, exist_ok=True)
+                _json_write(final_meta_path, {
+                    "model": model,
+                    "model_slug": model_slug,
+                    "task_id": task_id,
+                    "family": family,
+                    "sample_idx": sample_idx,
+                    "mode": "evas-guided-repair-3round",
+                    "status": "dry_run",
+                    "round_completed": 0,
+                    "selected_round": 0,
+                    "selected_round_label": "baseline",
+                    "best_status": "PASS",
+                    "best_scores": baseline_evas_result.get("scores", {}),
+                    "best_sample_dir": str(baseline_dir),
+                    "history": [],
+                })
+            else:
+                final_sample_dir.mkdir(parents=True, exist_ok=True)
+                for f in sorted(baseline_dir.glob("*")):
+                    if f.is_file():
+                        shutil.copy2(f, final_sample_dir / f.name)
+                baseline_meta: dict = {}
+                baseline_meta_path = baseline_dir / "generation_meta.json"
+                if baseline_meta_path.exists():
+                    baseline_meta = _json_read(baseline_meta_path)
+                _json_write(final_meta_path, {
+                    **baseline_meta,
+                    "model": model,
+                    "model_slug": model_slug,
+                    "task_id": task_id,
+                    "family": family,
+                    "sample_idx": sample_idx,
+                    "mode": "evas-guided-repair-3round",
+                    "round_completed": 0,
+                    "selected_round": 0,
+                    "selected_round_label": "baseline",
+                    "best_status": "PASS",
+                    "best_scores": baseline_evas_result.get("scores", {}),
+                    "best_sample_dir": str(baseline_dir),
+                    "history": [],
+                })
             continue
 
         best_evas_result = baseline_evas_result
@@ -952,6 +1040,8 @@ def parse_args() -> argparse.Namespace:
     ap.add_argument("--temperature", type=float, default=0.0)
     ap.add_argument("--top-p", type=float, default=1.0)
     ap.add_argument("--max-tokens", type=int, default=4096)
+    ap.add_argument("--workers", type=int, default=4,
+                    help="Parallel workers for single-round generate modes. Default: 4")
     ap.add_argument("--timeout-s", type=int, default=180)
     ap.add_argument("--spectre-timeout-s", type=int, default=240)
     ap.add_argument("--force", action="store_true")
@@ -1025,6 +1115,7 @@ def main() -> int:
                     max_tokens=args.max_tokens,
                     force=args.force,
                     dry_run=args.dry_run,
+                    workers=args.workers,
                     evas_inner_root=None,
                     skill_bundle_text=skill_bundle_text,
                     skill_bundle_path=skill_bundle_path,
@@ -1060,6 +1151,7 @@ def main() -> int:
                         force=args.force,
                         dry_run=args.dry_run,
                         evas_inner_root=raw_evas_inner_root,
+                        workers=args.workers,
                         n_rounds=3,
                         include_skill=False,
                         timeout_s=args.timeout_s,
@@ -1076,6 +1168,7 @@ def main() -> int:
                     max_tokens=args.max_tokens,
                     force=args.force,
                     dry_run=args.dry_run,
+                    workers=args.workers,
                     evas_inner_root=raw_evas_inner_root if mode in {"evas-assisted", "evas-guided-repair", "evas-guided-repair-no-skill"} else skill_evas_inner_root,
                     skill_bundle_text=skill_bundle_text,
                     skill_bundle_path=skill_bundle_path,

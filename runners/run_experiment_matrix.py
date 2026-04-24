@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -81,6 +82,12 @@ def get_output_dir(condition: str, model: str, split: str) -> Path:
     return ROOT / "results" / f"experiment-{condition_name[condition]}-{model_slug}-{split}-{DATE_TAG}"
 
 
+def get_evas_output_dir(condition: str, model: str, split: str) -> Path:
+    """Get EVAS scoring directory scoped by condition to avoid overwrite."""
+    model_slug = model.replace("/", "_")
+    return ROOT / "results" / f"evas-scoring-condition-{condition}-{model_slug}-{split}-{DATE_TAG}"
+
+
 def get_task_list(split: str) -> list[str]:
     """Get task IDs for a given split."""
     if split == "dev24":
@@ -93,6 +100,21 @@ def get_task_list(split: str) -> list[str]:
         return [task_id for task_id, _ in tasks]
     else:
         raise ValueError(f"unsupported split: {split}")
+
+
+def sync_baseline_for_repair(*, model: str, baseline_generated_root: Path) -> Path:
+    """Mirror condition-B baseline into runners/run_model_assisted_loop expected path."""
+    model_slug = model.replace("/", "_")
+    src = baseline_generated_root / model_slug
+    dst = ROOT / "generated" / model_slug
+    if not src.exists():
+        raise FileNotFoundError(f"repair baseline source missing: {src}")
+    if dst.exists():
+        shutil.rmtree(dst)
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(src, dst)
+    print(f"[repair-sync] mirrored baseline {src} -> {dst}")
+    return dst
 
 
 def run_baseline(
@@ -118,6 +140,12 @@ def run_baseline(
 
     task_ids = get_task_list(split)
 
+    # generate.py has no --force flag; when force is requested, clear
+    # prior generated artifacts so this run is guaranteed fresh.
+    if force and generated_root.exists():
+        print(f"[baseline-{condition}] force enabled: removing existing {generated_root}")
+        shutil.rmtree(generated_root)
+
     cmd = [
         "python3", str(ROOT / "runners" / "generate.py"),
         "--model", model,
@@ -137,8 +165,6 @@ def run_baseline(
         cmd.append("--include-checker")
     if config["include_skill"]:
         cmd.append("--include-skill")
-    if force:
-        cmd.append("--force")
     if dry_run:
         cmd.append("--dry-run")
 
@@ -153,6 +179,7 @@ def run_baseline(
 
 def run_evas_scoring(
     *,
+    condition: str,
     generated_root: Path,
     model: str,
     split: str,
@@ -164,7 +191,13 @@ def run_evas_scoring(
 ) -> Path:
     """Run EVAS scoring on generated samples."""
     model_slug = model.replace("/", "_")
-    output_root = ROOT / "results" / f"evas-scoring-{model_slug}-{split}-{DATE_TAG}"
+    output_root = get_evas_output_dir(condition, model, split)
+
+    # score.py has no --force flag; when force is requested, clear prior
+    # scoring outputs so this run starts from a clean result directory.
+    if force and output_root.exists():
+        print(f"[evas-scoring] force enabled: removing existing {output_root}")
+        shutil.rmtree(output_root)
 
     cmd = [
         "python3", str(ROOT / "runners" / "score.py"),
@@ -176,9 +209,6 @@ def run_evas_scoring(
         "--top-p", str(top_p),
         "--timeout-s", str(timeout_s),
     ]
-
-    if force:
-        cmd.append("--force")
 
     print(f"[evas-scoring] Running: {' '.join(cmd)}")
     proc = subprocess.run(cmd, cwd=ROOT, text=True)
@@ -199,6 +229,7 @@ def run_repair(
     temperature: float,
     top_p: float,
     max_tokens: int,
+    workers: int,
     force: bool,
     dry_run: bool,
 ) -> Path:
@@ -220,6 +251,7 @@ def run_repair(
         "--temperature", str(temperature),
         "--top-p", str(top_p),
         "--max-tokens", str(max_tokens),
+        "--workers", str(workers),
     ]
 
     if force:
@@ -233,8 +265,8 @@ def run_repair(
         print(f"[repair-{condition}] ERROR: returncode={proc.returncode}")
         sys.exit(1)
 
-    # Return the generated output directory
-    return ROOT / "generated-table2" / f"{mode}"
+    # run_model_assisted_loop writes to generated-table2-<mode>
+    return ROOT / f"generated-table2-{mode}"
 
 
 def main() -> int:
@@ -302,6 +334,7 @@ def main() -> int:
             # Run EVAS scoring for baseline conditions
             if args.stage == "all" and not args.dry_run:
                 evas_root = run_evas_scoring(
+                    condition=condition,
                     generated_root=generated_root,
                     model=args.model,
                     split=args.split,
@@ -334,18 +367,34 @@ def main() -> int:
                 baseline_generated_dirs["B"] = generated_root
 
             if "B" not in evas_result_dirs and not args.dry_run:
-                print(f"[repair-{condition}] Running EVAS scoring for baseline B...")
-                evas_root = run_evas_scoring(
-                    generated_root=baseline_generated_dirs["B"],
+                existing_b_evas = get_evas_output_dir("B", args.model, args.split)
+                if (
+                    not args.force
+                    and existing_b_evas.exists()
+                    and (existing_b_evas / "model_results.json").exists()
+                ):
+                    print(f"[repair-{condition}] Reusing existing baseline-B EVAS: {existing_b_evas}")
+                    evas_result_dirs["B"] = existing_b_evas
+                else:
+                    print(f"[repair-{condition}] Running EVAS scoring for baseline B...")
+                    evas_root = run_evas_scoring(
+                        condition="B",
+                        generated_root=baseline_generated_dirs["B"],
+                        model=args.model,
+                        split=args.split,
+                        sample_idx=args.sample_idx,
+                        temperature=args.temperature,
+                        top_p=args.top_p,
+                        timeout_s=args.timeout_s,
+                        force=args.force,
+                    )
+                    evas_result_dirs["B"] = evas_root
+
+            if not args.dry_run:
+                sync_baseline_for_repair(
                     model=args.model,
-                    split=args.split,
-                    sample_idx=args.sample_idx,
-                    temperature=args.temperature,
-                    top_p=args.top_p,
-                    timeout_s=args.timeout_s,
-                    force=args.force,
+                    baseline_generated_root=baseline_generated_dirs["B"],
                 )
-                evas_result_dirs["B"] = evas_root
 
             if not args.dry_run:
                 repair_root = run_repair(
@@ -357,10 +406,24 @@ def main() -> int:
                     temperature=args.temperature,
                     top_p=args.top_p,
                     max_tokens=args.max_tokens,
+                    workers=args.gen_workers,
                     force=args.force,
                     dry_run=args.dry_run,
                 )
                 print(f"[repair-{condition}] Output: {repair_root}")
+                if args.stage == "all":
+                    repaired_evas_root = run_evas_scoring(
+                        condition=condition,
+                        generated_root=repair_root,
+                        model=args.model,
+                        split=args.split,
+                        sample_idx=args.sample_idx,
+                        temperature=args.temperature,
+                        top_p=args.top_p,
+                        timeout_s=args.timeout_s,
+                        force=args.force,
+                    )
+                    print(f"[repair-{condition}] EVAS scoring output: {repaired_evas_root}")
 
     print(f"[experiment-matrix] Done.")
     return 0
