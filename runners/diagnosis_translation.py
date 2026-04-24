@@ -184,6 +184,25 @@ def translate_diagnosis(note: str, task_id: Optional[str] = None) -> dict:
             }
         )
         result["matched_keys"] = ["relock_time"]
+    elif task_id and "flash_adc" in task_id.lower() and re.search(r"\bonly_\d+_codes\b", lowered):
+        result.update(
+            {
+                "diagnosis": "Flash ADC code coverage is insufficient",
+                "matched_rule": "FLASH_ADC_CODE_COVERAGE",
+                "causes": [
+                    "Quantizer code may be stuck or not updated on clock edges",
+                    "Threshold ladder may not cover all 8 bins over the ramp",
+                    "Output bit targets may not be initialized or driven from the code state",
+                ],
+                "repair_suggestions": [
+                    "Implement seven ordered thresholds across the reference range",
+                    "Update one integer code state on each rising clock edge",
+                    "Drive dout2/dout1/dout0 from that code with MSB-to-LSB order",
+                    "Use Verilog-A `floor(...)` rather than `$floor(...)` when computing integer codes",
+                ],
+            }
+        )
+        result["matched_keys"] = ["only_N_codes"]
     elif _has_key(note, "unique_codes") or re.search(r"\bonly_\d+_codes\b", lowered):
         result.update(
             {
@@ -363,6 +382,24 @@ def translate_diagnosis(note: str, task_id: Optional[str] = None) -> dict:
             }
         )
         result["matched_keys"] = [k for k in ("checks", "q_mismatch", "qb_mismatch") if k in metrics]
+    elif task_id and "flash_adc" in task_id.lower() and _has_key(note, "too_few_edges"):
+        result.update(
+            {
+                "diagnosis": "Flash ADC checker cannot observe enough clocked conversion samples",
+                "matched_rule": "FLASH_ADC_EDGE_BUDGET",
+                "causes": [
+                    "Clock source may not create checker-visible rising crossings",
+                    "Clock period or transient window may not provide at least 20 sampled conversions",
+                    "Input sweep may not be aligned with the sampled clock window",
+                ],
+                "repair_suggestions": [
+                    "Repair the testbench clock/stimulus budget before changing quantizer thresholds",
+                    "Use a pulse clock with enough rising edges inside the fixed tran stop",
+                    "Sweep vin across the full reference range during those clocked samples",
+                ],
+            }
+        )
+        result["matched_keys"] = ["too_few_edges"]
     elif any(
         _has_key(note, key)
         for key in ("too_few_edges", "too_few_clock_edges", "insufficient_post_reset_samples", "no_clock_edges")
@@ -416,6 +453,7 @@ def translate_diagnosis(note: str, task_id: Optional[str] = None) -> dict:
                 "repair_suggestions": [
                     "Latch which input edge arrived first, emit only the corresponding pulse, then reset both",
                     "Keep UP/DN non-overlapping and window-local across the first and second intervals",
+                    "If pulse counts are sufficient but window fractions are too high, shorten pulse width rather than adding pulses",
                 ],
             }
         )
@@ -557,6 +595,7 @@ def translate_diagnosis(note: str, task_id: Optional[str] = None) -> dict:
                 "repair_suggestions": [
                     "Load the parallel word once per frame and shift in the specified MSB/LSB order",
                     "Align the first serial bit with the first checker sample after frame start",
+                    "If the observed bits are shifted by one, latch on LOAD but output the MSB on the first post-LOAD CLK before shifting",
                 ],
             }
         )

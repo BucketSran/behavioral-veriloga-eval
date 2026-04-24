@@ -1350,6 +1350,7 @@ def _repair_policy_contract(task_id: str, notes: list[str], sim_subtype: str) ->
             "- Modify only load/shift direction, bit counter reset, or frame-boundary timing.",
             "- Decide whether the mismatch is MSB/LSB order or a one-cycle shift; do not rewrite unrelated stimulus.",
             "- The first sampled serial bit after frame start must correspond to the first expected bit.",
+            "- For LOAD-framed serializers, LOAD should latch the parallel word and mark a pending frame; the first post-LOAD CLK should output the first bit, not the second bit.",
             "- Keep clock, reset, frame marker, and save names unchanged.",
         ])
     elif rule in {"CLOCK_DIVIDER_RATIO", "MULTIMOD_DIVIDER_COUNTS", "CLOCK_BURST"} or "divider" in task_lower:
@@ -1387,6 +1388,11 @@ def _repair_policy_contract(task_id: str, notes: list[str], sim_subtype: str) ->
             "- Preserve input stimulus and save names; the checker relies on waveform coverage.",
             "- Clamp only at valid boundaries and keep the linear/monotonic region active.",
             "- If outputs are bits, drive every bit from the same integer code state.",
+            "- For clocked ADC smoke tests, the public requirement is observable conversion samples: a pulse-style clock must produce enough rising edges inside the fixed `tran` window.",
+            "- For ADC-to-DAC round-trip tasks, keep one code state as the source of truth: sampled input -> integer code -> output bits -> DAC output.",
+            "- Prefer direct per-sample quantization when the checker measures code coverage, span, and round-trip error rather than internal SAR bit-cycle traces.",
+            "- Use Verilog-A math function `floor(...)`, not digital/SystemVerilog-style `$floor(...)`; `$floor` can compile in some flows but produce non-portable behavior.",
+            "- Declare temporary `real` and `integer` variables at module scope, not inside an event block.",
         ])
     elif rule == "GRAY_PROPERTY" or "gray" in task_lower:
         lines.extend([
@@ -1514,6 +1520,20 @@ def _subtype_specific_repair_policy(task_id: str, notes: list[str], status: str)
             "",
         ])
 
+    if "flash_adc" in task_lower and ("only_" in lowered and "codes" in lowered):
+        add_header("Behavior: flash ADC threshold ladder")
+        lines.extend([
+            "- The harness now produces clock edges; repair the DUT quantizer and bit-drive path.",
+            "- Use explicit threshold comparisons, or use `floor(...)` without the `$` prefix; avoid `$floor(...)` because it is not portable in this Verilog-A flow.",
+            "- Start with `code = 0`, then increment or assign code from seven ordered thresholds at `vrefn + k*(vrefp-vrefn)/8` for k=1..7.",
+            "- Update `code` only on `@(cross(V(clk)-vth,+1))`, and initialize output target variables in `@(initial_step)`.",
+            "- Keep all temporary variables such as sampled input, bit flags, and next code declared at module scope.",
+            "- Drive `dout2`, `dout1`, and `dout0` continuously from target variables using unconditional `transition()` contributions.",
+            "- Verify bit order: `dout2` is MSB, `dout1` middle, `dout0` LSB.",
+            "- Preserve the repaired pulse-clock/ramp testbench from the previous layer.",
+            "",
+        ])
+
     if "unique_codes=" in lowered and ("adc" in task_lower or "dac" in task_lower or "sar" in task_lower):
         add_header("Behavior: unique code span")
         lines.extend([
@@ -1524,6 +1544,37 @@ def _subtype_specific_repair_policy(task_id: str, notes: list[str], status: str)
             "",
         ])
 
+    if "flash_adc" in task_lower and any(key in lowered for key in ("too_few_edges=", "no_clock_edges", "only_0_edges")):
+        add_header("Observable/Stimulus: flash ADC clock edges")
+        lines.extend([
+            "- The checker already found the public columns, but it did not observe enough rising `clk` crossings.",
+            "- Repair the Spectre harness first and preserve the compiling ADC DUT unless the next EVAS note exposes code behavior.",
+            "- Use a `type=pulse` clock between 0 V and 0.9 V rather than relying on a sinusoidal source for digital sampling.",
+            "- Choose a clock period that gives at least 20 rising edges before the fixed `tran stop`, leaving settling time after each edge.",
+            "- Drive `vin` with a monotonic full-scale PWL or ramp covering roughly 0 V to 0.9 V over the same edge window.",
+            "- Save exact lowercase scalar names: `save vin clk dout2 dout1 dout0`.",
+            "- The next failure, if any, should be `only_N_codes` or `not_monotonic`, not `too_few_edges`.",
+            "",
+        ])
+
+    if "sar_adc_dac_weighted_8b" in task_lower and any(key in lowered for key in ("tran.csv missing", "returncode=1")):
+        add_header("Runtime: SAR/ADC-DAC round-trip harness")
+        lines.extend([
+            "- Treat `tran.csv missing` with successful preflight as a runtime/harness failure before changing numeric targets.",
+            "- Use simple Spectre-safe stimulus and module wiring: one top-level testbench, one `tran`, one canonical save list.",
+            "- Do not add `run` or `exit` statements; the runner invokes Spectre and reads the transient output directly.",
+            "- Prefer node `0` as ground and `global 0`; avoid custom `global gnd` unless every source and instance consistently uses it.",
+            "- Avoid inline comments after `parameters` assignments and avoid line continuations in source definitions unless already proven in the candidate.",
+            "- Avoid assigning `cross(...)` to a variable and then using `@(that_variable)`; write event blocks directly as `@(cross(V(clks)-vth,+1)) begin ... end`.",
+            "- Keep Verilog-A event statements at top level inside `analog begin`; put reset checks inside the event body.",
+            "- For this smoke contract, a direct sampled quantizer is acceptable: on each valid `clks` rising edge after reset, compute the clipped 8-bit code from `vin` or `vin_sh`.",
+            "- Use `floor(...)`, not `$floor(...)`, when converting a real voltage into an integer code.",
+            "- Drive all `dout_0..dout_7` bits from that one integer code state, with `dout_7` as MSB and `dout_0` as LSB.",
+            "- The DAC must decode the same bit order and drive `vout = code / 255 * vdd`; a stuck `vout` means the code-to-DAC path is broken.",
+            "- The sample/hold helper should make `vin_sh` track or sample `vin` in the checker-visible window; do not let reset hold it at zero after reset release.",
+            "",
+        ])
+
     if "bit_mismatch" in lowered or "serializer" in task_lower:
         add_header("Behavior: serializer bit order")
         lines.extend([
@@ -1531,6 +1582,8 @@ def _subtype_specific_repair_policy(task_id: str, notes: list[str], status: str)
             "- Modify only load/shift order or the one-cycle phase alignment.",
             "- On load active, capture the parallel word once. After load deasserts, present the configured MSB-first or LSB-first order consistently on successive clock edges.",
             "- If EVAS observed the same sequence shifted by one, preload `sout` with the first intended bit at load deassertion before the first post-load clock sample.",
+            "- Stronger LOAD/CLK skeleton: on LOAD rising edge, latch `shreg` and set `load_pending=1` but do not shift; on the first CLK rising edge with LOAD low, output `(shreg >> 7) & 1` and clear `load_pending`; only subsequent CLK edges shift left and output the next MSB.",
+            "- Do not update `sout` to the second bit before the checker samples the first post-load clock edge.",
             "- Do not alter clock, load waveform, save names, or unrelated output scaling.",
             "",
         ])
@@ -1542,7 +1595,11 @@ def _subtype_specific_repair_policy(task_id: str, notes: list[str], status: str)
             "- When REF leads DIV, emit a finite UP pulse and no DN pulse in that comparison window.",
             "- When DIV leads REF, emit a finite DN pulse and no UP pulse in that comparison window.",
             "- Reset both outputs after the pulse width expires; do not let UP remain high across multiple windows.",
-            "- The current failure with `dn_pulses_second=0` means the second-window DIV-leading case is not producing DN pulses.",
+            "- Use the EVAS fractions as pulse-width diagnostics: if `up_pulses_first` or `dn_pulses_second` is already high enough but the corresponding fraction exceeds the allowed range, shorten pulse width instead of adding more pulses.",
+            "- For reset-race smoke, the target is window-local finite pulses: `up_first` and `dn_second` should be visible but not wide, while `dn_first`, `up_second`, and `overlap_frac` stay near zero.",
+            "- A robust implementation is edge-latched pulse timers: on REF-leading edge set `up_state=1` and `up_release_t=$abstime+pulse_w`; on DIV-leading edge set `dn_state=1` and `dn_release_t=$abstime+pulse_w`; clear each state when `$abstime` exceeds its release time.",
+            "- If EVAS reports `dn_pulses_second=0`, the second-window DIV-leading case is not producing DN pulses; if it reports enough pulses but `dn_second` too large, shorten DN pulse width.",
+            "- Do not use ultra-small transition times or free-running timers that force excessive simulator steps.",
             "",
         ])
 
