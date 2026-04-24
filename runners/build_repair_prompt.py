@@ -877,6 +877,23 @@ def _dwa_plan_execute_section(task_id: str, notes: list[str]) -> list[str]:
         "6. Update `ptr_q` consistently with the selected window and task-specific wrap/no-overlap rule.",
         "7. Keep the observable CSV names required by the original task prompt.",
         "8. Keep reset release and transient stop consistent: reset must deassert before the checker sampling window, and `tran stop` must be after several post-reset clock edges.",
+        "",
+        "## DWA Behavior Skeleton",
+        "",
+        "- Treat `code_q` as the single decoded integer command for the current clock edge.",
+        "- Treat `ptr_q` as the single pointer state; do not derive different pointer values for `ptr_o` and `cell_en_o`.",
+        "- At each valid rising clock edge, clear all `ptr_val[*]` and `cell_en_val[*]` before setting the new outputs.",
+        "- Drive exactly one pointer bit high unless reset is active.",
+        "- Drive exactly `code_q` cell-enable bits high when `code_q > 0`; drive zero cells when `code_q == 0`.",
+        "- Keep all output targets in arrays and drive electrical bus bits from those arrays with unconditional contributions.",
+        "",
+        "## DWA Bit/Port Order Guardrail",
+        "",
+        "- Check the positional bus expansion order before changing the algorithm.",
+        "- For ports declared `[3:0] code_i`, scalar Spectre harnesses commonly connect MSB-to-LSB as `code_3 code_2 code_1 code_0`.",
+        "- For ports declared `[15:0] ptr_o` or `cell_en_o`, scalar harnesses commonly connect `*_15 ... *_0`.",
+        "- Therefore the Verilog-A decode should read fixed bus indices semantically: `code_i[0]` is LSB, `code_i[3]` is MSB, and output bit index `j` must mean checker column `ptr_j` or `cell_en_j`.",
+        "- If EVAS reports `wrap_events` and `split_wrap_rows` are already good but `bad_ptr_rows`/`bad_count_rows` remain high, suspect pointer update order, output bit order, or one-cycle timing before redesigning the DWA concept.",
     ]
 
     if "no_overlap" in task_id:
@@ -924,18 +941,25 @@ def _dwa_plan_execute_section(task_id: str, notes: list[str]) -> list[str]:
             ])
         if fnum("bad_ptr_rows") > 0.0:
             lines.extend([
-                "- Root cause: checker expected pointer starts at 13 and then updates as `(ptr_q + code_q) % 16`, but observed `ptr_*` is not one-hot at that index.",
-                "- Execute: initialize `ptr_q = 13`; on each valid clock, decode `code_q`, update `ptr_q = (ptr_q + code_q) % 16`, clear all `ptr_val`, then set only `ptr_val[ptr_q] = vdd`.",
+                "- Root cause: the observed `ptr_*` columns are not one-hot at the checker-visible pointer index.",
+                "- Execute: initialize `ptr_q` from the public task contract; on each valid clock, decode `code_q`, compute the next pointer once, clear all `ptr_val`, then set only `ptr_val[ptr_q] = vdd`.",
+                "- Also verify bit order: a correct internal pointer can still fail if `ptr_o[15:0]` is connected or driven reversed relative to checker columns `ptr_15..ptr_0`.",
             ])
         if fnum("bad_count_rows") > 0.0:
             lines.extend([
                 "- Root cause: active `cell_en_*` count does not equal decoded `code_q`.",
-                "- Execute: after updating pointer, clear all `cell_en_val`; for `j=0..code_q-1`, enable `(ptr_q - j + 16) % 16` or another consistent rotating window with exactly `code_q` cells.",
+                "- Execute: after computing the active window, clear all `cell_en_val`; for `j=0..code_q-1`, enable exactly one unique cell index per `j` modulo 16.",
+                "- Do not let pointer bit order and cell-enable bit order use opposite conventions.",
             ])
         if fnum("wrap_events") < 2.0 or fnum("split_wrap_rows") < 2.0:
             lines.extend([
                 "- Root cause: the stimulus/selection does not visibly split across the 15-to-0 boundary often enough.",
                 "- Execute: keep code stimulus values large enough to force at least two wraps from initial pointer 13, and make the enabled window split across indices near 15 and 0.",
+            ])
+        elif fnum("bad_ptr_rows") > 0.0 or fnum("bad_count_rows") > 0.0:
+            lines.extend([
+                "- Important: `wrap_events` and `split_wrap_rows` are already sufficient, so preserve the wrap-producing stimulus/window coverage.",
+                "- Focus only on making the pointer one-hot and the enabled-cell count equal to `code_q` in the existing sampled cycles.",
             ])
         lines.extend([
             "- Success target for next EVAS run: `bad_ptr_rows=0`, `bad_count_rows=0`, `wrap_events>=2`, and `split_wrap_rows>=2`.",

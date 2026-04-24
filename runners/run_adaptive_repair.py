@@ -285,6 +285,41 @@ def _main_module_name(task_dir: Path) -> str | None:
     return None
 
 
+def _protected_dut_modules(task_dir: Path, dst_sample: Path) -> set[str]:
+    """Return generated DUT modules that gold harness freeze must not overwrite.
+
+    Gold harness directories often contain Verilog-A stimulus/helper modules in
+    addition to the reference DUT.  During behavior-only repair we want the
+    verifier harness and helpers, but we must preserve the candidate's DUT.
+    Protect explicitly named DUT modules from the prompt; fall back to candidate
+    modules only when no prompt contract can be inferred.
+    """
+    prompt = task_dir.joinpath("prompt.md").read_text(encoding="utf-8", errors="ignore")
+    protected: set[str] = set()
+
+    main_module = _main_module_name(task_dir)
+    if main_module:
+        protected.add(main_module)
+
+    for match in re.finditer(
+        r"\bmodules?\s+named\s+((?:`[^`]+`(?:\s*(?:,|and)\s*)?)+)",
+        prompt,
+        flags=re.IGNORECASE,
+    ):
+        protected.update(re.findall(r"`([^`]+)`", match.group(1)))
+
+    for match in re.finditer(
+        r"\b(?:ADC|DAC|DUT|main)\s+module\s+`([^`]+)`",
+        prompt,
+        flags=re.IGNORECASE,
+    ):
+        protected.add(match.group(1))
+
+    if protected:
+        return protected
+    return _declared_modules(sorted(dst_sample.glob("*.va")))
+
+
 def _declared_modules(paths: list[Path]) -> set[str]:
     modules: set[str] = set()
     for path in paths:
@@ -304,10 +339,7 @@ def _freeze_gold_harness(task_dir: Path, dst_sample: Path) -> list[str]:
     gold_dir = task_dir / "gold"
     if not gold_dir.exists():
         return []
-    main_module = _main_module_name(task_dir)
-    candidate_modules = _declared_modules(sorted(dst_sample.glob("*.va")))
-    if main_module:
-        candidate_modules.add(main_module)
+    protected_modules = _protected_dut_modules(task_dir, dst_sample)
     copied: list[str] = []
 
     for existing in dst_sample.glob("*.scs"):
@@ -320,7 +352,7 @@ def _freeze_gold_harness(task_dir: Path, dst_sample: Path) -> list[str]:
     for src in sorted(gold_dir.glob("*.va")):
         signature = extract_module_signature(src)
         gold_module = signature[0] if signature else src.stem
-        if gold_module in candidate_modules:
+        if gold_module in protected_modules:
             continue
         shutil.copy2(src, dst_sample / src.name)
         copied.append(src.name)

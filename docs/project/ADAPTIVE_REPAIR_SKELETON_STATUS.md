@@ -28,6 +28,7 @@ EVAS closed loop progressively expose more actionable diagnostics:
 | Observable scalar alias skeleton | `results/adaptive-observable-skeleton-kimi-dwa-v3-2026-04-25` | `dwa_wraparound_smoke`: missing scalar columns became `insufficient_post_reset_samples count=0`. |
 | Post-reset sample budget skeleton | `results/adaptive-postreset-skeleton-kimi-dwa-2026-04-25` | `dwa_wraparound_smoke`: `insufficient_post_reset_samples count=0` became `sampled_cycles=8 bad_ptr_rows=8 bad_count_rows=7 wrap_events=3 split_wrap_rows=4`. |
 | Post-reset sample budget skeleton | `results/adaptive-postreset-skeleton-kimi-sh-2026-04-25` | `sample_hold_droop_smoke`: `too_few_clock_edges=2` became `droop_failures=3 windows=3`. |
+| DWA behavior + verifier-helper freeze fix | `results/adaptive-dwa-behavior-freezecheck-kimi-2026-04-25` | Existing repaired DWA DUT plus corrected verifier helper/harness reached `PASS`: `sampled_cycles=8 bad_ptr_rows=0 bad_count_rows=0 wrap_events=3 split_wrap_rows=3`. |
 
 ## What Changed Conceptually
 
@@ -75,15 +76,27 @@ and stimulus timing so enough post-reset samples exist.
 - Long DWA prompts are slow because the model has to regenerate many files and long bus wiring.
 - Some existing code changes are still experimental and should be reviewed before a clean commit.
 
+Update after the first DWA behavior probe:
+
+- A remaining DWA wraparound failure was traced to the behavior-layer harness freeze policy.
+- The loop preserved the model-generated `dwa_code_step_ref` helper, but the verifier harness expects
+  the benchmark helper/stimulus module.
+- Fixing the freeze policy so that only protected DUT modules are preserved, while verifier helper
+  modules are copied back from gold, converted the repaired DWA candidate to PASS.
+- This is a method-level finding: behavior-only repair must freeze the verifier harness and helper
+  stimulus modules, not only the `.scs` file.
+
 ## Recommended Next Work
 
 1. Implement a behavior-layer DWA skeleton for `bad_ptr_rows`, `bad_count_rows`, `wrap_events`, and
    `split_wrap_rows`.
-2. Implement a sample-hold behavior skeleton for `droop_failures` and `windows`.
-3. Re-run the same small validation cases after each skeleton, using failure-surface progress plus PASS
+2. Re-run DWA wraparound through the normal adaptive loop after the verifier-helper freeze fix, not
+   just through the direct freeze-check path.
+3. Implement a sample-hold behavior skeleton for `droop_failures` and `windows`.
+4. Re-run the same small validation cases after each skeleton, using failure-surface progress plus PASS
    as the acceptance metric.
-4. Once the small validation cases show real PASS uplift, run the 16-task small matrix again.
-5. Only after the small matrix improves, promote the method to the full 92-task EVAS-only experiment.
+5. Once the small validation cases show real PASS uplift, run the 16-task small matrix again.
+6. Only after the small matrix improves, promote the method to the full 92-task EVAS-only experiment.
 
 ## Upload Policy
 
