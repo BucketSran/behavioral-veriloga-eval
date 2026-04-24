@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-04-24
+Last updated: 2026-04-25
 
 ## 1) Project Goal
 
@@ -40,6 +40,18 @@ Key recorded runs:
 Reference:
 - `tables/RUN_REGISTRY.md`
 
+Latest local adaptive-repair status:
+- The current focus has shifted from running more `A/B/C/D/E/F` matrix cells to improving the EVAS
+  repair loop itself.
+- Two reusable observable-layer skeletons have been implemented locally:
+  - `observable_scalar_alias_template`
+  - `post_reset_sample_budget_template`
+- These skeletons do not yet improve final Pass@1 directly, but they convert shallow observable
+  failures into behavior-level EVAS diagnostics.
+
+Reference:
+- `docs/project/ADAPTIVE_REPAIR_SKELETON_STATUS.md`
+
 ## 4) Where To Look First (5-Minute Onboarding)
 
 1. `README.md` — project overview and core workflow
@@ -48,6 +60,7 @@ Reference:
 4. `tables/` — tracked paper-facing table summaries
 5. `docs/EXPERIMENT_ASSET_POLICY.md` — what to keep/push after each run
 6. `docs/project/POST_RUN_PLAYBOOK.md` — post-run update/upload checklist
+7. `docs/project/ADAPTIVE_REPAIR_SKELETON_STATUS.md` — latest adaptive repair skeleton status
 
 ## 5) Storage and Versioning Policy (Current)
 
@@ -58,7 +71,11 @@ Reference:
 
 ## 6) Next Execution Plan
 
-1. Complete full92 `A/B/C` for `kimi` and `qwen` under the same snapshot.
-2. Complete dev24 `D/E/F` for `qwen`.
-3. Promote stable repair conditions to full92 (`D/F`) for both models.
-4. Refresh `tables/` and append run lines into `tables/RUN_REGISTRY.md`.
+1. Finish behavior-layer repair skeletons on the small validation set:
+   - DWA pointer/count/window behavior.
+   - sample-hold droop behavior.
+2. Re-run the 16-task Kimi small matrix only after small-case behavior skeletons show actual PASS
+   uplift or clear failure-surface progress.
+3. Promote the method to the full 92-task EVAS-only experiment only after the small matrix improves.
+4. Return to full `A/B/C/D/E/F` cross-model matrix runs after the repair policy is stable enough to
+   justify broad comparison.

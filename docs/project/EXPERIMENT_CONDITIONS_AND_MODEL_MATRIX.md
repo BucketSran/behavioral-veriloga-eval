@@ -1,6 +1,6 @@
 # Experiment Conditions And Cross-Model Matrix
 
-This document unifies the `A/B/C/D/E/F` condition definitions used in vaEvas and
+This document unifies the `A/B/C/D/E/F/G` condition definitions used in vaEvas and
 defines the recommended cross-model comparison protocol.
 
 Important scope note:
@@ -27,6 +27,7 @@ Important scope note:
 | `D` | Yes | No | Yes | 1 | `run_model_assisted_loop.py --mode evas-guided-repair-no-skill` | What is the value of one EVAS-guided repair step without Skill? |
 | `E` | Yes | Yes | Yes | 1 | `run_model_assisted_loop.py --mode evas-guided-repair` | What is the value of one EVAS-guided repair step with Skill? |
 | `F` | Yes | No | Yes | 3 | `run_model_assisted_loop.py --mode evas-guided-repair-3round` | What is the value of generalized multi-round EVAS repair without model-specific tuning? |
+| `G` | Yes | Yes | Yes | 3 | `run_model_assisted_loop.py --mode evas-guided-repair-3round-skill` | What is the value of generalized multi-round EVAS repair with Skill enabled? |
 
 ## 2. Condition Semantics
 
@@ -73,6 +74,12 @@ Important scope note:
 - `F` is the current main condition for testing whether EVAS can support
   robust multi-round optimization.
 
+### `G`: Multi-Round EVAS Repair, With Skill
+- Starts from the `B` baseline.
+- Runs three EVAS-guided repair rounds with Skill injection enabled.
+- Mirrors `F` except for Skill, isolating whether multi-round Skill improves
+  repair convergence.
+
 ## 3. Fair Comparison Rules
 
 To keep claims model-agnostic and methodologically clean, use the following rules.
@@ -96,6 +103,8 @@ Recommended deltas:
 - `B -> D`
 - `B -> F`
 - `C -> E`
+- `C -> G`
+- `F -> G`
 
 Secondary deltas:
 - `A -> B`
