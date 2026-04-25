@@ -1,6 +1,6 @@
 # Experiment Conditions And Cross-Model Matrix
 
-This document unifies the `A/B/C/D/E/F/G` condition definitions used in vaEvas and
+This document unifies the `A/B/C/D/E/F/G/H` condition definitions used in vaEvas and
 defines the recommended cross-model comparison protocol.
 
 Important scope note:
@@ -28,6 +28,7 @@ Important scope note:
 | `E` | Yes | Yes | Yes | 1 | `run_model_assisted_loop.py --mode evas-guided-repair` | What is the value of one EVAS-guided repair step with Skill? |
 | `F` | Yes | No | Yes | 3 | `run_model_assisted_loop.py --mode evas-guided-repair-3round` | What is the value of generalized multi-round EVAS repair without model-specific tuning? |
 | `G` | Yes | Yes | Yes | 3 | `run_model_assisted_loop.py --mode evas-guided-repair-3round-skill` | What is the value of generalized multi-round EVAS repair with Skill enabled? |
+| `H` | Yes | Yes | Yes + EVAS fitness search | Adaptive | `signature_guided_h.py --anchor-root <G artifacts>` prototype | Can signature-gated mechanism templates rescue failures left after `G` without task-id overfitting? |
 
 ## 2. Condition Semantics
 
@@ -79,6 +80,42 @@ Important scope note:
 - Runs three EVAS-guided repair rounds with Skill injection enabled.
 - Mirrors `F` except for Skill, isolating whether multi-round Skill improves
   repair convergence.
+
+### `H`: G + Signature-Guided Template Search
+- Starts from the best available `G` artifact for each task.
+- Re-scores the exact artifact before attempting repair; stale historical G
+  metadata is not trusted for rescue counts.
+- If the re-scored `G` artifact fails, the runner first classifies the EVAS
+  failure notes, then checks the generated DUT module/interface signature.
+- A bounded mechanism-template branch may run only when both the failure
+  signature and interface signature match a reusable family.
+- EVAS is used as the fitness oracle to select the first passing candidate or
+  the best metric-moving candidate.
+- Current implementation is a prototype, not yet the final full92 condition:
+  `runners/signature_guided_h.py`.
+- Earlier `runners/template_guided_smallset.py` results remain useful
+  exploratory evidence, but formal H promotion should use the signature-gated
+  runner rather than task-id-selected templates.
+- `H` is designed to test whether EVAS speed can support generate-and-validate
+  mechanism search where free-form LLM repair fails to generate the right
+  candidate mechanism.
+
+## Current Scoring System Snapshot
+
+The current run system includes several safeguards that should be kept fixed
+when refreshing `A/B/C/D/E/F/G/H` numbers:
+
+- `score.py` uses per-task output isolation so parallel EVAS scoring cannot
+  share or corrupt `tran.csv`.
+- `score.py --resume` uses fingerprinted caches for generated files, gold
+  files, runner code, and simulation config.
+- `score.py --save-policy contract` is the default paper-facing setting; it
+  preserves only contract/gold observables needed by the checker.
+- `score.py --save-policy debug` keeps broader observables for repair/debug
+  runs where extra signals help failure attribution.
+- Experimental streaming checkers are disabled by default and require
+  `VAEVAS_ENABLE_EXPERIMENTAL_STREAMING_CHECKERS=1`; they should not be used in
+  formal scoring unless equivalence is separately validated.
 
 ## 3. Fair Comparison Rules
 
