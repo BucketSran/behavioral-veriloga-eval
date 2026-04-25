@@ -148,7 +148,7 @@ Infrastructure findings from this run:
 
 Next repair-policy implication:
 
-- Fixed three-round final-output selection is suboptimal. Logs showed some tasks became PASS in an intermediate round and then regressed in a later round. The next policy should keep the first PASS or best-scoring candidate per task, rather than always taking the last round.
+- Multi-round repair already keeps the EVAS best-so-far candidate and early-stops on PASS. The next policy improvement should therefore target wasted calls after repeated no-progress rounds, model-specific compile-stability templates, and provider-specific concurrency/rate-limit controls.
 
 ## Full92 Qwen Matrix Snapshot
 
