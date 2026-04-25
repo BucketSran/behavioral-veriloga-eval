@@ -206,14 +206,6 @@ Implemented in `runners/build_repair_prompt.py` and routed through `runners/diag
   `cppll_timer`, `clk_divider`, `pfd_reset_race_smoke`, `cross_sine_precision_smoke`). Best-so-far
   selection rejected those candidates, but this shows prompt-only guardrails are insufficient; the
   next improvement should be runner-level behavior-patch constraints or automatic regression repair.
-- The adaptive runner now supports `--regression-retry`: when a candidate regresses to a lower
-  layer, the runner discards it and retries once from the protected anchor with a narrower recovery
-  prompt. On the five-task v12 regression probe, all final best candidates preserved behavior-layer
-  status. Regression retry triggered on `bad_bus_output_loop`, `clk_divider`,
-  `cross_sine_precision_smoke`, and `pfd_reset_race_smoke`; only `bad_bus_output_loop` recovered
-  from compile regression back to behavior. This validates hard anti-regression rejection, but
-  suggests the next step should be structural patching/automatic rollback rather than another
-  natural-language retry.
 
 ## Full92 Kimi Matrix Snapshot
 
