@@ -452,30 +452,56 @@ def _task_lookup(task_ids: list[str]) -> list[tuple[str, Path]]:
 
 def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
     model_slug = _model_slug(args.model)
-    source_sample = find_generated_dir(Path(args.source_generated_dir), model_slug, task_id, args.sample_idx)
-    if source_sample is None:
-        raise SystemExit(f"Missing source sample for {model_slug}/{task_id}")
-
     out_root = Path(args.output_root)
     gen_root = Path(args.generated_root) / model_slug / task_id
     gen_root.mkdir(parents=True, exist_ok=True)
 
-    best_sample = source_sample
-    initial_result_path = Path(args.initial_result_root) / task_id / "result.json" if args.initial_result_root else None
-    if initial_result_path and initial_result_path.exists():
-        best_result = json.loads(initial_result_path.read_text(encoding="utf-8"))
-        print(f"[adaptive] {task_id} R0 reuse_result={initial_result_path}")
-    else:
-        best_result = _score_quick(
-            task_id=task_id,
-            task_dir=task_dir,
-            sample_dir=best_sample,
-            output_root=out_root / "round0",
-            model_slug=model_slug,
-            sample_idx=args.sample_idx,
-            timeout_s=args.timeout_s,
-            quick_maxstep=args.quick_maxstep,
+    candidate_generated_dirs = [args.source_generated_dir, *args.candidate_generated_dir]
+    candidate_result_roots = [args.initial_result_root, *args.candidate_result_root]
+    while len(candidate_result_roots) < len(candidate_generated_dirs):
+        candidate_result_roots.append("")
+
+    initial_candidates: list[dict] = []
+    for idx, (generated_dir, result_root) in enumerate(zip(candidate_generated_dirs, candidate_result_roots)):
+        source_sample = find_generated_dir(Path(generated_dir), model_slug, task_id, args.sample_idx)
+        if source_sample is None:
+            if idx == 0:
+                raise SystemExit(f"Missing source sample for {model_slug}/{task_id}")
+            continue
+        result_path = Path(result_root) / task_id / "result.json" if result_root else None
+        if result_path and result_path.exists():
+            result = json.loads(result_path.read_text(encoding="utf-8"))
+            print(f"[adaptive] {task_id} R0 candidate{idx} reuse_result={result_path}")
+        else:
+            result = _score_quick(
+                task_id=task_id,
+                task_dir=task_dir,
+                sample_dir=source_sample,
+                output_root=out_root / f"round0_candidate{idx}",
+                model_slug=model_slug,
+                sample_idx=args.sample_idx,
+                timeout_s=args.timeout_s,
+                quick_maxstep=args.quick_maxstep,
+            )
+        rank = _progress_rank(task_id, result)
+        initial_candidates.append(
+            {
+                "idx": idx,
+                "generated_dir": generated_dir,
+                "result_root": result_root,
+                "sample": source_sample,
+                "result": result,
+                "rank": rank,
+            }
         )
+        print(f"[adaptive] {task_id} R0 candidate{idx} {result.get('status')} rank={rank}")
+
+    if not initial_candidates:
+        raise SystemExit(f"Missing source samples for {model_slug}/{task_id}")
+
+    selected_candidate = max(initial_candidates, key=lambda item: item["rank"])
+    best_sample = selected_candidate["sample"]
+    best_result = selected_candidate["result"]
     best_rank = _progress_rank(task_id, best_result)
     best_layer = _classify_repair_layer(best_result)
     anchor_sample = best_sample
@@ -601,13 +627,19 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
             best_result = result
             best_rank = rank
             best_layer = result_layer
+            anchor_sample = sample_dir
+            anchor_result = result
+            anchor_policy = "latest_improved_candidate"
             no_progress = 0
         else:
             no_progress += 1
-        # Continue from the latest candidate to allow the next round to repair
-        # a newly exposed failure surface, while still preserving best-so-far.
-        anchor_sample = sample_dir
-        anchor_result = result
+            # Do not let a stalled or regressed candidate become the next base.
+            # The next LLM call should repair the best EVAS surface we have
+            # actually observed, not compound errors from a worse rewrite.
+            anchor_sample = best_sample
+            anchor_result = best_result
+            anchor_policy = "best_so_far_after_stall"
+        history[-1]["next_anchor_policy"] = anchor_policy
         if result.get("status") == "PASS" or no_progress >= args.patience:
             break
 
@@ -625,6 +657,18 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
             "best_layer": best_layer,
             "best_scores": best_result.get("scores", {}),
             "best_metrics": _extract_metrics(best_result),
+            "initial_candidates": [
+                {
+                    "idx": item["idx"],
+                    "generated_dir": item["generated_dir"],
+                    "result_root": item["result_root"],
+                    "sample": str(item["sample"]),
+                    "status": item["result"].get("status"),
+                    "scores": item["result"].get("scores", {}),
+                    "rank": list(item["rank"]),
+                }
+                for item in initial_candidates
+            ],
             "history": history,
             "generated_at": datetime.now(timezone.utc).isoformat(),
         },
@@ -640,6 +684,10 @@ def parse_args() -> argparse.Namespace:
     ap.add_argument("--source-generated-dir", default="generated-table2-evas-guided-repair-3round-skill")
     ap.add_argument("--initial-result-root", default="",
                     help="Optional existing EVAS result root used as round-0 feedback to avoid re-scoring slow baselines.")
+    ap.add_argument("--candidate-generated-dir", action="append", default=[],
+                    help="Additional generated roots to consider as round-0 candidates before repair.")
+    ap.add_argument("--candidate-result-root", action="append", default=[],
+                    help="Optional result roots paired with --candidate-generated-dir entries.")
     ap.add_argument("--generated-root", default="generated-adaptive-evas-repair")
     ap.add_argument("--output-root", default="results/adaptive-evas-repair-dwa-pilot-2026-04-24")
     ap.add_argument("--sample-idx", type=int, default=0)

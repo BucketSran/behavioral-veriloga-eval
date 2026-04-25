@@ -43,6 +43,10 @@ EVAS closed loop progressively expose more actionable diagnostics:
 | Reset-hold + clocked-settling F probe | `results/f-repair-settling-gray-final-v2-kimi-2026-04-25` | `gray_counter_4b_smoke` reached `PASS` through normal F: baseline `FAIL_DUT_COMPILE` -> round1 `FAIL_SIM_CORRECTNESS` -> round2 `PASS` with `unique_codes=16 bad_transitions=0`. |
 | Standard F latest-policy hard small matrix | `results/f-smallmatrix-kimi-latest-policy-strict-2026-04-25` | `4/16` PASS. This matches old full92 F on the same subset but underperforms adaptive layered-only `9/16`, showing that skeleton text alone is weaker than explicit layer freezing/routing. |
 | Main F runner with layered-only routing | `results/f-layered-smallmatrix-kimi-strict-2026-04-25` | `5/16` PASS. This improves standard F by one task on the hard subset and proves the main F runner can apply layer freezing/routing, but it still trails the standalone adaptive layered-only result (`9/16`). |
+| Standalone adaptive v3 latest trajectory | `results/adaptive-smallmatrix-kimi-skeleton-v3-2026-04-25` | `6/16` PASS. This run showed that a newer repair trajectory can forget earlier successful candidates, so single-path repair is not monotonic. |
+| Standalone adaptive v4 continuation | `results/adaptive-smallmatrix-kimi-skeleton-v4-continue-2026-04-25` | `2/10` PASS on v3 failures: `cppll_tracking_smoke` and `sample_hold_droop_smoke`. This supports behavior-layer patience greater than one retry. |
+| Standalone adaptive v5 anchor guard | `results/adaptive-smallmatrix-kimi-skeleton-v5-anchor-guard-2026-04-25` | `1/7` PASS on targeted failures: `serializer_8b_smoke`. More importantly, it confirmed that failed/regressed candidates should not become the next repair anchor. |
+| Standalone adaptive v6 candidate memory | `results/adaptive-smallmatrix-kimi-skeleton-v6-memory-2026-04-25` | `11/16` PASS. The runner selected the best EVAS-verified round-0 candidate from v2/v3/v4/v5 roots, then repaired only non-PASS tasks. This is the best current Hard16 method-development result. |
 
 ## What Changed Conceptually
 
@@ -52,6 +56,10 @@ EVAS closed loop progressively expose more actionable diagnostics:
 - Post-reset sample-window repair is now treated as a generic layer before behavior repair.
 - Reset release persistence and clocked-output settling are now treated as generic layers before
   deeper behavior rewrites.
+- Non-improving candidates are no longer allowed to become the next repair anchor. The loop keeps
+  repairing from the best EVAS-ranked candidate, which prevents one bad rewrite from compounding.
+- Candidate memory is now part of the experimental standalone adaptive loop. If prior EVAS-verified
+  roots exist, the runner can select the best round-0 candidate before spending new LLM calls.
 - These changes do not directly inject gold circuit behavior; they make EVAS feedback readable and
   well-sampled so that later behavior repair has a real target.
 
@@ -147,9 +155,12 @@ Implemented in `runners/build_repair_prompt.py` and routed through `runners/diag
 - Standard F with latest skeletons did not improve the 16-task hard subset aggregate over old F (`4/16` vs `4/16`).
 - Main F now has an optional `--layered-only-repair` path. It improves the hard subset from `4/16` to `5/16`,
   but the stronger result remains standalone adaptive layered-only repair (`9/16`).
-- The next implementation priority is to migrate the remaining adaptive-runner mechanics into main F/G:
-  quick-check sanitation, better layer-specific progress rank, and optional warm-start from a prior result root.
+- The standalone adaptive loop now has anchor guarding and candidate-memory warm start. These mechanics
+  should later be migrated carefully into main F/G after a clean ablation, because v6 is a method-development
+  result rather than a formal A/B/C/D/E/F/G condition.
 - Behavior repair remains the next bottleneck for SAR/ADC-DAC, PFD/BBPD, and PLL-like tasks.
+- The remaining Hard16 failures after v6 are `adpll_timer_smoke`, `dwa_ptr_gen_smoke`,
+  `gain_extraction_smoke`, `pfd_reset_race_smoke`, and `sar_adc_dac_weighted_8b_smoke`.
 - Long DWA prompts are slow because the model has to regenerate many files and long bus wiring.
 - SAR/ADC-DAC and PFD show that natural-language repair policies are sometimes too soft; these may
   need structured code skeletons or verifier-harness templates.
