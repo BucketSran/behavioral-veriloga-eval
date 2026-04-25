@@ -55,6 +55,16 @@ _CONCRETE_DIAGNOSTIC_MARKERS = (
     "dn_first=",
 )
 
+_LAYER_RANK = {
+    "infra": 0,
+    "compile_dut": 0,
+    "compile_tb": 0,
+    "runtime_interface": 1,
+    "observable": 2,
+    "behavior": 3,
+    "done": 4,
+}
+
 
 def _load_env_file(path: Path) -> None:
     if not path.exists():
@@ -184,6 +194,53 @@ def _classify_repair_layer(result: dict) -> str:
     if result.get("status") == "FAIL_SIM_CORRECTNESS":
         return "behavior"
     return "infra"
+
+
+def _is_layer_regression(anchor_layer: str, result_layer: str, anchor_result: dict, result: dict) -> bool:
+    """Return True when a candidate breaks an already higher-quality repair layer."""
+    if result.get("status") == "PASS":
+        return False
+    anchor_scores = anchor_result.get("scores", {})
+    result_scores = result.get("scores", {})
+    if (
+        float(anchor_scores.get("dut_compile", 0.0)) >= 1.0
+        and float(result_scores.get("dut_compile", 0.0)) < 1.0
+    ):
+        return True
+    if (
+        float(anchor_scores.get("tb_compile", 0.0)) >= 1.0
+        and float(result_scores.get("tb_compile", 0.0)) < 1.0
+    ):
+        return True
+    return _LAYER_RANK.get(result_layer, 0) < _LAYER_RANK.get(anchor_layer, 0)
+
+
+def _regression_recovery_section(
+    *,
+    anchor_layer: str,
+    result_layer: str,
+    regressed_result: dict,
+) -> str:
+    notes = regressed_result.get("evas_notes", [])[:8]
+    note_text = "\n".join(f"- `{note}`" for note in notes) or "- `<none>`"
+    return (
+        "\n\n# Regression Recovery Retry (runner-enforced)\n"
+        "\n"
+        f"The previous generated candidate regressed from `{anchor_layer}` to `{result_layer}`. "
+        "Discard that generated candidate completely. Continue from the compile-clean/current candidate files shown above, not from the regressed code.\n"
+        "\n"
+        "Regression evidence:\n"
+        f"{note_text}\n"
+        "\n"
+        "Mandatory recovery policy:\n"
+        "- This retry is not a fresh design. It is a smaller patch from the current candidate.\n"
+        "- Preserve all module names, filenames, port order, parameters, `ahdl_include` lines, save names, stimulus sources, and `tran` setup.\n"
+        "- Do not add or remove modules, hierarchy, ports, buses, or top-level nodes.\n"
+        "- Do not rewrite the testbench for a behavior-layer regression.\n"
+        "- Change only the smallest internal DUT behavior mechanism needed for the original EVAS metric.\n"
+        "- The next candidate must at least preserve DUT compile, TB compile, and `tran.csv` generation before improving behavior.\n"
+        "- If you cannot make the behavior fix without changing interface or syntax style, keep the existing code structure and make no broad rewrite.\n"
+    )
 
 
 def _progress_rank(task_id: str, result: dict) -> tuple:
@@ -617,6 +674,144 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
             f"layer={result_layer} improved={improved} rank={rank}"
         )
 
+        regression_attempts: list[dict] = []
+        if _is_layer_regression(layer, result_layer, anchor_result, result) and args.regression_retry > 0:
+            print(
+                f"[adaptive] {task_id} R{round_idx} regression "
+                f"{layer}->{result_layer}; retrying narrow recovery"
+            )
+            regressed_result = result
+            for retry_idx in range(1, args.regression_retry + 1):
+                recovery_prompt = build_evas_guided_repair_prompt(
+                    task_dir,
+                    anchor_sample,
+                    anchor_result,
+                    history=history,
+                    include_skill=True,
+                    loop_context={
+                        "attempt_round": round_idx,
+                        "best_round": history[-1]["round"] if history else 0,
+                        "best_status": best_result.get("status"),
+                        "best_scores": best_result.get("scores", {}),
+                        "best_metric_gap": metric_gap_summary(task_dir, best_result),
+                        "best_failure_subtype": _failure_subtype(best_result),
+                        "last_transition": "regressed",
+                        "last_transition_summary": (
+                            f"discarded candidate regressed from {layer} to {result_layer}"
+                        ),
+                    },
+                )
+                if args.layered_only_repair:
+                    recovery_prompt += _layer_policy_section(layer, task_dir)
+                elif args.freeze_gold_harness_on_behavior and anchor_result.get("status") == "FAIL_SIM_CORRECTNESS":
+                    recovery_prompt += _layer_policy_section("behavior", task_dir)
+                recovery_prompt += _regression_recovery_section(
+                    anchor_layer=layer,
+                    result_layer=result_layer,
+                    regressed_result=regressed_result,
+                )
+
+                retry_sample_dir = gen_root / f"adaptive_round{round_idx}_regression_retry{retry_idx}"
+                retry_sample_dir.mkdir(parents=True, exist_ok=True)
+                (retry_sample_dir / "repair_prompt.md").write_text(recovery_prompt, encoding="utf-8")
+
+                print(
+                    f"[adaptive] CALL {model_slug}/{task_id} "
+                    f"R{round_idx}.reg{retry_idx} ... ",
+                    end="",
+                    flush=True,
+                )
+                retry_response, retry_usage = call_model(
+                    args.model,
+                    recovery_prompt,
+                    0.0,
+                    args.top_p,
+                    args.max_tokens,
+                )
+                (retry_sample_dir / "raw_response.txt").write_text(retry_response, encoding="utf-8")
+                retry_saved = _save_generated_response(
+                    response_text=retry_response,
+                    sample_dir=retry_sample_dir,
+                    family=read_meta(task_dir).get("family", "end-to-end"),
+                    task_dir=task_dir,
+                )
+                retry_frozen_tbs: list[str] = []
+                retry_frozen_duts: list[str] = []
+                retry_frozen_harness: list[str] = []
+                if args.layered_only_repair:
+                    if layer == "observable":
+                        retry_frozen_duts = _freeze_veriloga_from(anchor_sample, retry_sample_dir)
+                    elif layer == "behavior":
+                        retry_frozen_harness = _freeze_gold_harness(task_dir, retry_sample_dir)
+                elif anchor_result.get("status") == "FAIL_SIM_CORRECTNESS":
+                    if args.freeze_gold_harness_on_behavior:
+                        retry_frozen_harness = _freeze_gold_harness(task_dir, retry_sample_dir)
+                    elif args.freeze_tb_on_behavior:
+                        retry_frozen_tbs = _freeze_testbench_from(best_sample, retry_sample_dir)
+                _json_write(
+                    retry_sample_dir / "generation_meta.json",
+                    {
+                        "model": args.model,
+                        "model_slug": model_slug,
+                        "task_id": task_id,
+                        "mode": "adaptive-evas-repair-v0-regression-retry",
+                        "round": round_idx,
+                        "regression_retry": retry_idx,
+                        "status": "generated" if retry_saved else "no_code_extracted",
+                        "saved_files": retry_saved,
+                        "frozen_testbench_from_best": retry_frozen_tbs,
+                        "frozen_dut_from_anchor": retry_frozen_duts,
+                        "frozen_gold_harness": retry_frozen_harness,
+                        "repair_layer": layer,
+                        "regressed_layer": result_layer,
+                        "generated_at": datetime.now(timezone.utc).isoformat(),
+                        **retry_usage,
+                    },
+                )
+                print("generated" if retry_saved else "no_code")
+                if not retry_saved:
+                    break
+
+                retry_result = _score_quick(
+                    task_id=task_id,
+                    task_dir=task_dir,
+                    sample_dir=retry_sample_dir,
+                    output_root=out_root / f"round{round_idx}_regression_retry{retry_idx}",
+                    model_slug=model_slug,
+                    sample_idx=args.sample_idx,
+                    timeout_s=args.timeout_s,
+                    quick_maxstep=args.quick_maxstep,
+                )
+                retry_rank = _progress_rank(task_id, retry_result)
+                retry_layer = _classify_repair_layer(retry_result)
+                retry_improved = retry_rank > best_rank
+                retry_regressed = _is_layer_regression(layer, retry_layer, anchor_result, retry_result)
+                print(
+                    f"[adaptive] {task_id} R{round_idx}.reg{retry_idx} "
+                    f"{retry_result.get('status')} layer={retry_layer} "
+                    f"improved={retry_improved} regression={retry_regressed} rank={retry_rank}"
+                )
+                regression_attempts.append(
+                    {
+                        "retry": retry_idx,
+                        "status": retry_result.get("status"),
+                        "result_layer": retry_layer,
+                        "scores": retry_result.get("scores", {}),
+                        "evas_notes": retry_result.get("evas_notes", []),
+                        "metrics": _extract_metrics(retry_result),
+                        "rank": list(retry_rank),
+                        "regressed": retry_regressed,
+                    }
+                )
+                if retry_rank > rank:
+                    sample_dir = retry_sample_dir
+                    result = retry_result
+                    rank = retry_rank
+                    result_layer = retry_layer
+                    improved = retry_improved
+                if retry_result.get("status") == "PASS" or not retry_regressed:
+                    break
+
         history.append(
             {
                 "round": round_idx,
@@ -631,6 +826,7 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
                 "metrics": _extract_metrics(result),
                 "progress_label": "improved" if improved else "stalled",
                 "progress_summary": "Adaptive quick-check improved rank." if improved else "No quick-check progress.",
+                "regression_attempts": regression_attempts,
             }
         )
         if improved:
@@ -717,6 +913,8 @@ def parse_args() -> argparse.Namespace:
                     help="For behavior failures, use benchmark gold stimulus/save harness while preserving generated DUT code.")
     ap.add_argument("--layered-only-repair", action="store_true",
                     help="Automatically route compile/observable/behavior failures to the narrowest editable layer.")
+    ap.add_argument("--regression-retry", type=int, default=0,
+                    help="When a candidate regresses to a lower repair layer, retry from the protected anchor with a narrower recovery prompt.")
     return ap.parse_args()
 
 

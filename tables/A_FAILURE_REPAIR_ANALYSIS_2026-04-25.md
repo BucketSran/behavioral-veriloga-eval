@@ -124,3 +124,26 @@ conservative wording does not reliably prevent the model from breaking compile/i
 hard behavior repair. The next policy improvement should move anti-regression from text guidance into
 runner behavior: reject or auto-repair any behavior-layer candidate whose compile/TB/runtime layer gets
 worse, and retry with a narrower patch-style prompt that preserves the previous candidate structure.
+
+## Follow-Up: Regression Retry v12
+
+The adaptive runner now supports `--regression-retry`, which detects when a generated repair candidate
+falls to a lower repair layer than the protected anchor, rejects that candidate, and performs a
+narrow recovery retry from the anchor.
+
+Probe result:
+
+- Result root: `results/regression-retry5-kimi-v12-2026-04-25`
+- Tasks: `bad_bus_output_loop`, `cppll_timer`, `clk_divider`, `pfd_reset_race_smoke`,
+  `cross_sine_precision_smoke`
+- Final PASS: `0/5`
+- Final best layer: all five preserved `FAIL_SIM_CORRECTNESS` behavior-level status
+- Regression retry triggered on four tasks: `bad_bus_output_loop`, `clk_divider`,
+  `cross_sine_precision_smoke`, and `pfd_reset_race_smoke`
+- Successful recovery from compile regression back to behavior: `bad_bus_output_loop`
+
+Interpretation: hard anti-regression selection works: the final selected candidates no longer fall
+back to compile/infra just because a behavior repair attempt broke syntax. However, the natural-language
+recovery retry is only partially effective. The next improvement should not merely add more prompt text;
+it should preserve the anchor file structure mechanically and apply smaller patch-style edits to the
+specific behavior block or state update mechanism.
