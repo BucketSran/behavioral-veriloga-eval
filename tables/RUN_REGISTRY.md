@@ -22,3 +22,10 @@ and are intentionally not tracked.
 | 2026-04-25 | kimi-k2.5 | full92 | E | 0.4891 | `results/evas-scoring-condition-E-kimi-k2.5-full86-2026-04-25-overnight-kimi` | one-round EVAS repair + skill |
 | 2026-04-25 | kimi-k2.5 | full92 | F | 0.5761 | `results/evas-scoring-condition-F-kimi-k2.5-full86-2026-04-25-overnight-kimi` | three-round EVAS repair, no skill; best current full92 result |
 | 2026-04-25 | kimi-k2.5 | full92 | G | 0.5543 | `results/evas-scoring-condition-G-kimi-k2.5-full86-2026-04-25-overnight-kimi` | three-round EVAS repair + skill; missing generated samples counted as failures |
+| 2026-04-25 | qwen3-max-2026-01-23 | full92 | A | 0.2717 | `results/evas-scoring-condition-A-qwen3-max-2026-01-23-full86-2026-04-25-overnight-qwen` | raw prompt baseline |
+| 2026-04-25 | qwen3-max-2026-01-23 | full92 | B | 0.2609 | `results/evas-scoring-condition-B-qwen3-max-2026-01-23-full86-2026-04-25-overnight-qwen` | checker contract baseline; lower than A |
+| 2026-04-25 | qwen3-max-2026-01-23 | full92 | C | 0.2717 | `results/evas-scoring-condition-C-qwen3-max-2026-01-23-full86-2026-04-25-overnight-qwen` | checker + skill baseline |
+| 2026-04-25 | qwen3-max-2026-01-23 | full92 | D | 0.3152 | `results/evas-scoring-condition-D-qwen3-max-2026-01-23-full86-2026-04-25-overnight-qwen` | one-round EVAS repair, no skill; best valid qwen result in this run |
+| 2026-04-25 | qwen3-max-2026-01-23 | full92 | E | 0.2826 | `results/evas-scoring-condition-E-qwen3-max-2026-01-23-full86-2026-04-25-overnight-qwen` | one-round EVAS repair + skill |
+| 2026-04-25 | qwen3-max-2026-01-23 | full92 | F | 0.3043 | `results/evas-scoring-condition-F-qwen3-max-2026-01-23-full86-2026-04-25-overnight-qwen` | three-round EVAS repair, no skill |
+| 2026-04-25 | qwen3-max-2026-01-23 | full92 | G | 0.2717 | `results/evas-scoring-condition-G-qwen3-max-2026-01-23-full86-2026-04-25-overnight-qwen` | rate-limit contaminated; do not compare as a clean model result |

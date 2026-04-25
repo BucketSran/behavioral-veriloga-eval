@@ -38,6 +38,7 @@ EVAS closed loop progressively expose more actionable diagnostics:
 | Accumulated skeleton small matrix | `results/adaptive-smallmatrix-kimi-skeleton-v2-2026-04-25` | `9/16` PASS, improved over the previous `5/16` layered-only small matrix. New matrix PASS cases include comparator hysteresis, DWA wraparound, flash ADC, and serializer. |
 | Cross-model Qwen small matrix | `results/adaptive-smallmatrix-qwen-skeleton-v2-2026-04-25` plus `results/adaptive-smallmatrix-qwen-skeleton-v2-remaining-2026-04-25` | `3/16` PASS. PASS cases: `adpll_timer_smoke`, `gain_extraction_smoke`, `mux_4to1_smoke`. Several compile failures improved to observable/behavior but did not reach PASS. |
 | Full92 Kimi A-G overnight matrix | `results/evas-scoring-condition-{A..G}-kimi-k2.5-full86-2026-04-25-overnight-kimi` | Best condition is F: `53/92` PASS (`0.5761`), improving over B checker baseline `43/92` (`0.4674`) by `+10` tasks. |
+| Full92 Qwen A-F overnight matrix | `results/evas-scoring-condition-{A..F}-qwen3-max-2026-01-23-full86-2026-04-25-overnight-qwen` | Best clean condition is D: `29/92` PASS (`0.3152`), improving over B checker baseline `24/92` (`0.2609`) by `+5` tasks. G was rate-limit contaminated. |
 
 ## What Changed Conceptually
 
@@ -148,6 +149,39 @@ Infrastructure findings from this run:
 Next repair-policy implication:
 
 - Fixed three-round final-output selection is suboptimal. Logs showed some tasks became PASS in an intermediate round and then regressed in a later round. The next policy should keep the first PASS or best-scoring candidate per task, rather than always taking the last round.
+
+## Full92 Qwen Matrix Snapshot
+
+Run date: `2026-04-25`
+
+Local result roots:
+
+- `results/evas-scoring-condition-A-qwen3-max-2026-01-23-full86-2026-04-25-overnight-qwen`
+- `results/evas-scoring-condition-B-qwen3-max-2026-01-23-full86-2026-04-25-overnight-qwen`
+- `results/evas-scoring-condition-C-qwen3-max-2026-01-23-full86-2026-04-25-overnight-qwen`
+- `results/evas-scoring-condition-D-qwen3-max-2026-01-23-full86-2026-04-25-overnight-qwen`
+- `results/evas-scoring-condition-E-qwen3-max-2026-01-23-full86-2026-04-25-overnight-qwen`
+- `results/evas-scoring-condition-F-qwen3-max-2026-01-23-full86-2026-04-25-overnight-qwen`
+- `results/evas-scoring-condition-G-qwen3-max-2026-01-23-full86-2026-04-25-overnight-qwen`
+
+Outcome:
+
+| Condition | Pass | Pass@1 | Main interpretation |
+| --- | ---: | ---: | --- |
+| A | `25/92` | `0.2717` | Raw prompt baseline. |
+| B | `24/92` | `0.2609` | Checker contract does not help qwen in this run. |
+| C | `25/92` | `0.2717` | Checker + skill roughly returns to A. |
+| D | `29/92` | `0.3152` | One-round EVAS repair is the best clean qwen condition. |
+| E | `26/92` | `0.2826` | Skill weakens one-round repair relative to D. |
+| F | `28/92` | `0.3043` | Three rounds do not improve over one round for qwen. |
+| G | `25/92` | `0.2717` | Rate-limit contaminated; not a clean comparison point. |
+
+Qwen-specific interpretation:
+
+- Qwen has many more DUT/TB compile failures than Kimi, especially in end-to-end tasks. This makes behavior-level EVAS feedback less actionable because many candidates never reach stable CSV observability.
+- EVAS repair still helps qwen: D improves B by `+5` PASS tasks. However, multi-round repair does not amplify the gain the way it does for Kimi.
+- The current skill text is not a reliable repair add-on for qwen; it likely needs to be narrowed into stricter compile-stability and Spectre-friendly syntax rules.
+- G hit provider-side rate limits even with sequential retry after the 8-worker run saturated the API. `runners/run_model_assisted_loop.py` now retries transient API failures with exponential backoff, but this run should still treat G as contaminated because many samples were generated before the retry fix and during an exhausted rate window.
 
 ## Latest Small-Matrix Result
 
