@@ -314,6 +314,11 @@ def _assignment_time(line: str, name: str) -> float | None:
     return _spectre_time_seconds(match.group(1)) if match else None
 
 
+def _assignment_token(line: str, name: str) -> str | None:
+    match = re.search(rf"\b{re.escape(name)}\s*=\s*([^\s\]]+)", line, flags=re.IGNORECASE)
+    return match.group(1).strip() if match else None
+
+
 def _wave_value_is_high(raw: str) -> bool | None:
     token = raw.strip().lower()
     if token in {"vdd", "vhigh", "vh", "val1"}:
@@ -386,6 +391,203 @@ def _clock_reset_timing_facts(sample_dir: Path | None) -> dict:
         first_valid_s = max(float(clk_delay_s), float(reset_s)) + 1e-15
         facts["estimated_post_reset_edges"] = max(0, int((stop_s - first_valid_s) // period_s) + 1)
     return facts
+
+
+def _reset_source_release_issue(sample_dir: Path | None) -> dict | None:
+    """Detect reset sources that deassert only temporarily then reassert.
+
+    A common LLM TB bug is using `type=pulse val0=0 val1=VDD width=50n`
+    for an active-low reset.  In Spectre pulse semantics this is high only for
+    `width`, then returns low, so the DUT is reset during the checker window.
+    """
+    if sample_dir is None:
+        return None
+    tb_path = find_tb_file(sample_dir)
+    if not tb_path:
+        return None
+
+    lines = tb_path.read_text(encoding="utf-8", errors="ignore").splitlines()
+    tran_stop_s: float | None = None
+    reset_candidates: list[dict] = []
+    for raw in lines:
+        line = raw.strip()
+        if not line or line.startswith("//"):
+            continue
+        lowered = line.lower()
+        if re.search(r"\btran\b", lowered):
+            tran_stop_s = _assignment_time(line, "stop") or tran_stop_s
+        if "vsource" not in lowered or "pulse" not in lowered:
+            continue
+        if not ("rst" in lowered or "reset" in lowered):
+            continue
+
+        val0 = _assignment_token(line, "val0")
+        val1 = _assignment_token(line, "val1")
+        width_s = _assignment_time(line, "width")
+        delay_s = _assignment_time(line, "delay") or 0.0
+        if val0 is None or val1 is None or width_s is None:
+            continue
+
+        active_low = any(token in lowered for token in ("rstb", "rst_n", "rst_ni", "reset_n", "resetb"))
+        val0_high = _wave_value_is_high(val0)
+        val1_high = _wave_value_is_high(val1)
+        if val0_high is None or val1_high is None:
+            continue
+
+        reasserts_after_width = False
+        if active_low and not val0_high and val1_high:
+            reasserts_after_width = True
+        if not active_low and val0_high and not val1_high:
+            reasserts_after_width = True
+        if not reasserts_after_width:
+            continue
+
+        reassert_s = delay_s + width_s
+        reset_candidates.append({
+            "line": line,
+            "active_low": active_low,
+            "delay_s": delay_s,
+            "width_s": width_s,
+            "reassert_s": reassert_s,
+            "tran_stop_s": tran_stop_s,
+        })
+
+    if not reset_candidates:
+        return None
+    # Prefer a source that reasserts before the transient ends.
+    for candidate in reset_candidates:
+        stop = candidate.get("tran_stop_s")
+        if isinstance(stop, float) and candidate["reassert_s"] < stop:
+            return candidate
+    return reset_candidates[0]
+
+
+def _reset_hold_contract_template(task_id: str, notes: list[str], sample_dir: Path | None) -> list[str]:
+    issue = _reset_source_release_issue(sample_dir)
+    joined = "\n".join(str(note) for note in notes).lower()
+    task_lower = task_id.lower()
+    if issue is None and not (
+        "not_enough_clk_edges" in joined
+        or "not_enough_post_reset" in joined
+        or "no post-reset samples" in joined
+        or ("gray" in task_lower and "bad_transitions" in joined)
+    ):
+        return []
+
+    lines = [
+        "",
+        "# Reusable Repair Skeleton: Reset Release Must Persist",
+        "",
+        "This is a generic testbench/bring-up repair. Many behavior failures are caused by a reset source that deasserts briefly and then reasserts during the checker window.",
+        "",
+        "## Required reset contract",
+        "",
+        "- Identify whether reset is active-low (`rstb`, `rst_n`, `rst_ni`) or active-high (`rst`, `reset`).",
+        "- Reset may assert at the beginning, but after release it must remain deasserted through the entire checking window.",
+        "- Do not model reset release with a finite-width pulse that returns to the active reset level before `tran stop`.",
+        "- Prefer a PWL source that explicitly holds the deasserted level until the final transient stop time.",
+        "- Repair this TB timing layer before changing DUT behavior when EVAS shows too few post-reset samples/edges or a state machine stuck in reset.",
+    ]
+    if issue:
+        polarity = "active-low" if issue["active_low"] else "active-high"
+        lines.extend([
+            "",
+            "## Detected candidate reset source",
+            "",
+            f"- Reset polarity inferred from signal name: `{polarity}`.",
+            f"- Existing source: `{issue['line']}`",
+            f"- Parsed reset reassertion time: `{_format_seconds(issue['reassert_s'])}`.",
+            f"- Parsed tran stop: `{_format_seconds(issue.get('tran_stop_s'))}`.",
+            "",
+            "Why this matters:",
+            "- In Spectre pulse semantics, the source returns from `val1` back to `val0` after `width`.",
+            "- For active-low reset, `val0=0 val1=VDD width=...` means reset is deasserted only during `width`, then asserted low again.",
+            "- For active-high reset, `val0=VDD val1=0 width=...` has the analogous problem.",
+        ])
+    lines.extend([
+        "",
+        "Safe edit patterns:",
+        "- Active-low reset release: use a PWL such as `wave=[0 0 20n 0 20.1n 1.8 <stop> 1.8]`.",
+        "- Active-high reset release: use a PWL such as `wave=[0 1.8 20n 1.8 20.1n 0 <stop> 0]`.",
+        "- If using a pulse anyway, ensure the deasserted level lasts beyond `tran stop`; otherwise use PWL.",
+        "- Keep clock and enable active after reset release so the checker observes valid post-reset behavior.",
+        "",
+        "Stop condition for this layer:",
+        "- The next EVAS result should no longer show reset-window symptoms such as `not_enough_post_reset_edges`, `not_enough_clk_edges`, `no post-reset samples`, or state outputs stuck at reset values.",
+    ])
+    return lines
+
+
+def _clocked_output_settle_template(task_id: str, notes: list[str], sample_dir: Path | None) -> list[str]:
+    joined = "\n".join(str(note) for note in notes).lower()
+    task_lower = task_id.lower()
+    markers = (
+        "gray_property_violated",
+        "bad_transitions",
+        "q_mismatch",
+        "qb_mismatch",
+        "bit_mismatch",
+        "sample_mismatch",
+    )
+    if not any(marker in joined for marker in markers):
+        return []
+    if not any(token in task_lower for token in ("gray", "counter", "dff", "serializer", "adc", "dac", "sar")):
+        return []
+
+    facts = _clock_reset_timing_facts(sample_dir)
+    tedge_lines: list[str] = []
+    if sample_dir is not None:
+        for va_path in sorted(sample_dir.glob("*.va"))[:4]:
+            text = va_path.read_text(encoding="utf-8", errors="ignore")
+            for match in re.finditer(r"parameter\s+real\s+(?:t(?:edge|rise|fall|d)|tr|tf)\s*=\s*([^;]+);", text):
+                tedge_lines.append(f"{va_path.name}: `{match.group(0).strip()}`")
+                if len(tedge_lines) >= 4:
+                    break
+            if len(tedge_lines) >= 4:
+                break
+
+    lines = [
+        "",
+        "# Reusable Repair Skeleton: Clocked Digital Output Settling",
+        "",
+        "This is a generic clocked-output repair. If the DUT state sequence is logically correct but EVAS still reports bit/transition mismatches, the checker may be sampling before `transition()` outputs have crossed its logic threshold.",
+        "",
+        "## Settling rule",
+        "",
+        "- Keep discrete state in held integer/real target variables.",
+        "- Update those target variables once per valid clock edge.",
+        "- Drive electrical outputs continuously from the targets with `transition()`.",
+        "- Ensure the transition rise/fall is fast enough for the checker sampling offset and `tran maxstep`.",
+        "- For smoke tests with sub-ns sampling after a clock edge, use a small edge time such as `10p` when a `tedge`/`tr`/`tf` parameter is available.",
+        "- Alternatively keep the checker threshold reasonable by using digital stimulus high levels near `2*vth` when the public task permits it.",
+        "- If the module exposes `tedge`, `tr`, or `tf`, the safest minimal repair is a testbench instance override such as `XDUT (...) module_name tedge=10p`; this preserves the module's public default while making the smoke waveform settle before sampling.",
+        "",
+        "Required edit pattern:",
+        "- Do not rewrite a correct counter/serializer/ADC algorithm just because EVAS reports sampled bit mismatches.",
+        "- First reduce output `transition()` edge time or override the exposed transition parameter in the testbench instance.",
+        "- If the same mismatch metric stayed unchanged across the previous round, make the transition-parameter override mandatory in the next answer; do not return another cosmetic DUT rewrite.",
+        "- Preserve reset release, clock period, save names, module names, and bit order while changing only the settle-time parameter.",
+    ]
+    if facts.get("tran_lines") or facts.get("clock_lines") or tedge_lines:
+        lines.extend(["", "## Current candidate timing facts", ""])
+        if facts.get("tran_lines"):
+            lines.append("- Tran: `" + " | ".join(facts["tran_lines"]) + "`")
+        if facts.get("clock_lines"):
+            lines.append("- Clock source: `" + " | ".join(facts["clock_lines"][:2]) + "`")
+        if tedge_lines:
+            lines.append("- Output transition parameters:")
+            lines.extend(f"  - {line}" for line in tedge_lines)
+            lines.extend([
+                "",
+                "Concrete next edit if no other metric moved:",
+                "- Keep the Verilog-A default parameter if the task lists one, but instantiate the DUT with a faster smoke-test edge, e.g. `... gray_counter_4b tedge=10p` or the equivalent for the current module.",
+            ])
+    lines.extend([
+        "",
+        "Stop condition for this layer:",
+        "- The next EVAS result should preserve compile/passable waveform columns and reduce sampled mismatch metrics such as `bad_transitions`, `q_mismatch`, `bit_mismatch`, or `sample_mismatch`.",
+    ])
+    return lines
 
 
 def _post_reset_sample_budget_template(task_id: str, notes: list[str], sample_dir: Path | None) -> list[str]:
@@ -1613,6 +1815,8 @@ def _subtype_specific_repair_policy(task_id: str, notes: list[str], status: str)
             "- Derive Gray output from the binary counter: `gray = binary ^ (binary >> 1)`.",
             "- Do not store Gray bits as packed arrays; drive each output bit from fixed arithmetic tests.",
             "- Update the binary counter exactly once per valid rising clock edge after reset.",
+            "- Before rewriting a compile-clean Gray DUT, inspect reset/enable stimulus: an active-low reset must stay high after release, and enable must stay active during the checker window.",
+            "- A finite `type=pulse val0=0 val1=VDD width=...` on an active-low reset reasserts reset low after `width`; use PWL or a source that holds reset deasserted through `tran stop`.",
             "",
         ])
 
@@ -1893,6 +2097,12 @@ def _targeted_repair_skill(
             post_reset_template_lines = _post_reset_sample_budget_template(task_id, notes, sample_dir)
             if post_reset_template_lines:
                 lines.extend(post_reset_template_lines)
+            reset_hold_lines = _reset_hold_contract_template(task_id, notes, sample_dir)
+            if reset_hold_lines:
+                lines.extend(reset_hold_lines)
+            settle_lines = _clocked_output_settle_template(task_id, notes, sample_dir)
+            if settle_lines:
+                lines.extend(settle_lines)
         elif sim_subtype == "simulation_artifact":
             lines.extend([
                 "",
@@ -1901,6 +2111,12 @@ def _targeted_repair_skill(
                 "- Eliminate compile/runtime blockers before changing behavior logic.",
                 "- Keep interfaces fixed; do not introduce broad rewrites until tran.csv is consistently produced.",
             ])
+            reset_hold_lines = _reset_hold_contract_template(task_id, notes, sample_dir)
+            if reset_hold_lines:
+                lines.extend(reset_hold_lines)
+            settle_lines = _clocked_output_settle_template(task_id, notes, sample_dir)
+            if settle_lines:
+                lines.extend(settle_lines)
         else:
             lines.extend([
                 "",
@@ -1921,6 +2137,12 @@ def _targeted_repair_skill(
             post_reset_template_lines = _post_reset_sample_budget_template(task_id, notes, sample_dir)
             if post_reset_template_lines:
                 lines.extend(post_reset_template_lines)
+            reset_hold_lines = _reset_hold_contract_template(task_id, notes, sample_dir)
+            if reset_hold_lines:
+                lines.extend(reset_hold_lines)
+            settle_lines = _clocked_output_settle_template(task_id, notes, sample_dir)
+            if settle_lines:
+                lines.extend(settle_lines)
     elif status == "FAIL_INFRA":
         # Parse what's actually missing from the notes
         missing_files: list[str] = []
@@ -2151,6 +2373,14 @@ def _targeted_repair_skill(
     post_reset_template_lines = _post_reset_sample_budget_template(task_id, notes, sample_dir)
     if post_reset_template_lines and "# Reusable Repair Skeleton: Post-Reset Sample Budget" not in "\n".join(lines):
         lines.extend(post_reset_template_lines)
+
+    reset_hold_lines = _reset_hold_contract_template(task_id, notes, sample_dir)
+    if reset_hold_lines and "# Reusable Repair Skeleton: Reset Release Must Persist" not in "\n".join(lines):
+        lines.extend(reset_hold_lines)
+
+    settle_lines = _clocked_output_settle_template(task_id, notes, sample_dir)
+    if settle_lines and "# Reusable Repair Skeleton: Clocked Digital Output Settling" not in "\n".join(lines):
+        lines.extend(settle_lines)
 
     # Add diagnosis-translated sections
     if diagnosis_sections:

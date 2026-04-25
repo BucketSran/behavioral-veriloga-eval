@@ -29,3 +29,6 @@ and are intentionally not tracked.
 | 2026-04-25 | qwen3-max-2026-01-23 | full92 | E | 0.2826 | `results/evas-scoring-condition-E-qwen3-max-2026-01-23-full86-2026-04-25-overnight-qwen` | one-round EVAS repair + skill |
 | 2026-04-25 | qwen3-max-2026-01-23 | full92 | F | 0.3043 | `results/evas-scoring-condition-F-qwen3-max-2026-01-23-full86-2026-04-25-overnight-qwen` | three-round EVAS repair, no skill |
 | 2026-04-25 | qwen3-max-2026-01-23 | full92 | G | 0.2717 | `results/evas-scoring-condition-G-qwen3-max-2026-01-23-full86-2026-04-25-overnight-qwen` | rate-limit contaminated; do not compare as a clean model result |
+| 2026-04-25 | kimi-k2.5 | 12-task contract validation | A | 0.1667 | `results/contract-validation-condition-A-kimi-k2.5-2026-04-25` | stricter public prompt contract; A stayed `2/12` |
+| 2026-04-25 | kimi-k2.5 | 12-task contract validation | B | 0.1667 | `results/contract-validation-condition-B-kimi-k2.5-2026-04-25` | stricter public prompt contract; B stayed `2/12` but DUT compile failures dropped from old B `4` to new B `2` on this subset |
+| 2026-04-25 | kimi-k2.5 | single-task F probe | F | 1.0000 | `results/f-repair-settling-gray-final-v2-kimi-2026-04-25` | `gray_counter_4b_smoke` PASS after reset-hold repair and clocked-output settling override `tedge=10p` |

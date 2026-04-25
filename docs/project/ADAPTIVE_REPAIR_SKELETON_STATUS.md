@@ -39,6 +39,8 @@ EVAS closed loop progressively expose more actionable diagnostics:
 | Cross-model Qwen small matrix | `results/adaptive-smallmatrix-qwen-skeleton-v2-2026-04-25` plus `results/adaptive-smallmatrix-qwen-skeleton-v2-remaining-2026-04-25` | `3/16` PASS. PASS cases: `adpll_timer_smoke`, `gain_extraction_smoke`, `mux_4to1_smoke`. Several compile failures improved to observable/behavior but did not reach PASS. |
 | Full92 Kimi A-G overnight matrix | `results/evas-scoring-condition-{A..G}-kimi-k2.5-full86-2026-04-25-overnight-kimi` | Best condition is F: `53/92` PASS (`0.5761`), improving over B checker baseline `43/92` (`0.4674`) by `+10` tasks. |
 | Full92 Qwen A-F overnight matrix | `results/evas-scoring-condition-{A..F}-qwen3-max-2026-01-23-full86-2026-04-25-overnight-qwen` | Best clean condition is D: `29/92` PASS (`0.3152`), improving over B checker baseline `24/92` (`0.2609`) by `+5` tasks. G was rate-limit contaminated. |
+| Strict public-contract validation subset | `results/contract-validation-condition-{A,B}-kimi-k2.5-2026-04-25` | On 12 hard contract-sensitive tasks, A remained `2/12`; B remained `2/12`, but DUT compile failures dropped from old B `4` to new B `2`. Stricter contract improves evaluability, but does not by itself solve behavior repair. |
+| Reset-hold + clocked-settling F probe | `results/f-repair-settling-gray-final-v2-kimi-2026-04-25` | `gray_counter_4b_smoke` reached `PASS` through normal F: baseline `FAIL_DUT_COMPILE` -> round1 `FAIL_SIM_CORRECTNESS` -> round2 `PASS` with `unique_codes=16 bad_transitions=0`. |
 
 ## What Changed Conceptually
 
@@ -46,6 +48,8 @@ EVAS closed loop progressively expose more actionable diagnostics:
   "behavior metric visible" is kept even if the coarse weighted score remains `0.6667`.
 - Observable repair is now treated as a generic layer rather than a task-specific prompt trick.
 - Post-reset sample-window repair is now treated as a generic layer before behavior repair.
+- Reset release persistence and clocked-output settling are now treated as generic layers before
+  deeper behavior rewrites.
 - These changes do not directly inject gold circuit behavior; they make EVAS feedback readable and
   well-sampled so that later behavior repair has a real target.
 
@@ -79,6 +83,44 @@ This skeleton is injected for too-few-sample and too-few-edge failures. It extra
 It asks the model to keep the benchmark transient window when possible and instead move reset, clock,
 and stimulus timing so enough post-reset samples exist.
 
+### `reset_hold_contract_template`
+
+Implemented in `runners/build_repair_prompt.py`.
+
+This skeleton is injected when the candidate has reset-window symptoms or when the current testbench
+contains a reset pulse that deasserts only temporarily and then reasserts before `tran stop`.
+
+The main generic rule is:
+
+- active-low reset sources such as `rstb`/`rst_n`/`rst_ni` must remain high after release,
+- active-high reset sources must remain low after release,
+- finite-width pulse sources are unsafe for reset release unless the deasserted level lasts beyond
+  the full checking window,
+- PWL reset release is preferred for smoke tests.
+
+Evidence: in `gray_counter_4b_smoke`, the repair loop changed the reset source from a finite pulse
+to a PWL that remains deasserted through the full `2us` transient.
+
+### `clocked_output_settle_template`
+
+Implemented in `runners/build_repair_prompt.py`.
+
+This skeleton is injected for clocked digital behavior mismatches such as `bad_transitions`,
+`q_mismatch`, `qb_mismatch`, `bit_mismatch`, or `sample_mismatch`.
+
+The main generic rule is:
+
+- if discrete state behavior is already plausible, do not immediately rewrite the algorithm,
+- first ensure `transition()` outputs settle before the checker samples after a clock edge,
+- when a module exposes `tedge`/`tr`/`tf`, prefer a testbench instance override such as
+  `XDUT (...) module_name tedge=10p` rather than changing the public default parameter,
+- if the same mismatch metric stalls across rounds, the transition-parameter override becomes a
+  mandatory next edit instead of another cosmetic rewrite.
+
+Evidence: in `gray_counter_4b_smoke`, the round1 candidate had the correct Gray sequence but EVAS
+read sampled values below the checker threshold because `1.8V` outputs with `100p` transition had
+not settled at the sample point. Round2 added `tedge=10p` in the DUT instance and reached `PASS`.
+
 ### Behavior skeletons with positive PASS evidence
 
 Implemented in `runners/build_repair_prompt.py` and routed through `runners/diagnosis_translation.py`.
@@ -99,6 +141,7 @@ Implemented in `runners/build_repair_prompt.py` and routed through `runners/diag
 - The observable and post-reset skeletons mostly improve failure-surface progress; final Pass@1 appears only after a targeted behavior skeleton is available.
 - DWA wraparound and sample-hold droop now have positive single-task PASS evidence.
 - Flash ADC and serializer now also have positive single-task PASS evidence.
+- Reset-hold plus clocked-output settling now has positive normal-F evidence on `gray_counter_4b_smoke`.
 - Behavior repair remains the next bottleneck for SAR/ADC-DAC, PFD/BBPD, and PLL-like tasks.
 - Long DWA prompts are slow because the model has to regenerate many files and long bus wiring.
 - SAR/ADC-DAC and PFD show that natural-language repair policies are sometimes too soft; these may
