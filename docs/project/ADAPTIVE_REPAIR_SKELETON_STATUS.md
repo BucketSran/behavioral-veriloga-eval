@@ -199,6 +199,13 @@ Implemented in `runners/build_repair_prompt.py` and routed through `runners/diag
   observability gaps: PLL feedback/lock timing, event-crossing windows, digital sequence/encoding,
   checker timeouts, phase-detector pulses, divider dynamics, and a small number of runtime CSV or
   Spectre syntax failures. See `tables/A_FAILURE_REPAIR_ANALYSIS_2026-04-25.md`.
+- A high-level conservative behavior-only and metric-to-mechanism prompt layer was added in
+  `runners/build_repair_prompt.py`. On the remaining `28` A-failed tasks, one additional task
+  passed: `bbpd_data_edge_alignment_smoke`. The test also exposed five generated round-1
+  regressions from behavior-level candidates back to compile/infra (`bad_bus_output_loop`,
+  `cppll_timer`, `clk_divider`, `pfd_reset_race_smoke`, `cross_sine_precision_smoke`). Best-so-far
+  selection rejected those candidates, but this shows prompt-only guardrails are insufficient; the
+  next improvement should be runner-level behavior-patch constraints or automatic regression repair.
 
 ## Full92 Kimi Matrix Snapshot
 

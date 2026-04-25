@@ -105,3 +105,22 @@ ratio dynamics, and stable digital sequence generation.
 The next optimization should focus on conservative behavior-only repair that preserves a compilable
 candidate, plus targeted skeletons for PLL feedback loops, crossing windows, and sequence/divider
 state machines.
+
+## Follow-Up: High-Level Template v11
+
+After this analysis, a high-level conservative behavior-only and metric-to-mechanism prompt layer was
+tested on the `28` remaining failures:
+
+- Result root: `results/a-failed-remaining28-kimi-high-template-v11-2026-04-25`
+- New PASS: `bbpd_data_edge_alignment_smoke`
+- Net remaining failures changed from `28` to `27`
+- Generated round-1 regressions were observed before best-so-far rejection:
+  `bad_bus_output_loop`, `cppll_timer`, `clk_divider`, `pfd_reset_race_smoke`,
+  and `cross_sine_precision_smoke`
+
+Interpretation: the metric-to-mechanism template can help when the EVAS metric maps cleanly to a
+repairable mechanism, such as `too_few_updn_pulses` to BBPD/PFD pulse generation. However, prompt-only
+conservative wording does not reliably prevent the model from breaking compile/interface layers during
+hard behavior repair. The next policy improvement should move anti-regression from text guidance into
+runner behavior: reject or auto-repair any behavior-layer candidate whose compile/TB/runtime layer gets
+worse, and retry with a narrower patch-style prompt that preserves the previous candidate structure.

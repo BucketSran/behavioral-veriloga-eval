@@ -2000,6 +2000,180 @@ def _pfd_pll_timing_window_section(task_id: str, notes: list[str]) -> list[str]:
     return lines
 
 
+def _conservative_behavior_boundary_section(evas_result: dict) -> list[str]:
+    """Protect a compile-clean candidate from behavior-repair regressions."""
+    status = evas_result.get("status", "")
+    scores = evas_result.get("scores", {})
+    dut_compile = float(scores.get("dut_compile", 0.0))
+    tb_compile = float(scores.get("tb_compile", 0.0))
+    if status != "FAIL_SIM_CORRECTNESS" or dut_compile < 1.0 or tb_compile < 1.0:
+        return []
+
+    notes = evas_result.get("evas_notes") or evas_result.get("notes") or []
+    lowered = "\n".join(str(note) for note in notes).lower()
+    if "tran.csv missing" in lowered or "returncode=1" in lowered or "tb_not_executed" in lowered:
+        return []
+
+    return [
+        "",
+        "# High-Level Repair Template: Conservative Behavior-Only Patch",
+        "",
+        "EVAS already reached a compile-clean and simulation-runnable candidate. From this point, treat the testbench/interface/syntax as a protected anchor.",
+        "",
+        "Mandatory guardrails:",
+        "- Do not change module names, port order, filenames, `ahdl_include` lines, save names, `tran` setup, or stimulus sources.",
+        "- Do not introduce new submodules, new hierarchy, renamed nodes, alternate supplies, or a different clock/reset convention.",
+        "- Do not replace a compile-clean Verilog-A style with SystemVerilog-like constructs.",
+        "- Keep every existing observable column alive. If a column was present in the current `tran.csv`, the next candidate must still expose it.",
+        "- Change only the internal state update, threshold/quantization math, pulse timer, divider counter, or output target assignment that explains the failing metric.",
+        "- If the next edit would require touching both DUT interface and TB, stop and instead make a smaller DUT-internal semantic edit.",
+        "",
+        "Anti-regression checklist before output:",
+        "- No `reg`, `wire`, `always`, packed integer bit assignments, dynamic `V(bus[i])`, conditional `cross`, or conditional `transition()` contributions.",
+        "- All temporary `integer`/`real` declarations remain at module scope.",
+        "- Electrical outputs are driven from target variables by unconditional `transition()` contributions.",
+        "- Reset behavior, clock edge direction, and output bit order are preserved unless the failing metric directly identifies one of them.",
+    ]
+
+
+def _metric_to_mechanism_template(task_id: str, notes: list[str]) -> list[str]:
+    """Map recurring EVAS metric symptoms to generic repair mechanisms."""
+    joined = "\n".join(str(note) for note in notes)
+    lowered = joined.lower()
+    metrics = _extract_metrics_from_notes(notes)
+    task_lower = task_id.lower()
+    lines: list[str] = []
+
+    def has_metric(*names: str) -> bool:
+        return any(name in metrics or f"{name}=" in lowered for name in names)
+
+    def add_header() -> None:
+        if not lines:
+            lines.extend([
+                "",
+                "# High-Level Repair Template: Metric-to-Mechanism Map",
+                "",
+                "Use the EVAS metric as a symptom of a circuit mechanism, not as a string to satisfy cosmetically. Pick the matching mechanism below and make the smallest code change that changes that metric.",
+            ])
+
+    if (
+        has_metric("fb", "ref", "late_edge_ratio", "freq_ratio", "lock_time", "pre_lock_edges", "post_lock_edges")
+        or any(key in task_lower for key in ("adpll", "cppll", "pll"))
+    ):
+        add_header()
+        lines.extend([
+            "",
+            "## Mechanism: PLL/ADPLL feedback and lock path",
+            "",
+            "- `fb=0`, `num=0`, `pre_lock_edges=0`, or `post_lock_edges=0` means the feedback edge generator/divider is not toggling in the checker window.",
+            "- Do not fix this by changing only `lock` thresholds or forcing `lock=1`; first make feedback edges visible.",
+            "- Use one monotonic timer state for oscillator edges: after each timer event, schedule the next strictly future edge.",
+            "- Tie feedback divider toggling to oscillator/DCO edges; do not let `fb_clk` depend on a one-shot initialization event.",
+            "- Ratio errors such as `freq_ratio` far from target mean terminal count/divider ratio is wrong; repair the counter threshold before touching analog control voltage.",
+            "- `late_edge_ratio` failures mean visible edges exist but cadence is wrong; preserve columns and adjust DCO period/divider cadence.",
+        ])
+
+    if (
+        has_metric("up_first", "dn_first", "up_second", "dn_second", "up_pulses_first", "dn_pulses_second", "too_few_updn_pulses", "overlap_frac")
+        or any(key in task_lower for key in ("pfd", "bbpd"))
+    ):
+        add_header()
+        lines.extend([
+            "",
+            "## Mechanism: phase-detector pulse generation",
+            "",
+            "- `up_pulses=0`, `dn_pulses=0`, or `too_few_updn_pulses` means the detector edge-order state is not producing finite pulses.",
+            "- Implement edge-latched pulse state: record which edge arrived first, assert the corresponding output, and clear it after a finite pulse width.",
+            "- Do not leave UP/DN as pure combinational comparisons of current input levels; the checker measures pulses over windows.",
+            "- If overlap is high, shorten pulse width or reset both outputs after both edges are observed; do not remove all pulses.",
+            "- For reset-race tasks, the first and second windows must exercise opposite lead/lag cases; preserve the checker stimulus and repair state timing.",
+        ])
+
+    if (
+        has_metric("transitions", "hi_frac", "complement_err", "invert_match_frac")
+        or any(key in task_lower for key in ("lfsr", "prbs", "digital", "dff", "nrz"))
+    ):
+        add_header()
+        lines.extend([
+            "",
+            "## Mechanism: digital state-machine activity",
+            "",
+            "- `transitions=0` or `hi_frac=0` means the state machine is stuck in reset, never clocked, or never updates its output target.",
+            "- First verify reset releases permanently and the clock crossing direction is correct.",
+            "- Keep one integer state variable as the source of truth; update it exactly once per valid clock edge.",
+            "- For LFSR/PRBS, compute feedback from fixed state bits, shift/update the integer state, and drive output from that state.",
+            "- For differential/complement outputs, drive both outputs from the same state with opposite target values; do not compute them independently.",
+            "- `invert_match_frac=0` usually means polarity is exactly inverted; flip the target assignment, not the whole harness.",
+        ])
+
+    if (
+        has_metric("unique_codes", "vout_span", "avg_abs_err", "code_span", "settled_high")
+        or any(key in task_lower for key in ("adc", "dac", "sar", "cal"))
+    ):
+        add_header()
+        lines.extend([
+            "",
+            "## Mechanism: ADC/DAC/calibration code path",
+            "",
+            "- `unique_codes=1`, `vout_span=0`, or `code_span=0` means the code path is stuck, even if the waveform columns exist.",
+            "- Keep one integer code as the source of truth: sampled input/calibration state -> code -> output bits/DAC voltage.",
+            "- Drive every output bit and analog DAC output from that same code; do not maintain separate unsynchronized bit and voltage states.",
+            "- Check reset release before changing quantization math; a valid code path cannot remain held in reset during the conversion window.",
+            "- Use `floor(...)` and explicit clipping for quantization; avoid `$floor(...)` and declarations inside event blocks.",
+            "- For multi-module ADC/DAC tasks, verify each public module boundary carries activity: sample/hold output changes, ADC bits change, DAC output changes.",
+        ])
+
+    if (
+        has_metric("ratio_code", "in_edges", "out_edges", "period_match", "base", "pre_count", "post_count")
+        or "divider" in task_lower
+    ):
+        add_header()
+        lines.extend([
+            "",
+            "## Mechanism: divider ratio and dynamic switching",
+            "",
+            "- If input/output edges exist but `period_match=0` or counts are wrong, the divider terminal count or ratio decode is wrong.",
+            "- Use one integer edge counter updated on each input clock crossing.",
+            "- Toggle output only when the counter reaches the decoded ratio terminal count, then reset the counter.",
+            "- For ratio-switch tasks, latch the new ratio at a safe clock boundary and avoid mid-cycle counter corruption.",
+            "- Do not repair divider failures by changing the testbench clock if EVAS already reports many input edges.",
+        ])
+
+    if (
+        "behavior_eval_timeout" in lowered
+        or "pathological" in lowered
+        or any(key in task_lower for key in ("bad_bus_output_loop",))
+    ):
+        add_header()
+        lines.extend([
+            "",
+            "## Mechanism: pathological CSV/checker timeout",
+            "",
+            "- A checker timeout after `returncode=0` means the waveform exists but is too pathological or too dense for the Python evaluator.",
+            "- Avoid uncontrolled high-frequency toggling, zero-delay feedback, or output loops that generate excessive events.",
+            "- Keep output transitions bounded by explicit clock/reset events; do not create combinational oscillation through electrical outputs.",
+            "- Reduce unnecessary saved internal nodes; preserve only public checker columns.",
+            "- Repair the state/update mechanism before changing checker-facing names.",
+        ])
+
+    if (
+        "tran.csv missing" in lowered
+        or "returncode=1" in lowered
+        or "dut_not_compiled" in lowered
+    ):
+        add_header()
+        lines.extend([
+            "",
+            "## Mechanism: runtime/interface artifact loss",
+            "",
+            "- `returncode=1` with missing `tran.csv` is not yet a behavior failure; restore a runnable DUT/TB artifact first.",
+            "- Check include filenames, module names, positional instance node counts, ground node consistency, and unsupported Spectre syntax.",
+            "- Do not tune thresholds or counters until the next EVAS run produces a CSV and behavior metrics.",
+        ])
+
+    return lines
+
+
 _SPECIFIC_DIAGNOSTIC_MARKERS = (
     "dynamic_analog_vector_index=",
     "conditional_cross=",
@@ -2238,6 +2412,8 @@ def _targeted_repair_skill(
             for example in subtype_examples:
                 lines.append(f"  - `{example}`")
         lines.extend(_repair_policy_contract(task_id, notes, sim_subtype))
+        lines.extend(_conservative_behavior_boundary_section(evas_result))
+        lines.extend(_metric_to_mechanism_template(task_id, notes))
         lines.extend(_complex_submodule_local_validation_section(task_id, notes))
         lines.extend(_multi_module_interface_harness_sanity_section(task_id, notes))
         lines.extend(_pfd_pll_timing_window_section(task_id, notes))
