@@ -459,7 +459,7 @@ Implementation:
 - EVAS ranks candidates and accepts the first passing candidate or the best
   metric-moving candidate.
 
-Smoke results:
+Initial smoke results:
 
 | Test | Tasks | Eligible | Rescued | Unsupported | Interpretation |
 |---|---:|---:|---:|---:|---|
@@ -475,3 +475,21 @@ Interpretation:
 - The next bottleneck is diagnostic quality for timeout-heavy cases. PFD/DWA
   need either safer checker/runtime handling or richer non-streaming notes
   before they should become formal H repair targets.
+
+Follow-up checker finding:
+
+- `dff_rst_smoke` initially looked like an unresolved sampled-latch repair case.
+- Direct gold validation showed the gold implementation failed the checker too:
+  `q_mismatch=4`.
+- The issue was a checker sampling-window bug: sampling `idx + 3` CSV rows after
+  a clock edge can mean sampling only about 1.9 ps after the edge, before a
+  public `transition(..., 10p)` output has settled.
+- `check_dff_rst` now samples by time about 100 ps after the detected clock
+  edge. The gold now passes with `q_mismatch=0 qb_mismatch=0`.
+
+Updated H evidence after this checker fix:
+
+| Test | Tasks | Best pass | Strict rescues | Note |
+|---|---:|---:|---:|---|
+| G-failed report-only sweep | 41 | 10 re-scored G PASS | 0 | 4 tasks eligible for templates; 37 unsupported. |
+| Eligible-4 H repair | 4 | 4 | 3 | `clk_divider`, `multimod_divider`, and `flash_adc_3b_smoke` are strict H rescues; `dff_rst_smoke` passes at baseline after checker fix. |

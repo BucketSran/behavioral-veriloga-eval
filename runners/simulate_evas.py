@@ -1120,9 +1120,13 @@ def check_dff_rst(rows: list[dict[str, float]]) -> tuple[bool, str]:
     qb_mismatches = 0
     checks = 0
     for idx in edges:
-        settle = min(idx + 3, len(rows) - 1)
+        edge_row = rows[idx]
+        edge_time = edge_row["time"]
+        settle = idx
+        while settle + 1 < len(rows) and rows[settle]["time"] < edge_time + 100e-12:
+            settle += 1
         r = rows[settle]
-        expected_q_hi = False if r["rst"] > vth else (r["d"] > vth)
+        expected_q_hi = False if edge_row["rst"] > vth else (edge_row["d"] > vth)
         q_hi = r["q"] > vth
         qb_hi = r["qb"] > vth
         checks += 1

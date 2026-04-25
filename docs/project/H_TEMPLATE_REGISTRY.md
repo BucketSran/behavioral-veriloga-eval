@@ -35,7 +35,7 @@ only when both conditions hold:
 | Evidence set | Result |
 |---|---|
 | Supported H smoke | `clk_divider`, `multimod_divider`, `flash_adc_3b_smoke` all rescued from G-failed anchors. |
-| Signature-gated H smoke | `3/3` eligible supported tasks rescued; `pfd_deadzone_smoke` and `dwa_ptr_gen_no_overlap_smoke` correctly stayed unsupported because notes were timeout-only or interface-incompatible. See `H_SIGNATURE_GUIDED_SMOKE_2026-04-26.md`. |
+| Signature-gated H smoke | After the DFF checker-window fix, the eligible-4 run reached `4/4` best pass with `3` strict rescues over re-scored G. `dff_rst_smoke` is not counted as a rescue because the re-scored baseline now passes. See `H_SIGNATURE_GUIDED_SMOKE_2026-04-26.md`. |
 | G runtime taxonomy | See `H_FAILURE_TAXONOMY_G_KIMI_2026-04-26.md`; many failures remain `unsupported/behavior_other`, so template coverage must expand carefully. |
 | Speed profile | See `SLOW_TASK_REPORT_G_KIMI_2026-04-26.md`; H validation should use `--resume`, isolated outputs, and contract save policy. |
 
