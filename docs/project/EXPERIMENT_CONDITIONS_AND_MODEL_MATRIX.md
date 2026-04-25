@@ -116,6 +116,8 @@ when refreshing `A/B/C/D/E/F/G/H` numbers:
 - Experimental streaming checkers are disabled by default and require
   `VAEVAS_ENABLE_EXPERIMENTAL_STREAMING_CHECKERS=1`; they should not be used in
   formal scoring unless equivalence is separately validated.
+- Latest partial refresh status is tracked in
+  `docs/project/LATEST_SYSTEM_SNAPSHOT_2026-04-26.md`.
 
 ## 3. Fair Comparison Rules
 
