@@ -51,16 +51,15 @@ paper claims without a refresh.
 | `D` | `results/evas-scoring-condition-D-kimi-k2.5-full86-2026-04-25-overnight-kimi` | 0.5000 | 46/92 | Needs latest-system rerun/rescore. |
 | `E` | `results/evas-scoring-condition-E-kimi-k2.5-full86-2026-04-25-overnight-kimi` | 0.4891 | 45/92 | Needs latest-system rerun/rescore. |
 | `F` | `results/evas-scoring-condition-F-kimi-k2.5-full86-2026-04-25-overnight-kimi` | 0.5761 | 53/92 | Needs latest-system rerun/rescore. |
-| `G` | `results/evas-scoring-condition-G-kimi-k2.5-full86-2026-04-25-overnight-kimi` | 0.5543 | 51/92 | Partially refreshed via G-failed report-only sweep. |
+| `G` | `results/latest-system-score-condition-G-bestround-kimi-2026-04-26` | 0.5326 | 49/92 | Refreshed with formal generated-testbench best-round scorer. |
 
 Important G refresh observation:
 
 - On the 41 historical G-failed tasks, the latest report-only re-score found 10
   tasks that now pass.
-- This does not yet constitute a full refreshed G number because only the
-  historical failures were re-scored in that sweep.
-- A paper-ready `G` refresh should re-score all 92 final/best G artifacts with
-  the latest checker and output isolation.
+- The formal generated-testbench best-round refresh on all 92 tasks gives
+  `49/92`, so the report-only DUT/gold-harness observation should not be
+  interpreted as the formal end-to-end G number.
 
 Repair-artifact scorer status:
 
@@ -71,6 +70,15 @@ Repair-artifact scorer status:
 - This differs from H because current H uses the gold/reference harness for
   DUT-side behavior repair. The distinction is intentional and must be kept
   explicit in claims.
+- Full G refresh summary:
+  - Pass@1: `0.5326`
+  - Pass count: `49/92`
+  - End-to-end: `0.4545`
+  - Spec-to-VA: `0.3889`
+  - Bugfix: `0.7500`
+  - TB generation: `1.0000`
+  - Failure taxonomy: `FAIL_SIM_CORRECTNESS=38`, `FAIL_DUT_COMPILE=3`,
+    `FAIL_OTHER=2`
 
 ## Current H Evidence
 
@@ -103,12 +111,9 @@ makes the re-scored G baseline pass.
 
 ## Next Refresh Work
 
-1. Add or reuse a scorer that can select the final/best round for `D/E/F/G`
-   artifacts rather than only `sample_0`. Initial version:
-   `runners/score_repair_artifacts.py`.
-2. Re-score all 92 Kimi `D/E/F/G` final artifacts with latest checker,
+1. Re-score all 92 Kimi `D/E/F` final artifacts with latest checker,
    isolated outputs, and `--save-policy contract`.
-3. Decide whether to re-run LLM generation for A/B/C if prompt files changed
+2. Decide whether to re-run LLM generation for A/B/C if prompt files changed
    materially since the stored artifacts were generated.
-4. Only after the Kimi refresh is stable, repeat the same refresh protocol for
+3. Only after the Kimi refresh is stable, repeat the same refresh protocol for
    Qwen.
