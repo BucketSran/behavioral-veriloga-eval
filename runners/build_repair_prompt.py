@@ -1844,6 +1844,162 @@ def _subtype_specific_repair_policy(task_id: str, notes: list[str], status: str)
     return lines
 
 
+def _complex_submodule_local_validation_section(task_id: str, notes: list[str]) -> list[str]:
+    """Route complex-system failures through contract-defined local checks.
+
+    This is not a request to expose gold internals.  It asks the model to verify
+    each public block that the task already requires before rewriting the whole
+    integrated system.
+    """
+    task_lower = task_id.lower()
+    joined = "\n".join(str(note) for note in notes).lower()
+    if not any(key in task_lower for key in ("adpll", "sar_adc_dac_weighted_8b")):
+        return []
+    if not any(key in joined for key in ("tran.csv missing", "returncode=1", "late_edge_ratio", "not_enough_edges", "unique_codes", "vout_span", "fb=", "lock_time")):
+        return []
+
+    lines = [
+        "",
+        "# Complex-System Local Validation Skeleton",
+        "",
+        "- Do not repair a complex system as one opaque rewrite. Decompose only along modules/signals already present in the public task contract.",
+        "- Keep exactly one final integrated Spectre testbench; do not output separate standalone mini-testbenches.",
+        "- Before outputting code, perform these local checks mentally and make the smallest edit that fixes the first failed local contract.",
+    ]
+
+    if "sar_adc_dac_weighted_8b" in task_lower:
+        lines.extend([
+            "",
+            "## SAR ADC/DAC local contracts",
+            "",
+            "- `sh_ideal`: `vin_sh` must follow or sample `vin` after `rst_n` is high; it must not stay reset/stuck near zero.",
+            "- `sar_adc_weighted_8b`: on every valid rising `clks` edge after reset, compute exactly one integer code from `vin` or `vin_sh`, clipped to `[0,255]`.",
+            "- `sar_adc_weighted_8b`: drive `dout_7..dout_0` from that one code state; `dout_7` is MSB and `dout_0` is LSB.",
+            "- `dac_weighted_8b`: decode the same bit order and drive `vout = code/255*vdd` inside `[0,vdd]`.",
+            "- Integrated check: if `tran.csv missing`, repair module interfaces and testbench wiring before changing quantization math.",
+            "- Integrated check: if CSV exists but code coverage is low, keep the harness fixed and repair only the sampled-code-to-bit-to-DAC path.",
+        ])
+    if "adpll" in task_lower:
+        lines.extend([
+            "",
+            "## ADPLL local contracts",
+            "",
+            "- Reference stimulus: `ref_clk` must provide many visible 50 MHz-class edges over the fixed `tran` window.",
+            "- DCO edge generator: `dco_clk` must keep toggling from a timer-driven next-edge state; it must not stall after initialization.",
+            "- Feedback divider: `fb_clk` must be derived from DCO/divider edges and must have nonzero late-window edges.",
+            "- Control/lock path: `vctrl_mon` should remain in range and change consistently with phase/frequency error; `lock` should assert only after measured edge cadence is stable.",
+            "- Integrated check: if EVAS reports `fb=0` or `not_enough_edges`, repair DCO/divider event scheduling before changing lock thresholds.",
+            "- Integrated check: if EVAS reports `late_edge_ratio`, preserve the observable columns and adjust feedback cadence/divider ratio first.",
+        ])
+    return lines
+
+
+def _multi_module_interface_harness_sanity_section(task_id: str, notes: list[str]) -> list[str]:
+    """Recover runtime CSV failures caused by module/testbench mismatch."""
+    task_lower = task_id.lower()
+    joined = "\n".join(str(note) for note in notes).lower()
+    if not any(key in joined for key in ("tran.csv missing", "returncode=1", "dut_not_compiled")):
+        return []
+    if not any(key in task_lower for key in ("gain_extraction", "sar_adc_dac_weighted_8b", "dwa_ptr_gen")):
+        return []
+
+    lines = [
+        "",
+        "# Multi-Module Interface/Harness Sanity Skeleton",
+        "",
+        "- Treat this as a runtime/harness recovery task until EVAS produces `tran.csv`.",
+        "- Do not tune numeric behavior while `returncode=1` or `tran.csv missing` remains.",
+        "- Every `ahdl_include` must name a Verilog-A file emitted in this answer; every included file must declare the same module name as its filename stem.",
+        "- Every instance must use Spectre-safe positional syntax: `Xname (node1 node2 ...) module_name params...`.",
+        "- Do not use named-port instance syntax, nested vector groups, or extra parentheses inside the node list.",
+        "- If a Verilog-A port is a bus, expand it to scalar nodes positionally in the same order expected by the task.",
+        "- Use exactly one `simulator lang=spectre`, one `tran`, and one canonical `save` list with public scalar names.",
+        "- Use node `0` as ground consistently; avoid mixing `gnd`, `vss`, and `0` unless the task module explicitly has a `vss` port and every source is wired consistently.",
+    ]
+
+    if "gain_extraction" in task_lower:
+        lines.extend([
+            "",
+            "## Gain-extraction required interface sanity",
+            "",
+            "- Emit exactly these DUT modules and no estimator module: `vin_src`, `lfsr`, `dither_adder`, `gain_amp_fixed`.",
+            "- Do not create or instantiate `gain_estimator`; the checker estimates gain from saved waveforms.",
+            "- Instantiate `vin_src` with ports `(clk rst_n vinp vinn)`.",
+            "- Instantiate `lfsr` with ports `(dpn vdd vss clk en rst_n)`.",
+            "- Instantiate `dither_adder` with ports `(vinp vinn dpn vdin_p vdin_n)`.",
+            "- Instantiate `gain_amp_fixed` with ports `(vdin_p vdin_n vamp_p vamp_n)`.",
+            "- Keep `rst_n` deasserted high and `en` asserted during the measurement window.",
+            "- Save exactly `vinp vinn vamp_p vamp_n` for the public checker columns.",
+        ])
+    if "sar_adc_dac_weighted_8b" in task_lower:
+        lines.extend([
+            "",
+            "## SAR ADC/DAC required interface sanity",
+            "",
+            "- Emit exactly `sar_adc_weighted_8b`, `dac_weighted_8b`, `sh_ideal`, and one top-level testbench.",
+            "- ADC instance order is `(vin clks rst_n dout_7 dout_6 dout_5 dout_4 dout_3 dout_2 dout_1 dout_0)` if scalar-expanded from `[7:0]` MSB-to-LSB.",
+            "- DAC instance order is `(dout_7 dout_6 dout_5 dout_4 dout_3 dout_2 dout_1 dout_0 vout)` if scalar-expanded from `[7:0]` MSB-to-LSB.",
+            "- SH instance order is `(vin clks vdd vss rst_n vin_sh)`.",
+            "- Save `vin vin_sh clks rst_n vout dout_7 dout_6 dout_5 dout_4 dout_3 dout_2 dout_1 dout_0`.",
+        ])
+    if "dwa_ptr_gen" in task_lower:
+        lines.extend([
+            "",
+            "## DWA pointer-generator required interface sanity",
+            "",
+            "- If using `v2b_4b`, include and instantiate it with plain scalar nodes; otherwise drive `code_3..code_0` directly.",
+            "- The DWA DUT node list must be flat, with no nested groups: `Xdut (clk_i rst_ni code_3 code_2 code_1 code_0 cell_en_15 ... cell_en_0 ptr_15 ... ptr_0) dwa_ptr_gen`.",
+            "- Do not write `dwa_ptr_gen dut (...)` and do not place `(code3 code2 code1 code0)` as a grouped argument inside the node list.",
+            "- Save `clk_i rst_ni ptr_15..ptr_0 cell_en_15..cell_en_0` as plain scalar names.",
+            "- Keep reset deasserted high through the full checking window.",
+        ])
+    return lines
+
+
+def _pfd_pll_timing_window_section(task_id: str, notes: list[str]) -> list[str]:
+    """Force timing-window failures to repair stimulus/check windows first."""
+    task_lower = task_id.lower()
+    joined = "\n".join(str(note) for note in notes).lower()
+    if not any(key in task_lower for key in ("pfd", "pll", "adpll", "cppll")):
+        return []
+    if not any(key in joined for key in ("behavior_eval_timeout", "late_edge_ratio", "not_enough_edges", "freq_ratio", "lock_time", "up_first", "dn_second", "overlap_frac")):
+        return []
+
+    lines = [
+        "",
+        "# PFD/PLL Timing-Window Skeleton",
+        "",
+        "- Treat this as a timing-window repair, not a broad rewrite.",
+        "- The generated comments are not enough: the actual voltage sources and state machines must create the checker-visible windows.",
+        "- Preserve public columns and fixed `tran` settings unless the current failure is `tran.csv missing`.",
+    ]
+
+    if "pfd" in task_lower:
+        lines.extend([
+            "",
+            "## PFD reset-race windows",
+            "",
+            "- Create two explicit comparison windows in the actual stimulus, not only in comments.",
+            "- First window: REF rising edges lead DIV rising edges by a small positive delta, so UP pulses are expected.",
+            "- Second window: DIV rising edges lead REF rising edges by a small positive delta, so DN pulses are expected.",
+            "- A single pair of periodic pulse sources with fixed delays cannot implement a lead/lag swap; use PWL edge lists or two gated pulse segments.",
+            "- Keep UP/DN pulse widths finite and easy to sample, for example around `0.5n` to `2n`; avoid `1p` transition edges unless the task explicitly requires picosecond resolution.",
+            "- Do not schedule timers at stale release times such as zero; only arm a release timer immediately after asserting a pulse.",
+            "- Success shape: first window has visible UP and near-zero DN, second window has visible DN and near-zero UP, and `overlap_frac` remains near zero.",
+        ])
+    if "pll" in task_lower:
+        lines.extend([
+            "",
+            "## PLL/ADPLL edge-count windows",
+            "",
+            "- Ensure both `ref_clk` and `fb_clk` have enough late-window edges; `fb=0` means the DCO/divider scheduling is broken, not merely the lock threshold.",
+            "- Use monotonic `next_edge_time` style timer scheduling for DCO/feedback edges; after each timer event, schedule the next future event.",
+            "- Keep feedback divider state tied to DCO edges so `fb_clk` cannot stop while `dco_clk` continues.",
+            "- Tune lock only after edge cadence is visible; a high `lock` with wrong `late_edge_ratio` is still a behavior failure.",
+        ])
+    return lines
+
+
 _SPECIFIC_DIAGNOSTIC_MARKERS = (
     "dynamic_analog_vector_index=",
     "conditional_cross=",
@@ -2082,6 +2238,9 @@ def _targeted_repair_skill(
             for example in subtype_examples:
                 lines.append(f"  - `{example}`")
         lines.extend(_repair_policy_contract(task_id, notes, sim_subtype))
+        lines.extend(_complex_submodule_local_validation_section(task_id, notes))
+        lines.extend(_multi_module_interface_harness_sanity_section(task_id, notes))
+        lines.extend(_pfd_pll_timing_window_section(task_id, notes))
         if sim_subtype == "observability_contract":
             lines.extend([
                 "",

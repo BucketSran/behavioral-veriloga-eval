@@ -47,6 +47,9 @@ EVAS closed loop progressively expose more actionable diagnostics:
 | Standalone adaptive v4 continuation | `results/adaptive-smallmatrix-kimi-skeleton-v4-continue-2026-04-25` | `2/10` PASS on v3 failures: `cppll_tracking_smoke` and `sample_hold_droop_smoke`. This supports behavior-layer patience greater than one retry. |
 | Standalone adaptive v5 anchor guard | `results/adaptive-smallmatrix-kimi-skeleton-v5-anchor-guard-2026-04-25` | `1/7` PASS on targeted failures: `serializer_8b_smoke`. More importantly, it confirmed that failed/regressed candidates should not become the next repair anchor. |
 | Standalone adaptive v6 candidate memory | `results/adaptive-smallmatrix-kimi-skeleton-v6-memory-2026-04-25` | `11/16` PASS. The runner selected the best EVAS-verified round-0 candidate from v2/v3/v4/v5 roots, then repaired only non-PASS tasks. This is the best current Hard16 method-development result. |
+| Standalone adaptive v7 structural skeletons | `results/adaptive-smallmatrix-kimi-skeleton-v7-structural-2026-04-25` | `1/5` PASS on the remaining hard failures. `dwa_ptr_gen_smoke` reached PASS after multi-module interface/harness sanity guidance. |
+| Standalone adaptive v8 runtime-interface routing | `results/adaptive-smallmatrix-kimi-skeleton-v8-runtime-interface-2026-04-25` | No additional PASS, but `sar_adc_dac_weighted_8b_smoke` progressed from runtime artifact loss (`tran.csv missing`) to checker-visible behavior failure (`unique_codes=1`, `vout_span=0.000`). |
+| Standalone adaptive v10 memory summary | `results/adaptive-smallmatrix-kimi-skeleton-v10-memory-summary-2026-04-25` | `12/16` PASS after merging v6/v7/v8/v9 best candidates. This is the best current Hard16 method-development result. |
 
 ## What Changed Conceptually
 
@@ -60,6 +63,14 @@ EVAS closed loop progressively expose more actionable diagnostics:
   repairing from the best EVAS-ranked candidate, which prevents one bad rewrite from compounding.
 - Candidate memory is now part of the experimental standalone adaptive loop. If prior EVAS-verified
   roots exist, the runner can select the best round-0 candidate before spending new LLM calls.
+- Complex systems now receive a local-validation skeleton keyed to public task modules/signals.
+  For SAR ADC/DAC it checks `sh_ideal`, ADC code generation, DAC decode, and top-level code path.
+  For ADPLL it checks reference edges, DCO scheduling, feedback divider edges, and lock/control coupling.
+- Multi-module runtime failures now receive an interface/harness sanity skeleton, and `tran.csv missing`
+  / `returncode=1` is routed to `runtime_interface` instead of observable-only repair. This avoids
+  freezing broken DUT module declarations when the DUT/TB interface is jointly inconsistent.
+- PFD/PLL timing-window failures now receive a timing-window skeleton that distinguishes waveform-window
+  construction from generic behavior repair.
 - These changes do not directly inject gold circuit behavior; they make EVAS feedback readable and
   well-sampled so that later behavior repair has a real target.
 
@@ -159,8 +170,14 @@ Implemented in `runners/build_repair_prompt.py` and routed through `runners/diag
   should later be migrated carefully into main F/G after a clean ablation, because v6 is a method-development
   result rather than a formal A/B/C/D/E/F/G condition.
 - Behavior repair remains the next bottleneck for SAR/ADC-DAC, PFD/BBPD, and PLL-like tasks.
-- The remaining Hard16 failures after v6 are `adpll_timer_smoke`, `dwa_ptr_gen_smoke`,
-  `gain_extraction_smoke`, `pfd_reset_race_smoke`, and `sar_adc_dac_weighted_8b_smoke`.
+- The remaining Hard16 failures after v10 are `adpll_timer_smoke`, `gain_extraction_smoke`,
+  `pfd_reset_race_smoke`, and `sar_adc_dac_weighted_8b_smoke`.
+- `dwa_ptr_gen_smoke` reached PASS in v7, validating the multi-module interface/harness sanity skeleton
+  for at least one previously `tran.csv missing` case.
+- `sar_adc_dac_weighted_8b_smoke` did not PASS, but v8 converted it from runtime artifact loss to
+  behavior-level metrics. The next skeleton should target the sampled-code-to-bit-to-DAC path directly.
+- `gain_extraction_smoke` and `pfd_reset_race_smoke` still regress under natural-language repair.
+  They likely need structured code/harness templates rather than broader prose guidance.
 - Long DWA prompts are slow because the model has to regenerate many files and long bus wiring.
 - SAR/ADC-DAC and PFD show that natural-language repair policies are sometimes too soft; these may
   need structured code skeletons or verifier-harness templates.

@@ -177,6 +177,8 @@ def _classify_repair_layer(result: dict) -> str:
         return "compile_dut"
     if tb_compile < 1.0:
         return "compile_tb"
+    if "tran.csv missing" in notes or "returncode=1" in notes or "tb_not_executed" in notes:
+        return "runtime_interface"
     if any(marker in notes for marker in _OBSERVABLE_NOTE_MARKERS):
         return "observable"
     if result.get("status") == "FAIL_SIM_CORRECTNESS":
@@ -389,6 +391,15 @@ def _layer_policy_section(layer: str, task_dir: Path) -> str:
             "The current failure is an observable/stimulus problem, not a DUT behavior problem. The runner will preserve "
             "the existing Verilog-A DUT files and evaluate only your repaired Spectre testbench/harness. Focus on reset "
             "release, transient stop, required save names, include paths, and stimulus coverage. Do not redesign DUT logic.\n"
+        )
+    if layer == "runtime_interface":
+        return (
+            "\n\n# Layered Only-Repair Policy: Runtime Interface/Harness\n"
+            "The current failure is `returncode=1`, `tran.csv missing`, or equivalent runtime artifact loss after strict "
+            "preflight. This is usually a coupled DUT/TB interface problem. Repair the smallest consistent set of "
+            "Verilog-A module declarations, file names, ahdl_include lines, Spectre instance node lists, reset/enable "
+            "sources, and save/tran setup needed to produce a stable `tran.csv`. Do not tune semantic constants until "
+            "the waveform CSV exists.\n"
         )
     if layer == "behavior":
         harness_params = _gold_harness_parameter_names(task_dir)
