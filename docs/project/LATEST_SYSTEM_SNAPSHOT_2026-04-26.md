@@ -12,16 +12,21 @@ system changes:
 - DFF checker sampling-window fix
 - signature-gated condition-H prototype
 
-## Refreshed Kimi Baselines
+## Refreshed Kimi A-G Formal Matrix
 
 These runs re-score existing Kimi artifacts with the latest EVAS/checker system.
-They do not call the LLM again.
+They do not call the LLM again. `A/B/C` use `score.py`; `D/E/F/G` use
+`score_repair_artifacts.py` to select the best observed repair round.
 
 | Condition | Result dir | Pass@1 | Pass count | Notes |
 |---|---|---:|---:|---|
-| `A` | `results/latest-system-score-condition-A-kimi-2026-04-26` | 0.1957 | 18/92 | Raw prompt artifact, latest checker/save-policy. |
-| `B` | `results/latest-system-score-condition-B-kimi-2026-04-26` | 0.2717 | 25/92 | Checker-transparent artifact, latest checker/save-policy. |
-| `C` | `results/latest-system-score-condition-C-kimi-2026-04-26` | 0.2717 | 25/92 | Checker + Skill artifact, latest checker/save-policy. |
+| `A` | `results/latest-system-score-condition-A-kimi-2026-04-26` | 0.1957 | 18/92 | Raw prompt artifact. |
+| `B` | `results/latest-system-score-condition-B-kimi-2026-04-26` | 0.2717 | 25/92 | Checker-transparent artifact. |
+| `C` | `results/latest-system-score-condition-C-kimi-2026-04-26` | 0.2717 | 25/92 | Checker + Skill artifact. |
+| `D` | `results/latest-system-score-condition-D-bestround-kimi-2026-04-26` | 0.5217 | 48/92 | Single-round EVAS, no Skill. |
+| `E` | `results/latest-system-score-condition-E-bestround-kimi-2026-04-26` | 0.5109 | 47/92 | Single-round EVAS + Skill. |
+| `F` | `results/latest-system-score-condition-F-bestround-kimi-2026-04-26` | 0.6087 | 56/92 | Multi-round EVAS, no Skill. |
+| `G` | `results/latest-system-score-condition-G-bestround-kimi-2026-04-26` | 0.5326 | 49/92 | Multi-round EVAS + Skill. |
 
 Family rates:
 
@@ -30,6 +35,10 @@ Family rates:
 | `A` | 0.0909 | 0.1667 | 0.5000 | 0.5455 |
 | `B` | 0.1636 | 0.2778 | 0.6250 | 0.5455 |
 | `C` | 0.1455 | 0.2778 | 0.7500 | 0.5455 |
+| `D` | 0.4182 | 0.4444 | 0.7500 | 1.0000 |
+| `E` | 0.4182 | 0.4444 | 0.6250 | 1.0000 |
+| `F` | 0.5273 | 0.5556 | 0.7500 | 1.0000 |
+| `G` | 0.4545 | 0.3889 | 0.7500 | 1.0000 |
 
 Failure taxonomy:
 
@@ -38,20 +47,24 @@ Failure taxonomy:
 | `A` | 48 | 20 | 5 | 1 |
 | `B` | 43 | 18 | 5 | 1 |
 | `C` | 41 | 19 | 5 | 2 |
+| `D` | 41 | 1 | 0 | 2 |
+| `E` | 39 | 3 | 1 | 2 |
+| `F` | 33 | 1 | 0 | 2 |
+| `G` | 38 | 3 | 0 | 2 |
 
-## Repair Conditions Status
+## Repair Conditions Notes
 
 `D/E/F/G` historical full92 Kimi results exist, but they were produced before
 the latest DFF checker-window fix and before the final signature-H framing.
-They should remain useful for trend reading, but should not be mixed into final
-paper claims without a refresh.
+They remain useful for trend reading, but the refreshed table above should be
+treated as the current Kimi formal snapshot.
 
 | Condition | Historical result | Pass@1 | Pass count | Refresh status |
 |---|---|---:|---:|---|
-| `D` | `results/evas-scoring-condition-D-kimi-k2.5-full86-2026-04-25-overnight-kimi` | 0.5000 | 46/92 | Needs latest-system rerun/rescore. |
-| `E` | `results/evas-scoring-condition-E-kimi-k2.5-full86-2026-04-25-overnight-kimi` | 0.4891 | 45/92 | Needs latest-system rerun/rescore. |
-| `F` | `results/evas-scoring-condition-F-kimi-k2.5-full86-2026-04-25-overnight-kimi` | 0.5761 | 53/92 | Needs latest-system rerun/rescore. |
-| `G` | `results/latest-system-score-condition-G-bestround-kimi-2026-04-26` | 0.5326 | 49/92 | Refreshed with formal generated-testbench best-round scorer. |
+| `D` | `results/evas-scoring-condition-D-kimi-k2.5-full86-2026-04-25-overnight-kimi` | 0.5000 | 46/92 | Latest refresh is 48/92. |
+| `E` | `results/evas-scoring-condition-E-kimi-k2.5-full86-2026-04-25-overnight-kimi` | 0.4891 | 45/92 | Latest refresh is 47/92. |
+| `F` | `results/evas-scoring-condition-F-kimi-k2.5-full86-2026-04-25-overnight-kimi` | 0.5761 | 53/92 | Latest refresh is 56/92. |
+| `G` | `results/evas-scoring-condition-G-kimi-k2.5-full86-2026-04-25-overnight-kimi` | 0.5543 | 51/92 | Latest refresh is 49/92. |
 
 Important G refresh observation:
 
@@ -70,15 +83,10 @@ Repair-artifact scorer status:
 - This differs from H because current H uses the gold/reference harness for
   DUT-side behavior repair. The distinction is intentional and must be kept
   explicit in claims.
-- Full G refresh summary:
-  - Pass@1: `0.5326`
-  - Pass count: `49/92`
-  - End-to-end: `0.4545`
-  - Spec-to-VA: `0.3889`
-  - Bugfix: `0.7500`
-  - TB generation: `1.0000`
-  - Failure taxonomy: `FAIL_SIM_CORRECTNESS=38`, `FAIL_DUT_COMPILE=3`,
-    `FAIL_OTHER=2`
+- Key observation: `F` is currently the strongest formal Kimi condition
+  (`56/92`), while `G` drops to `49/92`. Skill injection is not automatically
+  beneficial in the current repair loop and may introduce less compatible
+  implementation choices.
 
 ## Current H Evidence
 
@@ -111,9 +119,7 @@ makes the re-scored G baseline pass.
 
 ## Next Refresh Work
 
-1. Re-score all 92 Kimi `D/E/F` final artifacts with latest checker,
-   isolated outputs, and `--save-policy contract`.
-2. Decide whether to re-run LLM generation for A/B/C if prompt files changed
+1. Decide whether to re-run LLM generation for A/B/C if prompt files changed
    materially since the stored artifacts were generated.
-3. Only after the Kimi refresh is stable, repeat the same refresh protocol for
+2. Only after the Kimi refresh is stable, repeat the same refresh protocol for
    Qwen.
