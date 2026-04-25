@@ -117,9 +117,47 @@ Strict H rescues:
 `dff_rst_smoke` is not counted as an H rescue because the latest checker fix
 makes the re-scored G baseline pass.
 
+## Refreshed Qwen A-G Formal Matrix
+
+These are the matching latest-system scores for `qwen3-max-2026-01-23`.
+
+| Condition | Result dir | Pass@1 | Pass count | Notes |
+|---|---|---:|---:|---|
+| `A` | `results/latest-system-score-condition-A-qwen-2026-04-26` | 0.2717 | 25/92 | Raw prompt artifact. |
+| `B` | `results/latest-system-score-condition-B-qwen-2026-04-26` | 0.2500 | 23/92 | Checker-transparent artifact. |
+| `C` | `results/latest-system-score-condition-C-qwen-2026-04-26` | 0.2717 | 25/92 | Checker + Skill artifact. |
+| `D` | `results/latest-system-score-condition-D-bestround-qwen-2026-04-26` | 0.3043 | 28/92 | Single-round EVAS, no Skill. |
+| `E` | `results/latest-system-score-condition-E-bestround-qwen-2026-04-26` | 0.2717 | 25/92 | Single-round EVAS + Skill. |
+| `F` | `results/latest-system-score-condition-F-bestround-qwen-2026-04-26` | 0.2935 | 27/92 | Multi-round EVAS, no Skill. |
+| `G` | `results/latest-system-score-condition-G-bestround-qwen-2026-04-26` | 0.2500 | 23/92 | Multi-round EVAS + Skill; artifact quality needs review. |
+
+Family rates:
+
+| Condition | End-to-end | Spec-to-VA | Bugfix | TB generation |
+|---|---:|---:|---:|---:|
+| `A` | 0.1091 | 0.2222 | 0.6250 | 0.9091 |
+| `B` | 0.0909 | 0.1667 | 0.7500 | 0.8182 |
+| `C` | 0.1091 | 0.2778 | 0.5000 | 0.9091 |
+| `D` | 0.1273 | 0.2778 | 0.8750 | 0.8182 |
+| `E` | 0.1091 | 0.1667 | 0.8750 | 0.8182 |
+| `F` | 0.1273 | 0.2222 | 0.8750 | 0.8182 |
+| `G` | 0.0909 | 0.1667 | 0.7500 | 0.8182 |
+
+Key Qwen observations:
+
+- Qwen does not show the large Kimi-style closed-loop lift. Best refreshed Qwen
+  condition is `D` at `28/92`.
+- Qwen failures are much more compile/TB-heavy in `A/B/C`, so EVAS behavioral
+  repair has less room to help unless compile/harness stability improves first.
+- Qwen `G` contains many generated repair artifacts that score as infra or
+  compile failures. Treat this as an artifact-quality warning before using it
+  for strong model comparisons.
+
 ## Next Refresh Work
 
 1. Decide whether to re-run LLM generation for A/B/C if prompt files changed
    materially since the stored artifacts were generated.
-2. Only after the Kimi refresh is stable, repeat the same refresh protocol for
-   Qwen.
+2. Inspect Qwen `G` repair artifacts to distinguish real model limitation from
+   generated artifact/runner incompleteness.
+3. Decide whether H should be evaluated first on Kimi only, or also run on a
+   small Qwen subset after artifact quality is checked.
