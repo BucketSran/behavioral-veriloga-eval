@@ -41,6 +41,7 @@ EVAS closed loop progressively expose more actionable diagnostics:
 | Full92 Qwen A-F overnight matrix | `results/evas-scoring-condition-{A..F}-qwen3-max-2026-01-23-full86-2026-04-25-overnight-qwen` | Best clean condition is D: `29/92` PASS (`0.3152`), improving over B checker baseline `24/92` (`0.2609`) by `+5` tasks. G was rate-limit contaminated. |
 | Strict public-contract validation subset | `results/contract-validation-condition-{A,B}-kimi-k2.5-2026-04-25` | On 12 hard contract-sensitive tasks, A remained `2/12`; B remained `2/12`, but DUT compile failures dropped from old B `4` to new B `2`. Stricter contract improves evaluability, but does not by itself solve behavior repair. |
 | Reset-hold + clocked-settling F probe | `results/f-repair-settling-gray-final-v2-kimi-2026-04-25` | `gray_counter_4b_smoke` reached `PASS` through normal F: baseline `FAIL_DUT_COMPILE` -> round1 `FAIL_SIM_CORRECTNESS` -> round2 `PASS` with `unique_codes=16 bad_transitions=0`. |
+| Standard F latest-policy hard small matrix | `results/f-smallmatrix-kimi-latest-policy-strict-2026-04-25` | `4/16` PASS. This matches old full92 F on the same subset but underperforms adaptive layered-only `9/16`, showing that skeleton text alone is weaker than explicit layer freezing/routing. |
 
 ## What Changed Conceptually
 
@@ -142,6 +143,9 @@ Implemented in `runners/build_repair_prompt.py` and routed through `runners/diag
 - DWA wraparound and sample-hold droop now have positive single-task PASS evidence.
 - Flash ADC and serializer now also have positive single-task PASS evidence.
 - Reset-hold plus clocked-output settling now has positive normal-F evidence on `gray_counter_4b_smoke`.
+- Standard F with latest skeletons did not improve the 16-task hard subset aggregate over old F (`4/16` vs `4/16`).
+  The stronger result remains adaptive layered-only repair (`9/16`), so the next implementation priority is to
+  migrate layer freezing/routing into the main F/G runner rather than only adding more natural-language skeletons.
 - Behavior repair remains the next bottleneck for SAR/ADC-DAC, PFD/BBPD, and PLL-like tasks.
 - Long DWA prompts are slow because the model has to regenerate many files and long bus wiring.
 - SAR/ADC-DAC and PFD show that natural-language repair policies are sometimes too soft; these may
