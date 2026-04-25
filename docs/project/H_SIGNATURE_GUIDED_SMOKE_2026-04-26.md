@@ -8,6 +8,14 @@ This smoke test checks the current condition-H direction:
 
 `G artifact -> EVAS rescore -> failure signature -> module/interface gate -> bounded template candidates -> EVAS fitness selection`
 
+Important scope:
+
+- The current H prototype is a DUT-side repair experiment.
+- It uses the benchmark gold/reference testbench as the behavior harness.
+- Therefore, H strict rescues show that EVAS-guided mechanism search can repair
+  DUT behavior left unsolved by G, but they do not yet prove full end-to-end
+  generated-testbench closure.
+
 The key methodological constraint is that templates are not selected by task id.
 A template may run only when the EVAS failure notes and the DUT interface both
 match a reusable mechanism family.
@@ -198,3 +206,5 @@ Interpretation:
   strict rescues among the 41 historical G-failed tasks after re-scoring.
 - `dff_rst_smoke` should not be counted as an H rescue; it is a checker-window
   correction that turns the existing artifact/gold behavior into PASS.
+- A separate formal end-to-end repair-artifact scorer is now needed to quantify
+  how often repaired DUT behavior also transfers through generated testbenches.

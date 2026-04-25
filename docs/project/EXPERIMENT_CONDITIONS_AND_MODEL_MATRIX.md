@@ -85,6 +85,9 @@ Important scope note:
 - Starts from the best available `G` artifact for each task.
 - Re-scores the exact artifact before attempting repair; stale historical G
   metadata is not trusted for rescue counts.
+- Current prototype is DUT-side: it uses the benchmark gold/reference testbench
+  as the behavior harness. End-to-end generated-testbench closure should be
+  reported separately.
 - If the re-scored `G` artifact fails, the runner first classifies the EVAS
   failure notes, then checks the generated DUT module/interface signature.
 - A bounded mechanism-template branch may run only when both the failure

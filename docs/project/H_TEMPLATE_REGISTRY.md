@@ -4,6 +4,10 @@ Condition H is defined as:
 
 `G + signature-gated mechanism templates + EVAS candidate selection`
 
+Current implementation scope: DUT-side repair using the benchmark
+gold/reference testbench as the behavior harness. Full end-to-end
+generated-testbench closure must be measured separately.
+
 The template policy must not trigger from task id alone. A template is eligible
 only when both conditions hold:
 

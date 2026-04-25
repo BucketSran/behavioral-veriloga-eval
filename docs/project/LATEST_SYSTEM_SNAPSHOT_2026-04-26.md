@@ -62,11 +62,26 @@ Important G refresh observation:
 - A paper-ready `G` refresh should re-score all 92 final/best G artifacts with
   the latest checker and output isolation.
 
+Repair-artifact scorer status:
+
+- Added `runners/score_repair_artifacts.py` to re-score all available
+  `sample_0` / `sample_0_roundN` directories and select the best observed round.
+- A smoke on `clk_divider`, `dff_rst_smoke`, and `flash_adc_3b_smoke` under the
+  formal generated-testbench path produced `0/3` pass.
+- This differs from H because current H uses the gold/reference harness for
+  DUT-side behavior repair. The distinction is intentional and must be kept
+  explicit in claims.
+
 ## Current H Evidence
 
 Condition H is now:
 
 `G + EVAS failure signature + module/interface signature + bounded template candidates + EVAS fitness selection`
+
+Current H scope:
+
+- DUT-side repair with the benchmark gold/reference testbench.
+- Not yet a full end-to-end generated-testbench closure result.
 
 Latest H evidence:
 
@@ -89,11 +104,11 @@ makes the re-scored G baseline pass.
 ## Next Refresh Work
 
 1. Add or reuse a scorer that can select the final/best round for `D/E/F/G`
-   artifacts rather than only `sample_0`.
+   artifacts rather than only `sample_0`. Initial version:
+   `runners/score_repair_artifacts.py`.
 2. Re-score all 92 Kimi `D/E/F/G` final artifacts with latest checker,
    isolated outputs, and `--save-policy contract`.
 3. Decide whether to re-run LLM generation for A/B/C if prompt files changed
    materially since the stored artifacts were generated.
 4. Only after the Kimi refresh is stable, repeat the same refresh protocol for
    Qwen.
-
