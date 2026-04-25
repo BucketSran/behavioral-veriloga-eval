@@ -37,6 +37,7 @@ EVAS closed loop progressively expose more actionable diagnostics:
 | PFD pulse-window skeleton | `results/adaptive-pfd-pulsewidth-kimi-2026-04-25` | No PASS yet; best candidate remains close but fails with `up_first=0.0975` above the checker upper bound `0.08`. New candidates can regress to compile/timeout. |
 | Accumulated skeleton small matrix | `results/adaptive-smallmatrix-kimi-skeleton-v2-2026-04-25` | `9/16` PASS, improved over the previous `5/16` layered-only small matrix. New matrix PASS cases include comparator hysteresis, DWA wraparound, flash ADC, and serializer. |
 | Cross-model Qwen small matrix | `results/adaptive-smallmatrix-qwen-skeleton-v2-2026-04-25` plus `results/adaptive-smallmatrix-qwen-skeleton-v2-remaining-2026-04-25` | `3/16` PASS. PASS cases: `adpll_timer_smoke`, `gain_extraction_smoke`, `mux_4to1_smoke`. Several compile failures improved to observable/behavior but did not reach PASS. |
+| Full92 Kimi A-G overnight matrix | `results/evas-scoring-condition-{A..G}-kimi-k2.5-full86-2026-04-25-overnight-kimi` | Best condition is F: `53/92` PASS (`0.5761`), improving over B checker baseline `43/92` (`0.4674`) by `+10` tasks. |
 
 ## What Changed Conceptually
 
@@ -104,6 +105,49 @@ Implemented in `runners/build_repair_prompt.py` and routed through `runners/diag
 - Small-matrix reproducibility depends on the round-0 anchor. For example, sample-hold passed in a
   targeted single-task run but did not pass in the `16`-task matrix when started from the older matrix
   round-1 anchor.
+
+## Full92 Kimi Matrix Snapshot
+
+Run date: `2026-04-25`
+
+Local result roots:
+
+- `results/evas-scoring-condition-A-kimi-k2.5-full86-2026-04-25-overnight-kimi`
+- `results/evas-scoring-condition-B-kimi-k2.5-full86-2026-04-25-overnight-kimi`
+- `results/evas-scoring-condition-C-kimi-k2.5-full86-2026-04-25-overnight-kimi`
+- `results/evas-scoring-condition-D-kimi-k2.5-full86-2026-04-25-overnight-kimi`
+- `results/evas-scoring-condition-E-kimi-k2.5-full86-2026-04-25-overnight-kimi`
+- `results/evas-scoring-condition-F-kimi-k2.5-full86-2026-04-25-overnight-kimi`
+- `results/evas-scoring-condition-G-kimi-k2.5-full86-2026-04-25-overnight-kimi`
+
+Outcome:
+
+| Condition | Pass | Pass@1 | Main interpretation |
+| --- | ---: | ---: | --- |
+| A | `35/92` | `0.3804` | Raw prompt baseline. |
+| B | `43/92` | `0.4674` | Checker contract alone is a strong baseline improvement. |
+| C | `37/92` | `0.4022` | Skill alone does not reliably improve Kimi and can degrade end-to-end behavior. |
+| D | `46/92` | `0.5000` | One-round EVAS repair gives a small but real gain over B. |
+| E | `45/92` | `0.4891` | Adding skill to one-round repair is slightly worse than D. |
+| F | `53/92` | `0.5761` | Three-round EVAS repair with baseline-pass reuse is the best current full92 result. |
+| G | `51/92` | `0.5543` | Three-round + skill remains positive but underperforms F. |
+
+Important deltas:
+
+- B to F gains `11` tasks: `adc_dac_ideal_4b_smoke`, `clk_burst_gen_smoke`, `clk_div_smoke`, `clk_divider`, `comparator_offset_search_smoke`, `comparator_smoke`, `cross_interval_163p333_smoke`, `ramp_gen_smoke`, `sample_hold_droop_smoke`, `serializer_8b_smoke`, `strongarm_reset_priority_bug`.
+- B to F loses `1` task: `pfd_deadzone_smoke`.
+- F to G loses `2` tasks: `clk_divider`, `sample_hold_droop_smoke`.
+- G adds no new PASS over F in this run, suggesting current skill content is not yet a net-positive repair add-on for Kimi full92.
+
+Infrastructure findings from this run:
+
+- EVAS simulation timeout alone is insufficient. A task can finish `evas simulate` but hang in Python-side CSV/checker evaluation. `runners/simulate_evas.py` now wraps behavior evaluation in a child-process watchdog so a pathological CSV becomes `behavior_eval_timeout` instead of blocking the matrix.
+- Missing generated samples must count as failures. `runners/score.py` now records `missing_generated_sample` as `FAIL_INFRA` so all matrix rows use the same denominator.
+- Repair scoring should reuse existing B EVAS results when possible. The overnight D/E/F/G run manually reused the completed B result root as the inner feedback source to avoid repeated baseline scoring.
+
+Next repair-policy implication:
+
+- Fixed three-round final-output selection is suboptimal. Logs showed some tasks became PASS in an intermediate round and then regressed in a later round. The next policy should keep the first PASS or best-scoring candidate per task, rather than always taking the last round.
 
 ## Latest Small-Matrix Result
 
