@@ -184,6 +184,16 @@ Implemented in `runners/build_repair_prompt.py` and routed through `runners/diag
 - Small-matrix reproducibility depends on the round-0 anchor. For example, sample-hold passed in a
   targeted single-task run but did not pass in the `16`-task matrix when started from the older matrix
   round-1 anchor.
+- Applying the Hard16 policy back to condition-A failures gives two different evidence levels:
+  `A failed ∩ Hard16` reaches `12/15` PASS with v10 candidate reuse, proving that EVAS-guided
+  repair can rescue many raw-prompt failures on the method-development set. A held-out sample of
+  `20` non-Hard16 condition-A failures reaches `6/20` PASS without Hard16 candidate memory and
+  advances `10/20` tasks to a better failure layer, showing partial generalization.
+- The held-out rescue successes are `above_threshold_startup_smoke`, `comparator_smoke`,
+  `dac_therm_16b_smoke`, `pfd_updn_smoke`, `cdac_cal`, and `missing_transition_outputs`.
+  The clearest remaining gaps are PLL feedback-edge generation, crossing/timing-window behavior,
+  divider ratio dynamics, and checker-timeout cases where repair can regress a behavior-level
+  candidate back to compile/infra failure.
 
 ## Full92 Kimi Matrix Snapshot
 
