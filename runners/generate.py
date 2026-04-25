@@ -273,6 +273,16 @@ SYSTEM_PROMPT = textwrap.dedent("""\
        - Spectre testbenches: ```spectre ... ```
     5. Do not include any explanation outside the code blocks.
     6. If multiple files are needed, output them in order: DUT first, then testbench.
+    7. Choose module granularity from the task contract, not from circuit size alone.
+       If the task specifies one behavioral block with one analog input and digital/analog
+       outputs, implement it as one coherent behavioral module even if the real circuit
+       could contain many internal subcircuits.
+    8. Split into multiple modules only when the task explicitly asks for distinct modeled
+       blocks, required includes, or independently named interfaces. When you split, each
+       module must have a clear standalone behavior and the top-level testbench must
+       exercise every required block through observable signals.
+    9. Do not invent hidden submodules just to look realistic; prefer the simplest
+       evaluator-visible behavioral abstraction that satisfies the public contract.
 """)
 
 
@@ -326,6 +336,14 @@ You MUST return both deliverables:
 2. Spectre testbench code block: ```spectre ... ```
 
 Do not return DUT-only output for this task.
+
+## Hierarchical Modeling Policy (MANDATORY)
+
+Choose the module boundary from the public task contract:
+- If the task asks for a single behavioral component, keep it as one coherent module even if a transistor-level implementation would contain many internal blocks.
+- If the task asks for multiple named blocks/modules, implement those blocks separately and connect them in one top-level testbench.
+- For split designs, each generated module must have a clear local contract and the testbench must exercise the integrated behavior through the required public observables.
+- Do not add extra hidden submodules unless they are necessary to satisfy a named task interface or required include.
 """
 
     strict_tran_contract = [] if raw_has_public_eval_contract else _inject_strict_evas_validation_contract(task_dir, family)

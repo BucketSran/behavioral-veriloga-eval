@@ -743,6 +743,9 @@ def _end_to_end_shape_guidance(task_prompt: str, family: str) -> str:
         "- Do not concatenate several standalone mini-testbenches into one `.scs` file.",
         "- Put shared directives such as `simulator`, `global`, `save`, and `tran` in the single final testbench, not repeated per sub-block.",
         "- Every `ahdl_include` used by the testbench must correspond to a DUT file you emitted in this same answer.",
+        "- Choose module granularity from the task contract, not from circuit size alone.",
+        "- If the task asks for a single behavioral block, keep one coherent module; do not invent internal submodules just because the real circuit could be hierarchical.",
+        "- If the task asks for multiple named blocks/modules, preserve that split and make each block independently meaningful while verifying the integrated top-level behavior.",
     ]
     lowered = task_prompt.lower()
     if "separate modules" in lowered or "implement four" in lowered or "implement two" in lowered:
@@ -1771,6 +1774,8 @@ def _targeted_repair_skill(
             "End-to-end repair contract:",
             "- Return the full DUT artifact set required by the task plus exactly one top-level Spectre testbench.",
             "- Do not split the answer into several independent testbenches.",
+            "- Preserve the task's intended module granularity: keep single-block behavioral tasks single-block, and preserve explicit multi-block tasks as separately named modules.",
+            "- During repair, do not introduce or remove hierarchy unless EVAS reports an artifact/interface mismatch or the public task contract explicitly requires the split.",
             "- **DUT-TB filename consistency (critical):** The `ahdl_include` path in the TB must exactly match",
             "  the filename of your generated DUT. The DUT file is saved as `<module_name>.va` where",
             "  `<module_name>` is the identifier after the `module` keyword in your Verilog-A file.",

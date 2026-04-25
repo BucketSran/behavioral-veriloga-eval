@@ -149,6 +149,7 @@ Infrastructure findings from this run:
 Next repair-policy implication:
 
 - Multi-round repair already keeps the EVAS best-so-far candidate and early-stops on PASS. The next policy improvement should therefore target wasted calls after repeated no-progress rounds, model-specific compile-stability templates, and provider-specific concurrency/rate-limit controls.
+- Hierarchy must be contract-driven rather than size-driven. A large ADC-like task that exposes one analog input and one digital/analog output can be a single behavioral module; a task that explicitly asks for ADC/DAC/SAR/sample-hold subblocks should emit separate modules and preserve independently meaningful block contracts during repair.
 
 ## Full92 Qwen Matrix Snapshot
 
