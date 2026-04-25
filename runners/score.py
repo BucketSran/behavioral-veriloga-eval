@@ -29,6 +29,8 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
+import hashlib
 import json
 import re
 import shutil
@@ -178,6 +180,38 @@ def save_signals(tb_path: Path) -> list[str]:
     return []
 
 
+def all_save_signals(tb_path: Path) -> list[str] | None:
+    """Return all explicit saved signal tokens, or None for wildcard saves.
+
+    Unlike save_signals(), this scans every save line so contract pruning can
+    preserve multi-line save lists.  A wildcard save is intentionally ambiguous,
+    so callers should preserve the original save directives in that case.
+    """
+    text = tb_path.read_text(encoding="utf-8", errors="ignore").replace("\\\n", " ")
+    signals: list[str] = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped.lower().startswith("save "):
+            continue
+        rest = stripped[5:].strip()
+        if rest.lower() in {"all", "allpub"}:
+            return None
+        for token in rest.split():
+            token = token.strip().strip(",")
+            if not token:
+                continue
+            match = re.match(r"v\s*\(\s*([^)]+)\s*\)", token, re.IGNORECASE)
+            signals.append(match.group(1) if match else token)
+
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for signal in signals:
+        if signal not in seen:
+            seen.add(signal)
+            deduped.append(signal)
+    return deduped
+
+
 def tb_structure(tb_path: Path) -> dict:
     """Extract structural metadata from a Spectre testbench.
 
@@ -247,6 +281,35 @@ def normalize_tb_save_signals(tb_path: Path) -> int:
     if rewrite_count > 0:
         tb_path.write_text("\n".join(updated_lines) + "\n", encoding="utf-8")
     return rewrite_count
+
+
+def rewrite_tb_save_signals(tb_path: Path, desired_signals: list[str]) -> tuple[int, int]:
+    """Replace save directives with a compact explicit list.
+
+    Returns (removed_save_lines, inserted_save_lines).  An empty desired list
+    removes all save directives, useful when the scoring contract does not need
+    behavior/CSV inspection.
+    """
+    original_lines = tb_path.read_text(encoding="utf-8", errors="ignore").splitlines()
+    updated_lines: list[str] = []
+    removed = 0
+    inserted = 0
+    inserted_save = False
+    for line in original_lines:
+        stripped = line.strip()
+        if not stripped.lower().startswith("save "):
+            updated_lines.append(line)
+            continue
+        removed += 1
+        if desired_signals and not inserted_save:
+            indent = line[: len(line) - len(line.lstrip())]
+            updated_lines.append(indent + "save " + " ".join(desired_signals))
+            inserted += 1
+            inserted_save = True
+
+    if removed > 0 or inserted > 0:
+        tb_path.write_text("\n".join(updated_lines) + "\n", encoding="utf-8")
+    return removed, inserted
 
 
 def _safe_inc_path(stage_dir: Path, inc_name: str) -> Path:
@@ -616,6 +679,9 @@ def stage_candidate_case(
     tb_path: Path,
     stage_dir: Path,
     auxiliary_gold_vas: list[Path] | None = None,
+    save_policy: str = "contract",
+    required_axes: list[str] | None = None,
+    contract_save_signals: list[str] | None = None,
 ) -> tuple[Path, Path, list[str]]:
     """Stage DUT/TB so the selected candidate, not a gold fallback, is tested.
 
@@ -632,6 +698,26 @@ def stage_candidate_case(
     rewritten_save_tokens = normalize_tb_save_signals(staged_tb)
     if rewritten_save_tokens > 0:
         notes.append(f"normalized_tb_save_tokens={rewritten_save_tokens}")
+    staged_save_signals = all_save_signals(staged_tb)
+    required_axes = required_axes or []
+    requires_behavior = "sim_correct" in required_axes or "behavior" in required_axes
+    if save_policy == "contract":
+        if requires_behavior and contract_save_signals:
+            removed, inserted = rewrite_tb_save_signals(staged_tb, contract_save_signals)
+            if removed or inserted:
+                notes.append(
+                    f"contract_save_pruned=removed:{removed},inserted:{inserted},signals:{len(contract_save_signals)}"
+                )
+        elif not requires_behavior:
+            # Do not remove every save line: EVAS may otherwise fall back to
+            # saving many/all nodes.  One existing public signal is enough to
+            # prove the transient ran while keeping CSV output bounded.
+            minimal_signals = staged_save_signals[:1] if staged_save_signals else []
+            removed, inserted = rewrite_tb_save_signals(staged_tb, minimal_signals)
+            if removed or inserted:
+                notes.append(
+                    f"nonbehavior_save_minimized=removed:{removed},inserted:{inserted},signals:{len(minimal_signals)}"
+                )
 
     includes = ahdl_includes(tb_path)
     va_includes = [name for name in includes if Path(name).suffix.lower() == ".va"]
@@ -711,6 +797,7 @@ def score_one_task(
     temperature: float,
     top_p: float,
     timeout_s: int = 180,
+    save_policy: str = "contract",
 ) -> dict:
     """Score one generated candidate and return a structured result.json payload."""
     meta = read_meta(task_dir)
@@ -732,6 +819,7 @@ def score_one_task(
     generated_va = find_va_file(sample_dir)
     generated_tb = find_tb_file(sample_dir)
     gold_tb = choose_gold_tb(gold_dir)
+    contract_save_signals = all_save_signals(gold_tb) if gold_tb and gold_tb.exists() else None
 
     if family in ("spec-to-va", "bugfix"):
         # Model generates DUT; use gold testbench
@@ -779,6 +867,9 @@ def score_one_task(
             tb_path=tb_path,
             stage_dir=tmp_path,
             auxiliary_gold_vas=auxiliary_gold_vas,
+            save_policy=save_policy,
+            required_axes=required_axes,
+            contract_save_signals=contract_save_signals,
         )
 
         strict_status, strict_scores, strict_notes = spectre_strict_preflight(
@@ -799,7 +890,7 @@ def score_one_task(
                     task_dir,
                     tmp_dut,
                     tmp_tb,
-                    output_root=output_dir,
+                    output_root=output_dir / task_id,
                     timeout_s=timeout_s,
                     task_id_override=task_id,
                 )
@@ -837,6 +928,7 @@ def score_one_task(
         },
         "generation_meta": gen_meta,
         "evas_notes": evas_result.get("notes", []),
+        "evas_timing": evas_result.get("timing", {}),
     }
     result["evas_notes"] = staging_notes + result["evas_notes"]
     _save_result(result, output_dir)
@@ -872,6 +964,74 @@ def _save_result(result: dict, output_dir: Path) -> None:
     task_dir_out.mkdir(parents=True, exist_ok=True)
     result_path = task_dir_out / "result.json"
     result_path.write_text(json.dumps(result, indent=2), encoding="utf-8")
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _fingerprint_tree(root: Path, patterns: tuple[str, ...]) -> list[dict[str, str]]:
+    if not root.exists():
+        return []
+    paths: list[Path] = []
+    for pattern in patterns:
+        paths.extend(root.rglob(pattern))
+    items: list[dict[str, str]] = []
+    for path in sorted(set(paths)):
+        if path.is_file():
+            items.append(
+                {
+                    "path": str(path.relative_to(root)),
+                    "sha256": _sha256_file(path),
+                }
+            )
+    return items
+
+
+def _score_cache_key(
+    *,
+    task_id: str,
+    task_dir: Path,
+    sample_dir: Path,
+    model_slug: str,
+    sample_idx: int,
+    temperature: float,
+    top_p: float,
+    timeout_s: int,
+    save_policy: str,
+) -> dict:
+    return {
+        "version": 1,
+        "task_id": task_id,
+        "model": model_slug,
+        "sample_idx": sample_idx,
+        "temperature": temperature,
+        "top_p": top_p,
+        "timeout_s": timeout_s,
+        "save_policy": save_policy,
+        "task_gold": _fingerprint_tree(task_dir / "gold", ("*.scs", "*.va", "*.csv")),
+        "sample": _fingerprint_tree(sample_dir, ("*.scs", "*.va", "generation_meta.json")),
+        "score_py": _sha256_file(Path(__file__).resolve()),
+        "simulate_evas_py": _sha256_file((ROOT / "runners" / "simulate_evas.py").resolve()),
+    }
+
+
+def _load_cached_result(out_root: Path, task_id: str, expected_key: dict) -> dict | None:
+    result_path = out_root / task_id / "result.json"
+    if not result_path.exists():
+        return None
+    try:
+        result = json.loads(result_path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    if result.get("_score_cache_key") != expected_key:
+        return None
+    result["_cache_hit"] = True
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -961,6 +1121,72 @@ def build_model_results(model: str, results: list[dict], temperature: float,
 # Main
 # ---------------------------------------------------------------------------
 
+def _score_task_entry(
+    *,
+    task_id: str,
+    task_dir: Path,
+    generated_root: Path,
+    model_slug: str,
+    out_root: Path,
+    sample_idx: int,
+    temperature: float,
+    top_p: float,
+    timeout_s: int,
+    resume: bool,
+    save_policy: str,
+) -> dict:
+    sample_dir = find_generated_dir(generated_root, model_slug, task_id, sample_idx)
+    if sample_dir is None:
+        meta = read_meta(task_dir)
+        result = _fail_result(
+            task_id,
+            model_slug,
+            meta.get("family", "unknown"),
+            meta.get("category", "unknown"),
+            sample_idx,
+            temperature,
+            top_p,
+            meta.get("scoring", ["dut_compile", "tb_compile", "sim_correct"]),
+            "missing_generated_sample",
+            None,
+            None,
+        )
+        _save_result(result, out_root)
+        return result
+
+    cache_key = _score_cache_key(
+        task_id=task_id,
+        task_dir=task_dir,
+        sample_dir=sample_dir,
+        model_slug=model_slug,
+        sample_idx=sample_idx,
+        temperature=temperature,
+        top_p=top_p,
+        timeout_s=timeout_s,
+        save_policy=save_policy,
+    )
+    if resume:
+        cached = _load_cached_result(out_root, task_id, cache_key)
+        if cached is not None:
+            return cached
+
+    result = score_one_task(
+        task_id,
+        task_dir,
+        sample_dir,
+        out_root,
+        model=model_slug,
+        sample_idx=sample_idx,
+        temperature=temperature,
+        top_p=top_p,
+        timeout_s=timeout_s,
+        save_policy=save_policy,
+    )
+    result["_score_cache_key"] = cache_key
+    _save_result(result, out_root)
+    return result
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(
         description="Score model-generated Verilog-A candidates against the vaEvas benchmark."
@@ -989,6 +1215,26 @@ def main() -> int:
     ap.add_argument("--temperature", type=float, default=0.0)
     ap.add_argument("--top-p", type=float, default=1.0)
     ap.add_argument("--timeout-s", type=int, default=180)
+    ap.add_argument(
+        "--workers",
+        type=int,
+        default=1,
+        help="Parallel EVAS scoring workers. Default: 1 (serial).",
+    )
+    ap.add_argument(
+        "--resume",
+        action="store_true",
+        help="Reuse per-task result.json only when input/checker fingerprints match.",
+    )
+    ap.add_argument(
+        "--save-policy",
+        choices=["contract", "debug"],
+        default="contract",
+        help=(
+            "contract: prune save directives to public checker/gold observables, "
+            "and remove saves when behavior is not scored. debug: preserve original save directives."
+        ),
+    )
     args = ap.parse_args()
 
     generated_root = Path(args.generated_dir)
@@ -1023,46 +1269,64 @@ def main() -> int:
         return 2
 
     results: list[dict] = []
-    for task_id, task_dir in task_list:
-        sample_dir = find_generated_dir(generated_root, model_slug, task_id, args.sample_idx)
-        if sample_dir is None:
-            print(f"[score] scoring {task_id} ... FAIL_INFRA (missing generated files)")
-            meta = read_meta(task_dir)
-            result = _fail_result(
-                task_id,
-                model_slug,
-                meta.get("family", "unknown"),
-                meta.get("category", "unknown"),
-                args.sample_idx,
-                args.temperature,
-                args.top_p,
-                meta.get("scoring", ["dut_compile", "tb_compile", "sim_correct"]),
-                "missing_generated_sample",
-                None,
-                None,
+    worker_count = max(1, min(args.workers, len(task_list)))
+    if worker_count == 1:
+        for task_id, task_dir in task_list:
+            print(f"[score] scoring {task_id} ...", end=" ", flush=True)
+            result = _score_task_entry(
+                task_id=task_id,
+                task_dir=task_dir,
+                generated_root=generated_root,
+                model_slug=model_slug,
+                out_root=out_root,
+                sample_idx=args.sample_idx,
+                temperature=args.temperature,
+                top_p=args.top_p,
+                timeout_s=args.timeout_s,
+                resume=args.resume,
+                save_policy=args.save_policy,
             )
-            _save_result(result, out_root)
+            status = result["status"]
+            if status == "FAIL_INFRA" and "missing_generated_sample" in result.get("evas_notes", []):
+                print(f"{status} (missing generated files)")
+            elif result.get("_cache_hit"):
+                print(f"{status} (cached)")
+            else:
+                print(status)
             results.append(result)
-            continue
-
-        print(f"[score] scoring {task_id} ...", end=" ", flush=True)
-        result = score_one_task(
-            task_id, task_dir, sample_dir,
-            out_root,
-            model=model_slug,
-            sample_idx=args.sample_idx,
-            temperature=args.temperature,
-            top_p=args.top_p,
-            timeout_s=args.timeout_s,
-        )
-        status = result["status"]
-        print(status)
-        results.append(result)
+    else:
+        print(f"[score] parallel EVAS scoring with {worker_count} workers")
+        with concurrent.futures.ThreadPoolExecutor(max_workers=worker_count) as executor:
+            future_to_task = {
+                executor.submit(
+                    _score_task_entry,
+                    task_id=task_id,
+                    task_dir=task_dir,
+                    generated_root=generated_root,
+                    model_slug=model_slug,
+                    out_root=out_root,
+                    sample_idx=args.sample_idx,
+                    temperature=args.temperature,
+                    top_p=args.top_p,
+                    timeout_s=args.timeout_s,
+                    resume=args.resume,
+                    save_policy=args.save_policy,
+                ): task_id
+                for task_id, task_dir in task_list
+            }
+            for future in concurrent.futures.as_completed(future_to_task):
+                task_id = future_to_task[future]
+                result = future.result()
+                cache_suffix = " (cached)" if result.get("_cache_hit") else ""
+                print(f"[score] scoring {task_id} ... {result['status']}{cache_suffix}", flush=True)
+                results.append(result)
 
     if not results:
         print("[score] No results produced.")
         return 1
 
+    task_order = {task_id: idx for idx, (task_id, _) in enumerate(task_list)}
+    results.sort(key=lambda result: task_order.get(result.get("task_id", ""), 10**9))
     aggregate = build_model_results(model_slug, results, args.temperature, args.top_p)
     agg_path = out_root / "model_results.json"
     agg_path.write_text(json.dumps(aggregate, indent=2), encoding="utf-8")

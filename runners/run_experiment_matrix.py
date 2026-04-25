@@ -190,6 +190,9 @@ def run_evas_scoring(
     temperature: float,
     top_p: float,
     timeout_s: int,
+    score_workers: int,
+    resume_score: bool,
+    score_save_policy: str,
     force: bool,
 ) -> Path:
     """Run EVAS scoring on generated samples."""
@@ -211,7 +214,11 @@ def run_evas_scoring(
         "--temperature", str(temperature),
         "--top-p", str(top_p),
         "--timeout-s", str(timeout_s),
+        "--workers", str(score_workers),
+        "--save-policy", score_save_policy,
     ]
+    if resume_score and not force:
+        cmd.append("--resume")
 
     print(f"[evas-scoring] Running: {' '.join(cmd)}")
     proc = subprocess.run(cmd, cwd=ROOT, text=True)
@@ -286,6 +293,12 @@ def main() -> int:
     ap.add_argument("--max-tokens", type=int, default=4096)
     ap.add_argument("--gen-workers", type=int, default=4,
                     help="Parallel generation workers for baseline conditions A/B/C.")
+    ap.add_argument("--score-workers", type=int, default=4,
+                    help="Parallel EVAS scoring workers. Default: 4.")
+    ap.add_argument("--resume-score", action="store_true",
+                    help="Reuse matching per-task EVAS scoring results by input/checker fingerprint.")
+    ap.add_argument("--score-save-policy", choices=["contract", "debug"], default="contract",
+                    help="Save policy for EVAS scoring. Use debug to preserve extra repair observables.")
     ap.add_argument("--timeout-s", type=int, default=180)
     ap.add_argument("--date-tag", default=DATE_TAG,
                     help="Tag used in result directory names. Defaults to today's date.")
@@ -349,6 +362,9 @@ def main() -> int:
                     temperature=args.temperature,
                     top_p=args.top_p,
                     timeout_s=args.timeout_s,
+                    score_workers=args.score_workers,
+                    resume_score=args.resume_score,
+                    score_save_policy=args.score_save_policy,
                     force=args.force,
                 )
                 evas_result_dirs[condition] = evas_root
@@ -393,6 +409,9 @@ def main() -> int:
                         temperature=args.temperature,
                         top_p=args.top_p,
                         timeout_s=args.timeout_s,
+                        score_workers=args.score_workers,
+                        resume_score=args.resume_score,
+                        score_save_policy=args.score_save_policy,
                         force=args.force,
                     )
                     evas_result_dirs["B"] = evas_root
@@ -428,6 +447,9 @@ def main() -> int:
                         temperature=args.temperature,
                         top_p=args.top_p,
                         timeout_s=args.timeout_s,
+                        score_workers=args.score_workers,
+                        resume_score=args.resume_score,
+                        score_save_policy=args.score_save_policy,
                         force=args.force,
                     )
                     print(f"[repair-{condition}] EVAS scoring output: {repaired_evas_root}")

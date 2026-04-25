@@ -6,6 +6,7 @@ import csv
 import json
 import math
 import multiprocessing as mp
+import os
 import re
 import shutil
 import subprocess
@@ -92,6 +93,323 @@ def evaluate_noise_gen_csv(csv_path: Path) -> tuple[float, list[str]]:
     std = math.sqrt(max(var, 0.0))
     ok = std > 0.01 and max_abs > 0.05
     return (1.0 if ok else 0.0), [f"noise_std={std:.4f} max_abs={max_abs:.4f} samples={count}"]
+
+
+def _csv_fields(csv_path: Path) -> set[str]:
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        return set(reader.fieldnames or [])
+
+
+def _float_cell(row: dict[str, str], key: str, default: float = 0.0) -> float:
+    try:
+        return float(row.get(key, default))
+    except (TypeError, ValueError):
+        return default
+
+
+def _stream_max(csv_path: Path, key: str) -> float:
+    max_val = 0.0
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            max_val = max(max_val, _float_cell(row, key))
+    return max_val
+
+
+def _stream_pfd_deadzone_csv(csv_path: Path) -> tuple[float, list[str]]:
+    fields = _csv_fields(csv_path)
+    required = {"time", "ref", "div", "up", "dn"}
+    if not required.issubset(fields):
+        return 0.0, ["missing ref/div/up/dn"]
+
+    vth = 0.5 * _stream_max(csv_path, "ref")
+    prev_time: float | None = None
+    prev_up = 0.0
+    prev_dn = 0.0
+    prev_up_bit = 0
+    initialized = False
+    high_up_dt = 0.0
+    high_dn_dt = 0.0
+    total_dt = 0.0
+    run_len = 0
+    max_run = 0
+    up_pulses = 0
+
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            time = _float_cell(row, "time")
+            up = _float_cell(row, "up")
+            dn = _float_cell(row, "dn")
+            up_bit = 1 if up > vth else 0
+            dn_bit = 1 if dn > vth else 0
+            if initialized:
+                dt = time - (prev_time if prev_time is not None else time)
+                if dt > 0.0:
+                    total_dt += dt
+                    if 0.5 * (prev_up + up) > vth:
+                        high_up_dt += dt
+                    if 0.5 * (prev_dn + dn) > vth:
+                        high_dn_dt += dt
+                if prev_up_bit == 0 and up_bit == 1:
+                    up_pulses += 1
+            if up_bit and dn_bit:
+                run_len += 1
+                max_run = max(max_run, run_len)
+            else:
+                run_len = 0
+            initialized = True
+            prev_time = time
+            prev_up = up
+            prev_dn = dn
+            prev_up_bit = up_bit
+
+    up_frac = high_up_dt / max(total_dt, 1e-18)
+    dn_frac = high_dn_dt / max(total_dt, 1e-18)
+    if not (0.001 <= up_frac <= 0.03):
+        return 0.0, [f"up_frac_out_of_range={up_frac:.4f}"]
+    if dn_frac > 0.002:
+        return 0.0, [f"dn_frac_too_high={dn_frac:.4f}"]
+    if max_run > 6:
+        return 0.0, [f"overlap_too_long={max_run}"]
+    if up_pulses < 10:
+        return 0.0, [f"too_few_up_pulses={up_pulses}"]
+    return 1.0, [f"up_frac={up_frac:.4f} dn_frac={dn_frac:.4f} up_pulses={up_pulses}"]
+
+
+def _stream_pfd_reset_race_csv(csv_path: Path) -> tuple[float, list[str]]:
+    fields = _csv_fields(csv_path)
+    required = {"time", "ref", "div", "up", "dn"}
+    if not required.issubset(fields):
+        return 0.0, ["missing ref/div/up/dn"]
+
+    vth = 0.5 * _stream_max(csv_path, "ref")
+    windows = {
+        "first": {"start": 20e-9, "end": 120e-9, "up_dt": 0.0, "dn_dt": 0.0, "dt": 0.0, "up_pulses": 0, "dn_pulses": 0, "rows": 0},
+        "second": {"start": 160e-9, "end": 260e-9, "up_dt": 0.0, "dn_dt": 0.0, "dt": 0.0, "up_pulses": 0, "dn_pulses": 0, "rows": 0},
+    }
+    total_dt = 0.0
+    overlap_dt = 0.0
+    prev: dict[str, float] | None = None
+    prev_up_bit = 0
+    prev_dn_bit = 0
+
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            cur = {
+                "time": _float_cell(row, "time"),
+                "up": _float_cell(row, "up"),
+                "dn": _float_cell(row, "dn"),
+            }
+            up_bit = 1 if cur["up"] > vth else 0
+            dn_bit = 1 if cur["dn"] > vth else 0
+            for state in windows.values():
+                if state["start"] <= cur["time"] <= state["end"]:
+                    state["rows"] += 1
+                    if prev_up_bit == 0 and up_bit == 1:
+                        state["up_pulses"] += 1
+                    if prev_dn_bit == 0 and dn_bit == 1:
+                        state["dn_pulses"] += 1
+            if prev is not None:
+                dt = cur["time"] - prev["time"]
+                if dt > 0.0:
+                    total_dt += dt
+                    up_mid = 0.5 * (prev["up"] + cur["up"])
+                    dn_mid = 0.5 * (prev["dn"] + cur["dn"])
+                    if up_mid > vth and dn_mid > vth:
+                        overlap_dt += dt
+                    mid_t = 0.5 * (prev["time"] + cur["time"])
+                    for state in windows.values():
+                        if state["start"] <= mid_t <= state["end"]:
+                            state["dt"] += dt
+                            if up_mid > vth:
+                                state["up_dt"] += dt
+                            if dn_mid > vth:
+                                state["dn_dt"] += dt
+            prev = cur
+            prev_up_bit = up_bit
+            prev_dn_bit = dn_bit
+
+    first = windows["first"]
+    second = windows["second"]
+    if first["rows"] < 4 or second["rows"] < 4:
+        return 0.0, ["insufficient_window_samples"]
+    up_first = first["up_dt"] / max(first["dt"], 1e-18)
+    dn_first = first["dn_dt"] / max(first["dt"], 1e-18)
+    up_second = second["up_dt"] / max(second["dt"], 1e-18)
+    dn_second = second["dn_dt"] / max(second["dt"], 1e-18)
+    overlap_frac = overlap_dt / max(total_dt, 1e-18)
+    ok = (
+        0.001 <= up_first <= 0.08
+        and dn_first <= 0.01
+        and 0.001 <= dn_second <= 0.08
+        and up_second <= 0.01
+        and first["up_pulses"] >= 4
+        and second["dn_pulses"] >= 4
+        and overlap_frac <= 0.01
+    )
+    return (1.0 if ok else 0.0), [
+        f"up_first={up_first:.4f} dn_first={dn_first:.4f} "
+        f"up_second={up_second:.4f} dn_second={dn_second:.4f} "
+        f"up_pulses_first={int(first['up_pulses'])} "
+        f"dn_pulses_second={int(second['dn_pulses'])} "
+        f"overlap_frac={overlap_frac:.4f}"
+    ]
+
+
+def _stream_dac_binary_clk_4b_csv(csv_path: Path) -> tuple[float, list[str]]:
+    fields = _csv_fields(csv_path)
+    required = {"din3", "din2", "din1", "din0", "aout"}
+    if not required.issubset(fields):
+        return 0.0, ["missing din*/aout"]
+    sums = {idx: 0.0 for idx in range(16)}
+    counts = {idx: 0 for idx in range(16)}
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            code = (
+                (1 if _float_cell(row, "din3") > 0.45 else 0) * 8
+                + (1 if _float_cell(row, "din2") > 0.45 else 0) * 4
+                + (1 if _float_cell(row, "din1") > 0.45 else 0) * 2
+                + (1 if _float_cell(row, "din0") > 0.45 else 0)
+            )
+            sums[code] += _float_cell(row, "aout")
+            counts[code] += 1
+    medians = {code: sums[code] / counts[code] for code in counts if counts[code] > 0}
+    sorted_codes = sorted(medians)
+    monotonic = all(medians[sorted_codes[i]] <= medians[sorted_codes[i + 1]] + 1e-9 for i in range(len(sorted_codes) - 1))
+    span = medians[sorted_codes[-1]] - medians[sorted_codes[0]] if sorted_codes else 0.0
+    ok = len(sorted_codes) >= 14 and monotonic and span > 0.7
+    return (1.0 if ok else 0.0), [f"levels={len(sorted_codes)} aout_span={span:.3f}"]
+
+
+def _stream_sar_adc_dac_weighted_8b_csv(csv_path: Path) -> tuple[float, list[str]]:
+    fields = _csv_fields(csv_path)
+    required = {"vin", "vin_sh", "vout", "rst_n"} | {f"dout_{idx}" for idx in range(8)}
+    if not required.issubset(fields):
+        return 0.0, ["missing vin/vin_sh/vout/rst_n or dout_0..7"]
+    count = 0
+    err_sum = 0.0
+    min_vout = float("inf")
+    max_vout = float("-inf")
+    codes: set[int] = set()
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            if _float_cell(row, "rst_n") <= 0.45:
+                continue
+            code = sum((1 if _float_cell(row, f"dout_{idx}") > 0.45 else 0) << idx for idx in range(8))
+            vin_sh = _float_cell(row, "vin_sh")
+            vout = _float_cell(row, "vout")
+            codes.add(code)
+            err_sum += abs(vin_sh - vout)
+            min_vout = min(min_vout, vout)
+            max_vout = max(max_vout, vout)
+            count += 1
+    if count == 0:
+        return 0.0, ["no post-reset samples"]
+    unique_codes = len(codes)
+    avg_abs_err = err_sum / count
+    vout_span = max_vout - min_vout
+    ok = unique_codes >= 48 and vout_span > 0.7 and avg_abs_err < 0.08
+    return (1.0 if ok else 0.0), [f"unique_codes={unique_codes} avg_abs_err={avg_abs_err:.4f} vout_span={vout_span:.3f}"]
+
+
+def _stream_dwa_ptr_gen_no_overlap_csv(csv_path: Path) -> tuple[float, list[str]]:
+    fields = _csv_fields(csv_path)
+    required = {"time", "clk_i", "rst_ni", "ptr_0", "cell_en_0"}
+    if not required.issubset(fields):
+        return 0.0, ["missing time/clk_i/rst_ni/ptr_0/cell_en_0"]
+    ptr_cols = sorted([name for name in fields if re.fullmatch(r"ptr_\d+", name)], key=lambda n: int(n.rsplit("_", 1)[1]))
+    cell_cols = sorted([name for name in fields if re.fullmatch(r"cell_en_\d+", name)], key=lambda n: int(n.rsplit("_", 1)[1]))
+    if not ptr_cols or not cell_cols:
+        return 0.0, ["missing ptr_* or cell_en_* columns"]
+
+    pending_samples: list[float] = []
+    sampled_cycles = 0
+    bad_ptr_rows = 0
+    max_active_cells = 0
+    overlap_count = 0
+    prev_active: set[int] | None = None
+    prev_clk = 0.0
+    initialized = False
+
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            time = _float_cell(row, "time")
+            clk = _float_cell(row, "clk_i")
+            if initialized and prev_clk < 0.45 <= clk:
+                pending_samples.append(time + 1.0e-9)
+            while pending_samples and time >= pending_samples[0]:
+                pending_samples.pop(0)
+                if _float_cell(row, "rst_ni") <= 0.45:
+                    continue
+                sampled_cycles += 1
+                ptr_active = {idx for idx, col in enumerate(ptr_cols) if _float_cell(row, col) > 0.45}
+                if len(ptr_active) not in (0, 1):
+                    bad_ptr_rows += 1
+                active_cells = {idx for idx, col in enumerate(cell_cols) if _float_cell(row, col) > 0.45}
+                max_active_cells = max(max_active_cells, len(active_cells))
+                if prev_active is not None and prev_active & active_cells:
+                    overlap_count += 1
+                prev_active = active_cells
+            prev_clk = clk
+            initialized = True
+    if sampled_cycles < 2:
+        return 0.0, [f"insufficient_post_reset_samples count={sampled_cycles}"]
+    ok = bad_ptr_rows == 0 and max_active_cells > 0 and overlap_count == 0
+    return (1.0 if ok else 0.0), [
+        f"sampled_cycles={sampled_cycles} bad_ptr_rows={bad_ptr_rows} "
+        f"max_active_cells={max_active_cells} overlap_count={overlap_count}"
+    ]
+
+
+def _stream_not_gate_csv(csv_path: Path) -> tuple[float, list[str]]:
+    fields = _csv_fields(csv_path)
+    if {"a", "y"}.issubset(fields):
+        a_col, y_col = "a", "y"
+    elif {"not_a", "not_y"}.issubset(fields):
+        a_col, y_col = "not_a", "not_y"
+    else:
+        return 0.0, ["missing a/y"]
+    sampled_count = 0
+    good = 0
+    last_t = -1.0
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            time = _float_cell(row, "time")
+            if time - last_t < 5e-10:
+                continue
+            last_t = time
+            sampled_count += 1
+            if (_float_cell(row, a_col) > 0.4) != (_float_cell(row, y_col) > 0.4):
+                good += 1
+    if sampled_count < 10:
+        return 0.0, [f"too_few_samples={sampled_count}"]
+    frac = good / sampled_count
+    return (1.0 if frac > 0.9 else 0.0), [f"invert_match_frac={frac:.3f}"]
+
+
+def evaluate_streaming_behavior(task_id: str, csv_path: Path) -> tuple[float, list[str]] | None:
+    if os.environ.get("VAEVAS_ENABLE_EXPERIMENTAL_STREAMING_CHECKERS") != "1":
+        return None
+    streaming_checks = {
+        "pfd_deadzone_smoke": _stream_pfd_deadzone_csv,
+        "pfd_reset_race_smoke": _stream_pfd_reset_race_csv,
+        "dac_binary_clk_4b_smoke": _stream_dac_binary_clk_4b_csv,
+        "sar_adc_dac_weighted_8b_smoke": _stream_sar_adc_dac_weighted_8b_csv,
+        "dwa_ptr_gen_no_overlap_smoke": _stream_dwa_ptr_gen_no_overlap_csv,
+        "digital_basics_smoke": _stream_not_gate_csv,
+    }
+    checker = streaming_checks.get(task_id)
+    if checker is None:
+        return None
+    score, notes = checker(csv_path)
+    return score, [f"streaming_checker:{note}" for note in notes]
 
 
 def rising_edges(values: list[float], times: list[float], threshold: float = 0.45) -> list[float]:
@@ -2770,6 +3088,9 @@ def evaluate_behavior(task_id: str, csv_path: Path) -> tuple[float, list[str]]:
         return 0.0, [f"no behavior check implemented for {task_id}"]
     if task_id in {"noise_gen", "noise_gen_smoke"}:
         return evaluate_noise_gen_csv(csv_path)
+    streaming_result = evaluate_streaming_behavior(task_id, csv_path)
+    if streaming_result is not None:
+        return streaming_result
     rows = normalize_rows_for_task(task_id, load_csv(csv_path))
     ok, note = CHECKS[task_id](rows)
     return (1.0 if ok else 0.0), [note]
@@ -2818,6 +3139,40 @@ def evaluate_behavior_with_timeout(
     if status == "ok":
         return payload
     return 0.0, [f"behavior_eval_error={payload}"]
+
+
+def _duration_to_seconds(value: str, unit: str) -> float:
+    number = float(value)
+    normalized = unit.lower()
+    if normalized == "ms":
+        return number / 1000.0
+    if normalized in {"us", "µs"}:
+        return number / 1_000_000.0
+    if normalized == "ns":
+        return number / 1_000_000_000.0
+    return number
+
+
+def parse_evas_timing(text: str) -> dict[str, float]:
+    timing: dict[str, float] = {}
+    tran_match = re.search(
+        r"Tran analysis time:\s*CPU\s*=\s*[\d.]+\s*\w+,\s*elapsed\s*=\s*([\d.]+)\s*(ns|us|µs|ms|s)",
+        text,
+        re.IGNORECASE,
+    )
+    total_match = re.search(
+        r"Total time:\s*CPU\s*=\s*[\d.]+\s*\w+,\s*elapsed\s*=\s*([\d.]+)\s*(ns|us|µs|ms|s)",
+        text,
+        re.IGNORECASE,
+    )
+    steps_match = re.search(r"Number of accepted tran steps\s*=\s*([0-9]+)", text)
+    if tran_match:
+        timing["tran_elapsed_s"] = _duration_to_seconds(tran_match.group(1), tran_match.group(2))
+    if total_match:
+        timing["total_elapsed_s"] = _duration_to_seconds(total_match.group(1), total_match.group(2))
+    if steps_match:
+        timing["accepted_tran_steps"] = float(steps_match.group(1))
+    return timing
 
 
 def run_case(
@@ -2906,6 +3261,7 @@ def run_case(
                 str(out_dir / "strobe.txt"),
             ],
             "notes": notes,
+            "timing": parse_evas_timing(combined),
             "stdout_tail": combined[-4000:],
         }
     finally:
