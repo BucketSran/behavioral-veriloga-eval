@@ -31,6 +31,7 @@ make EVAS-only validation fast enough for iterative repair-policy development.
 - `runners/signature_guided_h.py` now supports `--resume` with fingerprint-checked per-task `summary.json` reuse.
 - `runners/simulate_evas.py` now records EVAS `tran_elapsed_s`, `total_elapsed_s`, and `accepted_tran_steps` when available.
 - `runners/score.py` now stores that timing metadata as `evas_timing` in each task result.
+- `runners/slow_task_report.py` creates reusable Markdown/JSON slow-task reports from any scoring result root.
 
 ## Recommended Defaults
 
@@ -79,6 +80,10 @@ generation is limited by provider rate limits, network stability, and API cost.
   `docs/project/RUNTIME_PROFILE_ANALYSIS_2026-04-26.md` records the clean
   full92 G-artifact timing profile and the discovered parallel-output isolation
   issue.
+- Slow-task report:
+  `docs/project/SLOW_TASK_REPORT_G_KIMI_2026-04-26.md` summarizes the current
+  G-artifact runtime bottlenecks and classifies slow tasks by timeout/CSV/step
+  cause.
 - Parallel H smoke:
   `results/smoke-signature-H-parallel-2026-04-26/summary.json`
   produced `tasks=3`, `eligible=3`, `rescued=3`, `best_pass=3`.
@@ -86,6 +91,6 @@ generation is limited by provider rate limits, network stability, and API cost.
 ## Next Speedups
 
 1. Add `--only-failed-from <result-root>` and `--only-signature-eligible` convenience filters.
-2. Add a small report script to rank tasks by `evas_timing.total_elapsed_s` and timeout frequency.
+2. Validate experimental streaming checkers against the original row-based checkers before enabling them by default.
 3. Build checker-specific early-exit readers for high-row-count CSVs after comparing against gold.
 4. Consider a two-pass timeout profile: short exploratory timeout for template discovery, full timeout for final reported matrix.
