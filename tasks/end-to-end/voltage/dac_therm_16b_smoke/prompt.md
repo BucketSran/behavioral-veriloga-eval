@@ -41,3 +41,29 @@ Ports:
 - `vout`: output electrical
 
 Implement this in Verilog-A behavioral modeling.
+
+
+## Public Evaluation Contract (Non-Gold)
+
+This section states evaluator-facing constraints that must be visible to the generated artifact.
+It does not prescribe the internal implementation or reveal a gold solution.
+
+Final EVAS transient setting:
+
+```spectre
+tran tran stop=2000n maxstep=1n
+```
+
+Required public waveform columns in `tran.csv`:
+
+- `rst_n`, `d15`, `d14`, `d13`, `d12`, `d11`, `d10`, `d9`
+- `d8`, `d7`, `d6`, `d5`, `d4`, `d3`, `d2`, `d1`
+- `d0`, `vout`
+
+Use plain scalar save names for these observables; do not rely on instance-qualified or aliased save names.
+
+Timing/checking-window contract:
+
+- Reset-like input(s) `reset`, `rst_n` must be asserted only for startup/explicit reset checks, then deasserted early enough and kept deasserted through the post-reset checking window.
+- For active-low resets such as `rstb`, `rst_n`, or `rst_ni`, avoid a finite-width pulse that returns the reset node low after release; use a waveform that remains high during checking.
+- Public stimulus nodes used by the reference harness include: `rst_n`, `d0`, `d1`, `d2`, `d3`, `d4`, `d5`, `d6`, `d7`, `d8`, `d9`, `d10`.

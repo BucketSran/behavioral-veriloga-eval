@@ -43,3 +43,25 @@ Ports:
 - `count_out`: output electrical
 
 Write EVAS-compatible Verilog-A (pure voltage-domain behavioral model, no current contributions).
+
+
+## Public Evaluation Contract (Non-Gold)
+
+This section states evaluator-facing constraints that must be visible to the generated artifact.
+It does not prescribe the internal implementation or reveal a gold solution.
+
+Final EVAS transient setting:
+
+```spectre
+tran tran stop=47n maxstep=1p errpreset=conservative
+```
+
+Required public waveform columns in `tran.csv`:
+
+- `first_err_out`, `max_err_out`, `count_out`
+
+Use plain scalar save names for these observables; do not rely on instance-qualified or aliased save names.
+
+Timing/checking-window contract:
+
+- Public stimulus nodes used by the reference harness include: `VDD`, `VSS`, `vin`.

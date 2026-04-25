@@ -47,3 +47,27 @@ Ports:
   - second block: Spectre testbench (` ```spectre ... ``` `)
 - The Spectre testbench must include the DUT with `ahdl_include "<module>.va"`.
 - Use a single `tran` analysis and include the required `save` signals for checker evaluation.
+
+
+## Public Evaluation Contract (Non-Gold)
+
+This section states evaluator-facing constraints that must be visible to the generated artifact.
+It does not prescribe the internal implementation or reveal a gold solution.
+
+Final EVAS transient setting:
+
+```spectre
+tran tran stop=130n maxstep=0.1n
+```
+
+Required public waveform columns in `tran.csv`:
+
+- `clk`, `frame`, `sout`
+
+Use plain scalar save names for these observables; do not rely on instance-qualified or aliased save names.
+
+Timing/checking-window contract:
+
+- Clock-like input(s) `clk`, `clock` must provide enough valid edges after reset/enable for the checker to sample settled outputs.
+- Sequential outputs are sampled shortly after clock edges, so drive outputs with stable held state variables and `transition()` targets rather than glitchy combinational expressions.
+- Public stimulus nodes used by the reference harness include: `vdd`, `vss`, `clk`, `load`, `din7`, `din6`, `din5`, `din4`, `din3`, `din2`, `din1`, `din0`.

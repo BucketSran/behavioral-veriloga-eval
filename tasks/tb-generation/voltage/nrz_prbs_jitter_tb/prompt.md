@@ -43,3 +43,28 @@ DUT module to instantiate: `nrz_prbs_jitter_ref`
 DUT module to instantiate: `nrz_prbs_jitter_ref`
 
 DUT module to instantiate: `nrz_prbs_jitter_ref`
+
+
+## Public Evaluation Contract (Non-Gold)
+
+This section states evaluator-facing constraints that must be visible to the generated artifact.
+It does not prescribe the internal implementation or reveal a gold solution.
+
+Final EVAS transient setting:
+
+```spectre
+tran tran stop=95n maxstep=20p
+```
+
+Required public waveform columns in `tran.csv`:
+
+- `clk`, `enable`, `sout_p`, `sout_n`
+
+Use plain scalar save names for these observables; do not rely on instance-qualified or aliased save names.
+
+Timing/checking-window contract:
+
+- Enable-like input(s) `enable` must be in the enabled state during the post-reset checking window unless the task explicitly asks for disabled intervals.
+- Clock-like input(s) `clk`, `clock` must provide enough valid edges after reset/enable for the checker to sample settled outputs.
+- Sequential outputs are sampled shortly after clock edges, so drive outputs with stable held state variables and `transition()` targets rather than glitchy combinational expressions.
+- Public stimulus nodes used by the reference harness include: `vdd`, `vss`, `clk`, `enable`.

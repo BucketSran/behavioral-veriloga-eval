@@ -69,3 +69,29 @@ Ports:
 - `RST`: input electrical
 - `Q`: output electrical
 - `QB`: output electrical
+
+
+## Public Evaluation Contract (Non-Gold)
+
+This section states evaluator-facing constraints that must be visible to the generated artifact.
+It does not prescribe the internal implementation or reveal a gold solution.
+
+Final EVAS transient setting:
+
+```spectre
+tran tran stop=200n maxstep=100p
+```
+
+Required public waveform columns in `tran.csv`:
+
+- `a`, `y`
+
+Use plain scalar save names for these observables; do not rely on instance-qualified or aliased save names.
+
+Timing/checking-window contract:
+
+- Reset-like input(s) `rst`, `reset` must be asserted only for startup/explicit reset checks, then deasserted early enough and kept deasserted through the post-reset checking window.
+- For active-low resets such as `rstb`, `rst_n`, or `rst_ni`, avoid a finite-width pulse that returns the reset node low after release; use a waveform that remains high during checking.
+- Clock-like input(s) `clk`, `clock` must provide enough valid edges after reset/enable for the checker to sample settled outputs.
+- Sequential outputs are sampled shortly after clock edges, so drive outputs with stable held state variables and `transition()` targets rather than glitchy combinational expressions.
+- Public stimulus nodes used by the reference harness include: `not_vdd`, `not_vss`, `not_a`, `and_a`, `and_b`, `or_a`, `or_b`, `dff_vdd`, `dff_vss`, `dff_clk`, `dff_d`, `dff_rst`.

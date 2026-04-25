@@ -292,6 +292,7 @@ def build_prompt(
             behavioral indicators without exposing gold implementation details.
     """
     prompt_md = (task_dir / "prompt.md").read_text(encoding="utf-8")
+    raw_has_public_eval_contract = "public evaluation contract (non-gold)" in prompt_md.lower()
     meta = read_meta(task_dir)
     family = meta.get("family", "end-to-end")
     task_id = meta.get("task_id") or meta.get("id") or task_dir.name
@@ -327,7 +328,7 @@ You MUST return both deliverables:
 Do not return DUT-only output for this task.
 """
 
-    strict_tran_contract = _inject_strict_evas_validation_contract(task_dir, family)
+    strict_tran_contract = [] if raw_has_public_eval_contract else _inject_strict_evas_validation_contract(task_dir, family)
     if strict_tran_contract:
         prompt_md += "\n\n" + "\n".join(strict_tran_contract)
 
@@ -449,7 +450,7 @@ endmodule
         public_contract_lines = _inject_public_behavior_contract(task_id)
         if public_contract_lines:
             prompt_md += "\n\n" + "\n".join(public_contract_lines)
-        observable_contract_lines = _inject_observable_csv_contract(task_id)
+        observable_contract_lines = [] if raw_has_public_eval_contract else _inject_observable_csv_contract(task_id)
         if observable_contract_lines:
             prompt_md += "\n\n" + "\n".join(observable_contract_lines)
 

@@ -38,3 +38,25 @@ Expected behavior:
 - When sel0=1, sel1=0: y should output d1 value (~0.3V in test)
 - When sel0=0, sel1=1: y should output d2 value (~0.6V in test)
 - When sel0=1, sel1=1: y should output d3 value (~0.8V in test)
+
+
+## Public Evaluation Contract (Non-Gold)
+
+This section states evaluator-facing constraints that must be visible to the generated artifact.
+It does not prescribe the internal implementation or reveal a gold solution.
+
+Final EVAS transient setting:
+
+```spectre
+tran tran stop=420n maxstep=1n errpreset=conservative
+```
+
+Required public waveform columns in `tran.csv`:
+
+- `d0`, `d1`, `d2`, `d3`, `sel1`, `sel0`, `y`, `time`
+
+Use plain scalar save names for these observables; do not rely on instance-qualified or aliased save names.
+
+Timing/checking-window contract:
+
+- Public stimulus nodes used by the reference harness include: `vdd`, `vss`, `d0`, `d1`, `d2`, `d3`, `sel1`, `sel0`.

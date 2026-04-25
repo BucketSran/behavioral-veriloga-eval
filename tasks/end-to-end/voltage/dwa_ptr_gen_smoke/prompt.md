@@ -53,3 +53,30 @@ Return the complete artifact set:
 1. `v2b_4b.va`, if you use a helper converter
 2. `dwa_ptr_gen.va`
 3. `tb_dwa_ptr_gen.scs`
+
+
+## Public Evaluation Contract (Non-Gold)
+
+This section states evaluator-facing constraints that must be visible to the generated artifact.
+It does not prescribe the internal implementation or reveal a gold solution.
+
+Final EVAS transient setting:
+
+```spectre
+tran tran stop=100n maxstep=2n
+```
+
+Required public waveform columns in `tran.csv`:
+
+- `clk_i`, `rst_ni`, `\`
+
+Use plain scalar save names for these observables; do not rely on instance-qualified or aliased save names.
+
+Timing/checking-window contract:
+
+- Reset-like input(s) `reset`, `rst_ni` must be asserted only for startup/explicit reset checks, then deasserted early enough and kept deasserted through the post-reset checking window.
+- For active-low resets such as `rstb`, `rst_n`, or `rst_ni`, avoid a finite-width pulse that returns the reset node low after release; use a waveform that remains high during checking.
+- Enable-like input(s) `enable` must be in the enabled state during the post-reset checking window unless the task explicitly asks for disabled intervals.
+- Clock-like input(s) `clock` must provide enough valid edges after reset/enable for the checker to sample settled outputs.
+- Sequential outputs are sampled shortly after clock edges, so drive outputs with stable held state variables and `transition()` targets rather than glitchy combinational expressions.
+- Public stimulus nodes used by the reference harness include: `clk_i`, `rst_ni`, `vin_node`.

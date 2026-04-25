@@ -32,3 +32,27 @@ Ports:
 - `lock`: output electrical
 
 Write EVAS-compatible Verilog-A (pure voltage-domain behavioral model, no current contributions).
+
+
+## Public Evaluation Contract (Non-Gold)
+
+This section states evaluator-facing constraints that must be visible to the generated artifact.
+It does not prescribe the internal implementation or reveal a gold solution.
+
+Final EVAS transient setting:
+
+```spectre
+tran tran stop=5u maxstep=5n
+```
+
+Required public waveform columns in `tran.csv`:
+
+- `ref_clk`, `vout`, `lock`, `vctrl_mon`, `ratio_ctrl`
+
+Use plain scalar save names for these observables; do not rely on instance-qualified or aliased save names.
+
+Timing/checking-window contract:
+
+- Clock-like input(s) `clock`, `ref_clk`, `fb_clk` must provide enough valid edges after reset/enable for the checker to sample settled outputs.
+- Sequential outputs are sampled shortly after clock edges, so drive outputs with stable held state variables and `transition()` targets rather than glitchy combinational expressions.
+- Public stimulus nodes used by the reference harness include: `vdd`, `vss`, `ref_clk`, `ratio_ctrl`.
