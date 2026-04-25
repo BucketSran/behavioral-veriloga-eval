@@ -206,6 +206,12 @@ Implemented in `runners/build_repair_prompt.py` and routed through `runners/diag
   `cppll_timer`, `clk_divider`, `pfd_reset_race_smoke`, `cross_sine_precision_smoke`). Best-so-far
   selection rejected those candidates, but this shows prompt-only guardrails are insufficient; the
   next improvement should be runner-level behavior-patch constraints or automatic regression repair.
+- A circuit-name-agnostic observation repair policy was added in `runners/observation_repair_policy.py`.
+  It maps EVAS notes/metrics to generic patterns such as stuck digital sequence, wrong event cadence,
+  missing pulse window, low code coverage, checker timeout, or runtime artifact loss. On a five-task
+  v13 probe, prompt classification worked but produced no new PASS. `pfd_reset_race_smoke` and
+  `clk_divider` still generated compile-regressed candidates, confirming that observation-level
+  classification is useful for framing but not sufficient without constrained patch editing.
 
 ## Full92 Kimi Matrix Snapshot
 

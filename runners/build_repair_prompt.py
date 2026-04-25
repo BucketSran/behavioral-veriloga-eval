@@ -16,6 +16,7 @@ from pathlib import Path
 from generate import build_prompt, read_meta, extract_module_signature
 from score import find_tb_file, find_va_file
 from diagnosis_translation import translate_diagnosis, format_repair_section
+from observation_repair_policy import build_observation_policy_section
 from extract_expected_values import (
     extract_expected_values,
     format_expected_for_prompt,
@@ -2412,6 +2413,7 @@ def _targeted_repair_skill(
             for example in subtype_examples:
                 lines.append(f"  - `{example}`")
         lines.extend(_repair_policy_contract(task_id, notes, sim_subtype))
+        lines.extend(build_observation_policy_section(notes))
         lines.extend(_conservative_behavior_boundary_section(evas_result))
         lines.extend(_metric_to_mechanism_template(task_id, notes))
         lines.extend(_complex_submodule_local_validation_section(task_id, notes))

@@ -124,3 +124,27 @@ conservative wording does not reliably prevent the model from breaking compile/i
 hard behavior repair. The next policy improvement should move anti-regression from text guidance into
 runner behavior: reject or auto-repair any behavior-layer candidate whose compile/TB/runtime layer gets
 worse, and retry with a narrower patch-style prompt that preserves the previous candidate structure.
+
+## Follow-Up: Observation Policy v13
+
+A circuit-name-agnostic observation policy was added in `runners/observation_repair_policy.py`. It
+classifies EVAS notes and metrics into generic failure patterns rather than task-specific circuit
+families.
+
+Probe result:
+
+- Result root: `results/observation-policy5-kimi-v13-2026-04-25`
+- Tasks: `lfsr_smoke`, `clk_divider`, `pfd_reset_race_smoke`,
+  `sar_adc_dac_weighted_8b_smoke`, `final_step_file_metric_smoke`
+- Final PASS: `0/5`
+- Prompt classification examples:
+  `lfsr_smoke -> stuck_or_wrong_digital_sequence`,
+  `clk_divider -> wrong_event_cadence_or_edge_count`,
+  `pfd_reset_race_smoke -> missing_or_wrong_pulse_window`,
+  `sar_adc_dac_weighted_8b_smoke -> low_code_coverage_or_stuck_code_path`
+- New candidate regressions still appeared for `pfd_reset_race_smoke` and `clk_divider`
+
+Interpretation: observation-driven classification is the right abstraction for generality, but it is
+still only a prompt-level intervention. It did not solve the core failure mode: free-form repair can
+still rewrite too much and break compile/interface layers. The next method should use the observation
+policy to select a constrained patch region, then mechanically preserve the rest of the candidate.
