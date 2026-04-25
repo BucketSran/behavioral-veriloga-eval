@@ -194,6 +194,11 @@ Implemented in `runners/build_repair_prompt.py` and routed through `runners/diag
   The clearest remaining gaps are PLL feedback-edge generation, crossing/timing-window behavior,
   divider ratio dynamics, and checker-timeout cases where repair can regress a behavior-level
   candidate back to compile/infra failure.
+- Completing the rest of the condition-A failures gives `28/56` PASS and `33/56` failure-layer
+  improvements overall. The remaining errors are mostly behavior-policy gaps rather than CSV
+  observability gaps: PLL feedback/lock timing, event-crossing windows, digital sequence/encoding,
+  checker timeouts, phase-detector pulses, divider dynamics, and a small number of runtime CSV or
+  Spectre syntax failures. See `tables/A_FAILURE_REPAIR_ANALYSIS_2026-04-25.md`.
 
 ## Full92 Kimi Matrix Snapshot
 
