@@ -16,6 +16,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -117,6 +118,56 @@ def _ensure_key_available(models: list[str]) -> tuple[bool, list[str]]:
         if not os.environ.get(key_name):
             missing.append(f"{model}:{key_name}")
     return not missing, missing
+
+
+def _is_transient_api_error(exc: Exception) -> bool:
+    text = f"{type(exc).__name__}: {exc}".lower()
+    return any(
+        token in text
+        for token in (
+            "ratelimit",
+            "rate limit",
+            "too many requests",
+            "timeout",
+            "api connection",
+            "temporarily unavailable",
+            "429",
+            "500",
+            "502",
+            "503",
+            "504",
+        )
+    )
+
+
+def _call_model_with_retries(
+    model: str,
+    prompt: str,
+    temperature: float,
+    top_p: float,
+    max_tokens: int,
+    *,
+    attempts: int = 4,
+) -> tuple[str, dict]:
+    """Retry transient provider failures so matrix rows are not lost to rate limits."""
+    last_exc: Exception | None = None
+    for attempt in range(1, attempts + 1):
+        try:
+            return call_model(model, prompt, temperature, top_p, max_tokens)
+        except Exception as exc:
+            last_exc = exc
+            if attempt >= attempts or not _is_transient_api_error(exc):
+                raise
+            delay_s = min(90, 8 * (2 ** (attempt - 1)))
+            print(
+                f"api_retry {type(exc).__name__} attempt={attempt}/{attempts} "
+                f"sleep={delay_s}s ... ",
+                end="",
+                flush=True,
+            )
+            time.sleep(delay_s)
+    assert last_exc is not None
+    raise last_exc
 
 
 def _task_list(split: str, selected_tasks: set[str] | None = None) -> list[tuple[str, Path]]:
@@ -739,7 +790,7 @@ def generate_mode(
 
         print(f"[generate:{mode}] CALL {model_slug}/{task_id} ... ", end="", flush=True)
         try:
-            response_text, usage = call_model(model, prompt, temperature, top_p, max_tokens)
+            response_text, usage = _call_model_with_retries(model, prompt, temperature, top_p, max_tokens)
             (sample_dir / "raw_response.txt").write_text(response_text, encoding="utf-8")
             saved_files = _save_generated_response(
                 response_text=response_text,
@@ -976,7 +1027,7 @@ def generate_multi_round_repair(
                 # Use higher temperature for round 2+ to avoid identical outputs when
                 # diagnosis is unchanged (T=0 would produce same code as previous round)
                 round_temp = temperature if round_idx == 1 else max(temperature, 0.3)
-                response_text, usage = call_model(model, prompt, round_temp, top_p, max_tokens)
+                response_text, usage = _call_model_with_retries(model, prompt, round_temp, top_p, max_tokens)
                 (round_sample_dir / "raw_response.txt").write_text(response_text, encoding="utf-8")
                 saved_files = _save_generated_response(
                     response_text=response_text,
