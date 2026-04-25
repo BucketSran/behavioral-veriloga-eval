@@ -34,6 +34,7 @@ from generate import (
     call_model,
     detect_provider,
     extract_code_blocks,
+    extract_module_signature,
     infer_module_name,
     infer_tb_name,
     list_task_dirs,
@@ -44,6 +45,20 @@ from score import build_model_results, find_generated_dir, score_one_task
 ROOT = Path(__file__).resolve().parents[1]
 DATE_TAG = "2026-04-20"
 PHASE_A_MODELS = ["qwen3-max-2026-01-23", "kimi-k2.5"]
+_OBSERVABLE_NOTE_MARKERS = (
+    "missing ",
+    "tran.csv missing",
+    "insufficient_post_reset_samples",
+    "too_few_edges",
+    "too_few_clock_edges",
+    "too_few_rising_edges",
+    "seen_out_never_high",
+)
+_MAIN_MODULE_PATTERNS = [
+    re.compile(r"Main module name:\s*`([^`]+)`", re.IGNORECASE),
+    re.compile(r"Module name:\s*`([^`]+)`", re.IGNORECASE),
+    re.compile(r"module named\s*`([^`]+)`", re.IGNORECASE),
+]
 
 DEV24_TASK_IDS = [
     "digital_basics_smoke",
@@ -90,6 +105,163 @@ _NUMERIC_TOKEN_RE = re.compile(r"^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$", 
 def _json_write(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
+def _classify_repair_layer(result: dict) -> str:
+    """Route failures to the narrowest editable layer for optional F/G repair."""
+    if result.get("status") == "PASS":
+        return "done"
+    scores = result.get("scores", {})
+    dut_compile = float(scores.get("dut_compile", 0.0))
+    tb_compile = float(scores.get("tb_compile", 0.0))
+    notes = " ".join(str(note) for note in result.get("evas_notes", [])).lower()
+    if dut_compile < 1.0:
+        return "compile_dut"
+    if tb_compile < 1.0:
+        return "compile_tb"
+    if any(marker in notes for marker in _OBSERVABLE_NOTE_MARKERS):
+        return "observable"
+    if result.get("status") == "FAIL_SIM_CORRECTNESS":
+        return "behavior"
+    return "infra"
+
+
+def _freeze_veriloga_from(src_sample: Path, dst_sample: Path) -> list[str]:
+    src_vas = sorted(src_sample.glob("*.va"))
+    if not src_vas:
+        return []
+    for existing in dst_sample.glob("*.va"):
+        existing.unlink()
+    copied: list[str] = []
+    for src in src_vas:
+        dst = dst_sample / src.name
+        shutil.copy2(src, dst)
+        copied.append(src.name)
+    return copied
+
+
+def _main_module_name(task_dir: Path) -> str | None:
+    prompt = task_dir.joinpath("prompt.md").read_text(encoding="utf-8", errors="ignore")
+    for pattern in _MAIN_MODULE_PATTERNS:
+        match = pattern.search(prompt)
+        if match:
+            return match.group(1).strip()
+    return None
+
+
+def _declared_modules(paths: list[Path]) -> set[str]:
+    modules: set[str] = set()
+    for path in paths:
+        signature = extract_module_signature(path)
+        if signature:
+            modules.add(signature[0])
+    return modules
+
+
+def _protected_dut_modules(task_dir: Path, dst_sample: Path) -> set[str]:
+    prompt = task_dir.joinpath("prompt.md").read_text(encoding="utf-8", errors="ignore")
+    protected: set[str] = set()
+    main_module = _main_module_name(task_dir)
+    if main_module:
+        protected.add(main_module)
+    for match in re.finditer(
+        r"\bmodules?\s+named\s+((?:`[^`]+`(?:\s*(?:,|and)\s*)?)+)",
+        prompt,
+        flags=re.IGNORECASE,
+    ):
+        protected.update(re.findall(r"`([^`]+)`", match.group(1)))
+    for match in re.finditer(
+        r"\b(?:ADC|DAC|DUT|main)\s+module\s+`([^`]+)`",
+        prompt,
+        flags=re.IGNORECASE,
+    ):
+        protected.add(match.group(1))
+    if protected:
+        return protected
+    return _declared_modules(sorted(dst_sample.glob("*.va")))
+
+
+def _freeze_gold_harness(task_dir: Path, dst_sample: Path) -> list[str]:
+    """Use gold verifier harness while preserving generated DUT modules."""
+    gold_dir = task_dir / "gold"
+    if not gold_dir.exists():
+        return []
+    protected_modules = _protected_dut_modules(task_dir, dst_sample)
+    copied: list[str] = []
+    for existing in dst_sample.glob("*.scs"):
+        existing.unlink()
+    for src in sorted(gold_dir.glob("*.scs")):
+        shutil.copy2(src, dst_sample / src.name)
+        copied.append(src.name)
+    for src in sorted(gold_dir.glob("*.va")):
+        signature = extract_module_signature(src)
+        gold_module = signature[0] if signature else src.stem
+        if gold_module in protected_modules:
+            continue
+        shutil.copy2(src, dst_sample / src.name)
+        copied.append(src.name)
+    return copied
+
+
+def _looks_like_settling_repair(result: dict, sample_dir: Path) -> bool:
+    notes = " ".join(str(note) for note in result.get("evas_notes", [])).lower()
+    if not any(marker in notes for marker in ("gray_property_violated", "bad_transitions", "q_mismatch", "qb_mismatch")):
+        return False
+    for va_path in sorted(sample_dir.glob("*.va"))[:4]:
+        text = va_path.read_text(encoding="utf-8", errors="ignore")
+        if re.search(r"parameter\s+real\s+(?:t(?:edge|rise|fall|d)|tr|tf)\s*=", text):
+            return True
+    return False
+
+
+def _gold_harness_parameter_names(task_dir: Path) -> list[str]:
+    names: set[str] = set()
+    for tb in sorted((task_dir / "gold").glob("*.scs")):
+        text = tb.read_text(encoding="utf-8", errors="ignore")
+        for name in re.findall(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*=", text):
+            if name not in {"type", "val0", "val1", "period", "delay", "rise", "fall", "width", "wave", "stop", "maxstep"}:
+                names.add(name)
+    return sorted(names)
+
+
+def _layer_policy_section(layer: str, task_dir: Path) -> str:
+    if layer == "compile_dut":
+        return (
+            "\n\n# Layered Only-Repair Policy: DUT Compile\n"
+            "The current failure is in DUT compile/interface. Change only the Verilog-A DUT files needed to compile. "
+            "Preserve the testbench stimulus, save statements, tran setup, module intent, and behavior policy unless "
+            "a compile error directly requires an interface adjustment.\n"
+        )
+    if layer == "compile_tb":
+        return (
+            "\n\n# Layered Only-Repair Policy: Testbench Compile\n"
+            "The current failure is in testbench compile/interface. Change only the Spectre testbench wiring, includes, "
+            "instances, parameters, save statements, or tran setup needed to compile. Preserve DUT Verilog-A behavior.\n"
+        )
+    if layer == "observable":
+        return (
+            "\n\n# Layered Only-Repair Policy: Observable Harness\n"
+            "The current failure is an observable/stimulus problem, not a DUT behavior problem. The runner will preserve "
+            "the existing Verilog-A DUT files and evaluate only your repaired Spectre testbench/harness. Focus on reset "
+            "release, transient stop, required save names, include paths, and stimulus coverage. Do not redesign DUT logic.\n"
+        )
+    if layer == "behavior":
+        harness_params = _gold_harness_parameter_names(task_dir)
+        param_text = ", ".join(f"`{name}`" for name in harness_params) if harness_params else "the verifier parameters"
+        return (
+            "\n\n# Layered Only-Repair Policy: DUT Behavior\n"
+            "The current failure is behavior correctness. The runner will use the benchmark verifier harness for stimulus "
+            "and saved observables, so repair the DUT behavior only. Do not spend tokens redesigning the Spectre testbench. "
+            "Preserve the required DUT module name and ports exactly.\n"
+            f"The DUT must accept these verifier parameters if present in the harness: {param_text}. "
+            "Use the verifier supply parameter (for example `vdd`) for output HIGH and verifier initialization parameters "
+            "for reset state when those names are present.\n"
+        )
+    return (
+        "\n\n# Layered Only-Repair Policy: Infrastructure\n"
+        "The failure is not yet classified as compile, observable, or behavior. Make the smallest change needed to expose "
+        "a concrete EVAS diagnostic, and do not rewrite working layers.\n"
+    )
 
 
 def _json_read(path: Path) -> dict:
@@ -847,6 +1019,7 @@ def generate_multi_round_repair(
     n_rounds: int = 3,
     include_skill: bool = False,
     timeout_s: int = 180,
+    layered_only_repair: bool = False,
 ) -> Path:
     """Multi-round EVAS-guided repair (condition F).
 
@@ -886,6 +1059,7 @@ def generate_multi_round_repair(
                     n_rounds=n_rounds,
                     include_skill=include_skill,
                     timeout_s=timeout_s,
+                    layered_only_repair=layered_only_repair,
                 )
                 for task_id, task_dir in tasks
             ]
@@ -997,6 +1171,9 @@ def generate_multi_round_repair(
                 include_skill=include_skill,
                 loop_context=loop_context,
             )
+            repair_layer = _classify_repair_layer(best_evas_result) if layered_only_repair else ""
+            if layered_only_repair:
+                prompt += _layer_policy_section(repair_layer, task_dir)
             round_sample_dir = generated_model_root / task_id / f"sample_{sample_idx}_round{round_idx}"
             round_sample_dir.mkdir(parents=True, exist_ok=True)
             (round_sample_dir / "repair_prompt.md").write_text(prompt, encoding="utf-8")
@@ -1035,9 +1212,25 @@ def generate_multi_round_repair(
                     family=family,
                     task_dir=task_dir,
                 )
+                frozen_duts: list[str] = []
+                frozen_harness: list[str] = []
+                freeze_exception = ""
+                if layered_only_repair and saved_files:
+                    if repair_layer == "observable":
+                        frozen_duts = _freeze_veriloga_from(best_sample_dir, round_sample_dir)
+                    elif repair_layer == "behavior":
+                        if _looks_like_settling_repair(best_evas_result, best_sample_dir):
+                            freeze_exception = "settling_repair_allows_tb_transition_override"
+                        else:
+                            frozen_harness = _freeze_gold_harness(task_dir, round_sample_dir)
                 status = "generated" if saved_files else "no_code_extracted"
                 _json_write(round_meta_path, {**base_meta, "status": status, "saved_files": saved_files,
                                               "actual_temperature": round_temp,
+                                              "layered_only_repair": layered_only_repair,
+                                              "repair_layer": repair_layer,
+                                              "freeze_exception": freeze_exception,
+                                              "frozen_dut_from_best": frozen_duts,
+                                              "frozen_gold_harness": frozen_harness,
                                               "raw_response_length": len(response_text), **usage})
                 print(status)
             except Exception as exc:
@@ -1213,6 +1406,14 @@ def parse_args() -> argparse.Namespace:
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--dry-run", action="store_true", help="Do not call model APIs; write prompt/meta placeholders.")
     ap.add_argument("--skill-bundle", default=str(DEFAULT_SKILL_BUNDLE), help="Frozen skill bundle path.")
+    ap.add_argument(
+        "--layered-only-repair",
+        action="store_true",
+        help=(
+            "For multi-round F/G repair, route each failure to the narrowest layer: "
+            "observable repairs preserve DUT files, and behavior repairs use the verifier harness."
+        ),
+    )
     return ap.parse_args()
 
 
@@ -1321,6 +1522,7 @@ def main() -> int:
                         n_rounds=3,
                         include_skill=(mode == "evas-guided-repair-3round-skill"),
                         timeout_s=args.timeout_s,
+                        layered_only_repair=args.layered_only_repair,
                     )
                     continue
                 generate_mode(
