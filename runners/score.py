@@ -1026,8 +1026,23 @@ def main() -> int:
     for task_id, task_dir in task_list:
         sample_dir = find_generated_dir(generated_root, model_slug, task_id, args.sample_idx)
         if sample_dir is None:
-            print(f"[score] SKIP {task_id} — no generated files at "
-                  f"{generated_root}/{model_slug}/{task_id}/sample_{args.sample_idx}/")
+            print(f"[score] scoring {task_id} ... FAIL_INFRA (missing generated files)")
+            meta = read_meta(task_dir)
+            result = _fail_result(
+                task_id,
+                model_slug,
+                meta.get("family", "unknown"),
+                meta.get("category", "unknown"),
+                args.sample_idx,
+                args.temperature,
+                args.top_p,
+                meta.get("scoring", ["dut_compile", "tb_compile", "sim_correct"]),
+                "missing_generated_sample",
+                None,
+                None,
+            )
+            _save_result(result, out_root)
+            results.append(result)
             continue
 
         print(f"[score] scoring {task_id} ...", end=" ", flush=True)
