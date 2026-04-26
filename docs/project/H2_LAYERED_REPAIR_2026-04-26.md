@@ -25,6 +25,7 @@ Output failure datasets:
 - `datasets/failure_sets/H2_ON_F_FAILURE33_V3_2026-04-26`
 - `datasets/failure_sets/H2_ON_F_FAILURE33_V4_2026-04-26`
 - `datasets/failure_sets/H2_ON_F_FAILURE33_V5_STREAMING_2026-04-26`
+- `datasets/failure_sets/H2_ON_F_FAILURE33_V6_STREAMING_2026-04-26`
 
 ## Implemented Executors
 
@@ -319,6 +320,41 @@ Interpretation:
   results and streaming notes agree on the same PASS-level metrics.
 - V5 should be treated as a method-development upper-bound candidate until the
   fast checkers are validated and promoted out of the experimental path.
+
+### E9: H2 v6 Gray Fast-Checker Candidate
+
+`gray_counter_one_bit_change_smoke` was still failing in V5 only because the
+default checker timed out after reading a 28 MB CSV into Python objects. A
+streaming equivalent checker was added behind the same experimental streaming
+flag. It performs the same public checks:
+
+- rising clock edge count;
+- post-reset Gray-code sequence;
+- one-bit transitions;
+- coverage of all 16 expected Gray codes.
+
+Result:
+
+| Metric | H2 v4 default formal | H2 v5 fast-checker candidate | H2 v6 fast-checker candidate |
+|---|---:|---:|---:|
+| Failure-set Pass@1 | 7/33 | 9/33 | 10/33 |
+| Remaining failures | 26 | 24 | 23 |
+| Remaining checker-timeout bucket | 9 | 4 | 3 |
+
+New candidate rescue:
+
+| Task | Evidence |
+|---|---|
+| `gray_counter_one_bit_change_smoke` | `unique_codes=16 bad_transitions=0` |
+
+Current interpretation:
+
+- The strongest default formal H2 result remains `7/33`.
+- The strongest candidate result with experimental fast checkers is `10/33`.
+- The gap is not model-generation ability alone; it includes evaluator
+  throughput/observability issues. This supports making validated fast checkers
+  a first-class part of the closed-loop infrastructure, while keeping a clear
+  distinction between default formal scoring and candidate fast-checker scoring.
 
 ## Rejected / Not Yet Formalized
 

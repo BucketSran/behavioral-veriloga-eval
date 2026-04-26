@@ -394,6 +394,83 @@ def _stream_not_gate_csv(csv_path: Path) -> tuple[float, list[str]]:
     return (1.0 if frac > 0.9 else 0.0), [f"invert_match_frac={frac:.3f}"]
 
 
+def _stream_gray_counter_one_bit_change_csv(csv_path: Path) -> tuple[float, list[str]]:
+    fields = _csv_fields(csv_path)
+
+    def pick(names: list[str]) -> str | None:
+        lower = {field.lower(): field for field in fields}
+        for name in names:
+            if name.lower() in lower:
+                return lower[name.lower()]
+        return None
+
+    clk_col = pick(["clk", "CLK"])
+    rst_col = pick(["rst", "RST", "rstb", "RSTB"])
+    g_cols = [pick([f"g{idx}", f"G{idx}"]) for idx in range(4)]
+    if clk_col is None or rst_col is None or any(col is None for col in g_cols):
+        return 0.0, ["missing clk/rst/g0..g3"]
+
+    total_rows = 0
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for _ in reader:
+            total_rows += 1
+    if total_rows == 0:
+        return 0.0, ["empty"]
+    reset_prefix_rows = max(4, total_rows // 10)
+
+    rst_prefix_high = False
+    edge_count = 0
+    post_reset_codes: list[int] = []
+    pending_offsets: list[int] = []
+    prev_clk: float | None = None
+
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row_idx, row in enumerate(reader):
+            clk = _float_cell(row, clk_col)
+            rst = _float_cell(row, rst_col)
+            if row_idx < reset_prefix_rows and rst > 0.45:
+                rst_prefix_high = True
+            if prev_clk is not None and prev_clk <= 0.45 < clk:
+                pending_offsets.append(8)
+                edge_count += 1
+            prev_clk = clk
+
+            for pending_idx in range(len(pending_offsets) - 1, -1, -1):
+                pending_offsets[pending_idx] -= 1
+                if pending_offsets[pending_idx] > 0:
+                    continue
+                del pending_offsets[pending_idx]
+                if (rst_prefix_high and rst > 0.45) or ((not rst_prefix_high) and rst < 0.45):
+                    continue
+                code = 0
+                for bit_idx, col in enumerate(g_cols):
+                    assert col is not None
+                    if _float_cell(row, col) > 0.45:
+                        code |= 1 << bit_idx
+                post_reset_codes.append(code)
+
+    if edge_count < 20:
+        return 0.0, [f"not_enough_clk_edges={edge_count}"]
+    if len(post_reset_codes) < 16:
+        return 0.0, [f"not_enough_post_reset_codes={len(post_reset_codes)}"]
+
+    bad_transitions = sum(
+        1
+        for a, b in zip(post_reset_codes[:-1], post_reset_codes[1:])
+        if bin(a ^ b).count("1") != 1
+    )
+    unique_codes = set(post_reset_codes)
+    expected_grays = {i ^ (i >> 1) for i in range(16)}
+    if bad_transitions:
+        return 0.0, [f"gray_property_violated bad_transitions={bad_transitions}"]
+    missing = 16 - len(expected_grays & unique_codes)
+    if missing:
+        return 0.0, [f"missing_gray_codes count={missing}"]
+    return 1.0, [f"unique_codes={len(unique_codes)} bad_transitions={bad_transitions}"]
+
+
 def evaluate_streaming_behavior(task_id: str, csv_path: Path) -> tuple[float, list[str]] | None:
     if os.environ.get("VAEVAS_ENABLE_EXPERIMENTAL_STREAMING_CHECKERS") != "1":
         return None
@@ -404,6 +481,7 @@ def evaluate_streaming_behavior(task_id: str, csv_path: Path) -> tuple[float, li
         "sar_adc_dac_weighted_8b_smoke": _stream_sar_adc_dac_weighted_8b_csv,
         "dwa_ptr_gen_no_overlap_smoke": _stream_dwa_ptr_gen_no_overlap_csv,
         "digital_basics_smoke": _stream_not_gate_csv,
+        "gray_counter_one_bit_change_smoke": _stream_gray_counter_one_bit_change_csv,
     }
     checker = streaming_checks.get(task_id)
     if checker is None:
