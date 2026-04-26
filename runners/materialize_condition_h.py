@@ -302,6 +302,37 @@ def _rewrite_reversed_vsource(text: str) -> tuple[str, list[str]]:
     return "\n".join(updated) + ("\n" if text.endswith("\n") else ""), repairs
 
 
+def _rewrite_flat_vsource_without_parens(text: str) -> tuple[str, list[str]]:
+    """Rewrite ``Vx p n vsource ...`` into ``Vx (p n) vsource ...``."""
+    repairs: list[str] = []
+    updated: list[str] = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        tokens = stripped.split()
+        if "(" in stripped or len(tokens) < 4:
+            updated.append(line)
+            continue
+        vsource_idx = next((idx for idx, token in enumerate(tokens) if token.lower() == "vsource"), None)
+        if vsource_idx is None or vsource_idx < 3:
+            updated.append(line)
+            continue
+        indent = line[: len(line) - len(line.lstrip())]
+        inst = tokens[0]
+        nodes = " ".join(tokens[1:vsource_idx])
+        params = " ".join(tokens[vsource_idx + 1 :])
+        params = re.sub(r"\bvdc\s*=", "dc=", params, flags=re.I)
+        params = re.sub(r"\bvtype\s*=", "type=", params, flags=re.I)
+        updated.append(f"{indent}{inst} ({nodes}) vsource {params}")
+        repairs.append(f"rewrite_flat_vsource={inst}")
+    return "\n".join(updated) + ("\n" if text.endswith("\n") else ""), repairs
+
+
+def _normalize_vsource_param_aliases(text: str) -> tuple[str, list[str]]:
+    updated = re.sub(r"\bvtype\s*=", "type=", text, flags=re.I)
+    updated = re.sub(r"\bvdc\s*=", "dc=", updated, flags=re.I)
+    return updated, ["normalize_vsource_param_aliases"] if updated != text else []
+
+
 def _rewrite_named_port_instance_blocks(sample_dir: Path, text: str) -> tuple[str, list[str]]:
     """Rewrite simple Verilog named-port instance blocks into Spectre instances."""
     port_orders = _module_port_orders(sample_dir)
@@ -357,6 +388,63 @@ def _rewrite_named_port_instance_blocks(sample_dir: Path, text: str) -> tuple[st
     return "\n".join(output) + ("\n" if text.endswith("\n") else ""), repairs
 
 
+def _rewrite_pair_port_instance_blocks(text: str) -> tuple[str, list[str]]:
+    """Rewrite blocks like ``module inst ( port node ... )`` using the node column."""
+    modules = {
+        Path(match).stem
+        for match in re.findall(r'(?m)^\s*ahdl_include\s+"(?:\./)?([^"]+\.va)"', text, flags=re.I)
+    }
+    if not modules:
+        return text, []
+
+    lines = text.splitlines()
+    output: list[str] = []
+    repairs: list[str] = []
+    idx = 0
+    while idx < len(lines):
+        line = lines[idx]
+        match = re.match(r"^(\s*)([A-Za-z_]\w*)\s+([A-Za-z_]\w*)\s*\(\s*$", line)
+        if not match or match.group(2) not in modules:
+            output.append(line)
+            idx += 1
+            continue
+
+        indent, module_name, inst_name = match.groups()
+        nodes: list[str] = []
+        block_lines: list[str] = []
+        idx += 1
+        while idx < len(lines):
+            current = lines[idx]
+            block_lines.append(current)
+            if re.match(r"^\s*\)\s*$", current):
+                idx += 1
+                break
+            pair = re.match(r"^\s*([A-Za-z_][\w\[\]]*)\s+([A-Za-z_]\w*)\s*$", current)
+            if pair:
+                nodes.append(pair.group(2))
+            idx += 1
+
+        params: list[str] = []
+        while idx < len(lines):
+            stripped = lines[idx].strip()
+            if re.match(r"^[A-Za-z_]\w*\s*=", stripped):
+                params.append(stripped)
+                idx += 1
+                continue
+            break
+
+        if not nodes:
+            output.append(line)
+            output.extend(block_lines)
+            output.extend(f"{indent}{param}" for param in params)
+            continue
+        param_suffix = f" {' '.join(params)}" if params else ""
+        output.append(f"{indent}{inst_name} ({' '.join(nodes)}) {module_name}{param_suffix}")
+        repairs.append(f"rewrite_pair_instance={module_name}:{inst_name}")
+
+    return "\n".join(output) + ("\n" if text.endswith("\n") else ""), repairs
+
+
 def _needs_edge_budget_repair(notes_text: str) -> bool:
     lowered = notes_text.lower()
     return any(
@@ -382,14 +470,20 @@ def _repair_generated_tb(sample_dir: Path, min_pulse_edges: int, notes_text: str
     tb_path = tb_files[0]
     original = tb_path.read_text(encoding="utf-8", errors="ignore")
     updated, repairs = _merge_alter_vsource_lines(original)
+    updated, alias_repairs = _normalize_vsource_param_aliases(updated)
+    repairs.extend(alias_repairs)
     updated, source_repairs = _rewrite_reversed_vsource(updated)
     repairs.extend(source_repairs)
+    updated, flat_source_repairs = _rewrite_flat_vsource_without_parens(updated)
+    repairs.extend(flat_source_repairs)
     updated, instance_repairs = _rewrite_verilog_style_instances(updated)
     repairs.extend(instance_repairs)
     updated, flat_repairs = _rewrite_flat_instance_without_parens(updated)
     repairs.extend(flat_repairs)
     updated, named_repairs = _rewrite_named_port_instance_blocks(sample_dir, updated)
     repairs.extend(named_repairs)
+    updated, pair_repairs = _rewrite_pair_port_instance_blocks(updated)
+    repairs.extend(pair_repairs)
     if _needs_edge_budget_repair(notes_text):
         updated, edge_repairs = _ensure_pulse_edge_budget(updated, min_pulse_edges)
         repairs.extend(edge_repairs)

@@ -22,6 +22,8 @@ Output failure datasets:
 - `datasets/failure_sets/H2_ON_F_FAILURE33_2026-04-26`
 - `datasets/failure_sets/H2_ON_F_FAILURE33_PLUS_DUTPROBE_2026-04-26`
 - `datasets/failure_sets/H2_ON_F_FAILURE33_V2_2026-04-26`
+- `datasets/failure_sets/H2_ON_F_FAILURE33_V3_2026-04-26`
+- `datasets/failure_sets/H2_ON_F_FAILURE33_V4_2026-04-26`
 
 ## Implemented Executors
 
@@ -175,6 +177,107 @@ Formal pass movements:
 | `parameter_type_override_smoke` | Yes | DUT parameterized pulse template + TB flat-instance syntax repair. |
 | `timer_absolute_grid_smoke` | Yes | TB reversed-vsource + named-port instance repair. |
 | `final_step_file_metric_smoke` | No | Flaky timeout recovery; original H1 artifact also passes on serial rerun. |
+
+### E5: H2 v3 General TB Normalization Probe
+
+Additional generated-testbench normalization was tested on the same 33-task
+failure anchor, using H2 v2 artifacts as the base so previously rescued DUT/TB
+pairs were preserved.
+
+New generic TB rewrites:
+
+- `Vx p n vsource ...` -> `Vx (p n) vsource ...`.
+- `vtype=` -> `type=` and `vdc=` -> `dc=`.
+- Pair-block instance syntax such as `module inst ( port node ... )` -> Spectre
+  positional instance using the node column.
+
+Result:
+
+| Metric | H2 v2 | H2 v3 |
+|---|---:|---:|
+| Failure-set Pass@1 | 6/33 | 6/33 |
+| Remaining formal failures | 27 | 27 |
+| `tb_stimulus_or_observable` failures | 3 | 0 |
+| `checker_runtime_or_complex_behavior` failures | 8 | 10 |
+
+Interpretation:
+
+- No new formal PASS was produced.
+- The change is still diagnostically useful: `bbpd_data_edge_alignment_smoke`
+  moved from `too_few_data_edges=0` to `lag_window_updn=8/0`, so the generated
+  TB now exercises the phase detector enough to expose behavior-level mismatch.
+- `gray_counter_one_bit_change_smoke` and `dwa_wraparound_smoke` moved from
+  missing stimulus/sample signatures into `behavior_eval_timeout`, indicating
+  that the remaining blocker is no longer obvious TB syntax.
+
+### E6: Streaming-Checker Diagnostic Probe
+
+Streaming checkers remain disabled by default in the formal scorer. A diagnostic
+run enabled them only on a 7-task timeout-heavy subset to estimate how many
+failures are checker-efficiency artifacts rather than circuit failures.
+
+Result directory:
+
+- `results/latest-system-score-condition-H2-v3-streaming-diagnostic-kimi-2026-04-26`
+
+| Task | Diagnostic result | Note |
+|---|---|---|
+| `pfd_deadzone_smoke` | PASS | `streaming_checker:up_frac=0.0040 dn_frac=0.0000 up_pulses=30`; this matches older non-timeout PASS notes and is likely a checker efficiency false failure in current formal scoring. |
+| `pfd_reset_race_smoke` | FAIL | `up_second=0.8000`, so this remains a real timing-window behavior failure. |
+| `sar_adc_dac_weighted_8b_smoke` | FAIL | `unique_codes=1 avg_abs_err=0.1881 vout_span=0.000`; real behavior failure plus expensive CSV. |
+| `digital_basics_smoke` | FAIL | `invert_match_frac=0.465`; real logic/multi-module mismatch. |
+| `dwa_ptr_gen_no_overlap_smoke` | FAIL | `max_active_cells=0` in H2 v3 formal artifact; generated formal pair is not behaving like the gold-harness template pass. |
+| `gray_counter_one_bit_change_smoke` | FAIL | Still uses the non-streaming checker and times out; needs a dedicated fast checker or formal TB transfer repair. |
+| `dwa_wraparound_smoke` | FAIL | Still uses the non-streaming checker and times out; needs checker/runtime profiling before behavior repair. |
+
+Decision:
+
+- Do not promote streaming checkers globally yet.
+- Treat `pfd_deadzone_smoke` as the first candidate for a validated fast-checker
+  path because historical non-streaming results and streaming notes agree.
+
+### E7: H2 v4 Template Transfer Probe
+
+A small DUT-template probe was run on failure-set tasks with existing reusable
+mechanism templates, using H2 v3 as the anchor and the benchmark gold harness
+for validation.
+
+Probe result:
+
+| Metric | Value |
+|---|---:|
+| Tasks | 6 |
+| Baseline PASS under gold harness | 2/6 |
+| Best template PASS under gold harness | 5/6 |
+| Improved tasks | 3/6 |
+
+Gold-harness outcomes:
+
+| Task | Best outcome | Interpretation |
+|---|---|---|
+| `bad_bus_output_loop` | PASS with `independent_bus_bit_outputs` | DUT template is transferable; formal generated scoring also passes. |
+| `dwa_ptr_gen_smoke` | PASS with DWA pointer template | Gold-harness DUT template works, but formal artifact still lacks a generated testbench, so this is not yet a formal rescue. |
+| `dwa_ptr_gen_no_overlap_smoke` | PASS with no-overlap DWA template | DUT template works under gold harness, but formal generated TB/checker transfer still fails. |
+| `gray_counter_one_bit_change_smoke` | Baseline already PASS under gold harness | Formal failure is generated-TB/checker transfer, not DUT behavior. |
+| `dac_therm_16b_smoke` | Baseline already PASS under gold harness | Formal failure is generated-TB/checker transfer, not DUT behavior. |
+| `pfd_reset_race_smoke` | EVAS timeout for all candidates | Needs runtime/checker/harness optimization before template comparison is meaningful. |
+
+The transferable `bad_bus_output_loop` DUT template was then copied back into a
+formal H2 v4 generated tree and scored on the same 33-task failure anchor.
+
+Formal result:
+
+| Metric | H2 v3 | H2 v4 |
+|---|---:|---:|
+| Failure-set Pass@1 | 6/33 | 7/33 |
+| Remaining formal failures | 27 | 26 |
+| Method-counted robust rescues | 5 | 6 |
+
+New formal rescue:
+
+| Task | Repair mode | Formal note |
+|---|---|---|
+| `bad_bus_output_loop` | DUT bugfix template transfer | `mismatch_frac=0.0000 code_patterns=16 dout_patterns=16 uniform_frac=0.155 stable_rows=2181` |
 
 ## Rejected / Not Yet Formalized
 

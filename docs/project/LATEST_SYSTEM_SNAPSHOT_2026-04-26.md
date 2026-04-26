@@ -174,6 +174,8 @@ Key result:
 | H2 TB/harness repair | 33 H-on-F failures | 2/33 | 2 | Rescued `flash_adc_3b_smoke` and `serializer_frame_alignment_smoke`. |
 | H2 + transferable DUT template probe | 33 H-on-F failures | 4/33 | 3 | Adds `nrz_prbs`; `final_step_file_metric_smoke` is a flaky timeout recovery, not counted as method gain. |
 | H2 v2 TB syntax + combined DUT/TB | 33 H-on-F failures | 6/33 | 5 | Adds `parameter_type_override_smoke` and `timer_absolute_grid_smoke`; `final_step_file_metric_smoke` remains flaky-only. |
+| H2 v3 general TB normalization | 33 H-on-F failures | 6/33 | 5 | No new PASS, but moves several failures from missing-stimulus signatures to checker/behavior signatures. |
+| H2 v4 template formal transfer | 33 H-on-F failures | 7/33 | 6 | Adds `bad_bus_output_loop` via a DUT bugfix template that transfers from gold-harness validation to formal generated scoring. |
 
 Accepted H2 mechanisms so far:
 
@@ -184,6 +186,19 @@ Accepted H2 mechanisms so far:
 | DUT PRBS/LFSR sequence template | `nrz_prbs` | Formal note becomes `transitions=8 complement_err=0.0000 swing=0.600`. |
 | DUT+TB combined parameter pulse repair | `parameter_type_override_smoke` | Formal note becomes `pulses=4 peak=0.720`. |
 | TB reversed-vsource + named-port instance repair | `timer_absolute_grid_smoke` | Formal note becomes `rises_ns=[10.1, 30.1, 50.1, 70.1] max_err_ns=0.000`. |
+| DUT bus-bit bugfix template transfer | `bad_bus_output_loop` | Formal note becomes `mismatch_frac=0.0000 code_patterns=16 dout_patterns=16 uniform_frac=0.155 stable_rows=2181`. |
+
+Additional H2 diagnostic findings:
+
+- `pfd_deadzone_smoke` passes when the existing streaming checker is enabled on
+  the same H2 v3 artifact: `up_frac=0.0040 dn_frac=0.0000 up_pulses=30`. This
+  is currently recorded as a diagnostic result, not a formal score change,
+  because streaming checkers remain disabled by default.
+- A 6-task gold-harness template probe reached `5/6` best PASS, but only
+  `bad_bus_output_loop` transferred cleanly back to formal generated scoring.
+  `dwa_ptr_gen_no_overlap_smoke`, `gray_counter_one_bit_change_smoke`, and
+  `dac_therm_16b_smoke` are now strong evidence for a generated-TB/checker
+  transfer bottleneck rather than missing DUT templates.
 
 Why the remaining H cases are not fixed yet:
 
