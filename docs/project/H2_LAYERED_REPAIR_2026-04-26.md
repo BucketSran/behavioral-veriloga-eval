@@ -217,9 +217,10 @@ Interpretation:
 
 ### E6: Streaming-Checker Diagnostic Probe
 
-Streaming checkers remain disabled by default in the formal scorer. A diagnostic
-run enabled them only on a 7-task timeout-heavy subset to estimate how many
-failures are checker-efficiency artifacts rather than circuit failures.
+At this historical E6 checkpoint, streaming checkers were still disabled by
+default in the formal scorer. A diagnostic run enabled them only on a 7-task
+timeout-heavy subset to estimate how many failures are checker-efficiency
+artifacts rather than circuit failures.
 
 Result directory:
 
@@ -237,7 +238,8 @@ Result directory:
 
 Decision:
 
-- Do not promote streaming checkers globally yet.
+- Historical decision at E6: do not promote streaming checkers globally yet.
+  This is superseded by the E11 parity proof and promotion below.
 - Treat `pfd_deadzone_smoke` as the first candidate for a validated fast-checker
   path because historical non-streaming results and streaming notes agree.
 
@@ -327,7 +329,7 @@ Interpretation:
 ### E9: H2 v6 Gray Fast-Checker Candidate
 
 `gray_counter_one_bit_change_smoke` was still failing in V5 only because the
-default checker timed out after reading a 28 MB CSV into Python objects. A
+row-based checker timed out after reading a 28 MB CSV into Python objects. A
 streaming equivalent checker was added behind the same experimental streaming
 flag. It performs the same public checks:
 
@@ -410,8 +412,8 @@ Parity proof summary:
 
 The fixture proof initially found one real mismatch:
 `gray_counter_one_bit_change_smoke` sampled one row earlier in the streaming
-checker than in the default checker. The streaming checker now matches the
-default `edge_idx + 8` settle rule.
+checker than in the row-based checker. The streaming checker now matches the
+original `edge_idx + 8` settle rule.
 
 After this parity fix, H2 v7 was re-scored on the same 33-task failure set:
 
@@ -431,6 +433,13 @@ Current fast-checker conclusion:
   pass/fail fixtures and no observed mismatch on comparable real CSVs.
 - The conservative paper-facing H2 v7 score should be `10/33`, not the earlier
   pre-parity `11/33`.
+- The parity-validated fast checkers are promoted to the default scoring path.
+  `VAEVAS_DISABLE_VALIDATED_FAST_CHECKERS=1` keeps the original row-based path
+  available for audit.
+- Default-path validation result:
+  `results/latest-system-score-condition-H2-on-F-failure33-v7-fastdefault-kimi-2026-04-26`
+  reaches `10/33`, with the same PASS set as the explicit parity-fixed
+  streaming run.
 - The remaining risk is large real-CSV coverage: most original checkers time
   out, so those rows justify the fast path but do not prove equivalence by
   themselves.

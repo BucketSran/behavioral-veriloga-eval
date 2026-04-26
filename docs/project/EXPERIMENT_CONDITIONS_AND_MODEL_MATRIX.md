@@ -116,9 +116,11 @@ when refreshing `A/B/C/D/E/F/G/H` numbers:
   preserves only contract/gold observables needed by the checker.
 - `score.py --save-policy debug` keeps broader observables for repair/debug
   runs where extra signals help failure attribution.
-- Experimental streaming checkers are disabled by default and require
-  `VAEVAS_ENABLE_EXPERIMENTAL_STREAMING_CHECKERS=1`; they should not be used in
-  formal scoring unless equivalence is separately validated.
+- Parity-validated streaming/fast checkers are enabled by default. Use
+  `VAEVAS_DISABLE_VALIDATED_FAST_CHECKERS=1` to force the original row-based
+  checker path for audit. Unvalidated experimental streaming checkers still
+  require `VAEVAS_ENABLE_EXPERIMENTAL_STREAMING_CHECKERS=1` and should not be
+  used in formal scoring unless equivalence is separately validated.
 - Latest partial refresh status is tracked in
   `docs/project/LATEST_SYSTEM_SNAPSHOT_2026-04-26.md`.
 

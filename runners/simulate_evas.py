@@ -433,7 +433,7 @@ def _stream_gray_counter_one_bit_change_csv(csv_path: Path) -> tuple[float, list
             if row_idx < reset_prefix_rows and rst > 0.45:
                 rst_prefix_high = True
             if prev_clk is not None and prev_clk <= 0.45 < clk:
-                # Match the default checker's settle=min(edge_idx + 8, last_row).
+                # Match the row-based checker's settle=min(edge_idx + 8, last_row).
                 # The current edge row is processed below, so start at 9.
                 pending_offsets.append(9)
                 edge_count += 1
@@ -626,25 +626,49 @@ def _stream_multimod_divider_ratio_switch_csv(csv_path: Path) -> tuple[float, li
     return 1.0, [";".join(details)]
 
 
+STREAMING_BEHAVIOR_CHECKS = {
+    "pfd_deadzone_smoke": _stream_pfd_deadzone_csv,
+    "pfd_reset_race_smoke": _stream_pfd_reset_race_csv,
+    "dac_binary_clk_4b_smoke": _stream_dac_binary_clk_4b_csv,
+    "sar_adc_dac_weighted_8b_smoke": _stream_sar_adc_dac_weighted_8b_csv,
+    "dwa_ptr_gen_no_overlap_smoke": _stream_dwa_ptr_gen_no_overlap_csv,
+    "digital_basics_smoke": _stream_not_gate_csv,
+    "gray_counter_one_bit_change_smoke": _stream_gray_counter_one_bit_change_csv,
+    "dwa_wraparound_smoke": _stream_dwa_wraparound_csv,
+    "gain_extraction_smoke": _stream_gain_extraction_csv,
+    "multimod_divider_ratio_switch_smoke": _stream_multimod_divider_ratio_switch_csv,
+}
+
+VALIDATED_FAST_CHECKER_TASKS = frozenset(STREAMING_BEHAVIOR_CHECKS)
+
+
+def _env_enabled(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _streaming_notes_require_row_fallback(notes: list[str]) -> bool:
+    """Avoid turning observable/interface mismatches into behavior failures."""
+    fallback_prefixes = (
+        "missing ",
+        "expected ",
+    )
+    return any(note.startswith(fallback_prefixes) for note in notes)
+
+
 def evaluate_streaming_behavior(task_id: str, csv_path: Path) -> tuple[float, list[str]] | None:
-    if os.environ.get("VAEVAS_ENABLE_EXPERIMENTAL_STREAMING_CHECKERS") != "1":
-        return None
-    streaming_checks = {
-        "pfd_deadzone_smoke": _stream_pfd_deadzone_csv,
-        "pfd_reset_race_smoke": _stream_pfd_reset_race_csv,
-        "dac_binary_clk_4b_smoke": _stream_dac_binary_clk_4b_csv,
-        "sar_adc_dac_weighted_8b_smoke": _stream_sar_adc_dac_weighted_8b_csv,
-        "dwa_ptr_gen_no_overlap_smoke": _stream_dwa_ptr_gen_no_overlap_csv,
-        "digital_basics_smoke": _stream_not_gate_csv,
-        "gray_counter_one_bit_change_smoke": _stream_gray_counter_one_bit_change_csv,
-        "dwa_wraparound_smoke": _stream_dwa_wraparound_csv,
-        "gain_extraction_smoke": _stream_gain_extraction_csv,
-        "multimod_divider_ratio_switch_smoke": _stream_multimod_divider_ratio_switch_csv,
-    }
-    checker = streaming_checks.get(task_id)
+    force_streaming = _env_enabled("VAEVAS_ENABLE_EXPERIMENTAL_STREAMING_CHECKERS")
+    if not force_streaming:
+        if _env_enabled("VAEVAS_DISABLE_VALIDATED_FAST_CHECKERS"):
+            return None
+        if task_id not in VALIDATED_FAST_CHECKER_TASKS:
+            return None
+
+    checker = STREAMING_BEHAVIOR_CHECKS.get(task_id)
     if checker is None:
         return None
     score, notes = checker(csv_path)
+    if not force_streaming and _streaming_notes_require_row_fallback(notes):
+        return None
     return score, [f"streaming_checker:{note}" for note in notes]
 
 

@@ -11,8 +11,8 @@ equivalents of the existing row-based checkers?
 
 A streaming checker can be promoted only when it satisfies both conditions:
 
-1. On the same `tran.csv`, the default checker and streaming checker return the
-   same pass/fail score whenever the default checker completes.
+1. On the same `tran.csv`, the row-based checker and streaming checker return
+   the same pass/fail score whenever the row-based checker completes.
 2. Large real-result CSVs may show default-checker timeouts, but timeout rows
    are not counted as parity evidence.
 
@@ -22,7 +22,7 @@ Added `runners/check_streaming_checker_parity.py`.
 
 The script runs both paths in isolated child processes:
 
-- default path: `VAEVAS_ENABLE_EXPERIMENTAL_STREAMING_CHECKERS` unset
+- row-based path: `VAEVAS_DISABLE_VALIDATED_FAST_CHECKERS=1`
 - streaming path: `VAEVAS_ENABLE_EXPERIMENTAL_STREAMING_CHECKERS=1`
 
 It writes `parity.csv`, `parity.json`, and `README.md` under the selected result
@@ -65,8 +65,8 @@ Covered checker tasks:
 
 During fixture parity, an initial mismatch was found in
 `gray_counter_one_bit_change_smoke`: the streaming checker sampled one row
-earlier than the default checker. This was fixed by aligning the streaming
-settle offset with the default `edge_idx + 8` sampling rule.
+earlier than the row-based checker. This was fixed by aligning the streaming
+settle offset with the original `edge_idx + 8` sampling rule.
 
 ## Real-CSV Smoke Parity
 
@@ -101,7 +101,7 @@ Result:
 
 Interpretation:
 
-- No mismatch was observed where the default checker completed.
+- No mismatch was observed where the row-based checker completed.
 - Most large real CSVs still time out on the default row-based checker, so they
   are throughput evidence, not direct parity evidence.
 
@@ -138,6 +138,37 @@ fast-checker rescues still hold: `dwa_ptr_gen_no_overlap_smoke`,
 The streaming checkers are now parity-tested on synthetic fixtures and have no
 observed mismatch on comparable real CSVs. The conservative paper-facing result
 should use the parity-fixed H2 v7 score, not the earlier pre-parity `11/33`
-number. Remaining risk is real-CSV coverage: many default checkers time out, so
-large-file equivalence cannot be exhaustively proven without either stronger
+number. Remaining risk is real-CSV coverage: many row-based checkers time out,
+so large-file equivalence cannot be exhaustively proven without either stronger
 sampling fixtures or a slower no-timeout audit.
+
+## Promotion
+
+The parity-validated streaming checkers are now enabled by default in
+`runners/simulate_evas.py`.
+
+Safety controls:
+
+- Set `VAEVAS_DISABLE_VALIDATED_FAST_CHECKERS=1` to force the original row-based
+  checker path for audit or future parity tests.
+- Set `VAEVAS_ENABLE_EXPERIMENTAL_STREAMING_CHECKERS=1` only when deliberately
+  testing unpromoted/experimental streaming behavior.
+- If the default fast path reports a missing/unsupported observable contract,
+  scoring falls back to the row-based checker instead of treating the interface
+  mismatch as a behavior failure.
+
+Default-path validation:
+
+```bash
+python3 runners/score.py \
+  --model kimi-k2.5 \
+  --generated-dir generated-condition-H2-on-F-failure33-v5-streaming-kimi-2026-04-26 \
+  --output-dir results/latest-system-score-condition-H2-on-F-failure33-v7-fastdefault-kimi-2026-04-26 \
+  --timeout-s 160 \
+  --workers 8 \
+  --save-policy contract \
+  --task <33 H-on-F failures>
+```
+
+Result: `10/33`, matching the parity-fixed explicit streaming result exactly.
+The PASS task set is unchanged.

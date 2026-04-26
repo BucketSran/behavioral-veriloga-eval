@@ -8,7 +8,7 @@ system changes:
 - per-task EVAS output isolation for parallel scoring
 - `--resume` fingerprinted scoring cache
 - `--save-policy contract`
-- experimental streaming checkers disabled by default
+- parity-validated streaming/fast checkers enabled by default
 - DFF checker sampling-window fix
 - signature-gated condition-H prototype
 
@@ -180,6 +180,7 @@ Key result:
 | H2 v6 fast-checker candidate | 33 H-on-F failures | 10/33 | 9 candidate rescues | Adds `gray_counter_one_bit_change_smoke` via a streaming equivalent of the existing Gray-code checker. |
 | H2 v7 fast-checker candidate, pre-parity | 33 H-on-F failures | 11/33 | 10 candidate rescues | Historical diagnostic result before checker-parity validation. |
 | H2 v7 fast-checker candidate, parity-fixed | 33 H-on-F failures | 10/33 | 10 candidate rescues | Parity proof fixed a Gray streaming sampling offset; `final_step_file_metric_smoke` fell back to its known timeout-flaky behavior and remains non-method-counted. |
+| H2 v7 fast-checker default | 33 H-on-F failures | 10/33 | 10 candidate rescues | Validated fast checkers are now enabled by default; result matches the parity-fixed explicit streaming run. |
 
 Accepted H2 mechanisms so far:
 
@@ -196,8 +197,8 @@ Additional H2 diagnostic findings:
 
 - `pfd_deadzone_smoke` passes when the existing streaming checker is enabled on
   the same H2 v3 artifact: `up_frac=0.0040 dn_frac=0.0000 up_pulses=30`. This
-  is currently recorded as a diagnostic result, not a formal score change,
-  because streaming checkers remain disabled by default.
+  was originally recorded as a diagnostic result before the E11 parity proof and
+  fast-checker promotion.
 - A 6-task gold-harness template probe reached `5/6` best PASS, but only
   `bad_bus_output_loop` transferred cleanly back to formal generated scoring.
   `dwa_ptr_gen_no_overlap_smoke`, `gray_counter_one_bit_change_smoke`, and
@@ -223,6 +224,15 @@ Additional H2 diagnostic findings:
   `docs/project/STREAMING_CHECKER_PARITY_2026-04-26.md`: synthetic fixture
   parity is `20/20` matches, real H2 CSV smoke parity has `2/2` comparable
   matches and `11` original-checker timeouts.
+- After parity validation, the validated fast checkers are now the default
+  behavior-scoring path. Set `VAEVAS_DISABLE_VALIDATED_FAST_CHECKERS=1` to run
+  the original row-based checker path for audit. Use
+  `VAEVAS_ENABLE_EXPERIMENTAL_STREAMING_CHECKERS=1` only for explicit
+  experimental/diagnostic streaming runs.
+- Default-path validation result:
+  `results/latest-system-score-condition-H2-on-F-failure33-v7-fastdefault-kimi-2026-04-26`
+  reaches `10/33`; its PASS set is identical to
+  `results/latest-system-score-condition-H2-on-F-failure33-v7-streaming-parityfix-kimi-2026-04-26`.
 
 Why the remaining H cases are not fixed yet:
 

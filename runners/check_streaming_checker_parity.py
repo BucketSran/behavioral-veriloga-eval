@@ -5,12 +5,12 @@ This script is intentionally separate from normal scoring.  It is a validation
 tool for the experimental streaming-checker path:
 
 1. find existing ``tran.csv`` files for supported streaming tasks;
-2. run the default checker with streaming disabled;
+2. run the row-based checker with validated fast checkers disabled;
 3. run the streaming checker on the same CSV;
-4. require exact score parity whenever the default checker completes.
+4. require exact score parity whenever the row-based checker completes.
 
-If the default checker times out, the row is reported as ``original_timeout`` and
-is not counted as parity evidence.
+If the row-based checker times out, the row is reported as
+``original_timeout`` and is not counted as parity evidence.
 """
 from __future__ import annotations
 
@@ -71,8 +71,10 @@ def _worker(task_id: str, csv_path: str, mode: str, queue: mp.Queue) -> None:
     try:
         if mode == "original":
             os.environ.pop("VAEVAS_ENABLE_EXPERIMENTAL_STREAMING_CHECKERS", None)
+            os.environ["VAEVAS_DISABLE_VALIDATED_FAST_CHECKERS"] = "1"
             queue.put(("ok", evaluate_behavior(task_id, Path(csv_path))))
         elif mode == "streaming":
+            os.environ.pop("VAEVAS_DISABLE_VALIDATED_FAST_CHECKERS", None)
             os.environ["VAEVAS_ENABLE_EXPERIMENTAL_STREAMING_CHECKERS"] = "1"
             result = evaluate_streaming_behavior(task_id, Path(csv_path))
             if result is None:
@@ -367,7 +369,7 @@ def _candidate_csvs(result_roots: list[Path], tasks: set[str], max_cases_per_tas
 
     selected: list[tuple[str, Path, str]] = []
     for task_id in sorted(by_task):
-        # Prefer smaller CSVs for parity because the default checker must finish
+        # Prefer smaller CSVs for parity because the row-based checker must finish
         # for a row to count as evidence.
         ordered = sorted(by_task[task_id], key=lambda path: path.stat().st_size)
         for csv_path in ordered[:max_cases_per_task]:
@@ -428,7 +430,7 @@ def _write_outputs(rows: list[dict[str, Any]], summary: dict[str, Any], output_d
         lines.append("- No pass/fail mismatches were observed on comparable cases.")
     else:
         lines.append("- At least one mismatch was observed; do not promote the streaming path yet.")
-    lines.append("- Rows where the default checker timed out are not parity evidence; they show where streaming improves evaluator throughput.")
+    lines.append("- Rows where the row-based checker timed out are not parity evidence; they show where streaming improves evaluator throughput.")
     (output_dir / "README.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 

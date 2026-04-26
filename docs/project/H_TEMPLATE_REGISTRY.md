@@ -62,4 +62,5 @@ Every new template family should record:
 - Do not report single-case exploratory templates as universal method evidence.
 - Do not enable experimental streaming checkers in formal scoring unless parity
   is validated and recorded. Current proof is in
-  `docs/project/STREAMING_CHECKER_PARITY_2026-04-26.md`.
+  `docs/project/STREAMING_CHECKER_PARITY_2026-04-26.md`; the validated subset is
+  now promoted to the default scoring path.
