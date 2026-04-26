@@ -21,6 +21,7 @@ Output failure datasets:
 
 - `datasets/failure_sets/H2_ON_F_FAILURE33_2026-04-26`
 - `datasets/failure_sets/H2_ON_F_FAILURE33_PLUS_DUTPROBE_2026-04-26`
+- `datasets/failure_sets/H2_ON_F_FAILURE33_V2_2026-04-26`
 
 ## Implemented Executors
 
@@ -144,12 +145,43 @@ Formal pass movements:
 | `nrz_prbs` | Yes | DUT sequence/LFSR template transfers to formal score. |
 | `final_step_file_metric_smoke` | No | No H2 repair was applied; original H1 artifact also passes when re-scored serially, so this is a checker-timeout/flakiness recovery. |
 
+### E4: H2 v2 TB Syntax + Combined DUT/TB Repair
+
+Additional TB/harness syntax rewrites:
+
+- `inst n1 n2 module params` -> `inst (n1 n2) module params`.
+- `vsource name (p n) vdc=x` -> `name (p n) vsource dc=x`.
+- Verilog named-port instance blocks `module inst (.PORT(node)) params` -> Spectre positional instance using the DUT module port order.
+
+Additional combined DUT transfer:
+
+- `parameter_type_override_smoke` uses the previously validated `periodic_parameterized_pulses` DUT template plus the flat-instance TB repair.
+
+Result on the same 33-task failure set:
+
+| Metric | Value |
+|---|---:|
+| Failure-set Pass@1 | 6/33 |
+| Method-counted robust rescues | 5 |
+| Flaky timeout recovery | 1 |
+
+Formal pass movements:
+
+| Task | Counted as H2 method gain? | Repair mode |
+|---|---|---|
+| `flash_adc_3b_smoke` | Yes | H DUT + TB `alter` inline + instance syntax + edge budget. |
+| `serializer_frame_alignment_smoke` | Yes | TB stop/window repair. |
+| `nrz_prbs` | Yes | DUT PRBS/LFSR sequence template. |
+| `parameter_type_override_smoke` | Yes | DUT parameterized pulse template + TB flat-instance syntax repair. |
+| `timer_absolute_grid_smoke` | Yes | TB reversed-vsource + named-port instance repair. |
+| `final_step_file_metric_smoke` | No | Flaky timeout recovery; original H1 artifact also passes on serial rerun. |
+
 ## Rejected / Not Yet Formalized
 
 | Candidate | Outcome | Decision |
 |---|---|---|
 | Broad stop extension for any pulse source | Wasted runtime on `dac_therm_16b_smoke` without pass | Rejected; replaced by signature-gated stop extension. |
-| `parameter_type_override_smoke` DUT template | Gold-harness PASS but formal generated TB still FAIL | Not counted; needs TB/formal-transfer repair. |
+| `parameter_type_override_smoke` DUT template alone | Gold-harness PASS but formal generated TB still FAIL | Promoted only after combined DUT+TB repair in E4. |
 | `dac_therm_16b_smoke` instance rewrite | Output became active but formal still FAIL | Keep as diagnostic progress, not rescue. |
 | `final_step_file_metric_smoke` PASS | Original H1 also passes on serial rerun | Mark as flaky timeout, not method gain. |
 
@@ -160,7 +192,8 @@ H2 has now demonstrated real value on the failure set, but not yet enough for fu
 - TB/harness repair can rescue formal failures that H1 could not transfer (`flash_adc_3b_smoke`).
 - Stop/window repair can rescue at least one formal sequence task (`serializer_frame_alignment_smoke`).
 - DUT mechanism templates can transfer when the generated/formal harness is compatible (`nrz_prbs`).
-- Some gold-harness successes do not transfer because the generated TB remains wrong (`parameter_type_override_smoke`, `dac_therm_16b_smoke`).
+- DUT and TB repair sometimes must be combined; `parameter_type_override_smoke` fails if either layer is left unfixed.
+- Some gold-harness successes still do not transfer because the generated TB remains wrong (`dac_therm_16b_smoke`).
 - Timeout failures must be treated carefully because some recover on rerun without any repair.
 
 ## 2x2 Isolation Probe

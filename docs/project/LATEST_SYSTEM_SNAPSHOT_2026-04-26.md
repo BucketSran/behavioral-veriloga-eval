@@ -173,6 +173,7 @@ Key result:
 |---|---:|---:|---:|---|
 | H2 TB/harness repair | 33 H-on-F failures | 2/33 | 2 | Rescued `flash_adc_3b_smoke` and `serializer_frame_alignment_smoke`. |
 | H2 + transferable DUT template probe | 33 H-on-F failures | 4/33 | 3 | Adds `nrz_prbs`; `final_step_file_metric_smoke` is a flaky timeout recovery, not counted as method gain. |
+| H2 v2 TB syntax + combined DUT/TB | 33 H-on-F failures | 6/33 | 5 | Adds `parameter_type_override_smoke` and `timer_absolute_grid_smoke`; `final_step_file_metric_smoke` remains flaky-only. |
 
 Accepted H2 mechanisms so far:
 
@@ -181,6 +182,8 @@ Accepted H2 mechanisms so far:
 | TB `alter` inline + instance-syntax repair + edge budget | `flash_adc_3b_smoke` | Formal note becomes `codes=8/8 reversals=0`. |
 | TB stop/window repair | `serializer_frame_alignment_smoke` | Formal note becomes `mismatch_total=0`. |
 | DUT PRBS/LFSR sequence template | `nrz_prbs` | Formal note becomes `transitions=8 complement_err=0.0000 swing=0.600`. |
+| DUT+TB combined parameter pulse repair | `parameter_type_override_smoke` | Formal note becomes `pulses=4 peak=0.720`. |
+| TB reversed-vsource + named-port instance repair | `timer_absolute_grid_smoke` | Formal note becomes `rises_ns=[10.1, 30.1, 50.1, 70.1] max_err_ns=0.000`. |
 
 Why the remaining H cases are not fixed yet:
 

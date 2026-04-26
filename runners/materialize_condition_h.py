@@ -231,6 +231,132 @@ def _rewrite_verilog_style_instances(text: str) -> tuple[str, list[str]]:
     return "\n".join(updated_lines) + ("\n" if text.endswith("\n") else ""), repairs
 
 
+def _module_port_orders(sample_dir: Path) -> dict[str, list[str]]:
+    orders: dict[str, list[str]] = {}
+    for va_path in sample_dir.glob("*.va"):
+        text = va_path.read_text(encoding="utf-8", errors="ignore")
+        for match in re.finditer(r"\bmodule\s+([A-Za-z_]\w*)\s*\((.*?)\)\s*;", text, flags=re.S):
+            ports = [item.strip() for item in match.group(2).replace("\n", " ").split(",")]
+            orders[match.group(1)] = [port for port in ports if port]
+    return orders
+
+
+def _rewrite_flat_instance_without_parens(text: str) -> tuple[str, list[str]]:
+    """Rewrite ``inst n1 n2 module params`` into ``inst (n1 n2) module params``."""
+    modules = {
+        Path(match).stem
+        for match in re.findall(r'(?m)^\s*ahdl_include\s+"(?:\./)?([^"]+\.va)"', text, flags=re.I)
+    }
+    if not modules:
+        return text, []
+
+    repairs: list[str] = []
+    updated: list[str] = []
+    reserved = {
+        "ahdl_include",
+        "alter",
+        "global",
+        "gnd",
+        "parameters",
+        "save",
+        "simulator",
+        "simulatoroptions",
+        "tran",
+        "vsource",
+    }
+    for line in text.splitlines():
+        stripped = line.strip()
+        tokens = stripped.split()
+        if not tokens or tokens[0].lower() in reserved or "(" in stripped or stripped.startswith("//"):
+            updated.append(line)
+            continue
+        module_idx = next((idx for idx, token in enumerate(tokens) if token in modules), None)
+        if module_idx is None or module_idx < 2:
+            updated.append(line)
+            continue
+        indent = line[: len(line) - len(line.lstrip())]
+        inst = tokens[0]
+        nodes = " ".join(tokens[1:module_idx])
+        module_name = tokens[module_idx]
+        params = " ".join(tokens[module_idx + 1 :])
+        suffix = f" {params}" if params else ""
+        updated.append(f"{indent}{inst} ({nodes}) {module_name}{suffix}")
+        repairs.append(f"rewrite_flat_instance={module_name}:{inst}")
+
+    return "\n".join(updated) + ("\n" if text.endswith("\n") else ""), repairs
+
+
+def _rewrite_reversed_vsource(text: str) -> tuple[str, list[str]]:
+    """Rewrite ``vsource name (p n) vdc=x`` into Spectre source-instance form."""
+    repairs: list[str] = []
+    updated: list[str] = []
+    for line in text.splitlines():
+        match = re.match(r"^(\s*)vsource\s+([A-Za-z_]\w*)\s+\(([^)]*)\)\s+(.*)$", line, flags=re.I)
+        if not match:
+            updated.append(line)
+            continue
+        indent, name, nodes, params = match.groups()
+        params = re.sub(r"\bvdc\s*=", "dc=", params, flags=re.I)
+        updated.append(f"{indent}{name} ({nodes.strip()}) vsource {params.strip()}")
+        repairs.append(f"rewrite_reversed_vsource={name}")
+    return "\n".join(updated) + ("\n" if text.endswith("\n") else ""), repairs
+
+
+def _rewrite_named_port_instance_blocks(sample_dir: Path, text: str) -> tuple[str, list[str]]:
+    """Rewrite simple Verilog named-port instance blocks into Spectre instances."""
+    port_orders = _module_port_orders(sample_dir)
+    if not port_orders:
+        return text, []
+
+    lines = text.splitlines()
+    output: list[str] = []
+    repairs: list[str] = []
+    idx = 0
+    while idx < len(lines):
+        line = lines[idx]
+        match = re.match(r"^(\s*)([A-Za-z_]\w*)\s+([A-Za-z_]\w*)\s*\(\s*$", line)
+        if not match or match.group(2) not in port_orders:
+            output.append(line)
+            idx += 1
+            continue
+
+        indent, module_name, inst_name = match.groups()
+        block_lines: list[str] = []
+        idx += 1
+        while idx < len(lines):
+            block_lines.append(lines[idx])
+            if re.match(r"^\s*\)\s*$", lines[idx]):
+                idx += 1
+                break
+            idx += 1
+
+        params: list[str] = []
+        while idx < len(lines):
+            stripped = lines[idx].strip()
+            if re.match(r"^[A-Za-z_]\w*\s*=", stripped):
+                params.append(stripped)
+                idx += 1
+                continue
+            break
+
+        mapping: dict[str, str] = {}
+        for block_line in block_lines:
+            for port, node in re.findall(r"\.([A-Za-z_]\w*)\s*\(\s*([^)]+?)\s*\)", block_line):
+                mapping[port] = node.strip()
+        if not mapping:
+            output.append(line)
+            output.extend(block_lines)
+            output.extend(f"{indent}{param}" for param in params)
+            continue
+
+        ordered_nodes = [mapping.get(port, port) for port in port_orders[module_name]]
+        param_suffix = f" {' '.join(params)}" if params else ""
+        output.append(f"{indent}{inst_name} ({' '.join(ordered_nodes)}) {module_name}{param_suffix}")
+        repairs.append(f"rewrite_named_instance={module_name}:{inst_name}")
+
+    return "\n".join(output) + ("\n" if text.endswith("\n") else ""), repairs
+
+
 def _needs_edge_budget_repair(notes_text: str) -> bool:
     lowered = notes_text.lower()
     return any(
@@ -256,8 +382,14 @@ def _repair_generated_tb(sample_dir: Path, min_pulse_edges: int, notes_text: str
     tb_path = tb_files[0]
     original = tb_path.read_text(encoding="utf-8", errors="ignore")
     updated, repairs = _merge_alter_vsource_lines(original)
+    updated, source_repairs = _rewrite_reversed_vsource(updated)
+    repairs.extend(source_repairs)
     updated, instance_repairs = _rewrite_verilog_style_instances(updated)
     repairs.extend(instance_repairs)
+    updated, flat_repairs = _rewrite_flat_instance_without_parens(updated)
+    repairs.extend(flat_repairs)
+    updated, named_repairs = _rewrite_named_port_instance_blocks(sample_dir, updated)
+    repairs.extend(named_repairs)
     if _needs_edge_budget_repair(notes_text):
         updated, edge_repairs = _ensure_pulse_edge_budget(updated, min_pulse_edges)
         repairs.extend(edge_repairs)
