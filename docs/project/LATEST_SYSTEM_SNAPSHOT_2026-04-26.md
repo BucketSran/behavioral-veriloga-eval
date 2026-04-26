@@ -162,6 +162,26 @@ makes the re-scored G baseline pass.
 end-to-end pass after materialization. The generated testbench still produces
 `too_few_edges=0`, so the corrected DUT is not properly exercised.
 
+## H2 Failure-Set Layered Repair Probe
+
+H2 was tested only on the 33-task `H-on-F-stable` failure set, not on full92.
+See `docs/project/H2_LAYERED_REPAIR_2026-04-26.md`.
+
+Key result:
+
+| Probe | Scope | Pass@1 on failure set | Method-counted robust rescues | Notes |
+|---|---:|---:|---:|---|
+| H2 TB/harness repair | 33 H-on-F failures | 2/33 | 2 | Rescued `flash_adc_3b_smoke` and `serializer_frame_alignment_smoke`. |
+| H2 + transferable DUT template probe | 33 H-on-F failures | 4/33 | 3 | Adds `nrz_prbs`; `final_step_file_metric_smoke` is a flaky timeout recovery, not counted as method gain. |
+
+Accepted H2 mechanisms so far:
+
+| Mechanism | Rescued task | Evidence |
+|---|---|---|
+| TB `alter` inline + instance-syntax repair + edge budget | `flash_adc_3b_smoke` | Formal note becomes `codes=8/8 reversals=0`. |
+| TB stop/window repair | `serializer_frame_alignment_smoke` | Formal note becomes `mismatch_total=0`. |
+| DUT PRBS/LFSR sequence template | `nrz_prbs` | Formal note becomes `transitions=8 complement_err=0.0000 swing=0.600`. |
+
 Why the remaining H cases are not fixed yet:
 
 | Failure bucket | Example | EVAS note | Why H does not repair it yet |

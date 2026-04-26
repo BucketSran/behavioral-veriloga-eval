@@ -175,7 +175,7 @@ def _classify(result: dict[str, Any]) -> dict[str, str]:
         or re.search(r"\bonly_\d+_codes", low)
         or "code_span=" in low
         or "no vdac activity" in low
-        or "max_vout=0.000" in low
+        or "max_vout=" in low
         or "diff_range=0.000" in low
     ):
         return {
@@ -189,7 +189,7 @@ def _classify(result: dict[str, Any]) -> dict[str, str]:
                     r"only_\d+_codes[^\n]+",
                     r"code_span=[^\n]+",
                     r"no vdac activity[^\n]+",
-                    r"max_vout=0\.000",
+                    r"max_vout=[^\n]+",
                     r"diff_range=0\.000",
                 ],
             ),

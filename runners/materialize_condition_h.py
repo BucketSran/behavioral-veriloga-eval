@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 from pathlib import Path
 
@@ -98,6 +99,173 @@ def _replace_dut(sample_dir: Path, best_dut_path: Path) -> Path:
     return target
 
 
+_TIME_UNITS = {
+    "f": 1e-15,
+    "p": 1e-12,
+    "n": 1e-9,
+    "u": 1e-6,
+    "m": 1e-3,
+    "": 1.0,
+}
+
+
+def _parse_time_s(token: str) -> float | None:
+    match = re.fullmatch(r"\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)\s*([fpnum]?)s?\s*", token, re.I)
+    if not match:
+        return None
+    value = float(match.group(1))
+    unit = match.group(2).lower()
+    return value * _TIME_UNITS.get(unit, 1.0)
+
+
+def _format_time_s(value_s: float) -> str:
+    for suffix, scale in (("u", 1e-6), ("n", 1e-9), ("p", 1e-12)):
+        scaled = value_s / scale
+        if 1 <= scaled < 1000:
+            return f"{scaled:.6g}{suffix}"
+    return f"{value_s:.6g}"
+
+
+def _extract_assignment(text: str, key: str) -> str | None:
+    match = re.search(rf"\b{re.escape(key)}\s*=\s*([^\s\]]+)", text, flags=re.I)
+    return match.group(1) if match else None
+
+
+def _merge_alter_vsource_lines(text: str) -> tuple[str, list[str]]:
+    """Inline simple Spectre ``alter`` source-waveform statements.
+
+    Several LLM-generated testbenches create a DC vsource and later write
+    ``alter SRC type=pwl`` or ``alter SRC type=pulse``.  EVAS currently treats
+    the original DC source as the effective stimulus, so the checker observes a
+    flat CSV.  This rewrite is intentionally narrow: it only rewrites source
+    instances that already exist in the same testbench and removes the matched
+    alter lines.
+    """
+    lines = text.splitlines()
+    alter_params: dict[str, str] = {}
+    rewritten: list[str] = []
+    repairs: list[str] = []
+
+    for line in lines:
+        match = re.match(r"\s*alter\s+([A-Za-z_][\w.]*)\s+(.+?)\s*$", line, flags=re.I)
+        if match:
+            alter_params[match.group(1)] = match.group(2).strip()
+        else:
+            rewritten.append(line)
+
+    if not alter_params:
+        return text, repairs
+
+    final_lines: list[str] = []
+    consumed: set[str] = set()
+    for line in rewritten:
+        match = re.match(r"^(\s*)([A-Za-z_][\w.]*)\s+(.+?\bvsource\b)(.*)$", line, flags=re.I)
+        if not match:
+            final_lines.append(line)
+            continue
+        indent, source_name, prefix, tail = match.groups()
+        params = alter_params.get(source_name)
+        if not params:
+            final_lines.append(line)
+            continue
+        final_lines.append(f"{indent}{source_name} {prefix} {params}")
+        consumed.add(source_name)
+        repairs.append(f"inline_alter_source={source_name}")
+
+    for source_name in sorted(set(alter_params) - consumed):
+        repairs.append(f"unmatched_alter_source={source_name}")
+
+    return "\n".join(final_lines) + ("\n" if text.endswith("\n") else ""), repairs
+
+
+def _ensure_pulse_edge_budget(text: str, min_pulse_edges: int) -> tuple[str, list[str]]:
+    """Extend short pulse-driven simulations enough for edge-count checkers."""
+    if min_pulse_edges <= 0:
+        return text, []
+    period_tokens = re.findall(r"\bperiod\s*=\s*([^\s\]]+)", text, flags=re.I)
+    periods = [value for value in (_parse_time_s(token) for token in period_tokens) if value and value > 0]
+    if not periods:
+        return text, []
+    period_s = min(periods)
+
+    stop_match = re.search(r"(?m)^(\s*tran\s+\S+.*?\bstop\s*=\s*)([^\s]+)(.*)$", text, flags=re.I)
+    if not stop_match:
+        return text, []
+    old_stop_s = _parse_time_s(stop_match.group(2))
+    if old_stop_s is None:
+        return text, []
+
+    required_stop_s = period_s * (min_pulse_edges + 1)
+    if old_stop_s >= required_stop_s:
+        return text, []
+
+    new_stop = _format_time_s(required_stop_s)
+    updated = (
+        text[: stop_match.start()]
+        + f"{stop_match.group(1)}{new_stop}{stop_match.group(3)}"
+        + text[stop_match.end() :]
+    )
+    return updated, [f"extend_tran_stop={stop_match.group(2)}->{new_stop}"]
+
+
+def _rewrite_verilog_style_instances(text: str) -> tuple[str, list[str]]:
+    """Rewrite simple ``module inst (...)`` lines into Spectre instance syntax."""
+    modules = {
+        Path(match).stem
+        for match in re.findall(r'(?m)^\s*ahdl_include\s+"([^"]+\.va)"', text, flags=re.I)
+    }
+    if not modules:
+        return text, []
+
+    repairs: list[str] = []
+    updated_lines: list[str] = []
+    for line in text.splitlines():
+        match = re.match(r"^(\s*)([A-Za-z_]\w*)\s+([A-Za-z_]\w*)\s*\(([^)]*)\)(.*)$", line)
+        if not match or match.group(2) not in modules:
+            updated_lines.append(line)
+            continue
+        indent, module_name, inst_name, nodes, tail = match.groups()
+        updated_lines.append(f"{indent}{inst_name} ({nodes.strip()}) {module_name}{tail}")
+        repairs.append(f"rewrite_instance_syntax={module_name}:{inst_name}")
+
+    return "\n".join(updated_lines) + ("\n" if text.endswith("\n") else ""), repairs
+
+
+def _needs_edge_budget_repair(notes_text: str) -> bool:
+    lowered = notes_text.lower()
+    return any(
+        key in lowered
+        for key in (
+            "too_few_edges",
+            "too_few_rising_edges",
+            "too_few_data_edges",
+            "not_enough_clk_edges",
+            "insufficient_post_reset_samples",
+            "clk_edges=",
+        )
+    )
+
+
+def _repair_generated_tb(sample_dir: Path, min_pulse_edges: int, notes_text: str) -> list[str]:
+    tb_files = sorted(sample_dir.glob("tb_*.scs")) or sorted(sample_dir.glob("*.scs"))
+    if not tb_files:
+        return ["tb_repair_skipped=no_testbench"]
+    if len(tb_files) > 1:
+        return [f"tb_repair_skipped=ambiguous_testbench:{','.join(path.name for path in tb_files)}"]
+
+    tb_path = tb_files[0]
+    original = tb_path.read_text(encoding="utf-8", errors="ignore")
+    updated, repairs = _merge_alter_vsource_lines(original)
+    updated, instance_repairs = _rewrite_verilog_style_instances(updated)
+    repairs.extend(instance_repairs)
+    if _needs_edge_budget_repair(notes_text):
+        updated, edge_repairs = _ensure_pulse_edge_budget(updated, min_pulse_edges)
+        repairs.extend(edge_repairs)
+    if updated != original:
+        tb_path.write_text(updated, encoding="utf-8")
+    return repairs
+
+
 def materialize_task(
     *,
     task_id: str,
@@ -108,6 +276,8 @@ def materialize_task(
     h_summary_root: Path,
     output_generated_root: Path,
     apply_policy: str,
+    tb_repair_scope: str,
+    min_pulse_edges: int,
 ) -> dict:
     round_name = _selected_round(base_score_root, model, task_id)
     src_sample = base_generated_root / model / task_id / round_name
@@ -122,7 +292,14 @@ def materialize_task(
         "output_sample_dir": str(dst_sample),
         "h_applied": False,
         "h_reason": "not_eligible_or_not_rescued",
+        "tb_repairs": [],
     }
+    base_result = _load_json(_base_result_path(base_score_root, model, task_id)) if _base_result_path(base_score_root, model, task_id) else {}
+    base_notes = base_result.get("evas_notes") or base_result.get("notes") or []
+    if isinstance(base_notes, str):
+        base_notes_text = base_notes
+    else:
+        base_notes_text = "\n".join(str(note) for note in base_notes)
 
     if not src_sample.is_dir():
         record["h_reason"] = "missing_base_sample"
@@ -151,6 +328,10 @@ def materialize_task(
         else:
             record["h_reason"] = "missing_h_best_dut"
 
+    should_repair_tb = tb_repair_scope == "all" or (tb_repair_scope == "h-applied" and record["h_applied"])
+    if should_repair_tb:
+        record["tb_repairs"] = _repair_generated_tb(dst_sample, min_pulse_edges, base_notes_text)
+
     _json_write(dst_sample / "h_materialization.json", record)
     return record
 
@@ -176,6 +357,8 @@ def run(args: argparse.Namespace) -> dict:
             h_summary_root=h_summary_root,
             output_generated_root=output_generated_root,
             apply_policy=args.apply_policy,
+            tb_repair_scope=args.tb_repair_scope,
+            min_pulse_edges=args.min_pulse_edges,
         )
         for task_id, task_dir in task_items
     ]
@@ -189,8 +372,18 @@ def run(args: argparse.Namespace) -> dict:
         "h_summary_root": str(h_summary_root),
         "output_generated_root": str(output_generated_root),
         "apply_policy": args.apply_policy,
+        "tb_repair_scope": args.tb_repair_scope,
+        "min_pulse_edges": args.min_pulse_edges,
         "task_count": len(records),
         "h_applied_count": sum(1 for record in records if record.get("h_applied")),
+        "tb_repaired_count": sum(
+            1
+            for record in records
+            if any(
+                not str(item).startswith(("tb_repair_skipped=", "unmatched_alter_source="))
+                for item in record.get("tb_repairs", [])
+            )
+        ),
         "h_applied_tasks": [record["task_id"] for record in records if record.get("h_applied")],
         "records": records,
     }
@@ -210,6 +403,18 @@ def main() -> int:
     parser.add_argument("--h-summary-root", required=True)
     parser.add_argument("--output-generated-root", required=True)
     parser.add_argument("--apply-policy", choices=("rescued", "best-pass"), default="rescued")
+    parser.add_argument(
+        "--tb-repair-scope",
+        choices=("none", "h-applied", "all"),
+        default="none",
+        help="Optionally apply safe generated-testbench stimulus repair for H2-style transfer tests.",
+    )
+    parser.add_argument(
+        "--min-pulse-edges",
+        type=int,
+        default=24,
+        help="Minimum pulse periods to preserve when extending short transient analyses.",
+    )
     parser.add_argument("--task", action="append")
     parser.add_argument("--family", action="append", choices=ALL_FAMILIES)
     args = parser.parse_args()
@@ -219,4 +424,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
