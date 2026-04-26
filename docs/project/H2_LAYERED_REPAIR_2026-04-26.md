@@ -24,6 +24,7 @@ Output failure datasets:
 - `datasets/failure_sets/H2_ON_F_FAILURE33_V2_2026-04-26`
 - `datasets/failure_sets/H2_ON_F_FAILURE33_V3_2026-04-26`
 - `datasets/failure_sets/H2_ON_F_FAILURE33_V4_2026-04-26`
+- `datasets/failure_sets/H2_ON_F_FAILURE33_V5_STREAMING_2026-04-26`
 
 ## Implemented Executors
 
@@ -278,6 +279,46 @@ New formal rescue:
 | Task | Repair mode | Formal note |
 |---|---|---|
 | `bad_bus_output_loop` | DUT bugfix template transfer | `mismatch_frac=0.0000 code_patterns=16 dout_patterns=16 uniform_frac=0.155 stable_rows=2181` |
+
+### E8: H2 v5 Fast-Checker Candidate Variant
+
+This is **not** the default formal H2 score. It is an explicit candidate variant
+to test whether the current H2 ceiling is being hidden by generated-TB interface
+breakage and checker timeout.
+
+Changes relative to H2 v4:
+
+- Copy the gold-harness-passing `dwa_rotating_pointer_no_overlap` DUT template
+  into the formal `dwa_ptr_gen_no_overlap_smoke` artifact.
+- Apply the generic positional-instance prefix repair:
+  `prepend_missing_instance_ports=dwa_ptr_gen_no_overlap:dut:clk_i,rst_ni`.
+- Enable the existing streaming checkers for this diagnostic run only.
+
+Result:
+
+| Metric | H2 v4 default formal | H2 v5 fast-checker candidate |
+|---|---:|---:|
+| Failure-set Pass@1 | 7/33 | 9/33 |
+| Remaining formal failures | 26 | 24 |
+
+New candidate rescues:
+
+| Task | Required layers | Evidence |
+|---|---|---|
+| `dwa_ptr_gen_no_overlap_smoke` | DUT no-overlap template + generated-TB port-prefix repair + fast checker | `sampled_cycles=17 bad_ptr_rows=0 max_active_cells=14 overlap_count=0`. |
+| `pfd_deadzone_smoke` | Fast checker only | `up_frac=0.0040 dn_frac=0.0000 up_pulses=30`; no DUT/TB rewrite was needed. |
+
+Interpretation:
+
+- `dwa_ptr_gen_no_overlap_smoke` demonstrates a three-layer failure: the DUT
+  template alone is insufficient, the generated TB was also missing `clk_i` and
+  `rst_ni` at the front of a scalarized positional instance, and the default
+  Python checker times out on the large CSV.
+- `pfd_deadzone_smoke` is likely not a repair-policy failure. It is a checker
+  throughput failure under the latest formal scorer because older non-timeout
+  results and streaming notes agree on the same PASS-level metrics.
+- V5 should be treated as a method-development upper-bound candidate until the
+  fast checkers are validated and promoted out of the experimental path.
 
 ## Rejected / Not Yet Formalized
 

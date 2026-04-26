@@ -176,6 +176,7 @@ Key result:
 | H2 v2 TB syntax + combined DUT/TB | 33 H-on-F failures | 6/33 | 5 | Adds `parameter_type_override_smoke` and `timer_absolute_grid_smoke`; `final_step_file_metric_smoke` remains flaky-only. |
 | H2 v3 general TB normalization | 33 H-on-F failures | 6/33 | 5 | No new PASS, but moves several failures from missing-stimulus signatures to checker/behavior signatures. |
 | H2 v4 template formal transfer | 33 H-on-F failures | 7/33 | 6 | Adds `bad_bus_output_loop` via a DUT bugfix template that transfers from gold-harness validation to formal generated scoring. |
+| H2 v5 fast-checker candidate | 33 H-on-F failures | 9/33 | 8 candidate rescues | Adds `dwa_ptr_gen_no_overlap_smoke` and `pfd_deadzone_smoke`, but uses experimental streaming checkers and should not replace the default formal score yet. |
 
 Accepted H2 mechanisms so far:
 
@@ -199,6 +200,11 @@ Additional H2 diagnostic findings:
   `dwa_ptr_gen_no_overlap_smoke`, `gray_counter_one_bit_change_smoke`, and
   `dac_therm_16b_smoke` are now strong evidence for a generated-TB/checker
   transfer bottleneck rather than missing DUT templates.
+- The follow-up H2 v5 candidate shows that `dwa_ptr_gen_no_overlap_smoke` does
+  transfer when three layers are combined: the DWA no-overlap DUT template, a
+  generic positional-instance prefix repair that restores missing `clk_i/rst_ni`,
+  and the fast checker. This raises the failure-anchor result to `9/33`, but it
+  remains a candidate variant until fast-checker parity is validated.
 
 Why the remaining H cases are not fixed yet:
 

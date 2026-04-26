@@ -445,6 +445,52 @@ def _rewrite_pair_port_instance_blocks(text: str) -> tuple[str, list[str]]:
     return "\n".join(output) + ("\n" if text.endswith("\n") else ""), repairs
 
 
+def _tb_node_names(text: str) -> set[str]:
+    nodes: set[str] = set()
+    for group in re.findall(r"\(([^)]*)\)", text):
+        for token in re.findall(r"[A-Za-z_]\w*(?:\[\d+\])?", group):
+            nodes.add(token)
+    return nodes
+
+
+def _repair_positional_instance_prefix(sample_dir: Path, text: str) -> tuple[str, list[str]]:
+    """Prepend omitted leading same-name ports in simple positional instances.
+
+    A common generated-TB failure is an otherwise valid Spectre instance whose
+    positional node list omits leading clock/reset ports while those same node
+    names exist in the testbench.  This repair is deliberately conservative:
+    it only fills a missing prefix, never reorders existing nodes.
+    """
+    port_orders = _module_port_orders(sample_dir)
+    if not port_orders:
+        return text, []
+    available_nodes = _tb_node_names(text)
+    repairs: list[str] = []
+
+    pattern = re.compile(
+        r"(?m)^(\s*)([A-Za-z_]\w*)\s*\(([^)]*)\)\s+([A-Za-z_]\w*)(.*)$"
+    )
+
+    def repl(match: re.Match[str]) -> str:
+        indent, inst_name, node_text, module_name, suffix = match.groups()
+        ports = port_orders.get(module_name)
+        if not ports:
+            return match.group(0)
+        nodes = node_text.split()
+        missing = len(ports) - len(nodes)
+        if missing <= 0 or missing > 4:
+            return match.group(0)
+        prefix = ports[:missing]
+        if not all(port in available_nodes for port in prefix):
+            return match.group(0)
+        repaired_nodes = " ".join(prefix + nodes)
+        repairs.append(f"prepend_missing_instance_ports={module_name}:{inst_name}:{','.join(prefix)}")
+        return f"{indent}{inst_name} ({repaired_nodes}) {module_name}{suffix}"
+
+    updated = pattern.sub(repl, text)
+    return updated, repairs
+
+
 def _needs_edge_budget_repair(notes_text: str) -> bool:
     lowered = notes_text.lower()
     return any(
@@ -484,6 +530,8 @@ def _repair_generated_tb(sample_dir: Path, min_pulse_edges: int, notes_text: str
     repairs.extend(named_repairs)
     updated, pair_repairs = _rewrite_pair_port_instance_blocks(updated)
     repairs.extend(pair_repairs)
+    updated, prefix_repairs = _repair_positional_instance_prefix(sample_dir, updated)
+    repairs.extend(prefix_repairs)
     if _needs_edge_budget_repair(notes_text):
         updated, edge_repairs = _ensure_pulse_edge_budget(updated, min_pulse_edges)
         repairs.extend(edge_repairs)
