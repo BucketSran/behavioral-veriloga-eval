@@ -28,9 +28,9 @@ condition.
 | `C` | `results/latest-system-score-condition-C-kimi-2026-04-26` | 0.2717 | 25/92 | Checker + Skill artifact. |
 | `D` | `results/latest-system-score-condition-D-bestround-kimi-2026-04-26` | 0.5217 | 48/92 | Single-round EVAS, no Skill. |
 | `E` | `results/latest-system-score-condition-E-bestround-kimi-2026-04-26` | 0.5109 | 47/92 | Single-round EVAS + Skill. |
-| `F` | `results/latest-system-score-condition-F-bestround-kimi-2026-04-26` | 0.6087 | 56/92 | Multi-round EVAS, no Skill. |
+| `F` | `results/latest-system-score-condition-F-bestround-kimi-2026-04-26-stable` | 0.6304 | 58/92 | Multi-round EVAS, no Skill; stable scorer config. |
 | `G` | `results/latest-system-score-condition-G-bestround-kimi-2026-04-26` | 0.5326 | 49/92 | Multi-round EVAS + Skill. |
-| `H` | `results/signature-guided-H-Gfailed-eligible4-fixed-checker-2026-04-26` | N/A | 3 strict rescues, 4/4 eligible best pass | DUT-side signature-gated template search on G-failed anchors. |
+| `H` | `results/latest-system-score-condition-H-on-F-kimi-2026-04-26-stable` | 0.6413 | 59/92 | Formal H-on-F: F best-round artifacts plus H rescued DUT replacements. |
 
 Family rates:
 
@@ -41,8 +41,9 @@ Family rates:
 | `C` | 0.1455 | 0.2778 | 0.7500 | 0.5455 |
 | `D` | 0.4182 | 0.4444 | 0.7500 | 1.0000 |
 | `E` | 0.4182 | 0.4444 | 0.6250 | 1.0000 |
-| `F` | 0.5273 | 0.5556 | 0.7500 | 1.0000 |
+| `F` | 0.5636 | 0.5556 | 0.7500 | 1.0000 |
 | `G` | 0.4545 | 0.3889 | 0.7500 | 1.0000 |
+| `H` | 0.5636 | 0.6111 | 0.7500 | 1.0000 |
 
 Failure taxonomy:
 
@@ -53,8 +54,9 @@ Failure taxonomy:
 | `C` | 41 | 19 | 5 | 2 |
 | `D` | 41 | 1 | 0 | 2 |
 | `E` | 39 | 3 | 1 | 2 |
-| `F` | 33 | 1 | 0 | 2 |
+| `F` | 31 | 1 | 0 | 2 |
 | `G` | 38 | 3 | 0 | 2 |
+| `H` | 30 | 1 | 0 | 2 |
 
 ## Repair Conditions Notes
 
@@ -67,7 +69,7 @@ treated as the current Kimi formal snapshot.
 |---|---|---:|---:|---|
 | `D` | `results/evas-scoring-condition-D-kimi-k2.5-full86-2026-04-25-overnight-kimi` | 0.5000 | 46/92 | Latest refresh is 48/92. |
 | `E` | `results/evas-scoring-condition-E-kimi-k2.5-full86-2026-04-25-overnight-kimi` | 0.4891 | 45/92 | Latest refresh is 47/92. |
-| `F` | `results/evas-scoring-condition-F-kimi-k2.5-full86-2026-04-25-overnight-kimi` | 0.5761 | 53/92 | Latest refresh is 56/92. |
+| `F` | `results/evas-scoring-condition-F-kimi-k2.5-full86-2026-04-25-overnight-kimi` | 0.5761 | 53/92 | Latest stable refresh is 58/92. |
 | `G` | `results/evas-scoring-condition-G-kimi-k2.5-full86-2026-04-25-overnight-kimi` | 0.5543 | 51/92 | Latest refresh is 49/92. |
 
 Important G refresh observation:
@@ -87,10 +89,10 @@ Repair-artifact scorer status:
 - This differs from H because current H uses the gold/reference harness for
   DUT-side behavior repair. The distinction is intentional and must be kept
   explicit in claims.
-- Key observation: `F` is currently the strongest formal Kimi condition
-  (`56/92`), while `G` drops to `49/92`. Skill injection is not automatically
-  beneficial in the current repair loop and may introduce less compatible
-  implementation choices.
+- Key observation before H materialization: `F` is the strongest A-G formal
+  Kimi condition. Under the stable scorer config it reaches `58/92`, while `G`
+  remains lower. Skill injection is not automatically beneficial in the current
+  repair loop and may introduce less compatible implementation choices.
 
 ## Current H Evidence
 
@@ -109,6 +111,7 @@ Latest H evidence:
 |---|---:|---:|---:|---:|
 | G-failed report-only sweep | 41 | 4 | 10 re-scored G PASS | 0 |
 | Eligible-4 H repair | 4 | 4 | 4 | 3 |
+| Formal H-on-F materialization | 92 | 3 applied | 59 formal PASS | +1 over F-stable |
 
 H accounting over the 41 historical G-failed Kimi tasks:
 
@@ -118,6 +121,31 @@ H accounting over the 41 historical G-failed Kimi tasks:
 | Strict H rescues | 3 | H repaired a failing DUT-side G anchor to PASS. |
 | H eligible but no rescue needed | 1 | `dff_rst_smoke` passes after the DFF checker-window fix. |
 | Still unresolved | 28 | H did not apply a trusted template or could not get enough diagnostic evidence. |
+
+Formal H materialization:
+
+- Script: `runners/materialize_condition_h.py`
+- Base: `generated-table2-evas-guided-repair-3round` with
+  `results/latest-system-score-condition-F-bestround-kimi-2026-04-26-stable`
+- H summaries:
+  `results/signature-guided-H-Gfailed-eligible4-fixed-checker-2026-04-26`
+- Output generated tree:
+  `generated-condition-H-on-F-kimi-2026-04-26`
+- Formal score:
+  `results/latest-system-score-condition-H-on-F-kimi-2026-04-26-stable`
+
+Formal delta against the same stable F scoring config:
+
+| Comparison | Pass count | Delta |
+|---|---:|---:|
+| `F-stable` | 58/92 | baseline |
+| `H-on-F-stable` | 59/92 | +1 |
+
+The only formal gain over `F-stable` is:
+
+| Task | F-stable | H-on-F-stable | Why it improves |
+|---|---|---|---|
+| `multimod_divider` | `FAIL_SIM_CORRECTNESS`, `base=4 pre_count=4 post_count=4` | `PASS`, `base=4 pre_count=9 post_count=9` | H replaces the DUT with a signature-gated multimod cadence template. |
 
 Strict H rescues:
 
@@ -129,6 +157,10 @@ Strict H rescues:
 
 `dff_rst_smoke` is not counted as an H rescue because the latest checker fix
 makes the re-scored G baseline pass.
+
+`flash_adc_3b_smoke` is a DUT-side H rescue, but it does not become a formal
+end-to-end pass after materialization. The generated testbench still produces
+`too_few_edges=0`, so the corrected DUT is not properly exercised.
 
 Why the remaining H cases are not fixed yet:
 

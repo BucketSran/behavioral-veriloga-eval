@@ -242,3 +242,41 @@ Takeaway:
 - H intentionally refuses to act when evidence is timeout-only, compile-level,
   multi-module, or outside the current template registry. This is a feature,
   not just a limitation, because it avoids task-name overfitting.
+
+## Formal H Materialization
+
+Implementation:
+
+- Added `runners/materialize_condition_h.py`.
+- The script copies the base condition's selected best-round artifact into a
+  normal `generated/`-style tree.
+- For strict H rescues, it replaces only the DUT `.va` file.
+- The generated testbench remains from the base condition, so this measures
+  formal end-to-end transfer rather than gold-harness DUT correctness.
+
+H-on-F result:
+
+| Condition | Scoring config | Formal pass |
+|---|---|---:|
+| `F-stable` | `workers=4 timeout=160 save-policy=contract` | 58/92 |
+| `H-on-F-stable` | `workers=4 timeout=160 save-policy=contract` | 59/92 |
+
+Formal gain:
+
+| Task | F-stable evidence | H-on-F evidence | Explanation |
+|---|---|---|---|
+| `multimod_divider` | `FAIL_SIM_CORRECTNESS`, `base=4 pre_count=4 post_count=4` | `PASS`, `base=4 pre_count=9 post_count=9` | H's multimod cadence template fixes the DUT while keeping the formal harness valid. |
+
+Non-transfer example:
+
+| Task | DUT-side H | Formal H-on-F | Reason |
+|---|---|---|---|
+| `flash_adc_3b_smoke` | PASS under gold/reference harness, `codes=8/8 reversals=0` | `FAIL_SIM_CORRECTNESS`, `too_few_edges=0` | The generated testbench does not exercise the ADC clock correctly, so a fixed DUT cannot be observed as formal PASS. |
+
+Conclusion:
+
+- H is now connected to formal scoring.
+- Under the fair stable config, it improves the best Kimi formal result from
+  `58/92` to `59/92`.
+- The main remaining bottleneck is cross-artifact repair: some H DUT fixes need
+  generated-testbench/harness repair before they can become end-to-end passes.
