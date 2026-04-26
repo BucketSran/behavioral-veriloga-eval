@@ -27,6 +27,8 @@ Output failure datasets:
 - `datasets/failure_sets/H2_ON_F_FAILURE33_V5_STREAMING_2026-04-26`
 - `datasets/failure_sets/H2_ON_F_FAILURE33_V6_STREAMING_2026-04-26`
 - `datasets/failure_sets/H2_ON_F_FAILURE33_V7_STREAMING_2026-04-26`
+- `results/streaming-checker-parity-fixtures-2026-04-26`
+- `results/streaming-checker-parity-smoke-2026-04-26`
 
 ## Implemented Executors
 
@@ -392,10 +394,46 @@ Current fast-checker conclusion:
 - Fast checkers are not just a speed optimization. They change failure
   attribution quality: timeout-only failures become either PASS with matching
   public metrics or behavior failures with actionable signatures.
-- H2 v7 should still be labelled as a candidate result because the streaming
-  path is experimental, but it is now the best evidence for where the closed
-  loop should invest next: cadence/PLL behavior templates and ADC/DAC behavior
-  templates, not more generic TB syntax repair.
+- This `11/33` number is a pre-parity candidate result. After parity validation,
+  the conservative score is updated in E11 below.
+
+### E11: Streaming-Checker Parity Proof And Conservative Re-Score
+
+See `docs/project/STREAMING_CHECKER_PARITY_2026-04-26.md`.
+
+Parity proof summary:
+
+| Check | Cases | Comparable | Matches | Mismatches | Original timeouts |
+|---|---:|---:|---:|---:|---:|
+| Synthetic fixture parity | 20 | 20 | 20 | 0 | 0 |
+| Real H2 CSV smoke parity | 13 | 2 | 2 | 0 | 11 |
+
+The fixture proof initially found one real mismatch:
+`gray_counter_one_bit_change_smoke` sampled one row earlier in the streaming
+checker than in the default checker. The streaming checker now matches the
+default `edge_idx + 8` settle rule.
+
+After this parity fix, H2 v7 was re-scored on the same 33-task failure set:
+
+| Metric | Pre-parity H2 v7 | Parity-fixed H2 v7 |
+|---|---:|---:|
+| Failure-set Pass@1 | 11/33 | 10/33 |
+| Pass@1 rate | 0.3333 | 0.3030 |
+
+The lost pass is the known flaky `final_step_file_metric_smoke` timeout:
+`behavior_eval_timeout>53s`. The core fast-checker rescues still hold:
+`dwa_ptr_gen_no_overlap_smoke`, `pfd_deadzone_smoke`,
+`gray_counter_one_bit_change_smoke`, and `gain_extraction_smoke` remain PASS.
+
+Current fast-checker conclusion:
+
+- The streaming checker path now has an auditable parity proof on small
+  pass/fail fixtures and no observed mismatch on comparable real CSVs.
+- The conservative paper-facing H2 v7 score should be `10/33`, not the earlier
+  pre-parity `11/33`.
+- The remaining risk is large real-CSV coverage: most original checkers time
+  out, so those rows justify the fast path but do not prove equivalence by
+  themselves.
 
 ## Rejected / Not Yet Formalized
 

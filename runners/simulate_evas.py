@@ -433,7 +433,9 @@ def _stream_gray_counter_one_bit_change_csv(csv_path: Path) -> tuple[float, list
             if row_idx < reset_prefix_rows and rst > 0.45:
                 rst_prefix_high = True
             if prev_clk is not None and prev_clk <= 0.45 < clk:
-                pending_offsets.append(8)
+                # Match the default checker's settle=min(edge_idx + 8, last_row).
+                # The current edge row is processed below, so start at 9.
+                pending_offsets.append(9)
                 edge_count += 1
             prev_clk = clk
 

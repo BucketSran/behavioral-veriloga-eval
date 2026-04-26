@@ -178,7 +178,8 @@ Key result:
 | H2 v4 template formal transfer | 33 H-on-F failures | 7/33 | 6 | Adds `bad_bus_output_loop` via a DUT bugfix template that transfers from gold-harness validation to formal generated scoring. |
 | H2 v5 fast-checker candidate | 33 H-on-F failures | 9/33 | 8 candidate rescues | Adds `dwa_ptr_gen_no_overlap_smoke` and `pfd_deadzone_smoke`, but uses experimental streaming checkers and should not replace the default formal score yet. |
 | H2 v6 fast-checker candidate | 33 H-on-F failures | 10/33 | 9 candidate rescues | Adds `gray_counter_one_bit_change_smoke` via a streaming equivalent of the existing Gray-code checker. |
-| H2 v7 fast-checker candidate | 33 H-on-F failures | 11/33 | 10 candidate rescues | Adds `gain_extraction_smoke` and eliminates the remaining checker-timeout bucket by turning timeout-only cases into PASS or actionable behavior signatures. |
+| H2 v7 fast-checker candidate, pre-parity | 33 H-on-F failures | 11/33 | 10 candidate rescues | Historical diagnostic result before checker-parity validation. |
+| H2 v7 fast-checker candidate, parity-fixed | 33 H-on-F failures | 10/33 | 10 candidate rescues | Parity proof fixed a Gray streaming sampling offset; `final_step_file_metric_smoke` fell back to its known timeout-flaky behavior and remains non-method-counted. |
 
 Accepted H2 mechanisms so far:
 
@@ -212,10 +213,16 @@ Additional H2 diagnostic findings:
   still `7/33`; the `10/33` number should be described as a fast-checker
   candidate result until these checkers are promoted through parity tests.
 - H2 v7 adds fast checkers for `gain_extraction_smoke`,
-  `multimod_divider_ratio_switch_smoke`, and `dwa_wraparound_smoke`, reaching
-  `11/33`. More importantly, the remaining checker-timeout bucket drops to zero:
-  `multimod_divider_ratio_switch_smoke` now reports `not_enough_edges in=32 out=0`,
-  and `dwa_wraparound_smoke` now reports concrete pointer/count mismatches.
+  `multimod_divider_ratio_switch_smoke`, and `dwa_wraparound_smoke`. The
+  pre-parity run reached `11/33`; after checker-parity validation and a Gray
+  streaming sampling fix, the conservative result is `10/33`. More importantly,
+  timeout-only failures become actionable signatures:
+  `multimod_divider_ratio_switch_smoke` reports `not_enough_edges in=32 out=0`,
+  and `dwa_wraparound_smoke` reports concrete pointer/count mismatches.
+- Streaming-checker parity evidence is recorded in
+  `docs/project/STREAMING_CHECKER_PARITY_2026-04-26.md`: synthetic fixture
+  parity is `20/20` matches, real H2 CSV smoke parity has `2/2` comparable
+  matches and `11` original-checker timeouts.
 
 Why the remaining H cases are not fixed yet:
 
