@@ -471,6 +471,159 @@ def _stream_gray_counter_one_bit_change_csv(csv_path: Path) -> tuple[float, list
     return 1.0, [f"unique_codes={len(unique_codes)} bad_transitions={bad_transitions}"]
 
 
+def _stream_dwa_wraparound_csv(csv_path: Path) -> tuple[float, list[str]]:
+    fields = _csv_fields(csv_path)
+    required = {"time", "clk_i", "rst_ni", "ptr_0", "cell_en_0", "code_0"}
+    if not required.issubset(fields):
+        return 0.0, ["missing time/clk_i/rst_ni/ptr_0/cell_en_0/code_0"]
+
+    ptr_cols = sorted(
+        [field for field in fields if re.fullmatch(r"ptr_\d+", field)],
+        key=lambda item: int(item.rsplit("_", 1)[1]),
+    )
+    cell_cols = sorted(
+        [field for field in fields if re.fullmatch(r"cell_en_\d+", field)],
+        key=lambda item: int(item.rsplit("_", 1)[1]),
+    )
+    code_cols = sorted(
+        [field for field in fields if re.fullmatch(r"code_\d+", field)],
+        key=lambda item: int(item.rsplit("_", 1)[1]),
+    )
+    if len(ptr_cols) != 16 or len(cell_cols) != 16 or len(code_cols) != 4:
+        return 0.0, ["expected ptr_0..15, cell_en_0..15, and code_0..3 columns"]
+
+    pending_samples: list[float] = []
+    sampled: list[tuple[int, list[int], set[int]]] = []
+    initialized = False
+    prev_clk = 0.0
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            time = _float_cell(row, "time")
+            clk = _float_cell(row, "clk_i")
+            if initialized and prev_clk < 0.45 <= clk:
+                pending_samples.append(time + 1.0e-9)
+            while pending_samples and time >= pending_samples[0]:
+                pending_samples.pop(0)
+                if _float_cell(row, "rst_ni") <= 0.45:
+                    continue
+                code = sum(
+                    (1 if _float_cell(row, col) > 0.45 else 0) << int(col[5:])
+                    for col in code_cols
+                )
+                ptr_active = [idx for idx, col in enumerate(ptr_cols) if _float_cell(row, col) > 0.45]
+                active_cells = {idx for idx, col in enumerate(cell_cols) if _float_cell(row, col) > 0.45}
+                sampled.append((code, ptr_active, active_cells))
+            prev_clk = clk
+            initialized = True
+
+    if len(sampled) < 5:
+        return 0.0, [f"insufficient_post_reset_samples count={len(sampled)}"]
+
+    expected_ptr = 13
+    bad_ptr_rows = 0
+    bad_count_rows = 0
+    wrap_events = 0
+    split_wrap_rows = 0
+    prev_ptr = expected_ptr
+    for code, ptr_active, active_cells in sampled:
+        expected_ptr = (expected_ptr + code) % 16
+        if expected_ptr < prev_ptr:
+            wrap_events += 1
+        if ptr_active != [expected_ptr]:
+            bad_ptr_rows += 1
+        if len(active_cells) != code:
+            bad_count_rows += 1
+        if active_cells and (max(active_cells) - min(active_cells) + 1) > len(active_cells):
+            split_wrap_rows += 1
+        prev_ptr = expected_ptr
+
+    ok = bad_ptr_rows == 0 and bad_count_rows == 0 and wrap_events >= 2 and split_wrap_rows >= 2
+    return (1.0 if ok else 0.0), [
+        f"sampled_cycles={len(sampled)} bad_ptr_rows={bad_ptr_rows} "
+        f"bad_count_rows={bad_count_rows} wrap_events={wrap_events} "
+        f"split_wrap_rows={split_wrap_rows}"
+    ]
+
+
+def _stream_gain_extraction_csv(csv_path: Path) -> tuple[float, list[str]]:
+    fields = _csv_fields(csv_path)
+    required = {"vinp", "vinn", "vamp_p", "vamp_n"}
+    if not required.issubset(fields):
+        return 0.0, ["missing vinp/vinn/vamp_p/vamp_n"]
+
+    count = 0
+    mean_in = 0.0
+    mean_out = 0.0
+    m2_in = 0.0
+    m2_out = 0.0
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            vin = _float_cell(row, "vinp") - _float_cell(row, "vinn")
+            vout = _float_cell(row, "vamp_p") - _float_cell(row, "vamp_n")
+            count += 1
+            delta_in = vin - mean_in
+            mean_in += delta_in / count
+            m2_in += delta_in * (vin - mean_in)
+            delta_out = vout - mean_out
+            mean_out += delta_out / count
+            m2_out += delta_out * (vout - mean_out)
+    if count == 0:
+        return 0.0, ["empty"]
+    std_in = math.sqrt(max(m2_in / count, 0.0))
+    std_out = math.sqrt(max(m2_out / count, 0.0))
+    gain = std_out / std_in if std_in > 1e-12 else 0.0
+    ok = gain > 4.0 and std_out > std_in
+    return (1.0 if ok else 0.0), [f"diff_gain={gain:.2f}"]
+
+
+def _stream_multimod_divider_ratio_switch_csv(csv_path: Path) -> tuple[float, list[str]]:
+    fields = _csv_fields(csv_path)
+    required = {"time", "clk_in", "div_out"}
+    if not required.issubset(fields):
+        return 0.0, ["missing time/clk_in/div_out"]
+
+    in_edges: list[float] = []
+    out_edges: list[float] = []
+    initialized = False
+    prev_in = 0.0
+    prev_out = 0.0
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            time = _float_cell(row, "time")
+            clk_in = _float_cell(row, "clk_in")
+            div_out = _float_cell(row, "div_out")
+            if initialized and prev_in < 0.45 <= clk_in:
+                in_edges.append(time)
+            if initialized and prev_out < 0.45 <= div_out:
+                out_edges.append(time)
+            prev_in = clk_in
+            prev_out = div_out
+            initialized = True
+
+    if len(in_edges) < 40 or len(out_edges) < 10:
+        return 0.0, [f"not_enough_edges in={len(in_edges)} out={len(out_edges)}"]
+
+    windows = [
+        (10e-9, 90e-9, 4, "pre_div4"),
+        (120e-9, 190e-9, 5, "mid_div5"),
+        (220e-9, 300e-9, 4, "post_div4"),
+    ]
+    details: list[str] = []
+    for t0, t1, expected_ratio, label in windows:
+        win_in = [time for time in in_edges if t0 <= time <= t1]
+        win_out = [time for time in out_edges if t0 <= time <= t1]
+        if len(win_in) < expected_ratio * 2 or len(win_out) < 2:
+            return 0.0, [f"{label}_insufficient_edges in={len(win_in)} out={len(win_out)}"]
+        measured_ratio = len(win_in) / max(len(win_out), 1)
+        details.append(f"{label}={measured_ratio:.2f}")
+        if abs(measured_ratio - expected_ratio) > 0.35:
+            return 0.0, [";".join(details)]
+    return 1.0, [";".join(details)]
+
+
 def evaluate_streaming_behavior(task_id: str, csv_path: Path) -> tuple[float, list[str]] | None:
     if os.environ.get("VAEVAS_ENABLE_EXPERIMENTAL_STREAMING_CHECKERS") != "1":
         return None
@@ -482,6 +635,9 @@ def evaluate_streaming_behavior(task_id: str, csv_path: Path) -> tuple[float, li
         "dwa_ptr_gen_no_overlap_smoke": _stream_dwa_ptr_gen_no_overlap_csv,
         "digital_basics_smoke": _stream_not_gate_csv,
         "gray_counter_one_bit_change_smoke": _stream_gray_counter_one_bit_change_csv,
+        "dwa_wraparound_smoke": _stream_dwa_wraparound_csv,
+        "gain_extraction_smoke": _stream_gain_extraction_csv,
+        "multimod_divider_ratio_switch_smoke": _stream_multimod_divider_ratio_switch_csv,
     }
     checker = streaming_checks.get(task_id)
     if checker is None:

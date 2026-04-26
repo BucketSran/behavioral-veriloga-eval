@@ -26,6 +26,7 @@ Output failure datasets:
 - `datasets/failure_sets/H2_ON_F_FAILURE33_V4_2026-04-26`
 - `datasets/failure_sets/H2_ON_F_FAILURE33_V5_STREAMING_2026-04-26`
 - `datasets/failure_sets/H2_ON_F_FAILURE33_V6_STREAMING_2026-04-26`
+- `datasets/failure_sets/H2_ON_F_FAILURE33_V7_STREAMING_2026-04-26`
 
 ## Implemented Executors
 
@@ -355,6 +356,46 @@ Current interpretation:
   throughput/observability issues. This supports making validated fast checkers
   a first-class part of the closed-loop infrastructure, while keeping a clear
   distinction between default formal scoring and candidate fast-checker scoring.
+
+### E10: H2 v7 Fast-Checker Coverage Expansion
+
+Additional streaming equivalent checkers were added under the same experimental
+flag for three timeout-heavy tasks:
+
+- `gain_extraction_smoke`
+- `multimod_divider_ratio_switch_smoke`
+- `dwa_wraparound_smoke`
+
+Result:
+
+| Metric | H2 v4 default formal | H2 v6 fast-checker candidate | H2 v7 fast-checker candidate |
+|---|---:|---:|---:|
+| Failure-set Pass@1 | 7/33 | 10/33 | 11/33 |
+| Remaining failures | 26 | 23 | 22 |
+| Remaining checker-timeout bucket | 9 | 3 | 0 |
+
+New candidate rescue:
+
+| Task | Evidence |
+|---|---|
+| `gain_extraction_smoke` | `diff_gain=16.96` |
+
+New diagnostic failures exposed by fast checkers:
+
+| Task | Diagnostic note | Meaning |
+|---|---|---|
+| `multimod_divider_ratio_switch_smoke` | `not_enough_edges in=32 out=0` | The output divider never toggles; this is a real DUT behavior/cadence failure. |
+| `dwa_wraparound_smoke` | `sampled_cycles=7 bad_ptr_rows=7 bad_count_rows=5 wrap_events=3 split_wrap_rows=6` | The generated pair is now observable, but pointer/count behavior is wrong. |
+
+Current fast-checker conclusion:
+
+- Fast checkers are not just a speed optimization. They change failure
+  attribution quality: timeout-only failures become either PASS with matching
+  public metrics or behavior failures with actionable signatures.
+- H2 v7 should still be labelled as a candidate result because the streaming
+  path is experimental, but it is now the best evidence for where the closed
+  loop should invest next: cadence/PLL behavior templates and ADC/DAC behavior
+  templates, not more generic TB syntax repair.
 
 ## Rejected / Not Yet Formalized
 

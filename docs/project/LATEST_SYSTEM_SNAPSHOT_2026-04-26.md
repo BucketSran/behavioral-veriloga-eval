@@ -178,6 +178,7 @@ Key result:
 | H2 v4 template formal transfer | 33 H-on-F failures | 7/33 | 6 | Adds `bad_bus_output_loop` via a DUT bugfix template that transfers from gold-harness validation to formal generated scoring. |
 | H2 v5 fast-checker candidate | 33 H-on-F failures | 9/33 | 8 candidate rescues | Adds `dwa_ptr_gen_no_overlap_smoke` and `pfd_deadzone_smoke`, but uses experimental streaming checkers and should not replace the default formal score yet. |
 | H2 v6 fast-checker candidate | 33 H-on-F failures | 10/33 | 9 candidate rescues | Adds `gray_counter_one_bit_change_smoke` via a streaming equivalent of the existing Gray-code checker. |
+| H2 v7 fast-checker candidate | 33 H-on-F failures | 11/33 | 10 candidate rescues | Adds `gain_extraction_smoke` and eliminates the remaining checker-timeout bucket by turning timeout-only cases into PASS or actionable behavior signatures. |
 
 Accepted H2 mechanisms so far:
 
@@ -210,6 +211,11 @@ Additional H2 diagnostic findings:
   and reaches `10/33` on the same failure anchor. The default formal H2 score is
   still `7/33`; the `10/33` number should be described as a fast-checker
   candidate result until these checkers are promoted through parity tests.
+- H2 v7 adds fast checkers for `gain_extraction_smoke`,
+  `multimod_divider_ratio_switch_smoke`, and `dwa_wraparound_smoke`, reaching
+  `11/33`. More importantly, the remaining checker-timeout bucket drops to zero:
+  `multimod_divider_ratio_switch_smoke` now reports `not_enough_edges in=32 out=0`,
+  and `dwa_wraparound_smoke` now reports concrete pointer/count mismatches.
 
 Why the remaining H cases are not fixed yet:
 
