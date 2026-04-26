@@ -12,11 +12,14 @@ system changes:
 - DFF checker sampling-window fix
 - signature-gated condition-H prototype
 
-## Refreshed Kimi A-G Formal Matrix
+## Refreshed Kimi A-H Matrix
 
 These runs re-score existing Kimi artifacts with the latest EVAS/checker system.
 They do not call the LLM again. `A/B/C` use `score.py`; `D/E/F/G` use
-`score_repair_artifacts.py` to select the best observed repair round.
+`score_repair_artifacts.py` to select the best observed repair round. `H` is
+reported separately because it is currently a DUT-side repair prototype using
+the benchmark gold/reference harness, not a full generated-testbench formal
+condition.
 
 | Condition | Result dir | Pass@1 | Pass count | Notes |
 |---|---|---:|---:|---|
@@ -27,6 +30,7 @@ They do not call the LLM again. `A/B/C` use `score.py`; `D/E/F/G` use
 | `E` | `results/latest-system-score-condition-E-bestround-kimi-2026-04-26` | 0.5109 | 47/92 | Single-round EVAS + Skill. |
 | `F` | `results/latest-system-score-condition-F-bestround-kimi-2026-04-26` | 0.6087 | 56/92 | Multi-round EVAS, no Skill. |
 | `G` | `results/latest-system-score-condition-G-bestround-kimi-2026-04-26` | 0.5326 | 49/92 | Multi-round EVAS + Skill. |
+| `H` | `results/signature-guided-H-Gfailed-eligible4-fixed-checker-2026-04-26` | N/A | 3 strict rescues, 4/4 eligible best pass | DUT-side signature-gated template search on G-failed anchors. |
 
 Family rates:
 
@@ -106,6 +110,15 @@ Latest H evidence:
 | G-failed report-only sweep | 41 | 4 | 10 re-scored G PASS | 0 |
 | Eligible-4 H repair | 4 | 4 | 4 | 3 |
 
+H accounting over the 41 historical G-failed Kimi tasks:
+
+| Bucket | Count | Meaning |
+|---|---:|---|
+| Re-scored G already PASS | 10 | Not H rescues; latest checker/scoring says the existing artifact passes. |
+| Strict H rescues | 3 | H repaired a failing DUT-side G anchor to PASS. |
+| H eligible but no rescue needed | 1 | `dff_rst_smoke` passes after the DFF checker-window fix. |
+| Still unresolved | 28 | H did not apply a trusted template or could not get enough diagnostic evidence. |
+
 Strict H rescues:
 
 | Task | Failure signature | Template family | Best variant |
@@ -116,6 +129,22 @@ Strict H rescues:
 
 `dff_rst_smoke` is not counted as an H rescue because the latest checker fix
 makes the re-scored G baseline pass.
+
+Why the remaining H cases are not fixed yet:
+
+| Failure bucket | Example | EVAS note | Why H does not repair it yet |
+|---|---|---|---|
+| Timeout-only / weak diagnostic | `pfd_deadzone_smoke` | `behavior_eval_timeout>26s` | No pulse-width or phase-window metrics are available, so the PFD template cannot safely choose a repair. |
+| Timeout / expensive harness | `pfd_reset_race_smoke` | `evas_timeout>80s` | The baseline harness times out before H gets useful behavior notes; this needs runtime/checker optimization first. |
+| Interface/template mismatch | `dwa_ptr_gen_no_overlap_smoke` | `evas_timeout>80s`; onehot signature detected | The anchor exposes bus-style ports (`cell_en_o`, `ptr_o`) while the older exploratory DWA template assumes scalar-expanded ports; applying it would risk interface breakage. |
+| Complex system behavior | `adpll_ratio_hop_smoke` | `pre_ratio=8.000 post_ratio=8.000 pre_lock=0.000 post_lock=0.000` | This is a system-level PLL behavior failure. Current H has no safe submodule decomposition or lock/reacquire template. |
+| Complex system behavior | `cppll_tracking_smoke` | `freq_ratio=1.0889 fb_jitter_frac=0.0446 lock_time=nan` | Requires PLL loop/timing-window reasoning, not a simple local counter or quantizer skeleton. |
+| Missing activity | `cdac_cal` | `no vdac activity` | H lacks a CDAC calibration/output-activity template and should first localize whether the issue is code update, DAC output, or harness observability. |
+| No output cadence/activity | `multimod_divider_ratio_switch_smoke` | `not_enough_edges in=320 out=0` | The existing multimod template only covers `base/pre_count/post_count`; this case needs a startup/output-enable cadence template. |
+| Sequence stuck | `nrz_prbs` | `transitions=0 complement_err=0.0041 swing=0.900` | Needs a PRBS/LFSR sequence-state template; current H has not promoted that family. |
+| Checker/runtime timeout | `bad_bus_output_loop` | `behavior_eval_timeout>26s` | Current notes do not identify whether the issue is bus indexing, save policy, or behavior, so H refuses to guess. |
+| Compile or harness failure | `digital_basics_smoke` | `tb_not_executed`, `tran.csv missing` | H is currently DUT-side behavior repair; compile/TB linkage must be fixed before behavior templates are useful. |
+| Non-single-module artifact | `segmented_dac` | `Cannot find a parseable single-module anchor` | H currently requires a parseable single-module DUT anchor. Multi-module/local-submodule H is still future work. |
 
 ## Refreshed Qwen A-G Formal Matrix
 

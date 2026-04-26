@@ -208,3 +208,37 @@ Interpretation:
   correction that turns the existing artifact/gold behavior into PASS.
 - A separate formal end-to-end repair-artifact scorer is now needed to quantify
   how often repaired DUT behavior also transfers through generated testbenches.
+
+## Why The Remaining H Cases Are Not Fixed
+
+After latest re-score, the 41 historical G-failed tasks split as:
+
+| Bucket | Count |
+|---|---:|
+| Re-scored G already PASS | 10 |
+| Strict H rescue | 3 |
+| Eligible but already PASS after checker fix | 1 |
+| Still unresolved | 28 |
+
+Representative unresolved cases:
+
+| Case | Failure evidence | Reason H does not repair it yet |
+|---|---|---|
+| `pfd_deadzone_smoke` | `behavior_eval_timeout>26s` | H cannot safely trigger a PFD timing-window template without pulse/phase metrics. |
+| `pfd_reset_race_smoke` | `evas_timeout>80s` | The harness is too slow or times out before useful behavior diagnostics are produced. |
+| `dwa_ptr_gen_no_overlap_smoke` | onehot family detected, but `evas_timeout>80s` | Existing exploratory DWA template assumes scalar-expanded ports, while this anchor is bus-style; H correctly refuses an interface-breaking patch. |
+| `adpll_ratio_hop_smoke` | `pre_ratio=8.000 post_ratio=8.000 pre_lock=0.000 post_lock=0.000` | Complex PLL system behavior requires submodule/local-loop decomposition, not a single generic template. |
+| `cppll_tracking_smoke` | `freq_ratio=1.0889 fb_jitter_frac=0.0446 lock_time=nan` | Needs loop/timing-window reasoning and lock metrics; current H has no safe PLL template. |
+| `cdac_cal` | `no vdac activity` | Needs a CDAC calibration/output-activity template and localization of code update vs DAC output path. |
+| `multimod_divider_ratio_switch_smoke` | `not_enough_edges in=320 out=0` | Current multimod template handles wrong count values, not a completely missing output cadence. |
+| `nrz_prbs` | `transitions=0 complement_err=0.0041 swing=0.900` | Needs a PRBS/LFSR sequence-state template; not yet promoted to formal H. |
+| `digital_basics_smoke` | `tb_not_executed`, `tran.csv missing` | This is compile/harness closure, not DUT behavior repair. |
+| `segmented_dac` | no parseable single-module anchor | Current H requires a single DUT module; multi-module H is future work. |
+
+Takeaway:
+
+- H succeeds when the failure is covered by a promoted mechanism family and the
+  DUT interface matches that family.
+- H intentionally refuses to act when evidence is timeout-only, compile-level,
+  multi-module, or outside the current template registry. This is a feature,
+  not just a limitation, because it avoids task-name overfitting.
