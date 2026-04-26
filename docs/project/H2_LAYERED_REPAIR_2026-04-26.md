@@ -163,8 +163,52 @@ H2 has now demonstrated real value on the failure set, but not yet enough for fu
 - Some gold-harness successes do not transfer because the generated TB remains wrong (`parameter_type_override_smoke`, `dac_therm_16b_smoke`).
 - Timeout failures must be treated carefully because some recover on rerun without any repair.
 
+## 2x2 Isolation Probe
+
+Implemented `runners/layered_isolation_probe.py` to automate:
+
+1. generated DUT + generated TB;
+2. generated DUT + gold TB;
+3. gold DUT + generated TB.
+
+Probe command:
+
+```bash
+python3 runners/layered_isolation_probe.py \
+  --model kimi-k2.5 \
+  --generated-dir generated-condition-H2-on-F-failure33-plus-dutprobe-kimi-2026-04-26 \
+  --output-dir results/h2-layered-isolation-probe-2026-04-26 \
+  --timeout-s 120 \
+  --workers 2 \
+  --task flash_adc_3b_smoke \
+  --task parameter_type_override_smoke \
+  --task dac_therm_16b_smoke \
+  --task nrz_prbs \
+  --task serializer_frame_alignment_smoke \
+  --task timer_absolute_grid_smoke
+```
+
+Layer counts:
+
+| Layer | Count |
+|---|---:|
+| `already_pass` | 2 |
+| `tb_or_harness` | 3 |
+| `dut_confirmed_with_gold_harness` | 1 |
+
+Key isolation conclusions:
+
+| Task | Isolation result | Meaning |
+|---|---|---|
+| `flash_adc_3b_smoke` | generated/generated PASS; generated/gold PASS; gold/generated PASS | H2 repaired both the H1 DUT-transfer gap and generated TB enough for formal pass. |
+| `serializer_frame_alignment_smoke` | generated/generated PASS; generated/gold PASS; gold/generated FAIL | The repaired generated pair is internally valid, but generated TB is not a universal harness for the gold DUT. |
+| `nrz_prbs` | spec-to-va generated DUT + gold TB PASS | DUT template repair is confirmed under the benchmark harness. |
+| `parameter_type_override_smoke` | generated DUT + gold TB PASS; gold DUT + generated TB FAIL | Remaining failure is generated TB/harness, not DUT. |
+| `dac_therm_16b_smoke` | generated DUT + gold TB PASS; gold DUT + generated TB FAIL | Remaining failure is generated TB/formal-transfer, not DUT. |
+| `timer_absolute_grid_smoke` | generated DUT + gold TB PASS; gold DUT + generated TB FAIL | Remaining failure is generated TB/harness. |
+
 Next recommended step:
 
-1. Add an explicit 2x2 isolation runner for selected failures: generated DUT/generated TB, generated DUT/gold TB, gold DUT/generated TB, repaired DUT/generated TB.
+1. Use the 2x2 isolation result to route `parameter_type_override_smoke`, `dac_therm_16b_smoke`, and `timer_absolute_grid_smoke` into TB/harness repair instead of DUT repair.
 2. Promote only repair executors that rescue more than one task or have a clear mechanistic transfer story.
 3. Keep full92 disabled until H2 reaches a stronger failure-set result with low flakiness.
