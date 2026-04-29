@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "dut.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0
+Vsig (monitor_node 0) vsource type=pwl wave=[ 0 0.05 25n 0.3 55n 0.55 85n 0.8 120n 0.15 ]
+
+XDUT (monitor_node vdd vss inside_window below_window above_window) v2_ext_window_detector_026
+
+tran tran stop=120n maxstep=500p
+save monitor_node inside_window below_window above_window

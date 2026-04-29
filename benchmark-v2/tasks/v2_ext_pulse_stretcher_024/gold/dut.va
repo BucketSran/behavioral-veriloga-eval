@@ -1,0 +1,32 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_ext_pulse_stretcher_024(event_in, vdd, vss, stretched_pulse);
+    input event_in, vdd, vss;
+    output stretched_pulse;
+    electrical event_in, vdd, vss, stretched_pulse;
+    parameter real vth = 0.45;
+    parameter real width = 4.0n;
+    parameter real tr = 40p;
+    integer pulse_q;
+    real clear_t;
+
+    analog begin
+        @(initial_step) begin
+            pulse_q = 0;
+            clear_t = 1.0;
+        end
+
+        @(cross(V(event_in) - vth, +1)) begin
+            pulse_q = 1;
+            clear_t = $abstime + width;
+        end
+
+        @(timer(clear_t)) begin
+            pulse_q = 0;
+            clear_t = 1.0;
+        end
+
+        V(stretched_pulse) <+ transition(pulse_q ? V(vdd) : V(vss), 0.0, tr, tr);
+    end
+endmodule

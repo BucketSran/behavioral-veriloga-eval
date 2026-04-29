@@ -1,0 +1,30 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_sample_hold_latched_level_004(analog_sample, strobe, vdd, vss, latched_level, settled);
+    input analog_sample, strobe, vdd, vss;
+    output latched_level, settled;
+    electrical analog_sample, strobe, vdd, vss, latched_level, settled;
+    parameter real vth = 0.45;
+    parameter real tr = 50p;
+    real held_v;
+    integer sample_count;
+    real settled_t;
+
+    analog begin
+        @(initial_step) begin
+            held_v = V(vss);
+            sample_count = 0;
+            settled_t = V(vss);
+        end
+
+        @(cross(V(strobe) - vth, +1)) begin
+            held_v = V(analog_sample);
+            sample_count = sample_count + 1;
+            if (sample_count > 6) settled_t = V(vdd);
+        end
+
+        V(latched_level) <+ transition(held_v, 0.0, tr, tr);
+        V(settled) <+ transition(settled_t, 0.0, tr, tr);
+    end
+endmodule

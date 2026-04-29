@@ -1,0 +1,53 @@
+{
+  "task_id": "v2_event_counter_not_async_007",
+  "family": "benchmark-v2",
+  "source_seed": "clk_divider",
+  "mechanism_family": "divider_counter",
+  "perturbation_level": "P4_negative_distractor",
+  "status": "materialized_draft",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "divider",
+    "clock": "capture_tick",
+    "output": "feedback_tick",
+    "ratio": 4
+  },
+  "manifest_entry": {
+    "task_id": "v2_event_counter_not_async_007",
+    "source_type": "seed_92_perturbation",
+    "source_seed": "clk_divider",
+    "mechanism_family": "divider_counter",
+    "perturbation_level": "P4_negative_distractor",
+    "prompt_strategy": "Require synchronous counted-event behavior; reject Gray-code or asynchronous toggle shortcuts when binary state is requested.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-hard-negative-r1",
+    "status": "materialized_draft",
+    "perturbation_axes": [
+      "ratio",
+      "reset",
+      "encoding",
+      "negative_constraint"
+    ],
+    "external_source_url": "not_applicable",
+    "external_source_license": "not_applicable",
+    "spec_overrides": {
+      "clock": "capture_tick",
+      "output": "feedback_tick",
+      "ratio": 4
+    },
+    "negative_constraints": [
+      "not_gray_code",
+      "not_async_toggle_only"
+    ]
+  }
+}

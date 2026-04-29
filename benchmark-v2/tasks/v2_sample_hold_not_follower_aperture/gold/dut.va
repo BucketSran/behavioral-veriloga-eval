@@ -1,0 +1,23 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_sample_hold_not_follower_aperture(sense_node, capture, vdd, vss, latched_level);
+    input sense_node, capture, vdd, vss;
+    output latched_level;
+    electrical sense_node, capture, vdd, vss, latched_level;
+    parameter real vth = 0.45;
+    parameter real tr = 50p;
+    real held_v;
+
+    analog begin
+        @(initial_step) begin
+            held_v = V(vss);
+        end
+
+        @(cross(V(capture) - vth, +1)) begin
+            held_v = V(sense_node);
+        end
+
+        V(latched_level) <+ transition(held_v, 0.0, tr, tr);
+    end
+endmodule

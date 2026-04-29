@@ -1,0 +1,55 @@
+{
+  "task_id": "v2_dwa_segmented_dac_glitch_alias",
+  "family": "benchmark-v2",
+  "source_seed": "dwa_ptr_gen_no_overlap_smoke",
+  "mechanism_family": "dwa_pointer_rotation",
+  "perturbation_level": "P6_system_composition",
+  "status": "materialized_draft",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "dwa",
+    "clock": "advance",
+    "rst": "clear_n",
+    "bits_lsb_first": [
+      "qty0",
+      "qty1",
+      "qty2"
+    ],
+    "cell_outputs": [
+      "cell0",
+      "cell1",
+      "cell2",
+      "cell3",
+      "cell4",
+      "cell5",
+      "cell6",
+      "cell7"
+    ],
+    "active_count": 3,
+    "min_distinct_windows": 4
+  },
+  "manifest_entry": {
+    "task_id": "v2_dwa_segmented_dac_glitch_alias",
+    "source_seed": "dwa_ptr_gen_no_overlap_smoke",
+    "mechanism_family": "dwa_pointer_rotation",
+    "perturbation_level": "P6_system_composition",
+    "prompt_strategy": "Compose rotating unit-cell selection with segmented DAC glitch-avoidance wording.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-seed-perturbation-r1",
+    "status": "materialized_draft",
+    "perturbation_axes": [
+      "system_composition",
+      "semantic_alias"
+    ]
+  }
+}

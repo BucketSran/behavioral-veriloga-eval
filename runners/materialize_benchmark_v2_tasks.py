@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Materialize benchmark-v2 draft tasks from the v2-small manifest."""
+"""Materialize benchmark-v2 draft tasks from a manifest."""
 from __future__ import annotations
 
+import argparse
 import json
 import shutil
 from pathlib import Path
@@ -10,7 +11,6 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 BENCH = ROOT / "benchmark-v2"
-MANIFEST = BENCH / "manifests" / "v2-small.json"
 TASK_ROOT = BENCH / "tasks"
 
 
@@ -292,11 +292,109 @@ endmodule
 """
 
 
+def _threshold_va(module: str, vin: str, out: str) -> str:
+    return f"""`include "constants.vams"
+`include "disciplines.vams"
+
+module {module}({vin}, vdd, vss, {out});
+{_ports_decl([vin, "vdd", "vss"], [out])}
+    parameter real threshold = 0.45;
+    parameter real tr = 40p;
+    real out_t;
+
+    analog begin
+        out_t = (V({vin}) >= threshold) ? V(vdd) : V(vss);
+        V({out}) <+ transition(out_t, 0.0, tr, tr);
+    end
+endmodule
+"""
+
+
+def _window_va(module: str, vin: str, inside: str, below: str, above: str) -> str:
+    return f"""`include "constants.vams"
+`include "disciplines.vams"
+
+module {module}({vin}, vdd, vss, {inside}, {below}, {above});
+{_ports_decl([vin, "vdd", "vss"], [inside, below, above])}
+    parameter real lo = 0.25;
+    parameter real hi = 0.65;
+    parameter real tr = 40p;
+    real inside_t;
+    real below_t;
+    real above_t;
+
+    analog begin
+        below_t = (V({vin}) < lo) ? V(vdd) : V(vss);
+        above_t = (V({vin}) > hi) ? V(vdd) : V(vss);
+        inside_t = (V({vin}) >= lo && V({vin}) <= hi) ? V(vdd) : V(vss);
+        V({inside}) <+ transition(inside_t, 0.0, tr, tr);
+        V({below}) <+ transition(below_t, 0.0, tr, tr);
+        V({above}) <+ transition(above_t, 0.0, tr, tr);
+    end
+endmodule
+"""
+
+
+def _limiter_va(module: str, vin: str, out: str) -> str:
+    return f"""`include "constants.vams"
+`include "disciplines.vams"
+
+module {module}({vin}, vdd, vss, {out});
+{_ports_decl([vin, "vdd", "vss"], [out])}
+    parameter real vlo = 0.18;
+    parameter real vhi = 0.72;
+    parameter real tr = 40p;
+    real y;
+
+    analog begin
+        y = V({vin});
+        if (y < vlo) y = vlo;
+        if (y > vhi) y = vhi;
+        V({out}) <+ transition(y, 0.0, tr, tr);
+    end
+endmodule
+"""
+
+
+def _pulse_va(module: str, trig: str, out: str) -> str:
+    return f"""`include "constants.vams"
+`include "disciplines.vams"
+
+module {module}({trig}, vdd, vss, {out});
+{_ports_decl([trig, "vdd", "vss"], [out])}
+    parameter real vth = 0.45;
+    parameter real width = 4.0n;
+    parameter real tr = 40p;
+    integer pulse_q;
+    real clear_t;
+
+    analog begin
+        @(initial_step) begin
+            pulse_q = 0;
+            clear_t = 1.0;
+        end
+
+        @(cross(V({trig}) - vth, +1)) begin
+            pulse_q = 1;
+            clear_t = $abstime + width;
+        end
+
+        @(timer(clear_t)) begin
+            pulse_q = 0;
+            clear_t = 1.0;
+        end
+
+        V({out}) <+ transition(pulse_q ? V(vdd) : V(vss), 0.0, tr, tr);
+    end
+endmodule
+"""
+
+
 def _pulse_source(name: str, node: str, period: str, width: str, delay: str = "0") -> str:
     return f"{name} ({node} 0) vsource type=pulse val0=0 val1=0.9 delay={delay} rise=50p fall=50p width={width} period={period}"
 
 
-def _tb(module: str, includes: str, instance_ports: list[str], sources: list[str], save: list[str], *, stop: str = "120n", maxstep: str = "50p") -> str:
+def _tb(module: str, includes: str, instance_ports: list[str], sources: list[str], save: list[str], *, stop: str = "120n", maxstep: str = "500p") -> str:
     return "\n".join(
         [
             "simulator lang=spectre",
@@ -342,6 +440,20 @@ if __name__ == "__main__":
 """
 
 
+def _apply_spec_overrides(spec: dict[str, Any], entry: dict[str, Any]) -> dict[str, Any]:
+    overrides = dict(entry.get("spec_overrides") or {})
+    width = overrides.pop("width", None)
+    bits_prefix = overrides.pop("bits_prefix", None)
+    if width is not None:
+        width = int(width)
+        spec["width"] = width
+        if spec["kind"] in {"adc_dac", "binary_dac"} and "bits_lsb_first" not in overrides:
+            prefix = bits_prefix or ("q" if spec["kind"] == "adc_dac" else "weight")
+            spec["bits_lsb_first"] = [f"{prefix}{i}" for i in range(width)]
+    spec.update(overrides)
+    return spec
+
+
 def _make_spec(entry: dict[str, Any]) -> dict[str, Any]:
     tid = entry["task_id"]
     if tid.startswith("v2_adc_dac"):
@@ -353,23 +465,42 @@ def _make_spec(entry: dict[str, Any]) -> dict[str, Any]:
         rst = "clear_n"
         vout = "held_level" if "alias" in tid else "estimate_level" if "keywordless" in tid else "reconstructed_level"
         settled = "settled" if "calibrated" in tid else None
-        return {"kind": "adc_dac", "width": width, "vin": vin, "clock": clk, "rst": rst, "bits_lsb_first": bits, "vout": vout, "settled": settled, "min_unique_codes": min(8, 1 << width)}
+        spec = {"kind": "adc_dac", "width": width, "vin": vin, "clock": clk, "rst": rst, "bits_lsb_first": bits, "vout": vout, "settled": settled, "min_unique_codes": min(8, 1 << width)}
+        return _apply_spec_overrides(spec, entry)
     if tid.startswith("v2_binary_dac"):
         width = 6 if "6b" in tid else 5 if "5b" in tid else 4
         bits = [f"weight{i}" for i in range(width)]
         guard = "glitch_guard" if "glitch_guard" in tid else None
-        return {"kind": "binary_dac", "bits_lsb_first": bits, "vout": "analog_sum", "guard": guard, "min_unique_codes": min(8, 1 << width)}
+        spec = {"kind": "binary_dac", "width": width, "bits_lsb_first": bits, "vout": "analog_sum", "guard": guard, "min_unique_codes": min(8, 1 << width)}
+        return _apply_spec_overrides(spec, entry)
     if tid.startswith("v2_dwa"):
         cells = [f"cell{i}" for i in range(8)]
-        return {"kind": "dwa", "clock": "advance", "rst": "clear_n", "bits_lsb_first": ["qty0", "qty1", "qty2"], "cell_outputs": cells, "active_count": 3, "min_distinct_windows": 4}
+        spec = {"kind": "dwa", "clock": "advance", "rst": "clear_n", "bits_lsb_first": ["qty0", "qty1", "qty2"], "cell_outputs": cells, "active_count": 3, "min_distinct_windows": 4}
+        return _apply_spec_overrides(spec, entry)
     if tid.startswith("v2_pfd"):
-        return {"kind": "pfd", "ref": "early_event", "div": "late_event", "up": "raise_pulse", "dn": "lower_pulse", "lock": "locked" if "lock" in tid else None}
-    if tid.startswith("v2_divider") or tid.startswith("v2_counter"):
+        spec = {"kind": "pfd", "ref": "early_event", "div": "late_event", "up": "raise_pulse", "dn": "lower_pulse", "lock": "locked" if "lock" in tid else None}
+        return _apply_spec_overrides(spec, entry)
+    if tid.startswith("v2_divider") or tid.startswith("v2_counter") or tid.startswith("v2_event_counter"):
         if "counter_not_gray" in tid:
-            return {"kind": "divider", "clock": "advance", "output": "tick_out", "counter_bits": ["cnt0", "cnt1", "cnt2", "cnt3"], "min_unique_codes": 5}
-        return {"kind": "divider", "clock": "advance", "output": "tick_out", "ratio": 3 if "odd" in tid else 4}
+            spec = {"kind": "divider", "clock": "advance", "output": "tick_out", "counter_bits": ["cnt0", "cnt1", "cnt2", "cnt3"], "min_unique_codes": 5}
+            return _apply_spec_overrides(spec, entry)
+        spec = {"kind": "divider", "clock": "advance", "output": "tick_out", "ratio": 3 if "odd" in tid else 4}
+        return _apply_spec_overrides(spec, entry)
     if tid.startswith("v2_sample_hold"):
-        return {"kind": "sample_hold", "vin": "sense_node", "clock": "capture", "vout": "latched_level", "settled": "settled" if "calibration" in tid else None}
+        spec = {"kind": "sample_hold", "vin": "sense_node", "clock": "capture", "vout": "latched_level", "settled": "settled" if "calibration" in tid else None}
+        return _apply_spec_overrides(spec, entry)
+    if tid.startswith("v2_ext_threshold"):
+        spec = {"kind": "threshold", "vin": "sense_level", "vout": "decision_level"}
+        return _apply_spec_overrides(spec, entry)
+    if tid.startswith("v2_ext_window"):
+        spec = {"kind": "window", "vin": "sensor_level", "inside": "inside_window", "below": "below_window", "above": "above_window"}
+        return _apply_spec_overrides(spec, entry)
+    if tid.startswith("v2_ext_limiter"):
+        spec = {"kind": "limiter", "vin": "raw_level", "vout": "limited_level"}
+        return _apply_spec_overrides(spec, entry)
+    if tid.startswith("v2_ext_pulse"):
+        spec = {"kind": "pulse", "trigger": "event_in", "vout": "stretched_pulse"}
+        return _apply_spec_overrides(spec, entry)
     raise ValueError(tid)
 
 
@@ -394,22 +525,38 @@ def _prompt(entry: dict[str, Any], spec: dict[str, Any]) -> str:
         lines.append(f"- Outputs: `{spec['vout']}`" + (f", `{spec['guard']}`." if spec.get("guard") else "."))
         lines.append("Behavior: binary-weighted reconstruction. Do not implement thermometer or unit-cell active-count coding.")
     elif spec["kind"] == "dwa":
-        lines.append("- Inputs: `advance`, `clear_n`, `qty0`, `qty1`, `qty2`, `vdd`, `vss`.")
+        lines.append(f"- Inputs: `{spec['clock']}`, `{spec['rst']}`, `{', '.join(spec['bits_lsb_first'])}`, `vdd`, `vss`.")
         lines.append(f"- Outputs: `{', '.join(spec['cell_outputs'])}`.")
         lines.append("Behavior: rotate a contiguous active-cell window on each advance event; do not randomize or scramble the selection.")
     elif spec["kind"] == "pfd":
-        lines.append("- Inputs: `early_event`, `late_event`, `vdd`, `vss`.")
-        lines.append("- Outputs: `raise_pulse`, `lower_pulse`" + (", `locked`." if spec.get("lock") else "."))
+        lines.append(f"- Inputs: `{spec['ref']}`, `{spec['div']}`, `vdd`, `vss`.")
+        lines.append(f"- Outputs: `{spec['up']}`, `{spec['dn']}`" + (f", `{spec['lock']}`." if spec.get("lock") else "."))
         lines.append("Behavior: generate mutually exclusive event-order pulses. This is not an XOR detector.")
     elif spec["kind"] == "divider":
-        lines.append("- Inputs: `advance`, `clear_n`, `vdd`, `vss`.")
-        outs = ["tick_out"] + spec.get("counter_bits", [])
+        lines.append(f"- Inputs: `{spec['clock']}`, `clear_n`, `vdd`, `vss`.")
+        outs = [spec["output"]] + spec.get("counter_bits", [])
         lines.append(f"- Outputs: `{', '.join(outs)}`.")
         lines.append("Behavior: count input events and update outputs synchronously; binary counter tasks are not Gray-code tasks.")
     elif spec["kind"] == "sample_hold":
-        lines.append("- Inputs: `sense_node`, `capture`, `vdd`, `vss`.")
-        lines.append("- Outputs: `latched_level`" + (", `settled`." if spec.get("settled") else "."))
+        lines.append(f"- Inputs: `{spec['vin']}`, `{spec['clock']}`, `vdd`, `vss`.")
+        lines.append(f"- Outputs: `{spec['vout']}`" + (f", `{spec['settled']}`." if spec.get("settled") else "."))
         lines.append("Behavior: sample only at capture events and hold between events. Do not build a continuous follower.")
+    elif spec["kind"] == "threshold":
+        lines.append(f"- Inputs: `{spec['vin']}`, `vdd`, `vss`.")
+        lines.append(f"- Outputs: `{spec['vout']}`.")
+        lines.append("Behavior: produce a voltage-domain decision level from a threshold crossing; this is a behavioral threshold detector, not an analog gain buffer.")
+    elif spec["kind"] == "window":
+        lines.append(f"- Inputs: `{spec['vin']}`, `vdd`, `vss`.")
+        lines.append(f"- Outputs: `{spec['inside']}`, `{spec['below']}`, `{spec['above']}`.")
+        lines.append("Behavior: classify whether the sensor level is below, inside, or above a voltage window with mutually consistent flags.")
+    elif spec["kind"] == "limiter":
+        lines.append(f"- Inputs: `{spec['vin']}`, `vdd`, `vss`.")
+        lines.append(f"- Outputs: `{spec['vout']}`.")
+        lines.append("Behavior: pass the input through an analog limiter with lower and upper clamps; do not emit an unconstrained follower.")
+    elif spec["kind"] == "pulse":
+        lines.append(f"- Inputs: `{spec['trigger']}`, `vdd`, `vss`.")
+        lines.append(f"- Outputs: `{spec['vout']}`.")
+        lines.append("Behavior: convert each rising input event into a finite-width voltage pulse, then return low.")
     lines.append("")
     lines.append("The testbench should exercise the observable behavior and save every public input/output used by the checker.")
     return "\n".join(lines) + "\n"
@@ -440,12 +587,13 @@ def _materialize(entry: dict[str, Any]) -> None:
         save = [*spec["bits_lsb_first"], spec["vout"]] + ([spec["guard"]] if spec.get("guard") else [])
     elif spec["kind"] == "dwa":
         va = _dwa_va(tid, spec["clock"], spec["rst"], spec["bits_lsb_first"], spec["cell_outputs"])
+        code_bits = spec["bits_lsb_first"]
         sources = [
             _pulse_source("Vclk", spec["clock"], "4n", "1.8n"),
             f"Vrst ({spec['rst']} 0) vsource type=pwl wave=[ 0 0 4n 0 4.1n 0.9 120n 0.9 ]",
-            "Vqty0 (qty0 0) vsource dc=0.9",
-            "Vqty1 (qty1 0) vsource dc=0.9",
-            "Vqty2 (qty2 0) vsource dc=0",
+            f"Vqty0 ({code_bits[0]} 0) vsource dc=0.9",
+            f"Vqty1 ({code_bits[1]} 0) vsource dc=0.9",
+            f"Vqty2 ({code_bits[2]} 0) vsource dc=0",
         ]
         ports = [spec["clock"], spec["rst"], *spec["bits_lsb_first"], "vdd", "vss", *spec["cell_outputs"]]
         save = [spec["clock"], spec["rst"], *spec["bits_lsb_first"], *spec["cell_outputs"]]
@@ -473,6 +621,26 @@ def _materialize(entry: dict[str, Any]) -> None:
         ]
         ports = [spec["vin"], spec["clock"], "vdd", "vss", spec["vout"]] + ([spec["settled"]] if spec.get("settled") else [])
         save = [spec["vin"], spec["clock"], spec["vout"]] + ([spec["settled"]] if spec.get("settled") else [])
+    elif spec["kind"] == "threshold":
+        va = _threshold_va(tid, spec["vin"], spec["vout"])
+        sources = [f"Vsig ({spec['vin']} 0) vsource type=pwl wave=[ 0 0 20n 0.2 45n 0.7 70n 0.3 95n 0.85 120n 0.1 ]"]
+        ports = [spec["vin"], "vdd", "vss", spec["vout"]]
+        save = [spec["vin"], spec["vout"]]
+    elif spec["kind"] == "window":
+        va = _window_va(tid, spec["vin"], spec["inside"], spec["below"], spec["above"])
+        sources = [f"Vsig ({spec['vin']} 0) vsource type=pwl wave=[ 0 0.05 25n 0.3 55n 0.55 85n 0.8 120n 0.15 ]"]
+        ports = [spec["vin"], "vdd", "vss", spec["inside"], spec["below"], spec["above"]]
+        save = [spec["vin"], spec["inside"], spec["below"], spec["above"]]
+    elif spec["kind"] == "limiter":
+        va = _limiter_va(tid, spec["vin"], spec["vout"])
+        sources = [f"Vsig ({spec['vin']} 0) vsource type=pwl wave=[ 0 0 20n 0.12 45n 0.45 75n 0.86 105n 0.35 120n 0.9 ]"]
+        ports = [spec["vin"], "vdd", "vss", spec["vout"]]
+        save = [spec["vin"], spec["vout"]]
+    elif spec["kind"] == "pulse":
+        va = _pulse_va(tid, spec["trigger"], spec["vout"])
+        sources = [_pulse_source("Vtrig", spec["trigger"], "14n", "1n", "2n")]
+        ports = [spec["trigger"], "vdd", "vss", spec["vout"]]
+        save = [spec["trigger"], spec["vout"]]
     else:
         raise ValueError(spec["kind"])
 
@@ -496,7 +664,14 @@ def _materialize(entry: dict[str, Any]) -> None:
 
 
 def main() -> int:
-    data = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--manifest", default=str(BENCH / "manifests" / "v2-small.json"))
+    args = ap.parse_args()
+
+    manifest = Path(args.manifest)
+    if not manifest.is_absolute():
+        manifest = ROOT / manifest
+    data = json.loads(manifest.read_text(encoding="utf-8"))
     entries = data.get("tasks", data if isinstance(data, list) else [])
     TASK_ROOT.mkdir(parents=True, exist_ok=True)
     for entry in entries:
@@ -504,8 +679,8 @@ def main() -> int:
         entry["status"] = "materialized_draft"
     data["tasks"] = entries
     data["materialized_at"] = "2026-04-29"
-    MANIFEST.write_text(json.dumps(data, indent=2), encoding="utf-8")
-    print(f"[benchmark-v2] materialized {len(entries)} tasks under {TASK_ROOT}")
+    manifest.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    print(f"[benchmark-v2] materialized {len(entries)} tasks from {manifest} under {TASK_ROOT}")
     return 0
 
 

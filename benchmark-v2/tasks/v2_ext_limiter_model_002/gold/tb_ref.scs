@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "dut.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0
+Vsig (input_quantity 0) vsource type=pwl wave=[ 0 0 20n 0.12 45n 0.45 75n 0.86 105n 0.35 120n 0.9 ]
+
+XDUT (input_quantity vdd vss safe_output) v2_ext_limiter_model_002
+
+tran tran stop=120n maxstep=500p
+save input_quantity safe_output

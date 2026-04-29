@@ -1,0 +1,16 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_ext_threshold_detector_009(sense_level, vdd, vss, decision_level);
+    input sense_level, vdd, vss;
+    output decision_level;
+    electrical sense_level, vdd, vss, decision_level;
+    parameter real threshold = 0.45;
+    parameter real tr = 40p;
+    real out_t;
+
+    analog begin
+        out_t = (V(sense_level) >= threshold) ? V(vdd) : V(vss);
+        V(decision_level) <+ transition(out_t, 0.0, tr, tr);
+    end
+endmodule

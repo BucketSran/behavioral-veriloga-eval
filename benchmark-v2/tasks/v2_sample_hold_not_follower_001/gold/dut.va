@@ -1,0 +1,23 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_sample_hold_not_follower_001(measured_quantity, sample_event, vdd, vss, held_sample);
+    input measured_quantity, sample_event, vdd, vss;
+    output held_sample;
+    electrical measured_quantity, sample_event, vdd, vss, held_sample;
+    parameter real vth = 0.45;
+    parameter real tr = 50p;
+    real held_v;
+
+    analog begin
+        @(initial_step) begin
+            held_v = V(vss);
+        end
+
+        @(cross(V(sample_event) - vth, +1)) begin
+            held_v = V(measured_quantity);
+        end
+
+        V(held_sample) <+ transition(held_v, 0.0, tr, tr);
+    end
+endmodule

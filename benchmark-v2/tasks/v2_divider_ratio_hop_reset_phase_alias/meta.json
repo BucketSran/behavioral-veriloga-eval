@@ -1,0 +1,40 @@
+{
+  "task_id": "v2_divider_ratio_hop_reset_phase_alias",
+  "family": "benchmark-v2",
+  "source_seed": "multimod_divider_ratio_switch_smoke",
+  "mechanism_family": "divider_counter",
+  "perturbation_level": "P5_parameter_checker",
+  "status": "materialized_draft",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "divider",
+    "clock": "advance",
+    "output": "tick_out",
+    "ratio": 4
+  },
+  "manifest_entry": {
+    "task_id": "v2_divider_ratio_hop_reset_phase_alias",
+    "source_seed": "multimod_divider_ratio_switch_smoke",
+    "mechanism_family": "divider_counter",
+    "perturbation_level": "P5_parameter_checker",
+    "prompt_strategy": "Test a reset-clean event counter with ratio wording changed from clock-divider terminology.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-seed-perturbation-r1",
+    "status": "materialized_draft",
+    "perturbation_axes": [
+      "timing",
+      "reset",
+      "semantic_alias"
+    ]
+  }
+}

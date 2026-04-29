@@ -1,0 +1,39 @@
+{
+  "task_id": "v2_divider_pfd_feedback_stub_alias",
+  "family": "benchmark-v2",
+  "source_seed": "adpll_ratio_hop_smoke",
+  "mechanism_family": "divider_counter",
+  "perturbation_level": "P6_system_composition",
+  "status": "materialized_draft",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "divider",
+    "clock": "advance",
+    "output": "tick_out",
+    "ratio": 4
+  },
+  "manifest_entry": {
+    "task_id": "v2_divider_pfd_feedback_stub_alias",
+    "source_seed": "adpll_ratio_hop_smoke",
+    "mechanism_family": "divider_counter",
+    "perturbation_level": "P6_system_composition",
+    "prompt_strategy": "Frame the divider as a feedback tick source for a phase/event comparison loop.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-seed-perturbation-r1",
+    "status": "materialized_draft",
+    "perturbation_axes": [
+      "system_composition",
+      "semantic_alias"
+    ]
+  }
+}

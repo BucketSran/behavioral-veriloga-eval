@@ -1,0 +1,41 @@
+{
+  "task_id": "v2_pfd_lock_detector_alias",
+  "family": "benchmark-v2",
+  "source_seed": "adpll_lock_smoke",
+  "mechanism_family": "pfd_event_order",
+  "perturbation_level": "P6_system_composition",
+  "status": "materialized_draft",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "pfd",
+    "ref": "early_event",
+    "div": "late_event",
+    "up": "raise_pulse",
+    "dn": "lower_pulse",
+    "lock": "locked"
+  },
+  "manifest_entry": {
+    "task_id": "v2_pfd_lock_detector_alias",
+    "source_seed": "adpll_lock_smoke",
+    "mechanism_family": "pfd_event_order",
+    "perturbation_level": "P6_system_composition",
+    "prompt_strategy": "Add a late lock indication to event-order pulses using aliased signal names.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-seed-perturbation-r1",
+    "status": "materialized_draft",
+    "perturbation_axes": [
+      "system_composition",
+      "aux_output"
+    ]
+  }
+}

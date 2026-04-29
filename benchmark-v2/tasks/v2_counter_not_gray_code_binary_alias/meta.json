@@ -1,0 +1,45 @@
+{
+  "task_id": "v2_counter_not_gray_code_binary_alias",
+  "family": "benchmark-v2",
+  "source_seed": "gray_counter_4b_smoke",
+  "mechanism_family": "divider_counter",
+  "perturbation_level": "P4_negative_distractor",
+  "status": "materialized_draft",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "divider",
+    "clock": "advance",
+    "output": "tick_out",
+    "counter_bits": [
+      "cnt0",
+      "cnt1",
+      "cnt2",
+      "cnt3"
+    ],
+    "min_unique_codes": 5
+  },
+  "manifest_entry": {
+    "task_id": "v2_counter_not_gray_code_binary_alias",
+    "source_seed": "gray_counter_4b_smoke",
+    "mechanism_family": "divider_counter",
+    "perturbation_level": "P4_negative_distractor",
+    "prompt_strategy": "Require observable binary counter state and explicitly reject Gray-code one-bit-change behavior.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-seed-perturbation-r1",
+    "status": "materialized_draft",
+    "perturbation_axes": [
+      "negative_constraint",
+      "encoding"
+    ]
+  }
+}

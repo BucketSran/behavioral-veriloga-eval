@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "dut.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0
+Vtap0 (tap0 0) vsource type=pulse val0=0 val1=0.9 delay=1n rise=50p fall=50p width=1n period=2n
+Vtap1 (tap1 0) vsource type=pulse val0=0 val1=0.9 delay=1n rise=50p fall=50p width=2n period=4n
+Vtap2 (tap2 0) vsource type=pulse val0=0 val1=0.9 delay=1n rise=50p fall=50p width=4n period=8n
+Vtap3 (tap3 0) vsource type=pulse val0=0 val1=0.9 delay=1n rise=50p fall=50p width=8n period=16n
+Vtap4 (tap4 0) vsource type=pulse val0=0 val1=0.9 delay=1n rise=50p fall=50p width=16n period=32n
+
+XDUT (tap0 tap1 tap2 tap3 tap4 vdd vss weighted_level) v2_binary_dac_not_thermometer_5b_007
+
+tran tran stop=120n maxstep=500p
+save tap0 tap1 tap2 tap3 tap4 weighted_level

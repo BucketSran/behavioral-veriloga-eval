@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "dut.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0
+Vweight0 (weight0 0) vsource type=pulse val0=0 val1=0.9 delay=1n rise=50p fall=50p width=1n period=2n
+Vweight1 (weight1 0) vsource type=pulse val0=0 val1=0.9 delay=1n rise=50p fall=50p width=2n period=4n
+Vweight2 (weight2 0) vsource type=pulse val0=0 val1=0.9 delay=1n rise=50p fall=50p width=4n period=8n
+Vweight3 (weight3 0) vsource type=pulse val0=0 val1=0.9 delay=1n rise=50p fall=50p width=8n period=16n
+
+XDUT (weight0 weight1 weight2 weight3 vdd vss analog_sum glitch_guard) v2_binary_dac_weighted_sum_4b_012
+
+tran tran stop=120n maxstep=500p
+save weight0 weight1 weight2 weight3 analog_sum glitch_guard

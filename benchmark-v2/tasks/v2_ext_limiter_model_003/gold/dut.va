@@ -1,0 +1,19 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_ext_limiter_model_003(raw_level, vdd, vss, limited_level);
+    input raw_level, vdd, vss;
+    output limited_level;
+    electrical raw_level, vdd, vss, limited_level;
+    parameter real vlo = 0.18;
+    parameter real vhi = 0.72;
+    parameter real tr = 40p;
+    real y;
+
+    analog begin
+        y = V(raw_level);
+        if (y < vlo) y = vlo;
+        if (y > vhi) y = vhi;
+        V(limited_level) <+ transition(y, 0.0, tr, tr);
+    end
+endmodule

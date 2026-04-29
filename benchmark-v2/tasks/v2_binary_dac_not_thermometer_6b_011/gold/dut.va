@@ -1,0 +1,24 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_binary_dac_not_thermometer_6b_011(tap0, tap1, tap2, tap3, tap4, tap5, vdd, vss, recon_value);
+    input tap0, tap1, tap2, tap3, tap4, tap5, vdd, vss;
+    output recon_value;
+    electrical tap0, tap1, tap2, tap3, tap4, tap5, vdd, vss, recon_value;
+    parameter real vth = 0.45;
+    parameter real tr = 40p;
+    integer code_q;
+    real out_t;
+
+    analog begin
+        code_q = 0;
+        if (V(tap0) >= vth) code_q = code_q + 1;
+        if (V(tap1) >= vth) code_q = code_q + 2;
+        if (V(tap2) >= vth) code_q = code_q + 4;
+        if (V(tap3) >= vth) code_q = code_q + 8;
+        if (V(tap4) >= vth) code_q = code_q + 16;
+        if (V(tap5) >= vth) code_q = code_q + 32;
+        out_t = V(vss) + (V(vdd) - V(vss)) * code_q / 63.0;
+        V(recon_value) <+ transition(out_t, 0.0, tr, tr);
+    end
+endmodule

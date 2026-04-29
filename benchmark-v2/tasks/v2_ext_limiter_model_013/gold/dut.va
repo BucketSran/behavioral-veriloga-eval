@@ -1,0 +1,19 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_ext_limiter_model_013(unbounded_signal, vdd, vss, clamped_level);
+    input unbounded_signal, vdd, vss;
+    output clamped_level;
+    electrical unbounded_signal, vdd, vss, clamped_level;
+    parameter real vlo = 0.18;
+    parameter real vhi = 0.72;
+    parameter real tr = 40p;
+    real y;
+
+    analog begin
+        y = V(unbounded_signal);
+        if (y < vlo) y = vlo;
+        if (y > vhi) y = vhi;
+        V(clamped_level) <+ transition(y, 0.0, tr, tr);
+    end
+endmodule

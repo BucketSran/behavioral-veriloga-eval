@@ -1,0 +1,23 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_binary_dac_weighted_sum_5b_013(input0, input1, input2, input3, input4, vdd, vss, weighted_level);
+    input input0, input1, input2, input3, input4, vdd, vss;
+    output weighted_level;
+    electrical input0, input1, input2, input3, input4, vdd, vss, weighted_level;
+    parameter real vth = 0.45;
+    parameter real tr = 40p;
+    integer code_q;
+    real out_t;
+
+    analog begin
+        code_q = 0;
+        if (V(input0) >= vth) code_q = code_q + 1;
+        if (V(input1) >= vth) code_q = code_q + 2;
+        if (V(input2) >= vth) code_q = code_q + 4;
+        if (V(input3) >= vth) code_q = code_q + 8;
+        if (V(input4) >= vth) code_q = code_q + 16;
+        out_t = V(vss) + (V(vdd) - V(vss)) * code_q / 31.0;
+        V(weighted_level) <+ transition(out_t, 0.0, tr, tr);
+    end
+endmodule

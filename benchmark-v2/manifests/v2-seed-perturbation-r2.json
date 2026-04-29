@@ -1,0 +1,4388 @@
+{
+  "manifest_version": 1,
+  "name": "v2-seed-perturbation-r2",
+  "created": "2026-04-29",
+  "purpose": "120-task seed perturbation split derived from original-92 mechanism families.",
+  "storage_rule": "Keep these tasks under benchmark-v2/tasks until gold EVAS and Spectre validation are reviewed.",
+  "task_count": 120,
+  "required_task_fields": [
+    "prompt.md",
+    "gold/dut.va",
+    "gold/tb_ref.scs",
+    "checker.py",
+    "meta.json"
+  ],
+  "tasks": [
+    {
+      "task_id": "v2_adc_dac_alias_sampled_code_3b_000",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb the sampled quantize/reconstruct interface with aliased names and width changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "rename",
+        "width",
+        "shared_state"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 3,
+        "vin": "sense_level",
+        "clock": "cadence",
+        "vout": "held_level",
+        "bits_prefix": "q",
+        "settled": "settled",
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_alias_sampled_code_4b_001",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb the sampled quantize/reconstruct interface with aliased names and width changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "rename",
+        "width",
+        "shared_state"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 4,
+        "vin": "measured_quantity",
+        "clock": "sample_event",
+        "vout": "reconstructed_level",
+        "bits_prefix": "dec",
+        "settled": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_alias_sampled_code_5b_002",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb the sampled quantize/reconstruct interface with aliased names and width changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "rename",
+        "width",
+        "shared_state"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 5,
+        "vin": "external_drive",
+        "clock": "capture_tick",
+        "vout": "estimate_node",
+        "bits_prefix": "state",
+        "settled": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_alias_sampled_code_6b_003",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Perturb the sampled quantize/reconstruct interface with aliased names and width changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "rename",
+        "width",
+        "shared_state"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 6,
+        "vin": "observed_level",
+        "clock": "advance_edge",
+        "vout": "drive_estimate",
+        "bits_prefix": "mark",
+        "settled": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_alias_sampled_code_3b_004",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb the sampled quantize/reconstruct interface with aliased names and width changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "rename",
+        "width",
+        "shared_state"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 3,
+        "vin": "analog_sample",
+        "clock": "strobe",
+        "vout": "latched_level",
+        "bits_prefix": "level",
+        "settled": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_alias_sampled_code_4b_005",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb the sampled quantize/reconstruct interface with aliased names and width changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "rename",
+        "width",
+        "shared_state"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 4,
+        "vin": "sense_level",
+        "clock": "cadence",
+        "vout": "held_level",
+        "bits_prefix": "q",
+        "settled": "settled",
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_alias_sampled_code_5b_006",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb the sampled quantize/reconstruct interface with aliased names and width changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "rename",
+        "width",
+        "shared_state"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 5,
+        "vin": "measured_quantity",
+        "clock": "sample_event",
+        "vout": "reconstructed_level",
+        "bits_prefix": "dec",
+        "settled": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_alias_sampled_code_6b_007",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Perturb the sampled quantize/reconstruct interface with aliased names and width changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "rename",
+        "width",
+        "shared_state"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 6,
+        "vin": "external_drive",
+        "clock": "capture_tick",
+        "vout": "estimate_node",
+        "bits_prefix": "state",
+        "settled": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_alias_sampled_code_3b_008",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb the sampled quantize/reconstruct interface with aliased names and width changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "rename",
+        "width",
+        "shared_state"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 3,
+        "vin": "observed_level",
+        "clock": "advance_edge",
+        "vout": "drive_estimate",
+        "bits_prefix": "mark",
+        "settled": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_alias_sampled_code_4b_009",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb the sampled quantize/reconstruct interface with aliased names and width changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "rename",
+        "width",
+        "shared_state"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 4,
+        "vin": "analog_sample",
+        "clock": "strobe",
+        "vout": "latched_level",
+        "bits_prefix": "level",
+        "settled": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_alias_sampled_code_5b_010",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb the sampled quantize/reconstruct interface with aliased names and width changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "rename",
+        "width",
+        "shared_state"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 5,
+        "vin": "sense_level",
+        "clock": "cadence",
+        "vout": "held_level",
+        "bits_prefix": "q",
+        "settled": "settled",
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_alias_sampled_code_6b_011",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Perturb the sampled quantize/reconstruct interface with aliased names and width changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "rename",
+        "width",
+        "shared_state"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 6,
+        "vin": "measured_quantity",
+        "clock": "sample_event",
+        "vout": "reconstructed_level",
+        "bits_prefix": "dec",
+        "settled": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_alias_sampled_code_3b_012",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb the sampled quantize/reconstruct interface with aliased names and width changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "rename",
+        "width",
+        "shared_state"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 3,
+        "vin": "external_drive",
+        "clock": "capture_tick",
+        "vout": "estimate_node",
+        "bits_prefix": "state",
+        "settled": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_alias_sampled_code_4b_013",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb the sampled quantize/reconstruct interface with aliased names and width changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "rename",
+        "width",
+        "shared_state"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 4,
+        "vin": "observed_level",
+        "clock": "advance_edge",
+        "vout": "drive_estimate",
+        "bits_prefix": "mark",
+        "settled": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_alias_sampled_code_5b_014",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb the sampled quantize/reconstruct interface with aliased names and width changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "rename",
+        "width",
+        "shared_state"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 5,
+        "vin": "analog_sample",
+        "clock": "strobe",
+        "vout": "latched_level",
+        "bits_prefix": "level",
+        "settled": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_alias_sampled_code_6b_015",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Perturb the sampled quantize/reconstruct interface with aliased names and width changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "rename",
+        "width",
+        "shared_state"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 6,
+        "vin": "sense_level",
+        "clock": "cadence",
+        "vout": "held_level",
+        "bits_prefix": "q",
+        "settled": "settled",
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_alias_sampled_code_3b_016",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb the sampled quantize/reconstruct interface with aliased names and width changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "rename",
+        "width",
+        "shared_state"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 3,
+        "vin": "measured_quantity",
+        "clock": "sample_event",
+        "vout": "reconstructed_level",
+        "bits_prefix": "dec",
+        "settled": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_alias_sampled_code_4b_017",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb the sampled quantize/reconstruct interface with aliased names and width changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "rename",
+        "width",
+        "shared_state"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 4,
+        "vin": "external_drive",
+        "clock": "capture_tick",
+        "vout": "estimate_node",
+        "bits_prefix": "state",
+        "settled": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_alias_sampled_code_5b_018",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb the sampled quantize/reconstruct interface with aliased names and width changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "rename",
+        "width",
+        "shared_state"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 5,
+        "vin": "observed_level",
+        "clock": "advance_edge",
+        "vout": "drive_estimate",
+        "bits_prefix": "mark",
+        "settled": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_alias_sampled_code_6b_019",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Perturb the sampled quantize/reconstruct interface with aliased names and width changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "rename",
+        "width",
+        "shared_state"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 6,
+        "vin": "analog_sample",
+        "clock": "strobe",
+        "vout": "latched_level",
+        "bits_prefix": "level",
+        "settled": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_weighted_sum_4b_000",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dac_binary_clk_4b_smoke",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb a binary-weighted analog reconstruction task with width and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "width",
+        "role_binding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 4,
+        "bits_prefix": "weight",
+        "vout": "analog_sum",
+        "guard": "glitch_guard",
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_weighted_sum_5b_001",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dac_binary_clk_4b_smoke",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb a binary-weighted analog reconstruction task with width and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "width",
+        "role_binding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 5,
+        "bits_prefix": "input",
+        "vout": "weighted_level",
+        "guard": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_weighted_sum_6b_002",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dac_binary_clk_4b_smoke",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb a binary-weighted analog reconstruction task with width and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "width",
+        "role_binding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 6,
+        "bits_prefix": "scale",
+        "vout": "recon_value",
+        "guard": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_weighted_sum_4b_003",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dac_binary_clk_4b_smoke",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb a binary-weighted analog reconstruction task with width and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "width",
+        "role_binding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 4,
+        "bits_prefix": "tap",
+        "vout": "analog_sum",
+        "guard": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_weighted_sum_5b_004",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dac_binary_clk_4b_smoke",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb a binary-weighted analog reconstruction task with width and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "width",
+        "role_binding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 5,
+        "bits_prefix": "weight",
+        "vout": "weighted_level",
+        "guard": "glitch_guard",
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_weighted_sum_6b_005",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dac_binary_clk_4b_smoke",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb a binary-weighted analog reconstruction task with width and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "width",
+        "role_binding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 6,
+        "bits_prefix": "input",
+        "vout": "recon_value",
+        "guard": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_weighted_sum_4b_006",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dac_binary_clk_4b_smoke",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb a binary-weighted analog reconstruction task with width and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "width",
+        "role_binding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 4,
+        "bits_prefix": "scale",
+        "vout": "analog_sum",
+        "guard": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_weighted_sum_5b_007",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dac_binary_clk_4b_smoke",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb a binary-weighted analog reconstruction task with width and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "width",
+        "role_binding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 5,
+        "bits_prefix": "tap",
+        "vout": "weighted_level",
+        "guard": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_weighted_sum_6b_008",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dac_binary_clk_4b_smoke",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb a binary-weighted analog reconstruction task with width and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "width",
+        "role_binding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 6,
+        "bits_prefix": "weight",
+        "vout": "recon_value",
+        "guard": "glitch_guard",
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_weighted_sum_4b_009",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dac_binary_clk_4b_smoke",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb a binary-weighted analog reconstruction task with width and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "width",
+        "role_binding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 4,
+        "bits_prefix": "input",
+        "vout": "analog_sum",
+        "guard": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_weighted_sum_5b_010",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dac_binary_clk_4b_smoke",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb a binary-weighted analog reconstruction task with width and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "width",
+        "role_binding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 5,
+        "bits_prefix": "scale",
+        "vout": "weighted_level",
+        "guard": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_weighted_sum_6b_011",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dac_binary_clk_4b_smoke",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb a binary-weighted analog reconstruction task with width and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "width",
+        "role_binding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 6,
+        "bits_prefix": "tap",
+        "vout": "recon_value",
+        "guard": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_weighted_sum_4b_012",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dac_binary_clk_4b_smoke",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb a binary-weighted analog reconstruction task with width and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "width",
+        "role_binding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 4,
+        "bits_prefix": "weight",
+        "vout": "analog_sum",
+        "guard": "glitch_guard",
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_weighted_sum_5b_013",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dac_binary_clk_4b_smoke",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb a binary-weighted analog reconstruction task with width and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "width",
+        "role_binding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 5,
+        "bits_prefix": "input",
+        "vout": "weighted_level",
+        "guard": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_weighted_sum_6b_014",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dac_binary_clk_4b_smoke",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb a binary-weighted analog reconstruction task with width and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "width",
+        "role_binding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 6,
+        "bits_prefix": "scale",
+        "vout": "recon_value",
+        "guard": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_weighted_sum_4b_015",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dac_binary_clk_4b_smoke",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb a binary-weighted analog reconstruction task with width and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "width",
+        "role_binding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 4,
+        "bits_prefix": "tap",
+        "vout": "analog_sum",
+        "guard": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_weighted_sum_5b_016",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dac_binary_clk_4b_smoke",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb a binary-weighted analog reconstruction task with width and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "width",
+        "role_binding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 5,
+        "bits_prefix": "weight",
+        "vout": "weighted_level",
+        "guard": "glitch_guard",
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_weighted_sum_6b_017",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dac_binary_clk_4b_smoke",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb a binary-weighted analog reconstruction task with width and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "width",
+        "role_binding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 6,
+        "bits_prefix": "input",
+        "vout": "recon_value",
+        "guard": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_weighted_sum_4b_018",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dac_binary_clk_4b_smoke",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb a binary-weighted analog reconstruction task with width and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "width",
+        "role_binding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 4,
+        "bits_prefix": "scale",
+        "vout": "analog_sum",
+        "guard": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_weighted_sum_5b_019",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dac_binary_clk_4b_smoke",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb a binary-weighted analog reconstruction task with width and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "width",
+        "role_binding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "width": 5,
+        "bits_prefix": "tap",
+        "vout": "weighted_level",
+        "guard": null,
+        "min_unique_codes": 8
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_circular_cursor_000",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dwa_ptr_gen_smoke",
+      "mechanism_family": "dwa_pointer_rotation",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Describe rotating unit-cell selection with cursor/window wording and wraparound checks.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "wraparound",
+        "window",
+        "coverage",
+        "keyword_removal"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "advance",
+        "rst": "clear_n",
+        "bits_lsb_first": [
+          "qty0_0",
+          "qty0_1",
+          "qty0_2"
+        ],
+        "cell_outputs": [
+          "cell0",
+          "cell1",
+          "cell2",
+          "cell3",
+          "cell4",
+          "cell5",
+          "cell6",
+          "cell7"
+        ],
+        "min_distinct_windows": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_circular_cursor_001",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dwa_ptr_gen_smoke",
+      "mechanism_family": "dwa_pointer_rotation",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Describe rotating unit-cell selection with cursor/window wording and wraparound checks.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "wraparound",
+        "window",
+        "coverage",
+        "keyword_removal"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "rotate_tick",
+        "rst": "release_n",
+        "bits_lsb_first": [
+          "qty1_0",
+          "qty1_1",
+          "qty1_2"
+        ],
+        "cell_outputs": [
+          "unit0",
+          "unit1",
+          "unit2",
+          "unit3",
+          "unit4",
+          "unit5",
+          "unit6",
+          "unit7"
+        ],
+        "min_distinct_windows": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_circular_cursor_002",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dwa_ptr_gen_smoke",
+      "mechanism_family": "dwa_pointer_rotation",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Describe rotating unit-cell selection with cursor/window wording and wraparound checks.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "wraparound",
+        "window",
+        "coverage",
+        "keyword_removal"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "next_window",
+        "rst": "clear_n",
+        "bits_lsb_first": [
+          "qty2_0",
+          "qty2_1",
+          "qty2_2"
+        ],
+        "cell_outputs": [
+          "cell0",
+          "cell1",
+          "cell2",
+          "cell3",
+          "cell4",
+          "cell5",
+          "cell6",
+          "cell7"
+        ],
+        "min_distinct_windows": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_circular_cursor_003",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dwa_ptr_gen_smoke",
+      "mechanism_family": "dwa_pointer_rotation",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Describe rotating unit-cell selection with cursor/window wording and wraparound checks.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "wraparound",
+        "window",
+        "coverage",
+        "keyword_removal"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "selection_event",
+        "rst": "release_n",
+        "bits_lsb_first": [
+          "qty0_0",
+          "qty0_1",
+          "qty0_2"
+        ],
+        "cell_outputs": [
+          "unit0",
+          "unit1",
+          "unit2",
+          "unit3",
+          "unit4",
+          "unit5",
+          "unit6",
+          "unit7"
+        ],
+        "min_distinct_windows": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_circular_cursor_004",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dwa_ptr_gen_smoke",
+      "mechanism_family": "dwa_pointer_rotation",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Describe rotating unit-cell selection with cursor/window wording and wraparound checks.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "wraparound",
+        "window",
+        "coverage",
+        "keyword_removal"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "advance",
+        "rst": "clear_n",
+        "bits_lsb_first": [
+          "qty1_0",
+          "qty1_1",
+          "qty1_2"
+        ],
+        "cell_outputs": [
+          "cell0",
+          "cell1",
+          "cell2",
+          "cell3",
+          "cell4",
+          "cell5",
+          "cell6",
+          "cell7"
+        ],
+        "min_distinct_windows": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_circular_cursor_005",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dwa_ptr_gen_smoke",
+      "mechanism_family": "dwa_pointer_rotation",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Describe rotating unit-cell selection with cursor/window wording and wraparound checks.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "wraparound",
+        "window",
+        "coverage",
+        "keyword_removal"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "rotate_tick",
+        "rst": "release_n",
+        "bits_lsb_first": [
+          "qty2_0",
+          "qty2_1",
+          "qty2_2"
+        ],
+        "cell_outputs": [
+          "unit0",
+          "unit1",
+          "unit2",
+          "unit3",
+          "unit4",
+          "unit5",
+          "unit6",
+          "unit7"
+        ],
+        "min_distinct_windows": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_circular_cursor_006",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dwa_ptr_gen_smoke",
+      "mechanism_family": "dwa_pointer_rotation",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Describe rotating unit-cell selection with cursor/window wording and wraparound checks.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "wraparound",
+        "window",
+        "coverage",
+        "keyword_removal"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "next_window",
+        "rst": "clear_n",
+        "bits_lsb_first": [
+          "qty0_0",
+          "qty0_1",
+          "qty0_2"
+        ],
+        "cell_outputs": [
+          "cell0",
+          "cell1",
+          "cell2",
+          "cell3",
+          "cell4",
+          "cell5",
+          "cell6",
+          "cell7"
+        ],
+        "min_distinct_windows": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_circular_cursor_007",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dwa_ptr_gen_smoke",
+      "mechanism_family": "dwa_pointer_rotation",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Describe rotating unit-cell selection with cursor/window wording and wraparound checks.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "wraparound",
+        "window",
+        "coverage",
+        "keyword_removal"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "selection_event",
+        "rst": "release_n",
+        "bits_lsb_first": [
+          "qty1_0",
+          "qty1_1",
+          "qty1_2"
+        ],
+        "cell_outputs": [
+          "unit0",
+          "unit1",
+          "unit2",
+          "unit3",
+          "unit4",
+          "unit5",
+          "unit6",
+          "unit7"
+        ],
+        "min_distinct_windows": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_circular_cursor_008",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dwa_ptr_gen_smoke",
+      "mechanism_family": "dwa_pointer_rotation",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Describe rotating unit-cell selection with cursor/window wording and wraparound checks.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "wraparound",
+        "window",
+        "coverage",
+        "keyword_removal"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "advance",
+        "rst": "clear_n",
+        "bits_lsb_first": [
+          "qty2_0",
+          "qty2_1",
+          "qty2_2"
+        ],
+        "cell_outputs": [
+          "cell0",
+          "cell1",
+          "cell2",
+          "cell3",
+          "cell4",
+          "cell5",
+          "cell6",
+          "cell7"
+        ],
+        "min_distinct_windows": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_circular_cursor_009",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dwa_ptr_gen_smoke",
+      "mechanism_family": "dwa_pointer_rotation",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Describe rotating unit-cell selection with cursor/window wording and wraparound checks.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "wraparound",
+        "window",
+        "coverage",
+        "keyword_removal"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "rotate_tick",
+        "rst": "release_n",
+        "bits_lsb_first": [
+          "qty0_0",
+          "qty0_1",
+          "qty0_2"
+        ],
+        "cell_outputs": [
+          "unit0",
+          "unit1",
+          "unit2",
+          "unit3",
+          "unit4",
+          "unit5",
+          "unit6",
+          "unit7"
+        ],
+        "min_distinct_windows": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_circular_cursor_010",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dwa_ptr_gen_smoke",
+      "mechanism_family": "dwa_pointer_rotation",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Describe rotating unit-cell selection with cursor/window wording and wraparound checks.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "wraparound",
+        "window",
+        "coverage",
+        "keyword_removal"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "next_window",
+        "rst": "clear_n",
+        "bits_lsb_first": [
+          "qty1_0",
+          "qty1_1",
+          "qty1_2"
+        ],
+        "cell_outputs": [
+          "cell0",
+          "cell1",
+          "cell2",
+          "cell3",
+          "cell4",
+          "cell5",
+          "cell6",
+          "cell7"
+        ],
+        "min_distinct_windows": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_circular_cursor_011",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dwa_ptr_gen_smoke",
+      "mechanism_family": "dwa_pointer_rotation",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Describe rotating unit-cell selection with cursor/window wording and wraparound checks.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "wraparound",
+        "window",
+        "coverage",
+        "keyword_removal"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "selection_event",
+        "rst": "release_n",
+        "bits_lsb_first": [
+          "qty2_0",
+          "qty2_1",
+          "qty2_2"
+        ],
+        "cell_outputs": [
+          "unit0",
+          "unit1",
+          "unit2",
+          "unit3",
+          "unit4",
+          "unit5",
+          "unit6",
+          "unit7"
+        ],
+        "min_distinct_windows": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_circular_cursor_012",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dwa_ptr_gen_smoke",
+      "mechanism_family": "dwa_pointer_rotation",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Describe rotating unit-cell selection with cursor/window wording and wraparound checks.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "wraparound",
+        "window",
+        "coverage",
+        "keyword_removal"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "advance",
+        "rst": "clear_n",
+        "bits_lsb_first": [
+          "qty0_0",
+          "qty0_1",
+          "qty0_2"
+        ],
+        "cell_outputs": [
+          "cell0",
+          "cell1",
+          "cell2",
+          "cell3",
+          "cell4",
+          "cell5",
+          "cell6",
+          "cell7"
+        ],
+        "min_distinct_windows": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_circular_cursor_013",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dwa_ptr_gen_smoke",
+      "mechanism_family": "dwa_pointer_rotation",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Describe rotating unit-cell selection with cursor/window wording and wraparound checks.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "wraparound",
+        "window",
+        "coverage",
+        "keyword_removal"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "rotate_tick",
+        "rst": "release_n",
+        "bits_lsb_first": [
+          "qty1_0",
+          "qty1_1",
+          "qty1_2"
+        ],
+        "cell_outputs": [
+          "unit0",
+          "unit1",
+          "unit2",
+          "unit3",
+          "unit4",
+          "unit5",
+          "unit6",
+          "unit7"
+        ],
+        "min_distinct_windows": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_circular_cursor_014",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dwa_ptr_gen_smoke",
+      "mechanism_family": "dwa_pointer_rotation",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Describe rotating unit-cell selection with cursor/window wording and wraparound checks.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "wraparound",
+        "window",
+        "coverage",
+        "keyword_removal"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "next_window",
+        "rst": "clear_n",
+        "bits_lsb_first": [
+          "qty2_0",
+          "qty2_1",
+          "qty2_2"
+        ],
+        "cell_outputs": [
+          "cell0",
+          "cell1",
+          "cell2",
+          "cell3",
+          "cell4",
+          "cell5",
+          "cell6",
+          "cell7"
+        ],
+        "min_distinct_windows": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_circular_cursor_015",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dwa_ptr_gen_smoke",
+      "mechanism_family": "dwa_pointer_rotation",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Describe rotating unit-cell selection with cursor/window wording and wraparound checks.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "wraparound",
+        "window",
+        "coverage",
+        "keyword_removal"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "selection_event",
+        "rst": "release_n",
+        "bits_lsb_first": [
+          "qty0_0",
+          "qty0_1",
+          "qty0_2"
+        ],
+        "cell_outputs": [
+          "unit0",
+          "unit1",
+          "unit2",
+          "unit3",
+          "unit4",
+          "unit5",
+          "unit6",
+          "unit7"
+        ],
+        "min_distinct_windows": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_circular_cursor_016",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dwa_ptr_gen_smoke",
+      "mechanism_family": "dwa_pointer_rotation",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Describe rotating unit-cell selection with cursor/window wording and wraparound checks.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "wraparound",
+        "window",
+        "coverage",
+        "keyword_removal"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "advance",
+        "rst": "clear_n",
+        "bits_lsb_first": [
+          "qty1_0",
+          "qty1_1",
+          "qty1_2"
+        ],
+        "cell_outputs": [
+          "cell0",
+          "cell1",
+          "cell2",
+          "cell3",
+          "cell4",
+          "cell5",
+          "cell6",
+          "cell7"
+        ],
+        "min_distinct_windows": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_circular_cursor_017",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dwa_ptr_gen_smoke",
+      "mechanism_family": "dwa_pointer_rotation",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Describe rotating unit-cell selection with cursor/window wording and wraparound checks.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "wraparound",
+        "window",
+        "coverage",
+        "keyword_removal"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "rotate_tick",
+        "rst": "release_n",
+        "bits_lsb_first": [
+          "qty2_0",
+          "qty2_1",
+          "qty2_2"
+        ],
+        "cell_outputs": [
+          "unit0",
+          "unit1",
+          "unit2",
+          "unit3",
+          "unit4",
+          "unit5",
+          "unit6",
+          "unit7"
+        ],
+        "min_distinct_windows": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_circular_cursor_018",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dwa_ptr_gen_smoke",
+      "mechanism_family": "dwa_pointer_rotation",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Describe rotating unit-cell selection with cursor/window wording and wraparound checks.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "wraparound",
+        "window",
+        "coverage",
+        "keyword_removal"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "next_window",
+        "rst": "clear_n",
+        "bits_lsb_first": [
+          "qty0_0",
+          "qty0_1",
+          "qty0_2"
+        ],
+        "cell_outputs": [
+          "cell0",
+          "cell1",
+          "cell2",
+          "cell3",
+          "cell4",
+          "cell5",
+          "cell6",
+          "cell7"
+        ],
+        "min_distinct_windows": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_circular_cursor_019",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "dwa_ptr_gen_smoke",
+      "mechanism_family": "dwa_pointer_rotation",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Describe rotating unit-cell selection with cursor/window wording and wraparound checks.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "wraparound",
+        "window",
+        "coverage",
+        "keyword_removal"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "selection_event",
+        "rst": "release_n",
+        "bits_lsb_first": [
+          "qty1_0",
+          "qty1_1",
+          "qty1_2"
+        ],
+        "cell_outputs": [
+          "unit0",
+          "unit1",
+          "unit2",
+          "unit3",
+          "unit4",
+          "unit5",
+          "unit6",
+          "unit7"
+        ],
+        "min_distinct_windows": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_lead_lag_000",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "pfd_reset_race_smoke",
+      "mechanism_family": "pfd_event_order",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb event-order pulse generation using lead/lag aliases and optional lock indication.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "event_order",
+        "mutual_exclusion",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "ref": "early_event",
+        "div": "late_event",
+        "up": "raise_pulse",
+        "dn": "lower_pulse",
+        "lock": "locked"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_lead_lag_001",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "pfd_reset_race_smoke",
+      "mechanism_family": "pfd_event_order",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb event-order pulse generation using lead/lag aliases and optional lock indication.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "event_order",
+        "mutual_exclusion",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "ref": "lead_edge",
+        "div": "lag_edge",
+        "up": "lead_pulse",
+        "dn": "lag_pulse",
+        "lock": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_lead_lag_002",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "pfd_reset_race_smoke",
+      "mechanism_family": "pfd_event_order",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb event-order pulse generation using lead/lag aliases and optional lock indication.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "event_order",
+        "mutual_exclusion",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "ref": "reference_event",
+        "div": "feedback_event",
+        "up": "advance_pulse",
+        "dn": "retard_pulse",
+        "lock": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_lead_lag_003",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "pfd_reset_race_smoke",
+      "mechanism_family": "pfd_event_order",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Perturb event-order pulse generation using lead/lag aliases and optional lock indication.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "event_order",
+        "mutual_exclusion",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "ref": "arrival_a",
+        "div": "arrival_b",
+        "up": "up_mark",
+        "dn": "down_mark",
+        "lock": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_lead_lag_004",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "pfd_reset_race_smoke",
+      "mechanism_family": "pfd_event_order",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb event-order pulse generation using lead/lag aliases and optional lock indication.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "event_order",
+        "mutual_exclusion",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "ref": "phase_a",
+        "div": "phase_b",
+        "up": "raise_pulse",
+        "dn": "lower_pulse",
+        "lock": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_lead_lag_005",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "pfd_reset_race_smoke",
+      "mechanism_family": "pfd_event_order",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb event-order pulse generation using lead/lag aliases and optional lock indication.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "event_order",
+        "mutual_exclusion",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "ref": "early_event",
+        "div": "late_event",
+        "up": "lead_pulse",
+        "dn": "lag_pulse",
+        "lock": "locked"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_lead_lag_006",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "pfd_reset_race_smoke",
+      "mechanism_family": "pfd_event_order",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb event-order pulse generation using lead/lag aliases and optional lock indication.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "event_order",
+        "mutual_exclusion",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "ref": "lead_edge",
+        "div": "lag_edge",
+        "up": "advance_pulse",
+        "dn": "retard_pulse",
+        "lock": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_lead_lag_007",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "pfd_reset_race_smoke",
+      "mechanism_family": "pfd_event_order",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Perturb event-order pulse generation using lead/lag aliases and optional lock indication.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "event_order",
+        "mutual_exclusion",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "ref": "reference_event",
+        "div": "feedback_event",
+        "up": "up_mark",
+        "dn": "down_mark",
+        "lock": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_lead_lag_008",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "pfd_reset_race_smoke",
+      "mechanism_family": "pfd_event_order",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb event-order pulse generation using lead/lag aliases and optional lock indication.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "event_order",
+        "mutual_exclusion",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "ref": "arrival_a",
+        "div": "arrival_b",
+        "up": "raise_pulse",
+        "dn": "lower_pulse",
+        "lock": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_lead_lag_009",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "pfd_reset_race_smoke",
+      "mechanism_family": "pfd_event_order",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb event-order pulse generation using lead/lag aliases and optional lock indication.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "event_order",
+        "mutual_exclusion",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "ref": "phase_a",
+        "div": "phase_b",
+        "up": "lead_pulse",
+        "dn": "lag_pulse",
+        "lock": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_lead_lag_010",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "pfd_reset_race_smoke",
+      "mechanism_family": "pfd_event_order",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb event-order pulse generation using lead/lag aliases and optional lock indication.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "event_order",
+        "mutual_exclusion",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "ref": "early_event",
+        "div": "late_event",
+        "up": "advance_pulse",
+        "dn": "retard_pulse",
+        "lock": "locked"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_lead_lag_011",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "pfd_reset_race_smoke",
+      "mechanism_family": "pfd_event_order",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Perturb event-order pulse generation using lead/lag aliases and optional lock indication.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "event_order",
+        "mutual_exclusion",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "ref": "lead_edge",
+        "div": "lag_edge",
+        "up": "up_mark",
+        "dn": "down_mark",
+        "lock": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_lead_lag_012",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "pfd_reset_race_smoke",
+      "mechanism_family": "pfd_event_order",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb event-order pulse generation using lead/lag aliases and optional lock indication.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "event_order",
+        "mutual_exclusion",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "ref": "reference_event",
+        "div": "feedback_event",
+        "up": "raise_pulse",
+        "dn": "lower_pulse",
+        "lock": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_lead_lag_013",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "pfd_reset_race_smoke",
+      "mechanism_family": "pfd_event_order",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb event-order pulse generation using lead/lag aliases and optional lock indication.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "event_order",
+        "mutual_exclusion",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "ref": "arrival_a",
+        "div": "arrival_b",
+        "up": "lead_pulse",
+        "dn": "lag_pulse",
+        "lock": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_lead_lag_014",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "pfd_reset_race_smoke",
+      "mechanism_family": "pfd_event_order",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb event-order pulse generation using lead/lag aliases and optional lock indication.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "event_order",
+        "mutual_exclusion",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "ref": "phase_a",
+        "div": "phase_b",
+        "up": "advance_pulse",
+        "dn": "retard_pulse",
+        "lock": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_lead_lag_015",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "pfd_reset_race_smoke",
+      "mechanism_family": "pfd_event_order",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Perturb event-order pulse generation using lead/lag aliases and optional lock indication.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "event_order",
+        "mutual_exclusion",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "ref": "early_event",
+        "div": "late_event",
+        "up": "up_mark",
+        "dn": "down_mark",
+        "lock": "locked"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_lead_lag_016",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "pfd_reset_race_smoke",
+      "mechanism_family": "pfd_event_order",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb event-order pulse generation using lead/lag aliases and optional lock indication.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "event_order",
+        "mutual_exclusion",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "ref": "lead_edge",
+        "div": "lag_edge",
+        "up": "raise_pulse",
+        "dn": "lower_pulse",
+        "lock": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_lead_lag_017",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "pfd_reset_race_smoke",
+      "mechanism_family": "pfd_event_order",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb event-order pulse generation using lead/lag aliases and optional lock indication.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "event_order",
+        "mutual_exclusion",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "ref": "reference_event",
+        "div": "feedback_event",
+        "up": "lead_pulse",
+        "dn": "lag_pulse",
+        "lock": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_lead_lag_018",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "pfd_reset_race_smoke",
+      "mechanism_family": "pfd_event_order",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb event-order pulse generation using lead/lag aliases and optional lock indication.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "event_order",
+        "mutual_exclusion",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "ref": "arrival_a",
+        "div": "arrival_b",
+        "up": "advance_pulse",
+        "dn": "retard_pulse",
+        "lock": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_lead_lag_019",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "pfd_reset_race_smoke",
+      "mechanism_family": "pfd_event_order",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Perturb event-order pulse generation using lead/lag aliases and optional lock indication.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "event_order",
+        "mutual_exclusion",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "ref": "phase_a",
+        "div": "phase_b",
+        "up": "up_mark",
+        "dn": "down_mark",
+        "lock": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_event_counter_000",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "clk_divider",
+      "mechanism_family": "divider_counter",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb event-counting divider behavior with ratio and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "ratio",
+        "reset",
+        "encoding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "cadence",
+        "output": "tick_out",
+        "ratio": 2
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_event_counter_001",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "clk_divider",
+      "mechanism_family": "divider_counter",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb event-counting divider behavior with ratio and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "ratio",
+        "reset",
+        "encoding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "sample_event",
+        "output": "slow_event",
+        "ratio": 3
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_event_counter_002",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "clk_divider",
+      "mechanism_family": "divider_counter",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb event-counting divider behavior with ratio and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "ratio",
+        "reset",
+        "encoding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "capture_tick",
+        "output": "divided_tick",
+        "ratio": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_event_counter_003",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "clk_divider",
+      "mechanism_family": "divider_counter",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb event-counting divider behavior with ratio and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "ratio",
+        "reset",
+        "encoding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "advance_edge",
+        "output": "feedback_tick",
+        "ratio": 5
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_event_counter_004",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "clk_divider",
+      "mechanism_family": "divider_counter",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb event-counting divider behavior with ratio and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "ratio",
+        "reset",
+        "encoding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "strobe",
+        "output": "tick_out",
+        "ratio": 6
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_event_counter_005",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "clk_divider",
+      "mechanism_family": "divider_counter",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb event-counting divider behavior with ratio and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "ratio",
+        "reset",
+        "encoding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "cadence",
+        "output": "slow_event",
+        "ratio": 2
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_event_counter_006",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "clk_divider",
+      "mechanism_family": "divider_counter",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb event-counting divider behavior with ratio and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "ratio",
+        "reset",
+        "encoding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "sample_event",
+        "output": "divided_tick",
+        "ratio": 3
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_event_counter_007",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "clk_divider",
+      "mechanism_family": "divider_counter",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb event-counting divider behavior with ratio and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "ratio",
+        "reset",
+        "encoding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "capture_tick",
+        "output": "feedback_tick",
+        "ratio": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_event_counter_008",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "clk_divider",
+      "mechanism_family": "divider_counter",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb event-counting divider behavior with ratio and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "ratio",
+        "reset",
+        "encoding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "advance_edge",
+        "output": "tick_out",
+        "ratio": 5
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_event_counter_009",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "clk_divider",
+      "mechanism_family": "divider_counter",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb event-counting divider behavior with ratio and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "ratio",
+        "reset",
+        "encoding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "strobe",
+        "output": "slow_event",
+        "ratio": 6
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_event_counter_010",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "clk_divider",
+      "mechanism_family": "divider_counter",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb event-counting divider behavior with ratio and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "ratio",
+        "reset",
+        "encoding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "cadence",
+        "output": "divided_tick",
+        "ratio": 2
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_event_counter_011",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "clk_divider",
+      "mechanism_family": "divider_counter",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb event-counting divider behavior with ratio and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "ratio",
+        "reset",
+        "encoding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "sample_event",
+        "output": "feedback_tick",
+        "ratio": 3
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_event_counter_012",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "clk_divider",
+      "mechanism_family": "divider_counter",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb event-counting divider behavior with ratio and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "ratio",
+        "reset",
+        "encoding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "capture_tick",
+        "output": "tick_out",
+        "ratio": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_event_counter_013",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "clk_divider",
+      "mechanism_family": "divider_counter",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb event-counting divider behavior with ratio and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "ratio",
+        "reset",
+        "encoding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "advance_edge",
+        "output": "slow_event",
+        "ratio": 5
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_event_counter_014",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "clk_divider",
+      "mechanism_family": "divider_counter",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb event-counting divider behavior with ratio and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "ratio",
+        "reset",
+        "encoding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "strobe",
+        "output": "divided_tick",
+        "ratio": 6
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_event_counter_015",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "clk_divider",
+      "mechanism_family": "divider_counter",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb event-counting divider behavior with ratio and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "ratio",
+        "reset",
+        "encoding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "cadence",
+        "output": "feedback_tick",
+        "ratio": 2
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_event_counter_016",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "clk_divider",
+      "mechanism_family": "divider_counter",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb event-counting divider behavior with ratio and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "ratio",
+        "reset",
+        "encoding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "sample_event",
+        "output": "tick_out",
+        "ratio": 3
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_event_counter_017",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "clk_divider",
+      "mechanism_family": "divider_counter",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb event-counting divider behavior with ratio and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "ratio",
+        "reset",
+        "encoding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "capture_tick",
+        "output": "slow_event",
+        "ratio": 4
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_event_counter_018",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "clk_divider",
+      "mechanism_family": "divider_counter",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb event-counting divider behavior with ratio and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "ratio",
+        "reset",
+        "encoding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "advance_edge",
+        "output": "divided_tick",
+        "ratio": 5
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_event_counter_019",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "clk_divider",
+      "mechanism_family": "divider_counter",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb event-counting divider behavior with ratio and naming changes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "ratio",
+        "reset",
+        "encoding",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "clock": "strobe",
+        "output": "feedback_tick",
+        "ratio": 6
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_latched_level_000",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "sample_hold_smoke",
+      "mechanism_family": "sample_hold",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb event-captured held-level behavior using renamed sense/capture/output roles.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "aperture",
+        "latched_state",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "vin": "sense_level",
+        "clock": "cadence",
+        "vout": "latched_level",
+        "settled": "settled"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_latched_level_001",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "sample_hold_smoke",
+      "mechanism_family": "sample_hold",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb event-captured held-level behavior using renamed sense/capture/output roles.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "aperture",
+        "latched_state",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "vin": "measured_quantity",
+        "clock": "sample_event",
+        "vout": "held_sample",
+        "settled": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_latched_level_002",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "sample_hold_smoke",
+      "mechanism_family": "sample_hold",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb event-captured held-level behavior using renamed sense/capture/output roles.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "aperture",
+        "latched_state",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "vin": "external_drive",
+        "clock": "capture_tick",
+        "vout": "capture_level",
+        "settled": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_latched_level_003",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "sample_hold_smoke",
+      "mechanism_family": "sample_hold",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Perturb event-captured held-level behavior using renamed sense/capture/output roles.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "aperture",
+        "latched_state",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "vin": "observed_level",
+        "clock": "advance_edge",
+        "vout": "remembered_level",
+        "settled": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_latched_level_004",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "sample_hold_smoke",
+      "mechanism_family": "sample_hold",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb event-captured held-level behavior using renamed sense/capture/output roles.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "aperture",
+        "latched_state",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "vin": "analog_sample",
+        "clock": "strobe",
+        "vout": "latched_level",
+        "settled": "settled"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_latched_level_005",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "sample_hold_smoke",
+      "mechanism_family": "sample_hold",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb event-captured held-level behavior using renamed sense/capture/output roles.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "aperture",
+        "latched_state",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "vin": "sense_level",
+        "clock": "cadence",
+        "vout": "held_sample",
+        "settled": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_latched_level_006",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "sample_hold_smoke",
+      "mechanism_family": "sample_hold",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb event-captured held-level behavior using renamed sense/capture/output roles.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "aperture",
+        "latched_state",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "vin": "measured_quantity",
+        "clock": "sample_event",
+        "vout": "capture_level",
+        "settled": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_latched_level_007",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "sample_hold_smoke",
+      "mechanism_family": "sample_hold",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Perturb event-captured held-level behavior using renamed sense/capture/output roles.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "aperture",
+        "latched_state",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "vin": "external_drive",
+        "clock": "capture_tick",
+        "vout": "remembered_level",
+        "settled": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_latched_level_008",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "sample_hold_smoke",
+      "mechanism_family": "sample_hold",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb event-captured held-level behavior using renamed sense/capture/output roles.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "aperture",
+        "latched_state",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "vin": "observed_level",
+        "clock": "advance_edge",
+        "vout": "latched_level",
+        "settled": "settled"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_latched_level_009",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "sample_hold_smoke",
+      "mechanism_family": "sample_hold",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb event-captured held-level behavior using renamed sense/capture/output roles.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "aperture",
+        "latched_state",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "vin": "analog_sample",
+        "clock": "strobe",
+        "vout": "held_sample",
+        "settled": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_latched_level_010",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "sample_hold_smoke",
+      "mechanism_family": "sample_hold",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb event-captured held-level behavior using renamed sense/capture/output roles.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "aperture",
+        "latched_state",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "vin": "sense_level",
+        "clock": "cadence",
+        "vout": "capture_level",
+        "settled": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_latched_level_011",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "sample_hold_smoke",
+      "mechanism_family": "sample_hold",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Perturb event-captured held-level behavior using renamed sense/capture/output roles.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "aperture",
+        "latched_state",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "vin": "measured_quantity",
+        "clock": "sample_event",
+        "vout": "remembered_level",
+        "settled": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_latched_level_012",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "sample_hold_smoke",
+      "mechanism_family": "sample_hold",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb event-captured held-level behavior using renamed sense/capture/output roles.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "aperture",
+        "latched_state",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "vin": "external_drive",
+        "clock": "capture_tick",
+        "vout": "latched_level",
+        "settled": "settled"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_latched_level_013",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "sample_hold_smoke",
+      "mechanism_family": "sample_hold",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb event-captured held-level behavior using renamed sense/capture/output roles.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "aperture",
+        "latched_state",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "vin": "observed_level",
+        "clock": "advance_edge",
+        "vout": "held_sample",
+        "settled": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_latched_level_014",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "sample_hold_smoke",
+      "mechanism_family": "sample_hold",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb event-captured held-level behavior using renamed sense/capture/output roles.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "aperture",
+        "latched_state",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "vin": "analog_sample",
+        "clock": "strobe",
+        "vout": "capture_level",
+        "settled": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_latched_level_015",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "sample_hold_smoke",
+      "mechanism_family": "sample_hold",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Perturb event-captured held-level behavior using renamed sense/capture/output roles.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "aperture",
+        "latched_state",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "vin": "sense_level",
+        "clock": "cadence",
+        "vout": "remembered_level",
+        "settled": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_latched_level_016",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "sample_hold_smoke",
+      "mechanism_family": "sample_hold",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Perturb event-captured held-level behavior using renamed sense/capture/output roles.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "aperture",
+        "latched_state",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "vin": "measured_quantity",
+        "clock": "sample_event",
+        "vout": "latched_level",
+        "settled": "settled"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_latched_level_017",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "sample_hold_smoke",
+      "mechanism_family": "sample_hold",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Perturb event-captured held-level behavior using renamed sense/capture/output roles.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "aperture",
+        "latched_state",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "vin": "external_drive",
+        "clock": "capture_tick",
+        "vout": "held_sample",
+        "settled": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_latched_level_018",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "sample_hold_smoke",
+      "mechanism_family": "sample_hold",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Perturb event-captured held-level behavior using renamed sense/capture/output roles.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "aperture",
+        "latched_state",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "vin": "observed_level",
+        "clock": "advance_edge",
+        "vout": "capture_level",
+        "settled": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_latched_level_019",
+      "source_type": "seed_92_perturbation",
+      "source_seed": "sample_hold_smoke",
+      "mechanism_family": "sample_hold",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Perturb event-captured held-level behavior using renamed sense/capture/output roles.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-seed-perturbation-r2",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "aperture",
+        "latched_state",
+        "rename"
+      ],
+      "external_source_url": "not_applicable",
+      "external_source_license": "not_applicable",
+      "spec_overrides": {
+        "vin": "analog_sample",
+        "clock": "strobe",
+        "vout": "remembered_level",
+        "settled": null
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    }
+  ],
+  "materialized_at": "2026-04-29",
+  "status": "validated_gold_evas_spectre",
+  "validation_summary": {
+    "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+    "evas_status": "PASS",
+    "evas_pass_count_for_new370_run": 370,
+    "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+    "spectre_status": "PASS",
+    "spectre_pass_count_for_new370_run": 370,
+    "spectre_mode": "spectre"
+  }
+}

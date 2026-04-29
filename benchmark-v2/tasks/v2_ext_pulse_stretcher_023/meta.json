@@ -1,0 +1,46 @@
+{
+  "task_id": "v2_ext_pulse_stretcher_023",
+  "family": "benchmark-v2",
+  "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+  "mechanism_family": "event_pulse_stretcher",
+  "perturbation_level": "P5_parameter_checker",
+  "status": "materialized_draft",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "pulse",
+    "trigger": "arrival_mark",
+    "vout": "one_shot_level"
+  },
+  "manifest_entry": {
+    "task_id": "v2_ext_pulse_stretcher_023",
+    "source_type": "external_architecture",
+    "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+    "mechanism_family": "event_pulse_stretcher",
+    "perturbation_level": "P5_parameter_checker",
+    "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-external-architecture-r1",
+    "status": "materialized_draft",
+    "perturbation_axes": [
+      "external_architecture",
+      "event_to_pulse",
+      "timing"
+    ],
+    "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+    "external_source_license": "not_applicable_behavioral_pattern",
+    "spec_overrides": {
+      "trigger": "arrival_mark",
+      "vout": "one_shot_level"
+    }
+  }
+}

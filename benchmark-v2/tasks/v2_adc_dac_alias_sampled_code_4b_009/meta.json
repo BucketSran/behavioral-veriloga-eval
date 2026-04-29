@@ -1,0 +1,62 @@
+{
+  "task_id": "v2_adc_dac_alias_sampled_code_4b_009",
+  "family": "benchmark-v2",
+  "source_seed": "adc_dac_ideal_4b",
+  "mechanism_family": "adc_dac_quantize_reconstruct",
+  "perturbation_level": "P3_keyword_removal",
+  "status": "materialized_draft",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "adc_dac",
+    "width": 4,
+    "vin": "analog_sample",
+    "clock": "strobe",
+    "rst": "clear_n",
+    "bits_lsb_first": [
+      "level0",
+      "level1",
+      "level2",
+      "level3"
+    ],
+    "vout": "latched_level",
+    "settled": null,
+    "min_unique_codes": 8
+  },
+  "manifest_entry": {
+    "task_id": "v2_adc_dac_alias_sampled_code_4b_009",
+    "source_type": "seed_92_perturbation",
+    "source_seed": "adc_dac_ideal_4b",
+    "mechanism_family": "adc_dac_quantize_reconstruct",
+    "perturbation_level": "P3_keyword_removal",
+    "prompt_strategy": "Perturb the sampled quantize/reconstruct interface with aliased names and width changes.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-seed-perturbation-r2",
+    "status": "materialized_draft",
+    "perturbation_axes": [
+      "rename",
+      "width",
+      "shared_state"
+    ],
+    "external_source_url": "not_applicable",
+    "external_source_license": "not_applicable",
+    "spec_overrides": {
+      "width": 4,
+      "vin": "analog_sample",
+      "clock": "strobe",
+      "vout": "latched_level",
+      "bits_prefix": "level",
+      "settled": null,
+      "min_unique_codes": 8
+    }
+  }
+}

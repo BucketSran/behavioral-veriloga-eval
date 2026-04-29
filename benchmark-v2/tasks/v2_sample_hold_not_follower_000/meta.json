@@ -1,0 +1,53 @@
+{
+  "task_id": "v2_sample_hold_not_follower_000",
+  "family": "benchmark-v2",
+  "source_seed": "sample_hold_smoke",
+  "mechanism_family": "sample_hold",
+  "perturbation_level": "P4_negative_distractor",
+  "status": "materialized_draft",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "sample_hold",
+    "vin": "sense_level",
+    "clock": "cadence",
+    "vout": "latched_level",
+    "settled": "settled"
+  },
+  "manifest_entry": {
+    "task_id": "v2_sample_hold_not_follower_000",
+    "source_type": "seed_92_perturbation",
+    "source_seed": "sample_hold_smoke",
+    "mechanism_family": "sample_hold",
+    "perturbation_level": "P4_negative_distractor",
+    "prompt_strategy": "Capture only on the event and hold between events; continuous follower behavior is forbidden.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-hard-negative-r1",
+    "status": "materialized_draft",
+    "perturbation_axes": [
+      "aperture",
+      "latched_state",
+      "negative_constraint"
+    ],
+    "external_source_url": "not_applicable",
+    "external_source_license": "not_applicable",
+    "spec_overrides": {
+      "vin": "sense_level",
+      "clock": "cadence",
+      "vout": "latched_level",
+      "settled": "settled"
+    },
+    "negative_constraints": [
+      "not_continuous_follower"
+    ]
+  }
+}

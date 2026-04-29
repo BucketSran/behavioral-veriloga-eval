@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "dut.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0
+Vclk (capture_tick 0) vsource type=pulse val0=0 val1=0.9 delay=0 rise=50p fall=50p width=0.9n period=2n
+Vrst (clear_n 0) vsource type=pwl wave=[ 0 0 3n 0 3.1n 0.9 90n 0.9 ]
+Vvin (external_drive 0) vsource type=pwl wave=[ 0 0 90n 0.9 ]
+
+XDUT (external_drive capture_tick clear_n vdd vss state5 state4 state3 state2 state1 state0 estimate_node) v2_adc_dac_alias_sampled_code_6b_007
+
+tran tran stop=120n maxstep=500p
+save external_drive capture_tick clear_n estimate_node state0 state1 state2 state3 state4 state5

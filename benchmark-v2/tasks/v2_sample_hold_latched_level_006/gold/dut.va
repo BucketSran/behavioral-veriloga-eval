@@ -1,0 +1,23 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_sample_hold_latched_level_006(measured_quantity, sample_event, vdd, vss, capture_level);
+    input measured_quantity, sample_event, vdd, vss;
+    output capture_level;
+    electrical measured_quantity, sample_event, vdd, vss, capture_level;
+    parameter real vth = 0.45;
+    parameter real tr = 50p;
+    real held_v;
+
+    analog begin
+        @(initial_step) begin
+            held_v = V(vss);
+        end
+
+        @(cross(V(sample_event) - vth, +1)) begin
+            held_v = V(measured_quantity);
+        end
+
+        V(capture_level) <+ transition(held_v, 0.0, tr, tr);
+    end
+endmodule

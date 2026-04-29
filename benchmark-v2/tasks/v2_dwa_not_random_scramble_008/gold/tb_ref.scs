@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "dut.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0
+Vclk (advance 0) vsource type=pulse val0=0 val1=0.9 delay=0 rise=50p fall=50p width=1.8n period=4n
+Vrst (clear_n 0) vsource type=pwl wave=[ 0 0 4n 0 4.1n 0.9 120n 0.9 ]
+Vqty0 (qty2_0 0) vsource dc=0.9
+Vqty1 (qty2_1 0) vsource dc=0.9
+Vqty2 (qty2_2 0) vsource dc=0
+
+XDUT (advance clear_n qty2_0 qty2_1 qty2_2 vdd vss cell0 cell1 cell2 cell3 cell4 cell5 cell6 cell7) v2_dwa_not_random_scramble_008
+
+tran tran stop=120n maxstep=500p
+save advance clear_n qty2_0 qty2_1 qty2_2 cell0 cell1 cell2 cell3 cell4 cell5 cell6 cell7

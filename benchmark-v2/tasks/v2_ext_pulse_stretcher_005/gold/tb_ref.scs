@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "dut.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0
+Vtrig (arrival_mark 0) vsource type=pulse val0=0 val1=0.9 delay=2n rise=50p fall=50p width=1n period=14n
+
+XDUT (arrival_mark vdd vss one_shot_level) v2_ext_pulse_stretcher_005
+
+tran tran stop=120n maxstep=500p
+save arrival_mark one_shot_level

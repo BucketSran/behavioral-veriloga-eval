@@ -1,0 +1,23 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_sample_hold_latched_level_019(analog_sample, strobe, vdd, vss, remembered_level);
+    input analog_sample, strobe, vdd, vss;
+    output remembered_level;
+    electrical analog_sample, strobe, vdd, vss, remembered_level;
+    parameter real vth = 0.45;
+    parameter real tr = 50p;
+    real held_v;
+
+    analog begin
+        @(initial_step) begin
+            held_v = V(vss);
+        end
+
+        @(cross(V(strobe) - vth, +1)) begin
+            held_v = V(analog_sample);
+        end
+
+        V(remembered_level) <+ transition(held_v, 0.0, tr, tr);
+    end
+endmodule

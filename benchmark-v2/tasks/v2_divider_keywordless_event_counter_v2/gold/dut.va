@@ -1,0 +1,44 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_divider_keywordless_event_counter_v2(advance, clear_n, vdd, vss, tick_out);
+    input advance, clear_n, vdd, vss;
+    output tick_out;
+    electrical advance, clear_n, vdd, vss, tick_out;
+    parameter real vth = 0.45;
+    parameter real tr = 40p;
+    integer div_count_q;
+    integer count_state_q;
+    integer out_q;
+    integer ratio_q;
+
+
+    analog begin
+        @(initial_step) begin
+            div_count_q = 0;
+            count_state_q = 0;
+            out_q = 0;
+            ratio_q = 4;
+        end
+
+        @(cross(V(advance) - vth, +1)) begin
+            if (V(clear_n) < vth) begin
+                div_count_q = 0;
+                count_state_q = 0;
+                out_q = 0;
+            end else begin
+                ratio_q = 4;
+                count_state_q = (count_state_q + 1) % 16;
+                div_count_q = div_count_q + 1;
+                if (div_count_q >= ratio_q) begin
+                    div_count_q = 0;
+                    out_q = !out_q;
+                end
+
+            end
+        end
+
+        V(tick_out) <+ transition(out_q ? V(vdd) : V(vss), 0.0, tr, tr);
+
+    end
+endmodule

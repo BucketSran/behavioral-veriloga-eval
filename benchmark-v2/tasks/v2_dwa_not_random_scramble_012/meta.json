@@ -1,0 +1,84 @@
+{
+  "task_id": "v2_dwa_not_random_scramble_012",
+  "family": "benchmark-v2",
+  "source_seed": "dwa_ptr_gen_smoke",
+  "mechanism_family": "dwa_pointer_rotation",
+  "perturbation_level": "P4_negative_distractor",
+  "status": "materialized_draft",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "dwa",
+    "clock": "advance",
+    "rst": "clear_n",
+    "bits_lsb_first": [
+      "qty0_0",
+      "qty0_1",
+      "qty0_2"
+    ],
+    "cell_outputs": [
+      "cell0",
+      "cell1",
+      "cell2",
+      "cell3",
+      "cell4",
+      "cell5",
+      "cell6",
+      "cell7"
+    ],
+    "active_count": 3,
+    "min_distinct_windows": 4
+  },
+  "manifest_entry": {
+    "task_id": "v2_dwa_not_random_scramble_012",
+    "source_type": "seed_92_perturbation",
+    "source_seed": "dwa_ptr_gen_smoke",
+    "mechanism_family": "dwa_pointer_rotation",
+    "perturbation_level": "P4_negative_distractor",
+    "prompt_strategy": "Use a deterministic rotating contiguous unit-cell window; random scramble or static selection is forbidden.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-hard-negative-r1",
+    "status": "materialized_draft",
+    "perturbation_axes": [
+      "wraparound",
+      "window",
+      "coverage",
+      "negative_constraint"
+    ],
+    "external_source_url": "not_applicable",
+    "external_source_license": "not_applicable",
+    "spec_overrides": {
+      "clock": "advance",
+      "rst": "clear_n",
+      "bits_lsb_first": [
+        "qty0_0",
+        "qty0_1",
+        "qty0_2"
+      ],
+      "cell_outputs": [
+        "cell0",
+        "cell1",
+        "cell2",
+        "cell3",
+        "cell4",
+        "cell5",
+        "cell6",
+        "cell7"
+      ],
+      "min_distinct_windows": 4
+    },
+    "negative_constraints": [
+      "not_random",
+      "not_static_window"
+    ]
+  }
+}

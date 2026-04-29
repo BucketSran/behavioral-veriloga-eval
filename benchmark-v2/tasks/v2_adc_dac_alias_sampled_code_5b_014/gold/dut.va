@@ -1,0 +1,59 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_adc_dac_alias_sampled_code_5b_014(analog_sample, strobe, clear_n, vdd, vss, level4, level3, level2, level1, level0, latched_level);
+    input analog_sample, strobe, clear_n, vdd, vss;
+    output level4, level3, level2, level1, level0, latched_level;
+    electrical analog_sample, strobe, clear_n, vdd, vss, level4, level3, level2, level1, level0, latched_level;
+    parameter real vth = 0.45;
+    parameter real tr = 50p;
+    integer code_q;
+    real step_q;
+    real vout_t;
+    real level0_t;
+    real level1_t;
+    real level2_t;
+    real level3_t;
+    real level4_t;
+    analog begin
+        @(initial_step) begin
+            code_q = 0;
+            vout_t = V(vss);
+            level0_t = V(vss);
+            level1_t = V(vss);
+            level2_t = V(vss);
+            level3_t = V(vss);
+            level4_t = V(vss);
+        end
+
+        @(cross(V(strobe) - vth, +1)) begin
+            if (V(clear_n) < vth) begin
+                code_q = 0;
+                vout_t = V(vss);
+            level0_t = V(vss);
+            level1_t = V(vss);
+            level2_t = V(vss);
+            level3_t = V(vss);
+            level4_t = V(vss);
+            end else begin
+                step_q = (V(vdd) - V(vss)) / 32.0;
+                code_q = (V(analog_sample) - V(vss)) / step_q;
+                if (code_q < 0) code_q = 0;
+                if (code_q > 31) code_q = 31;
+                vout_t = V(vss) + (V(vdd) - V(vss)) * code_q / 31.0;
+            level0_t = ((code_q & 1) != 0) ? V(vdd) : V(vss);
+            level1_t = ((code_q & 2) != 0) ? V(vdd) : V(vss);
+            level2_t = ((code_q & 4) != 0) ? V(vdd) : V(vss);
+            level3_t = ((code_q & 8) != 0) ? V(vdd) : V(vss);
+            level4_t = ((code_q & 16) != 0) ? V(vdd) : V(vss);
+            end
+        end
+
+        V(level0) <+ transition(level0_t, 0.0, tr, tr);
+        V(level1) <+ transition(level1_t, 0.0, tr, tr);
+        V(level2) <+ transition(level2_t, 0.0, tr, tr);
+        V(level3) <+ transition(level3_t, 0.0, tr, tr);
+        V(level4) <+ transition(level4_t, 0.0, tr, tr);
+        V(latched_level) <+ transition(vout_t, 0.0, tr, tr);
+    end
+endmodule

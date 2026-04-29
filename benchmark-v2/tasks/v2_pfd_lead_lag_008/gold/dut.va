@@ -1,0 +1,49 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_pfd_lead_lag_008(arrival_a, arrival_b, vdd, vss, raise_pulse, lower_pulse);
+    input arrival_a, arrival_b, vdd, vss;
+    output raise_pulse, lower_pulse;
+    electrical arrival_a, arrival_b, vdd, vss, raise_pulse, lower_pulse;
+    parameter real vth = 0.45;
+    parameter real pulse_width = 1.0n;
+    parameter real tr = 40p;
+    integer up_q;
+    integer dn_q;
+    real up_clear_t;
+    real dn_clear_t;
+
+    analog begin
+        @(initial_step) begin
+            up_q = 0;
+            dn_q = 0;
+            up_clear_t = 1.0;
+            dn_clear_t = 1.0;
+        end
+
+        @(cross(V(arrival_a) - vth, +1)) begin
+            up_q = 1;
+            dn_q = 0;
+            up_clear_t = $abstime + pulse_width;
+        end
+
+        @(cross(V(arrival_b) - vth, +1)) begin
+            dn_q = 1;
+            up_q = 0;
+            dn_clear_t = $abstime + pulse_width;
+        end
+
+        @(timer(up_clear_t)) begin
+            up_q = 0;
+            up_clear_t = 1.0;
+        end
+
+        @(timer(dn_clear_t)) begin
+            dn_q = 0;
+            dn_clear_t = 1.0;
+        end
+
+        V(raise_pulse) <+ transition(up_q ? V(vdd) : V(vss), 0.0, tr, tr);
+        V(lower_pulse) <+ transition(dn_q ? V(vdd) : V(vss), 0.0, tr, tr);
+    end
+endmodule

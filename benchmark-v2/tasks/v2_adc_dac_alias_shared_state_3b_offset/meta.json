@@ -1,0 +1,49 @@
+{
+  "task_id": "v2_adc_dac_alias_shared_state_3b_offset",
+  "family": "benchmark-v2",
+  "source_seed": "adc_dac_ideal_4b",
+  "mechanism_family": "adc_dac_quantize_reconstruct",
+  "perturbation_level": "P5_parameter_checker",
+  "status": "materialized_draft",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "adc_dac",
+    "width": 3,
+    "vin": "measured_level",
+    "clock": "sample_clock",
+    "rst": "clear_n",
+    "bits_lsb_first": [
+      "bit0",
+      "bit1",
+      "bit2"
+    ],
+    "vout": "held_level",
+    "settled": null,
+    "min_unique_codes": 8
+  },
+  "manifest_entry": {
+    "task_id": "v2_adc_dac_alias_shared_state_3b_offset",
+    "source_seed": "adc_dac_ideal_4b",
+    "mechanism_family": "adc_dac_quantize_reconstruct",
+    "perturbation_level": "P5_parameter_checker",
+    "prompt_strategy": "Use 3-bit decision outputs with aliased input/output names and require one shared sampled state for code and reconstruction.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-seed-perturbation-r1",
+    "status": "materialized_draft",
+    "perturbation_axes": [
+      "rename",
+      "width",
+      "shared_state"
+    ]
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "task_id": "v2_binary_dac_weighted_sum_4b_006",
+  "family": "benchmark-v2",
+  "source_seed": "dac_binary_clk_4b_smoke",
+  "mechanism_family": "binary_weighted_dac",
+  "perturbation_level": "P2_semantic_alias",
+  "status": "materialized_draft",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "binary_dac",
+    "width": 4,
+    "bits_lsb_first": [
+      "scale0",
+      "scale1",
+      "scale2",
+      "scale3"
+    ],
+    "vout": "analog_sum",
+    "guard": null,
+    "min_unique_codes": 8
+  },
+  "manifest_entry": {
+    "task_id": "v2_binary_dac_weighted_sum_4b_006",
+    "source_type": "seed_92_perturbation",
+    "source_seed": "dac_binary_clk_4b_smoke",
+    "mechanism_family": "binary_weighted_dac",
+    "perturbation_level": "P2_semantic_alias",
+    "prompt_strategy": "Perturb a binary-weighted analog reconstruction task with width and naming changes.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-seed-perturbation-r2",
+    "status": "materialized_draft",
+    "perturbation_axes": [
+      "width",
+      "role_binding",
+      "rename"
+    ],
+    "external_source_url": "not_applicable",
+    "external_source_license": "not_applicable",
+    "spec_overrides": {
+      "width": 4,
+      "bits_prefix": "scale",
+      "vout": "analog_sum",
+      "guard": null,
+      "min_unique_codes": 8
+    }
+  }
+}

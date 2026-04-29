@@ -229,6 +229,125 @@ def _check_sample_hold(rows: list[dict[str, float]], spec: dict[str, Any]) -> tu
     return True, f"sample_hold_ok vin_span={vin_span:.3f} vout_span={vout_span:.3f} mean_diff={mean_diff:.4f}"
 
 
+def _check_threshold(rows: list[dict[str, float]], spec: dict[str, Any]) -> tuple[bool, str]:
+    vin = spec["vin"]
+    out = spec["vout"]
+    ok, note = _has_fields(rows, [vin, out])
+    if not ok:
+        return False, note
+    threshold = float(spec.get("threshold", 0.45))
+    margin = float(spec.get("margin", 0.06))
+    logic_threshold = float(spec.get("logic_threshold", 0.45))
+    checked = 0
+    mismatches = 0
+    high_seen = False
+    low_seen = False
+    for row in rows:
+        x = row[vin]
+        if abs(x - threshold) < margin:
+            continue
+        expected = 1 if x > threshold else 0
+        observed = 1 if row[out] >= logic_threshold else 0
+        checked += 1
+        high_seen |= observed == 1
+        low_seen |= observed == 0
+        if expected != observed:
+            mismatches += 1
+    if checked < 12:
+        return False, f"insufficient_threshold_samples={checked}"
+    if not (high_seen and low_seen):
+        return False, "threshold_output_not_toggling"
+    if mismatches > max(3, 0.12 * checked):
+        return False, f"threshold_mismatch={mismatches}/{checked}"
+    return True, f"threshold_ok mismatch={mismatches}/{checked}"
+
+
+def _check_window(rows: list[dict[str, float]], spec: dict[str, Any]) -> tuple[bool, str]:
+    vin = spec["vin"]
+    inside = spec["inside"]
+    below = spec["below"]
+    above = spec["above"]
+    ok, note = _has_fields(rows, [vin, inside, below, above])
+    if not ok:
+        return False, note
+    lo = float(spec.get("lo", 0.25))
+    hi = float(spec.get("hi", 0.65))
+    margin = float(spec.get("margin", 0.04))
+    threshold = float(spec.get("threshold", 0.45))
+    checked = 0
+    bad = 0
+    seen = {"below": False, "inside": False, "above": False}
+    for row in rows:
+        x = row[vin]
+        if abs(x - lo) < margin or abs(x - hi) < margin:
+            continue
+        obs = {
+            "below": row[below] >= threshold,
+            "inside": row[inside] >= threshold,
+            "above": row[above] >= threshold,
+        }
+        exp = {
+            "below": x < lo,
+            "inside": lo <= x <= hi,
+            "above": x > hi,
+        }
+        checked += 1
+        for key, value in obs.items():
+            if value:
+                seen[key] = True
+        if obs != exp:
+            bad += 1
+    if checked < 12:
+        return False, f"insufficient_window_samples={checked}"
+    missing = [key for key, value in seen.items() if not value]
+    if missing:
+        return False, "window_region_missing=" + ",".join(missing)
+    if bad > max(4, 0.15 * checked):
+        return False, f"window_bad={bad}/{checked}"
+    return True, f"window_ok bad={bad}/{checked}"
+
+
+def _check_limiter(rows: list[dict[str, float]], spec: dict[str, Any]) -> tuple[bool, str]:
+    vin = spec["vin"]
+    out = spec["vout"]
+    ok, note = _has_fields(rows, [vin, out])
+    if not ok:
+        return False, note
+    vlo = float(spec.get("vlo", 0.18))
+    vhi = float(spec.get("vhi", 0.72))
+    tol = float(spec.get("tolerance", 0.08))
+    outputs = [row[out] for row in rows]
+    if min(outputs) < vlo - tol or max(outputs) > vhi + tol:
+        return False, f"limiter_bounds={min(outputs):.3f},{max(outputs):.3f}"
+    low_seen = any(row[vin] < vlo - 0.04 and abs(row[out] - vlo) < tol for row in rows)
+    mid_seen = any(vlo + 0.08 < row[vin] < vhi - 0.08 and abs(row[out] - row[vin]) < tol for row in rows)
+    high_seen = any(row[vin] > vhi + 0.04 and abs(row[out] - vhi) < tol for row in rows)
+    if not (low_seen and mid_seen and high_seen):
+        return False, f"limiter_regions low_mid_high={int(low_seen)},{int(mid_seen)},{int(high_seen)}"
+    return True, f"limiter_ok out_range={min(outputs):.3f},{max(outputs):.3f}"
+
+
+def _check_pulse(rows: list[dict[str, float]], spec: dict[str, Any]) -> tuple[bool, str]:
+    trig = spec["trigger"]
+    out = spec["vout"]
+    ok, note = _has_fields(rows, [trig, out])
+    if not ok:
+        return False, note
+    threshold = float(spec.get("threshold", 0.45))
+    trig_edges = len(_rising_edges(rows, trig, threshold))
+    out_edges = len(_rising_edges(rows, out, threshold))
+    out_high = sum(1 for row in rows if row[out] >= threshold)
+    if trig_edges < 3:
+        return False, f"pulse_trigger_edges={trig_edges}"
+    if out_edges < max(2, trig_edges - 2):
+        return False, f"pulse_output_edges={out_edges} trigger_edges={trig_edges}"
+    if out_high < int(spec.get("min_high_samples", 6)):
+        return False, f"pulse_high_samples={out_high}"
+    if rows[-1][out] >= threshold:
+        return False, "pulse_did_not_return_low"
+    return True, f"pulse_ok trigger_edges={trig_edges} out_edges={out_edges} high={out_high}"
+
+
 CHECKERS = {
     "adc_dac": _check_adc_dac,
     "binary_dac": _check_binary_dac,
@@ -236,6 +355,10 @@ CHECKERS = {
     "pfd": _check_pfd,
     "divider": _check_divider,
     "sample_hold": _check_sample_hold,
+    "threshold": _check_threshold,
+    "window": _check_window,
+    "limiter": _check_limiter,
+    "pulse": _check_pulse,
 }
 
 

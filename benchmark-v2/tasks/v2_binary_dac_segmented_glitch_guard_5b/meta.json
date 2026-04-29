@@ -1,0 +1,48 @@
+{
+  "task_id": "v2_binary_dac_segmented_glitch_guard_5b",
+  "family": "benchmark-v2",
+  "source_seed": "segmented_dac_glitch_tb",
+  "mechanism_family": "binary_weighted_dac",
+  "perturbation_level": "P6_system_composition",
+  "status": "materialized_draft",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "binary_dac",
+    "width": 5,
+    "bits_lsb_first": [
+      "weight0",
+      "weight1",
+      "weight2",
+      "weight3",
+      "weight4"
+    ],
+    "vout": "analog_sum",
+    "guard": "glitch_guard",
+    "min_unique_codes": 8
+  },
+  "manifest_entry": {
+    "task_id": "v2_binary_dac_segmented_glitch_guard_5b",
+    "source_seed": "segmented_dac_glitch_tb",
+    "mechanism_family": "binary_weighted_dac",
+    "perturbation_level": "P6_system_composition",
+    "prompt_strategy": "Combine weighted reconstruction with an always-valid guard flag for segmented-output tests.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-seed-perturbation-r1",
+    "status": "materialized_draft",
+    "perturbation_axes": [
+      "width",
+      "system_composition",
+      "aux_output"
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_adc_dac_alias_shared_state_3b_offset(measured_level, sample_clock, clear_n, vdd, vss, bit2, bit1, bit0, held_level);
+    input measured_level, sample_clock, clear_n, vdd, vss;
+    output bit2, bit1, bit0, held_level;
+    electrical measured_level, sample_clock, clear_n, vdd, vss, bit2, bit1, bit0, held_level;
+    parameter real vth = 0.45;
+    parameter real tr = 50p;
+    integer code_q;
+    real step_q;
+    real vout_t;
+    real bit0_t;
+    real bit1_t;
+    real bit2_t;
+    analog begin
+        @(initial_step) begin
+            code_q = 0;
+            vout_t = V(vss);
+            bit0_t = V(vss);
+            bit1_t = V(vss);
+            bit2_t = V(vss);
+        end
+
+        @(cross(V(sample_clock) - vth, +1)) begin
+            if (V(clear_n) < vth) begin
+                code_q = 0;
+                vout_t = V(vss);
+            bit0_t = V(vss);
+            bit1_t = V(vss);
+            bit2_t = V(vss);
+            end else begin
+                step_q = (V(vdd) - V(vss)) / 8.0;
+                code_q = (V(measured_level) - V(vss)) / step_q;
+                if (code_q < 0) code_q = 0;
+                if (code_q > 7) code_q = 7;
+                vout_t = V(vss) + (V(vdd) - V(vss)) * code_q / 7.0;
+            bit0_t = ((code_q & 1) != 0) ? V(vdd) : V(vss);
+            bit1_t = ((code_q & 2) != 0) ? V(vdd) : V(vss);
+            bit2_t = ((code_q & 4) != 0) ? V(vdd) : V(vss);
+            end
+        end
+
+        V(bit0) <+ transition(bit0_t, 0.0, tr, tr);
+        V(bit1) <+ transition(bit1_t, 0.0, tr, tr);
+        V(bit2) <+ transition(bit2_t, 0.0, tr, tr);
+        V(held_level) <+ transition(vout_t, 0.0, tr, tr);
+    end
+endmodule

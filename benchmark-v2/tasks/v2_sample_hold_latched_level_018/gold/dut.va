@@ -1,0 +1,23 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_sample_hold_latched_level_018(observed_level, advance_edge, vdd, vss, capture_level);
+    input observed_level, advance_edge, vdd, vss;
+    output capture_level;
+    electrical observed_level, advance_edge, vdd, vss, capture_level;
+    parameter real vth = 0.45;
+    parameter real tr = 50p;
+    real held_v;
+
+    analog begin
+        @(initial_step) begin
+            held_v = V(vss);
+        end
+
+        @(cross(V(advance_edge) - vth, +1)) begin
+            held_v = V(observed_level);
+        end
+
+        V(capture_level) <+ transition(held_v, 0.0, tr, tr);
+    end
+endmodule

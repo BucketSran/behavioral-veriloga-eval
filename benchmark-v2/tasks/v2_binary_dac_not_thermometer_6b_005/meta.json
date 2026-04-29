@@ -1,0 +1,63 @@
+{
+  "task_id": "v2_binary_dac_not_thermometer_6b_005",
+  "family": "benchmark-v2",
+  "source_seed": "dac_binary_clk_4b_smoke",
+  "mechanism_family": "binary_weighted_dac",
+  "perturbation_level": "P4_negative_distractor",
+  "status": "materialized_draft",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "binary_dac",
+    "width": 6,
+    "bits_lsb_first": [
+      "input0",
+      "input1",
+      "input2",
+      "input3",
+      "input4",
+      "input5"
+    ],
+    "vout": "recon_value",
+    "guard": null,
+    "min_unique_codes": 8
+  },
+  "manifest_entry": {
+    "task_id": "v2_binary_dac_not_thermometer_6b_005",
+    "source_type": "seed_92_perturbation",
+    "source_seed": "dac_binary_clk_4b_smoke",
+    "mechanism_family": "binary_weighted_dac",
+    "perturbation_level": "P4_negative_distractor",
+    "prompt_strategy": "Require binary-weighted reconstruction and explicitly reject thermometer or unary active-count behavior.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-hard-negative-r1",
+    "status": "materialized_draft",
+    "perturbation_axes": [
+      "width",
+      "role_binding",
+      "negative_constraint"
+    ],
+    "external_source_url": "not_applicable",
+    "external_source_license": "not_applicable",
+    "spec_overrides": {
+      "width": 6,
+      "bits_prefix": "input",
+      "vout": "recon_value",
+      "guard": null,
+      "min_unique_codes": 8
+    },
+    "negative_constraints": [
+      "not_thermometer",
+      "not_unit_cell_count"
+    ]
+  }
+}

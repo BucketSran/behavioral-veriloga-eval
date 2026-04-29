@@ -1,0 +1,55 @@
+{
+  "task_id": "v2_dwa_window_size_hop_alias",
+  "family": "benchmark-v2",
+  "source_seed": "dwa_wraparound_smoke",
+  "mechanism_family": "dwa_pointer_rotation",
+  "perturbation_level": "P5_parameter_checker",
+  "status": "materialized_draft",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "dwa",
+    "clock": "advance",
+    "rst": "clear_n",
+    "bits_lsb_first": [
+      "qty0",
+      "qty1",
+      "qty2"
+    ],
+    "cell_outputs": [
+      "cell0",
+      "cell1",
+      "cell2",
+      "cell3",
+      "cell4",
+      "cell5",
+      "cell6",
+      "cell7"
+    ],
+    "active_count": 3,
+    "min_distinct_windows": 4
+  },
+  "manifest_entry": {
+    "task_id": "v2_dwa_window_size_hop_alias",
+    "source_seed": "dwa_wraparound_smoke",
+    "mechanism_family": "dwa_pointer_rotation",
+    "perturbation_level": "P5_parameter_checker",
+    "prompt_strategy": "Check that the rotating window has the requested active count and wraps at the cell boundary.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-seed-perturbation-r1",
+    "status": "materialized_draft",
+    "perturbation_axes": [
+      "parameter",
+      "wraparound"
+    ]
+  }
+}

@@ -1,0 +1,58 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_adc_dac_alias_sampled_code_3b_000(sense_level, cadence, clear_n, vdd, vss, q2, q1, q0, held_level, settled);
+    input sense_level, cadence, clear_n, vdd, vss;
+    output q2, q1, q0, held_level, settled;
+    electrical sense_level, cadence, clear_n, vdd, vss, q2, q1, q0, held_level, settled;
+    parameter real vth = 0.45;
+    parameter real tr = 50p;
+    integer code_q;
+    real step_q;
+    real vout_t;
+    real q0_t;
+    real q1_t;
+    real q2_t;
+    integer stable_count;
+    real settled_t;
+    analog begin
+        @(initial_step) begin
+            code_q = 0;
+            vout_t = V(vss);
+            q0_t = V(vss);
+            q1_t = V(vss);
+            q2_t = V(vss);
+            stable_count = 0;
+            settled_t = V(vss);
+        end
+
+        @(cross(V(cadence) - vth, +1)) begin
+            if (V(clear_n) < vth) begin
+                code_q = 0;
+                vout_t = V(vss);
+            q0_t = V(vss);
+            q1_t = V(vss);
+            q2_t = V(vss);
+            stable_count = 0;
+            settled_t = V(vss);
+            end else begin
+                step_q = (V(vdd) - V(vss)) / 8.0;
+                code_q = (V(sense_level) - V(vss)) / step_q;
+                if (code_q < 0) code_q = 0;
+                if (code_q > 7) code_q = 7;
+                vout_t = V(vss) + (V(vdd) - V(vss)) * code_q / 7.0;
+            q0_t = ((code_q & 1) != 0) ? V(vdd) : V(vss);
+            q1_t = ((code_q & 2) != 0) ? V(vdd) : V(vss);
+            q2_t = ((code_q & 4) != 0) ? V(vdd) : V(vss);
+            stable_count = stable_count + 1;
+            if (stable_count > 8) settled_t = V(vdd);
+            end
+        end
+
+        V(q0) <+ transition(q0_t, 0.0, tr, tr);
+        V(q1) <+ transition(q1_t, 0.0, tr, tr);
+        V(q2) <+ transition(q2_t, 0.0, tr, tr);
+        V(held_level) <+ transition(vout_t, 0.0, tr, tr);
+        V(settled) <+ transition(settled_t, 0.0, tr, tr);
+    end
+endmodule

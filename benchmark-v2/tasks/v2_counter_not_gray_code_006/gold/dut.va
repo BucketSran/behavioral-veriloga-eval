@@ -1,0 +1,53 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_counter_not_gray_code_006(sample_event, clear_n, vdd, vss, divided_tick, cnt0_0, cnt0_1, cnt0_2, cnt0_3);
+    input sample_event, clear_n, vdd, vss;
+    output divided_tick, cnt0_0, cnt0_1, cnt0_2, cnt0_3;
+    electrical sample_event, clear_n, vdd, vss, divided_tick, cnt0_0, cnt0_1, cnt0_2, cnt0_3;
+    parameter real vth = 0.45;
+    parameter real tr = 40p;
+    integer div_count_q;
+    integer count_state_q;
+    integer out_q;
+    integer ratio_q;
+    real cnt0_0_t;
+    real cnt0_1_t;
+    real cnt0_2_t;
+    real cnt0_3_t;
+
+    analog begin
+        @(initial_step) begin
+            div_count_q = 0;
+            count_state_q = 0;
+            out_q = 0;
+            ratio_q = 3;
+        end
+
+        @(cross(V(sample_event) - vth, +1)) begin
+            if (V(clear_n) < vth) begin
+                div_count_q = 0;
+                count_state_q = 0;
+                out_q = 0;
+            end else begin
+                ratio_q = 3;
+                count_state_q = (count_state_q + 1) % 16;
+                div_count_q = div_count_q + 1;
+                if (div_count_q >= ratio_q) begin
+                    div_count_q = 0;
+                    out_q = !out_q;
+                end
+                cnt0_0_t = ((count_state_q & 1) != 0) ? V(vdd) : V(vss);
+                cnt0_1_t = ((count_state_q & 2) != 0) ? V(vdd) : V(vss);
+                cnt0_2_t = ((count_state_q & 4) != 0) ? V(vdd) : V(vss);
+                cnt0_3_t = ((count_state_q & 8) != 0) ? V(vdd) : V(vss);
+            end
+        end
+
+        V(divided_tick) <+ transition(out_q ? V(vdd) : V(vss), 0.0, tr, tr);
+        V(cnt0_0) <+ transition(cnt0_0_t, 0.0, tr, tr);
+        V(cnt0_1) <+ transition(cnt0_1_t, 0.0, tr, tr);
+        V(cnt0_2) <+ transition(cnt0_2_t, 0.0, tr, tr);
+        V(cnt0_3) <+ transition(cnt0_3_t, 0.0, tr, tr);
+    end
+endmodule

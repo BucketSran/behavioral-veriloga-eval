@@ -1,0 +1,30 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_sample_hold_latched_level_008(observed_level, advance_edge, vdd, vss, latched_level, settled);
+    input observed_level, advance_edge, vdd, vss;
+    output latched_level, settled;
+    electrical observed_level, advance_edge, vdd, vss, latched_level, settled;
+    parameter real vth = 0.45;
+    parameter real tr = 50p;
+    real held_v;
+    integer sample_count;
+    real settled_t;
+
+    analog begin
+        @(initial_step) begin
+            held_v = V(vss);
+            sample_count = 0;
+            settled_t = V(vss);
+        end
+
+        @(cross(V(advance_edge) - vth, +1)) begin
+            held_v = V(observed_level);
+            sample_count = sample_count + 1;
+            if (sample_count > 6) settled_t = V(vdd);
+        end
+
+        V(latched_level) <+ transition(held_v, 0.0, tr, tr);
+        V(settled) <+ transition(settled_t, 0.0, tr, tr);
+    end
+endmodule

@@ -1,0 +1,41 @@
+{
+  "task_id": "v2_pfd_not_xor_reset_window",
+  "family": "benchmark-v2",
+  "source_seed": "xor_pd_smoke",
+  "mechanism_family": "pfd_event_order",
+  "perturbation_level": "P4_negative_distractor",
+  "status": "materialized_draft",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "pfd",
+    "ref": "early_event",
+    "div": "late_event",
+    "up": "raise_pulse",
+    "dn": "lower_pulse",
+    "lock": null
+  },
+  "manifest_entry": {
+    "task_id": "v2_pfd_not_xor_reset_window",
+    "source_seed": "xor_pd_smoke",
+    "mechanism_family": "pfd_event_order",
+    "perturbation_level": "P4_negative_distractor",
+    "prompt_strategy": "Require event-order memory and pulse reset timing; explicitly reject XOR phase detector behavior.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-seed-perturbation-r1",
+    "status": "materialized_draft",
+    "perturbation_axes": [
+      "negative_constraint",
+      "reset_window"
+    ]
+  }
+}

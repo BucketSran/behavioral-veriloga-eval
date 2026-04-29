@@ -1,0 +1,23 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_ext_window_detector_025(measured_voltage, vdd, vss, inside_window, below_window, above_window);
+    input measured_voltage, vdd, vss;
+    output inside_window, below_window, above_window;
+    electrical measured_voltage, vdd, vss, inside_window, below_window, above_window;
+    parameter real lo = 0.25;
+    parameter real hi = 0.65;
+    parameter real tr = 40p;
+    real inside_t;
+    real below_t;
+    real above_t;
+
+    analog begin
+        below_t = (V(measured_voltage) < lo) ? V(vdd) : V(vss);
+        above_t = (V(measured_voltage) > hi) ? V(vdd) : V(vss);
+        inside_t = (V(measured_voltage) >= lo && V(measured_voltage) <= hi) ? V(vdd) : V(vss);
+        V(inside_window) <+ transition(inside_t, 0.0, tr, tr);
+        V(below_window) <+ transition(below_t, 0.0, tr, tr);
+        V(above_window) <+ transition(above_t, 0.0, tr, tr);
+    end
+endmodule

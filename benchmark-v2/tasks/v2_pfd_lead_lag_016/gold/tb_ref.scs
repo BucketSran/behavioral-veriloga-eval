@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "dut.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0
+Vref (lead_edge 0) vsource type=pulse val0=0 val1=0.9 delay=1n rise=50p fall=50p width=4n period=10n
+Vdiv (lag_edge 0) vsource type=pulse val0=0 val1=0.9 delay=4n rise=50p fall=50p width=4n period=10n
+
+XDUT (lead_edge lag_edge vdd vss raise_pulse lower_pulse) v2_pfd_lead_lag_016
+
+tran tran stop=120n maxstep=500p
+save lead_edge lag_edge raise_pulse lower_pulse

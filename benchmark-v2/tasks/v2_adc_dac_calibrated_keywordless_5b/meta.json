@@ -1,0 +1,51 @@
+{
+  "task_id": "v2_adc_dac_calibrated_keywordless_5b",
+  "family": "benchmark-v2",
+  "source_seed": "adc_dac_ideal_4b",
+  "mechanism_family": "adc_dac_quantize_reconstruct",
+  "perturbation_level": "P6_system_composition",
+  "status": "materialized_draft",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "adc_dac",
+    "width": 5,
+    "vin": "sense_value",
+    "clock": "cadence",
+    "rst": "clear_n",
+    "bits_lsb_first": [
+      "dec0",
+      "dec1",
+      "dec2",
+      "dec3",
+      "dec4"
+    ],
+    "vout": "estimate_level",
+    "settled": "settled",
+    "min_unique_codes": 8
+  },
+  "manifest_entry": {
+    "task_id": "v2_adc_dac_calibrated_keywordless_5b",
+    "source_seed": "adc_dac_ideal_4b",
+    "mechanism_family": "adc_dac_quantize_reconstruct",
+    "perturbation_level": "P6_system_composition",
+    "prompt_strategy": "Combine a 5-bit sampled decision chain with a late settled flag while avoiding ADC/DAC keywords.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-seed-perturbation-r1",
+    "status": "materialized_draft",
+    "perturbation_axes": [
+      "keyword_removal",
+      "width",
+      "system_composition"
+    ]
+  }
+}

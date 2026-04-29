@@ -1,0 +1,49 @@
+{
+  "task_id": "v2_ext_limiter_model_001",
+  "family": "benchmark-v2",
+  "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+  "mechanism_family": "analog_limiter",
+  "perturbation_level": "P4_negative_distractor",
+  "status": "materialized_draft",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "limiter",
+    "vin": "unbounded_signal",
+    "vout": "clamped_level"
+  },
+  "manifest_entry": {
+    "task_id": "v2_ext_limiter_model_001",
+    "source_type": "external_architecture",
+    "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+    "mechanism_family": "analog_limiter",
+    "perturbation_level": "P4_negative_distractor",
+    "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-external-architecture-r1",
+    "status": "materialized_draft",
+    "perturbation_axes": [
+      "external_architecture",
+      "nonlinear_transfer",
+      "negative_constraint"
+    ],
+    "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+    "external_source_license": "not_applicable_behavioral_pattern",
+    "spec_overrides": {
+      "vin": "unbounded_signal",
+      "vout": "clamped_level"
+    },
+    "negative_constraints": [
+      "not_unbounded_follower"
+    ]
+  }
+}

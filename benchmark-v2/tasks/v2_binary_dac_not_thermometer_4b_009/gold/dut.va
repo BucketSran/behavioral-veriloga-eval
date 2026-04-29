@@ -1,0 +1,22 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_binary_dac_not_thermometer_4b_009(input0, input1, input2, input3, vdd, vss, analog_sum);
+    input input0, input1, input2, input3, vdd, vss;
+    output analog_sum;
+    electrical input0, input1, input2, input3, vdd, vss, analog_sum;
+    parameter real vth = 0.45;
+    parameter real tr = 40p;
+    integer code_q;
+    real out_t;
+
+    analog begin
+        code_q = 0;
+        if (V(input0) >= vth) code_q = code_q + 1;
+        if (V(input1) >= vth) code_q = code_q + 2;
+        if (V(input2) >= vth) code_q = code_q + 4;
+        if (V(input3) >= vth) code_q = code_q + 8;
+        out_t = V(vss) + (V(vdd) - V(vss)) * code_q / 15.0;
+        V(analog_sum) <+ transition(out_t, 0.0, tr, tr);
+    end
+endmodule

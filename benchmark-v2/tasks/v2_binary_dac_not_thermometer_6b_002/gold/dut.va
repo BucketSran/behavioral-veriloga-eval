@@ -1,0 +1,24 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_binary_dac_not_thermometer_6b_002(scale0, scale1, scale2, scale3, scale4, scale5, vdd, vss, recon_value);
+    input scale0, scale1, scale2, scale3, scale4, scale5, vdd, vss;
+    output recon_value;
+    electrical scale0, scale1, scale2, scale3, scale4, scale5, vdd, vss, recon_value;
+    parameter real vth = 0.45;
+    parameter real tr = 40p;
+    integer code_q;
+    real out_t;
+
+    analog begin
+        code_q = 0;
+        if (V(scale0) >= vth) code_q = code_q + 1;
+        if (V(scale1) >= vth) code_q = code_q + 2;
+        if (V(scale2) >= vth) code_q = code_q + 4;
+        if (V(scale3) >= vth) code_q = code_q + 8;
+        if (V(scale4) >= vth) code_q = code_q + 16;
+        if (V(scale5) >= vth) code_q = code_q + 32;
+        out_t = V(vss) + (V(vdd) - V(vss)) * code_q / 63.0;
+        V(recon_value) <+ transition(out_t, 0.0, tr, tr);
+    end
+endmodule

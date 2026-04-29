@@ -1,0 +1,64 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_adc_dac_not_raw_follower_6b_011(measured_quantity, sample_event, clear_n, vdd, vss, dec5, dec4, dec3, dec2, dec1, dec0, reconstructed_level);
+    input measured_quantity, sample_event, clear_n, vdd, vss;
+    output dec5, dec4, dec3, dec2, dec1, dec0, reconstructed_level;
+    electrical measured_quantity, sample_event, clear_n, vdd, vss, dec5, dec4, dec3, dec2, dec1, dec0, reconstructed_level;
+    parameter real vth = 0.45;
+    parameter real tr = 50p;
+    integer code_q;
+    real step_q;
+    real vout_t;
+    real dec0_t;
+    real dec1_t;
+    real dec2_t;
+    real dec3_t;
+    real dec4_t;
+    real dec5_t;
+    analog begin
+        @(initial_step) begin
+            code_q = 0;
+            vout_t = V(vss);
+            dec0_t = V(vss);
+            dec1_t = V(vss);
+            dec2_t = V(vss);
+            dec3_t = V(vss);
+            dec4_t = V(vss);
+            dec5_t = V(vss);
+        end
+
+        @(cross(V(sample_event) - vth, +1)) begin
+            if (V(clear_n) < vth) begin
+                code_q = 0;
+                vout_t = V(vss);
+            dec0_t = V(vss);
+            dec1_t = V(vss);
+            dec2_t = V(vss);
+            dec3_t = V(vss);
+            dec4_t = V(vss);
+            dec5_t = V(vss);
+            end else begin
+                step_q = (V(vdd) - V(vss)) / 64.0;
+                code_q = (V(measured_quantity) - V(vss)) / step_q;
+                if (code_q < 0) code_q = 0;
+                if (code_q > 63) code_q = 63;
+                vout_t = V(vss) + (V(vdd) - V(vss)) * code_q / 63.0;
+            dec0_t = ((code_q & 1) != 0) ? V(vdd) : V(vss);
+            dec1_t = ((code_q & 2) != 0) ? V(vdd) : V(vss);
+            dec2_t = ((code_q & 4) != 0) ? V(vdd) : V(vss);
+            dec3_t = ((code_q & 8) != 0) ? V(vdd) : V(vss);
+            dec4_t = ((code_q & 16) != 0) ? V(vdd) : V(vss);
+            dec5_t = ((code_q & 32) != 0) ? V(vdd) : V(vss);
+            end
+        end
+
+        V(dec0) <+ transition(dec0_t, 0.0, tr, tr);
+        V(dec1) <+ transition(dec1_t, 0.0, tr, tr);
+        V(dec2) <+ transition(dec2_t, 0.0, tr, tr);
+        V(dec3) <+ transition(dec3_t, 0.0, tr, tr);
+        V(dec4) <+ transition(dec4_t, 0.0, tr, tr);
+        V(dec5) <+ transition(dec5_t, 0.0, tr, tr);
+        V(reconstructed_level) <+ transition(vout_t, 0.0, tr, tr);
+    end
+endmodule

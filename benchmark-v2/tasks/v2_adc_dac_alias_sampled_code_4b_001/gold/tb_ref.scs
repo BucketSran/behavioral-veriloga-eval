@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "dut.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0
+Vclk (sample_event 0) vsource type=pulse val0=0 val1=0.9 delay=0 rise=50p fall=50p width=0.9n period=2n
+Vrst (clear_n 0) vsource type=pwl wave=[ 0 0 3n 0 3.1n 0.9 90n 0.9 ]
+Vvin (measured_quantity 0) vsource type=pwl wave=[ 0 0 90n 0.9 ]
+
+XDUT (measured_quantity sample_event clear_n vdd vss dec3 dec2 dec1 dec0 reconstructed_level) v2_adc_dac_alias_sampled_code_4b_001
+
+tran tran stop=120n maxstep=500p
+save measured_quantity sample_event clear_n reconstructed_level dec0 dec1 dec2 dec3

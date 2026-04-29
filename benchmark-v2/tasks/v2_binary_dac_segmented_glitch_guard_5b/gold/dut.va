@@ -1,0 +1,24 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_binary_dac_segmented_glitch_guard_5b(weight0, weight1, weight2, weight3, weight4, vdd, vss, analog_sum, glitch_guard);
+    input weight0, weight1, weight2, weight3, weight4, vdd, vss;
+    output analog_sum, glitch_guard;
+    electrical weight0, weight1, weight2, weight3, weight4, vdd, vss, analog_sum, glitch_guard;
+    parameter real vth = 0.45;
+    parameter real tr = 40p;
+    integer code_q;
+    real out_t;
+
+    analog begin
+        code_q = 0;
+        if (V(weight0) >= vth) code_q = code_q + 1;
+        if (V(weight1) >= vth) code_q = code_q + 2;
+        if (V(weight2) >= vth) code_q = code_q + 4;
+        if (V(weight3) >= vth) code_q = code_q + 8;
+        if (V(weight4) >= vth) code_q = code_q + 16;
+        out_t = V(vss) + (V(vdd) - V(vss)) * code_q / 31.0;
+        V(analog_sum) <+ transition(out_t, 0.0, tr, tr);
+        V(glitch_guard) <+ transition(V(vdd), 0.0, tr, tr);
+    end
+endmodule

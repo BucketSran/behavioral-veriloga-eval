@@ -1,0 +1,32 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_ext_pulse_stretcher_007(trigger_level, vdd, vss, pulse_out);
+    input trigger_level, vdd, vss;
+    output pulse_out;
+    electrical trigger_level, vdd, vss, pulse_out;
+    parameter real vth = 0.45;
+    parameter real width = 4.0n;
+    parameter real tr = 40p;
+    integer pulse_q;
+    real clear_t;
+
+    analog begin
+        @(initial_step) begin
+            pulse_q = 0;
+            clear_t = 1.0;
+        end
+
+        @(cross(V(trigger_level) - vth, +1)) begin
+            pulse_q = 1;
+            clear_t = $abstime + width;
+        end
+
+        @(timer(clear_t)) begin
+            pulse_q = 0;
+            clear_t = 1.0;
+        end
+
+        V(pulse_out) <+ transition(pulse_q ? V(vdd) : V(vss), 0.0, tr, tr);
+    end
+endmodule

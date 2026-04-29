@@ -1,0 +1,59 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_adc_dac_alias_sampled_code_5b_018(observed_level, advance_edge, clear_n, vdd, vss, mark4, mark3, mark2, mark1, mark0, drive_estimate);
+    input observed_level, advance_edge, clear_n, vdd, vss;
+    output mark4, mark3, mark2, mark1, mark0, drive_estimate;
+    electrical observed_level, advance_edge, clear_n, vdd, vss, mark4, mark3, mark2, mark1, mark0, drive_estimate;
+    parameter real vth = 0.45;
+    parameter real tr = 50p;
+    integer code_q;
+    real step_q;
+    real vout_t;
+    real mark0_t;
+    real mark1_t;
+    real mark2_t;
+    real mark3_t;
+    real mark4_t;
+    analog begin
+        @(initial_step) begin
+            code_q = 0;
+            vout_t = V(vss);
+            mark0_t = V(vss);
+            mark1_t = V(vss);
+            mark2_t = V(vss);
+            mark3_t = V(vss);
+            mark4_t = V(vss);
+        end
+
+        @(cross(V(advance_edge) - vth, +1)) begin
+            if (V(clear_n) < vth) begin
+                code_q = 0;
+                vout_t = V(vss);
+            mark0_t = V(vss);
+            mark1_t = V(vss);
+            mark2_t = V(vss);
+            mark3_t = V(vss);
+            mark4_t = V(vss);
+            end else begin
+                step_q = (V(vdd) - V(vss)) / 32.0;
+                code_q = (V(observed_level) - V(vss)) / step_q;
+                if (code_q < 0) code_q = 0;
+                if (code_q > 31) code_q = 31;
+                vout_t = V(vss) + (V(vdd) - V(vss)) * code_q / 31.0;
+            mark0_t = ((code_q & 1) != 0) ? V(vdd) : V(vss);
+            mark1_t = ((code_q & 2) != 0) ? V(vdd) : V(vss);
+            mark2_t = ((code_q & 4) != 0) ? V(vdd) : V(vss);
+            mark3_t = ((code_q & 8) != 0) ? V(vdd) : V(vss);
+            mark4_t = ((code_q & 16) != 0) ? V(vdd) : V(vss);
+            end
+        end
+
+        V(mark0) <+ transition(mark0_t, 0.0, tr, tr);
+        V(mark1) <+ transition(mark1_t, 0.0, tr, tr);
+        V(mark2) <+ transition(mark2_t, 0.0, tr, tr);
+        V(mark3) <+ transition(mark3_t, 0.0, tr, tr);
+        V(mark4) <+ transition(mark4_t, 0.0, tr, tr);
+        V(drive_estimate) <+ transition(vout_t, 0.0, tr, tr);
+    end
+endmodule

@@ -1,0 +1,51 @@
+{
+  "task_id": "v2_adc_dac_not_raw_follower_5b",
+  "family": "benchmark-v2",
+  "source_seed": "adc_dac_ideal_4b",
+  "mechanism_family": "adc_dac_quantize_reconstruct",
+  "perturbation_level": "P4_negative_distractor",
+  "status": "materialized_draft",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "adc_dac",
+    "width": 5,
+    "vin": "external_drive",
+    "clock": "cadence",
+    "rst": "clear_n",
+    "bits_lsb_first": [
+      "q0",
+      "q1",
+      "q2",
+      "q3",
+      "q4"
+    ],
+    "vout": "reconstructed_level",
+    "settled": null,
+    "min_unique_codes": 8
+  },
+  "manifest_entry": {
+    "task_id": "v2_adc_dac_not_raw_follower_5b",
+    "source_seed": "adc_dac_ideal_4b",
+    "mechanism_family": "adc_dac_quantize_reconstruct",
+    "perturbation_level": "P4_negative_distractor",
+    "prompt_strategy": "Require a 5-bit held reconstructed level and explicitly reject continuous raw-input follower behavior.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-seed-perturbation-r1",
+    "status": "materialized_draft",
+    "perturbation_axes": [
+      "negative_constraint",
+      "width",
+      "sample_hold_state"
+    ]
+  }
+}

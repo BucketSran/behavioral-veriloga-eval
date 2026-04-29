@@ -1,0 +1,3808 @@
+{
+  "manifest_version": 1,
+  "name": "v2-external-architecture-r1",
+  "created": "2026-04-29",
+  "purpose": "120-task external architecture split from compact behavioral analog model patterns.",
+  "storage_rule": "Keep these tasks under benchmark-v2/tasks until gold EVAS and Spectre validation are reviewed.",
+  "task_count": 120,
+  "required_task_fields": [
+    "prompt.md",
+    "gold/dut.va",
+    "gold/tb_ref.scs",
+    "checker.py",
+    "meta.json"
+  ],
+  "tasks": [
+    {
+      "task_id": "v2_ext_threshold_detector_000",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sense_level",
+        "vout": "decision_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_000",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sensor_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_000",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "raw_level",
+        "vout": "limited_level"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_000",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "event_in",
+        "vout": "stretched_pulse"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_001",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sensor_reading",
+        "vout": "trip_flag"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_001",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "measured_voltage"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_001",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "unbounded_signal",
+        "vout": "clamped_level"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_001",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "trigger_level",
+        "vout": "pulse_out"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_002",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "probe_voltage",
+        "vout": "threshold_state"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_002",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "monitor_node"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_002",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "input_quantity",
+        "vout": "safe_output"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_002",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "arrival_mark",
+        "vout": "one_shot_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_003",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sense_level",
+        "vout": "decision_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_003",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sensor_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_003",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "raw_level",
+        "vout": "limited_level"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_003",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "event_in",
+        "vout": "stretched_pulse"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_004",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sensor_reading",
+        "vout": "trip_flag"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_004",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "measured_voltage"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_004",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "unbounded_signal",
+        "vout": "clamped_level"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_004",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "trigger_level",
+        "vout": "pulse_out"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_005",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "probe_voltage",
+        "vout": "threshold_state"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_005",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "monitor_node"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_005",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "input_quantity",
+        "vout": "safe_output"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_005",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "arrival_mark",
+        "vout": "one_shot_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_006",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sense_level",
+        "vout": "decision_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_006",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sensor_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_006",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "raw_level",
+        "vout": "limited_level"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_006",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "event_in",
+        "vout": "stretched_pulse"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_007",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sensor_reading",
+        "vout": "trip_flag"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_007",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "measured_voltage"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_007",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "unbounded_signal",
+        "vout": "clamped_level"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_007",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "trigger_level",
+        "vout": "pulse_out"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_008",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "probe_voltage",
+        "vout": "threshold_state"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_008",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "monitor_node"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_008",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "input_quantity",
+        "vout": "safe_output"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_008",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "arrival_mark",
+        "vout": "one_shot_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_009",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sense_level",
+        "vout": "decision_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_009",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sensor_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_009",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "raw_level",
+        "vout": "limited_level"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_009",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "event_in",
+        "vout": "stretched_pulse"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_010",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sensor_reading",
+        "vout": "trip_flag"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_010",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "measured_voltage"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_010",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "unbounded_signal",
+        "vout": "clamped_level"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_010",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "trigger_level",
+        "vout": "pulse_out"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_011",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "probe_voltage",
+        "vout": "threshold_state"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_011",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "monitor_node"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_011",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "input_quantity",
+        "vout": "safe_output"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_011",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "arrival_mark",
+        "vout": "one_shot_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_012",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sense_level",
+        "vout": "decision_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_012",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sensor_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_012",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "raw_level",
+        "vout": "limited_level"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_012",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "event_in",
+        "vout": "stretched_pulse"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_013",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sensor_reading",
+        "vout": "trip_flag"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_013",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "measured_voltage"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_013",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "unbounded_signal",
+        "vout": "clamped_level"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_013",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "trigger_level",
+        "vout": "pulse_out"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_014",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "probe_voltage",
+        "vout": "threshold_state"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_014",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "monitor_node"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_014",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "input_quantity",
+        "vout": "safe_output"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_014",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "arrival_mark",
+        "vout": "one_shot_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_015",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sense_level",
+        "vout": "decision_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_015",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sensor_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_015",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "raw_level",
+        "vout": "limited_level"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_015",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "event_in",
+        "vout": "stretched_pulse"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_016",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sensor_reading",
+        "vout": "trip_flag"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_016",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "measured_voltage"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_016",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "unbounded_signal",
+        "vout": "clamped_level"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_016",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "trigger_level",
+        "vout": "pulse_out"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_017",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "probe_voltage",
+        "vout": "threshold_state"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_017",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "monitor_node"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_017",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "input_quantity",
+        "vout": "safe_output"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_017",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "arrival_mark",
+        "vout": "one_shot_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_018",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sense_level",
+        "vout": "decision_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_018",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sensor_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_018",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "raw_level",
+        "vout": "limited_level"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_018",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "event_in",
+        "vout": "stretched_pulse"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_019",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sensor_reading",
+        "vout": "trip_flag"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_019",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "measured_voltage"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_019",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "unbounded_signal",
+        "vout": "clamped_level"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_019",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "trigger_level",
+        "vout": "pulse_out"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_020",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "probe_voltage",
+        "vout": "threshold_state"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_020",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "monitor_node"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_020",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "input_quantity",
+        "vout": "safe_output"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_020",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "arrival_mark",
+        "vout": "one_shot_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_021",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sense_level",
+        "vout": "decision_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_021",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sensor_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_021",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "raw_level",
+        "vout": "limited_level"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_021",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "event_in",
+        "vout": "stretched_pulse"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_022",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sensor_reading",
+        "vout": "trip_flag"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_022",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "measured_voltage"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_022",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "unbounded_signal",
+        "vout": "clamped_level"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_022",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "trigger_level",
+        "vout": "pulse_out"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_023",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "probe_voltage",
+        "vout": "threshold_state"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_023",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "monitor_node"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_023",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "input_quantity",
+        "vout": "safe_output"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_023",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "arrival_mark",
+        "vout": "one_shot_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_024",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sense_level",
+        "vout": "decision_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_024",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sensor_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_024",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "raw_level",
+        "vout": "limited_level"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_024",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "event_in",
+        "vout": "stretched_pulse"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_025",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sensor_reading",
+        "vout": "trip_flag"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_025",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "measured_voltage"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_025",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "unbounded_signal",
+        "vout": "clamped_level"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_025",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "trigger_level",
+        "vout": "pulse_out"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_026",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "probe_voltage",
+        "vout": "threshold_state"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_026",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "monitor_node"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_026",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "input_quantity",
+        "vout": "safe_output"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_026",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "arrival_mark",
+        "vout": "one_shot_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_027",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sense_level",
+        "vout": "decision_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_027",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sensor_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_027",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "raw_level",
+        "vout": "limited_level"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_027",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "event_in",
+        "vout": "stretched_pulse"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_028",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "sensor_reading",
+        "vout": "trip_flag"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_028",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "measured_voltage"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_028",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "unbounded_signal",
+        "vout": "clamped_level"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_028",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "trigger_level",
+        "vout": "pulse_out"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_threshold_detector_029",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "threshold_detector",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Convert a sensor level into a digital-like voltage decision using threshold behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "threshold",
+        "rename"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "probe_voltage",
+        "vout": "threshold_state"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_window_detector_029",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "window_detector",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Classify a sensor voltage into below/inside/above window flags.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "window",
+        "multi_output"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "monitor_node"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_limiter_model_029",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "analog_limiter",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Model a bounded analog transfer that follows midrange input but clamps outside lower and upper limits.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "nonlinear_transfer",
+        "negative_constraint"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "vin": "input_quantity",
+        "vout": "safe_output"
+      },
+      "negative_constraints": [
+        "not_unbounded_follower"
+      ],
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_ext_pulse_stretcher_029",
+      "source_type": "external_architecture",
+      "source_seed": "pattern-derived:public-analog-behavioral-modeling",
+      "mechanism_family": "event_pulse_stretcher",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Convert each rising event into a finite-width voltage pulse and return low after the pulse window.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-external-architecture-r1",
+      "status": "validated_gold_evas_spectre",
+      "perturbation_axes": [
+        "external_architecture",
+        "event_to_pulse",
+        "timing"
+      ],
+      "external_source_url": "pattern-derived:public-analog-behavioral-modeling",
+      "external_source_license": "not_applicable_behavioral_pattern",
+      "spec_overrides": {
+        "trigger": "arrival_mark",
+        "vout": "one_shot_level"
+      },
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    }
+  ],
+  "materialized_at": "2026-04-29",
+  "status": "validated_gold_evas_spectre",
+  "validation_summary": {
+    "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-evas-2026-04-29-r1",
+    "evas_status": "PASS",
+    "evas_pass_count_for_new370_run": 370,
+    "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-new370-gold-spectre-2026-04-29-r1",
+    "spectre_status": "PASS",
+    "spectre_pass_count_for_new370_run": 370,
+    "spectre_mode": "spectre"
+  }
+}

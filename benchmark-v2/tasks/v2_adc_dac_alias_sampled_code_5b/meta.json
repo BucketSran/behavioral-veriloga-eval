@@ -1,0 +1,51 @@
+{
+  "task_id": "v2_adc_dac_alias_sampled_code_5b",
+  "family": "benchmark-v2",
+  "source_seed": "adc_dac_ideal_4b",
+  "mechanism_family": "adc_dac_quantize_reconstruct",
+  "perturbation_level": "P2_semantic_alias",
+  "status": "materialized_draft",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "adc_dac",
+    "width": 5,
+    "vin": "measured_level",
+    "clock": "sample_clock",
+    "rst": "clear_n",
+    "bits_lsb_first": [
+      "bit0",
+      "bit1",
+      "bit2",
+      "bit3",
+      "bit4"
+    ],
+    "vout": "held_level",
+    "settled": null,
+    "min_unique_codes": 8
+  },
+  "manifest_entry": {
+    "task_id": "v2_adc_dac_alias_sampled_code_5b",
+    "source_seed": "adc_dac_ideal_4b",
+    "mechanism_family": "adc_dac_quantize_reconstruct",
+    "perturbation_level": "P2_semantic_alias",
+    "prompt_strategy": "Rename input, clock, output, and decision bits while preserving sampled-code reconstruction.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-seed-perturbation-r1",
+    "status": "materialized_draft",
+    "perturbation_axes": [
+      "rename",
+      "width",
+      "semantic_alias"
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2_ext_threshold_detector_020(probe_voltage, vdd, vss, threshold_state);
+    input probe_voltage, vdd, vss;
+    output threshold_state;
+    electrical probe_voltage, vdd, vss, threshold_state;
+    parameter real threshold = 0.45;
+    parameter real tr = 40p;
+    real out_t;
+
+    analog begin
+        out_t = (V(probe_voltage) >= threshold) ? V(vdd) : V(vss);
+        V(threshold_state) <+ transition(out_t, 0.0, tr, tr);
+    end
+endmodule
