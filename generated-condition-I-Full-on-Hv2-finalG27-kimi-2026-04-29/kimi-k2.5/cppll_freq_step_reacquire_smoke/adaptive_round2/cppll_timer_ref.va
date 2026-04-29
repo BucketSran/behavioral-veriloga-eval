@@ -1,0 +1,98 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cppll_timer_ref (VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock);
+    input VDD, VSS, ref_clk;
+    output fb_clk, dco_clk, vctrl_mon, lock;
+    inout VDD, VSS;
+    electrical VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock;
+
+    parameter real vhi = 1.8;
+    parameter real vlo = 0.0;
+    parameter real vth = 0.9;
+    parameter real trf = 0.1n;
+    parameter real tdel = 0.0;
+    parameter real kp = 2e-3;
+    parameter real ki = 1e-4;
+    parameter real f0 = 400e6;
+    parameter real kvco = 200e6;
+    parameter integer ndiv = 8;
+    parameter real lock_thr = 0.02;
+    parameter integer lock_cnt_max = 30;
+
+    real vctrl;
+    real fosc;
+    real tref, tref_prev;
+    real tfb, tfb_prev;
+    real terr;
+    real tnext_dco;
+    integer dco_state;
+    integer fb_state;
+    integer div_cnt;
+    integer ref_edge_cnt;
+    integer fb_edge_cnt;
+    integer lock_cnt;
+    integer locked;
+
+    analog begin
+        @(initial_step) begin
+            vctrl = vhi / 2.0;
+            fosc = f0;
+            tnext_dco = 0.5/f0;
+            dco_state = 0;
+            fb_state = 0;
+            div_cnt = 0;
+            ref_edge_cnt = 0;
+            fb_edge_cnt = 0;
+            tref_prev = 0.0;
+            tfb_prev = 0.0;
+            terr = 0.0;
+            lock_cnt = 0;
+            locked = 0;
+        end
+
+        @(cross(V(ref_clk) - vth, 1)) begin
+            tref = $abstime;
+            ref_edge_cnt = ref_edge_cnt + 1;
+
+            if (ref_edge_cnt > 1 && fb_edge_cnt > 1) begin
+                terr = (tref - tref_prev) - (tfb - tfb_prev);
+                vctrl = vctrl + kp * terr;
+                if (vctrl > vhi) vctrl = vhi;
+                if (vctrl < vlo) vctrl = vlo;
+                fosc = f0 + kvco * (vctrl - vhi/2.0) / (vhi/2.0);
+                if (fosc < f0/2.0) fosc = f0/2.0;
+                if (fosc > 2.0*f0) fosc = 2.0*f0;
+            end
+            tref_prev = tref;
+        end
+
+        @(timer(tnext_dco)) begin
+            dco_state = !dco_state;
+            tnext_dco = $abstime + 0.5/fosc;
+
+            div_cnt = div_cnt + 1;
+            if (div_cnt >= ndiv) begin
+                div_cnt = 0;
+                fb_state = !fb_state;
+                fb_edge_cnt = fb_edge_cnt + 1;
+                tfb = $abstime;
+
+                if (ref_edge_cnt > ndiv && fb_edge_cnt > ndiv) begin
+                    if (abs(terr) < lock_thr * 20e-9) begin
+                        lock_cnt = lock_cnt + 1;
+                        if (lock_cnt >= lock_cnt_max) locked = 1;
+                    end else begin
+                        lock_cnt = 0;
+                        locked = 0;
+                    end
+                end
+            end
+        end
+
+        V(dco_clk) <+ transition(dco_state ? vhi : vlo, tdel, trf);
+        V(fb_clk) <+ transition(fb_state ? vhi : vlo, tdel, trf);
+        V(vctrl_mon) <+ transition(vctrl, tdel, trf);
+        V(lock) <+ transition(locked ? vhi : vlo, tdel, trf);
+    end
+endmodule

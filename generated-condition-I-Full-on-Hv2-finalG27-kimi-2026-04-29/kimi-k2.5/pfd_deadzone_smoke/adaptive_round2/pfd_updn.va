@@ -1,0 +1,74 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pfd_updn (vdd, vss, ref, div, up, dn);
+    inout vdd, vss;
+    input ref, div;
+    output up, dn;
+    electrical vdd, vss, ref, div, up, dn;
+
+    parameter real vth = 0.45;
+    parameter real tedge = 20p;
+
+    integer up_state;
+    integer dn_state;
+    integer reset_pending;
+    real vhi;
+    real vlo;
+    real t_last_ref;
+    real t_last_div;
+
+    analog begin
+        @(initial_step) begin
+            up_state = 0;
+            dn_state = 0;
+            reset_pending = 0;
+            t_last_ref = 0;
+            t_last_div = 0;
+        end
+
+        // Capture rising edge of ref: set up high, record time
+        @(cross(V(ref) - vth, 1)) begin
+            up_state = 1;
+            t_last_ref = $abstime;
+            // Check if div already high -> schedule reset
+            if (dn_state == 1) begin
+                reset_pending = 1;
+            end
+        end
+
+        // Capture rising edge of div: set dn high, record time
+        @(cross(V(div) - vth, 1)) begin
+            dn_state = 1;
+            t_last_div = $abstime;
+            // Check if up already high -> schedule reset
+            if (up_state == 1) begin
+                reset_pending = 1;
+            end
+        end
+
+        // Timer-based reset: clear both states after small delay when both are high
+        // This creates finite pulses even with small phase offsets
+        @(timer(0, 50p)) begin
+            if (reset_pending == 1) begin
+                up_state = 0;
+                dn_state = 0;
+                reset_pending = 0;
+            end
+            // Also reset if both have been high for a while (safety)
+            if ((up_state == 1) && (dn_state == 1)) begin
+                up_state = 0;
+                dn_state = 0;
+                reset_pending = 0;
+            end
+        end
+
+        // Read supply levels dynamically
+        vhi = V(vdd);
+        vlo = V(vss);
+
+        // Drive outputs with transition for finite edge times
+        V(up) <+ transition(up_state ? vhi : vlo, 0, tedge);
+        V(dn) <+ transition(dn_state ? vhi : vlo, 0, tedge);
+    end
+endmodule

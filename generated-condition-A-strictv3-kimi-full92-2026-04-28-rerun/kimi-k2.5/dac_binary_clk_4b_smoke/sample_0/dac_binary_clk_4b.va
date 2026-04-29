@@ -1,0 +1,42 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dac_binary_clk_4b (DIN3, DIN2, DIN1, DIN0, CLK, AOUT);
+    input DIN3, DIN2, DIN1, DIN0, CLK;
+    output AOUT;
+    electrical DIN3, DIN2, DIN1, DIN0, CLK, AOUT;
+
+    parameter real vref = 0.9 from (0:inf);
+    parameter real vth = 0.45 from (0:inf);
+    parameter real tr = 100p from (0:inf);
+    parameter real tf = 100p from (0:inf);
+
+    integer code;
+    real aout_val;
+    real din3_val, din2_val, din1_val, din0_val;
+
+    analog begin
+        @(initial_step) begin
+            code = 0;
+            aout_val = 0.0;
+        end
+
+        // Detect rising edge of CLK
+        @(cross(V(CLK) - vth, 1)) begin
+            // Sample digital inputs (threshold comparison)
+            din3_val = (V(DIN3) > vth) ? 1.0 : 0.0;
+            din2_val = (V(DIN2) > vth) ? 1.0 : 0.0;
+            din1_val = (V(DIN1) > vth) ? 1.0 : 0.0;
+            din0_val = (V(DIN0) > vth) ? 1.0 : 0.0;
+
+            // Compute binary weighted code: 8*din3 + 4*din2 + 2*din1 + din0
+            code = 8 * (V(DIN3) > vth) + 4 * (V(DIN2) > vth) + 2 * (V(DIN1) > vth) + (V(DIN0) > vth);
+
+            // Compute analog output: code/16 * vref
+            aout_val = (code / 16.0) * vref;
+        end
+
+        // Drive output with smooth transition
+        V(AOUT) <+ transition(aout_val, 0, tr, tf);
+    end
+endmodule

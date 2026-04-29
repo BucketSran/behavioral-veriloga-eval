@@ -1,0 +1,101 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bbpd_data_edge_alignment_ref (vdd, vss, clk, data, up, dn, retimed_data);
+    inout vdd, vss;
+    input clk, data;
+    output up, dn, retimed_data;
+    electrical vdd, vss, clk, data, up, dn, retimed_data;
+
+    // Parameters
+    parameter real vhi = 1.8 from (0:inf);
+    parameter real vlo = 0.0 from (-inf:inf);
+    parameter real vth = 0.9 from (0:inf);
+    parameter real tdel = 0.0 from [0:inf);
+    parameter real tr = 0.1n from (0:inf);
+    parameter real tf = 0.1n from (0:inf);
+    parameter real pulse_width = 2.0n from (0:inf);
+    parameter real min_sep = 0.5n from (0:inf);
+
+    // State variables
+    integer up_state;
+    integer dn_state;
+    integer retimed_state;
+    real last_data_edge_time;
+    real last_clk_edge_time;
+    integer data_edge_valid;
+    integer clk_edge_valid;
+    real last_up_time;
+    real last_dn_time;
+
+    analog begin
+        @(initial_step) begin
+            up_state = 0;
+            dn_state = 0;
+            retimed_state = 0;
+            last_data_edge_time = -1e9;
+            last_clk_edge_time = -1e9;
+            data_edge_valid = 0;
+            clk_edge_valid = 0;
+            last_up_time = -1e9;
+            last_dn_time = -1e9;
+        end
+
+        // Detect data edges (both rising and falling)
+        @(cross(V(data) - vth, 1)) begin
+            last_data_edge_time = $abstime;
+            data_edge_valid = 1;
+        end
+        @(cross(V(data) - vth, -1)) begin
+            last_data_edge_time = $abstime;
+            data_edge_valid = 1;
+        end
+
+        // Detect clock rising edges
+        @(cross(V(clk) - vth, 1)) begin
+            last_clk_edge_time = $abstime;
+            clk_edge_valid = 1;
+            // Sample retimed data on clock edge
+            retimed_state = (V(data) > vth) ? 1 : 0;
+        end
+
+        // Process when we have both edges to compare
+        if (data_edge_valid && clk_edge_valid) begin
+            // Data edge leads clock edge: UP pulse
+            if (last_data_edge_time < last_clk_edge_time) begin
+                if (($abstime - last_dn_time) > min_sep) begin
+                    up_state = 1;
+                    last_up_time = $abstime;
+                end
+            end
+            // Data edge lags clock edge: DN pulse
+            else if (last_data_edge_time > last_clk_edge_time) begin
+                if (($abstime - last_up_time) > min_sep) begin
+                    dn_state = 1;
+                    last_dn_time = $abstime;
+                end
+            end
+            data_edge_valid = 0;
+            clk_edge_valid = 0;
+        end
+
+        // Clear UP pulse after pulse_width
+        @(timer(last_up_time + pulse_width)) begin
+            if (up_state && ($abstime - last_up_time) >= pulse_width) begin
+                up_state = 0;
+            end
+        end
+
+        // Clear DN pulse after pulse_width
+        @(timer(last_dn_time + pulse_width)) begin
+            if (dn_state && ($abstime - last_dn_time) >= pulse_width) begin
+                dn_state = 0;
+            end
+        end
+
+        // Output assignments with transition
+        V(up) <+ transition(up_state ? vhi : vlo, tdel, tr, tf);
+        V(dn) <+ transition(dn_state ? vhi : vlo, tdel, tr, tf);
+        V(retimed_data) <+ transition(retimed_state ? vhi : vlo, tdel, tr, tf);
+    end
+endmodule

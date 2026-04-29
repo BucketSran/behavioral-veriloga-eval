@@ -1,0 +1,102 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sar_logic (VDD, VSS, CLKS, DCOMP, DP_DAC_9, DP_DAC_8, DP_DAC_7, DP_DAC_6, DP_DAC_5, DP_DAC_4, DP_DAC_3, DP_DAC_2, DP_DAC_1, DP_DAC_0, RDY);
+    inout electrical VDD, VSS;
+    input electrical CLKS, DCOMP;
+    output electrical DP_DAC_9, DP_DAC_8, DP_DAC_7, DP_DAC_6, DP_DAC_5, DP_DAC_4, DP_DAC_3, DP_DAC_2, DP_DAC_1, DP_DAC_0, RDY;
+
+    integer state;
+    integer bit_idx;
+    integer result[0:9];
+    real vdd_val, vss_val;
+    real vout_high, vout_low;
+    real vth_clk;
+    real trise, tfall;
+    real dcomp_val;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+            bit_idx = 9;
+            result[0] = 0;
+            result[1] = 0;
+            result[2] = 0;
+            result[3] = 0;
+            result[4] = 0;
+            result[5] = 0;
+            result[6] = 0;
+            result[7] = 0;
+            result[8] = 0;
+            result[9] = 0;
+            vdd_val = 1.8;
+            vss_val = 0.0;
+            trise = 1n;
+            tfall = 1n;
+        end
+
+        vdd_val = V(VDD);
+        vss_val = V(VSS);
+        vout_high = vdd_val;
+        vout_low = vss_val;
+        vth_clk = (vdd_val + vss_val) / 2.0;
+
+        // Detect rising edge of CLKS
+        @(cross(V(CLKS) - vth_clk, 1)) begin
+            if (state == 0) begin
+                // Start conversion: set MSB to 1, others to 0
+                bit_idx = 9;
+                result[9] = 1;
+                result[8] = 0;
+                result[7] = 0;
+                result[6] = 0;
+                result[5] = 0;
+                result[4] = 0;
+                result[3] = 0;
+                result[2] = 0;
+                result[1] = 0;
+                result[0] = 0;
+                state = 1;
+            end else if (state == 1) begin
+                // Sample comparator result and decide next bit
+                dcomp_val = V(DCOMP);
+                if (dcomp_val > vth_clk) begin
+                    // Comparator high: keep current bit as 1
+                    result[bit_idx] = 1;
+                end else begin
+                    // Comparator low: clear current bit to 0
+                    result[bit_idx] = 0;
+                end
+
+                // Move to next bit
+                bit_idx = bit_idx - 1;
+
+                if (bit_idx >= 0) begin
+                    // Set next bit to 1 for trial
+                    result[bit_idx] = 1;
+                end else begin
+                    // Conversion complete
+                    state = 2;
+                end
+            end else if (state == 2) begin
+                // Hold final result, ready for next conversion
+                state = 0;
+            end
+        end
+
+        // Drive outputs with transition()
+        V(DP_DAC_9) <+ transition(result[9] ? vout_high : vout_low, 0, trise, tfall);
+        V(DP_DAC_8) <+ transition(result[8] ? vout_high : vout_low, 0, trise, tfall);
+        V(DP_DAC_7) <+ transition(result[7] ? vout_high : vout_low, 0, trise, tfall);
+        V(DP_DAC_6) <+ transition(result[6] ? vout_high : vout_low, 0, trise, tfall);
+        V(DP_DAC_5) <+ transition(result[5] ? vout_high : vout_low, 0, trise, tfall);
+        V(DP_DAC_4) <+ transition(result[4] ? vout_high : vout_low, 0, trise, tfall);
+        V(DP_DAC_3) <+ transition(result[3] ? vout_high : vout_low, 0, trise, tfall);
+        V(DP_DAC_2) <+ transition(result[2] ? vout_high : vout_low, 0, trise, tfall);
+        V(DP_DAC_1) <+ transition(result[1] ? vout_high : vout_low, 0, trise, tfall);
+        V(DP_DAC_0) <+ transition(result[0] ? vout_high : vout_low, 0, trise, tfall);
+
+        // RDY is high when conversion is complete (state == 2)
+        V(RDY) <+ transition((state == 2) ? vout_high : vout_low, 0, trise, tfall);
+    end
+endmodule

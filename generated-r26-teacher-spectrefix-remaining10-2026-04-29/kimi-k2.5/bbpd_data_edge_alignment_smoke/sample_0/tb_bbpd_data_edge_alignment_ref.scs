@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0.0
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=10n rise=50p fall=50p width=9n period=20n
+Vdata (data 0) vsource type=pwl wave=[ 0 0.0 7.95n 0.0 8.00n 0.9 27.95n 0.9 28.00n 0.0 47.95n 0.0 48.00n 0.9 67.95n 0.9 68.00n 0.0 91.95n 0.0 92.00n 0.9 111.95n 0.9 112.00n 0.0 131.95n 0.0 132.00n 0.9 151.95n 0.9 152.00n 0.0 170n 0.0 ]
+
+XDUT (vdd vss clk data up dn retimed_data) bbpd_data_edge_alignment_ref
+
+tran tran stop=170n maxstep=0.1n
+save clk data up dn retimed_data
+
+ahdl_include "bbpd_data_edge_alignment_ref.va"

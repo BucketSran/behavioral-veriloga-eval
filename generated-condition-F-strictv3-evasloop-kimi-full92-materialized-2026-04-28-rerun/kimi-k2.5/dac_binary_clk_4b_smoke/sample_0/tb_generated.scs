@@ -1,0 +1,56 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "dac_binary_clk_4b.va"
+
+// Parameters
+parameters vref=0.9
+parameters period=40n
+parameters vhi=0.9
+parameters vlo=0.0
+
+// Clock source: 40ns period, 50% duty cycle, 100ps rise/fall
+Vrdy (rdy 0) vsource type=pulse val0=vlo val1=vhi period=period rise=100p fall=100p width=20n
+
+// Digital input stimulus - PWL to sweep all 16 codes, one per clock period
+// Code 0 (0000): 0-40ns
+// Code 1 (0001): 40-80ns
+// Code 2 (0010): 80-120ns
+// Code 3 (0011): 120-160ns
+// Code 4 (0100): 160-200ns
+// Code 5 (0101): 200-240ns
+// Code 6 (0110): 240-280ns
+// Code 7 (0111): 280-320ns
+// Code 8 (1000): 320-360ns
+// Code 9 (1001): 360-400ns
+// Code 10 (1010): 400-440ns
+// Code 11 (1011): 440-480ns
+// Code 12 (1100): 480-520ns
+// Code 13 (1101): 520-560ns
+// Code 14 (1110): 560-600ns
+// Code 15 (1111): 600-640ns
+
+// din0 (LSB): toggles every 40ns (period/1)
+Vdin0 (din0 0) vsource type=pwl wave=[0n vlo, 40n vhi, 80n vlo, 120n vhi, 160n vlo, 200n vhi, 240n vlo, 280n vhi, 320n vlo, 360n vhi, 400n vlo, 440n vhi, 480n vlo, 520n vhi, 560n vlo, 600n vhi, 640n vlo]
+
+// din1: toggles every 80ns (2 codes)
+Vdin1 (din1 0) vsource type=pwl wave=[0n vlo, 80n vhi, 160n vlo, 240n vhi, 320n vlo, 400n vhi, 480n vlo, 560n vhi, 640n vlo]
+
+// din2: toggles every 160ns (4 codes)
+Vdin2 (din2 0) vsource type=pwl wave=[0n vlo, 160n vhi, 320n vlo, 480n vhi, 640n vlo]
+
+// din3 (MSB): toggles every 320ns (8 codes)
+Vdin3 (din3 0) vsource type=pwl wave=[0n vlo, 320n vhi, 640n vlo]
+
+// DUT instance
+XDUT (din3 din2 din1 din0 rdy aout) dac_binary_clk_4b
+
+// Save statements for required waveforms
+save din3
+save din2
+save din1
+save din0
+save aout
+
+// Transient analysis
+tran tran stop=660n maxstep=200p

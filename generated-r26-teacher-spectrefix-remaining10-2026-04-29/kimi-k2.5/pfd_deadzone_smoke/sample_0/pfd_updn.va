@@ -1,0 +1,44 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pfd_updn(vdd, vss, ref, div, up, dn);
+    inout vdd, vss, ref, div, up, dn;
+    electrical vdd, vss, ref, div, up, dn;
+    parameter real vth = 0.45;
+    parameter real tedge = 20p;
+
+    integer up_state, dn_state;
+    real v_high, v_low;
+
+    analog begin
+        @(initial_step) begin
+            up_state = 0;
+            dn_state = 0;
+        end
+
+        // Sample supply voltages dynamically
+        v_high = V(vdd);
+        v_low = V(vss);
+
+        // Detect rising edge of ref: set up high
+        @(cross(V(ref) - vth, 1)) begin
+            up_state = 1;
+        end
+
+        // Detect rising edge of div: set dn high
+        @(cross(V(div) - vth, 1)) begin
+            dn_state = 1;
+        end
+
+        // Reset condition: when both are high, reset both to low
+        // This creates a short pulse for small phase differences
+        if (up_state == 1 && dn_state == 1) begin
+            up_state = 0;
+            dn_state = 0;
+        end
+
+        // Output voltage assignments with transition
+        V(up) <+ transition(up_state ? v_high : v_low, 0, tedge);
+        V(dn) <+ transition(dn_state ? v_high : v_low, 0, tedge);
+    end
+endmodule

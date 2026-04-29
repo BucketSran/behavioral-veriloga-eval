@@ -1,0 +1,28 @@
+// Testbench for above_threshold_startup_ref
+// Tests that @(above()) works when condition is already true at t=0
+
+simulator lang=spectre
+
+// Include the Verilog-A module
+ahdl_include "above_threshold_startup_ref.va"
+
+// Global parameters
+parameters VDD_VAL=1.0
+parameters VSS_VAL=0.0
+parameters VIN_VAL=0.9
+
+// Supply voltage sources
+VDD (VDD 0) vsource dc=VDD_VAL
+VSS (VSS 0) vsource dc=VSS_VAL
+
+// Input voltage - set to 0.9V from t=0 (above 0.45V threshold)
+VIN (vin 0) vsource dc=VIN_VAL
+
+// Device under test
+DUT (VDD VSS vin out) above_threshold_startup_ref
+
+// Transient analysis
+tran tran stop=8n maxstep=50p errpreset=conservative
+
+// Save statements for required waveforms
+save vin out

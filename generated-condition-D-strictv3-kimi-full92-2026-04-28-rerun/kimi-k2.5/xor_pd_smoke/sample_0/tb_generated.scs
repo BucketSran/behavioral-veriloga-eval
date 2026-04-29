@@ -1,0 +1,23 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "xor_phase_detector.va"
+
+// Power supplies
+Vdd (vdd 0) vsource dc=0.9
+Vss (vss 0) vsource dc=0
+
+// Reference clock: 50MHz, 50% duty cycle
+Vref (ref 0) vsource type=pulse val0=0 val1=0.9 period=20n rise=100p fall=100p width=10n
+
+// Divided clock: same frequency, phase offset of 2.5ns (90 degrees at 50MHz)
+Vdiv (div 0) vsource type=pulse val0=0 val1=0.9 period=20n rise=100p fall=100p width=10n delay=2.5n
+
+// DUT instance
+XDUT (vdd vss ref div pd_out) xor_phase_detector
+
+// Save signals
+save ref div pd_out
+
+// Transient analysis
+tran tran stop=200n maxstep=100p errpreset=conservative

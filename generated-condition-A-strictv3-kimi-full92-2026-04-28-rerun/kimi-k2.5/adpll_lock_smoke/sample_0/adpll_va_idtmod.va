@@ -1,0 +1,191 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module adpll_va_idtmod (
+    VDD,
+    VSS,
+    ref_clk,
+    fb_clk,
+    dco_clk,
+    vctrl_mon,
+    lock
+);
+
+    inout VDD;
+    inout VSS;
+    input ref_clk;
+    output fb_clk;
+    output dco_clk;
+    output vctrl_mon;
+    output lock;
+
+    electrical VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock;
+
+    // Parameters
+    parameter real vdd_val = 1.2;
+    parameter real vss_val = 0.0;
+    parameter real vth = 0.6;           // Threshold for clock detection
+    parameter real tdel = 1e-12;        // Small delay
+    parameter real tr = 100e-12;        // Transition rise/fall time
+    parameter real tf = 100e-12;
+    parameter integer N = 8;            // Divider ratio (DCO freq / fb_clk freq)
+    parameter real Kdco = 1e6;          // DCO gain in Hz per LSB
+    parameter real f0 = 400e6;          // Free-running DCO frequency (Hz)
+    parameter real lock_threshold = 3;  // Cycles for lock assertion
+
+    // Internal variables
+    integer phase_error;        // Phase detector output: -1, 0, +1
+    integer dco_code;           // Digital control code for DCO
+    integer div_cnt;            // Divider counter
+    real dco_period;            // Current DCO period
+    real dco_phase;             // DCO phase accumulator
+    real next_dco_edge;         // Next edge time for DCO
+    real next_fb_edge;          // Next edge time for fb_clk
+    real ref_edge_time;         // Time of last ref_clk edge
+    real fb_edge_time;          // Time of last fb_clk edge
+    integer lock_cnt;           // Lock counter
+    integer locked;             // Lock state
+    integer ref_edge_valid;     // Flag for first ref edge
+    integer fb_edge_valid;      // Flag for first fb edge
+    real last_ref_time;         // Previous ref edge for period measurement
+    real last_fb_time;          // Previous fb edge for period measurement
+    real ref_period;            // Measured ref period
+    real fb_period;             // Measured fb period
+    integer first_ref;          // First ref edge flag
+    integer first_fb;           // First fb edge flag
+
+    // Output values
+    real dco_out_val;
+    real fb_out_val;
+    real lock_out_val;
+    real vctrl_val;
+
+    analog begin
+        // Initialize at first step
+        @(initial_step) begin
+            phase_error = 0;
+            dco_code = 0;
+            div_cnt = 0;
+            dco_period = 1.0 / f0;
+            dco_phase = 0.0;
+            next_dco_edge = $abstime + dco_period / 2.0;
+            next_fb_edge = $abstime + dco_period * N / 2.0;
+            ref_edge_time = 0.0;
+            fb_edge_time = 0.0;
+            lock_cnt = 0;
+            locked = 0;
+            ref_edge_valid = 0;
+            fb_edge_valid = 0;
+            last_ref_time = 0.0;
+            last_fb_time = 0.0;
+            ref_period = 20e-9;     // 50 MHz nominal
+            fb_period = 20e-9;
+            first_ref = 1;
+            first_fb = 1;
+            dco_out_val = vss_val;
+            fb_out_val = vss_val;
+            lock_out_val = vss_val;
+            vctrl_val = vss_val;
+        end
+
+        // Reference clock edge detection (rising)
+        @(cross(V(ref_clk) - vth, 1)) begin
+            ref_edge_time = $abstime;
+            ref_edge_valid = 1;
+
+            // Measure ref period
+            if (first_ref) begin
+                first_ref = 0;
+            end else begin
+                ref_period = ref_edge_time - last_ref_time;
+            end
+            last_ref_time = ref_edge_time;
+
+            // Phase detection: compare with fb_clk edge
+            if (fb_edge_valid) begin
+                // If ref arrives before fb, ref is early (fb is late) -> increase freq
+                // If ref arrives after fb, ref is late (fb is early) -> decrease freq
+                if (ref_edge_time > fb_edge_time + 100e-12) begin
+                    // fb was early, decrease DCO freq
+                    phase_error = -1;
+                end else if (ref_edge_time < fb_edge_time - 100e-12) begin
+                    // fb was late, increase DCO freq
+                    phase_error = +1;
+                end else begin
+                    phase_error = 0;
+                end
+            end else begin
+                phase_error = 0;
+            end
+
+            // Update DCO code based on phase error (bang-bang)
+            if (phase_error > 0 && dco_code < 127) begin
+                dco_code = dco_code + 1;
+            end else if (phase_error < 0 && dco_code > -128) begin
+                dco_code = dco_code - 1;
+            end
+
+            // Calculate new DCO period
+            dco_period = 1.0 / (f0 + Kdco * dco_code);
+
+            // Update lock detection
+            if (phase_error == 0 && fb_edge_valid) begin
+                lock_cnt = lock_cnt + 1;
+                if (lock_cnt >= lock_threshold) begin
+                    locked = 1;
+                end
+            end else begin
+                lock_cnt = 0;
+                locked = 0;
+            end
+
+            fb_edge_valid = 0;  // Reset for next cycle
+        end
+
+        // Feedback clock edge detection (rising) - from divider
+        @(timer(next_fb_edge)) begin
+            fb_edge_time = $abstime;
+            fb_edge_valid = 1;
+            fb_out_val = vdd_val;
+
+            // Schedule next fb edge
+            next_fb_edge = $abstime + dco_period * N;
+
+            // Measure fb period
+            if (first_fb) begin
+                first_fb = 0;
+            end else begin
+                fb_period = fb_edge_time - last_fb_time;
+            end
+            last_fb_time = fb_edge_time;
+
+            // Reset fb output after short pulse
+            @(timer($abstime + dco_period / 2.0)) begin
+                fb_out_val = vss_val;
+            end
+        end
+
+        // DCO clock generation
+        @(timer(next_dco_edge)) begin
+            dco_out_val = !dco_out_val;
+            next_dco_edge = $abstime + dco_period / 2.0;
+        end
+
+        // Update output values
+        vctrl_val = vss_val + (vdd_val - vss_val) * (dco_code + 128) / 255.0;
+        if (locked) begin
+            lock_out_val = vdd_val;
+        end else begin
+            lock_out_val = vss_val;
+        end
+
+        // Drive outputs with transitions
+        V(dco_clk) <+ transition(dco_out_val, tdel, tr, tf);
+        V(fb_clk) <+ transition(fb_out_val, tdel, tr, tf);
+        V(lock) <+ transition(lock_out_val, tdel, tr, tf);
+        V(vctrl_mon) <+ transition(vctrl_val, tdel, tr, tf);
+        V(VDD) <+ vdd_val;
+        V(VSS) <+ vss_val;
+    end
+
+endmodule

@@ -1,0 +1,45 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dff_rst (vdd, vss, d, clk, rst, q, qb);
+    inout electrical vdd, vss;
+    input electrical d, clk, rst;
+    output electrical q, qb;
+
+    parameter real tedge = 10p from (0:inf);
+
+    integer state;
+    real vth;
+    real vdd_val;
+    real vss_val;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+        end
+
+        // Calculate threshold and supply levels
+        vdd_val = V(vdd);
+        vss_val = V(vss);
+        vth = (vdd_val - vss_val) / 2.0;
+
+        // Detect rising edge of clk
+        @(cross(V(clk) - vth, 1)) begin
+            if (V(rst) > vth) begin
+                // Synchronous reset: q goes LOW
+                state = 0;
+            end else begin
+                // Sample d
+                if (V(d) > vth) begin
+                    state = 1;
+                end else begin
+                    state = 0;
+                end
+            end
+        end
+
+        // Drive outputs with transition
+        V(q) <+ transition(state ? vdd_val : vss_val, 0, tedge);
+        V(qb) <+ transition(state ? vss_val : vdd_val, 0, tedge);
+    end
+endmodule

@@ -1,0 +1,11 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "timer_absolute_grid_ref.va"
+
+VDD (VDD 0) vsource dc=0.9
+VSS (VSS 0) vsource dc=0
+XDUT (VDD VSS clk_out) timer_absolute_grid_ref tstart=10n tstep=10n tedge=200p
+
+tran tran stop=75n maxstep=20p errpreset=conservative
+save clk_out

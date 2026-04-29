@@ -1,0 +1,39 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module ref_step_clk (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    output electrical CLK
+);
+    parameter real period_pre = 20n from (0:inf);
+    parameter real period_post = 19.5n from (0:inf);
+    parameter real t_switch = 2u from [0:inf);
+    parameter real tedge = 100p from (0:inf);
+
+    real vh;
+    real vl;
+    real next_t;
+    real half_period;
+    integer clk_state;
+
+    analog begin
+        vh = V(VDD);
+        vl = V(VSS);
+
+        @(initial_step) begin
+            clk_state = 0;
+            half_period = 0.5 * period_pre;
+            next_t = $abstime + half_period;
+        end
+
+        @(timer(next_t)) begin
+            clk_state = 1 - clk_state;
+            if (next_t >= t_switch) half_period = 0.5 * period_post;
+            else half_period = 0.5 * period_pre;
+            next_t = next_t + half_period;
+        end
+
+        V(CLK) <+ vl + (vh - vl) * transition(clk_state ? 1.0 : 0.0, 0.0, tedge, tedge);
+    end
+endmodule

@@ -1,0 +1,104 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module therm2bin_ref (
+    therm_0, therm_1, therm_2, therm_3, therm_4,
+    therm_5, therm_6, therm_7, therm_8, therm_9,
+    therm_10, therm_11, therm_12, therm_13, therm_14,
+    bin_0, bin_1, bin_2, bin_3
+);
+    // Thermometer code inputs (15 bits, 0 to 14)
+    electrical therm_0, therm_1, therm_2, therm_3, therm_4;
+    electrical therm_5, therm_6, therm_7, therm_8, therm_9;
+    electrical therm_10, therm_11, therm_12, therm_13, therm_14;
+
+    // Binary code outputs (4 bits, 0 to 3)
+    electrical bin_0, bin_1, bin_2, bin_3;
+
+    // Parameters
+    parameter real vth = 0.5 from [0:inf);  // Threshold voltage for logic high
+    parameter real vlow = 0.0 from [0:inf); // Output low voltage
+    parameter real vhigh = 1.0 from [0:inf]; // Output high voltage
+    parameter real tdel = 0 from [0:inf);   // Delay time
+    parameter real tr = 1p from [0:inf);    // Rise time
+    parameter real tf = 1p from [0:inf);    // Fall time
+
+    // Internal variables
+    integer therm[0:14];  // Array to hold thermometer code bits
+    integer binary;       // Computed binary value
+    integer i, j;
+    integer first_zero;   // Position of first zero (for bubble error handling)
+    integer valid_ones;   // Count of valid consecutive ones from LSB
+
+    analog begin
+        // Sample thermometer inputs
+        therm[0] = (V(therm_0) > vth) ? 1 : 0;
+        therm[1] = (V(therm_1) > vth) ? 1 : 0;
+        therm[2] = (V(therm_2) > vth) ? 1 : 0;
+        therm[3] = (V(therm_3) > vth) ? 1 : 0;
+        therm[4] = (V(therm_4) > vth) ? 1 : 0;
+        therm[5] = (V(therm_5) > vth) ? 1 : 0;
+        therm[6] = (V(therm_6) > vth) ? 1 : 0;
+        therm[7] = (V(therm_7) > vth) ? 1 : 0;
+        therm[8] = (V(therm_8) > vth) ? 1 : 0;
+        therm[9] = (V(therm_9) > vth) ? 1 : 0;
+        therm[10] = (V(therm_10) > vth) ? 1 : 0;
+        therm[11] = (V(therm_11) > vth) ? 1 : 0;
+        therm[12] = (V(therm_12) > vth) ? 1 : 0;
+        therm[13] = (V(therm_13) > vth) ? 1 : 0;
+        therm[14] = (V(therm_14) > vth) ? 1 : 0;
+
+        // Find first zero in thermometer code (bubble error handling)
+        // Valid thermometer code should be: 000...00111...111
+        // We find the transition point and count valid ones
+
+        first_zero = 15;  // Default: all ones (value 15, but max is 14)
+        valid_ones = 0;
+
+        // Scan from MSB (therm_14) to LSB (therm_0) to find first 1->0 transition
+        // Actually, scan from LSB to find consecutive ones
+        for (i = 0; i < 15; i = i + 1) begin
+            if (therm[i] == 1) begin
+                valid_ones = valid_ones + 1;
+            end else begin
+                // Found a zero, check if there are any ones above it (bubble error)
+                // Continue to check - if we find a 1 after a 0, it's a bubble
+            end
+        end
+
+        // Bubble error correction: find the last valid consecutive 1 from LSB
+        // Then verify no 1s exist beyond that point
+        valid_ones = 0;
+        for (i = 0; i < 15; i = i + 1) begin
+            if (therm[i] == 1) begin
+                valid_ones = valid_ones + 1;
+            end else begin
+                // Check for bubble: any 1 above this 0?
+                for (j = i + 1; j < 15; j = j + 1) begin
+                    if (therm[j] == 1) begin
+                        // Bubble error detected - truncate at first zero
+                        valid_ones = i;  // Only count ones below the bubble
+                        j = 15;  // Break inner loop
+                        i = 15;  // Break outer loop
+                    end
+                end
+                if (i < 15) begin
+                    // No bubble, just end of consecutive ones
+                    i = 15;  // Break outer loop
+                end
+            end
+        end
+
+        // Convert valid_ones to 4-bit binary
+        // valid_ones ranges from 0 to 15, but we only have 15 thermometer bits (0-14)
+        // So valid_ones is 0 to 15, where 15 means all thermometer bits are 1
+
+        binary = valid_ones;
+
+        // Output binary code as voltages
+        V(bin_0) <+ transition(((binary & 1) == 1) ? vhigh : vlow, tdel, tr, tf);
+        V(bin_1) <+ transition(((binary & 2) == 2) ? vhigh : vlow, tdel, tr, tf);
+        V(bin_2) <+ transition(((binary & 4) == 4) ? vhigh : vlow, tdel, tr, tf);
+        V(bin_3) <+ transition(((binary & 8) == 8) ? vhigh : vlow, tdel, tr, tf);
+    end
+endmodule

@@ -1,0 +1,181 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cppll_timer_ref (VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock);
+    inout electrical VDD, VSS;
+    input electrical ref_clk;
+    output electrical fb_clk, dco_clk, vctrl_mon, lock;
+
+    // Parameters
+    parameter real VDD_VAL = 1.2;
+    parameter real VTH = 0.6;
+    parameter real TREF = 20n;          // 50 MHz reference period
+    parameter integer N_DIV = 8;        // Divider ratio
+    parameter real KPD = 0.1;           // Phase detector gain (V/rad)
+    parameter real KDCO = 1e9;          // DCO gain (Hz/V)
+    parameter real F0_DCO = 400e6;      // Free-running DCO frequency (Hz)
+    parameter real KP_PROP = 0.5;       // Proportional gain
+    parameter real KI_INT = 5e6;        // Integral gain (1/s)
+    parameter real LOCK_THR = 0.05;     // Lock threshold (fraction of period)
+    parameter real T_TRANS = 1n;        // Output transition time
+    parameter real T_UPDATE = 100p;     // Control update period
+
+    // Internal variables
+    integer ref_edge_count, fb_edge_count;
+    integer div_count;
+    real t_ref_last, t_fb_last;
+    real phase_error;
+    real vctrl_prop, vctrl_int;
+    real vctrl_total;
+    real t_dco_period;
+    real t_next_dco;
+    real lock_detect;
+    real t_now;
+    real ref_period_est, fb_period_est;
+    real freq_error;
+    integer dco_state;
+    integer fb_state;
+    integer lock_state;
+
+    analog begin
+        // Initialization
+        @(initial_step) begin
+            ref_edge_count = 0;
+            fb_edge_count = 0;
+            div_count = 0;
+            t_ref_last = 0.0;
+            t_fb_last = 0.0;
+            phase_error = 0.0;
+            vctrl_prop = 0.0;
+            vctrl_int = VDD_VAL / 2.0;
+            vctrl_total = VDD_VAL / 2.0;
+            t_dco_period = 1.0 / F0_DCO;
+            t_next_dco = 0.0;
+            lock_detect = 0.0;
+            dco_state = 0;
+            fb_state = 0;
+            lock_state = 0;
+            ref_period_est = TREF;
+            fb_period_est = TREF;
+            freq_error = 0.0;
+        end
+
+        // Reference clock edge detection (rising edge)
+        @(cross(V(ref_clk) - VTH, +1)) begin
+            t_now = $abstime;
+            if (ref_edge_count > 0) begin
+                ref_period_est = t_now - t_ref_last;
+            end
+            t_ref_last = t_now;
+            ref_edge_count = ref_edge_count + 1;
+        end
+
+        // Feedback clock edge detection (rising edge) - from divided output
+        @(cross(V(fb_clk) - VTH, +1)) begin
+            t_now = $abstime;
+            if (fb_edge_count > 0) begin
+                fb_period_est = t_now - t_fb_last;
+            end
+            t_fb_last = t_now;
+            fb_edge_count = fb_edge_count + 1;
+        end
+
+        // Periodic control update using timer
+        @(timer(0, T_UPDATE)) begin
+            // Calculate phase error (time-based, converted to voltage)
+            // Phase error is difference between expected and actual edge times
+            if (ref_edge_count > 1 && fb_edge_count > 1) begin
+                // Frequency error calculation
+                freq_error = (fb_period_est - ref_period_est * N_DIV) / (ref_period_est * N_DIV);
+
+                // Phase error based on edge timing difference
+                phase_error = (t_fb_last - t_ref_last);
+                while (phase_error > ref_period_est * N_DIV / 2.0) begin
+                    phase_error = phase_error - ref_period_est * N_DIV;
+                end
+                while (phase_error < -ref_period_est * N_DIV / 2.0) begin
+                    phase_error = phase_error + ref_period_est * N_DIV;
+                end
+
+                // Normalize phase error to voltage range
+                phase_error = phase_error / (ref_period_est * N_DIV) * VDD_VAL;
+            end else begin
+                phase_error = 0.0;
+                freq_error = 0.0;
+            end
+
+            // Proportional term
+            vctrl_prop = KP_PROP * phase_error;
+
+            // Integral term (simple Euler integration)
+            vctrl_int = vctrl_int - KI_INT * T_UPDATE * freq_error * VDD_VAL;
+
+            // Clamp integral term
+            if (vctrl_int > VDD_VAL) begin
+                vctrl_int = VDD_VAL;
+            end
+            if (vctrl_int < 0.0) begin
+                vctrl_int = 0.0;
+            end
+
+            // Total control voltage
+            vctrl_total = vctrl_int + vctrl_prop;
+
+            // Clamp total control voltage to supply rails
+            if (vctrl_total > VDD_VAL) begin
+                vctrl_total = VDD_VAL;
+            end
+            if (vctrl_total < 0.0) begin
+                vctrl_total = 0.0;
+            end
+
+            // Calculate DCO period from control voltage
+            // Vctrl = 0 -> higher frequency, Vctrl = VDD -> lower frequency
+            // Or: higher vctrl -> higher frequency (positive KDCO)
+            t_dco_period = 1.0 / (F0_DCO + KDCO * (vctrl_total - VDD_VAL/2.0));
+
+            // Ensure positive period
+            if (t_dco_period < 1.0 / (F0_DCO * 2.0)) begin
+                t_dco_period = 1.0 / (F0_DCO * 2.0);
+            end
+            if (t_dco_period > 1.0 / (F0_DCO * 0.5)) begin
+                t_dco_period = 1.0 / (F0_DCO * 0.5);
+            end
+
+            // Lock detection: small phase error and stable frequency
+            if ((abs(phase_error) < LOCK_THR * VDD_VAL) && (abs(freq_error) < LOCK_THR)) begin
+                lock_detect = lock_detect + T_UPDATE / 1e-6; // Accumulate lock time
+            end else begin
+                lock_detect = 0.0;
+            end
+
+            if (lock_detect > 1.0) begin
+                lock_state = 1;
+            end else begin
+                lock_state = 0;
+            end
+        end
+
+        // DCO timer-based oscillator
+        // Generate DCO clock edges
+        @(timer(t_next_dco)) begin
+            dco_state = 1 - dco_state;
+            t_next_dco = $abstime + t_dco_period / 2.0;
+
+            // Divider: count DCO edges and generate fb_clk
+            if (dco_state == 1) begin
+                div_count = div_count + 1;
+                if (div_count >= N_DIV / 2) begin
+                    fb_state = 1 - fb_state;
+                    div_count = 0;
+                end
+            end
+        end
+
+        // Output assignments with transition
+        V(dco_clk) <+ transition(dco_state * VDD_VAL, 0, T_TRANS);
+        V(fb_clk) <+ transition(fb_state * VDD_VAL, 0, T_TRANS);
+        V(vctrl_mon) <+ transition(vctrl_total, 0, T_TRANS);
+        V(lock) <+ transition(lock_state * VDD_VAL, 0, T_TRANS);
+    end
+endmodule

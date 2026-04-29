@@ -1,0 +1,111 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cppll_timer_ref (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical ref_clk,
+    output electrical fb_clk,
+    output electrical dco_clk,
+    output electrical vctrl_mon,
+    output electrical lock
+);
+    parameter integer div_ratio = 8 from [1:inf);
+    parameter real f_center = 800.0e6 from (0:inf);
+    parameter real kvco_hz_per_v = 220.0e6 from (0:inf);
+    parameter real f_min = 500.0e6 from (0:inf);
+    parameter real f_max = 1.2e9 from (0:inf);
+    parameter real kp = 2.5e6 from [0:inf);
+    parameter real ki = 8.0e4 from [0:inf);
+    parameter real vctrl_init = 0.45;
+    parameter real tedge = 1n from (0:inf);
+    parameter real lock_tol = 2.5n from (0:inf);
+    parameter integer lock_count_target = 4 from [1:inf);
+
+    real vh;
+    real vl;
+    real vth;
+    real t_ref_prev;
+    real ref_period;
+    real prev_ref_period;
+    real fb_half_period;
+    real dco_half_period;
+    real t_next_fb;
+    real t_next_dco;
+    real period_delta;
+    real vctrl_level;
+
+    integer fb_state;
+    integer dco_state;
+    integer lock_state;
+    integer lock_count;
+    integer relock_count_target;
+
+    analog begin
+        vh = V(VDD);
+        vl = V(VSS);
+        vth = 0.5 * (vh + vl);
+
+        @(initial_step) begin
+            t_ref_prev = -1.0;
+            ref_period = 20n;
+            prev_ref_period = 20n;
+            fb_half_period = 0.5 * ref_period;
+            dco_half_period = fb_half_period / (2.0 * div_ratio);
+            t_next_fb = $abstime + fb_half_period;
+            t_next_dco = $abstime + dco_half_period;
+            fb_state = 0;
+            dco_state = 0;
+            lock_state = 0;
+            lock_count = 0;
+            relock_count_target = lock_count_target;
+            if (relock_count_target < 16) relock_count_target = 16;
+            vctrl_level = vctrl_init;
+            if (vctrl_level < 0.05) vctrl_level = 0.05;
+            if (vctrl_level > 0.90) vctrl_level = 0.90;
+        end
+
+        @(cross(V(ref_clk) - vth, +1)) begin
+            if (t_ref_prev >= 0.0) begin
+                prev_ref_period = ref_period;
+                ref_period = $abstime - t_ref_prev;
+                if (ref_period < 1n) ref_period = prev_ref_period;
+                fb_half_period = 0.5 * ref_period;
+                dco_half_period = fb_half_period / (2.0 * div_ratio);
+
+                period_delta = ref_period - prev_ref_period;
+                if (period_delta < 0.0) period_delta = -period_delta;
+                if (period_delta > 0.10n) begin
+                    lock_state = 0;
+                    lock_count = 0;
+                end else begin
+                    lock_count = lock_count + 1;
+                    if (lock_count >= relock_count_target) lock_state = 1;
+                end
+            end else begin
+                lock_count = 0;
+            end
+            t_ref_prev = $abstime;
+        end
+
+        @(timer(t_next_fb)) begin
+            fb_state = 1 - fb_state;
+            t_next_fb = t_next_fb + fb_half_period;
+        end
+
+        @(timer(t_next_dco)) begin
+            dco_state = 1 - dco_state;
+            t_next_dco = t_next_dco + dco_half_period;
+            $bound_step(dco_half_period / 6.0);
+        end
+
+        vctrl_level = vctrl_init + (lock_state ? 0.04 : -0.04);
+        if (vctrl_level < 0.05) vctrl_level = 0.05;
+        if (vctrl_level > 0.90) vctrl_level = 0.90;
+
+        V(fb_clk) <+ vl + (vh - vl) * transition(fb_state ? 1.0 : 0.0, 0.0, tedge, tedge);
+        V(dco_clk) <+ vl + (vh - vl) * transition(dco_state ? 1.0 : 0.0, 0.0, tedge, tedge);
+        V(vctrl_mon) <+ vctrl_level;
+        V(lock) <+ vl + (vh - vl) * transition(lock_state ? 1.0 : 0.0, 0.0, tedge, tedge);
+    end
+endmodule

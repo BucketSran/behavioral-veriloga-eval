@@ -1,0 +1,58 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module ramp_gen(clk_in, rst_n, code_3, code_2, code_1, code_0);
+    input clk_in, rst_n;
+    output code_3, code_2, code_1, code_0;
+    electrical clk_in, rst_n, code_3, code_2, code_1, code_0;
+
+    parameter real vlogic_high = 1.2;
+    parameter real vlogic_low = 0.0;
+    parameter real vth = 0.6;
+    parameter real tr = 1e-9;
+    parameter real tf = 1e-9;
+
+    integer step;
+    real b0, b1, b2, b3;
+
+    analog begin
+        @(initial_step) begin
+            step = 0;
+            b0 = vlogic_low;
+            b1 = vlogic_low;
+            b2 = vlogic_low;
+            b3 = vlogic_low;
+        end
+
+        if (V(rst_n) < vth) begin
+            step = 0;
+            b0 = vlogic_low;
+            b1 = vlogic_low;
+            b2 = vlogic_low;
+            b3 = vlogic_low;
+        end
+
+        @(cross(V(clk_in) - vth, +1)) begin
+            if (V(rst_n) >= vth) begin
+                if (step == 0) begin
+                    b0 = vlogic_high;
+                    step = 1;
+                end else if (step == 1) begin
+                    b1 = vlogic_high;
+                    step = 2;
+                end else if (step == 2) begin
+                    b2 = vlogic_high;
+                    step = 3;
+                end else if (step == 3) begin
+                    b3 = vlogic_high;
+                    step = 4;
+                end
+            end
+        end
+
+        V(code_0) <+ transition(b0, 0.0, tr, tf);
+        V(code_1) <+ transition(b1, 0.0, tr, tf);
+        V(code_2) <+ transition(b2, 0.0, tr, tf);
+        V(code_3) <+ transition(b3, 0.0, tr, tf);
+    end
+endmodule

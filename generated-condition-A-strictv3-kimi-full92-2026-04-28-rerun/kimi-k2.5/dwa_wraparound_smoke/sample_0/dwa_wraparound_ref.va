@@ -1,0 +1,162 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dwa_wraparound_ref (
+    clk_i,
+    rst_ni,
+    code_i_0,
+    code_i_1,
+    code_i_2,
+    code_i_3,
+    cell_en_o_0,
+    cell_en_o_1,
+    cell_en_o_2,
+    cell_en_o_3,
+    cell_en_o_4,
+    cell_en_o_5,
+    cell_en_o_6,
+    cell_en_o_7,
+    cell_en_o_8,
+    cell_en_o_9,
+    cell_en_o_10,
+    cell_en_o_11,
+    cell_en_o_12,
+    cell_en_o_13,
+    cell_en_o_14,
+    cell_en_o_15,
+    ptr_o_0,
+    ptr_o_1,
+    ptr_o_2,
+    ptr_o_3,
+    ptr_o_4,
+    ptr_o_5,
+    ptr_o_6,
+    ptr_o_7,
+    ptr_o_8,
+    ptr_o_9,
+    ptr_o_10,
+    ptr_o_11,
+    ptr_o_12,
+    ptr_o_13,
+    ptr_o_14,
+    ptr_o_15
+);
+
+    // Ports
+    electrical clk_i, rst_ni;
+    electrical code_i_0, code_i_1, code_i_2, code_i_3;
+    electrical cell_en_o_0, cell_en_o_1, cell_en_o_2, cell_en_o_3;
+    electrical cell_en_o_4, cell_en_o_5, cell_en_o_6, cell_en_o_7;
+    electrical cell_en_o_8, cell_en_o_9, cell_en_o_10, cell_en_o_11;
+    electrical cell_en_o_12, cell_en_o_13, cell_en_o_14, cell_en_o_15;
+    electrical ptr_o_0, ptr_o_1, ptr_o_2, ptr_o_3;
+    electrical ptr_o_4, ptr_o_5, ptr_o_6, ptr_o_7;
+    electrical ptr_o_8, ptr_o_9, ptr_o_10, ptr_o_11;
+    electrical ptr_o_12, ptr_o_13, ptr_o_14, ptr_o_15;
+
+    // Parameters
+    parameter real vth = 0.5;
+    parameter real vhi = 1.0;
+    parameter real vlo = 0.0;
+    parameter real trise = 0.01n;
+    parameter real tfall = 0.01n;
+
+    // State variables
+    integer ptr;           // Current pointer position (0-15)
+    integer code;          // Sampled input code
+    integer i;
+    integer cell_en[0:15]; // Cell enable array
+    integer ptr_onehot[0:15]; // Pointer one-hot array
+
+    // Internal nodes for code sampling
+    real code_0_val, code_1_val, code_2_val, code_3_val;
+
+    analog begin
+        // Initialize state
+        @(initial_step) begin
+            ptr = 13;  // Start at pointer index 13 as specified
+            code = 0;
+            for (i = 0; i < 16; i = i + 1) begin
+                cell_en[i] = 0;
+                ptr_onehot[i] = 0;
+            end
+            ptr_onehot[13] = 1;  // One-hot at position 13
+        end
+
+        // Sample code inputs
+        code_0_val = V(code_i_0) > vth ? 1 : 0;
+        code_1_val = V(code_i_1) > vth ? 1 : 0;
+        code_2_val = V(code_i_2) > vth ? 1 : 0;
+        code_3_val = V(code_i_3) > vth ? 1 : 0;
+        code = code_0_val + 2*code_1_val + 4*code_2_val + 8*code_3_val;
+
+        // Reset handling - active low
+        if (V(rst_ni) < vth) begin
+            ptr = 13;
+            for (i = 0; i < 16; i = i + 1) begin
+                cell_en[i] = 0;
+                ptr_onehot[i] = 0;
+            end
+            ptr_onehot[13] = 1;
+        end
+
+        // Clock rising edge detection
+        @(cross(V(clk_i) - vth, +1)) begin
+            if (V(rst_ni) >= vth) begin
+                // Update pointer: rotate by code amount
+                ptr = (ptr + code) % 16;
+
+                // Update one-hot pointer output
+                for (i = 0; i < 16; i = i + 1) begin
+                    ptr_onehot[i] = 0;
+                end
+                ptr_onehot[ptr] = 1;
+
+                // Generate thermometer-coded cell enables
+                // Starting from ptr, enable 'code' cells (wrapping around)
+                for (i = 0; i < 16; i = i + 1) begin
+                    cell_en[i] = 0;
+                end
+                for (i = 0; i < code; i = i + 1) begin
+                    cell_en[(ptr + i) % 16] = 1;
+                end
+            end
+        end
+
+        // Drive outputs with transitions
+        V(ptr_o_0) <+ transition(ptr_onehot[0] ? vhi : vlo, 0, trise, tfall);
+        V(ptr_o_1) <+ transition(ptr_onehot[1] ? vhi : vlo, 0, trise, tfall);
+        V(ptr_o_2) <+ transition(ptr_onehot[2] ? vhi : vlo, 0, trise, tfall);
+        V(ptr_o_3) <+ transition(ptr_onehot[3] ? vhi : vlo, 0, trise, tfall);
+        V(ptr_o_4) <+ transition(ptr_onehot[4] ? vhi : vlo, 0, trise, tfall);
+        V(ptr_o_5) <+ transition(ptr_onehot[5] ? vhi : vlo, 0, trise, tfall);
+        V(ptr_o_6) <+ transition(ptr_onehot[6] ? vhi : vlo, 0, trise, tfall);
+        V(ptr_o_7) <+ transition(ptr_onehot[7] ? vhi : vlo, 0, trise, tfall);
+        V(ptr_o_8) <+ transition(ptr_onehot[8] ? vhi : vlo, 0, trise, tfall);
+        V(ptr_o_9) <+ transition(ptr_onehot[9] ? vhi : vlo, 0, trise, tfall);
+        V(ptr_o_10) <+ transition(ptr_onehot[10] ? vhi : vlo, 0, trise, tfall);
+        V(ptr_o_11) <+ transition(ptr_onehot[11] ? vhi : vlo, 0, trise, tfall);
+        V(ptr_o_12) <+ transition(ptr_onehot[12] ? vhi : vlo, 0, trise, tfall);
+        V(ptr_o_13) <+ transition(ptr_onehot[13] ? vhi : vlo, 0, trise, tfall);
+        V(ptr_o_14) <+ transition(ptr_onehot[14] ? vhi : vlo, 0, trise, tfall);
+        V(ptr_o_15) <+ transition(ptr_onehot[15] ? vhi : vlo, 0, trise, tfall);
+
+        V(cell_en_o_0) <+ transition(cell_en[0] ? vhi : vlo, 0, trise, tfall);
+        V(cell_en_o_1) <+ transition(cell_en[1] ? vhi : vlo, 0, trise, tfall);
+        V(cell_en_o_2) <+ transition(cell_en[2] ? vhi : vlo, 0, trise, tfall);
+        V(cell_en_o_3) <+ transition(cell_en[3] ? vhi : vlo, 0, trise, tfall);
+        V(cell_en_o_4) <+ transition(cell_en[4] ? vhi : vlo, 0, trise, tfall);
+        V(cell_en_o_5) <+ transition(cell_en[5] ? vhi : vlo, 0, trise, tfall);
+        V(cell_en_o_6) <+ transition(cell_en[6] ? vhi : vlo, 0, trise, tfall);
+        V(cell_en_o_7) <+ transition(cell_en[7] ? vhi : vlo, 0, trise, tfall);
+        V(cell_en_o_8) <+ transition(cell_en[8] ? vhi : vlo, 0, trise, tfall);
+        V(cell_en_o_9) <+ transition(cell_en[9] ? vhi : vlo, 0, trise, tfall);
+        V(cell_en_o_10) <+ transition(cell_en[10] ? vhi : vlo, 0, trise, tfall);
+        V(cell_en_o_11) <+ transition(cell_en[11] ? vhi : vlo, 0, trise, tfall);
+        V(cell_en_o_12) <+ transition(cell_en[12] ? vhi : vlo, 0, trise, tfall);
+        V(cell_en_o_13) <+ transition(cell_en[13] ? vhi : vlo, 0, trise, tfall);
+        V(cell_en_o_14) <+ transition(cell_en[14] ? vhi : vlo, 0, trise, tfall);
+        V(cell_en_o_15) <+ transition(cell_en[15] ? vhi : vlo, 0, trise, tfall);
+    end
+
+endmodule

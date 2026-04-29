@@ -1,0 +1,34 @@
+simulator lang=spectre
+global 0
+
+// Parameters
+parameters VDD=0.9
+parameters VSS=0.0
+parameters PERIOD=1n
+
+// Supply voltages
+Vdd (vdd 0) vsource dc=VDD
+Vss (vss 0) vsource dc=VSS
+
+// 1GHz clock with 50% duty cycle
+Vclk (clk 0) vsource type=pulse val0=VSS val1=VDD period=PERIOD rise=10p fall=10p width=500p
+
+// Differential input stimulus - 4 phases with decreasing differential
+// Phase 1 (0-4ns): diff=+10mV (vinp=0.505V, vinn=0.495V)
+// Phase 2 (4-8ns): diff=+1mV (vinp=0.5005V, vinn=0.4995V)
+// Phase 3 (8-12ns): diff=+0.1mV (vinp=0.50005V, vinn=0.49995V)
+// Phase 4 (12-16ns): diff=+0.01mV (vinp=0.500005V, vinn=0.499995V)
+Vinp (vinp 0) vsource type=pwl wave=[0 0.505 3.99n 0.505 4n 0.5005 7.99n 0.5005 8n 0.50005 11.99n 0.50005 12n 0.500005 16n 0.500005]
+Vinn (vinn 0) vsource type=pwl wave=[0 0.495 3.99n 0.495 4n 0.4995 7.99n 0.4995 8n 0.49995 11.99n 0.49995 12n 0.499995 16n 0.499995]
+
+// DUT instance
+XDUT (clk vinn vinp out_n out_p lp lm vss vdd) cmp_delay
+
+// Save signals
+save clk vinp vinn out_p out_n
+
+// Transient analysis
+tran tran stop=16n maxstep=10p
+
+// Include Verilog-A module
+ahdl_include "cmp_delay.va"

@@ -1,0 +1,119 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dwa_wraparound_ref (clk_i, rst_ni, code_i_0, code_i_1, code_i_2, code_i_3,
+                           cell_en_o_0, cell_en_o_1, cell_en_o_2, cell_en_o_3,
+                           cell_en_o_4, cell_en_o_5, cell_en_o_6, cell_en_o_7,
+                           cell_en_o_8, cell_en_o_9, cell_en_o_10, cell_en_o_11,
+                           cell_en_o_12, cell_en_o_13, cell_en_o_14, cell_en_o_15,
+                           ptr_o_0, ptr_o_1, ptr_o_2, ptr_o_3, ptr_o_4, ptr_o_5,
+                           ptr_o_6, ptr_o_7, ptr_o_8, ptr_o_9, ptr_o_10, ptr_o_11,
+                           ptr_o_12, ptr_o_13, ptr_o_14, ptr_o_15);
+    input clk_i, rst_ni, code_i_0, code_i_1, code_i_2, code_i_3;
+    output cell_en_o_0, cell_en_o_1, cell_en_o_2, cell_en_o_3;
+    output cell_en_o_4, cell_en_o_5, cell_en_o_6, cell_en_o_7;
+    output cell_en_o_8, cell_en_o_9, cell_en_o_10, cell_en_o_11;
+    output cell_en_o_12, cell_en_o_13, cell_en_o_14, cell_en_o_15;
+    output ptr_o_0, ptr_o_1, ptr_o_2, ptr_o_3, ptr_o_4, ptr_o_5;
+    output ptr_o_6, ptr_o_7, ptr_o_8, ptr_o_9, ptr_o_10, ptr_o_11;
+    output ptr_o_12, ptr_o_13, ptr_o_14, ptr_o_15;
+    electrical clk_i, rst_ni, code_i_0, code_i_1, code_i_2, code_i_3;
+    electrical cell_en_o_0, cell_en_o_1, cell_en_o_2, cell_en_o_3;
+    electrical cell_en_o_4, cell_en_o_5, cell_en_o_6, cell_en_o_7;
+    electrical cell_en_o_8, cell_en_o_9, cell_en_o_10, cell_en_o_11;
+    electrical cell_en_o_12, cell_en_o_13, cell_en_o_14, cell_en_o_15;
+    electrical ptr_o_0, ptr_o_1, ptr_o_2, ptr_o_3, ptr_o_4, ptr_o_5;
+    electrical ptr_o_6, ptr_o_7, ptr_o_8, ptr_o_9, ptr_o_10, ptr_o_11;
+    electrical ptr_o_12, ptr_o_13, ptr_o_14, ptr_o_15;
+
+    parameter real vth = 0.9;
+    parameter real vhi = 1.8;
+    parameter real vlo = 0.0;
+    parameter real tr = 0.1n;
+    parameter real tf = 0.1n;
+
+    integer ptr;
+    integer code;
+    integer i;
+    integer cell_idx;
+    integer ptr_array[0:15];
+    integer cell_en_array[0:15];
+
+    analog begin
+        @(initial_step) begin
+            ptr = 13;
+            for (i = 0; i < 16; i = i + 1) begin
+                ptr_array[i] = 0;
+                cell_en_array[i] = 0;
+            end
+            ptr_array[13] = 1;
+        end
+
+        @(cross(V(rst_ni) - vth, -1)) begin
+            ptr = 13;
+            for (i = 0; i < 16; i = i + 1) begin
+                ptr_array[i] = 0;
+            end
+            ptr_array[13] = 1;
+        end
+
+        @(cross(V(clk_i) - vth, +1)) begin
+            if (V(rst_ni) > vth) begin
+                code = 0;
+                if (V(code_i_0) > vth) code = code + 1;
+                if (V(code_i_1) > vth) code = code + 2;
+                if (V(code_i_2) > vth) code = code + 4;
+                if (V(code_i_3) > vth) code = code + 8;
+
+                ptr = ptr + code;
+                if (ptr >= 16) ptr = ptr - 16;
+
+                for (i = 0; i < 16; i = i + 1) begin
+                    ptr_array[i] = 0;
+                    cell_en_array[i] = 0;
+                end
+                ptr_array[ptr] = 1;
+
+                for (i = 0; i < code; i = i + 1) begin
+                    cell_idx = ptr + i;
+                    if (cell_idx >= 16) cell_idx = cell_idx - 16;
+                    cell_en_array[cell_idx] = 1;
+                end
+            end
+        end
+
+        V(ptr_o_0) <+ transition(ptr_array[0] ? vhi : vlo, 0, tr, tf);
+        V(ptr_o_1) <+ transition(ptr_array[1] ? vhi : vlo, 0, tr, tf);
+        V(ptr_o_2) <+ transition(ptr_array[2] ? vhi : vlo, 0, tr, tf);
+        V(ptr_o_3) <+ transition(ptr_array[3] ? vhi : vlo, 0, tr, tf);
+        V(ptr_o_4) <+ transition(ptr_array[4] ? vhi : vlo, 0, tr, tf);
+        V(ptr_o_5) <+ transition(ptr_array[5] ? vhi : vlo, 0, tr, tf);
+        V(ptr_o_6) <+ transition(ptr_array[6] ? vhi : vlo, 0, tr, tf);
+        V(ptr_o_7) <+ transition(ptr_array[7] ? vhi : vlo, 0, tr, tf);
+        V(ptr_o_8) <+ transition(ptr_array[8] ? vhi : vlo, 0, tr, tf);
+        V(ptr_o_9) <+ transition(ptr_array[9] ? vhi : vlo, 0, tr, tf);
+        V(ptr_o_10) <+ transition(ptr_array[10] ? vhi : vlo, 0, tr, tf);
+        V(ptr_o_11) <+ transition(ptr_array[11] ? vhi : vlo, 0, tr, tf);
+        V(ptr_o_12) <+ transition(ptr_array[12] ? vhi : vlo, 0, tr, tf);
+        V(ptr_o_13) <+ transition(ptr_array[13] ? vhi : vlo, 0, tr, tf);
+        V(ptr_o_14) <+ transition(ptr_array[14] ? vhi : vlo, 0, tr, tf);
+        V(ptr_o_15) <+ transition(ptr_array[15] ? vhi : vlo, 0, tr, tf);
+
+        V(cell_en_o_0) <+ transition(cell_en_array[0] ? vhi : vlo, 0, tr, tf);
+        V(cell_en_o_1) <+ transition(cell_en_array[1] ? vhi : vlo, 0, tr, tf);
+        V(cell_en_o_2) <+ transition(cell_en_array[2] ? vhi : vlo, 0, tr, tf);
+        V(cell_en_o_3) <+ transition(cell_en_array[3] ? vhi : vlo, 0, tr, tf);
+        V(cell_en_o_4) <+ transition(cell_en_array[4] ? vhi : vlo, 0, tr, tf);
+        V(cell_en_o_5) <+ transition(cell_en_array[5] ? vhi : vlo, 0, tr, tf);
+        V(cell_en_o_6) <+ transition(cell_en_array[6] ? vhi : vlo, 0, tr, tf);
+        V(cell_en_o_7) <+ transition(cell_en_array[7] ? vhi : vlo, 0, tr, tf);
+        V(cell_en_o_8) <+ transition(cell_en_array[8] ? vhi : vlo, 0, tr, tf);
+        V(cell_en_o_9) <+ transition(cell_en_array[9] ? vhi : vlo, 0, tr, tf);
+        V(cell_en_o_10) <+ transition(cell_en_array[10] ? vhi : vlo, 0, tr, tf);
+        V(cell_en_o_11) <+ transition(cell_en_array[11] ? vhi : vlo, 0, tr, tf);
+        V(cell_en_o_12) <+ transition(cell_en_array[12] ? vhi : vlo, 0, tr, tf);
+        V(cell_en_o_13) <+ transition(cell_en_array[13] ? vhi : vlo, 0, tr, tf);
+        V(cell_en_o_14) <+ transition(cell_en_array[14] ? vhi : vlo, 0, tr, tf);
+        V(cell_en_o_15) <+ transition(cell_en_array[15] ? vhi : vlo, 0, tr, tf);
+    end
+endmodule

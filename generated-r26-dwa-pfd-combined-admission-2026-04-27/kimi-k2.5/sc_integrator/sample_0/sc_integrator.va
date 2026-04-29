@@ -1,0 +1,49 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sc_integrator(VDD, VSS, VIN, PHI1, PHI2, VOUT);
+    // Ports
+    electrical VDD;
+    electrical VSS;
+    electrical VIN;
+    electrical PHI1;
+    electrical PHI2;
+    electrical VOUT;
+
+    // Parameters
+    parameter real Cin = 1.0 from (0:inf);
+    parameter real Cfb = 1.0 from (0:inf);
+
+    // Internal state variables
+    real sampled_vin;
+    real vout_state;
+    real vout_target;
+
+    // Threshold for clock detection
+    real vth;
+
+    analog begin
+        // Initialize on first step
+        @(initial_step) begin
+            sampled_vin = 0.0;
+            vout_state = 0.0;
+            vout_target = 0.0;
+            vth = 0.45;
+        end
+
+        // Detect rising edge of PHI1: sample VIN
+        @(cross(V(PHI1) - vth, 1)) begin
+            sampled_vin = V(VIN) - V(VSS);
+        end
+
+        // Detect rising edge of PHI2: update output state
+        @(cross(V(PHI2) - vth, 1)) begin
+            vout_state = vout_state + (Cin / Cfb) * sampled_vin;
+        end
+
+        // Continuous voltage contribution to VOUT
+        // Always drive VOUT relative to VSS with the current state
+        vout_target = vout_state + V(VSS);
+        V(VOUT) <+ transition(vout_target, 0, 1n);
+    end
+endmodule

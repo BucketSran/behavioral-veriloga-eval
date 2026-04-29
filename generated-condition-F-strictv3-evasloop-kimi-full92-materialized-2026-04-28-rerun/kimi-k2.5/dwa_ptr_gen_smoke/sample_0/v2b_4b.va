@@ -1,0 +1,64 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2b_4b (vin, b3, b2, b1, b0, vdd, vss);
+    input vin;
+    output b3, b2, b1, b0;
+    inout vdd, vss;
+    electrical vin, b3, b2, b1, b0, vdd, vss;
+
+    parameter real vdd_level = 0.9;
+    parameter real vth_level = 0.45;
+    parameter real tr = 100p;
+    parameter real tf = 100p;
+
+    integer code;
+    real vref;
+
+    analog begin
+        @(initial_step) begin
+            code = 0;
+        end
+
+        // Decode voltage to 4-bit code
+        vref = V(vin);
+        if (vref >= 0.875 * vdd_level)
+            code = 15;
+        else if (vref >= 0.8125 * vdd_level)
+            code = 14;
+        else if (vref >= 0.75 * vdd_level)
+            code = 13;
+        else if (vref >= 0.6875 * vdd_level)
+            code = 12;
+        else if (vref >= 0.625 * vdd_level)
+            code = 11;
+        else if (vref >= 0.5625 * vdd_level)
+            code = 10;
+        else if (vref >= 0.5 * vdd_level)
+            code = 9;
+        else if (vref >= 0.4375 * vdd_level)
+            code = 8;
+        else if (vref >= 0.375 * vdd_level)
+            code = 7;
+        else if (vref >= 0.3125 * vdd_level)
+            code = 6;
+        else if (vref >= 0.25 * vdd_level)
+            code = 5;
+        else if (vref >= 0.1875 * vdd_level)
+            code = 4;
+        else if (vref >= 0.125 * vdd_level)
+            code = 3;
+        else if (vref >= 0.0625 * vdd_level)
+            code = 2;
+        else if (vref >= 0.03125 * vdd_level)
+            code = 1;
+        else
+            code = 0;
+
+        // Output bits as voltages
+        V(b3) <+ transition((code >> 3) & 1 ? vdd_level : 0.0, 0, tr, tf);
+        V(b2) <+ transition((code >> 2) & 1 ? vdd_level : 0.0, 0, tr, tf);
+        V(b1) <+ transition((code >> 1) & 1 ? vdd_level : 0.0, 0, tr, tf);
+        V(b0) <+ transition((code >> 0) & 1 ? vdd_level : 0.0, 0, tr, tf);
+    end
+endmodule

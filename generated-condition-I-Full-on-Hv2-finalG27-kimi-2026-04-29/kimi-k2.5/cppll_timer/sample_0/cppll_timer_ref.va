@@ -1,0 +1,157 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cppll_timer_ref (VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock);
+    inout VDD;
+    inout VSS;
+    input ref_clk;
+    output fb_clk;
+    output dco_clk;
+    output vctrl_mon;
+    output lock;
+
+    electrical VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock;
+
+    // Parameters - using names that match expected interface
+    parameter real vctrl_init = 0.9;
+    parameter real VDD_level = 1.8;
+    parameter real VSS_level = 0.0;
+    parameter real vth = 0.9;
+    parameter real tdel = 1p;
+    parameter real tr = 100p;
+    parameter real tf = 100p;
+    parameter real kp = 2e-3;
+    parameter real ki = 1e-4;
+    parameter real kvco_hz_per_v = 1e9;
+    parameter real f_center = 50e6;
+    parameter real f_min = 10e6;
+    parameter real f_max = 100e6;
+    parameter integer div_ratio = 1;
+    parameter real lock_tol = 0.05;
+    parameter integer lock_count_target = 50;
+    parameter real tedge = 1n;
+
+    // Internal variables
+    integer ref_edge_count;
+    integer fb_edge_count;
+    integer dco_edge_count;
+    integer div_count;
+    integer lock_count;
+    integer locked;
+    integer dco_state;
+    integer fb_state;
+    real phase_error;
+    real vctrl;
+    real vctrl_prop;
+    real vctrl_int;
+    real t_dco;
+    real t_last_ref;
+    real t_last_fb;
+    real t_now;
+    real freq_error;
+    real ref_period;
+    real fb_period;
+    real t_next_dco;
+
+    analog begin
+        @(initial_step) begin
+            ref_edge_count = 0;
+            fb_edge_count = 0;
+            dco_edge_count = 0;
+            div_count = 0;
+            lock_count = 0;
+            locked = 0;
+            dco_state = 0;
+            fb_state = 0;
+            phase_error = 0.0;
+            vctrl = vctrl_init;
+            vctrl_prop = 0.0;
+            vctrl_int = vctrl_init;
+            t_dco = 1.0 / f_center;
+            t_last_ref = 0.0;
+            t_last_fb = 0.0;
+            ref_period = 1.0 / f_center;
+            fb_period = ref_period;
+            t_next_dco = 1.0 / f_center;
+        end
+
+        // Detect reference clock rising edge
+        @(cross(V(ref_clk) - vth, 1)) begin
+            t_now = $abstime;
+            if (ref_edge_count > 0) begin
+                ref_period = t_now - t_last_ref;
+            end
+            if (ref_edge_count > 0 && fb_edge_count > 0) begin
+                // Phase error: difference between expected and actual fb edge timing
+                phase_error = (t_last_fb - t_last_ref) - 0.5 * ref_period;
+            end else begin
+                phase_error = 0.0;
+            end
+            t_last_ref = t_now;
+            ref_edge_count = ref_edge_count + 1;
+
+            // PI controller update
+            vctrl_prop = kp * phase_error;
+            vctrl_int = vctrl_int + ki * phase_error;
+
+            // Clamp integrator
+            if (vctrl_int > VDD_level) vctrl_int = VDD_level;
+            if (vctrl_int < VSS_level) vctrl_int = VSS_level;
+
+            vctrl = vctrl_prop + vctrl_int;
+
+            // Clamp total control voltage
+            if (vctrl > VDD_level) vctrl = VDD_level;
+            if (vctrl < VSS_level) vctrl = VSS_level;
+
+            // Update DCO period based on control voltage - center at 50MHz
+            t_dco = 1.0 / (f_center + kvco_hz_per_v * (vctrl - vctrl_init));
+            if (t_dco < 1.0 / f_max) t_dco = 1.0 / f_max;
+            if (t_dco > 1.0 / f_min) t_dco = 1.0 / f_min;
+
+            // Lock detection based on frequency error
+            if (fb_edge_count > 0 && ref_edge_count > 1) begin
+                fb_period = t_last_fb - (t_last_ref - ref_period);
+                if (fb_period > 0 && ref_period > 0) begin
+                    freq_error = abs(1.0/ref_period - 1.0/fb_period);
+                    if (freq_error < lock_tol * f_center) begin
+                        lock_count = lock_count + 1;
+                        if (lock_count >= lock_count_target) locked = 1;
+                    end else begin
+                        lock_count = 0;
+                        locked = 0;
+                    end
+                end
+            end
+        end
+
+        // Detect feedback clock rising edge (from divider output)
+        @(cross(V(fb_clk) - vth, 1)) begin
+            t_last_fb = $abstime;
+            fb_edge_count = fb_edge_count + 1;
+        end
+
+        // DCO timer - generates oscillator clock with dynamic period update
+        @(timer(t_next_dco)) begin
+            dco_edge_count = dco_edge_count + 1;
+            dco_state = 1 - dco_state;
+            div_count = div_count + 1;
+            if (div_count >= div_ratio) begin
+                div_count = 0;
+                fb_state = 1 - fb_state;
+            end
+            // Schedule next DCO edge based on current t_dco
+            t_next_dco = $abstime + t_dco;
+        end
+
+        // Output assignments
+        V(vctrl_mon) <+ vctrl;
+        V(lock) <+ transition(locked ? VDD_level : VSS_level, tdel, tr, tf);
+
+        // DCO clock output - toggle based on timer
+        V(dco_clk) <+ transition(dco_state ? VDD_level : VSS_level, tdel, tr, tf);
+
+        // Feedback clock output - divided version
+        V(fb_clk) <+ transition(fb_state ? VDD_level : VSS_level, tdel, tr, tf);
+    end
+endmodule

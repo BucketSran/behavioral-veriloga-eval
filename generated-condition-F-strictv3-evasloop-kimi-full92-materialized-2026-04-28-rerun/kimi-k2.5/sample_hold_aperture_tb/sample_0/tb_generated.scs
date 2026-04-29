@@ -1,0 +1,24 @@
+simulator lang=spectre
+global 0
+
+// Power supplies
+VDD (VDD 0) vsource dc=0.9
+VSS (VSS 0) vsource dc=0
+
+// Clock: 50MHz, 50% duty cycle, 100ps rise/fall
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=20n rise=100p fall=100p width=10n
+
+// Analog input: ramp with some variation to observe aperture timing
+Vin (vin 0) vsource type=pwl wave=[0n 0 10n 0.3 30n 0.5 50n 0.2 70n 0.6 90n 0.4 110n 0.7 130n 0.3 140n 0.5]
+
+// DUT instance
+XDUT (VDD VSS clk vin vout) sample_hold_aperture_ref
+
+// Transient analysis
+tran tran stop=140n maxstep=100p
+
+// Save waveforms
+save vin clk vout
+
+// Include DUT Verilog-A
+ahdl_include "sample_hold_aperture_ref.va"

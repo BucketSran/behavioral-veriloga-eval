@@ -1,0 +1,46 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sar_adc_weighted_8b (vin, clks, rst_n, dout_7, dout_6, dout_5, dout_4, dout_3, dout_2, dout_1, dout_0);
+    electrical vin, clks, rst_n;
+    electrical dout_7, dout_6, dout_5, dout_4, dout_3, dout_2, dout_1, dout_0;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real tr = 1n;
+    parameter real tf = 1n;
+
+    integer code;
+    real vin_val;
+
+    analog begin
+        @(initial_step) begin
+            code = 0;
+        end
+
+        @(cross(V(rst_n) - vth, -1)) begin
+            code = 0;
+        end
+
+        @(cross(V(clks) - vth, +1)) begin
+            if (V(rst_n) > vth) begin
+                vin_val = V(vin);
+                if (vin_val < 0)
+                    code = 0;
+                else if (vin_val > vdd)
+                    code = 255;
+                else
+                    code = $floor(vin_val / vdd * 255.0);
+            end
+        end
+
+        V(dout_7) <+ transition((code >> 7) & 1 ? vdd : 0.0, 0, tr, tf);
+        V(dout_6) <+ transition((code >> 6) & 1 ? vdd : 0.0, 0, tr, tf);
+        V(dout_5) <+ transition((code >> 5) & 1 ? vdd : 0.0, 0, tr, tf);
+        V(dout_4) <+ transition((code >> 4) & 1 ? vdd : 0.0, 0, tr, tf);
+        V(dout_3) <+ transition((code >> 3) & 1 ? vdd : 0.0, 0, tr, tf);
+        V(dout_2) <+ transition((code >> 2) & 1 ? vdd : 0.0, 0, tr, tf);
+        V(dout_1) <+ transition((code >> 1) & 1 ? vdd : 0.0, 0, tr, tf);
+        V(dout_0) <+ transition((code >> 0) & 1 ? vdd : 0.0, 0, tr, tf);
+    end
+endmodule

@@ -1,0 +1,26 @@
+// Minimal EVAS-compatible Spectre testbench for noise_gen
+
+// Include the Verilog-A module
+ahdl_include "noise_gen.va"
+
+// Global ground node
+global gnd
+
+// Testbench circuit
+testbench {
+    // DC voltage source for input stimulus
+    vdc (vin_i gnd) vsource dc=1.0
+
+    // Device under test: noise generator
+    dut (vin_i vout_o) noise_gen sigma=0.1
+
+    // Save statements for required waveform columns
+    save vin_i
+    save vout_o
+}
+
+// Transient analysis
+tran tran stop=500n maxstep=1n
+
+// Output format for waveform CSV
+saveOptions options save=allpub currents=none

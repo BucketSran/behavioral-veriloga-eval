@@ -1,67 +1,36 @@
 Given a voltage-domain differential gain-stage DUT, generate a minimal
-EVAS-compatible Spectre-format `.scs` testbench that applies a small
-differential input step and saves both input and output waveforms.
+EVAS-compatible Spectre `.scs` testbench that applies a small differential
+input step and saves both input and output waveforms.
 
-Requirements:
+This is a testbench-generation task. Do not generate Verilog-A modules. Assume
+the DUT Verilog-A file is provided by the benchmark harness and only write the
+Spectre testbench.
 
-- provide `VDD`, `VSS`, and differential input sources
-- instantiate the DUT by position
-- include `tran`
-- include explicit `save`
-- place `ahdl_include` last
+Return exactly one fenced code block tagged `spectre`. Do not include prose
+outside the code block.
 
-Ports:
-- `VDD`: inout electrical (power rail)
-- `VSS`: inout electrical (power rail)
-- `vinp`: input electrical
-- `vinn`: input electrical
-- `voutp`: output electrical
-- `voutn`: output electrical
+## Provided DUT
 
-DUT module to instantiate: `gain_step_ref`
+- Include file: `gain_step_ref.va`
+- Module name: `gain_step_ref`
+- Positional port order: `(VDD, VSS, vinp, vinn, voutp, voutn)`
+- Required instance line:
+  `XDUT (VDD VSS vinp vinn voutp voutn) gain_step_ref`
 
-DUT module to instantiate: `gain_step_ref`
+## Required Testbench Structure
 
-DUT module to instantiate: `gain_step_ref`
+- Start with `simulator lang=spectre` and `global 0`.
+- Provide `VDD=0.9 V` and `VSS=0 V`.
+- Drive `vinp` and `vinn` with a small differential input step.
+- Use exactly one transient analysis:
+  `tran tran stop=100n maxstep=100p`
+- Save the public waveform columns:
+  `save vinp vinn voutp voutn`
+- Place the DUT include last:
+  `ahdl_include "gain_step_ref.va"`
 
-DUT module to instantiate: `gain_step_ref`
+## Public Evaluation Contract
 
-DUT module to instantiate: `gain_step_ref`
-
-DUT module to instantiate: `gain_step_ref`
-
-DUT module to instantiate: `gain_step_ref`
-
-DUT module to instantiate: `gain_step_ref`
-
-DUT module to instantiate: `gain_step_ref`
-
-DUT module to instantiate: `gain_step_ref`
-
-DUT module to instantiate: `gain_step_ref`
-
-DUT module to instantiate: `gain_step_ref`
-
-DUT module to instantiate: `gain_step_ref`
-
-
-## Public Evaluation Contract (Non-Gold)
-
-This section states evaluator-facing constraints that must be visible to the generated artifact.
-It does not prescribe the internal implementation or reveal a gold solution.
-
-Final EVAS transient setting:
-
-```spectre
-tran tran stop=100n maxstep=100p
-```
-
-Required public waveform columns in `tran.csv`:
-
-- `vinp`, `vinn`, `voutp`, `voutn`
-
-Use plain scalar save names for these observables; do not rely on instance-qualified or aliased save names.
-
-Timing/checking-window contract:
-
-- Public stimulus nodes used by the reference harness include: `VDD`, `VSS`, `vinp`, `vinn`.
+The evaluator reads `vinp`, `vinn`, `voutp`, and `voutn` from `tran.csv`. Use
+plain scalar save names; do not rely on instance-qualified or aliased save
+names.

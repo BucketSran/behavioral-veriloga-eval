@@ -1,0 +1,45 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module multimod_divider_ref(clk_in, mod, mod_0, mod_1, mod_2, mod_3, prescaler_out);
+    input clk_in, mod, mod_0, mod_1, mod_2, mod_3;
+    output prescaler_out;
+    electrical clk_in, mod, mod_0, mod_1, mod_2, mod_3, prescaler_out;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real trf = 10p;
+
+    integer base_count;
+    integer target_count;
+    integer edge_count;
+    integer pulse_state;
+
+    analog begin
+        @(initial_step) begin
+            base_count = 1;
+            target_count = 1;
+            edge_count = 0;
+            pulse_state = 0;
+        end
+
+        @(cross(V(clk_in) - vth, +1)) begin
+            base_count = (V(mod_0) > vth ? 1 : 0)
+                       + (V(mod_1) > vth ? 2 : 0)
+                       + (V(mod_2) > vth ? 4 : 0)
+                       + (V(mod_3) > vth ? 8 : 0);
+            if (base_count < 1)
+                base_count = 1;
+            target_count = base_count + (V(mod) > vth ? 1 : 0);
+            edge_count = edge_count + 1;
+            if (edge_count >= target_count) begin
+                pulse_state = 1;
+                edge_count = 0;
+            end else begin
+                pulse_state = 0;
+            end
+        end
+
+        V(prescaler_out) <+ transition(pulse_state ? vdd : 0.0, 0, trf, trf);
+    end
+endmodule

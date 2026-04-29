@@ -1,0 +1,79 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cdac_cal (VDD, VSS, CLK, D9, D8, D7, D6, D5, D4, D3, D2, D1, D0, CAL0, CAL1, VDAC_P, VDAC_N);
+    inout VDD, VSS;
+    input CLK, D9, D8, D7, D6, D5, D4, D3, D2, D1, D0, CAL0, CAL1;
+    output VDAC_P, VDAC_N;
+    electrical VDD, VSS, CLK, D9, D8, D7, D6, D5, D4, D3, D2, D1, D0, CAL0, CAL1, VDAC_P, VDAC_N;
+
+    // Parameters
+    parameter real vdd_level = 1.8;
+    parameter real vss_level = 0.0;
+    parameter real vth = 0.9;
+    parameter real tr = 100p;
+    parameter real tf = 100p;
+    parameter real td = 0.0;
+
+    // State variables - use integer code as source of truth
+    integer code_p, code_n;
+    real vout_p, vout_n;
+    real vdd_val;
+
+    analog begin
+        @(initial_step) begin
+            code_p = 0;
+            code_n = 0;
+            vout_p = vss_level;
+            vout_n = vss_level;
+        end
+
+        // Sample VDD for dynamic reference
+        vdd_val = V(VDD);
+
+        // Detect clock rising edge for code update
+        @(cross(V(CLK) - vth, 1)) begin
+            // Build integer code from input bits
+            // D9 is MSB (512 weight), D0 is LSB (1 weight)
+            // CAL0, CAL1 are additional 1 unit each
+            code_p = 0;
+            if (V(D9) > vth) code_p = code_p + 512;
+            if (V(D8) > vth) code_p = code_p + 256;
+            if (V(D7) > vth) code_p = code_p + 128;
+            if (V(D6) > vth) code_p = code_p + 64;
+            if (V(D5) > vth) code_p = code_p + 32;
+            if (V(D4) > vth) code_p = code_p + 16;
+            if (V(D3) > vth) code_p = code_p + 8;
+            if (V(D2) > vth) code_p = code_p + 4;
+            if (V(D1) > vth) code_p = code_p + 2;
+            if (V(D0) > vth) code_p = code_p + 1;
+            if (V(CAL0) > vth) code_p = code_p + 1;
+            if (V(CAL1) > vth) code_p = code_p + 1;
+
+            // Complementary code for negative side (inverted main array, same cal)
+            code_n = 0;
+            if (V(D9) <= vth) code_n = code_n + 512;
+            if (V(D8) <= vth) code_n = code_n + 256;
+            if (V(D7) <= vth) code_n = code_n + 128;
+            if (V(D6) <= vth) code_n = code_n + 64;
+            if (V(D5) <= vth) code_n = code_n + 32;
+            if (V(D4) <= vth) code_n = code_n + 16;
+            if (V(D3) <= vth) code_n = code_n + 8;
+            if (V(D2) <= vth) code_n = code_n + 4;
+            if (V(D1) <= vth) code_n = code_n + 2;
+            if (V(D0) <= vth) code_n = code_n + 1;
+            if (V(CAL0) > vth) code_n = code_n + 1;
+            if (V(CAL1) > vth) code_n = code_n + 1;
+        end
+
+        // Calculate DAC output voltages based on charge redistribution
+        // Full scale code is 1023 + 2 = 1025 for main array + cal caps
+        // VDAC_P and VDAC_N move differentially around common mode
+        vout_p = vss_level + vdd_val * code_p / 1025.0;
+        vout_n = vss_level + vdd_val * code_n / 1025.0;
+
+        // Output with transition for smooth changes
+        V(VDAC_P) <+ transition(vout_p, td, tr, tf);
+        V(VDAC_N) <+ transition(vout_n, td, tr, tf);
+    end
+endmodule

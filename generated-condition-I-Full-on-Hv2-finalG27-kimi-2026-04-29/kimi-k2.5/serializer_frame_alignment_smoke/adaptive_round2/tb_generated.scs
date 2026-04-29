@@ -1,0 +1,37 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "serializer_frame_alignment_ref.va"
+
+// Power supplies
+Vdd (vdd 0) vsource dc=1.8
+Vss (vss 0) vsource dc=0
+
+// Clock: 10ns period, 50% duty cycle
+Vclk (clk 0) vsource type=pulse val0=0 val1=1.8 period=10n rise=0.1n fall=0.1n width=4.9n delay=0
+
+// Load pulse: active for one clock cycle at 25ns and 105ns for two words
+Vload (load 0) vsource type=pwl wave=[0 0 25n 0 25.1n 1.8 35n 1.8 35.1n 0 105n 0 105.1n 1.8 115n 1.8 115.1n 0 200n 0]
+
+// Data inputs: first word 0xA5 = 10100101, second word 0x3C = 00111100
+// First word (0xA5): din7=1, din6=0, din5=1, din4=0, din3=0, din2=1, din1=0, din0=1
+// Second word (0x3C): din7=0, din6=0, din5=1, din4=1, din3=1, din2=1, din1=0, din0=0
+Vdin7 (din7 0) vsource type=pwl wave=[0 1.8 100n 1.8 100.1n 0 200n 0]
+Vdin6 (din6 0) vsource dc=0
+Vdin5 (din5 0) vsource type=pwl wave=[0 1.8 100n 1.8 100.1n 1.8 200n 1.8]
+Vdin4 (din4 0) vsource type=pwl wave=[0 0 100n 0 100.1n 1.8 200n 1.8]
+Vdin3 (din3 0) vsource type=pwl wave=[0 0 100n 0 100.1n 1.8 200n 1.8]
+Vdin2 (din2 0) vsource type=pwl wave=[0 1.8 100n 1.8 100.1n 1.8 200n 1.8]
+Vdin1 (din1 0) vsource dc=0
+Vdin0 (din0 0) vsource type=pwl wave=[0 1.8 100n 1.8 100.1n 0 200n 0]
+
+// DUT instance
+XDUT (vdd vss clk load din7 din6 din5 din4 din3 din2 din1 din0 sout frame) serializer_frame_alignment_ref
+
+// Transient analysis
+tran tran stop=130n maxstep=0.1n
+
+// Save required signals
+save clk
+save frame
+save sout

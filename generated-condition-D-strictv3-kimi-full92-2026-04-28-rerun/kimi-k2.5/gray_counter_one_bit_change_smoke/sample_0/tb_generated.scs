@@ -1,0 +1,28 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "gray_counter_one_bit_change_ref.va"
+
+// Power supplies
+Vdd (vdd 0) vsource dc=1.8
+Vss (vss 0) vsource dc=0
+
+// Reset signal: active high, released early
+Vrst (rst 0) vsource type=pwl wave=[0 1.8 10n 1.8 20n 0 220n 0]
+
+// Clock: 10ns period (100MHz), starts after reset release
+Vclk (clk 0) vsource type=pulse val0=0 val1=1.8 period=10n rise=100p fall=100p width=4.9n delay=30n
+
+// DUT instantiation
+XDUT (vdd vss clk rst g0 g1 g2 g3) gray_counter_one_bit_change_ref
+
+// Transient analysis
+tran tran stop=220n maxstep=100p errpreset=conservative
+
+// Save signals for checker evaluation
+save clk
+save rst
+save g0
+save g1
+save g2
+save g3

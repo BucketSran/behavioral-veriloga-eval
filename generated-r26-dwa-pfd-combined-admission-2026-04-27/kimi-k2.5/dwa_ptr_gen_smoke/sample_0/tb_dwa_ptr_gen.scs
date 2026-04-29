@@ -1,0 +1,25 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "dwa_ptr_gen.va"
+
+Vclk (clk_i 0) vsource type=pulse val0=0 val1=0.9 period=10n delay=2n rise=100p fall=100p width=5n
+Vrst (rst_ni 0) vsource type=pwl wave=[0 0 4.9n 0 5n 0.9 100n 0.9]
+Vcode0 (code_0 0) vsource dc=0.9
+Vcode1 (code_1 0) vsource dc=0.0
+Vcode2 (code_2 0) vsource dc=0.0
+Vcode3 (code_3 0) vsource dc=0.0
+
+XDUT (clk_i rst_ni code_3 code_2 code_1 code_0 \
+      cell_en_15 cell_en_14 cell_en_13 cell_en_12 cell_en_11 cell_en_10 cell_en_9 cell_en_8 \
+      cell_en_7 cell_en_6 cell_en_5 cell_en_4 cell_en_3 cell_en_2 cell_en_1 cell_en_0 \
+      ptr_15 ptr_14 ptr_13 ptr_12 ptr_11 ptr_10 ptr_9 ptr_8 \
+      ptr_7 ptr_6 ptr_5 ptr_4 ptr_3 ptr_2 ptr_1 ptr_0) \
+      dwa_ptr_gen vdd=0.9 vth=0.45
+
+tran tran stop=100n maxstep=0.1n
+save clk_i rst_ni code_0 code_1 code_2 code_3 \
+     cell_en_15 cell_en_14 cell_en_13 cell_en_12 cell_en_11 cell_en_10 cell_en_9 cell_en_8 \
+     cell_en_7 cell_en_6 cell_en_5 cell_en_4 cell_en_3 cell_en_2 cell_en_1 cell_en_0 \
+     ptr_15 ptr_14 ptr_13 ptr_12 ptr_11 ptr_10 ptr_9 ptr_8 \
+     ptr_7 ptr_6 ptr_5 ptr_4 ptr_3 ptr_2 ptr_1 ptr_0

@@ -1,0 +1,62 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module flash_adc_3b (vdd, vss, vin, clk, dout2, dout1, dout0);
+    electrical vdd, vss, vin, clk, dout2, dout1, dout0;
+
+    parameter real vrefp = 0.9;
+    parameter real vrefn = 0.0;
+    parameter real vth = 0.45;
+    parameter real tedge = 100p;
+
+    integer code;
+    real vhigh, vlow, vrange, lsb;
+    real vout2, vout1, vout0;
+
+    analog begin
+        @(initial_step) begin
+            code = 0;
+            vout2 = 0.0;
+            vout1 = 0.0;
+            vout0 = 0.0;
+        end
+
+        // Capture supply levels
+        vhigh = V(vdd);
+        vlow = V(vss);
+        vrange = vrefp - vrefn;
+        lsb = vrange / 8.0;
+
+        // Sample on rising clock edge
+        @(cross(V(clk) - vth, +1)) begin
+            // Compute ADC code from vin
+            real vin_val;
+            integer temp_code;
+
+            vin_val = V(vin);
+
+            // Quantize to 3-bit code
+            if (vin_val <= vrefn) begin
+                temp_code = 0;
+            end else if (vin_val >= vrefp) begin
+                temp_code = 7;
+            end else begin
+                temp_code = $floor((vin_val - vrefn) / lsb);
+                if (temp_code > 7) temp_code = 7;
+                if (temp_code < 0) temp_code = 0;
+            end
+
+            code = temp_code;
+
+            // Decode to individual bits
+            vout2 = ((code >> 2) & 1) ? vhigh : vlow;
+            vout1 = ((code >> 1) & 1) ? vhigh : vlow;
+            vout0 = ((code >> 0) & 1) ? vhigh : vlow;
+        end
+
+        // Drive outputs with transitions
+        V(dout2) <+ transition(vout2, 0, tedge);
+        V(dout1) <+ transition(vout1, 0, tedge);
+        V(dout0) <+ transition(vout0, 0, tedge);
+    end
+endmodule

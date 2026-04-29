@@ -1,0 +1,28 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module or_gate (A, B, Y);
+    input A;
+    input B;
+    output Y;
+    electrical A, B, Y;
+
+    parameter real vdd = 1.8 from (0:inf);
+    parameter real vth = 0.9 from (0:vdd);
+    parameter real tdel = 1e-9 from (0:inf);
+    parameter real tr = 1e-9 from (0:inf);
+    parameter real tf = 1e-9 from (0:inf);
+
+    integer y_val;
+
+    analog begin
+        @(initial_step) y_val = 0;
+
+        if (V(A) > vth || V(B) > vth)
+            y_val = 1;
+        else
+            y_val = 0;
+
+        V(Y) <+ transition(y_val * vdd, tdel, tr, tf);
+    end
+endmodule

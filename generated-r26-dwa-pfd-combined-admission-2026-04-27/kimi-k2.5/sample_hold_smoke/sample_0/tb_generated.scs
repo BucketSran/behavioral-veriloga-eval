@@ -1,0 +1,21 @@
+// Sample-and-Hold Testbench
+ahdl_include "sample_hold.va"
+
+// Power supplies
+VDD (vdd 0) vsource dc=1.8
+VSS (vss 0) vsource dc=0
+
+// Input signal - varying analog input
+Vin (in 0) vsource type=pulse val0=0.1 val1=1.7 period=400n rise=10n fall=10n width=200n
+
+// Clock signal
+Vclk (clk 0) vsource type=pulse val0=0 val1=1.8 period=100n rise=1n fall=1n width=48n
+
+// Device Under Test
+dut (vdd vss in clk out) sample_hold
+
+// Save signals for verification
+save in clk out
+
+// Transient analysis
+tran tran stop=1u maxstep=2n

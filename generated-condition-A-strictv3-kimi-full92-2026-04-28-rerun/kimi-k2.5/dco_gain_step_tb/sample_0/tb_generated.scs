@@ -1,0 +1,21 @@
+simulator lang=spectre
+global 0
+
+// Supply voltages
+VDD (VDD 0) vsource dc=0.9
+VSS (VSS 0) vsource dc=0
+
+// Control voltage step: 0.3V to 0.6V at 100ns
+VCTRL (vctrl 0) vsource dc=0.3 type=pulse val0=0.3 val1=0.6 period=1u delay=100n rise=1n fall=1n width=800n
+
+// DUT instance
+XDUT (VDD VSS vctrl vout) dco_gain_step_ref
+
+// Transient analysis
+tran tran stop=300n maxstep=100p
+
+// Save waveforms
+save vctrl vout
+
+// Include DUT Verilog-A
+ahdl_include "dco_gain_step_ref.va"

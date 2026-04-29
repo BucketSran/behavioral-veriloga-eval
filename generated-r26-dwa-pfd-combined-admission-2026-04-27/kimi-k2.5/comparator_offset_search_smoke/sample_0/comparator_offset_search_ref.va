@@ -1,0 +1,51 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module comparator_offset_search_ref(vdd, vss, inp, inn, outp);
+    inout electrical vdd;
+    inout electrical vss;
+    input electrical inp;
+    input electrical inn;
+    output electrical outp;
+
+    parameter real vos = 5m from [0:inf);
+    parameter real tr = 1n from (0:inf);
+    parameter real tf = 1n from (0:inf);
+    parameter real vhys = 1m from [0:inf);
+
+    integer state;
+    real vdiff;
+    real vout_val;
+    real vdd_val;
+    real vss_val;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+        end
+
+        vdd_val = V(vdd);
+        vss_val = V(vss);
+        vdiff = V(inp) - V(inn);
+
+        // Hysteresis: use different thresholds for rising and falling
+        // Rising: vdiff > vos + vhys/2
+        // Falling: vdiff < vos - vhys/2
+        @(cross(vdiff - (vos + vhys/2.0), +1)) begin
+            state = 1;
+        end
+
+        @(cross(vdiff - (vos - vhys/2.0), -1)) begin
+            state = 0;
+        end
+
+        // Output voltage based on state
+        if (state == 1) begin
+            vout_val = vdd_val;
+        end else begin
+            vout_val = vss_val;
+        end
+
+        V(outp) <+ transition(vout_val, 0, tr, tf);
+    end
+endmodule

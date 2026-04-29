@@ -1,0 +1,59 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module adc_ideal_4b (vin, clk, vdd, vss, rst_n, dout_3, dout_2, dout_1, dout_0);
+    input vin;
+    input clk;
+    input vdd;
+    input vss;
+    input rst_n;
+    output dout_3;
+    output dout_2;
+    output dout_1;
+    output dout_0;
+    electrical vin, clk, vdd, vss, rst_n;
+    electrical dout_3, dout_2, dout_1, dout_0;
+
+    integer code;
+    real vstep;
+    real vhi, vlo, vth;
+    real vin_sample;
+    real code_real;
+
+    analog begin
+        @(initial_step) begin
+            code = 0;
+            vhi = 0.9;
+            vlo = 0.0;
+            vth = 0.45;
+        end
+
+        vhi = V(vdd);
+        vlo = V(vss);
+        vstep = (vhi - vlo) / 16.0;
+        vth = (vhi + vlo) / 2.0;
+
+        @(cross(V(clk) - vth, 1)) begin
+            if (V(rst_n) < vth) begin
+                code = 0;
+            end else begin
+                vin_sample = V(vin);
+                if (vin_sample <= vlo) begin
+                    code = 0;
+                end else if (vin_sample >= vhi) begin
+                    code = 15;
+                end else begin
+                    code_real = (vin_sample - vlo) / vstep;
+                    code = code_real;
+                    if (code < 0) code = 0;
+                    if (code > 15) code = 15;
+                end
+            end
+        end
+
+        V(dout_3) <+ transition((code >= 8) ? vhi : vlo, 0, 10p);
+        V(dout_2) <+ transition((code >= 4) ? vhi : vlo, 0, 10p);
+        V(dout_1) <+ transition((code >= 2) ? vhi : vlo, 0, 10p);
+        V(dout_0) <+ transition((code >= 1) ? vhi : vlo, 0, 10p);
+    end
+endmodule

@@ -1,0 +1,29 @@
+// Spectre testbench for cppll_timer_ref
+// EVAS-compatible, minimal smoke test
+
+// Include Verilog-A module
+ahdl_include "cppll_timer_ref.va"
+
+// Supply voltages
+vsupply (VDD 0) vsource dc=1.2
+vgnd (VSS 0) vsource dc=0
+
+// Reference clock: 50 MHz, 1.2V swing
+vref (ref_clk 0) vsource type=pulse val0=0 val1=1.2 period=20n rise=0.5n fall=0.5n width=10n
+
+// Device Under Test
+dut (VDD VSS ref_clk fb_clk dco_clk vctrl_mon lock) cppll_timer_ref
+
+// Transient simulation
+tran tran stop=5u errpreset=conservative
+
+// Save statements for required waveforms
+save ref_clk
+save fb_clk
+save lock
+save vctrl_mon
+
+// Additional useful saves
+save dco_clk
+save VDD
+save VSS

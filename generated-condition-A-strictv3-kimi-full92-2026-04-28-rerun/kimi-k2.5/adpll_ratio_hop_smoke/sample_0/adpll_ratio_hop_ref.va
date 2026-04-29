@@ -1,0 +1,195 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module adpll_ratio_hop_ref (
+    VDD,
+    VSS,
+    ref_clk,
+    ratio_ctrl,
+    fb_clk,
+    vout,
+    vctrl_mon,
+    lock
+);
+
+    inout electrical VDD;
+    inout electrical VSS;
+    input electrical ref_clk;
+    input electrical ratio_ctrl;
+    output electrical fb_clk;
+    output electrical vout;
+    output electrical vctrl_mon;
+    output electrical lock;
+
+    // Parameters
+    parameter real vth = 0.5 from (0:1.5);      // Logic threshold
+    parameter real vhi = 1.0 from (0:2.0);      // High output voltage
+    parameter real vlo = 0.0 from (-1:1);       // Low output voltage
+    parameter real tdel = 1p from (0:1n);       // Delay
+    parameter real tr = 100p from (0:1n);       // Rise time
+    parameter real tf = 100p from (0:1n);       // Fall time
+    parameter real ref_period = 100n from (1n:1u); // Reference clock period (10 MHz)
+    parameter real dco_base_period = 400n from (1n:1u); // Base DCO period (2.5 MHz, ratio 4)
+    parameter real kp = 0.1 from (0:1);         // Proportional gain for DCO tuning
+    parameter real lock_thresh = 0.05 from (0:0.5); // Phase error threshold for lock
+    parameter integer lock_count = 10 from (1:100); // Consecutive good cycles for lock
+
+    // Internal variables
+    integer ratio;              // Divider ratio (2 to 16)
+    integer dco_code;           // DCO control code (0 to 1000)
+    real dco_period;            // Current DCO period
+    real dco_phase;             // DCO phase accumulator
+    real fb_phase;              // Feedback phase accumulator
+    real ref_phase;             // Reference phase at last edge
+    real phase_error;           // Measured phase error
+    real target_period;         // Target DCO period based on ratio
+
+    integer div_counter;        // Feedback divider counter
+    integer dco_out;            // DCO output state (0 or 1)
+    integer fb_out;             // Feedback output state (0 or 1)
+
+    // Lock detection
+    integer good_cycles;        // Count of good phase alignment cycles
+    integer locked;             // Lock state (0 or 1)
+    real last_ref_time;         // Time of last reference edge
+    real last_fb_time;          // Time of last feedback edge
+    real period_error;          // Period matching error
+
+    // Timer for DCO free-running
+    real next_dco_edge;
+    real next_ref_edge;
+
+    // Initialization flag
+    integer initialized;
+
+    analog begin
+        // Initialization
+        @(initial_step) begin
+            ratio = 4;
+            dco_code = 500;
+            dco_period = dco_base_period;
+            dco_phase = 0.0;
+            fb_phase = 0.0;
+            ref_phase = 0.0;
+            phase_error = 0.0;
+            div_counter = 0;
+            dco_out = 0;
+            fb_out = 0;
+            good_cycles = 0;
+            locked = 0;
+            last_ref_time = 0.0;
+            last_fb_time = 0.0;
+            period_error = 0.0;
+            next_dco_edge = 0.0;
+            next_ref_edge = 0.0;
+            initialized = 0;
+        end
+
+        // Sample ratio_ctrl and compute target ratio (2 to 16)
+        // Round to nearest integer
+        ratio = $floor(V(ratio_ctrl) / vhi + 0.5);
+        if (ratio < 2) ratio = 2;
+        if (ratio > 16) ratio = 16;
+
+        // Compute target DCO period based on ratio
+        // DCO frequency = ratio * ref_frequency
+        // DCO period = ref_period / ratio
+        target_period = ref_period / ratio;
+
+        // DCO: Timer-driven oscillator with adjustable period
+        // Generate DCO edges based on current dco_period
+        @(timer(next_dco_edge)) begin
+            dco_out = !dco_out;
+            next_dco_edge = $abstime + dco_period / 2.0;
+        end
+
+        // Initialize DCO timer on first step
+        if (!initialized) begin
+            initialized = 1;
+            next_dco_edge = $abstime + dco_period / 2.0;
+        end
+
+        // Feedback divider: divide DCO by ratio
+        @(cross(V(vout) - vth, 1)) begin
+            div_counter = div_counter + 1;
+            if (div_counter >= ratio) begin
+                div_counter = 0;
+                fb_out = !fb_out;
+                last_fb_time = $abstime;
+            end
+        end
+
+        // Phase detector: compare ref_clk and fb_clk edges
+        @(cross(V(ref_clk) - vth, 1)) begin
+            real current_ref_time;
+            real current_fb_time;
+            real t_error;
+
+            current_ref_time = $abstime;
+
+            // Compute phase error based on time difference
+            // We want fb_clk edges to align with ref_clk edges
+            t_error = current_ref_time - last_fb_time;
+
+            // Normalize to period and wrap
+            while (t_error > ref_period / 2.0) t_error = t_error - ref_period;
+            while (t_error < -ref_period / 2.0) t_error = t_error + ref_period;
+
+            phase_error = t_error / ref_period;
+
+            // Update DCO code with proportional control
+            // Negative feedback: if fb is late (phase_error > 0), decrease period (increase freq)
+            dco_code = dco_code - $floor(phase_error * 1000 * kp);
+
+            // Clamp DCO code
+            if (dco_code < 0) dco_code = 0;
+            if (dco_code > 1000) dco_code = 1000;
+
+            // Update DCO period based on code
+            // Code 500 gives target_period, code 0 gives 2x target, code 1000 gives 0.5x target
+            dco_period = target_period * (1.5 - dco_code / 1000.0);
+
+            // Lock detection: check if phase error is small
+            if ($abs(phase_error) < lock_thresh) begin
+                good_cycles = good_cycles + 1;
+                if (good_cycles >= lock_count) begin
+                    locked = 1;
+                end
+            end else begin
+                good_cycles = 0;
+                locked = 0;
+            end
+
+            last_ref_time = current_ref_time;
+        end
+
+        // Also check on feedback edges for faster lock detection
+        @(cross(V(fb_clk) - vth, 1)) begin
+            real t_since_ref;
+            t_since_ref = $abstime - last_ref_time;
+            // Additional lock check on feedback edge
+            if ($abs(t_since_ref) < ref_period * lock_thresh ||
+                $abs(t_since_ref - ref_period) < ref_period * lock_thresh) begin
+                // Good alignment
+            end else begin
+                // Misalignment detected
+            end
+        end
+
+        // Output assignments with transition
+        V(vout) <+ transition(dco_out ? vhi : vlo, tdel, tr, tf);
+        V(fb_clk) <+ transition(fb_out ? vhi : vlo, tdel, tr, tf);
+
+        // vctrl_mon: normalized monitor of DCO control code (0 to 1.2V range)
+        // Map code 0-1000 to 0-1.0V, with some headroom to 1.2V
+        V(vctrl_mon) <+ transition(dco_code / 1000.0 * vhi, tdel, tr, tf);
+
+        // lock: streak-based lock indicator
+        V(lock) <+ transition(locked ? vhi : vlo, tdel, tr, tf);
+
+        // VDD and VSS
+        V(VDD) <+ vhi;
+        V(VSS) <+ vlo;
+    end
+
+endmodule

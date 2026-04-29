@@ -1,0 +1,22 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "cross_interval_163p333_ref.va"
+
+// Supply
+VDD (VDD 0) vsource dc=1.8
+VSS (VSS 0) vsource dc=0
+
+// Input a: pulse with period such that b is 163.333ps later
+// Place first edge at 1ns, second input b at 1ns + 163.333ps = 1.163333ns
+Va (a 0) vsource type=pulse val0=0 val1=1.8 period=10n delay=1n rise=10p fall=10p width=5n
+Vb (b 0) vsource type=pulse val0=0 val1=1.8 period=10n delay=1.163333n rise=10p fall=10p width=5n
+
+// DUT
+XDUT (VDD VSS a b delay_out seen_out) cross_interval_163p333_ref
+
+// Transient analysis
+tran tran stop=12n maxstep=5p errpreset=conservative
+
+// Save outputs
+save delay_out seen_out

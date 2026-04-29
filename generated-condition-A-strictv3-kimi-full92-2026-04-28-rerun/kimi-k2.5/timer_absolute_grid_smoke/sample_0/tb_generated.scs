@@ -1,0 +1,16 @@
+// Spectre testbench for timer_absolute_grid_ref
+
+ahdl_include "timer_absolute_grid_ref.va"
+
+// Supply voltages
+VDD (VDD 0) vsource dc=0.9
+VSS (VSS 0) vsource dc=0
+
+// DUT instance
+dut (VDD VSS clk_out) timer_absolute_grid_ref tstart=10n tstep=10n tedge=200p
+
+// Save signals
+save clk_out
+
+// Transient analysis
+tran tran stop=75n maxstep=20p errpreset=conservative

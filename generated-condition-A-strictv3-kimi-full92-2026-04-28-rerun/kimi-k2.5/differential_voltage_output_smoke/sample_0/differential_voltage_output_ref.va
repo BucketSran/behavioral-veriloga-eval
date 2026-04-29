@@ -1,0 +1,43 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module differential_voltage_output_ref (VDD, VSS, outp, outn);
+    inout electrical VDD;
+    inout electrical VSS;
+    output electrical outp;
+    output electrical outn;
+
+    parameter real vcm = 0.2 from [0:inf);      // Common-mode voltage above VSS
+    parameter real vdiff_init = 0.1 from [0:inf); // Initial differential voltage
+    parameter real vdiff_high = 0.5 from [0:inf); // High differential voltage
+    parameter real t_switch1 = 20n from [0:inf);  // First switch time
+    parameter real t_switch2 = 40n from [0:inf);  // Second switch time
+    parameter real tr = 1n from (0:inf);          // Rise time for transition
+    parameter real tf = 1n from (0:inf);          // Fall time for transition
+
+    integer state;  // 0 = initial, 1 = high, 2 = back to low
+    real vdiff_target;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+            vdiff_target = vdiff_init;
+        end
+
+        @(timer(t_switch1)) begin
+            state = 1;
+            vdiff_target = vdiff_high;
+        end
+
+        @(timer(t_switch2)) begin
+            state = 2;
+            vdiff_target = vdiff_init;
+        end
+
+        // Drive outn at fixed common-mode reference above VSS
+        V(outn) <+ V(VSS) + vcm;
+
+        // Drive differential branch V(outp, outn) with transition
+        V(outp, outn) <+ transition(vdiff_target, 0, tr, tf);
+    end
+endmodule

@@ -1,0 +1,26 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module or_gate (a, b, y);
+    electrical a, b, y;
+
+    parameter real vdd = 1.8;
+    parameter real tedge = 10p;
+
+    real vth;
+    integer out_val;
+
+    analog begin
+        vth = vdd / 2.0;
+
+        // Determine output based on OR logic
+        if (V(a) > vth || V(b) > vth) begin
+            out_val = 1;
+        end else begin
+            out_val = 0;
+        end
+
+        // Drive output with transition
+        V(y) <+ transition(out_val * vdd, 0, tedge);
+    end
+endmodule

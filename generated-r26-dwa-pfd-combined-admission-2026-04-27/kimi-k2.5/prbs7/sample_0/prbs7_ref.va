@@ -1,0 +1,58 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module prbs7_ref(clk, rst_n, en, serial_out, state_0, state_1, state_2, state_3, state_4, state_5, state_6);
+    input clk, rst_n, en;
+    output serial_out, state_0, state_1, state_2, state_3, state_4, state_5, state_6;
+    electrical clk, rst_n, en, serial_out, state_0, state_1, state_2, state_3, state_4, state_5, state_6;
+
+    parameter real vhigh = 1.0;
+    parameter real vlow = 0.0;
+    parameter real vth = 0.5;
+    parameter real tr = 100p;
+    parameter real tf = 100p;
+
+    integer lfsr;
+    integer next_lfsr;
+    integer feedback;
+    integer i;
+    real vout[0:6];
+    real vserial;
+
+    analog begin
+        @(initial_step) begin
+            lfsr = 1;
+        end
+
+        @(cross(V(clk) - vth, 1)) begin
+            if (V(rst_n) < vth) begin
+                lfsr = 1;
+            end else if (V(en) > vth) begin
+                feedback = ((lfsr >> 6) & 1) ^ ((lfsr >> 5) & 1);
+                next_lfsr = ((lfsr << 1) & 127) | feedback;
+                lfsr = next_lfsr;
+            end
+        end
+
+        for (i = 0; i < 7; i = i + 1) begin
+            if ((lfsr >> i) & 1)
+                vout[i] = vhigh;
+            else
+                vout[i] = vlow;
+        end
+
+        if ((lfsr >> 6) & 1)
+            vserial = vhigh;
+        else
+            vserial = vlow;
+
+        V(state_0) <+ transition(vout[0], 0, tr, tf);
+        V(state_1) <+ transition(vout[1], 0, tr, tf);
+        V(state_2) <+ transition(vout[2], 0, tr, tf);
+        V(state_3) <+ transition(vout[3], 0, tr, tf);
+        V(state_4) <+ transition(vout[4], 0, tr, tf);
+        V(state_5) <+ transition(vout[5], 0, tr, tf);
+        V(state_6) <+ transition(vout[6], 0, tr, tf);
+        V(serial_out) <+ transition(vserial, 0, tr, tf);
+    end
+endmodule

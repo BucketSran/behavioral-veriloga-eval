@@ -1,0 +1,31 @@
+// cmp_delay smoke testbench
+// Minimal EVAS-compatible Spectre testbench
+
+// Include the Verilog-A model
+ahdl_include "cmp_delay.va"
+
+// Supply voltages
+vsource vdd (vdd 0) vdc=0.9
+vsource vss (vss 0) vdc=0
+
+// 1GHz clock with 50% duty cycle (period = 1ns)
+vsource clk (clk 0) vsource type=pulse val0=0 val1=0.9 period=1n delay=0 rise=10p fall=10p width=500p
+
+// Differential input generation
+// Common mode at 0.45V (VDD/2), differential varies by phase
+// Phase 1 (0-4ns): diff=+10mV -> vinp=0.455, vinn=0.445
+// Phase 2 (4-8ns): diff=+1mV -> vinp=0.4505, vinn=0.4495
+// Phase 3 (8-12ns): diff=+0.1mV -> vinp=0.45005, vinn=0.44995
+// Phase 4 (12-16ns): diff=+0.01mV -> vinp=0.450005, vinn=0.449995
+
+vsource vinp (vinp 0) vsource type=pwl wave=[0 0.455 4n 0.455 4n 0.4505 8n 0.4505 8n 0.45005 12n 0.45005 12n 0.450005 16n 0.450005]
+vsource vinn (vinn 0) vsource type=pwl wave=[0 0.445 4n 0.445 4n 0.4495 8n 0.4495 8n 0.44995 12n 0.44995 12n 0.449995 16n 0.449995]
+
+// Device Under Test
+cmp_delay dut (clk vinn vinp out_n out_p lp lm vss vdd)
+
+// Transient analysis
+tran tran stop=16n maxstep=10p
+
+// Save required signals
+save clk vinp vinn out_p out_n

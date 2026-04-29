@@ -1,0 +1,44 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dac_binary_clk_4b (din3, din2, din1, din0, rdy, aout);
+    input din3, din2, din1, din0, rdy;
+    output aout;
+    electrical din3, din2, din1, din0, rdy, aout;
+
+    parameter real vref = 0.9 from (0:inf);
+    parameter real vth = 0.45 from (0:inf);
+    parameter real tr = 100p from (0:inf);
+    parameter real tf = 100p from (0:inf);
+
+    integer code;
+    real aout_val;
+    real din3_val, din2_val, din1_val, din0_val;
+
+    analog begin
+        @(initial_step) begin
+            code = 0;
+            aout_val = 0.0;
+        end
+
+        @(cross(V(rdy) - vth, 1)) begin
+            // Sample digital inputs as real values and threshold
+            din3_val = V(din3) > vth ? 1.0 : 0.0;
+            din2_val = V(din2) > vth ? 1.0 : 0.0;
+            din1_val = V(din1) > vth ? 1.0 : 0.0;
+            din0_val = V(din0) > vth ? 1.0 : 0.0;
+
+            // Compute binary weighted code: 8*din3 + 4*din2 + 2*din1 + din0
+            code = 8 * (din3_val > 0.5 ? 1 : 0) +
+                   4 * (din2_val > 0.5 ? 1 : 0) +
+                   2 * (din1_val > 0.5 ? 1 : 0) +
+                   1 * (din0_val > 0.5 ? 1 : 0);
+
+            // Compute analog output: code/16 * vref
+            aout_val = (code * vref) / 16.0;
+        end
+
+        // Drive output with smooth transition
+        V(aout) <+ transition(aout_val, 0, tr, tf);
+    end
+endmodule

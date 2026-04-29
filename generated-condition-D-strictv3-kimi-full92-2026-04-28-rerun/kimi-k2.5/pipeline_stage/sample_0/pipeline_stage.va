@@ -1,0 +1,133 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pipeline_stage (VDD, VSS, PHI1, PHI2, VIN, VREF, VRES, D1, D0);
+    inout VDD;
+    inout VSS;
+    input PHI1;
+    input PHI2;
+    input VIN;
+    input VREF;
+    output VRES;
+    output D1;
+    output D0;
+
+    electrical VDD;
+    electrical VSS;
+    electrical PHI1;
+    electrical PHI2;
+    electrical VIN;
+    electrical VREF;
+    electrical VRES;
+    electrical D1;
+    electrical D0;
+
+    // Parameters
+    parameter real vth = 0.5 from (0:1.0);      // Clock threshold (VDD/2 for 1V supply)
+    parameter real vdd_level = 1.0 from (0:3.0); // Supply voltage level
+    parameter real tdel = 1n from [0:1u];        // Delay for transition
+    parameter real trise = 1n from [0:1u];       // Rise time
+    parameter real tfall = 1n from [0:1u];       // Fall time
+
+    // Internal variables
+    real vin_sampled;
+    real vref_val;
+    real vres_val;
+    integer d1_val;
+    integer d0_val;
+    integer phi1_state;
+    integer phi2_state;
+
+    analog begin
+        // Initialize on first step
+        @(initial_step) begin
+            vin_sampled = 0.0;
+            vref_val = 0.0;
+            vres_val = 0.0;
+            d1_val = 0;
+            d0_val = 0;
+            phi1_state = 0;
+            phi2_state = 0;
+        end
+
+        // Detect PHI1 rising edge (sampling phase)
+        @(cross(V(PHI1) - vth, 1)) begin
+            phi1_state = 1;
+            // Sample input and reference
+            vin_sampled = V(VIN);
+            vref_val = V(VREF);
+        end
+
+        // Detect PHI1 falling edge
+        @(cross(V(PHI1) - vth, -1)) begin
+            phi1_state = 0;
+        end
+
+        // Detect PHI2 rising edge (amplification/residue generation phase)
+        @(cross(V(PHI2) - vth, 1)) begin
+            phi2_state = 1;
+
+            // 1.5-bit sub-ADC decision: compare against +/-Vref/4 thresholds
+            // Thresholds: +Vref/4 and -Vref/4
+            real thresh_high;
+            real thresh_low;
+            thresh_high = vref_val / 4.0;
+            thresh_low = -vref_val / 4.0;
+
+            // Determine sub-ADC output (2-bit thermometer code)
+            // 00: vin < -Vref/4  (D1=0, D0=0)
+            // 01: -Vref/4 <= vin < +Vref/4  (D1=0, D0=1)
+            // 11: vin >= +Vref/4  (D1=1, D0=1)
+            if (vin_sampled >= thresh_high) begin
+                // Top region: output 11, subtract +Vref/2
+                d1_val = 1;
+                d0_val = 1;
+                // Residue = 2*(vin - Vref/2) = 2*vin - Vref
+                vres_val = 2.0 * vin_sampled - vref_val;
+            end else if (vin_sampled >= thresh_low) begin
+                // Middle region: output 01, no subtraction
+                d1_val = 0;
+                d0_val = 1;
+                // Residue = 2*vin
+                vres_val = 2.0 * vin_sampled;
+            end else begin
+                // Bottom region: output 00, subtract -Vref/2
+                d1_val = 0;
+                d0_val = 0;
+                // Residue = 2*(vin + Vref/2) = 2*vin + Vref
+                vres_val = 2.0 * vin_sampled + vref_val;
+            end
+
+            // Clamp residue to valid output range (optional, for robustness)
+            if (vres_val > vref_val) vres_val = vref_val;
+            if (vres_val < -vref_val) vres_val = -vref_val;
+        end
+
+        // Detect PHI2 falling edge
+        @(cross(V(PHI2) - vth, -1)) begin
+            phi2_state = 0;
+        end
+
+        // Output residue voltage (valid during PHI2)
+        if (phi2_state == 1) begin
+            V(VRES) <+ transition(vres_val, tdel, trise, tfall);
+        end else begin
+            // Hold last value or go to zero during PHI1
+            V(VRES) <+ transition(0.0, tdel, trise, tfall);
+        end
+
+        // Output digital codes as voltage levels
+        // D1, D0: 0V for logic 0, vdd_level for logic 1
+        if (d1_val == 1) begin
+            V(D1) <+ transition(vdd_level, tdel, trise, tfall);
+        end else begin
+            V(D1) <+ transition(0.0, tdel, trise, tfall);
+        end
+
+        if (d0_val == 1) begin
+            V(D0) <+ transition(vdd_level, tdel, trise, tfall);
+        end else begin
+            V(D0) <+ transition(0.0, tdel, trise, tfall);
+        end
+    end
+endmodule

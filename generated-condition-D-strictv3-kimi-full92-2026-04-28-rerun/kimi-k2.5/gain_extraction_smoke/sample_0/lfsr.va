@@ -1,0 +1,64 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module lfsr (dpn, vdd, vss, clk, en, rst_n);
+    output dpn;
+    input vdd;
+    input vss;
+    input clk;
+    input en;
+    input rst_n;
+    electrical dpn, vdd, vss, clk, en, rst_n;
+
+    parameter real vhi = 0.9;
+    parameter real vlo = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 1n;
+    parameter real tf = 1n;
+
+    // 4-bit LFSR with taps at positions 4 and 3 (feedback polynomial x^4 + x^3 + 1)
+    integer lfsr_reg;
+    integer bit0, bit1, bit2, bit3;
+    integer feedback;
+    integer dpn_val;
+
+    analog begin
+        @(initial_step) begin
+            lfsr_reg = 1; // Non-zero seed
+            dpn_val = 0;
+        end
+
+        @(cross(V(clk) - vth, 1)) begin
+            if (V(rst_n) < vth) begin
+                lfsr_reg = 1;
+                dpn_val = 0;
+            end else if (V(en) > vth) begin
+                // Extract bits
+                bit0 = lfsr_reg & 1;
+                bit1 = (lfsr_reg >> 1) & 1;
+                bit2 = (lfsr_reg >> 2) & 1;
+                bit3 = (lfsr_reg >> 3) & 1;
+
+                // Feedback from bit3 XOR bit2 (taps at 4 and 3)
+                feedback = bit3 ^ bit2;
+
+                // Shift and insert feedback
+                lfsr_reg = ((lfsr_reg << 1) & 15) | feedback;
+
+                // Ensure non-zero
+                if (lfsr_reg == 0) begin
+                    lfsr_reg = 1;
+                end
+
+                // Output is LSB
+                dpn_val = bit0;
+            end
+        end
+
+        if (dpn_val == 1) begin
+            V(dpn) <+ transition(vhi, 0, tr, tf);
+        end else begin
+            V(dpn) <+ transition(vlo, 0, tr, tf);
+        end
+    end
+endmodule

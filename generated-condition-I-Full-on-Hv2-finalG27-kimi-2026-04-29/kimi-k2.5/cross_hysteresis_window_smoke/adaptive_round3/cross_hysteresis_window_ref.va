@@ -1,0 +1,38 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cross_hysteresis_window_ref (vin, out, VDD, VSS);
+    input vin;
+    output out;
+    inout VDD, VSS;
+    electrical vin, out, VDD, VSS;
+
+    parameter real v_high_th = 0.6;
+    parameter real v_low_th = 0.3;
+    parameter real tt = 1n from (0:inf);
+
+    integer state;
+    real vout_target;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+        end
+
+        @(cross(V(vin) - v_high_th, +1)) begin
+            state = 1;
+        end
+
+        @(cross(V(vin) - v_low_th, -1)) begin
+            state = 0;
+        end
+
+        if (state == 1) begin
+            vout_target = V(VDD);
+        end else begin
+            vout_target = V(VSS);
+        end
+
+        V(out) <+ transition(vout_target, 0, tt);
+    end
+endmodule

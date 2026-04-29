@@ -1,0 +1,27 @@
+simulator lang=spectre
+global 0
+
+// Power supplies
+VDD (VDD 0) vsource dc=0.9
+VSS (VSS 0) vsource dc=0
+
+// Clock: 1GHz, 50% duty cycle, 10ps rise/fall
+VCLK (CLK 0) vsource type=pulse val0=0 val1=0.9 period=1n rise=10p fall=10p width=490p
+
+// Differential input sweep: small ramp to expose offset
+// VINP ramps from -10mV to +10mV, VINN stays at 0V (or complementary)
+// Using PWL for controlled differential sweep
+VINP (VINP 0) vsource type=pwl wave=[0 0 28n 0.02]
+VINN (VINN 0) vsource type=pwl wave=[0 0 28n -0.02]
+
+// DUT instance
+XDUT (VDD VSS CLK VINP VINN OUT_P) cmp_offset_ref
+
+// Transient analysis
+tran tran stop=28n maxstep=20p
+
+// Save public waveforms
+save CLK VINP VINN OUT_P
+
+// Include DUT Verilog-A
+ahdl_include "cmp_offset_ref.va"

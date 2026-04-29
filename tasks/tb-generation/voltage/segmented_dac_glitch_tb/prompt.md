@@ -1,64 +1,40 @@
-Given a 4-bit segmented DAC with 2 thermometer-style MSBs and 2 binary LSBs,
-write a minimal Spectre-compatible testbench that scans all codes, highlights
-boundary transitions such as `3->4`, `7->8`, and `11->12`, and saves the output
-waveform for glitch/monotonicity inspection.
+Given a 4-bit segmented DAC with two thermometer-style MSBs and two binary
+LSBs, generate a minimal EVAS-compatible Spectre `.scs` testbench that scans
+all codes, highlights boundary transitions, and saves the output waveform for
+glitch and monotonicity inspection.
 
-Ports:
-- `vdd`: inout electrical (power rail)
-- `vss`: inout electrical (power rail)
-- `clk`: input electrical
-- `d3`: input electrical
-- `d2`: input electrical
-- `d1`: input electrical
-- `d0`: input electrical
-- `vout`: output electrical
+This is a testbench-generation task. Do not generate Verilog-A modules. Assume
+the DUT Verilog-A file is provided by the benchmark harness and only write the
+Spectre testbench.
 
-DUT module to instantiate: `segmented_dac_glitch_ref`
+Return exactly one fenced code block tagged `spectre`. Do not include prose
+outside the code block.
 
-DUT module to instantiate: `segmented_dac_glitch_ref`
+## Provided DUT
 
-DUT module to instantiate: `segmented_dac_glitch_ref`
+- Include file: `segmented_dac_glitch_ref.va`
+- Module name: `segmented_dac_glitch_ref`
+- Positional port order: `(vdd, vss, clk, d3, d2, d1, d0, vout)`
+- Required instance line:
+  `XDUT (vdd vss clk d3 d2 d1 d0 vout) segmented_dac_glitch_ref`
 
-DUT module to instantiate: `segmented_dac_glitch_ref`
+## Required Testbench Structure
 
-DUT module to instantiate: `segmented_dac_glitch_ref`
+- Start with `simulator lang=spectre` and `global 0`.
+- Provide `vdd=0.9 V` and `vss=0 V`.
+- Drive `clk` with enough rising edges to sample all DAC codes.
+- Drive `d3`, `d2`, `d1`, and `d0` as a 4-bit binary count over the transient
+  window.
+- Include boundary transitions such as `3->4`, `7->8`, and `11->12`.
+- Use exactly one transient analysis:
+  `tran tran stop=160n maxstep=100p errpreset=conservative`
+- Save the public waveform columns:
+  `save clk d3 d2 d1 d0 vout`
+- Place the DUT include last:
+  `ahdl_include "segmented_dac_glitch_ref.va"`
 
-DUT module to instantiate: `segmented_dac_glitch_ref`
+## Public Evaluation Contract
 
-DUT module to instantiate: `segmented_dac_glitch_ref`
-
-DUT module to instantiate: `segmented_dac_glitch_ref`
-
-DUT module to instantiate: `segmented_dac_glitch_ref`
-
-DUT module to instantiate: `segmented_dac_glitch_ref`
-
-DUT module to instantiate: `segmented_dac_glitch_ref`
-
-DUT module to instantiate: `segmented_dac_glitch_ref`
-
-DUT module to instantiate: `segmented_dac_glitch_ref`
-
-
-## Public Evaluation Contract (Non-Gold)
-
-This section states evaluator-facing constraints that must be visible to the generated artifact.
-It does not prescribe the internal implementation or reveal a gold solution.
-
-Final EVAS transient setting:
-
-```spectre
-tran tran stop=160n maxstep=100p errpreset=conservative
-```
-
-Required public waveform columns in `tran.csv`:
-
-- `clk`, `d3`, `d2`, `d1`, `d0`, `vout`
-
-Use plain scalar save names for these observables; do not rely on instance-qualified or aliased save names.
-
-Timing/checking-window contract:
-
-- Clock-like input(s) `clk` must provide enough valid edges after reset/enable for the checker to sample settled outputs.
-- Sequential outputs are sampled shortly after clock edges, so drive outputs with stable held state variables and `transition()` targets rather than glitchy combinational expressions.
-- Public stimulus nodes used by the reference harness include: `vdd`, `vss`, `clk`, `d3`, `d2`, `d1`, `d0`.
+The evaluator reads `clk`, `d3`, `d2`, `d1`, `d0`, and `vout` from `tran.csv`.
+Use plain scalar save names; do not rely on instance-qualified or aliased save
+names.

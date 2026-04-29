@@ -1,0 +1,18 @@
+// Spectre testbench for phase_accumulator_timer_wrap_ref
+
+ahdl_include "phase_accumulator_timer_wrap_ref.va"
+
+// Supply voltages
+VDD (VDD 0) vsource dc=1.0
+VSS (VSS 0) vsource dc=0.0
+
+// Device Under Test
+dut (VDD VSS clk_out phase_out) phase_accumulator_timer_wrap_ref
+
+// Save statements for observable signals
+save dut.VDD dut.VSS
+save clk_out
+save phase_out
+
+// Transient analysis with strict EVAS settings
+tran tran stop=75n maxstep=20p errpreset=conservative

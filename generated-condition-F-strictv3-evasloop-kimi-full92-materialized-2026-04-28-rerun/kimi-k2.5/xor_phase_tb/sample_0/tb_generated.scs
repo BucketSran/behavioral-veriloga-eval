@@ -1,0 +1,24 @@
+simulator lang=spectre
+global 0
+
+// Power supplies
+VDD (VDD 0) vsource dc=0.9
+VSS (VSS 0) vsource dc=0
+
+// Reference clock: 1 GHz, 50% duty cycle, starts at 0 phase
+Vref (ref 0) vsource type=pulse val0=0 val1=0.9 period=1n rise=10p fall=10p width=0.5n
+
+// Divided clock: same frequency, 250ps phase offset (90 degrees at 1 GHz)
+Vdiv (div 0) vsource type=pulse val0=0 val1=0.9 period=1n rise=10p fall=10p width=0.5n delay=0.25n
+
+// DUT instance
+XDUT (VDD VSS ref div pd_out) xor_phase_ref
+
+// Transient analysis
+tran tran stop=80n maxstep=50p
+
+// Save outputs
+save ref div pd_out
+
+// Include DUT Verilog-A
+ahdl_include "xor_phase_ref.va"

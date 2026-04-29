@@ -19,7 +19,7 @@ Create a behavioral timer source that toggles output on an absolute timer grid i
   - On `@(initial_step)`, initialize `next_t = tstart`.
   - On every `@(timer(next_t))`, toggle the internal state and increment `next_t = next_t + tstep`.
   - Drive `clk_out` with `transition(...)` using the toggled state.
-  - Under the gold testbench, `clk_out` should rise near `10.1 ns`, `30.1 ns`, `50.1 ns`, and `70.1 ns`.
+  - Under the public evaluation testbench, `clk_out` should rise near `10.1 ns`, `30.1 ns`, `50.1 ns`, and `70.1 ns`.
 
 ## Testbench requirements
 

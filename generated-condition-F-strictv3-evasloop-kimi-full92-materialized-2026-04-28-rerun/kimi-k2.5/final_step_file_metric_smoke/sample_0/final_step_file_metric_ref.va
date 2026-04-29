@@ -1,0 +1,47 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module final_step_file_metric_ref (VDD, VSS, ref, metric_out);
+    inout VDD;
+    inout VSS;
+    input ref;
+    output metric_out;
+    electrical VDD, VSS, ref, metric_out;
+
+    integer edge_count;
+    integer file_desc;
+    real vdd_level;
+    real vss_level;
+    real vth;
+    real normalized;
+    parameter real vtrans = 1n from (0:inf);
+
+    analog begin
+        @(initial_step) begin
+            edge_count = 0;
+            vdd_level = V(VDD);
+            vss_level = V(VSS);
+            vth = (vdd_level + vss_level) / 2.0;
+        end
+
+        @(cross(V(ref) - vth, 1)) begin
+            edge_count = edge_count + 1;
+        end
+
+        // Normalize to a reasonable voltage range (0 to vdd_level)
+        // Using max expected edges of 10 for normalization
+        if (edge_count > 10) begin
+            normalized = vdd_level;
+        end else begin
+            normalized = (edge_count * vdd_level) / 10.0;
+        end
+
+        V(metric_out) <+ transition(normalized, 0, vtrans);
+
+        @(final_step) begin
+            file_desc = $fopen("final_metric.txt");
+            $fstrobe(file_desc, "edge_count=%d", edge_count);
+            $fclose(file_desc);
+        end
+    end
+endmodule

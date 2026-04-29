@@ -1,0 +1,29 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module not_gate (vdd, vss, a, y);
+    inout electrical vdd, vss, a, y;
+
+    parameter real vth = 0.45 from (0:inf);
+    parameter real tedge = 100p from (0:inf);
+
+    integer state;
+
+    analog begin
+        @(initial_step) begin
+            state = 1;  // Output high when input is low at startup
+        end
+
+        @(cross(V(a) - vth, +1)) begin
+            // Input rising above threshold: output goes low
+            state = 0;
+        end
+
+        @(cross(V(a) - vth, -1)) begin
+            // Input falling below threshold: output goes high
+            state = 1;
+        end
+
+        V(y) <+ transition(state ? V(vdd) : V(vss), 0, tedge);
+    end
+endmodule

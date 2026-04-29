@@ -1,0 +1,30 @@
+// Spectre testbench for final_step_file_metric_ref
+
+ahdl_include "final_step_file_metric_ref.va"
+
+// Global supplies
+global gnd
+
+// Testbench parameters
+parameters VDD_VAL=1.0
+parameters VTH=0.5
+
+// Voltage sources
+VDD (vdd 0) vsource dc=VDD_VAL
+VSS (vss 0) vsource dc=0
+
+// Reference clock generator - generate multiple edges
+// Using vpulse to create a clock with several rising edges
+VREF (ref 0) vsource type=pulse val0=0 val1=VDD_VAL period=10n delay=2n \
+    rise=0.5n fall=0.5n width=4n
+
+// Device Under Test
+DUT (vdd vss ref metric_out) final_step_file_metric_ref \
+    vth=VTH vdd_val=VDD_VAL tdel=0 trise=0.5n tfall=0.5n
+
+// Transient analysis with exact settings as required
+tran tran stop=80n maxstep=20p errpreset=conservative
+
+// Save statements for required signals
+save ref
+save metric_out

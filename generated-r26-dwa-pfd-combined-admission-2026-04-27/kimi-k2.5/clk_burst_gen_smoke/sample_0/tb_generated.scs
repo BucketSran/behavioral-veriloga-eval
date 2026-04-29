@@ -1,0 +1,24 @@
+// clk_burst_gen testbench
+simulator lang=spectre
+
+ahdl_include "clk_burst_gen.va"
+
+// Parameters
+parameters Tclk=100n
+parameters Treset=235n
+parameters Tstop=3000n
+
+// Input clock source - 100ns period (10MHz)
+Vclk (CLK 0) vsource type=pulse val0=0 val1=1 period=Tclk rise=1n fall=1n width=48n
+
+// Active-low reset - starts low, goes high at ~235ns
+Vrst (RST_N 0) vsource type=pwl wave=[0n 0 230n 0 240n 1 Tstop 1]
+
+// Device under test
+xdut (CLK RST_N CLK_OUT) clk_burst_gen div=8
+
+// Save statements for waveform CSV
+save CLK RST_N CLK_OUT
+
+// Transient analysis
+tran tran stop=3000n maxstep=5n

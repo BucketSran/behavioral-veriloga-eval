@@ -1,0 +1,97 @@
+// dac_therm_16b testbench - EVAS compatible
+
+// Include Verilog-A module
+ahdl_include "./dac_therm_16b.va"
+
+// Top-level testbench
+simulator lang=spectre
+
+// Parameters
+parameters vstep=1.0
+parameters vlogic=1.0
+parameters tperiod=400n
+
+// DUT instantiation
+dut (d15 d14 d13 d12 d11 d10 d9 d8 d7 d6 d5 d4 d3 d2 d1 d0 rst_n vout) dac_therm_16b
+
+// Stimulus sources - thermometer code inputs
+// d0-d15: thermometer coded inputs (0 to 16 ones)
+// Pattern: 0, 4, 8, 12, 16 ones over 2000ns
+
+// Reset: active low, released at 10ns
+Vrst_n (rst_n 0) vsource type=pulse val0=0 val1=vlogic delay=0 rise=1n fall=1n width=1990n period=2000n
+
+// Thermometer code stimulus - step through 0, 4, 8, 12, 16 ones
+// Time segments: 0-400ns (0 ones), 400-800ns (4 ones), 800-1200ns (8 ones),
+//                1200-1600ns (12 ones), 1600-2000ns (16 ones)
+
+// d0: 0 at 0ns, 1 at 400ns
+Vd0 (d0 0) vsource type=pwl wave=[0 0 400n vlogic]
+
+// d1: 0 at 0ns, 1 at 400ns
+Vd1 (d1 0) vsource type=pwl wave=[0 0 400n vlogic]
+
+// d2: 0 at 0ns, 1 at 400ns
+Vd2 (d2 0) vsource type=pwl wave=[0 0 400n vlogic]
+
+// d3: 0 at 0ns, 1 at 400ns
+Vd3 (d3 0) vsource type=pwl wave=[0 0 400n vlogic]
+
+// d4: 0 at 0ns, 1 at 800ns
+Vd4 (d4 0) vsource type=pwl wave=[0 0 800n vlogic]
+
+// d5: 0 at 0ns, 1 at 800ns
+Vd5 (d5 0) vsource type=pwl wave=[0 0 800n vlogic]
+
+// d6: 0 at 0ns, 1 at 800ns
+Vd6 (d6 0) vsource type=pwl wave=[0 0 800n vlogic]
+
+// d7: 0 at 0ns, 1 at 800ns
+Vd7 (d7 0) vsource type=pwl wave=[0 0 800n vlogic]
+
+// d8: 0 at 0ns, 1 at 1200ns
+Vd8 (d8 0) vsource type=pwl wave=[0 0 1200n vlogic]
+
+// d9: 0 at 0ns, 1 at 1200ns
+Vd9 (d9 0) vsource type=pwl wave=[0 0 1200n vlogic]
+
+// d10: 0 at 0ns, 1 at 1200ns
+Vd10 (d10 0) vsource type=pwl wave=[0 0 1200n vlogic]
+
+// d11: 0 at 0ns, 1 at 1200ns
+Vd11 (d11 0) vsource type=pwl wave=[0 0 1200n vlogic]
+
+// d12: 0 at 0ns, 1 at 1600ns
+Vd12 (d12 0) vsource type=pwl wave=[0 0 1600n vlogic]
+
+// d13: 0 at 0ns, 1 at 1600ns
+Vd13 (d13 0) vsource type=pwl wave=[0 0 1600n vlogic]
+
+// d14: 0 at 0ns, 1 at 1600ns
+Vd14 (d14 0) vsource type=pwl wave=[0 0 1600n vlogic]
+
+// d15: 0 at 0ns, 1 at 1600ns
+Vd15 (d15 0) vsource type=pwl wave=[0 0 1600n vlogic]
+
+// Save statements for required waveform columns
+save rst_n
+save d15
+save d14
+save d13
+save d12
+save d11
+save d10
+save d9
+save d8
+save d7
+save d6
+save d5
+save d4
+save d3
+save d2
+save d1
+save d0
+save vout
+
+// Transient analysis
+tran tran stop=2000n maxstep=1n

@@ -1,0 +1,50 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module clk_div (CLK_IN, RST_N, CLK_OUT);
+    inout CLK_IN, RST_N, CLK_OUT;
+    electrical CLK_IN, RST_N, CLK_OUT;
+
+    parameter real vlogic_high = 1.2;
+    parameter real vlogic_low = 0.0;
+    parameter real vth = 0.6;
+    parameter real tdel = 0.0;
+    parameter real tr = 0.1n;
+    parameter real tf = 0.1n;
+
+    integer count;
+    integer out_state;
+
+    analog begin
+        @(initial_step) begin
+            count = 0;
+            out_state = 0;
+        end
+
+        // Synchronous reset: when RST_N is low, reset counter and output
+        if (V(RST_N) < vth) begin
+            count = 0;
+            out_state = 0;
+        end
+        else begin
+            // Count on rising edge of CLK_IN
+            @(cross(V(CLK_IN) - vth, +1)) begin
+                if (count == 3) begin
+                    count = 0;
+                    out_state = ~out_state;
+                end
+                else begin
+                    count = count + 1;
+                end
+            end
+        end
+
+        // Drive output with transition for clean edges
+        if (out_state == 0) begin
+            V(CLK_OUT) <+ transition(vlogic_low, tdel, tr, tf);
+        end
+        else begin
+            V(CLK_OUT) <+ transition(vlogic_high, tdel, tr, tf);
+        end
+    end
+endmodule

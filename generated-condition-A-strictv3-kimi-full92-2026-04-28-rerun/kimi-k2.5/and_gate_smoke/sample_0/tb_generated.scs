@@ -1,0 +1,20 @@
+// Spectre testbench for and_gate
+
+// Include the Verilog-A model
+ahdl_include "and_gate.va"
+
+// Create the DUT instance
+and_gate dut (a b y) vdd=1.8 tedge=10p
+
+// Voltage sources for inputs a and b
+// Test all 4 combinations: (0,0), (0,1), (1,0), (1,1)
+// Each for 2ns, total 8ns
+
+v_a (a 0) vsource type=pwl wave=[0n 0 2n 0 2n 0 4n 0 4n 1.8 6n 1.8 6n 1.8 8n 1.8]
+v_b (b 0) vsource type=pwl wave=[0n 0 2n 0 2n 1.8 4n 1.8 4n 0 6n 0 6n 1.8 8n 1.8]
+
+// Save signals
+save a b y
+
+// Transient analysis
+tran tran stop=8n maxstep=100p

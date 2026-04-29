@@ -1,0 +1,46 @@
+{
+  "task_id": "v2_divider_alias_odd_ratio",
+  "family": "benchmark-v2",
+  "source_seed": "clk_div",
+  "mechanism_family": "divider_counter_ratio",
+  "perturbation_level": "P2_semantic_alias",
+  "status": "validated_gold_evas_spectre",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "divider",
+    "clock": "advance",
+    "output": "tick_out",
+    "ratio": 3
+  },
+  "manifest_entry": {
+    "task_id": "v2_divider_alias_odd_ratio",
+    "source_seed": "clk_div",
+    "mechanism_family": "divider_counter_ratio",
+    "perturbation_level": "P2_semantic_alias",
+    "prompt_strategy": "Rename input clock to cadence and output to every_fifth_mark for an odd divide ratio.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-small",
+    "status": "draft_manifest",
+    "parameter_changes": {
+      "ratio": 5
+    },
+    "review_notes": "Semantic alias plus odd-ratio timing."
+  },
+  "validation": {
+    "tasks": 30,
+    "evas_pass": "30/30",
+    "spectre_pass": "30/30",
+    "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+    "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1"
+  }
+}

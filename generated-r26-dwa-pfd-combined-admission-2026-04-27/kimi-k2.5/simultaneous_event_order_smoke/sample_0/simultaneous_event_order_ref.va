@@ -1,0 +1,69 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module simultaneous_event_order_ref(VDD, VSS, ref, out);
+    inout electrical VDD, VSS;
+    input electrical ref;
+    output electrical out;
+
+    parameter real vhigh = 1.0 from (0:inf);
+    parameter real vlow = 0.0 from (-inf:inf);
+    parameter real tperiod = 20n from (0:inf);
+    parameter real trise = 1n from (0:inf);
+    parameter real tfall = 1n from (0:inf);
+    parameter real tdelay = 0 from [0:inf);
+
+    integer state;
+    real vout;
+    real vref_prev;
+    integer cross_pending;
+    integer timer_pending;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+            vout = vlow;
+            vref_prev = V(ref);
+            cross_pending = 0;
+            timer_pending = 0;
+        end
+
+        // Absolute timer at 15n, 35n, 55n, 75n (every 20n starting at 15n)
+        @(timer(15n, tperiod)) begin
+            timer_pending = 1;
+        end
+
+        // Cross event when ref crosses 0.5 in positive direction
+        @(cross(V(ref) - 0.5, 1)) begin
+            cross_pending = 1;
+        end
+
+        // Cross event when ref crosses 0.5 in negative direction
+        @(cross(V(ref) - 0.5, -1)) begin
+            cross_pending = 1;
+        end
+
+        // Resolve simultaneous events: timer wins over cross
+        // Update state based on which events occurred
+        if (timer_pending && cross_pending) begin
+            // Both occurred: timer wins (add 2)
+            state = state + 2;
+            timer_pending = 0;
+            cross_pending = 0;
+        end else if (timer_pending) begin
+            // Only timer: add 2
+            state = state + 2;
+            timer_pending = 0;
+        end else if (cross_pending) begin
+            // Only cross: add 1
+            state = state + 1;
+            cross_pending = 0;
+        end
+
+        // Output voltage based on state
+        vout = vlow + state * 0.05;
+        if (vout > vhigh) vout = vhigh;
+
+        V(out) <+ transition(vout, tdelay, trise, tfall);
+    end
+endmodule

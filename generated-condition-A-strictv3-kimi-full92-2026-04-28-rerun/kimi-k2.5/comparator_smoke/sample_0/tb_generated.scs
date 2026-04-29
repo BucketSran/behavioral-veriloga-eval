@@ -1,0 +1,27 @@
+// Comparator testbench with differential ramp stimulus
+
+// Include Verilog-A module
+ahdl_include "comparator.va"
+
+// Supply voltages
+vsource vdd (vdd 0) vsource dc=1.8
+vsource vss (vss 0) vsource dc=0
+
+// Differential input: VINP ramps up, VINN ramps down, crossing at 15ns
+vsource vinp_src (vinp 0) vsource dc=0 type=pwl wave=[0 0.5 30n 1.3]
+vsource vinn_src (vinn 0) vsource dc=0 type=pwl wave=[0 1.3 30n 0.5]
+
+// Device under test
+comparator dut (
+    .VDD(vdd)
+    .VSS(vss)
+    .VINP(vinp)
+    .VINN(vinn)
+    .OUT_P(out_p)
+)
+
+// Save statements for required observables
+save vinp vinn out_p
+
+// Transient analysis
+tran tran stop=30n maxstep=0.5n

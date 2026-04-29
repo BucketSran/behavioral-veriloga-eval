@@ -1,0 +1,24 @@
+// Minimal EVAS-compatible testbench for flash_adc_3b
+
+// Include the DUT
+ahdl_include "flash_adc_3b.va"
+
+// Supply and ground
+VDD (vdd 0) vsource dc=0.9
+VSS (vss 0) vsource dc=0.0
+
+// Input sweep: slow ramp from near 0 to near 0.9V over ~800ns
+// This allows sampling all 8 codes with the clock
+VIN (vin 0) vsource type=pulse val0=0.01 val1=0.89 period=820n rise=800n fall=1n width=1n
+
+// Clock: 10MHz clock (100ns period) to sample ~8 times during the ramp
+VCLK (clk 0) vsource type=pulse val0=0 val1=0.9 period=100n rise=1n fall=1n width=48n
+
+// DUT instantiation by positional ports: vdd, vss, vin, clk, dout2, dout1, dout0
+I0 (vdd vss vin clk dout2 dout1 dout0) flash_adc_3b
+
+// Save required scalar names
+save vin clk dout2 dout1 dout0
+
+// Transient analysis per Public Evaluation Contract
+tran tran stop=820n maxstep=2n

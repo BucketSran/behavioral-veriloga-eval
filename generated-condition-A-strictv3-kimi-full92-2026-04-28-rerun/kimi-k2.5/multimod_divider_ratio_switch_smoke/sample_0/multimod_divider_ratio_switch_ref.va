@@ -1,0 +1,59 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module multimod_divider_ratio_switch_ref (clk_in, ratio_ctrl, div_out);
+    electrical clk_in, ratio_ctrl, div_out;
+
+    // Parameters
+    parameter real vth = 2.5;           // Threshold for clock edge detection
+    parameter real vth_ctrl = 4.5;      // Threshold for ratio control (4.5V)
+    parameter real voh = 5.0;           // Output high voltage
+    parameter real vol = 0.0;           // Output low voltage
+    parameter real tr = 1n;             // Transition rise time
+    parameter real tf = 1n;             // Transition fall time
+
+    // State variables
+    integer count;                      // Counter for division
+    integer target_ratio;               // Current target ratio (4 or 5)
+    integer next_ratio;                 // Next target ratio sampled at clock edge
+    real out_val;                       // Output voltage value
+
+    analog begin
+        // Initialize state
+        @(initial_step) begin
+            count = 0;
+            target_ratio = 4;
+            next_ratio = 4;
+            out_val = vol;
+        end
+
+        // Sample ratio_ctrl on every clock rising edge and update counter
+        @(cross(V(clk_in) - vth, 1)) begin
+            // Sample the ratio control value at this clock edge
+            if (V(ratio_ctrl) < vth_ctrl) begin
+                next_ratio = 4;
+            end else begin
+                next_ratio = 5;
+            end
+
+            // Increment counter
+            count = count + 1;
+
+            // Check if we've reached the target
+            if (count >= target_ratio) begin
+                // Emit pulse: toggle output high then schedule low
+                out_val = voh;
+                count = 0;
+                // Apply the newly sampled ratio for next cycle
+                target_ratio = next_ratio;
+            end else begin
+                // Keep output low, but still update target ratio
+                out_val = vol;
+                target_ratio = next_ratio;
+            end
+        end
+
+        // Drive output with transition
+        V(div_out) <+ transition(out_val, 0, tr, tf);
+    end
+endmodule

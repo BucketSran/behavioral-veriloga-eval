@@ -1,0 +1,56 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pfd_updn (VDD, VSS, REF, DIV, UP, DN);
+    inout electrical VDD, VSS;
+    input electrical REF, DIV;
+    output electrical UP, DN;
+
+    parameter real vth = 0.5 from (0:1.5);
+    parameter real vh = 1.0 from (0:2.0);
+    parameter real vl = 0.0 from (-0.5:0.5);
+    parameter real tr = 100p from (0:1u);
+    parameter real tf = 100p from (0:1u);
+    parameter real tdel = 0 from [0:1u);
+
+    integer up_state, dn_state;
+    real v_up, v_dn;
+
+    analog begin
+        @(initial_step) begin
+            up_state = 0;
+            dn_state = 0;
+        end
+
+        // Detect rising edge of REF
+        @(cross(V(REF) - vth, +1)) begin
+            if (dn_state == 0) begin
+                up_state = 1;
+            end
+            else begin
+                // Both would be high, reset both
+                up_state = 0;
+                dn_state = 0;
+            end
+        end
+
+        // Detect rising edge of DIV
+        @(cross(V(DIV) - vth, +1)) begin
+            if (up_state == 0) begin
+                dn_state = 1;
+            end
+            else begin
+                // Both would be high, reset both
+                up_state = 0;
+                dn_state = 0;
+            end
+        end
+
+        // Output voltage generation with transition
+        v_up = up_state ? vh : vl;
+        v_dn = dn_state ? vh : vl;
+
+        V(UP) <+ transition(v_up, tdel, tr, tf);
+        V(DN) <+ transition(v_dn, tdel, tr, tf);
+    end
+endmodule

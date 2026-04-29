@@ -1,0 +1,110 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bbpd_ref (data, clk, retimed_data, up, down);
+    input data;
+    input clk;
+    input retimed_data;
+    output up;
+    output down;
+    electrical data, clk, retimed_data, up, down;
+
+    parameter real vth = 0.9 from (0:inf);
+    parameter real vhi = 1.8 from (0:inf);
+    parameter real vlo = 0.0 from [0:inf);
+    parameter real tr = 10p from (0:inf);
+    parameter real tf = 10p from (0:inf);
+    parameter real pulse_width = 500p from (0:inf);
+
+    integer data_prev;
+    integer clk_prev;
+    integer retimed_prev;
+    integer up_active;
+    integer down_active;
+    real up_target;
+    real down_target;
+    real pulse_end_time;
+
+    analog begin
+        @(initial_step) begin
+            data_prev = 0;
+            clk_prev = 0;
+            retimed_prev = 0;
+            up_active = 0;
+            down_active = 0;
+            up_target = vlo;
+            down_target = vlo;
+            pulse_end_time = 0;
+        end
+
+        // Detect rising edge on data
+        @(cross(V(data) - vth, 1)) begin
+            // Latch which edge arrived first based on clk and retimed_data states
+            if (V(clk) > vth && V(retimed_data) > vth) begin
+                // CLK edge arrived before DATA edge (CLK leads) -> DOWN
+                down_active = 1;
+                up_active = 0;
+                pulse_end_time = $abstime + pulse_width;
+            end
+            else if (V(clk) < vth && V(retimed_data) < vth) begin
+                // DATA edge arrived before CLK edge (DATA leads) -> UP
+                up_active = 1;
+                down_active = 0;
+                pulse_end_time = $abstime + pulse_width;
+            end
+            else begin
+                // Ambiguous or aligned case - no pulse
+                up_active = 0;
+                down_active = 0;
+            end
+            data_prev = 1;
+        end
+
+        // Detect falling edge on data
+        @(cross(V(data) - vth, -1)) begin
+            data_prev = 0;
+        end
+
+        // Track clk state
+        @(cross(V(clk) - vth, 1)) begin
+            clk_prev = 1;
+        end
+
+        @(cross(V(clk) - vth, -1)) begin
+            clk_prev = 0;
+        end
+
+        // Track retimed_data state
+        @(cross(V(retimed_data) - vth, 1)) begin
+            retimed_prev = 1;
+        end
+
+        @(cross(V(retimed_data) - vth, -1)) begin
+            retimed_prev = 0;
+        end
+
+        // Timer to end pulses
+        @(timer(pulse_end_time)) begin
+            up_active = 0;
+            down_active = 0;
+        end
+
+        // Compute output targets based on active pulse state
+        if (up_active) begin
+            up_target = vhi;
+            down_target = vlo;
+        end
+        else if (down_active) begin
+            up_target = vlo;
+            down_target = vhi;
+        end
+        else begin
+            up_target = vlo;
+            down_target = vlo;
+        end
+
+        // Unconditional transition contributions
+        V(up) <+ transition(up_target, 0, tr, tf);
+        V(down) <+ transition(down_target, 0, tr, tf);
+    end
+endmodule

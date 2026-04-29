@@ -1,0 +1,50 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module comparator (VDD, VSS, VINP, VINN, OUT_P);
+    inout electrical VDD, VSS;
+    input electrical VINP, VINN;
+    output electrical OUT_P;
+
+    parameter real vhys = 10e-3 from [0:inf);  // hysteresis voltage (10mV)
+    parameter real tr = 0.5n from (0:inf);     // output rise time
+    parameter real tf = 0.5n from (0:inf);     // output fall time
+    parameter real td = 0 from [0:inf);        // propagation delay
+
+    integer state;  // 0 = low, 1 = high
+    real vout_high, vout_low;
+    real vdiff;
+    real vth_rise, vth_fall;
+    real out_target;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+        end
+
+        // Supply-referenced output levels
+        vout_high = V(VDD);
+        vout_low = V(VSS);
+
+        // Differential input
+        vdiff = V(VINP) - V(VINN);
+
+        // Hysteresis thresholds
+        vth_rise = vhys/2.0;
+        vth_fall = -vhys/2.0;
+
+        // Rising threshold crossing (vinp > vinn + vhys/2)
+        @(cross(vdiff - vth_rise, +1)) begin
+            state = 1;
+        end
+
+        // Falling threshold crossing (vinp < vinn - vhys/2)
+        @(cross(vdiff - vth_fall, -1)) begin
+            state = 0;
+        end
+
+        // Output voltage with finite transition
+        out_target = (state == 1) ? vout_high : vout_low;
+        V(OUT_P) <+ transition(out_target, td, tr, tf);
+    end
+endmodule

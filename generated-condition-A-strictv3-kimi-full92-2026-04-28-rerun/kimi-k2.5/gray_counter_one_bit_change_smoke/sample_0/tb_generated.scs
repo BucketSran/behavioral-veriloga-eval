@@ -1,0 +1,30 @@
+// Spectre testbench for 4-bit Gray-code counter
+
+ahdl_include "gray_counter_one_bit_change_ref.va"
+
+// Global nodes
+global gnd
+
+// Power supply
+vsource vdd (vdd 0) vdc=1.8
+vsource vss (vss 0) vdc=0
+
+// Clock: 10MHz (100ns period), starts low
+vsource clk (clk 0) vtype=pulse v1=0 v2=1.8 period=20n rise=100p fall=100p width=10n delay=5n
+
+// Reset: active high, asserted at start then released
+vsource rst (rst 0) vtype=pulse v1=1.8 v2=0 period=500n rise=100p fall=100p width=20n delay=0
+
+// Device Under Test
+gray_counter_one_bit_change_ref dut (vdd vss clk rst g0 g1 g2 g3)
+
+// Transient analysis
+tran tran stop=220n maxstep=100p errpreset=conservative
+
+// Save required signals for checker evaluation
+save clk
+save rst
+save g0
+save g1
+save g2
+save g3

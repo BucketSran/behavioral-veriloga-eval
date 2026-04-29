@@ -1,0 +1,117 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module clk_divider_ref (clk_in, rst_n, div_code_0, div_code_1, div_code_2, div_code_3, div_code_4, div_code_5, div_code_6, div_code_7, clk_out, lock);
+    input clk_in;
+    input rst_n;
+    input div_code_0;
+    input div_code_1;
+    input div_code_2;
+    input div_code_3;
+    input div_code_4;
+    input div_code_5;
+    input div_code_6;
+    input div_code_7;
+    output clk_out;
+    output lock;
+
+    electrical clk_in;
+    electrical rst_n;
+    electrical div_code_0;
+    electrical div_code_1;
+    electrical div_code_2;
+    electrical div_code_3;
+    electrical div_code_4;
+    electrical div_code_5;
+    electrical div_code_6;
+    electrical div_code_7;
+    electrical clk_out;
+    electrical lock;
+
+    parameter real vth = 0.9;
+    parameter real vhi = 1.8;
+    parameter real vlo = 0.0;
+    parameter real tr = 0.1n;
+    parameter real tf = 0.1n;
+
+    integer div_ratio;
+    integer counter;
+    integer clk_out_state;
+    integer lock_state;
+    integer first_period_done;
+    integer half_period;
+    integer rst_n_prev;
+
+    analog begin
+        @(initial_step) begin
+            div_ratio = 1;
+            counter = 0;
+            clk_out_state = 0;
+            lock_state = 0;
+            first_period_done = 0;
+            half_period = 1;
+            rst_n_prev = 0;
+        end
+
+        // Read division code from 8-bit input
+        div_ratio = 0;
+        if (V(div_code_7) > vth) div_ratio = div_ratio + 128;
+        if (V(div_code_6) > vth) div_ratio = div_ratio + 64;
+        if (V(div_code_5) > vth) div_ratio = div_ratio + 32;
+        if (V(div_code_4) > vth) div_ratio = div_ratio + 16;
+        if (V(div_code_3) > vth) div_ratio = div_ratio + 8;
+        if (V(div_code_2) > vth) div_ratio = div_ratio + 4;
+        if (V(div_code_1) > vth) div_ratio = div_ratio + 2;
+        if (V(div_code_0) > vth) div_ratio = div_ratio + 1;
+
+        // Clamp to valid range 1-255
+        if (div_ratio < 1) div_ratio = 1;
+        if (div_ratio > 255) div_ratio = 255;
+
+        // Calculate half period for 50% duty cycle
+        half_period = div_ratio / 2;
+        if (half_period < 1) half_period = 1;
+
+        // Detect rst_n rising edge (reset release)
+        @(cross(V(rst_n) - vth, 1)) begin
+            rst_n_prev = 1;
+        end
+
+        // Detect rst_n falling edge (reset assertion)
+        @(cross(V(rst_n) - vth, -1)) begin
+            counter = 0;
+            clk_out_state = 0;
+            lock_state = 0;
+            first_period_done = 0;
+            rst_n_prev = 0;
+        end
+
+        // Clock divider operation on rising edge of clk_in
+        @(cross(V(clk_in) - vth, 1)) begin
+            if (rst_n_prev == 1) begin
+                counter = counter + 1;
+
+                // Generate 50% duty cycle output
+                if (counter > half_period) begin
+                    clk_out_state = 0;
+                end else begin
+                    clk_out_state = 1;
+                end
+
+                // Check for end of period
+                if (counter >= div_ratio) begin
+                    counter = 0;
+                    // First full output period completed
+                    if (first_period_done == 0) begin
+                        first_period_done = 1;
+                        lock_state = 1;
+                    end
+                end
+            end
+        end
+
+        // Output assignments with transition
+        V(clk_out) <+ transition(clk_out_state ? vhi : vlo, 0, tr, tf);
+        V(lock) <+ transition(lock_state ? vhi : vlo, 0, tr, tf);
+    end
+endmodule

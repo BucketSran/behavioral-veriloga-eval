@@ -38,6 +38,8 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from failure_attribution import attach_failure_attribution
+from interface_parameter_guard import check_interface_parameter_paths, format_issue_notes
 from simulate_evas import has_behavior_check, run_case
 
 # ---------------------------------------------------------------------------
@@ -295,10 +297,13 @@ def rewrite_tb_save_signals(tb_path: Path, desired_signals: list[str]) -> tuple[
     removed = 0
     inserted = 0
     inserted_save = False
-    for line in original_lines:
+    idx = 0
+    while idx < len(original_lines):
+        line = original_lines[idx]
         stripped = line.strip()
         if not stripped.lower().startswith("save "):
             updated_lines.append(line)
+            idx += 1
             continue
         removed += 1
         if desired_signals and not inserted_save:
@@ -306,6 +311,14 @@ def rewrite_tb_save_signals(tb_path: Path, desired_signals: list[str]) -> tuple[
             updated_lines.append(indent + "save " + " ".join(desired_signals))
             inserted += 1
             inserted_save = True
+        idx += 1
+        # A Spectre save statement may span multiple physical lines using a
+        # trailing backslash.  Once the first save line is replaced/removed,
+        # all continuation lines must be removed too; otherwise real Spectre
+        # can parse the orphaned continuation as a new instance line.
+        while idx < len(original_lines) and original_lines[idx - 1].rstrip().endswith("\\"):
+            removed += 1
+            idx += 1
 
     if removed > 0 or inserted > 0:
         tb_path.write_text("\n".join(updated_lines) + "\n", encoding="utf-8")
@@ -329,6 +342,30 @@ def _copy_if_exists(src: Path, dst: Path) -> bool:
         _copy_as(src, dst)
         return True
     return False
+
+
+def _sample_ref_alias(sample_dir: Path, inc_name: str) -> Path | None:
+    """Return an emitted sample file that safely satisfies a missing *_ref include.
+
+    End-to-end repair sometimes preserves the benchmark TB while emitting public
+    DUT filenames without the verifier `_ref` suffix, for example a TB include
+    `dac_ideal_4b_ref.va` beside an emitted `dac_ideal_4b.va`.  This alias is
+    safe only when the include stem differs by exactly `_ref`; otherwise callers
+    should keep the missing-include failure visible.
+    """
+    inc = Path(inc_name)
+    if inc.suffix.lower() != ".va" or not inc.stem.endswith("_ref"):
+        return None
+
+    alias_name = inc.with_name(inc.stem[: -len("_ref")] + inc.suffix)
+    candidates = [
+        sample_dir / alias_name,
+        sample_dir / alias_name.name,
+    ]
+    for candidate in candidates:
+        if candidate.exists() and candidate.is_file():
+            return candidate
+    return None
 
 
 SPECTRE_PRIMITIVE_MODELS = {
@@ -393,9 +430,200 @@ def spectre_unsupported_directive_lines(tb_path: Path) -> list[str]:
     text = _strip_line_comments(tb_path.read_text(encoding="utf-8", errors="ignore"))
     bad: list[str] = []
     for lineno, line in enumerate(text.splitlines(), start=1):
-        stripped = line.strip().lower()
-        if stripped.startswith("plot "):
+        stripped = line.strip()
+        lowered = stripped.lower()
+        if lowered.startswith("plot "):
             bad.append(f"{lineno}:plot")
+        if "{" in stripped or "}" in stripped:
+            bad.append(f"{lineno}:curly_block")
+        if "'" in stripped:
+            bad.append(f"{lineno}:single_quote")
+    return bad
+
+
+def spectre_reversed_source_syntax_lines(tb_path: Path) -> list[str]:
+    """Detect reversed Spectre primitive syntax such as `vsource vdd (...)`.
+
+    Spectre instance syntax is `Vname (node 0) vsource ...`.  EVAS may be able
+    to salvage the intent of the reversed form, but real Spectre interprets the
+    line as an instance named `vsource` and often reports undefined model `0` or
+    duplicate instance failures.
+    """
+    text = _strip_line_comments(tb_path.read_text(encoding="utf-8", errors="ignore"))
+    bad: list[str] = []
+    pattern = re.compile(r"^\s*(?:vsource|isource)\s+[A-Za-z_][A-Za-z0-9_.$]*\s*\(", re.IGNORECASE)
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        if pattern.search(line):
+            compact = re.sub(r"\s+", " ", line.strip())
+            bad.append(f"{lineno}:{compact}")
+    return bad
+
+
+def spectre_pulse_nonpositive_timing_lines(tb_path: Path) -> list[str]:
+    """Detect pulse sources with zero rise/fall time.
+
+    The bridge's real Spectre rejects `type=pulse ... fall=0` during hierarchy
+    flattening.  Keep this in preflight so EVAS does not accept a candidate that
+    cannot run in Spectre.
+    """
+    text = _strip_line_comments(tb_path.read_text(encoding="utf-8", errors="ignore"))
+    bad: list[str] = []
+    pattern = re.compile(
+        r"\btype\s*=\s*pulse\b.*\b(rise|fall)\s*=\s*0(?:\.0*)?(?:\s|$|[fpnum]?s\b)",
+        re.IGNORECASE,
+    )
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        match = pattern.search(line)
+        if not match:
+            continue
+        compact = re.sub(r"\s+", " ", line.strip())
+        bad.append(f"{lineno}:{match.group(1).lower()}=0:{compact}")
+    return bad
+
+
+def _spectre_numeric_token(token: str) -> float | None:
+    token = token.strip().strip("{}")
+    match = re.fullmatch(
+        r"([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)([A-Za-z]*)",
+        token,
+    )
+    if not match:
+        return None
+    value = float(match.group(1))
+    suffix = match.group(2).lower()
+    scale = {
+        "": 1.0,
+        "s": 1.0,
+        "f": 1e-15,
+        "fs": 1e-15,
+        "p": 1e-12,
+        "ps": 1e-12,
+        "n": 1e-9,
+        "ns": 1e-9,
+        "u": 1e-6,
+        "us": 1e-6,
+        "m": 1e-3,
+        "ms": 1e-3,
+        "k": 1e3,
+        "meg": 1e6,
+        "g": 1e9,
+        "t": 1e12,
+    }.get(suffix)
+    if scale is None:
+        return None
+    return value * scale
+
+
+def _spectre_pwl_wave_blocks(tb_path: Path) -> list[tuple[int, str, str]]:
+    """Return `(start_lineno, body, compact_first_line)` for PWL wave blocks."""
+    text = _strip_line_comments(tb_path.read_text(encoding="utf-8", errors="ignore"))
+    blocks: list[tuple[int, str, str]] = []
+    collecting = False
+    start_lineno = 0
+    first_line = ""
+    parts: list[str] = []
+    start_re = re.compile(r"\btype\s*=\s*pwl\b.*?\bwave\s*=\s*\[", re.IGNORECASE)
+
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        if not collecting:
+            match = start_re.search(line)
+            if not match:
+                continue
+            collecting = True
+            start_lineno = lineno
+            first_line = re.sub(r"\s+", " ", line.strip())
+            tail = line[match.end():]
+        else:
+            tail = line
+
+        if "]" in tail:
+            before, _after = tail.split("]", 1)
+            parts.append(before)
+            blocks.append((start_lineno, "\n".join(parts), first_line))
+            collecting = False
+            start_lineno = 0
+            first_line = ""
+            parts = []
+        else:
+            parts.append(tail)
+
+    if collecting:
+        blocks.append((start_lineno, "\n".join(parts), first_line))
+    return blocks
+
+
+def spectre_malformed_pwl_wave_lines(tb_path: Path) -> list[str]:
+    """Detect PWL wave lists that are not simple time/value pairs.
+
+    Spectre PWL sources in these benchmarks should use a flat `wave=[t0 v0
+    t1 v1 ...]` list.  An odd token count usually means the model mixed up a
+    time and a value, which EVAS later reports only as `tran.csv missing`.
+    """
+    bad: list[str] = []
+    for lineno, body, compact in _spectre_pwl_wave_blocks(tb_path):
+        body = body.replace(",", " ")
+        tokens = [tok for tok in re.split(r"\s+", body.strip()) if tok]
+        if len(tokens) < 4 or len(tokens) % 2 != 0:
+            bad.append(f"{lineno}:tokens={len(tokens)}:{compact}")
+    return bad
+
+
+def spectre_nonincreasing_pwl_time_lines(tb_path: Path) -> list[str]:
+    """Detect PWL time vectors that real Spectre rejects.
+
+    Cadence Spectre requires PWL times to be strictly increasing; duplicate
+    timestamps that EVAS could treat as ideal steps fail with CMI-2204.
+    """
+    bad: list[str] = []
+    for lineno, body, compact in _spectre_pwl_wave_blocks(tb_path):
+        tokens = [tok for tok in re.split(r"\s+", body.replace(",", " ").strip()) if tok]
+        if len(tokens) < 4 or len(tokens) % 2 != 0:
+            continue
+        times: list[float] = []
+        parse_failed = False
+        for tok in tokens[0::2]:
+            value = _spectre_numeric_token(tok)
+            if value is None:
+                parse_failed = True
+                break
+            times.append(value)
+        if parse_failed:
+            continue
+        for idx in range(1, len(times)):
+            if times[idx] <= times[idx - 1]:
+                bad.append(
+                    f"{lineno}:t{idx - 1}={times[idx - 1]:.6g},t{idx}={times[idx]:.6g}:{compact}"
+                )
+                break
+    return bad
+
+
+def spectre_uncontinued_multiline_instance_lines(tb_path: Path) -> list[str]:
+    """Detect bare multiline instance node lists that Spectre does not join.
+
+    EVAS historically joined parenthesized lines, but Spectre requires an
+    explicit trailing `\\` for instance/source continuations.
+    """
+    text = _strip_line_comments(tb_path.read_text(encoding="utf-8", errors="ignore"))
+    bad: list[str] = []
+    skip_prefixes = (
+        "simulator ",
+        "global ",
+        "parameters ",
+        "ahdl_include",
+        "include ",
+        "save ",
+        "tran ",
+    )
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        stripped = line.strip()
+        if not stripped or stripped.lower().startswith(skip_prefixes):
+            continue
+        if stripped.endswith("\\"):
+            continue
+        if re.match(r"^[A-Za-z_][A-Za-z0-9_.$]*\s*\(", stripped) and ")" not in stripped:
+            compact = re.sub(r"\s+", " ", stripped)
+            bad.append(f"{lineno}:{compact}")
     return bad
 
 
@@ -477,6 +705,39 @@ def _has_dynamic_analog_vector_index(va_path: Path) -> bool:
     return bool(_dynamic_analog_vector_index_hits(va_path))
 
 
+def _embedded_declaration_hits(va_path: Path) -> list[str]:
+    """Detect declarations after executable statements in an analog block."""
+    text = _strip_line_comments(va_path.read_text(encoding="utf-8", errors="ignore"))
+    hits: list[str] = []
+    in_analog = False
+    seen_statement = False
+    declaration_pattern = re.compile(r"^\s*(?:real|integer)\s+[A-Za-z_][A-Za-z0-9_$]*(?:\s*[,;\[]|$)")
+
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if re.search(r"\banalog\s+begin\b", stripped):
+            in_analog = True
+            seen_statement = False
+            continue
+        if not in_analog:
+            continue
+        if re.match(r"^endmodule\b", stripped):
+            in_analog = False
+            seen_statement = False
+            continue
+        if declaration_pattern.match(stripped):
+            if seen_statement:
+                compact = re.sub(r"\s+", " ", stripped)
+                hits.append(f"{va_path.name}:{lineno}:{compact}")
+            continue
+        if re.match(r"^(begin|end)\b", stripped):
+            continue
+        seen_statement = True
+    return hits
+
+
 def _has_digital_verilog_syntax(va_path: Path) -> list[str]:
     """Detect digital Verilog/SystemVerilog constructs that EVAS tolerates but Spectre VACOMP rejects.
 
@@ -520,11 +781,187 @@ def _has_digital_verilog_syntax(va_path: Path) -> list[str]:
         if has_reg_decl and not has_integer_decl:
             issues.append("shift_operator_on_reg: << or >> with reg declaration")
 
+    if re.search(r"\binteger\s*\(", text):
+        issues.append("integer_function_cast: integer(...)")
+
     return issues
 
 
+def _direct_filename_fileio_hits(va_path: Path) -> list[str]:
+    """Detect Spectre-incompatible file I/O using a string as the descriptor.
+
+    EVAS can defensively accept `$fstrobe("file", ...)` to avoid crashing on
+    malformed output code, but Spectre VACOMP requires an integer descriptor
+    returned by `$fopen`.  Keep this in strict preflight so EVAS compatibility
+    does not turn into a false Spectre-compatible pass.
+    """
+    text = _strip_line_comments(va_path.read_text(encoding="utf-8", errors="ignore"))
+    pattern = re.compile(r"\$(fstrobe|fwrite|fdisplay)\s*\(\s*\"([^\"]+)\"")
+    hits: list[str] = []
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        for match in pattern.finditer(line):
+            func = match.group(1)
+            filename = match.group(2)
+            hits.append(f"{va_path.name}:{lineno}:${func}(\"{filename}\",...)")
+    return hits
+
+
+def _combined_direction_discipline_hits(va_path: Path) -> list[str]:
+    """Detect direction/discipline declarations Spectre VACOMP rejects.
+
+    EVAS accepts compact declarations like `input electrical vin;`, but the
+    Spectre version used by the bridge reports VACOMP-2259/VACOMP-2418 for
+    these.  The Spectre-compatible form separates direction and discipline,
+    e.g. `input vin; electrical vin;`.
+    """
+    text = _strip_line_comments(va_path.read_text(encoding="utf-8", errors="ignore"))
+    hits: list[str] = []
+    pattern = re.compile(r"^\s*(input|output|inout)\s+electrical\b", re.IGNORECASE)
+    in_module_header = False
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        stripped = line.strip()
+        if re.search(r"\bmodule\b", stripped):
+            in_module_header = not bool(re.search(r"\)\s*;", stripped))
+            continue
+        if in_module_header:
+            if re.search(r"\)\s*;", stripped):
+                in_module_header = False
+            continue
+        if pattern.search(line):
+            compact = re.sub(r"\s+", " ", stripped)
+            hits.append(f"{va_path.name}:{lineno}:{compact}")
+    return hits
+
+
+def _declared_names_by_type(text: str) -> dict[str, set[str]]:
+    names_by_type: dict[str, set[str]] = {"real": set(), "integer": set()}
+    for match in re.finditer(r"\b(real|integer)\s+([^;]+);", text, flags=re.IGNORECASE):
+        decl_type = match.group(1).lower()
+        body = match.group(2)
+        for item in body.split(","):
+            item = re.sub(r"\[[^\]]+\]", " ", item)
+            item = item.split("=")[0].strip()
+            name_match = re.match(r"([A-Za-z_]\w*)\b", item)
+            if name_match:
+                names_by_type.setdefault(decl_type, set()).add(name_match.group(1))
+    return names_by_type
+
+
+def _module_port_names(text: str) -> set[str]:
+    ports: set[str] = set()
+    for match in re.finditer(r"\bmodule\s+\w+\s*\((.*?)\)\s*;", text, flags=re.DOTALL):
+        for raw_item in match.group(1).replace("\n", " ").split(","):
+            item = re.sub(r"\[[^\]]+\]", " ", raw_item)
+            tokens = [tok for tok in re.split(r"\s+", item.strip()) if tok]
+            for token in reversed(tokens):
+                if re.fullmatch(r"[A-Za-z_]\w*", token):
+                    ports.add(token)
+                    break
+    return ports
+
+
+def _parameter_port_conflict_hits(va_path: Path) -> list[str]:
+    """Detect Spectre VACOMP failures from parameters shadowing port names.
+
+    EVAS may accept `parameter real vdd = ...;` even when `vdd` is also a port,
+    but Spectre rejects the redeclaration during AHDL read-in.
+    """
+    text = _strip_line_comments(va_path.read_text(encoding="utf-8", errors="ignore"))
+    ports = _module_port_names(text)
+    if not ports:
+        return []
+    hits: list[str] = []
+    pattern = re.compile(r"\bparameter\s+(?:real|integer)\s+([A-Za-z_]\w*)\b", re.IGNORECASE)
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        for match in pattern.finditer(line):
+            name = match.group(1)
+            if name in ports:
+                compact = re.sub(r"\s+", " ", line.strip())
+                hits.append(f"{va_path.name}:{lineno}:{compact}")
+    return hits
+
+
+def _random_distribution_seed_hits(va_path: Path) -> list[str]:
+    """Detect Spectre-incompatible random distribution calls with real seeds."""
+    text = _strip_line_comments(va_path.read_text(encoding="utf-8", errors="ignore"))
+    declared = _declared_names_by_type(text)
+    real_names = declared.get("real", set())
+    hits: list[str] = []
+    pattern = re.compile(r"\$(?:rdist|dist)_\w+\s*\(\s*([A-Za-z_]\w*)\b", re.IGNORECASE)
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        for match in pattern.finditer(line):
+            seed_name = match.group(1)
+            if seed_name in real_names:
+                compact = re.sub(r"\s+", " ", line.strip())
+                hits.append(f"{va_path.name}:{lineno}:real_seed={seed_name}:{compact}")
+    return hits
+
+
+def _modulo_array_index_hits(va_path: Path) -> list[str]:
+    """Detect direct modulo expressions inside array subscripts.
+
+    Spectre can evaluate negative modulo results as negative array indices,
+    causing runtime ASL-5401 out-of-bounds errors that EVAS may not reproduce.
+    The robust pattern is to normalize the index into a bounded integer before
+    using it as an array subscript.
+    """
+    text = _strip_line_comments(va_path.read_text(encoding="utf-8", errors="ignore"))
+    hits: list[str] = []
+    pattern = re.compile(r"\b([A-Za-z_]\w*)\s*\[\s*([^\]]*%[^\]]*)\]")
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        for match in pattern.finditer(line):
+            array_name = match.group(1)
+            expr = re.sub(r"\s+", "", match.group(2))
+            hits.append(f"{va_path.name}:{lineno}:{array_name}[{expr}]")
+    return hits
+
+
+def _duplicate_vsource_branch_hits(tb_path: Path) -> list[str]:
+    """Detect repeated ideal voltage sources across the same node pair.
+
+    Spectre reports these as rigid-branch loops during topology check, for
+    example a DC source and a PWL source both connected from `in` to `0`.
+    """
+    text = _strip_line_comments(tb_path.read_text(encoding="utf-8", errors="ignore"))
+    branches: dict[tuple[str, str], list[tuple[int, str]]] = {}
+    pattern = re.compile(r"^\s*([A-Za-z_]\w*)\s*\(([^)]*)\)\s+vsource\b", re.IGNORECASE)
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        match = pattern.search(line)
+        if not match:
+            continue
+        inst = match.group(1)
+        nodes = [node for node in re.split(r"\s+", match.group(2).strip()) if node]
+        if len(nodes) < 2:
+            continue
+        key = tuple(sorted((nodes[0], nodes[1])))
+        branches.setdefault(key, []).append((lineno, inst))
+
+    hits: list[str] = []
+    for (n0, n1), instances in sorted(branches.items()):
+        if len(instances) < 2:
+            continue
+        locs = ",".join(f"{inst}@{lineno}" for lineno, inst in instances[:6])
+        hits.append(f"{tb_path.name}:{n0}-{n1}:{locs}")
+    return hits
+
+
+def _normalized_required_axes(required_axes: list[str]) -> list[str]:
+    aliases = {
+        "syntax": "dut_compile",
+        "routing": "tb_compile",
+        "simulation": "sim_correct",
+        "behavior": "sim_correct",
+    }
+    normalized: list[str] = []
+    for axis in required_axes:
+        mapped = aliases.get(axis, axis)
+        if mapped not in normalized:
+            normalized.append(mapped)
+    return normalized
+
+
 def _weighted_total(scores: dict[str, float], required_axes: list[str]) -> float:
-    axes = [axis for axis in required_axes if axis in {"dut_compile", "tb_compile", "sim_correct"}]
+    axes = [axis for axis in _normalized_required_axes(required_axes) if axis in {"dut_compile", "tb_compile", "sim_correct"}]
     if not axes:
         axes = ["dut_compile", "tb_compile", "sim_correct"]
     return round(sum(scores.get(axis, 0.0) for axis in axes) / len(axes), 4)
@@ -552,6 +989,11 @@ def _strict_fail_scores(
             scores["tb_compile"] = 0.0
             scores["sim_correct"] = 0.0
             status = "FAIL_TB_COMPILE"
+    elif failure_kind == "tb_syntax":
+        scores["tb_compile"] = 0.0
+        if "sim_correct" in required_axes:
+            scores["sim_correct"] = 0.0
+        status = "FAIL_TB_COMPILE"
     else:
         # AHDL syntax restrictions live in the VA artifact. In DUT-generation
         # families this is a DUT failure; in tb-generation the VA is gold, but
@@ -628,6 +1070,69 @@ def spectre_strict_preflight(
             f"{','.join(bad_directives[:8])}"
         )
 
+    reversed_source_lines = spectre_reversed_source_syntax_lines(staged_tb)
+    if reversed_source_lines:
+        _record_failure("tb_syntax")
+        notes.append(
+            "spectre_strict:reversed_source_syntax="
+            + ",".join(reversed_source_lines[:8])
+        )
+
+    pulse_timing_lines = spectre_pulse_nonpositive_timing_lines(staged_tb)
+    if pulse_timing_lines:
+        _record_failure("tb_syntax")
+        notes.append(
+            "spectre_strict:pulse_nonpositive_timing="
+            + ",".join(pulse_timing_lines[:8])
+        )
+
+    malformed_pwl_lines = spectre_malformed_pwl_wave_lines(staged_tb)
+    if malformed_pwl_lines:
+        _record_failure("tb_syntax")
+        notes.append(
+            "spectre_strict:malformed_pwl_wave="
+            + ",".join(malformed_pwl_lines[:8])
+        )
+
+    nonincreasing_pwl_lines = spectre_nonincreasing_pwl_time_lines(staged_tb)
+    if nonincreasing_pwl_lines:
+        _record_failure("tb_syntax")
+        notes.append(
+            "spectre_strict:nonincreasing_pwl_time="
+            + ",".join(nonincreasing_pwl_lines[:8])
+        )
+
+    multiline_instance_lines = spectre_uncontinued_multiline_instance_lines(staged_tb)
+    if multiline_instance_lines:
+        _record_failure("tb_syntax")
+        notes.append(
+            "spectre_strict:uncontinued_multiline_instance="
+            + ",".join(multiline_instance_lines[:8])
+        )
+
+    duplicate_vsource_hits = _duplicate_vsource_branch_hits(staged_tb)
+    if duplicate_vsource_hits:
+        _record_failure("tb_syntax")
+        notes.append(
+            "spectre_strict:duplicate_vsource_branch="
+            + ",".join(duplicate_vsource_hits[:8])
+        )
+
+    interface_parameter_issues = check_interface_parameter_paths(
+        va_paths=staged_va_paths,
+        tb_paths=[staged_tb],
+    )
+    if interface_parameter_issues:
+        # Spectre treats invalid instance parameters on a Verilog-A primitive as
+        # warnings and ignores them (SFE-29/SFE-30), rather than rejecting the
+        # run. Keep the diagnostic for repair prompts, but do not turn it into
+        # a hard EVAS preflight failure; behavior checkers will catch cases
+        # where the ignored parameter matters.
+        notes.extend(
+            "spectre_strict:" + note
+            for note in format_issue_notes(interface_parameter_issues[:8])
+        )
+
     # --- Per-VA AHDL syntax checks (check all files, collect all issues) ---
     for va_path in staged_va_paths:
         if "_candidate_original" in va_path.parts:
@@ -659,9 +1164,51 @@ def spectre_strict_preflight(
                 "spectre_strict:dynamic_analog_vector_index="
                 + ",".join(dynamic_hits[:12])
             )
+        embedded_decl_hits = _embedded_declaration_hits(va_path)
+        if embedded_decl_hits:
+            _record_failure("ahdl_syntax")
+            notes.append(
+                "spectre_strict:embedded_declaration="
+                + ",".join(embedded_decl_hits[:12])
+            )
         for digital_issue in _has_digital_verilog_syntax(va_path):
             _record_failure("ahdl_syntax")
             notes.append(f"spectre_strict:digital_verilog_syntax={digital_issue} in {va_path.name}")
+        direct_fileio_hits = _direct_filename_fileio_hits(va_path)
+        if direct_fileio_hits:
+            _record_failure("ahdl_syntax")
+            notes.append(
+                "spectre_strict:direct_filename_fileio="
+                + ",".join(direct_fileio_hits[:8])
+            )
+        direction_discipline_hits = _combined_direction_discipline_hits(va_path)
+        if direction_discipline_hits:
+            _record_failure("ahdl_syntax")
+            notes.append(
+                "spectre_strict:combined_direction_discipline="
+                + ",".join(direction_discipline_hits[:12])
+            )
+        parameter_conflict_hits = _parameter_port_conflict_hits(va_path)
+        if parameter_conflict_hits:
+            _record_failure("ahdl_syntax")
+            notes.append(
+                "spectre_strict:parameter_port_conflict="
+                + ",".join(parameter_conflict_hits[:12])
+            )
+        random_seed_hits = _random_distribution_seed_hits(va_path)
+        if random_seed_hits:
+            _record_failure("ahdl_syntax")
+            notes.append(
+                "spectre_strict:random_dist_real_seed="
+                + ",".join(random_seed_hits[:8])
+            )
+        modulo_index_hits = _modulo_array_index_hits(va_path)
+        if modulo_index_hits:
+            _record_failure("ahdl_syntax")
+            notes.append(
+                "spectre_strict:modulo_array_index="
+                + ",".join(modulo_index_hits[:8])
+            )
 
     if first_status is not None:
         return first_status, first_scores, notes
@@ -750,6 +1297,10 @@ def stage_candidate_case(
             if _copy_if_exists(sample_match, staged_inc):
                 primary_dut = primary_dut or staged_inc
                 notes.append(f"generated_include={inc_name}")
+            elif alias_match := _sample_ref_alias(sample_dir, inc_name):
+                _copy_as(alias_match, staged_inc)
+                primary_dut = primary_dut or staged_inc
+                notes.append(f"generated_include_ref_alias={alias_match.name}->{inc_name}")
             elif not primary_dut_consumed:
                 _copy_as(dut_path, staged_inc)
                 primary_dut = staged_inc
@@ -815,6 +1366,29 @@ def score_one_task(
         except Exception:
             pass
 
+    invalid_generation_reasons: list[str] = []
+    if gen_meta.get("dry_run") or gen_meta.get("status") == "dry_run":
+        invalid_generation_reasons.append("dry_run_generation")
+    placeholder_files = sorted(
+        p.name
+        for p in sample_dir.glob("*placeholder*")
+        if p.is_file() and p.suffix.lower() in {".va", ".scs"}
+    )
+    if placeholder_files:
+        shown = ", ".join(placeholder_files[:4])
+        suffix = "" if len(placeholder_files) <= 4 else f", +{len(placeholder_files) - 4} more"
+        invalid_generation_reasons.append(f"placeholder_artifacts: {shown}{suffix}")
+    if invalid_generation_reasons:
+        result = _fail_result(
+            task_id, model, family, category, sample_idx, temperature, top_p,
+            required_axes, "; ".join(invalid_generation_reasons),
+            None, None,
+        )
+        result["generation_meta"] = gen_meta
+        result["artifacts"]["sample_dir"] = str(sample_dir)
+        _save_result(result, output_dir)
+        return result
+
     # Resolve DUT and testbench paths based on family
     generated_va = find_va_file(sample_dir)
     generated_tb = find_tb_file(sample_dir)
@@ -851,6 +1425,8 @@ def score_one_task(
             required_axes, f"missing_generated_files: {', '.join(missing)}",
             dut_path, tb_path,
         )
+        result["generation_meta"] = gen_meta
+        result["artifacts"]["sample_dir"] = str(sample_dir)
         _save_result(result, output_dir)
         return result
 
@@ -930,7 +1506,10 @@ def score_one_task(
         "evas_notes": evas_result.get("notes", []),
         "evas_timing": evas_result.get("timing", {}),
     }
+    if status != "PASS" and evas_result.get("stdout_tail"):
+        result["evas_stdout_tail"] = evas_result.get("stdout_tail")
     result["evas_notes"] = staging_notes + result["evas_notes"]
+    attach_failure_attribution(result)
     _save_result(result, output_dir)
     return result
 
@@ -938,7 +1517,7 @@ def score_one_task(
 def _fail_result(task_id, model, family, category, sample_idx, temperature, top_p,
                  required_axes, reason, dut_path, tb_path) -> dict:
     scores = {"dut_compile": 0.0, "tb_compile": 0.0, "sim_correct": 0.0, "weighted_total": 0.0}
-    return {
+    result = {
         "model": model,
         "task_id": task_id,
         "family": family,
@@ -957,9 +1536,13 @@ def _fail_result(task_id, model, family, category, sample_idx, temperature, top_
         "generation_meta": {},
         "evas_notes": [reason],
     }
+    attach_failure_attribution(result)
+    return result
 
 
 def _save_result(result: dict, output_dir: Path) -> None:
+    if "failure_attribution" not in result:
+        attach_failure_attribution(result)
     task_dir_out = output_dir / result["task_id"]
     task_dir_out.mkdir(parents=True, exist_ok=True)
     result_path = task_dir_out / "result.json"
@@ -1041,7 +1624,9 @@ def _load_cached_result(out_root: Path, task_id: str, expected_key: dict) -> dic
 def _task_pass(result: dict) -> bool:
     """A task passes Pass@1 if all required axes are 1.0."""
     scores = result.get("scores", {})
-    required = result.get("required_axes", ["dut_compile", "tb_compile", "sim_correct"])
+    required = _normalized_required_axes(
+        result.get("required_axes", ["dut_compile", "tb_compile", "sim_correct"])
+    )
     return all(scores.get(ax, 0.0) >= 1.0 for ax in required)
 
 
@@ -1072,7 +1657,7 @@ def build_model_results(model: str, results: list[dict], temperature: float,
     axis_stats: dict[str, dict[str, int]] = {}
     for r in results:
         scores = r.get("scores", {})
-        required = r.get("required_axes", [])
+        required = _normalized_required_axes(r.get("required_axes", []))
         for ax in required:
             if ax not in axis_stats:
                 axis_stats[ax] = {"denom": 0, "numer": 0}
@@ -1087,18 +1672,25 @@ def build_model_results(model: str, results: list[dict], temperature: float,
 
     # Failure taxonomy
     fail_taxonomy: dict[str, int] = {}
+    failure_domain_taxonomy: dict[str, int] = {}
+    repair_owner_taxonomy: dict[str, int] = {}
     for r in results:
+        attribution = r.get("failure_attribution") or attach_failure_attribution(dict(r))["failure_attribution"]
+        domain = attribution.get("domain", "unknown")
+        owner = attribution.get("repair_owner", "unknown")
+        failure_domain_taxonomy[domain] = failure_domain_taxonomy.get(domain, 0) + 1
+        repair_owner_taxonomy[owner] = repair_owner_taxonomy.get(owner, 0) + 1
         if not _task_pass(r):
             scores = r.get("scores", {})
             required = r.get("required_axes", [])
-            if scores.get("dut_compile", 1.0) < 1.0:
+            if r.get("status") == "FAIL_INFRA":
+                label = "FAIL_INFRA"
+            elif scores.get("dut_compile", 1.0) < 1.0:
                 label = "FAIL_DUT_COMPILE"
             elif scores.get("tb_compile", 1.0) < 1.0:
                 label = "FAIL_TB_COMPILE"
             elif scores.get("sim_correct", 1.0) < 1.0:
                 label = "FAIL_SIM_CORRECTNESS"
-            elif r.get("status") == "FAIL_INFRA":
-                label = "FAIL_INFRA"
             else:
                 label = "FAIL_OTHER"
             fail_taxonomy[label] = fail_taxonomy.get(label, 0) + 1
@@ -1113,6 +1705,8 @@ def build_model_results(model: str, results: list[dict], temperature: float,
         "by_family": family_rates,
         "axis_rates": axis_rates,
         "failure_taxonomy": fail_taxonomy,
+        "failure_domain_taxonomy": failure_domain_taxonomy,
+        "repair_owner_taxonomy": repair_owner_taxonomy,
         "status": "MODEL_EVALUATED",
     }
 

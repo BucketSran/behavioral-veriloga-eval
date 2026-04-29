@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+parameters fin=73e6 vth=0.45
+
+ahdl_include "cross_sine_precision_ref.va"
+
+Vvdd (VDD 0) vsource type=dc dc=1.0
+Vvss (VSS 0) vsource type=dc dc=0.0
+Vvin (vin 0) vsource type=sine sinedc=0.45 ampl=0.40 freq=fin
+IDUT (VDD VSS vin first_err_out max_err_out count_out) cross_sine_precision_ref fin=fin vth=vth
+
+tran tran stop=47n maxstep=1p errpreset=conservative
+save vin first_err_out max_err_out count_out

@@ -1,0 +1,20 @@
+// Spectre testbench for or_gate
+
+// Include the Verilog-A model
+ahdl_include "or_gate.va"
+
+// Create the OR gate instance
+I0 (a b y) or_gate
+
+// Voltage sources for inputs - test all 4 combinations over 8ns
+// (0,0) for 0-2ns, (0,1) for 2-4ns, (1,0) for 4-6ns, (1,1) for 6-8ns
+Va (a 0) vsource type=pwl wave=[0n 0 2n 0 2.001n 0 4n 0 4.001n 1.8 6n 1.8 6.001n 1.8 8n 1.8]
+Vb (b 0) vsource type=pwl wave=[0n 0 2n 0 2.001n 1.8 4n 1.8 4.001n 0 6n 0 6.001n 1.8 8n 1.8]
+
+// Save signals
+save a
+save b
+save y
+
+// Transient analysis
+tran tran stop=8n maxstep=100p

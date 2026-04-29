@@ -1,0 +1,27 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sample_hold(vdd, vss, in, clk, out);
+    inout vdd, vss;
+    input in, clk;
+    output out;
+
+    electrical vdd, vss, in, clk, out;
+
+    parameter real vth = 0.45 from (0:inf);
+    parameter real tedge = 100p from (0:inf);
+
+    real held_value;
+
+    analog begin
+        @(initial_step) begin
+            held_value = 0.0;
+        end
+
+        @(cross(V(clk) - vth, 1)) begin
+            held_value = V(in);
+        end
+
+        V(out) <+ transition(held_value, 0, tedge);
+    end
+endmodule

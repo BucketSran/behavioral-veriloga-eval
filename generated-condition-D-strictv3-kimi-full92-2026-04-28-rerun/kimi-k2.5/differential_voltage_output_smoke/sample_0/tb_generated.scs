@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "differential_voltage_output_ref.va"
+
+// Power supply
+VDD (VDD 0) vsource dc=1.0
+VSS (VSS 0) vsource dc=0.0
+
+// DUT instance
+XDUT (VDD VSS outp outn) differential_voltage_output_ref
+
+// Transient analysis
+tran tran stop=60n maxstep=20p errpreset=conservative
+
+// Save statements for required observables
+save outp
+save outn

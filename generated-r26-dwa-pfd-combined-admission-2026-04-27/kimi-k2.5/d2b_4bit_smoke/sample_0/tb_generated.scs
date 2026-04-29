@@ -1,0 +1,28 @@
+// EVAS testbench for d2b_4bit
+
+ahdl_include "d2b_4bit.va"
+
+// Supply voltages
+VDD (vdd 0) vsource dc=1.8
+VSS (vss 0) vsource dc=0
+
+// Input ramp from 0 to 1.8V over 100ns
+VIN (vin 0) vsource dc=0
+
+// DUT instantiation
+d2b_4bit dut (
+    VDD vdd
+    VSS vss
+    VIN vin
+    DOUT3 dout3
+    DOUT2 dout2
+    DOUT1 dout1
+    DOUT0 dout0
+)
+
+// Transient analysis
+tran tran stop=100n maxstep=2n
+
+// Save all signals
+save dut.*
+save V(vin) V(dout3) V(dout2) V(dout1) V(dout0)

@@ -1,0 +1,62 @@
+// ADC-DAC Round-Trip Testbench
+// EVAS-compatible Spectre testbench
+
+// Include Verilog-A modules
+ahdl_include "adc_ideal_4b.va"
+ahdl_include "dac_ideal_4b.va"
+
+// Global nodes
+global gnd
+
+// Parameters
+parameters vdd_val=0.9
+parameters t_sim=50n
+parameters t_ramp=50n
+parameters t_reset=10n
+parameters f_clk=1G
+parameters t_clk=1n
+
+// Voltage supplies
+v_vdd (vdd 0) vsource dc=vdd_val
+v_vss (vss 0) vsource dc=0
+
+// Reset: active low, deasserts at t_reset
+v_rst_n (rst_n 0) vsource dc=0 type=pwl wave=[0 0, t_reset 0, t_reset+1p vdd_val, t_sim vdd_val]
+
+// Clock: 1 GHz, starts after reset
+v_clk (clk 0) vsource dc=0 type=pulse val0=0 val1=vdd_val period=t_clk rise=10p fall=10p width=t_clk/2-10p delay=t_reset
+
+// Input ramp: 0 to vdd over t_ramp
+v_vin (vin 0) vsource dc=0 type=pwl wave=[0 0, t_ramp vdd_val, t_sim vdd_val]
+
+// ADC instance
+adc_ideal_4b adc (
+    .vin(vin)
+    .clk(clk)
+    .vdd(vdd)
+    .vss(vss)
+    .rst_n(rst_n)
+    .dout({dout_3 dout_2 dout_1 dout_0})
+)
+
+// DAC instance - chained from ADC output
+dac_ideal_4b dac (
+    .din({dout_3 dout_2 dout_1 dout_0})
+    .vdd(vdd)
+    .vss(vss)
+    .rst_n(rst_n)
+    .vout(vout)
+)
+
+// Transient analysis
+tran tran stop=t_sim maxstep=100p
+
+// Save statements for required observables
+save vin
+save vout
+save rst_n
+save clk
+save dout_3
+save dout_2
+save dout_1
+save dout_0

@@ -1,0 +1,46 @@
+// SAR ADC to DAC round-trip smoke testbench
+// 8-bit weighted SAR ADC, weighted DAC, and ideal sample/hold
+
+simulator lang=spectre
+
+// Supply and reference
+vsource vdd (vdd 0) vdc=0.9
+vsource vss (vss 0) vdc=0
+
+// Reset: active low, asserted at start then released
+vsource rst_n (rst_n 0) vdc=pwl(0 0, 50n 0, 60n 0.9)
+
+// Sampling clock: 50 MHz (20ns period)
+vsource clks (clks 0) vdc=pulse(0 0.9 100n 1n 1n 9n 20n)
+
+// Input: full-swing sine around mid-supply (0.45V)
+// Amplitude 0.4V gives range [0.05, 0.85] to avoid clipping at extremes
+// Frequency chosen to get many samples across cycles
+vsource vin (vin 0) vdc=0.45+0.4*sin(2*3.14159265359*1.2e6*time)
+
+// Instantiate sample/hold
+sh_ideal sh (vin clks vdd vss rst_n vin_sh)
+
+// Instantiate SAR ADC
+sar_adc_weighted_8b adc (vin clks rst_n dout_7 dout_6 dout_5 dout_4 dout_3 dout_2 dout_1 dout_0)
+
+// Instantiate weighted DAC
+dac_weighted_8b dac (dout_7 dout_6 dout_5 dout_4 dout_3 dout_2 dout_1 dout_0 vout)
+
+// Analysis
+tran tran stop=10u maxstep=5n
+
+// Save statements for required observables
+save vin
+save vin_sh
+save vout
+save rst_n
+save clks
+save dout_7
+save dout_6
+save dout_5
+save dout_4
+save dout_3
+save dout_2
+save dout_1
+save dout_0

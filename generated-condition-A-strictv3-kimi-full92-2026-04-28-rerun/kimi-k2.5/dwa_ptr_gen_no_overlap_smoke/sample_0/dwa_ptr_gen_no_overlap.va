@@ -1,0 +1,94 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dwa_ptr_gen_no_overlap (
+    clk_i,
+    rst_ni,
+    code_msb_i,
+    cell_en_o,
+    ptr_o
+);
+
+    // Ports
+    electrical clk_i;
+    electrical rst_ni;
+    electrical [3:0] code_msb_i;
+    electrical [15:0] cell_en_o;
+    electrical [15:0] ptr_o;
+
+    // Parameters
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter integer ptr_init = 0;
+
+    // Internal state variables
+    integer ptr;           // Current pointer position (0-15)
+    integer code;          // Sampled code value
+    integer i;
+    real cell_en_val[0:15];
+    real ptr_val[0:15];
+
+    analog begin
+        // Initialize state
+        @(initial_step) begin
+            ptr = ptr_init % 16;
+            code = 0;
+            for (i = 0; i < 16; i = i + 1) begin
+                cell_en_val[i] = 0.0;
+                ptr_val[i] = 0.0;
+            end
+            ptr_val[ptr] = vdd;
+        end
+
+        // Check for reset (active low)
+        if (V(rst_ni) < vth) begin
+            // Reset state
+            ptr = ptr_init % 16;
+            code = 0;
+            for (i = 0; i < 16; i = i + 1) begin
+                cell_en_val[i] = 0.0;
+                ptr_val[i] = 0.0;
+            end
+            ptr_val[ptr] = vdd;
+        end else begin
+            // Normal operation - sample on rising clock edge
+            @(cross(V(clk_i) - vth, +1)) begin
+                // Sample the 4-bit code
+                code = 0;
+                if (V(code_msb_i[3]) > vth) code = code + 8;
+                if (V(code_msb_i[2]) > vth) code = code + 4;
+                if (V(code_msb_i[1]) > vth) code = code + 2;
+                if (V(code_msb_i[0]) > vth) code = code + 1;
+
+                // Ensure code is 1-16 (treat 0 as 1 for meaningful operation)
+                if (code == 0) code = 1;
+
+                // Update cell enables based on current pointer and code
+                for (i = 0; i < 16; i = i + 1) begin
+                    cell_en_val[i] = 0.0;
+                end
+
+                // Enable cells starting from ptr for 'code' consecutive cells
+                for (i = 0; i < code; i = i + 1) begin
+                    cell_en_val[(ptr + i) % 16] = vdd;
+                end
+
+                // Update pointer for next cycle (non-overlapping: advance by code)
+                ptr = (ptr + code) % 16;
+
+                // Update pointer output (one-hot)
+                for (i = 0; i < 16; i = i + 1) begin
+                    ptr_val[i] = 0.0;
+                end
+                ptr_val[ptr] = vdd;
+            end
+        end
+
+        // Drive outputs with transitions
+        for (i = 0; i < 16; i = i + 1) begin
+            V(cell_en_o[i]) <+ transition(cell_en_val[i], 0, 100p);
+            V(ptr_o[i]) <+ transition(ptr_val[i], 0, 100p);
+        end
+    end
+
+endmodule

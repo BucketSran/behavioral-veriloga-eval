@@ -1,0 +1,66 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module _va_d2b_4b (VDD, VSS, VIN, DOUT3, DOUT2, DOUT1, DOUT0);
+    inout electrical VDD, VSS;
+    input electrical VIN;
+    output electrical DOUT3, DOUT2, DOUT1, DOUT0;
+
+    parameter real vdd = 1.8 from (0:inf);
+    parameter real vss = 0.0 from [0:inf);
+    parameter real tdel = 0 from [0:inf);
+    parameter real tr = 1n from (0:inf);
+    parameter real tf = 1n from (0:inf);
+
+    real vdd_val, vss_val;
+    real vin_val;
+    real vref;
+    integer code;
+    real d3, d2, d1, d0;
+    real vout3, vout2, vout1, vout0;
+
+    analog begin
+        @(initial_step) begin
+            vdd_val = vdd;
+            vss_val = vss;
+        end
+
+        // Sample supply and input voltages
+        vdd_val = V(VDD);
+        vss_val = V(VSS);
+        vin_val = V(VIN);
+
+        // Calculate reference voltage (full scale)
+        vref = vdd_val - vss_val;
+
+        // Quantize to 4-bit code (0-15)
+        // Code = floor((VIN - VSS) / VREF * 16), clamped to 0-15
+        if (vin_val <= vss_val) begin
+            code = 0;
+        end else if (vin_val >= vdd_val) begin
+            code = 15;
+        end else begin
+            code = $floor((vin_val - vss_val) / vref * 16.0);
+            if (code < 0) code = 0;
+            if (code > 15) code = 15;
+        end
+
+        // Extract individual bits
+        d3 = (code >= 8) ? vdd_val : vss_val;
+        d2 = ((code & 4) != 0) ? vdd_val : vss_val;
+        d1 = ((code & 2) != 0) ? vdd_val : vss_val;
+        d0 = ((code & 1) != 0) ? vdd_val : vss_val;
+
+        // Apply transitions for smooth output
+        vout3 = transition(d3, tdel, tr, tf);
+        vout2 = transition(d2, tdel, tr, tf);
+        vout1 = transition(d1, tdel, tr, tf);
+        vout0 = transition(d0, tdel, tr, tf);
+
+        // Drive outputs
+        V(DOUT3) <+ vout3;
+        V(DOUT2) <+ vout2;
+        V(DOUT1) <+ vout1;
+        V(DOUT0) <+ vout0;
+    end
+endmodule

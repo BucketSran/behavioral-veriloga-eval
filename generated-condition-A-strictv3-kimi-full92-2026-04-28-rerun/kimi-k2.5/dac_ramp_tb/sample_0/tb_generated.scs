@@ -1,0 +1,30 @@
+simulator lang=spectre
+global 0
+
+// Power supplies
+VDD (VDD 0) vsource dc=0.9
+VSS (VSS 0) vsource dc=0
+
+// Clock: 4ns period, 50% duty cycle, 16 cycles to cover all 4-bit codes
+VCLK (CLK 0) vsource type=pulse val0=0 val1=0.9 period=4n rise=100p fall=100p width=2n
+
+// 4-bit binary counter inputs: DIN3 (MSB) to DIN0 (LSB)
+// Count 0 to 15 over 64ns (16 clock cycles at 4ns each)
+// Each code held for 4ns, changing on falling edge of clock (at 2n, 6n, 10n, ...)
+
+VDIN3 (DIN3 0) vsource type=pwl wave=[0n 0 2n 0 6n 0.9 10n 0.9 14n 0.9 18n 0.9 22n 0 26n 0 30n 0 34n 0 38n 0.9 42n 0.9 46n 0.9 50n 0.9 54n 0 58n 0 62n 0 66n 0]
+VDIN2 (DIN2 0) vsource type=pwl wave=[0n 0 2n 0 6n 0 10n 0 14n 0.9 18n 0.9 22n 0.9 26n 0.9 30n 0 34n 0 38n 0 42n 0 46n 0.9 50n 0.9 54n 0.9 58n 0.9 62n 0 66n 0]
+VDIN1 (DIN1 0) vsource type=pwl wave=[0n 0 2n 0 6n 0 10n 0 14n 0 18n 0 22n 0.9 26n 0.9 30n 0.9 34n 0.9 38n 0 42n 0 46n 0 50n 0 54n 0.9 58n 0.9 62n 0.9 66n 0.9]
+VDIN0 (DIN0 0) vsource type=pwl wave=[0n 0 2n 0 6n 0.9 10n 0.9 14n 0 18n 0.9 22n 0 26n 0.9 30n 0 34n 0.9 38n 0 42n 0.9 46n 0 50n 0.9 54n 0 58n 0.9 62n 0 66n 0.9]
+
+// DUT instance
+XDUT (VDD VSS DIN3 DIN2 DIN1 DIN0 CLK AOUT) dac_ramp_ref
+
+// Transient analysis
+tran tran stop=68n maxstep=20p
+
+// Save public waveforms
+save CLK DIN3 DIN2 DIN1 DIN0 AOUT
+
+// Include DUT Verilog-A
+ahdl_include "dac_ramp_ref.va"

@@ -1,0 +1,22 @@
+// tb_xor_phase_detector.scs
+
+ahdl_include "xor_phase_detector.va"
+
+// Supply voltages
+VDD (VDD 0) vsource dc=0.9
+VSS (VSS 0) vsource dc=0
+
+// Reference clock: 100MHz, 50% duty, start at 0 phase
+Vref (ref 0) vsource type=pulse val0=0 val1=0.9 period=10n rise=100p fall=100p width=5n
+
+// Divided clock: 100MHz, 50% duty, 2.5ns phase offset (90 degrees)
+Vdiv (div 0) vsource type=pulse val0=0 val1=0.9 period=10n rise=100p fall=100p width=5n delay=2.5n
+
+// DUT instance
+xdut (VDD VSS ref div pd_out) xor_phase_detector
+
+// Save signals
+save ref div pd_out
+
+// Transient analysis
+tran tran stop=200n maxstep=100p errpreset=conservative

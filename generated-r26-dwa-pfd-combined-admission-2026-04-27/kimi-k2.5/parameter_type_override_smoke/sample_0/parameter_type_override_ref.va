@@ -1,0 +1,51 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module parameter_type_override_ref(out, vss);
+    electrical out, vss;
+
+    // Parameters with defaults that are NOT the final test values
+    parameter real vhi = 1.0 from [0:inf];      // Default 1.0V, will be overridden to 0.72
+    parameter integer reps = 2 from [0:inf];    // Default 2 pulses, will be overridden to 4
+
+    // Pulse timing parameters
+    parameter real period = 10.0n from (0:inf);
+    parameter real pulse_width = 5.0n from (0:inf);
+    parameter real rise_time = 0.5n from (0:inf);
+    parameter real fall_time = 0.5n from (0:inf);
+
+    integer pulse_count;
+    real next_rise_time;
+    real next_fall_time;
+    integer out_state;  // 0 = low, 1 = high
+
+    analog begin
+        @(initial_step) begin
+            pulse_count = 0;
+            next_rise_time = 0;
+            next_fall_time = pulse_width;
+            out_state = 0;
+        end
+
+        // Rising edge timer
+        @(timer(next_rise_time)) begin
+            if (pulse_count < reps) begin
+                out_state = 1;
+                next_fall_time = next_rise_time + pulse_width;
+                next_rise_time = next_rise_time + period;
+            end
+        end
+
+        // Falling edge timer
+        @(timer(next_fall_time)) begin
+            if (out_state == 1) begin
+                out_state = 0;
+                pulse_count = pulse_count + 1;
+            end
+        end
+
+        // Output voltage with smooth transitions
+        V(out) <+ transition(out_state * vhi, 0, rise_time, fall_time);
+        V(vss) <+ 0;
+    end
+endmodule

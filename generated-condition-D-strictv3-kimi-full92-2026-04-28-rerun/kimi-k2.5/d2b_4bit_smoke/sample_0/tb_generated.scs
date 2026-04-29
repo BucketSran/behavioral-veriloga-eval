@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "d2b_4bit.va"
+
+parameters vdd=0.9 vss=0
+
+Vdd (vdd 0) vsource dc=vdd
+Vss (vss 0) vsource dc=vss
+Vin (vin 0) vsource type=pwl wave=[0 vss 100n vdd]
+
+IDUT (vdd vss vin DOUT3 DOUT2 DOUT1 DOUT0) d2b_4bit
+
+tran tran stop=100n maxstep=2n
+
+save vin DOUT3 DOUT2 DOUT1 DOUT0

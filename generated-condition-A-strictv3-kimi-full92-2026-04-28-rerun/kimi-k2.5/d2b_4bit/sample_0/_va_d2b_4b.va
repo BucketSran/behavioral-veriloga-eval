@@ -1,0 +1,69 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module _va_d2b_4b (VDD, VSS, VIN, DOUT3, DOUT2, DOUT1, DOUT0);
+    inout electrical VDD, VSS;
+    input electrical VIN;
+    output electrical DOUT3, DOUT2, DOUT1, DOUT0;
+
+    parameter real vth = 0.5 from (0:1);        // threshold as fraction of VDD-VSS
+    parameter real tdel = 0 from [0:inf);       // delay
+    parameter real tr = 1n from (0:inf);        // rise time
+    parameter real tf = 1n from (0:inf);        // fall time
+
+    real vdd_val, vss_val;
+    real vin_val;
+    real vref;
+    real vlsb;
+    integer code;
+    real d3, d2, d1, d0;
+    real vout_high, vout_low;
+
+    analog begin
+        @(initial_step) begin
+            vdd_val = V(VDD);
+            vss_val = V(VSS);
+        end
+
+        // Sample supply and input continuously
+        vdd_val = V(VDD);
+        vss_val = V(VSS);
+        vin_val = V(VIN);
+
+        // Calculate reference levels
+        vref = vdd_val - vss_val;
+        vlsb = vref / 16.0;  // 16 levels for 4-bit, but we use 15 thresholds
+
+        // Clamp input to valid range
+        if (vin_val < vss_val)
+            vin_val = vss_val;
+        else if (vin_val > vdd_val)
+            vin_val = vdd_val;
+
+        // Determine binary code based on input voltage
+        // 16 equal regions: 0-1LSB, 1-2LSB, ..., 15-16LSB
+        // Output codes 0 to 15
+        code = integer((vin_val - vss_val) / vlsb);
+        if (code > 15)
+            code = 15;
+        if (code < 0)
+            code = 0;
+
+        // Extract individual bits
+        d3 = (code >= 8) ? 1.0 : 0.0;
+        d2 = ((code >= 4) && (code < 8)) || (code >= 12) ? 1.0 : 0.0;
+        d1 = ((code >= 2) && (code < 4)) || ((code >= 6) && (code < 8)) ||
+             ((code >= 10) && (code < 12)) || (code >= 14) ? 1.0 : 0.0;
+        d0 = (code % 2 == 1) ? 1.0 : 0.0;
+
+        // Output voltage levels
+        vout_high = vdd_val;
+        vout_low = vss_val;
+
+        // Drive outputs with transitions
+        V(DOUT3) <+ transition(d3 ? vout_high : vout_low, tdel, tr, tf);
+        V(DOUT2) <+ transition(d2 ? vout_high : vout_low, tdel, tr, tf);
+        V(DOUT1) <+ transition(d1 ? vout_high : vout_low, tdel, tr, tf);
+        V(DOUT0) <+ transition(d0 ? vout_high : vout_low, tdel, tr, tf);
+    end
+endmodule

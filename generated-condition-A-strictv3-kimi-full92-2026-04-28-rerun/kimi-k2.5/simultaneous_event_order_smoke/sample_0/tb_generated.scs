@@ -1,0 +1,37 @@
+// Simultaneous Event Order Testbench
+simulator lang=spectre
+
+ahdl_include "simultaneous_event_order_ref.va"
+
+// Supply and reference sources
+VDD (VDD 0) vsource dc=1.8
+VSS (VSS 0) vsource dc=0
+
+// Reference: ramp that crosses vth=0.9 at exactly 20n, 40n, 60n, 80n
+// Ramp from 0 to 1.8 over 80ns, so slope = 1.8/80n = 22.5e6 V/s
+// Crosses 0.9 at t = 0.9/22.5e6 = 40n? No, let's make it cross at 20n intervals
+// For crossing at 20n, 40n, 60n, 80n: need ref = 0.9 at those times
+// Use piecewise linear: 0 at 0, 0.9 at 20n, 1.8 at 40n, then repeat or continue
+// Actually simpler: ramp with proper slope
+// vth=0.9, want cross at 20n, 40n, 60n, 80n
+// If linear ramp 0->1.8 in T, then at time t, v = 1.8*t/T
+// Set 1.8*20n/T = 0.9 => T = 40n for first cross? No, we want multiple crosses
+// Use repeating triangle or sawtooth, or just a ramp that crosses multiple times
+
+// Better: use a reference that is a triangle wave crossing vth at desired times
+// Or use pwl with exact crossings at 20n, 40n, 60n, 80n
+
+Vref (ref 0) vsource type=pwl wave=[0n 0 20n 0.9 40n 0 60n 0.9 80n 0 100n 0.9]
+
+// DUT
+dut (VDD VSS ref out) simultaneous_event_order_ref
+
+// Transient analysis
+tran tran stop=80n maxstep=20p errpreset=conservative
+
+// Save statements for required observables
+save dut:out
+save ref
+save VDD
+save VSS
+save time

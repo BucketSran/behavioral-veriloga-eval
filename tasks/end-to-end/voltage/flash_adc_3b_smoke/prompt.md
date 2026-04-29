@@ -32,7 +32,7 @@ across the full reference range and produce all 8 output codes after clocked sam
 - Instantiate the DUT by positional ports.
 - Save these exact scalar names: `vin`, `clk`, `dout2`, `dout1`, `dout0`.
 - Include the generated DUT file `flash_adc_3b.va`.
-- Use the final transient setting provided by the injected Strict EVAS Validation Contract.
+- Use the final transient setting listed in the Public Evaluation Contract below.
 
 ## Deliverables
 

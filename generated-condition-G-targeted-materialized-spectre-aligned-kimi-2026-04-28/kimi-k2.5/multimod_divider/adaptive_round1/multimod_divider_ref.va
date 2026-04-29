@@ -1,0 +1,75 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module multimod_divider_ref (clk_in, mod, mod_0, mod_1, mod_2, mod_3, prescaler_out);
+    input clk_in;
+    input mod;
+    input mod_0;
+    input mod_1;
+    input mod_2;
+    input mod_3;
+    output prescaler_out;
+    electrical clk_in, mod, mod_0, mod_1, mod_2, mod_3, prescaler_out;
+
+    parameter real vth = 0.9 from (0:inf);
+    parameter real vhi = 1.8 from (0:inf);
+    parameter real vlo = 0.0 from [0:inf);
+    parameter real tdel = 0 from [0:inf);
+    parameter real tr = 1n from (0:inf);
+    parameter real tf = 1n from (0:inf);
+    parameter integer N = 4 from [1:inf);
+
+    integer count;
+    integer base_modulus;
+    integer current_modulus;
+    integer mod_val;
+    integer prescaler_state;
+    real prescaler_out_val;
+
+    analog begin
+        @(initial_step) begin
+            count = 0;
+            base_modulus = N;
+            current_modulus = N;
+            mod_val = 0;
+            prescaler_state = 0;
+            prescaler_out_val = vlo;
+        end
+
+        // Sample modulus control word on each clock rising edge
+        @(cross(V(clk_in) - vth, 1)) begin
+            // Build 4-bit base modulus from control word
+            base_modulus = N;
+            if (V(mod_0) > vth) base_modulus = base_modulus + 1;
+            if (V(mod_1) > vth) base_modulus = base_modulus + 2;
+            if (V(mod_2) > vth) base_modulus = base_modulus + 4;
+            if (V(mod_3) > vth) base_modulus = base_modulus + 8;
+
+            // MOD input selects between N and N+1 division
+            // Latch mod_val at clock edge to determine this cycle's modulus
+            if (V(mod) > vth) begin
+                mod_val = 1;
+            end else begin
+                mod_val = 0;
+            end
+
+            // Use the latched mod_val from previous cycle for terminal count
+            // First cycle uses mod_val=0 (base modulus)
+            current_modulus = base_modulus + mod_val;
+
+            // Count and toggle prescaler output
+            count = count + 1;
+            if (count >= current_modulus) begin
+                count = 0;
+                prescaler_state = !prescaler_state;
+                if (prescaler_state == 1) begin
+                    prescaler_out_val = vhi;
+                end else begin
+                    prescaler_out_val = vlo;
+                end
+            end
+        end
+
+        V(prescaler_out) <+ transition(prescaler_out_val, tdel, tr, tf);
+    end
+endmodule

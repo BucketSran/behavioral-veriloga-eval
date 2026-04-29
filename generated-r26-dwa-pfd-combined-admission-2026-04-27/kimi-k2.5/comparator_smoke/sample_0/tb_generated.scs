@@ -1,0 +1,23 @@
+// Comparator testbench
+simulator lang=spectre
+
+ahdl_include "comparator.va"
+
+// Supply voltages
+v_vdd (vdd 0) vsource dc=1.2
+v_vss (vss 0) vsource dc=0
+
+// Differential input: ramp crossing at ~2ns
+// vinp ramps from 0 to 1.2V, vinn stays at 0.6V
+// crossing happens at 0.6V input, which is at 2ns with 10ns ramp
+v_vinp (vinp 0) vsource type=pulse val0=0 val1=1.2 period=20n delay=0 rise=10n fall=10n width=0
+v_vinn (vinn 0) vsource dc=0.6
+
+// DUT
+dut (vdd vss vinp vinn out_p) comparator
+
+// Save statements for CSV output - exact names required
+save vinp vinn out_p
+
+// Transient analysis - exact settings required
+tran tran stop=30n maxstep=0.5n

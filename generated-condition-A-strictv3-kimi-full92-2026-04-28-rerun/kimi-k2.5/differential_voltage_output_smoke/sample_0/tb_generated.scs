@@ -1,0 +1,16 @@
+// Spectre testbench for differential_voltage_output_ref
+
+ahdl_include "differential_voltage_output_ref.va"
+
+// Supply voltages
+v_vdd (VDD 0) vsource dc=1.0
+v_vss (VSS 0) vsource dc=0.0
+
+// DUT instance
+dut (VDD VSS outp outn) differential_voltage_output_ref
+
+// Transient analysis
+tran tran stop=60n maxstep=20p errpreset=conservative
+
+// Save required signals for checker evaluation
+save outp outn

@@ -1,0 +1,145 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dwa_ptr_gen (clk_i, rst_ni, code_msb_i_3, code_msb_i_2, code_msb_i_1, code_msb_i_0,
+                    cell_en_o_15, cell_en_o_14, cell_en_o_13, cell_en_o_12,
+                    cell_en_o_11, cell_en_o_10, cell_en_o_9, cell_en_o_8,
+                    cell_en_o_7, cell_en_o_6, cell_en_o_5, cell_en_o_4,
+                    cell_en_o_3, cell_en_o_2, cell_en_o_1, cell_en_o_0,
+                    ptr_o_15, ptr_o_14, ptr_o_13, ptr_o_12,
+                    ptr_o_11, ptr_o_10, ptr_o_9, ptr_o_8,
+                    ptr_o_7, ptr_o_6, ptr_o_5, ptr_o_4,
+                    ptr_o_3, ptr_o_2, ptr_o_1, ptr_o_0);
+
+    inout clk_i, rst_ni;
+    inout code_msb_i_3, code_msb_i_2, code_msb_i_1, code_msb_i_0;
+    inout cell_en_o_15, cell_en_o_14, cell_en_o_13, cell_en_o_12;
+    inout cell_en_o_11, cell_en_o_10, cell_en_o_9, cell_en_o_8;
+    inout cell_en_o_7, cell_en_o_6, cell_en_o_5, cell_en_o_4;
+    inout cell_en_o_3, cell_en_o_2, cell_en_o_1, cell_en_o_0;
+    inout ptr_o_15, ptr_o_14, ptr_o_13, ptr_o_12;
+    inout ptr_o_11, ptr_o_10, ptr_o_9, ptr_o_8;
+    inout ptr_o_7, ptr_o_6, ptr_o_5, ptr_o_4;
+    inout ptr_o_3, ptr_o_2, ptr_o_1, ptr_o_0;
+
+    electrical clk_i, rst_ni;
+    electrical code_msb_i_3, code_msb_i_2, code_msb_i_1, code_msb_i_0;
+    electrical cell_en_o_15, cell_en_o_14, cell_en_o_13, cell_en_o_12;
+    electrical cell_en_o_11, cell_en_o_10, cell_en_o_9, cell_en_o_8;
+    electrical cell_en_o_7, cell_en_o_6, cell_en_o_5, cell_en_o_4;
+    electrical cell_en_o_3, cell_en_o_2, cell_en_o_1, cell_en_o_0;
+    electrical ptr_o_15, ptr_o_14, ptr_o_13, ptr_o_12;
+    electrical ptr_o_11, ptr_o_10, ptr_o_9, ptr_o_8;
+    electrical ptr_o_7, ptr_o_6, ptr_o_5, ptr_o_4;
+    electrical ptr_o_3, ptr_o_2, ptr_o_1, ptr_o_0;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter integer ptr_init = 0;
+    parameter real tr = 0.5n;
+    parameter real tf = 0.5n;
+
+    integer ptr;           // current pointer 0-15
+    integer code;          // input code 0-15
+    integer i;
+    real v_rst_n;
+
+    // Arrays for electrical outputs (using integers to track state)
+    integer ptr_state[0:15];
+    integer cell_en_state[0:15];
+
+    analog begin
+        @(initial_step) begin
+            ptr = ptr_init;
+            for (i = 0; i < 16; i = i + 1) begin
+                ptr_state[i] = 0;
+                cell_en_state[i] = 0;
+            end
+            ptr_state[ptr] = 1;
+            // Initialize cell_en based on ptr_init and code=0 (just ptr cell)
+            for (i = 0; i < 16; i = i + 1) begin
+                cell_en_state[i] = 0;
+            end
+            cell_en_state[ptr] = 1;
+        end
+
+        // Sample reset (active low)
+        v_rst_n = V(rst_ni);
+
+        // Detect rising clock edge
+        @(cross(V(clk_i) - vth, +1)) begin
+            if (v_rst_n < vth) begin
+                // Reset: initialize pointer
+                ptr = ptr_init;
+            end else begin
+                // Normal operation: read code and update pointer
+                code = 0;
+                if (V(code_msb_i_3) > vth) code = code + 8;
+                if (V(code_msb_i_2) > vth) code = code + 4;
+                if (V(code_msb_i_1) > vth) code = code + 2;
+                if (V(code_msb_i_0) > vth) code = code + 1;
+
+                // Update pointer: new_ptr = (old_ptr + code) % 16
+                ptr = ptr + code;
+                if (ptr >= 16) ptr = ptr - 16;
+            end
+
+            // Update one-hot pointer state
+            for (i = 0; i < 16; i = i + 1) begin
+                ptr_state[i] = (i == ptr) ? 1 : 0;
+            end
+
+            // Update cell enable: window from ptr to ptr+code (modulo 16)
+            // For code=0, enable just the ptr cell
+            // For code>0, enable ptr through ptr+code-1 (code cells total)
+            integer j, idx;
+            for (i = 0; i < 16; i = i + 1) begin
+                cell_en_state[i] = 0;
+            end
+            for (j = 0; j < code; j = j + 1) begin
+                idx = ptr + j;
+                if (idx >= 16) idx = idx - 16;
+                cell_en_state[idx] = 1;
+            end
+            // If code is 0, still need to enable something - enable ptr cell
+            if (code == 0) begin
+                cell_en_state[ptr] = 1;
+            end
+        end
+
+        // Drive outputs with transitions
+        V(ptr_o_15) <+ transition(ptr_state[15] ? vdd : 0, 0, tr, tf);
+        V(ptr_o_14) <+ transition(ptr_state[14] ? vdd : 0, 0, tr, tf);
+        V(ptr_o_13) <+ transition(ptr_state[13] ? vdd : 0, 0, tr, tf);
+        V(ptr_o_12) <+ transition(ptr_state[12] ? vdd : 0, 0, tr, tf);
+        V(ptr_o_11) <+ transition(ptr_state[11] ? vdd : 0, 0, tr, tf);
+        V(ptr_o_10) <+ transition(ptr_state[10] ? vdd : 0, 0, tr, tf);
+        V(ptr_o_9) <+ transition(ptr_state[9] ? vdd : 0, 0, tr, tf);
+        V(ptr_o_8) <+ transition(ptr_state[8] ? vdd : 0, 0, tr, tf);
+        V(ptr_o_7) <+ transition(ptr_state[7] ? vdd : 0, 0, tr, tf);
+        V(ptr_o_6) <+ transition(ptr_state[6] ? vdd : 0, 0, tr, tf);
+        V(ptr_o_5) <+ transition(ptr_state[5] ? vdd : 0, 0, tr, tf);
+        V(ptr_o_4) <+ transition(ptr_state[4] ? vdd : 0, 0, tr, tf);
+        V(ptr_o_3) <+ transition(ptr_state[3] ? vdd : 0, 0, tr, tf);
+        V(ptr_o_2) <+ transition(ptr_state[2] ? vdd : 0, 0, tr, tf);
+        V(ptr_o_1) <+ transition(ptr_state[1] ? vdd : 0, 0, tr, tf);
+        V(ptr_o_0) <+ transition(ptr_state[0] ? vdd : 0, 0, tr, tf);
+
+        V(cell_en_o_15) <+ transition(cell_en_state[15] ? vdd : 0, 0, tr, tf);
+        V(cell_en_o_14) <+ transition(cell_en_state[14] ? vdd : 0, 0, tr, tf);
+        V(cell_en_o_13) <+ transition(cell_en_state[13] ? vdd : 0, 0, tr, tf);
+        V(cell_en_o_12) <+ transition(cell_en_state[12] ? vdd : 0, 0, tr, tf);
+        V(cell_en_o_11) <+ transition(cell_en_state[11] ? vdd : 0, 0, tr, tf);
+        V(cell_en_o_10) <+ transition(cell_en_state[10] ? vdd : 0, 0, tr, tf);
+        V(cell_en_o_9) <+ transition(cell_en_state[9] ? vdd : 0, 0, tr, tf);
+        V(cell_en_o_8) <+ transition(cell_en_state[8] ? vdd : 0, 0, tr, tf);
+        V(cell_en_o_7) <+ transition(cell_en_state[7] ? vdd : 0, 0, tr, tf);
+        V(cell_en_o_6) <+ transition(cell_en_state[6] ? vdd : 0, 0, tr, tf);
+        V(cell_en_o_5) <+ transition(cell_en_state[5] ? vdd : 0, 0, tr, tf);
+        V(cell_en_o_4) <+ transition(cell_en_state[4] ? vdd : 0, 0, tr, tf);
+        V(cell_en_o_3) <+ transition(cell_en_state[3] ? vdd : 0, 0, tr, tf);
+        V(cell_en_o_2) <+ transition(cell_en_state[2] ? vdd : 0, 0, tr, tf);
+        V(cell_en_o_1) <+ transition(cell_en_state[1] ? vdd : 0, 0, tr, tf);
+        V(cell_en_o_0) <+ transition(cell_en_state[0] ? vdd : 0, 0, tr, tf);
+    end
+endmodule

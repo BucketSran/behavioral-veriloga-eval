@@ -1,0 +1,60 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dwa_ptr_gen (
+    input  electrical clk_i,
+    input  electrical rst_ni,
+    input  electrical [3:0] code_msb_i,
+    output electrical [15:0] cell_en_o,
+    output electrical [15:0] ptr_o
+);
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter integer ptr_init = 0;
+    parameter real tedge = 50p;
+    integer ptr;
+    integer code;
+    integer start_idx;
+    integer dist;
+    integer j;
+    real cell_val[15:0];
+    real ptr_val[15:0];
+    genvar i;
+
+    analog begin
+        @(initial_step) begin
+            ptr = ptr_init;
+            code = 0;
+            for (j = 0; j < 16; j = j + 1) begin
+                cell_val[j] = 0.0;
+                ptr_val[j] = (j == ptr) ? vdd : 0.0;
+            end
+        end
+
+        @(cross(V(clk_i) - vth, +1)) begin
+            if (V(rst_ni) < vth) begin
+                ptr = ptr_init;
+                code = 0;
+            end else begin
+                code = 0;
+                if (V(code_msb_i[0]) > vth) code = code + 1;
+                if (V(code_msb_i[1]) > vth) code = code + 2;
+                if (V(code_msb_i[2]) > vth) code = code + 4;
+                if (V(code_msb_i[3]) > vth) code = code + 8;
+                ptr = (ptr + code) % 16;
+            end
+
+            start_idx = (ptr - code + 1 + 32) % 16;
+            for (j = 0; j < 16; j = j + 1) begin
+                dist = (j - start_idx + 16) % 16;
+                cell_val[j] = ((code > 0) && (dist < code)) ? vdd : 0.0;
+                ptr_val[j] = (j == ptr) ? vdd : 0.0;
+            end
+        end
+
+        for (i = 0; i < 16; i = i + 1) begin
+            V(cell_en_o[i]) <+ transition(cell_val[i], 0.0, tedge, tedge);
+            V(ptr_o[i]) <+ transition(ptr_val[i], 0.0, tedge, tedge);
+        end
+    end
+endmodule

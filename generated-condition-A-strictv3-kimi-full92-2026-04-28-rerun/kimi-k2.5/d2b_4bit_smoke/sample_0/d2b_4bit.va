@@ -1,0 +1,49 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module d2b_4bit (VDD, VSS, VIN, DOUT3, DOUT2, DOUT1, DOUT0);
+    electrical VDD, VSS, VIN, DOUT3, DOUT2, DOUT1, DOUT0;
+
+    parameter real vtrans = 0.5 from (0:1);
+    parameter real tdel = 0 from [0:inf);
+    parameter real trise = 1n from (0:inf);
+    parameter real tfall = 1n from (0:inf);
+
+    real vdd_val, vss_val, vin_val;
+    real vstep;
+    integer code;
+    integer bit3, bit2, bit1, bit0;
+
+    analog begin
+        @(initial_step) begin
+            vdd_val = V(VDD);
+            vss_val = V(VSS);
+        end
+
+        vdd_val = V(VDD);
+        vss_val = V(VSS);
+        vin_val = V(VIN);
+
+        vstep = (vdd_val - vss_val) / 16.0;
+
+        if (vin_val <= vss_val) begin
+            code = 0;
+        end else if (vin_val >= vdd_val) begin
+            code = 15;
+        end else begin
+            code = $floor((vin_val - vss_val) / vstep);
+            if (code > 15) code = 15;
+            if (code < 0) code = 0;
+        end
+
+        bit3 = (code >> 3) & 1;
+        bit2 = (code >> 2) & 1;
+        bit1 = (code >> 1) & 1;
+        bit0 = code & 1;
+
+        V(DOUT3) <+ transition(bit3 ? vdd_val : vss_val, tdel, trise, tfall);
+        V(DOUT2) <+ transition(bit2 ? vdd_val : vss_val, tdel, trise, tfall);
+        V(DOUT1) <+ transition(bit1 ? vdd_val : vss_val, tdel, trise, tfall);
+        V(DOUT0) <+ transition(bit0 ? vdd_val : vss_val, tdel, trise, tfall);
+    end
+endmodule

@@ -1,0 +1,50 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module mux_4to1(vdd, vss, d3, d2, d1, d0, sel1, sel0, y);
+    electrical vdd, vss, d3, d2, d1, d0, sel1, sel0, y;
+    parameter real vth = 0.45;
+    parameter real tedge = 100p;
+
+    integer sel;
+    real vout;
+
+    analog begin
+        @(initial_step) begin
+            sel = 0;
+            vout = 0.0;
+        end
+
+        // Detect changes on sel0 and sel1 using cross
+        @(cross(V(sel0) - vth, 1)) ;
+        @(cross(V(sel0) - vth, -1)) ;
+        @(cross(V(sel1) - vth, 1)) ;
+        @(cross(V(sel1) - vth, -1)) ;
+
+        // Detect changes on data inputs (using small threshold for any change)
+        @(cross(V(d0) - V(d0), 1)) ;
+        @(cross(V(d1) - V(d1), 1)) ;
+        @(cross(V(d2) - V(d2), 1)) ;
+        @(cross(V(d3) - V(d3), 1)) ;
+
+        // Compute selection
+        if (V(sel1) > vth)
+            sel = 2;
+        else
+            sel = 0;
+
+        if (V(sel0) > vth)
+            sel = sel + 1;
+
+        // Select output based on sel
+        case (sel)
+            0: vout = V(d0);
+            1: vout = V(d1);
+            2: vout = V(d2);
+            3: vout = V(d3);
+            default: vout = V(d0);
+        endcase
+
+        V(y) <+ transition(vout, 0, tedge);
+    end
+endmodule

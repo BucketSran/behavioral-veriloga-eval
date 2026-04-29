@@ -1,0 +1,191 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sar_logic (VDD, VSS, CLKS, DCOMP, DP_DAC_9, DP_DAC_8, DP_DAC_7, DP_DAC_6, DP_DAC_5, DP_DAC_4, DP_DAC_3, DP_DAC_2, DP_DAC_1, DP_DAC_0, RDY);
+    inout VDD;
+    inout VSS;
+    input CLKS;
+    input DCOMP;
+    output DP_DAC_9;
+    output DP_DAC_8;
+    output DP_DAC_7;
+    output DP_DAC_6;
+    output DP_DAC_5;
+    output DP_DAC_4;
+    output DP_DAC_3;
+    output DP_DAC_2;
+    output DP_DAC_1;
+    output DP_DAC_0;
+    output RDY;
+
+    electrical VDD;
+    electrical VSS;
+    electrical CLKS;
+    electrical DCOMP;
+    electrical DP_DAC_9;
+    electrical DP_DAC_8;
+    electrical DP_DAC_7;
+    electrical DP_DAC_6;
+    electrical DP_DAC_5;
+    electrical DP_DAC_4;
+    electrical DP_DAC_3;
+    electrical DP_DAC_2;
+    electrical DP_DAC_1;
+    electrical DP_DAC_0;
+    electrical RDY;
+
+    integer state;
+    integer bit_idx;
+    integer dac_reg_9;
+    integer dac_reg_8;
+    integer dac_reg_7;
+    integer dac_reg_6;
+    integer dac_reg_5;
+    integer dac_reg_4;
+    integer dac_reg_3;
+    integer dac_reg_2;
+    integer dac_reg_1;
+    integer dac_reg_0;
+    integer rdy_reg;
+    real vdd_level;
+    real vss_level;
+    real vth;
+    real trise;
+    real tfall;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+            bit_idx = 9;
+            dac_reg_9 = 0;
+            dac_reg_8 = 0;
+            dac_reg_7 = 0;
+            dac_reg_6 = 0;
+            dac_reg_5 = 0;
+            dac_reg_4 = 0;
+            dac_reg_3 = 0;
+            dac_reg_2 = 0;
+            dac_reg_1 = 0;
+            dac_reg_0 = 0;
+            rdy_reg = 0;
+            vdd_level = 1.8;
+            vss_level = 0.0;
+            vth = 0.9;
+            trise = 0.1e-9;
+            tfall = 0.1e-9;
+        end
+
+        vdd_level = V(VDD);
+        vss_level = V(VSS);
+        vth = (vdd_level + vss_level) / 2.0;
+
+        @(cross(V(CLKS) - vth, 1)) begin
+            if (state == 0) begin
+                // Start conversion: set MSB and go to trial state
+                bit_idx = 9;
+                dac_reg_9 = 1;
+                dac_reg_8 = 0;
+                dac_reg_7 = 0;
+                dac_reg_6 = 0;
+                dac_reg_5 = 0;
+                dac_reg_4 = 0;
+                dac_reg_3 = 0;
+                dac_reg_2 = 0;
+                dac_reg_1 = 0;
+                dac_reg_0 = 0;
+                rdy_reg = 0;
+                state = 1;
+            end else if (state == 1) begin
+                // SAR decision state: latch comparator result for current bit
+                if (V(DCOMP) > vth) begin
+                    // Comparator high: keep bit set
+                end else begin
+                    // Comparator low: clear bit
+                    if (bit_idx == 9) begin
+                        dac_reg_9 = 0;
+                    end else if (bit_idx == 8) begin
+                        dac_reg_8 = 0;
+                    end else if (bit_idx == 7) begin
+                        dac_reg_7 = 0;
+                    end else if (bit_idx == 6) begin
+                        dac_reg_6 = 0;
+                    end else if (bit_idx == 5) begin
+                        dac_reg_5 = 0;
+                    end else if (bit_idx == 4) begin
+                        dac_reg_4 = 0;
+                    end else if (bit_idx == 3) begin
+                        dac_reg_3 = 0;
+                    end else if (bit_idx == 2) begin
+                        dac_reg_2 = 0;
+                    end else if (bit_idx == 1) begin
+                        dac_reg_1 = 0;
+                    end else if (bit_idx == 0) begin
+                        dac_reg_0 = 0;
+                    end
+                end
+
+                // Move to next bit or finish
+                bit_idx = bit_idx - 1;
+                if (bit_idx < 0) begin
+                    // Conversion complete
+                    rdy_reg = 1;
+                    state = 2;
+                end else begin
+                    // Set next bit for trial
+                    if (bit_idx == 8) begin
+                        dac_reg_8 = 1;
+                    end else if (bit_idx == 7) begin
+                        dac_reg_7 = 1;
+                    end else if (bit_idx == 6) begin
+                        dac_reg_6 = 1;
+                    end else if (bit_idx == 5) begin
+                        dac_reg_5 = 1;
+                    end else if (bit_idx == 4) begin
+                        dac_reg_4 = 1;
+                    end else if (bit_idx == 3) begin
+                        dac_reg_3 = 1;
+                    end else if (bit_idx == 2) begin
+                        dac_reg_2 = 1;
+                    end else if (bit_idx == 1) begin
+                        dac_reg_1 = 1;
+                    end else if (bit_idx == 0) begin
+                        dac_reg_0 = 1;
+                    end
+                end
+            end else if (state == 2) begin
+                // Wait for next start (CLKS edge with state already 2)
+                // Stay in state 2, keep RDY high, hold output
+            end
+        end
+
+        // Reset on VDD ramp or explicit reset condition
+        if (V(VDD) < vth) begin
+            state = 0;
+            bit_idx = 9;
+            dac_reg_9 = 0;
+            dac_reg_8 = 0;
+            dac_reg_7 = 0;
+            dac_reg_6 = 0;
+            dac_reg_5 = 0;
+            dac_reg_4 = 0;
+            dac_reg_3 = 0;
+            dac_reg_2 = 0;
+            dac_reg_1 = 0;
+            dac_reg_0 = 0;
+            rdy_reg = 0;
+        end
+
+        // Drive outputs with transition
+        V(DP_DAC_9) <+ transition(dac_reg_9 * vdd_level + (1 - dac_reg_9) * vss_level, 0, trise, tfall);
+        V(DP_DAC_8) <+ transition(dac_reg_8 * vdd_level + (1 - dac_reg_8) * vss_level, 0, trise, tfall);
+        V(DP_DAC_7) <+ transition(dac_reg_7 * vdd_level + (1 - dac_reg_7) * vss_level, 0, trise, tfall);
+        V(DP_DAC_6) <+ transition(dac_reg_6 * vdd_level + (1 - dac_reg_6) * vss_level, 0, trise, tfall);
+        V(DP_DAC_5) <+ transition(dac_reg_5 * vdd_level + (1 - dac_reg_5) * vss_level, 0, trise, tfall);
+        V(DP_DAC_4) <+ transition(dac_reg_4 * vdd_level + (1 - dac_reg_4) * vss_level, 0, trise, tfall);
+        V(DP_DAC_3) <+ transition(dac_reg_3 * vdd_level + (1 - dac_reg_3) * vss_level, 0, trise, tfall);
+        V(DP_DAC_2) <+ transition(dac_reg_2 * vdd_level + (1 - dac_reg_2) * vss_level, 0, trise, tfall);
+        V(DP_DAC_1) <+ transition(dac_reg_1 * vdd_level + (1 - dac_reg_1) * vss_level, 0, trise, tfall);
+        V(DP_DAC_0) <+ transition(dac_reg_0 * vdd_level + (1 - dac_reg_0) * vss_level, 0, trise, tfall);
+        V(RDY) <+ transition(rdy_reg * vdd_level + (1 - rdy_reg) * vss_level, 0, trise, tfall);
+    end
+endmodule

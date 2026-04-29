@@ -1,0 +1,40 @@
+// Gain Extraction Smoke Testbench
+// EVAS-compatible Spectre testbench
+
+simulator lang=spectre
+
+// Include Verilog-A modules
+ahdl_include "vin_src.va"
+ahdl_include "lfsr.va"
+ahdl_include "dither_adder.va"
+ahdl_include "gain_amp_fixed.va"
+
+// Global parameters
+global 0 vss
+parameters VDD=0.9
+parameters CLK_PERIOD=20n
+parameters CLK_FREQ=50M
+
+// Supply
+VDD (vdd vss) vsource dc=VDD
+
+// Clock generation - 50MHz
+VCLK (clk vss) vsource type=pulse val0=0 val1=VDD period=CLK_PERIOD rise=1n fall=1n width=10n
+
+// Reset - active low, asserted at start then released
+VRST (rst_n vss) vsource type=pulse val0=0 val1=VDD period=200u rise=1n fall=1n width=199u delay=50n
+
+// Enable - active high, asserted after reset
+VEN (en vss) vsource type=pulse val0=0 val1=VDD period=200u rise=1n fall=1n width=199.9u delay=100n
+
+// DUT instances with public port order
+IVIN  (clk rst_n vinp vinn) vin_src
+ILFSR (dpn vdd vss clk en rst_n) lfsr
+IDITH (vinp vinn dpn vdin_p vdin_n) dither_adder DITHER_AMP=0.014063
+IAMP  (vdin_p vdin_n vamp_p vamp_n) gain_amp_fixed ACTUAL_GAIN=8.64
+
+// Save statements for required waveforms
+save vinp vinn vamp_p vamp_n
+
+// Transient analysis per public evaluation contract
+tran tran stop=200u maxstep=8n

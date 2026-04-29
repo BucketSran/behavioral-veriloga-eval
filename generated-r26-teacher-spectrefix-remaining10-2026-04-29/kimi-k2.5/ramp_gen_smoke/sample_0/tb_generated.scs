@@ -1,0 +1,22 @@
+// EVAS testbench for ramp_gen
+
+// Include the DUT
+ahdl_include "ramp_gen.va"
+
+// Testbench parameters
+parameters vdd = 1.2
+parameters period = 10n
+parameters trise = 0.1n
+parameters tfall = 0.1n
+
+// Instantiate the DUT
+XDUT (clk_in rst_n code_3 code_2 code_1 code_0) ramp_gen
+// Voltage sources
+Vclk (clk_in 0) vsource type=pulse val0=0 val1=vdd period=period rise=trise fall=tfall width=4.9n
+Vrst (rst_n 0) vsource type=pulse val0=0 val1=vdd delay=5n rise=trise fall=tfall width=195n
+
+// Transient analysis
+tran tran stop=200n maxstep=5n
+
+// Save signals - exact checker-required names
+save code_3 code_2 code_1 code_0 clk_in rst_n

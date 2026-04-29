@@ -1,0 +1,56 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module multitone (OUT);
+    output OUT;
+    electrical OUT;
+
+    parameter integer N = 3 from [1:8];
+    parameter real freq1 = 1e6;
+    parameter real freq2 = 2e6;
+    parameter real freq3 = 3e6;
+    parameter real freq4 = 0;
+    parameter real freq5 = 0;
+    parameter real freq6 = 0;
+    parameter real freq7 = 0;
+    parameter real freq8 = 0;
+    parameter real amp1 = 0.2;
+    parameter real amp2 = 0.1;
+    parameter real amp3 = 0.05;
+    parameter real amp4 = 0;
+    parameter real amp5 = 0;
+    parameter real amp6 = 0;
+    parameter real amp7 = 0;
+    parameter real amp8 = 0;
+
+    real max_freq;
+    real out_val;
+    real t;
+
+    analog begin
+        @(initial_step) begin
+            max_freq = freq1;
+            if (freq2 > max_freq) max_freq = freq2;
+            if (freq3 > max_freq) max_freq = freq3;
+            if (freq4 > max_freq) max_freq = freq4;
+            if (freq5 > max_freq) max_freq = freq5;
+            if (freq6 > max_freq) max_freq = freq6;
+            if (freq7 > max_freq) max_freq = freq7;
+            if (freq8 > max_freq) max_freq = freq8;
+        end
+
+        $bound_step(0.1 / max_freq);
+
+        t = $abstime;
+        out_val = amp1 * sin(2.0 * `M_PI * freq1 * t) +
+                  amp2 * sin(2.0 * `M_PI * freq2 * t) +
+                  amp3 * sin(2.0 * `M_PI * freq3 * t) +
+                  amp4 * sin(2.0 * `M_PI * freq4 * t) +
+                  amp5 * sin(2.0 * `M_PI * freq5 * t) +
+                  amp6 * sin(2.0 * `M_PI * freq6 * t) +
+                  amp7 * sin(2.0 * `M_PI * freq7 * t) +
+                  amp8 * sin(2.0 * `M_PI * freq8 * t);
+
+        V(OUT) <+ out_val;
+    end
+endmodule

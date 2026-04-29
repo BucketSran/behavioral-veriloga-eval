@@ -1,0 +1,43 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dac_weighted_8b (din_7, din_6, din_5, din_4, din_3, din_2, din_1, din_0, vout);
+    input din_7;
+    input din_6;
+    input din_5;
+    input din_4;
+    input din_3;
+    input din_2;
+    input din_1;
+    input din_0;
+    output vout;
+    electrical din_7, din_6, din_5, din_4, din_3, din_2, din_1, din_0;
+    electrical vout;
+
+    parameter real vdd = 0.9 from (0:inf);
+    parameter real vth = 0.45 from (0:inf);
+    parameter real tdel = 0 from [0:inf);
+    parameter real tr = 1n from (0:inf);
+    parameter real tf = 1n from (0:inf);
+
+    integer code;
+    real vout_val;
+
+    analog begin
+        code = 0;
+        if (V(din_7) > vth) code = code + 128;
+        if (V(din_6) > vth) code = code + 64;
+        if (V(din_5) > vth) code = code + 32;
+        if (V(din_4) > vth) code = code + 16;
+        if (V(din_3) > vth) code = code + 8;
+        if (V(din_2) > vth) code = code + 4;
+        if (V(din_1) > vth) code = code + 2;
+        if (V(din_0) > vth) code = code + 1;
+
+        vout_val = code / 255.0 * vdd;
+        if (vout_val < 0) vout_val = 0;
+        if (vout_val > vdd) vout_val = vdd;
+
+        V(vout) <+ transition(vout_val, tdel, tr, tf);
+    end
+endmodule

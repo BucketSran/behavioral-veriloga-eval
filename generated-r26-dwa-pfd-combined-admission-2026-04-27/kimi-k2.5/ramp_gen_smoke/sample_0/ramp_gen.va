@@ -1,0 +1,59 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module ramp_gen (
+    clk_in,
+    rst_n,
+    code_3,
+    code_2,
+    code_1,
+    code_0
+);
+    input clk_in;
+    input rst_n;
+    output code_3;
+    output code_2;
+    output code_1;
+    output code_0;
+
+    electrical clk_in, rst_n, code_3, code_2, code_1, code_0;
+
+    parameter real vlogic_high = 1.2;
+    parameter real vlogic_low = 0.0;
+    parameter real vth = 0.6;
+    parameter real tr = 1e-9;
+    parameter real tf = 1e-9;
+
+    integer code;
+    integer code_prev;
+
+    analog begin
+        @(initial_step) begin
+            code = 0;
+            code_prev = 0;
+        end
+
+        // Clock rising edge detection - must be at top level
+        @(cross(V(clk_in) - vth, 1)) begin
+            // Reset check (active low) inside the event
+            if (V(rst_n) >= vth) begin
+                if (code < 15) begin
+                    code = code + 1;
+                end
+            end else begin
+                code = 0;
+            end
+        end
+
+        // Asynchronous reset (when rst_n is low, code resets immediately)
+        if (V(rst_n) < vth) begin
+            code = 0;
+        end
+
+        // Output the 4-bit code using transition
+        V(code_3) <+ transition((code & 8) ? vlogic_high : vlogic_low, 0, tr, tf);
+        V(code_2) <+ transition((code & 4) ? vlogic_high : vlogic_low, 0, tr, tf);
+        V(code_1) <+ transition((code & 2) ? vlogic_high : vlogic_low, 0, tr, tf);
+        V(code_0) <+ transition((code & 1) ? vlogic_high : vlogic_low, 0, tr, tf);
+    end
+endmodule

@@ -65,7 +65,7 @@ Use plain scalar save names for these observables; do not rely on instance-quali
 Timing/checking-window contract:
 
 - Reset-like input(s) `rst`, `reset` must be asserted only for startup/explicit reset checks, then deasserted early enough and kept deasserted through the post-reset checking window.
-- For active-low resets such as `rstb`, `rst_n`, or `rst_ni`, avoid a finite-width pulse that returns the reset node low after release; use a waveform that remains high during checking.
+- For active-low reset inputs, avoid a finite-width pulse that returns the reset node low after release; use a waveform that remains high during checking.
 - Clock-like input(s) `clk`, `clock` must provide enough valid edges after reset/enable for the checker to sample settled outputs.
 - Sequential outputs are sampled shortly after clock edges, so drive outputs with stable held state variables and `transition()` targets rather than glitchy combinational expressions.
 - Public stimulus nodes used by the reference harness include: `vdd`, `vss`, `clk`, `d`, `rst`.

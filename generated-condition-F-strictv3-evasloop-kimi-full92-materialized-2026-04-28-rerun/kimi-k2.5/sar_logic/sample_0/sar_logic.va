@@ -1,0 +1,106 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sar_logic (VDD, VSS, CLKS, DCOMP, DP_DAC_9, DP_DAC_8, DP_DAC_7, DP_DAC_6, DP_DAC_5, DP_DAC_4, DP_DAC_3, DP_DAC_2, DP_DAC_1, DP_DAC_0, RDY);
+    inout VDD, VSS;
+    input CLKS, DCOMP;
+    output DP_DAC_9, DP_DAC_8, DP_DAC_7, DP_DAC_6, DP_DAC_5, DP_DAC_4, DP_DAC_3, DP_DAC_2, DP_DAC_1, DP_DAC_0, RDY;
+    electrical VDD, VSS, CLKS, DCOMP, DP_DAC_9, DP_DAC_8, DP_DAC_7, DP_DAC_6, DP_DAC_5, DP_DAC_4, DP_DAC_3, DP_DAC_2, DP_DAC_1, DP_DAC_0, RDY;
+
+    parameter real vth = 0.9 from (0:inf);
+    parameter real vhi = 1.8 from (0:inf);
+    parameter real vlo = 0.0 from [0:inf);
+    parameter real tdel = 1p from [0:inf);
+    parameter real tr = 100p from (0:inf);
+    parameter real tf = 100p from (0:inf);
+
+    integer state;
+    integer bit_idx;
+    integer dac_val[0:9];
+    integer i;
+    real dcomp_prev;
+    real clks_prev;
+    real bit_clk;
+    integer sample_active;
+    integer rdy_val;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+            bit_idx = 9;
+            for (i = 0; i < 10; i = i + 1) begin
+                dac_val[i] = 0;
+            end
+            dcomp_prev = vlo;
+            clks_prev = vlo;
+            bit_clk = vlo;
+            sample_active = 0;
+            rdy_val = 0;
+        end
+
+        // Detect rising edge of CLKS
+        if (V(CLKS) > vth && clks_prev <= vth) begin
+            sample_active = 1;
+            bit_idx = 9;
+            for (i = 0; i < 10; i = i + 1) begin
+                dac_val[i] = 0;
+            end
+            rdy_val = 0;
+            bit_clk = vhi;
+        end
+
+        // Internal bit clock generation - toggle on each evaluation when sample_active
+        if (sample_active == 1) begin
+            // Process on bit clock edges
+            if (bit_clk > vth) begin
+                // Rising edge of bit clock: set current bit to 1 (trial)
+                dac_val[bit_idx] = 1;
+            end else begin
+                // Falling edge of bit clock: latch comparator result
+                if (V(DCOMP) > vth) begin
+                    // Comparator high: Vin > DAC, keep bit as 1
+                    dac_val[bit_idx] = 1;
+                end else begin
+                    // Comparator low: Vin < DAC, clear bit to 0
+                    dac_val[bit_idx] = 0;
+                end
+
+                // Move to next bit
+                bit_idx = bit_idx - 1;
+
+                if (bit_idx < 0) begin
+                    // Conversion complete
+                    sample_active = 0;
+                    rdy_val = 1;
+                    bit_idx = 9;
+                end
+            end
+
+            // Toggle bit clock for next cycle
+            if (bit_clk > vth) begin
+                bit_clk = vlo;
+            end else begin
+                bit_clk = vhi;
+            end
+        end
+
+        // Update previous values
+        dcomp_prev = V(DCOMP);
+        clks_prev = V(CLKS);
+
+        // Output DAC control bits
+        V(DP_DAC_9) <+ transition(dac_val[9] * vhi, tdel, tr, tf);
+        V(DP_DAC_8) <+ transition(dac_val[8] * vhi, tdel, tr, tf);
+        V(DP_DAC_7) <+ transition(dac_val[7] * vhi, tdel, tr, tf);
+        V(DP_DAC_6) <+ transition(dac_val[6] * vhi, tdel, tr, tf);
+        V(DP_DAC_5) <+ transition(dac_val[5] * vhi, tdel, tr, tf);
+        V(DP_DAC_4) <+ transition(dac_val[4] * vhi, tdel, tr, tf);
+        V(DP_DAC_3) <+ transition(dac_val[3] * vhi, tdel, tr, tf);
+        V(DP_DAC_2) <+ transition(dac_val[2] * vhi, tdel, tr, tf);
+        V(DP_DAC_1) <+ transition(dac_val[1] * vhi, tdel, tr, tf);
+        V(DP_DAC_0) <+ transition(dac_val[0] * vhi, tdel, tr, tf);
+
+        // Output ready flag
+        V(RDY) <+ transition(rdy_val * vhi, tdel, tr, tf);
+    end
+endmodule

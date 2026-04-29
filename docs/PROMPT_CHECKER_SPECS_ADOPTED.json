@@ -1,0 +1,6156 @@
+{
+  "version": 1,
+  "description": "Prompt-inferred checker specs adopted after validation. Advisory only; not official scoring gates.",
+  "adopt_threshold": 0.7,
+  "summary": {
+    "tasks": 92,
+    "validated_tasks": 61,
+    "validation_matches": 61,
+    "mechanism_match_rate": 1.0,
+    "adopted_specs": 63,
+    "adopt_threshold": 0.7,
+    "validation_set": "/Users/bucketsran/Documents/TsingProject/vaEvas/behavioral-veriloga-eval/docs/PROMPT_CHECKER_SPEC_VALIDATION_SET.json"
+  },
+  "specs": [
+    {
+      "task_id": "inverted_comparator_logic_bug",
+      "confidence": 0.74,
+      "templates": [
+        {
+          "template": "threshold_crossing",
+          "confidence": 0.74,
+          "signals": {
+            "inputs": [
+              "vinp",
+              "vinn"
+            ],
+            "outputs": [
+              "out_p"
+            ]
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes comparator/threshold behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "vinp",
+        "vinn",
+        "verilog",
+        "VDD",
+        "VSS",
+        "out_p"
+      ],
+      "roles": {
+        "clock": [],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [
+          "vinp",
+          "vinn"
+        ],
+        "analog_output": [
+          "out_p"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VSS": "inout",
+          "vinp": "input",
+          "vinn": "input",
+          "out_p": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "strongarm_reset_priority_bug",
+      "confidence": 0.74,
+      "templates": [
+        {
+          "template": "threshold_crossing",
+          "confidence": 0.74,
+          "signals": {
+            "inputs": [],
+            "outputs": [
+              "outp",
+              "outn"
+            ]
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes comparator/threshold behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "verilog",
+        "vdd",
+        "vss",
+        "clk",
+        "rst",
+        "inp",
+        "inn",
+        "outp",
+        "outn",
+        "reset",
+        "clock",
+        "Reset"
+      ],
+      "roles": {
+        "clock": [
+          "clk",
+          "clock"
+        ],
+        "reset": [
+          "rst",
+          "reset",
+          "Reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "outp",
+          "outn"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "vss": "inout",
+          "clk": "input",
+          "rst": "input",
+          "inp": "input",
+          "inn": "input",
+          "outp": "output",
+          "outn": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "swapped_pfd_outputs_bug",
+      "confidence": 0.91,
+      "templates": [
+        {
+          "template": "paired_edge_response",
+          "confidence": 0.91,
+          "signals": {
+            "reference": "ref",
+            "feedback": "div",
+            "up": "up",
+            "down": "dn"
+          },
+          "parameters": {
+            "edge": "rising"
+          },
+          "evidence": [
+            "prompt describes ref/div edge-triggered up/dn response"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "up",
+        "dn",
+        "ref",
+        "div",
+        "verilog",
+        "VDD",
+        "VSS"
+      ],
+      "roles": {
+        "clock": [],
+        "reset": [],
+        "reference_clock": [
+          "ref"
+        ],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [
+          "up"
+        ],
+        "down": [
+          "dn"
+        ],
+        "analog_input": [],
+        "analog_output": [
+          "up",
+          "dn"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VSS": "inout",
+          "ref": "input",
+          "div": "input",
+          "up": "output",
+          "dn": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "wrong_edge_sample_hold_bug",
+      "confidence": 0.82,
+      "templates": [
+        {
+          "template": "sample_hold_tracking",
+          "confidence": 0.82,
+          "signals": {
+            "input": null,
+            "output": "out",
+            "clock": "clk"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes sample/hold behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "verilog",
+        "VDD",
+        "VSS",
+        "clk",
+        "in",
+        "out",
+        "clock"
+      ],
+      "roles": {
+        "clock": [
+          "clk",
+          "clock"
+        ],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "out"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VSS": "inout",
+          "clk": "input",
+          "in": "input",
+          "out": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "adc_dac_ideal_4b_smoke",
+      "confidence": 0.93,
+      "templates": [
+        {
+          "template": "quantized_reconstruction",
+          "confidence": 0.93,
+          "signals": {
+            "input": "vin",
+            "output": "vout",
+            "bits": [
+              "dout_3",
+              "dout_2",
+              "dout_1",
+              "dout_0"
+            ],
+            "clock": "clk",
+            "reset": "rst_n"
+          },
+          "parameters": {
+            "bit_width": 4,
+            "min_unique_codes": 12
+          },
+          "evidence": [
+            "prompt mentions ADC-DAC round trip and reconstructed vout"
+          ]
+        },
+        {
+          "template": "monotonic_code_vs_input",
+          "confidence": 0.86,
+          "signals": {
+            "input": "vin",
+            "bits": [
+              "dout_3",
+              "dout_2",
+              "dout_1",
+              "dout_0"
+            ]
+          },
+          "parameters": {
+            "direction": "nondecreasing",
+            "bit_width": 4
+          },
+          "evidence": [
+            "prompt mentions ADC code/quantization or functional IR quantized encoding"
+          ]
+        },
+        {
+          "template": "sample_after_clock",
+          "confidence": 0.78,
+          "signals": {
+            "clock": "clk",
+            "bits": [
+              "dout_3",
+              "dout_2",
+              "dout_1",
+              "dout_0"
+            ]
+          },
+          "parameters": {
+            "edge": "rising"
+          },
+          "evidence": [
+            "prompt mentions sampled update on a clock edge or functional IR sample relation"
+          ]
+        },
+        {
+          "template": "thermometer_dac_code_to_output_span",
+          "confidence": 0.76,
+          "signals": {
+            "bits": [
+              "din_3",
+              "din_2",
+              "din_1",
+              "din_0"
+            ],
+            "output": "dout_3",
+            "clock": "clk"
+          },
+          "parameters": {
+            "bit_width": 4,
+            "require_monotonic": false
+          },
+          "evidence": [
+            "prompt describes DAC code-to-output behavior or functional IR code-to-analog transfer"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "adc_ideal_4b",
+        "dac_ideal_4b",
+        "vin",
+        "clk",
+        "vdd",
+        "vss",
+        "rst_n",
+        "dout_3",
+        "dout_2",
+        "dout_1",
+        "dout_0",
+        "din_3",
+        "din_2",
+        "din_1",
+        "din_0",
+        "vout",
+        "dout",
+        "reset",
+        "din",
+        "clock",
+        "Reset",
+        "Clock"
+      ],
+      "roles": {
+        "clock": [
+          "clk",
+          "clock",
+          "Clock"
+        ],
+        "reset": [
+          "rst_n",
+          "reset",
+          "Reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [
+          "vin",
+          "din_3",
+          "din_2",
+          "din_1",
+          "din_0",
+          "din"
+        ],
+        "analog_output": [
+          "dout_3",
+          "dout_2",
+          "dout_1",
+          "dout_0",
+          "vout"
+        ],
+        "code_bits": {
+          "dout": [
+            "dout_3",
+            "dout_2",
+            "dout_1",
+            "dout_0"
+          ],
+          "din": [
+            "din_3",
+            "din_2",
+            "din_1",
+            "din_0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "vin": "input",
+          "clk": "input",
+          "vdd": "input",
+          "vss": "input",
+          "rst_n": "input",
+          "dout_3": "output",
+          "dout_2": "output",
+          "dout_1": "output",
+          "dout_0": "output",
+          "din_3": "input",
+          "din_2": "input",
+          "din_1": "input",
+          "din_0": "input",
+          "vout": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "adpll_lock_smoke",
+      "confidence": 0.91,
+      "templates": [
+        {
+          "template": "ratio_edge_window",
+          "confidence": 0.91,
+          "signals": {
+            "reference": "ref_clk",
+            "feedback": "fb_clk"
+          },
+          "parameters": {
+            "expected_ratio": 1,
+            "window": "late"
+          },
+          "evidence": [
+            "prompt describes ref/fb frequency tracking"
+          ]
+        },
+        {
+          "template": "lock_after_ratio_stable",
+          "confidence": 0.84,
+          "signals": {
+            "lock": "lock",
+            "reference": "ref_clk",
+            "feedback": "fb_clk"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt requires lock assertion after convergence"
+          ]
+        },
+        {
+          "template": "control_to_frequency_step",
+          "confidence": 0.84,
+          "signals": {
+            "control": "vctrl_mon",
+            "output": "fb_clk"
+          },
+          "parameters": {
+            "tran": "tran tran stop=5u maxstep=5n"
+          },
+          "evidence": [
+            "prompt describes DCO/control-voltage frequency response"
+          ]
+        },
+        {
+          "template": "timer_future_event_liveness",
+          "confidence": 0.76,
+          "signals": {
+            "outputs": [
+              "ref_clk",
+              "fb_clk",
+              "dco_clk"
+            ]
+          },
+          "parameters": {
+            "tran": "tran tran stop=5u maxstep=5n"
+          },
+          "evidence": [
+            "prompt uses timer-driven output generation"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "adpll_va_idtmod",
+        "ref_clk",
+        "fb_clk",
+        "dco_clk",
+        "vctrl_mon",
+        "lock",
+        "VDD",
+        "VSS",
+        "clock",
+        "locked",
+        "Clock",
+        "reset"
+      ],
+      "roles": {
+        "clock": [
+          "dco_clk",
+          "clock",
+          "Clock"
+        ],
+        "reset": [
+          "reset"
+        ],
+        "reference_clock": [
+          "ref_clk"
+        ],
+        "feedback_clock": [
+          "fb_clk"
+        ],
+        "lock": [
+          "lock",
+          "locked"
+        ],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "fb_clk",
+          "dco_clk",
+          "vctrl_mon",
+          "lock"
+        ],
+        "code_bits": {},
+        "control": [
+          "vctrl_mon"
+        ],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "ref_clk": "input",
+          "fb_clk": "output",
+          "dco_clk": "output",
+          "vctrl_mon": "output",
+          "lock": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "adpll_ratio_hop_smoke",
+      "confidence": 0.91,
+      "templates": [
+        {
+          "template": "ratio_edge_window",
+          "confidence": 0.91,
+          "signals": {
+            "reference": "ref_clk",
+            "feedback": "fb_clk"
+          },
+          "parameters": {
+            "expected_ratio": 1,
+            "window": "late"
+          },
+          "evidence": [
+            "prompt describes ref/fb frequency tracking"
+          ]
+        },
+        {
+          "template": "lock_after_ratio_stable",
+          "confidence": 0.84,
+          "signals": {
+            "lock": "lock",
+            "reference": "ref_clk",
+            "feedback": "fb_clk"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt requires lock assertion after convergence"
+          ]
+        },
+        {
+          "template": "control_to_frequency_step",
+          "confidence": 0.84,
+          "signals": {
+            "control": "ratio_ctrl",
+            "output": "vout"
+          },
+          "parameters": {
+            "tran": "tran tran stop=5u maxstep=5n"
+          },
+          "evidence": [
+            "prompt describes DCO/control-voltage frequency response"
+          ]
+        },
+        {
+          "template": "ratio_hop_window",
+          "confidence": 0.8,
+          "signals": {
+            "control": "ratio_ctrl"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes ratio/control hop behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "adpll_ratio_hop_ref",
+        "electrical",
+        "ratio_ctrl",
+        "vout",
+        "fb_clk",
+        "vctrl_mon",
+        "lock",
+        "VDD",
+        "VSS",
+        "ref_clk",
+        "clock",
+        "Clock",
+        "reset"
+      ],
+      "roles": {
+        "clock": [
+          "clock",
+          "Clock"
+        ],
+        "reset": [
+          "reset"
+        ],
+        "reference_clock": [
+          "ref_clk"
+        ],
+        "feedback_clock": [
+          "fb_clk"
+        ],
+        "lock": [
+          "lock"
+        ],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "vout",
+          "fb_clk",
+          "vctrl_mon",
+          "lock"
+        ],
+        "code_bits": {},
+        "control": [
+          "ratio_ctrl",
+          "vctrl_mon"
+        ],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "ref_clk": "input",
+          "ratio_ctrl": "input",
+          "fb_clk": "output",
+          "vout": "output",
+          "vctrl_mon": "output",
+          "lock": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "adpll_timer_smoke",
+      "confidence": 0.91,
+      "templates": [
+        {
+          "template": "ratio_edge_window",
+          "confidence": 0.91,
+          "signals": {
+            "reference": "ref_clk",
+            "feedback": "fb_clk"
+          },
+          "parameters": {
+            "expected_ratio": 1,
+            "window": "late"
+          },
+          "evidence": [
+            "prompt describes ref/fb frequency tracking"
+          ]
+        },
+        {
+          "template": "lock_after_ratio_stable",
+          "confidence": 0.84,
+          "signals": {
+            "lock": "lock",
+            "reference": "ref_clk",
+            "feedback": "fb_clk"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt requires lock assertion after convergence"
+          ]
+        },
+        {
+          "template": "control_to_frequency_step",
+          "confidence": 0.84,
+          "signals": {
+            "control": "vctrl_mon",
+            "output": "fb_clk"
+          },
+          "parameters": {
+            "tran": "tran tran stop=5u maxstep=5n"
+          },
+          "evidence": [
+            "prompt describes DCO/control-voltage frequency response"
+          ]
+        },
+        {
+          "template": "timer_future_event_liveness",
+          "confidence": 0.76,
+          "signals": {
+            "outputs": [
+              "ref_clk",
+              "fb_clk",
+              "dco_clk"
+            ]
+          },
+          "parameters": {
+            "tran": "tran tran stop=5u maxstep=5n"
+          },
+          "evidence": [
+            "prompt uses timer-driven output generation"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "adpll_timer_ref",
+        "ref_clk",
+        "fb_clk",
+        "dco_clk",
+        "vctrl_mon",
+        "lock",
+        "VDD",
+        "VSS",
+        "clock",
+        "locked",
+        "Clock",
+        "reset"
+      ],
+      "roles": {
+        "clock": [
+          "dco_clk",
+          "clock",
+          "Clock"
+        ],
+        "reset": [
+          "reset"
+        ],
+        "reference_clock": [
+          "ref_clk"
+        ],
+        "feedback_clock": [
+          "fb_clk"
+        ],
+        "lock": [
+          "lock",
+          "locked"
+        ],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "fb_clk",
+          "dco_clk",
+          "vctrl_mon",
+          "lock"
+        ],
+        "code_bits": {},
+        "control": [
+          "vctrl_mon"
+        ],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "ref_clk": "input",
+          "fb_clk": "output",
+          "dco_clk": "output",
+          "vctrl_mon": "output",
+          "lock": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "and_gate_smoke",
+      "confidence": 0.78,
+      "templates": [
+        {
+          "template": "logic_truth_table",
+          "confidence": 0.78,
+          "signals": {
+            "inputs": [],
+            "outputs": [
+              "y",
+              "Y"
+            ]
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes digital logic behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "and_gate",
+        "electrical",
+        "a",
+        "b",
+        "y",
+        "vdd",
+        "tedge",
+        "idt",
+        "ddt",
+        "ahdl_include",
+        "A",
+        "B",
+        "Y"
+      ],
+      "roles": {
+        "clock": [],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "y",
+          "Y"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "A": "input",
+          "B": "input",
+          "Y": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "bbpd_data_edge_alignment_smoke",
+      "confidence": 0.91,
+      "templates": [
+        {
+          "template": "bbpd_data_clock_lead_lag",
+          "confidence": 0.91,
+          "signals": {
+            "reference": "data",
+            "feedback": "clk",
+            "up": "up",
+            "down": "dn"
+          },
+          "parameters": {
+            "edge": "rising"
+          },
+          "evidence": [
+            "prompt describes data/clock lead-lag bang-bang phase detection or functional IR lead-lag pulses"
+          ]
+        },
+        {
+          "template": "pulse_non_overlap",
+          "confidence": 0.88,
+          "signals": {
+            "up": "up",
+            "down": "dn"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt requires up/dn not overlap significantly"
+          ]
+        },
+        {
+          "template": "pulse_width_window",
+          "confidence": 0.75,
+          "signals": {
+            "up": "up",
+            "down": "dn"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes pulse behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "bbpd_data_edge_alignment_ref",
+        "vdd",
+        "vss",
+        "clk",
+        "data",
+        "up",
+        "dn",
+        "retimed_data",
+        "tran",
+        "save",
+        "clock",
+        "UP",
+        "DN",
+        "Clock",
+        "reset"
+      ],
+      "roles": {
+        "clock": [
+          "clk",
+          "clock",
+          "Clock"
+        ],
+        "reset": [
+          "reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [
+          "up",
+          "UP"
+        ],
+        "down": [
+          "dn",
+          "DN"
+        ],
+        "analog_input": [],
+        "analog_output": [
+          "up",
+          "dn",
+          "retimed_data"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "vss": "inout",
+          "clk": "input",
+          "data": "input",
+          "up": "output",
+          "dn": "output",
+          "retimed_data": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "bound_step_period_guard_smoke",
+      "confidence": 0.88,
+      "templates": [
+        {
+          "template": "bounded_step_window",
+          "confidence": 0.88,
+          "signals": {
+            "outputs": [
+              "guard_out",
+              "phase_out"
+            ]
+          },
+          "parameters": {
+            "tran": "tran tran stop=34n maxstep=20n errpreset=conservative"
+          },
+          "evidence": [
+            "prompt requires bounded-step preservation of narrow periodic windows"
+          ]
+        },
+        {
+          "template": "timer_future_event_liveness",
+          "confidence": 0.8,
+          "signals": {
+            "outputs": [
+              "guard_out",
+              "phase_out"
+            ]
+          },
+          "parameters": {
+            "tran": "tran tran stop=34n maxstep=20n errpreset=conservative"
+          },
+          "evidence": [
+            "prompt uses timer-driven output generation"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "bound_step_period_guard_ref",
+        "VDD",
+        "VSS",
+        "guard_out",
+        "phase_out",
+        "electrical",
+        "tran"
+      ],
+      "roles": {
+        "clock": [],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "guard_out",
+          "phase_out"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "guard_out": "output",
+          "phase_out": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "clk_div_smoke",
+      "confidence": 0.9,
+      "templates": [
+        {
+          "template": "counter_cadence",
+          "confidence": 0.9,
+          "signals": {
+            "input_clock": "clk_div",
+            "output": "CLK_OUT",
+            "control": null
+          },
+          "parameters": {
+            "expected_ratios": [
+              4
+            ],
+            "mode": "pulse"
+          },
+          "evidence": [
+            "prompt describes divider/counter ratio behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "clk_div",
+        "CLK_IN",
+        "RST_N",
+        "CLK_OUT",
+        "clock",
+        "reset",
+        "clk_in",
+        "clk_out",
+        "Reset",
+        "rst_n",
+        "Clock"
+      ],
+      "roles": {
+        "clock": [
+          "clk_div",
+          "CLK_IN",
+          "CLK_OUT",
+          "clock",
+          "clk_in",
+          "clk_out",
+          "Clock"
+        ],
+        "reset": [
+          "RST_N",
+          "reset",
+          "Reset",
+          "rst_n"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "CLK_OUT",
+          "clk_out"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "CLK_IN": "input",
+          "RST_N": "input",
+          "CLK_OUT": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "cmp_delay_smoke",
+      "confidence": 0.74,
+      "templates": [
+        {
+          "template": "threshold_crossing",
+          "confidence": 0.74,
+          "signals": {
+            "inputs": [
+              "vinn",
+              "vinp",
+              "VINN",
+              "VINP"
+            ],
+            "outputs": [
+              "DCMPN",
+              "DCMPP",
+              "LP",
+              "LM"
+            ]
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes comparator/threshold behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "cmp_delay",
+        "electrical",
+        "clk",
+        "vinn",
+        "vinp",
+        "out_n",
+        "out_p",
+        "lp",
+        "lm",
+        "vss",
+        "vdd",
+        "ahdl_include",
+        "CLK",
+        "VINN",
+        "VINP",
+        "DCMPN",
+        "DCMPP",
+        "LP",
+        "LM",
+        "VSS",
+        "VDD",
+        "clock",
+        "Clock",
+        "reset"
+      ],
+      "roles": {
+        "clock": [
+          "clk",
+          "CLK",
+          "clock",
+          "Clock"
+        ],
+        "reset": [
+          "reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [
+          "vinn",
+          "vinp",
+          "VINN",
+          "VINP"
+        ],
+        "analog_output": [
+          "DCMPN",
+          "DCMPP",
+          "LP",
+          "LM"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "CLK": "input",
+          "VINN": "input",
+          "VINP": "input",
+          "DCMPN": "output",
+          "DCMPP": "output",
+          "LP": "output",
+          "LM": "output",
+          "VSS": "inout",
+          "VDD": "inout"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "cmp_strongarm_smoke",
+      "confidence": 0.74,
+      "templates": [
+        {
+          "template": "threshold_crossing",
+          "confidence": 0.74,
+          "signals": {
+            "inputs": [
+              "vinn",
+              "vinp",
+              "VINN",
+              "VINP"
+            ],
+            "outputs": [
+              "DCMPN",
+              "DCMPP",
+              "LP",
+              "LM"
+            ]
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes comparator/threshold behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "cmp_strongarm",
+        "electrical",
+        "clk",
+        "vinn",
+        "vinp",
+        "out_n",
+        "out_p",
+        "lp",
+        "lm",
+        "vss",
+        "vdd",
+        "ahdl_include",
+        "CLK",
+        "VINN",
+        "VINP",
+        "DCMPN",
+        "DCMPP",
+        "LP",
+        "LM",
+        "VSS",
+        "VDD",
+        "clock",
+        "Clock",
+        "reset"
+      ],
+      "roles": {
+        "clock": [
+          "clk",
+          "CLK",
+          "clock",
+          "Clock"
+        ],
+        "reset": [
+          "reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [
+          "vinn",
+          "vinp",
+          "VINN",
+          "VINP"
+        ],
+        "analog_output": [
+          "DCMPN",
+          "DCMPP",
+          "LP",
+          "LM"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "CLK": "input",
+          "VINN": "input",
+          "VINP": "input",
+          "DCMPN": "output",
+          "DCMPP": "output",
+          "LP": "output",
+          "LM": "output",
+          "VSS": "inout",
+          "VDD": "inout"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "comparator_hysteresis_smoke",
+      "confidence": 0.8,
+      "templates": [
+        {
+          "template": "hysteresis_window",
+          "confidence": 0.8,
+          "signals": {
+            "inputs": [
+              "vinn",
+              "vinp"
+            ],
+            "outputs": []
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes comparator hysteresis"
+          ]
+        },
+        {
+          "template": "threshold_crossing",
+          "confidence": 0.74,
+          "signals": {
+            "inputs": [
+              "vinn",
+              "vinp"
+            ],
+            "outputs": []
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes comparator/threshold behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "cmp_hysteresis",
+        "electrical",
+        "vinn",
+        "vinp",
+        "out_n",
+        "out_p",
+        "vss",
+        "vdd",
+        "vhys",
+        "tedge"
+      ],
+      "roles": {
+        "clock": [],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [
+          "vinn",
+          "vinp"
+        ],
+        "analog_output": [],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {}
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "comparator_offset_search_smoke",
+      "confidence": 0.74,
+      "templates": [
+        {
+          "template": "threshold_crossing",
+          "confidence": 0.74,
+          "signals": {
+            "inputs": [],
+            "outputs": [
+              "outp"
+            ]
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes comparator/threshold behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "comparator_offset_search_ref",
+        "vdd",
+        "vss",
+        "inp",
+        "inn",
+        "outp"
+      ],
+      "roles": {
+        "clock": [],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "outp"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "vss": "inout",
+          "inp": "input",
+          "inn": "input",
+          "outp": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "comparator_smoke",
+      "confidence": 0.74,
+      "templates": [
+        {
+          "template": "threshold_crossing",
+          "confidence": 0.74,
+          "signals": {
+            "inputs": [
+              "VINP",
+              "VINN"
+            ],
+            "outputs": [
+              "OUT_P"
+            ]
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes comparator/threshold behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "comparator",
+        "VDD",
+        "VSS",
+        "VINP",
+        "VINN",
+        "OUT_P"
+      ],
+      "roles": {
+        "clock": [],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [
+          "VINP",
+          "VINN"
+        ],
+        "analog_output": [
+          "OUT_P"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "VINP": "input",
+          "VINN": "input",
+          "OUT_P": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "cppll_freq_step_reacquire_smoke",
+      "confidence": 0.91,
+      "templates": [
+        {
+          "template": "ratio_edge_window",
+          "confidence": 0.91,
+          "signals": {
+            "reference": "ref_clk",
+            "feedback": "fb_clk"
+          },
+          "parameters": {
+            "expected_ratio": 1,
+            "window": "late"
+          },
+          "evidence": [
+            "prompt describes ref/fb frequency tracking"
+          ]
+        },
+        {
+          "template": "lock_after_ratio_stable",
+          "confidence": 0.84,
+          "signals": {
+            "lock": "lock",
+            "reference": "ref_clk",
+            "feedback": "fb_clk"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt requires lock assertion after convergence"
+          ]
+        },
+        {
+          "template": "control_to_frequency_step",
+          "confidence": 0.84,
+          "signals": {
+            "control": "vctrl_mon",
+            "output": "fb_clk"
+          },
+          "parameters": {
+            "tran": "tran tran stop=6u maxstep=5n errpreset=conservative"
+          },
+          "evidence": [
+            "prompt describes DCO/control-voltage frequency response"
+          ]
+        },
+        {
+          "template": "ratio_hop_window",
+          "confidence": 0.8,
+          "signals": {
+            "control": "vctrl_mon"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes ratio/control hop behavior"
+          ]
+        },
+        {
+          "template": "timer_future_event_liveness",
+          "confidence": 0.76,
+          "signals": {
+            "outputs": [
+              "ref_clk",
+              "fb_clk",
+              "dco_clk"
+            ]
+          },
+          "parameters": {
+            "tran": "tran tran stop=6u maxstep=5n errpreset=conservative"
+          },
+          "evidence": [
+            "prompt uses timer-driven output generation"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "cppll_timer_ref",
+        "spectre",
+        "ref_clk",
+        "fb_clk",
+        "dco_clk",
+        "vctrl_mon",
+        "lock",
+        "VDD",
+        "VSS",
+        "clock",
+        "locked",
+        "Clock",
+        "reset"
+      ],
+      "roles": {
+        "clock": [
+          "dco_clk",
+          "clock",
+          "Clock"
+        ],
+        "reset": [
+          "reset"
+        ],
+        "reference_clock": [
+          "ref_clk"
+        ],
+        "feedback_clock": [
+          "fb_clk"
+        ],
+        "lock": [
+          "lock",
+          "locked"
+        ],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "fb_clk",
+          "dco_clk",
+          "vctrl_mon",
+          "lock"
+        ],
+        "code_bits": {},
+        "control": [
+          "vctrl_mon"
+        ],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "ref_clk": "input",
+          "fb_clk": "output",
+          "dco_clk": "output",
+          "vctrl_mon": "output",
+          "lock": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "cppll_tracking_smoke",
+      "confidence": 0.91,
+      "templates": [
+        {
+          "template": "ratio_edge_window",
+          "confidence": 0.91,
+          "signals": {
+            "reference": "ref_clk",
+            "feedback": "fb_clk"
+          },
+          "parameters": {
+            "expected_ratio": 1,
+            "window": "late"
+          },
+          "evidence": [
+            "prompt describes ref/fb frequency tracking"
+          ]
+        },
+        {
+          "template": "lock_after_ratio_stable",
+          "confidence": 0.84,
+          "signals": {
+            "lock": "lock",
+            "reference": "ref_clk",
+            "feedback": "fb_clk"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt requires lock assertion after convergence"
+          ]
+        },
+        {
+          "template": "control_to_frequency_step",
+          "confidence": 0.84,
+          "signals": {
+            "control": "vctrl_mon",
+            "output": "fb_clk"
+          },
+          "parameters": {
+            "tran": "tran tran stop=5u errpreset=conservative"
+          },
+          "evidence": [
+            "prompt describes DCO/control-voltage frequency response"
+          ]
+        },
+        {
+          "template": "timer_future_event_liveness",
+          "confidence": 0.76,
+          "signals": {
+            "outputs": [
+              "ref_clk",
+              "fb_clk",
+              "dco_clk"
+            ]
+          },
+          "parameters": {
+            "tran": "tran tran stop=5u errpreset=conservative"
+          },
+          "evidence": [
+            "prompt uses timer-driven output generation"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "cppll_timer_ref",
+        "ref_clk",
+        "fb_clk",
+        "dco_clk",
+        "vctrl_mon",
+        "lock",
+        "VDD",
+        "VSS",
+        "clock",
+        "Clock",
+        "reset"
+      ],
+      "roles": {
+        "clock": [
+          "dco_clk",
+          "clock",
+          "Clock"
+        ],
+        "reset": [
+          "reset"
+        ],
+        "reference_clock": [
+          "ref_clk"
+        ],
+        "feedback_clock": [
+          "fb_clk"
+        ],
+        "lock": [
+          "lock"
+        ],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "fb_clk",
+          "dco_clk",
+          "vctrl_mon",
+          "lock"
+        ],
+        "code_bits": {},
+        "control": [
+          "vctrl_mon"
+        ],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "ref_clk": "input",
+          "fb_clk": "output",
+          "dco_clk": "output",
+          "vctrl_mon": "output",
+          "lock": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "dac_binary_clk_4b_smoke",
+      "confidence": 0.86,
+      "templates": [
+        {
+          "template": "dac_code_to_output_span",
+          "confidence": 0.86,
+          "signals": {
+            "bits": [
+              "din3",
+              "din2",
+              "din1",
+              "din0"
+            ],
+            "output": "aout",
+            "clock": "dac_binary_clk_4b"
+          },
+          "parameters": {
+            "bit_width": 4,
+            "require_monotonic": true
+          },
+          "evidence": [
+            "prompt describes DAC code-to-output behavior or functional IR code-to-analog transfer"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "dac_binary_clk_4b",
+        "din3",
+        "din2",
+        "din1",
+        "din0",
+        "rdy",
+        "aout",
+        "DIN3",
+        "DIN2",
+        "DIN1",
+        "DIN0",
+        "CLK",
+        "AOUT",
+        "clock",
+        "din",
+        "Clock",
+        "reset"
+      ],
+      "roles": {
+        "clock": [
+          "dac_binary_clk_4b",
+          "rdy",
+          "CLK",
+          "clock",
+          "Clock"
+        ],
+        "reset": [
+          "reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [
+          "din3",
+          "din2",
+          "din1",
+          "din0",
+          "DIN3",
+          "DIN2",
+          "DIN1",
+          "DIN0",
+          "din"
+        ],
+        "analog_output": [
+          "aout",
+          "AOUT"
+        ],
+        "code_bits": {
+          "din": [
+            "din3",
+            "din2",
+            "din1",
+            "din0"
+          ],
+          "DIN": [
+            "DIN3",
+            "DIN2",
+            "DIN1",
+            "DIN0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "DIN3": "input",
+          "DIN2": "input",
+          "DIN1": "input",
+          "DIN0": "input",
+          "CLK": "input",
+          "AOUT": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "dac_therm_16b_smoke",
+      "confidence": 0.86,
+      "templates": [
+        {
+          "template": "thermometer_dac_code_to_output_span",
+          "confidence": 0.86,
+          "signals": {
+            "bits": [
+              "din_therm_15",
+              "din_therm_14",
+              "din_therm_13",
+              "din_therm_12",
+              "din_therm_11",
+              "din_therm_10",
+              "din_therm_9",
+              "din_therm_8",
+              "din_therm_7",
+              "din_therm_6",
+              "din_therm_5",
+              "din_therm_4",
+              "din_therm_3",
+              "din_therm_2",
+              "din_therm_1",
+              "din_therm_0"
+            ],
+            "output": "vout",
+            "clock": null
+          },
+          "parameters": {
+            "bit_width": 16,
+            "require_monotonic": false
+          },
+          "evidence": [
+            "prompt describes DAC code-to-output behavior or functional IR code-to-analog transfer"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "dac_therm_16b",
+        "din_therm_15",
+        "din_therm_14",
+        "din_therm_13",
+        "din_therm_12",
+        "din_therm_11",
+        "din_therm_10",
+        "din_therm_9",
+        "din_therm_8",
+        "din_therm_7",
+        "din_therm_6",
+        "din_therm_5",
+        "din_therm_4",
+        "din_therm_3",
+        "din_therm_2",
+        "din_therm_1",
+        "din_therm_0",
+        "rst_n",
+        "vout",
+        "vstep",
+        "for",
+        "genvar",
+        "d15",
+        "d14",
+        "d13",
+        "d12",
+        "d11",
+        "d10",
+        "d9",
+        "d8",
+        "d7",
+        "d6",
+        "d5",
+        "d4",
+        "d3",
+        "d2",
+        "d1",
+        "d0",
+        "din_therm",
+        "reset",
+        "Reset"
+      ],
+      "roles": {
+        "clock": [],
+        "reset": [
+          "rst_n",
+          "reset",
+          "Reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [
+          "din_therm_15",
+          "din_therm_14",
+          "din_therm_13",
+          "din_therm_12",
+          "din_therm_11",
+          "din_therm_10",
+          "din_therm_9",
+          "din_therm_8",
+          "din_therm_7",
+          "din_therm_6",
+          "din_therm_5",
+          "din_therm_4",
+          "din_therm_3",
+          "din_therm_2",
+          "din_therm_1",
+          "din_therm_0",
+          "din_therm"
+        ],
+        "analog_output": [
+          "vout"
+        ],
+        "code_bits": {
+          "din_therm": [
+            "din_therm_15",
+            "din_therm_14",
+            "din_therm_13",
+            "din_therm_12",
+            "din_therm_11",
+            "din_therm_10",
+            "din_therm_9",
+            "din_therm_8",
+            "din_therm_7",
+            "din_therm_6",
+            "din_therm_5",
+            "din_therm_4",
+            "din_therm_3",
+            "din_therm_2",
+            "din_therm_1",
+            "din_therm_0"
+          ],
+          "d": [
+            "d15",
+            "d14",
+            "d13",
+            "d12",
+            "d11",
+            "d10",
+            "d9",
+            "d8",
+            "d7",
+            "d6",
+            "d5",
+            "d4",
+            "d3",
+            "d2",
+            "d1",
+            "d0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "din_therm_15": "input",
+          "din_therm_14": "input",
+          "din_therm_13": "input",
+          "din_therm_12": "input",
+          "din_therm_11": "input",
+          "din_therm_10": "input",
+          "din_therm_9": "input",
+          "din_therm_8": "input",
+          "din_therm_7": "input",
+          "din_therm_6": "input",
+          "din_therm_5": "input",
+          "din_therm_4": "input",
+          "din_therm_3": "input",
+          "din_therm_2": "input",
+          "din_therm_1": "input",
+          "din_therm_0": "input",
+          "rst_n": "input",
+          "vout": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "differential_voltage_output_smoke",
+      "confidence": 0.88,
+      "templates": [
+        {
+          "template": "differential_step_response",
+          "confidence": 0.88,
+          "signals": {
+            "positive": "outp",
+            "negative": "outn"
+          },
+          "parameters": {
+            "mode": "timed_step"
+          },
+          "evidence": [
+            "prompt describes differential output branch levels over time"
+          ]
+        },
+        {
+          "template": "timer_future_event_liveness",
+          "confidence": 0.8,
+          "signals": {
+            "outputs": []
+          },
+          "parameters": {
+            "tran": "tran tran stop=60n maxstep=20p errpreset=conservative"
+          },
+          "evidence": [
+            "prompt uses timer-driven output generation"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "differential_voltage_output_ref",
+        "VDD",
+        "VSS",
+        "outp",
+        "outn",
+        "electrical",
+        "tran",
+        "save"
+      ],
+      "roles": {
+        "clock": [],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "outp",
+          "outn"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "outp": "output",
+          "outn": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "digital_basics_smoke",
+      "confidence": 0.78,
+      "templates": [
+        {
+          "template": "logic_truth_table",
+          "confidence": 0.78,
+          "signals": {
+            "inputs": [],
+            "outputs": []
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes digital logic behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "and_gate",
+        "or_gate",
+        "not_gate",
+        "dff_rst",
+        "spectre",
+        "D",
+        "CLK",
+        "RST",
+        "QB",
+        "Q",
+        "electrical",
+        "not_a",
+        "not_y",
+        "and_a",
+        "and_b",
+        "and_y",
+        "or_a",
+        "or_b",
+        "or_y",
+        "dff_d",
+        "dff_clk",
+        "dff_q",
+        "dff_qb",
+        "reset",
+        "clock"
+      ],
+      "roles": {
+        "clock": [
+          "CLK",
+          "dff_clk",
+          "clock"
+        ],
+        "reset": [
+          "dff_rst",
+          "RST",
+          "reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {}
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "dwa_ptr_gen_no_overlap_smoke",
+      "confidence": 0.84,
+      "templates": [
+        {
+          "template": "onehot_no_overlap",
+          "confidence": 0.84,
+          "signals": {
+            "clock": "clk_i",
+            "reset": "rst_ni",
+            "pointer_bits": [
+              "ptr_15",
+              "ptr_14",
+              "ptr_13",
+              "ptr_12",
+              "ptr_11",
+              "ptr_10",
+              "ptr_9",
+              "ptr_8",
+              "ptr_7",
+              "ptr_6",
+              "ptr_5",
+              "ptr_4",
+              "ptr_3",
+              "ptr_2",
+              "ptr_1",
+              "ptr_0"
+            ],
+            "cell_bits": [
+              "cell_en_15",
+              "cell_en_14",
+              "cell_en_13",
+              "cell_en_12",
+              "cell_en_11",
+              "cell_en_10",
+              "cell_en_9",
+              "cell_en_8",
+              "cell_en_7",
+              "cell_en_6",
+              "cell_en_5",
+              "cell_en_4",
+              "cell_en_3",
+              "cell_en_2",
+              "cell_en_1",
+              "cell_en_0"
+            ],
+            "code_bits": [
+              "code_msb_i_3",
+              "code_msb_i_2",
+              "code_msb_i_1",
+              "code_msb_i_0"
+            ]
+          },
+          "parameters": {
+            "cells": 16,
+            "require_no_overlap": false,
+            "require_wraparound": false
+          },
+          "evidence": [
+            "prompt describes DWA rotating pointer/cell-enable selection-window behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "dwa_ptr_gen_no_overlap",
+        "electrical",
+        "clk_i",
+        "rst_ni",
+        "code_msb_i_3",
+        "code_msb_i_2",
+        "code_msb_i_1",
+        "code_msb_i_0",
+        "cell_en_o_15",
+        "cell_en_o_14",
+        "cell_en_o_13",
+        "cell_en_o_12",
+        "cell_en_o_11",
+        "cell_en_o_10",
+        "cell_en_o_9",
+        "cell_en_o_8",
+        "cell_en_o_7",
+        "cell_en_o_6",
+        "cell_en_o_5",
+        "cell_en_o_4",
+        "cell_en_o_3",
+        "cell_en_o_2",
+        "cell_en_o_1",
+        "cell_en_o_0",
+        "ptr_o_15",
+        "ptr_o_14",
+        "ptr_o_13",
+        "ptr_o_12",
+        "ptr_o_11",
+        "ptr_o_10",
+        "ptr_o_9",
+        "ptr_o_8",
+        "ptr_o_7",
+        "ptr_o_6",
+        "ptr_o_5",
+        "ptr_o_4",
+        "ptr_o_3",
+        "ptr_o_2",
+        "ptr_o_1",
+        "ptr_o_0",
+        "vdd",
+        "vth",
+        "ptr_init",
+        "ahdl_include",
+        "cell_en_0",
+        "cell_en_1",
+        "cell_en_2",
+        "cell_en_3",
+        "cell_en_4",
+        "cell_en_5",
+        "cell_en_6",
+        "cell_en_7",
+        "cell_en_8",
+        "cell_en_9",
+        "cell_en_10",
+        "cell_en_11",
+        "cell_en_12",
+        "cell_en_13",
+        "cell_en_14",
+        "cell_en_15",
+        "ptr_0",
+        "ptr_1",
+        "ptr_2",
+        "ptr_3",
+        "ptr_4",
+        "ptr_5",
+        "ptr_6",
+        "ptr_7",
+        "ptr_8",
+        "ptr_9",
+        "ptr_10",
+        "ptr_11",
+        "ptr_12",
+        "ptr_13",
+        "ptr_14",
+        "ptr_15",
+        "Reset",
+        "reset",
+        "clock",
+        "Clock",
+        "CLK"
+      ],
+      "roles": {
+        "clock": [
+          "clk_i",
+          "clock",
+          "Clock",
+          "CLK"
+        ],
+        "reset": [
+          "rst_ni",
+          "Reset",
+          "reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [],
+        "code_bits": {
+          "code_msb_i": [
+            "code_msb_i_3",
+            "code_msb_i_2",
+            "code_msb_i_1",
+            "code_msb_i_0"
+          ],
+          "cell_en_o": [
+            "cell_en_o_15",
+            "cell_en_o_14",
+            "cell_en_o_13",
+            "cell_en_o_12",
+            "cell_en_o_11",
+            "cell_en_o_10",
+            "cell_en_o_9",
+            "cell_en_o_8",
+            "cell_en_o_7",
+            "cell_en_o_6",
+            "cell_en_o_5",
+            "cell_en_o_4",
+            "cell_en_o_3",
+            "cell_en_o_2",
+            "cell_en_o_1",
+            "cell_en_o_0"
+          ],
+          "ptr_o": [
+            "ptr_o_15",
+            "ptr_o_14",
+            "ptr_o_13",
+            "ptr_o_12",
+            "ptr_o_11",
+            "ptr_o_10",
+            "ptr_o_9",
+            "ptr_o_8",
+            "ptr_o_7",
+            "ptr_o_6",
+            "ptr_o_5",
+            "ptr_o_4",
+            "ptr_o_3",
+            "ptr_o_2",
+            "ptr_o_1",
+            "ptr_o_0"
+          ],
+          "cell_en": [
+            "cell_en_15",
+            "cell_en_14",
+            "cell_en_13",
+            "cell_en_12",
+            "cell_en_11",
+            "cell_en_10",
+            "cell_en_9",
+            "cell_en_8",
+            "cell_en_7",
+            "cell_en_6",
+            "cell_en_5",
+            "cell_en_4",
+            "cell_en_3",
+            "cell_en_2",
+            "cell_en_1",
+            "cell_en_0"
+          ],
+          "ptr": [
+            "ptr_15",
+            "ptr_14",
+            "ptr_13",
+            "ptr_12",
+            "ptr_11",
+            "ptr_10",
+            "ptr_9",
+            "ptr_8",
+            "ptr_7",
+            "ptr_6",
+            "ptr_5",
+            "ptr_4",
+            "ptr_3",
+            "ptr_2",
+            "ptr_1",
+            "ptr_0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {}
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "dwa_ptr_gen_smoke",
+      "confidence": 0.84,
+      "templates": [
+        {
+          "template": "onehot_no_overlap",
+          "confidence": 0.84,
+          "signals": {
+            "clock": "clk_i",
+            "reset": "rst_ni",
+            "pointer_bits": [
+              "ptr_15",
+              "ptr_0"
+            ],
+            "cell_bits": [
+              "cell_en_15",
+              "cell_en_0"
+            ],
+            "code_bits": [
+              "code_3",
+              "code_2",
+              "code_1",
+              "code_0"
+            ]
+          },
+          "parameters": {
+            "cells": 16,
+            "require_no_overlap": false,
+            "require_wraparound": false
+          },
+          "evidence": [
+            "prompt describes DWA rotating pointer/cell-enable selection-window behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "dwa_ptr_gen",
+        "v2b_4b",
+        "electrical",
+        "clk_i",
+        "rst_ni",
+        "code_msb_i_3",
+        "code_msb_i_2",
+        "code_msb_i_1",
+        "code_msb_i_0",
+        "cell_en_o_15",
+        "cell_en_o_14",
+        "cell_en_o_13",
+        "cell_en_o_12",
+        "cell_en_o_11",
+        "cell_en_o_10",
+        "cell_en_o_9",
+        "cell_en_o_8",
+        "cell_en_o_7",
+        "cell_en_o_6",
+        "cell_en_o_5",
+        "cell_en_o_4",
+        "cell_en_o_3",
+        "cell_en_o_2",
+        "cell_en_o_1",
+        "cell_en_o_0",
+        "ptr_o_15",
+        "ptr_o_14",
+        "ptr_o_13",
+        "ptr_o_12",
+        "ptr_o_11",
+        "ptr_o_10",
+        "ptr_o_9",
+        "ptr_o_8",
+        "ptr_o_7",
+        "ptr_o_6",
+        "ptr_o_5",
+        "ptr_o_4",
+        "ptr_o_3",
+        "ptr_o_2",
+        "ptr_o_1",
+        "ptr_o_0",
+        "vdd",
+        "vth",
+        "ptr_init",
+        "code_3",
+        "code_2",
+        "code_1",
+        "code_0",
+        "cell_en_15",
+        "cell_en_0",
+        "ptr_15",
+        "ptr_0",
+        "Reset",
+        "reset",
+        "clock",
+        "Clock"
+      ],
+      "roles": {
+        "clock": [
+          "clk_i",
+          "clock",
+          "Clock"
+        ],
+        "reset": [
+          "rst_ni",
+          "Reset",
+          "reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [],
+        "code_bits": {
+          "code_msb_i": [
+            "code_msb_i_3",
+            "code_msb_i_2",
+            "code_msb_i_1",
+            "code_msb_i_0"
+          ],
+          "cell_en_o": [
+            "cell_en_o_15",
+            "cell_en_o_14",
+            "cell_en_o_13",
+            "cell_en_o_12",
+            "cell_en_o_11",
+            "cell_en_o_10",
+            "cell_en_o_9",
+            "cell_en_o_8",
+            "cell_en_o_7",
+            "cell_en_o_6",
+            "cell_en_o_5",
+            "cell_en_o_4",
+            "cell_en_o_3",
+            "cell_en_o_2",
+            "cell_en_o_1",
+            "cell_en_o_0"
+          ],
+          "ptr_o": [
+            "ptr_o_15",
+            "ptr_o_14",
+            "ptr_o_13",
+            "ptr_o_12",
+            "ptr_o_11",
+            "ptr_o_10",
+            "ptr_o_9",
+            "ptr_o_8",
+            "ptr_o_7",
+            "ptr_o_6",
+            "ptr_o_5",
+            "ptr_o_4",
+            "ptr_o_3",
+            "ptr_o_2",
+            "ptr_o_1",
+            "ptr_o_0"
+          ],
+          "code": [
+            "code_3",
+            "code_2",
+            "code_1",
+            "code_0"
+          ],
+          "cell_en": [
+            "cell_en_15",
+            "cell_en_0"
+          ],
+          "ptr": [
+            "ptr_15",
+            "ptr_0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {}
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "dwa_wraparound_smoke",
+      "confidence": 0.91,
+      "templates": [
+        {
+          "template": "onehot_no_overlap",
+          "confidence": 0.91,
+          "signals": {
+            "clock": "clk_i",
+            "reset": "rst_ni",
+            "pointer_bits": [
+              "ptr_15",
+              "ptr_14",
+              "ptr_13",
+              "ptr_12",
+              "ptr_11",
+              "ptr_10",
+              "ptr_9",
+              "ptr_8",
+              "ptr_7",
+              "ptr_6",
+              "ptr_5",
+              "ptr_4",
+              "ptr_3",
+              "ptr_2",
+              "ptr_1",
+              "ptr_0"
+            ],
+            "cell_bits": [
+              "cell_en_15",
+              "cell_en_14",
+              "cell_en_13",
+              "cell_en_12",
+              "cell_en_11",
+              "cell_en_10",
+              "cell_en_9",
+              "cell_en_8",
+              "cell_en_7",
+              "cell_en_6",
+              "cell_en_5",
+              "cell_en_4",
+              "cell_en_3",
+              "cell_en_2",
+              "cell_en_1",
+              "cell_en_0"
+            ],
+            "code_bits": [
+              "code_3",
+              "code_2",
+              "code_1",
+              "code_0"
+            ]
+          },
+          "parameters": {
+            "cells": 16,
+            "require_no_overlap": false,
+            "require_wraparound": true
+          },
+          "evidence": [
+            "prompt describes DWA rotating pointer/cell-enable selection-window behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "dwa_wraparound_ref",
+        "dwa_code_step_ref",
+        "electrical",
+        "clk_i",
+        "rst_ni",
+        "code_i_3",
+        "code_i_2",
+        "code_i_1",
+        "code_i_0",
+        "cell_en_o_15",
+        "cell_en_o_14",
+        "cell_en_o_13",
+        "cell_en_o_12",
+        "cell_en_o_11",
+        "cell_en_o_10",
+        "cell_en_o_9",
+        "cell_en_o_8",
+        "cell_en_o_7",
+        "cell_en_o_6",
+        "cell_en_o_5",
+        "cell_en_o_4",
+        "cell_en_o_3",
+        "cell_en_o_2",
+        "cell_en_o_1",
+        "cell_en_o_0",
+        "ptr_o_15",
+        "ptr_o_14",
+        "ptr_o_13",
+        "ptr_o_12",
+        "ptr_o_11",
+        "ptr_o_10",
+        "ptr_o_9",
+        "ptr_o_8",
+        "ptr_o_7",
+        "ptr_o_6",
+        "ptr_o_5",
+        "ptr_o_4",
+        "ptr_o_3",
+        "ptr_o_2",
+        "ptr_o_1",
+        "ptr_o_0",
+        "ahdl_include",
+        "code_0",
+        "code_1",
+        "code_2",
+        "code_3",
+        "cell_en_0",
+        "cell_en_1",
+        "cell_en_2",
+        "cell_en_3",
+        "cell_en_4",
+        "cell_en_5",
+        "cell_en_6",
+        "cell_en_7",
+        "cell_en_8",
+        "cell_en_9",
+        "cell_en_10",
+        "cell_en_11",
+        "cell_en_12",
+        "cell_en_13",
+        "cell_en_14",
+        "cell_en_15",
+        "ptr_0",
+        "ptr_1",
+        "ptr_2",
+        "ptr_3",
+        "ptr_4",
+        "ptr_5",
+        "ptr_6",
+        "ptr_7",
+        "ptr_8",
+        "ptr_9",
+        "ptr_10",
+        "ptr_11",
+        "ptr_12",
+        "ptr_13",
+        "ptr_14",
+        "ptr_15",
+        "clock",
+        "reset",
+        "Reset",
+        "Clock"
+      ],
+      "roles": {
+        "clock": [
+          "clk_i",
+          "clock",
+          "Clock"
+        ],
+        "reset": [
+          "rst_ni",
+          "reset",
+          "Reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [],
+        "code_bits": {
+          "code_i": [
+            "code_i_3",
+            "code_i_2",
+            "code_i_1",
+            "code_i_0"
+          ],
+          "cell_en_o": [
+            "cell_en_o_15",
+            "cell_en_o_14",
+            "cell_en_o_13",
+            "cell_en_o_12",
+            "cell_en_o_11",
+            "cell_en_o_10",
+            "cell_en_o_9",
+            "cell_en_o_8",
+            "cell_en_o_7",
+            "cell_en_o_6",
+            "cell_en_o_5",
+            "cell_en_o_4",
+            "cell_en_o_3",
+            "cell_en_o_2",
+            "cell_en_o_1",
+            "cell_en_o_0"
+          ],
+          "ptr_o": [
+            "ptr_o_15",
+            "ptr_o_14",
+            "ptr_o_13",
+            "ptr_o_12",
+            "ptr_o_11",
+            "ptr_o_10",
+            "ptr_o_9",
+            "ptr_o_8",
+            "ptr_o_7",
+            "ptr_o_6",
+            "ptr_o_5",
+            "ptr_o_4",
+            "ptr_o_3",
+            "ptr_o_2",
+            "ptr_o_1",
+            "ptr_o_0"
+          ],
+          "code": [
+            "code_3",
+            "code_2",
+            "code_1",
+            "code_0"
+          ],
+          "cell_en": [
+            "cell_en_15",
+            "cell_en_14",
+            "cell_en_13",
+            "cell_en_12",
+            "cell_en_11",
+            "cell_en_10",
+            "cell_en_9",
+            "cell_en_8",
+            "cell_en_7",
+            "cell_en_6",
+            "cell_en_5",
+            "cell_en_4",
+            "cell_en_3",
+            "cell_en_2",
+            "cell_en_1",
+            "cell_en_0"
+          ],
+          "ptr": [
+            "ptr_15",
+            "ptr_14",
+            "ptr_13",
+            "ptr_12",
+            "ptr_11",
+            "ptr_10",
+            "ptr_9",
+            "ptr_8",
+            "ptr_7",
+            "ptr_6",
+            "ptr_5",
+            "ptr_4",
+            "ptr_3",
+            "ptr_2",
+            "ptr_1",
+            "ptr_0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {}
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "flash_adc_3b_smoke",
+      "confidence": 0.86,
+      "templates": [
+        {
+          "template": "monotonic_code_vs_input",
+          "confidence": 0.86,
+          "signals": {
+            "input": "vin",
+            "bits": [
+              "dout2",
+              "dout1",
+              "dout0"
+            ]
+          },
+          "parameters": {
+            "direction": "nondecreasing",
+            "bit_width": 3
+          },
+          "evidence": [
+            "prompt mentions ADC code/quantization or functional IR quantized encoding"
+          ]
+        },
+        {
+          "template": "sample_after_clock",
+          "confidence": 0.78,
+          "signals": {
+            "clock": "clk",
+            "bits": [
+              "dout2",
+              "dout1",
+              "dout0"
+            ]
+          },
+          "parameters": {
+            "edge": "rising"
+          },
+          "evidence": [
+            "prompt mentions sampled update on a clock edge or functional IR sample relation"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "flash_adc_3b",
+        "electrical",
+        "vdd",
+        "vss",
+        "vin",
+        "clk",
+        "dout2",
+        "dout1",
+        "dout0",
+        "vrefp",
+        "vrefn",
+        "vth",
+        "tedge",
+        "clock",
+        "Clock",
+        "reset"
+      ],
+      "roles": {
+        "clock": [
+          "clk",
+          "clock",
+          "Clock"
+        ],
+        "reset": [
+          "reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [
+          "vin"
+        ],
+        "analog_output": [],
+        "code_bits": {
+          "dout": [
+            "dout2",
+            "dout1",
+            "dout0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {}
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "gray_counter_4b_smoke",
+      "confidence": 0.9,
+      "templates": [
+        {
+          "template": "gray_counter_sequence",
+          "confidence": 0.9,
+          "signals": {
+            "clock": "clk",
+            "reset": "rstb",
+            "bits": [
+              "g3",
+              "g2",
+              "g1",
+              "g0"
+            ]
+          },
+          "parameters": {
+            "encoding": "binary_to_gray"
+          },
+          "evidence": [
+            "prompt describes Gray-code or one-bit-adjacent counter transition behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "gray_counter_4b",
+        "electrical",
+        "vdd",
+        "vss",
+        "clk",
+        "en",
+        "rstb",
+        "g3",
+        "g2",
+        "g1",
+        "g0",
+        "vth",
+        "tedge",
+        "idt",
+        "ahdl_include",
+        "VDD",
+        "VSS",
+        "CLK",
+        "EN",
+        "RSTB",
+        "G3",
+        "G2",
+        "G1",
+        "G0",
+        "reset",
+        "clock",
+        "Reset",
+        "Clock"
+      ],
+      "roles": {
+        "clock": [
+          "clk",
+          "CLK",
+          "clock",
+          "Clock"
+        ],
+        "reset": [
+          "rstb",
+          "RSTB",
+          "reset",
+          "Reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "G3",
+          "G2",
+          "G1",
+          "G0"
+        ],
+        "code_bits": {
+          "g": [
+            "g3",
+            "g2",
+            "g1",
+            "g0"
+          ],
+          "G": [
+            "G3",
+            "G2",
+            "G1",
+            "G0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "CLK": "input",
+          "EN": "input",
+          "RSTB": "input",
+          "G3": "output",
+          "G2": "output",
+          "G1": "output",
+          "G0": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "gray_counter_one_bit_change_smoke",
+      "confidence": 0.9,
+      "templates": [
+        {
+          "template": "gray_counter_sequence",
+          "confidence": 0.9,
+          "signals": {
+            "clock": "clk",
+            "reset": "rst",
+            "bits": [
+              "g3",
+              "g2",
+              "g1",
+              "g0"
+            ]
+          },
+          "parameters": {
+            "encoding": "binary_to_gray"
+          },
+          "evidence": [
+            "prompt describes Gray-code or one-bit-adjacent counter transition behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "gray_counter_one_bit_change_ref",
+        "vdd",
+        "vss",
+        "clk",
+        "rst",
+        "g0",
+        "g1",
+        "g2",
+        "g3",
+        "tran",
+        "save",
+        "reset",
+        "Reset",
+        "Clock",
+        "clock"
+      ],
+      "roles": {
+        "clock": [
+          "clk",
+          "Clock",
+          "clock"
+        ],
+        "reset": [
+          "rst",
+          "reset",
+          "Reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "g0",
+          "g1",
+          "g2",
+          "g3"
+        ],
+        "code_bits": {
+          "g": [
+            "g3",
+            "g2",
+            "g1",
+            "g0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "vss": "inout",
+          "clk": "input",
+          "rst": "input",
+          "g0": "output",
+          "g1": "output",
+          "g2": "output",
+          "g3": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "multimod_divider_ratio_switch_smoke",
+      "confidence": 0.9,
+      "templates": [
+        {
+          "template": "counter_cadence",
+          "confidence": 0.9,
+          "signals": {
+            "input_clock": "clk_in",
+            "output": "div_out",
+            "control": "ratio_ctrl"
+          },
+          "parameters": {
+            "expected_ratios": [
+              4,
+              5
+            ],
+            "mode": "pulse"
+          },
+          "evidence": [
+            "prompt describes divider/counter ratio behavior"
+          ]
+        },
+        {
+          "template": "ratio_control_window",
+          "confidence": 0.8,
+          "signals": {
+            "control": "ratio_ctrl"
+          },
+          "parameters": {
+            "expected_ratios": [
+              4,
+              5
+            ]
+          },
+          "evidence": [
+            "prompt describes ratio control changes"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "multimod_divider_ratio_switch_ref",
+        "clk_in",
+        "ratio_ctrl",
+        "div_out",
+        "tran",
+        "save",
+        "clock",
+        "Clock",
+        "reset"
+      ],
+      "roles": {
+        "clock": [
+          "clk_in",
+          "clock",
+          "Clock"
+        ],
+        "reset": [
+          "reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "div_out"
+        ],
+        "code_bits": {},
+        "control": [
+          "ratio_ctrl"
+        ],
+        "settled": [],
+        "prompt_port_roles": {
+          "clk_in": "input",
+          "ratio_ctrl": "input",
+          "div_out": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "not_gate_smoke",
+      "confidence": 0.78,
+      "templates": [
+        {
+          "template": "logic_truth_table",
+          "confidence": 0.78,
+          "signals": {
+            "inputs": [],
+            "outputs": [
+              "y",
+              "Y"
+            ]
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes digital logic behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "not_gate",
+        "electrical",
+        "vdd",
+        "vss",
+        "a",
+        "y",
+        "vth",
+        "tedge",
+        "idt",
+        "ddt",
+        "ahdl_include",
+        "VDD",
+        "VSS",
+        "A",
+        "Y"
+      ],
+      "roles": {
+        "clock": [],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "y",
+          "Y"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "A": "input",
+          "Y": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "or_gate_smoke",
+      "confidence": 0.78,
+      "templates": [
+        {
+          "template": "logic_truth_table",
+          "confidence": 0.78,
+          "signals": {
+            "inputs": [],
+            "outputs": [
+              "y",
+              "Y"
+            ]
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes digital logic behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "or_gate",
+        "electrical",
+        "a",
+        "b",
+        "y",
+        "vdd",
+        "tedge",
+        "idt",
+        "ddt",
+        "ahdl_include",
+        "A",
+        "B",
+        "Y"
+      ],
+      "roles": {
+        "clock": [],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "y",
+          "Y"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "A": "input",
+          "B": "input",
+          "Y": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "parameter_type_override_smoke",
+      "confidence": 0.86,
+      "templates": [
+        {
+          "template": "parameterized_event_sequence",
+          "confidence": 0.86,
+          "signals": {
+            "outputs": [
+              "out"
+            ]
+          },
+          "parameters": {
+            "tran": "tran tran stop=60n maxstep=200p"
+          },
+          "evidence": [
+            "prompt requires parameterized finite pulse/event behavior"
+          ]
+        },
+        {
+          "template": "timer_future_event_liveness",
+          "confidence": 0.8,
+          "signals": {
+            "outputs": [
+              "out"
+            ]
+          },
+          "parameters": {
+            "tran": "tran tran stop=60n maxstep=200p"
+          },
+          "evidence": [
+            "prompt uses timer-driven output generation"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "parameter_type_override_ref",
+        "out",
+        "vss",
+        "electrical",
+        "vhi",
+        "reps",
+        "and"
+      ],
+      "roles": {
+        "clock": [],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "out"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "vss": "inout"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "pfd_deadzone_smoke",
+      "confidence": 0.91,
+      "templates": [
+        {
+          "template": "paired_edge_response",
+          "confidence": 0.91,
+          "signals": {
+            "reference": "ref",
+            "feedback": "div",
+            "up": "up",
+            "down": "dn"
+          },
+          "parameters": {
+            "edge": "rising"
+          },
+          "evidence": [
+            "prompt describes ref/div edge-triggered up/dn response"
+          ]
+        },
+        {
+          "template": "pulse_non_overlap",
+          "confidence": 0.88,
+          "signals": {
+            "up": "up",
+            "down": "dn"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt requires up/dn not overlap significantly"
+          ]
+        },
+        {
+          "template": "pulse_width_window",
+          "confidence": 0.75,
+          "signals": {
+            "up": "up",
+            "down": "dn"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes pulse behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "pfd_updn",
+        "electrical",
+        "vdd",
+        "vss",
+        "ref",
+        "div",
+        "up",
+        "dn",
+        "vth",
+        "tedge",
+        "ahdl_include",
+        "VDD",
+        "VSS",
+        "REF",
+        "DIV",
+        "UP",
+        "DN",
+        "reset",
+        "Reset"
+      ],
+      "roles": {
+        "clock": [],
+        "reset": [
+          "reset",
+          "Reset"
+        ],
+        "reference_clock": [
+          "ref",
+          "REF"
+        ],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [
+          "up",
+          "UP"
+        ],
+        "down": [
+          "dn",
+          "DN"
+        ],
+        "analog_input": [],
+        "analog_output": [
+          "UP",
+          "DN"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "REF": "input",
+          "DIV": "input",
+          "UP": "output",
+          "DN": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "pfd_reset_race_smoke",
+      "confidence": 0.91,
+      "templates": [
+        {
+          "template": "paired_edge_response",
+          "confidence": 0.91,
+          "signals": {
+            "reference": "ref",
+            "feedback": "div",
+            "up": "up",
+            "down": "dn"
+          },
+          "parameters": {
+            "edge": "rising"
+          },
+          "evidence": [
+            "prompt describes ref/div edge-triggered up/dn response"
+          ]
+        },
+        {
+          "template": "pulse_non_overlap",
+          "confidence": 0.88,
+          "signals": {
+            "up": "up",
+            "down": "dn"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt requires up/dn not overlap significantly"
+          ]
+        },
+        {
+          "template": "pulse_width_window",
+          "confidence": 0.75,
+          "signals": {
+            "up": "up",
+            "down": "dn"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes pulse behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "pfd_updn",
+        "up",
+        "dn",
+        "electrical",
+        "ref",
+        "div",
+        "VDD",
+        "VSS",
+        "REF",
+        "DIV",
+        "UP",
+        "DN",
+        "reset",
+        "Reset"
+      ],
+      "roles": {
+        "clock": [],
+        "reset": [
+          "reset",
+          "Reset"
+        ],
+        "reference_clock": [
+          "ref",
+          "REF"
+        ],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [
+          "up",
+          "UP"
+        ],
+        "down": [
+          "dn",
+          "DN"
+        ],
+        "analog_input": [],
+        "analog_output": [
+          "UP",
+          "DN"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "REF": "input",
+          "DIV": "input",
+          "UP": "output",
+          "DN": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "pfd_updn_smoke",
+      "confidence": 0.91,
+      "templates": [
+        {
+          "template": "paired_edge_response",
+          "confidence": 0.91,
+          "signals": {
+            "reference": "ref",
+            "feedback": "div",
+            "up": "up",
+            "down": "dn"
+          },
+          "parameters": {
+            "edge": "rising"
+          },
+          "evidence": [
+            "prompt describes ref/div edge-triggered up/dn response"
+          ]
+        },
+        {
+          "template": "pulse_width_window",
+          "confidence": 0.75,
+          "signals": {
+            "up": "up",
+            "down": "dn"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes pulse behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "pfd_updn",
+        "electrical",
+        "vdd",
+        "vss",
+        "ref",
+        "div",
+        "up",
+        "dn",
+        "vth",
+        "tedge",
+        "ahdl_include",
+        "VDD",
+        "VSS",
+        "REF",
+        "DIV",
+        "UP",
+        "DN",
+        "reset",
+        "Reset",
+        "Clock",
+        "clock"
+      ],
+      "roles": {
+        "clock": [
+          "Clock",
+          "clock"
+        ],
+        "reset": [
+          "reset",
+          "Reset"
+        ],
+        "reference_clock": [
+          "ref",
+          "REF"
+        ],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [
+          "up",
+          "UP"
+        ],
+        "down": [
+          "dn",
+          "DN"
+        ],
+        "analog_input": [],
+        "analog_output": [
+          "UP",
+          "DN"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "REF": "input",
+          "DIV": "input",
+          "UP": "output",
+          "DN": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "sample_hold_droop_smoke",
+      "confidence": 0.82,
+      "templates": [
+        {
+          "template": "droop_window",
+          "confidence": 0.82,
+          "signals": {
+            "input": "vin",
+            "output": "vout",
+            "clock": "clk"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes sample/hold behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "sample_hold_droop_ref",
+        "electrical",
+        "vdd",
+        "vss",
+        "clk",
+        "vin",
+        "vout",
+        "vth",
+        "tau",
+        "dt",
+        "trf",
+        "Clock",
+        "reset",
+        "clock"
+      ],
+      "roles": {
+        "clock": [
+          "clk",
+          "Clock",
+          "clock"
+        ],
+        "reset": [
+          "reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [
+          "vin"
+        ],
+        "analog_output": [
+          "vout"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {}
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "sample_hold_smoke",
+      "confidence": 0.82,
+      "templates": [
+        {
+          "template": "sample_hold_tracking",
+          "confidence": 0.82,
+          "signals": {
+            "input": null,
+            "output": "out",
+            "clock": "clk"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes sample/hold behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "sample_hold",
+        "electrical",
+        "vdd",
+        "vss",
+        "in",
+        "clk",
+        "out",
+        "vth",
+        "tedge",
+        "ahdl_include",
+        "VDD",
+        "VSS",
+        "IN",
+        "CLK",
+        "OUT",
+        "clock",
+        "Clock",
+        "reset"
+      ],
+      "roles": {
+        "clock": [
+          "clk",
+          "CLK",
+          "clock",
+          "Clock"
+        ],
+        "reset": [
+          "reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "out",
+          "OUT"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "IN": "input",
+          "CLK": "input",
+          "OUT": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "sar_adc_dac_weighted_8b_smoke",
+      "confidence": 0.93,
+      "templates": [
+        {
+          "template": "quantized_reconstruction",
+          "confidence": 0.93,
+          "signals": {
+            "input": "vin",
+            "output": "vout",
+            "bits": [
+              "dout_7",
+              "dout_6",
+              "dout_5",
+              "dout_4",
+              "dout_3",
+              "dout_2",
+              "dout_1",
+              "dout_0"
+            ],
+            "clock": "clks",
+            "reset": "rst_n"
+          },
+          "parameters": {
+            "bit_width": 8,
+            "min_unique_codes": 12
+          },
+          "evidence": [
+            "prompt mentions ADC-DAC round trip and reconstructed vout"
+          ]
+        },
+        {
+          "template": "thermometer_dac_code_to_output_span",
+          "confidence": 0.86,
+          "signals": {
+            "bits": [
+              "din_7",
+              "din_6",
+              "din_5",
+              "din_4",
+              "din_3",
+              "din_2",
+              "din_1",
+              "din_0"
+            ],
+            "output": "vout",
+            "clock": "clks"
+          },
+          "parameters": {
+            "bit_width": 8,
+            "require_monotonic": false
+          },
+          "evidence": [
+            "prompt describes DAC code-to-output behavior or functional IR code-to-analog transfer"
+          ]
+        },
+        {
+          "template": "sample_hold_tracking",
+          "confidence": 0.82,
+          "signals": {
+            "input": "vin",
+            "output": "vout",
+            "clock": "clks"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes sample/hold behavior"
+          ]
+        },
+        {
+          "template": "sample_after_clock",
+          "confidence": 0.78,
+          "signals": {
+            "clock": "clks",
+            "bits": [
+              "dout_7",
+              "dout_6",
+              "dout_5",
+              "dout_4",
+              "dout_3",
+              "dout_2",
+              "dout_1",
+              "dout_0"
+            ]
+          },
+          "parameters": {
+            "edge": "rising"
+          },
+          "evidence": [
+            "prompt mentions sampled update on a clock edge or functional IR sample relation"
+          ]
+        },
+        {
+          "template": "monotonic_code_vs_input",
+          "confidence": 0.74,
+          "signals": {
+            "input": "vin",
+            "bits": [
+              "dout_7",
+              "dout_6",
+              "dout_5",
+              "dout_4",
+              "dout_3",
+              "dout_2",
+              "dout_1",
+              "dout_0"
+            ]
+          },
+          "parameters": {
+            "direction": "nondecreasing",
+            "bit_width": 8
+          },
+          "evidence": [
+            "prompt mentions ADC code/quantization or functional IR quantized encoding"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "sar_adc_weighted_8b",
+        "electrical",
+        "vin",
+        "clks",
+        "rst_n",
+        "dout_7",
+        "dout_6",
+        "dout_5",
+        "dout_4",
+        "dout_3",
+        "dout_2",
+        "dout_1",
+        "dout_0",
+        "dac_weighted_8b",
+        "din_7",
+        "din_6",
+        "din_5",
+        "din_4",
+        "din_3",
+        "din_2",
+        "din_1",
+        "din_0",
+        "vout",
+        "sh_ideal",
+        "vdd",
+        "vss",
+        "vin_sh",
+        "dout",
+        "reset",
+        "din",
+        "clock",
+        "Reset",
+        "Clock"
+      ],
+      "roles": {
+        "clock": [
+          "clks",
+          "clock",
+          "Clock"
+        ],
+        "reset": [
+          "rst_n",
+          "reset",
+          "Reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [
+          "vin",
+          "din_7",
+          "din_6",
+          "din_5",
+          "din_4",
+          "din_3",
+          "din_2",
+          "din_1",
+          "din_0",
+          "din"
+        ],
+        "analog_output": [
+          "vout"
+        ],
+        "code_bits": {
+          "dout": [
+            "dout_7",
+            "dout_6",
+            "dout_5",
+            "dout_4",
+            "dout_3",
+            "dout_2",
+            "dout_1",
+            "dout_0"
+          ],
+          "din": [
+            "din_7",
+            "din_6",
+            "din_5",
+            "din_4",
+            "din_3",
+            "din_2",
+            "din_1",
+            "din_0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {}
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "serializer_8b_smoke",
+      "confidence": 0.78,
+      "templates": [
+        {
+          "template": "sequence_alignment",
+          "confidence": 0.78,
+          "signals": {
+            "clock": "clk",
+            "outputs": [
+              "SOUT"
+            ]
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes serializer/frame sequencing"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "serializer_8b",
+        "electrical",
+        "vdd",
+        "vss",
+        "d7",
+        "d6",
+        "d5",
+        "d4",
+        "d3",
+        "d2",
+        "d1",
+        "d0",
+        "load",
+        "clk",
+        "sout",
+        "vth",
+        "tedge",
+        "ahdl_include",
+        "VDD",
+        "VSS",
+        "D7",
+        "D6",
+        "D5",
+        "D4",
+        "D3",
+        "D2",
+        "D1",
+        "D0",
+        "LOAD",
+        "CLK",
+        "SOUT",
+        "Reset",
+        "clock",
+        "Clock",
+        "reset"
+      ],
+      "roles": {
+        "clock": [
+          "clk",
+          "CLK",
+          "clock",
+          "Clock"
+        ],
+        "reset": [
+          "Reset",
+          "reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "SOUT"
+        ],
+        "code_bits": {
+          "d": [
+            "d7",
+            "d6",
+            "d5",
+            "d4",
+            "d3",
+            "d2",
+            "d1",
+            "d0"
+          ],
+          "D": [
+            "D7",
+            "D6",
+            "D5",
+            "D4",
+            "D3",
+            "D2",
+            "D1",
+            "D0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "D7": "input",
+          "D6": "input",
+          "D5": "input",
+          "D4": "input",
+          "D3": "input",
+          "D2": "input",
+          "D1": "input",
+          "D0": "input",
+          "LOAD": "input",
+          "CLK": "input",
+          "SOUT": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "serializer_frame_alignment_smoke",
+      "confidence": 0.78,
+      "templates": [
+        {
+          "template": "sequence_alignment",
+          "confidence": 0.78,
+          "signals": {
+            "clock": "clk",
+            "outputs": [
+              "sout",
+              "frame"
+            ]
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes serializer/frame sequencing"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "serializer_frame_alignment_ref",
+        "vdd",
+        "vss",
+        "clk",
+        "load",
+        "din_7",
+        "din_6",
+        "din_5",
+        "din_4",
+        "din_3",
+        "din_2",
+        "din_1",
+        "din_0",
+        "sout",
+        "frame",
+        "din7",
+        "din6",
+        "din5",
+        "din4",
+        "din3",
+        "din2",
+        "din1",
+        "din0",
+        "tran",
+        "save",
+        "din",
+        "clock",
+        "Clock",
+        "reset"
+      ],
+      "roles": {
+        "clock": [
+          "clk",
+          "clock",
+          "Clock"
+        ],
+        "reset": [
+          "reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [
+          "din_7",
+          "din_6",
+          "din_5",
+          "din_4",
+          "din_3",
+          "din_2",
+          "din_1",
+          "din_0",
+          "din7",
+          "din6",
+          "din5",
+          "din4",
+          "din3",
+          "din2",
+          "din1",
+          "din0",
+          "din"
+        ],
+        "analog_output": [
+          "sout",
+          "frame"
+        ],
+        "code_bits": {
+          "din": [
+            "din_7",
+            "din7",
+            "din_6",
+            "din6",
+            "din_5",
+            "din5",
+            "din_4",
+            "din4",
+            "din_3",
+            "din3",
+            "din_2",
+            "din2",
+            "din_1",
+            "din1",
+            "din_0",
+            "din0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "vss": "inout",
+          "clk": "input",
+          "load": "input",
+          "din7": "input",
+          "din6": "input",
+          "din5": "input",
+          "din4": "input",
+          "din3": "input",
+          "din2": "input",
+          "din1": "input",
+          "din0": "input",
+          "sout": "output",
+          "frame": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "timer_absolute_grid_smoke",
+      "confidence": 0.94,
+      "templates": [
+        {
+          "template": "absolute_event_window",
+          "confidence": 0.94,
+          "signals": {
+            "signal": "clk_out"
+          },
+          "parameters": {
+            "target_times_s": [
+              1.01e-08,
+              3.0100000000000005e-08,
+              5.0100000000000005e-08,
+              7.01e-08,
+              7.500000000000001e-08
+            ],
+            "tran": "tran tran stop=75n maxstep=20p errpreset=conservative"
+          },
+          "evidence": [
+            "prompt states absolute timer grid/target event times"
+          ]
+        },
+        {
+          "template": "timer_future_event_liveness",
+          "confidence": 0.8,
+          "signals": {
+            "outputs": [
+              "clk_out"
+            ]
+          },
+          "parameters": {
+            "tran": "tran tran stop=75n maxstep=20p errpreset=conservative"
+          },
+          "evidence": [
+            "prompt uses timer-driven output generation"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "timer_absolute_grid_ref",
+        "electrical",
+        "VDD",
+        "VSS",
+        "clk_out",
+        "tstart",
+        "tstep",
+        "tedge",
+        "ahdl_include"
+      ],
+      "roles": {
+        "clock": [
+          "clk_out"
+        ],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "clk_out"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "clk_out": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "xor_pd_smoke",
+      "confidence": 0.78,
+      "templates": [
+        {
+          "template": "logic_truth_table",
+          "confidence": 0.78,
+          "signals": {
+            "inputs": [],
+            "outputs": [
+              "pd_out",
+              "PD_OUT"
+            ]
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes digital logic behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "xor_phase_detector",
+        "electrical",
+        "vdd",
+        "vss",
+        "ref",
+        "div",
+        "pd_out",
+        "vth",
+        "tedge",
+        "idt",
+        "ddt",
+        "ahdl_include",
+        "VDD",
+        "VSS",
+        "REF",
+        "DIV",
+        "PD_OUT",
+        "Clock",
+        "clock",
+        "reset"
+      ],
+      "roles": {
+        "clock": [
+          "Clock",
+          "clock"
+        ],
+        "reset": [
+          "reset"
+        ],
+        "reference_clock": [
+          "ref",
+          "REF"
+        ],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "pd_out",
+          "PD_OUT"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "REF": "input",
+          "DIV": "input",
+          "PD_OUT": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "pipeline_stage",
+      "confidence": 0.78,
+      "templates": [
+        {
+          "template": "sample_after_clock",
+          "confidence": 0.78,
+          "signals": {
+            "clock": null,
+            "bits": [
+              "D1",
+              "D0"
+            ]
+          },
+          "parameters": {
+            "edge": "rising"
+          },
+          "evidence": [
+            "prompt mentions sampled update on a clock edge or functional IR sample relation"
+          ]
+        },
+        {
+          "template": "monotonic_code_vs_input",
+          "confidence": 0.74,
+          "signals": {
+            "input": "VIN",
+            "bits": [
+              "D1",
+              "D0"
+            ]
+          },
+          "parameters": {
+            "direction": "nondecreasing",
+            "bit_width": 5
+          },
+          "evidence": [
+            "prompt mentions ADC code/quantization or functional IR quantized encoding"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "pipeline_stage",
+        "VDD",
+        "VSS",
+        "PHI1",
+        "PHI2",
+        "VIN",
+        "VREF",
+        "VRES",
+        "D1",
+        "D0"
+      ],
+      "roles": {
+        "clock": [],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [
+          "VIN"
+        ],
+        "analog_output": [
+          "VRES",
+          "D1",
+          "D0"
+        ],
+        "code_bits": {
+          "PHI": [
+            "PHI2",
+            "PHI1"
+          ],
+          "D": [
+            "D1",
+            "D0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VSS": "inout",
+          "PHI1": "input",
+          "PHI2": "input",
+          "VIN": "input",
+          "VREF": "input",
+          "VRES": "output",
+          "D1": "output",
+          "D0": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "sar_12bit",
+      "confidence": 0.88,
+      "templates": [
+        {
+          "template": "sar_sequence",
+          "confidence": 0.88,
+          "signals": {
+            "clock": "CLKS",
+            "comparator": null,
+            "ready": null,
+            "eoc": "EOC",
+            "bits": [
+              "DP_CAP_11",
+              "DP_CAP_10",
+              "DP_CAP_9",
+              "DP_CAP_8",
+              "DP_CAP_7",
+              "DP_CAP_6",
+              "DP_CAP_5",
+              "DP_CAP_4",
+              "DP_CAP_3",
+              "DP_CAP_2",
+              "DP_CAP_1",
+              "DP_CAP_0"
+            ]
+          },
+          "parameters": {
+            "bit_width": 12
+          },
+          "evidence": [
+            "prompt describes SAR state sequencing or end-of-conversion/ready behavior"
+          ]
+        },
+        {
+          "template": "monotonic_code_vs_input",
+          "confidence": 0.74,
+          "signals": {
+            "input": null,
+            "bits": [
+              "DP_CAP_11",
+              "DP_CAP_10",
+              "DP_CAP_9",
+              "DP_CAP_8",
+              "DP_CAP_7",
+              "DP_CAP_6",
+              "DP_CAP_5",
+              "DP_CAP_4",
+              "DP_CAP_3",
+              "DP_CAP_2",
+              "DP_CAP_1",
+              "DP_CAP_0"
+            ]
+          },
+          "parameters": {
+            "direction": "nondecreasing",
+            "bit_width": 12
+          },
+          "evidence": [
+            "prompt mentions ADC code/quantization or functional IR quantized encoding"
+          ]
+        },
+        {
+          "template": "threshold_crossing",
+          "confidence": 0.74,
+          "signals": {
+            "inputs": [],
+            "outputs": [
+              "DP_CAP_11",
+              "DP_CAP_10",
+              "DP_CAP_9",
+              "DP_CAP_8",
+              "DP_CAP_7",
+              "DP_CAP_6",
+              "DP_CAP_5",
+              "DP_CAP_4",
+              "DP_CAP_3",
+              "DP_CAP_2",
+              "DP_CAP_1",
+              "DP_CAP_0",
+              "EOC"
+            ]
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes comparator/threshold behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "sar_12bit",
+        "VDD",
+        "VSS",
+        "CLKS",
+        "DCOMP_P",
+        "DCOMP_N",
+        "DP_CAP_11",
+        "DP_CAP_10",
+        "DP_CAP_9",
+        "DP_CAP_8",
+        "DP_CAP_7",
+        "DP_CAP_6",
+        "DP_CAP_5",
+        "DP_CAP_4",
+        "DP_CAP_3",
+        "DP_CAP_2",
+        "DP_CAP_1",
+        "DP_CAP_0",
+        "EOC",
+        "vth",
+        "vdd",
+        "tedge"
+      ],
+      "roles": {
+        "clock": [
+          "CLKS"
+        ],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "DP_CAP_11",
+          "DP_CAP_10",
+          "DP_CAP_9",
+          "DP_CAP_8",
+          "DP_CAP_7",
+          "DP_CAP_6",
+          "DP_CAP_5",
+          "DP_CAP_4",
+          "DP_CAP_3",
+          "DP_CAP_2",
+          "DP_CAP_1",
+          "DP_CAP_0",
+          "EOC"
+        ],
+        "code_bits": {
+          "DP_CAP": [
+            "DP_CAP_11",
+            "DP_CAP_10",
+            "DP_CAP_9",
+            "DP_CAP_8",
+            "DP_CAP_7",
+            "DP_CAP_6",
+            "DP_CAP_5",
+            "DP_CAP_4",
+            "DP_CAP_3",
+            "DP_CAP_2",
+            "DP_CAP_1",
+            "DP_CAP_0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "CLKS": "input",
+          "DCOMP_P": "input",
+          "DCOMP_N": "input",
+          "DP_CAP_11": "output",
+          "DP_CAP_10": "output",
+          "DP_CAP_9": "output",
+          "DP_CAP_8": "output",
+          "DP_CAP_7": "output",
+          "DP_CAP_6": "output",
+          "DP_CAP_5": "output",
+          "DP_CAP_4": "output",
+          "DP_CAP_3": "output",
+          "DP_CAP_2": "output",
+          "DP_CAP_1": "output",
+          "DP_CAP_0": "output",
+          "EOC": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "sar_logic",
+      "confidence": 0.88,
+      "templates": [
+        {
+          "template": "sar_sequence",
+          "confidence": 0.88,
+          "signals": {
+            "clock": "CLKS",
+            "comparator": "DCOMP",
+            "ready": "RDY",
+            "eoc": null,
+            "bits": [
+              "DP_DAC_9",
+              "DP_DAC_8",
+              "DP_DAC_7",
+              "DP_DAC_6",
+              "DP_DAC_5",
+              "DP_DAC_4",
+              "DP_DAC_3",
+              "DP_DAC_2",
+              "DP_DAC_1",
+              "DP_DAC_0"
+            ]
+          },
+          "parameters": {
+            "bit_width": 10
+          },
+          "evidence": [
+            "prompt describes SAR state sequencing or end-of-conversion/ready behavior"
+          ]
+        },
+        {
+          "template": "sample_after_clock",
+          "confidence": 0.78,
+          "signals": {
+            "clock": "CLKS",
+            "bits": [
+              "DP_DAC_9",
+              "DP_DAC_8",
+              "DP_DAC_7",
+              "DP_DAC_6",
+              "DP_DAC_5",
+              "DP_DAC_4",
+              "DP_DAC_3",
+              "DP_DAC_2",
+              "DP_DAC_1",
+              "DP_DAC_0"
+            ]
+          },
+          "parameters": {
+            "edge": "rising"
+          },
+          "evidence": [
+            "prompt mentions sampled update on a clock edge or functional IR sample relation"
+          ]
+        },
+        {
+          "template": "threshold_crossing",
+          "confidence": 0.74,
+          "signals": {
+            "inputs": [],
+            "outputs": [
+              "DP_DAC_9",
+              "DP_DAC_8",
+              "DP_DAC_7",
+              "DP_DAC_6",
+              "DP_DAC_5",
+              "DP_DAC_4",
+              "DP_DAC_3",
+              "DP_DAC_2",
+              "DP_DAC_1",
+              "DP_DAC_0",
+              "RDY"
+            ]
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes comparator/threshold behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "sar_logic",
+        "VDD",
+        "VSS",
+        "CLKS",
+        "DCOMP",
+        "DP_DAC_9",
+        "DP_DAC_8",
+        "DP_DAC_7",
+        "DP_DAC_6",
+        "DP_DAC_5",
+        "DP_DAC_4",
+        "DP_DAC_3",
+        "DP_DAC_2",
+        "DP_DAC_1",
+        "DP_DAC_0",
+        "RDY",
+        "clock"
+      ],
+      "roles": {
+        "clock": [
+          "CLKS",
+          "RDY",
+          "clock"
+        ],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "DP_DAC_9",
+          "DP_DAC_8",
+          "DP_DAC_7",
+          "DP_DAC_6",
+          "DP_DAC_5",
+          "DP_DAC_4",
+          "DP_DAC_3",
+          "DP_DAC_2",
+          "DP_DAC_1",
+          "DP_DAC_0",
+          "RDY"
+        ],
+        "code_bits": {
+          "DP_DAC": [
+            "DP_DAC_9",
+            "DP_DAC_8",
+            "DP_DAC_7",
+            "DP_DAC_6",
+            "DP_DAC_5",
+            "DP_DAC_4",
+            "DP_DAC_3",
+            "DP_DAC_2",
+            "DP_DAC_1",
+            "DP_DAC_0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "CLKS": "input",
+          "DCOMP": "input",
+          "DP_DAC_9": "output",
+          "DP_DAC_8": "output",
+          "DP_DAC_7": "output",
+          "DP_DAC_6": "output",
+          "DP_DAC_5": "output",
+          "DP_DAC_4": "output",
+          "DP_DAC_3": "output",
+          "DP_DAC_2": "output",
+          "DP_DAC_1": "output",
+          "DP_DAC_0": "output",
+          "RDY": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "bg_cal",
+      "confidence": 0.87,
+      "templates": [
+        {
+          "template": "calibration_settling_code",
+          "confidence": 0.87,
+          "signals": {
+            "clock": "CLK",
+            "comparator": "COMP_OUT",
+            "settled": "SETTLED",
+            "trim_bits": [
+              "TRIM_5",
+              "TRIM_4",
+              "TRIM_3",
+              "TRIM_2",
+              "TRIM_1",
+              "TRIM_0"
+            ]
+          },
+          "parameters": {
+            "settled_cycles": 8
+          },
+          "evidence": [
+            "prompt describes trim-code calibration and settled flag"
+          ]
+        },
+        {
+          "template": "threshold_crossing",
+          "confidence": 0.74,
+          "signals": {
+            "inputs": [
+              "COMP_OUT"
+            ],
+            "outputs": [
+              "COMP_OUT",
+              "SETTLED",
+              "TRIM_0",
+              "TRIM_1",
+              "TRIM_2",
+              "TRIM_3",
+              "TRIM_4",
+              "TRIM_5"
+            ]
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes comparator/threshold behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "bg_cal",
+        "VDD",
+        "VSS",
+        "CLK",
+        "COMP_OUT",
+        "SETTLED",
+        "TRIM_0",
+        "TRIM_1",
+        "TRIM_2",
+        "TRIM_3",
+        "TRIM_4",
+        "TRIM_5",
+        "trim",
+        "TRIM"
+      ],
+      "roles": {
+        "clock": [
+          "CLK"
+        ],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [
+          "COMP_OUT"
+        ],
+        "analog_output": [
+          "COMP_OUT",
+          "SETTLED",
+          "TRIM_0",
+          "TRIM_1",
+          "TRIM_2",
+          "TRIM_3",
+          "TRIM_4",
+          "TRIM_5"
+        ],
+        "code_bits": {
+          "TRIM": [
+            "TRIM_5",
+            "TRIM_4",
+            "TRIM_3",
+            "TRIM_2",
+            "TRIM_1",
+            "TRIM_0"
+          ]
+        },
+        "control": [],
+        "settled": [
+          "SETTLED"
+        ],
+        "prompt_port_roles": {
+          "VSS": "inout",
+          "CLK": "input",
+          "COMP_OUT": "input",
+          "SETTLED": "output",
+          "TRIM_0": "output",
+          "TRIM_1": "output",
+          "TRIM_2": "output",
+          "TRIM_3": "output",
+          "TRIM_4": "output",
+          "TRIM_5": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "cdac_cal",
+      "confidence": 0.82,
+      "templates": [
+        {
+          "template": "differential_code_response",
+          "confidence": 0.82,
+          "signals": {
+            "positive": "VDAC_P",
+            "negative": "VDAC_N"
+          },
+          "parameters": {
+            "bit_width": 10
+          },
+          "evidence": [
+            "prompt has differential output ports"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "cdac_cal",
+        "VDD",
+        "VSS",
+        "CLK",
+        "D9",
+        "D8",
+        "D7",
+        "D6",
+        "D5",
+        "D4",
+        "D3",
+        "D2",
+        "D1",
+        "D0",
+        "CAL0",
+        "CAL1",
+        "VDAC_P",
+        "VDAC_N"
+      ],
+      "roles": {
+        "clock": [
+          "CLK"
+        ],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "VDAC_P",
+          "VDAC_N"
+        ],
+        "code_bits": {
+          "D": [
+            "D9",
+            "D8",
+            "D7",
+            "D6",
+            "D5",
+            "D4",
+            "D3",
+            "D2",
+            "D1",
+            "D0"
+          ],
+          "CAL": [
+            "CAL1",
+            "CAL0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VSS": "inout",
+          "CLK": "input",
+          "D9": "input",
+          "D8": "input",
+          "D7": "input",
+          "D6": "input",
+          "D5": "input",
+          "D4": "input",
+          "D3": "input",
+          "D2": "input",
+          "D1": "input",
+          "D0": "input",
+          "CAL0": "input",
+          "CAL1": "input",
+          "VDAC_P": "output",
+          "VDAC_N": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "segmented_dac",
+      "confidence": 0.82,
+      "templates": [
+        {
+          "template": "differential_code_response",
+          "confidence": 0.82,
+          "signals": {
+            "positive": "VOUT_P",
+            "negative": "VOUT_N"
+          },
+          "parameters": {
+            "bit_width": 14
+          },
+          "evidence": [
+            "prompt has differential output ports"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "segmented_dac",
+        "VDD",
+        "VSS",
+        "CLK",
+        "D13",
+        "D0",
+        "VOUT_P",
+        "VOUT_N"
+      ],
+      "roles": {
+        "clock": [
+          "CLK"
+        ],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "VOUT_P",
+          "VOUT_N"
+        ],
+        "code_bits": {
+          "D": [
+            "D13",
+            "D0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "CLK": "input",
+          "VOUT_P": "output",
+          "VOUT_N": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "clk_divider",
+      "confidence": 0.9,
+      "templates": [
+        {
+          "template": "counter_cadence",
+          "confidence": 0.9,
+          "signals": {
+            "input_clock": "clk_divider_ref",
+            "output": "clk_out",
+            "control": null
+          },
+          "parameters": {
+            "expected_ratios": [],
+            "mode": "edge_ratio"
+          },
+          "evidence": [
+            "prompt describes divider/counter ratio behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "clk_divider_ref",
+        "clk_in",
+        "rst_n",
+        "div_code_0",
+        "div_code_1",
+        "div_code_2",
+        "div_code_3",
+        "div_code_4",
+        "div_code_5",
+        "div_code_6",
+        "div_code_7",
+        "clk_out",
+        "lock",
+        "clock",
+        "reset",
+        "LOCK"
+      ],
+      "roles": {
+        "clock": [
+          "clk_divider_ref",
+          "clk_in",
+          "clk_out",
+          "clock"
+        ],
+        "reset": [
+          "rst_n",
+          "reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [
+          "lock",
+          "LOCK"
+        ],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "clk_out",
+          "lock"
+        ],
+        "code_bits": {
+          "div_code": [
+            "div_code_7",
+            "div_code_6",
+            "div_code_5",
+            "div_code_4",
+            "div_code_3",
+            "div_code_2",
+            "div_code_1",
+            "div_code_0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "clk_in": "input",
+          "rst_n": "input",
+          "div_code_0": "input",
+          "div_code_1": "input",
+          "div_code_2": "input",
+          "div_code_3": "input",
+          "div_code_4": "input",
+          "div_code_5": "input",
+          "div_code_6": "input",
+          "div_code_7": "input",
+          "clk_out": "output",
+          "lock": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "adpll_timer",
+      "confidence": 0.91,
+      "templates": [
+        {
+          "template": "ratio_edge_window",
+          "confidence": 0.91,
+          "signals": {
+            "reference": "ref_clk",
+            "feedback": "fb_clk"
+          },
+          "parameters": {
+            "expected_ratio": 1,
+            "window": "late"
+          },
+          "evidence": [
+            "prompt describes ref/fb frequency tracking"
+          ]
+        },
+        {
+          "template": "lock_after_ratio_stable",
+          "confidence": 0.84,
+          "signals": {
+            "lock": "lock",
+            "reference": "ref_clk",
+            "feedback": "fb_clk"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt requires lock assertion after convergence"
+          ]
+        },
+        {
+          "template": "control_to_frequency_step",
+          "confidence": 0.84,
+          "signals": {
+            "control": "vctrl_mon",
+            "output": "fb_clk"
+          },
+          "parameters": {
+            "tran": "tran tran stop=5u maxstep=5n"
+          },
+          "evidence": [
+            "prompt describes DCO/control-voltage frequency response"
+          ]
+        },
+        {
+          "template": "timer_future_event_liveness",
+          "confidence": 0.76,
+          "signals": {
+            "outputs": [
+              "ref_clk",
+              "fb_clk",
+              "dco_clk"
+            ]
+          },
+          "parameters": {
+            "tran": "tran tran stop=5u maxstep=5n"
+          },
+          "evidence": [
+            "prompt uses timer-driven output generation"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "adpll_timer_ref",
+        "and",
+        "VDD",
+        "VSS",
+        "ref_clk",
+        "fb_clk",
+        "dco_clk",
+        "vctrl_mon",
+        "lock",
+        "clock"
+      ],
+      "roles": {
+        "clock": [
+          "dco_clk",
+          "clock"
+        ],
+        "reset": [],
+        "reference_clock": [
+          "ref_clk"
+        ],
+        "feedback_clock": [
+          "fb_clk"
+        ],
+        "lock": [
+          "lock"
+        ],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "fb_clk",
+          "dco_clk",
+          "vctrl_mon",
+          "lock"
+        ],
+        "code_bits": {},
+        "control": [
+          "vctrl_mon"
+        ],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "ref_clk": "input",
+          "fb_clk": "output",
+          "dco_clk": "output",
+          "vctrl_mon": "output",
+          "lock": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "cppll_timer",
+      "confidence": 0.91,
+      "templates": [
+        {
+          "template": "ratio_edge_window",
+          "confidence": 0.91,
+          "signals": {
+            "reference": "ref_clk",
+            "feedback": "fb_clk"
+          },
+          "parameters": {
+            "expected_ratio": 1,
+            "window": "late"
+          },
+          "evidence": [
+            "prompt describes ref/fb frequency tracking"
+          ]
+        },
+        {
+          "template": "lock_after_ratio_stable",
+          "confidence": 0.84,
+          "signals": {
+            "lock": "lock",
+            "reference": "ref_clk",
+            "feedback": "fb_clk"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt requires lock assertion after convergence"
+          ]
+        },
+        {
+          "template": "control_to_frequency_step",
+          "confidence": 0.84,
+          "signals": {
+            "control": "vctrl_mon",
+            "output": "fb_clk"
+          },
+          "parameters": {
+            "tran": "tran tran stop=5u errpreset=conservative"
+          },
+          "evidence": [
+            "prompt describes DCO/control-voltage frequency response"
+          ]
+        },
+        {
+          "template": "timer_future_event_liveness",
+          "confidence": 0.76,
+          "signals": {
+            "outputs": [
+              "ref_clk",
+              "fb_clk",
+              "dco_clk"
+            ]
+          },
+          "parameters": {
+            "tran": "tran tran stop=5u errpreset=conservative"
+          },
+          "evidence": [
+            "prompt uses timer-driven output generation"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "cppll_timer_ref",
+        "ref_clk",
+        "fb_clk",
+        "dco_clk",
+        "vctrl_mon",
+        "lock",
+        "VDD",
+        "VSS",
+        "clock"
+      ],
+      "roles": {
+        "clock": [
+          "dco_clk",
+          "clock"
+        ],
+        "reset": [],
+        "reference_clock": [
+          "ref_clk"
+        ],
+        "feedback_clock": [
+          "fb_clk"
+        ],
+        "lock": [
+          "lock"
+        ],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "fb_clk",
+          "dco_clk",
+          "vctrl_mon",
+          "lock"
+        ],
+        "code_bits": {},
+        "control": [
+          "vctrl_mon"
+        ],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "ref_clk": "input",
+          "fb_clk": "output",
+          "dco_clk": "output",
+          "vctrl_mon": "output",
+          "lock": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "multimod_divider",
+      "confidence": 0.9,
+      "templates": [
+        {
+          "template": "counter_cadence",
+          "confidence": 0.9,
+          "signals": {
+            "input_clock": "clk_in",
+            "output": "prescaler_out",
+            "control": null
+          },
+          "parameters": {
+            "expected_ratios": [],
+            "mode": "edge_ratio"
+          },
+          "evidence": [
+            "prompt describes divider/counter ratio behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "multimod_divider_ref",
+        "clk_in",
+        "mod",
+        "mod_0",
+        "mod_1",
+        "mod_2",
+        "mod_3",
+        "prescaler_out"
+      ],
+      "roles": {
+        "clock": [
+          "clk_in"
+        ],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "prescaler_out"
+        ],
+        "code_bits": {
+          "mod": [
+            "mod_3",
+            "mod_2",
+            "mod_1",
+            "mod_0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "clk_in": "input",
+          "mod": "input",
+          "mod_0": "input",
+          "mod_1": "input",
+          "mod_2": "input",
+          "mod_3": "input",
+          "prescaler_out": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "sar_logic_10b",
+      "confidence": 0.88,
+      "templates": [
+        {
+          "template": "sar_sequence",
+          "confidence": 0.88,
+          "signals": {
+            "clock": "CLKS",
+            "comparator": "DCOMP",
+            "ready": "RDY",
+            "eoc": null,
+            "bits": [
+              "DP_DAC_9",
+              "DP_DAC_8",
+              "DP_DAC_7",
+              "DP_DAC_6",
+              "DP_DAC_5",
+              "DP_DAC_4",
+              "DP_DAC_3",
+              "DP_DAC_2",
+              "DP_DAC_1",
+              "DP_DAC_0"
+            ]
+          },
+          "parameters": {
+            "bit_width": 10
+          },
+          "evidence": [
+            "prompt describes SAR state sequencing or end-of-conversion/ready behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "sar_logic",
+        "VDD",
+        "VSS",
+        "CLKS",
+        "DCOMP",
+        "DP_DAC_9",
+        "DP_DAC_8",
+        "DP_DAC_7",
+        "DP_DAC_6",
+        "DP_DAC_5",
+        "DP_DAC_4",
+        "DP_DAC_3",
+        "DP_DAC_2",
+        "DP_DAC_1",
+        "DP_DAC_0",
+        "RDY",
+        "clock"
+      ],
+      "roles": {
+        "clock": [
+          "CLKS",
+          "RDY",
+          "clock"
+        ],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "DP_DAC_9",
+          "DP_DAC_8",
+          "DP_DAC_7",
+          "DP_DAC_6",
+          "DP_DAC_5",
+          "DP_DAC_4",
+          "DP_DAC_3",
+          "DP_DAC_2",
+          "DP_DAC_1",
+          "DP_DAC_0",
+          "RDY"
+        ],
+        "code_bits": {
+          "DP_DAC": [
+            "DP_DAC_9",
+            "DP_DAC_8",
+            "DP_DAC_7",
+            "DP_DAC_6",
+            "DP_DAC_5",
+            "DP_DAC_4",
+            "DP_DAC_3",
+            "DP_DAC_2",
+            "DP_DAC_1",
+            "DP_DAC_0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VDD": "inout",
+          "VSS": "inout",
+          "CLKS": "input",
+          "DCOMP": "input",
+          "DP_DAC_9": "output",
+          "DP_DAC_8": "output",
+          "DP_DAC_7": "output",
+          "DP_DAC_6": "output",
+          "DP_DAC_5": "output",
+          "DP_DAC_4": "output",
+          "DP_DAC_3": "output",
+          "DP_DAC_2": "output",
+          "DP_DAC_1": "output",
+          "DP_DAC_0": "output",
+          "RDY": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "multitone",
+      "confidence": 0.88,
+      "templates": [
+        {
+          "template": "bounded_step_window",
+          "confidence": 0.88,
+          "signals": {
+            "outputs": [
+              "OUT"
+            ]
+          },
+          "parameters": {
+            "tran": "tran tran stop=500n maxstep=500p"
+          },
+          "evidence": [
+            "prompt requires bounded-step preservation of narrow periodic windows"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "multitone",
+        "OUT",
+        "up"
+      ],
+      "roles": {
+        "clock": [],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [
+          "up"
+        ],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "OUT"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "OUT": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "nrz_prbs",
+      "confidence": 0.88,
+      "templates": [
+        {
+          "template": "differential_step_response",
+          "confidence": 0.88,
+          "signals": {
+            "positive": "OUTP",
+            "negative": "OUTN"
+          },
+          "parameters": {
+            "mode": "differential"
+          },
+          "evidence": [
+            "prompt describes differential output branch levels over time"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "nrz_prbs",
+        "VDD",
+        "VSS",
+        "OUTP",
+        "OUTN"
+      ],
+      "roles": {
+        "clock": [],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "OUTP",
+          "OUTN"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {
+          "VSS": "inout",
+          "OUTP": "output",
+          "OUTN": "output"
+        }
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "clk_div_min_tb",
+      "confidence": 0.9,
+      "templates": [
+        {
+          "template": "counter_cadence",
+          "confidence": 0.9,
+          "signals": {
+            "input_clock": "clk_div_min",
+            "output": "CLK_OUT",
+            "control": null
+          },
+          "parameters": {
+            "expected_ratios": [],
+            "mode": "edge_ratio"
+          },
+          "evidence": [
+            "prompt describes divider/counter ratio behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "scs",
+        "spectre",
+        "clk_div_min",
+        "CLK",
+        "RST_N",
+        "CLK_OUT",
+        "clock",
+        "reset"
+      ],
+      "roles": {
+        "clock": [
+          "clk_div_min",
+          "CLK",
+          "CLK_OUT",
+          "clock"
+        ],
+        "reset": [
+          "RST_N",
+          "reset"
+        ],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "CLK_OUT"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {}
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "comparator_offset_tb",
+      "confidence": 0.74,
+      "templates": [
+        {
+          "template": "threshold_crossing",
+          "confidence": 0.74,
+          "signals": {
+            "inputs": [
+              "VINP",
+              "VINN"
+            ],
+            "outputs": []
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes comparator/threshold behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "scs",
+        "spectre",
+        "cmp_offset_ref",
+        "CLK",
+        "VINP",
+        "VINN",
+        "OUT_P"
+      ],
+      "roles": {
+        "clock": [
+          "CLK"
+        ],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [
+          "VINP",
+          "VINN"
+        ],
+        "analog_output": [],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {}
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "dac_ramp_tb",
+      "confidence": 0.86,
+      "templates": [
+        {
+          "template": "dac_code_to_output_span",
+          "confidence": 0.86,
+          "signals": {
+            "bits": [
+              "DIN3",
+              "DIN2",
+              "DIN1",
+              "DIN0"
+            ],
+            "output": "AOUT",
+            "clock": "CLK"
+          },
+          "parameters": {
+            "bit_width": 4,
+            "require_monotonic": true
+          },
+          "evidence": [
+            "prompt describes DAC code-to-output behavior or functional IR code-to-analog transfer"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "scs",
+        "spectre",
+        "dac_ramp_ref",
+        "CLK",
+        "DIN3",
+        "DIN2",
+        "DIN1",
+        "DIN0",
+        "AOUT"
+      ],
+      "roles": {
+        "clock": [
+          "CLK"
+        ],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [
+          "DIN3",
+          "DIN2",
+          "DIN1",
+          "DIN0"
+        ],
+        "analog_output": [
+          "AOUT"
+        ],
+        "code_bits": {
+          "DIN": [
+            "DIN3",
+            "DIN2",
+            "DIN1",
+            "DIN0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {}
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "dco_gain_step_tb",
+      "confidence": 0.84,
+      "templates": [
+        {
+          "template": "control_to_frequency_step",
+          "confidence": 0.84,
+          "signals": {
+            "control": "vctrl",
+            "output": "vout"
+          },
+          "parameters": {
+            "tran": "tran tran stop=300n maxstep=100p"
+          },
+          "evidence": [
+            "prompt describes DCO/control-voltage frequency response"
+          ]
+        },
+        {
+          "template": "timer_future_event_liveness",
+          "confidence": 0.8,
+          "signals": {
+            "outputs": [
+              "vout"
+            ]
+          },
+          "parameters": {
+            "tran": "tran tran stop=300n maxstep=100p"
+          },
+          "evidence": [
+            "prompt uses timer-driven output generation"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "scs",
+        "spectre",
+        "dco_gain_step_ref",
+        "vctrl",
+        "vout",
+        "clock"
+      ],
+      "roles": {
+        "clock": [
+          "clock"
+        ],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "vout"
+        ],
+        "code_bits": {},
+        "control": [
+          "vctrl"
+        ],
+        "settled": [],
+        "prompt_port_roles": {}
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "sample_hold_aperture_tb",
+      "confidence": 0.82,
+      "templates": [
+        {
+          "template": "sample_hold_tracking",
+          "confidence": 0.82,
+          "signals": {
+            "input": "vin",
+            "output": "vout",
+            "clock": "clk"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes sample/hold behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "scs",
+        "spectre",
+        "sample_hold_aperture_ref",
+        "clk",
+        "vin",
+        "vout"
+      ],
+      "roles": {
+        "clock": [
+          "clk"
+        ],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [
+          "vin"
+        ],
+        "analog_output": [
+          "vout"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {}
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "sample_hold_step_tb",
+      "confidence": 0.82,
+      "templates": [
+        {
+          "template": "sample_hold_tracking",
+          "confidence": 0.82,
+          "signals": {
+            "input": null,
+            "output": "out",
+            "clock": "clk"
+          },
+          "parameters": {},
+          "evidence": [
+            "prompt describes sample/hold behavior"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "scs",
+        "spectre",
+        "sample_hold_step_ref",
+        "clk",
+        "in",
+        "out",
+        "clock"
+      ],
+      "roles": {
+        "clock": [
+          "clk",
+          "clock"
+        ],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "out"
+        ],
+        "code_bits": {},
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {}
+      },
+      "source": "prompt_checker_spec_inference"
+    },
+    {
+      "task_id": "segmented_dac_glitch_tb",
+      "confidence": 0.76,
+      "templates": [
+        {
+          "template": "dac_code_to_output_span",
+          "confidence": 0.76,
+          "signals": {
+            "bits": [
+              "d3",
+              "d2",
+              "d1",
+              "d0"
+            ],
+            "output": "vout",
+            "clock": "clk"
+          },
+          "parameters": {
+            "bit_width": 4,
+            "require_monotonic": false
+          },
+          "evidence": [
+            "prompt describes DAC code-to-output behavior or functional IR code-to-analog transfer"
+          ]
+        }
+      ],
+      "signals_observed": [
+        "scs",
+        "spectre",
+        "segmented_dac_glitch_ref",
+        "clk",
+        "d3",
+        "d2",
+        "d1",
+        "d0",
+        "vout"
+      ],
+      "roles": {
+        "clock": [
+          "clk"
+        ],
+        "reset": [],
+        "reference_clock": [],
+        "feedback_clock": [],
+        "lock": [],
+        "up": [],
+        "down": [],
+        "analog_input": [],
+        "analog_output": [
+          "vout"
+        ],
+        "code_bits": {
+          "d": [
+            "d3",
+            "d2",
+            "d1",
+            "d0"
+          ]
+        },
+        "control": [],
+        "settled": [],
+        "prompt_port_roles": {}
+      },
+      "source": "prompt_checker_spec_inference"
+    }
+  ]
+}

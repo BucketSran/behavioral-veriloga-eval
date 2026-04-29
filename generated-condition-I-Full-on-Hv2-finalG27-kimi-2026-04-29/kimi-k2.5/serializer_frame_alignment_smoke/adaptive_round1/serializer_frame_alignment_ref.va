@@ -1,0 +1,72 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module serializer_frame_alignment_ref (vdd, vss, clk, load, din7, din6, din5, din4, din3, din2, din1, din0, sout, frame);
+    inout vdd, vss;
+    input clk, load;
+    input din7, din6, din5, din4, din3, din2, din1, din0;
+    output sout, frame;
+    electrical vdd, vss, clk, load, din7, din6, din5, din4, din3, din2, din1, din0, sout, frame;
+
+    parameter real vth = 0.9 from (0:inf);
+    parameter real vhi = 1.8 from (0:inf);
+    parameter real vlo = 0.0 from (-inf:inf);
+    parameter real tr = 0.1n from (0:inf);
+    parameter real tf = 0.1n from (0:inf);
+
+    integer shift_reg;
+    integer bit_count;
+    integer loaded;
+    integer sout_val;
+    integer frame_val;
+
+    analog begin
+        @(initial_step) begin
+            shift_reg = 0;
+            bit_count = 0;
+            loaded = 0;
+            sout_val = 0;
+            frame_val = 0;
+        end
+
+        // Detect rising edge of clk
+        @(cross(V(clk) - vth, 1)) begin
+            // Check if load is high at clock edge
+            if (V(load) > vth) begin
+                // Latch parallel input word MSB-first into shift register
+                shift_reg = 0;
+                if (V(din7) > vth) shift_reg = shift_reg + 128;
+                if (V(din6) > vth) shift_reg = shift_reg + 64;
+                if (V(din5) > vth) shift_reg = shift_reg + 32;
+                if (V(din4) > vth) shift_reg = shift_reg + 16;
+                if (V(din3) > vth) shift_reg = shift_reg + 8;
+                if (V(din2) > vth) shift_reg = shift_reg + 4;
+                if (V(din1) > vth) shift_reg = shift_reg + 2;
+                if (V(din0) > vth) shift_reg = shift_reg + 1;
+                bit_count = 8;
+                loaded = 1;
+            end
+
+            // Shift out MSB-first
+            if (loaded && bit_count > 0) begin
+                // Output current MSB
+                sout_val = (shift_reg >= 128) ? 1 : 0;
+                // Frame is high only for the first bit (when bit_count == 8 before decrement)
+                frame_val = (bit_count == 8) ? 1 : 0;
+                // Shift left for next bit
+                shift_reg = shift_reg * 2;
+                bit_count = bit_count - 1;
+                if (bit_count == 0) begin
+                    loaded = 0;
+                end
+            end else if (!loaded) begin
+                sout_val = 0;
+                frame_val = 0;
+            end
+        end
+
+        // Output assignments with transition
+        V(sout) <+ transition(sout_val * vhi, 0, tr, tf);
+        V(frame) <+ transition(frame_val * vhi, 0, tr, tf);
+    end
+endmodule

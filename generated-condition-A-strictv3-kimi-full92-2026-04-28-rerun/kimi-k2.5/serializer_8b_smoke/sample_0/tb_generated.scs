@@ -1,0 +1,42 @@
+// Spectre testbench for serializer_8b
+
+ahdl_include "serializer_8b.va"
+
+// Supply voltages
+v_vdd (vdd 0) vsource dc=0.9
+v_vss (vss 0) vsource dc=0
+
+// Parallel data inputs - distinct pattern 0xA5 (10100101)
+v_d7 (d7 0) vsource dc=0.9
+v_d6 (d6 0) vsource dc=0
+v_d5 (d5 0) vsource dc=0.9
+v_d4 (d4 0) vsource dc=0
+v_d3 (d3 0) vsource dc=0
+v_d2 (d2 0) vsource dc=0.9
+v_d1 (d1 0) vsource dc=0
+v_d0 (d0 0) vsource dc=0.9
+
+// Load pulse - frame start marker
+v_load (load 0) vsource type=pulse val0=0 val1=0.9 period=100n delay=5n rise=1n fall=1n width=10n
+
+// Clock - 8 cycles per frame
+v_clk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n delay=20n rise=0.5n fall=0.5n width=4n
+
+// Device under test
+dut (vdd vss d7 d6 d5 d4 d3 d2 d1 d0 load clk sout) serializer_8b
+
+// Transient analysis
+tran tran stop=300n maxstep=1n
+
+// Save statements for required observables
+save load
+save clk
+save sout
+save d7
+save d6
+save d5
+save d4
+save d3
+save d2
+save d1
+save d0

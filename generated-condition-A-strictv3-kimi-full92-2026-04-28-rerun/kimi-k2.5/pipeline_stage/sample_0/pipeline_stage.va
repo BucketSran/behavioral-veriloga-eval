@@ -1,0 +1,132 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pipeline_stage (VDD, VSS, PHI1, PHI2, VIN, VREF, VRES, D1, D0);
+    inout electrical VDD, VSS;
+    input electrical PHI1, PHI2, VIN, VREF;
+    output electrical VRES, D1, D0;
+
+    // Internal state variables
+    integer sub_adc_code;      // 0, 1, or 2 (2-bit output: 00, 01, 10)
+    real vin_sampled;
+    real vref_val;
+    real vres_val;
+    real d1_val, d0_val;
+    real vdd_val, vss_val;
+
+    // Threshold detection
+    integer phi1_state;        // 0 = low, 1 = high
+    integer phi2_state;        // 0 = low, 1 = high
+    integer sampling_done;     // Flag to track sampling phase
+
+    // Transition parameters
+    real trise = 1n;
+    real tfall = 1n;
+    real tdelay = 0;
+
+    // Threshold for clock detection (VDD/2)
+    real vth;
+
+    analog begin
+        @(initial_step) begin
+            sub_adc_code = 1;      // Default mid-code
+            vin_sampled = 0.0;
+            vref_val = 0.0;
+            vres_val = 0.0;
+            d1_val = 0.0;
+            d0_val = 0.0;
+            phi1_state = 0;
+            phi2_state = 0;
+            sampling_done = 0;
+            vdd_val = 1.8;         // Assume typical VDD, will update
+            vss_val = 0.0;
+        end
+
+        // Update power rail values
+        vdd_val = V(VDD);
+        vss_val = V(VSS);
+        vth = (vdd_val + vss_val) / 2.0;
+
+        // Detect PHI1 rising edge (sampling phase start)
+        @(cross(V(PHI1) - vth, 1)) begin
+            phi1_state = 1;
+            sampling_done = 0;
+        end
+
+        // Detect PHI1 falling edge (sampling phase end, hold begins)
+        @(cross(V(PHI1) - vth, -1)) begin
+            phi1_state = 0;
+            if (sampling_done == 0) begin
+                // Sample input and reference
+                vin_sampled = V(VIN);
+                vref_val = V(VREF);
+                sampling_done = 1;
+
+                // 1.5-bit sub-ADC comparison against ±Vref/4 thresholds
+                // Thresholds: -Vref/4 and +Vref/4
+                // Code 0 (00): Vin < -Vref/4
+                // Code 1 (01): -Vref/4 <= Vin < +Vref/4
+                // Code 2 (10): Vin >= +Vref/4
+
+                real vref_div4;
+                vref_div4 = vref_val / 4.0;
+
+                if (vin_sampled < -vref_div4) begin
+                    sub_adc_code = 0;      // 00
+                end else if (vin_sampled < vref_div4) begin
+                    sub_adc_code = 1;      // 01
+                end else begin
+                    sub_adc_code = 2;      // 10
+                end
+
+                // Compute digital outputs D1, D0
+                // sub_adc_code 0: D1=0, D0=0
+                // sub_adc_code 1: D1=0, D0=1
+                // sub_adc_code 2: D1=1, D0=0
+                if (sub_adc_code == 0) begin
+                    d1_val = vss_val;
+                    d0_val = vss_val;
+                end else if (sub_adc_code == 1) begin
+                    d1_val = vss_val;
+                    d0_val = vdd_val;
+                end else begin
+                    d1_val = vdd_val;
+                    d0_val = vss_val;
+                end
+            end
+        end
+
+        // Detect PHI2 rising edge (amplification phase)
+        @(cross(V(PHI2) - vth, 1)) begin
+            phi2_state = 1;
+
+            // Compute residue with gain-of-2 MDAC
+            // Residue = 2 * (Vin - Vdac)
+            // Vdac depends on sub_adc_code:
+            // Code 0: Vdac = -Vref/2, Residue = 2*Vin + Vref
+            // Code 1: Vdac = 0,       Residue = 2*Vin
+            // Code 2: Vdac = +Vref/2, Residue = 2*Vin - Vref
+
+            real vdac;
+            if (sub_adc_code == 0) begin
+                vdac = -vref_val / 2.0;
+            end else if (sub_adc_code == 1) begin
+                vdac = 0.0;
+            end else begin
+                vdac = vref_val / 2.0;
+            end
+
+            vres_val = 2.0 * (vin_sampled - vdac);
+        end
+
+        // Detect PHI2 falling edge
+        @(cross(V(PHI2) - vth, -1)) begin
+            phi2_state = 0;
+        end
+
+        // Output assignments with transitions
+        V(VRES) <+ transition(vres_val, tdelay, trise, tfall);
+        V(D1) <+ transition(d1_val, tdelay, trise, tfall);
+        V(D0) <+ transition(d0_val, tdelay, trise, tfall);
+    end
+endmodule

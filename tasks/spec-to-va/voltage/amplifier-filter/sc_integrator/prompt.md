@@ -33,10 +33,9 @@ Compatibility constraints:
 
 - Use pure voltage-domain Verilog-A only.
 - Put initialization inside `@(initial_step)` within an `analog begin` block.
-- ..))` for `PHI1` and `PHI2` edge detection.
-- Do not use Verilog `initial begin` blocks.
-- Do not place `transition(...)` contributions inside conditionally executed `if/else begin` branches.
-- Keep any `transition(...)` contribution as a continuous contribution in the main analog block.
+- Use Spectre-compatible cross-event syntax for `PHI1` and `PHI2` edge detection.
+- Use Spectre-compatible Verilog-A initialization and event syntax.
+- Keep output contributions Spectre-compatible and continuous in the main analog block.
 
 Ports:
 - `VDD`: electrical

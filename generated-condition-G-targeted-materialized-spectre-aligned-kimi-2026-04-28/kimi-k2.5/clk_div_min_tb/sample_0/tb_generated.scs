@@ -1,0 +1,24 @@
+simulator lang=spectre
+global 0
+
+// Power supplies
+VDD (VDD 0) vsource dc=0.9
+VSS (VSS 0) vsource dc=0
+
+// Clock source: 1 GHz (1 ns period), 50% duty cycle
+VCLK (CLK 0) vsource type=pulse val0=0 val1=0.9 period=1n rise=10p fall=10p width=490p
+
+// Reset: active-low, start low then release high at 2ns
+VRST_N (RST_N 0) vsource type=pwl wave=[0n 0 2n 0 2.01n 0.9]
+
+// DUT instance
+XDUT (VDD VSS CLK RST_N CLK_OUT) clk_div_min
+
+// Transient analysis
+tran tran stop=24n maxstep=20p
+
+// Save public waveforms
+save CLK RST_N CLK_OUT
+
+// Include DUT Verilog-A
+ahdl_include "clk_div_min.va"

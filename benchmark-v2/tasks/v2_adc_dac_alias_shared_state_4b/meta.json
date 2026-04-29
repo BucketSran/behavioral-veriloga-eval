@@ -1,0 +1,59 @@
+{
+  "task_id": "v2_adc_dac_alias_shared_state_4b",
+  "family": "benchmark-v2",
+  "source_seed": "adc_dac_ideal_4b",
+  "mechanism_family": "adc_dac_quantize_reconstruct",
+  "perturbation_level": "P2_semantic_alias",
+  "status": "validated_gold_evas_spectre",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "adc_dac",
+    "width": 4,
+    "vin": "measured_level",
+    "clock": "sample_clock",
+    "rst": "clear_n",
+    "bits_lsb_first": [
+      "bit0",
+      "bit1",
+      "bit2",
+      "bit3"
+    ],
+    "vout": "held_level",
+    "settled": null,
+    "min_unique_codes": 8
+  },
+  "manifest_entry": {
+    "task_id": "v2_adc_dac_alias_shared_state_4b",
+    "source_seed": "adc_dac_ideal_4b",
+    "mechanism_family": "adc_dac_quantize_reconstruct",
+    "perturbation_level": "P2_semantic_alias",
+    "prompt_strategy": "Rename analog input to measured_level and reconstructed output to held_level while preserving code-output behavior.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-small",
+    "status": "draft_manifest",
+    "expected_slots": [
+      "measured_level",
+      "sample_clock",
+      "code_bits[3:0]",
+      "held_level"
+    ],
+    "review_notes": "Control task for semantic aliasing and shared held code state."
+  },
+  "validation": {
+    "tasks": 30,
+    "evas_pass": "30/30",
+    "spectre_pass": "30/30",
+    "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+    "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1"
+  }
+}

@@ -1,0 +1,80 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module serializer_8b(vdd, vss, d7, d6, d5, d4, d3, d2, d1, d0, load, clk, sout);
+    inout electrical vdd, vss;
+    input electrical d7, d6, d5, d4, d3, d2, d1, d0;
+    input electrical load, clk;
+    output electrical sout;
+
+    parameter real vth = 0.45;
+    parameter real tedge = 100p;
+
+    integer shift_reg;
+    integer bit_cnt;
+    integer load_pending;
+    real v_high;
+    real v_low;
+    real out_val;
+
+    analog begin
+        @(initial_step) begin
+            shift_reg = 0;
+            bit_cnt = 0;
+            load_pending = 0;
+            v_high = 0.0;
+            v_low = 0.0;
+            out_val = 0.0;
+        end
+
+        // Update supply references dynamically
+        v_high = V(vdd);
+        v_low = V(vss);
+
+        // Detect rising edge of load
+        @(cross(V(load) - vth, 1)) begin
+            // Latch d7..d0 into shift register, MSB first
+            shift_reg = 0;
+            if (V(d7) > vth) shift_reg = shift_reg + 128;
+            if (V(d6) > vth) shift_reg = shift_reg + 64;
+            if (V(d5) > vth) shift_reg = shift_reg + 32;
+            if (V(d4) > vth) shift_reg = shift_reg + 16;
+            if (V(d3) > vth) shift_reg = shift_reg + 8;
+            if (V(d2) > vth) shift_reg = shift_reg + 4;
+            if (V(d1) > vth) shift_reg = shift_reg + 2;
+            if (V(d0) > vth) shift_reg = shift_reg + 1;
+            bit_cnt = 0;
+            load_pending = 1;
+            // Do NOT output yet - wait for first CLK edge after LOAD deasserts
+        end
+
+        // Detect rising edge of clk
+        @(cross(V(clk) - vth, 1)) begin
+            if (V(load) < vth) begin
+                if (load_pending) begin
+                    // First CLK after LOAD: output MSB (bit 7)
+                    if (shift_reg >= 128) begin
+                        out_val = v_high;
+                    end else begin
+                        out_val = v_low;
+                    end
+                    // Prepare for next bits: keep lower 7 bits, shift left
+                    shift_reg = (shift_reg & 127) * 2;
+                    bit_cnt = 1;
+                    load_pending = 0;
+                end else if (bit_cnt < 8) begin
+                    // Subsequent CLK edges: shift and output next bit
+                    if (shift_reg >= 128) begin
+                        out_val = v_high;
+                    end else begin
+                        out_val = v_low;
+                    end
+                    shift_reg = (shift_reg & 127) * 2;
+                    bit_cnt = bit_cnt + 1;
+                end
+            end
+        end
+
+        V(sout) <+ transition(out_val, 0, tedge);
+    end
+endmodule

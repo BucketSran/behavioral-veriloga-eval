@@ -1,0 +1,107 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module serializer_frame_alignment_ref (
+    vdd, vss, clk, load,
+    din7, din6, din5, din4, din3, din2, din1, din0,
+    sout, frame
+);
+
+    // Power rails
+    inout electrical vdd, vss;
+    // Clock and control
+    input electrical clk, load;
+    // Parallel data inputs
+    input electrical din7, din6, din5, din4, din3, din2, din1, din0;
+    // Serial output and frame alignment signal
+    output electrical sout, frame;
+
+    // Internal state
+    integer shift_reg;      // 8-bit shift register
+    integer bit_count;      // Counts bits shifted out (0-7)
+    integer loading;        // Flag indicating load just occurred
+    real vth;               // Threshold voltage for logic detection
+    real vhigh, vlow;       // High and low voltage levels
+    real tr, tf;            // Transition times
+
+    // Internal nodes for sampled inputs
+    electrical din[0:7];
+
+    analog begin
+        // Initialize parameters and state
+        @(initial_step) begin
+            vth = 0.5;
+            vhigh = 1.0;
+            vlow = 0.0;
+            tr = 0.1n;
+            tf = 0.1n;
+            shift_reg = 0;
+            bit_count = 0;
+            loading = 0;
+        end
+
+        // Sample parallel inputs (MSB first: din7 is bit 7, din0 is bit 0)
+        // Map individual ports to array for easier handling
+        // din7 -> bit 7, din6 -> bit 6, ..., din0 -> bit 0
+
+        // Detect rising edge of clock
+        @(cross(V(clk) - vth, 1)) begin
+            // Check if load is high at clock edge
+            if (V(load) > vth) begin
+                // Latch parallel input word
+                shift_reg = 0;
+                if (V(din7) > vth) shift_reg = shift_reg + 128; // bit 7
+                if (V(din6) > vth) shift_reg = shift_reg + 64;  // bit 6
+                if (V(din5) > vth) shift_reg = shift_reg + 32;  // bit 5
+                if (V(din4) > vth) shift_reg = shift_reg + 16;  // bit 4
+                if (V(din3) > vth) shift_reg = shift_reg + 8;   // bit 3
+                if (V(din2) > vth) shift_reg = shift_reg + 4;   // bit 2
+                if (V(din1) > vth) shift_reg = shift_reg + 2;   // bit 1
+                if (V(din0) > vth) shift_reg = shift_reg + 1;   // bit 0
+                bit_count = 0;
+                loading = 1;
+            end else begin
+                // Normal shift operation
+                if (bit_count < 8) begin
+                    bit_count = bit_count + 1;
+                    // Shift left (MSB-first: next bit becomes MSB)
+                    shift_reg = (shift_reg << 1) & 255;
+                end
+                loading = 0;
+            end
+        end
+
+        // Compute output values
+        // sout: MSB of shift_reg (bit 7)
+        // frame: high during first bit of each word (bit_count == 0 and valid data)
+        real sout_val, frame_val;
+
+        if (bit_count == 0 && loading == 1) begin
+            // First bit after load - output MSB and assert frame
+            if ((shift_reg & 128) != 0)
+                sout_val = vhigh;
+            else
+                sout_val = vlow;
+            frame_val = vhigh;
+        end else if (bit_count > 0 && bit_count <= 8) begin
+            // Subsequent bits - shift out remaining bits
+            // Current MSB after shifts
+            integer current_msb;
+            current_msb = (shift_reg >> 7) & 1;
+            if (current_msb != 0)
+                sout_val = vhigh;
+            else
+                sout_val = vlow;
+            frame_val = vlow;
+        end else begin
+            // Idle state
+            sout_val = vlow;
+            frame_val = vlow;
+        end
+
+        // Drive outputs with transitions
+        V(sout) <+ transition(sout_val, 0, tr, tf);
+        V(frame) <+ transition(frame_val, 0, tr, tf);
+    end
+
+endmodule

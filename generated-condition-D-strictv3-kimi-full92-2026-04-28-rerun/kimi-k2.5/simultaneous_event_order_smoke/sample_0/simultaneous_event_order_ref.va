@@ -1,0 +1,56 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module simultaneous_event_order_ref (VDD, VSS, ref, out);
+    inout VDD, VSS;
+    input ref;
+    output out;
+    electrical VDD, VSS, ref, out;
+
+    parameter real vdd_level = 1.8 from (0:inf);
+    parameter real vss_level = 0.0 from [0:inf);
+    parameter real cross_time = 40n from (0:inf);
+    parameter real timer_period = 40n from (0:inf);
+    parameter real tr = 1n from (0:inf);
+    parameter real tf = 1n from (0:inf);
+
+    integer state;
+    real out_val;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+            out_val = 0.0;
+        end
+
+        // Timer event at 40n, 80n, etc.
+        @(timer(timer_period)) begin
+            if (state == 0) begin
+                // Timer fires first at 40n
+                state = 1;
+                out_val = vdd_level * 0.25;
+            end
+            else if (state == 2) begin
+                // Timer fires at 80n after cross already fired
+                state = 3;
+                out_val = vdd_level * 0.75;
+            end
+        end
+
+        // Cross event when ref crosses 0.9V at 40n (rising edge of ref pulse)
+        @(cross(V(ref) - vdd_level/2, +1)) begin
+            if (state == 0) begin
+                // Cross fires first at 40n (before timer)
+                state = 2;
+                out_val = vdd_level * 0.5;
+            end
+            else if (state == 1) begin
+                // Cross fires at 40n after timer already fired
+                state = 3;
+                out_val = vdd_level * 0.75;
+            end
+        end
+
+        V(out) <+ transition(out_val, 0, tr, tf);
+    end
+endmodule

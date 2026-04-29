@@ -1,0 +1,91 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cmp_delay (clk, vinn, vinp, out_n, out_p, lp, lm, vss, vdd);
+    electrical clk, vinn, vinp, out_n, out_p, lp, lm, vss, vdd;
+
+    // Parameters
+    parameter real vth_clk = 0.45 from (0:1);
+    parameter real tdel = 1p from (0:1);
+    parameter real tr = 100p from (0:1);
+    parameter real tf = 100p from (0:1);
+
+    // Internal variables
+    integer state;
+    real vdd_val, vss_val;
+    real diff;
+    real delay_time;
+    real out_p_val, out_n_val;
+    real clk_prev;
+    real next_toggle_time;
+    integer pending;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+            clk_prev = 0;
+            pending = 0;
+            next_toggle_time = 0;
+            out_p_val = 0;
+            out_n_val = 0;
+        end
+
+        // Sample supply and input values
+        vdd_val = V(vdd);
+        vss_val = V(vss);
+        diff = V(vinp) - V(vinn);
+
+        // Detect rising edge of clk
+        @(cross(V(clk) - vth_clk, +1)) begin
+            // Calculate delay based on differential input magnitude
+            // Delay increases as |diff| decreases from 10mV to 0.01mV
+            // Using inverse relationship: larger diff = smaller delay
+
+            real abs_diff;
+            abs_diff = abs(diff);
+
+            // Base delay calculation: delay increases as diff shrinks
+            // At 10mV: minimal delay (~100ps)
+            // At 0.01mV: maximal delay (~800ps)
+            if (abs_diff >= 10e-3) begin
+                delay_time = 100e-12;
+            end else if (abs_diff >= 1e-3) begin
+                delay_time = 100e-12 + (10e-3 - abs_diff) / 10e-3 * 200e-12;
+            end else if (abs_diff >= 0.1e-3) begin
+                delay_time = 300e-12 + (1e-3 - abs_diff) / 1e-3 * 200e-12;
+            end else begin
+                delay_time = 500e-12 + (0.1e-3 - abs_diff) / 0.1e-3 * 300e-12;
+            end
+
+            // Determine output based on comparison
+            if (diff > 0) begin
+                // vinp > vinn: out_p high, out_n low
+                next_toggle_time = $abstime + delay_time;
+                pending = 1;
+            end else begin
+                // vinp <= vinn: out_p low, out_n high
+                next_toggle_time = $abstime + delay_time;
+                pending = 2;
+            end
+        end
+
+        // Handle delayed output update
+        if (pending == 1 && $abstime >= next_toggle_time) begin
+            out_p_val = vdd_val;
+            out_n_val = vss_val;
+            pending = 0;
+        end else if (pending == 2 && $abstime >= next_toggle_time) begin
+            out_p_val = vss_val;
+            out_n_val = vdd_val;
+            pending = 0;
+        end
+
+        // Drive outputs with transition
+        V(out_p) <+ transition(out_p_val, tdel, tr, tf);
+        V(out_n) <+ transition(out_n_val, tdel, tr, tf);
+
+        // LP and LM are latch outputs - drive to complementary levels
+        V(lp) <+ transition(out_p_val, tdel, tr, tf);
+        V(lm) <+ transition(out_n_val, tdel, tr, tf);
+    end
+endmodule

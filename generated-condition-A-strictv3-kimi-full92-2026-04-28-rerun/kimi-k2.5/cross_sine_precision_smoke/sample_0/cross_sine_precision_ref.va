@@ -1,0 +1,63 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cross_sine_precision_ref (VDD, VSS, vin, first_err_out, max_err_out, count_out);
+    inout electrical VDD, VSS, vin, first_err_out, max_err_out, count_out;
+
+    // Public parameters
+    parameter real fin = 73.0e6 from (0:inf);  // Input frequency in Hz
+    parameter real vth = 0.45 from (0:inf);    // Crossing threshold in V
+
+    // Internal state variables
+    integer count;
+    real first_abs_err_ps;
+    real max_abs_err_ps;
+    real current_err_ps;
+    real expected_time;
+    real vdd_val;
+    real vss_val;
+
+    analog begin
+        // Initialize on first step
+        @(initial_step) begin
+            count = 0;
+            first_abs_err_ps = 0.0;
+            max_abs_err_ps = 0.0;
+        end
+
+        // Get supply values for output scaling
+        vdd_val = V(VDD, VSS);
+        vss_val = 0.0;
+
+        // Detect rising crossings of vin through vth
+        @(cross(V(vin, VSS) - vth, +1)) begin
+            count = count + 1;
+
+            // Expected crossing time: count/fin (first crossing at 1/fin, etc.)
+            expected_time = count / fin;
+
+            // Calculate timing error in picoseconds
+            current_err_ps = ($abstime - expected_time) * 1.0e12;
+
+            // Update first error on first crossing
+            if (count == 1) begin
+                first_abs_err_ps = abs(current_err_ps);
+            end
+
+            // Update maximum absolute error
+            if (abs(current_err_ps) > max_abs_err_ps) begin
+                max_abs_err_ps = abs(current_err_ps);
+            end
+        end
+
+        // Drive outputs as voltage-scaled values
+        // first_err_out = VDD * first_abs_err_ps / 10
+        V(first_err_out, VSS) <+ transition(vdd_val * first_abs_err_ps / 10.0, 0, 1p);
+
+        // max_err_out = VDD * max_abs_err_ps / 10
+        V(max_err_out, VSS) <+ transition(vdd_val * max_abs_err_ps / 10.0, 0, 1p);
+
+        // count_out = VDD * count / 3
+        V(count_out, VSS) <+ transition(vdd_val * count / 3.0, 0, 1p);
+    end
+endmodule

@@ -1,0 +1,55 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module clk_div (CLK_IN, RST_N, CLK_OUT);
+    input CLK_IN;
+    input RST_N;
+    output CLK_OUT;
+    electrical CLK_IN, RST_N, CLK_OUT;
+
+    parameter real vlogic_high = 1.8 from (0:inf);
+    parameter real vlogic_low = 0.0 from [0:inf);
+    parameter real vth = 0.9 from (0:inf);
+    parameter real tdel = 0 from [0:inf);
+    parameter real tr = 0.1n from (0:inf);
+    parameter real tf = 0.1n from (0:inf);
+
+    integer count;
+    integer out_state;
+    real out_voltage;
+
+    analog begin
+        @(initial_step) begin
+            count = 0;
+            out_state = 0;
+            out_voltage = vlogic_low;
+        end
+
+        // Detect rising edge of CLK_IN - always at top level
+        @(cross(V(CLK_IN) - vth, +1)) begin
+            // Synchronous reset: active low
+            if (V(RST_N) < vth) begin
+                count = 0;
+                out_state = 0;
+                out_voltage = vlogic_low;
+            end
+            else begin
+                count = count + 1;
+                if (count >= 4) begin
+                    count = 0;
+                end
+                // 50% duty cycle: high for count 0,1; low for count 2,3
+                if (count < 2) begin
+                    out_state = 1;
+                    out_voltage = vlogic_high;
+                end
+                else begin
+                    out_state = 0;
+                    out_voltage = vlogic_low;
+                end
+            end
+        end
+
+        V(CLK_OUT) <+ transition(out_voltage, tdel, tr, tf);
+    end
+endmodule

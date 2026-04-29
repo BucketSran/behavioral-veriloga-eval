@@ -1,0 +1,46 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dac_ideal_4b (din_3, din_2, din_1, din_0, vdd, vss, rst_n, vout);
+    input din_3;
+    input din_2;
+    input din_1;
+    input din_0;
+    input vdd;
+    input vss;
+    input rst_n;
+    output vout;
+    electrical din_3, din_2, din_1, din_0;
+    electrical vdd, vss, rst_n;
+    electrical vout;
+
+    integer code;
+    real vhi, vlo, vth;
+    real vout_val;
+
+    analog begin
+        @(initial_step) begin
+            code = 0;
+            vhi = 0.9;
+            vlo = 0.0;
+            vth = 0.45;
+        end
+
+        vhi = V(vdd);
+        vlo = V(vss);
+        vth = (vhi + vlo) / 2.0;
+
+        if (V(rst_n) < vth) begin
+            code = 0;
+        end else begin
+            code = 0;
+            if (V(din_3) > vth) code = code + 8;
+            if (V(din_2) > vth) code = code + 4;
+            if (V(din_1) > vth) code = code + 2;
+            if (V(din_0) > vth) code = code + 1;
+        end
+
+        vout_val = vlo + (code / 16.0) * (vhi - vlo);
+        V(vout) <+ transition(vout_val, 0, 10p);
+    end
+endmodule

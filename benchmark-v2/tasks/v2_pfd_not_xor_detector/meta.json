@@ -1,0 +1,49 @@
+{
+  "task_id": "v2_pfd_not_xor_detector",
+  "family": "benchmark-v2",
+  "source_seed": "xor_phase_detector",
+  "mechanism_family": "pfd_updn_reset_race",
+  "perturbation_level": "P4_negative_distractor",
+  "status": "validated_gold_evas_spectre",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "pfd",
+    "ref": "early_event",
+    "div": "late_event",
+    "up": "raise_pulse",
+    "dn": "lower_pulse",
+    "lock": null
+  },
+  "manifest_entry": {
+    "task_id": "v2_pfd_not_xor_detector",
+    "source_seed": "xor_phase_detector",
+    "mechanism_family": "pfd_updn_reset_race",
+    "perturbation_level": "P4_negative_distractor",
+    "prompt_strategy": "Explicitly require separate UP/DN event pulses and reject duty-cycle XOR phase comparison.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-small",
+    "status": "draft_manifest",
+    "negative_constraints": [
+      "not_xor_phase_detector",
+      "not_single_duty_output"
+    ],
+    "review_notes": "Forbidden-mechanism trap between related phase-detector families."
+  },
+  "validation": {
+    "tasks": 30,
+    "evas_pass": "30/30",
+    "spectre_pass": "30/30",
+    "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+    "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1"
+  }
+}

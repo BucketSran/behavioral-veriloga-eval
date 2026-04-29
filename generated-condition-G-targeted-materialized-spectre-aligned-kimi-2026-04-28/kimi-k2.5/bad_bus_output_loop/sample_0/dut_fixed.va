@@ -1,0 +1,23 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bin4_out (VDD, VSS, CODE, DOUT);
+    inout VDD, VSS;
+    input [3:0] CODE;
+    output [3:0] DOUT;
+    electrical VDD, VSS;
+    electrical [3:0] CODE, DOUT;
+    real dout_val[0:3];
+    genvar k;
+    analog begin
+        dout_val[0] = (V(CODE[0]) > 0.45) ? V(VDD) : V(VSS);
+        dout_val[1] = (V(CODE[1]) > 0.45) ? V(VDD) : V(VSS);
+        dout_val[2] = (V(CODE[2]) > 0.45) ? V(VDD) : V(VSS);
+        dout_val[3] = (V(CODE[3]) > 0.45) ? V(VDD) : V(VSS);
+
+        V(DOUT[0]) <+ transition(dout_val[0], 0, 1p, 1p);
+        V(DOUT[1]) <+ transition(dout_val[1], 0, 1p, 1p);
+        V(DOUT[2]) <+ transition(dout_val[2], 0, 1p, 1p);
+        V(DOUT[3]) <+ transition(dout_val[3], 0, 1p, 1p);
+    end
+endmodule

@@ -1,0 +1,23 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "cppll_timer_ref.va"
+
+// Supply voltages
+VDD (VDD 0) vsource dc=1.8
+VSS (VSS 0) vsource dc=0
+
+// Reference clock: 50 MHz, 1.8V amplitude
+Vref (ref_clk 0) vsource type=pulse val0=0 val1=1.8 period=20n rise=100p fall=100p width=10n
+
+// DUT instance
+XDUT (VDD VSS ref_clk fb_clk dco_clk vctrl_mon lock) cppll_timer_ref
+
+// Transient analysis
+tran tran stop=5u errpreset=conservative
+
+// Save statements for required waveforms
+save ref_clk
+save fb_clk
+save lock
+save vctrl_mon

@@ -1,0 +1,26 @@
+// cmp_strongarm testbench
+simulator lang=spectre
+
+ahdl_include "cmp_strongarm.va"
+
+// Supply voltages
+v_vdd (vdd 0) vsource dc=0.9
+v_vss (vss 0) vsource dc=0.0
+
+// Clock: ~500MHz, period = 2ns
+v_clk (clk 0) vsource type=pulse val0=0 val1=0.9 period=2n rise=50p fall=50p width=1n
+
+// Differential input: vinp > vinn for first 2ns, then vinp < vinn
+// vinp starts at 0.6V, drops to 0.3V at 2ns
+// vinn starts at 0.3V, rises to 0.6V at 2ns
+v_vinp (vinp 0) vsource type=pwl wave=[0n 0.6 2n 0.6 2.01n 0.3 4n 0.3]
+v_vinn (vinn 0) vsource type=pwl wave=[0n 0.3 2n 0.3 2.01n 0.6 4n 0.6]
+
+// DUT instance
+dut (clk vinn vinp out_n out_p lp lm vss vdd) cmp_strongarm
+
+// Save signals
+save clk vinp vinn out_p out_n
+
+// Transient analysis
+tran tran stop=4n maxstep=5p

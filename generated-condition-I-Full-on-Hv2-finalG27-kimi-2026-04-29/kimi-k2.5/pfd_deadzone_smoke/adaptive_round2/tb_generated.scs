@@ -1,0 +1,24 @@
+simulator lang=spectre
+global 0
+
+// Supply
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0
+
+// Reference clock: 100MHz, 50% duty
+Vref (ref 0) vsource type=pulse val0=0 val1=0.9 period=10n rise=100p fall=100p width=5n
+
+// Divided clock: same frequency, small phase offset (~2ps lead then lag)
+// Using pulse with delay to create phase offset - cleaner than long PWL
+Vdiv (div 0) vsource type=pulse val0=0 val1=0.9 period=10n rise=100p fall=100p width=5n delay=2p
+
+// DUT
+XDUT (vdd vss ref div up dn) pfd_updn
+
+// Save outputs
+save ref div up dn
+
+// Transient analysis
+tran tran stop=300n maxstep=5p errpreset=conservative
+
+ahdl_include "pfd_updn.va"

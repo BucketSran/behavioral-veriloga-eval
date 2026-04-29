@@ -1,0 +1,77 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module d2b_4bit(VDD, VSS, VIN, DOUT3, DOUT2, DOUT1, DOUT0);
+    inout electrical VDD, VSS;
+    input electrical VIN;
+    output electrical DOUT3, DOUT2, DOUT1, DOUT0;
+
+    real vdd_val, vss_val, vin_val;
+    real vref;
+    integer code;
+    real d3, d2, d1, d0;
+    real td, tr;
+
+    analog begin
+        @(initial_step) begin
+            td = 0;
+            tr = 1n;
+        end
+
+        // Sample supply and input voltages
+        vdd_val = V(VDD);
+        vss_val = V(VSS);
+        vin_val = V(VIN);
+
+        // Calculate reference voltage (full scale)
+        vref = vdd_val - vss_val;
+
+        // Determine code based on input voltage
+        // 4-bit ADC: 16 levels, each step is vref/16
+        if (vin_val <= vss_val + vref/32) begin
+            code = 0;
+        end else if (vin_val <= vss_val + 3*vref/32) begin
+            code = 1;
+        end else if (vin_val <= vss_val + 5*vref/32) begin
+            code = 2;
+        end else if (vin_val <= vss_val + 7*vref/32) begin
+            code = 3;
+        end else if (vin_val <= vss_val + 9*vref/32) begin
+            code = 4;
+        end else if (vin_val <= vss_val + 11*vref/32) begin
+            code = 5;
+        end else if (vin_val <= vss_val + 13*vref/32) begin
+            code = 6;
+        end else if (vin_val <= vss_val + 15*vref/32) begin
+            code = 7;
+        end else if (vin_val <= vss_val + 17*vref/32) begin
+            code = 8;
+        end else if (vin_val <= vss_val + 19*vref/32) begin
+            code = 9;
+        end else if (vin_val <= vss_val + 21*vref/32) begin
+            code = 10;
+        end else if (vin_val <= vss_val + 23*vref/32) begin
+            code = 11;
+        end else if (vin_val <= vss_val + 25*vref/32) begin
+            code = 12;
+        end else if (vin_val <= vss_val + 27*vref/32) begin
+            code = 13;
+        end else if (vin_val <= vss_val + 29*vref/32) begin
+            code = 14;
+        end else begin
+            code = 15;
+        end
+
+        // Extract individual bits
+        d3 = (code >= 8) ? vdd_val : vss_val;
+        d2 = ((code % 8) >= 4) ? vdd_val : vss_val;
+        d1 = ((code % 4) >= 2) ? vdd_val : vss_val;
+        d0 = ((code % 2) >= 1) ? vdd_val : vss_val;
+
+        // Output with transitions
+        V(DOUT3) <+ transition(d3, td, tr);
+        V(DOUT2) <+ transition(d2, td, tr);
+        V(DOUT1) <+ transition(d1, td, tr);
+        V(DOUT0) <+ transition(d0, td, tr);
+    end
+endmodule

@@ -1,0 +1,135 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module prbs7_ref (clk, rst_n, en, serial_out, state_0, state_1, state_2, state_3, state_4, state_5, state_6);
+    input clk;
+    input rst_n;
+    input en;
+    output serial_out;
+    output state_0;
+    output state_1;
+    output state_2;
+    output state_3;
+    output state_4;
+    output state_5;
+    output state_6;
+
+    electrical clk;
+    electrical rst_n;
+    electrical en;
+    electrical serial_out;
+    electrical state_0;
+    electrical state_1;
+    electrical state_2;
+    electrical state_3;
+    electrical state_4;
+    electrical state_5;
+    electrical state_6;
+
+    parameter real vlogic_high = 1.8;
+    parameter real vlogic_low = 0.0;
+    parameter real vth = 0.9;
+    parameter real tdel = 0.0;
+    parameter real trise = 100e-12;
+    parameter real tfall = 100e-12;
+
+    integer lfsr;
+    integer bit0, bit1, bit2, bit3, bit4, bit5, bit6;
+    integer feedback;
+    integer serial_bit;
+    real vout_serial;
+    real vout_0, vout_1, vout_2, vout_3, vout_4, vout_5, vout_6;
+
+    analog begin
+        @(initial_step) begin
+            lfsr = 1;
+            bit0 = 1;
+            bit1 = 0;
+            bit2 = 0;
+            bit3 = 0;
+            bit4 = 0;
+            bit5 = 0;
+            bit6 = 0;
+            feedback = 0;
+            serial_bit = 0;
+        end
+
+        @(cross(V(clk) - vth, 1)) begin
+            if (V(rst_n) < vth) begin
+                lfsr = 1;
+                bit0 = 1;
+                bit1 = 0;
+                bit2 = 0;
+                bit3 = 0;
+                bit4 = 0;
+                bit5 = 0;
+                bit6 = 0;
+                serial_bit = 1;
+            end else if (V(en) > vth) begin
+                bit0 = lfsr & 1;
+                bit1 = (lfsr >> 1) & 1;
+                bit2 = (lfsr >> 2) & 1;
+                bit3 = (lfsr >> 3) & 1;
+                bit4 = (lfsr >> 4) & 1;
+                bit5 = (lfsr >> 5) & 1;
+                bit6 = (lfsr >> 6) & 1;
+
+                feedback = bit6 ^ bit5;
+
+                lfsr = (lfsr << 1) | feedback;
+                lfsr = lfsr & 127;
+
+                serial_bit = bit0;
+            end
+        end
+
+        if (serial_bit > 0)
+            vout_serial = vlogic_high;
+        else
+            vout_serial = vlogic_low;
+
+        if (bit0 > 0)
+            vout_0 = vlogic_high;
+        else
+            vout_0 = vlogic_low;
+
+        if (bit1 > 0)
+            vout_1 = vlogic_high;
+        else
+            vout_1 = vlogic_low;
+
+        if (bit2 > 0)
+            vout_2 = vlogic_high;
+        else
+            vout_2 = vlogic_low;
+
+        if (bit3 > 0)
+            vout_3 = vlogic_high;
+        else
+            vout_3 = vlogic_low;
+
+        if (bit4 > 0)
+            vout_4 = vlogic_high;
+        else
+            vout_4 = vlogic_low;
+
+        if (bit5 > 0)
+            vout_5 = vlogic_high;
+        else
+            vout_5 = vlogic_low;
+
+        if (bit6 > 0)
+            vout_6 = vlogic_high;
+        else
+            vout_6 = vlogic_low;
+
+        V(serial_out) <+ transition(vout_serial, tdel, trise, tfall);
+        V(state_0) <+ transition(vout_0, tdel, trise, tfall);
+        V(state_1) <+ transition(vout_1, tdel, trise, tfall);
+        V(state_2) <+ transition(vout_2, tdel, trise, tfall);
+        V(state_3) <+ transition(vout_3, tdel, trise, tfall);
+        V(state_4) <+ transition(vout_4, tdel, trise, tfall);
+        V(state_5) <+ transition(vout_5, tdel, trise, tfall);
+        V(state_6) <+ transition(vout_6, tdel, trise, tfall);
+    end
+endmodule

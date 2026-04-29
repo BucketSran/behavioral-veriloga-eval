@@ -1,0 +1,55 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sample_hold_droop_ref (vdd, vss, clk, vin, vout);
+    input vdd;
+    input vss;
+    input clk;
+    input vin;
+    output vout;
+    electrical vdd, vss, clk, vin, vout;
+
+    parameter real vth = 0.45;
+    parameter real tau = 120n;
+    parameter real dt = 0.5n;
+    parameter real trf = 40p;
+
+    real vheld;
+    real vtarget;
+    integer sample_pending;
+
+    analog begin
+        @(initial_step) begin
+            vheld = 0.0;
+            vtarget = 0.0;
+            sample_pending = 0;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            vheld = V(vin);
+            sample_pending = 1;
+        end
+
+        if (sample_pending) begin
+            vtarget = vheld;
+            sample_pending = 0;
+        end else if (V(clk) < vth) begin
+            // Hold mode: apply droop toward vss
+            @(timer(0, dt)) begin
+                real droop;
+                droop = (vheld - V(vss)) * dt / tau;
+                vtarget = vtarget - droop;
+                if (vtarget < V(vss))
+                    vtarget = V(vss);
+            end
+        end
+
+        // Clamp to supply range
+        if (vtarget > V(vdd))
+            vtarget = V(vdd);
+        else if (vtarget < V(vss))
+            vtarget = V(vss);
+
+        V(vout) <+ transition(vtarget, 0, trf, trf);
+    end
+endmodule

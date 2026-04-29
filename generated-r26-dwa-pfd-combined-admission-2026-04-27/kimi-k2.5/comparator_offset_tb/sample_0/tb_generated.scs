@@ -1,0 +1,26 @@
+simulator lang=spectre
+global 0
+
+// Power supplies
+Vvdd (VDD 0) vsource dc=0.9
+Vvss (VSS 0) vsource dc=0
+
+// Clock: 1GHz clock (1ns period, 50% duty cycle)
+Vclk (CLK 0) vsource type=pulse val0=0 val1=0.9 period=1n rise=10p fall=10p width=490p delay=0
+
+// Differential input: VINP swept, VINN at common mode
+// Sweep VINP from -10mV to +10mV around 0.45V common mode in 1mV steps
+// Using PWL to create stepped sweep over 28ns simulation
+Vinp (VINP 0) vsource type=pwl wave=[0n 0.44 2n 0.44 2n 0.441 4n 0.441 4n 0.442 6n 0.442 6n 0.443 8n 0.443 8n 0.444 10n 0.444 10n 0.445 12n 0.445 12n 0.446 14n 0.446 14n 0.447 16n 0.447 16n 0.448 18n 0.448 18n 0.449 20n 0.449 20n 0.45 22n 0.45 22n 0.451 24n 0.451 24n 0.452 26n 0.452 26n 0.453 28n 0.453]
+Vinn (VINN 0) vsource dc=0.45
+
+// DUT instantiation by position: (VDD, VSS, CLK, VINP, VINN, OUT_P)
+XDUT (VDD, VSS, CLK, VINP, VINN, OUT_P) cmp_offset_ref
+
+// Transient analysis
+tran tran stop=28n maxstep=20p
+
+// Save signals
+save VDD VSS CLK VINP VINN OUT_P
+
+ahdl_include "cmp_offset_ref.va"

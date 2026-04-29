@@ -1,0 +1,158 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sar_12bit (
+    VDD,
+    VSS,
+    CLKS,
+    DCOMP_P,
+    DCOMP_N,
+    DP_CAP_11,
+    DP_CAP_10,
+    DP_CAP_9,
+    DP_CAP_8,
+    DP_CAP_7,
+    DP_CAP_6,
+    DP_CAP_5,
+    DP_CAP_4,
+    DP_CAP_3,
+    DP_CAP_2,
+    DP_CAP_1,
+    DP_CAP_0,
+    EOC
+);
+
+    inout electrical VDD, VSS;
+    input electrical CLKS, DCOMP_P, DCOMP_N;
+    output electrical DP_CAP_11, DP_CAP_10, DP_CAP_9, DP_CAP_8;
+    output electrical DP_CAP_7, DP_CAP_6, DP_CAP_5, DP_CAP_4;
+    output electrical DP_CAP_3, DP_CAP_2, DP_CAP_1, DP_CAP_0;
+    output electrical EOC;
+
+    // Internal state variables
+    integer state;
+    integer bit_idx;
+    integer dac_value;
+    integer result;
+    integer comp_result;
+    integer eoc_flag;
+
+    // Threshold for logic levels
+    real vth;
+    real vdd_val;
+    real vss_val;
+    real trise;
+    real tfall;
+    real tdelay;
+
+    // Comparator threshold
+    real comp_vth;
+
+    analog begin
+        // Initialize parameters
+        vdd_val = 1.8;
+        vss_val = 0.0;
+        vth = 0.9;
+        trise = 0.1n;
+        tfall = 0.1n;
+        tdelay = 0.0;
+        comp_vth = 0.0;
+
+        // Initialize on first step
+        @(initial_step) begin
+            state = 0;
+            bit_idx = 11;
+            dac_value = 0;
+            result = 0;
+            comp_result = 0;
+            eoc_flag = 0;
+        end
+
+        // Detect rising edge of CLKS
+        @(cross(V(CLKS) - vth, 1)) begin
+            case (state)
+                0: begin // IDLE -> START conversion
+                    bit_idx = 11;
+                    dac_value = 2048; // Set MSB (bit 11)
+                    result = 0;
+                    eoc_flag = 0;
+                    state = 1;
+                end
+                1: begin // COMPARE phase
+                    // Sample comparator output
+                    if (V(DCOMP_P) > V(DCOMP_N)) begin
+                        comp_result = 1;
+                    end else begin
+                        comp_result = 0;
+                    end
+                    state = 2;
+                end
+                2: begin // SETTLE and DECISION phase
+                    if (comp_result == 1) begin
+                        // Keep the bit set
+                        result = result | (1 << bit_idx);
+                    end else begin
+                        // Clear the bit
+                        dac_value = dac_value & ~(1 << bit_idx);
+                    end
+
+                    // Move to next bit
+                    bit_idx = bit_idx - 1;
+
+                    if (bit_idx < 0) begin
+                        // Conversion complete
+                        eoc_flag = 1;
+                        state = 3;
+                    end else begin
+                        // Set next bit for trial
+                        dac_value = result | (1 << bit_idx);
+                        state = 1;
+                    end
+                end
+                3: begin // EOC asserted, wait for next start
+                    // Stay in EOC state, ready for restart
+                    // EOC remains high
+                end
+            endcase
+        end
+
+        // Detect falling edge of CLKS for potential reset/restart
+        @(cross(V(CLKS) - vth, -1)) begin
+            // Can use this for additional timing if needed
+            // For now, state machine advances on rising edge
+        end
+
+        // Output DAC capacitor control signals
+        // Each bit controls whether that capacitor is connected to VREF or not
+        // In thermometer/thermometric coding for CDAC, but here we use binary weighted control
+
+        // Bit 11 (MSB)
+        V(DP_CAP_11) <+ transition(((dac_value >> 11) & 1) ? vdd_val : vss_val, tdelay, trise, tfall);
+        // Bit 10
+        V(DP_CAP_10) <+ transition(((dac_value >> 10) & 1) ? vdd_val : vss_val, tdelay, trise, tfall);
+        // Bit 9
+        V(DP_CAP_9) <+ transition(((dac_value >> 9) & 1) ? vdd_val : vss_val, tdelay, trise, tfall);
+        // Bit 8
+        V(DP_CAP_8) <+ transition(((dac_value >> 8) & 1) ? vdd_val : vss_val, tdelay, trise, tfall);
+        // Bit 7
+        V(DP_CAP_7) <+ transition(((dac_value >> 7) & 1) ? vdd_val : vss_val, tdelay, trise, tfall);
+        // Bit 6
+        V(DP_CAP_6) <+ transition(((dac_value >> 6) & 1) ? vdd_val : vss_val, tdelay, trise, tfall);
+        // Bit 5
+        V(DP_CAP_5) <+ transition(((dac_value >> 5) & 1) ? vdd_val : vss_val, tdelay, trise, tfall);
+        // Bit 4
+        V(DP_CAP_4) <+ transition(((dac_value >> 4) & 1) ? vdd_val : vss_val, tdelay, trise, tfall);
+        // Bit 3
+        V(DP_CAP_3) <+ transition(((dac_value >> 3) & 1) ? vdd_val : vss_val, tdelay, trise, tfall);
+        // Bit 2
+        V(DP_CAP_2) <+ transition(((dac_value >> 2) & 1) ? vdd_val : vss_val, tdelay, trise, tfall);
+        // Bit 1
+        V(DP_CAP_1) <+ transition(((dac_value >> 1) & 1) ? vdd_val : vss_val, tdelay, trise, tfall);
+        // Bit 0 (LSB)
+        V(DP_CAP_0) <+ transition(((dac_value >> 0) & 1) ? vdd_val : vss_val, tdelay, trise, tfall);
+
+        // EOC output
+        V(EOC) <+ transition(eoc_flag ? vdd_val : vss_val, tdelay, trise, tfall);
+    end
+
+endmodule

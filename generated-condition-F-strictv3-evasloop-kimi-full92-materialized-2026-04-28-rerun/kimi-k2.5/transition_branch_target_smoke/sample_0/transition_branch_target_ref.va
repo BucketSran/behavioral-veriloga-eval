@@ -1,0 +1,40 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module transition_branch_target_ref (mode, clk, out, VDD, VSS);
+    input mode, clk;
+    output out;
+    inout VDD, VSS;
+    electrical mode, clk, out, VDD, VSS;
+
+    parameter real vth = 0.9 from (0:inf);
+    parameter real vhi = 1.8 from (0:inf);
+    parameter real vlo = 0.0 from [0:inf);
+    parameter real tr = 1n from (0:inf);
+    parameter real tf = 1n from (0:inf);
+
+    integer target_q;
+    real vout;
+
+    analog begin
+        @(initial_step) begin
+            target_q = 0;
+        end
+
+        @(cross(V(clk) - vth, 1)) begin
+            if (V(mode) > vth) begin
+                target_q = 1;
+            end else begin
+                target_q = 0;
+            end
+        end
+
+        if (target_q == 1) begin
+            vout = vhi;
+        end else begin
+            vout = vlo;
+        end
+
+        V(out) <+ transition(vout, 0, tr, tf);
+    end
+endmodule

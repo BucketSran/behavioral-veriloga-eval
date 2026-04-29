@@ -1,0 +1,94 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dwa_ptr_gen_no_overlap (clk_i, rst_ni, code_msb_i, cell_en_o, ptr_o);
+    input clk_i;
+    input rst_ni;
+    input [3:0] code_msb_i;
+    output [15:0] cell_en_o;
+    output [15:0] ptr_o;
+    electrical clk_i, rst_ni;
+    electrical [3:0] code_msb_i;
+    electrical [15:0] cell_en_o;
+    electrical [15:0] ptr_o;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter integer ptr_init = 0;
+
+    integer ptr;
+    integer code;
+    integer j;
+    real cell_en_val[0:15];
+    real ptr_val[0:15];
+    genvar k;
+
+    analog begin
+        @(initial_step) begin
+            ptr = ptr_init % 16;
+            if (ptr < 0) ptr = ptr + 16;
+        end
+
+        // Sample on rising edge of clk_i
+        @(cross(V(clk_i) - vth, +1)) begin
+            if (V(rst_ni) < vth) begin
+                ptr = ptr_init % 16;
+                if (ptr < 0) ptr = ptr + 16;
+            end else begin
+                // Decode 4-bit code from voltage inputs using fixed indices
+                code = 0;
+                if (V(code_msb_i[0]) > vth) code = code + 1;
+                if (V(code_msb_i[1]) > vth) code = code + 2;
+                if (V(code_msb_i[2]) > vth) code = code + 4;
+                if (V(code_msb_i[3]) > vth) code = code + 8;
+                // Clamp code to 0-15
+                if (code < 0) code = 0;
+                if (code > 15) code = 15;
+                // Update pointer: advance by code amount (non-overlapping)
+                ptr = (ptr + code) % 16;
+                if (ptr < 0) ptr = ptr + 16;
+            end
+        end
+
+        // Clear all outputs first
+        for (j = 0; j < 16; j = j + 1) begin
+            cell_en_val[j] = 0.0;
+            ptr_val[j] = 0.0;
+        end
+
+        // Asynchronous reset handling for outputs
+        if (V(rst_ni) < vth) begin
+            // All outputs remain cleared (0.0)
+        end else begin
+            // Decode current code value using fixed indices
+            code = 0;
+            if (V(code_msb_i[0]) > vth) code = code + 1;
+            if (V(code_msb_i[1]) > vth) code = code + 2;
+            if (V(code_msb_i[2]) > vth) code = code + 4;
+            if (V(code_msb_i[3]) > vth) code = code + 8;
+            if (code < 0) code = 0;
+            if (code > 15) code = 15;
+
+            // Generate cell_en_o: enable cells starting from ptr for 'code' cells
+            for (j = 0; j < 16; j = j + 1) begin
+                // Check if this cell is within the enabled window
+                // Window starts at ptr and extends for 'code' cells
+                integer idx;
+                idx = j - ptr;
+                if (idx < 0) idx = idx + 16;
+                if (code > 0 && idx >= 0 && idx < code) begin
+                    cell_en_val[j] = vdd;
+                end
+            end
+
+            // ptr_o is one-hot representation of current pointer
+            ptr_val[ptr] = vdd;
+        end
+
+        // Drive outputs using genvar loop for unconditional contributions
+        for (k = 0; k < 16; k = k + 1) begin
+            V(cell_en_o[k]) <+ transition(cell_en_val[k], 0, 100p, 100p);
+            V(ptr_o[k]) <+ transition(ptr_val[k], 0, 100p, 100p);
+        end
+    end
+endmodule

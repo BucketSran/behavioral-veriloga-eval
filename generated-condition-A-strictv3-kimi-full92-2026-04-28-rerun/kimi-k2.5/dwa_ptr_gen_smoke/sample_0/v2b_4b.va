@@ -1,0 +1,46 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module v2b_4b (vin, vout3, vout2, vout1, vout0);
+    inout vin;
+    inout vout3, vout2, vout1, vout0;
+    electrical vin, vout3, vout2, vout1, vout0;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real tr = 1n;
+    parameter real tf = 1n;
+
+    integer b3, b2, b1, b0;
+    real v_in;
+
+    analog begin
+        v_in = V(vin);
+
+        // 4-bit ADC: compare against thresholds
+        // b3: vin > 0.5*vdd (0.45) -> 1, else 0
+        // Actually need proper 4-bit encoding: 0-15 levels
+        // Map 0-vdd to 0-15: threshold at (n+0.5)*vdd/16
+
+        b3 = (v_in > 7.5 * vdd / 16) ? 1 : 0;
+        b2 = (v_in > ((b3 ? 12 : 4) + 0.5) * vdd / 16) ? 1 : 0;
+        // Simpler: direct comparison for each bit using successive approximation logic
+        // Actually let's use a simpler thermometer to binary approach
+
+        // Recompute: 4-bit value = floor(vin * 16 / vdd) clamped 0-15
+        integer code;
+        code = $floor(v_in * 16.0 / vdd);
+        if (code < 0) code = 0;
+        if (code > 15) code = 15;
+
+        b3 = (code >> 3) & 1;
+        b2 = (code >> 2) & 1;
+        b1 = (code >> 1) & 1;
+        b0 = code & 1;
+
+        V(vout3) <+ transition(b3 ? vdd : 0, 0, tr, tf);
+        V(vout2) <+ transition(b2 ? vdd : 0, 0, tr, tf);
+        V(vout1) <+ transition(b1 ? vdd : 0, 0, tr, tf);
+        V(vout0) <+ transition(b0 ? vdd : 0, 0, tr, tf);
+    end
+endmodule

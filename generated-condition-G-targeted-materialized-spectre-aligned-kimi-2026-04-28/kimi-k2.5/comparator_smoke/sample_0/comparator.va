@@ -1,0 +1,43 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module comparator (VDD, VSS, VINP, VINN, OUT_P);
+    inout VDD;
+    inout VSS;
+    input VINP;
+    input VINN;
+    output OUT_P;
+
+    electrical VDD, VSS, VINP, VINN, OUT_P;
+
+    parameter real vth_offset = 0.0 from [-1.0:1.0];
+    parameter real tr = 0.1n from [1p:1u];
+    parameter real tf = 0.1n from [1p:1u];
+
+    integer out_state;
+    real vdd_level;
+    real vss_level;
+    real vdiff;
+    real out_target;
+
+    analog begin
+        @(initial_step) begin
+            out_state = 0;
+        end
+
+        vdd_level = V(VDD);
+        vss_level = V(VSS);
+        vdiff = V(VINP) - V(VINN);
+
+        @(cross(vdiff - vth_offset, 1)) begin
+            out_state = 1;
+        end
+
+        @(cross(vdiff - vth_offset, -1)) begin
+            out_state = 0;
+        end
+
+        out_target = (out_state == 1) ? vdd_level : vss_level;
+        V(OUT_P) <+ transition(out_target, 0, tr, tf);
+    end
+endmodule

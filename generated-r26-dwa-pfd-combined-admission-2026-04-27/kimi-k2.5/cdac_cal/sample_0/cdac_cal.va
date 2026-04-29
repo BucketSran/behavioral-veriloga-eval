@@ -1,0 +1,156 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cdac_cal (
+    VDD,
+    VSS,
+    CLK,
+    D9, D8, D7, D6, D5, D4, D3, D2, D1, D0,
+    CAL0, CAL1,
+    VDAC_P,
+    VDAC_N
+);
+
+    // Power rails
+    inout electrical VDD;
+    inout electrical VSS;
+
+    // Clock input
+    input electrical CLK;
+
+    // Digital control inputs (10-bit main DAC + 2 calibration bits)
+    input electrical D9, D8, D7, D6, D5, D4, D3, D2, D1, D0;
+    input electrical CAL0, CAL1;
+
+    // Differential DAC outputs
+    output electrical VDAC_P;
+    output electrical VDAC_N;
+
+    // Internal variables
+    integer i;
+    real vdd_val, vss_val;
+    real d[0:9];        // D0-D9 values
+    real cal[0:1];      // CAL0-CAL1 values
+
+    // Capacitor weights (binary weighted 10-bit + 2 calibration)
+    // Main array: C, 2C, 4C, 8C, 16C, 32C, 64C, 128C, 256C, 512C (D0-D9)
+    // Calibration: C/4, C/4 (CAL0, CAL1) - redundant LSB capacitors
+    real weight[0:11];
+    real total_weight;
+    real sum_weighted_p, sum_weighted_n;
+    real vout_p, vout_n;
+    real vcm;
+
+    // Transition time for smooth output changes
+    parameter real ttran = 10p from (0:inf);
+
+    // Threshold for digital input detection
+    parameter real vth = 0.5 from (0:inf);
+
+    // Unit capacitor weight (normalized)
+    parameter real C_unit = 1.0 from (0:inf);
+
+    // Clock-to-output delay
+    parameter real tdc = 10p from (0:inf);
+
+    // Target output values (updated on clock edge)
+    real target_vout_p, target_vout_n;
+
+    analog begin
+        // Read power supply values
+        vdd_val = V(VDD);
+        vss_val = V(VSS);
+        vcm = (vdd_val + vss_val) / 2.0;
+
+        // Define binary weights for 10-bit main DAC
+        // D9 (MSB) = 512, D8 = 256, ..., D0 (LSB) = 1
+        weight[9] = 512.0 * C_unit;  // D9
+        weight[8] = 256.0 * C_unit;  // D8
+        weight[7] = 128.0 * C_unit;  // D7
+        weight[6] = 64.0 * C_unit;   // D6
+        weight[5] = 32.0 * C_unit;   // D5
+        weight[4] = 16.0 * C_unit;   // D4
+        weight[3] = 8.0 * C_unit;    // D3
+        weight[2] = 4.0 * C_unit;    // D2
+        weight[1] = 2.0 * C_unit;    // D1
+        weight[0] = 1.0 * C_unit;    // D0
+
+        // Calibration capacitors (redundant LSB, C/4 each)
+        weight[10] = 0.25 * C_unit;  // CAL0
+        weight[11] = 0.25 * C_unit;  // CAL1
+
+        // Calculate total capacitance
+        total_weight = 0.0;
+        for (i = 0; i < 12; i = i + 1) begin
+            total_weight = total_weight + weight[i];
+        end
+
+        // Initialize target values
+        @(initial_step) begin
+            target_vout_p = vcm;
+            target_vout_n = vcm;
+        end
+
+        // Update DAC output on rising clock edge
+        @(cross(V(CLK) - vth, +1)) begin
+            // Read digital inputs with threshold detection
+            d[9] = (V(D9) > vth) ? 1.0 : 0.0;
+            d[8] = (V(D8) > vth) ? 1.0 : 0.0;
+            d[7] = (V(D7) > vth) ? 1.0 : 0.0;
+            d[6] = (V(D6) > vth) ? 1.0 : 0.0;
+            d[5] = (V(D5) > vth) ? 1.0 : 0.0;
+            d[4] = (V(D4) > vth) ? 1.0 : 0.0;
+            d[3] = (V(D3) > vth) ? 1.0 : 0.0;
+            d[2] = (V(D2) > vth) ? 1.0 : 0.0;
+            d[1] = (V(D1) > vth) ? 1.0 : 0.0;
+            d[0] = (V(D0) > vth) ? 1.0 : 0.0;
+
+            cal[0] = (V(CAL0) > vth) ? 1.0 : 0.0;
+            cal[1] = (V(CAL1) > vth) ? 1.0 : 0.0;
+
+            // Charge redistribution DAC model
+            // Differential topology:
+            // VDAC_P connects to VDD when bit=1, VSS when bit=0
+            // VDAC_N connects to VSS when bit=1, VDD when bit=0 (complementary)
+
+            // Calculate weighted sum for positive output
+            sum_weighted_p = 0.0;
+            sum_weighted_p = sum_weighted_p + d[9] * weight[9] * vdd_val + (1.0 - d[9]) * weight[9] * vss_val;
+            sum_weighted_p = sum_weighted_p + d[8] * weight[8] * vdd_val + (1.0 - d[8]) * weight[8] * vss_val;
+            sum_weighted_p = sum_weighted_p + d[7] * weight[7] * vdd_val + (1.0 - d[7]) * weight[7] * vss_val;
+            sum_weighted_p = sum_weighted_p + d[6] * weight[6] * vdd_val + (1.0 - d[6]) * weight[6] * vss_val;
+            sum_weighted_p = sum_weighted_p + d[5] * weight[5] * vdd_val + (1.0 - d[5]) * weight[5] * vss_val;
+            sum_weighted_p = sum_weighted_p + d[4] * weight[4] * vdd_val + (1.0 - d[4]) * weight[4] * vss_val;
+            sum_weighted_p = sum_weighted_p + d[3] * weight[3] * vdd_val + (1.0 - d[3]) * weight[3] * vss_val;
+            sum_weighted_p = sum_weighted_p + d[2] * weight[2] * vdd_val + (1.0 - d[2]) * weight[2] * vss_val;
+            sum_weighted_p = sum_weighted_p + d[1] * weight[1] * vdd_val + (1.0 - d[1]) * weight[1] * vss_val;
+            sum_weighted_p = sum_weighted_p + d[0] * weight[0] * vdd_val + (1.0 - d[0]) * weight[0] * vss_val;
+            sum_weighted_p = sum_weighted_p + cal[0] * weight[10] * vdd_val + (1.0 - cal[0]) * weight[10] * vss_val;
+            sum_weighted_p = sum_weighted_p + cal[1] * weight[11] * vdd_val + (1.0 - cal[1]) * weight[11] * vss_val;
+
+            // Calculate weighted sum for negative output (complementary switching)
+            sum_weighted_n = 0.0;
+            sum_weighted_n = sum_weighted_n + d[9] * weight[9] * vss_val + (1.0 - d[9]) * weight[9] * vdd_val;
+            sum_weighted_n = sum_weighted_n + d[8] * weight[8] * vss_val + (1.0 - d[8]) * weight[8] * vdd_val;
+            sum_weighted_n = sum_weighted_n + d[7] * weight[7] * vss_val + (1.0 - d[7]) * weight[7] * vdd_val;
+            sum_weighted_n = sum_weighted_n + d[6] * weight[6] * vss_val + (1.0 - d[6]) * weight[6] * vdd_val;
+            sum_weighted_n = sum_weighted_n + d[5] * weight[5] * vss_val + (1.0 - d[5]) * weight[5] * vdd_val;
+            sum_weighted_n = sum_weighted_n + d[4] * weight[4] * vss_val + (1.0 - d[4]) * weight[4] * vdd_val;
+            sum_weighted_n = sum_weighted_n + d[3] * weight[3] * vss_val + (1.0 - d[3]) * weight[3] * vdd_val;
+            sum_weighted_n = sum_weighted_n + d[2] * weight[2] * vss_val + (1.0 - d[2]) * weight[2] * vdd_val;
+            sum_weighted_n = sum_weighted_n + d[1] * weight[1] * vss_val + (1.0 - d[1]) * weight[1] * vdd_val;
+            sum_weighted_n = sum_weighted_n + d[0] * weight[0] * vss_val + (1.0 - d[0]) * weight[0] * vdd_val;
+            sum_weighted_n = sum_weighted_n + cal[0] * weight[10] * vss_val + (1.0 - cal[0]) * weight[10] * vdd_val;
+            sum_weighted_n = sum_weighted_n + cal[1] * weight[11] * vss_val + (1.0 - cal[1]) * weight[11] * vdd_val;
+
+            // DAC output voltages (charge redistribution average)
+            target_vout_p = sum_weighted_p / total_weight;
+            target_vout_n = sum_weighted_n / total_weight;
+        end
+
+        // Output with transition for smooth changes (unconditional contribution)
+        V(VDAC_P) <+ transition(target_vout_p, tdc, ttran);
+        V(VDAC_N) <+ transition(target_vout_n, tdc, ttran);
+    end
+
+endmodule

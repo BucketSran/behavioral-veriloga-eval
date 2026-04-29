@@ -1,0 +1,114 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sar_logic (
+    VDD,
+    VSS,
+    CLKS,
+    DCOMP,
+    DP_DAC_9,
+    DP_DAC_8,
+    DP_DAC_7,
+    DP_DAC_6,
+    DP_DAC_5,
+    DP_DAC_4,
+    DP_DAC_3,
+    DP_DAC_2,
+    DP_DAC_1,
+    DP_DAC_0,
+    RDY
+);
+
+    inout electrical VDD, VSS;
+    input electrical CLKS, DCOMP;
+    output electrical DP_DAC_9, DP_DAC_8, DP_DAC_7, DP_DAC_6, DP_DAC_5;
+    output electrical DP_DAC_4, DP_DAC_3, DP_DAC_2, DP_DAC_1, DP_DAC_0;
+    output electrical RDY;
+
+    parameter real vth = 0.5 from (0:1.5);
+    parameter real tdel = 1n from (0:1u);
+    parameter real tr = 1n from (0:1u);
+    parameter real tf = 1n from (0:1u);
+
+    integer state;
+    integer bit_idx;
+    integer dac_code;
+    integer rdy_flag;
+    real vdd_val;
+    real vss_val;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+            bit_idx = 9;
+            dac_code = 0;
+            rdy_flag = 0;
+        end
+
+        vdd_val = V(VDD);
+        vss_val = V(VSS);
+
+        // Detect rising edge of CLKS
+        @(cross(V(CLKS) - vth, 1)) begin
+            case (state)
+                0: begin
+                    // Start conversion: clear DAC, set MSB
+                    dac_code = 512; // bit 9 set
+                    bit_idx = 9;
+                    rdy_flag = 0;
+                    state = 1;
+                end
+                1, 2, 3, 4, 5, 6, 7, 8, 9, 10: begin
+                    // SAR decision phase
+                    if (V(DCOMP) > vth) begin
+                        // Comparator high: keep bit set
+                    end else begin
+                        // Comparator low: clear current bit
+                        dac_code = dac_code - (1 << bit_idx);
+                    end
+
+                    // Move to next bit or finish
+                    if (bit_idx > 0) begin
+                        bit_idx = bit_idx - 1;
+                        dac_code = dac_code + (1 << bit_idx);
+                        state = state + 1;
+                    end else begin
+                        // Last bit done
+                        state = 11;
+                    end
+                end
+                11: begin
+                    // Final comparison for LSB
+                    if (V(DCOMP) < vth) begin
+                        dac_code = dac_code - 1;
+                    end
+                    rdy_flag = 1;
+                    state = 12;
+                end
+                12: begin
+                    // Hold state, wait for next CLKS to restart
+                    state = 0;
+                end
+                default: begin
+                    state = 0;
+                end
+            endcase
+        end
+
+        // Output DAC bits
+        V(DP_DAC_9) <+ transition((dac_code & 512) ? vdd_val : vss_val, tdel, tr, tf);
+        V(DP_DAC_8) <+ transition((dac_code & 256) ? vdd_val : vss_val, tdel, tr, tf);
+        V(DP_DAC_7) <+ transition((dac_code & 128) ? vdd_val : vss_val, tdel, tr, tf);
+        V(DP_DAC_6) <+ transition((dac_code & 64) ? vdd_val : vss_val, tdel, tr, tf);
+        V(DP_DAC_5) <+ transition((dac_code & 32) ? vdd_val : vss_val, tdel, tr, tf);
+        V(DP_DAC_4) <+ transition((dac_code & 16) ? vdd_val : vss_val, tdel, tr, tf);
+        V(DP_DAC_3) <+ transition((dac_code & 8) ? vdd_val : vss_val, tdel, tr, tf);
+        V(DP_DAC_2) <+ transition((dac_code & 4) ? vdd_val : vss_val, tdel, tr, tf);
+        V(DP_DAC_1) <+ transition((dac_code & 2) ? vdd_val : vss_val, tdel, tr, tf);
+        V(DP_DAC_0) <+ transition((dac_code & 1) ? vdd_val : vss_val, tdel, tr, tf);
+
+        // Output RDY
+        V(RDY) <+ transition(rdy_flag ? vdd_val : vss_val, tdel, tr, tf);
+    end
+
+endmodule

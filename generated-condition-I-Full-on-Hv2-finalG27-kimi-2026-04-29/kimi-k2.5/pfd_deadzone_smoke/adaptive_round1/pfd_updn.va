@@ -1,0 +1,60 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pfd_updn (vdd, vss, ref, div, up, dn);
+    inout vdd, vss;
+    input ref, div;
+    output up, dn;
+    electrical vdd, vss, ref, div, up, dn;
+
+    parameter real vth = 0.45;
+    parameter real tedge = 20p;
+
+    integer up_state;
+    integer dn_state;
+    real vhi;
+    real vlo;
+    real last_ref_time;
+    real last_div_time;
+    real pulse_width;
+
+    analog begin
+        @(initial_step) begin
+            up_state = 0;
+            dn_state = 0;
+            last_ref_time = 0;
+            last_div_time = 0;
+            pulse_width = 500p;
+        end
+
+        // Capture rising edge of ref: set up high, record time
+        @(cross(V(ref) - vth, 1)) begin
+            up_state = 1;
+            last_ref_time = $abstime;
+        end
+
+        // Capture rising edge of div: set dn high, record time
+        @(cross(V(div) - vth, 1)) begin
+            dn_state = 1;
+            last_div_time = $abstime;
+        end
+
+        // Auto-clear UP after pulse_width from when it was set
+        if ((up_state == 1) && (($abstime - last_ref_time) >= pulse_width)) begin
+            up_state = 0;
+        end
+
+        // Auto-clear DN after pulse_width from when it was set
+        if ((dn_state == 1) && (($abstime - last_div_time) >= pulse_width)) begin
+            dn_state = 0;
+        end
+
+        // Read supply levels dynamically
+        vhi = V(vdd);
+        vlo = V(vss);
+
+        // Drive outputs with transition for finite edge times
+        V(up) <+ transition(up_state ? vhi : vlo, 0, tedge);
+        V(dn) <+ transition(dn_state ? vhi : vlo, 0, tedge);
+    end
+endmodule

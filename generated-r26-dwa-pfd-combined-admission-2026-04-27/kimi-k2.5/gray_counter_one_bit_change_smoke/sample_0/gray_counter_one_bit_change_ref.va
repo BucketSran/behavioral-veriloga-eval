@@ -1,0 +1,68 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module gray_counter_one_bit_change_ref(vdd, vss, clk, rst, g0, g1, g2, g3);
+    electrical vdd, vss, clk, rst, g0, g1, g2, g3;
+
+    parameter real vhigh = 1.0 from (0:inf);
+    parameter real vlow = 0.0 from (-inf:inf);
+    parameter real vth = 0.5 from (0:inf);
+    parameter real tdel = 0 from [0:inf);
+    parameter real tr = 1n from (0:inf);
+    parameter real tf = 1n from (0:inf);
+
+    integer bin_count;
+    integer gray_code;
+    real g0_val, g1_val, g2_val, g3_val;
+
+    analog begin
+        @(initial_step) begin
+            bin_count = 0;
+            gray_code = 0;
+            g0_val = vlow;
+            g1_val = vlow;
+            g2_val = vlow;
+            g3_val = vlow;
+        end
+
+        // Detect rising edge of clk
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth) begin
+                // Reset active high
+                bin_count = 0;
+            end else begin
+                // Increment binary counter
+                if (bin_count >= 15) begin
+                    bin_count = 0;
+                end else begin
+                    bin_count = bin_count + 1;
+                end
+            end
+
+            // Convert binary to Gray code: gray = bin ^ (bin >> 1)
+            gray_code = bin_count ^ (bin_count >> 1);
+
+            // Extract individual bits for output
+            g0_val = ((gray_code & 1) == 1) ? vhigh : vlow;
+            g1_val = ((gray_code & 2) == 2) ? vhigh : vlow;
+            g2_val = ((gray_code & 4) == 4) ? vhigh : vlow;
+            g3_val = ((gray_code & 8) == 8) ? vhigh : vlow;
+        end
+
+        // Also check for reset asynchronously (when reset goes high)
+        @(cross(V(rst) - vth, +1)) begin
+            bin_count = 0;
+            gray_code = 0;
+            g0_val = vlow;
+            g1_val = vlow;
+            g2_val = vlow;
+            g3_val = vlow;
+        end
+
+        // Drive outputs with transitions
+        V(g0) <+ transition(g0_val, tdel, tr, tf);
+        V(g1) <+ transition(g1_val, tdel, tr, tf);
+        V(g2) <+ transition(g2_val, tdel, tr, tf);
+        V(g3) <+ transition(g3_val, tdel, tr, tf);
+    end
+endmodule

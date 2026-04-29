@@ -1,0 +1,59 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bound_step_period_guard_ref(VDD, VSS, guard_out, phase_out);
+    inout electrical VDD, VSS;
+    output electrical guard_out, phase_out;
+
+    parameter real period = 8n from (0:inf);
+    parameter real guard_width = 1.5n from (0:inf);
+    parameter real tr = 10p from (0:inf);
+    parameter real tf = 10p from (0:inf);
+
+    real next_cycle;
+    real cycle_start;
+    real t_now;
+    real phase;
+    real guard_val;
+    real vdd_val;
+    real vss_val;
+
+    analog begin
+        @(initial_step) begin
+            next_cycle = 0;
+            cycle_start = 0;
+        end
+
+        // Request tight time step bound continuously
+        $bound_step(period / 16.0);
+
+        // Get supply values
+        vdd_val = V(VDD);
+        vss_val = V(VSS);
+
+        // Current time
+        t_now = $abstime;
+
+        // Check for cycle boundary
+        @(timer(next_cycle)) begin
+            cycle_start = next_cycle;
+            next_cycle = next_cycle + period;
+        end
+
+        // Calculate phase within current cycle (0 to 1)
+        phase = (t_now - cycle_start) / period;
+        if (phase < 0) phase = 0;
+        if (phase > 1) phase = 1;
+
+        // Guard output: HIGH for first guard_width of each cycle
+        if ((t_now - cycle_start) < guard_width) begin
+            guard_val = vdd_val;
+        end else begin
+            guard_val = vss_val;
+        end
+
+        // Drive outputs with transitions
+        V(guard_out) <+ transition(guard_val, 0, tr, tf);
+        V(phase_out) <+ transition(vss_val + phase * (vdd_val - vss_val), 0, tr, tf);
+    end
+endmodule

@@ -1,0 +1,38 @@
+simulator lang=spectre
+
+global 0
+
+ahdl_include "sar_adc_weighted_8b.va"
+ahdl_include "dac_weighted_8b.va"
+ahdl_include "sh_ideal.va"
+
+// Supply
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0
+
+// Reset - active low, released at 100ns
+Vrst (rst_n 0) vsource type=pwl wave=[0 0 100n 0 105n 0.9]
+
+// Sampling clock 50MHz (period 20ns)
+Vclk (clks 0) vsource type=pulse val0=0 val1=0.9 period=20n rise=1n fall=1n width=9n
+
+// Full-swing sine input around mid-supply (0.45V)
+// Amplitude 0.4V gives range 0.05V to 0.85V, covering most of ADC range
+Vsin (vin 0) vsource type=sine freq=1.5Meg ampl=0.4 offset=0.45
+
+// Sample/hold helper
+Xsh (vin clks vdd vss rst_n vin_sh) sh_ideal
+
+// SAR ADC
+Xadc (vin clks rst_n dout_7 dout_6 dout_5 dout_4 dout_3 dout_2 dout_1 dout_0) sar_adc_weighted_8b
+
+// Weighted DAC
+Xdac (dout_7 dout_6 dout_5 dout_4 dout_3 dout_2 dout_1 dout_0 vout) dac_weighted_8b
+
+// Save statements
+save vin vin_sh vout rst_n
+save dout_7 dout_6 dout_5 dout_4 dout_3 dout_2 dout_1 dout_0
+save clks
+
+// Transient analysis
+tran tran stop=10u maxstep=5n

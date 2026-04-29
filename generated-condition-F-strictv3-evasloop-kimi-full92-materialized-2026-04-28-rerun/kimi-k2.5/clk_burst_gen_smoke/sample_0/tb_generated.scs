@@ -1,0 +1,19 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "clk_burst_gen.va"
+
+// Input clock: 100 ns period (10 MHz)
+Vclk (CLK 0) vsource type=pulse val0=0 val1=1.8 period=100n rise=1n fall=1n width=49n
+
+// Active-low reset: asserted low initially, deasserts at ~235 ns
+Vrst (RST_N 0) vsource type=pwl wave=[0n 0, 230n 0, 235n 1.8]
+
+// DUT instance
+XDUT (CLK RST_N CLK_OUT) clk_burst_gen div=8
+
+// Transient analysis
+tran tran stop=3000n maxstep=5n
+
+// Save outputs
+save CLK RST_N CLK_OUT

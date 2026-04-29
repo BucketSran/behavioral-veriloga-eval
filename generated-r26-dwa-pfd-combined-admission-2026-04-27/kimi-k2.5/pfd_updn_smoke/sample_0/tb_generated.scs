@@ -1,0 +1,22 @@
+// Spectre testbench for pfd_updn
+
+ahdl_include "pfd_updn.va"
+
+// Supply voltages
+VDD (vdd 0) vsource dc=0.9
+VSS (vss 0) vsource dc=0
+
+// Reference clock: 100MHz, starts at 0
+VREF (ref 0) vsource type=pulse val0=0 val1=0.9 period=10n rise=100p fall=100p width=5n
+
+// Divider clock: 100MHz with phase offset (slightly slower to create phase difference)
+VDIV (div 0) vsource type=pulse val0=0 val1=0.9 period=10.1n rise=100p fall=100p width=5.05n
+
+// DUT
+dut (vdd vss ref div up dn) pfd_updn
+
+// Save signals
+save ref div up dn
+
+// Transient analysis
+tran tran stop=300n maxstep=100p errpreset=conservative

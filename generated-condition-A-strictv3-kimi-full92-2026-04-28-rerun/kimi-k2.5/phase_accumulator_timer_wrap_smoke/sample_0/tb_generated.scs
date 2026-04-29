@@ -1,0 +1,30 @@
+// Spectre testbench for phase_accumulator_timer_wrap_ref
+
+// Include the Verilog-A module
+ahdl_include "phase_accumulator_timer_wrap_ref.va"
+
+// Testbench parameters
+parameters vdd=1.0
+parameters vss=0.0
+parameters tstep=1n
+parameters phase_inc=0.1
+
+// DUT instance
+phase_accumulator_timer_wrap_ref dut (
+    VDD     VDD
+    VSS     VSS
+    clk_out clk_out
+    phase_out phase_out
+) {
+    vdd = vdd
+    vss = vss
+    tstep = tstep
+    phase_inc = phase_inc
+}
+
+// Save statements for required observables
+save clk_out
+save phase_out
+
+// Transient analysis
+tran tran stop=75n maxstep=20p errpreset=conservative

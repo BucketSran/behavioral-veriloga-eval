@@ -1,0 +1,32 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module or_gate (A, B, Y);
+    electrical A, B, Y;
+
+    parameter real vdd = 1.8;
+    parameter real vth = 0.9;
+    parameter real tdel = 0.1n;
+    parameter real tr = 0.1n;
+    parameter real tf = 0.1n;
+
+    integer a_logic, b_logic, y_logic;
+
+    analog begin
+        @(initial_step) begin
+            a_logic = 0;
+            b_logic = 0;
+            y_logic = 0;
+        end
+
+        // Detect logic levels
+        a_logic = (V(A) > vth) ? 1 : 0;
+        b_logic = (V(B) > vth) ? 1 : 0;
+
+        // OR function
+        y_logic = a_logic | b_logic;
+
+        // Drive output
+        V(Y) <+ transition(y_logic * vdd, tdel, tr, tf);
+    end
+endmodule

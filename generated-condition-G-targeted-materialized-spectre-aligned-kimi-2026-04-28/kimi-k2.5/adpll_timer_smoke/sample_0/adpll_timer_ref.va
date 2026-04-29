@@ -1,0 +1,150 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module adpll_timer_ref (VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock);
+    inout VDD, VSS;
+    input ref_clk;
+    output fb_clk, dco_clk, vctrl_mon, lock;
+    electrical VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock;
+
+    // Parameters
+    parameter real vhi = 1.8 from (0:inf);
+    parameter real vlo = 0.0 from [0:inf);
+    parameter real vth = 0.9 from (0:inf);
+    parameter real tdel = 1p from [0:inf);
+    parameter real tr = 100p from (0:inf);
+    parameter real tf = 100p from (0:inf);
+    parameter real ref_freq = 50e6 from (0:inf);
+    parameter real dco_center_freq = 500e6 from (0:inf);
+    parameter integer div_ratio = 10 from [1:inf);
+    parameter real kp = 0.01 from (0:inf);
+    parameter real lock_threshold = 0.05 from (0:inf);
+    parameter integer lock_count = 100 from [1:inf);
+
+    // State variables
+    integer dco_code;
+    integer div_cnt;
+    integer fb_val;
+    integer dco_val;
+    integer lock_val;
+    integer ref_edge_cnt;
+    integer fb_edge_cnt;
+    integer lock_cnt;
+    integer phase_err;
+    integer freq_err;
+    integer prev_ref;
+    integer prev_fb;
+    integer ref_rising;
+    integer fb_rising;
+    integer dco_period_fs;
+    integer next_dco_edge_fs;
+    integer sim_time_fs;
+    integer ref_time_fs;
+    integer fb_time_fs;
+    integer time_diff_fs;
+    integer abs_err;
+    integer lock_detect;
+
+    // Internal nodes for DCO timer
+    integer dco_timer_active;
+    real vctrl_norm;
+    real dco_period_real;
+    real ref_time;
+    real fb_time;
+
+    analog begin
+        @(initial_step) begin
+            dco_code = 512;
+            div_cnt = 0;
+            fb_val = 0;
+            dco_val = 0;
+            lock_val = 0;
+            ref_edge_cnt = 0;
+            fb_edge_cnt = 0;
+            lock_cnt = 0;
+            phase_err = 0;
+            freq_err = 0;
+            prev_ref = 0;
+            prev_fb = 0;
+            ref_rising = 0;
+            fb_rising = 0;
+            dco_period_fs = 1000000;
+            next_dco_edge_fs = 0;
+            dco_timer_active = 0;
+            lock_detect = 0;
+            ref_time = 0;
+            fb_time = 0;
+        end
+
+        // Detect reference clock edges
+        @(cross(V(ref_clk) - vth, 1)) begin
+            ref_rising = 1;
+            ref_edge_cnt = ref_edge_cnt + 1;
+            ref_time = $abstime;
+        end
+
+        // Detect feedback clock edges
+        @(cross(V(fb_clk) - vth, 1)) begin
+            fb_rising = 1;
+            fb_edge_cnt = fb_edge_cnt + 1;
+            fb_time = $abstime;
+        end
+
+        // Bang-bang phase/frequency detector
+        if (ref_rising && !fb_rising) begin
+            if (dco_code < 1023) begin
+                dco_code = dco_code + 1;
+            end
+            phase_err = 1;
+            ref_rising = 0;
+        end else if (!ref_rising && fb_rising) begin
+            if (dco_code > 0) begin
+                dco_code = dco_code - 1;
+            end
+            phase_err = -1;
+            fb_rising = 0;
+        end else if (ref_rising && fb_rising) begin
+            phase_err = 0;
+            ref_rising = 0;
+            fb_rising = 0;
+        end
+
+        // Calculate DCO period based on control code
+        dco_period_real = 1.0 / (dco_center_freq * (0.8 + 0.4 * dco_code / 1023.0));
+        dco_period_fs = dco_period_real * 1e15;
+
+        // DCO using timer - generate edges
+        @(timer(0, dco_period_real)) begin
+            dco_val = !dco_val;
+
+            // Divider for feedback clock
+            div_cnt = div_cnt + 1;
+            if (div_cnt >= div_ratio) begin
+                div_cnt = 0;
+                fb_val = !fb_val;
+            end
+        end
+
+        // Lock detection
+        if (ref_rising || fb_rising) begin
+            if (phase_err == 0) begin
+                lock_cnt = lock_cnt + 1;
+            end else begin
+                lock_cnt = 0;
+            end
+
+            if (lock_cnt >= lock_count) begin
+                lock_detect = 1;
+            end
+        end
+
+        // Drive outputs with transitions
+        V(dco_clk) <+ transition(dco_val ? vhi : vlo, tdel, tr, tf);
+        V(fb_clk) <+ transition(fb_val ? vhi : vlo, tdel, tr, tf);
+        V(lock) <+ transition(lock_detect ? vhi : vlo, tdel, tr, tf);
+
+        // vctrl_mon: normalized control voltage (0 to vhi)
+        vctrl_norm = vhi * dco_code / 1023.0;
+        V(vctrl_mon) <+ transition(vctrl_norm, tdel, tr, tf);
+    end
+endmodule

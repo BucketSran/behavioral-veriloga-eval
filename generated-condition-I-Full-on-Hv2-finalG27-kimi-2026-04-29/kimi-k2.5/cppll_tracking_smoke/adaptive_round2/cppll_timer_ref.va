@@ -1,0 +1,176 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cppll_timer_ref (VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock);
+    inout VDD;
+    inout VSS;
+    input ref_clk;
+    output fb_clk;
+    output dco_clk;
+    output vctrl_mon;
+    output lock;
+
+    electrical VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock;
+
+    // Parameters
+    parameter real vth = 0.9 from (0:inf);
+    parameter real tdel = 1p from (0:inf);
+    parameter real tr = 100p from (0:inf);
+    parameter real tf = 100p from (0:inf);
+    parameter real kp = 5e-2 from (0:inf);
+    parameter real ki = 1e-3 from (0:inf);
+    parameter real fmin = 40e6 from (0:inf);
+    parameter real fmax = 360e6 from (0:inf);
+    parameter integer div_ratio = 4 from (1:inf);
+    parameter real lock_thr = 0.02 from (0:inf);
+    parameter integer lock_cnt_max = 50 from (1:inf);
+
+    // Internal variables
+    integer ref_edge_cnt;
+    integer fb_edge_cnt;
+    integer div_cnt;
+    integer lock_cnt;
+    integer locked;
+    integer dco_state;
+    integer fb_state;
+    real phase_err;
+    real vctrl;
+    real vctrl_prop;
+    real vctrl_int;
+    real t_dco;
+    real t_next;
+    real vdd_level;
+    real vss_level;
+    real ref_period_est;
+    real fb_period_est;
+    real freq_err;
+    real last_ref_time;
+    real last_fb_time;
+    real ref_period_meas;
+    real fb_period_meas;
+    real dco_freq;
+    real t_init;
+    real freq_err_filtered;
+
+    analog begin
+        @(initial_step) begin
+            ref_edge_cnt = 0;
+            fb_edge_cnt = 0;
+            div_cnt = 0;
+            lock_cnt = 0;
+            locked = 0;
+            phase_err = 0.0;
+            vctrl = 0.5;
+            vctrl_prop = 0.0;
+            vctrl_int = 0.0;
+            t_dco = 2.5e-9;
+            t_next = 10n;
+            vdd_level = 1.8;
+            vss_level = 0.0;
+            ref_period_est = 20e-9;
+            fb_period_est = 20e-9;
+            freq_err = 0.0;
+            freq_err_filtered = 0.0;
+            dco_state = 0;
+            fb_state = 0;
+            last_ref_time = 0.0;
+            last_fb_time = 0.0;
+            ref_period_meas = 20e-9;
+            fb_period_meas = 20e-9;
+            dco_freq = 200e6;
+            t_init = 10n;
+        end
+
+        // Sample supply levels
+        vdd_level = V(VDD);
+        vss_level = V(VSS);
+
+        // Reference clock edge detection
+        @(cross(V(ref_clk) - vth, 1)) begin
+            ref_edge_cnt = ref_edge_cnt + 1;
+            ref_period_meas = $abstime - last_ref_time;
+            last_ref_time = $abstime;
+            if (ref_period_meas > 1e-12) ref_period_est = ref_period_meas;
+
+            // Frequency error: positive if fb too slow (fb_period > ref_period)
+            // We want fb_freq = ref_freq, so fb_period should equal ref_period
+            freq_err = (fb_period_est - ref_period_est) / ref_period_est;
+
+            // Low-pass filter for frequency error to reduce noise
+            freq_err_filtered = 0.7 * freq_err_filtered + 0.3 * freq_err;
+
+            // PI controller
+            vctrl_prop = kp * freq_err_filtered;
+            vctrl_int = vctrl_int + ki * freq_err_filtered;
+
+            // Clamp integrator
+            if (vctrl_int > 0.4) vctrl_int = 0.4;
+            if (vctrl_int < -0.4) vctrl_int = -0.4;
+
+            // Total control voltage (0 to 1 normalized, then scaled to vdd)
+            vctrl = 0.5 + vctrl_prop + vctrl_int;
+
+            // Clamp control voltage to valid range 0-0.95
+            if (vctrl > 0.95) vctrl = 0.95;
+            if (vctrl < 0.0) vctrl = 0.0;
+
+            // Lock detection based on small frequency error
+            if (abs(freq_err_filtered) < lock_thr) begin
+                lock_cnt = lock_cnt + 1;
+                if (lock_cnt >= lock_cnt_max) locked = 1;
+            end else begin
+                lock_cnt = 0;
+                locked = 0;
+            end
+        end
+
+        // DCO timer-based oscillator
+        @(timer(t_next)) begin
+            // Toggle DCO state
+            dco_state = !dco_state;
+
+            // Calculate DCO frequency based on vctrl (normalized 0-1)
+            // vctrl=0 -> fmin, vctrl=1 -> fmax
+            // Target: when locked, dco_freq = div_ratio * ref_freq = 4 * 50MHz = 200MHz
+            dco_freq = fmin + (fmax - fmin) * vctrl;
+
+            // Clamp frequency
+            if (dco_freq < fmin) dco_freq = fmin;
+            if (dco_freq > fmax) dco_freq = fmax;
+
+            // DCO period
+            t_dco = 1.0 / dco_freq;
+
+            // Schedule next DCO edge (half period for toggle)
+            t_next = $abstime + 0.5 * t_dco;
+
+            // Increment divider counter on each DCO edge
+            div_cnt = div_cnt + 1;
+
+            // Generate divided feedback clock
+            // fb toggles every div_ratio DCO edges
+            // fb_period = div_ratio * t_dco (since t_dco is full period, but we toggle every 0.5*t_dco)
+            // Actually: we toggle DCO every 0.5*t_dco, so div_cnt counts half-periods
+            // For fb_freq = ref_freq = 50MHz, we need:
+            //   fb_period = 20ns
+            //   Each DCO half-period is 0.5*t_dco = 0.5/f_dco
+            //   For dco_freq = 200MHz, t_dco = 5ns, half-period = 2.5ns
+            //   fb_period = div_ratio * 2 * (0.5*t_dco) = div_ratio * t_dco = 4 * 5ns = 20ns
+            // So we toggle fb every div_ratio DCO edges (counting both edges)
+            if (div_cnt >= div_ratio) begin
+                div_cnt = 0;
+                fb_state = !fb_state;
+                fb_edge_cnt = fb_edge_cnt + 1;
+                fb_period_meas = $abstime - last_fb_time;
+                last_fb_time = $abstime;
+                if (fb_period_meas > 1e-12) fb_period_est = fb_period_meas;
+            end
+        end
+
+        // Output assignments with transition
+        V(dco_clk) <+ transition(dco_state ? vdd_level : vss_level, tdel, tr, tf);
+        V(fb_clk) <+ transition(fb_state ? vdd_level : vss_level, tdel, tr, tf);
+        V(vctrl_mon) <+ transition(vctrl * vdd_level, tdel, tr, tf);
+        V(lock) <+ transition(locked ? vdd_level : vss_level, tdel, tr, tf);
+    end
+endmodule

@@ -1,0 +1,28 @@
+// tb_dff_rst.scs - Spectre testbench for dff_rst
+
+ahdl_include "dff_rst.va"
+
+// Global nodes
+global vdd vss
+
+// Supply voltages
+VDD (vdd vss) vsource dc=1.8
+VSS (vss 0) vsource dc=0
+
+// DUT instance
+DUT (vdd vss d clk rst q qb) dff_rst
+
+// Clock: 1GHz = period 2ns, 50% duty cycle
+VCLK (clk vss) vsource type=pulse val0=0 val1=1.8 period=2n rise=10p fall=10p width=990p
+
+// Data input: test pattern
+VD (d vss) vsource type=pwl wave=[0n 0 0.5n 1.8 1.5n 1.8 2.5n 0 3.5n 0 4.5n 1.8 5.5n 1.8 6.5n 0 7.5n 0 8.5n 1.8 9.5n 1.8 10.5n 0 11.5n 0 12.5n 1.8 13.5n 1.8 14.5n 0 15.5n 0 16.5n 1.8 17.5n 1.8 18.5n 0 19.5n 0]
+
+// Reset: active high, test synchronous reset
+VRST (rst vss) vsource type=pwl wave=[0n 0 3n 0 3.1n 1.8 5n 1.8 5.1n 0 12n 0 12.1n 1.8 14n 1.8 14.1n 0 20n 0]
+
+// Save statements - use plain scalar names for CSV output
+save d clk rst q qb
+
+// Transient analysis
+tran tran stop=20n maxstep=50p

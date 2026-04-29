@@ -1,0 +1,24 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "cmp_strongarm.va"
+
+// Supply
+Vdd (vdd 0) vsource dc=0.9
+Vss (vss 0) vsource dc=0
+
+// Clock: 500MHz = 2ns period
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=2n rise=50p fall=50p width=1n
+
+// Differential inputs: vinp > vinn initially, then swap
+Vinp (vinp 0) vsource type=pwl wave=[0 0.55 2n 0.55 2.001n 0.45 4n 0.45]
+Vinn (vinn 0) vsource type=pwl wave=[0 0.45 2n 0.45 2.001n 0.55 4n 0.55]
+
+// DUT
+XDUT (clk vinn vinp out_n out_p lp lm vss vdd) cmp_strongarm
+
+// Save signals
+save clk vinp vinn out_p out_n
+
+// Transient analysis
+tran tran stop=4n maxstep=5p

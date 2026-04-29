@@ -1,0 +1,58 @@
+simulator lang=spectre
+global 0
+
+// Supply rails
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0
+
+// Clock: 10ns period (100MHz), 50% duty, aligned to code changes
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n rise=100p fall=100p width=5n
+
+// Digital inputs: PWL to scan all 16 codes with 10ns per code
+// Code sequence: 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0
+// Each code held for 10ns, changing at t=0,10n,20n,...150n
+// Boundary transitions: 3->4 at 30n, 7->8 at 70n, 11->12 at 110n
+
+// d3 (MSB of thermometer, bit 3): high for codes 8-15
+Vd3 (d3 0) vsource type=pwl wave=[ \
+  0n 0  10n 0  20n 0  30n 0  40n 0  50n 0  60n 0  70n 0  \
+  80n 0.9  90n 0.9  100n 0.9  110n 0.9  120n 0.9  130n 0.9  140n 0.9  150n 0.9  160n 0 ]
+
+// d2 (bit 2): part of thermometer, high for codes 4-7 and 12-15
+Vd2 (d2 0) vsource type=pwl wave=[ \
+  0n 0  10n 0  20n 0  30n 0  \
+  40n 0.9  50n 0.9  60n 0.9  70n 0.9  \
+  80n 0  90n 0  100n 0  110n 0  \
+  120n 0.9  130n 0.9  140n 0.9  150n 0.9  160n 0 ]
+
+// d1 (bit 1): binary LSB, toggles every 2 codes
+Vd1 (d1 0) vsource type=pwl wave=[ \
+  0n 0  10n 0  \
+  20n 0.9  30n 0.9  \
+  40n 0  50n 0  \
+  60n 0.9  70n 0.9  \
+  80n 0  90n 0  \
+  100n 0.9  110n 0.9  \
+  120n 0  130n 0  \
+  140n 0.9  150n 0.9  160n 0 ]
+
+// d0 (bit 0): binary LSB, toggles every code
+Vd0 (d0 0) vsource type=pwl wave=[ \
+  0n 0  10n 0.9  20n 0  30n 0.9  40n 0  50n 0.9  60n 0  70n 0.9  \
+  80n 0  90n 0.9  100n 0  110n 0.9  120n 0  130n 0.9  140n 0  150n 0.9  160n 0 ]
+
+// DUT instantiation
+XDUT (vdd vss clk d3 d2 d1 d0 vout) segmented_dac_glitch_ref
+
+// Transient analysis
+tran tran stop=160n maxstep=100p errpreset=conservative
+
+// Save signals for glitch/monotonicity inspection
+save vout
+save clk
+save d3
+save d2
+save d1
+save d0
+
+ahdl_include "segmented_dac_glitch_ref.va"

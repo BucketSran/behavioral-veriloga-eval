@@ -1,0 +1,70 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bound_step_period_guard_ref (VDD, VSS, guard_out, phase_out);
+    inout VDD;
+    inout VSS;
+    output guard_out;
+    output phase_out;
+    electrical VDD, VSS, guard_out, phase_out;
+
+    parameter real period = 8n from (0:inf);
+    parameter real guard_width = 1.5n from (0:period);
+    parameter real tr = 10p from (0:inf);
+    parameter real tf = 10p from (0:inf);
+
+    real next_cycle;
+    real cycle_start;
+    real t_now;
+    real phase;
+    real vdd_level;
+    real vss_level;
+    integer guard_state;
+
+    analog begin
+        @(initial_step) begin
+            next_cycle = 0.0;
+            cycle_start = 0.0;
+            guard_state = 0;
+        end
+
+        // Request tight local step bound continuously
+        $bound_step(period / 16.0);
+
+        // Track cycle boundaries
+        @(timer(next_cycle)) begin
+            cycle_start = next_cycle;
+            next_cycle = next_cycle + period;
+        end
+
+        // Compute current time within cycle
+        t_now = $abstime;
+
+        // Handle initial cycle before first timer event
+        if (t_now < cycle_start) begin
+            cycle_start = 0.0;
+        end
+
+        // Normalized phase 0..1 within cycle
+        phase = (t_now - cycle_start) / period;
+        if (phase < 0.0) phase = 0.0;
+        if (phase > 1.0) phase = 1.0;
+
+        // Guard output: HIGH for first guard_width of each cycle
+        if ((t_now - cycle_start) < guard_width) begin
+            guard_state = 1;
+        end else begin
+            guard_state = 0;
+        end
+
+        // Get supply levels
+        vdd_level = V(VDD);
+        vss_level = V(VSS);
+
+        // Drive guard_out with transition
+        V(guard_out) <+ transition(guard_state ? vdd_level : vss_level, 0.0, tr, tf);
+
+        // Drive phase_out as normalized ramp 0..VDD
+        V(phase_out) <+ transition(vss_level + phase * (vdd_level - vss_level), 0.0, tr, tf);
+    end
+endmodule

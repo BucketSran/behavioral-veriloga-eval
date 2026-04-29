@@ -1,0 +1,208 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sar_12bit (
+    VDD, VSS, CLKS, DCOMP_P, DCOMP_N,
+    DP_CAP_11, DP_CAP_10, DP_CAP_9, DP_CAP_8,
+    DP_CAP_7, DP_CAP_6, DP_CAP_5, DP_CAP_4,
+    DP_CAP_3, DP_CAP_2, DP_CAP_1, DP_CAP_0,
+    EOC
+);
+
+    // Ports
+    inout electrical VDD, VSS;
+    input electrical CLKS;
+    input electrical DCOMP_P, DCOMP_N;
+    output electrical DP_CAP_11, DP_CAP_10, DP_CAP_9, DP_CAP_8;
+    output electrical DP_CAP_7, DP_CAP_6, DP_CAP_5, DP_CAP_4;
+    output electrical DP_CAP_3, DP_CAP_2, DP_CAP_1, DP_CAP_0;
+    output electrical EOC;
+
+    // Public parameters
+    parameter real vth = 0.6;
+    parameter real vdd = 1.2;
+    parameter real tedge = 1e-9;
+
+    // Internal state
+    integer bit_idx;
+    integer sar_result[0:11];
+    integer state;
+    integer comp_result;
+
+    // State encoding
+    integer STATE_IDLE = 0;
+    integer STATE_SAMPLE = 1;
+    integer STATE_CONVERT = 2;
+    integer STATE_DONE = 3;
+
+    // Output voltage variables
+    real v_dp_cap_11, v_dp_cap_10, v_dp_cap_9, v_dp_cap_8;
+    real v_dp_cap_7, v_dp_cap_6, v_dp_cap_5, v_dp_cap_4;
+    real v_dp_cap_3, v_dp_cap_2, v_dp_cap_1, v_dp_cap_0;
+    real v_eoc;
+
+    analog begin
+        // Initialize on first step
+        @(initial_step) begin
+            bit_idx = 11;
+            state = STATE_IDLE;
+            comp_result = 0;
+            v_dp_cap_11 = 0.0;
+            v_dp_cap_10 = 0.0;
+            v_dp_cap_9 = 0.0;
+            v_dp_cap_8 = 0.0;
+            v_dp_cap_7 = 0.0;
+            v_dp_cap_6 = 0.0;
+            v_dp_cap_5 = 0.0;
+            v_dp_cap_4 = 0.0;
+            v_dp_cap_3 = 0.0;
+            v_dp_cap_2 = 0.0;
+            v_dp_cap_1 = 0.0;
+            v_dp_cap_0 = 0.0;
+            v_eoc = 0.0;
+            sar_result[0] = 0;
+            sar_result[1] = 0;
+            sar_result[2] = 0;
+            sar_result[3] = 0;
+            sar_result[4] = 0;
+            sar_result[5] = 0;
+            sar_result[6] = 0;
+            sar_result[7] = 0;
+            sar_result[8] = 0;
+            sar_result[9] = 0;
+            sar_result[10] = 0;
+            sar_result[11] = 0;
+        end
+
+        // Clock rising edge detection
+        @(cross(V(CLKS) - vth, 1)) begin
+            case (state)
+                STATE_IDLE: begin
+                    // Start conversion on first clock
+                    state = STATE_SAMPLE;
+                    bit_idx = 11;
+                    v_eoc = 0.0;
+                    // Initialize all bits to 0 (will set MSB in next state)
+                    v_dp_cap_11 = 0.0;
+                    v_dp_cap_10 = 0.0;
+                    v_dp_cap_9 = 0.0;
+                    v_dp_cap_8 = 0.0;
+                    v_dp_cap_7 = 0.0;
+                    v_dp_cap_6 = 0.0;
+                    v_dp_cap_5 = 0.0;
+                    v_dp_cap_4 = 0.0;
+                    v_dp_cap_3 = 0.0;
+                    v_dp_cap_2 = 0.0;
+                    v_dp_cap_1 = 0.0;
+                    v_dp_cap_0 = 0.0;
+                    sar_result[0] = 0;
+                    sar_result[1] = 0;
+                    sar_result[2] = 0;
+                    sar_result[3] = 0;
+                    sar_result[4] = 0;
+                    sar_result[5] = 0;
+                    sar_result[6] = 0;
+                    sar_result[7] = 0;
+                    sar_result[8] = 0;
+                    sar_result[9] = 0;
+                    sar_result[10] = 0;
+                    sar_result[11] = 0;
+                end
+
+                STATE_SAMPLE: begin
+                    // Move to conversion, set MSB to try
+                    state = STATE_CONVERT;
+                    // Set current bit to try (1 = VDD, 0 = VSS)
+                    if (bit_idx == 11) v_dp_cap_11 = vdd;
+                    else if (bit_idx == 10) v_dp_cap_10 = vdd;
+                    else if (bit_idx == 9) v_dp_cap_9 = vdd;
+                    else if (bit_idx == 8) v_dp_cap_8 = vdd;
+                    else if (bit_idx == 7) v_dp_cap_7 = vdd;
+                    else if (bit_idx == 6) v_dp_cap_6 = vdd;
+                    else if (bit_idx == 5) v_dp_cap_5 = vdd;
+                    else if (bit_idx == 4) v_dp_cap_4 = vdd;
+                    else if (bit_idx == 3) v_dp_cap_3 = vdd;
+                    else if (bit_idx == 2) v_dp_cap_2 = vdd;
+                    else if (bit_idx == 1) v_dp_cap_1 = vdd;
+                    else if (bit_idx == 0) v_dp_cap_0 = vdd;
+                end
+
+                STATE_CONVERT: begin
+                    // Read comparator result from previous cycle
+                    // DCOMP_P > DCOMP_N means Vin+ > Vin-, comparator output is 1
+                    if (V(DCOMP_P) > V(DCOMP_N)) begin
+                        comp_result = 1;
+                    end else begin
+                        comp_result = 0;
+                    end
+
+                    // Store result: if comparator is 1, keep the bit (Vin > Vdac), else clear it
+                    sar_result[bit_idx] = comp_result;
+
+                    // Update output based on comparator result
+                    if (comp_result == 0) begin
+                        // Clear current bit (set to VSS)
+                        if (bit_idx == 11) v_dp_cap_11 = 0.0;
+                        else if (bit_idx == 10) v_dp_cap_10 = 0.0;
+                        else if (bit_idx == 9) v_dp_cap_9 = 0.0;
+                        else if (bit_idx == 8) v_dp_cap_8 = 0.0;
+                        else if (bit_idx == 7) v_dp_cap_7 = 0.0;
+                        else if (bit_idx == 6) v_dp_cap_6 = 0.0;
+                        else if (bit_idx == 5) v_dp_cap_5 = 0.0;
+                        else if (bit_idx == 4) v_dp_cap_4 = 0.0;
+                        else if (bit_idx == 3) v_dp_cap_3 = 0.0;
+                        else if (bit_idx == 2) v_dp_cap_2 = 0.0;
+                        else if (bit_idx == 1) v_dp_cap_1 = 0.0;
+                        else if (bit_idx == 0) v_dp_cap_0 = 0.0;
+                    end
+
+                    // Move to next bit
+                    bit_idx = bit_idx - 1;
+
+                    if (bit_idx < 0) begin
+                        // Conversion complete
+                        state = STATE_DONE;
+                        v_eoc = vdd;
+                    end else begin
+                        // Set next bit to try
+                        if (bit_idx == 10) v_dp_cap_10 = vdd;
+                        else if (bit_idx == 9) v_dp_cap_9 = vdd;
+                        else if (bit_idx == 8) v_dp_cap_8 = vdd;
+                        else if (bit_idx == 7) v_dp_cap_7 = vdd;
+                        else if (bit_idx == 6) v_dp_cap_6 = vdd;
+                        else if (bit_idx == 5) v_dp_cap_5 = vdd;
+                        else if (bit_idx == 4) v_dp_cap_4 = vdd;
+                        else if (bit_idx == 3) v_dp_cap_3 = vdd;
+                        else if (bit_idx == 2) v_dp_cap_2 = vdd;
+                        else if (bit_idx == 1) v_dp_cap_1 = vdd;
+                        else if (bit_idx == 0) v_dp_cap_0 = vdd;
+                    end
+                end
+
+                STATE_DONE: begin
+                    // Stay in done state, EOC remains high
+                    // Can restart by going to idle (but for now stay done)
+                    // To allow restart, uncomment below:
+                    // state = STATE_IDLE;
+                    // v_eoc = 0.0;
+                end
+            endcase
+        end
+
+        // Drive outputs with transitions
+        V(DP_CAP_11) <+ transition(v_dp_cap_11, 0, tedge);
+        V(DP_CAP_10) <+ transition(v_dp_cap_10, 0, tedge);
+        V(DP_CAP_9) <+ transition(v_dp_cap_9, 0, tedge);
+        V(DP_CAP_8) <+ transition(v_dp_cap_8, 0, tedge);
+        V(DP_CAP_7) <+ transition(v_dp_cap_7, 0, tedge);
+        V(DP_CAP_6) <+ transition(v_dp_cap_6, 0, tedge);
+        V(DP_CAP_5) <+ transition(v_dp_cap_5, 0, tedge);
+        V(DP_CAP_4) <+ transition(v_dp_cap_4, 0, tedge);
+        V(DP_CAP_3) <+ transition(v_dp_cap_3, 0, tedge);
+        V(DP_CAP_2) <+ transition(v_dp_cap_2, 0, tedge);
+        V(DP_CAP_1) <+ transition(v_dp_cap_1, 0, tedge);
+        V(DP_CAP_0) <+ transition(v_dp_cap_0, 0, tedge);
+        V(EOC) <+ transition(v_eoc, 0, tedge);
+    end
+
+endmodule

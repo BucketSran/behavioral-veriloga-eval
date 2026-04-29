@@ -1,0 +1,57 @@
+// cmp_delay testbench
+// Minimal EVAS-compatible Spectre testbench
+
+ahdl_include "cmp_delay.va"
+
+// Global parameters
+parameters VDD=0.9
+parameters VSS=0.0
+
+// Supply voltage sources
+VDD (vdd 0) vsource dc=VDD
+VSS (vss 0) vsource dc=VSS
+
+// Clock: 1GHz, 50% duty cycle (period = 1ns)
+VCLK (clk 0) vsource type=pulse val0=VSS val1=VDD period=1n delay=0 rise=10p fall=10p width=0.5n
+
+// Differential input generation
+// Phase 1 (0-4ns): diff=+10mV (vinp=0.45+5mV, vinn=0.45-5mV)
+// Phase 2 (4-8ns): diff=+1mV
+// Phase 3 (8-12ns): diff=+0.1mV
+// Phase 4 (12-16ns): diff=+0.01mV
+
+// Common mode voltage = 0.45V
+// vinp = vcm + diff/2, vinn = vcm - diff/2
+
+VINP (vinp 0) vsource type=pwl wave=[ \
+    0      0.455 \
+    4n     0.455 \
+    4.001n 0.4505 \
+    8n     0.4505 \
+    8.001n 0.45005 \
+    12n    0.45005 \
+    12.001n 0.450005 \
+    16n    0.450005 ]
+
+VINN (vinn 0) vsource type=pwl wave=[ \
+    0      0.445 \
+    4n     0.445 \
+    4.001n 0.4495 \
+    8n     0.4495 \
+    8.001n 0.44995 \
+    12n    0.44995 \
+    12.001n 0.449995 \
+    16n    0.449995 ]
+
+// DUT instance
+DUT (clk vinn vinp out_n out_p lp lm vss vdd) cmp_delay
+
+// Transient analysis
+tran tran stop=16n maxstep=10p
+
+// Save signals for checker
+save clk
+save vinp
+save vinn
+save out_p
+save out_n

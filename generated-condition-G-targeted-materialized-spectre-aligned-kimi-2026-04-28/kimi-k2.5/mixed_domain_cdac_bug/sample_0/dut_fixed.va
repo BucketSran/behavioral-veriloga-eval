@@ -1,0 +1,22 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module residue_stage (VDD, VSS, CLK, VIN, VOUT);
+    inout VDD, VSS;
+    input CLK, VIN;
+    output VOUT;
+    electrical VDD, VSS, CLK, VIN, VOUT;
+    parameter real gain = 2.0;
+    parameter real vth = 0.45;
+    parameter real tr = 1p;
+    real sampled;
+    analog begin
+        @(initial_step) begin
+            sampled = 0.0;
+        end
+        @(cross(V(CLK) - vth, +1)) begin
+            sampled = gain * V(VIN, VSS);
+        end
+        V(VOUT, VSS) <+ transition(sampled, 0, tr);
+    end
+endmodule

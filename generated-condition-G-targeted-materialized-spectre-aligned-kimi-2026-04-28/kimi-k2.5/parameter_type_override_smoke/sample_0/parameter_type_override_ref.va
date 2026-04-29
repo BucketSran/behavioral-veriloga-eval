@@ -1,0 +1,42 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module parameter_type_override_ref (out, vss);
+    output out;
+    inout vss;
+    electrical out, vss;
+
+    parameter real vhi = 1.0 from [0:inf);
+    parameter integer reps = 2 from [0:inf);
+
+    integer pulse_count;
+    real out_val;
+    real period;
+    real duty;
+    real pulse_width;
+
+    analog begin
+        @(initial_step) begin
+            pulse_count = 0;
+            out_val = 0.0;
+            period = 10n;
+            duty = 0.5;
+            pulse_width = period * duty;
+        end
+
+        @(timer(0, period)) begin
+            if (pulse_count < reps) begin
+                out_val = vhi;
+                pulse_count = pulse_count + 1;
+            end else begin
+                out_val = 0.0;
+            end
+        end
+
+        @(timer(pulse_width, period)) begin
+            out_val = 0.0;
+        end
+
+        V(out) <+ transition(out_val, 0, 100p);
+    end
+endmodule

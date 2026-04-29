@@ -1,0 +1,79 @@
+// tb_dwa_ptr_gen_no_overlap.scs
+// Minimal EVAS-compatible Spectre testbench for dwa_ptr_gen_no_overlap
+
+// Include the DUT
+ahdl_include "dwa_ptr_gen_no_overlap.va"
+
+// Parameters
+parameters vdd=0.9
+parameters vth=0.45
+parameters ptr_init=0
+
+// Supply
+Vvdd (vdd 0) vsource dc=vdd
+
+// Clock: 100 MHz, period 10 ns
+Vclk (clk_i 0) vsource type=pulse val0=0 val1=vdd period=10n rise=100p fall=100p width=5n
+
+// Reset: active low, held low initially, deasserted after 5 ns
+Vrst (rst_ni 0) vsource type=pulse val0=0 val1=vdd delay=0 rise=100p fall=100p period=200n width=195n
+
+// Code input: 4-bit sweep
+// Use piecewise linear to sweep through different code values
+Vcode3 (code_msb_i_3 0) vsource type=pwl wave=[0n 0 12n 0 12.1n vdd 22n vdd 22.1n 0 32n 0 32.1n vdd 42n vdd 42.1n 0 52n 0 52.1n vdd 62n vdd 62.1n 0 72n 0 72.1n vdd 82n vdd 82.1n 0 92n 0 92.1n vdd 102n vdd 102.1n 0 112n 0 112.1n vdd 122n vdd 122.1n 0 132n 0 132.1n vdd 142n vdd 142.1n 0 152n 0 152.1n vdd 162n vdd 162.1n 0 172n 0]
+Vcode2 (code_msb_i_2 0) vsource type=pwl wave=[0n 0 22n 0 22.1n vdd 32n vdd 32.1n 0 42n 0 42.1n vdd 52n vdd 52.1n 0 62n 0 62.1n vdd 72n vdd 72.1n 0 82n 0 82.1n vdd 92n vdd 92.1n 0 102n 0 102.1n vdd 112n vdd 112.1n 0 122n 0 122.1n vdd 132n vdd 132.1n 0 142n 0 142.1n vdd 152n vdd 152.1n 0 162n 0 162.1n vdd 172n vdd 172.1n 0]
+Vcode1 (code_msb_i_1 0) vsource type=pwl wave=[0n 0 32n 0 32.1n vdd 42n vdd 42.1n 0 52n 0 52.1n vdd 62n vdd 62.1n 0 72n 0 72.1n vdd 82n vdd 82.1n 0 92n 0 92.1n vdd 102n vdd 102.1n 0 112n 0 112.1n vdd 122n vdd 122.1n 0 132n 0 132.1n vdd 142n vdd 142.1n 0 152n 0 152.1n vdd 162n vdd 162.1n 0 172n 0]
+Vcode0 (code_msb_i_0 0) vsource type=pwl wave=[0n 0 42n 0 42.1n vdd 52n vdd 52.1n 0 62n 0 62.1n vdd 72n vdd 72.1n 0 82n 0 82.1n vdd 92n vdd 92.1n 0 102n 0 102.1n vdd 112n vdd 112.1n 0 122n 0 122.1n vdd 132n vdd 132.1n 0 142n 0 142.1n vdd 152n vdd 152.1n 0 162n 0 162.1n vdd 172n vdd 172.1n 0]
+
+// DUT instance
+dut (clk_i rst_ni code_msb_i cell_en_o ptr_o) dwa_ptr_gen_no_overlap vdd=vdd vth=vth ptr_init=ptr_init
+
+// Connect code input vector
+// Individual nodes for code bits
+code_msb_i_3 code_msb_i[3] 0
+code_msb_i_2 code_msb_i[2] 0
+code_msb_i_1 code_msb_i[1] 0
+code_msb_i_0 code_msb_i[0] 0
+
+// Save statements for required observable signals
+save clk_i
+save rst_ni
+
+// Save cell_en_o bits as scalar names
+save cell_en_o[0] cell_en_0
+save cell_en_o[1] cell_en_1
+save cell_en_o[2] cell_en_2
+save cell_en_o[3] cell_en_3
+save cell_en_o[4] cell_en_4
+save cell_en_o[5] cell_en_5
+save cell_en_o[6] cell_en_6
+save cell_en_o[7] cell_en_7
+save cell_en_o[8] cell_en_8
+save cell_en_o[9] cell_en_9
+save cell_en_o[10] cell_en_10
+save cell_en_o[11] cell_en_11
+save cell_en_o[12] cell_en_12
+save cell_en_o[13] cell_en_13
+save cell_en_o[14] cell_en_14
+save cell_en_o[15] cell_en_15
+
+// Save ptr_o bits as scalar names
+save ptr_o[0] ptr_0
+save ptr_o[1] ptr_1
+save ptr_o[2] ptr_2
+save ptr_o[3] ptr_3
+save ptr_o[4] ptr_4
+save ptr_o[5] ptr_5
+save ptr_o[6] ptr_6
+save ptr_o[7] ptr_7
+save ptr_o[8] ptr_8
+save ptr_o[9] ptr_9
+save ptr_o[10] ptr_10
+save ptr_o[11] ptr_11
+save ptr_o[12] ptr_12
+save ptr_o[13] ptr_13
+save ptr_o[14] ptr_14
+save ptr_o[15] ptr_15
+
+// Transient analysis
+tran tran stop=175n maxstep=0.1n

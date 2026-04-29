@@ -1,0 +1,26 @@
+// Spectre testbench for transition_branch_target_ref
+
+ahdl_include "transition_branch_target_ref.va"
+
+// Supply voltages
+vsource vdd (VDD 0) vdc=1.2
+vsource vss (VSS 0) vdc=0
+
+// Clock source: 100MHz clock (10ns period)
+vsource vclk (clk 0) vtype=pulse val0=0 val1=1.2 period=10n rise=100p fall=100p width=5n
+
+// Mode source: changes at specific times
+vsource vmode (mode 0) vtype=pwl wave=[0n 0, 25n 0, 25.1n 1.2, 50n 1.2, 50.1n 0, 75n 0, 75.1n 1.2, 90n 1.2]
+
+// DUT instance
+transition_branch_target_ref dut (VDD VSS mode clk out)
+
+// Transient analysis
+tran tran stop=90n maxstep=20p errpreset=conservative
+
+// Save signals for checker evaluation
+save VDD
+save VSS
+save mode
+save clk
+save out

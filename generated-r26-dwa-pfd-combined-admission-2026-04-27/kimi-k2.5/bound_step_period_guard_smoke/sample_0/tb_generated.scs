@@ -1,0 +1,19 @@
+// Testbench for bound_step_period_guard_ref
+simulator lang=spectre
+
+ahdl_include "bound_step_period_guard_ref.va"
+
+// Supply voltages
+VDD (vdd 0) vsource dc=1.0
+VSS (vss 0) vsource dc=0.0
+
+// Device Under Test
+DUT (vdd vss guard_out phase_out) bound_step_period_guard_ref
+
+// Transient analysis with coarse maxstep to test $bound_step effectiveness
+tran tran stop=34n maxstep=20n errpreset=conservative
+
+// Save statements for required signals - use exact checker-required names
+save guard_out
+save phase_out
+save time

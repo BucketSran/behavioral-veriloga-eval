@@ -1,0 +1,45 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sample_hold_droop_ref (vdd, vss, clk, vin, vout);
+    electrical vdd, vss, clk, vin, vout;
+
+    parameter real vth = 0.45;
+    parameter real tau = 120n;
+    parameter real dt = 0.5n;
+    parameter real trf = 40p;
+
+    real vheld;
+    real tlast;
+    real vtarget;
+    real vdroop;
+
+    analog begin
+        @(initial_step) begin
+            vheld = 0.0;
+            tlast = 0.0;
+        end
+
+        // Sample on rising edge of clk
+        @(cross(V(clk) - vth, +1)) begin
+            vheld = V(vin);
+            tlast = $abstime;
+        end
+
+        // Calculate droop toward vss
+        // Exponential decay: vout = vheld * exp(-(t - tlast)/tau)
+        // For small dt approximation or direct evaluation
+        vdroop = vheld * exp(-($abstime - tlast) / tau);
+
+        // Clamp to supply range
+        if (vdroop > V(vdd))
+            vtarget = V(vdd);
+        else if (vdroop < V(vss))
+            vtarget = V(vss);
+        else
+            vtarget = vdroop;
+
+        // Output with transition
+        V(vout) <+ transition(vtarget, dt, trf, trf);
+    end
+endmodule

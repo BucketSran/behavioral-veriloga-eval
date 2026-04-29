@@ -1,0 +1,50 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module vin_src (clk, rst_n, vinp, vinn);
+    input clk;
+    input rst_n;
+    output vinp;
+    output vinn;
+    electrical clk, rst_n, vinp, vinn;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vdiff_amp = 0.01;
+    parameter real vth = 0.45;
+    parameter real tr = 1n;
+    parameter real tf = 1n;
+
+    integer state;
+    real vdiff;
+    real vinp_target;
+    real vinn_target;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+        end
+
+        @(cross(V(clk) - vth, 1)) begin
+            if (V(rst_n) < vth) begin
+                state = 0;
+            end else begin
+                state = state + 1;
+            end
+        end
+
+        // Generate differential stimulus: alternating pattern based on LSB of state
+        if ((state & 1) == 0) begin
+            vdiff = vdiff_amp;
+        end else begin
+            vdiff = -vdiff_amp;
+        end
+
+        vinp_target = vcm + vdiff/2.0;
+        vinn_target = vcm - vdiff/2.0;
+
+        V(vinp) <+ transition(vinp_target, 0, tr, tf);
+        V(vinn) <+ transition(vinn_target, 0, tr, tf);
+    end
+endmodule

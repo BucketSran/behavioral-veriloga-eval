@@ -1,0 +1,61 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module strongarm_reset_priority_fixed(vdd, vss, clk, rst, inp, inn, outp, outn);
+    inout vdd, vss;
+    input clk, rst, inp, inn;
+    output outp, outn;
+    electrical vdd, vss, clk, rst, inp, inn, outp, outn;
+
+    parameter real vth = 0.45;
+    parameter real trf = 20p;
+
+    integer outp_state, outn_state;
+    integer rst_active;
+    real outp_target, outn_target;
+
+    analog begin
+        @(initial_step) begin
+            outp_state = 0;
+            outn_state = 0;
+            rst_active = 0;
+        end
+
+        // Detect reset assertion and deassertion
+        @(above(V(rst, vss) - vth)) begin
+            rst_active = 1;
+            outp_state = 0;
+            outn_state = 0;
+        end
+
+        @(above(vth - V(rst, vss))) begin
+            rst_active = 0;
+        end
+
+        // Clock edge processing only when reset is not active
+        @(cross(V(clk, vss) - vth, +1)) begin
+            if (!rst_active) begin
+                if (V(inp, vss) > V(inn, vss)) begin
+                    outp_state = 1;
+                    outn_state = 0;
+                end else begin
+                    outp_state = 0;
+                    outn_state = 1;
+                end
+            end
+        end
+
+        // Compute target values based on reset state
+        if (V(rst, vss) > vth) begin
+            outp_target = 0.0;
+            outn_target = 0.0;
+        end else begin
+            outp_target = outp_state ? 1.0 : 0.0;
+            outn_target = outn_state ? 1.0 : 0.0;
+        end
+
+        // Unconditional transition contributions
+        V(outp, vss) <+ V(vdd, vss) * transition(outp_target, 0, trf, trf);
+        V(outn, vss) <+ V(vdd, vss) * transition(outn_target, 0, trf, trf);
+    end
+endmodule

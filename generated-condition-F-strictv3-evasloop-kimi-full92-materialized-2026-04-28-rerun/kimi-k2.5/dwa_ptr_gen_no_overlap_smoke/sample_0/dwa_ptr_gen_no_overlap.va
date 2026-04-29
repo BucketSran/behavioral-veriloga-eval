@@ -1,0 +1,94 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dwa_ptr_gen_no_overlap (clk_i, rst_ni, code_msb_i, cell_en_o, ptr_o);
+    input clk_i;
+    input rst_ni;
+    input [3:0] code_msb_i;
+    output [15:0] cell_en_o;
+    output [15:0] ptr_o;
+    electrical clk_i, rst_ni;
+    electrical [3:0] code_msb_i;
+    electrical [15:0] cell_en_o;
+    electrical [15:0] ptr_o;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter integer ptr_init = 0;
+
+    integer ptr;
+    integer code;
+    integer i;
+    integer j;
+    integer en_val;
+    integer ptr_val;
+
+    analog begin
+        @(initial_step) begin
+            ptr = ptr_init % 16;
+            if (ptr < 0) ptr = ptr + 16;
+        end
+
+        // Sample on rising edge of clk_i
+        @(cross(V(clk_i) - vth, +1)) begin
+            if (V(rst_ni) < vth) begin
+                ptr = ptr_init % 16;
+                if (ptr < 0) ptr = ptr + 16;
+            end else begin
+                // Decode 4-bit code from voltage inputs
+                code = 0;
+                for (i = 0; i < 4; i = i + 1) begin
+                    if (V(code_msb_i[i]) > vth) begin
+                        code = code + (1 << i);
+                    end
+                end
+                // Clamp code to 0-15
+                if (code < 0) code = 0;
+                if (code > 15) code = 15;
+                // Update pointer: advance by code amount (non-overlapping)
+                ptr = (ptr + code) % 16;
+                if (ptr < 0) ptr = ptr + 16;
+            end
+        end
+
+        // Asynchronous reset handling for outputs
+        if (V(rst_ni) < vth) begin
+            for (i = 0; i < 16; i = i + 1) begin
+                V(cell_en_o[i]) <+ transition(0.0, 0, 100p);
+                V(ptr_o[i]) <+ transition(0.0, 0, 100p);
+            end
+        end else begin
+            // Generate cell_en_o: enable cells starting from ptr for 'code' cells
+            // First decode current code value
+            code = 0;
+            for (i = 0; i < 4; i = i + 1) begin
+                if (V(code_msb_i[i]) > vth) begin
+                    code = code + (1 << i);
+                end
+            end
+            if (code < 0) code = 0;
+            if (code > 15) code = 15;
+
+            for (i = 0; i < 16; i = i + 1) begin
+                // Check if this cell is within the enabled window
+                // Window starts at ptr and extends for 'code' cells
+                j = i - ptr;
+                if (j < 0) j = j + 16;
+                if (code > 0 && j >= 0 && j < code) begin
+                    en_val = vdd;
+                end else begin
+                    en_val = 0;
+                end
+                V(cell_en_o[i]) <+ transition(en_val, 0, 100p);
+
+                // ptr_o is one-hot representation of current pointer
+                if (i == ptr) begin
+                    ptr_val = vdd;
+                end else begin
+                    ptr_val = 0;
+                end
+                V(ptr_o[i]) <+ transition(ptr_val, 0, 100p);
+            end
+        end
+    end
+endmodule

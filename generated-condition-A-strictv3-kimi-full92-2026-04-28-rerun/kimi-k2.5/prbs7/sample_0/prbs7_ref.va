@@ -1,0 +1,70 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module prbs7_ref (clk, rst_n, en, serial_out, state_0, state_1, state_2, state_3, state_4, state_5, state_6);
+    input clk;
+    input rst_n;
+    input en;
+    output serial_out;
+    output state_0;
+    output state_1;
+    output state_2;
+    output state_3;
+    output state_4;
+    output state_5;
+    output state_6;
+
+    electrical clk;
+    electrical rst_n;
+    electrical en;
+    electrical serial_out;
+    electrical state_0;
+    electrical state_1;
+    electrical state_2;
+    electrical state_3;
+    electrical state_4;
+    electrical state_5;
+    electrical state_6;
+
+    parameter real vlogic_high = 1.0;
+    parameter real vlogic_low = 0.0;
+    parameter real vth = 0.5;
+    parameter real tt = 1p;
+
+    integer lfsr;
+    integer new_bit;
+    integer i;
+
+    analog begin
+        @(initial_step) begin
+            lfsr = 1;
+        end
+
+        // Reset (active low)
+        if (V(rst_n) < vth) begin
+            lfsr = 1;
+        end
+        // Clock rising edge with enable
+        else @(cross(V(clk) - vth, 1)) begin
+            if (V(en) > vth) begin
+                // PRBS-7: taps at positions 7 and 6 (1-based indexing)
+                // Equivalent to x^7 + x^6 + 1
+                // In 0-based: bits 6 and 5
+                new_bit = ((lfsr >> 6) & 1) ^ ((lfsr >> 5) & 1);
+                lfsr = ((lfsr << 1) & 127) | new_bit;
+            end
+        end
+
+        // Output serial_out (LSB of LFSR)
+        V(serial_out) <+ transition(((lfsr & 1) == 1) ? vlogic_high : vlogic_low, 0, tt);
+
+        // Output parallel state bits
+        V(state_0) <+ transition(((lfsr >> 0) & 1) == 1 ? vlogic_high : vlogic_low, 0, tt);
+        V(state_1) <+ transition(((lfsr >> 1) & 1) == 1 ? vlogic_high : vlogic_low, 0, tt);
+        V(state_2) <+ transition(((lfsr >> 2) & 1) == 1 ? vlogic_high : vlogic_low, 0, tt);
+        V(state_3) <+ transition(((lfsr >> 3) & 1) == 1 ? vlogic_high : vlogic_low, 0, tt);
+        V(state_4) <+ transition(((lfsr >> 4) & 1) == 1 ? vlogic_high : vlogic_low, 0, tt);
+        V(state_5) <+ transition(((lfsr >> 5) & 1) == 1 ? vlogic_high : vlogic_low, 0, tt);
+        V(state_6) <+ transition(((lfsr >> 6) & 1) == 1 ? vlogic_high : vlogic_low, 0, tt);
+    end
+endmodule

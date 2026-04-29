@@ -1,0 +1,22 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "cross_sine_precision_ref.va"
+
+// Supply voltages
+VDD (VDD 0) vsource dc=1.8
+VSS (VSS 0) vsource dc=0
+
+// Input stimulus: 0.45 V + 0.40 V * sin(2*pi*73 MHz*t)
+// This gives crossings at vth=0.45V when sin term is zero
+// i.e., at t = n/fin for n = 1, 2, 3, ...
+Vin (vin 0) vsource type=sine dc=0.45 ampl=0.40 freq=73e6
+
+// DUT instance
+IDUT (VDD VSS vin first_err_out max_err_out count_out) cross_sine_precision_ref
+
+// Save outputs
+save vin first_err_out max_err_out count_out
+
+// Transient analysis
+tran tran stop=47n maxstep=1p errpreset=conservative

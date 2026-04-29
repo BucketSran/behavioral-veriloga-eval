@@ -1,0 +1,19 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "ramp_gen.va"
+
+// Clock source: 20ns period (50MHz)
+Vclk (clk_in 0) vsource type=pulse val0=0 val1=1.8 period=20n rise=1n fall=1n width=9n
+
+// Reset source: active low, released at 15ns
+Vrst (rst_n 0) vsource type=pwl wave=[0n 0 10n 0 15n 1.8 200n 1.8]
+
+// DUT instance
+XDUT (clk_in rst_n code_3 code_2 code_1 code_0) ramp_gen
+
+// Transient analysis
+tran tran stop=200n maxstep=5n
+
+// Save outputs
+save clk_in rst_n code_3 code_2 code_1 code_0

@@ -1,0 +1,54 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dac_weighted_8b (din_7, din_6, din_5, din_4, din_3, din_2, din_1, din_0, vout);
+    electrical din_7, din_6, din_5, din_4, din_3, din_2, din_1, din_0;
+    electrical vout;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real tr = 1e-9;
+    parameter real tf = 1e-9;
+
+    integer weighted_code;
+    real bit_val;
+    real vout_val;
+
+    analog begin
+        // Read input bits and compute weighted code
+        weighted_code = 0;
+
+        bit_val = V(din_0);
+        if (bit_val > vth) weighted_code = weighted_code + 1;
+
+        bit_val = V(din_1);
+        if (bit_val > vth) weighted_code = weighted_code + 2;
+
+        bit_val = V(din_2);
+        if (bit_val > vth) weighted_code = weighted_code + 4;
+
+        bit_val = V(din_3);
+        if (bit_val > vth) weighted_code = weighted_code + 8;
+
+        bit_val = V(din_4);
+        if (bit_val > vth) weighted_code = weighted_code + 16;
+
+        bit_val = V(din_5);
+        if (bit_val > vth) weighted_code = weighted_code + 32;
+
+        bit_val = V(din_6);
+        if (bit_val > vth) weighted_code = weighted_code + 64;
+
+        bit_val = V(din_7);
+        if (bit_val > vth) weighted_code = weighted_code + 128;
+
+        // Compute vout = weighted_code / 255 * vdd
+        vout_val = weighted_code / 255.0 * vdd;
+
+        // Clip to [0, vdd]
+        if (vout_val < 0) vout_val = 0;
+        if (vout_val > vdd) vout_val = vdd;
+
+        V(vout) <+ transition(vout_val, 0, tr, tf);
+    end
+endmodule

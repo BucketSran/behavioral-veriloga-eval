@@ -1,0 +1,52 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module simultaneous_event_order_ref (VDD, VSS, ref, out);
+    inout electrical VDD, VSS;
+    input electrical ref;
+    output electrical out;
+
+    parameter real vdd = 1.8;
+    parameter real vss = 0.0;
+    parameter real vout_low = 0.0;
+    parameter real vout_high = 1.0;
+    parameter real vout_mid = 0.5;
+    parameter real t_period = 20n;
+    parameter real t_rise = 1n;
+    parameter real t_fall = 1n;
+    parameter real vth = 0.9;
+    parameter real cross_tol = 1e-6;
+
+    integer state;
+    real next_timer_time;
+    real vout_val;
+
+    analog begin
+        // Supply voltages
+        V(VDD) <+ vdd;
+        V(VSS) <+ vss;
+
+        @(initial_step) begin
+            state = 0;
+            next_timer_time = t_period;
+            vout_val = vout_low;
+        end
+
+        // Timer event at t_period, 2*t_period, 3*t_period, etc.
+        @(timer(next_timer_time)) begin
+            // Timer event: set to mid level
+            vout_val = vout_mid;
+            next_timer_time = next_timer_time + t_period;
+        end
+
+        // Cross event when ref crosses vth at same times (ref is a ramp)
+        @(cross(V(ref) - vth, 1, cross_tol)) begin
+            // Cross event: override to high level if at timer event time
+            // This reveals execution order: if cross happens after timer, it wins
+            vout_val = vout_high;
+        end
+
+        // Output with smooth transitions
+        V(out) <+ transition(vout_val, 0, t_rise, t_fall);
+    end
+endmodule

@@ -1,0 +1,31 @@
+simulator lang=spectre
+global 0
+
+// Power supplies
+VDD (VDD 0) vsource dc=0.9
+VSS (VSS 0) vsource dc=0
+
+// Clock: 4ns period, 50% duty cycle, 0.1ns rise/fall
+// Need 16 codes, so need 16 rising edges minimum
+// 16 * 4ns = 64ns, plus some margin -> 68ns stop time
+VCLK (CLK 0) vsource type=pulse val0=0 val1=0.9 period=4n rise=0.1n fall=0.1n width=1.9n
+
+// 4-bit binary counter on DIN[3:0]
+// Count 0 to 15 over 64ns (16 codes * 4ns per code)
+// Each bit has half the period of the previous
+VDIN0 (DIN0 0) vsource type=pulse val0=0 val1=0.9 period=4n rise=0.1n fall=0.1n width=1.9n
+VDIN1 (DIN1 0) vsource type=pulse val0=0 val1=0.9 period=8n rise=0.1n fall=0.1n width=3.9n
+VDIN2 (DIN2 0) vsource type=pulse val0=0 val1=0.9 period=16n rise=0.1n fall=0.1n width=7.9n
+VDIN3 (DIN3 0) vsource type=pulse val0=0 val1=0.9 period=32n rise=0.1n fall=0.1n width=15.9n
+
+// DUT instance
+XDUT (VDD VSS DIN3 DIN2 DIN1 DIN0 CLK AOUT) dac_ramp_ref
+
+// Transient analysis
+tran tran stop=68n maxstep=20p
+
+// Save statements for public waveforms
+save CLK DIN3 DIN2 DIN1 DIN0 AOUT
+
+// Include DUT Verilog-A
+ahdl_include "dac_ramp_ref.va"

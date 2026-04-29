@@ -1,0 +1,20 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module multitone(OUT);
+    output OUT;
+    electrical OUT;
+    parameter real f1 = 1.0e6;
+    parameter real f2 = 2.0e6;
+    parameter real f3 = 3.0e6;
+    parameter real a1 = 0.2;
+    parameter real a2 = 0.1;
+    parameter real a3 = 0.05;
+
+    analog begin
+        $bound_step(0.02 / f3);
+        V(OUT) <+ a1 * sin(2.0 * `M_PI * f1 * $abstime)
+                + a2 * sin(2.0 * `M_PI * f2 * $abstime)
+                + a3 * sin(2.0 * `M_PI * f3 * $abstime);
+    end
+endmodule

@@ -1,0 +1,49 @@
+{
+  "task_id": "v2_pfd_reset_delay_window",
+  "family": "benchmark-v2",
+  "source_seed": "pfd_reset_race_smoke",
+  "mechanism_family": "pfd_updn_reset_race",
+  "perturbation_level": "P5_parameter_checker",
+  "status": "validated_gold_evas_spectre",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "pfd",
+    "ref": "early_event",
+    "div": "late_event",
+    "up": "raise_pulse",
+    "dn": "lower_pulse",
+    "lock": null
+  },
+  "manifest_entry": {
+    "task_id": "v2_pfd_reset_delay_window",
+    "source_seed": "pfd_reset_race_smoke",
+    "mechanism_family": "pfd_updn_reset_race",
+    "perturbation_level": "P5_parameter_checker",
+    "prompt_strategy": "Vary reset-delay window and require no double pulses across near-simultaneous edge arrivals.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-small",
+    "status": "draft_manifest",
+    "parameter_changes": {
+      "reset_delay_ps": 25,
+      "race_window_ps": 40
+    },
+    "review_notes": "Checker must observe event timing rather than only final voltage."
+  },
+  "validation": {
+    "tasks": 30,
+    "evas_pass": "30/30",
+    "spectre_pass": "30/30",
+    "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+    "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1"
+  }
+}

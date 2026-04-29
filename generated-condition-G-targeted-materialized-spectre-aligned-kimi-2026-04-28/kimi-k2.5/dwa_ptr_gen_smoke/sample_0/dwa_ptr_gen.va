@@ -1,0 +1,139 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dwa_ptr_gen (clk_i, rst_ni, code_msb_i_3, code_msb_i_2, code_msb_i_1, code_msb_i_0,
+                    cell_en_o_15, cell_en_o_14, cell_en_o_13, cell_en_o_12,
+                    cell_en_o_11, cell_en_o_10, cell_en_o_9, cell_en_o_8,
+                    cell_en_o_7, cell_en_o_6, cell_en_o_5, cell_en_o_4,
+                    cell_en_o_3, cell_en_o_2, cell_en_o_1, cell_en_o_0,
+                    ptr_o_15, ptr_o_14, ptr_o_13, ptr_o_12,
+                    ptr_o_11, ptr_o_10, ptr_o_9, ptr_o_8,
+                    ptr_o_7, ptr_o_6, ptr_o_5, ptr_o_4,
+                    ptr_o_3, ptr_o_2, ptr_o_1, ptr_o_0,
+                    vdd, vss);
+
+    input clk_i, rst_ni;
+    input code_msb_i_3, code_msb_i_2, code_msb_i_1, code_msb_i_0;
+    output cell_en_o_15, cell_en_o_14, cell_en_o_13, cell_en_o_12;
+    output cell_en_o_11, cell_en_o_10, cell_en_o_9, cell_en_o_8;
+    output cell_en_o_7, cell_en_o_6, cell_en_o_5, cell_en_o_4;
+    output cell_en_o_3, cell_en_o_2, cell_en_o_1, cell_en_o_0;
+    output ptr_o_15, ptr_o_14, ptr_o_13, ptr_o_12;
+    output ptr_o_11, ptr_o_10, ptr_o_9, ptr_o_8;
+    output ptr_o_7, ptr_o_6, ptr_o_5, ptr_o_4;
+    output ptr_o_3, ptr_o_2, ptr_o_1, ptr_o_0;
+    inout vdd, vss;
+
+    electrical clk_i, rst_ni;
+    electrical code_msb_i_3, code_msb_i_2, code_msb_i_1, code_msb_i_0;
+    electrical cell_en_o_15, cell_en_o_14, cell_en_o_13, cell_en_o_12;
+    electrical cell_en_o_11, cell_en_o_10, cell_en_o_9, cell_en_o_8;
+    electrical cell_en_o_7, cell_en_o_6, cell_en_o_5, cell_en_o_4;
+    electrical cell_en_o_3, cell_en_o_2, cell_en_o_1, cell_en_o_0;
+    electrical ptr_o_15, ptr_o_14, ptr_o_13, ptr_o_12;
+    electrical ptr_o_11, ptr_o_10, ptr_o_9, ptr_o_8;
+    electrical ptr_o_7, ptr_o_6, ptr_o_5, ptr_o_4;
+    electrical ptr_o_3, ptr_o_2, ptr_o_1, ptr_o_0;
+    electrical vdd, vss;
+
+    parameter real vdd_level = 0.9;
+    parameter real vth = 0.45;
+    parameter integer ptr_init = 0;
+    parameter real tr = 100p;
+    parameter real tf = 100p;
+
+    integer ptr;
+    integer code;
+    integer i;
+    integer new_ptr;
+    integer cell_idx;
+    integer ptr_bit;
+    integer cell_bit;
+
+    analog begin
+        @(initial_step) begin
+            ptr = ptr_init;
+        end
+
+        // Detect rising edge of clk_i
+        @(cross(V(clk_i) - vth, +1)) begin
+            // Check reset
+            if (V(rst_ni) < vth) begin
+                ptr = ptr_init;
+            end else begin
+                // Decode 4-bit code from inputs
+                code = 0;
+                if (V(code_msb_i_3) > vth) code = code + 8;
+                if (V(code_msb_i_2) > vth) code = code + 4;
+                if (V(code_msb_i_1) > vth) code = code + 2;
+                if (V(code_msb_i_0) > vth) code = code + 1;
+
+                // Update pointer: new_ptr = (old_ptr + code) % 16
+                new_ptr = ptr + code;
+                while (new_ptr >= 16) begin
+                    new_ptr = new_ptr - 16;
+                end
+                ptr = new_ptr;
+            end
+        end
+
+        // Output one-hot pointer
+        for (i = 0; i < 16; i = i + 1) begin
+            ptr_bit = (ptr == i) ? 1 : 0;
+            case (i)
+                0: V(ptr_o_0) <+ transition(ptr_bit ? vdd_level : 0.0, 0, tr, tf);
+                1: V(ptr_o_1) <+ transition(ptr_bit ? vdd_level : 0.0, 0, tr, tf);
+                2: V(ptr_o_2) <+ transition(ptr_bit ? vdd_level : 0.0, 0, tr, tf);
+                3: V(ptr_o_3) <+ transition(ptr_bit ? vdd_level : 0.0, 0, tr, tf);
+                4: V(ptr_o_4) <+ transition(ptr_bit ? vdd_level : 0.0, 0, tr, tf);
+                5: V(ptr_o_5) <+ transition(ptr_bit ? vdd_level : 0.0, 0, tr, tf);
+                6: V(ptr_o_6) <+ transition(ptr_bit ? vdd_level : 0.0, 0, tr, tf);
+                7: V(ptr_o_7) <+ transition(ptr_bit ? vdd_level : 0.0, 0, tr, tf);
+                8: V(ptr_o_8) <+ transition(ptr_bit ? vdd_level : 0.0, 0, tr, tf);
+                9: V(ptr_o_9) <+ transition(ptr_bit ? vdd_level : 0.0, 0, tr, tf);
+                10: V(ptr_o_10) <+ transition(ptr_bit ? vdd_level : 0.0, 0, tr, tf);
+                11: V(ptr_o_11) <+ transition(ptr_bit ? vdd_level : 0.0, 0, tr, tf);
+                12: V(ptr_o_12) <+ transition(ptr_bit ? vdd_level : 0.0, 0, tr, tf);
+                13: V(ptr_o_13) <+ transition(ptr_bit ? vdd_level : 0.0, 0, tr, tf);
+                14: V(ptr_o_14) <+ transition(ptr_bit ? vdd_level : 0.0, 0, tr, tf);
+                15: V(ptr_o_15) <+ transition(ptr_bit ? vdd_level : 0.0, 0, tr, tf);
+            endcase
+        end
+
+        // Output cell enable window (cells from ptr to ptr+code-1, wrapping)
+        for (i = 0; i < 16; i = i + 1) begin
+            // Calculate if cell i is in the window [ptr, ptr+code-1] mod 16
+            if (code == 0) begin
+                cell_bit = 0;
+            end else begin
+                cell_idx = i - ptr;
+                while (cell_idx < 0) begin
+                    cell_idx = cell_idx + 16;
+                end
+                while (cell_idx >= 16) begin
+                    cell_idx = cell_idx - 16;
+                end
+                cell_bit = (cell_idx < code) ? 1 : 0;
+            end
+
+            case (i)
+                0: V(cell_en_o_0) <+ transition(cell_bit ? vdd_level : 0.0, 0, tr, tf);
+                1: V(cell_en_o_1) <+ transition(cell_bit ? vdd_level : 0.0, 0, tr, tf);
+                2: V(cell_en_o_2) <+ transition(cell_bit ? vdd_level : 0.0, 0, tr, tf);
+                3: V(cell_en_o_3) <+ transition(cell_bit ? vdd_level : 0.0, 0, tr, tf);
+                4: V(cell_en_o_4) <+ transition(cell_bit ? vdd_level : 0.0, 0, tr, tf);
+                5: V(cell_en_o_5) <+ transition(cell_bit ? vdd_level : 0.0, 0, tr, tf);
+                6: V(cell_en_o_6) <+ transition(cell_bit ? vdd_level : 0.0, 0, tr, tf);
+                7: V(cell_en_o_7) <+ transition(cell_bit ? vdd_level : 0.0, 0, tr, tf);
+                8: V(cell_en_o_8) <+ transition(cell_bit ? vdd_level : 0.0, 0, tr, tf);
+                9: V(cell_en_o_9) <+ transition(cell_bit ? vdd_level : 0.0, 0, tr, tf);
+                10: V(cell_en_o_10) <+ transition(cell_bit ? vdd_level : 0.0, 0, tr, tf);
+                11: V(cell_en_o_11) <+ transition(cell_bit ? vdd_level : 0.0, 0, tr, tf);
+                12: V(cell_en_o_12) <+ transition(cell_bit ? vdd_level : 0.0, 0, tr, tf);
+                13: V(cell_en_o_13) <+ transition(cell_bit ? vdd_level : 0.0, 0, tr, tf);
+                14: V(cell_en_o_14) <+ transition(cell_bit ? vdd_level : 0.0, 0, tr, tf);
+                15: V(cell_en_o_15) <+ transition(cell_bit ? vdd_level : 0.0, 0, tr, tf);
+            endcase
+        end
+    end
+endmodule

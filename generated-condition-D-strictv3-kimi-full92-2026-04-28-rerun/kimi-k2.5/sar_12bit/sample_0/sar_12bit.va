@@ -1,0 +1,158 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sar_12bit (VDD, VSS, CLKS, DCOMP_P, DCOMP_N, DP_CAP_11, DP_CAP_10, DP_CAP_9, DP_CAP_8, DP_CAP_7, DP_CAP_6, DP_CAP_5, DP_CAP_4, DP_CAP_3, DP_CAP_2, DP_CAP_1, DP_CAP_0, EOC);
+    inout VDD, VSS;
+    input CLKS, DCOMP_P, DCOMP_N;
+    output DP_CAP_11, DP_CAP_10, DP_CAP_9, DP_CAP_8, DP_CAP_7, DP_CAP_6, DP_CAP_5, DP_CAP_4, DP_CAP_3, DP_CAP_2, DP_CAP_1, DP_CAP_0, EOC;
+    electrical VDD, VSS, CLKS, DCOMP_P, DCOMP_N, DP_CAP_11, DP_CAP_10, DP_CAP_9, DP_CAP_8, DP_CAP_7, DP_CAP_6, DP_CAP_5, DP_CAP_4, DP_CAP_3, DP_CAP_2, DP_CAP_1, DP_CAP_0, EOC;
+
+    parameter real vth = 0.9;
+    parameter real vdd = 1.8;
+    parameter real tedge = 1n;
+
+    integer state;
+    integer bit_idx;
+    integer result_11, result_10, result_9, result_8, result_7, result_6, result_5, result_4, result_3, result_2, result_1, result_0;
+    integer trial_bit;
+    integer comp_result;
+    real vout_11, vout_10, vout_9, vout_8, vout_7, vout_6, vout_5, vout_4, vout_3, vout_2, vout_1, vout_0;
+    real vout_eoc;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+            bit_idx = 11;
+            result_11 = 0;
+            result_10 = 0;
+            result_9 = 0;
+            result_8 = 0;
+            result_7 = 0;
+            result_6 = 0;
+            result_5 = 0;
+            result_4 = 0;
+            result_3 = 0;
+            result_2 = 0;
+            result_1 = 0;
+            result_0 = 0;
+            trial_bit = 0;
+            comp_result = 0;
+            vout_11 = 0;
+            vout_10 = 0;
+            vout_9 = 0;
+            vout_8 = 0;
+            vout_7 = 0;
+            vout_6 = 0;
+            vout_5 = 0;
+            vout_4 = 0;
+            vout_3 = 0;
+            vout_2 = 0;
+            vout_1 = 0;
+            vout_0 = 0;
+            vout_eoc = 0;
+        end
+
+        @(cross(V(CLKS) - vth, 1)) begin
+            if (state == 0) begin
+                // Start conversion
+                bit_idx = 11;
+                result_11 = 0;
+                result_10 = 0;
+                result_9 = 0;
+                result_8 = 0;
+                result_7 = 0;
+                result_6 = 0;
+                result_5 = 0;
+                result_4 = 0;
+                result_3 = 0;
+                result_2 = 0;
+                result_1 = 0;
+                result_0 = 0;
+                trial_bit = 1;
+                state = 1;
+            end else if (state == 1) begin
+                // Set trial bit and wait for comparator
+                state = 2;
+            end else if (state == 2) begin
+                // Latch comparator result
+                if (V(DCOMP_P) > V(DCOMP_N)) begin
+                    comp_result = 1;
+                end else begin
+                    comp_result = 0;
+                end
+
+                // Keep or clear trial bit based on comparator
+                if (comp_result == 1) begin
+                    // Keep the bit set
+                    if (bit_idx == 11) result_11 = 1;
+                    else if (bit_idx == 10) result_10 = 1;
+                    else if (bit_idx == 9) result_9 = 1;
+                    else if (bit_idx == 8) result_8 = 1;
+                    else if (bit_idx == 7) result_7 = 1;
+                    else if (bit_idx == 6) result_6 = 1;
+                    else if (bit_idx == 5) result_5 = 1;
+                    else if (bit_idx == 4) result_4 = 1;
+                    else if (bit_idx == 3) result_3 = 1;
+                    else if (bit_idx == 2) result_2 = 1;
+                    else if (bit_idx == 1) result_1 = 1;
+                    else if (bit_idx == 0) result_0 = 1;
+                end else begin
+                    // Clear the trial bit
+                    if (bit_idx == 11) result_11 = 0;
+                    else if (bit_idx == 10) result_10 = 0;
+                    else if (bit_idx == 9) result_9 = 0;
+                    else if (bit_idx == 8) result_8 = 0;
+                    else if (bit_idx == 7) result_7 = 0;
+                    else if (bit_idx == 6) result_6 = 0;
+                    else if (bit_idx == 5) result_5 = 0;
+                    else if (bit_idx == 4) result_4 = 0;
+                    else if (bit_idx == 3) result_3 = 0;
+                    else if (bit_idx == 2) result_2 = 0;
+                    else if (bit_idx == 1) result_1 = 0;
+                    else if (bit_idx == 0) result_0 = 0;
+                end
+
+                // Move to next bit or finish
+                bit_idx = bit_idx - 1;
+                if (bit_idx < 0) begin
+                    state = 3; // Conversion complete
+                    vout_eoc = vdd;
+                end else begin
+                    state = 1; // Next bit trial
+                end
+            end else if (state == 3) begin
+                // Hold EOC high, reset for next conversion
+                vout_eoc = 0;
+                state = 0;
+            end
+        end
+
+        // Output voltage assignments with transition
+        vout_11 = result_11 * vdd;
+        vout_10 = result_10 * vdd;
+        vout_9 = result_9 * vdd;
+        vout_8 = result_8 * vdd;
+        vout_7 = result_7 * vdd;
+        vout_6 = result_6 * vdd;
+        vout_5 = result_5 * vdd;
+        vout_4 = result_4 * vdd;
+        vout_3 = result_3 * vdd;
+        vout_2 = result_2 * vdd;
+        vout_1 = result_1 * vdd;
+        vout_0 = result_0 * vdd;
+
+        V(DP_CAP_11) <+ transition(vout_11, 0, tedge);
+        V(DP_CAP_10) <+ transition(vout_10, 0, tedge);
+        V(DP_CAP_9) <+ transition(vout_9, 0, tedge);
+        V(DP_CAP_8) <+ transition(vout_8, 0, tedge);
+        V(DP_CAP_7) <+ transition(vout_7, 0, tedge);
+        V(DP_CAP_6) <+ transition(vout_6, 0, tedge);
+        V(DP_CAP_5) <+ transition(vout_5, 0, tedge);
+        V(DP_CAP_4) <+ transition(vout_4, 0, tedge);
+        V(DP_CAP_3) <+ transition(vout_3, 0, tedge);
+        V(DP_CAP_2) <+ transition(vout_2, 0, tedge);
+        V(DP_CAP_1) <+ transition(vout_1, 0, tedge);
+        V(DP_CAP_0) <+ transition(vout_0, 0, tedge);
+        V(EOC) <+ transition(vout_eoc, 0, tedge);
+    end
+endmodule

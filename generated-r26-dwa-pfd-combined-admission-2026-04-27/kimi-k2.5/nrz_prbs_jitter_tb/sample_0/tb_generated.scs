@@ -1,0 +1,28 @@
+simulator lang=spectre
+global 0
+
+// Supply rails
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0
+
+// Clock source: 2GHz clock (500ps period, 250ps pulse width)
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=500p width=250p rise=10p fall=10p
+
+// Enable stimulus: burst on/off window
+// Enable high from 10ns to 30ns, low from 30ns to 50ns, high from 50ns to 95ns
+Venable (enable 0) vsource type=pwl wave=[0n 0 10n 0.9 30n 0.9 30.001n 0 50n 0 50.001n 0.9 95n 0.9]
+
+// DUT instantiation by position
+XDUT (vdd vss clk enable sout_p sout_n) nrz_prbs_jitter_ref
+
+// Transient analysis
+tran tran stop=95n maxstep=20p
+
+// Explicit save statements
+save clk
+save enable
+save sout_p
+save sout_n
+
+// AHDL include last
+ahdl_include "nrz_prbs_jitter_ref.va"

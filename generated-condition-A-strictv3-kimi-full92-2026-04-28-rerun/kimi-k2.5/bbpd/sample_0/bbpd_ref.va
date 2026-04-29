@@ -1,0 +1,72 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bbpd_ref (data, clk, retimed_data, up, down);
+    inout data;
+    inout clk;
+    inout retimed_data;
+    inout up;
+    inout down;
+
+    electrical data;
+    electrical clk;
+    electrical retimed_data;
+    electrical up;
+    electrical down;
+
+    parameter real vth = 0.5 from (0:inf);
+    parameter real vhigh = 1.0 from (0:inf);
+    parameter real vlow = 0.0 from (-inf:inf);
+    parameter real tr = 10p from (0:inf);
+    parameter real tf = 10p from (0:inf);
+    parameter real td = 0 from [0:inf);
+
+    integer up_state;
+    integer down_state;
+    integer data_prev;
+    integer clk_prev;
+    integer retimed_prev;
+
+    analog begin
+        @(initial_step) begin
+            up_state = 0;
+            down_state = 0;
+            data_prev = 0;
+            clk_prev = 0;
+            retimed_prev = 0;
+        end
+
+        // Detect DATA transitions (rising or falling edges)
+        @(cross(V(data) - vth, 1) or cross(V(data) - vth, -1)) begin
+            // On DATA edge, sample CLK and RETIMED_DATA states
+            if (V(clk) > vth) begin
+                // CLK is high: need to speed up (UP pulse)
+                up_state = 1;
+                down_state = 0;
+            end else begin
+                // CLK is low: need to slow down (DOWN pulse)
+                up_state = 0;
+                down_state = 1;
+            end
+        end
+
+        // Reset UP/DOWN when appropriate phase alignment occurs
+        // UP pulse ends when CLK goes low (phase caught up)
+        @(cross(V(clk) - vth, -1)) begin
+            if (up_state == 1) begin
+                up_state = 0;
+            end
+        end
+
+        // DOWN pulse ends when CLK goes high (phase caught up)
+        @(cross(V(clk) - vth, 1)) begin
+            if (down_state == 1) begin
+                down_state = 0;
+            end
+        end
+
+        // Output voltage transitions
+        V(up) <+ transition(up_state ? vhigh : vlow, td, tr, tf);
+        V(down) <+ transition(down_state ? vhigh : vlow, td, tr, tf);
+    end
+endmodule

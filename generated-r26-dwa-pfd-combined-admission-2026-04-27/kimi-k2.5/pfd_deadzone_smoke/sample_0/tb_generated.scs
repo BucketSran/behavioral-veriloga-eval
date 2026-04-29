@@ -1,0 +1,24 @@
+// Minimal PFD deadzone smoke testbench
+// Includes pfd_updn.va and tests small phase offset behavior
+
+ahdl_include "pfd_updn.va"
+
+// Supply voltages
+v_vdd (vdd 0) vsource dc=0.9
+v_vss (vss 0) vsource dc=0
+
+// Reference clock: 100MHz, 10ns period
+v_ref (ref 0) vsource type=pulse val0=0 val1=0.9 period=10n rise=100p fall=100p width=5n
+
+// Divided clock: same frequency, small phase lead (~50ps)
+// This creates small phase error to test deadzone behavior
+v_div (div 0) vsource type=pulse val0=0 val1=0.9 period=10n rise=100p fall=100p width=5n delay=50p
+
+// Device Under Test
+pfd0 (vdd vss ref div up dn) pfd_updn vth=0.45 tedge=20p
+
+// Save signals for CSV output - use exact names required by checker
+save ref div up dn
+
+// Transient analysis with strict EVAS settings
+tran tran stop=300n maxstep=5p errpreset=conservative

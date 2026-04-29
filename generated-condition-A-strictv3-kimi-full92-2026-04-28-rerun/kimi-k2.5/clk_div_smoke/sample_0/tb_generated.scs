@@ -1,0 +1,27 @@
+// EVAS testbench for clk_div
+
+// Load Verilog-A module
+ahdl_include "clk_div.va"
+
+// Top-level testbench
+simulator lang=spectre
+
+// Power supply and logic levels
+parameters vdd=1.2
+parameters vss=0.0
+parameters period=10n
+
+// Input clock source - 100MHz clock (10ns period)
+vclk (clk_in 0) vsource type=pulse val0=vss val1=vdd period=period rise=0.1n fall=0.1n width=period/2
+
+// Reset - active low, released early
+vrst (rst_n 0) vsource type=pulse val0=vss val1=vdd period=300n rise=0.1n fall=0.1n width=295n delay=0n
+
+// Device Under Test
+dut (clk_in rst_n clk_out) clk_div
+
+// Save statements for required waveforms
+save clk_in clk_out rst_n
+
+// Transient analysis
+tran tran stop=300n maxstep=1n

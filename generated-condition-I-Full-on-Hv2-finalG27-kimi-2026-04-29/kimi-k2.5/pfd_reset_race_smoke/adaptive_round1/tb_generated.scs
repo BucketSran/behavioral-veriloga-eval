@@ -1,0 +1,158 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "pfd_updn.va"
+
+// Supply
+Vdd (vdd 0) vsource dc=1.8
+Vss (vss 0) vsource dc=0
+
+// PFD DUT
+XDUT (vdd vss ref div up dn) pfd_updn
+
+// Reference stimulus: 10MHz with phase modulation to create lead/lag swaps
+// First window (20-120ns): REF leads DIV
+// Second window (160-260ns): DIV leads REF
+
+Vref (ref 0) vsource type=pwl wave=[
+    0n 0
+    // Startup edges
+    5n 0 5.05n 1.8
+    55n 1.8 55.05n 0
+    // First window: REF leads DIV by ~5ns, period ~100ns
+    105n 0 105.05n 1.8
+    155n 1.8 155.05n 0
+    205n 0 205.05n 1.8
+    255n 1.8 255.05n 0
+    305n 0 305.05n 1.8
+    355n 1.8 355.05n 0
+    // Second window: DIV leads REF by ~5ns (REF delayed)
+    415n 0 415.05n 1.8
+    465n 1.8 465.05n 0
+    515n 0 515.05n 1.8
+    565n 1.8 565.05n 0
+    615n 0 615.05n 1.8
+    665n 1.8 665.05n 0
+    715n 0 715.05n 1.8
+    765n 1.8 765.05n 0
+    // Continue pattern
+    815n 0 815.05n 1.8
+    865n 1.8 865.05n 0
+    915n 0 915.05n 1.8
+    965n 1.8 965.05n 0
+    1015n 0 1015.05n 1.8
+    1065n 1.8 1065.05n 0
+    1115n 0 1115.05n 1.8
+    1165n 1.8 1165.05n 0
+    1215n 0 1215.05n 1.8
+    1265n 1.8 1265.05n 0
+    1315n 0 1315.05n 1.8
+    1365n 1.8 1365.05n 0
+    1415n 0 1415.05n 1.8
+    1465n 1.8 1465.05n 0
+    1515n 0 1515.05n 1.8
+    1565n 1.8 1565.05n 0
+    1615n 0 1615.05n 1.8
+    1665n 1.8 1665.05n 0
+    1715n 0 1715.05n 1.8
+    1765n 1.8 1765.05n 0
+    1815n 0 1815.05n 1.8
+    1865n 1.8 1865.05n 0
+    1915n 0 1915.05n 1.8
+    1965n 1.8 1965.05n 0
+    2015n 0 2015.05n 1.8
+    2065n 1.8 2065.05n 0
+    2115n 0 2115.05n 1.8
+    2165n 1.8 2165.05n 0
+    2215n 0 2215.05n 1.8
+    2265n 1.8 2265.05n 0
+    2315n 0 2315.05n 1.8
+    2365n 1.8 2365.05n 0
+    2415n 0 2415.05n 1.8
+    2465n 1.8 2465.05n 0
+    2515n 0 2515.05n 1.8
+    2565n 1.8 2565.05n 0
+    2615n 0 2615.05n 1.8
+    2665n 1.8 2665.05n 0
+    2715n 0 2715.05n 1.8
+    2765n 1.8 2765.05n 0
+    2815n 0 2815.05n 1.8
+    2865n 1.8 2865.05n 0
+    2915n 0 2915.05n 1.8
+    2965n 1.8 2965.05n 0
+]
+
+// DIV: 10MHz with phase offset - lags REF in first window, leads in second
+Vdiv (div 0) vsource type=pwl wave=[
+    0n 0
+    // Startup edges (lag REF by 5ns)
+    10n 0 10.05n 1.8
+    60n 1.8 60.05n 0
+    // First window: DIV lags REF by ~5ns
+    110n 0 110.05n 1.8
+    160n 1.8 160.05n 0
+    210n 0 210.05n 1.8
+    260n 1.8 260.05n 0
+    310n 0 310.05n 1.8
+    360n 1.8 360.05n 0
+    // Second window: DIV leads REF by ~5ns (DIV advanced)
+    405n 0 405.05n 1.8
+    455n 1.8 455.05n 0
+    505n 0 505.05n 1.8
+    555n 1.8 555.05n 0
+    605n 0 605.05n 1.8
+    655n 1.8 655.05n 0
+    705n 0 705.05n 1.8
+    755n 1.8 755.05n 0
+    // Continue pattern
+    805n 0 805.05n 1.8
+    855n 1.8 855.05n 0
+    905n 0 905.05n 1.8
+    955n 1.8 955.05n 0
+    1005n 0 1005.05n 1.8
+    1055n 1.8 1055.05n 0
+    1105n 0 1105.05n 1.8
+    1155n 1.8 1155.05n 0
+    1205n 0 1205.05n 1.8
+    1255n 1.8 1255.05n 0
+    1305n 0 1305.05n 1.8
+    1355n 1.8 1355.05n 0
+    1405n 0 1405.05n 1.8
+    1455n 1.8 1455.05n 0
+    1505n 0 1505.05n 1.8
+    1555n 1.8 1555.05n 0
+    1605n 0 1605.05n 1.8
+    1655n 1.8 1655.05n 0
+    1705n 0 1705.05n 1.8
+    1755n 1.8 1755.05n 0
+    1805n 0 1805.05n 1.8
+    1855n 1.8 1855.05n 0
+    1905n 0 1905.05n 1.8
+    1955n 1.8 1955.05n 0
+    2005n 0 2005.05n 1.8
+    2055n 1.8 2055.05n 0
+    2105n 0 2105.05n 1.8
+    2155n 1.8 2155.05n 0
+    2205n 0 2205.05n 1.8
+    2255n 1.8 2255.05n 0
+    2305n 0 2305.05n 1.8
+    2355n 1.8 2355.05n 0
+    2405n 0 2405.05n 1.8
+    2455n 1.8 2455.05n 0
+    2505n 0 2505.05n 1.8
+    2555n 1.8 2555.05n 0
+    2605n 0 2605.05n 1.8
+    2655n 1.8 2655.05n 0
+    2705n 0 2705.05n 1.8
+    2755n 1.8 2755.05n 0
+    2805n 0 2805.05n 1.8
+    2855n 1.8 2855.05n 0
+    2905n 0 2905.05n 1.8
+    2955n 1.8 2955.05n 0
+]
+
+// Save statements for required observables
+save ref div up dn
+
+// Transient analysis
+tran tran stop=300n maxstep=10p errpreset=conservative

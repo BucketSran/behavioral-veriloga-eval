@@ -1,0 +1,140 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sar_logic (
+    VDD,
+    VSS,
+    CLKS,
+    DCOMP,
+    DP_DAC_9,
+    DP_DAC_8,
+    DP_DAC_7,
+    DP_DAC_6,
+    DP_DAC_5,
+    DP_DAC_4,
+    DP_DAC_3,
+    DP_DAC_2,
+    DP_DAC_1,
+    DP_DAC_0,
+    RDY
+);
+
+    inout electrical VDD, VSS;
+    input electrical CLKS, DCOMP;
+    output electrical DP_DAC_9, DP_DAC_8, DP_DAC_7, DP_DAC_6, DP_DAC_5;
+    output electrical DP_DAC_4, DP_DAC_3, DP_DAC_2, DP_DAC_1, DP_DAC_0;
+    output electrical RDY;
+
+    // Internal parameters
+    parameter real vth = 0.6 from (0:inf);      // Threshold for logic high
+    parameter real tdel = 0 from [0:inf);       // Delay time
+    parameter real trise = 1n from (0:inf);     // Rise time
+    parameter real tfall = 1n from (0:inf);     // Fall time
+
+    // State variables
+    integer bit_count;      // Current bit being processed (9 down to 0)
+    integer dac_value;      // Current DAC value being built
+    integer state;          // State machine: 0=idle, 1=sample, 2=convert, 3=done
+    integer prev_clks;      // Previous CLKS state for edge detection
+
+    // Internal signals for DAC bits
+    integer dac_bit[0:9];   // Individual DAC bits
+
+    // Voltage references
+    real vdd_val, vss_val;
+
+    analog begin
+        // Get power supply values
+        vdd_val = V(VDD);
+        vss_val = V(VSS);
+
+        // Initialize on first step
+        @(initial_step) begin
+            bit_count = 9;
+            dac_value = 0;
+            state = 0;
+            prev_clks = 0;
+            dac_bit[9] = 0;
+            dac_bit[8] = 0;
+            dac_bit[7] = 0;
+            dac_bit[6] = 0;
+            dac_bit[5] = 0;
+            dac_bit[4] = 0;
+            dac_bit[3] = 0;
+            dac_bit[2] = 0;
+            dac_bit[1] = 0;
+            dac_bit[0] = 0;
+        end
+
+        // Detect rising edge of CLKS
+        @(cross(V(CLKS) - vth, 1)) begin
+            // State machine
+            if (state == 0) begin
+                // Start conversion - move to sample state
+                state = 1;
+                bit_count = 9;
+                dac_value = 0;
+                // Set MSB for trial
+                dac_bit[9] = 1;
+                dac_bit[8] = 0;
+                dac_bit[7] = 0;
+                dac_bit[6] = 0;
+                dac_bit[5] = 0;
+                dac_bit[4] = 0;
+                dac_bit[3] = 0;
+                dac_bit[2] = 0;
+                dac_bit[1] = 0;
+                dac_bit[0] = 0;
+            end
+            else if (state == 1) begin
+                // Sample/hold complete, start conversion
+                state = 2;
+            end
+            else if (state == 2) begin
+                // SAR conversion in progress
+                // Check comparator output and update current bit
+                if (V(DCOMP) > vth) begin
+                    // Comparator high: keep bit set
+                    dac_bit[bit_count] = 1;
+                end
+                else begin
+                    // Comparator low: clear bit
+                    dac_bit[bit_count] = 0;
+                end
+
+                // Move to next bit
+                bit_count = bit_count - 1;
+
+                if (bit_count >= 0) begin
+                    // Set next bit for trial
+                    dac_bit[bit_count] = 1;
+                end
+                else begin
+                    // Conversion complete
+                    state = 3;
+                end
+            end
+            else if (state == 3) begin
+                // Done - hold value, ready for next conversion
+                // Reset to idle, next rising edge will start new conversion
+                state = 0;
+            end
+        end
+
+        // Output DAC control bits with transitions
+        V(DP_DAC_9) <+ transition(dac_bit[9] ? vdd_val : vss_val, tdel, trise, tfall);
+        V(DP_DAC_8) <+ transition(dac_bit[8] ? vdd_val : vss_val, tdel, trise, tfall);
+        V(DP_DAC_7) <+ transition(dac_bit[7] ? vdd_val : vss_val, tdel, trise, tfall);
+        V(DP_DAC_6) <+ transition(dac_bit[6] ? vdd_val : vss_val, tdel, trise, tfall);
+        V(DP_DAC_5) <+ transition(dac_bit[5] ? vdd_val : vss_val, tdel, trise, tfall);
+        V(DP_DAC_4) <+ transition(dac_bit[4] ? vdd_val : vss_val, tdel, trise, tfall);
+        V(DP_DAC_3) <+ transition(dac_bit[3] ? vdd_val : vss_val, tdel, trise, tfall);
+        V(DP_DAC_2) <+ transition(dac_bit[2] ? vdd_val : vss_val, tdel, trise, tfall);
+        V(DP_DAC_1) <+ transition(dac_bit[1] ? vdd_val : vss_val, tdel, trise, tfall);
+        V(DP_DAC_0) <+ transition(dac_bit[0] ? vdd_val : vss_val, tdel, trise, tfall);
+
+        // RDY is high when conversion is complete (state == 3)
+        V(RDY) <+ transition((state == 3) ? vdd_val : vss_val, tdel, trise, tfall);
+    end
+
+endmodule

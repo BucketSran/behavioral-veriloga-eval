@@ -1,0 +1,170 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module adpll_timer_ref (VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock);
+    inout electrical VDD, VSS;
+    input electrical ref_clk;
+    output electrical fb_clk, dco_clk, vctrl_mon, lock;
+
+    // Parameters
+    parameter integer div_ratio = 8 from [1:inf);
+    parameter real f_center = 760e6 from (0:inf);
+    parameter real freq_step_hz = 5e6 from (0:inf);
+    parameter real f_min = 500e6 from (0:inf);
+    parameter real f_max = 1.2e9 from (0:inf);
+    parameter integer code_min = 0 from [0:inf);
+    parameter integer code_max = 63 from [0:inf);
+    parameter integer code_center = 32 from [0:inf);
+    parameter integer code_init = 40 from [0:inf);
+    parameter real tedge = 1n from (0:inf);
+    parameter real lock_tol = 12n from (0:inf);
+    parameter integer lock_count_target = 4 from [1:inf);
+
+    // Local parameters
+    localparam real v_high = 1.2;
+    localparam real v_low = 0.0;
+    localparam real v_th = 0.6;
+
+    // State variables
+    integer dco_code;
+    integer div_counter;
+    integer lock_count;
+    real t_next_toggle;
+    real t_last_ref;
+    real t_last_fb;
+    real phase_error;
+    real dco_period;
+    real dco_freq;
+    real v_dco;
+    real v_fb;
+    real v_lock;
+    real v_vctrl;
+
+    // Internal signals for edge detection
+    real v_ref_prev;
+    real v_fb_prev;
+    integer ref_rising;
+    integer fb_rising;
+    integer dco_rising;
+
+    analog begin
+        // Initialization
+        @(initial_step) begin
+            dco_code = code_init;
+            div_counter = 0;
+            lock_count = 0;
+            t_next_toggle = 0;
+            t_last_ref = 0;
+            t_last_fb = 0;
+            phase_error = 0;
+            v_dco = v_low;
+            v_fb = v_low;
+            v_lock = v_low;
+            v_vctrl = 0;
+            v_ref_prev = v_low;
+            v_fb_prev = v_low;
+            ref_rising = 0;
+            fb_rising = 0;
+            dco_rising = 0;
+        end
+
+        // Detect reference clock rising edge
+        @(cross(V(ref_clk) - v_th, 1)) begin
+            ref_rising = 1;
+            t_last_ref = $abstime;
+        end
+
+        // Detect feedback clock rising edge
+        @(cross(V(fb_clk) - v_th, 1)) begin
+            fb_rising = 1;
+            t_last_fb = $abstime;
+        end
+
+        // Calculate phase error when both edges have occurred
+        if (ref_rising || fb_rising) begin
+            if (t_last_ref > 0 && t_last_fb > 0) begin
+                phase_error = t_last_fb - t_last_ref;
+            end
+        end
+
+        // Update DCO code based on phase error (bang-bang PFD)
+        if (ref_rising) begin
+            // Phase detector: if fb is late (phase_error > 0), need higher freq
+            // If fb is early (phase_error < 0), need lower freq
+            if (abs(phase_error) > lock_tol || phase_error == 0) begin
+                // Not locked, adjust frequency
+                if (phase_error > 0) begin
+                    // Feedback is late, increase frequency
+                    dco_code = dco_code + 1;
+                end else if (phase_error < 0) begin
+                    // Feedback is early, decrease frequency
+                    dco_code = dco_code - 1;
+                end
+            end
+
+            // Clamp code to bounds
+            if (dco_code < code_min) dco_code = code_min;
+            if (dco_code > code_max) dco_code = code_max;
+
+            ref_rising = 0;
+        end
+
+        if (fb_rising) begin
+            fb_rising = 0;
+        end
+
+        // Calculate DCO frequency from code
+        dco_freq = f_center + (dco_code - code_center) * freq_step_hz;
+        if (dco_freq < f_min) dco_freq = f_min;
+        if (dco_freq > f_max) dco_freq = f_max;
+        dco_period = 1.0 / dco_freq;
+
+        // DCO timer: toggle at half period
+        @(timer(t_next_toggle)) begin
+            if (v_dco > v_th) begin
+                v_dco = v_low;
+                t_next_toggle = $abstime + dco_period / 2.0;
+                dco_rising = 0;
+            end else begin
+                v_dco = v_high;
+                t_next_toggle = $abstime + dco_period / 2.0;
+                dco_rising = 1;
+
+                // Divider: count DCO rising edges
+                div_counter = div_counter + 1;
+                if (div_counter >= div_ratio) begin
+                    div_counter = 0;
+                    // Toggle feedback clock
+                    if (v_fb > v_th) begin
+                        v_fb = v_low;
+                    end else begin
+                        v_fb = v_high;
+                    end
+                end
+            end
+        end
+
+        // Lock detection: check if phase error is within tolerance
+        // Use continuous evaluation based on measured phase error
+        if (abs(phase_error) < lock_tol && t_last_ref > 0 && t_last_fb > 0 && phase_error != 0) begin
+            lock_count = lock_count + 1;
+            if (lock_count > lock_count_target) begin
+                v_lock = v_high;
+            end
+        end else if (abs(phase_error) >= lock_tol && phase_error != 0) begin
+            lock_count = 0;
+            v_lock = v_low;
+        end
+
+        // Calculate normalized vctrl_mon (0 to 1.2V range)
+        v_vctrl = (dco_code - code_min) * v_high / (code_max - code_min);
+        if (v_vctrl < v_low) v_vctrl = v_low;
+        if (v_vctrl > v_high) v_vctrl = v_high;
+
+        // Drive outputs with transitions (always executed, not in conditional branches)
+        V(dco_clk) <+ transition(v_dco, 0, tedge);
+        V(fb_clk) <+ transition(v_fb, 0, tedge);
+        V(lock) <+ transition(v_lock, 0, tedge);
+        V(vctrl_mon) <+ transition(v_vctrl, 0, tedge);
+    end
+endmodule

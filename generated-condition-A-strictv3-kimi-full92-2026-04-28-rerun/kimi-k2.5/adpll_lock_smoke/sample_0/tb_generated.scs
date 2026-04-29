@@ -1,0 +1,52 @@
+// ADPLL Testbench - EVAS Compatible
+// Simulates a 50 MHz reference clock and checks ADPLL lock
+
+simulator lang=spectre
+
+// Include Verilog-A module
+ahdl_include "adpll_va_idtmod.va"
+
+// Global parameters
+parameters VDD_VAL=1.2
+parameters VSS_VAL=0.0
+parameters FREF=50e6
+parameters TREF=20n
+
+// Supply nodes
+vsource vdd (vdd 0) vsource dc=VDD_VAL
+vsource vss (vss 0) vsource dc=VSS_VAL
+
+// Reference clock generator - 50 MHz square wave
+// Using vpulse for clean clock generation
+vpulse ref_gen (ref_clk vss) type=pulse \
+    val0=VSS_VAL \
+    val1=VDD_VAL \
+    period=TREF \
+    rise=100p \
+    fall=100p \
+    width=TREF/2
+
+// DUT instantiation
+adpll_va_idtmod dut (
+    VDD vdd
+    VSS vss
+    ref_clk ref_clk
+    fb_clk fb_clk
+    dco_clk dco_clk
+    vctrl_mon vctrl_mon
+    lock lock
+)
+
+// Analysis
+tran tran stop=5u maxstep=5n
+
+// Save statements for required waveforms
+save ref_clk
+save fb_clk
+save lock
+save vctrl_mon
+
+// Additional saves for debugging
+save dco_clk
+save vdd
+save vss

@@ -1,0 +1,27 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module above_threshold_startup_ref(VDD, VSS, vin, out);
+    inout electrical VDD;
+    inout electrical VSS;
+    input electrical vin;
+    output electrical out;
+
+    integer state;
+    parameter real v_high = 1.0;
+    parameter real v_low = 0.0;
+    parameter real vth = 0.45;
+    parameter real tt = 1n;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+        end
+
+        @(above(V(vin) - vth)) begin
+            state = 1;
+        end
+
+        V(out) <+ transition(state ? v_high : v_low, 0, tt);
+    end
+endmodule

@@ -1,0 +1,28 @@
+// Spectre testbench for dff_rst
+
+ahdl_include "dff_rst.va"
+
+// Supply voltages
+VDD (vdd 0) vsource dc=1.8
+VSS (vss 0) vsource dc=0
+
+// DUT instance
+DUT (vdd vss d clk rst q qb) dff_rst
+
+// Clock: 1GHz = period 1ns (high 0.5ns, low 0.5ns)
+// Actually 1GHz means 1ns period, but spec says period=2ns for 1GHz?
+// Using 2ns period = 500MHz, but spec says "1GHz clock (period=2ns)" which is contradictory.
+// Following spec literally: period=2ns
+VCLK (clk 0) vsource type=pulse val0=0 val1=1.8 period=2n rise=50p fall=50p width=1n
+
+// Data signal: test pattern
+VD (d 0) vsource type=pwl wave=[0n 0 1.9n 0 2n 1.8 3.9n 1.8 4n 0 5.9n 0 6n 1.8 7.9n 1.8 8n 0 9.9n 0 10n 1.8 11.9n 1.8 12n 0 13.9n 0 14n 1.8 15.9n 1.8 16n 0 17.9n 0 18n 1.8 19.9n 1.8]
+
+// Reset: assert high at start, then deassert
+VRST (rst 0) vsource type=pwl wave=[0n 1.8 3n 1.8 3.1n 0 20n 0]
+
+// Transient analysis
+tran tran stop=20n maxstep=50p
+
+// Save signals
+save d clk rst q qb

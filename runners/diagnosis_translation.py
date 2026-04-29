@@ -10,6 +10,7 @@ P0 goals implemented here:
 from __future__ import annotations
 
 import re
+import os
 from typing import Optional
 
 _KV_RE = re.compile(r"\b([A-Za-z_][A-Za-z0-9_]*)=([^\s,;]+)")
@@ -18,6 +19,10 @@ _BOOKKEEPING_KEYS = {"generated_include", "returncode"}
 
 def _parse_metrics(note: str) -> dict[str, str]:
     return {k: v for k, v in _KV_RE.findall(note)}
+
+
+def _functional_ir_only() -> bool:
+    return os.environ.get("VAEVAS_FUNCTIONAL_IR_ONLY", "").strip().lower() in {"1", "true", "yes", "on"}
 
 
 def _behavior_metrics(metrics: dict[str, str]) -> dict[str, str]:
@@ -62,6 +67,8 @@ def _route_failure_type(note: str, metrics: dict[str, str]) -> str:
 
 def translate_diagnosis(note: str, task_id: Optional[str] = None) -> dict:
     """Translate one EVAS note into structured, actionable repair guidance."""
+    if _functional_ir_only():
+        task_id = None
     metrics = _parse_metrics(note)
     failure_type = _route_failure_type(note, metrics)
     lowered = note.lower()

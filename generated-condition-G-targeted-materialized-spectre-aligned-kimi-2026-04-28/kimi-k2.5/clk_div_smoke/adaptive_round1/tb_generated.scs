@@ -1,0 +1,23 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "clk_div.va"
+
+// Parameters
+parameters period=20n
+parameters vdd=1.8
+
+// Input clock: 50MHz (20ns period)
+Vclk (clk_in 0) vsource type=pulse dc=0 val0=0 val1=vdd period=period rise=0.1n fall=0.1n width=10n
+
+// Active-low reset: asserted at start, released at 50ns
+Vrst (rst_n 0) vsource type=pwl wave=[0 0 50n 0 51n vdd 300n vdd]
+
+// DUT instance
+XDUT (clk_in rst_n clk_out) clk_div
+
+// Save statements
+save clk_in clk_out
+
+// Transient analysis
+tran tran stop=300n maxstep=1n

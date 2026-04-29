@@ -1,0 +1,69 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module flash_adc_3b (vdd, vss, vin, clk, dout2, dout1, dout0);
+    input vdd, vss, vin, clk;
+    output dout2, dout1, dout0;
+    electrical vdd, vss, vin, clk, dout2, dout1, dout0;
+
+    parameter real vrefp = 0.9;
+    parameter real vrefn = 0.0;
+    parameter real vth = 0.45;
+    parameter real tedge = 100p;
+
+    integer code;
+    real vhigh, vlow, vrange, lsb;
+    real vout2, vout1, vout0;
+
+    analog begin
+        @(initial_step) begin
+            code = 0;
+            vout2 = 0.0;
+            vout1 = 0.0;
+            vout0 = 0.0;
+        end
+
+        vhigh = V(vdd);
+        vlow = V(vss);
+        vrange = vrefp - vrefn;
+        lsb = vrange / 8.0;
+
+        @(cross(V(clk) - vth, +1)) begin
+            // Quantize vin to 3-bit code
+            if (V(vin) <= vrefn) begin
+                code = 0;
+            end else if (V(vin) >= vrefp) begin
+                code = 7;
+            end else begin
+                code = integer((V(vin) - vrefn) / lsb);
+                if (code < 0) code = 0;
+                if (code > 7) code = 7;
+            end
+
+            // Decode to individual bit voltages
+            if (code >= 4) begin
+                vout2 = vhigh;
+                code = code - 4;
+            end else begin
+                vout2 = vlow;
+            end
+
+            if (code >= 2) begin
+                vout1 = vhigh;
+                code = code - 2;
+            end else begin
+                vout1 = vlow;
+            end
+
+            if (code >= 1) begin
+                vout0 = vhigh;
+            end else begin
+                vout0 = vlow;
+            end
+        end
+
+        V(dout2) <+ transition(vout2, 0, tedge);
+        V(dout1) <+ transition(vout1, 0, tedge);
+        V(dout0) <+ transition(vout0, 0, tedge);
+    end
+endmodule

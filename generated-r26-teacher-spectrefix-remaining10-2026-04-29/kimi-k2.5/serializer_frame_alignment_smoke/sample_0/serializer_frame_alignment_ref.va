@@ -1,0 +1,77 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module serializer_frame_alignment_ref(vdd, vss, clk, load, din7, din6, din5, din4, din3, din2, din1, din0, sout, frame);
+    inout vdd, vss;
+    electrical vdd, vss;
+    input clk, load;
+    electrical clk, load;
+    input din7, din6, din5, din4, din3, din2, din1, din0;
+    electrical din7, din6, din5, din4, din3, din2, din1, din0;
+    output sout, frame;
+    electrical sout, frame;
+    parameter real vth = 0.5;
+    parameter real vhigh = 1.0;
+    parameter real vlow = 0.0;
+    parameter real tr = 0.1n;
+    parameter real tf = 0.1n;
+
+    integer shift_reg;
+    integer bit_count;
+    integer loading;
+    integer sout_val;
+    integer frame_val;
+
+    analog begin
+        @(initial_step) begin
+            shift_reg = 0;
+            bit_count = 0;
+            loading = 0;
+            sout_val = 0;
+            frame_val = 0;
+        end
+
+        // Detect rising edge of load: latch parallel input and set loading flag
+        @(cross(V(load) - vth, 1)) begin
+            // Latch parallel input
+            shift_reg = 0;
+            if (V(din7) > vth) shift_reg = shift_reg + 128;
+            if (V(din6) > vth) shift_reg = shift_reg + 64;
+            if (V(din5) > vth) shift_reg = shift_reg + 32;
+            if (V(din4) > vth) shift_reg = shift_reg + 16;
+            if (V(din3) > vth) shift_reg = shift_reg + 8;
+            if (V(din2) > vth) shift_reg = shift_reg + 4;
+            if (V(din1) > vth) shift_reg = shift_reg + 2;
+            if (V(din0) > vth) shift_reg = shift_reg + 1;
+            loading = 1;
+        end
+
+        // Detect rising edge of clk
+        @(cross(V(clk) - vth, 1)) begin
+            if (loading) begin
+                // First clock edge after load: output MSB, assert frame for first bit
+                bit_count = 6;  // 6 more bits after MSB
+                loading = 0;
+                frame_val = 1;
+                sout_val = (shift_reg >> 7) & 1;
+            end else if (bit_count >= 0) begin
+                // Continue shifting: output next bit, deassert frame after first bit
+                if (bit_count == 6) begin
+                    frame_val = 0;  // Frame only for first bit
+                end else begin
+                    frame_val = 0;
+                end
+                sout_val = (shift_reg >> bit_count) & 1;
+                bit_count = bit_count - 1;
+            end else begin
+                // Idle: no more bits to shift
+                frame_val = 0;
+                sout_val = 0;
+            end
+        end
+
+        // Output assignments with transition
+        V(sout) <+ transition(sout_val ? vhigh : vlow, 0, tr, tf);
+        V(frame) <+ transition(frame_val ? vhigh : vlow, 0, tr, tf);
+    end
+endmodule

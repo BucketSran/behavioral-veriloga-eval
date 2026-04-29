@@ -1,0 +1,40 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dff_rst (VDD, VSS, D, CLK, RST, Q, QB);
+    electrical VDD, VSS, D, CLK, RST, Q, QB;
+
+    parameter real vth = 0.9;
+    parameter real tdel = 0.1n;
+    parameter real tr = 0.1n;
+    parameter real tf = 0.1n;
+
+    integer d_logic, rst_logic, q_logic;
+    real vdd_val;
+
+    analog begin
+        @(initial_step) begin
+            q_logic = 0;
+        end
+
+        // Get supply voltage
+        vdd_val = V(VDD) - V(VSS);
+
+        // Detect rising edge of CLK
+        @(cross(V(CLK) - V(VSS) - vth, 1)) begin
+            // Sample inputs at clock edge
+            d_logic = (V(D) - V(VSS) > vth) ? 1 : 0;
+            rst_logic = (V(RST) - V(VSS) > vth) ? 1 : 0;
+
+            if (rst_logic == 1) begin
+                q_logic = 0;
+            end else begin
+                q_logic = d_logic;
+            end
+        end
+
+        // Drive outputs
+        V(Q) <+ transition(V(VSS) + q_logic * vdd_val, tdel, tr, tf);
+        V(QB) <+ transition(V(VSS) + (~q_logic & 1) * vdd_val, tdel, tr, tf);
+    end
+endmodule

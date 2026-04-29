@@ -1,0 +1,23 @@
+simulator lang=spectre
+global 0
+
+// Power supplies
+VDD (VDD 0) vsource dc=0.9
+VSS (VSS 0) vsource dc=0
+
+// Differential input step: vinp steps from 0.45V to 0.46V, vinn steps from 0.45V to 0.44V
+// Common mode = 0.45V, differential step = 20mV
+Vin_p (vinp 0) vsource type=pulse val0=0.45 val1=0.46 period=200n rise=1n fall=1n width=100n delay=10n
+Vin_n (vinn 0) vsource type=pulse val0=0.45 val1=0.44 period=200n rise=1n fall=1n width=100n delay=10n
+
+// DUT instance
+XDUT (VDD VSS vinp vinn voutp voutn) gain_step_ref
+
+// Transient analysis
+tran tran stop=100n maxstep=100p
+
+// Save waveforms
+save vinp vinn voutp voutn
+
+// Include DUT Verilog-A
+ahdl_include "gain_step_ref.va"

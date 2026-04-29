@@ -1,0 +1,139 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cppll_timer_ref (VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock);
+    inout VDD;
+    inout VSS;
+    input ref_clk;
+    output fb_clk;
+    output dco_clk;
+    output vctrl_mon;
+    output lock;
+
+    electrical VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock;
+
+    // Parameters
+    parameter real VDD_level = 1.8;
+    parameter real VSS_level = 0.0;
+    parameter real vth = 0.9;
+    parameter real tdel = 1p;
+    parameter real tr = 100p;
+    parameter real tf = 100p;
+    parameter real Kp = 1e-3;
+    parameter real Ki = 5e-5;
+    parameter real Kvco = 1e9;
+    parameter real Fref = 50e6;
+    parameter integer Ndiv = 1;
+    parameter real lock_thr = 0.05;
+
+    // Internal variables
+    integer ref_edge_count;
+    integer fb_edge_count;
+    integer dco_edge_count;
+    integer div_count;
+    integer lock_count;
+    integer locked;
+    integer dco_state;
+    integer fb_state;
+    real phase_error;
+    real vctrl;
+    real vctrl_prop;
+    real vctrl_int;
+    real t_dco;
+    real t_last_ref;
+    real t_last_fb;
+    real t_now;
+    real freq_error;
+    real next_dco_time;
+
+    analog begin
+        @(initial_step) begin
+            ref_edge_count = 0;
+            fb_edge_count = 0;
+            dco_edge_count = 0;
+            div_count = 0;
+            lock_count = 0;
+            locked = 0;
+            dco_state = 0;
+            fb_state = 0;
+            phase_error = 0.0;
+            vctrl = 0.5 * VDD_level;
+            vctrl_prop = 0.0;
+            vctrl_int = 0.5 * VDD_level;
+            t_dco = 10n;
+            t_last_ref = 0.0;
+            t_last_fb = 0.0;
+            next_dco_time = 5n;
+        end
+
+        // Detect reference clock rising edge
+        @(cross(V(ref_clk) - vth, 1)) begin
+            t_now = $abstime;
+            if (ref_edge_count > 0) begin
+                phase_error = (t_now - t_last_ref) - (t_last_fb - t_last_ref);
+                if (fb_edge_count == 0) begin
+                    phase_error = 0.0;
+                end
+            end
+            t_last_ref = t_now;
+            ref_edge_count = ref_edge_count + 1;
+
+            // PI controller update
+            vctrl_prop = Kp * phase_error;
+            vctrl_int = vctrl_int + Ki * phase_error;
+
+            // Clamp integrator
+            if (vctrl_int > VDD_level) vctrl_int = VDD_level;
+            if (vctrl_int < VSS_level) vctrl_int = VSS_level;
+
+            vctrl = vctrl_prop + vctrl_int;
+
+            // Clamp total control voltage
+            if (vctrl > VDD_level) vctrl = VDD_level;
+            if (vctrl < VSS_level) vctrl = VSS_level;
+
+            // Update DCO period
+            t_dco = 1.0 / (Kvco * vctrl + 1e6);
+            if (t_dco < 100p) t_dco = 100p;
+            if (t_dco > 100n) t_dco = 100n;
+
+            // Lock detection
+            freq_error = abs(1.0/(t_now - t_last_ref) - 1.0/(t_last_fb - t_last_ref + 1e-18));
+            if (freq_error < lock_thr * Fref) begin
+                lock_count = lock_count + 1;
+                if (lock_count > 100) locked = 1;
+            end else begin
+                lock_count = 0;
+                locked = 0;
+            end
+        end
+
+        // Detect feedback clock rising edge (from divider)
+        @(cross(V(fb_clk) - vth, 1)) begin
+            t_last_fb = $abstime;
+            fb_edge_count = fb_edge_count + 1;
+        end
+
+        // DCO timer - generates oscillator clock
+        @(timer(next_dco_time, t_dco)) begin
+            dco_state = !dco_state;
+            dco_edge_count = dco_edge_count + 1;
+            div_count = div_count + 1;
+            if (div_count >= Ndiv) begin
+                div_count = 0;
+                fb_state = !fb_state;
+            end
+            next_dco_time = $abstime + t_dco;
+        end
+
+        // Output assignments
+        V(vctrl_mon) <+ vctrl;
+        V(lock) <+ transition(locked ? VDD_level : VSS_level, tdel, tr, tf);
+
+        // DCO clock output
+        V(dco_clk) <+ transition(dco_state ? VDD_level : VSS_level, tdel, tr, tf);
+
+        // Feedback clock output - divided version
+        V(fb_clk) <+ transition(fb_state ? VDD_level : VSS_level, tdel, tr, tf);
+    end
+endmodule

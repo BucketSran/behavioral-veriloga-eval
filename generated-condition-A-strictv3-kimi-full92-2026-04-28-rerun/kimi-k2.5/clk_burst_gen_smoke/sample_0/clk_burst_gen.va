@@ -1,0 +1,78 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module clk_burst_gen (CLK, RST_N, CLK_OUT);
+    input CLK;
+    input RST_N;
+    output CLK_OUT;
+    electrical CLK, RST_N, CLK_OUT;
+
+    parameter integer div = 8 from [3:inf);
+    parameter real vhigh = 1.0;
+    parameter real vlow = 0.0;
+    parameter real vth = 0.5;
+    parameter real tt = 1e-9;
+
+    integer cnt;
+    integer active;
+    real out_val;
+
+    analog begin
+        @(initial_step) begin
+            cnt = 0;
+            active = 0;
+            out_val = vlow;
+        end
+
+        // Reset detection (active low)
+        @(cross(V(RST_N) - vth, -1)) begin
+            cnt = 0;
+            active = 0;
+            out_val = vlow;
+        end
+
+        // Reset release - allow operation
+        @(cross(V(RST_N) - vth, 1)) begin
+            cnt = 0;
+            active = 1;
+        end
+
+        // Clock rising edge
+        @(cross(V(CLK) - vth, 1)) begin
+            if (V(RST_N) > vth) begin
+                // Reset is deasserted, normal operation
+                if (active) begin
+                    // Output CLK for first 2 cycles of period
+                    if (cnt < 2) begin
+                        out_val = vhigh;
+                    end else begin
+                        out_val = vlow;
+                    end
+
+                    // Increment counter, wrap at div
+                    cnt = cnt + 1;
+                    if (cnt >= div) begin
+                        cnt = 0;
+                    end
+                end
+            end
+        end
+
+        // Clock falling edge
+        @(cross(V(CLK) - vth, -1)) begin
+            if (V(RST_N) > vth) begin
+                if (active) begin
+                    // Mirror CLK: go low on falling edge if we're in active burst
+                    if (cnt <= 2) begin
+                        // We just came from high, go low
+                        out_val = vlow;
+                    end
+                    // If cnt > 2, already low, stay low
+                end
+            end
+        end
+
+        // Drive output with transition
+        V(CLK_OUT) <+ transition(out_val, 0, tt);
+    end
+endmodule

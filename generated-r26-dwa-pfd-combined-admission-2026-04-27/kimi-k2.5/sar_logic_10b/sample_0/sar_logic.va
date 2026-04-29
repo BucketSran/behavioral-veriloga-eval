@@ -1,0 +1,130 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sar_logic (
+    VDD,
+    VSS,
+    CLKS,
+    DCOMP,
+    DP_DAC_9,
+    DP_DAC_8,
+    DP_DAC_7,
+    DP_DAC_6,
+    DP_DAC_5,
+    DP_DAC_4,
+    DP_DAC_3,
+    DP_DAC_2,
+    DP_DAC_1,
+    DP_DAC_0,
+    RDY
+);
+
+    inout electrical VDD;
+    inout electrical VSS;
+    input electrical CLKS;
+    input electrical DCOMP;
+    output electrical DP_DAC_9;
+    output electrical DP_DAC_8;
+    output electrical DP_DAC_7;
+    output electrical DP_DAC_6;
+    output electrical DP_DAC_5;
+    output electrical DP_DAC_4;
+    output electrical DP_DAC_3;
+    output electrical DP_DAC_2;
+    output electrical DP_DAC_1;
+    output electrical DP_DAC_0;
+    output electrical RDY;
+
+    // Internal state variables
+    integer state;          // 0=idle, 1-10=conversion bits, 11=done
+    integer bit_idx;        // Current bit being tested (9 down to 0)
+    integer dac_value;      // Current DAC code being built
+
+    // Parameters
+    parameter real tdel = 0;
+    parameter real tr = 1n;
+    parameter real tf = 1n;
+    parameter real vth = 0.5;  // Clock threshold relative to supplies
+
+    // Output target variables
+    real rdy_target;
+    real dac9_target;
+    real dac8_target;
+    real dac7_target;
+    real dac6_target;
+    real dac5_target;
+    real dac4_target;
+    real dac3_target;
+    real dac2_target;
+    real dac1_target;
+    real dac0_target;
+
+    analog begin
+        // Initialize on first step
+        @(initial_step) begin
+            state = 0;
+            bit_idx = 9;
+            dac_value = 0;
+        end
+
+        // Detect rising edge of CLKS (crossing from low to high)
+        // Using cross with +1 direction for rising edge
+        @(cross(V(CLKS) - (V(VDD)*vth + V(VSS)*(1.0-vth)), +1)) begin
+            if (state == 0) begin
+                // Start conversion
+                state = 1;
+                bit_idx = 9;
+                dac_value = 512;  // Set MSB (bit 9)
+            end else if (state >= 1 && state <= 10) begin
+                // SAR logic: keep or clear current bit based on comparator
+                if (V(DCOMP) > (V(VDD)*vth + V(VSS)*(1.0-vth))) begin
+                    // Comparator high: Vin > DAC, keep the bit
+                end else begin
+                    // Comparator low: Vin < DAC, clear the bit
+                    dac_value = dac_value - (1 << bit_idx);
+                end
+
+                // Move to next bit
+                bit_idx = bit_idx - 1;
+                state = state + 1;
+
+                // Set next bit to try (if not done)
+                if (bit_idx >= 0) begin
+                    dac_value = dac_value + (1 << bit_idx);
+                end
+            end else if (state == 11) begin
+                // Hold final value, stay in done state
+                state = 11;
+            end
+        end
+
+        // Compute RDY target
+        rdy_target = (state == 11) ? V(VDD) : V(VSS);
+        V(RDY) <+ transition(rdy_target, tdel, tr, tf);
+
+        // Compute DP_DAC bit targets
+        dac9_target = ((dac_value >> 9) & 1) ? V(VDD) : V(VSS);
+        dac8_target = ((dac_value >> 8) & 1) ? V(VDD) : V(VSS);
+        dac7_target = ((dac_value >> 7) & 1) ? V(VDD) : V(VSS);
+        dac6_target = ((dac_value >> 6) & 1) ? V(VDD) : V(VSS);
+        dac5_target = ((dac_value >> 5) & 1) ? V(VDD) : V(VSS);
+        dac4_target = ((dac_value >> 4) & 1) ? V(VDD) : V(VSS);
+        dac3_target = ((dac_value >> 3) & 1) ? V(VDD) : V(VSS);
+        dac2_target = ((dac_value >> 2) & 1) ? V(VDD) : V(VSS);
+        dac1_target = ((dac_value >> 1) & 1) ? V(VDD) : V(VSS);
+        dac0_target = ((dac_value >> 0) & 1) ? V(VDD) : V(VSS);
+
+        // Drive outputs with transition
+        V(DP_DAC_9) <+ transition(dac9_target, tdel, tr, tf);
+        V(DP_DAC_8) <+ transition(dac8_target, tdel, tr, tf);
+        V(DP_DAC_7) <+ transition(dac7_target, tdel, tr, tf);
+        V(DP_DAC_6) <+ transition(dac6_target, tdel, tr, tf);
+        V(DP_DAC_5) <+ transition(dac5_target, tdel, tr, tf);
+        V(DP_DAC_4) <+ transition(dac4_target, tdel, tr, tf);
+        V(DP_DAC_3) <+ transition(dac3_target, tdel, tr, tf);
+        V(DP_DAC_2) <+ transition(dac2_target, tdel, tr, tf);
+        V(DP_DAC_1) <+ transition(dac1_target, tdel, tr, tf);
+        V(DP_DAC_0) <+ transition(dac0_target, tdel, tr, tf);
+    end
+
+endmodule

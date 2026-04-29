@@ -1,0 +1,41 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cmp_hysteresis(vinn, vinp, out_n, out_p, vss, vdd);
+    electrical vinn, vinp, out_n, out_p, vss, vdd;
+    parameter real vhys = 10e-3;
+    parameter real tedge = 50p;
+
+    integer state;  // 0 = out_p LOW, out_n HIGH; 1 = out_p HIGH, out_n LOW
+    real out_p_target;
+    real out_n_target;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+        end
+
+        // Rising threshold: V(vinp) - V(vinn) > +vhys/2
+        @(cross(V(vinp) - V(vinn) - vhys/2, +1)) begin
+            state = 1;
+        end
+
+        // Falling threshold: V(vinp) - V(vinn) < -vhys/2
+        @(cross(V(vinp) - V(vinn) + vhys/2, -1)) begin
+            state = 0;
+        end
+
+        // Compute output targets based on state
+        if (state == 1) begin
+            out_p_target = V(vdd);
+            out_n_target = V(vss);
+        end else begin
+            out_p_target = V(vss);
+            out_n_target = V(vdd);
+        end
+
+        // Drive outputs with transition
+        V(out_p) <+ transition(out_p_target, 0, tedge);
+        V(out_n) <+ transition(out_n_target, 0, tedge);
+    end
+endmodule

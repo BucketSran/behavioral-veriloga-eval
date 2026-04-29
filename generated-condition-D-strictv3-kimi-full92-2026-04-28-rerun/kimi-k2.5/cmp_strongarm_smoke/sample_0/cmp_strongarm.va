@@ -1,0 +1,58 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cmp_strongarm (clk, vinn, vinp, out_n, out_p, lp, lm, vss, vdd);
+    input clk;
+    input vinn;
+    input vinp;
+    output out_n;
+    output out_p;
+    output lp;
+    output lm;
+    inout vss;
+    inout vdd;
+    electrical clk, vinn, vinp, out_n, out_p, lp, lm, vss, vdd;
+
+    parameter real vth = 0.45 from (0:inf);
+    parameter real tr = 50p from (0:inf);
+    parameter real tf = 50p from (0:inf);
+    parameter real td = 100p from [0:inf);
+
+    integer state;
+    real vhi;
+    real vlo;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+        end
+
+        vhi = V(vdd);
+        vlo = V(vss);
+
+        @(cross(V(clk) - vth, 1)) begin
+            if (V(vinp) > V(vinn)) begin
+                state = 1;
+            end else begin
+                state = -1;
+            end
+        end
+
+        if (state == 1) begin
+            V(out_p) <+ transition(vhi, td, tr, tf);
+            V(out_n) <+ transition(vlo, td, tr, tf);
+            V(lp) <+ transition(vhi, td, tr, tf);
+            V(lm) <+ transition(vlo, td, tr, tf);
+        end else if (state == -1) begin
+            V(out_p) <+ transition(vlo, td, tr, tf);
+            V(out_n) <+ transition(vhi, td, tr, tf);
+            V(lp) <+ transition(vlo, td, tr, tf);
+            V(lm) <+ transition(vhi, td, tr, tf);
+        end else begin
+            V(out_p) <+ transition((vhi+vlo)/2, td, tr, tf);
+            V(out_n) <+ transition((vhi+vlo)/2, td, tr, tf);
+            V(lp) <+ transition((vhi+vlo)/2, td, tr, tf);
+            V(lm) <+ transition((vhi+vlo)/2, td, tr, tf);
+        end
+    end
+endmodule

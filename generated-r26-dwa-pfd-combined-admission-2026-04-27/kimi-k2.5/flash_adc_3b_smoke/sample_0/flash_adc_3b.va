@@ -1,0 +1,47 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module flash_adc_3b(vdd, vss, vin, clk, dout2, dout1, dout0);
+    inout electrical vdd, vss;
+    input electrical vin, clk;
+    output electrical dout2, dout1, dout0;
+    parameter real vrefp = 0.9;
+    parameter real vrefn = 0.0;
+    parameter real vth = 0.45;
+    parameter real tedge = 100p;
+    integer code;
+    integer bit0;
+    integer bit1;
+    integer bit2;
+    real norm;
+
+    analog begin
+        @(initial_step) begin
+            code = 0;
+            bit0 = 0;
+            bit1 = 0;
+            bit2 = 0;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            norm = (V(vin) - vrefn) / (vrefp - vrefn);
+            if (norm < 0.125) code = 0;
+            else if (norm < 0.250) code = 1;
+            else if (norm < 0.375) code = 2;
+            else if (norm < 0.500) code = 3;
+            else if (norm < 0.625) code = 4;
+            else if (norm < 0.750) code = 5;
+            else if (norm < 0.875) code = 6;
+            else code = 7;
+            if (code < 0) code = 0;
+            if (code > 7) code = 7;
+            bit2 = (code >= 4) ? 1 : 0;
+            bit1 = ((code == 2) || (code == 3) || (code == 6) || (code == 7)) ? 1 : 0;
+            bit0 = ((code == 1) || (code == 3) || (code == 5) || (code == 7)) ? 1 : 0;
+        end
+
+        V(dout2) <+ V(vss) + (V(vdd) - V(vss)) * transition(bit2 ? 1.0 : 0.0, 0.0, tedge, tedge);
+        V(dout1) <+ V(vss) + (V(vdd) - V(vss)) * transition(bit1 ? 1.0 : 0.0, 0.0, tedge, tedge);
+        V(dout0) <+ V(vss) + (V(vdd) - V(vss)) * transition(bit0 ? 1.0 : 0.0, 0.0, tedge, tedge);
+    end
+endmodule

@@ -1,0 +1,92 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bbpd_ref (data, clk, retimed_data, up, down);
+    input data;
+    input clk;
+    input retimed_data;
+    output up;
+    output down;
+    electrical data, clk, retimed_data, up, down;
+
+    parameter real vth = 0.9 from (0:inf);
+    parameter real vhi = 1.8 from (0:inf);
+    parameter real vlo = 0.0 from [0:inf);
+    parameter real tr = 10p from (0:inf);
+    parameter real tf = 10p from (0:inf);
+
+    integer state;
+    integer data_prev;
+    integer clk_prev;
+    integer retimed_prev;
+    real up_target;
+    real down_target;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+            data_prev = 0;
+            clk_prev = 0;
+            retimed_prev = 0;
+            up_target = vlo;
+            down_target = vlo;
+        end
+
+        // Detect rising edge on data
+        @(cross(V(data) - vth, 1)) begin
+            if (clk_prev == 0 && retimed_prev == 0) begin
+                state = 1;  // UP pulse
+            end
+            else if (clk_prev == 1 && retimed_prev == 1) begin
+                state = 2;  // DOWN pulse
+            end
+            else begin
+                state = 0;  // No pulse (aligned)
+            end
+            data_prev = 1;
+        end
+
+        // Detect falling edge on data
+        @(cross(V(data) - vth, -1)) begin
+            data_prev = 0;
+        end
+
+        // Track clk state
+        @(cross(V(clk) - vth, 1)) begin
+            clk_prev = 1;
+        end
+
+        @(cross(V(clk) - vth, -1)) begin
+            clk_prev = 0;
+        end
+
+        // Track retimed_data state
+        @(cross(V(retimed_data) - vth, 1)) begin
+            retimed_prev = 1;
+        end
+
+        @(cross(V(retimed_data) - vth, -1)) begin
+            retimed_prev = 0;
+        end
+
+        // Compute output targets based on state
+        if (state == 1) begin
+            up_target = vhi;
+            down_target = vlo;
+            state = 0;  // Reset after one evaluation
+        end
+        else if (state == 2) begin
+            up_target = vlo;
+            down_target = vhi;
+            state = 0;  // Reset after one evaluation
+        end
+        else begin
+            up_target = vlo;
+            down_target = vlo;
+        end
+
+        // Unconditional transition contributions
+        V(up) <+ transition(up_target, 0, tr, tf);
+        V(down) <+ transition(down_target, 0, tr, tf);
+    end
+endmodule

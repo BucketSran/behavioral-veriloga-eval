@@ -1,0 +1,25 @@
+// Spectre testbench for xor_phase_detector
+
+ahdl_include "xor_phase_detector.va"
+
+// Supply voltages
+VDD (vdd 0) vsource dc=0.9
+VSS (vss 0) vsource dc=0
+
+// Clock sources with phase offset
+// ref: 100MHz, 50% duty cycle, starts at 0
+VREF (ref 0) vsource type=pulse val0=0 val1=0.9 period=10n rise=100p fall=100p width=5n
+
+// div: 100MHz, 50% duty cycle, 2.5ns phase offset (90 degrees)
+VDIV (div 0) vsource type=pulse val0=0 val1=0.9 period=10n rise=100p fall=100p width=5n delay=2.5n
+
+// Device Under Test
+DUT (vdd vss ref div pd_out) xor_phase_detector vth=0.45 tedge=50p
+
+// Save statements for required signals
+save ref
+save div
+save pd_out
+
+// Transient analysis
+tran tran stop=200n maxstep=100p errpreset=conservative

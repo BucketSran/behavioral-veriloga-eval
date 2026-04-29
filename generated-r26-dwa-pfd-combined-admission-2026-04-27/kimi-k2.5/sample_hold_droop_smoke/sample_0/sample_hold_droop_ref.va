@@ -1,0 +1,57 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sample_hold_droop_ref(vdd, vss, clk, vin, vout);
+    electrical vdd, vss, clk, vin, vout;
+
+    parameter real vth = 0.45;
+    parameter real tau = 120n;
+    parameter real dt = 0.5n;
+    parameter real trf = 40p;
+
+    real v_held;
+    real vout_target;
+    integer in_hold;
+    real t_last_droop;
+
+    analog begin
+        @(initial_step) begin
+            v_held = 0.0;
+            vout_target = 0.0;
+            in_hold = 0;
+            t_last_droop = 0.0;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            v_held = V(vin);
+            in_hold = 0;
+            t_last_droop = $abstime;
+        end
+
+        @(cross(V(clk) - vth, -1)) begin
+            in_hold = 1;
+            t_last_droop = $abstime;
+        end
+
+        if (in_hold == 0) begin
+            // During sample (clk high), track the held sample value
+            vout_target = v_held;
+        end else begin
+            // During hold (clk low), apply droop toward vss using timer-based updates
+            @(timer(t_last_droop, dt)) begin
+                real alpha;
+                alpha = 1.0 - (dt / tau);
+                if (alpha < 0.0) alpha = 0.0;
+                if (alpha > 1.0) alpha = 1.0;
+                v_held = v_held * alpha;
+                // Clamp to supply range
+                if (v_held > V(vdd)) v_held = V(vdd);
+                if (v_held < V(vss)) v_held = V(vss);
+                t_last_droop = $abstime;
+            end
+            vout_target = v_held;
+        end
+
+        V(vout) <+ transition(vout_target, 0, trf, trf);
+    end
+endmodule

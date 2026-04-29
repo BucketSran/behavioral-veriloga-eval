@@ -1,0 +1,63 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module serializer_8b (vdd, vss, d7, d6, d5, d4, d3, d2, d1, d0, load, clk, sout);
+    inout electrical vdd, vss;
+    input electrical d7, d6, d5, d4, d3, d2, d1, d0;
+    input electrical load, clk;
+    output electrical sout;
+
+    parameter real vth = 0.45;
+    parameter real tedge = 100p;
+
+    integer shift_reg;
+    integer bit_cnt;
+    integer sout_val;
+    real v_high;
+    real v_low;
+
+    analog begin
+        @(initial_step) begin
+            shift_reg = 0;
+            bit_cnt = 0;
+            sout_val = 0;
+        end
+
+        // Capture dynamic supply levels
+        v_high = V(vdd);
+        v_low = V(vss);
+
+        // Rising edge of load: latch parallel data, reset counter, output MSB
+        @(cross(V(load) - vth, 1)) begin
+            shift_reg = 0;
+            if (V(d7) > vth) shift_reg = shift_reg + 128;
+            if (V(d6) > vth) shift_reg = shift_reg + 64;
+            if (V(d5) > vth) shift_reg = shift_reg + 32;
+            if (V(d4) > vth) shift_reg = shift_reg + 16;
+            if (V(d3) > vth) shift_reg = shift_reg + 8;
+            if (V(d2) > vth) shift_reg = shift_reg + 4;
+            if (V(d1) > vth) shift_reg = shift_reg + 2;
+            if (V(d0) > vth) shift_reg = shift_reg + 1;
+            bit_cnt = 0;
+            sout_val = (shift_reg >> 7) & 1;
+        end
+
+        // Rising edge of clk (when load is low): shift and output next bit
+        @(cross(V(clk) - vth, 1)) begin
+            if (V(load) < vth) begin
+                if (bit_cnt < 7) begin
+                    bit_cnt = bit_cnt + 1;
+                    shift_reg = (shift_reg << 1) & 255;
+                    sout_val = (shift_reg >> 7) & 1;
+                end
+            end
+        end
+
+        // Drive output with transition
+        if (sout_val == 1) begin
+            V(sout) <+ transition(v_high, 0, tedge);
+        end else begin
+            V(sout) <+ transition(v_low, 0, tedge);
+        end
+    end
+endmodule

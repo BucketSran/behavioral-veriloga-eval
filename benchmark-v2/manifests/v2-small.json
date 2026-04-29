@@ -1,0 +1,713 @@
+{
+  "manifest_version": 1,
+  "name": "v2-small",
+  "created": "2026-04-29",
+  "purpose": "Draft perturbation-transfer split for RAG-v2 and mechanism-level generalization.",
+  "storage_rule": "Draft only. Do not migrate entries into behavioral-veriloga-eval/tasks until gold, checker, and EVAS/Spectre parity are reviewed.",
+  "task_count": 30,
+  "required_task_fields": [
+    "task_id",
+    "source_seed",
+    "mechanism_family",
+    "perturbation_level",
+    "prompt_strategy",
+    "gold_required",
+    "checker_required",
+    "spectre_parity_required",
+    "split",
+    "status"
+  ],
+  "tasks": [
+    {
+      "task_id": "v2_adc_dac_alias_shared_state_4b",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Rename analog input to measured_level and reconstructed output to held_level while preserving code-output behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "expected_slots": [
+        "measured_level",
+        "sample_clock",
+        "code_bits[3:0]",
+        "held_level"
+      ],
+      "review_notes": "Control task for semantic aliasing and shared held code state.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_keywordless_ramp_5b",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Describe sampled decision outputs and a held reconstructed level without ADC, DAC, quantizer, or monotonic keywords.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "parameter_changes": {
+        "width": 5,
+        "stimulus": "slow_ramp_with_dwell"
+      },
+      "review_notes": "Tests query rewriting from functional description.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_not_continuous_tracking",
+      "source_seed": "adc_dac_ideal_4b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Require reconstructed output to update only from the sampled decision code, explicitly not to track the raw input continuously.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "negative_constraints": [
+        "not_continuous_tracking",
+        "single_code_source_of_truth"
+      ],
+      "review_notes": "Should reject gain-buffer or raw-input follower templates.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_reference_offset_3b",
+      "source_seed": "flash_adc_3b",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Use shifted reference endpoints and checker tolerance around code-centered reconstruction.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "parameter_changes": {
+        "width": 3,
+        "vmin": 0.2,
+        "vmax": 1.0,
+        "tolerance_lsb": 0.35
+      },
+      "review_notes": "Tests parameter binding beyond default VDD/VSS assumptions.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_adc_dac_calibrated_chain_settled",
+      "source_seed": "sar_adc_dac_weighted_8b",
+      "mechanism_family": "adc_dac_quantize_reconstruct_plus_calibration",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Compose sampled code/reconstruction with an offset-search settled flag; final output must use calibrated offset after search.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "expected_slots": [
+        "sense_node",
+        "advance",
+        "code_bits",
+        "reconstructed_level",
+        "settled"
+      ],
+      "review_notes": "System task: local ADC-DAC behavior alone is insufficient.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_alias_6b",
+      "source_seed": "dac_binary_clk_4b",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Use neutral names for bit inputs and output drive_estimate while keeping binary-weighted behavior.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "parameter_changes": {
+        "width": 6
+      },
+      "review_notes": "Semantic alias with width perturbation.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_keywordless_weighted_sum",
+      "source_seed": "dac_binary_clk_4b",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Describe a clocked weighted sum of electrical decision lines without saying DAC, binary, or converter.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "review_notes": "Forces mechanism inference from weights and held update timing.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_not_thermometer_5b",
+      "source_seed": "dac_binary_clk_4b",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Explicitly reject thermometer/unary active-count coding; each input line has binary place value.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "negative_constraints": [
+        "not_thermometer",
+        "not_unary_active_count"
+      ],
+      "parameter_changes": {
+        "width": 5
+      },
+      "review_notes": "Forbidden-mechanism top-k trap for retrieval.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_reordered_ports_msb_first",
+      "source_seed": "dac_binary_clk_4b",
+      "mechanism_family": "binary_weighted_dac",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Declare ports in MSB-first order but define weights by names; checker verifies binding, not declaration order.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "negative_constraints": [
+        "do_not_infer_weight_from_port_order_only"
+      ],
+      "review_notes": "Tests slot binding for bit significance.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_binary_dac_segmented_glitch_guard",
+      "source_seed": "dac_binary_clk_4b",
+      "mechanism_family": "binary_weighted_dac_with_segment_guard",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Combine binary coarse bits with small unit-cell segment and require bounded transition glitch after clock edge.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "review_notes": "System task mixing binary and unit-cell semantics.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_alias_rotating_window",
+      "source_seed": "dwa_ptr_gen",
+      "mechanism_family": "dwa_rotating_pointer_window",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Rename pointer to cursor and selected cells to active_window while preserving contiguous rotation.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "review_notes": "Semantic alias control for DWA.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_keywordless_cursor_wrap",
+      "source_seed": "dwa_wraparound_smoke",
+      "mechanism_family": "dwa_rotating_pointer_window",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Describe rotating contiguous cell activation with wraparound without using DWA, DEM, or pointer keywords.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "review_notes": "Tests HyDE mechanism hypothesis for DWA-like behavior.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_not_random_scramble",
+      "source_seed": "dwa_ptr_gen_no_overlap_smoke",
+      "mechanism_family": "dwa_rotating_pointer_window",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Explicitly require deterministic cyclic contiguous selection, not random scrambling or independent per-cell toggling.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "negative_constraints": [
+        "not_randomized",
+        "not_independent_cell_toggle"
+      ],
+      "review_notes": "Rejects stochastic/no-overlap-only templates.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_window_size_hop",
+      "source_seed": "dwa_ptr_gen",
+      "mechanism_family": "dwa_rotating_pointer_window",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Change active window size during run and verify pointer advance equals prior active count.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "parameter_changes": {
+        "cells": 16,
+        "window_sizes": [
+          3,
+          5,
+          2
+        ]
+      },
+      "review_notes": "Tests state update ordering and checker-aware parameterization.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_dwa_segmented_dac_glitch",
+      "source_seed": "dwa_ptr_gen",
+      "mechanism_family": "dwa_plus_segmented_dac",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Use rotating unit-cell selection to drive a segmented analog output and check wrap plus bounded settling glitch.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "review_notes": "Composition task linking pointer correctness to analog output behavior.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_alias_event_order",
+      "source_seed": "pfd_updn",
+      "mechanism_family": "pfd_updn_reset_race",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Rename ref/div to early_event and late_event and outputs to accelerate/retard pulses.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "review_notes": "Semantic alias for event-order pulse behavior.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_keywordless_mutual_exclusion",
+      "source_seed": "pfd_updn",
+      "mechanism_family": "pfd_updn_reset_race",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Describe two edge streams producing mutually exclusive correction pulses until both have arrived, without PFD or phase detector terms.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "review_notes": "Tests retrieval without canonical phase-detector language.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_not_xor_detector",
+      "source_seed": "xor_phase_detector",
+      "mechanism_family": "pfd_updn_reset_race",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Explicitly require separate UP/DN event pulses and reject duty-cycle XOR phase comparison.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "negative_constraints": [
+        "not_xor_phase_detector",
+        "not_single_duty_output"
+      ],
+      "review_notes": "Forbidden-mechanism trap between related phase-detector families.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_reset_delay_window",
+      "source_seed": "pfd_reset_race_smoke",
+      "mechanism_family": "pfd_updn_reset_race",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Vary reset-delay window and require no double pulses across near-simultaneous edge arrivals.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "parameter_changes": {
+        "reset_delay_ps": 25,
+        "race_window_ps": 40
+      },
+      "review_notes": "Checker must observe event timing rather than only final voltage.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_pfd_lock_detector_composed",
+      "source_seed": "pfd_updn",
+      "mechanism_family": "pfd_plus_lock_detector",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Combine UP/DN pulse logic with a lock flag asserted after repeated small correction windows.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "review_notes": "System behavior requires temporal aggregation of pulse widths.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_divider_alias_odd_ratio",
+      "source_seed": "clk_div",
+      "mechanism_family": "divider_counter_ratio",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Rename input clock to cadence and output to every_fifth_mark for an odd divide ratio.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "parameter_changes": {
+        "ratio": 5
+      },
+      "review_notes": "Semantic alias plus odd-ratio timing.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_divider_keywordless_ratio_counter",
+      "source_seed": "clk_div",
+      "mechanism_family": "divider_counter_ratio",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Describe emitting one output event after a fixed number of input events without divider or counter keywords.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "review_notes": "Tests mechanism inference from event ratio only.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_counter_not_gray_code",
+      "source_seed": "gray_counter_4b",
+      "mechanism_family": "binary_counter_ratio",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Require ordinary binary count progression and explicitly reject Gray-code one-bit-change output.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "negative_constraints": [
+        "not_gray_code",
+        "not_one_bit_change_property"
+      ],
+      "review_notes": "Prevents retrieval of gray_counter skeleton for binary task.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_divider_ratio_hop_reset_phase",
+      "source_seed": "clk_div",
+      "mechanism_family": "divider_counter_ratio",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Switch divide ratio after reset release and verify phase of first output event.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "parameter_changes": {
+        "ratios": [
+          3,
+          7
+        ],
+        "reset_initial_count": 0
+      },
+      "review_notes": "Tests state reset and dynamic parameter binding.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_divider_pfd_feedback_stub",
+      "source_seed": "clk_div",
+      "mechanism_family": "divider_plus_event_feedback",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Feed divided events into a simple lead/lag pulse comparator and verify ratio-dependent pulse direction.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "review_notes": "Small system relation between divider and event comparator.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_alias_sense_node",
+      "source_seed": "sample_hold",
+      "mechanism_family": "sample_hold_discrete_update",
+      "perturbation_level": "P2_semantic_alias",
+      "prompt_strategy": "Rename input to sense_node and clock to capture_strobe while requiring held output between strobes.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "review_notes": "Semantic alias control for sample/hold.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_keywordless_latched_level",
+      "source_seed": "sample_hold",
+      "mechanism_family": "sample_hold_discrete_update",
+      "perturbation_level": "P3_keyword_removal",
+      "prompt_strategy": "Describe copying an electrical level only at capture instants and preserving it otherwise, without sample or hold terms.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "review_notes": "Tests functional IR extraction for discrete update state.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_not_follower",
+      "source_seed": "sample_hold",
+      "mechanism_family": "sample_hold_discrete_update",
+      "perturbation_level": "P4_negative_distractor",
+      "prompt_strategy": "Explicitly reject continuous follower behavior; output may only change in a narrow window after capture_strobe.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "negative_constraints": [
+        "not_voltage_follower",
+        "not_continuous_tracking"
+      ],
+      "review_notes": "Checker should test between-edge invariance.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_aperture_tolerance",
+      "source_seed": "sample_hold",
+      "mechanism_family": "sample_hold_discrete_update",
+      "perturbation_level": "P5_parameter_checker",
+      "prompt_strategy": "Vary aperture delay and droop tolerance; checker verifies captured value at delayed observation point.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "parameter_changes": {
+        "aperture_delay_ns": 0.5,
+        "droop_tolerance_mv": 3.0
+      },
+      "review_notes": "Tests timing and tolerance parameter binding.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    },
+    {
+      "task_id": "v2_sample_hold_calibration_settled",
+      "source_seed": "sample_hold",
+      "mechanism_family": "sample_hold_plus_calibration",
+      "perturbation_level": "P6_system_composition",
+      "prompt_strategy": "Feed held samples into a simple offset search that raises settled only after consecutive bounded errors.",
+      "gold_required": true,
+      "checker_required": true,
+      "spectre_parity_required": true,
+      "split": "v2-small",
+      "status": "validated_gold_evas_spectre",
+      "review_notes": "Composition task combining discrete update and calibration convergence.",
+      "validation": {
+        "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+        "evas_status": "PASS",
+        "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1",
+        "spectre_status": "PASS",
+        "spectre_mode": "spectre"
+      }
+    }
+  ],
+  "materialized_at": "2026-04-29",
+  "status": "validated_gold_evas_spectre",
+  "validation_summary": {
+    "tasks": 30,
+    "evas_pass": "30/30",
+    "spectre_pass": "30/30",
+    "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+    "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1"
+  }
+}

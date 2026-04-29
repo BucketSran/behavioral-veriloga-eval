@@ -1,0 +1,51 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "bbpd_data_edge_alignment_ref.va"
+
+// Power supplies
+Vdd (vdd 0) vsource dc=1.8
+Vss (vss 0) vsource dc=0
+
+// Clock: 20MHz, period = 50ns
+Vclk (clk 0) vsource type=pulse val0=0 val1=1.8 period=50n rise=0.1n fall=0.1n width=25n
+
+// Data: Pattern with intentional phase variations to test alignment
+// Lead window (0-80ns): data edges before clock edges -> UP pulses
+// Lag window (90-170ns): data edges after clock edges -> DN pulses
+Vdata (data 0) vsource type=pwl wave=[
+    0n      0
+    5n      0
+    5.1n    1.8
+    15n     1.8
+    15.1n   0
+    30n     0
+    30.1n   1.8
+    45n     1.8
+    45.1n   0
+    60n     0
+    60.1n   1.8
+    75n     1.8
+    75.1n   0
+    90n     0
+    90.1n   1.8
+    105n    1.8
+    105.1n  0
+    120n    0
+    120.1n  1.8
+    135n    1.8
+    135.1n  0
+    150n    0
+    150.1n  1.8
+    165n    1.8
+    165.1n  0
+]
+
+// DUT instance
+XDUT (vdd vss clk data up dn retimed_data) bbpd_data_edge_alignment_ref
+
+// Transient analysis
+tran tran stop=170n maxstep=0.1n
+
+// Save required signals
+save clk data up dn

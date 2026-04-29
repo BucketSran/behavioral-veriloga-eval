@@ -1,0 +1,42 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cmp_strongarm (clk, vinn, vinp, out_n, out_p, lp, lm, vss, vdd);
+    input electrical clk, vinn, vinp, vss, vdd;
+    output electrical out_n, out_p, lp, lm;
+
+    parameter real vth = 0.45 from [0:1.8];
+    parameter real voh = 0.9 from [0:1.8];
+    parameter real vol = 0.0 from [0:1.8];
+    parameter real tr = 100p from (0:1];
+    parameter real tf = 100p from (0:1];
+    parameter real td = 50p from [0:1];
+
+    integer state; // 0: vinp > vinn, 1: vinp < vinn
+    real out_p_val, out_n_val;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+            out_p_val = vol;
+            out_n_val = voh;
+        end
+
+        @(cross(V(clk) - vth, 1)) begin
+            if (V(vinp) > V(vinn)) begin
+                state = 0;
+                out_p_val = voh;
+                out_n_val = vol;
+            end else begin
+                state = 1;
+                out_p_val = vol;
+                out_n_val = voh;
+            end
+        end
+
+        V(out_p) <+ transition(out_p_val, td, tr, tf);
+        V(out_n) <+ transition(out_n_val, td, tr, tf);
+        V(lp) <+ transition((state == 0) ? voh : vol, td, tr, tf);
+        V(lm) <+ transition((state == 1) ? voh : vol, td, tr, tf);
+    end
+endmodule

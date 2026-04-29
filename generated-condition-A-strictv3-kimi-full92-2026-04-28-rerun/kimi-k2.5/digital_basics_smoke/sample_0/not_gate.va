@@ -1,0 +1,33 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module not_gate (VDD, VSS, A, Y);
+    electrical VDD, VSS, A, Y;
+
+    parameter real vth = 0.9;
+    parameter real tdel = 0.1n;
+    parameter real tr = 0.1n;
+    parameter real tf = 0.1n;
+
+    integer a_logic, y_logic;
+    real vdd_val;
+
+    analog begin
+        @(initial_step) begin
+            a_logic = 0;
+            y_logic = 1;
+        end
+
+        // Get supply voltage
+        vdd_val = V(VDD) - V(VSS);
+
+        // Detect logic level
+        a_logic = (V(A) - V(VSS) > vth) ? 1 : 0;
+
+        // NOT function
+        y_logic = ~a_logic & 1;
+
+        // Drive output
+        V(Y) <+ transition(V(VSS) + y_logic * vdd_val, tdel, tr, tf);
+    end
+endmodule

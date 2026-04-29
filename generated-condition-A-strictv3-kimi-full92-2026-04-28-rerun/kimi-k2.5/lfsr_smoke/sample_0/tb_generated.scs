@@ -1,0 +1,62 @@
+// LFSR Testbench - EVAS compatible
+// 31-bit LFSR with 1 GHz clock, seed=123, reset deasserts at 101 ns
+
+// Include Verilog-A module
+include "lfsr.va"
+
+// Global parameters
+parameters vdd_val=1.0
+parameters vss_val=0.0
+parameters seed=123
+
+// Power supplies
+vsource vdd (vdd 0) vsource dc=vdd_val
+vsource vss (vss 0) vsource dc=vss_val
+
+// Clock: 1 GHz = 1 ns period, 50% duty cycle
+// Start with 0.5 ns delay to align edges
+vsource clk (clk 0) vsource type=pulse \
+    val0=vss_val val1=vdd_val \
+    period=1n rise=0.05n fall=0.05n \
+    width=0.45n delay=0.5n
+
+// Active-low reset: starts low, goes high at 101 ns
+vsource rstb (rstb 0) vsource type=pulse \
+    val0=vss_val val1=vdd_val \
+    period=1000n rise=0.05n fall=0.05n \
+    width=900n delay=0n
+
+// Enable: always high
+vsource en (en 0) vsource dc=vdd_val
+
+// DUT instantiation
+lfsr dut (
+    DPN dpn
+    VDD vdd
+    VSS vss
+    CLK clk
+    EN en
+    RSTB rstb
+) (
+    vdd_val=vdd_val
+    vss_val=vss_val
+    vth=0.5
+    tr=0.05n
+    tf=0.05n
+    seed=seed
+)
+
+// Transient analysis
+tran tran stop=500n maxstep=2n
+
+// Save statements for required waveforms
+save dpn
+save rstb
+save clk
+save vdd
+save vss
+save en
+
+// Additional internal saves for debugging
+save dut.lfsr_reg
+save dut.dpn_val

@@ -1,0 +1,148 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cppll_timer_ref (VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock);
+    inout VDD;
+    inout VSS;
+    input ref_clk;
+    output fb_clk;
+    output dco_clk;
+    output vctrl_mon;
+    output lock;
+
+    electrical VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock;
+
+    // Parameters
+    parameter real vth = 0.9 from (0:inf);
+    parameter real tdel = 1p from (0:inf);
+    parameter real tr = 100p from (0:inf);
+    parameter real tf = 100p from (0:inf);
+    parameter real kp = 1e-6 from (0:inf);
+    parameter real ki = 5e-9 from (0:inf);
+    parameter real fmin = 10e6 from (0:inf);
+    parameter real fmax = 200e6 from (0:inf);
+    parameter real div_ratio = 8 from (1:inf);
+    parameter real lock_thr = 0.05 from (0:inf);
+    parameter real lock_cnt_max = 100 from (1:inf);
+
+    // Internal variables
+    integer ref_edge_cnt;
+    integer fb_edge_cnt;
+    integer div_cnt;
+    integer lock_cnt;
+    integer locked;
+    real phase_err;
+    real vctrl;
+    real vctrl_prop;
+    real vctrl_int;
+    real t_dco;
+    real t_dco_nom;
+    real t_next;
+    real vdd_level;
+    real vss_level;
+    real ref_period_est;
+    real fb_period_est;
+    real freq_err;
+
+    analog begin
+        @(initial_step) begin
+            ref_edge_cnt = 0;
+            fb_edge_cnt = 0;
+            div_cnt = 0;
+            lock_cnt = 0;
+            locked = 0;
+            phase_err = 0.0;
+            vctrl = 0.0;
+            vctrl_prop = 0.0;
+            vctrl_int = 0.0;
+            t_dco = 1.0 / 100e6;
+            t_dco_nom = 1.0 / 100e6;
+            t_next = 0.0;
+            vdd_level = 1.8;
+            vss_level = 0.0;
+            ref_period_est = 20e-9;
+            fb_period_est = 20e-9;
+            freq_err = 0.0;
+        end
+
+        // Sample supply levels
+        vdd_level = V(VDD);
+        vss_level = V(VSS);
+
+        // Reference clock edge detection
+        @(cross(V(ref_clk) - vth, 1)) begin
+            ref_edge_cnt = ref_edge_cnt + 1;
+            // Estimate reference period from DCO nominal
+            ref_period_est = t_dco_nom * div_ratio;
+        end
+
+        // DCO timer-based oscillator
+        // Generate edges at t_next, update period based on vctrl
+        @(timer(t_next)) begin
+            // Toggle DCO output
+            div_cnt = div_cnt + 1;
+
+            // Calculate next edge time based on current vctrl
+            // vctrl maps to frequency: higher vctrl = higher frequency
+            t_dco = t_dco_nom * (1.0 - 0.5 * (vctrl - 0.5 * (vdd_level + vss_level)) / (vdd_level - vss_level));
+
+            // Clamp period
+            if (t_dco < 1.0 / fmax) t_dco = 1.0 / fmax;
+            if (t_dco > 1.0 / fmin) t_dco = 1.0 / fmin;
+
+            t_next = $abstime + t_dco;
+
+            // Generate divided feedback clock
+            if (div_cnt >= div_ratio) begin
+                div_cnt = 0;
+                fb_edge_cnt = fb_edge_cnt + 1;
+                fb_period_est = t_dco * div_ratio;
+            end
+        end
+
+        // Phase/frequency detector and loop filter (proportional + integral)
+        // Update on reference edges
+        @(cross(V(ref_clk) - vth, 1)) begin
+            // Frequency error estimation
+            freq_err = (fb_period_est - ref_period_est) / ref_period_est;
+
+            // Phase error (simplified: use frequency error as proxy when not locked)
+            phase_err = freq_err;
+
+            // PI controller
+            vctrl_prop = kp * phase_err;
+            vctrl_int = vctrl_int + ki * phase_err;
+
+            // Clamp integrator
+            if (vctrl_int > (vdd_level - vss_level)) vctrl_int = (vdd_level - vss_level);
+            if (vctrl_int < -(vdd_level - vss_level)) vctrl_int = -(vdd_level - vss_level);
+
+            // Total control voltage (centered at mid-rail)
+            vctrl = 0.5 * (vdd_level + vss_level) + vctrl_prop + vctrl_int;
+
+            // Clamp control voltage to supply rails
+            if (vctrl > vdd_level) vctrl = vdd_level;
+            if (vctrl < vss_level) vctrl = vss_level;
+
+            // Lock detection
+            if (abs(phase_err) < lock_thr) begin
+                lock_cnt = lock_cnt + 1;
+                if (lock_cnt >= lock_cnt_max) locked = 1;
+            end else begin
+                lock_cnt = 0;
+                locked = 0;
+            end
+        end
+
+        // Initialize t_next on first step
+        @(initial_step) begin
+            t_next = 1e-9;
+        end
+
+        // Output assignments with transition
+        V(dco_clk) <+ transition((div_cnt < div_ratio/2) ? vdd_level : vss_level, tdel, tr, tf);
+        V(fb_clk) <+ transition((div_cnt == 0) ? vdd_level : vss_level, tdel, tr, tf);
+        V(vctrl_mon) <+ transition(vctrl, tdel, tr, tf);
+        V(lock) <+ transition(locked ? vdd_level : vss_level, tdel, tr, tf);
+    end
+endmodule

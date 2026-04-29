@@ -1,0 +1,200 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module adpll_timer_ref (VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock);
+    inout VDD, VSS;
+    input ref_clk;
+    output fb_clk, dco_clk, vctrl_mon, lock;
+    electrical VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock;
+
+    // Parameters
+    parameter integer div_ratio = 8;
+    parameter real f_center = 760e6;
+    parameter real freq_step_hz = 5e6;
+    parameter real f_min = 500e6;
+    parameter real f_max = 1.2e9;
+    parameter integer code_min = 0;
+    parameter integer code_max = 63;
+    parameter integer code_center = 32;
+    parameter integer code_init = 40;
+    parameter real tedge = 1n;
+    parameter real lock_tol = 12n;
+    parameter integer lock_count_target = 4;
+
+    // Internal state variables
+    integer dco_code;
+    integer div_counter;
+    integer lock_count;
+    real t_next_toggle;
+    real dco_period;
+    real dco_freq;
+    real ref_period;
+    real phase_error;
+    real vdd_level;
+    real vss_level;
+    real vth;
+    real vctrl_val;
+    real lock_val;
+    real fb_val;
+    real dco_val;
+    real last_ref_time;
+    real last_fb_time;
+    real ref_period_est;
+    real fb_period_est;
+    integer initialized;
+    integer first_ref;
+    integer first_fb;
+    real current_time;
+    real time_since_fb;
+
+    analog begin
+        @(initial_step) begin
+            vdd_level = 1.8;
+            vss_level = 0.0;
+            vth = 0.9;
+            dco_code = code_init;
+            div_counter = 0;
+            lock_count = 0;
+            t_next_toggle = 0.0;
+            dco_period = 1.0 / f_center;
+            dco_freq = f_center;
+            ref_period = 20n; // 50 MHz reference
+            phase_error = 0.0;
+            last_ref_time = 0.0;
+            last_fb_time = 0.0;
+            ref_period_est = 20n;
+            fb_period_est = 20n;
+            initialized = 0;
+            first_ref = 1;
+            first_fb = 1;
+            dco_val = vss_level;
+            fb_val = vss_level;
+            lock_val = vss_level;
+            vctrl_val = vss_level;
+            current_time = 0.0;
+            time_since_fb = 0.0;
+        end
+
+        // Initialize DCO timer on first step
+        if (!initialized) begin
+            t_next_toggle = $abstime + dco_period / 2.0;
+            initialized = 1;
+        end
+
+        // DCO timer-based toggle
+        @(timer(t_next_toggle)) begin
+            // Toggle DCO output
+            if (dco_val > vth) begin
+                dco_val = vss_level;
+            end else begin
+                dco_val = vdd_level;
+            end
+
+            // Update next toggle time based on current DCO frequency
+            dco_period = 1.0 / dco_freq;
+            t_next_toggle = t_next_toggle + dco_period / 2.0;
+
+            // Divide DCO rising edges to generate fb_clk
+            if (dco_val > vth) begin
+                div_counter = div_counter + 1;
+                if (div_counter >= div_ratio) begin
+                    div_counter = 0;
+                    // Toggle fb_clk on division
+                    if (fb_val > vth) begin
+                        fb_val = vss_level;
+                    end else begin
+                        fb_val = vdd_level;
+                    end
+                end
+            end
+        end
+
+        // Detect reference clock rising edges
+        @(cross(V(ref_clk) - vth, 1)) begin
+            current_time = $abstime;
+
+            if (!first_ref) begin
+                ref_period_est = current_time - last_ref_time;
+            end
+            first_ref = 0;
+            last_ref_time = current_time;
+
+            // Phase comparison: compare ref edge timing with expected fb edge
+            // Simple bang-bang phase detector
+            time_since_fb = current_time - last_fb_time;
+
+            // If fb edge was recent, we're close to lock
+            // If fb edge is far, we need to adjust
+            if (time_since_fb > ref_period_est / 2.0) begin
+                // fb is lagging, increase frequency
+                dco_code = dco_code + 1;
+            end else begin
+                // fb is leading, decrease frequency
+                dco_code = dco_code - 1;
+            end
+
+            // Clamp code to bounds
+            if (dco_code < code_min) begin
+                dco_code = code_min;
+            end
+            if (dco_code > code_max) begin
+                dco_code = code_max;
+            end
+
+            // Update DCO frequency based on code - target 50 MHz * div_ratio = 400 MHz for fb_clk = ref_clk
+            // For fb_clk to match 50 MHz ref, dco_freq should be 50 MHz * div_ratio
+            dco_freq = 50e6 * div_ratio + (dco_code - code_center) * freq_step_hz;
+
+            // Clamp frequency
+            if (dco_freq < f_min) begin
+                dco_freq = f_min;
+            end
+            if (dco_freq > f_max) begin
+                dco_freq = f_max;
+            end
+
+            // Calculate phase error for lock detection
+            phase_error = time_since_fb;
+            if (phase_error > ref_period_est / 2.0) begin
+                phase_error = ref_period_est - phase_error;
+            end
+
+            // Lock detection: consecutive phase errors within tolerance
+            if (phase_error < lock_tol) begin
+                lock_count = lock_count + 1;
+                if (lock_count >= lock_count_target) begin
+                    lock_count = lock_count_target; // saturate
+                end
+            end else begin
+                lock_count = 0;
+            end
+        end
+
+        // Detect feedback clock rising edges
+        @(cross(V(fb_clk) - vth, 1)) begin
+            current_time = $abstime;
+
+            if (!first_fb) begin
+                fb_period_est = current_time - last_fb_time;
+            end
+            first_fb = 0;
+            last_fb_time = current_time;
+        end
+
+        // Drive outputs with transitions
+        V(dco_clk) <+ transition(dco_val, 0, tedge);
+        V(fb_clk) <+ transition(fb_val, 0, tedge);
+
+        // vctrl_mon: normalized voltage monitor of digital control code
+        vctrl_val = vss_level + (vdd_level - vss_level) * (dco_code - code_min) / (code_max - code_min);
+        V(vctrl_mon) <+ transition(vctrl_val, 0, tedge);
+
+        // lock: asserted when locked
+        if (lock_count >= lock_count_target) begin
+            lock_val = vdd_level;
+        end else begin
+            lock_val = vss_level;
+        end
+        V(lock) <+ transition(lock_val, 0, tedge);
+    end
+endmodule

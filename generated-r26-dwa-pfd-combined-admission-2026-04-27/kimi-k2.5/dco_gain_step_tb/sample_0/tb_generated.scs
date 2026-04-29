@@ -1,0 +1,21 @@
+simulator lang=spectre
+global 0
+
+// Supply voltages
+Vvdd (VDD 0) vsource dc=0.9
+Vvss (VSS 0) vsource dc=0
+
+// Control voltage step: 0.3V for first 100ns, then step to 0.6V
+Vctrl (vctrl 0) vsource type=pwl wave=[0 0.3 100n 0.3 100.1n 0.6]
+
+// DUT instantiation by position: (VDD, VSS, vctrl, vout)
+XDUT (VDD VSS vctrl vout) dco_gain_step_ref
+
+// Transient analysis
+tran tran stop=300n maxstep=100p
+
+// Save waveforms
+save vctrl vout
+
+// AHDL include last
+ahdl_include "dco_gain_step_ref.va"

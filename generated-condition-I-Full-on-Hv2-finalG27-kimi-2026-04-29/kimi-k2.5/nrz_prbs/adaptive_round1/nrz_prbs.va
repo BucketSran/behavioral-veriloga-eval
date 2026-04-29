@@ -1,0 +1,70 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module nrz_prbs (VDD, VSS, OUTP, OUTN);
+    inout VDD;
+    inout VSS;
+    output OUTP;
+    output OUTN;
+    electrical VDD, VSS, OUTP, OUTN;
+
+    // Parameters
+    parameter real data_rate = 10e9 from (0:inf);      // Data rate in Hz
+    parameter real amp = 1.0 from (0:inf);             // Differential output amplitude (V)
+    parameter real pre = 0.0 from (-1.0:1.0);          // Pre-emphasis tap coefficient
+    parameter real tr = 10e-12 from (0:inf);           // Rise/fall time (s)
+
+    // Local variables
+    integer prbs_reg;      // PRBS-15 shift register
+    integer current_bit;   // Current output bit
+    integer prev_bit;      // Previous bit for pre-emphasis
+    integer feedback;      // PRBS feedback bit
+    real bit_period;       // Bit period in seconds
+    real vout_p;           // Output voltage for OUTP
+    real vout_n;           // Output voltage for OUTN
+    real vcm;              // Common mode voltage
+    real vdiff;            // Differential voltage
+
+    analog begin
+        // Calculate bit period
+        bit_period = 1.0 / data_rate;
+
+        // Initialize PRBS-15: 15-bit LFSR with polynomial x^15 + x^14 + 1
+        @(initial_step) begin
+            prbs_reg = 1;      // Non-zero seed
+            current_bit = 1;
+            prev_bit = 1;
+        end
+
+        // Generate next bit at each bit boundary using timer
+        @(timer(0, bit_period)) begin
+            // PRBS-15: taps at positions 15 and 14 (1-indexed)
+            // Feedback = bit14 XOR bit13 (0-indexed: bits 14 and 13)
+            feedback = ((prbs_reg >> 14) & 1) ^ ((prbs_reg >> 13) & 1);
+
+            // Shift and insert feedback
+            prbs_reg = ((prbs_reg << 1) & 32767) | feedback;
+
+            // Update bits for FIR
+            prev_bit = current_bit;
+            current_bit = prbs_reg & 1;
+        end
+
+        // Calculate differential voltage with 1-tap FIR pre-emphasis
+        // Map bits 0/1 to -1/+1 for signed arithmetic
+        // y[n] = x[n] + pre * (x[n] - x[n-1])
+        vdiff = amp * ((2.0 * current_bit - 1.0) + pre * (2.0 * current_bit - 2.0 * prev_bit));
+
+        // Common mode voltage (referenced to VDD/VSS midpoint)
+        vcm = (V(VDD) + V(VSS)) / 2.0;
+
+        // Differential output: OUTP - OUTN = vdiff
+        // So OUTP = vcm + vdiff/2, OUTN = vcm - vdiff/2
+        vout_p = vcm + vdiff / 2.0;
+        vout_n = vcm - vdiff / 2.0;
+
+        // Apply transition smoothing
+        V(OUTP) <+ transition(vout_p, 0, tr);
+        V(OUTN) <+ transition(vout_n, 0, tr);
+    end
+endmodule

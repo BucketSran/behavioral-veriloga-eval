@@ -1,0 +1,32 @@
+// Spectre testbench for gray_counter_4b
+
+// Include the Verilog-A model
+ahdl_include "gray_counter_4b.va"
+
+// Supply voltages
+v_vdd (vdd 0) vsource dc=1.8
+v_vss (vss 0) vsource dc=0
+
+// Clock generation: ~100MHz (period ~10ns, so 200 cycles in 2us is plenty)
+// Using 10ns period = 100MHz, for 2us we get 200 cycles
+v_clk (clk 0) vsource type=pulse val0=0 val1=1.8 period=10n rise=100p fall=100p width=5n
+
+// Enable signal: start low, go high after reset
+v_en (en 0) vsource type=pulse val0=0 val1=1.8 delay=60n period=2u rise=100p fall=100p width=1.94u
+
+// Reset signal: active low, start low then go high and stay high
+v_rstb (rstb 0) vsource type=pwl wave=[0 0 20n 0 20.1n 1.8 2u 1.8]
+
+// Device Under Test
+dut (vdd vss clk en rstb g3 g2 g1 g0) gray_counter_4b tedge=10p
+
+// Save signals for CSV output - use exact names required by checker
+save clk
+save rstb
+save g3
+save g2
+save g1
+save g0
+
+// Transient analysis as specified in contract
+tran tran stop=2u maxstep=500p errpreset=conservative

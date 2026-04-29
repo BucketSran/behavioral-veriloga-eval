@@ -1,0 +1,115 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cppll_timer_ref (VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock);
+    inout VDD;
+    inout VSS;
+    input ref_clk;
+    output fb_clk;
+    output dco_clk;
+    output vctrl_mon;
+    output lock;
+
+    electrical VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock;
+
+    parameter real VDD_VAL = 1.8;
+    parameter real VTH = 0.9;
+    parameter real T0 = 20n;        // Initial DCO period (50 MHz)
+    parameter real KVCO = 1e-9;     // Period sensitivity (s/V)
+    parameter real ICP = 10e-6;     // Charge pump current (A)
+    parameter real C1 = 10e-12;     // Loop filter cap (F)
+    parameter real R1 = 10e3;       // Loop filter resistor (Ohm)
+    parameter real DIV_N = 1.0;     // Divider ratio
+    parameter real LOCK_TH = 0.05;  // Lock threshold (fractional period error)
+    parameter real TLOCK = 500n;    // Lock detect time
+
+    real vctrl, vctrl_filt;
+    real dco_period;
+    real t_last_ref, t_last_fb;
+    real ref_period, fb_period_inst;
+    real phase_error;
+    real lock_timer;
+    integer locked;
+    real t_next_dco;
+    integer dco_state;
+    integer div_cnt;
+    real t_last_fb_out;
+
+    analog begin
+        @(initial_step) begin
+            vctrl = VDD_VAL/2;
+            vctrl_filt = VDD_VAL/2;
+            dco_period = T0;
+            t_last_ref = 0;
+            t_last_fb = 0;
+            ref_period = T0;
+            fb_period_inst = T0;
+            phase_error = 0;
+            lock_timer = 0;
+            locked = 0;
+            t_next_dco = 0;
+            dco_state = 0;
+            div_cnt = 0;
+            t_last_fb_out = 0;
+        end
+
+        // Reference clock edge detection and period measurement
+        @(cross(V(ref_clk) - VTH, 1)) begin
+            ref_period = $abstime - t_last_ref;
+            t_last_ref = $abstime;
+        end
+
+        // DCO timer: generate oscillator edges
+        @(timer(t_next_dco)) begin
+            dco_state = !dco_state;
+            t_next_dco = $abstime + dco_period/2.0;
+
+            // Divider for feedback clock
+            div_cnt = div_cnt + 1;
+            if (div_cnt >= DIV_N) begin
+                div_cnt = 0;
+                t_last_fb_out = $abstime;
+            end
+        end
+
+        // Phase detector / charge pump behavior
+        // Simple proportional control based on period error
+        @(cross(V(ref_clk) - VTH, 1)) begin
+            // Measure instantaneous FB period
+            fb_period_inst = (t_last_fb_out - t_last_fb) * DIV_N;
+            if (fb_period_inst < 1e-15) fb_period_inst = dco_period * DIV_N;
+            t_last_fb = t_last_fb_out;
+
+            // Period error (positive when DCO is too slow / period too long)
+            phase_error = (fb_period_inst - ref_period) / ref_period;
+
+            // Update control voltage (simple integrator with proportional term)
+            vctrl = vctrl - ICP * R1 * phase_error - (ICP/C1) * phase_error * 10n;
+
+            // Clamp to supply rails
+            if (vctrl > VDD_VAL - 0.1) vctrl = VDD_VAL - 0.1;
+            if (vctrl < 0.1) vctrl = 0.1;
+        end
+
+        // Simple loop filter (leaky integrator)
+        vctrl_filt = vctrl_filt + 0.1 * (vctrl - vctrl_filt);
+
+        // Update DCO period based on control voltage
+        dco_period = T0 + KVCO * (VDD_VAL/2 - vctrl_filt);
+
+        // Lock detection
+        if (abs(phase_error) < LOCK_TH) begin
+            lock_timer = lock_timer + 10n;
+            if (lock_timer > TLOCK) locked = 1;
+        end else begin
+            lock_timer = 0;
+            locked = 0;
+        end
+
+        // Drive outputs with transitions
+        V(dco_clk) <+ transition(dco_state ? VDD_VAL : 0, 0, 100p);
+        V(fb_clk) <+ transition((div_cnt == 0 && dco_state) ? VDD_VAL : 0, 0, 100p);
+        V(vctrl_mon) <+ transition(vctrl_filt, 0, 1n);
+        V(lock) <+ transition(locked ? VDD_VAL : 0, 0, 1n);
+    end
+endmodule

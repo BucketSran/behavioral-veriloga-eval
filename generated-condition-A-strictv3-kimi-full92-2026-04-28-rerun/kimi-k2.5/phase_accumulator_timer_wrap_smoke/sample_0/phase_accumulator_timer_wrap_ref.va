@@ -1,0 +1,51 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module phase_accumulator_timer_wrap_ref (VDD, VSS, clk_out, phase_out);
+    inout electrical VDD, VSS;
+    output electrical clk_out, phase_out;
+
+    // Parameters
+    parameter real vdd = 1.0 from (0:inf);
+    parameter real vss = 0.0 from (-inf:inf);
+    parameter real tstep = 1n from (0:inf);      // Timer step period
+    parameter real phase_inc = 0.1 from (0:1];   // Phase increment per step
+    parameter real tr = 10p from (0:inf);        // Transition rise/fall time
+
+    // Internal variables
+    real phase;      // Phase accumulator state (0.0 to 1.0)
+    real clk_state;  // Clock output state (0 or vdd)
+
+    analog begin
+        // Initialize on first step
+        @(initial_step) begin
+            phase = 0.0;
+            clk_state = vss;
+        end
+
+        // Advance phase on absolute timer
+        @(timer(0, tstep)) begin
+            // Increment phase
+            phase = phase + phase_inc;
+
+            // Manual wrap at phase 1.0
+            if (phase >= 1.0) begin
+                phase = phase - 1.0;
+                // Toggle clock on wrap
+                if (clk_state > vss) begin
+                    clk_state = vss;
+                end else begin
+                    clk_state = vdd;
+                end
+            end
+        end
+
+        // Drive outputs with transition for stable held state
+        V(phase_out) <+ transition(phase * vdd, 0, tr);
+        V(clk_out) <+ transition(clk_state, 0, tr);
+
+        // Reference supplies
+        V(VDD) <+ vdd;
+        V(VSS) <+ vss;
+    end
+endmodule

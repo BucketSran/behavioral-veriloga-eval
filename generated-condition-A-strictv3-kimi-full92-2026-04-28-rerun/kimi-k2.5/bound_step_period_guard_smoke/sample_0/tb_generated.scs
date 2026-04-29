@@ -1,0 +1,24 @@
+// Testbench for bound_step_period_guard_ref
+// Uses coarse maxstep=20n to verify $bound_step() preserves guard windows
+
+simulator lang=spectre
+
+// Include the DUT
+ahdl_include "bound_step_period_guard_ref.va"
+
+// Supply voltages
+VDD (VDD 0) vsource dc=1.8
+VSS (VSS 0) vsource dc=0
+
+// Device Under Test
+DUT (VDD VSS guard_out phase_out) bound_step_period_guard_ref
+
+// Transient analysis with coarse step - DUT's $bound_step should override locally
+tran tran stop=34n maxstep=20n errpreset=conservative
+
+// Save required waveforms
+save DUT:guard_out DUT:phase_out
+save VDD VSS
+
+// Output format for CSV extraction
+saveOptions options save=allpub currents=none

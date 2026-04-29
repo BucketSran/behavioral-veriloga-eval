@@ -1,0 +1,20 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "d2b_4bit.va"
+
+// Supply rails
+vdd (vdd 0) vsource dc=0.9
+vss (vss 0) vsource dc=0
+
+// Input ramp: 0V to 0.9V over 100ns
+vin (vin 0) vsource dc=0 type=pwl wave=[0 0 100n 0.9]
+
+// DUT instantiation by position: (VDD, VSS, VIN, DOUT3, DOUT2, DOUT1, DOUT0)
+IDUT (vdd vss vin DOUT3 DOUT2 DOUT1 DOUT0) d2b_4bit
+
+// Transient analysis
+tran tran stop=100n maxstep=2n
+
+// Save public waveform columns
+save vin DOUT3 DOUT2 DOUT1 DOUT0

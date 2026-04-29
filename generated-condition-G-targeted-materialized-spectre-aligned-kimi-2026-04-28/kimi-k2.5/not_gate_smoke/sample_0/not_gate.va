@@ -1,0 +1,32 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module not_gate (vdd, vss, a, y);
+    inout vdd, vss;
+    input a;
+    output y;
+    electrical vdd, vss, a, y;
+
+    parameter real vth = 0.45 from [0:inf);
+    parameter real tedge = 100p from (0:inf);
+
+    integer out_state;
+    real out_target;
+
+    analog begin
+        @(initial_step) begin
+            out_state = 1;
+        end
+
+        @(cross(V(a) - vth, 1)) begin
+            out_state = 0;
+        end
+
+        @(cross(V(a) - vth, -1)) begin
+            out_state = 1;
+        end
+
+        out_target = (out_state == 1) ? V(vdd) : V(vss);
+        V(y) <+ transition(out_target, 0, tedge, tedge);
+    end
+endmodule

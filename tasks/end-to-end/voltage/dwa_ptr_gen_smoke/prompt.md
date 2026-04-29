@@ -39,7 +39,7 @@ drive several input codes and expose a rotating 16-cell pointer and cell-enable 
   - `clk_i`, `rst_ni`
   - `cell_en_15` through `cell_en_0`
   - `ptr_15` through `ptr_0`
-- Use the final transient setting provided by the injected Strict EVAS Validation Contract.
+- Use the final transient setting listed in the Public Evaluation Contract below.
 
 ## Observable CSV Contract
 
@@ -75,7 +75,7 @@ Use plain scalar save names for these observables; do not rely on instance-quali
 Timing/checking-window contract:
 
 - Reset-like input(s) `reset`, `rst_ni` must be asserted only for startup/explicit reset checks, then deasserted early enough and kept deasserted through the post-reset checking window.
-- For active-low resets such as `rstb`, `rst_n`, or `rst_ni`, avoid a finite-width pulse that returns the reset node low after release; use a waveform that remains high during checking.
+- For active-low reset inputs, avoid a finite-width pulse that returns the reset node low after release; use a waveform that remains high during checking.
 - Enable-like input(s) `enable` must be in the enabled state during the post-reset checking window unless the task explicitly asks for disabled intervals.
 - Clock-like input(s) `clock` must provide enough valid edges after reset/enable for the checker to sample settled outputs.
 - Sequential outputs are sampled shortly after clock edges, so drive outputs with stable held state variables and `transition()` targets rather than glitchy combinational expressions.

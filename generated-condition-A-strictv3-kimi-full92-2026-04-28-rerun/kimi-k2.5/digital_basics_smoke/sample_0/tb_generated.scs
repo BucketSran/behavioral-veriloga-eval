@@ -1,0 +1,43 @@
+// Verilog-A includes
+ahdl_include "and_gate.va"
+ahdl_include "or_gate.va"
+ahdl_include "not_gate.va"
+ahdl_include "dff_rst.va"
+
+// Global parameters
+parameters vdd=1.8
+
+// Supply nets
+v_vdd (vdd 0) vsource dc=vdd
+v_vss (vss 0) vsource dc=0
+
+// NOT gate test signals
+v_not_a (not_a 0) vsource type=pulse val0=0 val1=vdd period=40n rise=0.1n fall=0.1n width=19.9n
+
+// AND gate test signals
+v_and_a (and_a 0) vsource type=pulse val0=0 val1=vdd period=80n rise=0.1n fall=0.1n width=39.9n
+v_and_b (and_b 0) vsource type=pulse val0=0 val1=vdd period=40n rise=0.1n fall=0.1n width=19.9n
+
+// OR gate test signals
+v_or_a (or_a 0) vsource type=pulse val0=0 val1=vdd period=80n rise=0.1n fall=0.1n width=39.9n
+v_or_b (or_b 0) vsource type=pulse val0=0 val1=vdd period=40n rise=0.1n fall=0.1n width=19.9n delay=10n
+
+// DFF test signals
+v_dff_d (dff_d 0) vsource type=pulse val0=0 val1=vdd period=60n rise=0.1n fall=0.1n width=29.9n delay=5n
+v_dff_clk (dff_clk 0) vsource type=pulse val0=0 val1=vdd period=20n rise=0.1n fall=0.1n width=9.9n
+v_dff_rst (dff_rst 0) vsource type=pulse val0=vdd val1=0 period=200n rise=0.1n fall=0.1n width=180n delay=0
+
+// DUT instances
+I_not (vdd vss not_a not_y) not_gate
+I_and (and_a and_b and_y) and_gate
+I_or (or_a or_b or_y) or_gate
+I_dff (vdd vss dff_d dff_clk dff_rst dff_q dff_qb) dff_rst
+
+// Transient analysis
+tran tran stop=200n maxstep=100p
+
+// Save all outputs
+save not_a not_y
+save and_a and_b and_y
+save or_a or_b or_y
+save dff_d dff_clk dff_rst dff_q dff_qb

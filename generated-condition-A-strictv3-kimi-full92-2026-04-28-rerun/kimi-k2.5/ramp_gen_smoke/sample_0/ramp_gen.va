@@ -1,0 +1,81 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module ramp_gen (clk_in, rst_n, code_3, code_2, code_1, code_0);
+    input clk_in;
+    input rst_n;
+    output code_3;
+    output code_2;
+    output code_1;
+    output code_0;
+
+    electrical clk_in;
+    electrical rst_n;
+    electrical code_3;
+    electrical code_2;
+    electrical code_1;
+    electrical code_0;
+
+    parameter real vlogic_high = 1.8;
+    parameter real vlogic_low = 0.0;
+    parameter real vth = 0.9;
+    parameter real trise = 0.1n;
+    parameter real tfall = 0.1n;
+    parameter real tdelay = 0.1n;
+
+    integer code;
+    integer prev_clk;
+    real vcode_3, vcode_2, vcode_1, vcode_0;
+
+    analog begin
+        @(initial_step) begin
+            code = 0;
+            prev_clk = 0;
+            vcode_3 = vlogic_low;
+            vcode_2 = vlogic_low;
+            vcode_1 = vlogic_low;
+            vcode_0 = vlogic_low;
+        end
+
+        // Detect rising edge of clk_in when rst_n is high
+        @(cross(V(clk_in) - vth, 1)) begin
+            if (V(rst_n) > vth) begin
+                if (code < 15) begin
+                    code = code + 1;
+                end
+            end
+        end
+
+        // Detect falling edge of rst_n (active-low reset)
+        @(cross(V(rst_n) - vth, -1)) begin
+            code = 0;
+        end
+
+        // Update output voltages based on code bits
+        if (code & 8)
+            vcode_3 = vlogic_high;
+        else
+            vcode_3 = vlogic_low;
+
+        if (code & 4)
+            vcode_2 = vlogic_high;
+        else
+            vcode_2 = vlogic_low;
+
+        if (code & 2)
+            vcode_1 = vlogic_high;
+        else
+            vcode_1 = vlogic_low;
+
+        if (code & 1)
+            vcode_0 = vlogic_high;
+        else
+            vcode_0 = vlogic_low;
+
+        // Drive outputs with transitions
+        V(code_3) <+ transition(vcode_3, tdelay, trise, tfall);
+        V(code_2) <+ transition(vcode_2, tdelay, trise, tfall);
+        V(code_1) <+ transition(vcode_1, tdelay, trise, tfall);
+        V(code_0) <+ transition(vcode_0, tdelay, trise, tfall);
+    end
+endmodule

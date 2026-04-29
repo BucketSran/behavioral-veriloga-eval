@@ -1,0 +1,37 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pfd_updn(vdd, vss, ref, div, up, dn);
+    inout electrical vdd, vss;
+    input electrical ref, div;
+    output electrical up, dn;
+
+    parameter real vth = 0.45;
+    parameter real tedge = 50p;
+
+    integer up_state, dn_state;
+
+    analog begin
+        @(initial_step) begin
+            up_state = 0;
+            dn_state = 0;
+        end
+
+        @(cross(V(ref) - vth, 1)) begin
+            up_state = 1;
+        end
+
+        @(cross(V(div) - vth, 1)) begin
+            dn_state = 1;
+        end
+
+        // Combinational reset when both are high
+        if (up_state == 1 && dn_state == 1) begin
+            up_state = 0;
+            dn_state = 0;
+        end
+
+        V(up) <+ transition(up_state ? V(vdd) : V(vss), 0, tedge);
+        V(dn) <+ transition(dn_state ? V(vdd) : V(vss), 0, tedge);
+    end
+endmodule

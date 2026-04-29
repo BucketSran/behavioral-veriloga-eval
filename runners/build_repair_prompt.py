@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import textwrap
 from pathlib import Path
@@ -26,6 +27,7 @@ from extract_expected_values import (
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SKILL_BUNDLE = ROOT / "docs" / "TABLE2_VERILOGA_SKILL_BUNDLE.md"
+DEFAULT_CONTRACT_REPAIR_CARDS = ROOT / "docs" / "CONTRACT_REPAIR_CARDS.json"
 SKILL_REFS_DIR = ROOT.parent / "veriloga-skills" / "veriloga" / "references" / "categories"
 _METRIC_TOKEN_RE = re.compile(r"([A-Za-z_][A-Za-z0-9_]*)=([^\s,;]+)")
 _NUMERIC_TOKEN_RE = re.compile(r"^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$", re.IGNORECASE)
@@ -45,6 +47,20 @@ _TIME_UNITS = {
     "f": 1e-15,
     "fs": 1e-15,
 }
+
+
+def _functional_ir_only() -> bool:
+    return os.environ.get("VAEVAS_FUNCTIONAL_IR_ONLY", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _task_id_text_for_matching(task_id: str) -> str:
+    """Return task-id text only when benchmark-name matching is allowed.
+
+    I-clean/cold-start runs should select guidance from prompt-derived
+    functional IR, contract vectors, and EVAS notes.  In that mode the task id
+    remains available for logs and paths but not for semantic routing.
+    """
+    return "" if _functional_ir_only() else task_id.lower()
 
 
 def _get_gold_tran_params(task_dir: Path) -> str | None:
@@ -102,6 +118,445 @@ def _dedupe_preserve_order(items: list[str]) -> list[str]:
     return result
 
 
+def _contract_csv_candidates(evas_result: dict) -> list[Path]:
+    artifacts = evas_result.get("artifacts") or {}
+    candidates: list[Path] = []
+
+    for key in ("tran_csv", "csv_path"):
+        value = artifacts.get(key) or evas_result.get(key)
+        if value:
+            candidates.append(Path(value))
+
+    result_json = artifacts.get("result_json") or evas_result.get("result_json")
+    if result_json:
+        candidates.append(Path(result_json).parent / "tran.csv")
+
+    seen: set[Path] = set()
+    result: list[Path] = []
+    for candidate in candidates:
+        if candidate in seen:
+            continue
+        seen.add(candidate)
+        result.append(candidate)
+    return result
+
+
+def _env_truthy(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _contract_repair_cards_section(task_dir: Path, report: dict) -> str:
+    if not _env_truthy("VAEVAS_ENABLE_REPAIR_CARDS"):
+        return ""
+    card_path = Path(os.environ.get("VAEVAS_REPAIR_CARDS_PATH", str(DEFAULT_CONTRACT_REPAIR_CARDS)))
+    if not card_path.exists():
+        return ""
+    try:
+        from contract_repair_cards import format_contract_repair_cards, select_contract_repair_cards
+
+        meta = read_meta(task_dir)
+        limit = int(os.environ.get("VAEVAS_REPAIR_CARD_LIMIT", "2"))
+        cards = select_contract_repair_cards(
+            report,
+            task_id=meta.get("task_id", meta.get("id", task_dir.name)),
+            category=meta.get("category", ""),
+            card_path=card_path,
+            limit=limit,
+        )
+        return format_contract_repair_cards(cards)
+    except Exception as exc:
+        return textwrap.dedent(f"""\
+            # Contract-Guided Repair Cards
+
+            Repair-card retrieval was unavailable: `{type(exc).__name__}: {exc}`.
+            Continue using the behavior-contract diagnosis above.
+        """).strip()
+
+
+def _circuit_mechanism_rag_section(task_dir: Path, evas_result: dict) -> str:
+    """Append prompt-derived circuit-mechanism RAG hints when enabled.
+
+    This is intentionally advisory.  It does not use gold code or task-id
+    routing; the query is built from the public prompt, inferred functional IR,
+    and the current EVAS notes.
+    """
+    if not _env_truthy("VAEVAS_ENABLE_CIRCUIT_RAG"):
+        return ""
+    try:
+        from infer_prompt_checker_specs import infer_specs
+        from run_circuit_mechanism_rag_audit import build_knowledge_base, retrieve, _query_text
+
+        resolved_task_dir = task_dir.resolve()
+        prompt = (resolved_task_dir / "prompt.md").read_text(encoding="utf-8", errors="ignore")
+        record = infer_specs(resolved_task_dir.name, resolved_task_dir, include_gold_save_names=False)
+        templates = [
+            str(item.get("template", ""))
+            for item in record.get("templates", [])
+            if float(item.get("confidence", 0.0)) >= float(os.environ.get("VAEVAS_RAG_TEMPLATE_THRESHOLD", "0.62"))
+        ]
+        claims = [
+            str(item.get("type", ""))
+            for item in record.get("functional_ir", {}).get("claims", [])
+            if isinstance(item, dict) and item.get("type")
+        ]
+        prompt_l = prompt.lower()
+        explicit_count_style = any(
+            phrase in prompt_l
+            for phrase in (
+                "thermometer",
+                "unary",
+                "population count",
+                "count of ones",
+                "count high",
+                "number of high",
+            )
+        )
+        if not explicit_count_style:
+            templates = [item for item in templates if "thermometer" not in item and "unary" not in item]
+            claims = [item for item in claims if item != "count_high_to_analog"]
+        notes = [str(item) for item in (evas_result.get("evas_notes") or evas_result.get("notes") or [])]
+        report = {
+            "failed_contracts": [],
+            "failed_hard_contracts": [],
+            "contract_results": [],
+            "prompt_checker_templates": templates,
+            "prompt_functional_claims": claims,
+            "source": {
+                "prompt_checker_templates": templates,
+                "prompt_functional_claims": claims,
+                "prompt_functional_ir": record.get("functional_ir", {}),
+            },
+        }
+        query = "\n".join(
+            [
+                _query_text(prompt, record, report),
+                "evas_status " + str(evas_result.get("status", "")),
+                "evas_notes " + " ".join(notes),
+            ]
+        )
+        nodes = build_knowledge_base(include_skills=_env_truthy("VAEVAS_RAG_INCLUDE_SKILLS"))
+        node_by_id = {node.node_id: node for node in nodes}
+        top_k = int(os.environ.get("VAEVAS_RAG_TOP_K", "4"))
+        max_chars = int(os.environ.get("VAEVAS_RAG_NODE_MAX_CHARS", "1400"))
+        raw_retrieved = retrieve(nodes, query, top_k=max(top_k * 30, 80))
+        filtered = []
+        for item in raw_retrieved:
+            node = node_by_id.get(str(item.get("node_id")))
+            if node is None:
+                continue
+            node_l = f"{node.node_id} {node.title} {node.text}".lower()
+            node_head_l = f"{node.node_id} {node.title}".lower()
+            if not explicit_count_style and ("thermometer" in node_head_l or "unary" in node_head_l) and "dwa" not in node_head_l:
+                continue
+            filtered.append(item)
+        if _env_truthy("VAEVAS_RAG_DIVERSIFY_KINDS") or os.environ.get("VAEVAS_RAG_DIVERSIFY_KINDS", "1") == "1":
+            retrieved = []
+            seen_ids: set[str] = set()
+
+            def add_first(kind: str, *, min_score: float = 0.0) -> None:
+                for candidate in filtered:
+                    if candidate.get("kind") != kind:
+                        continue
+                    if float(candidate.get("score", 0.0)) < min_score:
+                        continue
+                    node_id = str(candidate.get("node_id"))
+                    if node_id in seen_ids:
+                        continue
+                    retrieved.append(candidate)
+                    seen_ids.add(node_id)
+                    return
+
+            # Prefer executable skeletons and compact mechanism summaries when
+            # available. Template nodes explain what failed; skeleton/card/R26
+            # nodes explain how to build it.
+            add_first("mechanism_skeleton", min_score=8.0)
+            add_first("r26_template", min_score=10.0)
+            add_first("repair_card", min_score=10.0)
+            add_first("prompt_template", min_score=0.0)
+            for candidate in filtered:
+                if len(retrieved) >= top_k:
+                    break
+                node_id = str(candidate.get("node_id"))
+                if node_id in seen_ids:
+                    continue
+                retrieved.append(candidate)
+                seen_ids.add(node_id)
+        else:
+            retrieved = filtered[:top_k]
+        if len(retrieved) > top_k:
+            retrieved = retrieved[:top_k]
+        if not retrieved:
+            return ""
+
+        lines = [
+            "# Circuit-Mechanism RAG Hints",
+            "",
+            "Use these prompt-matched mechanism hints as soft guidance. Keep the original module interface and EVAS artifact contract authoritative.",
+        ]
+        if templates or claims:
+            lines.append(f"- Inferred prompt templates: {', '.join(f'`{item}`' for item in templates) or '`none`'}")
+            lines.append(f"- Inferred functional claims: {', '.join(f'`{item}`' for item in claims) or '`none`'}")
+        for rank, item in enumerate(retrieved, start=1):
+            node = node_by_id.get(str(item.get("node_id")))
+            if node is None:
+                continue
+            if node.kind == "mechanism_skeleton":
+                metadata = node.metadata or {}
+                pieces = []
+                slot_schema = metadata.get("slot_schema", {})
+                if isinstance(slot_schema, dict) and slot_schema:
+                    pieces.append("Slots: " + "; ".join(f"{key}={value}" for key, value in slot_schema.items()))
+                impl = metadata.get("implementation_skeleton", [])
+                if impl:
+                    pieces.append("Implementation: " + " ".join(str(part) for part in impl))
+                shape = metadata.get("veriloga_shape", [])
+                if shape:
+                    pieces.append("Verilog-A shape: " + " | ".join(str(part) for part in shape))
+                anti = metadata.get("anti_patterns", [])
+                if anti:
+                    pieces.append("Avoid: " + " ".join(str(part) for part in anti))
+                snippet = " ".join(pieces) if pieces else node.text
+            else:
+                snippet = node.text
+            snippet = re.sub(r"\s+", " ", snippet).strip()
+            if len(snippet) > max_chars:
+                snippet = snippet[: max_chars - 3].rstrip() + "..."
+            lines.extend(
+                [
+                    "",
+                    f"{rank}. `{node.node_id}` ({node.kind}, score={item.get('score')})",
+                    f"   - Title: {node.title}",
+                    f"   - Guidance: {snippet}",
+                ]
+            )
+        return "\n".join(lines)
+    except Exception as exc:
+        return textwrap.dedent(f"""\
+            # Circuit-Mechanism RAG Hints
+
+            RAG hint retrieval was unavailable: `{type(exc).__name__}: {exc}`.
+            Continue using EVAS notes and any contract/card guidance above.
+        """).strip()
+
+
+def _contract_report_without_csv(task_dir: Path, contracts_path: Path) -> dict:
+    """Build a semantic guard report when no waveform CSV exists yet.
+
+    Compile/runtime failures often block the normal contract checker, but the
+    generated contract spec still carries public prompt templates and semantic
+    repair-family hints.  Relaxed card selection can use those hints to inject
+    a mechanism-preservation card while the model fixes the blocking layer.
+    """
+    try:
+        spec = json.loads(contracts_path.read_text(encoding="utf-8"))
+    except Exception:
+        spec = {}
+    source = spec.get("source", {}) if isinstance(spec.get("source", {}), dict) else {}
+    functional_ir = source.get("prompt_functional_ir", {}) if isinstance(source.get("prompt_functional_ir", {}), dict) else {}
+    functional_claims = source.get("prompt_functional_claims", [])
+    if not functional_claims:
+        functional_claims = [
+            str(item.get("type", ""))
+            for item in functional_ir.get("claims", [])
+            if isinstance(item, dict) and item.get("type")
+        ]
+    return {
+        "task_id": spec.get("task_id", task_dir.name),
+        "contract_path": str(contracts_path),
+        "csv_path": "",
+        "source": source,
+        "prompt_functional_ir": functional_ir,
+        "prompt_functional_claims": functional_claims,
+        "prompt_checker_templates": source.get("prompt_checker_templates", []),
+        "prompt_checker_signal_sources": source.get("prompt_checker_signal_sources", {}),
+        "status": "NO_CSV",
+        "advisory_status": "PASS",
+        "passed_contracts": [],
+        "failed_contracts": [],
+        "passed_hard_contracts": [],
+        "passed_advisory_contracts": [],
+        "failed_hard_contracts": [],
+        "failed_advisory_contracts": [],
+        "contract_results": [],
+        "diagnostic_summary": [],
+    }
+
+
+def _contract_source_for_task(task_dir: Path) -> dict:
+    """Read prompt-derived contract source metadata for mechanism routing.
+
+    This helper is intentionally task-id independent when
+    `VAEVAS_FUNCTIONAL_IR_ONLY=1`: it reads the task's generated contracts,
+    whose source fields are produced from the public prompt/functional IR.
+    """
+    contract_paths: list[Path] = []
+    external_root = os.environ.get("VAEVAS_CONTRACT_ROOT")
+    if external_root:
+        contract_paths.append(Path(external_root) / task_dir.name / "contracts.json")
+    contract_paths.append(task_dir / "contracts.json")
+    for path in contract_paths:
+        if not path.exists():
+            continue
+        try:
+            spec = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        source = spec.get("source", {})
+        if isinstance(source, dict):
+            return source
+    return {}
+
+
+def _contract_mechanism_tokens(task_dir: Path, notes: list[str]) -> set[str]:
+    source = _contract_source_for_task(task_dir)
+    tokens: set[str] = set()
+    for key in (
+        "semantic_family",
+        "prompt_semantic_family",
+        "semantic_repair_template",
+        "prompt_semantic_repair_template",
+        "repair_template",
+        "raw_repair_template",
+        "blocking_repair_template",
+    ):
+        value = source.get(key)
+        if value:
+            tokens.add(str(value))
+    for key in ("prompt_checker_templates", "prompt_semantic_templates", "prompt_functional_claims"):
+        values = source.get(key, [])
+        if isinstance(values, list):
+            tokens.update(str(item) for item in values if str(item))
+    functional_ir = source.get("prompt_functional_ir", {})
+    if isinstance(functional_ir, dict):
+        for claim in functional_ir.get("claims", []):
+            if isinstance(claim, dict) and claim.get("type"):
+                tokens.add(str(claim["type"]))
+    lowered_notes = "\n".join(str(note) for note in notes).lower()
+    for marker in (
+        "dynamic_analog_vector_index",
+        "conditional_transition",
+        "duplicate_vsource_branch",
+        "evas_timeout",
+        "ptr_",
+        "cell_en_",
+        "late_edge_ratio",
+        "lag_window_updn",
+        "up_first",
+        "dn_second",
+        "vdac",
+        "frame_rises",
+    ):
+        if marker in lowered_notes:
+            tokens.add(marker)
+    return tokens
+
+
+def _behavior_contract_diagnosis_section(task_dir: Path, evas_result: dict) -> str:
+    """Summarize optional task-local behavior contracts for repair prompts.
+
+    Contracts are hidden benchmark checks. The prompt gets pass/fail names and
+    abstract repair hints, not raw thresholds or gold implementation details.
+    """
+    contract_paths: list[Path] = []
+    external_root = os.environ.get("VAEVAS_CONTRACT_ROOT")
+    if external_root:
+        contract_paths.append(Path(external_root) / task_dir.name / "contracts.json")
+    contract_paths.append(task_dir / "contracts.json")
+    contracts_path = next((path for path in contract_paths if path.exists()), None)
+    if contracts_path is None:
+        return ""
+
+    csv_path = next((path for path in _contract_csv_candidates(evas_result) if path.exists()), None)
+    if csv_path is None:
+        report = _contract_report_without_csv(task_dir, contracts_path)
+        source = report.get("source", {})
+        semantic_family = source.get("semantic_family") or source.get("prompt_semantic_family") or ""
+        semantic_repair = source.get("semantic_repair_template") or source.get("prompt_semantic_repair_template") or ""
+        prompt_templates = report.get("prompt_checker_templates", [])
+        lines = textwrap.dedent("""\
+            # Behavior Contract Diagnosis
+
+            Task-local behavior contracts are available, but no transient CSV from the failed run was found.
+            Continue using EVAS notes and preserve any already-fixed observability behavior.
+        """).strip().splitlines()
+        if semantic_family or semantic_repair or prompt_templates:
+            lines.extend(
+                [
+                    "",
+                    "Public semantic guard while CSV is unavailable:",
+                    f"- Semantic family: `{semantic_family or 'unknown'}`",
+                    f"- Semantic repair family: `{semantic_repair or 'unknown'}`",
+                ]
+            )
+            if prompt_templates:
+                lines.append(f"- Prompt templates: {', '.join(f'`{item}`' for item in prompt_templates)}")
+            lines.append(
+                "- First repair the blocking compile/runtime layer, but preserve this mechanism shape for the next EVAS round."
+            )
+        card_section = _contract_repair_cards_section(task_dir, report)
+        if card_section:
+            lines.extend(["", card_section])
+        return "\n".join(lines)
+
+    try:
+        from contract_check import run_contracts
+
+        report = run_contracts(contracts_path, csv_path)
+    except Exception as exc:
+        return textwrap.dedent(f"""\
+            # Behavior Contract Diagnosis
+
+            Task-local behavior contract diagnosis was unavailable: `{type(exc).__name__}: {exc}`.
+            Continue using EVAS notes and preserve any already-fixed observability behavior.
+        """).strip()
+
+    passed = report.get("passed_contracts") or []
+    failed = report.get("failed_contracts") or []
+    failed_hard = report.get("failed_hard_contracts")
+    failed_advisory = report.get("failed_advisory_contracts")
+    if failed_hard is None:
+        failed_hard = failed
+    if failed_advisory is None:
+        failed_advisory = []
+    summaries = report.get("diagnostic_summary") or []
+    failed_families = _dedupe_preserve_order(
+        [
+            str(item.get("repair_family"))
+            for item in report.get("contract_results", [])
+            if not item.get("passed") and item.get("severity", "hard") == "hard" and item.get("repair_family")
+        ]
+    )
+
+    lines = [
+        "# Behavior Contract Diagnosis",
+        "",
+        "Use these task-local contract outcomes as repair guidance. Preserve passed contracts, fix hard failures first, and treat advisory failures as secondary hints.",
+        "",
+        f"- Contract status: `{report.get('status', 'UNKNOWN')}`",
+    ]
+    if passed:
+        lines.append(f"- Passed contracts: {', '.join(f'`{name}`' for name in passed)}")
+    if failed_hard:
+        lines.append(f"- Failed hard contracts: {', '.join(f'`{name}`' for name in failed_hard)}")
+    if failed_advisory:
+        lines.append(f"- Advisory hints still failing: {', '.join(f'`{name}`' for name in failed_advisory)}")
+    if failed and not failed_hard and not failed_advisory:
+        lines.append(f"- Failed contracts: {', '.join(f'`{name}`' for name in failed)}")
+    if failed_families:
+        lines.append(f"- Repair families to prioritize: {', '.join(f'`{name}`' for name in failed_families)}")
+    if summaries:
+        lines.append("")
+        lines.append("Diagnostic hints:")
+        for summary in summaries:
+            lines.append(f"- {summary}")
+
+    card_section = _contract_repair_cards_section(task_dir, report)
+    if card_section:
+        lines.extend(["", card_section])
+
+    return "\n".join(lines)
+
+
 def _expand_column_ranges(text: str) -> list[str]:
     """Expand compact checker notes such as `ptr_0..15` or `dout_3..0`."""
     columns: list[str] = []
@@ -120,7 +575,7 @@ def _observable_columns_from_notes(task_id: str, notes: list[str]) -> list[str]:
     human strings (`missing vin/clk/dout2/...`, `ptr_0..15`).  This function
     turns those strings into explicit scalar names for the repair skeleton.
     """
-    task_lower = task_id.lower()
+    task_lower = _task_id_text_for_matching(task_id)
     joined = "\n".join(str(note) for note in notes)
     lowered = joined.lower()
     columns: list[str] = []
@@ -466,7 +921,7 @@ def _reset_source_release_issue(sample_dir: Path | None) -> dict | None:
 def _reset_hold_contract_template(task_id: str, notes: list[str], sample_dir: Path | None) -> list[str]:
     issue = _reset_source_release_issue(sample_dir)
     joined = "\n".join(str(note) for note in notes).lower()
-    task_lower = task_id.lower()
+    task_lower = _task_id_text_for_matching(task_id)
     if issue is None and not (
         "not_enough_clk_edges" in joined
         or "not_enough_post_reset" in joined
@@ -521,7 +976,7 @@ def _reset_hold_contract_template(task_id: str, notes: list[str], sample_dir: Pa
 
 def _clocked_output_settle_template(task_id: str, notes: list[str], sample_dir: Path | None) -> list[str]:
     joined = "\n".join(str(note) for note in notes).lower()
-    task_lower = task_id.lower()
+    task_lower = _task_id_text_for_matching(task_id)
     markers = (
         "gray_property_violated",
         "bad_transitions",
@@ -700,7 +1155,7 @@ def _inject_skill_reference(task_id: str) -> list[str]:
         "lpf": "amplifier-filter.md",
     }
 
-    task_lower = task_id.lower()
+    task_lower = _task_id_text_for_matching(task_id)
     matched_ref = None
     for key, ref_file in ref_mapping.items():
         if key in task_lower:
@@ -821,7 +1276,7 @@ def _extract_checker_source(checker_name: str) -> Optional[str]:
 
 def _get_circuit_context(task_id: str) -> str:
     """根据 task_id 关键词提供简短的电路上下文"""
-    task_lower = task_id.lower()
+    task_lower = _task_id_text_for_matching(task_id)
 
     if "pll" in task_lower or "adpll" in task_lower or "cppll" in task_lower:
         return """
@@ -1046,11 +1501,22 @@ def _dwa_plan_execute_section(task_id: str, notes: list[str]) -> list[str]:
     This is intentionally written as a retrieval-style policy: EVAS metrics
     select the relevant DWA knowledge snippet and a bounded edit plan.
     """
-    if "dwa" not in task_id.lower():
-        return []
-
     metrics = _extract_metrics_from_notes(notes)
     joined_notes = "\n".join(str(note) for note in notes).lower()
+    task_allows_dwa = "dwa" in _task_id_text_for_matching(task_id) or any(
+        marker in joined_notes
+        for marker in (
+            "ptr_",
+            "cell_en_",
+            "bad_ptr_rows",
+            "bad_count_rows",
+            "wrap_events",
+            "overlap_count",
+            "max_active_cells",
+        )
+    )
+    if not task_allows_dwa:
+        return []
     if not metrics and "insufficient_post_reset_samples" not in joined_notes:
         return []
 
@@ -1125,6 +1591,14 @@ def _dwa_plan_execute_section(task_id: str, notes: list[str]) -> list[str]:
             lines.extend([
                 "- Root cause: consecutive active cell sets overlap.",
                 "- Execute: advance `ptr_q` by the prior window width before selecting the next window, or choose a disjoint next start.",
+                "- Also check feasibility: two consecutive windows cannot be disjoint if the active-cell count is too large for a 16-cell array.",
+                "- If the generated testbench drives large codes such as 14 or 15, change the public stimulus to small nonzero codes such as 1 or 2 for the no-overlap smoke window.",
+                "- Keep the DUT code-to-active-count relation correct for the sampled code; make the smoke stimulus choose a code sequence whose requested windows can actually be disjoint.",
+            ])
+        if fnum("max_active_cells") > 8.0:
+            lines.extend([
+                "- `max_active_cells` is larger than half the 16-cell array. That makes consecutive disjoint windows impossible for many cycles.",
+                "- For this no-overlap smoke test, prefer low code stimulus values and verify the DUT selects exactly those small windows.",
             ])
         lines.extend([
             "- Success target for next EVAS run: `bad_ptr_rows=0`, `max_active_cells>0`, and `overlap_count=0`.",
@@ -1177,6 +1651,180 @@ def _dwa_plan_execute_section(task_id: str, notes: list[str]) -> list[str]:
         "",
         "Before outputting code, mentally check the next EVAS note you want to see. If the task still fails, it should fail on a smaller behavior gap, not on compile, missing CSV columns, or unchanged DWA metrics.",
     ])
+    return lines
+
+
+def _implementation_safety_skeleton_section(task_dir: Path, evas_result: dict, sample_dir: Path | None) -> list[str]:
+    """Inject syntax-safe implementation skeletons selected from functional IR.
+
+    System relation cards explain what behavior should hold. This section adds
+    the implementation pattern needed to make that behavior Spectre-safe before
+    the model starts tuning metrics.
+    """
+    task_id = task_dir.name
+    status = str(evas_result.get("status", ""))
+    notes = evas_result.get("evas_notes") or evas_result.get("notes") or []
+    spectre_notes = evas_result.get("spectre_notes", [])
+    notes = notes + [n for n in spectre_notes if n not in notes]
+    joined = "\n".join(str(note) for note in notes)
+    lowered = joined.lower()
+    tokens = _contract_mechanism_tokens(task_dir, notes)
+
+    syntax_markers = {
+        "dynamic_analog_vector_index",
+        "conditional_transition",
+        "conditional_cross",
+        "genvar_inside_analog",
+        "digital_verilog_syntax",
+        "packed_bit_select",
+    }
+    has_syntax_marker = any(marker in lowered for marker in syntax_markers) or "transition() contribution is inside" in lowered
+    has_duplicate_source = "duplicate_vsource_branch" in lowered
+    has_timeout = "evas_timeout" in lowered
+
+    is_dwa = bool({"onehot_no_overlap", "rotating_selection_window", "dwa-pointer-thermometer-mask", "dwa_pointer_window"} & tokens)
+    is_pll = bool({"pll_clock_ratio_lock", "pll-dco-counter-feedback-loop", "ratio_edge_window", "ratio_hop_window"} & tokens)
+    is_pulse = bool({"pulse_or_edge_protocol", "pfd-latched-pulse-delayed-clear", "bbpd-data-clock-lead-lag", "paired_edge_response", "bbpd_data_clock_lead_lag"} & tokens)
+    is_adc_dac = bool({"adc_dac_code_or_output_coverage", "quantized_reconstruction", "monotonic_code_vs_input", "differential_code_response", "sar_sequence"} & tokens)
+    is_serializer = bool({"sequence_frame_or_pulse_generation", "sequence-frame-alignment", "sequence_alignment", "frame_aligned_serial_sequence"} & tokens)
+
+    if not (
+        status in {"FAIL_DUT_COMPILE", "FAIL_TB_COMPILE", "FAIL_INFRA"}
+        or has_syntax_marker
+        or has_duplicate_source
+        or has_timeout
+        or is_dwa
+        or is_pll
+        or is_pulse
+        or is_adc_dac
+        or is_serializer
+    ):
+        return []
+
+    lines = [
+        "",
+        "# Implementation-Safe Repair Skeleton",
+        "",
+        "Use this section before applying the mechanism card. The goal is to satisfy Spectre/EVAS syntax and artifact constraints while preserving the intended behavior relation.",
+        "",
+        "Repair order:",
+        "1. If the current failure is compile, TB compile, timeout, missing CSV, or strict-preflight, fix that implementation layer first.",
+        "2. Preserve module names, port order, filenames, `ahdl_include`, save columns, and fixed `tran` settings unless the EVAS note names that layer.",
+        "3. After syntax/artifact safety is restored, apply the behavior mechanism card to reduce the metric gap.",
+        "4. The next failure should move downward: compile/TB/infra -> runnable behavior metrics -> smaller metric gap.",
+    ]
+
+    if has_syntax_marker or status == "FAIL_DUT_COMPILE":
+        lines.extend([
+            "",
+            "## Spectre-safe Verilog-A construction rules",
+            "",
+            "- Keep all `integer`, `real`, `parameter`, and `genvar` declarations at module scope before `analog begin`.",
+            "- Use `integer`/`real` state variables for logic; do not use `reg`, `wire`, `logic`, `always`, or packed integer bit assignments.",
+            "- Put `@(cross(...))` and `@(timer(...))` event statements at the top level of the analog block; put reset/enable decisions inside the event body.",
+            "- Compute output target variables inside events or combinational assignments, then drive each electrical output with one unconditional `transition()` contribution.",
+            "- Do not place `transition()` inside `if`, `else`, `case`, or loop branches whose execution can skip the contribution.",
+            "- For multiple transition-driven outputs, use the generic target-buffer pattern: declare one `real` target per output, or a `real target[0:N-1]` array; update only those targets inside events/conditions; put every `V(out) <+ transition(target, ...)` contribution at analog top level.",
+            "- If using an output target array, the contribution loop must use a module-scope `genvar`, not an `integer` runtime loop variable. If unsure, explicitly unroll each output contribution.",
+            "- Do not read or write electrical buses using runtime integer indices inside `V(...)`; use fixed-index reads or module-scope `genvar` contribution loops.",
+        ])
+
+    if is_dwa:
+        lines.extend([
+            "",
+            "## Spectre-safe DWA bus/state skeleton",
+            "",
+            "- If EVAS already reported `dynamic_analog_vector_index`, the next repair must explicitly unroll every offending bus access. Do not try another runtime `for (i=...) V(bus[i])` pattern.",
+            "- Use fixed scalar reads for the command code. Example for a 4-bit input bus:",
+            "  - `code_q = 0; if (V(code_i[0]) > vth) code_q = code_q + 1; if (V(code_i[1]) > vth) code_q = code_q + 2; if (V(code_i[2]) > vth) code_q = code_q + 4; if (V(code_i[3]) > vth) code_q = code_q + 8;`",
+            "- Keep one `integer ptr_q` and one `integer code_q`; they are the source of truth for both pointer and cell-enable outputs.",
+            "- Keep `real ptr_val[0:15]` and `real cell_en_val[0:15]` as held target arrays.",
+            "- On reset or clock edge, clear all 16 target entries first, then set the selected pointer bit and selected cell-enable window.",
+            "- For the first repair after a dynamic-index failure, prefer explicit unrolled output contributions over a loop:",
+            "  - `V(ptr_o[0]) <+ transition(ptr_val[0], 0, tr, tf);`",
+            "  - `V(ptr_o[1]) <+ transition(ptr_val[1], 0, tr, tf);`",
+            "  - continue the same pattern through index 15 for both `ptr_o` and `cell_en_o`.",
+            "- A module-scope `genvar k` contribution loop is acceptable only after the compile layer is already clean:",
+            "  - `genvar k; analog begin ... for (k=0; k<16; k=k+1) begin V(ptr_o[k]) <+ transition(ptr_val[k], 0, tr, tf); V(cell_en_o[k]) <+ transition(cell_en_val[k], 0, tr, tf); end end`",
+            "- Never write `V(code_i[i])`, `V(ptr_o[i])`, or `V(cell_en_o[i])` with `i` declared as `integer`.",
+            "- For no-overlap DWA, choose the next window start so the new selected set is disjoint from the previous selected set.",
+            "- For wraparound DWA, preserve modulo-16 selection and allow split windows across index 15 to 0.",
+        ])
+
+    if is_pll:
+        lines.extend([
+            "",
+            "## Spectre-safe PLL timer/divider skeleton",
+            "",
+            "- Use one held oscillator or DCO state and one strictly future `t_next` timer; each timer event must schedule the next future event.",
+            "- Derive `fb_clk` from DCO/divider state instead of creating an unrelated feedback timer.",
+            "- Keep divider counters as `integer` state and toggle feedback from counter terminal count.",
+            "- Drive `dco_clk`, `fb_clk`, `vctrl_mon`, and `lock` from held real targets with unconditional contributions.",
+            "- If `late_edge_ratio` is wrong but clocks are alive, tune divider cadence before lock thresholds.",
+            "- If `lock_time=nan`, do not force lock high; first make the late-window ratio stable, then assert lock from a stability counter.",
+        ])
+
+    if is_pulse:
+        lines.extend([
+            "",
+            "## Spectre-safe PFD/BBPD pulse skeleton",
+            "",
+            "- Keep last-edge times or independent latch states for the two input edge streams.",
+            "- On the leading side, assert the corresponding held UP/DN target; clear it with a finite timer or trailing-edge clear.",
+            "- Use finite pulse widths that the checker can sample; avoid picosecond-only pulses unless the prompt requires them.",
+            "- Drive UP and DN from held targets with unconditional `transition()` contributions.",
+            "- For lead/lag tasks, the data/reference input is an edge stream, not a static Boolean level.",
+        ])
+
+    if is_adc_dac:
+        lines.extend([
+            "",
+            "## Spectre-safe ADC/DAC code-output skeleton",
+            "",
+            "- Use one held integer code or trial code as the source of truth for all public output bits and analog reconstruction targets.",
+            "- Decode electrical input bits with fixed-index threshold reads; avoid integer bit-slice syntax.",
+            "- For code coverage failures, update the code on the specified clock/sample event and drive every bit from that code.",
+            "- For output-span failures with code coverage present, preserve the code path and repair only the code-to-analog target calculation.",
+            "- For differential outputs, compute one differential value and drive positive/negative targets around common mode with opposite polarity.",
+            "- For timeout failures, reduce unnecessary internal timers/save traffic and avoid ultra-small transition times or maxstep pressure.",
+        ])
+
+    if is_serializer:
+        lines.extend([
+            "",
+            "## Spectre-safe serializer state skeleton",
+            "",
+            "- Keep one held shift register and one bit index.",
+            "- Load the parallel word only on the specified load event; then shift exactly one bit per valid clock edge.",
+            "- Drive `sout` from the current bit and `frame` high only for the first serialized bit.",
+            "- Drive output targets continuously with unconditional `transition()` contributions.",
+        ])
+
+    if has_duplicate_source or status == "FAIL_TB_COMPILE":
+        lines.extend([
+            "",
+            "## Spectre-safe testbench single-driver skeleton",
+            "",
+            "- Each electrical branch must have one stimulus source. Do not drive the same node with both a base clock and a step/PWL source.",
+            "- To model a frequency or phase step, replace the original source with one PWL/pulse schedule or generate the step inside the DUT monitor logic; do not add a second source on the same node.",
+            "- Keep one canonical `save` list with plain scalar names only.",
+            "- Keep `ahdl_include` filenames consistent with the generated module filenames.",
+        ])
+
+    if has_timeout:
+        facts = _clock_reset_timing_facts(sample_dir)
+        lines.extend([
+            "",
+            "## Timeout-safe simulation skeleton",
+            "",
+            "- Treat timeout as an implementation/runtime failure before behavior tuning.",
+            "- Avoid ultra-small transition times, unbounded free-running timers, and excessive saved internal nodes.",
+            "- Keep only checker-required public observables in the save list when possible.",
+            "- Preserve the fixed public `tran` stop/maxstep unless EVAS says the tran line itself is invalid.",
+        ])
+        if facts.get("tran_lines"):
+            lines.append("- Current tran line(s): `" + " | ".join(facts["tran_lines"]) + "`")
+
     return lines
 
 
@@ -1528,7 +2176,7 @@ def _primary_diagnosis(notes: list[str], task_id: str) -> dict:
 def _repair_policy_contract(task_id: str, notes: list[str], sim_subtype: str) -> list[str]:
     diagnosis = _primary_diagnosis(notes, task_id)
     rule = diagnosis.get("matched_rule", "")
-    task_lower = task_id.lower()
+    task_lower = _task_id_text_for_matching(task_id)
 
     lines = [
         "",
@@ -1629,7 +2277,7 @@ def _subtype_specific_repair_policy(task_id: str, notes: list[str], status: str)
     repeated EVAS failure subtypes into bounded edit recipes so the model does
     not respond to every failure by rewriting the whole circuit.
     """
-    task_lower = task_id.lower()
+    task_lower = _task_id_text_for_matching(task_id)
     joined = "\n".join(str(note) for note in notes)
     lowered = joined.lower()
     lines: list[str] = []
@@ -1646,9 +2294,10 @@ def _subtype_specific_repair_policy(task_id: str, notes: list[str], status: str)
             "- No expression inside `V(...)` may contain an `integer` loop variable such as `i` or `j`.",
             "- For input buses, decode with fixed reads only: `V(code_i[0])`, `V(code_i[1])`, ...",
             "- For output buses, store targets in real arrays such as `ptr_val[0:15]` and `cell_en_val[0:15]`.",
-            "- Drive electrical output buses with a module-scope `genvar k` contribution loop, not an `integer` loop.",
-            "- Declare `genvar k;` before `analog begin`; keep the `for (k=0; ...) V(bus[k]) <+ transition(target[k], ...)` contribution unconditional.",
-            "- If in doubt, explicitly unroll all 16 output contributions instead of using runtime indexing.",
+            "- For this repair round, explicitly unroll all offending reads and output contributions instead of using another runtime loop.",
+            "- Write `V(out[0]) <+ transition(target[0], ...)`, `V(out[1]) <+ transition(target[1], ...)`, and so on through every required bit.",
+            "- A module-scope `genvar k` contribution loop can be used in future cleanup, but the safest next fix after this EVAS note is full static unroll.",
+            "- Do not output any line matching `V(<bus>[i])` or `V(<bus>[j])` when `i`/`j` is an `integer`.",
             "",
         ])
 
@@ -1852,7 +2501,7 @@ def _complex_submodule_local_validation_section(task_id: str, notes: list[str]) 
     each public block that the task already requires before rewriting the whole
     integrated system.
     """
-    task_lower = task_id.lower()
+    task_lower = _task_id_text_for_matching(task_id)
     joined = "\n".join(str(note) for note in notes).lower()
     if not any(key in task_lower for key in ("adpll", "sar_adc_dac_weighted_8b")):
         return []
@@ -1897,7 +2546,7 @@ def _complex_submodule_local_validation_section(task_id: str, notes: list[str]) 
 
 def _multi_module_interface_harness_sanity_section(task_id: str, notes: list[str]) -> list[str]:
     """Recover runtime CSV failures caused by module/testbench mismatch."""
-    task_lower = task_id.lower()
+    task_lower = _task_id_text_for_matching(task_id)
     joined = "\n".join(str(note) for note in notes).lower()
     if not any(key in joined for key in ("tran.csv missing", "returncode=1", "dut_not_compiled")):
         return []
@@ -1959,7 +2608,7 @@ def _multi_module_interface_harness_sanity_section(task_id: str, notes: list[str
 
 def _pfd_pll_timing_window_section(task_id: str, notes: list[str]) -> list[str]:
     """Force timing-window failures to repair stimulus/check windows first."""
-    task_lower = task_id.lower()
+    task_lower = _task_id_text_for_matching(task_id)
     joined = "\n".join(str(note) for note in notes).lower()
     if not any(key in task_lower for key in ("pfd", "pll", "adpll", "cppll")):
         return []
@@ -2042,7 +2691,7 @@ def _metric_to_mechanism_template(task_id: str, notes: list[str]) -> list[str]:
     joined = "\n".join(str(note) for note in notes)
     lowered = joined.lower()
     metrics = _extract_metrics_from_notes(notes)
-    task_lower = task_id.lower()
+    task_lower = _task_id_text_for_matching(task_id)
     lines: list[str] = []
 
     def has_metric(*names: str) -> bool:
@@ -2321,6 +2970,10 @@ def _targeted_repair_skill(
             "- Do not use bare `errpreset=conservative` without an explicit `maxstep`.",
         ])
 
+    implementation_skeleton_lines = _implementation_safety_skeleton_section(task_dir, evas_result, sample_dir)
+    if implementation_skeleton_lines:
+        lines.extend(implementation_skeleton_lines)
+
     if status == "FAIL_DUT_COMPILE":
         lines.extend([
             "",
@@ -2399,6 +3052,8 @@ def _targeted_repair_skill(
             "- Keep the save list aligned with the task-required observables.",
             "- Use a single `tran` statement: `tran tran stop=200n maxstep=5n`.",
             "- Use only `vsource` elements for stimulus (type=pulse or type=pwl). Do NOT use `vcvs`, `ccvs`, `capacitor`, or `resistor` unless the task explicitly requires them.",
+            "- PWL `wave=[...]` time entries must be strictly increasing; use a tiny finite transition interval instead of duplicate timestamps.",
+            "- For long instance node lists, either keep the whole `XDUT (...) module_name` instance on one line or use explicit `\\` continuation at each line break.",
             "- Write a single `tran` analysis. Do NOT add `dc` sweep or `ac` analysis.",
             "- In `save` statements, use plain signal names only: `save clk vin vout`. Do NOT use `XDUT:signal` colon syntax.",
             "- Add `global 0` on the line after `simulator lang=spectre`.",
@@ -2547,6 +3202,16 @@ def _targeted_repair_skill(
             note_hints.extend([
                 "- **CRITICAL: Colon-instance syntax detected**. Spectre rejects this pattern.",
                 "- Replace `save X1:A X1:B X1:Y` with plain signal names: `save a b y`.",
+            ])
+        if "nonincreasing_pwl_time=" in note:
+            note_hints.extend([
+                "- **CRITICAL: PWL time vector is not strictly increasing.** Spectre rejects duplicate timestamps.",
+                "- Replace duplicate-time steps with small finite intervals, for example `3.99n old 4n new` rather than `4n old 4n new`.",
+            ])
+        if "uncontinued_multiline_instance=" in note:
+            note_hints.extend([
+                "- **CRITICAL: Bare multiline Spectre instance detected.** Spectre will parse the following lines as separate undefined instances.",
+                "- Put the complete instance on one line or add `\\` at each continued instance line.",
             ])
         if "conditional_transition=" in note:
             note_hints.extend([
@@ -2902,6 +3567,7 @@ def build_evas_assisted_prompt(
     status = evas_result.get("status", "FAIL_OTHER")
     task_id = meta.get("task_id", meta.get("id", task_dir.name))
     notes = evas_result.get("evas_notes") or evas_result.get("notes") or []
+    contract_diagnosis_text = _behavior_contract_diagnosis_section(task_dir, evas_result)
 
     if status == "FAIL_DUT_COMPILE":
         focus = (
@@ -2963,6 +3629,8 @@ def build_evas_assisted_prompt(
         # EVAS Result
 
         {score_text.strip()}
+
+        {contract_diagnosis_text}
 
         # Original Task Prompt
 
@@ -3030,6 +3698,8 @@ def build_evas_guided_repair_prompt(
     *,
     history: list[dict] | None = None,
     include_skill: bool = True,
+    include_contract_diagnosis: bool = True,
+    public_spec_mode: str = "legacy-extracted",
     loop_context: dict | None = None,
 ) -> str:
     """Build a targeted repair prompt.
@@ -3037,12 +3707,16 @@ def build_evas_guided_repair_prompt(
     Args:
         history: list of previous round result dicts (each has 'round', 'evas_notes').
                  When provided, accumulated constraints are included to prevent oscillation.
-        include_skill: If True, inject Skill circuit knowledge (Experiment condition E).
-                       If False, only Checker + EVAS diagnosis (Experiment condition D).
+        include_skill: If True, inject Skill circuit knowledge.
+                       If False, use Checker + EVAS diagnosis only.
+        include_contract_diagnosis: If True, include optional task-local
+            contract diagnosis. Disable for clean F-style EVAS-only repair.
+        public_spec_mode: Forwarded to generate.build_prompt so repair rounds
+            can use the same public prompt/spec condition as initial generation.
     """
     meta = read_meta(task_dir)
     family = meta.get("family", "end-to-end")
-    original_prompt = build_prompt(task_dir)
+    original_prompt = build_prompt(task_dir, public_spec_mode=public_spec_mode)
     candidate_text = "\n\n".join(_candidate_sections(sample_dir))
     score_text = _score_summary(evas_result)
     targeted_skill_text = _targeted_repair_skill(task_dir, evas_result, include_skill=include_skill, sample_dir=sample_dir)
@@ -3050,6 +3724,12 @@ def build_evas_guided_repair_prompt(
     history_text = _history_section(history or [], current_status=evas_result.get("status", "FAIL"))
     notes = evas_result.get("evas_notes") or evas_result.get("notes") or []
     diagnostic_retention_text = _diagnostic_retention_section(notes, history or [])
+    contract_diagnosis_text = (
+        _behavior_contract_diagnosis_section(task_dir, evas_result)
+        if include_contract_diagnosis
+        else ""
+    )
+    circuit_rag_text = _circuit_mechanism_rag_section(task_dir, evas_result)
 
     skill_label = "Checker + EVAS + Skill" if include_skill else "Checker + EVAS only"
 
@@ -3071,6 +3751,10 @@ def build_evas_guided_repair_prompt(
         {targeted_skill_text}
 
         {diagnostic_retention_text}
+
+        {contract_diagnosis_text}
+
+        {circuit_rag_text}
 
         # EVAS Result
 

@@ -1,0 +1,21 @@
+simulator lang=spectre
+global 0
+
+// Supply rails
+Vvdd (VDD 0) vsource dc=0.9
+Vvss (VSS 0) vsource dc=0
+
+// Differential input sources - small step
+Vinp (vinp 0) vsource type=pulse val0=0.5 val1=0.51 period=200n delay=10n rise=1n fall=1n width=180n
+Vinn (vinn 0) vsource type=pulse val0=0.5 val1=0.49 period=200n delay=10n rise=1n fall=1n width=180n
+
+// DUT instantiation by position
+XDUT (VDD, VSS, vinp, vinn, voutp, voutn) gain_step_ref
+
+// Transient analysis
+tran tran stop=100n maxstep=100p
+
+// Save waveforms
+save vinp vinn voutp voutn
+
+ahdl_include "gain_step_ref.va"

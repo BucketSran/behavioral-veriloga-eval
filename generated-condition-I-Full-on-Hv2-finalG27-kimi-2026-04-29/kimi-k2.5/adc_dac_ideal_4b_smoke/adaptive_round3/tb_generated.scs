@@ -1,0 +1,38 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "adc_ideal_4b.va"
+ahdl_include "dac_ideal_4b.va"
+
+// Supply
+Vdd (vdd 0) vsource dc=0.9
+Vss (vss 0) vsource dc=0.0
+
+// Reset: active low, deasserts at 10ns
+Vrst (rst_n 0) vsource type=pwl wave=[0 0 10n 0 10.1n 0.9]
+
+// Clock: 1GHz, 50% duty, starts after reset deassertion
+// Period = 1ns, so 500ps high, 500ps low
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=1n rise=10p fall=10p width=490p delay=11n
+
+// Input ramp: 0 to 0.9V over 50ns
+Vin (vin 0) vsource type=pwl wave=[0 0 50n 0.9]
+
+// ADC instance
+Xadc (vin clk vdd vss rst_n adc_d3 adc_d2 adc_d1 adc_d0) adc_ideal_4b
+
+// DAC instance, chained from ADC output
+Xdac (adc_d3 adc_d2 adc_d1 adc_d0 vdd vss rst_n vout) dac_ideal_4b
+
+// Transient analysis
+tran tran stop=50n maxstep=100p
+
+// Save statements for required signals
+save vin
+save clk
+save rst_n
+save vout
+save adc_d3
+save adc_d2
+save adc_d1
+save adc_d0

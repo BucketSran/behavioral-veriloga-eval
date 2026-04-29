@@ -1,0 +1,87 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "pfd_updn.va"
+
+// Supply
+Vdd (vdd 0) vsource dc=1.8
+Vss (vss 0) vsource dc=0
+
+// PFD DUT
+XDUT (vdd vss ref div up dn) pfd_updn
+
+// Reference stimulus: 10MHz with phase modulation to create lead/lag swaps
+// First window (20ns-120ns): REF leads DIV by ~2ns -> UP pulses expected
+// Second window (160ns-260ns): DIV leads REF by ~2ns -> DN pulses expected
+
+Vref (ref 0) vsource type=pwl wave=[
+    0n 0
+    // First window: REF leads DIV by 2ns (period 20ns = 50MHz for test)
+    20n 0 20.1n 1.8
+    30n 1.8 30.1n 0
+    40n 0 40.1n 1.8
+    50n 1.8 50.1n 0
+    60n 0 60.1n 1.8
+    70n 1.8 70.1n 0
+    80n 0 80.1n 1.8
+    90n 1.8 90.1n 0
+    100n 0 100.1n 1.8
+    110n 1.8 110.1n 0
+    // Gap to second window
+    120n 0 120.1n 0
+    // Second window: DIV leads REF by 2ns (REF edges delayed)
+    162n 0 162.1n 1.8
+    172n 1.8 172.1n 0
+    182n 0 182.1n 1.8
+    192n 1.8 192.1n 0
+    202n 0 202.1n 1.8
+    212n 1.8 212.1n 0
+    222n 0 222.1n 1.8
+    232n 1.8 232.1n 0
+    242n 0 242.1n 1.8
+    252n 1.8 252.1n 0
+    // Continue to fill simulation time
+    262n 0 262.1n 0
+    300n 0
+]
+
+// DIV stimulus: phase relationship swaps relative to REF
+// First window: DIV lags REF by 2ns
+// Second window: DIV leads REF by 2ns
+
+Vdiv (div 0) vsource type=pwl wave=[
+    0n 0
+    // First window: DIV lags REF by 2ns
+    22n 0 22.1n 1.8
+    32n 1.8 32.1n 0
+    42n 0 42.1n 1.8
+    52n 1.8 52.1n 0
+    62n 0 62.1n 1.8
+    72n 1.8 72.1n 0
+    82n 0 82.1n 1.8
+    92n 1.8 92.1n 0
+    102n 0 102.1n 1.8
+    112n 1.8 112.1n 0
+    // Gap to second window
+    120n 0 120.1n 0
+    // Second window: DIV leads REF by 2ns
+    160n 0 160.1n 1.8
+    170n 1.8 170.1n 0
+    180n 0 180.1n 1.8
+    190n 1.8 190.1n 0
+    200n 0 200.1n 1.8
+    210n 1.8 210.1n 0
+    220n 0 220.1n 1.8
+    230n 1.8 230.1n 0
+    240n 0 240.1n 1.8
+    250n 1.8 250.1n 0
+    // Continue to fill simulation time
+    260n 0 260.1n 0
+    300n 0
+]
+
+// Save statements for required observables
+save ref div up dn
+
+// Transient analysis
+tran tran stop=300n maxstep=10p errpreset=conservative

@@ -1,0 +1,42 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module comparator_offset_search_ref (vdd, vss, inp, inn, outp);
+    inout electrical vdd;
+    inout electrical vss;
+    input electrical inp;
+    input electrical inn;
+    output electrical outp;
+
+    parameter real vos = 5m from [0:inf);  // Built-in static offset voltage
+    parameter real vth = 0.5 from (0:1);   // Threshold for cross detection (fraction of supply)
+    parameter real tr = 1n from (0:inf);   // Output rise time
+    parameter real tf = 1n from (0:inf);   // Output fall time
+
+    integer state;  // 0 = low, 1 = high
+    real vout_high;
+    real vout_low;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+        end
+
+        // Calculate output voltage levels from supply rails
+        vout_high = V(vdd);
+        vout_low = V(vss);
+
+        // Detect crossing: V(inp) - V(inn) > vos (rising edge)
+        @(cross(V(inp) - V(inn) - vos, +1)) begin
+            state = 1;
+        end
+
+        // Detect crossing: V(inp) - V(inn) < vos (falling edge)
+        @(cross(V(inp) - V(inn) - vos, -1)) begin
+            state = 0;
+        end
+
+        // Output voltage with transition
+        V(outp) <+ transition(state ? vout_high : vout_low, 0, tr, tf);
+    end
+endmodule

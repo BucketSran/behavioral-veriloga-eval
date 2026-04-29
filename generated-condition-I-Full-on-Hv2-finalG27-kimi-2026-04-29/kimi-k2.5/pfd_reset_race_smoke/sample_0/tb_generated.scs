@@ -1,0 +1,116 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "pfd_updn.va"
+
+// Supply
+Vdd (vdd 0) vsource dc=1.8
+Vss (vss 0) vsource dc=0
+
+// PFD DUT
+XDUT (vdd vss ref div up dn) pfd_updn
+
+// Reference stimulus: starts at 10MHz, phase shifts to create lead/lag swaps
+// Period = 100ns, but we create near-simultaneous edges with small timing offsets
+
+// REF: 10MHz with phase modulation to create lead/lag relationship changes
+// Window 1: REF leads DIV by 5ns
+// Window 2: Near simultaneous (within 100ps)
+// Window 3: DIV leads REF by 5ns
+// Window 4: Near simultaneous with opposite relationship
+
+Vref (ref 0) vsource type=pwl wave=[
+    0n 0
+    1n 0 1.1n 1.8
+    100n 1.8 100.1n 0
+    200n 0 200.1n 1.8
+    300n 1.8 300.1n 0
+    // Near simultaneous with DIV at 400ns (REF slightly early)
+    395n 0 395.05n 1.8
+    495n 1.8 495.05n 0
+    // DIV leads at 500ns
+    600n 0 600.1n 1.8
+    700n 1.8 700.1n 0
+    // Near simultaneous with DIV slightly early
+    795n 0 795.08n 1.8
+    895n 1.8 895.05n 0
+    // REF leads again
+    1000n 0 1000.1n 1.8
+    1100n 1.8 1100.1n 0
+    // Continue pattern with varying relationships
+    1200n 0 1200.1n 1.8
+    1300n 1.8 1300.1n 0
+    // Very close edges - race condition test
+    1399.9n 0 1400n 1.8
+    1500n 1.8 1500.1n 0
+    // DIV leads
+    1605n 0 1605.1n 1.8
+    1700n 1.8 1700.1n 0
+    // Near simultaneous
+    1799.95n 0 1800n 1.8
+    1900n 1.8 1900.1n 0
+    // Continue to 300ns stop
+    2000n 0 2000.1n 1.8
+    2100n 1.8 2100.1n 0
+    2200n 0 2200.1n 1.8
+    2300n 1.8 2300.1n 0
+    2400n 0 2400.1n 1.8
+    2500n 1.8 2500.1n 0
+    2600n 0 2600.1n 1.8
+    2700n 1.8 2700.1n 0
+    2800n 0 2800.1n 1.8
+    2900n 1.8 2900.1n 0
+    3000n 0 3000.1n 1.8
+]
+
+// DIV: 10MHz with phase modulation - relationship to REF changes over time
+Vdiv (div 0) vsource type=pwl wave=[
+    0n 0
+    // DIV lags REF by 5ns initially
+    6n 0 6.1n 1.8
+    106n 1.8 106.1n 0
+    206n 0 206.1n 1.8
+    306n 1.8 306.1n 0
+    // Near simultaneous at 400ns (DIV slightly late)
+    395.1n 0 395.15n 1.8
+    495.1n 1.8 495.15n 0
+    // DIV leads at 500ns
+    595n 0 595.1n 1.8
+    695n 1.8 695.1n 0
+    // Near simultaneous at 800ns (DIV slightly early)
+    795n 0 795.05n 1.8
+    895n 1.8 895.05n 0
+    // DIV lags
+    1006n 0 1006.1n 1.8
+    1106n 1.8 1106.1n 0
+    // Continue
+    1206n 0 1206.1n 1.8
+    1306n 1.8 1306.1n 0
+    // Very close edges - race condition test (DIV slightly late)
+    1400.1n 0 1400.15n 1.8
+    1500.1n 1.8 1500.15n 0
+    // DIV leads
+    1595n 0 1595.1n 1.8
+    1705n 1.8 1705.1n 0
+    // Near simultaneous (DIV slightly early)
+    1799.9n 0 1799.95n 1.8
+    1900.1n 1.8 1900.15n 0
+    // Continue
+    2010n 0 2010.1n 1.8
+    2110n 1.8 2110.1n 0
+    2210n 0 2210.1n 1.8
+    2310n 1.8 2310.1n 0
+    2410n 0 2410.1n 1.8
+    2510n 1.8 2510.1n 0
+    2610n 0 2610.1n 1.8
+    2710n 1.8 2710.1n 0
+    2810n 0 2810.1n 1.8
+    2910n 1.8 2910.1n 0
+    3010n 0 3010.1n 1.8
+]
+
+// Save statements for required observables
+save ref div up dn
+
+// Transient analysis
+tran tran stop=300n maxstep=10p errpreset=conservative

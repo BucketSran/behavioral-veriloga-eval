@@ -1,0 +1,65 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module lfsr (DPN, VDD, VSS, CLK, EN, RSTB);
+    inout DPN;
+    inout VDD;
+    inout VSS;
+    input CLK;
+    input EN;
+    input RSTB;
+
+    electrical DPN;
+    electrical VDD;
+    electrical VSS;
+    electrical CLK;
+    electrical EN;
+    electrical RSTB;
+
+    parameter real vdd_val = 1.0 from (0:inf);
+    parameter real vss_val = 0.0 from [0:inf);
+    parameter real vth = 0.5 from (0:inf);
+    parameter real tr = 0.1n from (0:inf);
+    parameter real tf = 0.1n from (0:inf);
+    parameter integer seed = 123 from [1:2147483647];
+
+    integer lfsr_reg;
+    integer new_bit;
+    integer dpn_val;
+    real v_high;
+    real v_low;
+
+    analog begin
+        @(initial_step) begin
+            lfsr_reg = seed;
+            dpn_val = (lfsr_reg >> 30) & 1;
+            v_high = vdd_val;
+            v_low = vss_val;
+        end
+
+        // Active-low reset: when RSTB is low, initialize to seed
+        @(cross(V(RSTB) - vth, -1)) begin
+            lfsr_reg = seed;
+            dpn_val = (lfsr_reg >> 30) & 1;
+        end
+
+        // Rising edge of CLK with RSTB high and EN high: advance LFSR
+        @(cross(V(CLK) - vth, 1)) begin
+            if (V(RSTB) > vth && V(EN) > vth) begin
+                // Maximal-length polynomial for n=31: taps at 31, 21, 1, 0
+                // Equivalent to: new_bit = bit31 ^ bit21 ^ bit1 ^ bit0
+                new_bit = ((lfsr_reg >> 30) & 1) ^ ((lfsr_reg >> 20) & 1) ^ ((lfsr_reg >> 0) & 1) ^ ((lfsr_reg >> 1) & 1);
+                // Shift right and insert new bit at MSB (position 30)
+                lfsr_reg = (new_bit << 30) | (lfsr_reg >> 1);
+                dpn_val = (lfsr_reg >> 30) & 1;
+            end
+        end
+
+        // Drive DPN output with transition
+        if (dpn_val == 1) begin
+            V(DPN) <+ transition(v_high, tr, tf);
+        end else begin
+            V(DPN) <+ transition(v_low, tr, tf);
+        end
+    end
+endmodule

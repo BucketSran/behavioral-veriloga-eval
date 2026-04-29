@@ -1,0 +1,36 @@
+// Spectre testbench for multimod_divider_ratio_switch_ref
+
+// Include the Verilog-A module
+ahdl_include "multimod_divider_ratio_switch_ref.va"
+
+// Global nodes
+global gnd
+
+// Parameters
+parameters VDD=5.0
+parameters PERIOD=20n
+
+// Voltage supply
+VDD (vdd gnd) vsource dc=VDD
+
+// Clock input: 50MHz clock (20ns period)
+Vclk (clk_in gnd) vsource type=pulse \
+    val0=0 val1=VDD \
+    period=PERIOD \
+    rise=1n fall=1n \
+    width=9n
+
+// Ratio control: starts low (divide-by-4), switches high (divide-by-5) at 150ns
+Vctrl (ratio_ctrl gnd) vsource type=pwl \
+    wave=[0 0, 150n 0, 155n VDD, 320n VDD]
+
+// Device Under Test
+DUT (clk_in ratio_ctrl div_out) multimod_divider_ratio_switch_ref
+
+// Transient analysis
+tran tran stop=320n maxstep=20p errpreset=conservative
+
+// Save statements for required observables
+save clk_in
+save div_out
+save ratio_ctrl

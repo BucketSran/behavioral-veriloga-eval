@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "noise_gen.va"
+
+// DC input source at 1.0 V
+Vdc (vin_i 0) vsource dc=1.0
+
+// Noise generator instance
+Xnoise (vin_i vout_o) noise_gen sigma=0.1
+
+// Transient analysis
+tran tran stop=500n maxstep=1n
+
+// Save required waveforms
+save vin_i vout_o

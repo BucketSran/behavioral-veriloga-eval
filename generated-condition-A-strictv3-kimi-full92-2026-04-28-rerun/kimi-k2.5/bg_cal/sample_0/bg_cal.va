@@ -1,0 +1,105 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bg_cal (VDD, VSS, CLK, COMP_OUT, SETTLED, TRIM_0, TRIM_1, TRIM_2, TRIM_3, TRIM_4, TRIM_5);
+    inout electrical VDD, VSS;
+    input electrical CLK, COMP_OUT;
+    output electrical SETTLED, TRIM_0, TRIM_1, TRIM_2, TRIM_3, TRIM_4, TRIM_5;
+
+    // Parameters
+    parameter integer N = 16 from [1:256];          // Number of comparisons to average
+    parameter real vth = 0.5 from [0:1.8];          // Logic threshold voltage
+    parameter real vhigh = 1.0 from [0:1.8];        // High output voltage
+    parameter real vlow = 0.0 from [0:1.8];         // Low output voltage
+    parameter real tdel = 0 from [0:1n];            // Delay time
+    parameter real tr = 1n from [0:10n];            // Rise time
+    parameter real tf = 1n from [0:10n];            // Fall time
+
+    // State variables
+    integer trim_code;          // Current 6-bit trim code (0-63)
+    integer comp_count;         // Counter for averaging N comparisons
+    integer comp_sum;           // Sum of comparator outputs
+    integer settled_count;      // Counter for consecutive unchanged cycles
+    integer prev_trim_code;     // Previous trim code to detect changes
+    integer settled_flag;       // SETTLED flag state
+
+    // Internal signals for output
+    real trim_0_val, trim_1_val, trim_2_val, trim_3_val, trim_4_val, trim_5_val;
+    real settled_val;
+
+    analog begin
+        // Initialization
+        @(initial_step) begin
+            trim_code = 32;         // Start at mid-scale (32)
+            prev_trim_code = 32;
+            comp_count = 0;
+            comp_sum = 0;
+            settled_count = 0;
+            settled_flag = 0;
+        end
+
+        // Detect rising edge of CLK
+        @(cross(V(CLK) - vth, 1)) begin
+            // Sample COMP_OUT (interpret as 1 if above threshold, 0 if below)
+            if (V(COMP_OUT) > vth) begin
+                comp_sum = comp_sum + 1;
+            end
+            comp_count = comp_count + 1;
+
+            // After N comparisons, compute average and update trim code
+            if (comp_count >= N) begin
+                // Determine offset direction from average
+                // If average > 0.5, comparator tends to output 1 (positive offset)
+                // If average < 0.5, comparator tends to output 0 (negative offset)
+                // Adjust trim code to compensate (opposite direction)
+
+                if (comp_sum > N/2) begin
+                    // Positive offset detected, decrease trim code
+                    if (trim_code > 0) begin
+                        trim_code = trim_code - 1;
+                    end
+                end else if (comp_sum < N/2) begin
+                    // Negative offset detected, increase trim code
+                    if (trim_code < 63) begin
+                        trim_code = trim_code + 1;
+                    end
+                end
+                // If comp_sum == N/2, no adjustment needed (balanced)
+
+                // Check if trim code has changed
+                if (trim_code == prev_trim_code) begin
+                    settled_count = settled_count + 1;
+                    if (settled_count >= 8) begin
+                        settled_flag = 1;
+                    end
+                end else begin
+                    settled_count = 0;
+                    settled_flag = 0;
+                end
+                prev_trim_code = trim_code;
+
+                // Reset counters for next averaging cycle
+                comp_count = 0;
+                comp_sum = 0;
+            end
+        end
+
+        // Extract individual bits from trim_code for output
+        trim_0_val = (trim_code & 1) ? vhigh : vlow;
+        trim_1_val = ((trim_code >> 1) & 1) ? vhigh : vlow;
+        trim_2_val = ((trim_code >> 2) & 1) ? vhigh : vlow;
+        trim_3_val = ((trim_code >> 3) & 1) ? vhigh : vlow;
+        trim_4_val = ((trim_code >> 4) & 1) ? vhigh : vlow;
+        trim_5_val = ((trim_code >> 5) & 1) ? vhigh : vlow;
+        settled_val = settled_flag ? vhigh : vlow;
+
+        // Drive outputs with transitions
+        V(TRIM_0) <+ transition(trim_0_val, tdel, tr, tf);
+        V(TRIM_1) <+ transition(trim_1_val, tdel, tr, tf);
+        V(TRIM_2) <+ transition(trim_2_val, tdel, tr, tf);
+        V(TRIM_3) <+ transition(trim_3_val, tdel, tr, tf);
+        V(TRIM_4) <+ transition(trim_4_val, tdel, tr, tf);
+        V(TRIM_5) <+ transition(trim_5_val, tdel, tr, tf);
+        V(SETTLED) <+ transition(settled_val, tdel, tr, tf);
+    end
+endmodule

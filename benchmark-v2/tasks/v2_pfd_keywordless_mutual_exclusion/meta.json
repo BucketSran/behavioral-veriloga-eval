@@ -1,0 +1,45 @@
+{
+  "task_id": "v2_pfd_keywordless_mutual_exclusion",
+  "family": "benchmark-v2",
+  "source_seed": "pfd_updn",
+  "mechanism_family": "pfd_updn_reset_race",
+  "perturbation_level": "P3_keyword_removal",
+  "status": "validated_gold_evas_spectre",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "pfd",
+    "ref": "early_event",
+    "div": "late_event",
+    "up": "raise_pulse",
+    "dn": "lower_pulse",
+    "lock": null
+  },
+  "manifest_entry": {
+    "task_id": "v2_pfd_keywordless_mutual_exclusion",
+    "source_seed": "pfd_updn",
+    "mechanism_family": "pfd_updn_reset_race",
+    "perturbation_level": "P3_keyword_removal",
+    "prompt_strategy": "Describe two edge streams producing mutually exclusive correction pulses until both have arrived, without PFD or phase detector terms.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-small",
+    "status": "draft_manifest",
+    "review_notes": "Tests retrieval without canonical phase-detector language."
+  },
+  "validation": {
+    "tasks": 30,
+    "evas_pass": "30/30",
+    "spectre_pass": "30/30",
+    "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+    "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1"
+  }
+}

@@ -1,0 +1,44 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dither_adder (vinp, vinn, dpn, vdin_p, vdin_n);
+    input vinp;
+    input vinn;
+    input dpn;
+    output vdin_p;
+    output vdin_n;
+    electrical vinp, vinn, dpn, vdin_p, vdin_n;
+
+    parameter real DITHER_AMP = 0.014063;
+    parameter real vth = 0.45;
+    parameter real tr = 1n;
+    parameter real tf = 1n;
+
+    real vin_diff;
+    real dither_val;
+    real vdin_diff;
+    real vdin_p_target;
+    real vdin_n_target;
+
+    analog begin
+        // Sample input differential voltage
+        vin_diff = V(vinp) - V(vinn);
+
+        // Determine dither sign based on dpn
+        if (V(dpn) > vth) begin
+            dither_val = DITHER_AMP;
+        end else begin
+            dither_val = -DITHER_AMP;
+        end
+
+        // Add dither to differential signal
+        vdin_diff = vin_diff + dither_val;
+
+        // Output common mode is preserved at midpoint of inputs
+        vdin_p_target = (V(vinp) + V(vinn))/2.0 + vdin_diff/2.0;
+        vdin_n_target = (V(vinp) + V(vinn))/2.0 - vdin_diff/2.0;
+
+        V(vdin_p) <+ transition(vdin_p_target, 0, tr, tf);
+        V(vdin_n) <+ transition(vdin_n_target, 0, tr, tf);
+    end
+endmodule

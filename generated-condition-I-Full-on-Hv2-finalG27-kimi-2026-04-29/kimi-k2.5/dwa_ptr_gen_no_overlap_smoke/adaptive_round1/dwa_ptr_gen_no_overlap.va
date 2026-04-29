@@ -1,0 +1,83 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dwa_ptr_gen_no_overlap (clk_i, rst_ni, code_msb_i, cell_en_o, ptr_o);
+    input clk_i;
+    input rst_ni;
+    input [3:0] code_msb_i;
+    output [15:0] cell_en_o;
+    output [15:0] ptr_o;
+    electrical clk_i, rst_ni;
+    electrical [3:0] code_msb_i;
+    electrical [15:0] cell_en_o;
+    electrical [15:0] ptr_o;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter integer ptr_init = 0;
+
+    integer ptr_q;
+    integer code_q;
+    integer j;
+    integer idx;
+    real cell_en_val[0:15];
+    real ptr_val[0:15];
+    genvar k;
+
+    analog begin
+        @(initial_step) begin
+            ptr_q = ptr_init % 16;
+            if (ptr_q < 0) ptr_q = ptr_q + 16;
+            code_q = 0;
+        end
+
+        // Sample on rising edge of clk_i
+        @(cross(V(clk_i) - vth, +1)) begin
+            // Decode 4-bit code from voltage inputs using fixed indices
+            code_q = 0;
+            if (V(code_msb_i[0]) > vth) code_q = code_q + 1;
+            if (V(code_msb_i[1]) > vth) code_q = code_q + 2;
+            if (V(code_msb_i[2]) > vth) code_q = code_q + 4;
+            if (V(code_msb_i[3]) > vth) code_q = code_q + 8;
+            // Clamp code to 0-15
+            if (code_q < 0) code_q = 0;
+            if (code_q > 15) code_q = 15;
+
+            if (V(rst_ni) < vth) begin
+                ptr_q = ptr_init % 16;
+                if (ptr_q < 0) ptr_q = ptr_q + 16;
+            end else begin
+                // Update pointer: advance by code amount (non-overlapping)
+                ptr_q = (ptr_q + code_q) % 16;
+                if (ptr_q < 0) ptr_q = ptr_q + 16;
+            end
+        end
+
+        // Clear all outputs first
+        for (j = 0; j < 16; j = j + 1) begin
+            cell_en_val[j] = 0.0;
+            ptr_val[j] = 0.0;
+        end
+
+        // Asynchronous reset handling for outputs
+        if (V(rst_ni) < vth) begin
+            // All outputs remain cleared (0)
+        end else begin
+            // Set pointer output (one-hot)
+            ptr_val[ptr_q] = vdd;
+
+            // Set cell enable outputs: enable cells starting from ptr_q for 'code_q' cells
+            for (j = 0; j < code_q; j = j + 1) begin
+                idx = ptr_q + j;
+                if (idx >= 16) idx = idx - 16;
+                cell_en_val[idx] = vdd;
+            end
+        end
+
+        // Drive outputs with unconditional transition contributions
+        for (k = 0; k < 16; k = k + 1) begin
+            V(cell_en_o[k]) <+ transition(cell_en_val[k], 0, 100p, 100p);
+            V(ptr_o[k]) <+ transition(ptr_val[k], 0, 100p, 100p);
+        end
+    end
+endmodule

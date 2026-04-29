@@ -1,0 +1,26 @@
+// cmp_strongarm smoke testbench
+simulator lang=spectre
+
+ahdl_include "cmp_strongarm.va"
+
+// Supply voltages
+vsource vdd (vdd 0) vdc=0.9
+vsource vss (vss 0) vdc=0
+
+// Clock: ~500MHz, period = 2ns
+vsource clk (clk 0) vsource type=pulse val0=0 val1=0.9 period=2n delay=0 rise=50p fall=50p width=1n
+
+// Differential inputs: vinp > vinn for first 2 cycles, then vinp < vinn
+// vinp: 0.5V for 0-3ns, 0.4V for 3ns+
+vsource vinp_src (vinp 0) vsource type=pwl wave=[0 0.5 3n 0.5 3.001n 0.4 10n 0.4]
+// vinn: 0.4V for 0-3ns, 0.5V for 3ns+
+vsource vinn_src (vinn 0) vsource type=pwl wave=[0 0.4 3n 0.4 3.001n 0.5 10n 0.5]
+
+// DUT instance
+cmp_strongarm dut (clk vinn vinp out_n out_p lp lm vss vdd)
+
+// Save statements - plain scalar names for EVAS compatibility
+save clk vinp vinn out_p out_n
+
+// Transient analysis
+tran tran stop=4n maxstep=5p

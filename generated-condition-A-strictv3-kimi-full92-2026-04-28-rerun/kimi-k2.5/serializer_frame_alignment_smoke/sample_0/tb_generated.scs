@@ -1,0 +1,40 @@
+// Spectre testbench for serializer_frame_alignment_ref
+
+// Include the Verilog-A model
+ahdl_include "serializer_frame_alignment_ref.va"
+
+// Supply voltages
+vsource vdd (vdd 0) vdc=1.0
+vsource vss (vss 0) vdc=0.0
+
+// Clock source - 10MHz clock (100ns period)
+vsource clk (clk 0) vdc=0.0 vpulse=(0 1.0 0 0.1n 0.1n 4.9n 10n)
+
+// Load control - pulse high to load data
+vsource load (load 0) vdc=0.0 vpulse=(0 1.0 25n 0.1n 0.1n 5n 100n)
+
+// Parallel data inputs - first word: 0xA5 (10100101)
+// din7=1, din6=0, din5=1, din4=0, din3=0, din2=1, din1=0, din0=1
+vsource din7 (din7 0) vdc=1.0
+vsource din6 (din6 0) vdc=0.0
+vsource din5 (din5 0) vdc=1.0
+vsource din4 (din4 0) vdc=0.0
+vsource din3 (din3 0) vdc=0.0
+vsource din2 (din2 0) vdc=1.0
+vsource din1 (din1 0) vdc=0.0
+vsource din0 (din0 0) vdc=1.0
+
+// DUT instance
+serializer_frame_alignment_ref dut (
+    vdd vss clk load
+    din7 din6 din5 din4 din3 din2 din1 din0
+    sout frame
+)
+
+// Transient analysis
+tran tran stop=130n maxstep=0.1n
+
+// Save required signals for checker evaluation
+save clk
+save frame
+save sout

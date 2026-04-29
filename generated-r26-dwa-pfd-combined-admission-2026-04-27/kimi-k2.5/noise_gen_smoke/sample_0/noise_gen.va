@@ -1,0 +1,28 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module noise_gen(vin_i, vout_o);
+    inout vin_i;
+    inout vout_o;
+    electrical vin_i;
+    electrical vout_o;
+
+    parameter real sigma = 0.1 from [0:inf);
+
+    real noise_val;
+    real out_val;
+
+    analog begin
+        @(initial_step) begin
+            noise_val = 0.0;
+        end
+
+        // Generate Gaussian noise using $rdist_normal
+        // $rdist_normal(seed, mean, stddev) - seed 0 means auto-seed
+        noise_val = sigma * $rdist_normal(0, 0.0, 1.0);
+
+        // Output = input + noise, with transition for smoothness
+        out_val = V(vin_i) + noise_val;
+        V(vout_o) <+ transition(out_val, 0, 1p);
+    end
+endmodule

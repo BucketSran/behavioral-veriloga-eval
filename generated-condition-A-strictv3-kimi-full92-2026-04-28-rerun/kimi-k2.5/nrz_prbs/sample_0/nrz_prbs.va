@@ -1,0 +1,100 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module nrz_prbs (VDD, VSS, OUTP, OUTN);
+    inout electrical VDD, VSS;
+    output electrical OUTP, OUTN;
+
+    // Parameters
+    parameter real data_rate = 10e9 from (0:inf);      // Data rate in Hz (default 10 Gbps)
+    parameter real vout_diff = 0.4 from (0:inf);       // Differential output amplitude (V)
+    parameter real preemph_tap = 0.0 from [-1:1];      // Pre-emphasis coefficient (-1 to 1)
+    parameter real tr = 10p from (0:inf);              // Rise/fall time (s)
+    parameter real tf = 10p from (0:inf);              // Fall time (s)
+
+    // PRBS-15 polynomial: x^15 + x^14 + 1 (taps at 15 and 14)
+    // LFSR state
+    integer lfsr;
+    integer bit_period;
+    real bit_time;
+    real v_common;
+    real v_diff;
+    real v_preemph;
+    real prev_bit;      // Previous bit value for pre-emphasis
+    real curr_bit;      // Current bit value
+    real bit_val;       // Actual bit to output with pre-emphasis
+    real time_next;
+    real v_outp;
+    real v_outn;
+    integer first_bit;
+
+    analog begin
+        @(initial_step) begin
+            // Initialize LFSR with non-zero seed
+            lfsr = 1;
+            bit_time = 1.0 / data_rate;
+            prev_bit = 0;
+            first_bit = 1;
+            time_next = 0;
+        end
+
+        // Generate next bit on timer
+        @(timer(time_next)) begin
+            // PRBS-15: feedback = bit15 XOR bit14
+            // LFSR bits numbered 1-15, where bit 1 is output
+            integer feedback;
+            integer bit_out;
+
+            // Extract bits 14 and 15 (1-indexed)
+            // bit 14 = (lfsr >> 13) & 1
+            // bit 15 = (lfsr >> 14) & 1
+            feedback = (((lfsr >> 13) & 1) ^ ((lfsr >> 14) & 1));
+
+            // Output is bit 1 (LSB)
+            bit_out = lfsr & 1;
+
+            // Shift and insert feedback at bit 15
+            lfsr = (lfsr >> 1) | (feedback << 14);
+
+            // Store current bit as previous for next iteration
+            prev_bit = curr_bit;
+            curr_bit = bit_out;
+
+            // Apply 1-tap FIR pre-emphasis: output = curr_bit + preemph_tap * (curr_bit - prev_bit)
+            // This emphasizes transitions
+            if (first_bit) begin
+                bit_val = curr_bit;
+                first_bit = 0;
+            end else begin
+                bit_val = curr_bit + preemph_tap * (curr_bit - prev_bit);
+            end
+
+            // Clamp to valid range
+            if (bit_val > 1.0)
+                bit_val = 1.0;
+            if (bit_val < -1.0)
+                bit_val = -1.0;
+
+            // Schedule next bit
+            time_next = time_next + bit_time;
+        end
+
+        // Calculate differential output voltage
+        // NRZ: bit_val of 1 -> +vout_diff/2 on OUTP, -vout_diff/2 on OUTN
+        //      bit_val of 0 or -1 -> -vout_diff/2 on OUTP, +vout_diff/2 on OUTN (scaled)
+        // Map bit_val [-1, 1] to differential voltage
+
+        v_diff = bit_val * vout_diff / 2.0;
+
+        // Common mode at midpoint of VDD and VSS
+        v_common = (V(VDD) + V(VSS)) / 2.0;
+
+        // Differential outputs
+        v_outp = v_common + v_diff;
+        v_outn = v_common - v_diff;
+
+        // Apply with transition for realistic rise/fall
+        V(OUTP) <+ transition(v_outp, 0, tr, tf);
+        V(OUTN) <+ transition(v_outn, 0, tr, tf);
+    end
+endmodule

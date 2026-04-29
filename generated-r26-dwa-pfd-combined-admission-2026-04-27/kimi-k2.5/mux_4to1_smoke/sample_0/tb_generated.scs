@@ -1,0 +1,27 @@
+// Spectre testbench for mux_4to1
+
+ahdl_include "mux_4to1.va"
+
+// Power supplies
+v_vdd (vdd 0) vsource dc=0.9
+v_vss (vss 0) vsource dc=0
+
+// Data inputs - distinctive voltages
+v_d0 (d0 0) vsource dc=0.1
+v_d1 (d1 0) vsource dc=0.3
+v_d2 (d2 0) vsource dc=0.6
+v_d3 (d3 0) vsource dc=0.8
+
+// Selection inputs - walk through all 4 cases
+// 00 -> 01 -> 10 -> 11, each 100ns
+v_sel0 (sel0 0) vsource type=pwl wave=[0n 0 100n 0 100.1n 0.9 200n 0.9 200.1n 0 300n 0 300.1n 0.9 400n 0.9]
+v_sel1 (sel1 0) vsource type=pwl wave=[0n 0 200n 0 200.1n 0.9 400n 0.9]
+
+// DUT instance
+dut (vdd vss d3 d2 d1 d0 sel1 sel0 y) mux_4to1
+
+// Save signals
+save d0 d1 d2 d3 sel1 sel0 y
+
+// Transient analysis
+tran tran stop=420n maxstep=1n errpreset=conservative

@@ -1,61 +1,46 @@
-Create a testbench probe that monitors a DAC output and computes code-by-code INL and DNL. Input: analog DAC output + clock strobe. Output: writes results to a file using $fopen/$fdisplay at end of simulation.
+Generate a minimal EVAS-compatible Spectre `.scs` testbench for an INL/DNL
+probe smoke run.
 
-Ports:
-- `VDD`: inout electrical (power rail)
-- `VSS`: inout electrical (power rail)
-- `DIN3`: input electrical
-- `DIN2`: input electrical
-- `DIN1`: input electrical
-- `DIN0`: input electrical
-- `CLK`: input electrical
-- `AOUT`: output electrical
+This is a testbench-generation task. Do not generate Verilog-A modules. Assume
+the following Verilog-A files are provided by the benchmark harness and only
+write the Spectre testbench.
 
-DUT module to instantiate: `dac_for_probe`
+Return exactly one fenced code block tagged `spectre`. Do not include prose
+outside the code block.
 
-DUT module to instantiate: `dac_for_probe`
+## Provided Modules
 
-DUT module to instantiate: `dac_for_probe`
+1. DAC stimulus target:
+   - Include file: `dac_for_probe.va`
+   - Module name: `dac_for_probe`
+   - Positional port order: `(VDD, VSS, DIN3, DIN2, DIN1, DIN0, CLK, AOUT)`
 
-DUT module to instantiate: `dac_for_probe`
+2. INL/DNL probe:
+   - Include file: `inl_dnl_probe.va`
+   - Module name: `inl_dnl_probe`
+   - Positional port order: `(VDD, VSS, CLKSTB, VOUT)`
 
-DUT module to instantiate: `dac_for_probe`
+## Required Testbench Structure
 
-DUT module to instantiate: `dac_for_probe`
+- Start with `simulator lang=spectre` and `global 0`.
+- Provide `VDD=0.9 V` and `VSS=0 V`.
+- Drive `CLK` with enough rising edges to sample all 16 DAC codes.
+- Drive `DIN3`, `DIN2`, `DIN1`, and `DIN0` as a 4-bit binary count over the
+  transient window.
+- Instantiate the DAC by position:
+  `XDAC (VDD VSS DIN3 DIN2 DIN1 DIN0 CLK AOUT) dac_for_probe`
+- Instantiate the probe by position:
+  `XPROBE (VDD VSS CLK AOUT) inl_dnl_probe`
+- Use exactly one transient analysis:
+  `tran tran stop=68n maxstep=20p`
+- Save the public waveform columns:
+  `save CLK DIN3 DIN2 DIN1 DIN0 AOUT`
+- Place the `ahdl_include` lines last:
+  `ahdl_include "dac_for_probe.va"`
+  `ahdl_include "inl_dnl_probe.va"`
 
-DUT module to instantiate: `dac_for_probe`
+## Public Evaluation Contract
 
-DUT module to instantiate: `dac_for_probe`
-
-DUT module to instantiate: `dac_for_probe`
-
-DUT module to instantiate: `dac_for_probe`
-
-DUT module to instantiate: `dac_for_probe`
-
-DUT module to instantiate: `dac_for_probe`
-
-DUT module to instantiate: `dac_for_probe`
-
-
-## Public Evaluation Contract (Non-Gold)
-
-This section states evaluator-facing constraints that must be visible to the generated artifact.
-It does not prescribe the internal implementation or reveal a gold solution.
-
-Final EVAS transient setting:
-
-```spectre
-tran tran stop=68n maxstep=20p
-```
-
-Required public waveform columns in `tran.csv`:
-
-- `CLK`, `DIN3`, `DIN2`, `DIN1`, `DIN0`, `AOUT`
-
-Use plain scalar save names for these observables; do not rely on instance-qualified or aliased save names.
-
-Timing/checking-window contract:
-
-- Clock-like input(s) `clock`, `CLK` must provide enough valid edges after reset/enable for the checker to sample settled outputs.
-- Sequential outputs are sampled shortly after clock edges, so drive outputs with stable held state variables and `transition()` targets rather than glitchy combinational expressions.
-- Public stimulus nodes used by the reference harness include: `VDD`, `VSS`, `CLK`, `DIN0`, `DIN1`, `DIN2`, `DIN3`.
+The evaluator reads the transient waveform columns `CLK`, `DIN3`, `DIN2`,
+`DIN1`, `DIN0`, and `AOUT`. Use plain scalar save names; do not rely on
+instance-qualified or aliased save names.

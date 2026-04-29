@@ -29,7 +29,7 @@ differential input through both hysteresis thresholds so both output states are 
 - Instantiate the DUT by positional ports.
 - Save these exact scalar names: `vinp`, `vinn`, `out_p`, `out_n`.
 - Include the generated DUT file `cmp_hysteresis.va`.
-- Use the final transient setting provided by the injected Strict EVAS Validation Contract.
+- Use the final transient setting listed in the Public Evaluation Contract below.
 
 ## Deliverables
 

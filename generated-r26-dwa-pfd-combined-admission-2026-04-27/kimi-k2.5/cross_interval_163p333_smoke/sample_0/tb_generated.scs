@@ -1,0 +1,24 @@
+// Testbench for cross_interval_163p333_ref
+
+// Include the DUT
+ahdl_include "cross_interval_163p333_ref.va"
+
+// Supply voltage
+VDD (VDD 0) vsource dc=1.2
+VSS (VSS 0) vsource dc=0
+
+// Create two pulses 163.333 ps apart
+// First pulse on 'a' at around 2ns
+Va (a 0) vsource type=pulse val0=0 val1=1.2 period=20n delay=2n rise=10p fall=10p width=5n
+// Second pulse on 'b' at around 2ns + 163.333ps = 2.163333ns
+Vb (b 0) vsource type=pulse val0=0 val1=1.2 period=20n delay=2.163333n rise=10p fall=10p width=5n
+
+// DUT instance
+dut (VDD VSS a b delay_out seen_out) cross_interval_163p333_ref
+
+// Save outputs for checker
+save delay_out
+save seen_out
+
+// Transient analysis
+tran tran stop=12n maxstep=5p errpreset=conservative

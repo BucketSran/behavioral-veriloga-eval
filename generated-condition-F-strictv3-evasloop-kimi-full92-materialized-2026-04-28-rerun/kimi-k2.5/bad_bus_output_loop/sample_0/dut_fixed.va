@@ -1,0 +1,15 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bin4_out (VDD, VSS, CODE, DOUT);
+    inout VDD, VSS;
+    input [3:0] CODE;
+    output [3:0] DOUT;
+    electrical VDD, VSS;
+    electrical [3:0] CODE, DOUT;
+    integer i;
+    analog begin
+        for (i = 0; i < 4; i = i + 1)
+            V(DOUT[i]) <+ ((V(CODE[i]) > 0.45) ? V(VDD) : V(VSS));
+    end
+endmodule

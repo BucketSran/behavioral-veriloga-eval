@@ -1,0 +1,24 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "simultaneous_event_order_ref.va"
+
+// Power supplies
+VDD (VDD 0) vsource dc=1.8
+VSS (VSS 0) vsource dc=0
+
+// Reference signal: pulse that crosses 0.9V at exactly 40ns
+// Pulse starts at 0, rises to 1.8V with transition centered at 40ns
+Vref (ref 0) vsource type=pulse val0=0 val1=1.8 period=100n rise=2n fall=2n width=50n delay=39n
+
+// DUT instance
+XDUT (VDD VSS ref out) simultaneous_event_order_ref
+
+// Transient analysis
+tran tran stop=80n maxstep=20p errpreset=conservative
+
+// Save required signals
+save out
+save ref
+save VDD
+save VSS

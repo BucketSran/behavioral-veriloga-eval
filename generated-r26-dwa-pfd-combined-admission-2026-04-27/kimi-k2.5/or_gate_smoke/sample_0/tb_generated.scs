@@ -1,0 +1,16 @@
+// Spectre testbench for or_gate
+
+ahdl_include "or_gate.va"
+
+// Voltage sources for inputs
+v_a a 0 vsource dc=0 type=pulse val0=0 val1=1.8 period=4n delay=0 rise=10p fall=10p width=2n
+v_b b 0 vsource dc=0 type=pulse val0=0 val1=1.8 period=8n delay=2n rise=10p fall=10p width=2n
+
+// DUT instance
+dut (a b y) or_gate
+
+// Transient analysis
+tran tran stop=8n maxstep=100p
+
+// Save signals
+save a b y

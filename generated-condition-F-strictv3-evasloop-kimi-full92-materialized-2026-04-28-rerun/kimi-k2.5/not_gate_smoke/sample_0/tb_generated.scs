@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "not_gate.va"
+
+Vdd (vdd 0) vsource dc=0.9
+Vss (vss 0) vsource dc=0
+
+Va (a 0) vsource type=pulse val0=0 val1=0.9 period=20n rise=100p fall=100p width=10n
+
+XDUT (vdd vss a y) not_gate
+
+save a y
+
+tran tran stop=200n maxstep=5n

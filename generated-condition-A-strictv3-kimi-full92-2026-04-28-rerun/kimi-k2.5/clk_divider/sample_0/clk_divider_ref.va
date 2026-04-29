@@ -1,0 +1,126 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module clk_divider_ref (
+    clk_in,
+    rst_n,
+    div_code_0,
+    div_code_1,
+    div_code_2,
+    div_code_3,
+    div_code_4,
+    div_code_5,
+    div_code_6,
+    div_code_7,
+    clk_out,
+    lock
+);
+
+    // Ports
+    input clk_in;
+    input rst_n;
+    input div_code_0;
+    input div_code_1;
+    input div_code_2;
+    input div_code_3;
+    input div_code_4;
+    input div_code_5;
+    input div_code_6;
+    input div_code_7;
+    output clk_out;
+    output lock;
+
+    electrical clk_in;
+    electrical rst_n;
+    electrical div_code_0;
+    electrical div_code_1;
+    electrical div_code_2;
+    electrical div_code_3;
+    electrical div_code_4;
+    electrical div_code_5;
+    electrical div_code_6;
+    electrical div_code_7;
+    electrical clk_out;
+    electrical lock;
+
+    // Parameters
+    parameter real vth = 0.5;
+    parameter real vhigh = 1.0;
+    parameter real vlow = 0.0;
+    parameter real tr = 100p;
+    parameter real tf = 100p;
+
+    // State variables
+    integer div_ratio;
+    integer counter;
+    integer clk_out_state;
+    integer lock_state;
+    integer first_period_done;
+
+    analog begin
+        // Initialize state
+        @(initial_step) begin
+            div_ratio = 1;
+            counter = 0;
+            clk_out_state = 0;
+            lock_state = 0;
+            first_period_done = 0;
+        end
+
+        // Read division code (8-bit, 1-255)
+        div_ratio = (V(div_code_7) > vth ? 128 : 0) +
+                    (V(div_code_6) > vth ? 64 : 0) +
+                    (V(div_code_5) > vth ? 32 : 0) +
+                    (V(div_code_4) > vth ? 16 : 0) +
+                    (V(div_code_3) > vth ? 8 : 0) +
+                    (V(div_code_2) > vth ? 4 : 0) +
+                    (V(div_code_1) > vth ? 2 : 0) +
+                    (V(div_code_0) > vth ? 1 : 0);
+
+        // Clamp to valid range 1-255
+        if (div_ratio < 1)
+            div_ratio = 1;
+        if (div_ratio > 255)
+            div_ratio = 255;
+
+        // Synchronous reset and clock divider logic
+        @(cross(V(clk_in) - vth, 1)) begin
+            if (V(rst_n) < vth) begin
+                // Reset
+                counter = 0;
+                clk_out_state = 0;
+                lock_state = 0;
+                first_period_done = 0;
+            end else begin
+                // Normal operation
+                counter = counter + 1;
+
+                // Generate 50% duty cycle output
+                // Toggle at half the division ratio
+                if (counter >= div_ratio) begin
+                    counter = 0;
+                    clk_out_state = ~clk_out_state;
+
+                    // Set lock after first full output period (two toggles = one period)
+                    if (first_period_done == 0 && clk_out_state == 0) begin
+                        // Completed first full period (went high then low)
+                        first_period_done = 1;
+                        lock_state = 1;
+                    end else if (first_period_done == 0 && clk_out_state == 1) begin
+                        // First half period done, mark that we've gone high
+                        first_period_done = 2; // 2 means we've gone high, waiting to go low
+                    end else if (first_period_done == 2 && clk_out_state == 0) begin
+                        // Completed first full period
+                        first_period_done = 1;
+                        lock_state = 1;
+                    end
+                end
+            end
+        end
+
+        // Output assignments
+        V(clk_out) <+ transition(clk_out_state ? vhigh : vlow, 0, tr, tf);
+        V(lock) <+ transition(lock_state ? vhigh : vlow, 0, tr, tf);
+    end
+
+endmodule

@@ -1,0 +1,28 @@
+// Minimal EVAS-compatible Spectre testbench for cmp_hysteresis
+
+// Include the DUT
+ahdl_include "cmp_hysteresis.va"
+
+// Supply and ground
+vsource vdd (vdd 0) vdc=0.9
+vsource vss (gnd 0) vdc=0
+
+// Differential input stimulus: sweep through both hysteresis thresholds
+// vhys = 10mV, so thresholds are at +5mV and -5mV
+// Use a piecewise linear source to create a triangle wave on differential input
+vsource vinp (vinp 0) vdc=0
+vsource vinn (vinn 0) vdc=0
+
+// Create differential input using vpwl on vinp relative to vinn
+// Differential voltage: start at -20mV, go to +20mV, back to -20mV
+// This crosses both +5mV and -5mV thresholds
+vsource vdiff (vinp vinn) type=pwl wave=[0 -20m 20n +20m 40n -20m 60n +20m 80n -20m]
+
+// DUT instantiation by positional ports: vinn, vinp, out_n, out_p, vss, vdd
+cmp_hysteresis dut (vinn, vinp, out_n, out_p, gnd, vdd)
+
+// Save required scalar names
+save vinp vinn out_p out_n
+
+// Transient analysis per Public Evaluation Contract
+tran tran stop=80n maxstep=100p

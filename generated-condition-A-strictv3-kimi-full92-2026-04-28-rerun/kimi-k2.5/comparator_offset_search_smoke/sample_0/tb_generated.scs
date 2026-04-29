@@ -1,0 +1,27 @@
+// Spectre testbench for comparator_offset_search_ref
+// Verifies that output switches when V(inp) - V(inn) crosses vos
+
+simulator lang=spectre
+
+// Include the Verilog-A model
+ahdl_include "comparator_offset_search_ref.va"
+
+// Supply voltages
+v_vdd (vdd 0) vsource dc=1.8
+v_vss (vss 0) vsource dc=0
+
+// Reference input (inn) at fixed voltage
+v_inn (inn 0) vsource dc=0.5
+
+// Input ramp: sweep inp from below threshold to above threshold
+// Threshold should be at inn + vos = 0.5 + 5m = 0.505
+v_inp (inp 0) vsource type=pwl wave=[0 0.4 100n 0.6]
+
+// Device under test
+dut (vdd vss inp inn outp) comparator_offset_search_ref
+
+// Transient analysis
+tran tran stop=100n maxstep=100p errpreset=conservative
+
+// Save statements for required public waveforms
+save inp inn outp

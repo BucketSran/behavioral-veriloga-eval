@@ -1,0 +1,86 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module flash_adc_3b (vdd, vss, vin, clk, dout2, dout1, dout0);
+    input vdd, vss, vin, clk;
+    output dout2, dout1, dout0;
+    electrical vdd, vss, vin, clk, dout2, dout1, dout0;
+
+    parameter real vrefp = 0.9;
+    parameter real vrefn = 0.0;
+    parameter real vth = 0.45;
+    parameter real tedge = 100p;
+
+    integer code;
+    integer bit2, bit1, bit0;
+    real vhigh, vlow, vrange, lsb;
+    real vout2, vout1, vout0;
+    real vin_val;
+    real temp_code;
+
+    analog begin
+        @(initial_step) begin
+            code = 0;
+            bit2 = 0;
+            bit1 = 0;
+            bit0 = 0;
+            vout2 = 0.0;
+            vout1 = 0.0;
+            vout0 = 0.0;
+        end
+
+        vhigh = V(vdd);
+        vlow = V(vss);
+        vrange = vrefp - vrefn;
+        lsb = vrange / 8.0;
+
+        @(cross(V(clk) - vth, +1)) begin
+            vin_val = V(vin);
+
+            // Quantize vin to 3-bit code
+            if (vin_val <= vrefn) begin
+                code = 0;
+            end else if (vin_val >= vrefp) begin
+                code = 7;
+            end else begin
+                temp_code = (vin_val - vrefn) / lsb;
+                // Manual floor conversion
+                if (temp_code >= 7.0) begin
+                    code = 7;
+                end else if (temp_code >= 6.0) begin
+                    code = 6;
+                end else if (temp_code >= 5.0) begin
+                    code = 5;
+                end else if (temp_code >= 4.0) begin
+                    code = 4;
+                end else if (temp_code >= 3.0) begin
+                    code = 3;
+                end else if (temp_code >= 2.0) begin
+                    code = 2;
+                end else if (temp_code >= 1.0) begin
+                    code = 1;
+                end else begin
+                    code = 0;
+                end
+            end
+
+            // Clamp to [0, 7]
+            if (code < 0) code = 0;
+            if (code > 7) code = 7;
+
+            // Decode to individual bits
+            bit2 = code / 4;
+            bit1 = (code - bit2 * 4) / 2;
+            bit0 = code - bit2 * 4 - bit1 * 2;
+
+            // Set output voltages
+            vout2 = bit2 ? vhigh : vlow;
+            vout1 = bit1 ? vhigh : vlow;
+            vout0 = bit0 ? vhigh : vlow;
+        end
+
+        V(dout2) <+ transition(vout2, 0, tedge);
+        V(dout1) <+ transition(vout1, 0, tedge);
+        V(dout0) <+ transition(vout0, 0, tedge);
+    end
+endmodule

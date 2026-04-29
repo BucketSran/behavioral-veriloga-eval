@@ -1,0 +1,37 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module not_gate (vdd, vss, a, y);
+    inout electrical vdd, vss, a, y;
+
+    parameter real vth = 0.45 from (0:inf);
+    parameter real tedge = 100p from (0:inf);
+
+    real vout;
+    integer state;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+        end
+
+        @(cross(V(a) - vth, 1)) begin
+            // Rising edge on a: a goes above vth, y should go LOW
+            state = 0;
+        end
+
+        @(cross(V(a) - vth, -1)) begin
+            // Falling edge on a: a goes below vth, y should go HIGH
+            state = 1;
+        end
+
+        // Determine output based on current input level
+        if (V(a) > vth) begin
+            vout = V(vss);
+        end else begin
+            vout = V(vdd);
+        end
+
+        V(y) <+ transition(vout, 0, tedge);
+    end
+endmodule

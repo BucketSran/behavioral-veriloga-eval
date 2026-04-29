@@ -1,97 +1,80 @@
-Create four basic voltage-domain digital gate/flip-flop models in Verilog-A,
-produce minimal EVAS-compatible Spectre testbenches, and run smoke simulations.
+Create four basic voltage-domain digital gate/flip-flop models in Verilog-A
+and one minimal EVAS-compatible Spectre testbench that exercises all four
+modules in a single transient run.
 
-You need to implement four separate modules:
+Return exactly five fenced code blocks:
 
-1. **AND gate** (`and_gate`): inputs A, B; output Y = A AND B
-2. **OR gate** (`or_gate`): inputs A, B; output Y = A OR B
-3. **NOT gate** (`not_gate`): input A; output Y = NOT A (requires VDD/VSS supply rails)
-4. **D flip-flop with synchronous reset** (`dff_rst`): inputs D, CLK, RST (active-high),
-   supply rails VDD/VSS; outputs Q (data), QB (complement)
+1. A `verilog-a` block for module `and_gate`
+2. A `verilog-a` block for module `or_gate`
+3. A `verilog-a` block for module `not_gate`
+4. A `verilog-a` block for module `dff_rst`
+5. A `spectre` block for the combined testbench
 
-**Module port order (CRITICAL):**
-- Modules with power pins: **VDD/VSS first**, then signal ports
-- NOT gate: `module not_gate (inout VDD, inout VSS, input A, output Y);`
-- DFF: `module dff_rst (inout VDD, inout VSS, input D, input CLK, input RST, output Q, output QB);`
-- Modules without power: inputs first, outputs last
-- AND/OR gate: `module and_gate (input A, input B, output Y);`
+Do not include prose outside the code blocks.
 
-Behavioral intent for all modules:
+## Required Verilog-A Modules
 
-- pure voltage-domain Verilog-A only
-- EVAS-compatible syntax
-- use `transition(...)` to drive all outputs
-- gates are combinational: output updates continuously via `V() <+ transition(...)`
-- DFF: samples D on rising edge of CLK; if RST=1 at clock edge, Q=0 regardless of D
-- QB must always be the complement of Q
+1. AND gate:
+   - Module name: `and_gate`
+   - Positional port order: `(A, B, Y)`
+   - Behavior: `Y = A AND B`
 
-Implementation constraints:
+2. OR gate:
+   - Module name: `or_gate`
+   - Positional port order: `(A, B, Y)`
+   - Behavior: `Y = A OR B`
 
-- logic levels referenced to VDD/VSS supply rails
-- threshold at VDD/2 for input level detection
-- **Signal naming convention for the testbench:**
-  - NOT gate: `not_a`, `not_y`
-  - AND gate: `and_a`, `and_b`, `and_y`
-  - OR gate: `or_a`, `or_b`, `or_y`
-  - DFF: `dff_d`, `dff_clk`, `dff_rst`, `dff_q`, `dff_qb`
-- These signals must appear in the waveform CSV via the `save` statement
+3. NOT gate:
+   - Module name: `not_gate`
+   - Positional port order: `(VDD, VSS, A, Y)`
+   - Behavior: `Y = NOT A`
 
-Testbench requirements:
+4. D flip-flop with synchronous reset:
+   - Module name: `dff_rst`
+   - Positional port order: `(VDD, VSS, D, CLK, RST, Q, QB)`
+   - Behavior: sample `D` on the rising edge of `CLK`; when `RST` is high at
+     the clock edge, force `Q=0`; `QB` is always the complement of `Q`.
 
-- Single top-level Spectre testbench with one `tran` analysis covering all modules
-- Use `simulator lang=spectre` header
-- Include all four modules with `ahdl_include`
-- **Instance port order must match DUT module port order exactly:**
-  - NOT gate: `I_not (not_vdd not_vss not_a not_y) not_gate`
-  - DFF: `I_dff (dff_vdd dff_vss dff_d dff_clk dff_rst dff_q dff_qb) dff_rst`
-  - AND/OR gate: `I_and (and_a and_b and_y) and_gate`
-- **Do NOT use named port syntax** (e.g., `A=not_a VDD=vdd`) - use positional port order
-- **Do NOT use colon-instance syntax in save statements**
-- Correct: `save not_a not_y and_a and_b and_y or_a or_b or_y dff_d dff_clk dff_q dff_qb`
-- Wrong: `save I_not:A I_not:Y I_and:A I_and:B I_and:Y` (Spectre rejects this)
+## Verilog-A Requirements
 
-Minimum simulation goal (per module):
+- Use pure voltage-domain Verilog-A only.
+- Declare all ports as `electrical`.
+- Use `transition(...)` for driven outputs.
+- Use Spectre-compatible Verilog-A syntax rather than digital-Verilog syntax.
+- Use a threshold near half supply to detect logic levels.
 
-- AND/OR/NOT: verify all combinations of inputs over 8 ns; truth table must be exact
-- DFF: 20 ns run at 1 GHz (CLK period=2 ns), exercise D=0, D=1, RST=1 sequence;
-  Q must follow the expected clocked sequence and QB must always be complementary
+## Required Testbench Structure
 
-Expected behavior:
-- AND gate: y = a & b (both high → output high)
-- OR gate: y = a | b (either high → output high)
-- NOT gate: y = ~a (inverse of input)
-- DFF with reset: q = d on clk edge when rst=0; q=0 when rst=1
-Ports:
-- `VDD`: inout electrical
-- `VSS`: inout electrical
-- `D`: input electrical
-- `CLK`: input electrical
-- `RST`: input electrical
-- `Q`: output electrical
-- `QB`: output electrical
+The Spectre testbench must include all four generated module files:
 
+- `ahdl_include "and_gate.va"`
+- `ahdl_include "or_gate.va"`
+- `ahdl_include "not_gate.va"`
+- `ahdl_include "dff_rst.va"`
 
-## Public Evaluation Contract (Non-Gold)
+Instantiate by positional port order:
 
-This section states evaluator-facing constraints that must be visible to the generated artifact.
-It does not prescribe the internal implementation or reveal a gold solution.
+- `I_and (and_a and_b and_y) and_gate`
+- `I_or (or_a or_b or_y) or_gate`
+- `I_not (not_vdd not_vss not_a not_y) not_gate`
+- `I_dff (dff_vdd dff_vss dff_d dff_clk dff_rst dff_q dff_qb) dff_rst`
 
-Final EVAS transient setting:
+Use one transient analysis:
 
-```spectre
-tran tran stop=200n maxstep=100p
-```
+- `tran tran stop=200n maxstep=100p`
 
-Required public waveform columns in `tran.csv`:
+Save all public waveform columns:
 
-- `a`, `y`
+- `not_a`, `not_y`
+- `and_a`, `and_b`, `and_y`
+- `or_a`, `or_b`, `or_y`
+- `dff_d`, `dff_clk`, `dff_rst`, `dff_q`, `dff_qb`
 
-Use plain scalar save names for these observables; do not rely on instance-qualified or aliased save names.
+Use plain scalar save names and Spectre-compatible instance/save syntax.
 
-Timing/checking-window contract:
+## Public Evaluation Contract
 
-- Reset-like input(s) `rst`, `reset` must be asserted only for startup/explicit reset checks, then deasserted early enough and kept deasserted through the post-reset checking window.
-- For active-low resets such as `rstb`, `rst_n`, or `rst_ni`, avoid a finite-width pulse that returns the reset node low after release; use a waveform that remains high during checking.
-- Clock-like input(s) `clk`, `clock` must provide enough valid edges after reset/enable for the checker to sample settled outputs.
-- Sequential outputs are sampled shortly after clock edges, so drive outputs with stable held state variables and `transition()` targets rather than glitchy combinational expressions.
-- Public stimulus nodes used by the reference harness include: `not_vdd`, `not_vss`, `not_a`, `and_a`, `and_b`, `or_a`, `or_b`, `dff_vdd`, `dff_vss`, `dff_clk`, `dff_d`, `dff_rst`.
+The evaluator checks the AND, OR, NOT, and DFF/reset behavior through the saved
+waveform columns above. The testbench must exercise all input combinations for
+the combinational gates and enough clock edges after reset for the DFF output
+sequence to be visible.

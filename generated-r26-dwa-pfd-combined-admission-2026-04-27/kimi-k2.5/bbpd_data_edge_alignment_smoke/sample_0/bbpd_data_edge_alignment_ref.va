@@ -1,0 +1,86 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bbpd_data_edge_alignment_ref(vdd, vss, clk, data, up, dn, retimed_data);
+    inout electrical vdd, vss;
+    input electrical clk, data;
+    output electrical up, dn, retimed_data;
+
+    // Parameters
+    parameter real vth = 0.5 from (0:1.5);
+    parameter real vhi = 1.0 from (0:2.0);
+    parameter real vlo = 0.0 from (-1:1);
+    parameter real pulse_width = 2e-9 from (1e-12:1e-6);
+    parameter real tr = 0.1e-9 from (1e-15:1e-6);
+    parameter real tf = 0.1e-9 from (1e-15:1e-6);
+
+    // Internal state variables
+    integer up_state, dn_state;
+    real up_timer, dn_timer;
+    real last_data_edge_time, last_clk_edge_time;
+    integer data_arrived_first;
+
+    analog begin
+        // Initialize on first step
+        @(initial_step) begin
+            up_state = 0;
+            dn_state = 0;
+            up_timer = 0;
+            dn_timer = 0;
+            last_data_edge_time = -1e-6;
+            last_clk_edge_time = -1e-6;
+            data_arrived_first = 0;
+        end
+
+        // Detect data edges (both rising and falling)
+        @(cross(V(data) - vth, 1)) begin
+            last_data_edge_time = $abstime;
+            // If no recent clock edge, data leads
+            if (($abstime - last_clk_edge_time) > 5e-9) begin
+                data_arrived_first = 1;
+                up_state = 1;
+                up_timer = $abstime + pulse_width;
+            end
+        end
+
+        @(cross(V(data) - vth, -1)) begin
+            last_data_edge_time = $abstime;
+            // If no recent clock edge, data leads
+            if (($abstime - last_clk_edge_time) > 5e-9) begin
+                data_arrived_first = 1;
+                up_state = 1;
+                up_timer = $abstime + pulse_width;
+            end
+        end
+
+        // Detect clock rising edges
+        @(cross(V(clk) - vth, 1)) begin
+            last_clk_edge_time = $abstime;
+            // If no recent data edge, clock leads (data lags)
+            if (($abstime - last_data_edge_time) > 5e-9) begin
+                data_arrived_first = 0;
+                dn_state = 1;
+                dn_timer = $abstime + pulse_width;
+            end
+        end
+
+        // Clear expired UP timer
+        @(timer(up_timer)) begin
+            if (up_state && $abstime >= up_timer) begin
+                up_state = 0;
+            end
+        end
+
+        // Clear expired DN timer
+        @(timer(dn_timer)) begin
+            if (dn_state && $abstime >= dn_timer) begin
+                dn_state = 0;
+            end
+        end
+
+        // Generate output voltages with transitions
+        V(up) <+ transition(up_state ? vhi : vlo, 0, tr, tf);
+        V(dn) <+ transition(dn_state ? vhi : vlo, 0, tr, tf);
+        V(retimed_data) <+ V(vdd);
+    end
+endmodule

@@ -1,0 +1,191 @@
+// DWA Wraparound Smoke Testbench
+// EVAS-compatible Spectre testbench
+
+// Include Verilog-A module
+ahdl_include "dwa_wraparound_ref.va"
+
+// Global parameters
+global 0
+
+// Testbench parameters
+parameters VDD=1.0
+parameters TCLK=10n
+parameters TRF=0.1n
+
+// DUT instantiation
+dwa_wraparound_ref dut (
+    clk_i       clk_i
+    rst_ni      rst_ni
+    code_i_0    code_0
+    code_i_1    code_1
+    code_i_2    code_2
+    code_i_3    code_3
+    cell_en_o_0 cell_en_0
+    cell_en_o_1 cell_en_1
+    cell_en_o_2 cell_en_2
+    cell_en_o_3 cell_en_3
+    cell_en_o_4 cell_en_4
+    cell_en_o_5 cell_en_5
+    cell_en_o_6 cell_en_6
+    cell_en_o_7 cell_en_7
+    cell_en_o_8 cell_en_8
+    cell_en_o_9 cell_en_9
+    cell_en_o_10 cell_en_10
+    cell_en_o_11 cell_en_11
+    cell_en_o_12 cell_en_12
+    cell_en_o_13 cell_en_13
+    cell_en_o_14 cell_en_14
+    cell_en_o_15 cell_en_15
+    ptr_o_0     ptr_0
+    ptr_o_1     ptr_1
+    ptr_o_2     ptr_2
+    ptr_o_3     ptr_3
+    ptr_o_4     ptr_4
+    ptr_o_5     ptr_5
+    ptr_o_6     ptr_6
+    ptr_o_7     ptr_7
+    ptr_o_8     ptr_8
+    ptr_o_9     ptr_9
+    ptr_o_10    ptr_10
+    ptr_o_11    ptr_11
+    ptr_o_12    ptr_12
+    ptr_o_13    ptr_13
+    ptr_o_14    ptr_14
+    ptr_o_15    ptr_15
+)
+
+// Clock generation - 10ns period, 50% duty cycle
+Vclk clk_i 0 vsource type=pulse val0=0 val1=VDD period=TCLK rise=TRF fall=TRF width=5n
+
+// Reset - active low, assert for first 15ns then release
+Vrst rst_ni 0 vsource type=pulse val0=0 val1=VDD period=100n rise=TRF fall=TRF width=85n delay=15n
+
+// Code inputs - drive values that force wraparound from initial pointer 13
+// Starting at ptr=13, code=5 gives cells 13,14,15,0,1 (wraps at 15->0)
+// code=7 gives cells 1,2,3,4,5,6,7 (from ptr=1)
+// code=10 gives cells 8,9,10,11,12,13,14,15,0,1 (wraps again)
+// code=3 gives cells 2,3,4
+// code=6 gives cells 5,6,7,8,9,10
+
+// code_0 (LSB) - pattern: 1,1,0,1,0 (binary for 5,7,10,3,6)
+Vcode0 code_0 0 vsource type=pwl wave=[ \
+    0n 0 \
+    20n 0 \
+    20.1n VDD \
+    30n VDD \
+    30.1n VDD \
+    40n VDD \
+    40.1n 0 \
+    50n 0 \
+    50.1n VDD \
+    60n VDD \
+    60.1n 0 \
+    70n 0 \
+    70.1n 0 \
+    80n 0 \
+    80.1n VDD \
+    90n VDD \
+]
+
+// code_1 - pattern: 0,1,1,1,1 (binary for 5,7,10,3,6)
+Vcode1 code_1 0 vsource type=pwl wave=[ \
+    0n 0 \
+    20n 0 \
+    20.1n 0 \
+    30n 0 \
+    30.1n VDD \
+    40n VDD \
+    40.1n VDD \
+    50n VDD \
+    50.1n VDD \
+    60n VDD \
+    60.1n VDD \
+    70n VDD \
+    70.1n VDD \
+    80n VDD \
+    80.1n VDD \
+    90n VDD \
+]
+
+// code_2 - pattern: 1,0,0,0,1 (binary for 5,7,10,3,6)
+Vcode2 code_2 0 vsource type=pwl wave=[ \
+    0n 0 \
+    20n 0 \
+    20.1n VDD \
+    30n VDD \
+    30.1n 0 \
+    40n 0 \
+    40.1n 0 \
+    50n 0 \
+    50.1n 0 \
+    60n 0 \
+    60.1n 0 \
+    70n 0 \
+    70.1n 0 \
+    80n 0 \
+    80.1n VDD \
+    90n VDD \
+]
+
+// code_3 (MSB) - pattern: 0,0,1,0,0 (binary for 5,7,10,3,6)
+Vcode3 code_3 0 vsource type=pwl wave=[ \
+    0n 0 \
+    20n 0 \
+    20.1n 0 \
+    30n 0 \
+    30.1n 0 \
+    40n 0 \
+    40.1n VDD \
+    50n VDD \
+    50.1n VDD \
+    60n VDD \
+    60.1n 0 \
+    70n 0 \
+    70.1n 0 \
+    80n 0 \
+    80.1n 0 \
+    90n 0 \
+]
+
+// Transient analysis
+tran tran stop=90n maxstep=0.1n
+
+// Save statements for all required signals - scalar names exactly as specified
+save clk_i
+save rst_ni
+save code_0
+save code_1
+save code_2
+save code_3
+save cell_en_0
+save cell_en_1
+save cell_en_2
+save cell_en_3
+save cell_en_4
+save cell_en_5
+save cell_en_6
+save cell_en_7
+save cell_en_8
+save cell_en_9
+save cell_en_10
+save cell_en_11
+save cell_en_12
+save cell_en_13
+save cell_en_14
+save cell_en_15
+save ptr_0
+save ptr_1
+save ptr_2
+save ptr_3
+save ptr_4
+save ptr_5
+save ptr_6
+save ptr_7
+save ptr_8
+save ptr_9
+save ptr_10
+save ptr_11
+save ptr_12
+save ptr_13
+save ptr_14
+save ptr_15

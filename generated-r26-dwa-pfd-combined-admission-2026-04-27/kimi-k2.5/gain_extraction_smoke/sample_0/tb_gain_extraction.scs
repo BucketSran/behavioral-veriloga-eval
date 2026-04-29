@@ -1,0 +1,42 @@
+// tb_gain_extraction.scs
+// EVAS-compatible testbench for gain extraction smoke test
+
+simulator lang=spectre
+
+// Include Verilog-A modules
+ahdl_include "vin_src.va"
+ahdl_include "lfsr.va"
+ahdl_include "dither_adder.va"
+ahdl_include "gain_amp_fixed.va"
+
+// Supply and ground
+VDD (vdd 0) vsource dc=0.9
+VSS (vss 0) vsource dc=0.0
+
+// Clock: 50 MHz
+VCLK (clk 0) vsource type=pulse val0=0 val1=0.9 period=20n rise=1n fall=1n width=10n
+
+// Reset: active low, starts low then goes high and stays high
+VRST (rst_n 0) vsource type=pwl wave=[0 0 20n 0 20.1n 0.9 200u 0.9]
+
+// Enable: high after reset
+VEN (en 0) vsource type=pwl wave=[0 0 50n 0 50.1n 0.9 200u 0.9]
+
+// DUT instances
+Ivin_src (clk rst_n vinp vinn) vin_src \
+    VDD=0.9 VCM=0.45 VIN_AMP=0.01 CLK_TH=0.45 TR=1n TF=1n
+
+Ilfsr (dpn vdd vss clk en rst_n) lfsr \
+    VDD=0.9 VSS=0.0 CLK_TH=0.45 TR=1n TF=1n SEED=1
+
+Idither_adder (vinp vinn dpn vdin_p vdin_n) dither_adder \
+    DITHER_AMP=0.014063 VDD=0.9 CLK_TH=0.45 TR=1n TF=1n
+
+Igain_amp_fixed (vdin_p vdin_n vamp_p vamp_n) gain_amp_fixed \
+    ACTUAL_GAIN=8.64 VCM=0.45 TR=1n TF=1n
+
+// Save statements for EVAS checker - exact scalar names required
+save vinp vinn vamp_p vamp_n
+
+// Transient analysis - final transient setting per EVAS contract
+tran tran stop=200u maxstep=8n

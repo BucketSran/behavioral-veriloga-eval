@@ -1,0 +1,40 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module xor_phase_detector (vdd, vss, ref, div, pd_out);
+    inout electrical vdd, vss;
+    input electrical ref, div;
+    output electrical pd_out;
+
+    parameter real vth = 0.45;
+    parameter real tedge = 50p;
+
+    integer ref_state, div_state;
+    integer xor_out;
+
+    analog begin
+        @(initial_step) begin
+            ref_state = 0;
+            div_state = 0;
+            xor_out = 0;
+        end
+
+        @(cross(V(ref) - vth, 1)) begin
+            ref_state = 1;
+        end
+        @(cross(V(ref) - vth, -1)) begin
+            ref_state = 0;
+        end
+
+        @(cross(V(div) - vth, 1)) begin
+            div_state = 1;
+        end
+        @(cross(V(div) - vth, -1)) begin
+            div_state = 0;
+        end
+
+        xor_out = (ref_state != div_state) ? 1 : 0;
+
+        V(pd_out) <+ transition(xor_out ? V(vdd) : V(vss), 0, tedge);
+    end
+endmodule

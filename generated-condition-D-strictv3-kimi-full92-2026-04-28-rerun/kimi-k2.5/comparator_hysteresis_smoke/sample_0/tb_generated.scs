@@ -1,0 +1,30 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "cmp_hysteresis.va"
+
+// Supply
+Vdd (vdd 0) vsource dc=0.9
+Vss (vss 0) vsource dc=0
+
+// Differential input stimulus
+// vinp: ramps from -20mV to +20mV relative to vinn
+// vinn: held at 0.45V (mid-rail)
+// This sweeps through both hysteresis thresholds (+/-5mV)
+
+Vinn (vinn 0) vsource dc=0.45
+
+// vinp ramps: 0.43V to 0.47V over 80ns (differential -20mV to +20mV)
+Vinp (vinp 0) vsource type=pwl wave=[0 0.43 80n 0.47]
+
+// DUT instantiation: vinn, vinp, out_n, out_p, vss, vdd
+XDUT (vinn vinp out_n out_p vss vdd) cmp_hysteresis
+
+// Transient analysis
+tran tran stop=80n maxstep=100p
+
+// Save statements
+save vinp
+save vinn
+save out_p
+save out_n

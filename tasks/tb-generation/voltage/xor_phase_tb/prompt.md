@@ -1,68 +1,36 @@
 Given a voltage-domain XOR phase detector DUT, generate a minimal
-EVAS-compatible Spectre-format `.scs` testbench that excites a fixed phase
-offset between the reference and divided clocks.
+EVAS-compatible Spectre `.scs` testbench that excites a fixed phase offset
+between the reference and divided clocks.
 
-Requirements:
+This is a testbench-generation task. Do not generate Verilog-A modules. Assume
+the DUT Verilog-A file is provided by the benchmark harness and only write the
+Spectre testbench.
 
-- provide `VDD`, `VSS`, and two clock-like pulse sources with a non-zero phase offset
-- instantiate the DUT by position
-- include `tran`
-- include explicit `save`
-- place `ahdl_include` last
+Return exactly one fenced code block tagged `spectre`. Do not include prose
+outside the code block.
 
-Ports:
-- `VDD`: inout electrical (power rail)
-- `VSS`: inout electrical (power rail)
-- `ref`: input electrical
-- `div`: input electrical
-- `pd_out`: output electrical
+## Provided DUT
 
-DUT module to instantiate: `xor_phase_ref`
+- Include file: `xor_phase_ref.va`
+- Module name: `xor_phase_ref`
+- Positional port order: `(VDD, VSS, ref, div, pd_out)`
+- Required instance line:
+  `XDUT (VDD VSS ref div pd_out) xor_phase_ref`
 
-DUT module to instantiate: `xor_phase_ref`
+## Required Testbench Structure
 
-DUT module to instantiate: `xor_phase_ref`
+- Start with `simulator lang=spectre` and `global 0`.
+- Provide `VDD=0.9 V` and `VSS=0 V`.
+- Drive `ref` and `div` as clock-like pulse sources with a nonzero phase
+  offset.
+- Use exactly one transient analysis:
+  `tran tran stop=80n maxstep=50p`
+- Save the public waveform columns:
+  `save ref div pd_out`
+- Place the DUT include last:
+  `ahdl_include "xor_phase_ref.va"`
 
-DUT module to instantiate: `xor_phase_ref`
+## Public Evaluation Contract
 
-DUT module to instantiate: `xor_phase_ref`
-
-DUT module to instantiate: `xor_phase_ref`
-
-DUT module to instantiate: `xor_phase_ref`
-
-DUT module to instantiate: `xor_phase_ref`
-
-DUT module to instantiate: `xor_phase_ref`
-
-DUT module to instantiate: `xor_phase_ref`
-
-DUT module to instantiate: `xor_phase_ref`
-
-DUT module to instantiate: `xor_phase_ref`
-
-DUT module to instantiate: `xor_phase_ref`
-
-
-## Public Evaluation Contract (Non-Gold)
-
-This section states evaluator-facing constraints that must be visible to the generated artifact.
-It does not prescribe the internal implementation or reveal a gold solution.
-
-Final EVAS transient setting:
-
-```spectre
-tran tran stop=80n maxstep=50p
-```
-
-Required public waveform columns in `tran.csv`:
-
-- `ref`, `div`, `pd_out`
-
-Use plain scalar save names for these observables; do not rely on instance-qualified or aliased save names.
-
-Timing/checking-window contract:
-
-- Clock-like input(s) `clock` must provide enough valid edges after reset/enable for the checker to sample settled outputs.
-- Sequential outputs are sampled shortly after clock edges, so drive outputs with stable held state variables and `transition()` targets rather than glitchy combinational expressions.
-- Public stimulus nodes used by the reference harness include: `VDD`, `VSS`, `ref`, `div`.
+The evaluator reads `ref`, `div`, and `pd_out` from `tran.csv`. Use plain
+scalar save names; do not rely on instance-qualified or aliased save names.

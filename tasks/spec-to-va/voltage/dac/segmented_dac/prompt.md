@@ -3,43 +3,26 @@ Write a Verilog-A module named `segmented_dac`.
 I need a 14-bit DAC with 6-bit thermometer MSBs and 8-bit binary LSBs. Differential current-steering output. Include INL/DNL-friendly unary decoding for the MSBs.
 
 Ports:
-- `VDD`: electrical
-- `VSS`: electrical
-- `CLK`: electrical
-- `D13`: electrical
-- `D12`: electrical
-- `D11`: electrical
-- `D10`: electrical
-- `D9`: electrical
-- `D8`: electrical
-- `D7`: electrical
-- `D6`: electrical
-- `D5`: electrical
-- `D4`: electrical
-- `D3`: electrical
-- `D2`: electrical
-- `D1`: electrical
-- `D0`: electrical
-- `VOUT_P`: electrical
-- `VOUT_N`: electrical (power rail)
-- `VSS`: inout electrical (power rail)
+- `VDD`: inout electrical power rail
+- `VSS`: inout electrical power rail
 - `CLK`: input electrical
-- `D13`: input electrical
-- `D12`: input electrical
-- `D11`: input electrical
-- `D10`: input electrical
-- `D9`: input electrical
-- `D8`: input electrical
-- `D7`: input electrical
-- `D6`: input electrical
-- `D5`: input electrical
-- `D4`: input electrical
-- `D3`: input electrical
-- `D2`: input electrical
-- `D1`: input electrical
-- `D0`: input electrical
+- `D13`..`D0`: input electrical, with `D13` as the MSB and `D0` as the LSB
 - `VOUT_P`: output electrical
 - `VOUT_N`: output electrical
+
+Use this exact module port order:
+
+```verilog
+module segmented_dac(VDD, VSS, CLK, D13, D12, D11, D10, D9, D8, D7, D6, D5, D4, D3, D2, D1, D0, VOUT_P, VOUT_N);
+```
+
+Verilog-A compatibility requirements:
+
+- Use Spectre-compatible Verilog-A syntax for scalar integer arithmetic and
+  data-bit decoding.
+- Use pure voltage-domain contributions only: drive outputs with `V(node) <+`
+  and do not use current contributions.
+- Return the Verilog-A module code only.
 
 
 ## Public Evaluation Contract (Non-Gold)

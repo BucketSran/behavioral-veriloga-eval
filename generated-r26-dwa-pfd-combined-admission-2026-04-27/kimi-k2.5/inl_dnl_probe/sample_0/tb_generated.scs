@@ -1,0 +1,35 @@
+simulator lang=spectre
+global 0
+
+// Power supplies
+Vvdd (VDD 0) vsource dc=0.9
+Vvss (VSS 0) vsource dc=0
+
+// DAC digital inputs - PWL to sweep all 16 codes
+// Code 0: 0000, Code 1: 0001, ..., Code 15: 1111
+// Each code held for 4ns, total 64ns + setup
+Vdin3 (DIN3 0) vsource type=pwl wave=[0n 0 2n 0 4n 0.9 6n 0.9 8n 0 10n 0 12n 0.9 14n 0.9 16n 0 18n 0 20n 0.9 22n 0.9 24n 0 26n 0 28n 0.9 30n 0.9 32n 0 34n 0 36n 0.9 38n 0.9 40n 0 42n 0 44n 0.9 46n 0.9 48n 0 50n 0 52n 0.9 54n 0.9 56n 0 58n 0 60n 0.9 62n 0.9 64n 0.9 66n 0.9 68n 0.9]
+Vdin2 (DIN2 0) vsource type=pwl wave=[0n 0 4n 0 8n 0.9 12n 0.9 16n 0 20n 0 24n 0.9 28n 0.9 32n 0 36n 0 40n 0.9 44n 0.9 48n 0 52n 0 56n 0.9 60n 0.9 64n 0 68n 0]
+Vdin1 (DIN1 0) vsource type=pwl wave=[0n 0 8n 0 16n 0.9 24n 0.9 32n 0 40n 0 48n 0.9 56n 0.9 64n 0 68n 0]
+Vdin0 (DIN0 0) vsource type=pwl wave=[0n 0 16n 0 32n 0.9 48n 0.9 64n 0 68n 0]
+
+// DAC clock - pulse to trigger sampling at end of each code
+Vclk (CLK 0) vsource type=pulse val0=0 val1=0.9 period=4n delay=3.5n rise=100p fall=100p width=3n
+
+// Clock strobe for probe - delayed version to sample settled output
+Vstb (CLKSTB 0) vsource type=pulse val0=0 val1=0.9 period=4n delay=3.8n rise=100p fall=100p width=2n
+
+// DUT DAC
+XDUT (VDD, VSS, DIN3, DIN2, DIN1, DIN0, CLK, AOUT) dac_for_probe
+
+// INL/DNL probe
+XPROBE (VDD, VSS, CLKSTB, AOUT) inl_dnl_probe
+
+// Analysis
+tran tran stop=68n maxstep=20p
+
+// Save signals
+save DIN3 DIN2 DIN1 DIN0 CLK CLKSTB AOUT
+
+ahdl_include "dac_for_probe.va"
+ahdl_include "inl_dnl_probe.va"

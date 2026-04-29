@@ -1,0 +1,44 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module comparator (VDD, VSS, VINP, VINN, OUT_P);
+    inout electrical VDD, VSS;
+    input electrical VINP, VINN;
+    output electrical OUT_P;
+
+    parameter real vth_offset = 0.0 from [-1:1];  // threshold offset in V
+    parameter real tdel = 0.0 from [0:inf);       // delay
+    parameter real tr = 1n from (0:inf);          // rise time
+    parameter real tf = 1n from (0:inf);          // fall time
+
+    integer out_state;  // 0 = low, 1 = high
+    real vdd_val, vss_val;
+    real voh, vol;
+
+    analog begin
+        @(initial_step) begin
+            out_state = 0;
+        end
+
+        // Sample supply levels
+        vdd_val = V(VDD);
+        vss_val = V(VSS);
+        voh = vdd_val * 0.9;  // 90% of VDD for logic high
+        vol = vss_val + 0.1 * (vdd_val - vss_val);  // 10% above VSS for logic low
+
+        // Detect threshold crossing with hysteresis
+        @(cross(V(VINP) - V(VINN) - vth_offset, +1)) begin
+            out_state = 1;
+        end
+        @(cross(V(VINP) - V(VINN) - vth_offset, -1)) begin
+            out_state = 0;
+        end
+
+        // Output voltage with finite transition
+        if (out_state == 1) begin
+            V(OUT_P) <+ transition(voh, tdel, tr, tf);
+        end else begin
+            V(OUT_P) <+ transition(vol, tdel, tr, tf);
+        end
+    end
+endmodule

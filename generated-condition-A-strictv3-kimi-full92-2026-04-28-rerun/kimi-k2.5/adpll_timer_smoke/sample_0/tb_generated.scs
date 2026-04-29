@@ -1,0 +1,53 @@
+// ADPLL Timer-Based Testbench
+// EVAS-compatible Spectre netlist
+
+simulator lang=spectre
+
+// Include Verilog-A module
+ahdl_include "./adpll_timer_ref.va"
+
+// Global parameters
+parameters vdd_val=1.2
+parameters vss_val=0.0
+parameters ref_freq=50M
+parameters sim_stop=5u
+
+// Supply voltages
+vsource vdd (vdd 0) vsource dc=vdd_val
+vsource vss (vss 0) vsource dc=vss_val
+
+// Reference clock generator - 50MHz square wave
+// Using vpulse for clean clock generation
+vpulse vref (ref_clk 0) dc=vdd_val/2 \
+    val0=vss_val val1=vdd_val \
+    period=20n rise=0.1n fall=0.1n width=10n
+
+// DUT instantiation
+adpll_timer_ref dut (
+    VDD vdd
+    VSS vss
+    ref_clk ref_clk
+    fb_clk fb_clk
+    dco_clk dco_clk
+    vctrl_mon vctrl_mon
+    lock lock
+)
+
+// Analysis
+tran tran stop=sim_stop maxstep=5n
+
+// Save statements for required waveforms
+save ref_clk
+save fb_clk
+save lock
+save vctrl_mon
+
+// Additional saves for debugging
+save dco_clk
+save dut.dco_ctrl_code
+save dut.dco_period
+save dut.freq_error
+save dut.lock_cnt
+
+// Output format for CSV
+saveOptions options save=allpub currents=none

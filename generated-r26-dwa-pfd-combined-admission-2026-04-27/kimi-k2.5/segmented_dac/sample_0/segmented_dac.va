@@ -1,0 +1,280 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module segmented_dac (
+    VDD,
+    VSS,
+    CLK,
+    D13, D12, D11, D10, D9, D8, D7, D6, D5, D4, D3, D2, D1, D0,
+    VOUT_P,
+    VOUT_N
+);
+
+// Power rails
+inout electrical VDD;
+inout electrical VSS;
+
+// Clock and data inputs
+input electrical CLK;
+input electrical D13, D12, D11, D10, D9, D8, D7, D6, D5, D4, D3, D2, D1, D0;
+
+// Differential output
+output electrical VOUT_P;
+output electrical VOUT_N;
+
+// Internal parameters
+parameter real vdd_nom = 1.8;
+parameter real vss_nom = 0.0;
+parameter real vth = 0.45;  // Logic threshold - mid-supply for 0.9V signals
+parameter real tdel = 0.1n;
+parameter real tr = 0.1n;
+parameter real tf = 0.1n;
+parameter real lsb_weight = 1.0e-3;  // LSB voltage weight
+parameter real msb_weight = 256.0e-3; // MSB weight (2^8 * lsb_weight)
+
+// Internal variables
+integer code;
+integer msb_code;
+integer lsb_code;
+integer i;
+integer thermometer0, thermometer1, thermometer2, thermometer3;
+integer thermometer4, thermometer5, thermometer6, thermometer7;
+integer thermometer8, thermometer9, thermometer10, thermometer11;
+integer thermometer12, thermometer13, thermometer14, thermometer15;
+integer thermometer16, thermometer17, thermometer18, thermometer19;
+integer thermometer20, thermometer21, thermometer22, thermometer23;
+integer thermometer24, thermometer25, thermometer26, thermometer27;
+integer thermometer28, thermometer29, thermometer30, thermometer31;
+integer thermometer32, thermometer33, thermometer34, thermometer35;
+integer thermometer36, thermometer37, thermometer38, thermometer39;
+integer thermometer40, thermometer41, thermometer42, thermometer43;
+integer thermometer44, thermometer45, thermometer46, thermometer47;
+integer thermometer48, thermometer49, thermometer50, thermometer51;
+integer thermometer52, thermometer53, thermometer54, thermometer55;
+integer thermometer56, thermometer57, thermometer58, thermometer59;
+integer thermometer60, thermometer61, thermometer62, thermometer63;
+real vout_p_val;
+real vout_n_val;
+real vout_diff;
+real vout_common;
+
+analog begin
+    // Initialize
+    @(initial_step) begin
+        code = 0;
+        msb_code = 0;
+        lsb_code = 0;
+        vout_p_val = vss_nom;
+        vout_n_val = vss_nom;
+        vout_diff = 0.0;
+        vout_common = vdd_nom / 2.0;
+        thermometer0 = 0; thermometer1 = 0; thermometer2 = 0; thermometer3 = 0;
+        thermometer4 = 0; thermometer5 = 0; thermometer6 = 0; thermometer7 = 0;
+        thermometer8 = 0; thermometer9 = 0; thermometer10 = 0; thermometer11 = 0;
+        thermometer12 = 0; thermometer13 = 0; thermometer14 = 0; thermometer15 = 0;
+        thermometer16 = 0; thermometer17 = 0; thermometer18 = 0; thermometer19 = 0;
+        thermometer20 = 0; thermometer21 = 0; thermometer22 = 0; thermometer23 = 0;
+        thermometer24 = 0; thermometer25 = 0; thermometer26 = 0; thermometer27 = 0;
+        thermometer28 = 0; thermometer29 = 0; thermometer30 = 0; thermometer31 = 0;
+        thermometer32 = 0; thermometer33 = 0; thermometer34 = 0; thermometer35 = 0;
+        thermometer36 = 0; thermometer37 = 0; thermometer38 = 0; thermometer39 = 0;
+        thermometer40 = 0; thermometer41 = 0; thermometer42 = 0; thermometer43 = 0;
+        thermometer44 = 0; thermometer45 = 0; thermometer46 = 0; thermometer47 = 0;
+        thermometer48 = 0; thermometer49 = 0; thermometer50 = 0; thermometer51 = 0;
+        thermometer52 = 0; thermometer53 = 0; thermometer54 = 0; thermometer55 = 0;
+        thermometer56 = 0; thermometer57 = 0; thermometer58 = 0; thermometer59 = 0;
+        thermometer60 = 0; thermometer61 = 0; thermometer62 = 0; thermometer63 = 0;
+    end
+
+    // Detect rising edge of CLK
+    @(cross(V(CLK) - vth, 1)) begin
+        // Sample all data bits on rising edge
+        code = 0;
+        if (V(D13) > vth) code = code + 8192;
+        if (V(D12) > vth) code = code + 4096;
+        if (V(D11) > vth) code = code + 2048;
+        if (V(D10) > vth) code = code + 1024;
+        if (V(D9) > vth) code = code + 512;
+        if (V(D8) > vth) code = code + 256;
+        if (V(D7) > vth) code = code + 128;
+        if (V(D6) > vth) code = code + 64;
+        if (V(D5) > vth) code = code + 32;
+        if (V(D4) > vth) code = code + 16;
+        if (V(D3) > vth) code = code + 8;
+        if (V(D2) > vth) code = code + 4;
+        if (V(D1) > vth) code = code + 2;
+        if (V(D0) > vth) code = code + 1;
+
+        // Split into 6-bit MSB (thermometer) and 8-bit LSB (binary)
+        // msb_code = code[13:8] = upper 6 bits = code / 256
+        msb_code = code / 256;
+        // lsb_code = code[7:0] = lower 8 bits = code % 256
+        lsb_code = code - (msb_code * 256);
+
+        // Generate thermometer code for MSBs (INL/DNL friendly)
+        // Thermometer: first msb_code elements are 1, rest are 0
+        thermometer0 = (msb_code > 0) ? 1 : 0;
+        thermometer1 = (msb_code > 1) ? 1 : 0;
+        thermometer2 = (msb_code > 2) ? 1 : 0;
+        thermometer3 = (msb_code > 3) ? 1 : 0;
+        thermometer4 = (msb_code > 4) ? 1 : 0;
+        thermometer5 = (msb_code > 5) ? 1 : 0;
+        thermometer6 = (msb_code > 6) ? 1 : 0;
+        thermometer7 = (msb_code > 7) ? 1 : 0;
+        thermometer8 = (msb_code > 8) ? 1 : 0;
+        thermometer9 = (msb_code > 9) ? 1 : 0;
+        thermometer10 = (msb_code > 10) ? 1 : 0;
+        thermometer11 = (msb_code > 11) ? 1 : 0;
+        thermometer12 = (msb_code > 12) ? 1 : 0;
+        thermometer13 = (msb_code > 13) ? 1 : 0;
+        thermometer14 = (msb_code > 14) ? 1 : 0;
+        thermometer15 = (msb_code > 15) ? 1 : 0;
+        thermometer16 = (msb_code > 16) ? 1 : 0;
+        thermometer17 = (msb_code > 17) ? 1 : 0;
+        thermometer18 = (msb_code > 18) ? 1 : 0;
+        thermometer19 = (msb_code > 19) ? 1 : 0;
+        thermometer20 = (msb_code > 20) ? 1 : 0;
+        thermometer21 = (msb_code > 21) ? 1 : 0;
+        thermometer22 = (msb_code > 22) ? 1 : 0;
+        thermometer23 = (msb_code > 23) ? 1 : 0;
+        thermometer24 = (msb_code > 24) ? 1 : 0;
+        thermometer25 = (msb_code > 25) ? 1 : 0;
+        thermometer26 = (msb_code > 26) ? 1 : 0;
+        thermometer27 = (msb_code > 27) ? 1 : 0;
+        thermometer28 = (msb_code > 28) ? 1 : 0;
+        thermometer29 = (msb_code > 29) ? 1 : 0;
+        thermometer30 = (msb_code > 30) ? 1 : 0;
+        thermometer31 = (msb_code > 31) ? 1 : 0;
+        thermometer32 = (msb_code > 32) ? 1 : 0;
+        thermometer33 = (msb_code > 33) ? 1 : 0;
+        thermometer34 = (msb_code > 34) ? 1 : 0;
+        thermometer35 = (msb_code > 35) ? 1 : 0;
+        thermometer36 = (msb_code > 36) ? 1 : 0;
+        thermometer37 = (msb_code > 37) ? 1 : 0;
+        thermometer38 = (msb_code > 38) ? 1 : 0;
+        thermometer39 = (msb_code > 39) ? 1 : 0;
+        thermometer40 = (msb_code > 40) ? 1 : 0;
+        thermometer41 = (msb_code > 41) ? 1 : 0;
+        thermometer42 = (msb_code > 42) ? 1 : 0;
+        thermometer43 = (msb_code > 43) ? 1 : 0;
+        thermometer44 = (msb_code > 44) ? 1 : 0;
+        thermometer45 = (msb_code > 45) ? 1 : 0;
+        thermometer46 = (msb_code > 46) ? 1 : 0;
+        thermometer47 = (msb_code > 47) ? 1 : 0;
+        thermometer48 = (msb_code > 48) ? 1 : 0;
+        thermometer49 = (msb_code > 49) ? 1 : 0;
+        thermometer50 = (msb_code > 50) ? 1 : 0;
+        thermometer51 = (msb_code > 51) ? 1 : 0;
+        thermometer52 = (msb_code > 52) ? 1 : 0;
+        thermometer53 = (msb_code > 53) ? 1 : 0;
+        thermometer54 = (msb_code > 54) ? 1 : 0;
+        thermometer55 = (msb_code > 55) ? 1 : 0;
+        thermometer56 = (msb_code > 56) ? 1 : 0;
+        thermometer57 = (msb_code > 57) ? 1 : 0;
+        thermometer58 = (msb_code > 58) ? 1 : 0;
+        thermometer59 = (msb_code > 59) ? 1 : 0;
+        thermometer60 = (msb_code > 60) ? 1 : 0;
+        thermometer61 = (msb_code > 61) ? 1 : 0;
+        thermometer62 = (msb_code > 62) ? 1 : 0;
+        thermometer63 = (msb_code > 63) ? 1 : 0;
+    end
+
+    // Calculate output voltages
+    // MSB contribution: sum of thermometer-coded elements
+    // LSB contribution: binary weighted
+
+    // Differential current-steering output
+    // VOUT_P increases with code, VOUT_N decreases with code
+    // Full scale: code = 16383 (14-bit max)
+
+    vout_diff = 0.0;
+
+    // MSB thermometer contribution (64 elements, each worth 256 LSBs)
+    vout_diff = vout_diff + thermometer0 * msb_weight;
+    vout_diff = vout_diff + thermometer1 * msb_weight;
+    vout_diff = vout_diff + thermometer2 * msb_weight;
+    vout_diff = vout_diff + thermometer3 * msb_weight;
+    vout_diff = vout_diff + thermometer4 * msb_weight;
+    vout_diff = vout_diff + thermometer5 * msb_weight;
+    vout_diff = vout_diff + thermometer6 * msb_weight;
+    vout_diff = vout_diff + thermometer7 * msb_weight;
+    vout_diff = vout_diff + thermometer8 * msb_weight;
+    vout_diff = vout_diff + thermometer9 * msb_weight;
+    vout_diff = vout_diff + thermometer10 * msb_weight;
+    vout_diff = vout_diff + thermometer11 * msb_weight;
+    vout_diff = vout_diff + thermometer12 * msb_weight;
+    vout_diff = vout_diff + thermometer13 * msb_weight;
+    vout_diff = vout_diff + thermometer14 * msb_weight;
+    vout_diff = vout_diff + thermometer15 * msb_weight;
+    vout_diff = vout_diff + thermometer16 * msb_weight;
+    vout_diff = vout_diff + thermometer17 * msb_weight;
+    vout_diff = vout_diff + thermometer18 * msb_weight;
+    vout_diff = vout_diff + thermometer19 * msb_weight;
+    vout_diff = vout_diff + thermometer20 * msb_weight;
+    vout_diff = vout_diff + thermometer21 * msb_weight;
+    vout_diff = vout_diff + thermometer22 * msb_weight;
+    vout_diff = vout_diff + thermometer23 * msb_weight;
+    vout_diff = vout_diff + thermometer24 * msb_weight;
+    vout_diff = vout_diff + thermometer25 * msb_weight;
+    vout_diff = vout_diff + thermometer26 * msb_weight;
+    vout_diff = vout_diff + thermometer27 * msb_weight;
+    vout_diff = vout_diff + thermometer28 * msb_weight;
+    vout_diff = vout_diff + thermometer29 * msb_weight;
+    vout_diff = vout_diff + thermometer30 * msb_weight;
+    vout_diff = vout_diff + thermometer31 * msb_weight;
+    vout_diff = vout_diff + thermometer32 * msb_weight;
+    vout_diff = vout_diff + thermometer33 * msb_weight;
+    vout_diff = vout_diff + thermometer34 * msb_weight;
+    vout_diff = vout_diff + thermometer35 * msb_weight;
+    vout_diff = vout_diff + thermometer36 * msb_weight;
+    vout_diff = vout_diff + thermometer37 * msb_weight;
+    vout_diff = vout_diff + thermometer38 * msb_weight;
+    vout_diff = vout_diff + thermometer39 * msb_weight;
+    vout_diff = vout_diff + thermometer40 * msb_weight;
+    vout_diff = vout_diff + thermometer41 * msb_weight;
+    vout_diff = vout_diff + thermometer42 * msb_weight;
+    vout_diff = vout_diff + thermometer43 * msb_weight;
+    vout_diff = vout_diff + thermometer44 * msb_weight;
+    vout_diff = vout_diff + thermometer45 * msb_weight;
+    vout_diff = vout_diff + thermometer46 * msb_weight;
+    vout_diff = vout_diff + thermometer47 * msb_weight;
+    vout_diff = vout_diff + thermometer48 * msb_weight;
+    vout_diff = vout_diff + thermometer49 * msb_weight;
+    vout_diff = vout_diff + thermometer50 * msb_weight;
+    vout_diff = vout_diff + thermometer51 * msb_weight;
+    vout_diff = vout_diff + thermometer52 * msb_weight;
+    vout_diff = vout_diff + thermometer53 * msb_weight;
+    vout_diff = vout_diff + thermometer54 * msb_weight;
+    vout_diff = vout_diff + thermometer55 * msb_weight;
+    vout_diff = vout_diff + thermometer56 * msb_weight;
+    vout_diff = vout_diff + thermometer57 * msb_weight;
+    vout_diff = vout_diff + thermometer58 * msb_weight;
+    vout_diff = vout_diff + thermometer59 * msb_weight;
+    vout_diff = vout_diff + thermometer60 * msb_weight;
+    vout_diff = vout_diff + thermometer61 * msb_weight;
+    vout_diff = vout_diff + thermometer62 * msb_weight;
+    vout_diff = vout_diff + thermometer63 * msb_weight;
+
+    // LSB binary contribution (0 to 255 LSBs)
+    vout_diff = vout_diff + lsb_code * lsb_weight;
+
+    // Scale to meaningful voltage range (0.1 to 1.7V for diff)
+    // Center around common mode
+    vout_common = (V(VDD) + V(VSS)) / 2.0;
+
+    // Differential output: VOUT_P goes up, VOUT_N goes down
+    vout_p_val = vout_common + vout_diff / 2.0;
+    vout_n_val = vout_common - vout_diff / 2.0;
+
+    // Clamp to supply rails
+    if (vout_p_val > V(VDD)) vout_p_val = V(VDD);
+    if (vout_p_val < V(VSS)) vout_p_val = V(VSS);
+    if (vout_n_val > V(VDD)) vout_n_val = V(VDD);
+    if (vout_n_val < V(VSS)) vout_n_val = V(VSS);
+
+    // Output with transition
+    V(VOUT_P) <+ transition(vout_p_val, tdel, tr, tf);
+    V(VOUT_N) <+ transition(vout_n_val, tdel, tr, tf);
+end
+
+endmodule

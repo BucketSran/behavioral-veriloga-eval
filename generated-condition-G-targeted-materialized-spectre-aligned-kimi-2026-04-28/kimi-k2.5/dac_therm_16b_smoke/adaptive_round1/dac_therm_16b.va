@@ -1,0 +1,55 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dac_therm_16b (din_therm, rst_n, vout);
+    input [15:0] din_therm;
+    input rst_n;
+    output vout;
+    electrical [15:0] din_therm;
+    electrical rst_n;
+    electrical vout;
+
+    parameter real vstep = 1.0 from [0:inf);
+    parameter real tr = 1n from (0:inf);
+    parameter real tf = 1n from (0:inf);
+    parameter real vth = 0.5;
+
+    integer count;
+    real vout_val;
+
+    analog begin
+        @(initial_step) begin
+            count = 0;
+            vout_val = 0.0;
+        end
+
+        // Count ones in thermometer code - fixed index reads
+        count = 0;
+        if (V(din_therm[0]) > vth) count = count + 1;
+        if (V(din_therm[1]) > vth) count = count + 1;
+        if (V(din_therm[2]) > vth) count = count + 1;
+        if (V(din_therm[3]) > vth) count = count + 1;
+        if (V(din_therm[4]) > vth) count = count + 1;
+        if (V(din_therm[5]) > vth) count = count + 1;
+        if (V(din_therm[6]) > vth) count = count + 1;
+        if (V(din_therm[7]) > vth) count = count + 1;
+        if (V(din_therm[8]) > vth) count = count + 1;
+        if (V(din_therm[9]) > vth) count = count + 1;
+        if (V(din_therm[10]) > vth) count = count + 1;
+        if (V(din_therm[11]) > vth) count = count + 1;
+        if (V(din_therm[12]) > vth) count = count + 1;
+        if (V(din_therm[13]) > vth) count = count + 1;
+        if (V(din_therm[14]) > vth) count = count + 1;
+        if (V(din_therm[15]) > vth) count = count + 1;
+
+        // Calculate output voltage based on reset and count
+        if (V(rst_n) < vth) begin
+            vout_val = 0.0;
+        end else begin
+            vout_val = count * vstep;
+        end
+
+        // Drive output with transition
+        V(vout) <+ transition(vout_val, 0, tr, tf);
+    end
+endmodule

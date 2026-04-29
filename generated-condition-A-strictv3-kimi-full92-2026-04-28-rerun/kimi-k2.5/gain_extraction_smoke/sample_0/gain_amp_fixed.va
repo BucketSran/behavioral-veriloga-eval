@@ -1,0 +1,26 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module gain_amp_fixed (vdin_p, vdin_n, vamp_p, vamp_n);
+    electrical vdin_p, vdin_n, vamp_p, vamp_n;
+
+    parameter real ACTUAL_GAIN = 8.64;
+    parameter real T_RISE = 1n;
+    parameter real T_FALL = 1n;
+
+    real vdiff_in;
+    real vcm_in;
+    real vamp_p_out;
+    real vamp_n_out;
+
+    analog begin
+        vdiff_in = V(vdin_p) - V(vdin_n);
+        vcm_in = 0.5 * (V(vdin_p) + V(vdin_n));
+
+        vamp_p_out = vcm_in + 0.5 * ACTUAL_GAIN * vdiff_in;
+        vamp_n_out = vcm_in - 0.5 * ACTUAL_GAIN * vdiff_in;
+
+        V(vamp_p) <+ transition(vamp_p_out, 0, T_RISE, T_FALL);
+        V(vamp_n) <+ transition(vamp_n_out, 0, T_RISE, T_FALL);
+    end
+endmodule

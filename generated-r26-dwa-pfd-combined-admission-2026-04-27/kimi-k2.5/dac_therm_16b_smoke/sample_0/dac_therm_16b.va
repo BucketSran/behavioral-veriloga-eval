@@ -1,0 +1,45 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dac_therm_16b(din_therm, rst_n, vout);
+    electrical [15:0] din_therm;
+    electrical rst_n;
+    electrical vout;
+
+    parameter real vstep = 1.0 from (0:inf);
+    parameter real tr = 1n from (0:inf);
+    parameter real tf = 1n from (0:inf);
+
+    integer count;
+    real vout_val;
+    real vout_target;
+
+    analog begin
+        count = 0;
+        if (V(din_therm[0]) > 0.5) count = count + 1;
+        if (V(din_therm[1]) > 0.5) count = count + 1;
+        if (V(din_therm[2]) > 0.5) count = count + 1;
+        if (V(din_therm[3]) > 0.5) count = count + 1;
+        if (V(din_therm[4]) > 0.5) count = count + 1;
+        if (V(din_therm[5]) > 0.5) count = count + 1;
+        if (V(din_therm[6]) > 0.5) count = count + 1;
+        if (V(din_therm[7]) > 0.5) count = count + 1;
+        if (V(din_therm[8]) > 0.5) count = count + 1;
+        if (V(din_therm[9]) > 0.5) count = count + 1;
+        if (V(din_therm[10]) > 0.5) count = count + 1;
+        if (V(din_therm[11]) > 0.5) count = count + 1;
+        if (V(din_therm[12]) > 0.5) count = count + 1;
+        if (V(din_therm[13]) > 0.5) count = count + 1;
+        if (V(din_therm[14]) > 0.5) count = count + 1;
+        if (V(din_therm[15]) > 0.5) count = count + 1;
+
+        if (V(rst_n) < 0.5) begin
+            vout_target = 0.0;
+        end else begin
+            vout_target = count * vstep;
+        end
+
+        vout_val = transition(vout_target, 0, tr, tf);
+        V(vout) <+ vout_val;
+    end
+endmodule

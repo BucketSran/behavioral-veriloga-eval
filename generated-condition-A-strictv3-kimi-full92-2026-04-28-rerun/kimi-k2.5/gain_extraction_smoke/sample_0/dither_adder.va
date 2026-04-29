@@ -1,0 +1,25 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dither_adder (vinp, vinn, dpn, vdin_p, vdin_n);
+    electrical vinp, vinn, dpn, vdin_p, vdin_n;
+
+    parameter real DITHER_AMP = 0.014063;
+    parameter real VTH = 0.45;
+    parameter real T_RISE = 1n;
+    parameter real T_FALL = 1n;
+
+    real dither_val;
+    real vdin_p_out;
+    real vdin_n_out;
+
+    analog begin
+        dither_val = (V(dpn) > VTH) ? DITHER_AMP : -DITHER_AMP;
+
+        vdin_p_out = V(vinp) + 0.5 * dither_val;
+        vdin_n_out = V(vinn) - 0.5 * dither_val;
+
+        V(vdin_p) <+ transition(vdin_p_out, 0, T_RISE, T_FALL);
+        V(vdin_n) <+ transition(vdin_n_out, 0, T_RISE, T_FALL);
+    end
+endmodule

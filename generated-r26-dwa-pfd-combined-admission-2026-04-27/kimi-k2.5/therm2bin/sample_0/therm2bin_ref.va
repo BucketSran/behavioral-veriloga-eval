@@ -1,0 +1,134 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module therm2bin_ref(
+    therm_0, therm_1, therm_2, therm_3, therm_4,
+    therm_5, therm_6, therm_7, therm_8, therm_9,
+    therm_10, therm_11, therm_12, therm_13, therm_14,
+    bin_0, bin_1, bin_2, bin_3
+);
+
+    input therm_0, therm_1, therm_2, therm_3, therm_4;
+    input therm_5, therm_6, therm_7, therm_8, therm_9;
+    input therm_10, therm_11, therm_12, therm_13, therm_14;
+    output bin_0, bin_1, bin_2, bin_3;
+
+    electrical therm_0, therm_1, therm_2, therm_3, therm_4;
+    electrical therm_5, therm_6, therm_7, therm_8, therm_9;
+    electrical therm_10, therm_11, therm_12, therm_13, therm_14;
+    electrical bin_0, bin_1, bin_2, bin_3;
+
+    parameter real vth = 0.5 from (0:1);
+    parameter real vlow = 0.0 from (-1:1);
+    parameter real vhigh = 1.0 from (0:2);
+    parameter real tdel = 0 from [0:1n);
+    parameter real tr = 1n from (0:10n);
+    parameter real tf = 1n from (0:10n);
+
+    integer i, j, k;
+    integer therm_val[0:14];
+    integer ones_count;
+    integer bubble_corrected;
+    integer bin_out;
+    real vtherm[0:14];
+
+    analog begin
+        // Sample thermometer inputs
+        vtherm[0] = V(therm_0);
+        vtherm[1] = V(therm_1);
+        vtherm[2] = V(therm_2);
+        vtherm[3] = V(therm_3);
+        vtherm[4] = V(therm_4);
+        vtherm[5] = V(therm_5);
+        vtherm[6] = V(therm_6);
+        vtherm[7] = V(therm_7);
+        vtherm[8] = V(therm_8);
+        vtherm[9] = V(therm_9);
+        vtherm[10] = V(therm_10);
+        vtherm[11] = V(therm_11);
+        vtherm[12] = V(therm_12);
+        vtherm[13] = V(therm_13);
+        vtherm[14] = V(therm_14);
+
+        // Convert to binary thermometer values
+        for (i = 0; i < 15; i = i + 1) begin
+            if (vtherm[i] > vth)
+                therm_val[i] = 1;
+            else
+                therm_val[i] = 0;
+        end
+
+        // Count ones with bubble error correction
+        // Use majority voting on sliding window to handle bubbles
+        ones_count = 0;
+        for (i = 0; i < 15; i = i + 1) begin
+            ones_count = ones_count + therm_val[i];
+        end
+
+        // Bubble correction: find the longest consecutive run of 1s from the start
+        // and use that as the corrected count
+        bubble_corrected = 0;
+        for (i = 0; i < 15; i = i + 1) begin
+            if (therm_val[i] == 1)
+                bubble_corrected = bubble_corrected + 1;
+            else begin
+                // Check if this is a bubble (single 0 surrounded by 1s)
+                if (i > 0 && i < 14 && therm_val[i-1] == 1 && therm_val[i+1] == 1) begin
+                    // It's a bubble, continue counting
+                    bubble_corrected = bubble_corrected + 1;
+                end else begin
+                    // Check for more 1s after this 0 (bubble in the middle)
+                    // Count remaining 1s
+                    for (j = i + 1; j < 15; j = j + 1) begin
+                        if (therm_val[j] == 1) begin
+                            // Found a 1 after 0, this might be a bubble pattern
+                            // Use simple majority: if more 1s than 0s seen so far, continue
+                        end
+                    end
+                    // Break at first real 0
+                    i = 15; // break
+                end
+            end
+        end
+
+        // Alternative bubble-robust counting: use the position of the 0-to-1 transition
+        // Find the first 0 after consecutive 1s from start
+        bubble_corrected = 0;
+        for (i = 0; i < 15; i = i + 1) begin
+            if (therm_val[i] == 1)
+                bubble_corrected = i + 1;
+            else begin
+                // Check if remaining bits are all 0 (valid thermometer)
+                // or if there's a bubble (some 1s after this 0)
+                for (j = i + 1; j < 15; j = j + 1) begin
+                    if (therm_val[j] == 1) begin
+                        // Bubble detected: a 1 after a 0
+                        // Continue counting from where we left off, ignoring this 0
+                        bubble_corrected = bubble_corrected + 1;
+                    end
+                end
+                // Done processing
+                i = 15; // break
+            end
+        end
+
+        // Simpler robust approach: just count total ones, but cap at 15
+        // This handles bubbles gracefully by outputting the count of 1s
+        // For proper thermometer, this equals the position
+        // For bubbles, it gives a reasonable approximation
+        if (ones_count > 15)
+            bubble_corrected = 15;
+        else
+            bubble_corrected = ones_count;
+
+        // Convert to 4-bit binary
+        bin_out = bubble_corrected;
+
+        // Output binary bits with transitions
+        V(bin_0) <+ transition((bin_out & 1) ? vhigh : vlow, tdel, tr, tf);
+        V(bin_1) <+ transition(((bin_out >> 1) & 1) ? vhigh : vlow, tdel, tr, tf);
+        V(bin_2) <+ transition(((bin_out >> 2) & 1) ? vhigh : vlow, tdel, tr, tf);
+        V(bin_3) <+ transition(((bin_out >> 3) & 1) ? vhigh : vlow, tdel, tr, tf);
+    end
+
+endmodule

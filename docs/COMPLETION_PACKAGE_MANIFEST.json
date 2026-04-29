@@ -1,0 +1,37 @@
+{
+  "version": "vaevas-completion-package-v0",
+  "date": "2026-04-29",
+  "purpose": "Make the current 92-task closed set reproducible and expose reusable mechanism/syntax assets for same-type tasks.",
+  "claim_boundary": {
+    "closed_set_92": "Can be reported as closed-set completion with provenance.",
+    "cold_start": "Must not claim 92/92 cold-start, because 27/92 use teacher replay or teacher-derived spectrefix.",
+    "generalization": "Must be validated on benchmark-v2 or later held-out perturbation tasks."
+  },
+  "closed_set_assets": [
+    "docs/CLOSEDSET92_COMPLETION_LEDGER.json",
+    "docs/VERIFIED_ARTIFACT_STORE.json",
+    "docs/CLOSEDSET_CIRCUIT_TEMPLATES.json"
+  ],
+  "reusable_knowledge_assets": [
+    "docs/CIRCUIT_MECHANISM_SKELETONS.json",
+    "docs/SPECTRE_COMPATIBILITY_TEMPLATES.json",
+    "docs/CONTRACT_REPAIR_CARDS.json"
+  ],
+  "runners": [
+    "runners/audit_completion_package.py",
+    "runners/completion_package_materialize_benchmark_v2.py",
+    "runners/validate_benchmark_v2_gold.py",
+    "runners/rag_v2_router.py",
+    "runners/make_r26_spectre_fix_overlay.py",
+    "runners/build_closedset92_assets.py"
+  ],
+  "validated_result_roots": {
+    "closed_set_92_ledger": "docs/CLOSEDSET92_COMPLETION_LEDGER.json",
+    "benchmark_v2_evas": "results/benchmark-v2-gold-validation-2026-04-29-r2",
+    "benchmark_v2_spectre": "results/benchmark-v2-gold-validation-spectre-2026-04-29-r1"
+  },
+  "expected_reproducibility_checks": {
+    "closed_set_92_audit": "92/92 accepted entries with Spectre-compatible evidence and explicit provenance",
+    "benchmark_v2_template_transfer": "30/30 EVAS and 30/30 Spectre when using slot-bound public-prompt materializer"
+  }
+}

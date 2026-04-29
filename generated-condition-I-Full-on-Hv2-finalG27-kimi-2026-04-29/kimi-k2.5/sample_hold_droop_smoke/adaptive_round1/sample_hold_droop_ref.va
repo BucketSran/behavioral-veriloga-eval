@@ -1,0 +1,52 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sample_hold_droop_ref (vdd, vss, clk, vin, vout);
+    input vdd;
+    input vss;
+    input clk;
+    input vin;
+    output vout;
+    electrical vdd, vss, clk, vin, vout;
+
+    parameter real vth = 0.45;
+    parameter real tau = 120n;
+    parameter real dt = 0.5n;
+    parameter real trf = 40p;
+
+    real vheld;
+    real tlast;
+    real vtarget;
+    integer sampling;
+
+    analog begin
+        @(initial_step) begin
+            vheld = 0.0;
+            tlast = 0.0;
+            sampling = 0;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            vheld = V(vin);
+            tlast = $abstime;
+            sampling = 1;
+        end
+
+        @(timer(tlast + dt)) begin
+            sampling = 0;
+        end
+
+        if (sampling) begin
+            vtarget = V(vin);
+        end else begin
+            vtarget = vheld * $exp(-($abstime - tlast) / tau);
+        end
+
+        if (vtarget > V(vdd))
+            vtarget = V(vdd);
+        else if (vtarget < V(vss))
+            vtarget = V(vss);
+
+        V(vout) <+ transition(vtarget, 0, trf, trf);
+    end
+endmodule

@@ -1,0 +1,202 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module adpll_va_idtmod (VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock);
+    inout VDD;
+    inout VSS;
+    input ref_clk;
+    output fb_clk;
+    output dco_clk;
+    output vctrl_mon;
+    output lock;
+
+    electrical VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock;
+
+    // Parameters
+    parameter real vhi = 1.8 from (0:inf);
+    parameter real vlo = 0.0 from [0:vhi);
+    parameter real vth = 0.9 from (vlo:vhi);
+    parameter real tr = 0.1n from (0:inf);
+    parameter real tf = 0.1n from (0:inf);
+    parameter real td = 0.0 from [0:inf);
+
+    // DCO parameters - target 50 MHz output, so DCO at 500 MHz with divide-by-10
+    parameter real f0 = 500e6 from (0:inf);      // Free-running frequency (Hz)
+    parameter real kv = 50e6 from (0:inf);       // Frequency gain (Hz/V)
+    parameter integer n = 10 from (1:inf);       // Divider ratio
+
+    // Lock detection parameters
+    parameter real lock_thr = 0.1 from (0:inf);  // Lock threshold in periods
+    parameter integer lock_cnt = 5 from (1:inf); // Consecutive cycles for lock
+
+    // Internal variables
+    integer ref_edge;
+    integer fb_edge;
+    integer dctrl;
+    integer dctrl_min;
+    integer dctrl_max;
+    integer lock_count;
+    integer locked;
+    integer div_cnt;
+    integer dco_state;
+
+    real t_ref;
+    real t_fb;
+    real t_next_dco;
+    real t_next_fb;
+    real period_ref;
+    real period_fb;
+    real vctrl;
+    real f_dco;
+    real t_last_ref;
+    real t_last_fb;
+    real period_diff;
+    real t_last_update;
+
+    // Bang-bang phase detector state
+    integer bb_up;
+    integer bb_dn;
+
+    // Output target variables
+    real dco_clk_target;
+    real fb_clk_target;
+    real vctrl_mon_target;
+    real lock_target;
+
+    analog begin
+        @(initial_step) begin
+            ref_edge = 0;
+            fb_edge = 0;
+            dctrl = 512;           // Mid-scale control word
+            dctrl_min = 0;
+            dctrl_max = 1023;
+            lock_count = 0;
+            locked = 0;
+            div_cnt = 0;
+            dco_state = 0;
+            t_ref = 0;
+            t_fb = 0;
+            t_next_dco = 1n;
+            t_next_fb = 10n;
+            period_ref = 20n;      // 50 MHz default
+            period_fb = 20n;
+            vctrl = 0.9;
+            f_dco = f0;
+            t_last_ref = 0;
+            t_last_fb = 0;
+            bb_up = 0;
+            bb_dn = 0;
+            period_diff = 1.0;
+            t_last_update = 0;
+            dco_clk_target = vlo;
+            fb_clk_target = vlo;
+            vctrl_mon_target = vlo;
+            lock_target = vlo;
+        end
+
+        // Detect reference clock rising edge
+        @(cross(V(ref_clk) - vth, 1)) begin
+            t_ref = $abstime;
+            ref_edge = 1;
+            period_ref = t_ref - t_last_ref;
+            t_last_ref = t_ref;
+        end
+
+        // Detect feedback clock rising edge
+        @(cross(V(fb_clk) - vth, 1)) begin
+            t_fb = $abstime;
+            fb_edge = 1;
+            period_fb = t_fb - t_last_fb;
+            t_last_fb = t_fb;
+        end
+
+        // Bang-bang phase/frequency detector - update on reference edges
+        if (ref_edge) begin
+            if (!fb_edge) begin
+                // No feedback edge yet, DCO is slow
+                bb_up = 1;
+                bb_dn = 0;
+            end else begin
+                // Both edges present - compare times
+                if (t_ref < t_fb) begin
+                    bb_up = 1;
+                    bb_dn = 0;
+                end else begin
+                    bb_up = 0;
+                    bb_dn = 1;
+                end
+                fb_edge = 0;
+            end
+            ref_edge = 0;
+        end else if (fb_edge) begin
+            // Feedback without reference, DCO is fast
+            bb_up = 0;
+            bb_dn = 1;
+            fb_edge = 0;
+        end
+
+        // Update digital control word periodically
+        if ($abstime > t_last_update + 100n) begin
+            t_last_update = $abstime;
+            if (bb_up && dctrl < dctrl_max) begin
+                dctrl = dctrl + 1;
+            end else if (bb_dn && dctrl > dctrl_min) begin
+                dctrl = dctrl - 1;
+            end
+            bb_up = 0;
+            bb_dn = 0;
+
+            // Calculate control voltage from digital word (0 to vhi)
+            vctrl = (dctrl * vhi) / dctrl_max;
+
+            // Calculate DCO frequency centered around 500 MHz
+            f_dco = f0 + kv * (vctrl - vhi/2);
+            if (f_dco < 200e6) f_dco = 200e6;
+            if (f_dco > 800e6) f_dco = 800e6;
+        end
+
+        // DCO edge generation using timer
+        @(timer(t_next_dco)) begin
+            dco_state = !dco_state;
+            // Schedule next edge based on current frequency
+            t_next_dco = $abstime + 0.5 / f_dco;
+        end
+
+        // Feedback divider - toggle fb_clk every n/2 DCO edges for 50% duty cycle
+        @(timer(t_next_fb)) begin
+            div_cnt = div_cnt + 1;
+            if (div_cnt >= n) begin
+                div_cnt = 0;
+            end
+            // Schedule next check (at DCO rate)
+            t_next_fb = $abstime + 1.0 / f_dco;
+        end
+
+        // Lock detection - check periodically
+        if ($abstime > t_last_update + 50n && period_ref > 0 && period_fb > 0) begin
+            period_diff = abs(period_fb - period_ref) / period_ref;
+            if (period_diff < lock_thr) begin
+                lock_count = lock_count + 1;
+                if (lock_count >= lock_cnt) begin
+                    locked = 1;
+                end
+            end else begin
+                lock_count = 0;
+                locked = 0;
+            end
+        end
+
+        // Compute output targets
+        dco_clk_target = dco_state ? vhi : vlo;
+        // fb_clk toggles once per n DCO cycles (divide by n)
+        fb_clk_target = (div_cnt < n/2) ? vhi : vlo;
+        vctrl_mon_target = vctrl;
+        lock_target = locked ? vhi : vlo;
+
+        // Drive outputs with transition
+        V(dco_clk) <+ transition(dco_clk_target, td, tr, tf);
+        V(fb_clk) <+ transition(fb_clk_target, td, tr, tf);
+        V(vctrl_mon) <+ transition(vctrl_mon_target, td, tr, tf);
+        V(lock) <+ transition(lock_target, td, tr, tf);
+    end
+endmodule

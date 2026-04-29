@@ -1,0 +1,27 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "pfd_updn.va"
+
+// Power supplies
+Vdd (vdd 0) vsource dc=0.9
+Vss (vss 0) vsource dc=0
+
+// Reference clock: 100MHz, starts at 0 phase
+Vref (ref 0) vsource type=pulse val0=0 val1=0.9 period=10n rise=100p fall=100p width=5n
+
+// Divider clock: 100MHz with phase offset (slightly slower or phase shifted)
+// Using 10.2ns period to create frequency difference for visible UP/DN pulses
+Vdiv (div 0) vsource type=pulse val0=0 val1=0.9 period=10.2n rise=100p fall=100p width=5.1n delay=2n
+
+// DUT instance
+XDUT (vdd vss ref div up dn) pfd_updn
+
+// Transient analysis
+tran tran stop=300n maxstep=100p errpreset=conservative
+
+// Save statements for required observables
+save ref
+save div
+save up
+save dn

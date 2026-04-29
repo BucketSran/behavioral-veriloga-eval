@@ -1,0 +1,20 @@
+// Spectre testbench for cross_sine_precision_ref
+
+ahdl_include "cross_sine_precision_ref.va"
+
+// Supply voltages
+VDD (VDD 0) vsource dc=1.0
+VSS (VSS 0) vsource dc=0.0
+
+// Input stimulus: vin = 0.45 V + 0.40 V * sin(2*pi*73 MHz*t)
+// This gives vth=0.45V crossings at 1/fin, 2/fin, 3/fin, etc.
+Vin (vin 0) vsource dc=0.45 mag=0.40 freq=73e6 type=sine
+
+// Device Under Test
+IDUT (VDD VSS vin first_err_out max_err_out count_out) cross_sine_precision_ref
+
+// Save outputs for verification
+save vin first_err_out max_err_out count_out
+
+// Transient analysis
+tran tran stop=47n maxstep=1p errpreset=conservative

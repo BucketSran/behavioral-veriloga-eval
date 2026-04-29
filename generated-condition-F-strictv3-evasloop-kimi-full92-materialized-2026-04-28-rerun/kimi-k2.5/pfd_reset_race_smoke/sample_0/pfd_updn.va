@@ -1,0 +1,58 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pfd_updn (VDD, VSS, REF, DIV, UP, DN);
+    inout VDD, VSS;
+    input REF, DIV;
+    output UP, DN;
+    electrical VDD, VSS, REF, DIV, UP, DN;
+
+    parameter real vth = 0.5 from (0:inf);
+    parameter real tr = 100p from (0:inf);
+    parameter real tf = 100p from (0:inf);
+    parameter real td = 0 from [0:inf);
+
+    integer up_state, dn_state;
+    real vhi, vlo;
+
+    analog begin
+        @(initial_step) begin
+            up_state = 0;
+            dn_state = 0;
+        end
+
+        // Detect rising edge of REF
+        @(cross(V(REF) - vth, 1)) begin
+            if (up_state == 0 && dn_state == 0) begin
+                up_state = 1;
+            end
+            else if (up_state == 0 && dn_state == 1) begin
+                // REF arrives while DN is high: reset both
+                up_state = 0;
+                dn_state = 0;
+            end
+            // else up_state == 1: already up, ignore
+        end
+
+        // Detect rising edge of DIV
+        @(cross(V(DIV) - vth, 1)) begin
+            if (up_state == 0 && dn_state == 0) begin
+                dn_state = 1;
+            end
+            else if (up_state == 1 && dn_state == 0) begin
+                // DIV arrives while UP is high: reset both
+                up_state = 0;
+                dn_state = 0;
+            end
+            // else dn_state == 1: already dn, ignore
+        end
+
+        // Output voltage levels based on VDD/VSS
+        vhi = V(VDD);
+        vlo = V(VSS);
+
+        // Drive outputs with transition
+        V(UP) <+ transition(up_state ? vhi : vlo, td, tr, tf);
+        V(DN) <+ transition(dn_state ? vhi : vlo, td, tr, tf);
+    end
+endmodule

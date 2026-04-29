@@ -1,0 +1,49 @@
+{
+  "task_id": "v2_binary_dac_keywordless_weighted_sum",
+  "family": "benchmark-v2",
+  "source_seed": "dac_binary_clk_4b",
+  "mechanism_family": "binary_weighted_dac",
+  "perturbation_level": "P3_keyword_removal",
+  "status": "validated_gold_evas_spectre",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "binary_dac",
+    "bits_lsb_first": [
+      "weight0",
+      "weight1",
+      "weight2",
+      "weight3"
+    ],
+    "vout": "analog_sum",
+    "guard": null,
+    "min_unique_codes": 8
+  },
+  "manifest_entry": {
+    "task_id": "v2_binary_dac_keywordless_weighted_sum",
+    "source_seed": "dac_binary_clk_4b",
+    "mechanism_family": "binary_weighted_dac",
+    "perturbation_level": "P3_keyword_removal",
+    "prompt_strategy": "Describe a clocked weighted sum of electrical decision lines without saying DAC, binary, or converter.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-small",
+    "status": "draft_manifest",
+    "review_notes": "Forces mechanism inference from weights and held update timing."
+  },
+  "validation": {
+    "tasks": 30,
+    "evas_pass": "30/30",
+    "spectre_pass": "30/30",
+    "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+    "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1"
+  }
+}

@@ -1,0 +1,33 @@
+simulator lang=spectre
+global 0
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0.0
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=1n rise=50p fall=50p width=2.4n period=5n
+Vload (load 0) vsource type=pwl wave=[ \
+  0 0.0 \
+  2.0n 0.9 \
+  12.0n 0.9 \
+  12.1n 0.0 \
+  72.0n 0.0 \
+  72.1n 0.9 \
+  82.0n 0.9 \
+  82.1n 0.0 \
+  130n 0.0 \
+]
+
+Vd7 (din7 0) vsource type=pwl wave=[0 0.9 70n 0.9 70.1n 0.0 130n 0.0]
+Vd6 (din6 0) vsource type=pwl wave=[0 0.0 70n 0.0 70.1n 0.0 130n 0.0]
+Vd5 (din5 0) vsource type=pwl wave=[0 0.9 70n 0.9 70.1n 0.9 130n 0.9]
+Vd4 (din4 0) vsource type=pwl wave=[0 0.0 70n 0.0 70.1n 0.9 130n 0.9]
+Vd3 (din3 0) vsource type=pwl wave=[0 0.0 70n 0.0 70.1n 0.9 130n 0.9]
+Vd2 (din2 0) vsource type=pwl wave=[0 0.9 70n 0.9 70.1n 0.9 130n 0.9]
+Vd1 (din1 0) vsource type=pwl wave=[0 0.0 70n 0.0 70.1n 0.0 130n 0.0]
+Vd0 (din0 0) vsource type=pwl wave=[0 0.9 70n 0.9 70.1n 0.0 130n 0.0]
+
+XDUT (vdd vss clk load din7 din6 din5 din4 din3 din2 din1 din0 sout frame) serializer_frame_alignment_ref
+
+tran tran stop=130n maxstep=0.1n
+save clk load frame sout din7 din6 din5 din4 din3 din2 din1 din0
+
+ahdl_include "serializer_frame_alignment_ref.va"

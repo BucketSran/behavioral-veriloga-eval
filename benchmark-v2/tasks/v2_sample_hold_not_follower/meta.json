@@ -1,0 +1,48 @@
+{
+  "task_id": "v2_sample_hold_not_follower",
+  "family": "benchmark-v2",
+  "source_seed": "sample_hold",
+  "mechanism_family": "sample_hold_discrete_update",
+  "perturbation_level": "P4_negative_distractor",
+  "status": "validated_gold_evas_spectre",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "sample_hold",
+    "vin": "sense_node",
+    "clock": "capture",
+    "vout": "latched_level",
+    "settled": null
+  },
+  "manifest_entry": {
+    "task_id": "v2_sample_hold_not_follower",
+    "source_seed": "sample_hold",
+    "mechanism_family": "sample_hold_discrete_update",
+    "perturbation_level": "P4_negative_distractor",
+    "prompt_strategy": "Explicitly reject continuous follower behavior; output may only change in a narrow window after capture_strobe.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-small",
+    "status": "draft_manifest",
+    "negative_constraints": [
+      "not_voltage_follower",
+      "not_continuous_tracking"
+    ],
+    "review_notes": "Checker should test between-edge invariance."
+  },
+  "validation": {
+    "tasks": 30,
+    "evas_pass": "30/30",
+    "spectre_pass": "30/30",
+    "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+    "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1"
+  }
+}

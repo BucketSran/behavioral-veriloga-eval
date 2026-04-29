@@ -1,0 +1,41 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dac_therm_16b (din_therm, rst_n, vout);
+    electrical [15:0] din_therm;
+    electrical rst_n;
+    electrical vout;
+
+    parameter real vstep = 1.0 from (0:inf);
+    parameter real tdel = 0 from [0:inf);
+    parameter real trise = 1n from (0:inf);
+    parameter real tfall = 1n from (0:inf);
+    parameter real vlogic_high = 1.0;
+    parameter real vlogic_low = 0.0;
+    parameter real vth = 0.5;
+
+    integer i;
+    integer count;
+    real vout_val;
+
+    analog begin
+        count = 0;
+
+        // Count ones in thermometer code using for loop
+        for (i = 0; i < 16; i = i + 1) begin
+            if (V(din_therm[i]) > vth) begin
+                count = count + 1;
+            end
+        end
+
+        // Calculate output voltage based on reset state
+        if (V(rst_n) < vth) begin
+            vout_val = 0.0;
+        end else begin
+            vout_val = count * vstep;
+        end
+
+        // Drive output with transition
+        V(vout) <+ transition(vout_val, tdel, trise, tfall);
+    end
+endmodule

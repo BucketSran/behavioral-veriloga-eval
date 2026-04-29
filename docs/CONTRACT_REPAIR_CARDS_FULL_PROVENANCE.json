@@ -1,0 +1,977 @@
+{
+  "version": 1,
+  "description": "Full repair-card catalog: historical/veriloga-skills local cards plus Codex/system-relation cards.",
+  "cards": [
+    {
+      "id": "dac_differential_output_from_code",
+      "title": "Drive Differential DAC Output From Decoded Code",
+      "source": "../veriloga-skills/veriloga/references/categories/dac.md",
+      "match": {
+        "task_keywords_any": [
+          "dac",
+          "cdac",
+          "segmented"
+        ],
+        "failed_hard_any": [
+          "*differential_output_moves",
+          "*differential_range",
+          "vdac*_moves"
+        ],
+        "passed_any": [
+          "*code_changes",
+          "*_input_activity"
+        ],
+        "functional_claim_any": [
+          "code_to_analog_transfer",
+          "count_high_to_analog",
+          "ordered_transfer"
+        ],
+        "prompt_template_any": [
+          "dac_code_to_output_span",
+          "thermometer_dac_code_to_output_span",
+          "differential_code_response"
+        ]
+      },
+      "text": [
+        "Preserve the already-working code/input activity and repair only the analog output mechanism.",
+        "Decode the visible input/control bits into one integer code using fixed-index reads, then normalize that code to the output range.",
+        "Use a mid-rail logic threshold for public 0/VDD bit stimuli; do not set the threshold equal to the high rail when using strict `>` comparisons.",
+        "Update the decoded code and output target variables inside the same clock/event block; outside the event, keep only unconditional contributions from held target variables.",
+        "For differential outputs, compute a signal around common-mode and drive `out_p = vcm + signal/2`, `out_n = vcm - signal/2`.",
+        "Use real target variables and unconditional `V(out) <+ transition(target, ...)` contributions; do not put `transition()` inside branches.",
+        "For segmented DACs, combine thermometer/MSB contribution and binary/LSB contribution into one normalized code before driving the differential target."
+      ]
+    },
+    {
+      "id": "adc_quantizer_code_update",
+      "title": "Quantize Input Into Output Code Bits",
+      "source": "../veriloga-skills/veriloga/references/categories/adc-sar.md",
+      "match": {
+        "task_keywords_any": [
+          "adc",
+          "quantizer",
+          "flash"
+        ],
+        "failed_hard_any": [
+          "dout*_code_changes",
+          "*code_changes"
+        ],
+        "passed_any": [
+          "vin_input_activity",
+          "*input_activity"
+        ],
+        "functional_claim_any": [
+          "quantized_encoding",
+          "sample_on_clock_edge"
+        ],
+        "prompt_template_any": [
+          "monotonic_code_vs_input",
+          "sample_after_clock"
+        ]
+      },
+      "text": [
+        "The input stimulus is already visible; focus on converting input voltage into changing output code bits.",
+        "Compute an integer code from the analog input, clamp it into `[0, 2^N - 1]`, and update it on the intended sample/clock event or continuously for combinational flash ADCs.",
+        "Drive each output bit from that integer code with fixed bit positions, using target variables and unconditional `transition()` contributions.",
+        "Check threshold direction and bit ordering: the checker-visible MSB/LSB names must match the saved column names."
+      ]
+    },
+    {
+      "id": "adc_dac_reconstruction_chain",
+      "title": "Keep ADC Quantization And DAC Reconstruction Coupled",
+      "source": "../veriloga-skills/veriloga/references/categories/adc-sar.md; ../veriloga-skills/veriloga/references/categories/dac.md",
+      "match": {
+        "repair_family_any": [
+          "prompt-spec:quantized_reconstruction",
+          "clocked-quantizer-code-update"
+        ],
+        "failed_hard_all": [
+          "dout*_code_changes",
+          "vout_moves"
+        ],
+        "functional_claim_any": [
+          "quantized_encoding",
+          "code_to_analog_transfer",
+          "ordered_transfer"
+        ],
+        "prompt_template_any": [
+          "quantized_reconstruction"
+        ]
+      },
+      "text": [
+        "This task needs both halves of the chain: input voltage should produce a digital code, and that same code should reconstruct an analog output.",
+        "Preserve the artifact boundary: keep existing file names, module names, ports, includes, saves, and the generated testbench unless the contract explicitly flags a TB failure.",
+        "First compute a clipped integer ADC code from `vin`; then drive the saved code bits from that integer.",
+        "Use the same integer code to compute the DAC output level, scaled across the public supply/reference range.",
+        "Do not rewrite the multi-file structure or interface while fixing behavior; keep `vout` and code-bit column names checker-visible.",
+        "Do not leave `vout` tied to a constant or to the raw input; the checker expects a quantized reconstruction that moves with code."
+      ]
+    },
+    {
+      "id": "bg_cal_settled_flag_from_stable_cycles",
+      "title": "Assert Bandgap Calibration Settled Only After Stable Cycles",
+      "source": "../veriloga-skills/veriloga/references/categories/calibration.md",
+      "match": {
+        "task_keywords_any": [
+          "bg_cal",
+          "bandgap",
+          "cal"
+        ],
+        "failed_hard_any": [
+          "settled_high",
+          "*settled*",
+          "settled_flag_high"
+        ],
+        "passed_any": [
+          "code_span",
+          "*code_span",
+          "TRIM_code_changes",
+          "CAL_code_changes",
+          "*code_changes"
+        ],
+        "prompt_template_any": [
+          "calibration_settling_code"
+        ]
+      },
+      "text": [
+        "Use an explore-freeze-settle calibration pattern: first let the trim code move, then explicitly freeze the final trim code, then count stable public clock cycles, then assert SETTLED and hold it high.",
+        "Treat passed `TRIM_code_changes` as an invariant: keep the existing trim update/search path and add only the stable-count/SETTLED mechanism unless the trim path is explicitly failing.",
+        "For `bg_cal`, a fixed-high `COMP_OUT` stimulus is allowed; do not try to make `COMP_OUT` move or derive success from comparator activity.",
+        "Do not keep searching forever. Once trim activity has covered the required range or the calibration error is within tolerance, enter a frozen/done phase and stop changing the trim code.",
+        "Count consecutive stable cycles at the public CLK cadence while the held trim code is unchanged; do not count only rare averaging/update events.",
+        "After the stable counter reaches the required consecutive-cycle count, drive SETTLED from a held flag and keep it high through the final validation window.",
+        "Keep one held integer trim_code as the source of truth for TRIM_0..TRIM_5, and drive SETTLED with an unconditional transition() contribution.",
+        "Avoid increasing averaging latency beyond the validation window. If the harness or anchor uses a public averaging parameter, preserve that parameter name and do not replace it with a slower private parameter.",
+        "Preserve the existing interface and testbench; drive the flag with an unconditional `transition()` contribution."
+      ]
+    },
+    {
+      "id": "calibration_code_to_measurement_response",
+      "title": "Connect Calibration Code To Measured Response",
+      "source": "../veriloga-skills/veriloga/references/categories/calibration.md; ../veriloga-skills/veriloga/references/categories/comparator.md",
+      "match": {
+        "task_keywords_any": [
+          "cal",
+          "trim",
+          "bg_cal"
+        ],
+        "failed_hard_any": [
+          "COMP_OUT_moves",
+          "*differential_output_moves",
+          "*differential_range",
+          "vdac*_moves"
+        ],
+        "passed_any": [
+          "TRIM_code_changes",
+          "CAL_code_changes",
+          "*code_changes"
+        ],
+        "prompt_template_any": [
+          "calibration_settling_code",
+          "differential_code_response"
+        ]
+      },
+      "text": [
+        "The calibration/search code is already changing; repair the measured analog/comparator response that should depend on that code.",
+        "Model a trim effect from the decoded code, compare it against the target/input error, and update the comparator/measurement output from that comparison.",
+        "For CDAC-style calibration, decode the calibration bits into a weighted DAC value before driving `vdac_p/vdac_n` or the comparator input.",
+        "Hold the final code/output state after the search completes; do not keep outputs disconnected from the calibration state."
+      ]
+    },
+    {
+      "id": "segmented_dac_differential_weighted_sum",
+      "title": "Build Segmented DAC Differential Output From Weighted Segments",
+      "source": "../veriloga-skills/veriloga/references/categories/dac.md",
+      "match": {
+        "task_keywords_any": [
+          "segmented_dac",
+          "segmented"
+        ],
+        "failed_hard_any": [
+          "diff_range",
+          "*differential_range",
+          "*differential_output_moves",
+          "vout_moves"
+        ],
+        "passed_any": [
+          "*code_changes",
+          "*input_activity"
+        ],
+        "functional_claim_any": [
+          "code_to_analog_transfer",
+          "count_high_to_analog",
+          "ordered_transfer"
+        ],
+        "prompt_template_any": [
+          "dac_code_to_output_span",
+          "differential_code_response"
+        ]
+      },
+      "text": [
+        "Preserve the existing segmented-DAC interface and testbench; repair only the DUT summation/output path.",
+        "Decode `D*` bits with a mid-supply threshold so public 0/0.9 V pulses are sampled as real logic highs; a `vth` equal to 0.9 V with `>` will read every high bit as 0.",
+        "Decode thermometer/MSB and binary/LSB controls separately, then sum them with the correct segment weights into one normalized code.",
+        "Compute `vout_diff`, `vout_p_target`, and `vout_n_target` immediately after decoding the code in the clock event; do not leave target computation as free procedural statements after the event body.",
+        "Compute a differential signal from that weighted sum around common-mode and drive both output pins with opposite polarity.",
+        "Use held real targets plus unconditional `V(out_p/out_n) <+ transition(target, ...)`; do not leave either side constant."
+      ]
+    },
+    {
+      "id": "divider_counter_toggle_output",
+      "title": "Toggle Divider Output From Input Clock Counter",
+      "source": "../veriloga-skills/veriloga/references/categories/pll-clock.md; ../veriloga-skills/veriloga/references/categories/digital-logic.md",
+      "match": {
+        "task_keywords_any": [
+          "divider",
+          "multimod",
+          "ratio"
+        ],
+        "failed_hard_any": [
+          "div_out_edges_present",
+          "divider_output_edges_present",
+          "clk_out_edges_present"
+        ],
+        "passed_any": [
+          "clk_in_edges_present",
+          "*clk*_edges_present"
+        ],
+        "prompt_template_any": [
+          "counter_cadence",
+          "ratio_control_window"
+        ]
+      },
+      "text": [
+        "The input clock is present; repair the divider state machine rather than the testbench clock.",
+        "On each input rising edge, increment a counter. When it reaches the active division ratio, reset the counter and toggle the output state.",
+        "If the ratio changes at runtime, latch or read the ratio code at a safe clock edge and apply it to subsequent counter periods.",
+        "Drive the output from a held integer state with an unconditional `transition()` contribution."
+      ]
+    },
+    {
+      "id": "pfd_windowed_latched_pulse_symmetry",
+      "title": "Repair PFD Edge-Pair Pulse Symmetry",
+      "source": "../veriloga-skills/veriloga/references/categories/pll-clock.md",
+      "priority": 5,
+      "match": {
+        "task_keywords_any": [
+          "pfd"
+        ],
+        "failed_any": [
+          "pfd_pulse_symmetry_window",
+          "pfd_paired_edge_response",
+          "pfd_pulse_width_fraction_window"
+        ],
+        "repair_family_any": [
+          "pfd-windowed-latched-pulse-symmetry"
+        ],
+        "functional_claim_any": [
+          "data_clock_lead_lag_pulses"
+        ],
+        "prompt_template_any": [
+          "paired_edge_response",
+          "pulse_non_overlap",
+          "pulse_width_window"
+        ]
+      },
+      "text": [
+        "Preserve the public PFD parameter interface. If the harness passes `vth` and `tedge`, the repaired module must declare both parameters and should use `tedge` in output transitions.",
+        "Treat REF-leading and DIV-leading edge pairs symmetrically: REF rising sets a held UP state, DIV rising sets a held DN state.",
+        "Do not suppress the second side by requiring both states to be zero before setting a latch. A trailing edge should either clear an existing opposite latch or create its own response when it leads.",
+        "Use independent held `up_state` and `dn_state` variables plus a small delayed-clear or finite pulse timer so pulses are visible but do not stay high.",
+        "Keep `@(cross(...))` event statements unconditional in the analog block; put reset, set, and clear decisions inside event bodies.",
+        "Drive `up` and `dn` from held target variables with unconditional `transition()` contributions. Do not place `transition()` inside `if` branches.",
+        "For reset-race tasks, preserve the already-passing non-overlap behavior while adding the missing response side. For deadzone tasks, keep the non-leading side mostly low."
+      ]
+    },
+    {
+      "id": "pfd_paired_up_dn_pulses",
+      "title": "Use Symmetric PFD Latches For UP/DN Pulses",
+      "source": "../veriloga-skills/veriloga/references/categories/pll-clock.md",
+      "match": {
+        "task_keywords_any": [
+          "pfd"
+        ],
+        "failed_hard_any": [
+          "dn_pulses_present",
+          "up_pulses_present",
+          "dn_moves",
+          "up_moves"
+        ],
+        "passed_any": [
+          "ref_edges_present",
+          "div_edges_present",
+          "*non_overlap"
+        ],
+        "functional_claim_any": [
+          "data_clock_lead_lag_pulses"
+        ],
+        "prompt_template_any": [
+          "paired_edge_response",
+          "bbpd_data_clock_lead_lag",
+          "pulse_non_overlap"
+        ]
+      },
+      "text": [
+        "Preserve the public PFD parameter interface. If the harness passes `vth` and `tedge`, the repaired module must declare both parameters and should use `tedge` in output transitions.",
+        "A PFD should have paired latch behavior: REF edge sets UP, DIV edge sets DN.",
+        "When both latches are high, clear both after a small delay so pulses are finite and non-overlapping.",
+        "If only one side pulses, check that both edge event handlers update independent held states and that both outputs are driven from those states.",
+        "Preserve module ports, node names, and the existing testbench/interface while repairing the latch logic.",
+        "Do not gate or conditionally instantiate `@(cross())` statements; put reset/clear conditions inside event bodies.",
+        "Do not put `transition()` calls inside conditional branches; compute held UP/DN target states first, then drive outputs unconditionally."
+      ]
+    },
+    {
+      "id": "timer_absolute_event_output",
+      "title": "Schedule Absolute Timer Events And Toggle A Held Output",
+      "source": "../veriloga-skills/veriloga/references/categories/pll-clock.md; ../veriloga-skills/veriloga/references/categories/digital-logic.md",
+      "match": {
+        "task_keywords_any": [
+          "timer",
+          "absolute_grid"
+        ],
+        "failed_hard_any": [
+          "clk_out_edges_present",
+          "*edges_present"
+        ],
+        "prompt_template_any": [
+          "absolute_event_window",
+          "timer_future_event_liveness",
+          "parameterized_event_sequence"
+        ]
+      },
+      "text": [
+        "Use a held next-event time variable such as `t_next`, initialized in `@(initial_step)`.",
+        "Schedule `@(timer(t_next))`, toggle a held output state, then advance `t_next` by the required interval.",
+        "Drive the saved output from the held state with an unconditional `transition()` contribution.",
+        "Avoid two-argument periodic timers when the next interval must align to an absolute grid."
+      ]
+    },
+    {
+      "id": "pll_feedback_edge_and_lock_path",
+      "title": "Close PLL Feedback Edge And Lock Path",
+      "source": "../veriloga-skills/veriloga/references/categories/pll-clock.md",
+      "match": {
+        "repair_family_any": [
+          "pll-dco-counter-feedback-loop",
+          "prompt-spec:ratio_edge_window",
+          "prompt-spec:control_to_frequency_step"
+        ],
+        "failed_hard_any": [
+          "*frequency_ratio*",
+          "*lock_asserts*",
+          "*vctrl*_moves",
+          "*fb*_edges_present",
+          "prompt_ratio_edge_window_*"
+        ],
+        "prompt_template_any": [
+          "ratio_edge_window",
+          "control_to_frequency_step",
+          "lock_after_ratio_stable",
+          "timer_future_event_liveness"
+        ]
+      },
+      "text": [
+        "Preserve the public REF/FB/control/lock interface and the existing testbench stimulus.",
+        "Repair the edge path before tuning lock thresholds: reference activity plus zero feedback edges means the oscillator/divider feedback generator is not alive.",
+        "Use a held oscillator period or frequency state and schedule every next output edge strictly in the future.",
+        "Tie feedback divider toggling to generated oscillator edges; do not derive feedback from a one-shot initialization event.",
+        "Update control voltage or control monitor from phase/frequency error so it moves when the loop is unlocked.",
+        "Assert lock only after feedback/reference cadence is close for a stable window; do not force lock high while the ratio contract is failing."
+      ]
+    },
+    {
+      "id": "pll_feedback_edge_liveness_stage",
+      "title": "Stage 1 PLL Repair: Make The Feedback Clock Alive",
+      "source": "../veriloga-skills/veriloga/references/categories/pll-clock.md",
+      "priority": 30,
+      "match": {
+        "task_keywords_any": [
+          "pll",
+          "adpll",
+          "cppll"
+        ],
+        "passed_any": [
+          "ref_clk_edges_present"
+        ],
+        "failed_hard_any": [
+          "fb_clk_edges_present",
+          "prompt_timer_future_event_liveness_fb_clk_edges",
+          "prompt_control_to_frequency_step_fb_clk_edges"
+        ],
+        "prompt_template_any": [
+          "ratio_edge_window",
+          "control_to_frequency_step",
+          "timer_future_event_liveness"
+        ]
+      },
+      "text": [
+        "Treat missing `fb_clk` edges as a stage-1 PLL failure. Do not start by changing lock thresholds; first create a real feedback clock path.",
+        "Preserve every public verifier parameter name that the testbench passes. For ADPLL/CPPLL tasks this commonly includes `div_ratio`, `f_center`, `freq_step_hz`, `f_min`, `f_max`, `code_min`, `code_max`, `code_center`, `code_init`, `tedge`, `lock_tol`, and `lock_count_target`; ratio-hop tasks may also pass `ratio_min` and `ratio_max`.",
+        "If you prefer internal names such as `ndiv`, `tdco_nom`, or `lock_thr`, derive them from the public parameters inside the analog code, but still declare the public parameters exactly.",
+        "Use one held oscillator/DCO state and one absolute `t_next` timer. Initialize `t_next` in `@(initial_step)`, toggle the oscillator state in `@(timer(t_next))`, then advance `t_next` by a strictly positive half-period.",
+        "For ADPLL-style tasks without a separate `dco_clk`, `fb_clk` may be the divided/toggled DCO feedback output. For CPPLL-style tasks with `dco_clk`, generate `dco_clk` first and derive `fb_clk` from divider/counter state.",
+        "Never schedule a future edge from a stale one-shot initialization event. Every generated edge must schedule the next edge explicitly in the future.",
+        "Preserve the public `ref_clk`, `fb_clk`, `vctrl_mon`, `lock`, supply, and parameter interface. Drive clock outputs from held states with unconditional `transition()` contributions.",
+        "Clamp oscillator frequency or period to a safe positive range so the timer cannot stop, go negative, or schedule an infinite-rate loop."
+      ]
+    },
+    {
+      "id": "pll_feedback_ratio_stage",
+      "title": "Stage 2 PLL Repair: Match Feedback/Reference Ratio",
+      "source": "../veriloga-skills/veriloga/references/categories/pll-clock.md",
+      "priority": 24,
+      "match": {
+        "task_keywords_any": [
+          "pll",
+          "adpll",
+          "cppll"
+        ],
+        "passed_any": [
+          "fb_clk_edges_present",
+          "dco_clk_edges_present"
+        ],
+        "failed_hard_any": [
+          "ref_clk_fb_clk_frequency_ratio_near_one",
+          "prompt_ratio_edge_window_ref_clk_fb_clk_ratio"
+        ],
+        "prompt_template_any": [
+          "ratio_edge_window",
+          "ratio_hop_window"
+        ]
+      },
+      "text": [
+        "Feedback edges already exist; preserve that liveness and repair the divider/control cadence that sets the feedback/reference ratio.",
+        "Preserve public verifier parameter names exactly. Do not replace `div_ratio`, `ratio_min`, `ratio_max`, `f_center`, `freq_step_hz`, `f_min`, `f_max`, `code_min`, `code_max`, `code_center`, `code_init`, `tedge`, `lock_tol`, or `lock_count_target` with private-only names.",
+        "Keep an integer divider counter connected to oscillator or DCO edges. Toggle or pulse `fb_clk` only from that counter, not from an unrelated timer.",
+        "Be explicit about half-period versus full-period counting. If the DCO timer fires on every half-cycle toggle, and `fb_clk` toggles after `N` DCO timer fires, then one full `fb_clk` period is `2*N` timer intervals. Choose `N` or the DCO period so the late-window `fb_clk` rising-edge rate matches `ref_clk`, not 20-30% high or low.",
+        "For ADPLL-style divided feedback, use the mechanism relation `f_dco ~= 2 * div_ratio * f_ref` when `fb_clk` toggles once per divider count. Changing `div_ratio` without a matching DCO nominal frequency will push the late-window edge ratio high or low.",
+        "For ADPLL verifier harnesses with a 50 MHz reference and `div_ratio=8`, a nominal DCO around `f_center` should be divided so `fb_clk` has a near-20 ns rising-edge period. Do not ignore `f_center` or replace it with a fixed private oscillator.",
+        "If the prompt exposes a ratio word, hop control, or mode input, latch it on a safe public clock edge and apply it to subsequent divider periods.",
+        "For a ratio-near-one checker, set the nominal feedback cadence so late-window `fb_clk` and `ref_clk` edge counts align before asserting lock.",
+        "Do not make `lock` pass by forcing it high while the ratio contract is failing. Ratio first, lock second.",
+        "When repairing CPPLL tasks, keep `dco_clk` alive and adjust the divider/control path rather than replacing the whole loop with an independent `fb_clk` generator."
+      ]
+    },
+    {
+      "id": "pll_control_monitor_stage",
+      "title": "Stage 3 PLL Repair: Move Control From Phase/Frequency Error",
+      "source": "../veriloga-skills/veriloga/references/categories/pll-clock.md",
+      "priority": 28,
+      "match": {
+        "task_keywords_any": [
+          "pll",
+          "adpll",
+          "cppll"
+        ],
+        "failed_hard_any": [
+          "vctrl_mon_moves",
+          "*vctrl*_moves"
+        ],
+        "prompt_template_any": [
+          "control_to_frequency_step",
+          "ratio_hop_window"
+        ]
+      },
+      "text": [
+        "`vctrl_mon` or the control monitor should be a held loop state, not a constant cosmetic output.",
+        "Keep the verifier parameter interface intact while adding control movement. The public harness may pass `f_center`, `freq_step_hz`, `f_min`, `f_max`, `code_min`, `code_max`, `code_center`, `code_init`, `ratio_min`, `ratio_max`, `tedge`, `lock_tol`, and `lock_count_target`; declare those names even if some are only used to clamp the behavioral model.",
+        "Update the control state from phase/frequency error: REF-leading events should move the control in the direction that speeds up feedback, and FB-leading events should move it in the direction that slows feedback.",
+        "A lightweight behavioral loop filter is acceptable: accumulate bounded UP/DN corrections into one real control variable, clamp it to supply/reference limits, and drive `vctrl_mon` from that variable.",
+        "Tie oscillator/DCO frequency to the same control variable so the monitor movement is causally connected to feedback cadence.",
+        "For ratio-hop or frequency-step tasks, preserve already-passing feedback edges and ratio behavior while adding visible control movement around the hop/step window.",
+        "Drive `vctrl_mon` with an unconditional contribution from the held control state; do not leave it at a fixed mid-rail value."
+      ]
+    },
+    {
+      "id": "pll_lock_after_stable_ratio_stage",
+      "title": "Stage 4 PLL Repair: Assert Lock Only After Stable Ratio",
+      "source": "../veriloga-skills/veriloga/references/categories/pll-clock.md",
+      "priority": 18,
+      "match": {
+        "task_keywords_any": [
+          "pll",
+          "adpll",
+          "cppll"
+        ],
+        "passed_any": [
+          "ref_clk_fb_clk_frequency_ratio_near_one",
+          "prompt_ratio_edge_window_ref_clk_fb_clk_ratio"
+        ],
+        "failed_hard_any": [
+          "lock_asserts_somewhere"
+        ],
+        "failed_advisory_any": [
+          "prompt_lock_after_ratio_stable_lock_asserts"
+        ],
+        "prompt_template_any": [
+          "lock_after_ratio_stable",
+          "ratio_edge_window"
+        ]
+      },
+      "text": [
+        "Only repair lock after feedback edges and ratio are already plausible.",
+        "Preserve public lock and edge parameters such as `tedge`, `lock_tol`, and `lock_count_target`; use them to set transition time, allowed phase/frequency error, and required stable-window count.",
+        "Maintain a small stability counter over consecutive reference edges where recent reference and feedback cadence are close. A code-near-center test is not enough; the lock flag should summarize observed ref/fb timing stability.",
+        "Use `lock_tol` as a time or period tolerance when comparing recent ref/fb edge timing, and `lock_count_target` as the required number of consecutive stable observations.",
+        "`lock_count_target` mainly controls lock assertion latency; it should not be used to hide an incorrect feedback/reference ratio.",
+        "Assert a held `lock` flag only after the stability counter reaches the required window; clear or lower it when a hop, reset, or large frequency error occurs.",
+        "For reacquire tasks, allow lock to drop after the disturbance and assert again only after the post-step ratio has restabilized.",
+        "Do not use `lock = 1` as a shortcut. Lock must summarize a stable feedback path, not replace it."
+      ]
+    },
+    {
+      "id": "dwa_pointer_cell_enable_activity",
+      "title": "Drive DWA Pointer And Cell Enables From A Wrapped State",
+      "source": "../veriloga-skills/veriloga/references/categories/dac.md; ../veriloga-skills/veriloga/references/categories/digital-logic.md",
+      "match": {
+        "repair_family_any": [
+          "dwa-pointer-thermometer-mask"
+        ],
+        "failed_hard_any": [
+          "cell_en*_code_changes",
+          "cell_en_has_active_bits",
+          "ptr*_code_changes",
+          "ptr_has_active_bits",
+          "code_code_changes"
+        ],
+        "prompt_template_any": [
+          "dac_code_to_output_span"
+        ]
+      },
+      "text": [
+        "Preserve the public pointer/cell-enable/output column names and repair the state update path first.",
+        "Keep one integer pointer as the source of truth. Initialize it after reset and update it once per valid clock/sample event.",
+        "Decode the requested active cell count from the public input code, clamp it to the cell array size, and wrap selections modulo the number of cells.",
+        "Drive every saved `cell_en_*` and `ptr_*` bit from held integer state variables with unconditional voltage contributions.",
+        "For no-overlap tasks, ensure no cell enable is driven by two independent branches in the same timestep; compute the full mask first, then drive pins."
+      ]
+    },
+    {
+      "id": "flash_adc_monotonic_code_coverage",
+      "title": "Generate Flash ADC Code Coverage From Input Thresholds",
+      "source": "../veriloga-skills/veriloga/references/categories/adc-sar.md",
+      "match": {
+        "failed_hard_any": [
+          "dout_code_changes",
+          "prompt_monotonic_code_vs_input_code_coverage"
+        ],
+        "failed_advisory_any": [
+          "vin_input_activity",
+          "prompt_monotonic_code_vs_input_input_span"
+        ],
+        "functional_claim_any": [
+          "quantized_encoding",
+          "ordered_transfer"
+        ],
+        "prompt_template_any": [
+          "monotonic_code_vs_input"
+        ]
+      },
+      "text": [
+        "If the input span contract passes but output code coverage fails, repair the quantizer/code path rather than the stimulus.",
+        "Compute a clipped integer code from the public analog input using evenly spaced thresholds across the public input/reference range.",
+        "For flash-style tasks, combinational threshold decoding is acceptable unless the prompt explicitly requires clocked sampling.",
+        "Drive each `dout_*` bit from the same integer code with the checker-visible bit order.",
+        "Use mid-supply digital thresholds for any enable/reset pins and keep output transitions unconditional."
+      ]
+    },
+    {
+      "id": "runtime_csv_interface_recovery",
+      "title": "Recover Runtime CSV And Observable Interface",
+      "source": "../veriloga-skills/veriloga/references/evas-parity-gate.md; ../veriloga-skills/veriloga/references/domain-routing.md",
+      "match": {
+        "repair_family_any": [
+          "runtime-interface-minimal-harness"
+        ],
+        "failed_hard_any": [
+          "runtime_csv_missing",
+          "csv_has_observables"
+        ],
+        "prompt_template_any": [
+          "logic_truth_table",
+          "sequence_alignment",
+          "absolute_event_window",
+          "counter_cadence"
+        ]
+      },
+      "text": [
+        "Repair the simulation artifact before changing DUT semantics.",
+        "Check that every required generated file exists with the expected filename and that the testbench includes that exact file.",
+        "Preserve module names, port order, discipline declarations, and save signal names from the public task contract.",
+        "Ensure the transient analysis is present, finite, and long enough for the required observables to be saved.",
+        "If a checker times out on a large CSV, prefer a streaming/lightweight checker path or a smaller save set before behavior tuning."
+      ]
+    },
+    {
+      "id": "event_crossing_output_activity",
+      "title": "Drive Event Outputs From Detected Crossings",
+      "source": "../veriloga-skills/veriloga/references/verilog-a-advanced.md",
+      "match": {
+        "failed_hard_any": [
+          "count_out_moves",
+          "max_err_out_moves",
+          "*count*_moves",
+          "*err*_moves"
+        ]
+      },
+      "text": [
+        "Preserve the input waveform and repair the event-detection state that produces checker-visible outputs.",
+        "Use unconditional `@(cross(...))` or `@(above(...))` event statements in the analog block; put state updates inside event bodies.",
+        "Maintain held counters or error accumulators as real/integer variables and drive saved outputs from those held variables.",
+        "Do not compute saved outputs only inside the event branch; keep the voltage contributions unconditional so CSV columns move after events.",
+        "If the checker observes a count output, increment it exactly once per intended crossing and avoid reset conditions that clear it before the validation window."
+      ]
+    },
+    {
+      "id": "sar_sequence_and_internal_dac_activity",
+      "title": "Keep SAR Sequence And Internal DAC Activity Coupled",
+      "source": "../veriloga-skills/veriloga/references/categories/adc-sar.md",
+      "match": {
+        "repair_family_any": [
+          "prompt-spec:sar_sequence",
+          "clocked-quantizer-code-update",
+          "scoring-schema-reconcile"
+        ],
+        "failed_hard_any": [
+          "dp_dac_code_changes",
+          "*dac*_code_changes",
+          "*sar*_code_changes"
+        ],
+        "functional_claim_any": [
+          "sample_on_clock_edge",
+          "quantized_encoding"
+        ],
+        "prompt_template_any": [
+          "sar_sequence",
+          "sample_after_clock",
+          "quantized_reconstruction"
+        ]
+      },
+      "text": [
+        "A SAR task needs visible trial-code activity, not only a final held code.",
+        "Keep one SAR state machine with a bit index, trial code, comparator decision, and held final code.",
+        "On each valid sample/clock step, update the trial bit and internal DAC/code monitor before advancing to the next bit.",
+        "Drive public SAR/DAC monitor bits from the same trial-code integer so code coverage appears in the waveform.",
+        "After conversion completes, freeze the final code until the next sample event instead of continuing to toggle randomly."
+      ]
+    },
+    {
+      "id": "thermometer_dac_count_to_voltage",
+      "title": "Map Thermometer-Code Population Count To Output Voltage",
+      "source": "../veriloga-skills/veriloga/references/categories/dac.md",
+      "priority": 8,
+      "match": {
+        "repair_family_any": [
+          "prompt-spec:thermometer_dac_code_to_output_span"
+        ],
+        "failed_hard_any": [
+          "prompt_thermometer_dac_code_to_output_span_output_span",
+          "vout_moves",
+          "*output_span"
+        ],
+        "functional_claim_any": [
+          "count_high_to_analog",
+          "ordered_transfer"
+        ],
+        "prompt_template_any": [
+          "thermometer_dac_code_to_output_span"
+        ]
+      },
+      "text": [
+        "For thermometer-coded DACs, decode the output level from the number of asserted public input bits, not from a binary interpretation of bit positions.",
+        "Preserve active-low reset semantics: when reset is asserted low, force the held output target to the low rail or zero level; after reset release, keep the reset stimulus deasserted through the checking window.",
+        "Use a mid-supply threshold to count high input cells and compute `vout_target = count_of_ones * vstep` or the prompt-specified full-scale mapping.",
+        "Drive `vout` from one held real target with an unconditional `transition()` contribution.",
+        "Keep scalar save aliases such as `d0..d15` visible when the public prompt names them, even if the DUT internally uses a bus."
+      ]
+    },
+    {
+      "id": "gray_counter_one_bit_sequence",
+      "title": "Update Binary Count Then Encode One-Bit Gray Transitions",
+      "source": "../veriloga-skills/veriloga/references/categories/digital-logic.md",
+      "priority": 10,
+      "match": {
+        "repair_family_any": [
+          "prompt-spec:gray_counter_sequence",
+          "gray-counter-one-bit-sequence"
+        ],
+        "failed_hard_any": [
+          "*_one_bit_transitions",
+          "*code_changes"
+        ],
+        "functional_claim_any": [
+          "one_bit_adjacent_transition"
+        ],
+        "prompt_template_any": [
+          "gray_counter_sequence"
+        ]
+      },
+      "text": [
+        "Keep a held binary counter as the source of truth and update it once per valid clock edge after reset release.",
+        "Encode the public outputs as `gray = binary ^ (binary >> 1)`; do not increment the Gray word directly.",
+        "Reset should drive both the binary counter and the Gray outputs to zero, then remain released during the checking window.",
+        "Drive every saved Gray bit from the held encoded word with unconditional voltage contributions.",
+        "If code coverage passes but one-bit transitions fail, preserve clock/reset stimulus and repair only the encoding/update order."
+      ]
+    },
+    {
+      "id": "serializer_frame_alignment_sequence",
+      "title": "Align Serializer Load, First Bit, And Frame Pulse",
+      "source": "../veriloga-skills/veriloga/references/categories/digital-logic.md",
+      "priority": 8,
+      "match": {
+        "repair_family_any": [
+          "prompt-spec:sequence_alignment"
+        ],
+        "failed_any": [
+          "prompt_sequence_alignment_*",
+          "frame*_moves",
+          "sout*_moves"
+        ],
+        "functional_claim_any": [
+          "frame_aligned_serial_sequence"
+        ],
+        "prompt_template_any": [
+          "sequence_alignment"
+        ]
+      },
+      "text": [
+        "Treat serializer repair as a state-machine alignment problem, not as a free-running pulse generator.",
+        "Latch the parallel word only on the prompt-specified load event or load-qualified clock edge.",
+        "After loading, shift exactly one bit per clock edge in the requested order, commonly MSB-first when the prompt says so.",
+        "Assert the frame marker only for the first serialized bit of each loaded word, then clear it on later bits.",
+        "Drive `sout` and `frame` from held state variables with unconditional `transition()` contributions so sampling after clock edges is stable."
+      ]
+    },
+    {
+      "id": "parameterized_pulse_train_from_instance_overrides",
+      "title": "Generate Pulse Train From Public Instance Parameters",
+      "source": "../veriloga-skills/veriloga/references/categories/digital-logic.md",
+      "priority": 8,
+      "match": {
+        "repair_family_any": [
+          "prompt-spec:parameterized_event_sequence",
+          "prompt-spec:timer_future_event_liveness"
+        ],
+        "failed_any": [
+          "prompt_parameterized_event_sequence_*",
+          "prompt_timer_future_event_liveness_*",
+          "*pulses_present",
+          "out_moves"
+        ],
+        "functional_claim_any": [
+          "parameterized_repetition"
+        ],
+        "prompt_template_any": [
+          "parameterized_event_sequence",
+          "timer_future_event_liveness"
+        ]
+      },
+      "text": [
+        "Declare the public real and integer parameters exactly as the prompt names them so Spectre instance overrides bind to the DUT.",
+        "Use defaults that are not equal to the final test values when the prompt asks for override sensitivity.",
+        "Schedule a finite sequence with `@(timer(t_next))`: toggle or assert a held output state, count emitted pulses, and stop after the overridden repetition count.",
+        "Scale the high target from the overridden amplitude parameter, not from a hard-coded constant.",
+        "Drive the output from a held real target with an unconditional `transition()` contribution."
+      ]
+    },
+    {
+      "id": "basic_logic_truth_table_and_port_order",
+      "title": "Preserve Basic Logic Truth Tables And Harness Port Order",
+      "source": "../veriloga-skills/veriloga/references/categories/digital-logic.md",
+      "priority": 6,
+      "match": {
+        "repair_family_any": [
+          "prompt-spec:logic_truth_table",
+          "runtime-interface-minimal-harness"
+        ],
+        "failed_any": [
+          "prompt_logic_truth_table_*",
+          "csv_has_observables",
+          "*_moves"
+        ],
+        "prompt_template_any": [
+          "logic_truth_table"
+        ]
+      },
+      "text": [
+        "For basic logic tasks, first preserve the public module names, positional port order, include file names, and scalar save names from the prompt.",
+        "Implement combinational gates as direct thresholded logic functions using the public VDD/VSS rails or prompt-specified logic levels.",
+        "For sequential cells, sample only on the requested clock edge and treat reset polarity exactly as stated in the prompt.",
+        "Drive each output continuously from held or directly computed logic targets with `transition()`; do not hide outputs behind instance-qualified save names.",
+        "If the failure is CSV missing or checker timeout, fix the harness/save set before changing truth-table behavior."
+      ]
+    },
+    {
+      "id": "bbpd_data_clock_lead_lag_pulses",
+      "title": "Detect Data/Clock Lead-Lag And Emit Non-Overlapping BBPD Pulses",
+      "source": "../veriloga-skills/veriloga/references/categories/pll-clock.md",
+      "priority": 10,
+      "match": {
+        "repair_family_any": [
+          "prompt-spec:bbpd_data_clock_lead_lag",
+          "bbpd-data-clock-lead-lag"
+        ],
+        "failed_any": [
+          "prompt_bbpd_data_clock_lead_lag",
+          "bbpd_data_clock_paired_edge_response",
+          "up_pulses_present",
+          "dn_pulses_present",
+          "prompt_pulse_non_overlap"
+        ],
+        "functional_claim_any": [
+          "data_clock_lead_lag_pulses"
+        ],
+        "prompt_template_any": [
+          "bbpd_data_clock_lead_lag",
+          "paired_edge_response"
+        ]
+      },
+      "text": [
+        "For bang-bang/data-edge phase detectors, compare recent data-edge time against the nearby clock-edge time; do not treat data as a static logic input.",
+        "When the data edge leads the clock edge within the public checking window, emit a bounded UP pulse; when it lags, emit a bounded DN pulse.",
+        "Keep independent held UP and DN states and clear each pulse after a finite duration so the two outputs remain mostly non-overlapping.",
+        "Retimed data should update on clock edges from the sampled data level, while UP/DN pulses summarize the data/clock timing relationship.",
+        "Use top-level unconditional `@(cross())` event statements and drive UP/DN/retimed outputs from held targets with unconditional `transition()` contributions."
+      ]
+    },
+    {
+      "id": "pll_system_feedback_graph",
+      "title": "Preserve The PLL Feedback-Control-Lock Relation Graph",
+      "source": "docs/SYSTEM_CONTRACT_GRAPHS.json; ../veriloga-skills/veriloga/references/categories/pll-clock.md",
+      "priority": 36,
+      "match": {
+        "repair_family_any": [
+          "pll-dco-counter-feedback-loop",
+          "prompt-spec:ratio_edge_window",
+          "prompt-spec:ratio_hop_window",
+          "prompt-spec:lock_after_ratio_stable",
+          "prompt-spec:control_to_frequency_step"
+        ],
+        "prompt_template_any": [
+          "ratio_edge_window",
+          "ratio_hop_window",
+          "lock_after_ratio_stable",
+          "control_to_frequency_step",
+          "timer_future_event_liveness"
+        ]
+      },
+      "text": [
+        "Repair PLL tasks as one coupled system: reference edges, DCO/oscillator edges, feedback divider edges, control movement, and lock assertion must all describe the same loop.",
+        "Preserve the public parameter and port interface exactly; derive private helper names from public parameters instead of replacing them.",
+        "Generate one oscillator/DCO cadence state, derive feedback from a divider/counter on that cadence, and compare feedback against reference edges.",
+        "Update the control monitor from phase/frequency error and tie oscillator cadence to that same control state; do not make `vctrl_mon` a cosmetic moving signal.",
+        "Assert lock only after the late-window reference/feedback ratio is stable; on ratio hop or frequency step, allow lock to drop and reacquire after the new relation settles.",
+        "Avoid independent shortcuts such as a free-running feedback timer plus forced lock. Those can satisfy one observable while breaking the system relation."
+      ]
+    },
+    {
+      "id": "dwa_system_rotating_window_graph",
+      "title": "Preserve The DWA Pointer-Window-Enable Relation Graph",
+      "source": "docs/BEHAVIOR_CONTRACT_TEMPLATES.md; ../veriloga-skills/veriloga/references/categories/dac.md",
+      "priority": 34,
+      "match": {
+        "repair_family_any": [
+          "dwa-pointer-thermometer-mask",
+          "prompt-spec:onehot_no_overlap"
+        ],
+        "prompt_template_any": [
+          "onehot_no_overlap",
+          "thermometer_dac_code_to_output_span"
+        ]
+      },
+      "text": [
+        "Treat DWA as a state relation between sampled input code, pointer state, selected cell window, and scalar observable bits.",
+        "Keep one integer pointer as the only source of truth. Initialize it from reset/parameter state, then update it once per valid clock edge.",
+        "Decode the sampled input code into an active-cell count, clamp it to the cell array size, and form the complete cell-enable mask before driving any output.",
+        "For wraparound, split the contiguous window across the array boundary using modulo arithmetic. For no-overlap, advance the pointer so consecutive selected sets do not reuse cells.",
+        "Drive `ptr_*` as a one-hot view of the held pointer and `cell_en_*` as the held selected mask; expose scalar nodes with stable names for every bit.",
+        "Do not repair DWA by only changing save aliases or by independently toggling cell enables. The pointer, active count, wrap behavior, and no-overlap rule must stay coupled."
+      ]
+    },
+    {
+      "id": "pfd_bbpd_system_edge_pulse_graph",
+      "title": "Preserve The Edge-Order To UP/DN Pulse Relation",
+      "source": "../veriloga-skills/veriloga/references/categories/pll-clock.md",
+      "priority": 28,
+      "match": {
+        "repair_family_any": [
+          "pfd-latched-pulse-delayed-clear",
+          "pfd-windowed-latched-pulse-symmetry",
+          "bbpd-data-clock-lead-lag",
+          "prompt-spec:paired_edge_response",
+          "prompt-spec:bbpd_data_clock_lead_lag",
+          "prompt-spec:pulse_non_overlap"
+        ],
+        "prompt_template_any": [
+          "paired_edge_response",
+          "bbpd_data_clock_lead_lag",
+          "pulse_non_overlap",
+          "pulse_width_window"
+        ]
+      },
+      "text": [
+        "Repair PFD/BBPD tasks by preserving the mapping from two input edge streams to finite UP/DN pulses.",
+        "Record recent edge times or latch states for both sides. The leading side determines which pulse is emitted; the trailing side clears or bounds the response.",
+        "Keep UP and DN as independent held states, then clear them after a finite delay so pulses are visible but mostly non-overlapping.",
+        "For BBPD, data is an edge stream relative to the clock, not a static logic input. Retimed data and UP/DN pulses should come from the same sampled edge-order relation.",
+        "Keep all `@(cross())` event controls unconditional in the analog block and drive outputs with unconditional `transition()` contributions from held states."
+      ]
+    },
+    {
+      "id": "adc_dac_system_quantize_reconstruct_graph",
+      "title": "Preserve The ADC Code And DAC Reconstruction Relation",
+      "source": "docs/SYSTEM_CONTRACT_GRAPHS.json; ../veriloga-skills/veriloga/references/categories/adc-sar.md; ../veriloga-skills/veriloga/references/categories/dac.md",
+      "priority": 30,
+      "match": {
+        "repair_family_any": [
+          "clocked-quantizer-code-update",
+          "segmented-dac-differential-weighted-sum",
+          "prompt-spec:quantized_reconstruction",
+          "prompt-spec:monotonic_code_vs_input",
+          "prompt-spec:differential_code_response",
+          "prompt-spec:sar_sequence"
+        ],
+        "prompt_template_any": [
+          "quantized_reconstruction",
+          "monotonic_code_vs_input",
+          "sample_after_clock",
+          "sar_sequence",
+          "differential_code_response",
+          "thermometer_dac_code_to_output_span"
+        ]
+      },
+      "text": [
+        "Treat converter repairs as a chain: sample/reset state, quantized code, internal trial/control code, and analog reconstruction must agree.",
+        "If code coverage fails, repair sampling/reset/code update first. If code coverage passes but output span fails, preserve the code path and repair code-to-output decoding.",
+        "Use one held integer code or trial code as the source of truth for all public code-bit outputs and DAC/reconstruction targets.",
+        "For SAR/CDAC/calibration cases, make the trial/control bits move during the sequence, then freeze the final state and assert ready/settled only after completion.",
+        "For differential DAC outputs, compute one differential signal from the decoded code and drive positive/negative outputs with opposite polarity around common mode.",
+        "Do not make `vout` track raw `vin` continuously when the prompt asks for quantized reconstruction; the analog output should follow the same code that drives the bits."
+      ]
+    },
+    {
+      "id": "serializer_system_load_shift_frame_graph",
+      "title": "Preserve The Serializer Load-Shift-Frame Relation",
+      "source": "../veriloga-skills/veriloga/references/categories/digital-logic.md",
+      "priority": 24,
+      "match": {
+        "repair_family_any": [
+          "sequence-frame-alignment",
+          "prompt-spec:sequence_alignment"
+        ],
+        "prompt_template_any": [
+          "sequence_alignment"
+        ]
+      },
+      "text": [
+        "Treat serializer tasks as a state machine, not as independent toggles on `sout` and `frame`.",
+        "Latch the parallel input word only on the specified load event, then shift exactly one bit per valid clock edge.",
+        "Keep a bit index and a held shift register as the source of truth. The serialized output should come from the current index before the index advances.",
+        "Assert the frame marker only for the first serialized bit of each loaded word, then clear it for the remaining bits.",
+        "Preserve scalar observable names and drive `sout`/`frame` from held targets with unconditional `transition()` contributions."
+      ]
+    }
+  ]
+}

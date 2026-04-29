@@ -1,0 +1,41 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dac_ideal_4b (din, vdd, vss, rst_n, vout);
+    input [3:0] din;
+    input vdd, vss, rst_n;
+    output vout;
+    electrical [3:0] din;
+    electrical vdd, vss, rst_n;
+    electrical vout;
+
+    parameter real tr = 10p from (0:inf);
+    parameter real tf = 10p from (0:inf);
+    parameter real vth = 0.45 from (0:inf);
+
+    integer code;
+    real vout_val;
+    real vdd_val, vss_val;
+    real rst_val;
+
+    analog begin
+        vdd_val = V(vdd);
+        vss_val = V(vss);
+        rst_val = V(rst_n);
+
+        // Read digital inputs as binary values
+        code = 0;
+        if (V(din[3]) > vth) code = code + 8;
+        if (V(din[2]) > vth) code = code + 4;
+        if (V(din[1]) > vth) code = code + 2;
+        if (V(din[0]) > vth) code = code + 1;
+
+        if (rst_val < vth) begin
+            vout_val = vss_val;
+        end else begin
+            vout_val = vss_val + (code / 16.0) * (vdd_val - vss_val);
+        end
+
+        V(vout) <+ transition(vout_val, 0, tr, tf);
+    end
+endmodule

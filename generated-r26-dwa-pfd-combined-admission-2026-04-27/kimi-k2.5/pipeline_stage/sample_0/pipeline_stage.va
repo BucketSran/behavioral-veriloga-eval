@@ -1,0 +1,73 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pipeline_stage(VDD, VSS, PHI1, PHI2, VIN, VREF, VRES, D1, D0);
+    inout electrical VDD, VSS;
+    input electrical PHI1, PHI2, VIN, VREF;
+    output electrical VRES, D1, D0;
+
+    parameter real vth = 0.5 from (0:1);
+    parameter real tr = 1n from (0:inf);
+    parameter real tf = 1n from (0:inf);
+    parameter real td = 0 from [0:inf);
+
+    real vin_sample;
+    real vref_val;
+    real vres_val;
+    real d1_val;
+    real d0_val;
+    real vdd_val;
+    real vss_val;
+    integer state;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+            vin_sample = 0.0;
+            vres_val = 0.0;
+            d1_val = 0.0;
+            d0_val = 0.0;
+        end
+
+        vdd_val = V(VDD);
+        vss_val = V(VSS);
+        vref_val = V(VREF);
+
+        @(cross(V(PHI1) - vth, 1)) begin
+            state = 1;
+            vin_sample = V(VIN);
+        end
+
+        @(cross(V(PHI2) - vth, 1)) begin
+            state = 2;
+            real vref_div4;
+            vref_div4 = vref_val / 4.0;
+
+            if (vin_sample > vref_div4) begin
+                d1_val = vdd_val;
+                d0_val = vss_val;
+                vres_val = 2.0 * vin_sample - vref_val;
+            end else if (vin_sample < -vref_div4) begin
+                d1_val = vss_val;
+                d0_val = vdd_val;
+                vres_val = 2.0 * vin_sample + vref_val;
+            end else begin
+                d1_val = vss_val;
+                d0_val = vss_val;
+                vres_val = 2.0 * vin_sample;
+            end
+        end
+
+        @(cross(V(PHI1) - vth, -1)) begin
+            state = 0;
+        end
+
+        @(cross(V(PHI2) - vth, -1)) begin
+            state = 0;
+        end
+
+        V(VRES) <+ transition(vres_val, td, tr, tf);
+        V(D1) <+ transition(d1_val, td, tr, tf);
+        V(D0) <+ transition(d0_val, td, tr, tf);
+    end
+endmodule

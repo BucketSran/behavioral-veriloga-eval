@@ -1,0 +1,89 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bbpd_ref (data, clk, retimed_data, up, down);
+    input data;
+    input clk;
+    input retimed_data;
+    output up;
+    output down;
+    electrical data, clk, retimed_data, up, down;
+
+    parameter real vth = 0.9 from (0:inf);
+    parameter real vhi = 1.8 from (0:inf);
+    parameter real vlo = 0.0 from [0:inf);
+    parameter real tr = 10p from (0:inf);
+    parameter real tf = 10p from (0:inf);
+    parameter real pulse_width = 500p from (0:inf);
+
+    integer data_edge_detected;
+    integer clk_was_high;
+    integer retimed_was_high;
+    real up_target;
+    real down_target;
+    real up_release_time;
+    real down_release_time;
+
+    analog begin
+        @(initial_step) begin
+            data_edge_detected = 0;
+            clk_was_high = 0;
+            retimed_was_high = 0;
+            up_target = vlo;
+            down_target = vlo;
+            up_release_time = 0;
+            down_release_time = 0;
+        end
+
+        // Detect rising edge on data - latch the phase relationship
+        @(cross(V(data) - vth, 1)) begin
+            data_edge_detected = 1;
+            // Sample clk and retimed_data at data edge
+            if (V(clk) > vth) begin
+                clk_was_high = 1;
+            end
+            else begin
+                clk_was_high = 0;
+            end
+            if (V(retimed_data) > vth) begin
+                retimed_was_high = 1;
+            end
+            else begin
+                retimed_was_high = 0;
+            end
+        end
+
+        // Detect falling edge on data - clear edge detect
+        @(cross(V(data) - vth, -1)) begin
+            data_edge_detected = 0;
+        end
+
+        // Generate UP pulse if data leads (clk low when data rises)
+        if (data_edge_detected && clk_was_high == 0) begin
+            up_target = vhi;
+            up_release_time = $abstime + pulse_width;
+            data_edge_detected = 0;  // Clear after generating pulse
+        end
+
+        // Generate DOWN pulse if data lags (clk high when data rises)
+        if (data_edge_detected && clk_was_high == 1) begin
+            down_target = vhi;
+            down_release_time = $abstime + pulse_width;
+            data_edge_detected = 0;  // Clear after generating pulse
+        end
+
+        // Release UP pulse after pulse_width
+        @(timer(up_release_time)) begin
+            up_target = vlo;
+        end
+
+        // Release DOWN pulse after pulse_width
+        @(timer(down_release_time)) begin
+            down_target = vlo;
+        end
+
+        // Unconditional transition contributions
+        V(up) <+ transition(up_target, 0, tr, tf);
+        V(down) <+ transition(down_target, 0, tr, tf);
+    end
+endmodule

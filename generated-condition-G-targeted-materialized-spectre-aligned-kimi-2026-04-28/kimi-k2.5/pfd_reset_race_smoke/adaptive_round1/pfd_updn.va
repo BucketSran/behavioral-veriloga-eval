@@ -1,0 +1,82 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pfd_updn (VDD, VSS, REF, DIV, UP, DN);
+    inout VDD, VSS;
+    input REF, DIV;
+    output UP, DN;
+    electrical VDD, VSS, REF, DIV, UP, DN;
+
+    parameter real vth = 0.5 from (0:inf);
+    parameter real tr = 100p from (0:inf);
+    parameter real tf = 100p from (0:inf);
+    parameter real td = 0 from [0:inf);
+    parameter real pulse_width = 2n from (0:inf);
+
+    integer up_state, dn_state;
+    real up_release_time, dn_release_time;
+    real vhi, vlo;
+
+    analog begin
+        @(initial_step) begin
+            up_state = 0;
+            dn_state = 0;
+            up_release_time = 0;
+            dn_release_time = 0;
+        end
+
+        // Detect rising edge of REF
+        @(cross(V(REF) - vth, 1)) begin
+            if (up_state == 0 && dn_state == 0) begin
+                // REF arrives first: assert UP, schedule release
+                up_state = 1;
+                up_release_time = $abstime + pulse_width;
+            end
+            else if (up_state == 0 && dn_state == 1) begin
+                // REF arrives while DN is high: reset both (DIV was first)
+                up_state = 0;
+                dn_state = 0;
+                dn_release_time = 0;
+            end
+            // else up_state == 1: already up, ignore
+        end
+
+        // Detect rising edge of DIV
+        @(cross(V(DIV) - vth, 1)) begin
+            if (up_state == 0 && dn_state == 0) begin
+                // DIV arrives first: assert DN, schedule release
+                dn_state = 1;
+                dn_release_time = $abstime + pulse_width;
+            end
+            else if (up_state == 1 && dn_state == 0) begin
+                // DIV arrives while UP is high: reset both (REF was first)
+                up_state = 0;
+                dn_state = 0;
+                up_release_time = 0;
+            end
+            // else dn_state == 1: already dn, ignore
+        end
+
+        // Timer-based release for UP pulse
+        @(timer(up_release_time)) begin
+            if (up_state == 1) begin
+                up_state = 0;
+            end
+        end
+
+        // Timer-based release for DN pulse
+        @(timer(dn_release_time)) begin
+            if (dn_state == 1) begin
+                dn_state = 0;
+            end
+        end
+
+        // Output voltage levels based on VDD/VSS
+        vhi = V(VDD);
+        vlo = V(VSS);
+
+        // Drive outputs with transition
+        V(UP) <+ transition(up_state ? vhi : vlo, td, tr, tf);
+        V(DN) <+ transition(dn_state ? vhi : vlo, td, tr, tf);
+    end
+endmodule

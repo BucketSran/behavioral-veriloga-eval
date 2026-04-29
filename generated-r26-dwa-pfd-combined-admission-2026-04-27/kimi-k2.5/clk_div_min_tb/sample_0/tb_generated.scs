@@ -1,0 +1,24 @@
+simulator lang=spectre
+global 0
+
+// Power supplies
+Vvdd (VDD 0) vsource dc=0.9
+Vvss (VSS 0) vsource dc=0
+
+// Input clock stimulus (100MHz, 50% duty cycle)
+Vclk (CLK 0) vsource type=pulse val0=0 val1=0.9 period=10n rise=100p fall=100p width=5n
+
+// Reset stimulus (active low, release after initial reset)
+Vrst (RST_N 0) vsource type=pwl wave=[0n 0 2n 0 2.1n 0.9]
+
+// DUT instantiation by position
+XDUT (VDD, VSS, CLK, RST_N, CLK_OUT) clk_div_min
+
+// Transient analysis
+tran tran stop=24n maxstep=20p
+
+// Explicit save
+save CLK RST_N CLK_OUT
+
+// AHDL include last
+ahdl_include "clk_div_min.va"

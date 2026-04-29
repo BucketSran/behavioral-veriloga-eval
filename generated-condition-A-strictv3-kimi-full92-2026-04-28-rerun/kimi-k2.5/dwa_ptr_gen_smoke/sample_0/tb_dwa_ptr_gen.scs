@@ -1,0 +1,66 @@
+// tb_dwa_ptr_gen.scs - Minimal EVAS-compatible testbench for DWA pointer generator
+
+// Include Verilog-A modules
+ahdl_include "v2b_4b.va"
+ahdl_include "dwa_ptr_gen.va"
+
+// Supply and ground
+VDD (vdd 0) vsource dc=0.9
+VSS (vss 0) vsource dc=0
+
+// Clock generation - 100 MHz (10ns period, 5ns high, 5ns low)
+// Using pulse with rise/fall times
+VCLK (clk_i 0) vsource type=pulse val0=0 val1=0.9 period=10n rise=0.1n fall=0.1n width=4.8n
+
+// Reset - active low, deasserts at 15ns
+VRST (rst_ni 0) vsource type=pulse val0=0 val1=0.9 period=200n rise=0.1n fall=0.1n width=180n delay=15n
+
+// Input code stimulus - piecewise linear to exercise pointer movement
+// Using v2b_4b converter for clean digital levels
+VIN_CODE (vin_code 0) vsource type=pwl wave=[0n 0.0 \
+                                            20n 0.0 \
+                                            25n 0.05625 \
+                                            30n 0.1125 \
+                                            35n 0.16875 \
+                                            40n 0.225 \
+                                            45n 0.28125 \
+                                            50n 0.3375 \
+                                            55n 0.39375 \
+                                            60n 0.45 \
+                                            65n 0.50625 \
+                                            70n 0.5625 \
+                                            75n 0.61875 \
+                                            80n 0.675 \
+                                            85n 0.73125 \
+                                            90n 0.7875 \
+                                            95n 0.84375 \
+                                            100n 0.0]
+
+// 4-bit ADC to convert analog code to digital
+I_v2b (vin_code code_3 code_2 code_1 code_0) v2b_4b vdd=0.9 vth=0.45
+
+// DWA pointer generator DUT - scalar port connection
+I_dwa (clk_i rst_ni code_3 code_2 code_1 code_0 \
+       cell_en_15 cell_en_14 cell_en_13 cell_en_12 \
+       cell_en_11 cell_en_10 cell_en_9 cell_en_8 \
+       cell_en_7 cell_en_6 cell_en_5 cell_en_4 \
+       cell_en_3 cell_en_2 cell_en_1 cell_en_0 \
+       ptr_15 ptr_14 ptr_13 ptr_12 \
+       ptr_11 ptr_10 ptr_9 ptr_8 \
+       ptr_7 ptr_6 ptr_5 ptr_4 \
+       ptr_3 ptr_2 ptr_1 ptr_0) dwa_ptr_gen vdd=0.9 vth=0.45 ptr_init=0
+
+// Save statements for required observable signals
+save clk_i
+save rst_ni
+save cell_en_15 cell_en_14 cell_en_13 cell_en_12
+save cell_en_11 cell_en_10 cell_en_9 cell_en_8
+save cell_en_7 cell_en_6 cell_en_5 cell_en_4
+save cell_en_3 cell_en_2 cell_en_1 cell_en_0
+save ptr_15 ptr_14 ptr_13 ptr_12
+save ptr_11 ptr_10 ptr_9 ptr_8
+save ptr_7 ptr_6 ptr_5 ptr_4
+save ptr_3 ptr_2 ptr_1 ptr_0
+
+// Transient analysis per public evaluation contract
+tran tran stop=100n maxstep=2n

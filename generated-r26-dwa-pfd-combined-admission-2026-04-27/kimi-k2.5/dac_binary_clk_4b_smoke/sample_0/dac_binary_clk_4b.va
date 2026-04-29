@@ -1,0 +1,37 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dac_binary_clk_4b(DIN3, DIN2, DIN1, DIN0, CLK, AOUT);
+    input DIN3, DIN2, DIN1, DIN0, CLK;
+    output AOUT;
+    electrical DIN3, DIN2, DIN1, DIN0, CLK, AOUT;
+
+    parameter real vref = 0.9 from (0:inf);
+    parameter real vth = 0.45 from (0:inf);
+    parameter real tr = 100p from (0:inf);
+    parameter real tf = 100p from (0:inf);
+
+    integer code;
+    real aout_val;
+    real aout_target;
+
+    analog begin
+        @(initial_step) begin
+            code = 0;
+            aout_val = 0.0;
+            aout_target = 0.0;
+        end
+
+        @(cross(V(CLK) - vth, 1)) begin
+            code = 0;
+            if (V(DIN3) > vth) code = code + 8;
+            if (V(DIN2) > vth) code = code + 4;
+            if (V(DIN1) > vth) code = code + 2;
+            if (V(DIN0) > vth) code = code + 1;
+            aout_target = (code * vref) / 16.0;
+        end
+
+        aout_val = transition(aout_target, 0, tr, tf);
+        V(AOUT) <+ aout_val;
+    end
+endmodule

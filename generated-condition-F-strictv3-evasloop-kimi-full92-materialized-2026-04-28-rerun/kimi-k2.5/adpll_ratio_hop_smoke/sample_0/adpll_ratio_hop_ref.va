@@ -1,0 +1,147 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module adpll_ratio_hop_ref (VDD, VSS, ref_clk, ratio_ctrl, fb_clk, vout, vctrl_mon, lock);
+    inout VDD, VSS;
+    input ref_clk, ratio_ctrl;
+    output fb_clk, vout, vctrl_mon, lock;
+    electrical VDD, VSS, ref_clk, ratio_ctrl, fb_clk, vout, vctrl_mon, lock;
+
+    // Parameters
+    parameter real vdd_level = 1.8;
+    parameter real vss_level = 0.0;
+    parameter real vth = 0.9;
+    parameter real tdel = 1n;
+    parameter real tr = 0.1n;
+    parameter real tf = 0.1n;
+    parameter real dco_fmin = 100e6;
+    parameter real dco_fmax = 2e9;
+    parameter real kp = 0.1;
+    parameter real lock_threshold = 0.05;
+    parameter integer lock_streak_req = 5;
+    parameter real tstart = 100n;
+
+    // State variables
+    integer ratio;
+    integer dco_code;
+    real dco_period;
+    real ref_period;
+    real phase_error;
+    real vctrl_norm;
+    integer lock_streak;
+    integer locked;
+    integer ref_edge_count;
+    integer fb_edge_count;
+    real last_ref_time;
+    real last_fb_time;
+    real last_dco_toggle_time;
+    integer dco_state;
+    integer fb_state;
+    integer fb_div_count;
+    real ratio_real;
+    integer initialized;
+
+    analog begin
+        @(initial_step) begin
+            ratio = 4;
+            dco_code = 512;
+            dco_period = 1.0 / (dco_fmin + (dco_fmax - dco_fmin) * 0.5);
+            ref_period = 10n;
+            phase_error = 0.0;
+            vctrl_norm = 0.5;
+            lock_streak = 0;
+            locked = 0;
+            ref_edge_count = 0;
+            fb_edge_count = 0;
+            last_ref_time = 0.0;
+            last_fb_time = 0.0;
+            last_dco_toggle_time = 0.0;
+            dco_state = 0;
+            fb_state = 0;
+            fb_div_count = 0;
+            ratio_real = 4.0;
+            initialized = 0;
+        end
+
+        // Sample ratio_ctrl and compute integer ratio (2 to 16)
+        ratio_real = V(ratio_ctrl);
+        if (ratio_real < 2.0) ratio_real = 2.0;
+        if (ratio_real > 16.0) ratio_real = 16.0;
+        ratio = $floor(ratio_real + 0.5);
+        if (ratio < 2) ratio = 2;
+        if (ratio > 16) ratio = 16;
+
+        // Detect reference clock edges
+        @(cross(V(ref_clk) - vth, 1)) begin
+            ref_edge_count = ref_edge_count + 1;
+            if (ref_edge_count > 1 && $abstime > tstart) begin
+                ref_period = $abstime - last_ref_time;
+            end
+            last_ref_time = $abstime;
+        end
+
+        // DCO: timer-driven oscillator based on dco_period
+        @(timer(last_dco_toggle_time + dco_period/2.0)) begin
+            dco_state = !dco_state;
+            last_dco_toggle_time = $abstime;
+        end
+
+        // Feedback divider: count DCO edges and generate fb_clk
+        // We detect DCO output transitions via timer alignment
+        @(timer(last_dco_toggle_time)) begin
+            fb_div_count = fb_div_count + 1;
+            if (fb_div_count >= ratio) begin
+                fb_div_count = 0;
+                fb_state = !fb_state;
+                fb_edge_count = fb_edge_count + 1;
+                if (fb_edge_count > 1 && $abstime > tstart) begin
+                    // Phase/frequency detector: compare fb edge to expected ref edge
+                    real expected_fb_period;
+                    expected_fb_period = ref_period * ratio;
+                    real actual_fb_period;
+                    if (last_fb_time > 0) begin
+                        actual_fb_period = $abstime - last_fb_time;
+                        real freq_error;
+                        freq_error = (actual_fb_period - expected_fb_period) / expected_fb_period;
+
+                        // Update DCO code with proportional control
+                        dco_code = dco_code - $floor(kp * freq_error * 1000.0);
+                        if (dco_code < 0) dco_code = 0;
+                        if (dco_code > 1023) dco_code = 1023;
+
+                        // Update DCO frequency
+                        vctrl_norm = dco_code / 1023.0;
+                        real dco_freq;
+                        dco_freq = dco_fmin + (dco_fmax - dco_fmin) * vctrl_norm;
+                        dco_period = 1.0 / dco_freq;
+
+                        // Lock detection based on frequency error
+                        if ($abs(freq_error) < lock_threshold) begin
+                            lock_streak = lock_streak + 1;
+                            if (lock_streak >= lock_streak_req) locked = 1;
+                        end else begin
+                            lock_streak = 0;
+                            locked = 0;
+                        end
+                    end
+                end
+                last_fb_time = $abstime;
+            end
+        end
+
+        // Initialize DCO at startup
+        if (!initialized && $abstime > tstart) begin
+            initialized = 1;
+            last_dco_toggle_time = $abstime;
+            real init_freq;
+            init_freq = dco_fmin + (dco_fmax - dco_fmin) * 0.5;
+            dco_period = 1.0 / init_freq;
+        end
+
+        // Output assignments with transition
+        V(vout) <+ transition(dco_state ? vdd_level : vss_level, tdel, tr, tf);
+        V(fb_clk) <+ transition(fb_state ? vdd_level : vss_level, tdel, tr, tf);
+        V(vctrl_mon) <+ transition(vctrl_norm * vdd_level, tdel, tr, tf);
+        V(lock) <+ transition(locked ? vdd_level : vss_level, tdel, tr, tf);
+    end
+endmodule

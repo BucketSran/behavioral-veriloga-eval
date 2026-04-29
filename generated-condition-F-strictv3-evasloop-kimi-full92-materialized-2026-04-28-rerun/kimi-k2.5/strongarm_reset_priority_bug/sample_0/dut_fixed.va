@@ -1,0 +1,45 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module strongarm_reset_priority_fixed(vdd, vss, clk, rst, inp, inn, outp, outn);
+    inout vdd, vss;
+    input clk, rst, inp, inn;
+    output outp, outn;
+    electrical vdd, vss, clk, rst, inp, inn, outp, outn;
+
+    parameter real vth = 0.45;
+    parameter real trf = 20p;
+
+    integer outp_state, outn_state;
+
+    analog begin
+        @(initial_step) begin
+            outp_state = 0;
+            outn_state = 0;
+        end
+
+        // Reset has highest priority: when rst is high, force both outputs low
+        // Check reset condition on every evaluation
+        if (V(rst, vss) > vth) begin
+            outp_state = 0;
+            outn_state = 0;
+        end
+
+        // Clock edge detection at top level - reset check inside event body
+        @(cross(V(clk, vss) - vth, +1)) begin
+            if (V(rst, vss) <= vth) begin
+                // Only process comparison when reset is not active
+                if (V(inp, vss) > V(inn, vss)) begin
+                    outp_state = 1;
+                    outn_state = 0;
+                end else begin
+                    outp_state = 0;
+                    outn_state = 1;
+                end
+            end
+        end
+
+        V(outp, vss) <+ V(vdd, vss) * transition(outp_state ? 1.0 : 0.0, 0, trf, trf);
+        V(outn, vss) <+ V(vdd, vss) * transition(outn_state ? 1.0 : 0.0, 0, trf, trf);
+    end
+endmodule

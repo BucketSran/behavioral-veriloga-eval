@@ -1,0 +1,24 @@
+simulator lang=spectre
+global 0
+
+// Supply voltages
+VDD (vdd 0) vsource dc=0.9
+VSS (vss 0) vsource dc=0
+
+// Clock: 2 GHz (500 ps period), run for full simulation
+VCLK (clk 0) vsource type=pulse val0=0 val1=0.9 period=500p rise=10p fall=10p width=240p
+
+// Enable: burst from 10ns to 50ns, gap from 50ns to 70ns, burst from 70ns to 95ns
+VEN (enable 0) vsource type=pwl wave=[0n 0 10n 0 10.001n 0.9 50n 0.9 50.001n 0 70n 0 70.001n 0.9 95n 0.9]
+
+// DUT instance
+XDUT (vdd vss clk enable sout_p sout_n) nrz_prbs_jitter_ref
+
+// Transient analysis
+tran tran stop=95n maxstep=20p
+
+// Save public waveforms
+save clk enable sout_p sout_n
+
+// Include DUT Verilog-A
+ahdl_include "nrz_prbs_jitter_ref.va"

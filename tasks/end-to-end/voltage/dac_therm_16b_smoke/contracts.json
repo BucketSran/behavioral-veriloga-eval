@@ -1,0 +1,29 @@
+{
+  "task_id": "dac_therm_16b_smoke",
+  "contracts": [
+    {
+      "name": "csv_has_observables",
+      "type": "signal_present",
+      "signals": ["time", "rst_n", "d15", "d14", "d13", "d12", "d11", "d10", "d9", "d8", "d7", "d6", "d5", "d4", "d3", "d2", "d1", "d0", "vout"],
+      "diagnostic_hint": "Thermometer input bits and vout must be saved.",
+      "repair_family": "runtime-interface-minimal-harness"
+    },
+    {
+      "name": "thermometer_code_changes",
+      "type": "code_coverage",
+      "bits": ["d15", "d14", "d13", "d12", "d11", "d10", "d9", "d8", "d7", "d6", "d5", "d4", "d3", "d2", "d1", "d0"],
+      "threshold": 0.45,
+      "min_unique": 4,
+      "diagnostic_hint": "Thermometer stimulus changes are present if this passes.",
+      "repair_family": "drive-output-target-and-transition"
+    },
+    {
+      "name": "analog_output_moves",
+      "type": "output_span",
+      "signal": "vout",
+      "min_span": 0.1,
+      "diagnostic_hint": "DAC output is stuck despite thermometer input activity.",
+      "repair_family": "drive-output-target-and-transition"
+    }
+  ]
+}

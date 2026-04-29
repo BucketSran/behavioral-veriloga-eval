@@ -1,0 +1,41 @@
+simulator lang=spectre
+global 0
+
+// Parameters
+parameters vdd=0.9 vss=0
+
+// Power supplies
+Vdd (vdd 0) vsource dc=vdd
+Vss (vss 0) vsource dc=vss
+
+// Clock: 10ns period, 50% duty cycle, 1ns rise/fall
+// Need 16 codes + 1 extra edge = 17 rising edges minimum
+// 160ns / 10ns = 16 periods, gives 16 rising edges
+// Use 5ns period to ensure enough edges: 160ns / 5ns = 32 periods
+Vclk (clk 0) vsource type=pulse val0=0 val1=vdd period=5n rise=100p fall=100p width=2.5n
+
+// 4-bit binary counter driving d3:d0
+// d0: LSB, toggles every clock (period=10ns)
+// d1: toggles every 2 clocks (period=20ns)
+// d2: toggles every 4 clocks (period=40ns)
+// d3: MSB, toggles every 8 clocks (period=80ns)
+
+Vd0 (d0 0) vsource type=pulse val0=0 val1=vdd period=10n rise=100p fall=100p width=5n
+Vd1 (d1 0) vsource type=pulse val0=0 val1=vdd period=20n rise=100p fall=100p width=10n
+Vd2 (d2 0) vsource type=pulse val0=0 val1=vdd period=40n rise=100p fall=100p width=20n
+Vd3 (d3 0) vsource type=pulse val0=0 val1=vdd period=80n rise=100p fall=100p width=40n
+
+// Transient analysis
+tran tran stop=160n maxstep=100p errpreset=conservative
+
+// Save statements for public waveforms
+save clk
+save d3
+save d2
+save d1
+save d0
+save vout
+
+// DUT instance
+ahdl_include "segmented_dac_glitch_ref.va"
+XDUT (vdd vss clk d3 d2 d1 d0 vout) segmented_dac_glitch_ref

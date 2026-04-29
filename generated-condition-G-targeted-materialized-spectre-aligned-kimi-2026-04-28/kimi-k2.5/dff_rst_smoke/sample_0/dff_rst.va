@@ -1,0 +1,41 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dff_rst (vdd, vss, d, clk, rst, q, qb);
+    inout vdd, vss;
+    input d, clk, rst;
+    output q, qb;
+    electrical vdd, vss, d, clk, rst, q, qb;
+
+    parameter real tedge = 10p from (0:inf);
+
+    integer state;
+    real vth;
+    real vhi;
+    real vlo;
+
+    analog begin
+        vhi = V(vdd) - V(vss);
+        vlo = 0.0;
+        vth = vhi / 2.0;
+
+        @(initial_step) begin
+            state = 0;
+        end
+
+        @(cross(V(clk) - vth, 1)) begin
+            if (V(rst) > vth) begin
+                state = 0;
+            end else begin
+                if (V(d) > vth) begin
+                    state = 1;
+                end else begin
+                    state = 0;
+                end
+            end
+        end
+
+        V(q) <+ transition(state * vhi, 0.0, tedge);
+        V(qb) <+ transition((1 - state) * vhi, 0.0, tedge);
+    end
+endmodule

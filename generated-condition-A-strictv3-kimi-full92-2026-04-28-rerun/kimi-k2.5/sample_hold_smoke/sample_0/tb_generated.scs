@@ -1,0 +1,28 @@
+// Sample-and-Hold Testbench
+// Minimal EVAS-compatible Spectre testbench
+
+ahdl_include "sample_hold.va"
+
+// Global nodes
+global vdd vss
+
+// Supply voltages
+Vvdd (vdd vss) vsource dc=1.8
+Vvss (vss 0) vsource dc=0
+
+// Input signal - varying analog input
+Vin (in vss) vsource type=sine freq=1e6 ampl=0.5 offset=0.9
+
+// Clock signal - 10MHz clock with 50% duty cycle
+Vclk (clk vss) vsource type=pulse val0=0 val1=1.8 period=100n rise=1n fall=1n width=49n
+
+// Device Under Test
+DUT (vdd vss in clk out) sample_hold vth=0.9 tedge=1n
+
+// Transient analysis
+tran tran stop=1u maxstep=2n
+
+// Save statements - plain scalar names as required
+save in
+save clk
+save out

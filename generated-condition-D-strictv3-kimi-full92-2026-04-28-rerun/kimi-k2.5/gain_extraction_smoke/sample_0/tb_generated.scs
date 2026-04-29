@@ -1,0 +1,32 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "vin_src.va"
+ahdl_include "lfsr.va"
+ahdl_include "dither_adder.va"
+ahdl_include "gain_amp_fixed.va"
+
+// Supply
+Vdd (vdd 0) vsource dc=0.9
+Vss (vss 0) vsource dc=0
+
+// Clock: 50 MHz, 20ns period
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=20n rise=1n fall=1n width=9n
+
+// Reset: active low, asserted for 100ns then released
+Vrst (rst_n 0) vsource type=pulse val0=0 val1=0.9 period=200u rise=1n fall=1n width=199.9u delay=100n
+
+// Enable: high after reset
+Ven (en 0) vsource type=pulse val0=0 val1=0.9 period=200u rise=1n fall=1n width=199.8u delay=200n
+
+// Signal path instances
+IVIN (clk rst_n vinp vinn) vin_src
+ILFSR (dpn vdd vss clk en rst_n) lfsr
+IDITH (vinp vinn dpn vdin_p vdin_n) dither_adder DITHER_AMP=0.014063
+IAMP (vdin_p vdin_n vamp_p vamp_n) gain_amp_fixed ACTUAL_GAIN=8.64
+
+// Save required waveforms
+save vinp vinn vamp_p vamp_n
+
+// Transient analysis
+tran tran stop=200u maxstep=8n

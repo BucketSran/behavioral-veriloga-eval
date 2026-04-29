@@ -1,0 +1,56 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module gray_counter_4b (vdd, vss, clk, en, rstb, g3, g2, g1, g0);
+    inout electrical vdd, vss;
+    input electrical clk, en, rstb;
+    output electrical g3, g2, g1, g0;
+
+    parameter real vth = 0.45;
+    parameter real tedge = 100p;
+
+    integer bin_count;
+    integer gray_code;
+    integer g3_val, g2_val, g1_val, g0_val;
+
+    analog begin
+        @(initial_step) begin
+            bin_count = 0;
+            gray_code = 0;
+            g3_val = 0;
+            g2_val = 0;
+            g1_val = 0;
+            g0_val = 0;
+        end
+
+        // Detect rising edge of clk
+        @(cross(V(clk) - vth, 1)) begin
+            if (V(rstb) < vth) begin
+                // Active-low reset
+                bin_count = 0;
+            end
+            else if (V(en) > vth) begin
+                // Increment binary counter (mod 16)
+                bin_count = bin_count + 1;
+                if (bin_count > 15) begin
+                    bin_count = 0;
+                end
+            end
+
+            // Convert binary to Gray code: gray = bin ^ (bin >> 1)
+            gray_code = bin_count ^ (bin_count >> 1);
+
+            // Extract individual bits
+            g3_val = (gray_code >> 3) & 1;
+            g2_val = (gray_code >> 2) & 1;
+            g1_val = (gray_code >> 1) & 1;
+            g0_val = gray_code & 1;
+        end
+
+        // Drive outputs with transition
+        V(g3) <+ transition(g3_val * V(vdd), 0, tedge);
+        V(g2) <+ transition(g2_val * V(vdd), 0, tedge);
+        V(g1) <+ transition(g1_val * V(vdd), 0, tedge);
+        V(g0) <+ transition(g0_val * V(vdd), 0, tedge);
+    end
+endmodule

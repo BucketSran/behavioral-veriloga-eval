@@ -1,0 +1,23 @@
+// Spectre testbench for final_step_file_metric_ref
+
+ahdl_include "final_step_file_metric_ref.va"
+
+// Supply voltages
+vsource vdd (VDD 0) vsource dc=1.0
+vsource vss (VSS 0) vsource dc=0.0
+
+// Reference signal - generate edges for counting
+// Create a pulse train with multiple edges
+vpulse ref_gen (ref 0) dc=0.0 val0=0.0 val1=1.0 \
+    period=10n rise=1n fall=1n width=4n \
+    delay=2n
+
+// Device Under Test
+final_step_file_metric_ref dut (VDD VSS ref metric_out)
+
+// Transient analysis
+tran tran stop=80n maxstep=20p errpreset=conservative
+
+// Save required signals for checker evaluation
+save ref
+save metric_out

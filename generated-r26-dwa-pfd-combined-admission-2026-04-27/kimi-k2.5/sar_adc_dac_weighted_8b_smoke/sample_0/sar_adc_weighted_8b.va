@@ -1,0 +1,56 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sar_adc_weighted_8b (vin, clks, rst_n, dout_7, dout_6, dout_5, dout_4, dout_3, dout_2, dout_1, dout_0);
+    electrical vin, clks, rst_n;
+    electrical dout_7, dout_6, dout_5, dout_4, dout_3, dout_2, dout_1, dout_0;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real tr = 1e-9;
+    parameter real tf = 1e-9;
+
+    integer code;
+    real vin_val;
+    real rst_val;
+    real bit0, bit1, bit2, bit3, bit4, bit5, bit6, bit7;
+
+    analog begin
+        @(initial_step) begin
+            code = 0;
+        end
+
+        @(cross(V(clks) - vth, +1)) begin
+            rst_val = V(rst_n);
+            if (rst_val >= vth) begin
+                vin_val = V(vin);
+                // Calculate code: floor(vin/vdd * 255), clipped to [0, 255]
+                code = floor(vin_val / vdd * 255.0);
+                if (code < 0) code = 0;
+                if (code > 255) code = 255;
+            end else begin
+                code = 0;
+            end
+        end
+
+        // Precompute bit values to avoid glitchy expressions in transition
+        bit0 = (code & 1) ? vdd : 0.0;
+        bit1 = ((code >> 1) & 1) ? vdd : 0.0;
+        bit2 = ((code >> 2) & 1) ? vdd : 0.0;
+        bit3 = ((code >> 3) & 1) ? vdd : 0.0;
+        bit4 = ((code >> 4) & 1) ? vdd : 0.0;
+        bit5 = ((code >> 5) & 1) ? vdd : 0.0;
+        bit6 = ((code >> 6) & 1) ? vdd : 0.0;
+        bit7 = ((code >> 7) & 1) ? vdd : 0.0;
+
+        // Drive output bits with transition
+        V(dout_0) <+ transition(bit0, 0, tr, tf);
+        V(dout_1) <+ transition(bit1, 0, tr, tf);
+        V(dout_2) <+ transition(bit2, 0, tr, tf);
+        V(dout_3) <+ transition(bit3, 0, tr, tf);
+        V(dout_4) <+ transition(bit4, 0, tr, tf);
+        V(dout_5) <+ transition(bit5, 0, tr, tf);
+        V(dout_6) <+ transition(bit6, 0, tr, tf);
+        V(dout_7) <+ transition(bit7, 0, tr, tf);
+    end
+endmodule

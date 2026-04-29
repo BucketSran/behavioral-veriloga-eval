@@ -1,0 +1,22 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "comparator.va"
+
+// Supply
+Vdd (vdd 0) vsource dc=1.8
+Vss (vss 0) vsource dc=0
+
+// Differential input stimulus: VINP ramps up while VINN ramps down
+// This creates a clear threshold crossing around 15ns
+Vinp (vinp 0) vsource type=pwl wave=[0n 0.0 10n 0.0 20n 1.8 30n 1.8]
+Vinn (vinn 0) vsource type=pwl wave=[0n 1.8 10n 1.8 20n 0.0 30n 0.0]
+
+// DUT instance
+XDUT (vdd vss vinp vinn out_p) comparator
+
+// Transient analysis
+tran tran stop=30n maxstep=1n
+
+// Save statements for required observables
+save vinp vinn out_p

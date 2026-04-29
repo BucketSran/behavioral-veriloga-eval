@@ -1,0 +1,17 @@
+// Continuous hysteresis comparator sweep
+simulator lang=spectre
+global 0
+
+Vvdd (vdd 0) vsource dc=0.9 type=dc
+Vgnd (gnd 0) vsource dc=0.0 type=dc
+
+Vvinp (vinp 0) vsource type=pwl wave=[0 0.44 40n 0.46 80n 0.44]
+Vvinn (vinn 0) vsource dc=0.45 type=dc
+
+// DUT (port order: VINN VINP OUTN OUTP VSS VDD)
+IDUT (vinn vinp out_n out_p gnd vdd) cmp_hysteresis vhys=10m tedge=50p
+
+tran tran stop=80n maxstep=100p
+save vinp vinn out_p out_n
+
+ahdl_include "./cmp_hysteresis.va"

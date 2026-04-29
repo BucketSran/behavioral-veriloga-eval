@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "dut.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0
+Vclk (advance 0) vsource type=pulse val0=0 val1=0.9 delay=0 rise=50p fall=50p width=0.45n period=1n
+Vrst (clear_n 0) vsource type=pwl wave=[ 0 0 2n 0 2.1n 0.9 120n 0.9 ]
+
+XDUT (advance clear_n vdd vss tick_out cnt0 cnt1 cnt2 cnt3) v2_counter_not_gray_code
+
+tran tran stop=120n maxstep=50p
+save advance clear_n tick_out cnt0 cnt1 cnt2 cnt3

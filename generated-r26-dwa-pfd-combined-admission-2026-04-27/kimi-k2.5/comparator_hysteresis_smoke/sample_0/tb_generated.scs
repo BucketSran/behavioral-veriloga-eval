@@ -1,0 +1,23 @@
+// cmp_hysteresis testbench
+// Drives differential input through both hysteresis thresholds
+
+ahdl_include "cmp_hysteresis.va"
+
+// Supply
+Vdd (vdd 0) vsource dc=0.9
+Vss (vss 0) vsource dc=0
+
+// Differential input stimulus
+// vinp ramps from 0 to 0.9V, vinn stays at 0.45V
+// This creates differential crossing of +/- vhys/2 thresholds
+Vinp (vinp 0) vsource type=pwl wave=[0 0 30n 0.9 70n 0.9 100n 0]
+Vinn (vinn 0) vsource dc=0.45
+
+// DUT instantiation - positional ports: vinn, vinp, out_n, out_p, vss, vdd
+DUT (vinn vinp out_n out_p vss vdd) cmp_hysteresis vhys=10e-3 tedge=50p
+
+// Save required signals
+save vinp vinn out_p out_n
+
+// Transient analysis
+tran tran stop=80n maxstep=100p

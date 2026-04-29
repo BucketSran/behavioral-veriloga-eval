@@ -1,0 +1,88 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module therm2bin_ref (therm_0, therm_1, therm_2, therm_3, therm_4,
+                      therm_5, therm_6, therm_7, therm_8, therm_9,
+                      therm_10, therm_11, therm_12, therm_13, therm_14,
+                      bin_0, bin_1, bin_2, bin_3);
+    input therm_0, therm_1, therm_2, therm_3, therm_4;
+    input therm_5, therm_6, therm_7, therm_8, therm_9;
+    input therm_10, therm_11, therm_12, therm_13, therm_14;
+    output bin_0, bin_1, bin_2, bin_3;
+    electrical therm_0, therm_1, therm_2, therm_3, therm_4;
+    electrical therm_5, therm_6, therm_7, therm_8, therm_9;
+    electrical therm_10, therm_11, therm_12, therm_13, therm_14;
+    electrical bin_0, bin_1, bin_2, bin_3;
+
+    parameter real vth = 0.5 from (0:inf);
+    parameter real vhi = 1.0 from (0:inf);
+    parameter real vlo = 0.0 from (-inf:inf);
+    parameter real tdel = 0 from [0:inf);
+    parameter real trise = 1n from (0:inf);
+    parameter real tfall = 1n from (0:inf);
+
+    integer therm[0:14];
+    integer binary;
+    integer i;
+    integer first_zero;
+    integer valid;
+
+    analog begin
+        // Sample thermometer inputs
+        therm[0] = (V(therm_0) > vth) ? 1 : 0;
+        therm[1] = (V(therm_1) > vth) ? 1 : 0;
+        therm[2] = (V(therm_2) > vth) ? 1 : 0;
+        therm[3] = (V(therm_3) > vth) ? 1 : 0;
+        therm[4] = (V(therm_4) > vth) ? 1 : 0;
+        therm[5] = (V(therm_5) > vth) ? 1 : 0;
+        therm[6] = (V(therm_6) > vth) ? 1 : 0;
+        therm[7] = (V(therm_7) > vth) ? 1 : 0;
+        therm[8] = (V(therm_8) > vth) ? 1 : 0;
+        therm[9] = (V(therm_9) > vth) ? 1 : 0;
+        therm[10] = (V(therm_10) > vth) ? 1 : 0;
+        therm[11] = (V(therm_11) > vth) ? 1 : 0;
+        therm[12] = (V(therm_12) > vth) ? 1 : 0;
+        therm[13] = (V(therm_13) > vth) ? 1 : 0;
+        therm[14] = (V(therm_14) > vth) ? 1 : 0;
+
+        // Find first zero (transition point)
+        // Valid thermometer: all 1s up to some point, then all 0s
+        // Bubble error: 0 followed by 1
+        first_zero = 15; // default: all ones (value 15)
+        valid = 1;
+
+        for (i = 0; i < 15; i = i + 1) begin
+            if (therm[i] == 0) begin
+                if (first_zero == 15) begin
+                    first_zero = i;
+                end
+            end else begin
+                // Found a 1 after we saw a 0 -> bubble error
+                if (first_zero != 15) begin
+                    valid = 0;
+                end
+            end
+        end
+
+        // Compute binary output
+        // first_zero gives the count of 1s (0 to 15)
+        // For 4-bit output, clamp to 0-15
+        if (valid == 0) begin
+            // Bubble error: use first_zero as best estimate (majority voting)
+            // This gracefully degrades by using the transition point found
+            binary = first_zero;
+            if (binary > 15) begin
+                binary = 15;
+            end
+        end else begin
+            binary = first_zero;
+        end
+
+        // Output binary as thermometer code on 4 bits
+        // bin_0 = LSB, bin_3 = MSB
+        V(bin_0) <+ transition(((binary & 1) != 0) ? vhi : vlo, tdel, trise, tfall);
+        V(bin_1) <+ transition(((binary & 2) != 0) ? vhi : vlo, tdel, trise, tfall);
+        V(bin_2) <+ transition(((binary & 4) != 0) ? vhi : vlo, tdel, trise, tfall);
+        V(bin_3) <+ transition(((binary & 8) != 0) ? vhi : vlo, tdel, trise, tfall);
+    end
+endmodule

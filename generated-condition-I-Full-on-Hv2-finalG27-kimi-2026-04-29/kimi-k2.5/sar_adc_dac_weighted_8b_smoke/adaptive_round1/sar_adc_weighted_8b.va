@@ -1,0 +1,70 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sar_adc_weighted_8b (vin, clks, rst_n, dout_7, dout_6, dout_5, dout_4, dout_3, dout_2, dout_1, dout_0);
+    input vin;
+    input clks;
+    input rst_n;
+    output dout_7;
+    output dout_6;
+    output dout_5;
+    output dout_4;
+    output dout_3;
+    output dout_2;
+    output dout_1;
+    output dout_0;
+    electrical vin;
+    electrical clks;
+    electrical rst_n;
+    electrical dout_7, dout_6, dout_5, dout_4, dout_3, dout_2, dout_1, dout_0;
+
+    parameter real vdd = 0.9 from (0:inf);
+    parameter real vth = 0.45 from (0:inf);
+    parameter real tdel = 0 from [0:inf);
+    parameter real tr = 1n from (0:inf);
+    parameter real tf = 1n from (0:inf);
+
+    integer code;
+    real vin_val;
+    integer rst_active;
+
+    analog begin
+        @(initial_step) begin
+            code = 0;
+            rst_active = 1;
+        end
+
+        @(cross(V(rst_n) - vth, -1)) begin
+            rst_active = 0;
+        end
+
+        @(cross(V(rst_n) - vth, +1)) begin
+            rst_active = 1;
+            code = 0;
+        end
+
+        @(cross(V(clks) - vth, +1)) begin
+            if (rst_active == 0) begin
+                vin_val = V(vin);
+                if (vin_val < 0) begin
+                    code = 0;
+                end else if (vin_val > vdd) begin
+                    code = 255;
+                end else begin
+                    code = (vin_val / vdd * 255.0);
+                    if (code < 0) code = 0;
+                    if (code > 255) code = 255;
+                end
+            end
+        end
+
+        V(dout_7) <+ transition((code >= 128) ? vdd : 0.0, tdel, tr, tf);
+        V(dout_6) <+ transition(((code / 64) % 2 == 1) ? vdd : 0.0, tdel, tr, tf);
+        V(dout_5) <+ transition(((code / 32) % 2 == 1) ? vdd : 0.0, tdel, tr, tf);
+        V(dout_4) <+ transition(((code / 16) % 2 == 1) ? vdd : 0.0, tdel, tr, tf);
+        V(dout_3) <+ transition(((code / 8) % 2 == 1) ? vdd : 0.0, tdel, tr, tf);
+        V(dout_2) <+ transition(((code / 4) % 2 == 1) ? vdd : 0.0, tdel, tr, tf);
+        V(dout_1) <+ transition(((code / 2) % 2 == 1) ? vdd : 0.0, tdel, tr, tf);
+        V(dout_0) <+ transition((code % 2 == 1) ? vdd : 0.0, tdel, tr, tf);
+    end
+endmodule

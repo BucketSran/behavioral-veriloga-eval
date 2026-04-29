@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "bound_step_period_guard_ref.va"
+
+// Supply sources
+VDD (VDD 0) vsource dc=1.8
+VSS (VSS 0) vsource dc=0
+
+// DUT instance
+XDUT (VDD VSS guard_out phase_out) bound_step_period_guard_ref
+
+// Transient analysis with coarse step to test bound_step effectiveness
+tran tran stop=34n maxstep=20n errpreset=conservative
+
+// Save required public waveforms
+save guard_out phase_out

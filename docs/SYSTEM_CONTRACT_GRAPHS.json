@@ -1,0 +1,260 @@
+{
+  "version": 1,
+  "graphs": [
+    {
+      "id": "pll_feedback_lock_v0",
+      "description": "PLL relation graph for feedback generation, ratio closure, control monitor activity, and lock semantics.",
+      "nodes": {
+        "reference": {
+          "signals": ["ref_clk", "ref", "clk_ref", "refclk"],
+          "role": "input_clock"
+        },
+        "feedback": {
+          "signals": ["fb_clk", "fb", "clk_fb", "div"],
+          "role": "feedback_clock"
+        },
+        "dco": {
+          "signals": ["dco_clk", "vout", "osc_clk"],
+          "role": "oscillator_clock"
+        },
+        "control": {
+          "signals": ["vctrl_mon", "vctrl", "control_code", "ctrl_mon"],
+          "role": "loop_control_monitor"
+        },
+        "lock": {
+          "signals": ["lock", "locked"],
+          "role": "lock_indicator"
+        },
+        "ratio_control": {
+          "signals": ["ratio_ctrl", "div_ratio_ctrl", "ratio"],
+          "role": "programmable_ratio_input"
+        }
+      },
+      "relations": [
+        {
+          "id": "pll_public_parameter_interface",
+          "type": "source_declares_parameters",
+          "severity": "hard",
+          "parameters_any": ["div_ratio", "ratio_min", "ratio_max"],
+          "parameters_recommended": [
+            "f_center",
+            "freq_step_hz",
+            "f_min",
+            "f_max",
+            "code_min",
+            "code_max",
+            "code_center",
+            "code_init",
+            "tedge",
+            "lock_tol",
+            "lock_count_target"
+          ],
+          "repair_hint": "Preserve public verifier parameters and derive private helper variables from them instead of replacing them."
+        },
+        {
+          "id": "feedback_edge_liveness",
+          "type": "edge_liveness",
+          "severity": "hard",
+          "node": "feedback",
+          "threshold": 0.45,
+          "min_rising_edges": 8,
+          "repair_hint": "Repair oscillator/DCO and divider edge generation before tuning lock."
+        },
+        {
+          "id": "feedback_reference_late_ratio",
+          "type": "edge_count_ratio_window",
+          "severity": "hard",
+          "numerator_node": "feedback",
+          "denominator_node": "reference",
+          "threshold": 0.45,
+          "window_fraction": [0.8, 1.0],
+          "expected_ratio": 1.0,
+          "tolerance": 0.05,
+          "min_edges": 4,
+          "repair_hint": "Keep feedback derived from the DCO/divider path and tune cadence so late-window feedback/reference edge counts align."
+        },
+        {
+          "id": "dco_to_feedback_divider_observable",
+          "type": "optional_frequency_ratio_window",
+          "severity": "advisory",
+          "numerator_node": "dco",
+          "denominator_node": "feedback",
+          "threshold": 0.45,
+          "window_fraction": [0.8, 1.0],
+          "min_edges": 4,
+          "repair_hint": "When DCO is saved, verify feedback is a divided DCO-derived clock rather than an independent timer."
+        },
+        {
+          "id": "control_monitor_activity",
+          "type": "signal_span",
+          "severity": "advisory",
+          "node": "control",
+          "min_span": 0.01,
+          "repair_hint": "Drive the control monitor from the same state that adjusts oscillator cadence."
+        },
+        {
+          "id": "lock_after_feedback_stable",
+          "type": "lock_after_ratio",
+          "severity": "hard",
+          "reference_node": "reference",
+          "feedback_node": "feedback",
+          "lock_node": "lock",
+          "threshold": 0.45,
+          "window_fraction": [0.8, 1.0],
+          "expected_ratio": 1.0,
+          "ratio_tolerance": 0.05,
+          "max_first_lock_time_s": 1e-6,
+          "repair_hint": "Assert lock only after feedback/reference cadence is stable; do not force lock high to hide a bad ratio."
+        },
+        {
+          "id": "ratio_control_to_dco_cadence",
+          "type": "ratio_hop_tracking",
+          "severity": "hard",
+          "skip_if_missing": true,
+          "reference_node": "reference",
+          "dco_node": "dco",
+          "ratio_control_node": "ratio_control",
+          "lock_node": "lock",
+          "control_node": "control",
+          "threshold": 0.45,
+          "hop_threshold": 5.0,
+          "pre_expected_ratio": 4.0,
+          "post_expected_ratio": 6.0,
+          "pre_tolerance": 0.25,
+          "post_tolerance": 0.35,
+          "pre_window_s": [-1e-6, -2e-7],
+          "post_window_s": [1.2e-6, 2.5e-6],
+          "pre_lock_window_s": [-4e-7, -5e-8],
+          "post_lock_window_s": [1.8e-6, 2.8e-6],
+          "min_lock_fraction": 0.8,
+          "repair_hint": "Latch ratio control and retune DCO/divider cadence after the hop; lock must reacquire after the new ratio settles."
+        }
+      ]
+    },
+    {
+      "id": "adc_data_converter_v0",
+      "description": "ADC/data-converter relation graph for quantization, sampling, DAC reconstruction, SAR readiness, residue activity, and calibration settle semantics.",
+      "nodes": {
+        "analog_input": {
+          "signals": ["vin_sh", "vin", "VIN", "VINP"],
+          "role": "sampled_or_raw_analog_input"
+        },
+        "sample_clock": {
+          "signals": ["clks", "clk", "CLK", "CLKS", "phi1", "phi2"],
+          "role": "sample_or_update_clock"
+        },
+        "reset": {
+          "signals": ["rst_n", "RST_N", "rst_ni"],
+          "role": "active_low_reset"
+        },
+        "reconstruction_output": {
+          "signals": ["vout", "aout", "VOUT", "VOUT_P", "VDAC_P"],
+          "role": "analog_reconstruction_or_dac_output"
+        },
+        "ready": {
+          "signals": ["rdy", "RDY", "eoc", "EOC", "SETTLED"],
+          "role": "conversion_done_or_settled_flag"
+        },
+        "residue": {
+          "signals": ["vres", "residue", "VRES"],
+          "role": "pipeline_residue_output"
+        },
+        "diff_positive": {
+          "signals": ["VOUT_P", "VDAC_P", "outp"],
+          "role": "differential_positive_output"
+        },
+        "diff_negative": {
+          "signals": ["VOUT_N", "VDAC_N", "outn"],
+          "role": "differential_negative_output"
+        },
+        "trim_or_control": {
+          "signals": ["TRIM_code", "trim_code", "dp_dac_9", "dp_cap_11", "CAL0", "CAL1"],
+          "role": "sar_or_calibration_control_activity"
+        }
+      },
+      "relations": [
+        {
+          "id": "adc_sample_clock_liveness",
+          "type": "edge_liveness",
+          "severity": "hard",
+          "skip_if_missing": true,
+          "node": "sample_clock",
+          "threshold": 0.45,
+          "min_rising_edges": 4,
+          "repair_hint": "The ADC path must expose a real sampling/update clock before code coverage or reconstruction can be trusted."
+        },
+        {
+          "id": "quantizer_code_coverage",
+          "type": "code_coverage",
+          "severity": "hard",
+          "skip_if_missing": true,
+          "code_signals": ["dout_code", "DOUT_code", "TRIM_code"],
+          "bit_prefixes": ["dout_", "dout", "DOUT_", "DOUT", "TRIM_"],
+          "min_width": 3,
+          "min_unique_codes": 8,
+          "threshold": 0.45,
+          "repair_hint": "The quantizer/control code must cover multiple codes; a stuck code usually means missing clock sampling, reset stuck active, or bit extraction/threshold logic is wrong."
+        },
+        {
+          "id": "adc_dac_reconstruction_tracking",
+          "type": "analog_reconstruction",
+          "severity": "hard",
+          "skip_if_missing": true,
+          "input_node": "analog_input",
+          "output_node": "reconstruction_output",
+          "reset_node": "reset",
+          "min_input_span": 0.2,
+          "min_output_span": 0.2,
+          "max_avg_abs_error": 0.08,
+          "repair_hint": "For ADC-DAC round trips, the sampled input, digital code, and DAC output must share the same quantization scale and bit ordering."
+        },
+        {
+          "id": "dac_output_span",
+          "type": "signal_span",
+          "severity": "hard",
+          "skip_if_missing": true,
+          "node": "reconstruction_output",
+          "min_span": 0.2,
+          "repair_hint": "A DAC or reconstruction output with too little span usually means code bits are not decoded, reset remains active, or the output is held constant."
+        },
+        {
+          "id": "sar_ready_or_settled_flag",
+          "type": "flag_high",
+          "severity": "hard",
+          "skip_if_missing": true,
+          "node": "ready",
+          "threshold": 0.45,
+          "repair_hint": "SAR/calibration controllers must assert RDY/EOC/SETTLED after the internal sequence completes."
+        },
+        {
+          "id": "sar_or_calibration_control_activity",
+          "type": "signal_span",
+          "severity": "hard",
+          "skip_if_missing": true,
+          "node": "trim_or_control",
+          "min_span": 0.4,
+          "repair_hint": "SAR/CDAC/calibration control signals must move; a static control bus means the FSM or calibration accumulator is not connected to observable outputs."
+        },
+        {
+          "id": "pipeline_residue_activity",
+          "type": "signal_span",
+          "severity": "hard",
+          "skip_if_missing": true,
+          "node": "residue",
+          "min_span": 0.1,
+          "repair_hint": "Pipeline stages must produce a bounded but non-static residue after sub-ADC decision and MDAC subtraction/amplification."
+        },
+        {
+          "id": "differential_dac_span",
+          "type": "differential_span",
+          "severity": "hard",
+          "skip_if_missing": true,
+          "positive_node": "diff_positive",
+          "negative_node": "diff_negative",
+          "min_span": 0.1,
+          "repair_hint": "Differential DAC/CDAC outputs should move in opposite directions; a flat differential span indicates missing code decode or complementary drive."
+        }
+      ]
+    }
+  ]
+}

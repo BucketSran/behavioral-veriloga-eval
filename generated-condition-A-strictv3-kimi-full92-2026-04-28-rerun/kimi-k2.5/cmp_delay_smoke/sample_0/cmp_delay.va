@@ -1,0 +1,84 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cmp_delay (clk, vinn, vinp, out_n, out_p, lp, lm, vss, vdd);
+    electrical clk, vinn, vinp, out_n, out_p, lp, lm, vss, vdd;
+
+    // Parameters
+    parameter real vth_clk = 0.45 from (0:inf);  // Clock threshold (VDD/2)
+    parameter real tr = 10p from (0:inf);        // Output transition rise time
+    parameter real tf = 10p from (0:inf);        // Output transition fall time
+    parameter real td_min = 50p from (0:inf);    // Minimum delay at large diff
+    parameter real td_max = 2n from (0:inf);     // Maximum delay at small diff
+    parameter real vdiff_ref = 10m from (0:inf); // Reference differential voltage
+
+    // State variables
+    integer out_p_state;
+    integer out_n_state;
+    integer lp_state;
+    integer lm_state;
+    real clk_prev;
+    real vdd_val;
+    real vss_val;
+    real delay;
+
+    analog begin
+        // Initialize on first step
+        @(initial_step) begin
+            out_p_state = 0;
+            out_n_state = 0;
+            lp_state = 0;
+            lm_state = 0;
+            clk_prev = 0;
+        end
+
+        // Sample supply and clock levels
+        vdd_val = V(vdd);
+        vss_val = V(vss);
+        clk_prev = V(clk);
+
+        // Detect rising edge of clock
+        @(cross(V(clk) - vth_clk, +1)) begin
+            // Calculate differential input voltage
+            real vdiff;
+            real vdiff_abs;
+            real log_ratio;
+
+            vdiff = V(vinp) - V(vinn);
+            vdiff_abs = abs(vdiff);
+
+            // Calculate delay: increases as |vdiff| decreases
+            // Use logarithmic scaling: delay = td_min + (td_max - td_min) * log10(vdiff_ref / vdiff_abs) / 3
+            // This gives td_min at 10mV, td_max at 0.01mV
+            if (vdiff_abs >= vdiff_ref) begin
+                delay = td_min;
+            end else if (vdiff_abs <= 0.01m) begin
+                delay = td_max;
+            end else begin
+                // Logarithmic interpolation: 3 decades from 10mV to 0.01mV
+                log_ratio = ln(vdiff_ref / vdiff_abs) / ln(10.0); // log10
+                delay = td_min + (td_max - td_min) * (log_ratio / 3.0);
+            end
+
+            // Comparator decision: positive polarity (vinp > vinn) -> out_p high, out_n low
+            if (vdiff > 0) begin
+                out_p_state = 1;
+                out_n_state = 0;
+                lp_state = 1;
+                lm_state = 0;
+            end else begin
+                out_p_state = 0;
+                out_n_state = 1;
+                lp_state = 0;
+                lm_state = 1;
+            end
+        end
+
+        // Drive outputs with transition() to rail-referenced levels
+        // out_p: high = vdd, low = vss
+        V(out_p) <+ transition(out_p_state ? vdd_val : vss_val, delay, tr, tf);
+        V(out_n) <+ transition(out_n_state ? vdd_val : vss_val, delay, tr, tf);
+        V(lp) <+ transition(lp_state ? vdd_val : vss_val, delay, tr, tf);
+        V(lm) <+ transition(lm_state ? vdd_val : vss_val, delay, tr, tf);
+    end
+endmodule

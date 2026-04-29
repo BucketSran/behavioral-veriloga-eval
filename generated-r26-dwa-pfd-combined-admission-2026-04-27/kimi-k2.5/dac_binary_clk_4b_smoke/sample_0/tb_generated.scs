@@ -1,0 +1,42 @@
+// Spectre testbench for dac_binary_clk_4b
+// 4-bit binary DAC smoke test
+
+ahdl_include "dac_binary_clk_4b.va"
+
+// Parameters
+parameters vref=0.9
+parameters vdd=0.9
+parameters period=40n
+parameters trf=100p
+
+// Voltage sources for digital inputs (PWL to sweep all 16 codes)
+// Code sequence: 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0
+// Each code lasts 40ns
+
+// CLK: 40ns period, 50% duty cycle, starts low
+vclk (clk 0) vsource type=pwl wave=[0 0 20n vdd 40n 0 60n vdd 80n 0 100n vdd 120n 0 140n vdd 160n 0 180n vdd 200n 0 220n vdd 240n 0 260n vdd 280n 0 300n vdd 320n 0 340n vdd 360n 0 380n vdd 400n 0 420n vdd 440n 0 460n vdd 480n 0 500n vdd 520n 0 540n vdd 560n 0 580n vdd 600n 0 620n vdd 640n 0 660n 0]
+
+// DIN0 (LSB): toggles every 40ns (period=80n within the sequence)
+vdin0 (din0 0) vsource type=pwl wave=[0 0 40n vdd 80n 0 120n vdd 160n 0 200n vdd 240n 0 280n vdd 320n 0 360n vdd 400n 0 440n vdd 480n 0 520n vdd 560n 0 600n vdd 640n 0 660n 0]
+
+// DIN1: toggles every 80ns
+vdin1 (din1 0) vsource type=pwl wave=[0 0 80n 0 120n vdd 200n vdd 240n 0 320n 0 360n vdd 440n vdd 480n 0 560n 0 600n vdd 640n vdd 660n 0]
+
+// DIN2: toggles every 160ns
+vdin2 (din2 0) vsource type=pwl wave=[0 0 160n 0 240n vdd 400n vdd 480n 0 640n 0 660n 0]
+
+// DIN3 (MSB): toggles every 320ns
+vdin3 (din3 0) vsource type=pwl wave=[0 0 320n 0 480n vdd 660n vdd]
+
+// DUT instance
+xdac (din3 din2 din1 din0 clk aout) dac_binary_clk_4b
+
+// Transient analysis
+tran tran stop=660n maxstep=200p
+
+// Save statements for CSV output - must match exact column names expected by checker
+save din3
+save din2
+save din1
+save din0
+save aout

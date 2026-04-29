@@ -1,0 +1,78 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module multimod_divider_ref (clk_in, mod, mod_0, mod_1, mod_2, mod_3, prescaler_out);
+    input clk_in;
+    input mod;
+    input mod_0;
+    input mod_1;
+    input mod_2;
+    input mod_3;
+    output prescaler_out;
+    electrical clk_in, mod, mod_0, mod_1, mod_2, mod_3, prescaler_out;
+
+    parameter real vth = 0.5 from (0:inf);
+    parameter real vhigh = 1.0 from (0:inf);
+    parameter real vlow = 0.0 from (0:inf);
+    parameter real tdel = 0 from [0:inf);
+    parameter real tr = 1p from (0:inf);
+    parameter real tf = 1p from (0:inf);
+    parameter integer n_base = 8 from [1:inf);
+
+    integer count;
+    integer modulus;
+    integer mod_val;
+    integer mod_0_val, mod_1_val, mod_2_val, mod_3_val;
+    integer prescaler_state;
+    real out_voltage;
+
+    analog begin
+        @(initial_step) begin
+            count = 0;
+            modulus = n_base;
+            prescaler_state = 0;
+            out_voltage = vlow;
+        end
+
+        // Sample modulus control bits
+        mod_0_val = (V(mod_0) > vth) ? 1 : 0;
+        mod_1_val = (V(mod_1) > vth) ? 1 : 0;
+        mod_2_val = (V(mod_2) > vth) ? 1 : 0;
+        mod_3_val = (V(mod_3) > vth) ? 1 : 0;
+
+        // Form 4-bit modulus control word: mod_3 is MSB, mod_0 is LSB
+        // This gives range 0-15, which we map to N = n_base + control_word
+        modulus = n_base + (mod_3_val * 8 + mod_2_val * 4 + mod_1_val * 2 + mod_0_val);
+
+        // Sample mod input (divide by N or N+1)
+        mod_val = (V(mod) > vth) ? 1 : 0;
+
+        // Detect rising edge of clk_in
+        @(cross(V(clk_in) - vth, 1)) begin
+            count = count + 1;
+
+            // Determine effective division ratio
+            // When mod is high, divide by modulus+1, else divide by modulus
+            if (mod_val == 1) begin
+                if (count >= (modulus + 1)) begin
+                    count = 0;
+                    prescaler_state = ~prescaler_state;
+                end
+            end else begin
+                if (count >= modulus) begin
+                    count = 0;
+                    prescaler_state = ~prescaler_state;
+                end
+            end
+        end
+
+        // Output prescaler signal
+        if (prescaler_state == 1) begin
+            out_voltage = vhigh;
+        end else begin
+            out_voltage = vlow;
+        end
+
+        V(prescaler_out) <+ transition(out_voltage, tdel, tr, tf);
+    end
+endmodule

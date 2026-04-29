@@ -1,0 +1,53 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module multimod_divider_ratio_switch_ref (clk_in, ratio_ctrl, div_out);
+    input clk_in;
+    input ratio_ctrl;
+    output div_out;
+    electrical clk_in, ratio_ctrl, div_out;
+
+    parameter real vth_clk = 0.9 from (0:inf);
+    parameter real vth_ctrl = 4.5 from (0:inf);
+    parameter real vhi = 1.8 from (0:inf);
+    parameter real vlo = 0.0 from (-inf:inf);
+    parameter real tr = 1n from (0:inf);
+    parameter real tf = 1n from (0:inf);
+
+    integer count;
+    integer target_ratio;
+    integer div_state;
+
+    analog begin
+        @(initial_step) begin
+            count = 0;
+            target_ratio = 4;
+            div_state = 0;
+        end
+
+        // Sample ratio_ctrl on every input clock edge (rising)
+        @(cross(V(clk_in) - vth_clk, 1)) begin
+            // Determine target ratio based on ratio_ctrl voltage
+            if (V(ratio_ctrl) < vth_ctrl) begin
+                target_ratio = 4;
+            end else begin
+                target_ratio = 5;
+            end
+
+            // Increment counter
+            count = count + 1;
+
+            // Check if we've reached the target count
+            // Toggle output on every target_ratio edges, not just at terminal count
+            if (count >= target_ratio) begin
+                count = 0;
+                // Toggle output state to create a pulse
+                div_state = !div_state;
+            end
+        end
+
+        // Output: high when div_state is 1, low when 0
+        // Use transition for smooth output
+        V(div_out) <+ transition(div_state ? vhi : vlo, 0, tr, tf);
+    end
+endmodule

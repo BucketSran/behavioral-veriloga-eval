@@ -1,0 +1,51 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module phase_accumulator_timer_wrap_ref(VDD, VSS, clk_out, phase_out);
+    inout electrical VDD, VSS;
+    output electrical clk_out, phase_out;
+
+    parameter real vdd = 1.0 from (0:inf);
+    parameter real vss = 0.0 from [0:0];
+    parameter real tstep = 1.0n from (0:inf);
+    parameter real tr = 10p from (0:inf);
+    parameter real tf = 10p from (0:inf);
+
+    integer phase_int;
+    real phase_real;
+    real clk_val;
+    real next_timer;
+
+    analog begin
+        @(initial_step) begin
+            phase_int = 0;
+            phase_real = 0.0;
+            clk_val = vss;
+            next_timer = 0.0;
+        end
+
+        // Advance phase on absolute timer
+        @(timer(next_timer)) begin
+            phase_real = phase_real + 0.05;  // Increment phase
+            if (phase_real >= 1.0) begin
+                phase_real = phase_real - 1.0;  // Manual wrap at 1.0
+            end
+            next_timer = $abstime + tstep;
+        end
+
+        // Generate clock output: square wave based on phase
+        // clk high when phase < 0.5, low otherwise
+        if (phase_real < 0.5) begin
+            clk_val = vdd;
+        end else begin
+            clk_val = vss;
+        end
+
+        // Output assignments with transition
+        V(phase_out) <+ transition(phase_real * vdd, 0, tr, tf);
+        V(clk_out) <+ transition(clk_val, 0, tr, tf);
+
+        // Schedule next timer event
+        next_timer = next_timer;
+    end
+endmodule

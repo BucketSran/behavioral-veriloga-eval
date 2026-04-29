@@ -1,0 +1,101 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module adc_ideal_4b (vin, clk, vdd, vss, rst_n, dout_3, dout_2, dout_1, dout_0);
+    input vin;
+    input clk;
+    input vdd;
+    input vss;
+    input rst_n;
+    output dout_3;
+    output dout_2;
+    output dout_1;
+    output dout_0;
+    electrical vin, clk, vdd, vss, rst_n;
+    electrical dout_3, dout_2, dout_1, dout_0;
+
+    integer code;
+    real vstep;
+    real vhi, vlo, vth;
+    real vin_sample;
+
+    analog begin
+        @(initial_step) begin
+            code = 0;
+            vhi = 0.9;
+            vlo = 0.0;
+            vth = 0.45;
+        end
+
+        vhi = V(vdd);
+        vlo = V(vss);
+        vstep = (vhi - vlo) / 16.0;
+        vth = (vhi + vlo) / 2.0;
+
+        @(cross(V(clk) - vth, 1)) begin
+            if (V(rst_n) < vth) begin
+                code = 0;
+            end else begin
+                vin_sample = V(vin);
+                if (vin_sample <= vlo) begin
+                    code = 0;
+                end else if (vin_sample >= vhi) begin
+                    code = 15;
+                end else begin
+                    code = $floor((vin_sample - vlo) / vstep);
+                    if (code < 0) code = 0;
+                    if (code > 15) code = 15;
+                end
+            end
+        end
+
+        V(dout_3) <+ transition((code >= 8) ? vhi : vlo, 0, 10p);
+        V(dout_2) <+ transition(((code >= 4) && (code < 8)) || (code >= 12)) ? vhi : vlo, 0, 10p);
+        V(dout_1) <+ transition(((code >= 2) && (code < 4)) || ((code >= 6) && (code < 8)) || ((code >= 10) && (code < 12)) || (code >= 14)) ? vhi : vlo, 0, 10p);
+        V(dout_0) <+ transition((code & 1) ? vhi : vlo, 0, 10p);
+    end
+endmodule
+
+module dac_ideal_4b (din_3, din_2, din_1, din_0, vdd, vss, rst_n, vout);
+    input din_3;
+    input din_2;
+    input din_1;
+    input din_0;
+    input vdd;
+    input vss;
+    input rst_n;
+    output vout;
+    electrical din_3, din_2, din_1, din_0;
+    electrical vdd, vss, rst_n;
+    electrical vout;
+
+    integer code;
+    real vhi, vlo, vth;
+    real vout_val;
+
+    analog begin
+        @(initial_step) begin
+            code = 0;
+            vhi = 0.9;
+            vlo = 0.0;
+            vth = 0.45;
+        end
+
+        vhi = V(vdd);
+        vlo = V(vss);
+        vth = (vhi + vlo) / 2.0;
+
+        if (V(rst_n) < vth) begin
+            code = 0;
+        end else begin
+            code = 0;
+            if (V(din_3) > vth) code = code + 8;
+            if (V(din_2) > vth) code = code + 4;
+            if (V(din_1) > vth) code = code + 2;
+            if (V(din_0) > vth) code = code + 1;
+        end
+
+        vout_val = vlo + (code / 16.0) * (vhi - vlo);
+        V(vout) <+ transition(vout_val, 0, 10p);
+    end
+endmodule

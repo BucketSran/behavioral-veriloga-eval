@@ -30,7 +30,7 @@ produce several sampling and hold windows so EVAS can measure droop behavior.
 - Instantiate the DUT by positional ports.
 - Save these exact scalar names: `vin`, `clk`, `vout`.
 - Include the generated DUT file `sample_hold_droop_ref.va`.
-- Use the final transient setting provided by the injected Strict EVAS Validation Contract.
+- Use the final transient setting listed in the Public Evaluation Contract below.
 
 ## Deliverables
 

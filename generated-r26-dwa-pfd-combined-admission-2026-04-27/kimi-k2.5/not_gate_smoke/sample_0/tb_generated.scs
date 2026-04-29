@@ -1,0 +1,19 @@
+// Testbench for not_gate
+
+ahdl_include "not_gate.va"
+
+// Supply voltages
+v_vdd (vdd 0) vsource dc=0.9
+v_vss (vss 0) vsource dc=0
+
+// Input stimulus: 50MHz square wave (period = 20ns)
+v_a (a 0) vsource type=pulse val0=0 val1=0.9 period=20n rise=100p fall=100p width=10n
+
+// DUT instance
+dut (vdd vss a y) not_gate
+
+// Save signals
+save a y
+
+// Transient analysis
+tran tran stop=200n maxstep=5n

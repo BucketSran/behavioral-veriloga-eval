@@ -1,0 +1,16 @@
+// Spectre testbench for and_gate
+
+ahdl_include "and_gate.va"
+
+// Voltage sources for inputs
+v_a a 0 vsource type=pulse val0=0 val1=1.8 period=4n delay=0 rise=100p fall=100p width=2n
+v_b b 0 vsource type=pulse val0=0 val1=1.8 period=8n delay=0 rise=100p fall=100p width=4n
+
+// DUT instance
+dut (a b y) and_gate vdd=1.8 tedge=10p
+
+// Transient analysis
+tran tran stop=8n maxstep=100p
+
+// Save signals
+save a b y

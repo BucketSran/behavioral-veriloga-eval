@@ -1,0 +1,43 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module phase_accumulator_timer_wrap_ref (VDD, VSS, clk_out, phase_out);
+    inout VDD, VSS;
+    output clk_out, phase_out;
+    electrical VDD, VSS, clk_out, phase_out;
+
+    parameter real vlogic_high = 1.8 from (0:inf);
+    parameter real vlogic_low = 0.0 from [0:inf);
+    parameter real tperiod = 10n from (0:inf);
+    parameter real trise = 100p from (0:inf);
+    parameter real tfall = 100p from (0:inf);
+    parameter real tdel = 0 from [0:inf);
+
+    real phase;
+    integer clk_state;
+    real clk_voltage;
+
+    analog begin
+        @(initial_step) begin
+            phase = 0.0;
+            clk_state = 0;
+        end
+
+        @(timer(tdel, tperiod)) begin
+            phase = phase + 0.1;
+            if (phase >= 1.0) begin
+                phase = phase - 1.0;
+                clk_state = ~clk_state;
+            end
+        end
+
+        if (clk_state == 1) begin
+            clk_voltage = vlogic_high;
+        end else begin
+            clk_voltage = vlogic_low;
+        end
+
+        V(clk_out) <+ transition(clk_voltage, 0, trise, tfall);
+        V(phase_out) <+ transition(phase * vlogic_high, 0, trise, tfall);
+    end
+endmodule

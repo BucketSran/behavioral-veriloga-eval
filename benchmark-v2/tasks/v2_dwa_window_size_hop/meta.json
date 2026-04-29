@@ -1,0 +1,67 @@
+{
+  "task_id": "v2_dwa_window_size_hop",
+  "family": "benchmark-v2",
+  "source_seed": "dwa_ptr_gen",
+  "mechanism_family": "dwa_rotating_pointer_window",
+  "perturbation_level": "P5_parameter_checker",
+  "status": "validated_gold_evas_spectre",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "dwa",
+    "clock": "advance",
+    "rst": "clear_n",
+    "bits_lsb_first": [
+      "qty0",
+      "qty1",
+      "qty2"
+    ],
+    "cell_outputs": [
+      "cell0",
+      "cell1",
+      "cell2",
+      "cell3",
+      "cell4",
+      "cell5",
+      "cell6",
+      "cell7"
+    ],
+    "active_count": 3,
+    "min_distinct_windows": 4
+  },
+  "manifest_entry": {
+    "task_id": "v2_dwa_window_size_hop",
+    "source_seed": "dwa_ptr_gen",
+    "mechanism_family": "dwa_rotating_pointer_window",
+    "perturbation_level": "P5_parameter_checker",
+    "prompt_strategy": "Change active window size during run and verify pointer advance equals prior active count.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-small",
+    "status": "draft_manifest",
+    "parameter_changes": {
+      "cells": 16,
+      "window_sizes": [
+        3,
+        5,
+        2
+      ]
+    },
+    "review_notes": "Tests state update ordering and checker-aware parameterization."
+  },
+  "validation": {
+    "tasks": 30,
+    "evas_pass": "30/30",
+    "spectre_pass": "30/30",
+    "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+    "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1"
+  }
+}

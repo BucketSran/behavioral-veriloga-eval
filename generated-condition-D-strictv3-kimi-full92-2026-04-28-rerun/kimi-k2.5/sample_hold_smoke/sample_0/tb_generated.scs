@@ -1,0 +1,23 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "sample_hold.va"
+
+// Power supplies
+Vdd (vdd 0) vsource dc=1.8
+Vss (vss 0) vsource dc=0
+
+// Clock: 10MHz, 50% duty cycle, 1ns rise/fall
+Vclk (clk 0) vsource type=pulse val0=0 val1=1.8 period=100n rise=1n fall=1n width=49n
+
+// Input: 1MHz sine wave, 0.9V offset, 0.8V amplitude
+Vin (in 0) vsource type=sine freq=1M ampl=0.8 offset=0.9
+
+// DUT
+XDUT (vdd vss in clk out) sample_hold
+
+// Transient analysis
+tran tran stop=1u maxstep=2n
+
+// Save signals
+save in clk out

@@ -7,6 +7,7 @@ feedback can drive a fast repair loop without committing to a fixed round count.
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import json
 import os
 import re
@@ -16,6 +17,7 @@ from pathlib import Path
 
 from build_repair_prompt import build_evas_guided_repair_prompt, metric_gap_summary
 from generate import call_model, extract_module_signature, list_task_dirs, read_meta
+from interface_parameter_guard import check_interface_parameters, format_issue_notes
 from run_model_assisted_loop import _model_slug, _save_generated_response
 from score import find_generated_dir, score_one_task
 
@@ -39,12 +41,19 @@ _MAIN_MODULE_PATTERNS = [
 ]
 _CONCRETE_DIAGNOSTIC_MARKERS = (
     "dynamic_analog_vector_index=",
+    "interface_parameter_missing=",
     "conditional_cross=",
     "conditional_transition=",
     "digital_verilog_syntax=",
     "genvar_inside_analog=",
+    "embedded_declaration=",
+    "unsupported_tb_directives=",
+    "evas_log_diagnostic=",
     "undefined_module=",
     "colon_instance_syntax_lines=",
+    "nonincreasing_pwl_time=",
+    "uncontinued_multiline_instance=",
+    "evas_runtime_error=",
     "evas_compile_errors:",
     "missing dout_code",
     "missing dout_0..7",
@@ -53,6 +62,31 @@ _CONCRETE_DIAGNOSTIC_MARKERS = (
     "unique_codes=",
     "up_first=",
     "dn_first=",
+)
+_SYNTAX_ZERO_STRICT_MARKERS = (
+    "dynamic_analog_vector_index=",
+    "interface_parameter_missing=",
+    "conditional_cross=",
+    "conditional_transition=",
+    "digital_verilog_syntax=",
+    "genvar_inside_analog=",
+    "embedded_declaration=",
+    "unsupported_tb_directives=",
+    "evas_log_diagnostic=",
+    "undefined_module=",
+    "colon_instance_syntax_lines=",
+    "nonincreasing_pwl_time=",
+    "uncontinued_multiline_instance=",
+    "spectre_strict_preflight",
+    "strict_preflight",
+)
+_SYNTAX_ZERO_RUNTIME_MARKERS = (
+    "tran.csv missing",
+    "tb_not_executed",
+    "returncode=1",
+    "evas_timeout",
+    "evas_runtime_error",
+    "timeout",
 )
 
 
@@ -132,6 +166,17 @@ def _metric_float(metrics: dict[str, float | str], key: str, default: float = 0.
     return float(value) if isinstance(value, (int, float)) else default
 
 
+def _metric_bool(metrics: dict[str, float | str], key: str) -> int:
+    value = metrics.get(key)
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, (int, float)):
+        return int(value != 0)
+    if isinstance(value, str):
+        return int(value.strip().lower() in {"1", "true", "yes", "ok"})
+    return 0
+
+
 def _failure_phase_score(result: dict) -> int:
     """Reward useful failure-surface progress even when weighted score ties.
 
@@ -157,6 +202,33 @@ def _failure_phase_score(result: dict) -> int:
     if status == "FAIL_DUT_COMPILE":
         return 0
     return 0
+
+
+def _syntax_blocker_count(result: dict) -> int:
+    """Count compile/runtime blockers so partial syntax cleanup can be ranked.
+
+    Several G repairs stay in the same coarse FAIL_DUT_COMPILE bucket after
+    removing one error and exposing the next.  A lower blocker count is still
+    progress and should not be discarded immediately.
+    """
+    notes = " ".join(str(note) for note in result.get("evas_notes", [])).lower()
+    markers = (
+        "digital_verilog_syntax=",
+        "embedded_declaration=",
+        "conditional_transition=",
+        "conditional_cross=",
+        "dynamic_analog_vector_index=",
+        "genvar_inside_analog=",
+        "unsupported_tb_directives=",
+        "undefined_module=",
+        "colon_instance_syntax_lines=",
+        "evas_log_diagnostic=error:",
+        "evas_runtime_error=",
+        "dut_not_compiled",
+        "tb_not_executed",
+        "tran.csv missing",
+    )
+    return sum(notes.count(marker) for marker in markers)
 
 
 def _classify_repair_layer(result: dict) -> str:
@@ -196,6 +268,7 @@ def _progress_rank(task_id: str, result: dict) -> tuple:
         float(scores.get("dut_compile", 0.0)),
         float(scores.get("tb_compile", 0.0)),
         _failure_phase_score(result),
+        -_syntax_blocker_count(result),
     )
     if "no_overlap" in task_id:
         return (
@@ -212,6 +285,28 @@ def _progress_rank(task_id: str, result: dict) -> tuple:
             -_metric_float(metrics, "bad_count_rows", 99.0),
             min(_metric_float(metrics, "wrap_events"), 2.0),
             min(_metric_float(metrics, "split_wrap_rows"), 2.0),
+        )
+    if "pll" in task_id or "adpll" in task_id or "cppll" in task_id:
+        late_ratio = _metric_float(metrics, "late_edge_ratio", 0.0)
+        freq_ratio = _metric_float(metrics, "freq_ratio", 0.0)
+        pre_ratio = _metric_float(metrics, "pre_ratio", 0.0)
+        post_ratio = _metric_float(metrics, "post_ratio", 0.0)
+        edge_progress = max(
+            min(late_ratio, 1.0),
+            1.0 if _metric_float(metrics, "fb", 0.0) > 0 else 0.0,
+        )
+        ratio_progress = max(
+            1.0 - min(abs(late_ratio - 1.0), 1.0) if late_ratio else 0.0,
+            1.0 - min(abs(freq_ratio - 1.0), 1.0) if freq_ratio else 0.0,
+            1.0 - min(abs(pre_ratio - post_ratio), 1.0) if pre_ratio and post_ratio else 0.0,
+        )
+        return (
+            *base,
+            edge_progress,
+            ratio_progress,
+            _metric_bool(metrics, "vctrl_range_ok"),
+            _metric_float(metrics, "pre_lock", 0.0),
+            _metric_float(metrics, "post_lock", 0.0),
         )
     return base
 
@@ -239,6 +334,10 @@ def _sanitize_quick_tb(sample_dir: Path, quick_maxstep: str) -> list[str]:
             if "save=all" in stripped or "currents=all" in stripped:
                 edits.append(f"removed broad save option from {tb.name}")
                 continue
+            updated_quotes = re.sub(r"=\s*'([^']+)'", r"=\1", line)
+            if updated_quotes != line:
+                edits.append(f"removed single-quoted parameter expression in {tb.name}: {line.strip()} -> {updated_quotes.strip()}")
+                line = updated_quotes
             if quick_maxstep:
                 updated = re.sub(r"\bmaxstep\s*=\s*0\.[0-9]+n\b", f"maxstep={quick_maxstep}", line)
                 if updated != line:
@@ -248,6 +347,76 @@ def _sanitize_quick_tb(sample_dir: Path, quick_maxstep: str) -> list[str]:
         if new_lines != lines:
             tb.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
     return edits
+
+
+def _materialize_syntax_zero_sanitizers(sample_dir: Path) -> list[str]:
+    """Apply deterministic, syntax-only normalizations to the final sample.
+
+    These edits do not encode task behavior.  They materialize the same public
+    Spectre syntax cleanup used by the quick checker so the final sample is not
+    scored differently from the accepted candidate.
+    """
+    edits: list[str] = []
+    for tb in sample_dir.glob("*.scs"):
+        text = tb.read_text(encoding="utf-8", errors="ignore")
+        updated = re.sub(r"=\s*'([^']+)'", r"=\1", text)
+        if updated != text:
+            edits.append(f"removed_single_quoted_param_expr:{tb.name}")
+            tb.write_text(updated, encoding="utf-8")
+    return edits
+
+
+def _first_file(path: Path, pattern: str) -> Path | None:
+    matches = sorted(path.glob(pattern))
+    return matches[0] if matches else None
+
+
+def _interface_guard_fail_result(
+    *,
+    task_id: str,
+    task_dir: Path,
+    sample_dir: Path,
+    output_root: Path,
+    model_slug: str,
+    sample_idx: int,
+    notes: list[str],
+) -> dict:
+    meta = read_meta(task_dir)
+    family = meta.get("family", "end-to-end")
+    category = meta.get("category", "unknown")
+    required_axes: list[str] = meta.get("scoring", ["dut_compile", "tb_compile", "sim_correct"])
+    scores = {"dut_compile": 0.0, "tb_compile": 0.0, "sim_correct": 0.0, "weighted_total": 0.0}
+    gen_meta_path = sample_dir / "generation_meta.json"
+    gen_meta: dict = {}
+    if gen_meta_path.exists():
+        try:
+            gen_meta = json.loads(gen_meta_path.read_text(encoding="utf-8"))
+        except Exception:
+            gen_meta = {}
+    dut_path = _first_file(sample_dir, "*.va")
+    tb_path = _first_file(sample_dir, "*.scs")
+    result = {
+        "model": model_slug,
+        "task_id": task_id,
+        "family": family,
+        "category": category,
+        "sample_idx": sample_idx,
+        "temperature": 0.0,
+        "top_p": 1.0,
+        "status": "FAIL_INFRA",
+        "scores": scores,
+        "required_axes": required_axes,
+        "artifacts": {
+            "dut_path": str(dut_path) if dut_path else None,
+            "tb_path": str(tb_path) if tb_path else None,
+            "result_json": str(output_root / task_id / "result.json"),
+        },
+        "generation_meta": gen_meta,
+        "evas_notes": notes,
+        "evas_timing": {},
+    }
+    _json_write(output_root / task_id / "result.json", result)
+    return result
 
 
 def _freeze_testbench_from(src_sample: Path, dst_sample: Path) -> list[str]:
@@ -420,6 +589,155 @@ def _layer_policy_section(layer: str, task_dir: Path) -> str:
     )
 
 
+def _syntax_zero_gate_state(result: dict) -> dict:
+    layer = _classify_repair_layer(result)
+    scores = result.get("scores", {})
+    status = result.get("status")
+    notes = " ".join(str(note) for note in result.get("evas_notes", [])).lower()
+    issues: list[str] = []
+
+    if float(scores.get("dut_compile", 0.0)) < 1.0:
+        issues.append("dut_compile_not_zero")
+    if float(scores.get("tb_compile", 0.0)) < 1.0:
+        issues.append("tb_compile_not_zero")
+    for marker in _SYNTAX_ZERO_RUNTIME_MARKERS:
+        if marker in notes:
+            issues.append(f"runtime_artifact:{marker}")
+    for marker in _SYNTAX_ZERO_STRICT_MARKERS:
+        if marker in notes:
+            issues.append(f"strict_preflight:{marker}")
+    if any(marker in notes for marker in _OBSERVABLE_NOTE_MARKERS):
+        issues.append("observable_surface_not_zero")
+    if status == "FAIL_INFRA" and not issues:
+        issues.append("infra_unclassified")
+
+    return {
+        "layer": layer,
+        "cleared": status == "PASS" or (layer == "behavior" and not issues),
+        "issues": issues[:12],
+    }
+
+
+def _syntax_zero_gate_policy_section(layer: str, result: dict) -> str:
+    state = _syntax_zero_gate_state(result)
+    issues = ", ".join(state["issues"]) if state["issues"] else "none"
+    notes = " ".join(str(note) for note in result.get("evas_notes", [])).lower()
+    if state["cleared"]:
+        return (
+            "\n\n# Syntax-Zero Gate (Condition G): Cleared\n"
+            "The compile/interface/runtime/observable gate is currently clear, so this round may repair behavior. "
+            "Keep the working module names, ports, ahdl_include lines, saved signals, transient setup, and CSV-producing "
+            "testbench structure stable while changing only the DUT behavior needed by the EVAS metric gap.\n"
+        )
+
+    if layer == "compile_dut":
+        target = (
+            "Fix Verilog-A legality and DUT interface first: module declaration, ports, disciplines, parameters, "
+            "analog block syntax, and Spectre-compatible constructs."
+        )
+    elif layer == "compile_tb":
+        target = (
+            "Fix the Spectre testbench first: ahdl_include, instance node order, file names, parameter names, "
+            "stimulus sources, save directives, and tran statement."
+        )
+    elif layer == "runtime_interface":
+        target = (
+            "Fix the runtime artifact path first: the simulation must execute and produce the required waveform CSV "
+            "with the expected saved columns."
+        )
+    elif layer == "observable":
+        target = (
+            "Fix observability first: reset/stimulus coverage, saved signal names, transient duration, and required "
+            "columns. Do not redesign the DUT behavior while the checker cannot observe the intended surface."
+        )
+    else:
+        target = (
+            "Expose a stable compile/runtime/observable diagnostic first, then repair only that failing surface."
+        )
+
+    strong_templates: list[str] = []
+    if "integer_function_cast" in notes or "integer(...)" in notes:
+        strong_templates.extend([
+            "- `integer(...)` is not a Verilog-A cast. Remove every `integer(expr)` occurrence. Use declared `integer` variables and integer arithmetic assignments instead.",
+            "- If a real-to-integer conversion is needed, assign the expression to an `integer` state variable directly and avoid function-style casts in the source text.",
+        ])
+    if "embedded_declaration=" in notes:
+        strong_templates.extend([
+            "- Move every `integer`, `real`, `parameter`, and `genvar` declaration out of `analog begin`, `if`, `case`, event, and loop bodies. Declarations must live at module scope before `analog begin`.",
+            "- Do not introduce replacement local declarations while editing; reuse module-scope temporaries.",
+        ])
+    if "conditional_transition=" in notes or "transition() contribution is inside" in notes:
+        strong_templates.extend([
+            "- Replace conditional `transition()` contributions with held target variables: update `real out_target` inside events/branches, then drive `V(out) <+ transition(out_target, 0, tr, tf);` exactly once and unconditionally.",
+            "- No `transition()` may appear inside `if`, `else`, `case`, `for`, `while`, or event branches whose execution can skip the contribution.",
+            "- For many outputs, use a generic multi-output target-buffer pattern: declare `real out0_t, out1_t, ...` or `real out_t[0:N-1]` at module scope; update those targets inside event/condition code; drive all electrical outputs once at analog top level.",
+            "- A loop around `transition()` is legal only when the loop variable is a module-scope `genvar`. A loop with `integer i` is runtime control flow and must not contain `V(out[i]) <+ transition(...)`.",
+            "- If there are fewer than about 32 public outputs, prefer explicit unrolled contributions for the compile-clean repair: `V(out_0) <+ transition(out0_t, 0, tr, tf);`, `V(out_1) <+ transition(out1_t, 0, tr, tf);`, and so on.",
+        ])
+    if "dynamic_analog_vector_index=" in notes:
+        strong_templates.extend([
+            "- Runtime integer indices inside `V(bus[i])` are not allowed. Replace each offending access with fixed-index code, for example `V(bus[0])`, `V(bus[1])`, ... through the required width.",
+            "- For output buses, prefer explicit unrolled contributions for this repair. Do not use `V(out[i])` with `integer i` inside an analog loop.",
+        ])
+    if "unsupported_tb_directives=" in notes or "single_quote" in notes:
+        strong_templates.extend([
+            "- Spectre testbenches must not use shell-style single-quoted directives or strings. Replace single quotes with Spectre-compatible double-quoted paths/strings or plain numeric tokens.",
+            "- Keep the testbench in `simulator lang=spectre` and preserve `ahdl_include`, instance, `save`, and `tran` structure while fixing only the illegal directive syntax.",
+        ])
+    if "model " in notes and " not found" in notes:
+        strong_templates.extend([
+            "- If EVAS reports `Model ... not found`, make the instance model name exactly match the `module` identifier in the generated Verilog-A file and make `ahdl_include` point to that file.",
+        ])
+    if "cannot find va file" in notes:
+        strong_templates.extend([
+            "- If EVAS reports `Cannot find VA file`, make the `ahdl_include` filename exactly match a generated `.va` artifact in the same sample directory.",
+        ])
+    if "invalid source" in notes or "failed to parse" in notes:
+        strong_templates.extend([
+            "- If EVAS reports an invalid source or parse error, repair only the Spectre netlist syntax first; do not change DUT behavior until the testbench parses and runs.",
+        ])
+    if "nonincreasing_pwl_time=" in notes:
+        strong_templates.extend([
+            "- Spectre PWL time entries must be strictly increasing. Do not encode an ideal step with duplicate timestamps such as `4n ... 4n ...`.",
+            "- Replace every duplicate-time PWL step with a tiny finite transition window that preserves intent, for example hold until `3.99n` and change at `4n`, or use adjacent times separated by the task's maxstep scale.",
+        ])
+    if "uncontinued_multiline_instance=" in notes:
+        strong_templates.extend([
+            "- Spectre does not join bare multi-line instance node lists. Put the entire instance on one line, or end every continued instance line with `\\`.",
+            "- Do not split `XDUT (...) model` across lines without explicit continuation; otherwise later node names are parsed as new undefined instances.",
+        ])
+    if "tran.csv missing" in notes or "tb_not_executed" in notes:
+        strong_templates.extend([
+            "- `tran.csv missing` means the run did not reach a usable transient waveform. First ensure the TB has one valid `tran` statement, all included VA modules compile, all instances reference existing modules, and the `save` list names real nodes.",
+        ])
+
+    template_text = ""
+    if strong_templates:
+        deduped: list[str] = []
+        seen: set[str] = set()
+        for item in strong_templates:
+            if item in seen:
+                continue
+            seen.add(item)
+            deduped.append(item)
+        template_text = (
+            "\nMandatory signature-specific compile-clean templates:\n"
+            + "\n".join(deduped[:12])
+            + "\n"
+        )
+
+    return (
+        "\n\n# Syntax-Zero Gate (Condition G)\n"
+        f"Current gate layer: `{layer}`. Gate issues: {issues}.\n"
+        f"{target}\n"
+        f"{template_text}"
+        "This round is not allowed to tune semantic constants, gains, ratios, thresholds, lock criteria, quantization "
+        "policy, or state-machine behavior unless the change is directly required to clear the gate. The acceptance "
+        "target for this round is zero syntax/interface/runtime/observable errors; behavior optimization starts only "
+        "after DUT compile, TB compile, strict preflight, simulation execution, and required observables are stable.\n"
+    )
+
+
 def _score_quick(
     *,
     task_id: str,
@@ -434,6 +752,7 @@ def _score_quick(
     quick_sample = output_root / "_quick_samples" / task_id / sample_dir.name
     _copy_sample(sample_dir, quick_sample)
     edits = _sanitize_quick_tb(quick_sample, quick_maxstep)
+    guard_issues = check_interface_parameters(quick_sample)
     result = score_one_task(
         task_id,
         task_dir,
@@ -445,8 +764,17 @@ def _score_quick(
         top_p=1.0,
         timeout_s=timeout_s,
     )
+    if guard_issues:
+        # Spectre normally treats extra/unknown Verilog-A instance parameters as
+        # warnings.  Do not let this older guard mask real compile blockers such
+        # as integer casts, dynamic analog vector indices, or conditional
+        # transition contributions.
+        result.setdefault("evas_notes", []).extend(
+            ["interface_parameter_guard=warning", *format_issue_notes(guard_issues)]
+        )
     if edits:
         result.setdefault("evas_notes", []).insert(0, "quick_sanitize=" + ";".join(edits))
+    if edits or guard_issues:
         _json_write(output_root / task_id / "result.json", result)
     return result
 
@@ -466,6 +794,13 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
     out_root = Path(args.output_root)
     gen_root = Path(args.generated_root) / model_slug / task_id
     gen_root.mkdir(parents=True, exist_ok=True)
+    final_dir = Path(args.generated_root) / model_slug / task_id / f"sample_{args.sample_idx}"
+    best_result_path = out_root / "best" / task_id / "result.json"
+
+    if args.resume and best_result_path.exists() and final_dir.exists():
+        result = json.loads(best_result_path.read_text(encoding="utf-8"))
+        print(f"[adaptive] {task_id} resume best={best_result_path} status={result.get('status')}")
+        return result
 
     candidate_generated_dirs = [args.source_generated_dir, *args.candidate_generated_dir]
     candidate_result_roots = [args.initial_result_root, *args.candidate_result_root]
@@ -531,7 +866,9 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
             anchor_sample,
             anchor_result,
             history=history,
-            include_skill=True,
+            include_skill=not args.no_repair_skill,
+            include_contract_diagnosis=not args.disable_contract_diagnosis,
+            public_spec_mode=args.repair_public_spec_mode,
             loop_context={
                 "attempt_round": round_idx,
                 "best_round": history[-1]["round"] if history else 0,
@@ -543,6 +880,8 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
         )
         if args.layered_only_repair:
             prompt += _layer_policy_section(layer, task_dir)
+        if args.syntax_zero_gate:
+            prompt += _syntax_zero_gate_policy_section(layer, anchor_result)
         elif args.freeze_gold_harness_on_behavior and anchor_result.get("status") == "FAIL_SIM_CORRECTNESS":
             prompt += _layer_policy_section("behavior", task_dir)
         sample_dir = gen_root / f"adaptive_round{round_idx}"
@@ -567,11 +906,15 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
         frozen_tbs: list[str] = []
         frozen_duts: list[str] = []
         frozen_harness: list[str] = []
+        syntax_gate_state = _syntax_zero_gate_state(anchor_result) if args.syntax_zero_gate else {}
         if args.layered_only_repair:
             if layer == "observable":
                 frozen_duts = _freeze_veriloga_from(anchor_sample, sample_dir)
             elif layer == "behavior":
                 frozen_harness = _freeze_gold_harness(task_dir, sample_dir)
+        elif args.syntax_zero_gate:
+            if layer in {"compile_tb", "observable"}:
+                frozen_duts = _freeze_veriloga_from(anchor_sample, sample_dir)
         elif anchor_result.get("status") == "FAIL_SIM_CORRECTNESS":
             if args.freeze_gold_harness_on_behavior:
                 frozen_harness = _freeze_gold_harness(task_dir, sample_dir)
@@ -591,6 +934,8 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
                 "frozen_dut_from_anchor": frozen_duts,
                 "frozen_gold_harness": frozen_harness,
                 "repair_layer": layer,
+                "syntax_zero_gate": bool(args.syntax_zero_gate),
+                "syntax_zero_gate_state": syntax_gate_state,
                 "generated_at": datetime.now(timezone.utc).isoformat(),
                 **usage,
             },
@@ -654,8 +999,10 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
         if result.get("status") == "PASS" or no_progress >= args.patience:
             break
 
-    final_dir = Path(args.generated_root) / model_slug / task_id / f"sample_{args.sample_idx}"
     _copy_sample(best_sample, final_dir)
+    materialized_syntax_edits = (
+        _materialize_syntax_zero_sanitizers(final_dir) if args.syntax_zero_gate else []
+    )
     _json_write(
         final_dir / "generation_meta.json",
         {
@@ -668,6 +1015,8 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
             "best_layer": best_layer,
             "best_scores": best_result.get("scores", {}),
             "best_metrics": _extract_metrics(best_result),
+            "syntax_zero_gate": bool(args.syntax_zero_gate),
+            "materialized_syntax_edits": materialized_syntax_edits,
             "initial_candidates": [
                 {
                     "idx": item["idx"],
@@ -691,7 +1040,10 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
 def parse_args() -> argparse.Namespace:
     ap = argparse.ArgumentParser(description="Adaptive EVAS repair pilot runner.")
     ap.add_argument("--model", default="kimi-k2.5")
+    ap.add_argument("--all", action="store_true", help="Run all benchmark tasks instead of the small default pilot set.")
     ap.add_argument("--task", action="append", default=[])
+    ap.add_argument("--workers", type=int, default=1, help="Task-level parallel workers. Use 1 for serial mode.")
+    ap.add_argument("--resume", action="store_true", help="Skip tasks that already have a best result and final sample.")
     ap.add_argument("--source-generated-dir", default="generated-table2-evas-guided-repair-3round-skill")
     ap.add_argument("--initial-result-root", default="",
                     help="Optional existing EVAS result root used as round-0 feedback to avoid re-scoring slow baselines.")
@@ -711,26 +1063,90 @@ def parse_args() -> argparse.Namespace:
     ap.add_argument("--top-p", type=float, default=1.0)
     ap.add_argument("--max-tokens", type=int, default=4096)
     ap.add_argument("--env-file", default=".env.table2")
+    ap.add_argument(
+        "--repair-public-spec-mode",
+        choices=["prompt-only", "spectre-strict-v3", "legacy-extracted"],
+        default="legacy-extracted",
+        help="Prompt/spec mode used when reconstructing the original task inside repair prompts.",
+    )
+    ap.add_argument(
+        "--no-repair-skill",
+        action="store_true",
+        help="Disable repair skill/circuit-knowledge injection for clean EVAS-only F experiments.",
+    )
+    ap.add_argument(
+        "--disable-contract-diagnosis",
+        action="store_true",
+        help="Disable task-local behavior contract diagnosis for clean EVAS-only F experiments.",
+    )
     ap.add_argument("--freeze-tb-on-behavior", action="store_true",
                     help="For behavior failures, keep the best-so-far testbench and only evaluate generated DUT changes.")
     ap.add_argument("--freeze-gold-harness-on-behavior", action="store_true",
                     help="For behavior failures, use benchmark gold stimulus/save harness while preserving generated DUT code.")
     ap.add_argument("--layered-only-repair", action="store_true",
                     help="Automatically route compile/observable/behavior failures to the narrowest editable layer.")
+    ap.add_argument(
+        "--syntax-zero-gate",
+        action="store_true",
+        help=(
+            "Condition G: repair compile/interface/runtime/strict-preflight/observable errors before behavior tuning, "
+            "and preserve working layers where possible."
+        ),
+    )
     return ap.parse_args()
 
 
 def main() -> int:
     args = parse_args()
     _load_env_file(Path(args.env_file))
-    tasks = _task_lookup(args.task or DEFAULT_TASKS)
+    tasks = _task_lookup([] if args.all else (args.task or DEFAULT_TASKS))
     results = []
-    for task_id, task_dir in tasks:
-        results.append(run_task(args, task_id, task_dir))
+
+    def _runner_exception_result(task_id: str, task_dir: Path, exc: BaseException) -> dict:
+        meta = read_meta(task_dir)
+        result = {
+            "model": args.model,
+            "task_id": task_id,
+            "family": meta.get("family", "unknown"),
+            "category": meta.get("category", "unknown"),
+            "status": "FAIL_INFRA",
+            "scores": {"dut_compile": 0.0, "tb_compile": 0.0, "sim_correct": 0.0, "weighted_total": 0.0},
+            "required_axes": meta.get("scoring", ["dut_compile", "tb_compile", "sim_correct"]),
+            "evas_notes": [f"adaptive_runner_exception={type(exc).__name__}: {exc}"],
+        }
+        _json_write(Path(args.output_root) / "best" / task_id / "result.json", result)
+        return result
+
+    worker_count = max(1, min(args.workers, len(tasks)))
+    if worker_count == 1:
+        for task_id, task_dir in tasks:
+            results.append(run_task(args, task_id, task_dir))
+    else:
+        print(f"[adaptive] parallel task-level repair with {worker_count} workers")
+        with concurrent.futures.ThreadPoolExecutor(max_workers=worker_count) as executor:
+            future_map = {
+                executor.submit(run_task, args, task_id, task_dir): (task_id, task_dir)
+                for task_id, task_dir in tasks
+            }
+            for future in concurrent.futures.as_completed(future_map):
+                task_id, task_dir = future_map[future]
+                try:
+                    results.append(future.result())
+                except BaseException as exc:
+                    print(f"[adaptive] {task_id} runner exception: {type(exc).__name__}: {exc}")
+                    results.append(_runner_exception_result(task_id, task_dir, exc))
     summary = {
         "model": args.model,
         "tasks": len(results),
         "pass_count": sum(1 for r in results if r.get("status") == "PASS"),
+        "workers": worker_count,
+        "condition_flags": {
+            "syntax_zero_gate": bool(args.syntax_zero_gate),
+            "layered_only_repair": bool(args.layered_only_repair),
+            "repair_public_spec_mode": args.repair_public_spec_mode,
+            "no_repair_skill": bool(args.no_repair_skill),
+            "disable_contract_diagnosis": bool(args.disable_contract_diagnosis),
+        },
         "results": [
             {
                 "task_id": r.get("task_id"),

@@ -1,0 +1,43 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cross_sine_precision_ref (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical vin,
+    output electrical first_err_out,
+    output electrical max_err_out,
+    output electrical count_out
+);
+    parameter real vth = 0.45;
+    parameter real fin = 73.0e6 from (0:inf);
+    parameter real scale_ps = 10.0 from (0:inf);
+    parameter real tedge = 20p from (0:inf);
+    integer count;
+    real expected_t;
+    real err_ps;
+    real abs_err_ps;
+    real first_abs_err_ps;
+    real max_abs_err_ps;
+
+    analog begin
+        @(initial_step) begin
+            count = 0;
+            first_abs_err_ps = 0.0;
+            max_abs_err_ps = 0.0;
+        end
+
+        @(cross(V(vin, VSS) - vth, +1)) begin
+            count = count + 1;
+            expected_t = count / fin;
+            err_ps = ($abstime - expected_t) * 1.0e12;
+            abs_err_ps = (err_ps < 0.0) ? -err_ps : err_ps;
+            if (count == 1) first_abs_err_ps = abs_err_ps;
+            if (abs_err_ps > max_abs_err_ps) max_abs_err_ps = abs_err_ps;
+        end
+
+        V(first_err_out, VSS) <+ transition(V(VDD, VSS) * first_abs_err_ps / scale_ps, 0.0, tedge, tedge);
+        V(max_err_out, VSS) <+ transition(V(VDD, VSS) * max_abs_err_ps / scale_ps, 0.0, tedge, tedge);
+        V(count_out, VSS) <+ transition(V(VDD, VSS) * count / 3.0, 0.0, tedge, tedge);
+    end
+endmodule

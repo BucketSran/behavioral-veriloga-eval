@@ -1,0 +1,26 @@
+// Testbench for above_threshold_startup_ref
+simulator lang=spectre
+
+// Include the DUT
+ahdl_include "above_threshold_startup_ref.va"
+
+// Ground reference
+gnd (0) vsource dc=0
+
+// Power supplies
+VDD (VDD 0) vsource dc=1.0
+VSS (VSS 0) vsource dc=0
+
+// Input voltage - already above threshold at t=0
+vin (vin 0) vsource dc=0.9
+
+// Device under test
+dut (VDD VSS vin out) above_threshold_startup_ref
+
+// Transient analysis
+tran tran stop=8n maxstep=50p errpreset=conservative
+
+// Save statements for observable signals
+save vin
+save out
+save dut.state

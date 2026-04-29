@@ -1,0 +1,54 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cross_interval_163p333_ref (VDD, VSS, a, b, delay_out, seen_out);
+    inout electrical VDD, VSS;
+    input electrical a, b;
+    output electrical delay_out, seen_out;
+
+    parameter real vth = 0.45 from (0:inf);
+    parameter real tdel = 1p from [0:inf);
+    parameter real tr = 100p from [0:inf);
+    parameter real tf = 100p from [0:inf);
+
+    integer seen_a, seen_b;
+    real t_a, t_b, delay_ps, delay_val;
+
+    analog begin
+        @(initial_step) begin
+            seen_a = 0;
+            seen_b = 0;
+            t_a = 0.0;
+            t_b = 0.0;
+            delay_ps = 0.0;
+            delay_val = 0.0;
+        end
+
+        // Detect rising cross on input a
+        @(cross(V(a) - vth, +1)) begin
+            if (seen_a == 0) begin
+                t_a = $abstime;
+                seen_a = 1;
+            end
+        end
+
+        // Detect rising cross on input b
+        @(cross(V(b) - vth, +1)) begin
+            if (seen_b == 0 && seen_a == 1) begin
+                t_b = $abstime;
+                seen_b = 1;
+                delay_ps = (t_b - t_a) / 1p;  // Convert to ps
+            end
+        end
+
+        // Calculate delay_out: VDD * delay_ps / 200
+        if (seen_a == 1 && seen_b == 1) begin
+            delay_val = V(VDD) * delay_ps / 200.0;
+        end else begin
+            delay_val = 0.0;
+        end
+
+        V(delay_out) <+ transition(delay_val, tdel, tr, tf);
+        V(seen_out) <+ transition((seen_a == 1 && seen_b == 1) ? V(VDD) : V(VSS), tdel, tr, tf);
+    end
+endmodule

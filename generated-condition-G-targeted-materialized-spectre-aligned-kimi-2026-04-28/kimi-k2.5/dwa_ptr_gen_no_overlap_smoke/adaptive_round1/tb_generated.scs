@@ -1,0 +1,42 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "dwa_ptr_gen_no_overlap.va"
+
+// Parameters
+parameters vdd=0.9 vth=0.45 period=10n
+
+// Power supply
+Vdd (vdd 0) vsource dc=vdd
+
+// Clock: 100 MHz, period 10ns
+Vclk (clk_i 0) vsource type=pulse val0=0 val1=vdd period=period rise=100p fall=100p width=5n
+
+// Reset: active low, released after 5ns
+Vrst (rst_ni 0) vsource type=pwl wave=[0 0 5n 0 5.1n vdd]
+
+// Code inputs: 4-bit code_msb_i[3:0]
+// Sweep through various codes to exercise pointer updates
+Vcode0 (code_msb_i_0 0) vsource type=pwl wave=[0 0 15n 0 15.1n vdd 35n vdd 35.1n 0 55n 0 55.1n vdd 75n vdd 75.1n 0 95n 0 95.1n vdd 115n vdd 115.1n 0 135n 0 135.1n vdd 155n vdd 155.1n 0]
+Vcode1 (code_msb_i_1 0) vsource type=pwl wave=[0 0 25n 0 25.1n vdd 45n vdd 45.1n 0 65n 0 65.1n vdd 85n vdd 85.1n 0 105n 0 105.1n vdd 125n vdd 125.1n 0 145n 0 145.1n vdd]
+Vcode2 (code_msb_i_2 0) vsource type=pwl wave=[0 0 35n 0 35.1n vdd 55n vdd 55.1n 0 75n 0 75.1n vdd 95n vdd 95.1n 0 115n 0 115.1n vdd 135n vdd 135.1n 0]
+Vcode3 (code_msb_i_3 0) vsource type=pwl wave=[0 0 45n 0 45.1n vdd 65n vdd 65.1n 0 85n 0 85.1n vdd 105n vdd 105.1n 0 125n 0 125.1n vdd 145n vdd 145.1n 0]
+
+// DUT instance
+XDUT (clk_i rst_ni code_msb_i_0 code_msb_i_1 code_msb_i_2 code_msb_i_3 \
+      cell_en_o_0 cell_en_o_1 cell_en_o_2 cell_en_o_3 cell_en_o_4 cell_en_o_5 cell_en_o_6 cell_en_o_7 \
+      cell_en_o_8 cell_en_o_9 cell_en_o_10 cell_en_o_11 cell_en_o_12 cell_en_o_13 cell_en_o_14 cell_en_o_15 \
+      ptr_o_0 ptr_o_1 ptr_o_2 ptr_o_3 ptr_o_4 ptr_o_5 ptr_o_6 ptr_o_7 \
+      ptr_o_8 ptr_o_9 ptr_o_10 ptr_o_11 ptr_o_12 ptr_o_13 ptr_o_14 ptr_o_15) \
+      dwa_ptr_gen_no_overlap
+
+// Save statements for required observable signals
+save clk_i
+save rst_ni
+save cell_en_o_0 cell_en_o_1 cell_en_o_2 cell_en_o_3 cell_en_o_4 cell_en_o_5 cell_en_o_6 cell_en_o_7
+save cell_en_o_8 cell_en_o_9 cell_en_o_10 cell_en_o_11 cell_en_o_12 cell_en_o_13 cell_en_o_14 cell_en_o_15
+save ptr_o_0 ptr_o_1 ptr_o_2 ptr_o_3 ptr_o_4 ptr_o_5 ptr_o_6 ptr_o_7
+save ptr_o_8 ptr_o_9 ptr_o_10 ptr_o_11 ptr_o_12 ptr_o_13 ptr_o_14 ptr_o_15
+
+// Transient analysis
+tran tran stop=175n maxstep=0.1n

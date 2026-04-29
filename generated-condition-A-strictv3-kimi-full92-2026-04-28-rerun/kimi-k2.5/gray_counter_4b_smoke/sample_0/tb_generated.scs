@@ -1,0 +1,31 @@
+// Spectre testbench for gray_counter_4b
+
+// Include the Verilog-A model
+ahdl_include "gray_counter_4b.va"
+
+// Supply voltages
+VDD (vdd 0) vsource dc=1.8
+VSS (vss 0) vsource dc=0
+
+// Clock source: 100MHz (10ns period)
+VCLK (clk 0) vsource type=pulse val0=0 val1=1.8 period=10n rise=100p fall=100p width=5n
+
+// Enable signal: high after initial reset
+VEN (en 0) vsource type=pwl wave=[0 0 50n 0 60n 1.8]
+
+// Reset signal: active-low, released after 40ns
+VRSTB (rstb 0) vsource type=pwl wave=[0 0 40n 0 50n 1.8]
+
+// Device under test
+DUT (vdd vss clk en rstb g3 g2 g1 g0) gray_counter_4b
+
+// Save statements for required signals
+save clk
+save rstb
+save g3
+save g2
+save g1
+save g0
+
+// Transient analysis
+tran tran stop=2u maxstep=500p errpreset=conservative

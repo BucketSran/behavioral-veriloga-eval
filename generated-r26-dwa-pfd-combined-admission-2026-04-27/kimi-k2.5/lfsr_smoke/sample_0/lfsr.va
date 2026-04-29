@@ -1,0 +1,54 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module lfsr (DPN, VDD, VSS, CLK, EN, RSTB);
+    inout DPN;
+    inout VDD;
+    inout VSS;
+    input CLK;
+    input EN;
+    input RSTB;
+
+    electrical DPN, VDD, VSS, CLK, EN, RSTB;
+
+    parameter real vdd_val = 1.0 from (0:inf);
+    parameter real vss_val = 0.0 from (0:inf);
+    parameter real vth = 0.5 from (0:inf);
+    parameter real tr = 10p from (0:inf);
+    parameter real tf = 10p from (0:inf);
+    parameter real td = 0 from [0:inf);
+    parameter integer seed = 123 from [0:2147483647];
+
+    integer lfsr_reg;
+    integer new_bit;
+    integer msb;
+    real dpn_val;
+
+    analog begin
+        @(initial_step) begin
+            lfsr_reg = seed;
+            msb = (lfsr_reg >> 30) & 1;
+            dpn_val = msb * vdd_val;
+        end
+
+        @(cross(V(RSTB) - vth, -1)) begin
+            lfsr_reg = seed;
+            msb = (lfsr_reg >> 30) & 1;
+            dpn_val = msb * vdd_val;
+        end
+
+        @(cross(V(CLK) - vth, 1)) begin
+            if (V(RSTB) > vth) begin
+                if (V(EN) > vth) begin
+                    new_bit = ((lfsr_reg >> 30) & 1) ^ ((lfsr_reg >> 20) & 1) ^ ((lfsr_reg >> 0) & 1) ^ ((lfsr_reg >> 1) & 1);
+                    lfsr_reg = (lfsr_reg << 1) | new_bit;
+                    lfsr_reg = lfsr_reg & 2147483647;
+                    msb = (lfsr_reg >> 30) & 1;
+                    dpn_val = msb * vdd_val;
+                end
+            end
+        end
+
+        V(DPN) <+ transition(dpn_val, td, tr, tf);
+    end
+endmodule

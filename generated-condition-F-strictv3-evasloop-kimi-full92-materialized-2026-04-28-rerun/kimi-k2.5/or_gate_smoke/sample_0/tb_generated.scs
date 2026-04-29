@@ -1,0 +1,24 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "or_gate.va"
+
+// Power supply
+Vdd (vdd 0) vsource dc=1.8
+
+// Input A: 0 for 2ns, 1 for 2ns, 1 for 2ns, 0 for 2ns
+// Pattern: 0, 0, 1, 1
+Va (a 0) vsource type=pwl wave=[0n 0 2n 0 2.001n 1.8 4n 1.8 4.001n 1.8 6n 1.8 6.001n 0 8n 0]
+
+// Input B: 0 for 2ns, 0 for 2ns, 1 for 2ns, 1 for 2ns
+// Pattern: 0, 1, 0, 1
+Vb (b 0) vsource type=pwl wave=[0n 0 2n 0 2.001n 0 4n 0 4.001n 1.8 6n 1.8 6.001n 1.8 8n 1.8]
+
+// DUT
+XDUT (a b y) or_gate
+
+// Save signals
+save a b y
+
+// Transient analysis
+tran tran stop=8n maxstep=100p

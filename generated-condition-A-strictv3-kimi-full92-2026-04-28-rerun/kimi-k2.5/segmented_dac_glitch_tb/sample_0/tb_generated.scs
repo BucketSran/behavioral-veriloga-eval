@@ -1,0 +1,45 @@
+simulator lang=spectre
+global 0
+
+// Supply voltages
+VDD (vdd 0) vsource dc=0.9
+VSS (vss 0) vsource dc=0
+
+// Clock: 10ns period, 50% duty cycle, enough edges for 16 codes
+// Need 16 clock cycles, use 20 for margin, 200ns total but stop at 160n
+// Actually 16 codes * 10ns = 160ns, so 16 rising edges
+VCLK (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n rise=100p fall=100p width=4.9n
+
+// 4-bit binary counter inputs: d3 d2 d1 d0
+// Code sequence 0-15 over 160ns, each code lasts 10ns (one clock period)
+// d0 (LSB): toggles every 10ns (period 20ns, but we need 10ns for full speed)
+// Actually: 10ns per code, so d0 period = 20ns, d1 period = 40ns, d2 period = 80ns, d3 period = 160ns
+
+// d0: LSB, period 20ns, toggles at 5ns, 15ns, 25ns...
+VD0 (d0 0) vsource type=pulse val0=0 val1=0.9 period=20n rise=100p fall=100p width=9.9n delay=5n
+
+// d1: period 40ns
+VD1 (d1 0) vsource type=pulse val0=0 val1=0.9 period=40n rise=100p fall=100p width=19.9n delay=10n
+
+// d2: period 80ns
+VD2 (d2 0) vsource type=pulse val0=0 val1=0.9 period=80n rise=100p fall=100p width=39.9n delay=20n
+
+// d3: MSB, period 160ns
+VD3 (d3 0) vsource type=pulse val0=0 val1=0.9 period=160n rise=100p fall=100p width=79.9n delay=40n
+
+// DUT instance
+XDUT (vdd vss clk d3 d2 d1 d0 vout) segmented_dac_glitch_ref
+
+// Transient analysis
+tran tran stop=160n maxstep=100p errpreset=conservative
+
+// Save statements - plain scalar names for evaluator
+save clk
+save d3
+save d2
+save d1
+save d0
+save vout
+
+// Include DUT last
+ahdl_include "segmented_dac_glitch_ref.va"

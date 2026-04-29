@@ -1,0 +1,46 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module adc_ideal_4b (vin, clk, vdd, vss, rst_n, dout);
+    input vin, clk, vdd, vss, rst_n;
+    output [3:0] dout;
+    electrical vin, clk, vdd, vss, rst_n;
+    electrical [3:0] dout;
+
+    parameter real vth = 0.45 from (0:inf);
+    parameter real tr = 10p from (0:inf);
+    parameter real tf = 10p from (0:inf);
+
+    integer code;
+    real vstep;
+    real vdd_val, vss_val;
+    real rst_val;
+
+    analog begin
+        @(initial_step) begin
+            code = 0;
+        end
+
+        // Sample on rising edge of clk
+        @(cross(V(clk) - vth, 1)) begin
+            vdd_val = V(vdd);
+            vss_val = V(vss);
+            rst_val = V(rst_n);
+            vstep = (vdd_val - vss_val) / 16.0;
+
+            if (rst_val < vth) begin
+                code = 0;
+            end else begin
+                code = $floor((V(vin) - vss_val) / vstep);
+                if (code < 0) code = 0;
+                if (code > 15) code = 15;
+            end
+        end
+
+        // Drive digital outputs with transition
+        V(dout[3]) <+ transition((code >> 3) & 1, 0, tr, tf);
+        V(dout[2]) <+ transition((code >> 2) & 1, 0, tr, tf);
+        V(dout[1]) <+ transition((code >> 1) & 1, 0, tr, tf);
+        V(dout[0]) <+ transition(code & 1, 0, tr, tf);
+    end
+endmodule

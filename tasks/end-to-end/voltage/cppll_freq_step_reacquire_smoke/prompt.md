@@ -5,6 +5,16 @@ model in Verilog-A, then produce a minimal EVAS-compatible Spectre testbench
 that demonstrates unlock and reacquire behavior after a reference-frequency
 step.
 
+Return code blocks only. Do not include explanations or design discussion
+outside the code blocks.
+
+Return exactly two fenced code blocks:
+
+1. A `verilog-a` block for `cppll_timer_ref.va`
+2. A `spectre` block for `tb_cppll_freq_step_reacquire.scs`
+
+Keep the code compact enough that both required blocks are emitted completely.
+
 Behavioral intent:
 
 - one reference clock input `ref_clk`

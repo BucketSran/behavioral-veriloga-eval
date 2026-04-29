@@ -1,0 +1,117 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bg_cal (VDD, VSS, CLK, COMP_OUT, SETTLED, TRIM_0, TRIM_1, TRIM_2, TRIM_3, TRIM_4, TRIM_5);
+    inout VDD;
+    inout VSS;
+    input CLK;
+    input COMP_OUT;
+    output SETTLED;
+    output TRIM_0;
+    output TRIM_1;
+    output TRIM_2;
+    output TRIM_3;
+    output TRIM_4;
+    output TRIM_5;
+
+    electrical VDD, VSS, CLK, COMP_OUT, SETTLED, TRIM_0, TRIM_1, TRIM_2, TRIM_3, TRIM_4, TRIM_5;
+
+    // Parameters
+    parameter real vth = 0.9 from (0:inf);
+    parameter real vhi = 1.8 from (0:inf);
+    parameter real vlo = 0.0 from [0:inf);
+    parameter real tdel = 0 from [0:inf);
+    parameter real trise = 1e-9 from (0:inf);
+    parameter real tfall = 1e-9 from (0:inf);
+    parameter integer navg = 16 from [1:inf);  // Number of comparisons to average
+
+    // State variables
+    integer trim_code;
+    integer comp_count;
+    integer comp_sum;
+    integer settled_count;
+    integer prev_trim_code;
+    integer settled_flag;
+    integer clk_state;
+    integer comp_sample;
+
+    analog begin
+        @(initial_step) begin
+            trim_code = 32;
+            comp_count = 0;
+            comp_sum = 0;
+            settled_count = 0;
+            prev_trim_code = 32;
+            settled_flag = 0;
+            clk_state = 0;
+            comp_sample = 0;
+        end
+
+        // Detect rising edge of CLK
+        @(cross(V(CLK) - vth, 1)) begin
+            clk_state = 1;
+
+            // Sample COMP_OUT at clock edge
+            if (V(COMP_OUT) > vth) begin
+                comp_sample = 1;
+            end else begin
+                comp_sample = 0;
+            end
+
+            // Accumulate comparison results
+            comp_sum = comp_sum + comp_sample;
+            comp_count = comp_count + 1;
+
+            // After navg comparisons, compute offset direction and update trim
+            if (comp_count >= navg) begin
+                // Determine offset direction: if more 1s than 0s, offset is positive
+                // Average > 0.5 means positive offset (more 1s)
+                if (comp_sum > (navg / 2)) begin
+                    // Positive offset, decrease trim code
+                    trim_code = trim_code - 1;
+                end else if (comp_sum < (navg / 2)) begin
+                    // Negative offset, increase trim code
+                    trim_code = trim_code + 1;
+                end
+                // else: balanced, no change
+
+                // Clamp trim_code to 6-bit range (0 to 63)
+                if (trim_code < 0) trim_code = 0;
+                if (trim_code > 63) trim_code = 63;
+
+                // Check if trim code has settled
+                if (trim_code == prev_trim_code) begin
+                    settled_count = settled_count + 1;
+                end else begin
+                    settled_count = 0;
+                end
+
+                // Set settled flag after 8 consecutive unchanged cycles
+                if (settled_count >= 8) begin
+                    settled_flag = 1;
+                end
+
+                prev_trim_code = trim_code;
+
+                // Reset accumulation for next calibration cycle
+                comp_count = 0;
+                comp_sum = 0;
+            end
+        end
+
+        @(cross(V(CLK) - vth, -1)) begin
+            clk_state = 0;
+        end
+
+        // Output SETTLED flag
+        V(SETTLED) <+ transition(settled_flag * vhi, tdel, trise, tfall);
+
+        // Output 6-bit trim code as individual electrical signals
+        V(TRIM_0) <+ transition(((trim_code >> 0) & 1) * vhi, tdel, trise, tfall);
+        V(TRIM_1) <+ transition(((trim_code >> 1) & 1) * vhi, tdel, trise, tfall);
+        V(TRIM_2) <+ transition(((trim_code >> 2) & 1) * vhi, tdel, trise, tfall);
+        V(TRIM_3) <+ transition(((trim_code >> 3) & 1) * vhi, tdel, trise, tfall);
+        V(TRIM_4) <+ transition(((trim_code >> 4) & 1) * vhi, tdel, trise, tfall);
+        V(TRIM_5) <+ transition(((trim_code >> 5) & 1) * vhi, tdel, trise, tfall);
+    end
+endmodule

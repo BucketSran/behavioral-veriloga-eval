@@ -1,0 +1,27 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module not_gate (inout VDD, inout VSS, input A, output Y);
+    electrical VDD, VSS, A, Y;
+    real vdd_val, vss_val, vth, out_val;
+    real tr, tf;
+
+    analog begin
+        @(initial_step) begin
+            tr = 100p;
+            tf = 100p;
+        end
+
+        vdd_val = V(VDD);
+        vss_val = V(VSS);
+        vth = (vdd_val + vss_val) / 2.0;
+
+        if (V(A) > vth) begin
+            out_val = vss_val;
+        end else begin
+            out_val = vdd_val;
+        end
+
+        V(Y) <+ transition(out_val, 0, tr, tf);
+    end
+endmodule

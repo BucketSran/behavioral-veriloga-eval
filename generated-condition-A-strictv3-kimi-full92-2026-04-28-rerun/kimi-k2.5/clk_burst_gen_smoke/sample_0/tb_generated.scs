@@ -1,0 +1,25 @@
+// clk_burst_gen testbench - EVAS compatible
+
+// Include Verilog-A module
+ahdl_include "clk_burst_gen.va"
+
+// Parameters
+parameters period=100n div=8 vdd=1.0
+
+// Top level testbench
+simulator lang=spectre
+
+// Voltage sources
+Vclk (CLK 0) vsource type=pulse val0=0 val1=vdd period=period rise=1n fall=1n width=period/2-1n
+Vrst (RST_N 0) vsource type=pwl wave=[0n 0 235n 0 236n vdd 3000n vdd]
+
+// Device under test
+xdut (CLK RST_N CLK_OUT) clk_burst_gen div=div
+
+// Transient analysis
+tran tran stop=3000n maxstep=5n
+
+// Save statements for required waveforms
+save CLK
+save RST_N
+save CLK_OUT

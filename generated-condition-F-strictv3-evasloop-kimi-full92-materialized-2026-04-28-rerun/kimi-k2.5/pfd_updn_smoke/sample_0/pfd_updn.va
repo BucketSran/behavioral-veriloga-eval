@@ -1,0 +1,54 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pfd_updn (vdd, vss, ref, div, up, dn);
+    inout vdd, vss;
+    input ref, div;
+    output up, dn;
+    electrical vdd, vss, ref, div, up, dn;
+
+    parameter real vth = 0.45;
+    parameter real tedge = 50p;
+
+    integer up_state;
+    integer dn_state;
+    integer up_next;
+    integer dn_next;
+
+    analog begin
+        @(initial_step) begin
+            up_state = 0;
+            dn_state = 0;
+        end
+
+        // Detect rising edge on ref
+        @(cross(V(ref) - vth, 1)) begin
+            up_next = 1;
+            dn_next = dn_state;
+            // Combinational reset: if both would be high, reset both
+            if (up_next == 1 && dn_next == 1) begin
+                up_next = 0;
+                dn_next = 0;
+            end
+            up_state = up_next;
+            dn_state = dn_next;
+        end
+
+        // Detect rising edge on div
+        @(cross(V(div) - vth, 1)) begin
+            up_next = up_state;
+            dn_next = 1;
+            // Combinational reset: if both would be high, reset both
+            if (up_next == 1 && dn_next == 1) begin
+                up_next = 0;
+                dn_next = 0;
+            end
+            up_state = up_next;
+            dn_state = dn_next;
+        end
+
+        // Output drivers with transition
+        V(up) <+ transition(up_state * (V(vdd) - V(vss)) + V(vss), 0, tedge);
+        V(dn) <+ transition(dn_state * (V(vdd) - V(vss)) + V(vss), 0, tedge);
+    end
+endmodule

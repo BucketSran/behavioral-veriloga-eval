@@ -1,0 +1,39 @@
+// Spectre testbench for cross_interval_163p333_ref
+// Tests interval measurement with 163.333 ps between rising edges
+
+simulator lang=spectre
+
+// Include the Verilog-A module
+ahdl_include "cross_interval_163p333_ref.va"
+
+// Supply voltages
+VDD (VDD 0) vsource dc=1.8
+VSS (VSS 0) vsource dc=0
+
+// Input stimulus: two pulses 163.333 ps apart on rising edges
+// First pulse on 'a' at t=1ns with 100ps rise time, crossing at ~1.05ns
+// Second pulse on 'b' at t=1.163333ns with 100ps rise time, crossing at ~1.213333ns
+// Interval between crossings: 163.333 ps
+
+// Pulse on 'a': starts at 1ns, 100ps rise, 1ns width, 2ns period
+Va (a 0) vsource type=pulse val0=0 val1=1.8 period=4n delay=1n \
+    rise=100p fall=100p width=2n
+
+// Pulse on 'b': starts at 1.163333ns (163.333ps after 'a' start), same shape
+// This gives crossing at 1.163333ns + 50ps = 1.213333ns
+// Interval: 1.213333ns - 1.05ns = 163.333ps
+Vb (b 0) vsource type=pulse val0=0 val1=1.8 period=4n delay=1.163333n \
+    rise=100p fall=100p width=2n
+
+// Device under test
+dut (VDD VSS a b delay_out seen_out) cross_interval_163p333_ref
+
+// Transient analysis
+tran tran stop=12n maxstep=5p errpreset=conservative
+
+// Save statements for required outputs
+save dut.delay_out
+save dut.seen_out
+save a
+save b
+save VDD

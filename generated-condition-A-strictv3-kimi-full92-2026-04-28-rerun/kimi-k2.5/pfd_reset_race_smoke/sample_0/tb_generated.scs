@@ -1,0 +1,165 @@
+// Spectre testbench for pfd_updn
+// Tests near-simultaneous ref/div edges with swapping lead/lag relationship
+
+simulator lang=spectre
+
+// Include the Verilog-A model
+ahdl_include "pfd_updn.va"
+
+// Supply voltages
+vsource vdd (vdd 0) vsource dc=1.0
+vsource vss (vss 0) vsource dc=0.0
+
+// PFD instance
+pfd_updn dut (vdd vss ref div up dn)
+
+// Stimulus: ref and div with near-simultaneous edges, swapping lead/lag
+// Window 1: ref leads div (up pulse expected)
+// Window 2: div leads ref (dn pulse expected)
+// Window 3: near-simultaneous edges (reset race test)
+
+// REF stimulus: starts with period 40ns, then shifts phase
+vsource vref (ref 0) vsource type=pulse \
+    val0=0 val1=1.0 period=40n delay=0 rise=100p fall=100p width=20n
+
+// DIV stimulus: starts lagging, then leads, then near-simultaneous
+// Period 40ns, but phase shifts to create different relationships
+vsource vdiv (div 0) vsource type=pulse \
+    val0=0 val1=1.0 period=40n delay=5n rise=100p fall=100p width=20n
+
+// Additional phase modulation to swap lead/lag during simulation
+// Using a second pulse source with varying delay would be complex,
+// so we use a PWL to create the phase walk
+
+// Alternative: use PWL for precise edge control
+// Delete above vdiv and use this for more control:
+
+// First, let's use a more controlled approach with PWL
+// Comment out the simple pulse and use PWL-based stimulus
+
+// Window 1: ref leads by 5ns (0-100ns)
+// Window 2: div leads by 5ns (100-200ns)
+// Window 3: near simultaneous, swapping (200-300ns)
+
+// Actually, let's use vpwl for precise edge placement
+// Delete previous vdiv and create controlled stimulus
+
+// REF: regular 40ns period starting at t=0
+// Edge times: 0, 40n, 80n, 120n, 160n, 200n, 240n, 280n
+
+// DIV: phase walks from +5ns lag to -5ns lead
+// Edge times: 5n, 45n, 85n, 115n, 155n, 195n, 235n, 275n (lag ref by 5n)
+// Then: 35n, 75n, 115n... wait that's messy with single PWL
+
+// Better approach: use two PWL sources with explicit edge times
+
+// REF PWL
+vsource vref_pwl (ref 0) vsource type=pwl \
+    wave=[0n 0  \
+          0.1n 1.0  \
+          20n 1.0  \
+          20.1n 0  \
+          40n 0  \
+          40.1n 1.0  \
+          60n 1.0  \
+          60.1n 0  \
+          80n 0  \
+          80.1n 1.0  \
+          100n 1.0  \
+          100.1n 0  \
+          120n 0  \
+          120.1n 1.0  \
+          140n 1.0  \
+          140.1n 0  \
+          160n 0  \
+          160.1n 1.0  \
+          180n 1.0  \
+          180.1n 0  \
+          200n 0  \
+          200.1n 1.0  \
+          220n 1.0  \
+          220.1n 0  \
+          240n 0  \
+          240.1n 1.0  \
+          260n 1.0  \
+          260.1n 0  \
+          280n 0  \
+          280.1n 1.0  \
+          300n 1.0]
+
+// DIV PWL: starts lagging ref by 5ns, then leads by 5ns, then near-simultaneous
+vsource vdiv_pwl (div 0) vsource type=pwl \
+    wave=[0n 0  \
+          5n 0  \
+          5.1n 1.0  \
+          25n 1.0  \
+          25.1n 0  \
+          45n 0  \
+          45.1n 1.0  \
+          65n 1.0  \
+          65.1n 0  \
+          85n 0  \
+          85.1n 1.0  \
+          105n 1.0  \
+          105.1n 0  \
+          115n 0  \   // div leads by 5ns starting here
+          115.1n 1.0  \
+          135n 1.0  \
+          135.1n 0  \
+          155n 0  \
+          155.1n 1.0  \
+          175n 1.0  \
+          175.1n 0  \
+          195n 0  \
+          195.1n 1.0  \
+          215n 1.0  \
+          215.1n 0  \
+          235n 0  \
+          235.1n 1.0  \
+          255n 1.0  \
+          255.1n 0  \
+          // Near simultaneous region: edges within 100ps of each other
+          279.9n 0  \
+          280.0n 1.0  \
+          300n 1.0]
+
+// Actually, let's simplify with a cleaner PWL that shows the key behaviors
+
+// Delete previous sources and use cleaner version
+// Use ideal pulse with phase modulation via delay parameter change - not possible in one source
+
+// Final clean approach: explicit PWL with clear windows
+
+// Window 1 (0-80ns): ref leads div by 5ns -> up pulses
+// Window 2 (80-160ns): div leads ref by 5ns -> dn pulses
+// Window 3 (160-240ns): ref leads div by 5ns -> up pulses
+// Window 4 (240-300ns): near-simultaneous edges for reset race test
+
+// Delete vref_pwl, vdiv_pwl and use final version
+
+// Final REF PWL - 50ns period for clearer visualization
+vsource vref_final (ref 0) vsource type=pwl \
+    wave=[0n 0  0.1n 1.0  25n 1.0  25.1n 0  \
+          50n 0  50.1n 1.0  75n 1.0  75.1n 0  \
+          100n 0  100.1n 1.0  125n 1.0  125.1n 0  \
+          150n 0  150.1n 1.0  175n 1.0  175.1n 0  \
+          200n 0  200.1n 1.0  225n 1.0  225.1n 0  \
+          250n 0  250.1n 1.0  275n 1.0  275.1n 0  \
+          300n 0]
+
+// Final DIV PWL - phase walks: lag, lead, lag, near-simultaneous
+vsource vdiv_final (div 0) vsource type=pwl \
+    wave=[0n 0  \
+          5n 0  5.1n 1.0  30n 1.0  30.1n 0  \     // lags ref by 5ns (up)
+          45n 0  45.1n 1.0  70n 1.0  70.1n 0  \   // leads ref by 5ns (dn)
+          105n 0  105.1n 1.0  130n 1.0  130.1n 0  \ // lags ref by 5ns (up)
+          155n 0  155.1n 1.0  180n 1.0  180.1n 0  \ // leads ref by 5ns (dn)
+          205n 0  205.1n 1.0  230n 1.0  230.1n 0  \ // lags ref by 5ns (up)
+          249.9n 0  250.0n 1.0  275n 1.0  275.1n 0  \ // near-simultaneous at 250n
+          300n 0]
+
+// Analysis
+tran tran stop=300n maxstep=10p errpreset=conservative
+
+// Save statements for required observables
+save ref div up dn

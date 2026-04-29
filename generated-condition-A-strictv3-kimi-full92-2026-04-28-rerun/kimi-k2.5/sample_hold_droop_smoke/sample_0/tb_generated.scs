@@ -1,0 +1,26 @@
+// Sample-and-hold droop testbench
+// EVAS-compatible Spectre testbench
+
+// Include the DUT
+ahdl_include "sample_hold_droop_ref.va"
+
+// Supply voltages
+vsource vdd (vdd 0) vdc=0.9
+vsource vss (vss 0) vdc=0.0
+
+// Clock: period ~20ns, multiple edges for hold windows
+// 170ns simulation allows ~8 clock cycles
+vsource clk (clk 0) vsource type=pulse val0=0 val1=0.9 period=20n delay=5n rise=100p fall=100p width=9.8n
+
+// Input signal: multiple distinct levels for sampling
+// Step changes to create different held values
+vsource vin (vin 0) vsource type=pwl wave=[0n 0.0 10n 0.0 10.1n 0.3 40n 0.3 40.1n 0.6 70n 0.6 70.1n 0.8 100n 0.8 100.1n 0.2 130n 0.2 130.1n 0.5 160n 0.5]
+
+// DUT instantiation: vdd, vss, clk, vin, vout
+sample_hold_droop_ref dut (vdd vss clk vin vout)
+
+// Save required scalar names
+save vin clk vout
+
+// Transient analysis per public contract
+tran tran stop=170n maxstep=0.1n

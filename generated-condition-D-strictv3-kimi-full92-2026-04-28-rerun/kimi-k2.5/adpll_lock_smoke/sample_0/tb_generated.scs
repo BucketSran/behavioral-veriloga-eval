@@ -1,0 +1,23 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "adpll_va_idtmod.va"
+
+// Supply voltages
+Vdd (VDD 0) vsource dc=1.8
+Vss (VSS 0) vsource dc=0
+
+// 50 MHz reference clock (20ns period)
+Vref (ref_clk 0) vsource type=pulse val0=0 val1=1.8 period=20n rise=0.1n fall=0.1n width=10n
+
+// DUT instance
+XDUT (VDD VSS ref_clk fb_clk dco_clk vctrl_mon lock) adpll_va_idtmod
+
+// Transient analysis
+tran tran stop=5u maxstep=5n
+
+// Save required signals
+save ref_clk
+save fb_clk
+save lock
+save vctrl_mon

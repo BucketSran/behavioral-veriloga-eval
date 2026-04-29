@@ -1,0 +1,23 @@
+// Spectre testbench for noise_gen module
+simulator lang=spectre
+
+// Include the Verilog-A module
+ahdl_include "noise_gen.va"
+
+// Supply and ground
+VDD (vdd 0) vsource dc=1.0
+
+// DC input source at 1.0 V
+Vin (vin_i 0) vsource dc=1.0
+
+// Device under test
+DUT (vin_i vout_o) noise_gen sigma=0.1
+
+// Transient analysis - strict EVAS validation settings
+tran tran stop=500n maxstep=1n
+
+// Save statements for observable waveforms
+save DUT:vin_i
+save DUT:vout_o
+save vin_i
+save vout_o

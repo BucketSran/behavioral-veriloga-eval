@@ -1,0 +1,55 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cross_sine_precision_ref (VDD, VSS, vin, first_err_out, max_err_out, count_out);
+    inout VDD;
+    inout VSS;
+    input vin;
+    output first_err_out;
+    output max_err_out;
+    output count_out;
+    electrical VDD, VSS, vin, first_err_out, max_err_out, count_out;
+
+    parameter real fin = 73.0e6 from (0:inf);
+    parameter real vth = 0.45 from (0:inf);
+
+    integer count;
+    real first_abs_err_ps;
+    real max_abs_err_ps;
+    real expected_time;
+    real abs_err_ps;
+    real vdd_val;
+    real vss_val;
+
+    analog begin
+        @(initial_step) begin
+            count = 0;
+            first_abs_err_ps = 0.0;
+            max_abs_err_ps = 0.0;
+        end
+
+        // Capture VDD and VSS values for output scaling
+        vdd_val = V(VDD);
+        vss_val = V(VSS);
+
+        // Monitor rising cross events on vin - vth
+        @(cross(V(vin, VSS) - vth, +1)) begin
+            count = count + 1;
+            expected_time = count / fin;
+            abs_err_ps = abs($abstime - expected_time) * 1.0e12; // convert to ps
+
+            if (count == 1) begin
+                first_abs_err_ps = abs_err_ps;
+            end
+
+            if (abs_err_ps > max_abs_err_ps) begin
+                max_abs_err_ps = abs_err_ps;
+            end
+        end
+
+        // Drive outputs with transition for smooth voltage changes
+        V(first_err_out) <+ transition(vdd_val * first_abs_err_ps / 10.0, 0, 1p);
+        V(max_err_out) <+ transition(vdd_val * max_abs_err_ps / 10.0, 0, 1p);
+        V(count_out) <+ transition(vdd_val * count / 3.0, 0, 1p);
+    end
+endmodule

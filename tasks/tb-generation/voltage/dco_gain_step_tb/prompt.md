@@ -1,68 +1,36 @@
 Given a voltage-domain timer-based DCO DUT, generate a minimal EVAS-compatible
-Spectre-format `.scs` testbench that applies a control-voltage step and saves
-the control and clock waveforms so frequency change can be measured before and
-after the step.
+Spectre `.scs` testbench that applies a control-voltage step and saves the
+control and clock waveforms.
 
-Requirements:
+This is a testbench-generation task. Do not generate Verilog-A modules. Assume
+the DUT Verilog-A file is provided by the benchmark harness and only write the
+Spectre testbench.
 
-- provide `VDD`, `VSS`, and a `vctrl` stimulus
-- instantiate the DUT by position
-- include `tran`
-- include explicit `save`
-- place `ahdl_include` last
+Return exactly one fenced code block tagged `spectre`. Do not include prose
+outside the code block.
 
-Ports:
-- `VDD`: inout electrical
-- `VSS`: inout electrical
-- `vctrl`: input electrical
-- `vout`: output electrical
+## Provided DUT
 
-DUT module to instantiate: `dco_gain_step_ref`
+- Include file: `dco_gain_step_ref.va`
+- Module name: `dco_gain_step_ref`
+- Positional port order: `(VDD, VSS, vctrl, vout)`
+- Required instance line:
+  `XDUT (VDD VSS vctrl vout) dco_gain_step_ref`
 
-DUT module to instantiate: `dco_gain_step_ref`
+## Required Testbench Structure
 
-DUT module to instantiate: `dco_gain_step_ref`
+- Start with `simulator lang=spectre` and `global 0`.
+- Provide `VDD=0.9 V` and `VSS=0 V`.
+- Drive `vctrl` with a clear low-to-high or high-to-low step so the output
+  frequency change is visible before and after the step.
+- Use exactly one transient analysis:
+  `tran tran stop=300n maxstep=100p`
+- Save the public waveform columns:
+  `save vctrl vout`
+- Place the DUT include last:
+  `ahdl_include "dco_gain_step_ref.va"`
 
-DUT module to instantiate: `dco_gain_step_ref`
+## Public Evaluation Contract
 
-DUT module to instantiate: `dco_gain_step_ref`
-
-DUT module to instantiate: `dco_gain_step_ref`
-
-DUT module to instantiate: `dco_gain_step_ref`
-
-DUT module to instantiate: `dco_gain_step_ref`
-
-DUT module to instantiate: `dco_gain_step_ref`
-
-DUT module to instantiate: `dco_gain_step_ref`
-
-DUT module to instantiate: `dco_gain_step_ref`
-
-DUT module to instantiate: `dco_gain_step_ref`
-
-DUT module to instantiate: `dco_gain_step_ref`
-
-
-## Public Evaluation Contract (Non-Gold)
-
-This section states evaluator-facing constraints that must be visible to the generated artifact.
-It does not prescribe the internal implementation or reveal a gold solution.
-
-Final EVAS transient setting:
-
-```spectre
-tran tran stop=300n maxstep=100p
-```
-
-Required public waveform columns in `tran.csv`:
-
-- `vctrl`, `vout`
-
-Use plain scalar save names for these observables; do not rely on instance-qualified or aliased save names.
-
-Timing/checking-window contract:
-
-- Clock-like input(s) `clock` must provide enough valid edges after reset/enable for the checker to sample settled outputs.
-- Sequential outputs are sampled shortly after clock edges, so drive outputs with stable held state variables and `transition()` targets rather than glitchy combinational expressions.
-- Public stimulus nodes used by the reference harness include: `VDD`, `VSS`, `vctrl`.
+The evaluator reads `vctrl` and `vout` from `tran.csv`. Use plain scalar save
+names; do not rely on instance-qualified or aliased save names.

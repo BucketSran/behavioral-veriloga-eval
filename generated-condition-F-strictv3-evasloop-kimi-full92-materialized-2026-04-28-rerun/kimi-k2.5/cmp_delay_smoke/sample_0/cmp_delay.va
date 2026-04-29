@@ -1,0 +1,110 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cmp_delay (clk, vinn, vinp, out_n, out_p, lp, lm, vss, vdd);
+    input clk;
+    input vinn;
+    input vinp;
+    output out_n;
+    output out_p;
+    output lp;
+    output lm;
+    inout vss;
+    inout vdd;
+
+    electrical clk, vinn, vinp, out_n, out_p, lp, lm, vss, vdd;
+
+    // Parameters
+    parameter real vth = 0.45 from (0:inf);      // Clock threshold (VDD/2 for 0.9V)
+    parameter real tr = 10p from (0:inf);        // Output rise time
+    parameter real tf = 10p from (0:inf);        // Output fall time
+    parameter real tdel_min = 50p from (0:inf);  // Minimum delay at 10mV
+    parameter real tdel_max = 5n from (0:inf);   // Maximum delay at 0.01mV
+
+    // State variables
+    integer out_p_state;
+    integer out_n_state;
+    integer lp_state;
+    integer lm_state;
+
+    // Internal variables
+    real vdd_val;
+    real vss_val;
+    real vdiff;
+    real tdel;
+    real vclk;
+
+    analog begin
+        // Initialize states
+        @(initial_step) begin
+            out_p_state = 0;
+            out_n_state = 0;
+            lp_state = 0;
+            lm_state = 0;
+        end
+
+        // Sample supply and clock
+        vdd_val = V(vdd);
+        vss_val = V(vss);
+        vclk = V(clk);
+
+        // Detect rising edge of clock
+        @(cross(vclk - vth, 1)) begin
+            // Calculate differential input voltage
+            vdiff = V(vinp) - V(vinn);
+
+            // Calculate delay based on |vdiff|
+            // Monotonically increasing delay as |vdiff| decreases from 10mV to 0.01mV
+            // Use logarithmic scaling: delay ~ 1/|vdiff|
+            if (vdiff > 0) begin
+                // Positive differential: out_p goes high, out_n goes low
+                // Clamp vdiff to avoid division by zero and bound the delay
+                if (vdiff > 10e-3) begin
+                    tdel = tdel_min;
+                end else if (vdiff < 10e-6) begin
+                    tdel = tdel_max;
+                end else begin
+                    // Logarithmic interpolation: delay increases as vdiff decreases
+                    // Map 10mV -> tdel_min, 0.01mV -> tdel_max
+                    tdel = tdel_min + (tdel_max - tdel_min) * (1.0 - ln(vdiff/10e-3)/ln(0.01));
+                    if (tdel < tdel_min) tdel = tdel_min;
+                    if (tdel > tdel_max) tdel = tdel_max;
+                end
+
+                out_p_state = 1;
+                out_n_state = 0;
+                lp_state = 1;
+                lm_state = 0;
+            end else if (vdiff < 0) begin
+                // Negative differential: out_p goes low, out_n goes high
+                if (vdiff < -10e-3) begin
+                    tdel = tdel_min;
+                end else if (vdiff > -10e-6) begin
+                    tdel = tdel_max;
+                end else begin
+                    tdel = tdel_min + (tdel_max - tdel_min) * (1.0 - ln(-vdiff/10e-3)/ln(0.01));
+                    if (tdel < tdel_min) tdel = tdel_min;
+                    if (tdel > tdel_max) tdel = tdel_max;
+                end
+
+                out_p_state = 0;
+                out_n_state = 1;
+                lp_state = 0;
+                lm_state = 1;
+            end else begin
+                // Zero differential: default to low, max delay
+                tdel = tdel_max;
+                out_p_state = 0;
+                out_n_state = 1;
+                lp_state = 0;
+                lm_state = 1;
+            end
+        end
+
+        // Drive outputs with transition
+        V(out_p) <+ transition(out_p_state * (vdd_val - vss_val) + vss_val, tdel, tr, tf);
+        V(out_n) <+ transition(out_n_state * (vdd_val - vss_val) + vss_val, tdel, tr, tf);
+        V(lp) <+ transition(lp_state * (vdd_val - vss_val) + vss_val, tdel, tr, tf);
+        V(lm) <+ transition(lm_state * (vdd_val - vss_val) + vss_val, tdel, tr, tf);
+    end
+endmodule

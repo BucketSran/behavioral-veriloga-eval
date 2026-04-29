@@ -1,0 +1,30 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module gain_amp_fixed (vdin_p, vdin_n, vamp_p, vamp_n);
+    input vdin_p;
+    input vdin_n;
+    output vamp_p;
+    output vamp_n;
+    electrical vdin_p, vdin_n, vamp_p, vamp_n;
+
+    parameter real ACTUAL_GAIN = 8.64;
+    parameter real vcm_out = 0.45;
+    parameter real tr = 1n;
+    parameter real tf = 1n;
+
+    real vdin_diff;
+    real vamp_diff;
+
+    analog begin
+        // Compute differential input
+        vdin_diff = V(vdin_p) - V(vdin_n);
+
+        // Apply gain
+        vamp_diff = ACTUAL_GAIN * vdin_diff;
+
+        // Output with preserved common mode
+        V(vamp_p) <+ transition(vcm_out + vamp_diff/2.0, 0, tr, tf);
+        V(vamp_n) <+ transition(vcm_out - vamp_diff/2.0, 0, tr, tf);
+    end
+endmodule

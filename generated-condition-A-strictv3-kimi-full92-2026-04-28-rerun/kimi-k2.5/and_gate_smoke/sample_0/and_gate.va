@@ -1,0 +1,23 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module and_gate (a, b, y);
+    electrical a, b, y;
+    parameter real vdd = 1.8 from (0:inf);
+    parameter real tedge = 10p from (0:inf);
+
+    real vout;
+    real vth;
+
+    analog begin
+        vth = vdd / 2.0;
+
+        if (V(a) > vth && V(b) > vth) begin
+            vout = vdd;
+        end else begin
+            vout = 0.0;
+        end
+
+        V(y) <+ transition(vout, 0, tedge);
+    end
+endmodule

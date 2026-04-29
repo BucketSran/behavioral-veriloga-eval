@@ -1,0 +1,26 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "dff_rst.va"
+
+// Power supplies
+Vdd (vdd 0) vsource dc=1.8
+Vss (vss 0) vsource dc=0
+
+// Clock: 1GHz, period=2ns, 50% duty cycle
+Vclk (clk 0) vsource type=pulse val0=0 val1=1.8 period=2n rise=10p fall=10p width=990p
+
+// Data input: test pattern
+Vd (d 0) vsource type=pwl wave=[0n 0, 1.5n 0, 1.6n 1.8, 3.5n 1.8, 3.6n 0, 5.5n 0, 5.6n 1.8, 7.5n 1.8, 7.6n 0, 9.5n 0, 9.6n 1.8, 11.5n 1.8, 11.6n 0, 13.5n 0, 13.6n 1.8, 15.5n 1.8, 15.6n 0, 17.5n 0, 17.6n 1.8, 20n 1.8]
+
+// Reset: active high, assert at start then release
+Vrst (rst 0) vsource type=pwl wave=[0n 1.8, 0.5n 1.8, 0.6n 0, 10n 0, 10.1n 1.8, 10.5n 1.8, 10.6n 0, 20n 0]
+
+// DUT
+XDUT (vdd vss d clk rst q qb) dff_rst
+
+// Transient analysis
+tran tran stop=20n maxstep=50p
+
+// Save signals
+save d clk rst q qb

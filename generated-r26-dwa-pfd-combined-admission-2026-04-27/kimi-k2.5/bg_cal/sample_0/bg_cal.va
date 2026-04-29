@@ -1,0 +1,39 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bg_cal(VDD, VSS, CLK, COMP_OUT, SETTLED, TRIM_0, TRIM_1, TRIM_2, TRIM_3, TRIM_4, TRIM_5);
+    inout electrical VDD, VSS;
+    input electrical CLK, COMP_OUT;
+    output electrical SETTLED, TRIM_0, TRIM_1, TRIM_2, TRIM_3, TRIM_4, TRIM_5;
+    parameter real vth = 0.45;
+    parameter real tedge = 100p;
+    integer trim_code;
+    integer stable_count;
+    integer settled;
+
+    analog begin
+        @(initial_step) begin
+            trim_code = 0;
+            stable_count = 0;
+            settled = 0;
+        end
+
+        @(cross(V(CLK) - vth, +1)) begin
+            if (trim_code < 15) begin
+                trim_code = trim_code + 1;
+                stable_count = 0;
+            end else begin
+                stable_count = stable_count + 1;
+                if (stable_count >= 8) settled = 1;
+            end
+        end
+
+        V(TRIM_0) <+ V(VSS) + (V(VDD) - V(VSS)) * transition(((trim_code & 1) != 0) ? 1.0 : 0.0, 0.0, tedge, tedge);
+        V(TRIM_1) <+ V(VSS) + (V(VDD) - V(VSS)) * transition(((trim_code & 2) != 0) ? 1.0 : 0.0, 0.0, tedge, tedge);
+        V(TRIM_2) <+ V(VSS) + (V(VDD) - V(VSS)) * transition(((trim_code & 4) != 0) ? 1.0 : 0.0, 0.0, tedge, tedge);
+        V(TRIM_3) <+ V(VSS) + (V(VDD) - V(VSS)) * transition(((trim_code & 8) != 0) ? 1.0 : 0.0, 0.0, tedge, tedge);
+        V(TRIM_4) <+ V(VSS) + (V(VDD) - V(VSS)) * transition(((trim_code & 16) != 0) ? 1.0 : 0.0, 0.0, tedge, tedge);
+        V(TRIM_5) <+ V(VSS) + (V(VDD) - V(VSS)) * transition(((trim_code & 32) != 0) ? 1.0 : 0.0, 0.0, tedge, tedge);
+        V(SETTLED) <+ V(VSS) + (V(VDD) - V(VSS)) * transition(settled ? 1.0 : 0.0, 0.0, tedge, tedge);
+    end
+endmodule

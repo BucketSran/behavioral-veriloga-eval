@@ -24,6 +24,17 @@ Ports:
 
 Implement this in Verilog-A behavioral modeling.
 
+Interface and Verilog-A compatibility requirements:
+
+- Use this exact module port order:
+  `VDD, VSS, CLKS, DCOMP_P, DCOMP_N, DP_CAP_11, DP_CAP_10, DP_CAP_9, DP_CAP_8, DP_CAP_7, DP_CAP_6, DP_CAP_5, DP_CAP_4, DP_CAP_3, DP_CAP_2, DP_CAP_1, DP_CAP_0, EOC`.
+- Provide public parameters named `vth`, `vdd`, and `tedge`.
+- Use Spectre-compatible Verilog-A syntax for declarations, loops, and
+  event-driven state updates.
+- Use pure voltage-domain contributions only: drive outputs with `V(node) <+`
+  and do not use current contributions.
+- Return the Verilog-A module code only.
+
 
 ## Public Evaluation Contract (Non-Gold)
 

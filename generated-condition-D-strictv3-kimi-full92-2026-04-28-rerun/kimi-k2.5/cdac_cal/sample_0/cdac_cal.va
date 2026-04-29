@@ -1,0 +1,84 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cdac_cal (VDD, VSS, CLK, D9, D8, D7, D6, D5, D4, D3, D2, D1, D0, CAL0, CAL1, VDAC_P, VDAC_N);
+    inout VDD, VSS;
+    input CLK, D9, D8, D7, D6, D5, D4, D3, D2, D1, D0, CAL0, CAL1;
+    output VDAC_P, VDAC_N;
+    electrical VDD, VSS, CLK, D9, D8, D7, D6, D5, D4, D3, D2, D1, D0, CAL0, CAL1, VDAC_P, VDAC_N;
+
+    // Parameters
+    parameter real vdd_level = 1.8;
+    parameter real vss_level = 0.0;
+    parameter real vth = 0.9;
+    parameter real tr = 100p;
+    parameter real tf = 100p;
+    parameter real td = 0.0;
+
+    // Capacitor weight parameters (binary weighted main array + 2 redundant calibration caps)
+    // Main array: 512, 256, 128, 64, 32, 16, 8, 4, 2, 1 (relative units)
+    // Calibration caps: typically 1/2 LSB or 1 LSB each, here using 1 unit each
+    parameter real c_unit = 1.0;
+    parameter real c_total = 1024.0 + 2.0; // 1023 for main array (sum of 512+256+...+1 = 1023) + 2 cal = 1025, but using 1024 base + 2
+
+    // State variables
+    integer state;
+    real vout_p, vout_n;
+    real weight_sum_p, weight_sum_n;
+    real clk_val;
+    real d9_val, d8_val, d7_val, d6_val, d5_val, d4_val, d3_val, d2_val, d1_val, d0_val;
+    real cal0_val, cal1_val;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+            vout_p = vss_level;
+            vout_n = vss_level;
+        end
+
+        // Sample input values
+        clk_val = V(CLK);
+        d9_val = V(D9) > vth ? 1.0 : 0.0;
+        d8_val = V(D8) > vth ? 1.0 : 0.0;
+        d7_val = V(D7) > vth ? 1.0 : 0.0;
+        d6_val = V(D6) > vth ? 1.0 : 0.0;
+        d5_val = V(D5) > vth ? 1.0 : 0.0;
+        d4_val = V(D4) > vth ? 1.0 : 0.0;
+        d3_val = V(D3) > vth ? 1.0 : 0.0;
+        d2_val = V(D2) > vth ? 1.0 : 0.0;
+        d1_val = V(D1) > vth ? 1.0 : 0.0;
+        d0_val = V(D0) > vth ? 1.0 : 0.0;
+        cal0_val = V(CAL0) > vth ? 1.0 : 0.0;
+        cal1_val = V(CAL1) > vth ? 1.0 : 0.0;
+
+        // Detect clock rising edge for charge redistribution update
+        @(cross(V(CLK) - vth, 1)) begin
+            state = state + 1;
+        end
+
+        // Calculate weighted sum for positive output (switches to VDD when bit is 1, VSS when 0)
+        // Binary weighted: D9=512, D8=256, D7=128, D6=64, D5=32, D4=16, D3=8, D2=4, D1=2, D0=1
+        // CAL0 and CAL1 are 1 unit each
+        weight_sum_p = 512.0 * d9_val + 256.0 * d8_val + 128.0 * d7_val + 64.0 * d6_val +
+                       32.0 * d5_val + 16.0 * d4_val + 8.0 * d3_val + 4.0 * d2_val +
+                       2.0 * d1_val + 1.0 * d0_val + 1.0 * cal0_val + 1.0 * cal1_val;
+
+        // For differential topology, negative side gets complementary switching
+        // When main array bit is 1 on P side, N side sees 0, and vice versa
+        // This creates differential output
+        weight_sum_n = 512.0 * (1.0 - d9_val) + 256.0 * (1.0 - d8_val) + 128.0 * (1.0 - d7_val) +
+                       64.0 * (1.0 - d6_val) + 32.0 * (1.0 - d5_val) + 16.0 * (1.0 - d4_val) +
+                       8.0 * (1.0 - d3_val) + 4.0 * (1.0 - d2_val) + 2.0 * (1.0 - d1_val) +
+                       1.0 * (1.0 - d0_val) + 1.0 * cal1_val + 1.0 * cal0_val;
+
+        // Calculate DAC output voltages based on charge redistribution
+        // VDAC_P = VSS + (VDD - VSS) * weight_sum_p / c_total
+        // VDAC_N = VSS + (VDD - VSS) * weight_sum_n / c_total
+        vout_p = vss_level + (vdd_level - vss_level) * weight_sum_p / 1025.0;
+        vout_n = vss_level + (vdd_level - vss_level) * weight_sum_n / 1025.0;
+
+        // Output with transition for smooth changes
+        V(VDAC_P) <+ transition(vout_p, td, tr, tf);
+        V(VDAC_N) <+ transition(vout_n, td, tr, tf);
+    end
+endmodule

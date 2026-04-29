@@ -1,0 +1,43 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module differential_voltage_output_ref (VDD, VSS, outp, outn);
+    inout VDD;
+    inout VSS;
+    output outp;
+    output outn;
+    electrical VDD, VSS, outp, outn;
+
+    parameter real vcm = 0.2 from [0:inf);
+    parameter real vdiff_low = 0.1 from [0:inf);
+    parameter real vdiff_high = 0.5 from [0:inf);
+    parameter real t_switch1 = 20n from [0:inf);
+    parameter real t_switch2 = 40n from [0:inf);
+    parameter real tt = 1n from [0:inf);
+
+    integer state;
+    real vdiff;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+            vdiff = vdiff_low;
+        end
+
+        @(timer(t_switch1)) begin
+            state = 1;
+            vdiff = vdiff_high;
+        end
+
+        @(timer(t_switch2)) begin
+            state = 2;
+            vdiff = vdiff_low;
+        end
+
+        // outn is fixed at vcm above VSS
+        V(outn) <+ V(VSS) + vcm;
+
+        // outp is driven differentially above outn
+        V(outp, outn) <+ transition(vdiff, 0, tt);
+    end
+endmodule

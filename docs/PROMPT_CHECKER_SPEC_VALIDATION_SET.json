@@ -1,0 +1,250 @@
+{
+  "version": 1,
+  "description": "Representative validation set for prompt-driven checker-spec inference. Expected templates are mechanism families visible from public prompts.",
+  "tasks": {
+    "adc_dac_ideal_4b_smoke": {
+      "required_templates": ["quantized_reconstruction"],
+      "notes": "ADC-DAC round trip with ramp input, code coverage, and vout reconstruction."
+    },
+    "sar_adc_dac_weighted_8b_smoke": {
+      "required_templates": ["quantized_reconstruction"],
+      "notes": "SAR ADC plus weighted DAC round trip."
+    },
+    "dac_binary_clk_4b_smoke": {
+      "required_templates": ["dac_code_to_output_span"],
+      "notes": "Clocked binary DAC monotonic output-span check."
+    },
+    "dac_therm_16b_smoke": {
+      "required_templates": ["thermometer_dac_code_to_output_span"],
+      "notes": "Thermometer DAC levels and output span."
+    },
+    "multimod_divider_ratio_switch_smoke": {
+      "required_templates": ["counter_cadence"],
+      "notes": "Pulse-per-divide interval with ratio_ctrl switching."
+    },
+    "multimod_divider": {
+      "required_templates": ["counter_cadence"],
+      "notes": "Spec-to-VA dual-modulus divider."
+    },
+    "clk_div_smoke": {
+      "required_templates": ["counter_cadence"],
+      "notes": "Clock divider edge-ratio behavior."
+    },
+    "pfd_reset_race_smoke": {
+      "required_templates": ["paired_edge_response", "pulse_non_overlap"],
+      "notes": "PFD up/dn response with non-overlap under near-simultaneous edges."
+    },
+    "pfd_updn_smoke": {
+      "required_templates": ["paired_edge_response"],
+      "notes": "PFD up/dn pulse response."
+    },
+    "bbpd_data_edge_alignment_smoke": {
+      "required_templates": ["bbpd_data_clock_lead_lag", "pulse_non_overlap"],
+      "notes": "Bang-bang data/clock lead-lag detector with bounded non-overlapping UP/DN pulses."
+    },
+    "timer_absolute_grid_smoke": {
+      "required_templates": ["absolute_event_window"],
+      "notes": "Timer grid with public target rise times."
+    },
+    "adpll_timer_smoke": {
+      "required_templates": ["ratio_edge_window", "lock_after_ratio_stable"],
+      "notes": "ADPLL feedback/reference ratio and lock behavior."
+    },
+    "adpll_lock_smoke": {
+      "required_templates": ["ratio_edge_window", "lock_after_ratio_stable"],
+      "notes": "ADPLL lock smoke."
+    },
+    "adpll_ratio_hop_smoke": {
+      "required_templates": ["ratio_edge_window"],
+      "notes": "ADPLL ratio-control hop."
+    },
+    "cppll_timer": {
+      "required_templates": ["ratio_edge_window", "lock_after_ratio_stable"],
+      "notes": "CPPLL reference/feedback tracking."
+    },
+    "cppll_tracking_smoke": {
+      "required_templates": ["ratio_edge_window", "lock_after_ratio_stable"],
+      "notes": "CPPLL tracking smoke."
+    },
+    "bg_cal": {
+      "required_templates": ["calibration_settling_code"],
+      "notes": "Trim-code calibration with settled flag."
+    },
+    "segmented_dac": {
+      "required_templates": ["differential_code_response"],
+      "notes": "Differential DAC code-to-output behavior."
+    },
+    "cdac_cal": {
+      "required_templates": ["differential_code_response"],
+      "notes": "Differential calibrated CDAC response."
+    },
+    "sample_hold_smoke": {
+      "required_templates": ["sample_hold_tracking"],
+      "notes": "Sample/hold tracks then holds input."
+    },
+    "sample_hold_droop_smoke": {
+      "required_templates": ["droop_window"],
+      "notes": "Sample/hold droop over hold window."
+    },
+    "inverted_comparator_logic_bug": {
+      "required_templates": ["threshold_crossing"],
+      "notes": "Comparator polarity bug; prompt-visible mechanism is threshold decision polarity."
+    },
+    "strongarm_reset_priority_bug": {
+      "required_templates": ["threshold_crossing"],
+      "notes": "StrongArm comparator decision with reset-priority behavior."
+    },
+    "swapped_pfd_outputs_bug": {
+      "required_templates": ["paired_edge_response"],
+      "notes": "PFD up/dn outputs swapped relative to ref/div lead direction."
+    },
+    "wrong_edge_sample_hold_bug": {
+      "required_templates": ["sample_hold_tracking"],
+      "notes": "Sample-and-hold wrong-edge update bug."
+    },
+    "and_gate_smoke": {
+      "required_templates": ["logic_truth_table"],
+      "notes": "AND gate truth-table behavior."
+    },
+    "bound_step_period_guard_smoke": {
+      "required_templates": ["bounded_step_window"],
+      "notes": "Bound-step periodic observation window."
+    },
+    "cmp_delay_smoke": {
+      "required_templates": ["threshold_crossing"],
+      "notes": "Clocked comparator threshold decision with delay trend."
+    },
+    "cmp_strongarm_smoke": {
+      "required_templates": ["threshold_crossing"],
+      "notes": "Clocked StrongARM comparator threshold decision."
+    },
+    "comparator_hysteresis_smoke": {
+      "required_templates": ["hysteresis_window"],
+      "notes": "Comparator hysteresis with rising/falling decision thresholds."
+    },
+    "comparator_offset_search_smoke": {
+      "required_templates": ["threshold_crossing"],
+      "notes": "Comparator built-in offset crossing."
+    },
+    "comparator_smoke": {
+      "required_templates": ["threshold_crossing"],
+      "notes": "Differential comparator threshold crossing."
+    },
+    "cppll_freq_step_reacquire_smoke": {
+      "required_templates": ["ratio_edge_window", "lock_after_ratio_stable", "ratio_hop_window"],
+      "notes": "CPPLL frequency step, unlock, and reacquire behavior."
+    },
+    "differential_voltage_output_smoke": {
+      "required_templates": ["differential_step_response"],
+      "notes": "Timed differential branch output levels."
+    },
+    "digital_basics_smoke": {
+      "required_templates": ["logic_truth_table"],
+      "notes": "Basic logic gate and DFF smoke behavior."
+    },
+    "gray_counter_one_bit_change_smoke": {
+      "required_templates": ["gray_counter_sequence"],
+      "notes": "Gray-code counter with one-bit adjacent transitions."
+    },
+    "flash_adc_3b_smoke": {
+      "required_templates": ["monotonic_code_vs_input"],
+      "notes": "Flash ADC input-to-code monotonic conversion."
+    },
+    "not_gate_smoke": {
+      "required_templates": ["logic_truth_table"],
+      "notes": "NOT gate truth-table behavior."
+    },
+    "or_gate_smoke": {
+      "required_templates": ["logic_truth_table"],
+      "notes": "OR gate truth-table behavior."
+    },
+    "parameter_type_override_smoke": {
+      "required_templates": ["parameterized_event_sequence"],
+      "notes": "Parameterized finite pulse/event behavior."
+    },
+    "pfd_deadzone_smoke": {
+      "required_templates": ["paired_edge_response", "pulse_non_overlap"],
+      "notes": "PFD deadzone pulse response with non-overlap."
+    },
+    "dwa_ptr_gen_no_overlap_smoke": {
+      "required_templates": ["onehot_no_overlap"],
+      "notes": "DWA rotating pointer/cell-enable window with no-overlap behavior."
+    },
+    "dwa_wraparound_smoke": {
+      "required_templates": ["onehot_no_overlap"],
+      "notes": "DWA rotating pointer/cell-enable window with wraparound behavior."
+    },
+    "serializer_8b_smoke": {
+      "required_templates": ["sequence_alignment"],
+      "notes": "Serializer bit sequence and output alignment."
+    },
+    "serializer_frame_alignment_smoke": {
+      "required_templates": ["sequence_alignment"],
+      "notes": "Serializer frame alignment behavior."
+    },
+    "xor_pd_smoke": {
+      "required_templates": ["logic_truth_table"],
+      "notes": "XOR phase detector logic relation between ref/div and pd_out."
+    },
+    "pipeline_stage": {
+      "required_templates": ["sample_after_clock"],
+      "notes": "Pipeline ADC stage sampled decision/residue behavior."
+    },
+    "sar_12bit": {
+      "required_templates": ["sar_sequence"],
+      "notes": "SAR logic sequencing with EOC and CDAC control outputs."
+    },
+    "sar_logic": {
+      "required_templates": ["sar_sequence"],
+      "notes": "SAR logic sequencing with ready flag and DAC control outputs."
+    },
+    "clk_divider": {
+      "required_templates": ["counter_cadence"],
+      "notes": "Programmable clock divider cadence and lock behavior."
+    },
+    "adpll_timer": {
+      "required_templates": ["ratio_edge_window", "lock_after_ratio_stable"],
+      "notes": "Spec-to-VA ADPLL reference/feedback tracking and lock behavior."
+    },
+    "sar_logic_10b": {
+      "required_templates": ["sar_sequence"],
+      "notes": "10-bit SAR logic state sequencing."
+    },
+    "multitone": {
+      "required_templates": ["bounded_step_window"],
+      "notes": "Multitone source requires bound-step guidance for high-frequency components."
+    },
+    "nrz_prbs": {
+      "required_templates": ["differential_step_response"],
+      "notes": "Differential NRZ PRBS output activity."
+    },
+    "clk_div_min_tb": {
+      "required_templates": ["counter_cadence"],
+      "notes": "TB generation for clock divider cadence observability."
+    },
+    "comparator_offset_tb": {
+      "required_templates": ["threshold_crossing"],
+      "notes": "TB generation for comparator offset sweep/crossing."
+    },
+    "dac_ramp_tb": {
+      "required_templates": ["dac_code_to_output_span"],
+      "notes": "TB generation for DAC monotonic ramp response."
+    },
+    "dco_gain_step_tb": {
+      "required_templates": ["control_to_frequency_step"],
+      "notes": "TB generation for DCO control-to-frequency step response."
+    },
+    "sample_hold_aperture_tb": {
+      "required_templates": ["sample_hold_tracking"],
+      "notes": "TB generation for sample-hold aperture/capture behavior."
+    },
+    "sample_hold_step_tb": {
+      "required_templates": ["sample_hold_tracking"],
+      "notes": "TB generation for sample-hold step behavior."
+    },
+    "segmented_dac_glitch_tb": {
+      "required_templates": ["dac_code_to_output_span"],
+      "notes": "TB generation for segmented DAC code scan and glitch/monotonicity inspection."
+    }
+  }
+}

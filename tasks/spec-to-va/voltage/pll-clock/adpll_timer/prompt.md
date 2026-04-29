@@ -30,7 +30,7 @@ Behavioral intent:
 - Use a DCO timing loop based on `@(timer(t_next_toggle))`, not `idtmod()`.
 - Toggle `dco_clk` from the DCO timer.
 - Divide DCO rising edges by `div_ratio` to generate `fb_clk`.
-- 
+-
 - Make the divided feedback frequency converge toward the 50 MHz reference clock in the late simulation window.
 - Assert `lock` during the transient run after enough consecutive phase errors fall within `lock_tol`.
 - Drive `vctrl_mon` as a normalized voltage monitor of the digital control code.
@@ -39,9 +39,9 @@ Compatibility constraints:
 
 - Use pure voltage-domain Verilog-A only.
 - Put initialization inside `@(initial_step)` within an `analog begin` block.
-- Do not use Verilog `initial begin` blocks.
+- Use Spectre-compatible Verilog-A initialization and event syntax.
 - Drive `fb_clk`, `dco_clk`, `vctrl_mon`, and `lock` using continuous voltage contributions.
-- Do not place `transition(...)` contributions inside conditionally executed `if/else begin` branches.
+- Keep output contributions Spectre-compatible and continuous in the main analog block.
 - Clamp frequency and control-code values to their parameter bounds.
 
 Ports:

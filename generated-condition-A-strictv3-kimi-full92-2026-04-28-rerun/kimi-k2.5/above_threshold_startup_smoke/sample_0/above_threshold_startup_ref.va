@@ -1,0 +1,33 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module above_threshold_startup_ref (VDD, VSS, vin, out);
+    inout electrical VDD;
+    inout electrical VSS;
+    input electrical vin;
+    output electrical out;
+
+    integer state;
+    real vout;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+        end
+
+        // Use @(above()) to detect when vin crosses above 0.45V
+        // This should trigger even if condition is already true at t=0
+        @(above(V(vin) - 0.45)) begin
+            state = 1;
+        end
+
+        // Drive output based on latched state
+        if (state == 1) begin
+            vout = 1.0;
+        end else begin
+            vout = 0.0;
+        end
+
+        V(out) <+ transition(vout, 0, 100p);
+    end
+endmodule

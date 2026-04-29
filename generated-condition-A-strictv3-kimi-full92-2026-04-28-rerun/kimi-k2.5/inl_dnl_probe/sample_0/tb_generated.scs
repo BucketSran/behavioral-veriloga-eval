@@ -1,0 +1,33 @@
+simulator lang=spectre
+global 0
+
+// Power supplies
+VDD (VDD 0) vsource dc=0.9
+VSS (VSS 0) vsource dc=0
+
+// Clock: 4ns period, 50% duty cycle, 16 cycles needed for 16 codes
+// First edge at 2ns, runs until ~66ns
+VCLK (CLK 0) vsource type=pulse val0=0 val1=0.9 period=4n delay=2n rise=100p fall=100p width=2n
+
+// 4-bit binary counter: DIN[3:0] counts 0 to 15
+// Code changes every 4ns, aligned with clock falling edge
+VDIN0 (DIN0 0) vsource type=pulse val0=0 val1=0.9 period=8n delay=0n rise=100p fall=100p width=4n
+VDIN1 (DIN1 0) vsource type=pulse val0=0 val1=0.9 period=16n delay=0n rise=100p fall=100p width=8n
+VDIN2 (DIN2 0) vsource type=pulse val0=0 val1=0.9 period=32n delay=0n rise=100p fall=100p width=16n
+VDIN3 (DIN3 0) vsource type=pulse val0=0 val1=0.9 period=64n delay=0n rise=100p fall=100p width=32n
+
+// DUT: DAC with 4-bit input
+XDAC (VDD VSS DIN3 DIN2 DIN1 DIN0 CLK AOUT) dac_for_probe
+
+// INL/DNL probe: CLK as strobe, AOUT as measured output
+XPROBE (VDD VSS CLK AOUT) inl_dnl_probe
+
+// Transient analysis: 68ns covers 16 codes at 4ns/code + settling
+tran tran stop=68n maxstep=20p
+
+// Save public waveforms
+save CLK DIN3 DIN2 DIN1 DIN0 AOUT
+
+// AHDL includes
+ahdl_include "dac_for_probe.va"
+ahdl_include "inl_dnl_probe.va"

@@ -1,0 +1,23 @@
+simulator lang=spectre
+global 0
+
+// Power supplies
+Vvdd (VDD 0) vsource dc=0.9
+Vvss (VSS 0) vsource dc=0
+
+// Clock stimulus: 10MHz clock, 50% duty cycle
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=100n delay=0 rise=1n fall=1n width=49n
+
+// Analog input waveform: ramp from 0 to 0.9V over 100ns
+Vin (in 0) vsource type=pwl wave=[0 0 100n 0.9]
+
+// DUT instantiation
+XDUT (VDD VSS clk in out) sample_hold_step_ref
+
+// Transient analysis
+tran tran stop=100n maxstep=100p
+
+// Save signals
+save VDD VSS clk in out
+
+ahdl_include "sample_hold_step_ref.va"

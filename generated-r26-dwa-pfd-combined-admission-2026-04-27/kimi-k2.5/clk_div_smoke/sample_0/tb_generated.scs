@@ -1,0 +1,21 @@
+// clk_div testbench
+
+ahdl_include "clk_div.va"
+
+// Supply and ground
+VDD (vdd 0) vsource dc=1.2
+
+// Clock input: 100MHz (10ns period)
+VCLK (clk_in 0) vsource type=pulse val0=0 val1=1.2 period=10n rise=0.1n fall=0.1n width=5n
+
+// Reset: active low, start low then release
+VRST (rst_n 0) vsource type=pulse val0=0 val1=1.2 delay=5n rise=0.1n fall=0.1n period=1u width=995n
+
+// Device Under Test
+dut (clk_in rst_n clk_out) clk_div
+
+// Transient analysis
+tran tran stop=300n maxstep=1n
+
+// Save signals
+save clk_in rst_n clk_out

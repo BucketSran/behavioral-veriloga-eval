@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from bisect import bisect_left
 import csv
 import json
 import math
@@ -13,6 +14,9 @@ import subprocess
 import tempfile
 import warnings
 from pathlib import Path
+
+
+GRAY_COUNTER_SETTLE_TIME_S = 2e-9
 
 
 def read_meta(task_dir: Path) -> dict:
@@ -115,6 +119,94 @@ def _stream_max(csv_path: Path, key: str) -> float:
         for row in reader:
             max_val = max(max_val, _float_cell(row, key))
     return max_val
+
+
+def _stream_time_signal_metrics_csv(
+    csv_path: Path,
+    *,
+    required: set[str],
+    rising_edge_signals: tuple[str, ...] = (),
+    range_signals: tuple[str, ...] = (),
+    high_fraction_windows: tuple[tuple[str, str, float, float], ...] = (),
+    threshold: float = 0.45,
+) -> tuple[dict[str, object] | None, list[str]]:
+    """Collect common time-domain metrics without loading the waveform CSV.
+
+    The helper intentionally computes only mechanism-level primitives:
+    rising-edge timestamps, min/max ranges, and weighted high fractions inside
+    named time windows. Task-specific checkers keep their own thresholds and
+    pass/fail semantics on top of these primitives.
+    """
+    fields = _csv_fields(csv_path)
+    missing = sorted(required - fields)
+    if missing:
+        return None, ["missing " + "/".join(missing)]
+
+    signal_names = set(rising_edge_signals) | set(range_signals)
+    signal_names.update(signal for _, signal, _, _ in high_fraction_windows)
+    signal_names.add("time")
+
+    edges = {signal: [] for signal in rising_edge_signals}
+    min_vals = {signal: float("inf") for signal in range_signals}
+    max_vals = {signal: float("-inf") for signal in range_signals}
+    window_high_dt = {name: 0.0 for name, _, _, _ in high_fraction_windows}
+    window_total_dt = {name: 0.0 for name, _, _, _ in high_fraction_windows}
+
+    prev_time: float | None = None
+    prev_vals: dict[str, float] = {}
+    first_time: float | None = None
+    last_time = 0.0
+    row_count = 0
+
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            vals = {name: _float_cell(row, name) for name in signal_names}
+            time = vals["time"]
+            if first_time is None:
+                first_time = time
+            last_time = time
+            row_count += 1
+
+            for signal in range_signals:
+                val = vals[signal]
+                min_vals[signal] = min(min_vals[signal], val)
+                max_vals[signal] = max(max_vals[signal], val)
+
+            if prev_time is not None:
+                for signal in rising_edge_signals:
+                    if prev_vals[signal] < threshold <= vals[signal]:
+                        edges[signal].append(time)
+
+                dt = time - prev_time
+                if dt > 0.0:
+                    for name, signal, start, end in high_fraction_windows:
+                        overlap = min(time, end) - max(prev_time, start)
+                        if overlap <= 0.0:
+                            continue
+                        window_total_dt[name] += overlap
+                        if 0.5 * (prev_vals[signal] + vals[signal]) > threshold:
+                            window_high_dt[name] += overlap
+
+            prev_time = time
+            prev_vals = vals
+
+    high_fractions = {
+        name: window_high_dt[name] / max(window_total_dt[name], 1e-18)
+        for name in window_high_dt
+    }
+    ranges = {
+        signal: (min_vals[signal], max_vals[signal])
+        for signal in range_signals
+    }
+    return {
+        "row_count": row_count,
+        "time_start": first_time if first_time is not None else 0.0,
+        "time_end": last_time,
+        "edges": edges,
+        "ranges": ranges,
+        "high_fractions": high_fractions,
+    }, []
 
 
 def _stream_pfd_deadzone_csv(csv_path: Path) -> tuple[float, list[str]]:
@@ -261,28 +353,39 @@ def _stream_pfd_reset_race_csv(csv_path: Path) -> tuple[float, list[str]]:
 
 def _stream_dac_binary_clk_4b_csv(csv_path: Path) -> tuple[float, list[str]]:
     fields = _csv_fields(csv_path)
-    required = {"din3", "din2", "din1", "din0", "aout"}
+    required = {"time", "rdy", "din3", "din2", "din1", "din0", "aout"}
     if not required.issubset(fields):
-        return 0.0, ["missing din*/aout"]
-    sums = {idx: 0.0 for idx in range(16)}
-    counts = {idx: 0 for idx in range(16)}
+        return 0.0, ["missing time/rdy/din*/aout"]
+    sampled: dict[int, list[float]] = {idx: [] for idx in range(16)}
+    pending_sample_times: list[float] = []
+    settle_delay = 1e-9
+    prev_rdy = 0.0
+    initialized = False
     with csv_path.open(newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
+            time = _float_cell(row, "time")
+            rdy = _float_cell(row, "rdy")
             code = (
                 (1 if _float_cell(row, "din3") > 0.45 else 0) * 8
                 + (1 if _float_cell(row, "din2") > 0.45 else 0) * 4
                 + (1 if _float_cell(row, "din1") > 0.45 else 0) * 2
                 + (1 if _float_cell(row, "din0") > 0.45 else 0)
             )
-            sums[code] += _float_cell(row, "aout")
-            counts[code] += 1
-    medians = {code: sums[code] / counts[code] for code in counts if counts[code] > 0}
-    sorted_codes = sorted(medians)
-    monotonic = all(medians[sorted_codes[i]] <= medians[sorted_codes[i + 1]] + 1e-9 for i in range(len(sorted_codes) - 1))
-    span = medians[sorted_codes[-1]] - medians[sorted_codes[0]] if sorted_codes else 0.0
+            due = [target for target in pending_sample_times if time >= target]
+            if due:
+                sampled[code].append(_float_cell(row, "aout"))
+                pending_sample_times = [target for target in pending_sample_times if time < target]
+            if initialized and prev_rdy < 0.45 <= rdy:
+                pending_sample_times.append(time + settle_delay)
+            prev_rdy = rdy
+            initialized = True
+    means = {code: sum(vals) / len(vals) for code, vals in sampled.items() if vals}
+    sorted_codes = sorted(means)
+    monotonic = all(means[sorted_codes[i]] <= means[sorted_codes[i + 1]] + 1e-9 for i in range(len(sorted_codes) - 1))
+    span = means[sorted_codes[-1]] - means[sorted_codes[0]] if sorted_codes else 0.0
     ok = len(sorted_codes) >= 14 and monotonic and span > 0.7
-    return (1.0 if ok else 0.0), [f"levels={len(sorted_codes)} aout_span={span:.3f}"]
+    return (1.0 if ok else 0.0), [f"edge_sampled_levels={len(sorted_codes)} aout_span={span:.3f}"]
 
 
 def _stream_sar_adc_dac_weighted_8b_csv(csv_path: Path) -> tuple[float, list[str]]:
@@ -422,28 +525,26 @@ def _stream_gray_counter_one_bit_change_csv(csv_path: Path) -> tuple[float, list
     rst_prefix_high = False
     edge_count = 0
     post_reset_codes: list[int] = []
-    pending_offsets: list[int] = []
+    pending_sample_times: list[float] = []
     prev_clk: float | None = None
 
     with csv_path.open(newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row_idx, row in enumerate(reader):
+            t = _float_cell(row, "time")
             clk = _float_cell(row, clk_col)
             rst = _float_cell(row, rst_col)
             if row_idx < reset_prefix_rows and rst > 0.45:
                 rst_prefix_high = True
             if prev_clk is not None and prev_clk <= 0.45 < clk:
-                # Match the row-based checker's settle=min(edge_idx + 8, last_row).
-                # The current edge row is processed below, so start at 9.
-                pending_offsets.append(9)
+                pending_sample_times.append(t + GRAY_COUNTER_SETTLE_TIME_S)
                 edge_count += 1
             prev_clk = clk
 
-            for pending_idx in range(len(pending_offsets) - 1, -1, -1):
-                pending_offsets[pending_idx] -= 1
-                if pending_offsets[pending_idx] > 0:
+            for pending_idx in range(len(pending_sample_times) - 1, -1, -1):
+                if t < pending_sample_times[pending_idx]:
                     continue
-                del pending_offsets[pending_idx]
+                del pending_sample_times[pending_idx]
                 if (rst_prefix_high and rst > 0.45) or ((not rst_prefix_high) and rst < 0.45):
                     continue
                 code = 0
@@ -626,7 +727,457 @@ def _stream_multimod_divider_ratio_switch_csv(csv_path: Path) -> tuple[float, li
     return 1.0, [";".join(details)]
 
 
+def _stream_adpll_lock_csv(csv_path: Path) -> tuple[float, list[str]]:
+    fields = _csv_fields(csv_path)
+    required = {"time", "ref_clk", "fb_clk", "lock", "vctrl_mon"}
+    if not required.issubset(fields):
+        return 0.0, ["missing ref_clk/fb_clk/lock/vctrl_mon"]
+
+    metrics, notes = _stream_time_signal_metrics_csv(
+        csv_path,
+        required=required,
+        rising_edge_signals=("ref_clk", "fb_clk", "lock"),
+        range_signals=("vctrl_mon",),
+        threshold=0.45,
+    )
+    if metrics is None:
+        return 0.0, notes
+    if metrics["row_count"] < 2:
+        return 0.0, ["empty_or_short_csv"]
+
+    t_end = metrics["time_end"]
+    t_start = t_end * 0.8
+    edges = metrics["edges"]
+    ref_edge_times = edges["ref_clk"]
+    fb_edge_times = edges["fb_clk"]
+    lock_edge_times = edges["lock"]
+    ref_edges = len(ref_edge_times)
+    fb_edges = len(fb_edge_times)
+    ref_late = sum(1 for time in ref_edge_times if t_start <= time <= t_end)
+    fb_late = sum(1 for time in fb_edge_times if t_start <= time <= t_end)
+    lock_time = lock_edge_times[0] if lock_edge_times else float("nan")
+    vctrl_min, vctrl_max = metrics["ranges"]["vctrl_mon"]
+    vctrl_in_range = -1e-6 <= vctrl_min and vctrl_max <= 1.2
+
+    if ref_edges < 8 or fb_edges < 8:
+        return 0.0, [f"not_enough_edges ref={ref_edges} fb={fb_edges}"]
+    if ref_late == 0 or fb_late == 0:
+        return 0.0, ["missing late-window edges"]
+
+    ratio = fb_late / max(ref_late, 1)
+    lock_ok = not math.isnan(lock_time) and lock_time <= 1.0e-6
+    freq_ok = 0.95 <= ratio <= 1.05
+    ok = freq_ok and lock_ok and vctrl_in_range
+    return (1.0 if ok else 0.0), [
+        f"late_edge_ratio={ratio:.3f} "
+        f"lock_time={lock_time:.3e} "
+        f"vctrl_range_ok={vctrl_in_range}"
+    ]
+
+
+def _stream_dff_rst_csv(csv_path: Path) -> tuple[float, list[str]]:
+    fields = _csv_fields(csv_path)
+    required = {"time", "d", "clk", "rst", "q", "qb"}
+    if not required.issubset(fields):
+        return 0.0, ["missing time/d/clk/rst/q/qb"]
+
+    clk_max = _stream_max(csv_path, "clk")
+    vth = 0.45 if clk_max < 0.9 else 0.5 * clk_max
+    checks = 0
+    mismatches = 0
+    qb_mismatches = 0
+    prev_clk: float | None = None
+    pending: list[tuple[float, bool]] = []
+
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            t = _float_cell(row, "time")
+            clk = _float_cell(row, "clk")
+            d_val = _float_cell(row, "d")
+            rst_val = _float_cell(row, "rst")
+            q_val = _float_cell(row, "q")
+            qb_val = _float_cell(row, "qb")
+
+            if prev_clk is not None and prev_clk <= vth < clk:
+                expected_q_hi = False if rst_val > vth else (d_val > vth)
+                pending.append((t + 100e-12, expected_q_hi))
+            prev_clk = clk
+
+            while pending and t >= pending[0][0]:
+                _, expected_q_hi = pending.pop(0)
+                q_hi = q_val > vth
+                qb_hi = qb_val > vth
+                checks += 1
+                if q_hi != expected_q_hi:
+                    mismatches += 1
+                if qb_hi == q_hi:
+                    qb_mismatches += 1
+
+    if checks < 6:
+        return 0.0, [f"too_few_clk_edges={checks}"]
+    ok = mismatches <= 1 and qb_mismatches <= 1
+    return (1.0 if ok else 0.0), [
+        f"checks={checks} q_mismatch={mismatches} qb_mismatch={qb_mismatches}"
+    ]
+
+
+def _stream_final_step_file_metric_csv(csv_path: Path) -> tuple[float, list[str]]:
+    fields = _csv_fields(csv_path)
+    required = {"time", "ref", "metric_out"}
+    if not required.issubset(fields):
+        return 0.0, ["missing time/ref/metric_out"]
+
+    max_ref = 0.0
+    vmax = 0.0
+    last_time = 0.0
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            last_time = _float_cell(row, "time", last_time)
+            max_ref = max(max_ref, _float_cell(row, "ref"))
+            vmax = max(vmax, _float_cell(row, "metric_out"))
+
+    if vmax < 0.2:
+        return 0.0, [f"metric_out_too_low={vmax:.3f}"]
+
+    vth = 0.45 if max_ref < 1.0 else 0.5 * max_ref
+    tail_start = 0.85 * last_time
+    prev_ref: float | None = None
+    prev_metric: float | None = None
+    ref_edges = 0
+    dips = 0
+    tail_sum = 0.0
+    tail_count = 0
+
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            t = _float_cell(row, "time")
+            ref = _float_cell(row, "ref")
+            metric = _float_cell(row, "metric_out")
+            if prev_ref is not None and prev_ref < vth <= ref:
+                ref_edges += 1
+            if prev_metric is not None and metric + 0.03 < prev_metric:
+                dips += 1
+            if t >= tail_start:
+                tail_sum += metric
+                tail_count += 1
+            prev_ref = ref
+            prev_metric = metric
+
+    final_norm = (tail_sum / tail_count) / max(vmax, 1e-6) if tail_count else 0.0
+    ok = ref_edges >= 4 and final_norm > 0.90 and dips <= 3
+    return (1.0 if ok else 0.0), [
+        f"ref_edges={ref_edges} final_norm={final_norm:.3f} metric_dips={dips}"
+    ]
+
+
+def _stream_transition_branch_target_csv(csv_path: Path) -> tuple[float, list[str]]:
+    fields = _csv_fields(csv_path)
+    required = {"time", "mode", "clk", "out"}
+    if not required.issubset(fields):
+        return 0.0, ["missing time/mode/clk/out"]
+
+    windows = {
+        "low0": (15e-9, 22e-9),
+        "high1": (35e-9, 42e-9),
+        "high2": (55e-9, 62e-9),
+        "low3": (75e-9, 85e-9),
+    }
+    sums = {name: 0.0 for name in windows}
+    counts = {name: 0 for name in windows}
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            t = _float_cell(row, "time")
+            out = _float_cell(row, "out")
+            for name, (start, stop) in windows.items():
+                if start <= t <= stop:
+                    sums[name] += out
+                    counts[name] += 1
+
+    if any(counts[name] == 0 for name in windows):
+        return 0.0, ["insufficient_window_samples"]
+    m0 = sums["low0"] / counts["low0"]
+    m1 = sums["high1"] / counts["high1"]
+    m2 = sums["high2"] / counts["high2"]
+    m3 = sums["low3"] / counts["low3"]
+    span = max(m1, m2) - min(m0, m3)
+    ok = (m1 - m0) > 0.35 * max(span, 1e-6) and (m2 - m3) > 0.35 * max(span, 1e-6)
+    return (1.0 if ok else 0.0), [f"means=({m0:.3f},{m1:.3f},{m2:.3f},{m3:.3f})"]
+
+
+def _stream_therm2bin_csv(csv_path: Path) -> tuple[float, list[str]]:
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        fields = list(reader.fieldnames or [])
+    b_cols = [
+        name
+        for name in fields
+        if name.lower() in {"b3", "b2", "b1", "b0", "bin_3", "bin_2", "bin_1", "bin_0"}
+    ]
+    if len(b_cols) < 4:
+        return 0.0, [f"missing b3..b0; got={fields[:12]}"]
+    b_cols = sorted(b_cols, key=lambda name: int(re.findall(r"(\d+)$", name)[0]))[:4]
+
+    t_end = 0.0
+    row_count = 0
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            t_end = _float_cell(row, "time", t_end)
+            row_count += 1
+    if row_count == 0:
+        return 0.0, ["empty"]
+
+    late_count = 0
+    all_high = True
+    late_start = 0.75 * t_end
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            t = _float_cell(row, "time")
+            if t <= late_start:
+                continue
+            late_count += 1
+            if any(_float_cell(row, name) <= 0.45 for name in b_cols):
+                all_high = False
+
+    if late_count == 0:
+        return 0.0, ["no late-window rows"]
+    return (1.0 if all_high else 0.0), [f"all_bits_high_final_window={all_high}"]
+
+
+def _stream_bad_bus_output_loop_csv(csv_path: Path) -> tuple[float, list[str]]:
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        fields = {name: 0.0 for name in reader.fieldnames or []}
+    code_cols = _find_bus_columns(fields, "CODE")
+    dout_cols = _find_bus_columns(fields, "DOUT")
+    bit_indices = [idx for idx in range(4) if idx in code_cols and idx in dout_cols]
+    if len(bit_indices) != 4:
+        return 0.0, ["missing CODE_*/DOUT_* bit columns"]
+
+    mismatch = 0
+    total = 0
+    code_patterns: set[tuple[int, ...]] = set()
+    dout_patterns: set[tuple[int, ...]] = set()
+    uniform_rows = 0
+    stable_rows = 0
+    row_count = 0
+    prev_code_tuple: tuple[int, ...] | None = None
+    settle_until = float("-inf")
+    settle_s = 0.1e-9
+
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            row_count += 1
+            code_tuple = tuple(1 if _float_cell(row, code_cols[idx]) > 0.45 else 0 for idx in bit_indices)
+            dout_tuple = tuple(1 if _float_cell(row, dout_cols[idx]) > 0.45 else 0 for idx in bit_indices)
+            t = _float_cell(row, "time")
+            if prev_code_tuple is not None and code_tuple != prev_code_tuple:
+                settle_until = max(settle_until, t + settle_s)
+            prev_code_tuple = code_tuple
+
+            code_patterns.add(code_tuple)
+            dout_patterns.add(dout_tuple)
+            if len(set(dout_tuple)) == 1:
+                uniform_rows += 1
+            if t <= settle_until:
+                continue
+            stable_rows += 1
+            for code_bit, dout_bit in zip(code_tuple, dout_tuple):
+                total += 1
+                if code_bit != dout_bit:
+                    mismatch += 1
+
+    if row_count == 0:
+        return 0.0, ["empty tran.csv"]
+    mismatch_frac = mismatch / max(total, 1)
+    uniform_frac = uniform_rows / max(row_count, 1)
+    ok = (
+        mismatch_frac < 0.05
+        and len(code_patterns) >= 6
+        and len(dout_patterns) >= 6
+        and uniform_frac < 0.8
+        and stable_rows >= 20
+    )
+    return (1.0 if ok else 0.0), [
+        f"mismatch_frac={mismatch_frac:.4f} code_patterns={len(code_patterns)} "
+        f"dout_patterns={len(dout_patterns)} uniform_frac={uniform_frac:.3f} "
+        f"stable_rows={stable_rows}"
+    ]
+
+
+def _stream_simultaneous_event_order_csv(csv_path: Path) -> tuple[float, list[str]]:
+    fields = _csv_fields(csv_path)
+    required = {"time", "out"}
+    if not required.issubset(fields):
+        return 0.0, ["missing time/out"]
+
+    windows = [
+        (12e-9, 18e-9),
+        (32e-9, 38e-9),
+        (52e-9, 58e-9),
+        (72e-9, 78e-9),
+    ]
+    sums = [0.0 for _ in windows]
+    counts = [0 for _ in windows]
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            t = _float_cell(row, "time")
+            out = _float_cell(row, "out")
+            for idx, (start, stop) in enumerate(windows):
+                if start <= t <= stop:
+                    sums[idx] += out
+                    counts[idx] += 1
+    if any(count == 0 for count in counts):
+        return 0.0, ["insufficient_window_samples"]
+    levels = [total / count for total, count in zip(sums, counts)]
+    monotonic = all(levels[i] <= levels[i + 1] + 0.05 for i in range(len(levels) - 1))
+    span = levels[-1] - levels[0]
+    ok = monotonic and span > 0.15
+    return (1.0 if ok else 0.0), [
+        f"plateau_levels={[round(v, 3) for v in levels]} span={span:.3f}"
+    ]
+
+
+def _stream_adc_dac_ideal_4b_csv(csv_path: Path) -> tuple[float, list[str]]:
+    fields = _csv_fields(csv_path)
+    base_required = {"vin", "vout", "rst_n"}
+    has_code = "dout_code" in fields
+    has_bits = {"dout_3", "dout_2", "dout_1", "dout_0"}.issubset(fields)
+    if not base_required.issubset(fields):
+        return 0.0, ["missing vin/vout/rst_n"]
+    if not has_code and not has_bits:
+        return 0.0, ["missing dout_code or dout_3..0"]
+
+    unique_codes: set[int] = set()
+    prev_code: int | None = None
+    monotonic = True
+    post_count = 0
+    min_vout = float("inf")
+    max_vout = float("-inf")
+    min_vin = float("inf")
+    max_vin = float("-inf")
+
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            if _float_cell(row, "rst_n") <= 0.45:
+                continue
+            post_count += 1
+            if has_code:
+                code = int(round(_float_cell(row, "dout_code")))
+            else:
+                code = (
+                    ((1 if _float_cell(row, "dout_3") > 0.45 else 0) << 3)
+                    | ((1 if _float_cell(row, "dout_2") > 0.45 else 0) << 2)
+                    | ((1 if _float_cell(row, "dout_1") > 0.45 else 0) << 1)
+                    | (1 if _float_cell(row, "dout_0") > 0.45 else 0)
+                )
+            if prev_code is not None and prev_code > code:
+                monotonic = False
+            prev_code = code
+            unique_codes.add(code)
+
+            vin = _float_cell(row, "vin")
+            vout = _float_cell(row, "vout")
+            min_vin = min(min_vin, vin)
+            max_vin = max(max_vin, vin)
+            min_vout = min(min_vout, vout)
+            max_vout = max(max_vout, vout)
+
+    if post_count == 0:
+        return 0.0, ["no post-reset samples"]
+    code_count = len(unique_codes)
+    span = max_vout - min_vout
+    vin_span = max_vin - min_vin
+    ok = code_count >= 12 and monotonic and span > 0.6 and vin_span > 0.6
+    return (1.0 if ok else 0.0), [
+        f"unique_codes={code_count} vout_span={span:.3f} vin_span={vin_span:.3f}"
+    ]
+
+
+def _stream_cppll_freq_step_reacquire_csv(csv_path: Path) -> tuple[float, list[str]]:
+    required = {"time", "ref_clk", "fb_clk", "lock", "vctrl_mon"}
+    fields = _csv_fields(csv_path)
+    if not required.issubset(fields):
+        return 0.0, ["missing ref_clk/fb_clk/lock/vctrl_mon"]
+
+    vth = 0.45
+    disturb_start = 2.05e-6
+    disturb_end = 2.8e-6
+
+    metrics, notes = _stream_time_signal_metrics_csv(
+        csv_path,
+        required=required,
+        rising_edge_signals=("ref_clk", "fb_clk", "lock"),
+        range_signals=("vctrl_mon",),
+        high_fraction_windows=(("disturb_lock", "lock", disturb_start, disturb_end),),
+        threshold=vth,
+    )
+    if metrics is None:
+        return 0.0, notes
+
+    if metrics["row_count"] == 0:
+        return 0.0, ["empty"]
+
+    edges = metrics["edges"]
+    ref_edges = edges["ref_clk"]
+    fb_edges = edges["fb_clk"]
+    lock_edges = edges["lock"]
+    ranges = metrics["ranges"]
+    vctrl_min, vctrl_max = ranges["vctrl_mon"]
+    vctrl_in_range = -1e-6 <= vctrl_min and vctrl_max <= 0.95
+
+    if len(ref_edges) < 12 or len(fb_edges) < 12:
+        return 0.0, [f"not_enough_edges ref={len(ref_edges)} fb={len(fb_edges)}"]
+
+    ref_late = [t for t in ref_edges if 4.5e-6 <= t <= 5.9e-6]
+    fb_late = [t for t in fb_edges if 4.5e-6 <= t <= 5.9e-6]
+    if len(ref_late) < 4 or len(fb_late) < 4:
+        return 0.0, [
+            f"not_enough_late_edges ref_late={len(ref_late)} fb_late={len(fb_late)}"
+        ]
+
+    ref_periods = [b - a for a, b in zip(ref_late, ref_late[1:])]
+    fb_periods = [b - a for a, b in zip(fb_late, fb_late[1:])]
+    ref_period = sum(ref_periods) / len(ref_periods)
+    fb_period = sum(fb_periods) / len(fb_periods)
+    if ref_period <= 0.0 or fb_period <= 0.0:
+        return 0.0, ["non_positive_period"]
+    freq_ratio = ref_period / fb_period
+
+    pre_lock_edges = [t for t in lock_edges if t < 2.0e-6]
+    post_lock_edges = [t for t in lock_edges if 2.2e-6 <= t <= 5.9e-6]
+    relock_time = post_lock_edges[0] if post_lock_edges else float("nan")
+    disturb_low_frac = 1.0 - metrics["high_fractions"]["disturb_lock"]
+
+    ok = (
+        bool(pre_lock_edges)
+        and disturb_low_frac >= 0.25
+        and bool(post_lock_edges)
+        and 0.97 <= freq_ratio <= 1.03
+        and vctrl_in_range
+    )
+    return (1.0 if ok else 0.0), [
+        f"pre_lock_edges={len(pre_lock_edges)} "
+        f"disturb_lock_low_frac={disturb_low_frac:.3f} "
+        f"post_lock_edges={len(post_lock_edges)} "
+        f"late_freq_ratio={freq_ratio:.4f} "
+        f"relock_time={relock_time:.3e} "
+        f"vctrl_min={vctrl_min:.3f} "
+        f"vctrl_max={vctrl_max:.3f}"
+    ]
+
+
 STREAMING_BEHAVIOR_CHECKS = {
+    "adc_dac_ideal_4b": _stream_adc_dac_ideal_4b_csv,
+    "adc_dac_ideal_4b_smoke": _stream_adc_dac_ideal_4b_csv,
     "pfd_deadzone_smoke": _stream_pfd_deadzone_csv,
     "pfd_reset_race_smoke": _stream_pfd_reset_race_csv,
     "dac_binary_clk_4b_smoke": _stream_dac_binary_clk_4b_csv,
@@ -637,6 +1188,16 @@ STREAMING_BEHAVIOR_CHECKS = {
     "dwa_wraparound_smoke": _stream_dwa_wraparound_csv,
     "gain_extraction_smoke": _stream_gain_extraction_csv,
     "multimod_divider_ratio_switch_smoke": _stream_multimod_divider_ratio_switch_csv,
+    "adpll_lock_smoke": _stream_adpll_lock_csv,
+    "adpll_timer_smoke": _stream_adpll_lock_csv,
+    "adpll_timer": _stream_adpll_lock_csv,
+    "dff_rst_smoke": _stream_dff_rst_csv,
+    "final_step_file_metric_smoke": _stream_final_step_file_metric_csv,
+    "transition_branch_target_smoke": _stream_transition_branch_target_csv,
+    "therm2bin": _stream_therm2bin_csv,
+    "bad_bus_output_loop": _stream_bad_bus_output_loop_csv,
+    "simultaneous_event_order_smoke": _stream_simultaneous_event_order_csv,
+    "cppll_freq_step_reacquire_smoke": _stream_cppll_freq_step_reacquire_csv,
 }
 
 VALIDATED_FAST_CHECKER_TASKS = frozenset(STREAMING_BEHAVIOR_CHECKS)
@@ -706,6 +1267,92 @@ def sample_rows_at_or_after_times(
         row = rows[row_idx]
         if rst_key is None or row.get(rst_key, 0.0) > rst_threshold:
             sampled.append(row)
+    return sampled
+
+
+def logic_settled_sample_rows(
+    rows: list[dict[str, float]],
+    input_names: list[str],
+    *,
+    threshold: float = 0.45,
+    start_offset_s: float = 5e-10,
+    settle_s: float = 1e-10,
+    min_spacing_s: float = 5e-10,
+) -> list[dict[str, float]]:
+    """Sample stable logic rows without over-weighting transition breakpoints.
+
+    Spectre inserts many solver points around PWL and `transition()` edges.
+    Row-weighted truth-table checks can then count one physical transition as
+    many failures.  This helper skips a short settling interval after any input
+    logic-state change and samples the remaining rows at a coarse time spacing.
+    """
+    if not rows:
+        return []
+
+    start_t = rows[0]["time"] + start_offset_s
+    settle_until = start_t
+    last_state: tuple[bool, ...] | None = None
+    last_sample_t = float("-inf")
+    sampled: list[dict[str, float]] = []
+
+    for row in rows:
+        t = row["time"]
+        state = tuple(row[name] > threshold for name in input_names)
+        if last_state is None:
+            last_state = state
+        elif state != last_state:
+            last_state = state
+            settle_until = max(settle_until, t + settle_s)
+
+        if t < start_t or t <= settle_until:
+            continue
+        if t - last_sample_t >= min_spacing_s:
+            sampled.append(row)
+            last_sample_t = t
+
+    return sampled
+
+
+def bus_settled_sample_rows(
+    rows: list[dict[str, float]],
+    bit_names: list[str],
+    *,
+    threshold: float = 0.45,
+    start_offset_s: float = 5e-10,
+    settle_s: float = 5e-10,
+    min_spacing_s: float = 5e-10,
+) -> list[dict[str, float]]:
+    """Sample bus rows after decoded bus-state transitions settle."""
+    if not rows:
+        return []
+
+    start_t = rows[0]["time"] + start_offset_s
+    settle_until = start_t
+    last_code: int | None = None
+    last_sample_t = float("-inf")
+    sampled: list[dict[str, float]] = []
+
+    for row in rows:
+        t = row["time"]
+        code = 0
+        for bit_name in bit_names:
+            bit = 1 if row[bit_name] > threshold else 0
+            m = re.search(r"(\d+)\]?$", bit_name)
+            idx = int(m.group(1)) if m else 0
+            code |= bit << idx
+
+        if last_code is None:
+            last_code = code
+        elif code != last_code:
+            last_code = code
+            settle_until = max(settle_until, t + settle_s)
+
+        if t < start_t or t <= settle_until:
+            continue
+        if t - last_sample_t >= min_spacing_s:
+            sampled.append(row)
+            last_sample_t = t
+
     return sampled
 
 
@@ -1209,11 +1856,14 @@ def check_d2b(rows: list[dict[str, float]]) -> tuple[bool, str]:
     dout_bits = [k for k in rows[0] if re.fullmatch(r"dout[_\[]?\d+\]?", k, flags=re.IGNORECASE)]
     vin_col = next((k for k in rows[0] if k.lower().startswith("vin")), None)
     if vin_col and dout_bits:
-        codes = decode_bus(rows, dout_bits)
-        vins = [r[vin_col] for r in rows]
+        check_rows = bus_settled_sample_rows(rows, dout_bits)
+        if len(check_rows) < 10:
+            check_rows = rows
+        codes = decode_bus(check_rows, dout_bits)
+        vins = [r[vin_col] for r in check_rows]
         pairs = sorted(zip(vins, codes), key=lambda x: x[0])
         monotonic = all(pairs[i][1] <= pairs[i + 1][1] for i in range(len(pairs) - 1))
-        return monotonic, "dynamic monotonic code check"
+        return monotonic, f"dynamic monotonic code check samples={len(check_rows)} unique_codes={len(set(codes))}"
     return False, "missing d2b outputs"
 
 
@@ -1246,23 +1896,36 @@ def check_adc_dac_ideal_4b(rows: list[dict[str, float]]) -> tuple[bool, str]:
 
 
 def check_dac_binary_clk_4b(rows: list[dict[str, float]]) -> tuple[bool, str]:
-    if not rows or not {"din3", "din2", "din1", "din0", "aout"}.issubset(rows[0]):
-        return False, "missing din*/aout"
-    levels: dict[int, list[float]] = {}
+    if not rows or not {"time", "rdy", "din3", "din2", "din1", "din0", "aout"}.issubset(rows[0]):
+        return False, "missing time/rdy/din*/aout"
+    levels: dict[int, list[float]] = {idx: [] for idx in range(16)}
+    pending_sample_times: list[float] = []
+    settle_delay = 1e-9
+    prev_rdy = 0.0
+    initialized = False
     for r in rows:
+        time = r["time"]
+        rdy = r["rdy"]
         code = (
             (1 if r["din3"] > 0.45 else 0) * 8
             + (1 if r["din2"] > 0.45 else 0) * 4
             + (1 if r["din1"] > 0.45 else 0) * 2
             + (1 if r["din0"] > 0.45 else 0)
         )
-        levels.setdefault(code, []).append(r["aout"])
-    medians = {c: sum(vs) / len(vs) for c, vs in levels.items()}
-    sorted_codes = sorted(medians)
-    monotonic = all(medians[sorted_codes[i]] <= medians[sorted_codes[i + 1]] + 1e-9 for i in range(len(sorted_codes) - 1))
-    span = medians[sorted_codes[-1]] - medians[sorted_codes[0]] if sorted_codes else 0.0
+        due = [target for target in pending_sample_times if time >= target]
+        if due:
+            levels[code].append(r["aout"])
+            pending_sample_times = [target for target in pending_sample_times if time < target]
+        if initialized and prev_rdy < 0.45 <= rdy:
+            pending_sample_times.append(time + settle_delay)
+        prev_rdy = rdy
+        initialized = True
+    means = {c: sum(vs) / len(vs) for c, vs in levels.items() if vs}
+    sorted_codes = sorted(means)
+    monotonic = all(means[sorted_codes[i]] <= means[sorted_codes[i + 1]] + 1e-9 for i in range(len(sorted_codes) - 1))
+    span = means[sorted_codes[-1]] - means[sorted_codes[0]] if sorted_codes else 0.0
     ok = len(sorted_codes) >= 14 and monotonic and span > 0.7
-    return ok, f"levels={len(sorted_codes)} aout_span={span:.3f}"
+    return ok, f"edge_sampled_levels={len(sorted_codes)} aout_span={span:.3f}"
 
 
 def check_dac_therm_16b(rows: list[dict[str, float]]) -> tuple[bool, str]:
@@ -1313,24 +1976,20 @@ def check_sar_adc_dac_weighted_8b(rows: list[dict[str, float]]) -> tuple[bool, s
 def check_not_gate(rows: list[dict[str, float]]) -> tuple[bool, str]:
     if not rows or not {"a", "y"}.issubset(rows[0]):
         return False, "missing a/y"
-    # Down-sample to ≥500 ps spacing to avoid over-weighting EVAS transition sub-steps
-    sampled: list[dict[str, float]] = []
-    last_t = -1.0
-    for r in rows:
-        if r["time"] - last_t >= 5e-10:
-            sampled.append(r)
-            last_t = r["time"]
+    sampled = logic_settled_sample_rows(rows, ["a"], threshold=0.4)
     check_rows = sampled if len(sampled) >= 10 else rows
     good = sum(1 for r in check_rows if (r["a"] > 0.4) != (r["y"] > 0.4))
     frac = good / len(check_rows)
-    return frac > 0.9, f"invert_match_frac={frac:.3f}"
+    return frac > 0.9, f"invert_match_frac={frac:.3f} samples={len(check_rows)}"
 
 
 def check_and_gate(rows: list[dict[str, float]]) -> tuple[bool, str]:
     required = {"a", "b", "y"}
     if not rows or not required.issubset(rows[0]):
         return False, "missing a/b/y"
-    check_rows = [r for r in rows if r["time"] >= rows[0]["time"] + 5e-10]
+    check_rows = logic_settled_sample_rows(rows, ["a", "b"], threshold=0.45)
+    if len(check_rows) < 10:
+        check_rows = [r for r in rows if r["time"] >= rows[0]["time"] + 5e-10]
     if len(check_rows) < 10:
         check_rows = rows
     good = 0
@@ -1341,14 +2000,16 @@ def check_and_gate(rows: list[dict[str, float]]) -> tuple[bool, str]:
         if y_hi == (a_hi and b_hi):
             good += 1
     frac = good / len(check_rows)
-    return frac > 0.92, f"and_truth_match_frac={frac:.3f}"
+    return frac > 0.92, f"and_truth_match_frac={frac:.3f} samples={len(check_rows)}"
 
 
 def check_or_gate(rows: list[dict[str, float]]) -> tuple[bool, str]:
     required = {"a", "b", "y"}
     if not rows or not required.issubset(rows[0]):
         return False, "missing a/b/y"
-    check_rows = [r for r in rows if r["time"] >= rows[0]["time"] + 5e-10]
+    check_rows = logic_settled_sample_rows(rows, ["a", "b"], threshold=0.45)
+    if len(check_rows) < 10:
+        check_rows = [r for r in rows if r["time"] >= rows[0]["time"] + 5e-10]
     if len(check_rows) < 10:
         check_rows = rows
     good = 0
@@ -1359,7 +2020,7 @@ def check_or_gate(rows: list[dict[str, float]]) -> tuple[bool, str]:
         if y_hi == (a_hi or b_hi):
             good += 1
     frac = good / len(check_rows)
-    return frac > 0.92, f"or_truth_match_frac={frac:.3f}"
+    return frac > 0.92, f"or_truth_match_frac={frac:.3f} samples={len(check_rows)}"
 
 
 def check_dff_rst(rows: list[dict[str, float]]) -> tuple[bool, str]:
@@ -2577,10 +3238,11 @@ def check_gray_counter_4b(rows: list[dict[str, float]]) -> tuple[bool, str]:
     vth = max(r["clk"] for r in rows) * 0.5
     clk = [r["clk"] for r in rows]
     times_ns = [r["time"] * 1e9 for r in rows]
+    times_s = [r["time"] for r in rows]
     edge_idx = [i for i in range(1, len(clk)) if clk[i - 1] <= vth < clk[i]]
     codes: list[int] = []
     for idx in edge_idx:
-        settle = min(idx + 8, len(rows) - 1)
+        settle = min(bisect_left(times_s, times_s[idx] + GRAY_COUNTER_SETTLE_TIME_S, idx), len(rows) - 1)
         code = (
             (1 if rows[settle]["g3"] > vth else 0) << 3
             | (1 if rows[settle]["g2"] > vth else 0) << 2
@@ -2619,6 +3281,7 @@ def check_gray_counter_one_bit_change(rows: list[dict[str, float]]) -> tuple[boo
 
     threshold = 0.45
     clk = [r[clk_col] for r in rows]
+    times_s = [r["time"] for r in rows]
     edge_idx = [i for i in range(1, len(clk)) if clk[i - 1] <= threshold < clk[i]]
     if len(edge_idx) < 20:
         return False, f"not_enough_clk_edges={len(edge_idx)}"
@@ -2626,7 +3289,7 @@ def check_gray_counter_one_bit_change(rows: list[dict[str, float]]) -> tuple[boo
     rst_high_active = any(r[rst_col] > threshold for r in rows[: max(4, len(rows) // 10)])
     post_reset_codes: list[int] = []
     for idx in edge_idx:
-        settle = min(idx + 8, len(rows) - 1)
+        settle = min(bisect_left(times_s, times_s[idx] + GRAY_COUNTER_SETTLE_TIME_S, idx), len(rows) - 1)
         rst_val = rows[settle][rst_col]
         if (rst_high_active and rst_val > threshold) or ((not rst_high_active) and rst_val < threshold):
             continue
@@ -3034,8 +3697,13 @@ def check_above_threshold_startup(rows: list[dict[str, float]]) -> tuple[bool, s
     out_min = min(out_vals)
     out_max = max(out_vals)
     span = out_max - out_min
+    late_abs = [r["out"] for r in rows if r["time"] >= rows[-1]["time"] * 0.6]
+    late_abs_hi_frac = sum(1 for v in late_abs if v > 0.45) / max(len(late_abs), 1)
     if span < 0.2:
-        return False, f"out_not_latched_high span={span:.3f}"
+        ok = out_max > 0.45 and late_abs_hi_frac > 0.95
+        if ok:
+            return True, f"startup_already_high late_hi_frac={late_abs_hi_frac:.3f}"
+        return False, f"out_not_latched_high span={span:.3f} late_hi_frac={late_abs_hi_frac:.3f}"
     vth = out_min + 0.5 * span
     first_hi_t = next((r["time"] for r in rows if r["out"] > vth), None)
     if first_hi_t is None:
@@ -3439,6 +4107,50 @@ def parse_evas_timing(text: str) -> dict[str, float]:
     return timing
 
 
+def parse_evas_runtime_error(text: str) -> str | None:
+    """Extract the final Python/EVAS runtime exception from simulator output."""
+    for line in reversed(text.splitlines()):
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if re.match(r"^[A-Za-z_][A-Za-z0-9_.]*Error:\s+", stripped):
+            return stripped
+        if stripped.startswith(("Exception:", "RuntimeError:", "ValueError:", "ZeroDivisionError:")):
+            return stripped
+    return None
+
+
+def parse_evas_log_diagnostics(text: str, *, limit: int = 8) -> list[str]:
+    """Extract simulator log diagnostics that are actionable for repair.
+
+    The checker-level note ``tran.csv missing`` is too coarse for a repair
+    loop: it hides whether the root cause was a missing include, unknown model,
+    invalid source, or Spectre-incompatible instance.  EVAS already prints
+    those details in its log, so preserve the important lines as compact notes.
+    """
+    diagnostics: list[str] = []
+    seen: set[str] = set()
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        if not (
+            line.startswith("ERROR:")
+            or line.startswith("WARNING:")
+            or re.match(r"^[A-Za-z_][A-Za-z0-9_.]*Error:\s+", line)
+            or line.startswith(("Exception:", "RuntimeError:", "ValueError:", "ZeroDivisionError:"))
+        ):
+            continue
+        compact = re.sub(r"\s+", " ", line)
+        if compact in seen:
+            continue
+        seen.add(compact)
+        diagnostics.append(compact[:500])
+        if len(diagnostics) >= limit:
+            break
+    return diagnostics
+
+
 def run_case(
     task_dir: Path,
     dut_path: Path,
@@ -3466,6 +4178,11 @@ def run_case(
         tb_compile = 1.0 if ("Transient Analysis" in combined or (out_dir / "tran.csv").exists()) else 0.0
 
         notes = [f"returncode={proc.returncode}"]
+        runtime_error = parse_evas_runtime_error(combined)
+        if proc.returncode != 0 and runtime_error:
+            notes.append("evas_runtime_error=" + runtime_error)
+        for diagnostic in parse_evas_log_diagnostics(combined):
+            notes.append("evas_log_diagnostic=" + diagnostic)
         if dut_compile == 0.0:
             notes.append("dut_not_compiled")
         if tb_compile == 0.0:

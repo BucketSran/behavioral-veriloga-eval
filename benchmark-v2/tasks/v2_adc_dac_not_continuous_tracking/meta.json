@@ -1,0 +1,57 @@
+{
+  "task_id": "v2_adc_dac_not_continuous_tracking",
+  "family": "benchmark-v2",
+  "source_seed": "adc_dac_ideal_4b",
+  "mechanism_family": "adc_dac_quantize_reconstruct",
+  "perturbation_level": "P4_negative_distractor",
+  "status": "validated_gold_evas_spectre",
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "gold": {
+    "dut": "gold/dut.va",
+    "tb": "gold/tb_ref.scs"
+  },
+  "v2_checker_spec": {
+    "kind": "adc_dac",
+    "width": 4,
+    "vin": "external_drive",
+    "clock": "cadence",
+    "rst": "clear_n",
+    "bits_lsb_first": [
+      "q0",
+      "q1",
+      "q2",
+      "q3"
+    ],
+    "vout": "reconstructed_level",
+    "settled": null,
+    "min_unique_codes": 8
+  },
+  "manifest_entry": {
+    "task_id": "v2_adc_dac_not_continuous_tracking",
+    "source_seed": "adc_dac_ideal_4b",
+    "mechanism_family": "adc_dac_quantize_reconstruct",
+    "perturbation_level": "P4_negative_distractor",
+    "prompt_strategy": "Require reconstructed output to update only from the sampled decision code, explicitly not to track the raw input continuously.",
+    "gold_required": true,
+    "checker_required": true,
+    "spectre_parity_required": true,
+    "split": "v2-small",
+    "status": "draft_manifest",
+    "negative_constraints": [
+      "not_continuous_tracking",
+      "single_code_source_of_truth"
+    ],
+    "review_notes": "Should reject gain-buffer or raw-input follower templates."
+  },
+  "validation": {
+    "tasks": 30,
+    "evas_pass": "30/30",
+    "spectre_pass": "30/30",
+    "evas_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-2026-04-29-r2",
+    "spectre_root": "behavioral-veriloga-eval/results/benchmark-v2-gold-validation-spectre-2026-04-29-r1"
+  }
+}

@@ -1,0 +1,130 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bbpd_data_edge_alignment_ref (vdd, vss, clk, data, up, dn, retimed_data);
+    electrical vdd, vss, clk, data, up, dn, retimed_data;
+
+    // Parameters
+    parameter real vth = 0.5 from (0:1.5);      // Threshold voltage (fraction of vdd)
+    parameter real vdd_val = 1.0 from (0:3.3);  // Supply voltage
+    parameter real tdel = 0.0 from [0:1n);      // Delay
+    parameter real tr = 0.1n from (0:10n);      // Rise time
+    parameter real tf = 0.1n from (0:10n);      // Fall time
+    parameter real pulse_width = 2n from (0:10n); // UP/DN pulse width
+    parameter real setup_margin = 0.5n from (0:5n); // Setup margin for edge detection
+
+    // Internal variables
+    integer clk_state;      // 0 = low, 1 = high
+    integer data_state;     // 0 = low, 1 = high
+    integer up_active;      // UP pulse active flag
+    integer dn_active;      // DN pulse active flag
+    integer last_data_edge_time; // Time of last data edge (in integer ps for precision)
+    integer clk_edge_time;  // Time of clock edge
+    real up_voltage;
+    real dn_voltage;
+    real retimed_voltage;
+
+    // Time tracking in real for analog
+    real last_data_edge_real;
+    real last_clk_edge_real;
+    integer pending_up;
+    integer pending_dn;
+
+    analog begin
+        // Initialize
+        @(initial_step) begin
+            clk_state = 0;
+            data_state = 0;
+            up_active = 0;
+            dn_active = 0;
+            last_data_edge_real = 0.0;
+            last_clk_edge_real = 0.0;
+            pending_up = 0;
+            pending_dn = 0;
+            up_voltage = 0.0;
+            dn_voltage = 0.0;
+            retimed_voltage = 0.0;
+        end
+
+        // Detect data edges (both rising and falling)
+        @(cross(V(data) - vth*vdd_val, +1)) begin // Data rising edge
+            data_state = 1;
+            last_data_edge_real = $abstime;
+        end
+
+        @(cross(V(data) - vth*vdd_val, -1)) begin // Data falling edge
+            data_state = 0;
+            last_data_edge_real = $abstime;
+        end
+
+        // Detect clock rising edge - evaluate alignment
+        @(cross(V(clk) - vth*vdd_val, +1)) begin
+            clk_state = 1;
+            last_clk_edge_real = $abstime;
+
+            // Determine if data edge leads or lags clock edge
+            // If data edge occurred before clock edge (within window), data leads -> UP
+            // If data edge occurred after clock edge (within window), data lags -> DN
+            // If no recent data edge, no pulse
+
+            real time_diff = last_clk_edge_real - last_data_edge_real;
+            real abs_diff = (time_diff > 0) ? time_diff : -time_diff;
+
+            // Check if there's a recent data edge (within reasonable window)
+            if (abs_diff < 5n && abs_diff > 0.01n) begin
+                if (time_diff > 0) begin
+                    // Data edge was before clock edge -> data leads -> UP
+                    pending_up = 1;
+                    pending_dn = 0;
+                end else begin
+                    // Data edge was after clock edge -> data lags -> DN
+                    pending_dn = 1;
+                    pending_up = 0;
+                end
+            end else begin
+                // No recent data edge or edges too close/simultaneous
+                pending_up = 0;
+                pending_dn = 0;
+            end
+        end
+
+        // Detect clock falling edge - clear pulses and update retimed data
+        @(cross(V(clk) - vth*vdd_val, -1)) begin
+            clk_state = 0;
+            // Clear pending pulses on clock falling edge to ensure non-overlap
+            pending_up = 0;
+            pending_dn = 0;
+            // Retimed data follows input data sampled at clock falling edge
+            retimed_voltage = data_state * vdd_val;
+        end
+
+        // Generate UP pulse when pending_up is set
+        if (pending_up == 1 && clk_state == 1) begin
+            up_voltage = vdd_val;
+        end else begin
+            up_voltage = 0.0;
+        end
+
+        // Generate DN pulse when pending_dn is set
+        if (pending_dn == 1 && clk_state == 1) begin
+            dn_voltage = vdd_val;
+        end else begin
+            dn_voltage = 0.0;
+        end
+
+        // Ensure UP and DN are mutually exclusive (safety check)
+        if (up_voltage > vth*vdd_val && dn_voltage > vth*vdd_val) begin
+            // Conflict resolution: prioritize based on most recent edge
+            if (last_data_edge_real < last_clk_edge_real) begin
+                dn_voltage = 0.0; // Data was before clock, keep UP
+            end else begin
+                up_voltage = 0.0; // Data was after clock, keep DN
+            end
+        end
+
+        // Drive outputs with transitions
+        V(up) <+ transition(up_voltage, tdel, tr, tf);
+        V(dn) <+ transition(dn_voltage, tdel, tr, tf);
+        V(retimed_data) <+ transition(retimed_voltage, tdel, tr, tf);
+    end
+endmodule

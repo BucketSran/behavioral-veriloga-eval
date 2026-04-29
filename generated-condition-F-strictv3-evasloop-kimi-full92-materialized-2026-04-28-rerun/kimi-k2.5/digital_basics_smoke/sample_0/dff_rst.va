@@ -1,0 +1,44 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dff_rst (VDD, VSS, D, CLK, RST, Q, QB);
+    input VDD;
+    input VSS;
+    input D;
+    input CLK;
+    input RST;
+    output Q;
+    output QB;
+    electrical VDD, VSS, D, CLK, RST, Q, QB;
+
+    parameter real vth_ratio = 0.5 from (0:1);
+    parameter real tdel = 1e-9 from (0:inf);
+    parameter real tr = 1e-9 from (0:inf);
+    parameter real tf = 1e-9 from (0:inf);
+
+    real vdd_level;
+    real vth;
+    integer q_state;
+    integer last_clk;
+
+    analog begin
+        @(initial_step) begin
+            vdd_level = V(VDD) - V(VSS);
+            vth = vdd_level * vth_ratio;
+            q_state = 0;
+            last_clk = 0;
+        end
+
+        @(cross(V(CLK) - V(VSS) - vth, 1)) begin
+            if (V(RST) - V(VSS) > vth)
+                q_state = 0;
+            else if (V(D) - V(VSS) > vth)
+                q_state = 1;
+            else
+                q_state = 0;
+        end
+
+        V(Q) <+ V(VSS) + transition(q_state * vdd_level, tdel, tr, tf);
+        V(QB) <+ V(VSS) + transition((1 - q_state) * vdd_level, tdel, tr, tf);
+    end
+endmodule

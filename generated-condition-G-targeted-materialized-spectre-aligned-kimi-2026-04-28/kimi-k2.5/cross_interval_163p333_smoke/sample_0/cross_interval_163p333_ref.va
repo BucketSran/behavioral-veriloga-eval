@@ -1,0 +1,50 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cross_interval_163p333_ref (VDD, VSS, a, b, delay_out, seen_out);
+    inout VDD, VSS;
+    input a, b;
+    output delay_out, seen_out;
+    electrical VDD, VSS, a, b, delay_out, seen_out;
+
+    parameter real vth = 0.45;
+    parameter real tdel = 1p;
+    parameter real tr = 100p;
+    parameter real tf = 100p;
+
+    integer seen_a, seen_b;
+    real t_a, t_b, delay_ps;
+
+    analog begin
+        @(initial_step) begin
+            seen_a = 0;
+            seen_b = 0;
+            t_a = 0.0;
+            t_b = 0.0;
+            delay_ps = 0.0;
+        end
+
+        @(cross(V(a) - vth, +1)) begin
+            if (seen_a == 0) begin
+                t_a = $abstime;
+                seen_a = 1;
+            end
+        end
+
+        @(cross(V(b) - vth, +1)) begin
+            if (seen_b == 0) begin
+                t_b = $abstime;
+                seen_b = 1;
+            end
+        end
+
+        if (seen_a && seen_b) begin
+            delay_ps = (t_b - t_a) * 1e12;
+        end else begin
+            delay_ps = 0.0;
+        end
+
+        V(delay_out) <+ transition(V(VDD) * delay_ps / 200.0, tdel, tr, tf);
+        V(seen_out) <+ transition((seen_a && seen_b) ? V(VDD) : V(VSS), tdel, tr, tf);
+    end
+endmodule

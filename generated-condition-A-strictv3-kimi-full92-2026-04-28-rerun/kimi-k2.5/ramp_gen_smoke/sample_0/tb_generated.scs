@@ -1,0 +1,30 @@
+// EVAS testbench for ramp_gen
+
+// Include Verilog-A module
+ahdl_include "ramp_gen.va"
+
+// Top-level testbench
+simulator lang=spectre
+
+// Power supply and ground
+Vvdd (vdd 0) vsource dc=1.8
+
+// Clock source: 20MHz clock (50ns period)
+Vclk (clk_in 0) vsource type=pulse val0=0 val1=1.8 period=50n rise=1n fall=1n width=24n
+
+// Reset source: active-low, asserted at start then released
+Vrst (rst_n 0) vsource type=pulse val0=0 val1=1.8 period=200n rise=1n fall=1n width=180n delay=10n
+
+// Device Under Test
+ramp_gen dut (clk_in rst_n code_3 code_2 code_1 code_0)
+
+// Save statements for required observables
+save clk_in
+save rst_n
+save code_3
+save code_2
+save code_1
+save code_0
+
+// Transient analysis
+tran tran stop=200n maxstep=5n

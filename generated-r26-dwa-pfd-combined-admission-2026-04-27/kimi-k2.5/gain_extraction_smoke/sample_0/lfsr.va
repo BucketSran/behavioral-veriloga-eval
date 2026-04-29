@@ -1,0 +1,47 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module lfsr (dpn, vdd, vss, clk, en, rst_n);
+    output dpn;
+    input vdd, vss, clk, en, rst_n;
+    electrical dpn, vdd, vss, clk, en, rst_n;
+
+    parameter real VDD = 0.9;
+    parameter real VSS = 0.0;
+    parameter real CLK_TH = 0.45;
+    parameter real TR = 1n;
+    parameter real TF = 1n;
+    parameter integer SEED = 1;
+
+    integer lfsr_reg;
+    integer bit0, bit1, bit2, bit3, new_bit;
+    real vout;
+
+    analog begin
+        @(initial_step) begin
+            lfsr_reg = SEED;
+            vout = VSS;
+        end
+
+        @(cross(V(clk) - CLK_TH, 1)) begin
+            if (V(rst_n) < CLK_TH) begin
+                lfsr_reg = SEED;
+                vout = VSS;
+            end else if (V(en) > CLK_TH) begin
+                bit0 = lfsr_reg & 1;
+                bit1 = (lfsr_reg >> 1) & 1;
+                bit2 = (lfsr_reg >> 2) & 1;
+                bit3 = (lfsr_reg >> 3) & 1;
+                new_bit = bit0 ^ bit3;
+                lfsr_reg = (lfsr_reg >> 1) | (new_bit << 3);
+                if (bit0 == 1) begin
+                    vout = VDD;
+                end else begin
+                    vout = VSS;
+                end
+            end
+        end
+
+        V(dpn) <+ transition(vout, 0, TR, TF);
+    end
+endmodule

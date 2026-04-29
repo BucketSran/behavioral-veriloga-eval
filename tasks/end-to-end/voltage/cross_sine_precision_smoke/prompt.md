@@ -26,10 +26,11 @@ Write a Verilog-A cross-event precision probe that measures `$abstime` accuracy 
 ## Constraints
 
 - Use plain `@(cross(...,+1))` and `$abstime` inside the event body.
-- ..)` for outputs.
 - Pure voltage-domain only.
 - No `time_tol` / `expr_tol` in `cross()`.
 - No `I() <+`, `ddt()`, `idt()`, `idtmod()`, or matrix/current-domain constructs.
+- Support public parameters `fin` and `vth` so the testbench can set the input
+  frequency and crossing threshold without changing the module body.
 
 Expected behavior:
 - @(cross()) event should detect zero-crossing precisely
@@ -43,6 +44,32 @@ Ports:
 - `count_out`: output electrical
 
 Write EVAS-compatible Verilog-A (pure voltage-domain behavioral model, no current contributions).
+
+## Deliverables
+
+Return code blocks only, with exactly these two files:
+
+1. A fenced `verilog-a` block for `cross_sine_precision_ref.va`.
+2. A fenced `spectre` block for `tb_cross_sine_precision_ref.scs`.
+
+The Spectre testbench must use Verilog-A include syntax, not a plain Spectre
+`include` statement:
+
+```spectre
+ahdl_include "cross_sine_precision_ref.va"
+```
+
+Instantiate the DUT using Spectre positional instance syntax:
+
+```spectre
+IDUT (VDD VSS vin first_err_out max_err_out count_out) cross_sine_precision_ref
+```
+
+Save plain scalar names:
+
+```spectre
+save vin first_err_out max_err_out count_out
+```
 
 
 ## Public Evaluation Contract (Non-Gold)

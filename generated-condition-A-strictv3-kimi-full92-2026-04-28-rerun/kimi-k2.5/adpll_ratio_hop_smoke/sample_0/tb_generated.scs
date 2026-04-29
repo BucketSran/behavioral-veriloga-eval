@@ -1,0 +1,41 @@
+// Spectre testbench for adpll_ratio_hop_ref
+// Tests ratio hop from 4 to 6 during transient
+
+simulator lang=spectre
+
+// Include the Verilog-A module
+ahdl_include "adpll_ratio_hop_ref.va"
+
+// Global parameters
+parameters VDD=1.0
+parameters VSS=0.0
+parameters TREF=100n  // Reference period (10 MHz)
+
+// Supply sources
+VDD (vdd 0) vsource dc=VDD
+VSS (vss 0) vsource dc=VSS
+
+// Reference clock: 10 MHz square wave
+VREF (ref_clk 0) vsource type=pulse val0=VSS val1=VDD period=TREF rise=1n fall=1n width=TREF/2-1n
+
+// Ratio control: steps from 4V to 6V at 2.5us
+// Using 1V per ratio unit (ratio=4 at 4V, ratio=6 at 6V with VDD=1.0 scaling)
+// Actually ratio_ctrl is interpreted as voltage, so 4V means ratio=4 when vhi=1.0
+// We need to scale: ratio_ctrl = ratio * vhi = ratio * 1.0V
+VRATIO (ratio_ctrl 0) vsource type=pwl wave=[0 4.0 2.5u 4.0 2.6u 6.0 5u 6.0]
+
+// DUT instantiation
+adpll (vdd vss ref_clk ratio_ctrl fb_clk vout vctrl_mon lock) adpll_ratio_hop_ref
+
+// Transient analysis
+tran tran stop=5u maxstep=5n
+
+// Save statements for required waveforms
+save ref_clk
+save vout
+save lock
+save vctrl_mon
+save ratio_ctrl
+
+// Additional saves for debugging
+save fb_clk

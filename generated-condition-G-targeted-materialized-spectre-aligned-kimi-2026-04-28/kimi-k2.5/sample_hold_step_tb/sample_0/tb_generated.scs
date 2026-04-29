@@ -1,0 +1,24 @@
+simulator lang=spectre
+global 0
+
+// Power supplies
+VDD (VDD 0) vsource dc=0.9
+VSS (VSS 0) vsource dc=0
+
+// Clock: 10MHz, 50% duty cycle, 100ps rise/fall
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=100n rise=100p fall=100p width=50n
+
+// Input: stepped waveform to demonstrate sample-and-hold
+Vin (in 0) vsource type=pwl wave=[0n 0.1 20n 0.1 20.001n 0.3 40n 0.3 40.001n 0.5 60n 0.5 60.001n 0.7 80n 0.7 80.001n 0.2 100n 0.2]
+
+// DUT instance
+XDUT (VDD VSS clk in out) sample_hold_step_ref
+
+// Transient analysis
+tran tran stop=100n maxstep=100p
+
+// Save waveforms
+save in clk out
+
+// Include Verilog-A DUT
+ahdl_include "sample_hold_step_ref.va"

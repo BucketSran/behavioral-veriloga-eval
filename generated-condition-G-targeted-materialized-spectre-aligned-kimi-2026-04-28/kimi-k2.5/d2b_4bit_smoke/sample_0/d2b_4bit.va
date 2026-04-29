@@ -1,0 +1,53 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module d2b_4bit (VDD, VSS, VIN, DOUT3, DOUT2, DOUT1, DOUT0);
+    input VDD, VSS, VIN;
+    output DOUT3, DOUT2, DOUT1, DOUT0;
+    electrical VDD, VSS, VIN, DOUT3, DOUT2, DOUT1, DOUT0;
+
+    real vdd_level;
+    real vss_level;
+    real vin_val;
+    real vstep;
+    real code_real;
+    integer code;
+    integer bit3, bit2, bit1, bit0;
+
+    analog begin
+        @(initial_step) begin
+            vdd_level = V(VDD);
+            vss_level = V(VSS);
+        end
+
+        vdd_level = V(VDD);
+        vss_level = V(VSS);
+        vin_val = V(VIN);
+
+        vstep = (vdd_level - vss_level) / 16.0;
+
+        if (vin_val <= vss_level) begin
+            code = 0;
+        end else if (vin_val >= vdd_level) begin
+            code = 15;
+        end else begin
+            code_real = (vin_val - vss_level) / vstep;
+            if (code_real < 0.0)
+                code = 0;
+            else if (code_real > 15.0)
+                code = 15;
+            else
+                code = $floor(code_real);
+        end
+
+        bit3 = (code / 8) % 2;
+        bit2 = (code / 4) % 2;
+        bit1 = (code / 2) % 2;
+        bit0 = code % 2;
+
+        V(DOUT3) <+ transition(bit3 * (vdd_level - vss_level) + vss_level, 0, 100p);
+        V(DOUT2) <+ transition(bit2 * (vdd_level - vss_level) + vss_level, 0, 100p);
+        V(DOUT1) <+ transition(bit1 * (vdd_level - vss_level) + vss_level, 0, 100p);
+        V(DOUT0) <+ transition(bit0 * (vdd_level - vss_level) + vss_level, 0, 100p);
+    end
+endmodule

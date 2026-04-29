@@ -1,0 +1,97 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "pfd_updn.va"
+
+// Supply
+Vdd (vdd 0) vsource dc=1.8
+Vss (vss 0) vsource dc=0
+
+// PFD DUT
+XDUT (vdd vss ref div up dn) pfd_updn
+
+// Reference stimulus: 10MHz with phase modulation to create lead/lag swaps
+// First window (20ns-120ns): REF leads DIV
+// Second window (160ns-260ns): DIV leads REF
+
+Vref (ref 0) vsource type=pwl wave=[
+    0n 0
+    // REF leads in first window: edges at 25ns, 125ns, etc.
+    25n 0 25.05n 1.8
+    125n 1.8 125.05n 0
+    225n 0 225.05n 1.8
+    325n 1.8 325.05n 0
+    // DIV leads in second window: REF edges delayed
+    435n 0 435.05n 1.8
+    535n 1.8 535.05n 0
+    635n 0 635.05n 1.8
+    735n 1.8 735.05n 0
+    835n 0 835.05n 1.8
+    935n 1.8 935.05n 0
+    1035n 0 1035.05n 1.8
+    1135n 1.8 1135.05n 0
+    1235n 0 1235.05n 1.8
+    1335n 1.8 1335.05n 0
+    1435n 0 1435.05n 1.8
+    1535n 1.8 1535.05n 0
+    1635n 0 1635.05n 1.8
+    1735n 1.8 1735.05n 0
+    1835n 0 1835.05n 1.8
+    1935n 1.8 1935.05n 0
+    2035n 0 2035.05n 1.8
+    2135n 1.8 2135.05n 0
+    2235n 0 2235.05n 1.8
+    2335n 1.8 2335.05n 0
+    2435n 0 2435.05n 1.8
+    2535n 1.8 2535.05n 0
+    2635n 0 2635.05n 1.8
+    2735n 1.8 2735.05n 0
+    2835n 0 2835.05n 1.8
+    2935n 1.8 2935.05n 0
+]
+
+// DIV: 10MHz with opposite phase relationship
+// First window: DIV lags REF by ~10ns
+// Second window: DIV leads REF by ~10ns
+
+Vdiv (div 0) vsource type=pwl wave=[
+    0n 0
+    // DIV lags in first window: edges at 35ns, 135ns, etc.
+    35n 0 35.05n 1.8
+    135n 1.8 135.05n 0
+    235n 0 235.05n 1.8
+    335n 1.8 335.05n 0
+    // DIV leads in second window: edges at 425ns, 525ns, etc.
+    425n 0 425.05n 1.8
+    525n 1.8 525.05n 0
+    625n 0 625.05n 1.8
+    725n 1.8 725.05n 0
+    825n 0 825.05n 1.8
+    925n 1.8 925.05n 0
+    1025n 0 1025.05n 1.8
+    1125n 1.8 1125.05n 0
+    1225n 0 1225.05n 1.8
+    1325n 1.8 1325.05n 0
+    1425n 0 1425.05n 1.8
+    1525n 1.8 1525.05n 0
+    1625n 0 1625.05n 1.8
+    1725n 1.8 1725.05n 0
+    1825n 0 1825.05n 1.8
+    1925n 1.8 1925.05n 0
+    2025n 0 2025.05n 1.8
+    2125n 1.8 2125.05n 0
+    2225n 0 2225.05n 1.8
+    2325n 1.8 2325.05n 0
+    2425n 0 2425.05n 1.8
+    2525n 1.8 2525.05n 0
+    2625n 0 2625.05n 1.8
+    2725n 1.8 2725.05n 0
+    2825n 0 2825.05n 1.8
+    2925n 1.8 2925.05n 0
+]
+
+// Save statements for required observables
+save ref div up dn
+
+// Transient analysis
+tran tran stop=300n maxstep=10p errpreset=conservative

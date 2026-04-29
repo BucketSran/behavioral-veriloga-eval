@@ -44,6 +44,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ALL_FAMILIES = ("end-to-end", "spec-to-va", "bugfix", "tb-generation")
+PUBLIC_SPECTRE_RULES_PATH = ROOT / "specs" / "spectre_veriloga_public_rules.md"
 
 
 def family_task_root(family: str) -> Path:
@@ -58,6 +59,12 @@ def family_task_root(family: str) -> Path:
 
 def read_meta(task_dir: Path) -> dict:
     return json.loads((task_dir / "meta.json").read_text(encoding="utf-8"))
+
+
+def _load_public_spectre_rules() -> str:
+    if not PUBLIC_SPECTRE_RULES_PATH.exists():
+        return ""
+    return PUBLIC_SPECTRE_RULES_PATH.read_text(encoding="utf-8").strip()
 
 
 def _normalize_port_name(port_item: str) -> str | None:
@@ -291,6 +298,7 @@ def build_prompt(
     include_checker: bool = False,
     include_skill: bool = False,
     include_public_contract: bool = True,
+    public_spec_mode: str = "legacy-extracted",
 ) -> str:
     """Read prompt.md and optionally include buggy DUT for bugfix tasks.
 
@@ -300,12 +308,19 @@ def build_prompt(
         include_skill: If True, inject Skill circuit knowledge (condition C)
         include_public_contract: If True, inject evaluator-aligned public
             behavioral indicators without exposing gold implementation details.
+        public_spec_mode: "prompt-only" uses only the public prompt plus
+            generic syntax/output rules. "spectre-strict-v3" adds public
+            Spectre/Verilog-A compatibility rules without checker/gold-derived
+            contracts. "legacy-extracted" preserves the older helper contracts
+            extracted from checker/gold harness files.
     """
     prompt_md = (task_dir / "prompt.md").read_text(encoding="utf-8")
     raw_has_public_eval_contract = "public evaluation contract (non-gold)" in prompt_md.lower()
     meta = read_meta(task_dir)
     family = meta.get("family", "end-to-end")
     task_id = meta.get("task_id") or meta.get("id") or task_dir.name
+    use_extracted_contracts = public_spec_mode == "legacy-extracted"
+    use_public_spectre_rules = public_spec_mode == "spectre-strict-v3"
 
     # For bugfix tasks, append the buggy DUT source code
     if family == "bugfix":
@@ -319,7 +334,7 @@ def build_prompt(
 
     gold_include_entries_list: list[dict[str, str]] = []
     gold_tb_text = ""
-    if family in ("spec-to-va", "bugfix", "end-to-end"):
+    if use_extracted_contracts and family in ("spec-to-va", "bugfix", "end-to-end"):
         gold_dir = task_dir / "gold"
         if gold_dir.is_dir():
             tbs = sorted(gold_dir.glob("tb_*.scs"))
@@ -346,7 +361,11 @@ Choose the module boundary from the public task contract:
 - Do not add extra hidden submodules unless they are necessary to satisfy a named task interface or required include.
 """
 
-    strict_tran_contract = [] if raw_has_public_eval_contract else _inject_strict_evas_validation_contract(task_dir, family)
+    strict_tran_contract = (
+        []
+        if raw_has_public_eval_contract or not use_extracted_contracts
+        else _inject_strict_evas_validation_contract(task_dir, family)
+    )
     if strict_tran_contract:
         prompt_md += "\n\n" + "\n".join(strict_tran_contract)
 
@@ -419,9 +438,18 @@ endmodule
 ```
 """
 
+    if use_public_spectre_rules:
+        public_rules = _load_public_spectre_rules()
+        if public_rules:
+            prompt_md += (
+                "\n\n## Public Spectre/Verilog-A Compatibility Rules (MANDATORY)\n\n"
+                + public_rules
+                + "\n"
+            )
+
     # For tb-generation tasks, inject the Gold VA interface as hard constraints.
     # The model must use: exact module names, exact port order, correct supply voltage.
-    if family == "tb-generation":
+    if use_extracted_contracts and family == "tb-generation":
         gold_dir = task_dir / "gold"
         if gold_dir.is_dir():
             gold_vas = sorted(gold_dir.glob("*.va"))
@@ -464,7 +492,7 @@ endmodule
 
     # Public behavioral contract: expose must-satisfy evaluator indicators as
     # task-level contract, without exposing checker source or gold design code.
-    if include_public_contract:
+    if include_public_contract and use_extracted_contracts:
         public_contract_lines = _inject_public_behavior_contract(task_id)
         if public_contract_lines:
             prompt_md += "\n\n" + "\n".join(public_contract_lines)
@@ -878,6 +906,76 @@ def extract_code_blocks(response_text: str) -> dict[str, list[str]]:
     return {"va": va_blocks, "scs": scs_blocks}
 
 
+def required_artifact_kinds(family: str) -> set[str]:
+    if family in ("spec-to-va", "bugfix"):
+        return {"va"}
+    if family == "tb-generation":
+        return {"scs"}
+    if family == "end-to-end":
+        return {"va", "scs"}
+    return {"va"}
+
+
+def present_artifact_kinds_from_blocks(blocks: dict[str, list[str]]) -> set[str]:
+    present: set[str] = set()
+    if blocks.get("va"):
+        present.add("va")
+    if blocks.get("scs"):
+        present.add("scs")
+    return present
+
+
+def present_artifact_kinds_from_saved_files(saved_files: list[str]) -> set[str]:
+    present: set[str] = set()
+    for raw in saved_files:
+        suffix = Path(raw).suffix.lower()
+        if suffix == ".va":
+            present.add("va")
+        elif suffix == ".scs":
+            present.add("scs")
+    return present
+
+
+def missing_required_artifacts(family: str, blocks: dict[str, list[str]]) -> list[str]:
+    required = required_artifact_kinds(family)
+    present = present_artifact_kinds_from_blocks(blocks)
+    return sorted(required - present)
+
+
+def meta_has_required_artifacts(existing_meta: dict, family: str) -> bool:
+    if existing_meta.get("dry_run"):
+        return False
+    saved_files = existing_meta.get("saved_files") or []
+    if not isinstance(saved_files, list):
+        return False
+    present = present_artifact_kinds_from_saved_files([str(p) for p in saved_files])
+    return required_artifact_kinds(family).issubset(present)
+
+
+def was_truncated(usage: dict, max_tokens: int) -> bool:
+    finish = str(usage.get("finish_reason", "")).lower()
+    out_tokens = int(usage.get("output_tokens", 0) or 0)
+    return finish in {"max_tokens", "length"} or (max_tokens > 0 and out_tokens >= max_tokens)
+
+
+def artifact_retry_prompt(prompt_text: str, missing: list[str]) -> str:
+    missing_list = ", ".join(missing)
+    return prompt_text + f"""
+
+## Artifact Completeness Retry
+
+Your previous response was cut off before all required code blocks were emitted.
+This retry is only about producing the complete artifact set, not changing the
+circuit specification.
+
+Return code blocks only. Do not include explanations, markdown prose, analysis,
+or design discussion outside fenced code blocks.
+
+Make sure the final answer includes every required artifact for this task.
+Currently missing artifact type(s): {missing_list}.
+"""
+
+
 def infer_module_name(va_code: str) -> str:
     """Extract the module name from a Verilog-A code block."""
     m = re.search(r"\bmodule\s+(\w+)", va_code)
@@ -1054,6 +1152,9 @@ def generate_one_task(
     dry_run: bool,
     include_checker: bool = False,
     include_skill: bool = False,
+    public_spec_mode: str = "legacy-extracted",
+    artifact_retry_on_truncation: bool = False,
+    artifact_retry_max_tokens: int = 8192,
 ) -> dict:
     """Generate candidate(s) for one task. Returns generation_meta dict.
 
@@ -1072,12 +1173,23 @@ def generate_one_task(
     if existing_meta_path.exists() and not dry_run:
         try:
             existing = json.loads(existing_meta_path.read_text(encoding="utf-8"))
-            if existing.get("status") in ("generated", "no_code_extracted", "dry_run", "api_error"):
+            if (
+                existing.get("status") in ("generated", "no_code_extracted")
+                and meta_has_required_artifacts(existing, family)
+            ):
                 return existing
         except Exception:
             pass
+        for stale in sample_dir.glob("*placeholder*"):
+            if stale.is_file():
+                stale.unlink()
 
-    prompt_text = build_prompt(task_dir, include_checker=include_checker, include_skill=include_skill)
+    prompt_text = build_prompt(
+        task_dir,
+        include_checker=include_checker,
+        include_skill=include_skill,
+        public_spec_mode=public_spec_mode,
+    )
     gen_meta_base = {
         "model": model,
         "model_slug": model_slug,
@@ -1090,6 +1202,9 @@ def generate_one_task(
         "dry_run": dry_run,
         "include_checker": include_checker,
         "include_skill": include_skill,
+        "public_spec_mode": public_spec_mode,
+        "artifact_retry_on_truncation": artifact_retry_on_truncation,
+        "artifact_retry_max_tokens": artifact_retry_max_tokens,
     }
 
     if dry_run:
@@ -1132,6 +1247,40 @@ def generate_one_task(
         return gen_meta
 
     blocks = extract_code_blocks(response_text)
+    artifact_retry_meta: dict = {
+        "attempted": False,
+        "used": False,
+    }
+    missing_after_first = missing_required_artifacts(family, blocks)
+    if artifact_retry_on_truncation and missing_after_first and was_truncated(usage, max_tokens):
+        retry_max_tokens = max(max_tokens, artifact_retry_max_tokens)
+        retry_prompt = artifact_retry_prompt(prompt_text, missing_after_first)
+        artifact_retry_meta = {
+            "attempted": True,
+            "used": False,
+            "reason": "truncated_missing_required_artifacts",
+            "missing_after_first": missing_after_first,
+            "first_finish_reason": usage.get("finish_reason"),
+            "first_output_tokens": usage.get("output_tokens"),
+            "retry_max_tokens": retry_max_tokens,
+        }
+        try:
+            retry_response_text, retry_usage = call_model(
+                model, retry_prompt, temperature, top_p, retry_max_tokens
+            )
+            retry_blocks = extract_code_blocks(retry_response_text)
+            first_score = len(present_artifact_kinds_from_blocks(blocks) & required_artifact_kinds(family))
+            retry_score = len(present_artifact_kinds_from_blocks(retry_blocks) & required_artifact_kinds(family))
+            artifact_retry_meta["retry_finish_reason"] = retry_usage.get("finish_reason")
+            artifact_retry_meta["retry_output_tokens"] = retry_usage.get("output_tokens")
+            artifact_retry_meta["missing_after_retry"] = missing_required_artifacts(family, retry_blocks)
+            if retry_score >= first_score:
+                response_text = retry_response_text
+                usage = retry_usage
+                blocks = retry_blocks
+                artifact_retry_meta["used"] = True
+        except Exception as exc:
+            artifact_retry_meta["error"] = str(exc)[:400]
 
     va_blocks = blocks["va"]
     scs_blocks = blocks["scs"]
@@ -1210,6 +1359,7 @@ def generate_one_task(
         "status": "generated" if saved_files else "no_code_extracted",
         "saved_files": saved_files,
         "raw_response_length": len(response_text),
+        "artifact_retry": artifact_retry_meta,
         **usage,
     }
     (sample_dir / "generation_meta.json").write_text(json.dumps(gen_meta, indent=2))
@@ -1252,10 +1402,34 @@ def main() -> int:
     ap.add_argument("--include-skill", action="store_true",
                     help="Inject Skill circuit knowledge (Experiment condition C: +Skill)")
     ap.add_argument(
+        "--public-spec-mode",
+        choices=["prompt-only", "spectre-strict-v3", "legacy-extracted"],
+        default="legacy-extracted",
+        help=(
+            "prompt-only: use prompt.md plus generic output/syntax rules only. "
+            "spectre-strict-v3: prompt-only plus public Spectre/Verilog-A compatibility rules. "
+            "legacy-extracted: also inject older helper contracts extracted from checker/gold harness files."
+        ),
+    )
+    ap.add_argument(
         "--max-workers",
         type=int,
         default=4,
         help="Max parallel generation workers. Use 1 to force serial mode.",
+    )
+    ap.add_argument(
+        "--artifact-retry-on-truncation",
+        action="store_true",
+        help=(
+            "If a response is truncated and misses a required code-block type, "
+            "retry once with a neutral code-only artifact-completeness prompt."
+        ),
+    )
+    ap.add_argument(
+        "--artifact-retry-max-tokens",
+        type=int,
+        default=8192,
+        help="Max output tokens for artifact-completeness retry. Default: 8192.",
     )
     args = ap.parse_args()
 
@@ -1299,6 +1473,8 @@ def main() -> int:
     print(f"[generate] model={args.model}  tasks={len(task_list)}"
           f"  temp={args.temperature}  sample={args.sample_idx}"
           f"  checker={args.include_checker}  skill={args.include_skill}"
+          f"  public_spec_mode={args.public_spec_mode}"
+          f"  artifact_retry={args.artifact_retry_on_truncation}"
           f"  dry_run={args.dry_run}  workers={args.max_workers}")
 
     total_input_tokens = 0
@@ -1318,6 +1494,9 @@ def main() -> int:
                 dry_run=args.dry_run,
                 include_checker=args.include_checker,
                 include_skill=args.include_skill,
+                public_spec_mode=args.public_spec_mode,
+                artifact_retry_on_truncation=args.artifact_retry_on_truncation,
+                artifact_retry_max_tokens=args.artifact_retry_max_tokens,
             )
             status = gen_meta.get("status", "?")
             out_tok = int(gen_meta.get("output_tokens", 0) or 0)
@@ -1342,6 +1521,9 @@ def main() -> int:
                 dry_run=args.dry_run,
                 include_checker=args.include_checker,
                 include_skill=args.include_skill,
+                public_spec_mode=args.public_spec_mode,
+                artifact_retry_on_truncation=args.artifact_retry_on_truncation,
+                artifact_retry_max_tokens=args.artifact_retry_max_tokens,
             )
             return task_id, gen_meta
 

@@ -1,0 +1,35 @@
+// Spectre testbench for lfsr module
+// EVAS-compatible smoke test
+
+ahdl_include "lfsr.va"
+
+// Global ground
+global gnd
+
+// Testbench parameters
+parameters vdd_val=1.0
+parameters vss_val=0.0
+parameters seed=123
+
+// Voltage sources
+Vvdd (vdd gnd) vsource dc=vdd_val
+Vvss (vss gnd) vsource dc=vss_val
+
+// Clock: 1 GHz = 1ns period, 50% duty
+Vclk (clk gnd) vsource type=pulse val0=0 val1=vdd_val period=1n rise=10p fall=10p width=0.5n
+
+// Reset: active low, deasserts at 101ns
+Vrstb (rstb gnd) vsource type=pulse val0=0 val1=vdd_val period=600n rise=10p fall=10p width=500n delay=101n
+
+// Enable: always high
+Ven (en gnd) vsource dc=vdd_val
+
+// DUT instance
+DUT (dpn vdd vss clk en rstb) lfsr vdd_val=vdd_val vss_val=vss_val seed=seed
+
+// Save statements for CSV output - must match checker expectations
+save DUT.dpn
+save DUT.rstb
+
+// Transient analysis - strict EVAS validation settings
+tran tran stop=500n maxstep=2n

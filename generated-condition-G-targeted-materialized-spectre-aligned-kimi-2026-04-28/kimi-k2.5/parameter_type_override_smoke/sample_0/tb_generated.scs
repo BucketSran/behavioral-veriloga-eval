@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "parameter_type_override_ref.va"
+
+Vvss (vss 0) vsource dc=0
+
+XDUT (out vss) parameter_type_override_ref vhi=0.72 reps=4
+
+save out
+save vss
+
+tran tran stop=60n maxstep=200p

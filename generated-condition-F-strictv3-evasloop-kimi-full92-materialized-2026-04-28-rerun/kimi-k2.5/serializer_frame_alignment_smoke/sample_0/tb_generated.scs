@@ -1,0 +1,35 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "serializer_frame_alignment_ref.va"
+
+// Power supplies
+Vdd (vdd 0) vsource dc=1.8
+Vss (vss 0) vsource dc=0
+
+// Clock: 10ns period, 50% duty cycle
+Vclk (clk 0) vsource type=pulse val0=0 val1=1.8 period=10n rise=0.1n fall=0.1n width=4.9n delay=0
+
+// Load pulse: active for one clock cycle at 25ns
+Vload (load 0) vsource type=pulse val0=0 val1=1.8 period=200n rise=0.1n fall=0.1n width=9.9n delay=25n
+
+// Data inputs: 0xA5 = 10100101
+Vdin7 (din7 0) vsource dc=1.8
+Vdin6 (din6 0) vsource dc=0
+Vdin5 (din5 0) vsource dc=1.8
+Vdin4 (din4 0) vsource dc=0
+Vdin3 (din3 0) vsource dc=0
+Vdin2 (din2 0) vsource dc=1.8
+Vdin1 (din1 0) vsource dc=0
+Vdin0 (din0 0) vsource dc=1.8
+
+// DUT instance
+XDUT (vdd vss clk load din7 din6 din5 din4 din3 din2 din1 din0 sout frame) serializer_frame_alignment_ref
+
+// Transient analysis
+tran tran stop=130n maxstep=0.1n
+
+// Save required signals
+save clk
+save frame
+save sout

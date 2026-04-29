@@ -1,0 +1,23 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "sample_hold_droop_ref.va"
+
+// Supply
+Vdd (vdd 0) vsource dc=0.9
+Vss (vss 0) vsource dc=0
+
+// Clock: ~100MHz, multiple edges for hold windows
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=20n rise=100p fall=100p width=9.9n
+
+// Input: stepped levels to show different held values
+Vin (vin 0) vsource type=pwl wave=[0n 0 30n 0 30.1n 0.3 60n 0.3 60.1n 0.6 90n 0.6 90.1n 0.2 120n 0.2 120.1n 0.8 150n 0.8 150.1n 0.1 170n 0.1]
+
+// DUT
+XDUT (vdd vss clk vin vout) sample_hold_droop_ref
+
+// Analysis
+tran tran stop=170n maxstep=0.1n
+
+// Save outputs
+save vin clk vout

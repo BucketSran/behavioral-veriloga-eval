@@ -1,0 +1,19 @@
+// Spectre testbench for parameter_type_override_ref
+
+// Include the Verilog-A module
+ahdl_include "parameter_type_override_ref.va"
+
+// Power rail (ground)
+vsource vss (vss 0) vdc=0
+
+// DUT with instance parameter overrides
+// vhi=0.72 (overrides default 0.5)
+// reps=4 (overrides default 2)
+dut parameter_type_override_ref (out vss) vhi=0.72 reps=4
+
+// Transient analysis
+tran tran stop=60n maxstep=200p
+
+// Save outputs
+save out
+save dut.out

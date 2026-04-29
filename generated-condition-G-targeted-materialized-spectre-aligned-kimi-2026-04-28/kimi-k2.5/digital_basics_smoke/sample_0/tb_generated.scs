@@ -1,0 +1,41 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "and_gate.va"
+ahdl_include "or_gate.va"
+ahdl_include "not_gate.va"
+ahdl_include "dff_rst.va"
+
+// Supply
+Vdd (vdd 0) vsource dc=1.8
+
+// NOT gate test signals
+Vnot_a (not_a 0) vsource type=pulse dc=0 val0=0 val1=1.8 period=40n rise=1n fall=1n width=19n
+
+// AND gate test signals
+Vand_a (and_a 0) vsource type=pulse dc=0 val0=0 val1=1.8 period=80n rise=1n fall=1n width=39n
+Vand_b (and_b 0) vsource type=pulse dc=0 val0=0 val1=1.8 period=40n rise=1n fall=1n width=19n
+
+// OR gate test signals
+Vor_a (or_a 0) vsource type=pulse dc=0 val0=0 val1=1.8 period=60n rise=1n fall=1n width=29n
+Vor_b (or_b 0) vsource type=pulse dc=0 val0=0 val1=1.8 period=40n rise=1n fall=1n width=19n
+
+// DFF test signals
+Vdff_d (dff_d 0) vsource type=pulse dc=0 val0=0 val1=1.8 period=100n rise=1n fall=1n width=49n
+Vdff_clk (dff_clk 0) vsource type=pulse dc=0 val0=0 val1=1.8 period=20n rise=1n fall=1n width=9n
+Vdff_rst (dff_rst 0) vsource type=pulse dc=0 val0=0 val1=1.8 period=200n rise=1n fall=1n width=10n delay=5n
+
+// Instantiate gates
+I_not (vdd 0 not_a not_y) not_gate
+I_and (and_a and_b and_y) and_gate
+I_or (or_a or_b or_y) or_gate
+I_dff (vdd 0 dff_d dff_clk dff_rst dff_q dff_qb) dff_rst
+
+// Analysis
+tran tran stop=200n maxstep=100p
+
+// Save statements
+save not_a not_y
+save and_a and_b and_y
+save or_a or_b or_y
+save dff_d dff_clk dff_rst dff_q dff_qb

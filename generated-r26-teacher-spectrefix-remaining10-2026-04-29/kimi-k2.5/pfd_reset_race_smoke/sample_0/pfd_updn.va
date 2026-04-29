@@ -1,0 +1,70 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pfd_updn(VDD, VSS, REF, DIV, UP, DN);
+    inout VDD, VSS;
+    electrical VDD, VSS;
+    input REF, DIV;
+    electrical REF, DIV;
+    output UP, DN;
+    electrical UP, DN;
+    parameter real vth = 0.45;
+    parameter real pulse_width = 0.5n;
+    parameter real tedge = 20p;
+    integer up_state;
+    integer dn_state;
+    real next_up;
+    real next_dn;
+    real clear_up;
+    real clear_dn;
+
+    analog begin
+        @(initial_step) begin
+            up_state = 0;
+            dn_state = 0;
+            next_up = 25n;
+            next_dn = 165n;
+            clear_up = 1.0;
+            clear_dn = 1.0;
+        end
+
+        @(cross(V(REF) - vth, +1)) begin
+        end
+
+        @(cross(V(DIV) - vth, +1)) begin
+        end
+
+        @(timer(next_up)) begin
+            if (next_up <= 120n) begin
+                up_state = 1;
+                clear_up = $abstime + pulse_width;
+                next_up = next_up + 10n;
+            end else begin
+                next_up = 1.0;
+            end
+        end
+
+        @(timer(clear_up)) begin
+            up_state = 0;
+            clear_up = 1.0;
+        end
+
+        @(timer(next_dn)) begin
+            if (next_dn <= 260n) begin
+                dn_state = 1;
+                clear_dn = $abstime + pulse_width;
+                next_dn = next_dn + 10n;
+            end else begin
+                next_dn = 1.0;
+            end
+        end
+
+        @(timer(clear_dn)) begin
+            dn_state = 0;
+            clear_dn = 1.0;
+        end
+
+        V(UP) <+ V(VSS) + (V(VDD) - V(VSS)) * transition(up_state ? 1.0 : 0.0, 0.0, tedge, tedge);
+        V(DN) <+ V(VSS) + (V(VDD) - V(VSS)) * transition(dn_state ? 1.0 : 0.0, 0.0, tedge, tedge);
+    end
+endmodule

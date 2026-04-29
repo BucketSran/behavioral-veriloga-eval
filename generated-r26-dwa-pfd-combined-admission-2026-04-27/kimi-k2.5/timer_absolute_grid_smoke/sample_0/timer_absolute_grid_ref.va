@@ -1,0 +1,28 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module timer_absolute_grid_ref (
+    inout electrical VDD,
+    inout electrical VSS,
+    output electrical clk_out
+);
+    parameter real tstart = 10n from [0:inf);
+    parameter real tstep = 10n from (0:inf);
+    parameter real tedge = 200p from (0:inf);
+    real next_t;
+    integer state;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+            next_t = tstart;
+        end
+
+        @(timer(next_t)) begin
+            state = 1 - state;
+            next_t = next_t + tstep;
+        end
+
+        V(clk_out) <+ V(VSS) + (V(VDD) - V(VSS)) * transition(state ? 1.0 : 0.0, 0.0, tedge, tedge);
+    end
+endmodule

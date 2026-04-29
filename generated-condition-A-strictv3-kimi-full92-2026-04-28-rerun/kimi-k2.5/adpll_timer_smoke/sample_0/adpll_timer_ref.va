@@ -1,0 +1,178 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module adpll_timer_ref (VDD, VSS, ref_clk, fb_clk, dco_clk, vctrl_mon, lock);
+    inout VDD;
+    inout VSS;
+    input ref_clk;
+    output fb_clk;
+    output dco_clk;
+    output vctrl_mon;
+    output lock;
+
+    electrical VDD;
+    electrical VSS;
+    electrical ref_clk;
+    electrical fb_clk;
+    electrical dco_clk;
+    electrical vctrl_mon;
+    electrical lock;
+
+    // Parameters
+    parameter real vdd = 1.2;
+    parameter real vss = 0.0;
+    parameter real vth = 0.6;           // Threshold for clock detection
+    parameter real tdel = 0.0;          // Delay for transitions
+    parameter real trise = 0.1n;        // Rise time
+    parameter real tfall = 0.1n;        // Fall time
+    parameter real ref_freq = 50M;      // Reference frequency
+    parameter integer ndiv = 1;         // Feedback divider ratio
+    parameter real kp = 0.01;           // Proportional gain for DCO tuning
+    parameter real init_dco_freq = 45M; // Initial DCO frequency
+    parameter real lock_threshold = 0.05; // Frequency error threshold for lock
+    parameter integer lock_count = 10;   // Consecutive cycles for lock assertion
+
+    // State variables
+    integer ref_edge_count;
+    integer fb_edge_count;
+    integer phase_error;        // Bang-bang: -1, 0, +1
+    integer dco_ctrl_code;      // Digital control code for DCO
+    integer lock_state;         // 0 = unlocked, 1 = locked
+    integer lock_cnt;           // Counter for lock detection
+    real dco_period;            // Current DCO period
+    real dco_half_period;       // Half period for clock generation
+    real next_dco_edge;         // Time of next DCO edge
+    real ref_period;            // Measured reference period
+    real fb_period;             // Measured feedback period
+    real freq_error;            // Frequency error ratio
+
+    // Internal signals
+    real dco_val;               // Current DCO output value
+    real fb_val;                // Current feedback clock value
+    real lock_val;              // Current lock output value
+    real vctrl_val;             // Control voltage monitor value
+
+    analog begin
+        // Initialize
+        @(initial_step) begin
+            ref_edge_count = 0;
+            fb_edge_count = 0;
+            phase_error = 0;
+            dco_ctrl_code = 0;
+            lock_state = 0;
+            lock_cnt = 0;
+            dco_period = 1.0 / init_dco_freq;
+            dco_half_period = dco_period / 2.0;
+            next_dco_edge = 0;
+            ref_period = 1.0 / ref_freq;
+            fb_period = dco_period * ndiv;
+            freq_error = 0.0;
+            dco_val = vss;
+            fb_val = vss;
+            lock_val = vss;
+            vctrl_val = vss;
+        end
+
+        // Reference clock edge detection (rising edge)
+        @(cross(V(ref_clk) - vth, 1)) begin
+            ref_edge_count = ref_edge_count + 1;
+
+            // Calculate phase error using bang-bang detection
+            // Compare expected vs actual fb_clk edge timing
+            if (fb_edge_count > 0) begin
+                // Frequency comparison: is fb running faster or slower?
+                if (fb_period < ref_period * 0.99) begin
+                    phase_error = -1;  // fb too fast, slow down DCO
+                end else if (fb_period > ref_period * 1.01) begin
+                    phase_error = +1;  // fb too slow, speed up DCO
+                end else begin
+                    phase_error = 0;   // close enough
+                end
+            end
+
+            // Update DCO control based on phase error (bang-bang)
+            if (phase_error == -1) begin
+                dco_ctrl_code = dco_ctrl_code - 1;
+            end else if (phase_error == +1) begin
+                dco_ctrl_code = dco_ctrl_code + 1;
+            end
+
+            // Clamp control code
+            if (dco_ctrl_code < -100) dco_ctrl_code = -100;
+            if (dco_ctrl_code > 100) dco_ctrl_code = 100;
+
+            // Update DCO period based on control code
+            // Negative code = slower (longer period), Positive = faster (shorter period)
+            dco_period = (1.0 / init_dco_freq) * (1.0 - kp * dco_ctrl_code);
+            if (dco_period < 1.0 / (init_dco_freq * 2.0))
+                dco_period = 1.0 / (init_dco_freq * 2.0);
+            if (dco_period > 1.0 / (init_dco_freq * 0.5))
+                dco_period = 1.0 / (init_dco_freq * 0.5);
+
+            dco_half_period = dco_period / 2.0;
+
+            // Calculate frequency error for lock detection
+            freq_error = abs(fb_period - ref_period) / ref_period;
+
+            // Lock detection logic
+            if (freq_error < lock_threshold) begin
+                lock_cnt = lock_cnt + 1;
+                if (lock_cnt >= lock_count) begin
+                    lock_state = 1;
+                    lock_cnt = lock_count;  // Saturate
+                end
+            end else begin
+                lock_cnt = 0;
+                lock_state = 0;
+            end
+
+            // Update monitor output (normalized control voltage)
+            vctrl_val = vss + (vdd - vss) * (dco_ctrl_code + 100) / 200.0;
+        end
+
+        // DCO timer-based clock generation
+        // Use timer to schedule next edge
+        @(timer(next_dco_edge)) begin
+            // Toggle DCO output
+            if (dco_val > vth) begin
+                dco_val = vss;
+            end else begin
+                dco_val = vdd;
+            end
+
+            // Schedule next edge
+            next_dco_edge = next_dco_edge + dco_half_period;
+        end
+
+        // Initialize DCO timer on first step
+        @(initial_step) begin
+            next_dco_edge = $abstime + dco_half_period;
+        end
+
+        // Feedback divider: count DCO edges and generate fb_clk
+        // Simple divide-by-ndiv using DCO edge detection
+        @(cross(V(dco_clk) - vth, 1)) begin
+            fb_edge_count = fb_edge_count + 1;
+
+            // Update fb_period measurement
+            fb_period = dco_period * ndiv;
+
+            // Generate divided feedback clock
+            if ((fb_edge_count % (2 * ndiv)) < ndiv) begin
+                fb_val = vdd;
+            end else begin
+                fb_val = vss;
+            end
+        end
+
+        // Drive outputs with transitions
+        V(dco_clk) <+ transition(dco_val, tdel, trise, tfall);
+        V(fb_clk) <+ transition(fb_val, tdel, trise, tfall);
+        V(lock) <+ transition(lock_state ? vdd : vss, tdel, trise, tfall);
+        V(vctrl_mon) <+ transition(vctrl_val, tdel, trise, tfall);
+
+        // Power supply
+        V(VDD) <+ vdd;
+        V(VSS) <+ vss;
+    end
+endmodule

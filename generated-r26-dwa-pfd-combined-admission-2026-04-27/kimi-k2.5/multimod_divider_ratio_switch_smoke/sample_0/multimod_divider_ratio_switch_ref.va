@@ -1,0 +1,43 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module multimod_divider_ratio_switch_ref (
+    input electrical clk_in,
+    input electrical ratio_ctrl,
+    output electrical div_out
+);
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real pulse_width = 0.6n from (0:inf);
+    parameter real tedge = 20p from (0:inf);
+    integer count;
+    integer div_target;
+    integer pulse_state;
+    real clear_t;
+
+    analog begin
+        @(initial_step) begin
+            count = 0;
+            div_target = 4;
+            pulse_state = 0;
+            clear_t = 1.0;
+        end
+
+        @(cross(V(clk_in) - vth, +1)) begin
+            div_target = (V(ratio_ctrl) >= 4.5) ? 5 : 4;
+            count = count + 1;
+            if (count >= div_target) begin
+                count = 0;
+                pulse_state = 1;
+                clear_t = $abstime + pulse_width;
+            end
+        end
+
+        @(timer(clear_t)) begin
+            pulse_state = 0;
+            clear_t = 1.0;
+        end
+
+        V(div_out) <+ transition(pulse_state ? vdd : 0.0, 0.0, tedge, tedge);
+    end
+endmodule

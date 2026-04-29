@@ -1,0 +1,20 @@
+// Spectre testbench for not_gate
+
+// Include the Verilog-A model
+ahdl_include "not_gate.va"
+
+// Power supplies
+VDD (vdd 0) vsource dc=0.9
+VSS (vss 0) vsource dc=0
+
+// Input stimulus: 50MHz square wave (period = 20ns)
+VA (a 0) vsource type=pulse val0=0 val1=0.9 period=20n rise=100p fall=100p width=10n
+
+// Device under test
+DUT (vdd vss a y) not_gate vth=0.45 tedge=100p
+
+// Save signals
+save a y
+
+// Transient analysis
+tran tran stop=200n maxstep=5n

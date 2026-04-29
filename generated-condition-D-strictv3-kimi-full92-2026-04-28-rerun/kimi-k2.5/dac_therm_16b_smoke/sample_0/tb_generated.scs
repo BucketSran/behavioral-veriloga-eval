@@ -1,0 +1,90 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "dac_therm_16b.va"
+
+// Parameters
+parameters vstep=1.0
+
+// Instantiate DUT
+IDUT (d15 d14 d13 d12 d11 d10 d9 d8 d7 d6 d5 d4 d3 d2 d1 d0 rst_n vout) dac_therm_16b vstep=vstep
+
+// Reset source - active low, starts low then goes high
+Vrst_n (rst_n 0) vsource type=pwl wave=[0n 0 100n 0 110n 1.8]
+
+// Thermometer code bit sources - PWL to step through 0, 4, 8, 12, 16 ones
+// d0-d3: 0 ones at 0-200ns, 4 ones at 200-400ns, stay high
+// d4-d7: 0 ones at 0-400ns, 4 ones at 400-600ns, stay high
+// d8-d11: 0 ones at 0-600ns, 4 ones at 600-800ns, stay high
+// d12-d15: 0 ones at 0-800ns, 4 ones at 800-1000ns, stay high
+
+// d0: high from 200ns
+Vd0 (d0 0) vsource type=pwl wave=[0n 0 200n 0 210n 1.8]
+
+// d1: high from 200ns
+Vd1 (d1 0) vsource type=pwl wave=[0n 0 200n 0 210n 1.8]
+
+// d2: high from 200ns
+Vd2 (d2 0) vsource type=pwl wave=[0n 0 200n 0 210n 1.8]
+
+// d3: high from 200ns
+Vd3 (d3 0) vsource type=pwl wave=[0n 0 200n 0 210n 1.8]
+
+// d4: high from 400ns
+Vd4 (d4 0) vsource type=pwl wave=[0n 0 400n 0 410n 1.8]
+
+// d5: high from 400ns
+Vd5 (d5 0) vsource type=pwl wave=[0n 0 400n 0 410n 1.8]
+
+// d6: high from 400ns
+Vd6 (d6 0) vsource type=pwl wave=[0n 0 400n 0 410n 1.8]
+
+// d7: high from 400ns
+Vd7 (d7 0) vsource type=pwl wave=[0n 0 400n 0 410n 1.8]
+
+// d8: high from 600ns
+Vd8 (d8 0) vsource type=pwl wave=[0n 0 600n 0 610n 1.8]
+
+// d9: high from 600ns
+Vd9 (d9 0) vsource type=pwl wave=[0n 0 600n 0 610n 1.8]
+
+// d10: high from 600ns
+Vd10 (d10 0) vsource type=pwl wave=[0n 0 600n 0 610n 1.8]
+
+// d11: high from 600ns
+Vd11 (d11 0) vsource type=pwl wave=[0n 0 600n 0 610n 1.8]
+
+// d12: high from 800ns
+Vd12 (d12 0) vsource type=pwl wave=[0n 0 800n 0 810n 1.8]
+
+// d13: high from 800ns
+Vd13 (d13 0) vsource type=pwl wave=[0n 0 800n 0 810n 1.8]
+
+// d14: high from 800ns
+Vd14 (d14 0) vsource type=pwl wave=[0n 0 800n 0 810n 1.8]
+
+// d15: high from 800ns
+Vd15 (d15 0) vsource type=pwl wave=[0n 0 800n 0 810n 1.8]
+
+// Transient analysis
+tran tran stop=2000n maxstep=1n
+
+// Save statements for required signals
+save rst_n
+save d15
+save d14
+save d13
+save d12
+save d11
+save d10
+save d9
+save d8
+save d7
+save d6
+save d5
+save d4
+save d3
+save d2
+save d1
+save d0
+save vout

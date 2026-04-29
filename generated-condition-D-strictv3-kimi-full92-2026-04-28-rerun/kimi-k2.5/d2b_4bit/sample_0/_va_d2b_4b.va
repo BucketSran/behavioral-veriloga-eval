@@ -1,0 +1,60 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module _va_d2b_4b (VDD, VSS, VIN, DOUT3, DOUT2, DOUT1, DOUT0);
+    inout VDD;
+    inout VSS;
+    input VIN;
+    output DOUT3;
+    output DOUT2;
+    output DOUT1;
+    output DOUT0;
+    electrical VDD, VSS, VIN, DOUT3, DOUT2, DOUT1, DOUT0;
+
+    parameter real vdd_level = 1.8 from (0:inf);
+    parameter real vss_level = 0.0 from [0:inf);
+    parameter real tdel = 0 from [0:inf);
+    parameter real tr = 1n from (0:inf);
+    parameter real tf = 1n from (0:inf);
+
+    real vin_norm;
+    integer code;
+    integer b3, b2, b1, b0;
+    real vout3, vout2, vout1, vout0;
+
+    analog begin
+        // Normalize input to 0-1 range based on VDD/VSS
+        vin_norm = (V(VIN) - V(VSS)) / (V(VDD) - V(VSS));
+
+        // Clamp to valid range
+        if (vin_norm < 0.0)
+            vin_norm = 0.0;
+        else if (vin_norm > 1.0)
+            vin_norm = 1.0;
+
+        // Convert to 4-bit code (0-15)
+        code = integer(vin_norm * 16.0);
+        if (code > 15)
+            code = 15;
+        if (code < 0)
+            code = 0;
+
+        // Extract bits
+        b3 = (code >> 3) & 1;
+        b2 = (code >> 2) & 1;
+        b1 = (code >> 1) & 1;
+        b0 = code & 1;
+
+        // Convert bits to voltage levels
+        vout3 = b3 ? vdd_level : vss_level;
+        vout2 = b2 ? vdd_level : vss_level;
+        vout1 = b1 ? vdd_level : vss_level;
+        vout0 = b0 ? vdd_level : vss_level;
+
+        // Output with transitions
+        V(DOUT3) <+ transition(vout3, tdel, tr, tf);
+        V(DOUT2) <+ transition(vout2, tdel, tr, tf);
+        V(DOUT1) <+ transition(vout1, tdel, tr, tf);
+        V(DOUT0) <+ transition(vout0, tdel, tr, tf);
+    end
+endmodule

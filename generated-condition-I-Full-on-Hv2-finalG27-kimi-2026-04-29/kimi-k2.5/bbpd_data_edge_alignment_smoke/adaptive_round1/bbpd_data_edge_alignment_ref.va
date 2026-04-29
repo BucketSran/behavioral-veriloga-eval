@@ -1,0 +1,90 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bbpd_data_edge_alignment_ref (vdd, vss, clk, data, up, dn, retimed_data);
+    inout vdd, vss;
+    input clk, data;
+    output up, dn, retimed_data;
+    electrical vdd, vss, clk, data, up, dn, retimed_data;
+
+    // Parameters
+    parameter real vhi = 1.8 from (0:inf);
+    parameter real vlo = 0.0 from (-inf:inf);
+    parameter real vth = 0.9 from (0:inf);
+    parameter real tdel = 0.0 from [0:inf);
+    parameter real tr = 0.1n from (0:inf);
+    parameter real tf = 0.1n from (0:inf);
+    parameter real pulse_width = 2.0n from (0:inf);
+
+    // State variables
+    integer up_state;
+    integer dn_state;
+    integer retimed_state;
+    real last_data_edge_time;
+    real last_clk_edge_time;
+    real up_clear_time;
+    real dn_clear_time;
+
+    analog begin
+        @(initial_step) begin
+            up_state = 0;
+            dn_state = 0;
+            retimed_state = 0;
+            last_data_edge_time = -1e9;
+            last_clk_edge_time = -1e9;
+            up_clear_time = -1e9;
+            dn_clear_time = -1e9;
+        end
+
+        // Detect data edges (both rising and falling)
+        @(cross(V(data) - vth, 1)) begin
+            last_data_edge_time = $abstime;
+        end
+        @(cross(V(data) - vth, -1)) begin
+            last_data_edge_time = $abstime;
+        end
+
+        // Detect clock rising edges
+        @(cross(V(clk) - vth, 1)) begin
+            last_clk_edge_time = $abstime;
+
+            // Sample retimed data on clock edge
+            retimed_state = (V(data) > vth) ? 1 : 0;
+
+            // Determine lead/lag and emit appropriate pulse
+            if (last_data_edge_time > last_clk_edge_time - 25n) begin
+                // Recent data edge exists, compare timing
+                if (last_data_edge_time < last_clk_edge_time) begin
+                    // Data leads clock: UP pulse
+                    up_state = 1;
+                    up_clear_time = $abstime + pulse_width;
+                end
+                else begin
+                    // Data lags clock: DN pulse
+                    dn_state = 1;
+                    dn_clear_time = $abstime + pulse_width;
+                end
+            end
+            else begin
+                // No recent data edge, data is effectively lagging: DN pulse
+                dn_state = 1;
+                dn_clear_time = $abstime + pulse_width;
+            end
+        end
+
+        // Clear UP pulse after pulse_width
+        @(timer(up_clear_time)) begin
+            up_state = 0;
+        end
+
+        // Clear DN pulse after pulse_width
+        @(timer(dn_clear_time)) begin
+            dn_state = 0;
+        end
+
+        // Output assignments with transition
+        V(up) <+ transition(up_state ? vhi : vlo, tdel, tr, tf);
+        V(dn) <+ transition(dn_state ? vhi : vlo, tdel, tr, tf);
+        V(retimed_data) <+ transition(retimed_state ? vhi : vlo, tdel, tr, tf);
+    end
+endmodule

@@ -1,0 +1,38 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module vin_src (clk, rst_n, vinp, vinn);
+    electrical clk, rst_n, vinp, vinn;
+
+    parameter real VCM = 0.45;
+    parameter real VDIFF_AMP = 0.01;
+    parameter real CLK_VHI = 0.9;
+    parameter real CLK_VLO = 0.0;
+    parameter real CLK_VTH = 0.45;
+    parameter real T_RISE = 1n;
+    parameter real T_FALL = 1n;
+
+    integer state;
+    real vdiff_out;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+            vdiff_out = 0.0;
+        end
+
+        @(cross(V(clk) - CLK_VTH, +1)) begin
+            if (V(rst_n) > CLK_VTH) begin
+                state = state + 1;
+                vdiff_out = VDIFF_AMP * ((state % 2 == 0) ? 1.0 : -1.0);
+            end
+        end
+
+        if (V(rst_n) < CLK_VTH) begin
+            vdiff_out = 0.0;
+        end
+
+        V(vinp) <+ VCM + 0.5 * transition(vdiff_out, 0, T_RISE, T_FALL);
+        V(vinn) <+ VCM - 0.5 * transition(vdiff_out, 0, T_RISE, T_FALL);
+    end
+endmodule

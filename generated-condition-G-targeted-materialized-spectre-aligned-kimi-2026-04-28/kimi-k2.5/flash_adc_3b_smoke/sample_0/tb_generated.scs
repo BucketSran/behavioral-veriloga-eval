@@ -1,0 +1,23 @@
+simulator lang=spectre
+global 0
+
+// Supply
+Vdd (vdd 0) vsource dc=0.9
+Vss (vss 0) vsource dc=0.0
+
+// Input sweep: ramp from 0.01V to 0.89V over 800ns
+Vin (vin 0) vsource type=pwl wave=[0 0.01 800n 0.89]
+
+// Clock: 20MHz, 50% duty, fast edges to sample all 8 codes (40ns period = 20 edges in 800ns)
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=40n rise=1n fall=1n width=19n
+
+// DUT instantiation: vdd, vss, vin, clk, dout2, dout1, dout0
+XDUT (vdd vss vin clk dout2 dout1 dout0) flash_adc_3b
+
+ahdl_include "flash_adc_3b.va"
+
+// Transient analysis
+tran tran stop=820n maxstep=2n
+
+// Save required scalar names
+save vin clk dout2 dout1 dout0

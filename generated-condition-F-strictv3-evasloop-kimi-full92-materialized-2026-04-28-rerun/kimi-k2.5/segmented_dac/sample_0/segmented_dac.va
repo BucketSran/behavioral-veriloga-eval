@@ -1,0 +1,91 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module segmented_dac(VDD, VSS, CLK, D13, D12, D11, D10, D9, D8, D7, D6, D5, D4, D3, D2, D1, D0, VOUT_P, VOUT_N);
+    inout VDD, VSS;
+    input CLK;
+    input D13, D12, D11, D10, D9, D8, D7, D6, D5, D4, D3, D2, D1, D0;
+    output VOUT_P, VOUT_N;
+    electrical VDD, VSS, CLK, D13, D12, D11, D10, D9, D8, D7, D6, D5, D4, D3, D2, D1, D0, VOUT_P, VOUT_N;
+
+    // Parameters
+    parameter real vdd_level = 1.8 from (0:inf);
+    parameter real vth = 0.9 from (0:vdd_level);
+    parameter real vlsb = 1.0e-3 from (0:inf);  // LSB voltage step
+    parameter real tdel = 0 from [0:inf);
+    parameter real trise = 100e-12 from (0:inf);
+    parameter real tfall = 100e-12 from (0:inf);
+
+    // Internal variables
+    integer code;
+    integer msb_code;
+    integer lsb_code;
+    integer thermometer_code;
+    integer i;
+    real vout_p_val;
+    real vout_n_val;
+    real vdiff;
+
+    analog begin
+        @(initial_step) begin
+            code = 0;
+            msb_code = 0;
+            lsb_code = 0;
+            thermometer_code = 0;
+            vout_p_val = 0;
+            vout_n_val = 0;
+            vdiff = 0;
+        end
+
+        // Sample on rising edge of CLK
+        @(cross(V(CLK) - vth, 1)) begin
+            // Read 14-bit input code from electrical inputs
+            // D13 is MSB, D0 is LSB
+            code = 0;
+            if (V(D13) > vth) code = code + 8192;
+            if (V(D12) > vth) code = code + 4096;
+            if (V(D11) > vth) code = code + 2048;
+            if (V(D10) > vth) code = code + 1024;
+            if (V(D9) > vth) code = code + 512;
+            if (V(D8) > vth) code = code + 256;
+            if (V(D7) > vth) code = code + 128;
+            if (V(D6) > vth) code = code + 64;
+            if (V(D5) > vth) code = code + 32;
+            if (V(D4) > vth) code = code + 16;
+            if (V(D3) > vth) code = code + 8;
+            if (V(D2) > vth) code = code + 4;
+            if (V(D1) > vth) code = code + 2;
+            if (V(D0) > vth) code = code + 1;
+
+            // Segmented decoding: 6-bit MSB (thermometer) + 8-bit LSB (binary)
+            // MSB: top 6 bits (D13:D8), range 0-63
+            // LSB: bottom 8 bits (D7:D0), range 0-255
+
+            msb_code = code / 256;        // 6-bit MSB value (0-63)
+            lsb_code = code - msb_code * 256;  // 8-bit LSB value (0-255)
+
+            // Thermometer decode: convert 6-bit binary to 63-bit thermometer
+            // thermometer_code represents how many MSB segments are active (0-64)
+            // For INL/DNL-friendly: use unary weighting
+            thermometer_code = msb_code;  // 0 to 63, each unit represents 256 LSBs
+
+            // Calculate differential output voltage
+            // Full scale: 16383 * vlsb
+            // MSB contribution: thermometer_code * 256 * vlsb
+            // LSB contribution: lsb_code * vlsb
+
+            // Differential output: positive when code > 8191 (midscale), negative when code < 8191
+            // Midscale at code = 8192 (actually 8191.5 for true mid, use 8192)
+
+            vdiff = (thermometer_code * 256 + lsb_code - 8192) * vlsb;
+
+            // Differential outputs
+            vout_p_val = vdiff / 2.0;
+            vout_n_val = -vdiff / 2.0;
+        end
+
+        // Drive outputs with transition smoothing
+        V(VOUT_P) <+ transition(vout_p_val, tdel, trise, tfall);
+        V(VOUT_N) <+ transition(vout_n_val, tdel, trise, tfall);
+    end
+endmodule

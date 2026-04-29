@@ -1,0 +1,93 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bbpd_ref(data, clk, retimed_data, up, down);
+    input data;
+    input clk;
+    input retimed_data;
+    output up;
+    output down;
+    electrical data, clk, retimed_data, up, down;
+
+    parameter real vth = 0.5 from (0:inf);
+    parameter real vhigh = 1.0 from (0:inf);
+    parameter real vlow = 0.0 from (-inf:0);
+    parameter real tr = 10p from (0:inf);
+    parameter real tf = 10p from (0:inf);
+    parameter real tpulse = 100p from (0:inf);
+
+    integer state;  // 0: idle, 1: up asserted, 2: down asserted
+    integer data_edge_type;  // 1: rising, -1: falling
+    real clk_sampled;
+    real up_val, down_val;
+    real timer_start;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+            data_edge_type = 0;
+            clk_sampled = vlow;
+            up_val = vlow;
+            down_val = vlow;
+            timer_start = 0;
+        end
+
+        // Detect data edges (both rising and falling)
+        @(cross(V(data) - vth, 1)) begin
+            // Rising edge on data
+            data_edge_type = 1;
+            clk_sampled = V(clk);
+            timer_start = $abstime;
+
+            // If clk is low, data leads clk -> UP
+            // If clk is high, data lags clk -> DOWN
+            if (clk_sampled < vth) begin
+                state = 1;  // UP
+                up_val = vhigh;
+                down_val = vlow;
+            end else begin
+                state = 2;  // DOWN
+                up_val = vlow;
+                down_val = vhigh;
+            end
+        end
+
+        @(cross(V(data) - vth, -1)) begin
+            // Falling edge on data
+            data_edge_type = -1;
+            clk_sampled = V(clk);
+            timer_start = $abstime;
+
+            // Same logic for falling edge
+            if (clk_sampled < vth) begin
+                state = 1;  // UP
+                up_val = vhigh;
+                down_val = vlow;
+            end else begin
+                state = 2;  // DOWN
+                up_val = vlow;
+                down_val = vhigh;
+            end
+        end
+
+        // Clear pulses after tpulse duration
+        if (state != 0 && ($abstime - timer_start) >= tpulse) begin
+            state = 0;
+            up_val = vlow;
+            down_val = vlow;
+        end
+
+        // Force pulse clearing check on each evaluation
+        if (state != 0) begin
+            if (($abstime - timer_start) >= tpulse) begin
+                state = 0;
+                up_val = vlow;
+                down_val = vlow;
+            end
+        end
+
+        // Output assignments with transitions
+        V(up) <+ transition(up_val, 0, tr, tf);
+        V(down) <+ transition(down_val, 0, tr, tf);
+    end
+endmodule

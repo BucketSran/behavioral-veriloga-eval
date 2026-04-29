@@ -1,0 +1,22 @@
+// Spectre testbench for cross_hysteresis_window_ref
+
+ahdl_include "cross_hysteresis_window_ref.va"
+
+// Supply voltages
+v_vdd (VDD 0) vsource dc=1.0
+v_vss (VSS 0) vsource dc=0.0
+
+// Input stimulus: ramp up past 0.6V, then ramp down past 0.3V
+// Time: 0-30ns: ramp 0 to 0.8V (crosses 0.6V around 22.5ns)
+//       30-60ns: ramp 0.8V down to 0.2V (crosses 0.3V around 52.5ns)
+//       60-90ns: hold at 0.2V
+v_vin (vin 0) vsource type=pwl wave=[0 0 30n 0.8 60n 0.2 90n 0.2]
+
+// DUT instance
+dut (vin out VDD VSS) cross_hysteresis_window_ref
+
+// Transient analysis
+tran tran stop=90n maxstep=20p errpreset=conservative
+
+// Save signals for checker evaluation
+save vin out

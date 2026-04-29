@@ -1,0 +1,30 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sh_ideal (vin, clks, vdd, vss, rst_n, vin_sh);
+    electrical vin, clks, vdd, vss, rst_n, vin_sh;
+
+    parameter real vth = 0.45;
+    parameter real tr = 1n;
+    parameter real tf = 1n;
+
+    real sampled_val;
+
+    analog begin
+        @(initial_step) begin
+            sampled_val = 0.0;
+        end
+
+        @(cross(V(rst_n) - vth, -1)) begin
+            sampled_val = 0.0;
+        end
+
+        @(cross(V(clks) - vth, +1)) begin
+            if (V(rst_n) > vth) begin
+                sampled_val = V(vin);
+            end
+        end
+
+        V(vin_sh) <+ transition(sampled_val, 0, tr, tf);
+    end
+endmodule

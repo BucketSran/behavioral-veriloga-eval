@@ -1,44 +1,46 @@
-Write a Verilog-A module named `d2b_4bit`.
+Write a Verilog-A module named `d2b_4bit` and a minimal EVAS-compatible
+Spectre testbench for it.
 
-Create a 4-bit static analog-to-binary converter in Verilog-A, then produce a
-minimal EVAS testbench and run a smoke simulation.
+Return exactly two fenced code blocks:
 
-Behavioral intent:
+1. A `verilog-a` block for module `d2b_4bit`
+2. A `spectre` block for the testbench
 
-- continuous tracking, no clock
-- analog input over the VSS-to-VDD range
-- 4-bit digital output bus
-- output code should increase as input voltage increases
+Do not include prose outside the code blocks.
 
-Ports:
-- `VDD`: inout electrical
-- `VSS`: inout electrical
-- `VIN`: input electrical
-- `DOUT3`: output electrical
-- `DOUT2`: output electrical
-- `DOUT1`: output electrical
-- `DOUT0`: output electrical
+## DUT Contract
 
+- Module name: `d2b_4bit`
+- Positional port order: `(VDD, VSS, VIN, DOUT3, DOUT2, DOUT1, DOUT0)`
+- All ports are electrical.
+- `VDD` and `VSS` are supply rails.
+- `VIN` is a continuous analog input over the `VSS` to `VDD` range.
+- `DOUT3` is the MSB and `DOUT0` is the LSB.
 
-## Public Evaluation Contract (Non-Gold)
+## Behavioral Intent
 
-This section states evaluator-facing constraints that must be visible to the generated artifact.
-It does not prescribe the internal implementation or reveal a gold solution.
+- Implement a static 4-bit analog-to-binary converter.
+- The output code should increase monotonically as `VIN` increases.
+- Clip the code to the range `[0, 15]`.
+- Drive each output bit as a voltage level using `transition(...)`.
+- Use pure, Spectre-compatible Verilog-A syntax.
 
-Final EVAS transient setting:
+## Required Testbench Structure
 
-```spectre
-tran tran stop=100n maxstep=2n
-```
+- Start with `simulator lang=spectre` and `global 0`.
+- Include the generated DUT file:
+  `ahdl_include "d2b_4bit.va"`
+- Provide `vdd=0.9 V` and `vss=0 V`.
+- Drive `vin` with a monotonic ramp from 0 V to 0.9 V over the run.
+- Instantiate the DUT by position:
+  `IDUT (vdd vss vin DOUT3 DOUT2 DOUT1 DOUT0) d2b_4bit`
+- Use exactly one transient analysis:
+  `tran tran stop=100n maxstep=2n`
+- Save the public waveform columns:
+  `save vin DOUT3 DOUT2 DOUT1 DOUT0`
 
-Required public waveform columns in `tran.csv`:
+## Public Evaluation Contract
 
-- `vin`, `DOUT3`, `DOUT2`, `DOUT1`, `DOUT0`
-
-Use plain scalar save names for these observables; do not rely on instance-qualified or aliased save names.
-
-Timing/checking-window contract:
-
-- Clock-like input(s) `clock` must provide enough valid edges after reset/enable for the checker to sample settled outputs.
-- Sequential outputs are sampled shortly after clock edges, so drive outputs with stable held state variables and `transition()` targets rather than glitchy combinational expressions.
-- Public stimulus nodes used by the reference harness include: `vdd`, `vss`, `vin`.
+The evaluator reads the transient waveform columns `vin`, `DOUT3`, `DOUT2`,
+`DOUT1`, and `DOUT0`. Use plain scalar save names; do not rely on
+instance-qualified or aliased save names.
