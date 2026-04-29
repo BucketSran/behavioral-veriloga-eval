@@ -1,0 +1,715 @@
+{
+  "version": "lego-mechanism-skills-v1",
+  "purpose": "Typed mechanism skills distilled from R26/92PASS/gold-derived skeletons for functional RAG retrieval.",
+  "skills": [
+    {
+      "skill_id": "dwa_pointer_window",
+      "title": "DWA Pointer / Window / Enable Skeleton",
+      "mechanism_family": "dwa_rotating_pointer_window",
+      "aliases": [
+        "dem_rotating_window",
+        "cursor_wrap_unit_cells"
+      ],
+      "concepts": [
+        "sample_event",
+        "rotating_window",
+        "contiguous_window",
+        "wraparound",
+        "active_count_code"
+      ],
+      "slot_schema": {
+        "clock": "public clock input",
+        "reset": "optional public reset input and polarity",
+        "code_bits": "ordered public input bits or scalar code input",
+        "ptr_outputs": "scalar pointer outputs or bus bits",
+        "cell_outputs": "scalar cell-enable outputs or bus bits",
+        "cell_count": "number of unit cells, default 16",
+        "vhi_vlo_vth": "public rails and threshold"
+      },
+      "implementation_skeleton": [
+        "Declare integer pointer state, current code, previous/window code, loop index, and modulo index at module scope.",
+        "Declare real target arrays for pointer outputs and cell-enable outputs at module scope.",
+        "Inside @(initial_step), normalize pointer into [0,N-1], clear all target arrays, and set the held pointer one-hot target.",
+        "Inside the requested clock event, first decode the public code bits using fixed-index voltage reads and clamp the active count.",
+        "If reset is active, restore pointer and clear masks. Otherwise advance the pointer once per valid event according to the no-overlap/wrap rule.",
+        "Clear every target array entry, set exactly one pointer target, then construct the complete selected cell window using modulo arithmetic before any output contribution.",
+        "Drive every electrical output from its held target with unconditional transition() contributions outside the event block."
+      ],
+      "code_shape": [
+        "integer ptr_q, code_q, prev_code_q, j, idx;",
+        "real cell_target[0:N-1]; real ptr_target[0:N-1]; genvar k;",
+        "analog begin",
+        "  @(initial_step) begin clear_targets(); ptr_q = normalized_init; ptr_target[ptr_q] = vhi; end",
+        "  @(cross(V(clock)-vth,+1)) begin",
+        "    code_q = decode_public_code_bits(); code_q = clamp(code_q, 0, N);",
+        "    if (reset_active) begin ptr_q = normalized_init; code_q = 0; prev_code_q = 0; end",
+        "    else begin ptr_q = next_pointer(ptr_q, prev_code_q, N); prev_code_q = code_q; end",
+        "    clear_targets(); ptr_target[ptr_q] = vhi;",
+        "    for (j=0; j<code_q; j=j+1) begin idx = (ptr_q + j) % N; cell_target[idx] = vhi; end",
+        "  end",
+        "  for (k=0; k<N; k=k+1) begin V(cell_outputs[k]) <+ transition(cell_target[k],0,tr,tr); V(ptr_outputs[k]) <+ transition(ptr_target[k],0,tr,tr); end",
+        "end"
+      ],
+      "checker_expectations": [
+        "The active cell window is contiguous modulo the cell count.",
+        "The pointer/cursor advances deterministically according to the prior or current active count specified by the prompt.",
+        "Exactly the requested number of cell outputs is high in each valid window.",
+        "Negative prompts such as not-random and not-scramble must block independent per-cell toggling."
+      ],
+      "spectre_constraints": [
+        "Use pure Verilog-A and Cadence Spectre-compatible syntax.",
+        "Declare port directions and electrical disciplines separately.",
+        "Keep state variables at module scope; avoid declarations inside analog/event/if/loop bodies.",
+        "Update held real/integer targets inside events, then drive electrical outputs with unconditional transition() contributions.",
+        "Do not use runtime integer indexing into electrical vectors; prefer fixed scalar ports or unrolled accesses.",
+        "Use Spectre positional instance syntax in testbenches and keep ahdl_include filenames aligned with generated DUT files."
+      ],
+      "anti_patterns": [
+        "Do not toggle cell enables independently of pointer and decoded code.",
+        "Do not put transition() contributions inside runtime if/case branches.",
+        "Do not repair by changing only save names or aliases."
+      ],
+      "source": "R26:dwa_rotating_pointer_window; docs/CONTRACT_REPAIR_CARDS.json:dwa_system_rotating_window_graph"
+    },
+    {
+      "skill_id": "adc_dac_quantize_reconstruct",
+      "title": "ADC Quantize / DAC Reconstruct Skeleton",
+      "mechanism_family": "adc_dac_quantize_reconstruct",
+      "aliases": [
+        "converter_quantize_reconstruct_or_decode",
+        "sampled_code_reconstruct"
+      ],
+      "concepts": [
+        "sample_event",
+        "held_state",
+        "quantized_code",
+        "reconstruct_from_code",
+        "shared_source_of_truth"
+      ],
+      "slot_schema": {
+        "vin": "analog input to quantize",
+        "clock": "sample clock when the prompt requests sampled ADC behavior",
+        "reset": "optional reset",
+        "code_outputs": "public code-bit outputs or scalar code observable",
+        "vout": "analog reconstruction output",
+        "reference": "VDD/VSS or explicit reference range",
+        "width": "ADC/DAC bit width"
+      },
+      "implementation_skeleton": [
+        "Use one held integer code as the source of truth for both public code bits and DAC reconstruction.",
+        "On reset, set the held code and output target to the public reset state.",
+        "On the requested sample event, compute vstep from public reference rails, quantize vin by floor/truncation, and clamp to [0, 2^width-1].",
+        "Immediately update all code-bit targets from that same held code using fixed bit extraction.",
+        "Compute the DAC target from the same held code and reference range. Do not let vout track raw vin continuously when the prompt asks for quantized reconstruction.",
+        "Drive code bits and vout with unconditional transition() contributions from held targets."
+      ],
+      "code_shape": [
+        "integer code_q, max_code, b;",
+        "real bit_target[0:WIDTH-1]; real vout_target; real vref_span, vstep;",
+        "analog begin",
+        "  @(initial_step) begin code_q = 0; vout_target = vss; clear_bit_targets(); end",
+        "  @(cross(V(clock)-vth,+1)) begin",
+        "    if (reset_active) code_q = 0;",
+        "    else begin vref_span = V(vdd)-V(vss); vstep = vref_span/(1<<WIDTH); code_q = floor((V(vin)-V(vss))/vstep); code_q = clamp(code_q,0,max_code); end",
+        "    for (b=0; b<WIDTH; b=b+1) bit_target[b] = bit_is_set(code_q,b) ? vhi : vlo;",
+        "    vout_target = V(vss) + vref_span * code_q / (1<<WIDTH);",
+        "  end",
+        "  for (b=0; b<WIDTH; b=b+1) V(code_outputs[b]) <+ transition(bit_target[b],0,tr,tr);",
+        "  V(vout) <+ transition(vout_target,0,tr,tr);",
+        "end"
+      ],
+      "checker_expectations": [
+        "Code pins cover multiple quantized states under ramp or dwell stimulus.",
+        "The reconstructed analog level is derived from the same held code, not directly from raw input.",
+        "Code and reconstructed output remain stable between sample events unless reset changes them.",
+        "Reference range, bit width, and output bit order are bound from public ports/parameters."
+      ],
+      "spectre_constraints": [
+        "Use pure Verilog-A and Cadence Spectre-compatible syntax.",
+        "Declare port directions and electrical disciplines separately.",
+        "Keep state variables at module scope; avoid declarations inside analog/event/if/loop bodies.",
+        "Update held real/integer targets inside events, then drive electrical outputs with unconditional transition() contributions.",
+        "Do not use runtime integer indexing into electrical vectors; prefer fixed scalar ports or unrolled accesses.",
+        "Use Spectre positional instance syntax in testbenches and keep ahdl_include filenames aligned with generated DUT files."
+      ],
+      "anti_patterns": [
+        "Do not compute code bits and vout from different state variables.",
+        "Do not use dynamic electrical bus indexing if Spectre-compatible scalar outputs are available.",
+        "Do not hard-code reference scale when the prompt exposes VDD/VSS or VREF."
+      ],
+      "source": "R26:adc_dac_quantize_reconstruct; docs/CONTRACT_REPAIR_CARDS.json:adc_dac_system_quantize_reconstruct_graph"
+    },
+    {
+      "skill_id": "pfd_edge_pulse_window",
+      "title": "PFD Edge-Order / Non-Overlap Pulse Skeleton",
+      "mechanism_family": "pfd_updn_reset_race",
+      "aliases": [
+        "phase_detector_pulse_relation",
+        "event_order_pulses"
+      ],
+      "concepts": [
+        "edge_pair",
+        "pulse_window",
+        "mutual_exclusion",
+        "event_order_state"
+      ],
+      "slot_schema": {
+        "ref_edge": "reference edge input",
+        "div_edge": "divider/feedback edge input",
+        "up": "UP output",
+        "dn": "DN output",
+        "pulse_width": "public pulse width or reset delay parameter",
+        "vhi_vlo_vth": "public rails and threshold"
+      },
+      "implementation_skeleton": [
+        "Keep held real targets for UP and DN outputs.",
+        "On REF leading edge, assert UP target and schedule its clear time; on DIV leading edge, assert DN target and schedule its clear time.",
+        "If the opposite pulse is active, clear it or block overlap according to the prompt's reset-race rule.",
+        "Use timer events or explicit clear deadlines to deassert pulses after the public width.",
+        "Drive UP and DN with unconditional transition() contributions; never drive both high in the same stable window."
+      ],
+      "code_shape": [
+        "real up_target, dn_target, up_clear_t, dn_clear_t; integer up_active, dn_active;",
+        "analog begin",
+        "  @(initial_step) begin up_target=0; dn_target=0; up_active=0; dn_active=0; end",
+        "  @(cross(V(ref)-vth,+1)) begin if (!dn_active) begin up_active=1; up_target=vhi; up_clear_t=$abstime+pulse_width; end end",
+        "  @(cross(V(div)-vth,+1)) begin if (!up_active) begin dn_active=1; dn_target=vhi; dn_clear_t=$abstime+pulse_width; end end",
+        "  @(timer(up_clear_t)) begin up_active=0; up_target=vlo; end",
+        "  @(timer(dn_clear_t)) begin dn_active=0; dn_target=vlo; end",
+        "  V(up) <+ transition(up_target,0,tr,tr); V(dn) <+ transition(dn_target,0,tr,tr);",
+        "end"
+      ],
+      "checker_expectations": [
+        "REF/early-leading windows produce bounded UP/raise pulses; DIV/late-leading windows produce bounded DN/lower pulses.",
+        "The two correction outputs do not overlap unless the public prompt explicitly asks to measure overlap.",
+        "Near-simultaneous arrivals clear or suppress pulses according to the reset-delay/window rule.",
+        "A not-XOR prompt must block duty-cycle XOR implementations."
+      ],
+      "spectre_constraints": [
+        "Use pure Verilog-A and Cadence Spectre-compatible syntax.",
+        "Declare port directions and electrical disciplines separately.",
+        "Keep state variables at module scope; avoid declarations inside analog/event/if/loop bodies.",
+        "Update held real/integer targets inside events, then drive electrical outputs with unconditional transition() contributions.",
+        "Do not use runtime integer indexing into electrical vectors; prefer fixed scalar ports or unrolled accesses.",
+        "Use Spectre positional instance syntax in testbenches and keep ahdl_include filenames aligned with generated DUT files."
+      ],
+      "anti_patterns": [
+        "Do not infer UP/DN from a static phase sign only; the checker usually expects edge-triggered pulse windows.",
+        "Do not let UP and DN overlap except if the prompt explicitly requests overlap measurement.",
+        "Do not omit the clear timer; stuck-high pulses fail window checkers."
+      ],
+      "source": "R26:pfd_mutual_exclusion_pulse_windows; docs/CONTRACT_REPAIR_CARDS.json:pfd_bbpd_system_edge_pulse_graph"
+    },
+    {
+      "skill_id": "pll_feedback_cadence",
+      "title": "PLL Feedback Divider / Lock Cadence Skeleton",
+      "mechanism_family": "pll_feedback_cadence",
+      "aliases": [
+        "pll_ratio_lock",
+        "feedback_divider_lock"
+      ],
+      "concepts": [
+        "edge_pair",
+        "divider_ratio",
+        "feedback_loop",
+        "lock_after_settle",
+        "frequency_control"
+      ],
+      "slot_schema": {
+        "ref_clk": "reference edge input",
+        "dco_clk": "oscillator output or internal cadence",
+        "fb_clk": "feedback divider output",
+        "lock": "lock output",
+        "vctrl": "control monitor output when requested",
+        "div_ratio": "public divider ratio",
+        "frequency_params": "center/min/max/KVCO or DCO step parameters"
+      },
+      "implementation_skeleton": [
+        "Use one oscillator phase/timer state as the source of truth for DCO edges.",
+        "Toggle feedback only by counting oscillator edges up to the public divider ratio.",
+        "Update control state from ref/fb edge timing error, then derive oscillator period/frequency from that same control state.",
+        "Assert lock only after a stable late-window relation between ref edges and feedback edges; drop lock on ratio hop or frequency step until the relation settles again.",
+        "Expose vctrl/lock/fb from held targets with unconditional transition() contributions."
+      ],
+      "code_shape": [
+        "integer div_count, stable_count, lock_q; real dco_target, fb_target, lock_target, vctrl_q, next_dco_t, dco_period;",
+        "analog begin",
+        "  @(initial_step) begin initialize phase, divider, vctrl, lock, and next_dco_t; end",
+        "  @(timer(next_dco_t)) begin",
+        "    dco_target = toggle(dco_target); next_dco_t = $abstime + dco_period/2;",
+        "    if (rising_dco_edge) begin div_count = div_count + 1; if (div_count >= div_ratio) begin div_count=0; fb_target=toggle(fb_target); end end",
+        "  end",
+        "  @(cross(V(ref_clk)-vth,+1)) begin update phase/frequency error using latest fb edge; update vctrl_q; recompute dco_period; update stable_count and lock_q; end",
+        "  V(fb_clk) <+ transition(fb_target,0,tr,tr); V(lock) <+ transition(lock_q ? vhi : vlo,0,tr,tr); V(vctrl) <+ transition(vctrl_q,0,tr,tr);",
+        "end"
+      ],
+      "checker_expectations": [
+        "Feedback edge cadence is derived from oscillator/divider state rather than an unrelated timer.",
+        "Lock is asserted only after the ref/fb relation settles over the checker window.",
+        "Ratio hops or frequency steps temporarily unsettle lock and then reacquire.",
+        "Control observables such as vctrl must be connected to cadence or phase error, not cosmetic ramps."
+      ],
+      "spectre_constraints": [
+        "Use pure Verilog-A and Cadence Spectre-compatible syntax.",
+        "Declare port directions and electrical disciplines separately.",
+        "Keep state variables at module scope; avoid declarations inside analog/event/if/loop bodies.",
+        "Update held real/integer targets inside events, then drive electrical outputs with unconditional transition() contributions.",
+        "Do not use runtime integer indexing into electrical vectors; prefer fixed scalar ports or unrolled accesses.",
+        "Use Spectre positional instance syntax in testbenches and keep ahdl_include filenames aligned with generated DUT files."
+      ],
+      "anti_patterns": [
+        "Do not generate fb_clk as an independent free-running timer unrelated to the oscillator/divider state.",
+        "Do not assert lock permanently from time zero.",
+        "Do not make vctrl a cosmetic ramp disconnected from DCO cadence."
+      ],
+      "source": "R26:pll_feedback_cadence_lock; docs/CONTRACT_REPAIR_CARDS.json:pll_system_feedback_graph"
+    },
+    {
+      "skill_id": "divider_counter_ratio",
+      "title": "Clock Divider / Counter Ratio Skeleton",
+      "mechanism_family": "divider_counter_ratio",
+      "aliases": [
+        "counter_or_divider_sequence",
+        "binary_counter_ratio"
+      ],
+      "concepts": [
+        "sample_event",
+        "divider_ratio",
+        "edge_counting",
+        "held_state"
+      ],
+      "slot_schema": {
+        "clock": "input edge stream",
+        "reset": "optional reset input and polarity",
+        "ratio": "static or runtime divide ratio",
+        "output": "divided/toggled output",
+        "vhi_vlo_vth": "public rails and threshold"
+      },
+      "implementation_skeleton": [
+        "Keep an integer edge counter and held output target.",
+        "On reset, clear the counter and set output to the public reset state.",
+        "On each input clock edge, increment the counter; when it reaches the active ratio, clear it and toggle the held output target.",
+        "For runtime ratio changes, sample the ratio at a safe input edge and apply it to subsequent periods.",
+        "Drive the output with one unconditional transition() contribution outside event bodies."
+      ],
+      "code_shape": [
+        "integer count_q, ratio_q, out_q;",
+        "analog begin",
+        "  @(initial_step) begin count_q=0; out_q=0; ratio_q=initial_ratio; end",
+        "  @(cross(V(clock)-vth,+1)) begin if (reset_active) begin count_q=0; out_q=0; end else begin ratio_q=read_ratio(); count_q=count_q+1; if (count_q>=ratio_q) begin count_q=0; out_q=!out_q; end end end",
+        "  V(output) <+ transition(out_q ? vhi : vlo,0,tr,tr);",
+        "end"
+      ],
+      "checker_expectations": [
+        "Output events/toggles occur after the requested number of input events.",
+        "Odd ratios preserve the expected rising-edge interval while allowing approximate duty balance.",
+        "Runtime ratio changes take effect on safe event boundaries.",
+        "Binary counter prompts must not be repaired as Gray-code one-bit-change outputs."
+      ],
+      "spectre_constraints": [
+        "Use pure Verilog-A and Cadence Spectre-compatible syntax.",
+        "Declare port directions and electrical disciplines separately.",
+        "Keep state variables at module scope; avoid declarations inside analog/event/if/loop bodies.",
+        "Update held real/integer targets inside events, then drive electrical outputs with unconditional transition() contributions.",
+        "Do not use runtime integer indexing into electrical vectors; prefer fixed scalar ports or unrolled accesses.",
+        "Use Spectre positional instance syntax in testbenches and keep ahdl_include filenames aligned with generated DUT files."
+      ],
+      "anti_patterns": [
+        "Do not use an independent free-running timer when the prompt requires input-edge division.",
+        "Do not ignore runtime ratio-code changes.",
+        "Do not put transition() inside the edge event."
+      ],
+      "source": "closed-set ledger: counter_or_divider_sequence residuals; docs/CONTRACT_REPAIR_CARDS.json divider/counter cards"
+    },
+    {
+      "skill_id": "comparator_threshold_hysteresis",
+      "title": "Comparator Threshold / Hysteresis Skeleton",
+      "mechanism_family": "comparator_threshold_hysteresis",
+      "aliases": [
+        "threshold_decision",
+        "hysteresis_window"
+      ],
+      "concepts": [
+        "threshold_decision",
+        "latched_decision",
+        "hysteresis_window"
+      ],
+      "slot_schema": {
+        "positive_input": "vinp or single-ended input",
+        "negative_input": "vinn or threshold reference",
+        "output": "decision output",
+        "hysteresis": "optional hysteresis window",
+        "vhi_vlo_vth": "public rails and threshold"
+      },
+      "implementation_skeleton": [
+        "Keep one held integer decision state.",
+        "For simple comparators, set the state according to input minus threshold or vinp-vinn.",
+        "For hysteresis, use two thresholds: upper threshold for low-to-high and lower threshold for high-to-low.",
+        "Use cross events or continuous decision updates according to the prompt timing requirement.",
+        "Drive the output from the held state with an unconditional transition() contribution."
+      ],
+      "code_shape": [
+        "integer state_q; real diff;",
+        "analog begin",
+        "  diff = V(vinp)-V(vinn_or_threshold);",
+        "  if (state_q==0 && diff > vhys/2) state_q=1; else if (state_q==1 && diff < -vhys/2) state_q=0;",
+        "  V(output) <+ transition(state_q ? vhi : vlo,0,tr,tr);",
+        "end"
+      ],
+      "checker_expectations": [
+        "Output polarity changes when the public input relation crosses the required threshold.",
+        "Hysteresis variants use separate rising/falling thresholds and avoid chatter inside the window.",
+        "Delay/strongarm variants preserve reset priority and event timing requirements."
+      ],
+      "spectre_constraints": [
+        "Use pure Verilog-A and Cadence Spectre-compatible syntax.",
+        "Declare port directions and electrical disciplines separately.",
+        "Keep state variables at module scope; avoid declarations inside analog/event/if/loop bodies.",
+        "Update held real/integer targets inside events, then drive electrical outputs with unconditional transition() contributions.",
+        "Do not use runtime integer indexing into electrical vectors; prefer fixed scalar ports or unrolled accesses.",
+        "Use Spectre positional instance syntax in testbenches and keep ahdl_include filenames aligned with generated DUT files."
+      ],
+      "anti_patterns": [
+        "Do not reverse comparator polarity unless the prompt explicitly asks for inversion.",
+        "Do not make hysteresis a cosmetic parameter that is unused in the decision.",
+        "Do not leave output as an ideal discontinuous assignment when transition smoothing is required."
+      ],
+      "source": "closed-set ledger: comparator_threshold_hysteresis residuals; comparator repair cards"
+    },
+    {
+      "skill_id": "dac_decode_binary_thermometer",
+      "title": "DAC Binary / Thermometer / Segmented Decode Skeleton",
+      "mechanism_family": "binary_weighted_dac",
+      "aliases": [
+        "converter_quantize_reconstruct_or_decode",
+        "binary_or_thermometer_decode"
+      ],
+      "concepts": [
+        "weighted_sum",
+        "code_or_bits",
+        "held_state",
+        "decode_to_analog"
+      ],
+      "slot_schema": {
+        "code_inputs": "binary bits, thermometer cells, or segmented MSB/LSB groups",
+        "vout": "analog output",
+        "reference": "vdd/vss or vref range",
+        "width": "code width or number of unit cells"
+      },
+      "implementation_skeleton": [
+        "First classify the code style from the prompt: binary-weighted, thermometer/unary, segmented, or DWA unit-cell window.",
+        "Decode the public inputs into one held integer code or active-count value.",
+        "For binary DACs, use weighted bit positions; for thermometer DACs, count active cells; for segmented DACs, combine MSB thermometer and LSB binary parts.",
+        "Compute vout from the decoded value and public reference range.",
+        "Drive vout with an unconditional transition() contribution."
+      ],
+      "code_shape": [
+        "integer code_q, b; real vout_target;",
+        "analog begin",
+        "  code_q = decode_according_to_prompt_style();",
+        "  vout_target = vss + (vdd-vss) * code_q / full_scale_count;",
+        "  V(vout) <+ transition(vout_target,0,tr,tr);",
+        "end"
+      ],
+      "checker_expectations": [
+        "Output follows the weighted value of named decision/code inputs.",
+        "Binary-weighted tasks must not be treated as thermometer or unary active-count tasks.",
+        "Bit order is bound by public names or checker-visible columns, not by declaration order alone.",
+        "Clocked variants update only on the public sample/cadence event."
+      ],
+      "spectre_constraints": [
+        "Use pure Verilog-A and Cadence Spectre-compatible syntax.",
+        "Declare port directions and electrical disciplines separately.",
+        "Keep state variables at module scope; avoid declarations inside analog/event/if/loop bodies.",
+        "Update held real/integer targets inside events, then drive electrical outputs with unconditional transition() contributions.",
+        "Do not use runtime integer indexing into electrical vectors; prefer fixed scalar ports or unrolled accesses.",
+        "Use Spectre positional instance syntax in testbenches and keep ahdl_include filenames aligned with generated DUT files."
+      ],
+      "anti_patterns": [
+        "Do not use thermometer decoding for a prompt that explicitly says binary-weighted or not thermometer.",
+        "Do not assume monotonic ordering if the prompt explicitly allows arbitrary code order.",
+        "Do not compute output from a different state than the decoded public code."
+      ],
+      "source": "closed-set ledger: converter tasks; negative retrieval guard for binary-vs-thermometer"
+    },
+    {
+      "skill_id": "sample_hold_track_latch",
+      "title": "Sample-Hold Track / Latch / Droop Skeleton",
+      "mechanism_family": "sample_hold_discrete_update",
+      "aliases": [
+        "sample_hold_track_latch",
+        "latched_level"
+      ],
+      "concepts": [
+        "sample_event",
+        "held_state",
+        "latched_level",
+        "not_continuous_follower"
+      ],
+      "slot_schema": {
+        "input": "analog input",
+        "sample_control": "clock or sample enable",
+        "output": "held output",
+        "droop": "optional droop rate or leakage behavior",
+        "vhi_vlo_vth": "control threshold and output rails if digital"
+      },
+      "implementation_skeleton": [
+        "Keep one held real sample value.",
+        "During track mode, update the held value from the input if the prompt requests tracking; otherwise update only on the sample edge.",
+        "During hold mode, preserve the held value and optionally apply the public droop model.",
+        "Drive output from the held value with an unconditional contribution/transition according to output type."
+      ],
+      "code_shape": [
+        "real held_v, last_sample_t;",
+        "analog begin",
+        "  @(initial_step) begin held_v=V(input); last_sample_t=$abstime; end",
+        "  @(cross(V(sample_control)-vth,+1)) begin held_v=V(input); last_sample_t=$abstime; end",
+        "  V(output) <+ transition(held_v - droop_rate*max($abstime-last_sample_t,0),0,tr,tr);",
+        "end"
+      ],
+      "checker_expectations": [
+        "Output copies the input only in the public capture/sample aperture.",
+        "Output remains held between capture instants except for explicitly modeled droop.",
+        "A not-follower prompt must block continuous buffer behavior.",
+        "Aperture/delay tolerance is checked at public observation times."
+      ],
+      "spectre_constraints": [
+        "Use pure Verilog-A and Cadence Spectre-compatible syntax.",
+        "Declare port directions and electrical disciplines separately.",
+        "Keep state variables at module scope; avoid declarations inside analog/event/if/loop bodies.",
+        "Update held real/integer targets inside events, then drive electrical outputs with unconditional transition() contributions.",
+        "Do not use runtime integer indexing into electrical vectors; prefer fixed scalar ports or unrolled accesses.",
+        "Use Spectre positional instance syntax in testbenches and keep ahdl_include filenames aligned with generated DUT files."
+      ],
+      "anti_patterns": [
+        "Do not continuously buffer input when the prompt expects hold behavior.",
+        "Do not sample on the wrong edge.",
+        "Do not implement droop as an unrelated ramp disconnected from the held sample."
+      ],
+      "source": "closed-set ledger: sample_hold_track_latch residuals; sample-hold skill/card knowledge"
+    },
+    {
+      "skill_id": "lfsr_prbs_sequence",
+      "title": "LFSR / PRBS Sequence Skeleton",
+      "mechanism_family": "lfsr_prbs_sequence",
+      "aliases": [
+        "lfsr_sequence",
+        "prbs_sequence"
+      ],
+      "concepts": [
+        "sample_event",
+        "feedback_sequence",
+        "held_state",
+        "bit_sequence"
+      ],
+      "slot_schema": {
+        "clock": "update edge",
+        "reset_or_seed": "initial seed state",
+        "outputs": "serial bit or state-bit outputs",
+        "polynomial": "tap positions or named PRBS length",
+        "vhi_vlo_vth": "public rails and threshold"
+      },
+      "implementation_skeleton": [
+        "Keep one integer shift-register state.",
+        "Initialize to a nonzero seed unless the prompt requires a specific seed.",
+        "On each clock edge, compute feedback from fixed taps, shift state, and update held output targets.",
+        "Expose serial/state bits from the same held state with unconditional transition() contributions."
+      ],
+      "code_shape": [
+        "integer state_q, fb;",
+        "analog begin",
+        "  @(initial_step) state_q = nonzero_seed;",
+        "  @(cross(V(clock)-vth,+1)) begin fb = xor_taps(state_q); state_q = next_lfsr_state(state_q, fb); end",
+        "  V(output) <+ transition(bit_value(state_q, out_bit) ? vhi : vlo,0,tr,tr);",
+        "end"
+      ],
+      "checker_expectations": [
+        "State advances only on public clock events.",
+        "Feedback taps create the expected nontrivial repeating bit sequence.",
+        "Reset/seed handling produces the required initial state without stuck output."
+      ],
+      "spectre_constraints": [
+        "Use pure Verilog-A and Cadence Spectre-compatible syntax.",
+        "Declare port directions and electrical disciplines separately.",
+        "Keep state variables at module scope; avoid declarations inside analog/event/if/loop bodies.",
+        "Update held real/integer targets inside events, then drive electrical outputs with unconditional transition() contributions.",
+        "Do not use runtime integer indexing into electrical vectors; prefer fixed scalar ports or unrolled accesses.",
+        "Use Spectre positional instance syntax in testbenches and keep ahdl_include filenames aligned with generated DUT files."
+      ],
+      "anti_patterns": [
+        "Do not use all-zero LFSR seed unless explicitly requested.",
+        "Do not replace PRBS with a simple counter.",
+        "Do not update output from a different state than the shifted register."
+      ],
+      "source": "closed-set ledger: lfsr_prbs_sequence residuals; PRBS/LFSR verified artifacts"
+    },
+    {
+      "skill_id": "calibration_search_settle",
+      "title": "Calibration Search / Code Update / Settled Flag Skeleton",
+      "mechanism_family": "calibration_search_settle",
+      "aliases": [
+        "offset_search_settle",
+        "trim_search"
+      ],
+      "concepts": [
+        "calibration_search",
+        "settled_flag",
+        "bounded_error",
+        "held_state"
+      ],
+      "slot_schema": {
+        "clock": "update or measurement clock",
+        "metric_input": "error/measurement input",
+        "code_outputs": "trim/code outputs",
+        "settled": "done/settled flag",
+        "search_params": "step size, averaging, target window"
+      },
+      "implementation_skeleton": [
+        "Keep one integer calibration/trim code as the source of truth.",
+        "Update the code from the public metric or comparator result according to the requested search rule.",
+        "Drive every code output from that held code using fixed bit positions.",
+        "Assert settled only after the metric/code remains stable for the requested window.",
+        "Drive code and settled outputs with unconditional transition() contributions."
+      ],
+      "code_shape": [
+        "integer code_q, stable_count, settled_q, b;",
+        "analog begin",
+        "  @(initial_step) begin code_q=initial_code; stable_count=0; settled_q=0; end",
+        "  @(cross(V(clock)-vth,+1)) begin update_code_from_metric(); update_stable_count(); settled_q = stable_count >= required_count; end",
+        "  for (b=0; b<WIDTH; b=b+1) V(code_outputs[b]) <+ transition(bit_value(code_q,b) ? vhi : vlo,0,tr,tr);",
+        "  V(settled) <+ transition(settled_q ? vhi : vlo,0,tr,tr);",
+        "end"
+      ],
+      "checker_expectations": [
+        "Search/trim code updates according to the observed error metric.",
+        "Settled/done asserts only after the required bounded-error or stable-window condition.",
+        "Final analog behavior uses the calibrated code/offset, not the uncalibrated raw path."
+      ],
+      "spectre_constraints": [
+        "Use pure Verilog-A and Cadence Spectre-compatible syntax.",
+        "Declare port directions and electrical disciplines separately.",
+        "Keep state variables at module scope; avoid declarations inside analog/event/if/loop bodies.",
+        "Update held real/integer targets inside events, then drive electrical outputs with unconditional transition() contributions.",
+        "Do not use runtime integer indexing into electrical vectors; prefer fixed scalar ports or unrolled accesses.",
+        "Use Spectre positional instance syntax in testbenches and keep ahdl_include filenames aligned with generated DUT files."
+      ],
+      "anti_patterns": [
+        "Do not assert settled from time zero.",
+        "Do not drive code outputs independently of the held calibration code.",
+        "Do not replace search behavior with a fixed constant unless the prompt explicitly asks for a fixed code."
+      ],
+      "source": "closed-set ledger: calibration_search_settle residuals; calibration repair cards"
+    },
+    {
+      "skill_id": "serializer_frame_sequence",
+      "title": "Serializer Frame / Bit Order / Alignment Skeleton",
+      "mechanism_family": "serializer_frame_sequence",
+      "aliases": [
+        "serializer_frame_alignment",
+        "parallel_to_serial"
+      ],
+      "concepts": [
+        "sample_event",
+        "bit_sequence",
+        "frame_alignment",
+        "held_state"
+      ],
+      "slot_schema": {
+        "clock": "bit clock or frame clock",
+        "parallel_data": "parallel input data or generated frame pattern",
+        "serial_output": "serial output",
+        "frame_marker": "optional frame/valid marker",
+        "bit_order": "MSB-first or LSB-first ordering"
+      },
+      "implementation_skeleton": [
+        "Keep a held shift register and bit index.",
+        "Load the parallel/frame word at the requested frame boundary.",
+        "On each bit clock, drive the selected bit according to public bit order and advance the index.",
+        "Update frame/valid outputs from the same frame state.",
+        "Drive serial and marker outputs with unconditional transition() contributions."
+      ],
+      "code_shape": [
+        "integer shift_q, bit_idx, frame_q;",
+        "analog begin",
+        "  @(cross(V(frame_clock)-vth,+1)) begin shift_q=read_parallel_word(); bit_idx=0; frame_q=1; end",
+        "  @(cross(V(bit_clock)-vth,+1)) begin serial_q=select_bit(shift_q, bit_idx); bit_idx=next_bit(bit_idx); end",
+        "  V(serial_output) <+ transition(serial_q ? vhi : vlo,0,tr,tr);",
+        "end"
+      ],
+      "checker_expectations": [
+        "Serial output follows the public bit order and frame cadence.",
+        "Frame/alignment flags assert on the requested boundaries.",
+        "Reset restarts bit index and frame state deterministically."
+      ],
+      "spectre_constraints": [
+        "Use pure Verilog-A and Cadence Spectre-compatible syntax.",
+        "Declare port directions and electrical disciplines separately.",
+        "Keep state variables at module scope; avoid declarations inside analog/event/if/loop bodies.",
+        "Update held real/integer targets inside events, then drive electrical outputs with unconditional transition() contributions.",
+        "Do not use runtime integer indexing into electrical vectors; prefer fixed scalar ports or unrolled accesses.",
+        "Use Spectre positional instance syntax in testbenches and keep ahdl_include filenames aligned with generated DUT files."
+      ],
+      "anti_patterns": [
+        "Do not ignore bit order.",
+        "Do not free-run the serial pattern without loading the public frame data.",
+        "Do not let frame marker drift independently of bit index."
+      ],
+      "source": "closed-set ledger: serializer_frame_sequence residuals"
+    },
+    {
+      "skill_id": "transition_glitch_guard",
+      "title": "Bounded Transition/Glitch Guard",
+      "mechanism_family": "transition_glitch_guard",
+      "aliases": [
+        "bounded_step_window",
+        "glitch_guard_settle"
+      ],
+      "concepts": [
+        "sample_event",
+        "bounded_transition_glitch",
+        "settling_window",
+        "held_state"
+      ],
+      "slot_schema": {
+        "clock": "Public event after which the transition/glitch window is checked.",
+        "analog_output": "Analog value whose transition must settle or remain bounded.",
+        "guard_output": "Optional public guard/flag output indicating a valid bounded window.",
+        "reference": "Supply/reference pins used for high/low levels."
+      },
+      "implementation_skeleton": [
+        "Keep the main analog value in a held real target updated only at the public event.",
+        "Track the previous value and event time so the guard can describe the post-event settling window.",
+        "Drive the analog output and guard output with unconditional transition() contributions from held targets.",
+        "Use the public prompt/checker window as a bounded-settling constraint; do not create a separate functional code path only for the guard."
+      ],
+      "code_shape": [
+        "real out_target, prev_target, guard_target, last_event_t;",
+        "analog begin",
+        "  @(initial_step) begin out_target=vlo; prev_target=vlo; guard_target=vlo; last_event_t=0; end",
+        "  @(cross(V(clock)-vth,+1)) begin prev_target=out_target; out_target=compute_next_value(); last_event_t=$abstime; guard_target=vhi; end",
+        "  V(analog_output) <+ transition(out_target,0,tr,tr);",
+        "  V(guard_output) <+ transition(guard_target,0,tr,tr);",
+        "end"
+      ],
+      "checker_expectations": [
+        "After a public clock/event edge, the analog output reaches the new target within the bounded checker window.",
+        "The guard flag is derived from the same held state/timing relation as the analog output.",
+        "A segmented or code-driven analog output should not show unrelated intermediate states after the accepted settling time."
+      ],
+      "spectre_constraints": [
+        "Use pure Verilog-A and Cadence Spectre-compatible syntax.",
+        "Declare port directions and electrical disciplines separately.",
+        "Keep state variables at module scope; avoid declarations inside analog/event/if/loop bodies.",
+        "Update held real/integer targets inside events, then drive electrical outputs with unconditional transition() contributions.",
+        "Do not use runtime integer indexing into electrical vectors; prefer fixed scalar ports or unrolled accesses.",
+        "Use Spectre positional instance syntax in testbenches and keep ahdl_include filenames aligned with generated DUT files."
+      ],
+      "anti_patterns": [
+        "Do not put transition() inside conditional branches.",
+        "Do not fake the guard as a constant pass flag if the analog output is not connected to the same state.",
+        "Do not use discontinuous ideal assignments for outputs that the checker samples near transitions."
+      ],
+      "source": "R26/92PASS ledger: segmented DAC glitch guard and transition-output repairs"
+    }
+  ]
+}

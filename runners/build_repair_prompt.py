@@ -339,6 +339,53 @@ def _circuit_mechanism_rag_section(task_dir: Path, evas_result: dict) -> str:
         """).strip()
 
 
+def _lego_mechanism_skill_section(task_dir: Path, evas_result: dict) -> str:
+    """Append typed LEGO-style mechanism skill packets when enabled.
+
+    Unlike the older RAG hints, this section has an explicit skill schema:
+    function concepts, slot binding, checker expectations, implementation
+    skeleton, and Spectre constraints.  It is prompt/EVAS-note based by
+    default and does not route from task id.
+    """
+    if not _env_truthy("VAEVAS_ENABLE_LEGO_SKILLS"):
+        return ""
+    try:
+        from lego_skill_library import format_lego_skill_prompt, retrieve_lego_skills
+
+        prompt = (task_dir / "prompt.md").read_text(encoding="utf-8", errors="ignore")
+        meta_path = task_dir / "meta.json"
+        meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
+        notes = [str(item) for item in (evas_result.get("evas_notes") or evas_result.get("notes") or [])]
+        result = retrieve_lego_skills(
+            prompt,
+            meta=meta,
+            notes=notes,
+            top_k=int(os.environ.get("VAEVAS_LEGO_SKILL_TOP_K", "3")),
+            use_meta_family=_env_truthy("VAEVAS_LEGO_USE_META_FAMILY"),
+            use_meta_slots=_env_truthy("VAEVAS_LEGO_USE_META_SLOTS"),
+        )
+        packets = result.get("skills", [])
+        if not packets:
+            return ""
+        lines = [
+            format_lego_skill_prompt(packets),
+            "",
+            "Functional routing evidence:",
+            "- Concepts: " + ", ".join(f"`{item}`" for item in result.get("functional_ir", {}).get("concepts", [])),
+            "- Negative constraints: " + (
+                ", ".join(f"`{item}`" for item in result.get("functional_ir", {}).get("negative_constraints", [])) or "`none`"
+            ),
+        ]
+        return "\n".join(lines).strip()
+    except Exception as exc:
+        return textwrap.dedent(f"""\
+            # LEGO-Style Mechanism Skills
+
+            LEGO skill retrieval was unavailable: `{type(exc).__name__}: {exc}`.
+            Continue using EVAS notes, behavior contracts, and generic repair guidance.
+        """).strip()
+
+
 def _contract_report_without_csv(task_dir: Path, contracts_path: Path) -> dict:
     """Build a semantic guard report when no waveform CSV exists yet.
 
@@ -3730,6 +3777,7 @@ def build_evas_guided_repair_prompt(
         else ""
     )
     circuit_rag_text = _circuit_mechanism_rag_section(task_dir, evas_result)
+    lego_skill_text = _lego_mechanism_skill_section(task_dir, evas_result)
 
     skill_label = "Checker + EVAS + Skill" if include_skill else "Checker + EVAS only"
 
@@ -3755,6 +3803,8 @@ def build_evas_guided_repair_prompt(
         {contract_diagnosis_text}
 
         {circuit_rag_text}
+
+        {lego_skill_text}
 
         # EVAS Result
 
