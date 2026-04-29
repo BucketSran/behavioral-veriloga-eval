@@ -1,0 +1,17 @@
+syntax:
+  must_include:
+    - "@(cross("
+    - "transition("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "serializer_output_matches_parallel_input"
+    - "serializer_msb_first_order"
+
+parity:
+  required: true
+  spectre_result_path: "behavioral-veriloga-eval/results/gold-dual-suite-final/serializer_8b_smoke/spectre/tran_spectre.csv"
+  tolerance_notes: "needs-review parity mismatch; keep task failed until parity closure"

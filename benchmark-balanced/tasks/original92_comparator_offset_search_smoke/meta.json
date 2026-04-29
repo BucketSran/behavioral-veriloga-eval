@@ -1,0 +1,62 @@
+{
+  "id": "comparator_offset_search_smoke",
+  "task_name": "Comparator Offset Search Smoke Test",
+  "family": "end-to-end",
+  "category": "comparator",
+  "domain": "voltage",
+  "difficulty": "medium",
+  "expected_backend": "evas",
+  "source": {
+    "type": "benchmark-gold",
+    "path": "behavioral-veriloga-eval/tasks/end-to-end/voltage/comparator_offset_search_smoke/gold"
+  },
+  "tier": "verified",
+  "verification_status": "passed",
+  "owner": "team",
+  "created_at": "2026-04-19",
+  "must_include": [
+    "@(cross(",
+    "transition("
+  ],
+  "must_not_include": [
+    "I(",
+    "ddt(",
+    "idt("
+  ],
+  "inputs": [
+    "prompt.md"
+  ],
+  "artifacts": [
+    "comparator_offset_search_ref.va",
+    "tb_comparator_offset_search_ref.scs",
+    "tran.csv"
+  ],
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "parity_policy": "default",
+  "checks": {
+    "dut_compile": "required",
+    "tb_compile": "required",
+    "tran_generated": "required",
+    "sim_correct": "required",
+    "parity_required": true
+  },
+  "evidence": {
+    "result_path": "behavioral-veriloga-eval/results/gold-suite-p1-e2e-2026-04-19/comparator_offset_search_smoke",
+    "pr_link": "[TODO]",
+    "notes": "Added on 2026-04-19 as a comparator offset-extraction benchmark; EVAS gold validation passes with crossing_voltage=0.5050, low_frac=1.000, and high_frac=1.000."
+  },
+  "task_id": "original92_comparator_offset_search_smoke",
+  "benchmark_split": "benchmark-balanced",
+  "source_collection": "original92",
+  "source_task_id": "comparator_offset_search_smoke",
+  "source_family": "end-to-end",
+  "source_relative_path": "tasks/end-to-end/voltage/comparator_offset_search_smoke",
+  "core_function": "comparator",
+  "task_form": "end-to-end",
+  "balanced_role": "imported_original92",
+  "promotion_status": "imported_original92_with_normalized_metadata"
+}

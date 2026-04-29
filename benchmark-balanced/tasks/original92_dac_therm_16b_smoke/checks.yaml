@@ -1,0 +1,16 @@
+syntax:
+  must_include:
+    - "transition("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "dac_therm_checkpoint_voltages"
+    - "dac_therm_monotonic"
+
+parity:
+  required: true
+  spectre_result_path: "behavioral-veriloga-eval/results/gold-dual-suite-final/dac_therm_16b_smoke/spectre/tran_spectre.csv"
+  tolerance_notes: "dual-validated; Spectre parity artifact path backfilled from final dual-suite run"

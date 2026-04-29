@@ -1,0 +1,19 @@
+// lfsr gold smoke testbench
+// seed=123, 1 GHz clock, RSTB deasserts at 101ns, run 500ns.
+// Check: DPN toggles ≥10 times, hi_frac in (0.05, 0.95).
+simulator lang=spectre
+global 0
+
+ahdl_include "lfsr.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0.0
+
+Vclk  (clk  0) vsource type=pulse val0=0 val1=0.9 period=1n width=0.5n rise=50p fall=50p
+Vrstb (rstb 0) vsource type=pwl wave=[0 0  100.9n 0  101n 0.9  500n 0.9]
+Ven   (en   0) vsource dc=0.9
+
+IDUT (dpn vdd vss clk en rstb) lfsr seed=123
+
+tran tran stop=500n maxstep=2n
+save clk rstb dpn

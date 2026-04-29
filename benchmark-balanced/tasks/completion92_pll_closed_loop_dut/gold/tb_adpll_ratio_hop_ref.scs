@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "adpll_ratio_hop_ref.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0.0
+
+Vref (ref_clk 0) vsource type=pulse val0=0 val1=0.9 period=20n width=10n rise=100p fall=100p
+Vratio (ratio_ctrl 0) vsource type=pwl wave=[0 4 1.999u 4 2.001u 6 5u 6]
+
+IDUT (vdd vss ref_clk ratio_ctrl fb_clk vout vctrl_mon lock) adpll_ratio_hop_ref \
+    f_center=240e6 freq_step_hz=5e6 f_min=120e6 f_max=420e6 \
+    code_min=0 code_max=63 code_center=32 code_init=24 \
+    ratio_min=2 ratio_max=16 tedge=200p lock_tol=2n lock_count_target=5
+
+tran tran stop=5u maxstep=5n
+save ref_clk ratio_ctrl fb_clk vout vctrl_mon lock

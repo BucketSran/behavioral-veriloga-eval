@@ -1,0 +1,62 @@
+{
+  "id": "cross_interval_163p333_smoke",
+  "task_id": "original92_cross_interval_163p333_smoke",
+  "task_name": "Cross Interval 163.333 ps Event-Time Smoke Test",
+  "family": "end-to-end",
+  "category": "analog-events",
+  "domain": "voltage",
+  "difficulty": "medium",
+  "expected_backend": "evas",
+  "source": {
+    "type": "table1-supplement",
+    "path": "vaEvas/refine-logs/TABLE1_VALIDATOR_RELIABILITY_EXPANSION.md"
+  },
+  "tier": "verified",
+  "verification_status": "passed",
+  "owner": "codex",
+  "created_at": "2026-04-21",
+  "must_include": [
+    "@(cross(",
+    "$abstime",
+    "transition("
+  ],
+  "must_not_include": [
+    "I(",
+    "ddt(",
+    "idt("
+  ],
+  "inputs": [
+    "prompt.md"
+  ],
+  "artifacts": [
+    "cross_interval_163p333_ref.va",
+    "tb_cross_interval_163p333_ref.scs",
+    "tran.csv"
+  ],
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "checks": {
+    "dut_compile": "required",
+    "tb_compile": "required",
+    "tran_generated": "required",
+    "sim_correct": "required",
+    "parity_required": true
+  },
+  "evidence": {
+    "result_path": "behavioral-veriloga-eval/results/gold-dual-r025-cross-interval-2026-04-21/cross_interval_163p333_smoke",
+    "pr_link": "[TODO]",
+    "notes": "Added on 2026-04-21 as R025 Table 1 supplemental event-time precision benchmark. EVAS and Spectre dual validation passed; both measured 163.3330 ps with EVAS-vs-Spectre interval delta about 2.56e-13 ps. This measures $abstime inside cross() event bodies rather than exported waveform edge reconstruction."
+  },
+  "benchmark_split": "benchmark-balanced",
+  "source_collection": "original92",
+  "source_task_id": "cross_interval_163p333_smoke",
+  "source_family": "end-to-end",
+  "source_relative_path": "tasks/end-to-end/voltage/cross_interval_163p333_smoke",
+  "core_function": "analog-events",
+  "task_form": "end-to-end",
+  "balanced_role": "imported_original92",
+  "promotion_status": "imported_original92_with_normalized_metadata"
+}

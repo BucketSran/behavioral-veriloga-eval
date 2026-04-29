@@ -1,0 +1,37 @@
+{
+  "task_id": "adc_dac_ideal_4b_smoke",
+  "contracts": [
+    {
+      "name": "csv_has_observables",
+      "type": "signal_present",
+      "signals": ["time", "vin", "clk", "rst_n", "vout", "dout_3", "dout_2", "dout_1", "dout_0"],
+      "diagnostic_hint": "ADC/DAC checker-visible signals must be saved.",
+      "repair_family": "runtime-interface-minimal-harness"
+    },
+    {
+      "name": "input_sweep_present",
+      "type": "input_span",
+      "signal": "vin",
+      "min_span": 0.5,
+      "diagnostic_hint": "Input sweep is present; do not redesign stimulus if this passes.",
+      "repair_family": "clocked-quantizer-code-update"
+    },
+    {
+      "name": "adc_code_changes",
+      "type": "code_coverage",
+      "bits": ["dout_3", "dout_2", "dout_1", "dout_0"],
+      "threshold": 0.45,
+      "min_unique": 4,
+      "diagnostic_hint": "ADC output code is stuck or covers too few codes.",
+      "repair_family": "clocked-quantizer-code-update"
+    },
+    {
+      "name": "dac_output_moves",
+      "type": "output_span",
+      "signal": "vout",
+      "min_span": 0.1,
+      "diagnostic_hint": "DAC analog output is not responding to code changes.",
+      "repair_family": "drive-output-target-and-transition"
+    }
+  ]
+}

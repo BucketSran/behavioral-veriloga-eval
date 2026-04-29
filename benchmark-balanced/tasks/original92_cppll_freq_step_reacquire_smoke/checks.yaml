@@ -1,0 +1,19 @@
+syntax:
+  must_include:
+    - "@(cross("
+    - "@(timer("
+    - "transition("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "cppll_reacquires_after_reference_step"
+    - "late_window_tracks_new_reference"
+    - "vctrl_stays_bounded"
+
+parity:
+  required: true
+  spectre_result_path: "behavioral-veriloga-eval/results/gold-dual-suite-expansion-2026-04-19/cppll_freq_step_reacquire_smoke/spectre/tran_spectre.csv"
+  tolerance_notes: "Requires EVAS/Spectre dual validation on pre-lock, disturbance, and late-window relock behavior."

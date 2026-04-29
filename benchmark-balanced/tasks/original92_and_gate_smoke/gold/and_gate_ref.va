@@ -1,0 +1,36 @@
+// Simple AND gate — EVAS-compatible
+// Output Y = A AND B: goes high only when both inputs are high.
+// Uses continuous comparison for combinational logic.
+
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 10p
+
+module and_gate(
+    input  electrical A,
+    input  electrical B,
+    output electrical Y
+);
+
+parameter real vdd   = 1.8;
+parameter real tedge = 10p;
+
+real y_level;
+
+analog begin
+    @(initial_step) begin
+        y_level = 0.0;
+        $strobe("[and] INIT | a=%.3gV b=%.3gV", V(A), V(B));
+    end
+
+    // Combinational: Y = A AND B
+    if (V(A) > vdd/2.0 && V(B) > vdd/2.0) begin
+        y_level = vdd;
+    end else begin
+        y_level = 0.0;
+    end
+
+    V(Y) <+ transition(y_level, 0, tedge, tedge);
+end
+
+endmodule

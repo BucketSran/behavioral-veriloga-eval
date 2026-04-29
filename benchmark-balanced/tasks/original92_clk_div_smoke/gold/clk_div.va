@@ -1,0 +1,44 @@
+// Divide-by-4 clock divider — EVAS-compatible
+// Output toggles every 2 rising edges of CLK_IN → ÷4, ~50% duty cycle.
+
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 10p
+
+module clk_div(
+    input  electrical CLK_IN,
+    input  electrical RST_N,
+    output electrical CLK_OUT
+);
+
+parameter real vth   = 0.45;
+parameter real vdd   = 0.9;
+parameter real tedge = 100p;
+
+integer cnt;
+real    clk_level;
+
+analog begin
+    @(initial_step) begin
+        cnt       = 0;
+        clk_level = 0.0;
+    end
+
+    @(cross(V(RST_N) - vth, -1)) begin
+        cnt       = 0;
+        clk_level = 0.0;
+    end
+
+    @(cross(V(CLK_IN) - vth, +1)) begin
+        if (V(RST_N) > vth) begin
+            cnt = cnt + 1;
+            if (cnt >= 4) cnt = 0;
+            clk_level = (cnt < 2) ? vdd : 0.0;
+        end
+        $strobe("[clk_div] t=%.3f ns | cnt=%d | out=%.3g", $abstime*1e9, cnt, clk_level);
+    end
+
+    V(CLK_OUT) <+ transition(clk_level, 0, tedge, tedge);
+end
+
+endmodule

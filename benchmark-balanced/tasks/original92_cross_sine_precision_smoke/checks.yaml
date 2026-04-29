@@ -1,0 +1,18 @@
+syntax:
+  must_include:
+    - "@(cross("
+    - "$abstime"
+    - "transition("
+  must_not_include:
+    - "time_tol"
+    - "expr_tol"
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "cross_sine_precision"
+parity:
+  required: true
+  tolerance_notes: "Event-time precision stress: nonlinear sine source, coarse maxstep, and metric encoded from $abstime inside rising cross() event bodies."

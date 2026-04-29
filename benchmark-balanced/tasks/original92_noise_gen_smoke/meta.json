@@ -1,0 +1,59 @@
+{
+  "task_id": "original92_noise_gen_smoke",
+  "task_name": "Gaussian Noise Generator Smoke Test",
+  "family": "end-to-end",
+  "category": "stimulus",
+  "domain": "voltage",
+  "difficulty": "easy",
+  "expected_backend": "evas",
+  "source": {
+    "type": "example",
+    "path": "behavioral-veriloga-eval/examples/stimulus/noise_gen"
+  },
+  "tier": "verified",
+  "verification_status": "passed",
+  "owner": "team",
+  "created_at": "2026-04-05",
+  "must_include": [
+    "transition(",
+    "$rdist_normal"
+  ],
+  "must_not_include": [
+    "I(",
+    "ddt("
+  ],
+  "inputs": [
+    "prompt.md"
+  ],
+  "artifacts": [
+    "dut.va",
+    "tb_noise_gen.scs",
+    "tran.csv"
+  ],
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "checks": {
+    "dut_compile": "required",
+    "tb_compile": "required",
+    "tran_generated": "required",
+    "sim_correct": "required",
+    "parity_required": true
+  },
+  "evidence": {
+    "result_path": "behavioral-veriloga-eval/results/gold-dual-suite-final/noise_gen_smoke",
+    "pr_link": "[TODO]",
+    "notes": "Converted from examples/stimulus/noise_gen; tests $rdist_normal semantic; dual validation backfill 2026-04-16"
+  },
+  "benchmark_split": "benchmark-balanced",
+  "source_collection": "original92",
+  "source_task_id": "noise_gen_smoke",
+  "source_family": "end-to-end",
+  "source_relative_path": "tasks/end-to-end/voltage/noise_gen_smoke",
+  "core_function": "stimulus",
+  "task_form": "end-to-end",
+  "balanced_role": "imported_original92",
+  "promotion_status": "imported_original92_with_normalized_metadata"
+}

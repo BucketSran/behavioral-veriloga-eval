@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+Vvdd (VDD 0) vsource dc=1.0 type=dc
+Vvss (VSS 0) vsource dc=0.0 type=dc
+
+// The two ramps cross 0.45 V at 10.000000 ns and 10.163333 ns.
+Va (a 0) vsource type=pwl wave=[0 0 9.95n 0 10.05n 0.9 12n 0.9]
+Vb (b 0) vsource type=pwl wave=[0 0 10.113333n 0 10.213333n 0.9 12n 0.9]
+
+IDUT (VDD VSS a b delay_out seen_out) cross_interval_163p333_ref
+
+simulatorOptions options reltol=1e-5 vabstol=1e-8 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+tran tran stop=12n maxstep=5p errpreset=conservative
+save a b delay_out seen_out
+
+ahdl_include "./cross_interval_163p333_ref.va"

@@ -1,0 +1,60 @@
+{
+  "id": "nrz_prbs_jitter_tb",
+  "task_name": "NRZ PRBS Jitter/Burst Testbench Generation",
+  "family": "tb-generation",
+  "category": "comms",
+  "domain": "voltage",
+  "difficulty": "medium",
+  "expected_backend": "evas",
+  "source": {
+    "type": "benchmark-gold",
+    "path": "behavioral-veriloga-eval/tasks/tb-generation/voltage/nrz_prbs_jitter_tb/gold"
+  },
+  "tier": "verified",
+  "verification_status": "passed",
+  "owner": "team",
+  "created_at": "2026-04-19",
+  "must_include": [
+    "simulator lang=spectre",
+    "tran",
+    "save",
+    "ahdl_include"
+  ],
+  "must_not_include": [
+    "I(",
+    ".control"
+  ],
+  "inputs": [
+    "prompt.md"
+  ],
+  "artifacts": [
+    "nrz_prbs_jitter_ref.va",
+    "tb_nrz_prbs_jitter_ref.scs"
+  ],
+  "scoring": [
+    "dut_compile",
+    "tb_compile"
+  ],
+  "parity_policy": "not_required",
+  "checks": {
+    "dut_compile": "required",
+    "tb_compile": "required",
+    "tran_generated": "required",
+    "parity_required": false
+  },
+  "evidence": {
+    "result_path": "behavioral-veriloga-eval/results/gold-suite-p2-2026-04-19/nrz_prbs_jitter_tb",
+    "pr_link": "codex/upstream-complete-pr",
+    "notes": "Added on 2026-04-19 as a P2 tb-generation task extending NRZ PRBS coverage with jittered edge delay and burst-gap enable windows."
+  },
+  "task_id": "original92_nrz_prbs_jitter_tb",
+  "benchmark_split": "benchmark-balanced",
+  "source_collection": "original92",
+  "source_task_id": "nrz_prbs_jitter_tb",
+  "source_family": "tb-generation",
+  "source_relative_path": "tasks/tb-generation/voltage/nrz_prbs_jitter_tb",
+  "core_function": "comms",
+  "task_form": "tb-generation",
+  "balanced_role": "imported_original92",
+  "promotion_status": "imported_original92_with_normalized_metadata"
+}

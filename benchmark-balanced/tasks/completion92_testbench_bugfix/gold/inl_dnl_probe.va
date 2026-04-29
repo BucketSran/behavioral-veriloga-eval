@@ -1,0 +1,72 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module inl_dnl_probe(VDD, VSS, CLKSTB, VOUT);
+    inout VDD, VSS;
+    input CLKSTB, VOUT;
+    electrical VDD, VSS, CLKSTB, VOUT;
+
+    integer sample_idx;
+    integer fd;
+    real s0, s1, s2, s3, s4, s5, s6, s7;
+    real s8, s9, s10, s11, s12, s13, s14, s15;
+    real base;
+    real lsb;
+
+    analog begin
+        @(initial_step) begin
+            sample_idx = 0;
+            s0 = 0.0;  s1 = 0.0;  s2 = 0.0;  s3 = 0.0;
+            s4 = 0.0;  s5 = 0.0;  s6 = 0.0;  s7 = 0.0;
+            s8 = 0.0;  s9 = 0.0;  s10 = 0.0; s11 = 0.0;
+            s12 = 0.0; s13 = 0.0; s14 = 0.0; s15 = 0.0;
+        end
+
+        @(cross(V(CLKSTB, VSS) - 0.45, +1)) begin
+            if (sample_idx == 0) s0 = V(VOUT, VSS);
+            else if (sample_idx == 1) s1 = V(VOUT, VSS);
+            else if (sample_idx == 2) s2 = V(VOUT, VSS);
+            else if (sample_idx == 3) s3 = V(VOUT, VSS);
+            else if (sample_idx == 4) s4 = V(VOUT, VSS);
+            else if (sample_idx == 5) s5 = V(VOUT, VSS);
+            else if (sample_idx == 6) s6 = V(VOUT, VSS);
+            else if (sample_idx == 7) s7 = V(VOUT, VSS);
+            else if (sample_idx == 8) s8 = V(VOUT, VSS);
+            else if (sample_idx == 9) s9 = V(VOUT, VSS);
+            else if (sample_idx == 10) s10 = V(VOUT, VSS);
+            else if (sample_idx == 11) s11 = V(VOUT, VSS);
+            else if (sample_idx == 12) s12 = V(VOUT, VSS);
+            else if (sample_idx == 13) s13 = V(VOUT, VSS);
+            else if (sample_idx == 14) s14 = V(VOUT, VSS);
+            else if (sample_idx == 15) s15 = V(VOUT, VSS);
+
+            if (sample_idx < 15) sample_idx = sample_idx + 1;
+        end
+
+        @(final_step) begin
+            fd = $fopen("candidate.out", "w");
+            base = s0;
+            lsb = (s15 - s0) / 15.0;
+            if (lsb == 0.0) lsb = 1.0;
+
+            $fdisplay(fd, "code,voltage,dnl,inl");
+            $fdisplay(fd, "0,%.6f,0.000000,0.000000", s0);
+            $fdisplay(fd, "1,%.6f,%.6f,%.6f", s1, ((s1 - s0) / lsb) - 1.0, (s1 - (base + 1.0 * lsb)) / lsb);
+            $fdisplay(fd, "2,%.6f,%.6f,%.6f", s2, ((s2 - s1) / lsb) - 1.0, (s2 - (base + 2.0 * lsb)) / lsb);
+            $fdisplay(fd, "3,%.6f,%.6f,%.6f", s3, ((s3 - s2) / lsb) - 1.0, (s3 - (base + 3.0 * lsb)) / lsb);
+            $fdisplay(fd, "4,%.6f,%.6f,%.6f", s4, ((s4 - s3) / lsb) - 1.0, (s4 - (base + 4.0 * lsb)) / lsb);
+            $fdisplay(fd, "5,%.6f,%.6f,%.6f", s5, ((s5 - s4) / lsb) - 1.0, (s5 - (base + 5.0 * lsb)) / lsb);
+            $fdisplay(fd, "6,%.6f,%.6f,%.6f", s6, ((s6 - s5) / lsb) - 1.0, (s6 - (base + 6.0 * lsb)) / lsb);
+            $fdisplay(fd, "7,%.6f,%.6f,%.6f", s7, ((s7 - s6) / lsb) - 1.0, (s7 - (base + 7.0 * lsb)) / lsb);
+            $fdisplay(fd, "8,%.6f,%.6f,%.6f", s8, ((s8 - s7) / lsb) - 1.0, (s8 - (base + 8.0 * lsb)) / lsb);
+            $fdisplay(fd, "9,%.6f,%.6f,%.6f", s9, ((s9 - s8) / lsb) - 1.0, (s9 - (base + 9.0 * lsb)) / lsb);
+            $fdisplay(fd, "10,%.6f,%.6f,%.6f", s10, ((s10 - s9) / lsb) - 1.0, (s10 - (base + 10.0 * lsb)) / lsb);
+            $fdisplay(fd, "11,%.6f,%.6f,%.6f", s11, ((s11 - s10) / lsb) - 1.0, (s11 - (base + 11.0 * lsb)) / lsb);
+            $fdisplay(fd, "12,%.6f,%.6f,%.6f", s12, ((s12 - s11) / lsb) - 1.0, (s12 - (base + 12.0 * lsb)) / lsb);
+            $fdisplay(fd, "13,%.6f,%.6f,%.6f", s13, ((s13 - s12) / lsb) - 1.0, (s13 - (base + 13.0 * lsb)) / lsb);
+            $fdisplay(fd, "14,%.6f,%.6f,%.6f", s14, ((s14 - s13) / lsb) - 1.0, (s14 - (base + 14.0 * lsb)) / lsb);
+            $fdisplay(fd, "15,%.6f,%.6f,%.6f", s15, ((s15 - s14) / lsb) - 1.0, (s15 - (base + 15.0 * lsb)) / lsb);
+            $fclose(fd);
+        end
+    end
+endmodule

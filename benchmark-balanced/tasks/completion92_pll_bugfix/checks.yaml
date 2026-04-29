@@ -1,0 +1,18 @@
+syntax:
+  must_include:
+    - "@(cross("
+    - "transition("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "div4_before_switch"
+    - "div5_after_first_switch"
+    - "div4_after_second_switch"
+
+parity:
+  required: false
+  spectre_result_path: "[TODO]"
+  tolerance_notes: "PLL-style task uses EVAS-first validation in this queue."

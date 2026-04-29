@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "dut.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0
+Vtrig (event_in 0) vsource type=pulse val0=0 val1=0.9 delay=5n rise=40p fall=40p width=600p period=18n
+
+XDUT (event_in vdd vss stretched_pulse) balanced_pulse_stretcher
+
+tran tran stop=140n maxstep=200p
+save event_in stretched_pulse

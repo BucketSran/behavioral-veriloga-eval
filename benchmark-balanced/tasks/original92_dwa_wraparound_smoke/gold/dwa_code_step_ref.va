@@ -1,0 +1,35 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module dwa_code_step_ref (
+    output electrical code_3,
+    output electrical code_2,
+    output electrical code_1,
+    output electrical code_0
+);
+
+parameter real vdd = 0.9;
+
+integer code_q;
+
+analog begin
+    @(initial_step) code_q = 0;
+
+    @(timer(8n))  code_q = 4;
+    @(timer(18n)) code_q = 5;
+    @(timer(28n)) code_q = 6;
+    @(timer(38n)) code_q = 7;
+    @(timer(48n)) code_q = 8;
+    @(timer(58n)) code_q = 3;
+    @(timer(68n)) code_q = 5;
+    @(timer(78n)) code_q = 2;
+
+    V(code_3) <+ transition(vdd * ((code_q >> 3) & 1));
+    V(code_2) <+ transition(vdd * ((code_q >> 2) & 1));
+    V(code_1) <+ transition(vdd * ((code_q >> 1) & 1));
+    V(code_0) <+ transition(vdd * ((code_q >> 0) & 1));
+end
+
+endmodule

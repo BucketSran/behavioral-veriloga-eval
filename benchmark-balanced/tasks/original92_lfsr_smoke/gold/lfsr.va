@@ -1,0 +1,60 @@
+// 31-bit LFSR — EVAS-compatible
+// Maximal-length polynomial: taps at 31, 21, 1, 0.
+// DPN output stored as piecewise-constant real (updated in event blocks).
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`define N_lfsr 31
+`default_transition 10p
+
+module lfsr(
+    output electrical DPN,
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical CLK,
+    input  electrical EN,
+    input  electrical RSTB
+);
+
+parameter integer seed = 123;
+
+real    vtrans_clk;
+integer lfsr_r[`N_lfsr:0];
+integer tmp_lfsr_r[(`N_lfsr+1):0];
+integer i;
+real    dpn_level;   // piecewise-constant output voltage
+
+analog begin
+    @(initial_step or cross(V(RSTB) - 0.5, -1)) begin
+        vtrans_clk = 0.5;
+        for (i = 0; i <= `N_lfsr; i = i + 1) begin
+            lfsr_r[i] = (seed >> i) & 1;
+        end
+        // Ensure seed is non-zero
+        for (i = 0; i <= `N_lfsr; i = i + 5) begin
+            lfsr_r[i] = 1;
+        end
+        dpn_level = lfsr_r[`N_lfsr] > 0 ? V(VDD) : V(VSS);
+        $strobe("[lfsr] t=%.3f ns | INIT/RST | seed=%d | DPN=%d",
+                $abstime*1e9, seed, lfsr_r[`N_lfsr]);
+    end
+
+    @(cross(V(CLK) - 0.5, +1)) begin
+        if (V(RSTB) > 0.5) begin
+            for (i = 0; i <= `N_lfsr; i = i + 1) begin
+                tmp_lfsr_r[i + 1] = lfsr_r[i];
+            end
+            tmp_lfsr_r[0] = lfsr_r[31] ^ lfsr_r[21] ^ lfsr_r[1] ^ lfsr_r[0];
+            for (i = 0; i <= `N_lfsr; i = i + 1) begin
+                lfsr_r[i] = tmp_lfsr_r[i];
+            end
+            dpn_level = lfsr_r[`N_lfsr] > 0 ? V(VDD) : V(VSS);
+            $strobe("[lfsr] t=%.3f ns | DPN=%d", $abstime*1e9, lfsr_r[`N_lfsr]);
+        end
+    end
+
+    V(DPN) <+ transition(dpn_level, 0, 50p, 50p);
+end
+
+endmodule

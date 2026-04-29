@@ -1,0 +1,15 @@
+syntax:
+  must_include:
+    - "@(cross("
+    - "$abstime"
+    - "transition("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "cross_interval_163p333"
+parity:
+  required: true
+  tolerance_notes: "Event-time parity compares the DUT-recorded $abstime interval between two cross() events; it does not require waveform-sampling or solver-step identity."

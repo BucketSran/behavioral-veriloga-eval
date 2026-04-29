@@ -28,8 +28,10 @@ from spectre_validate_baseline import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-BENCH = ROOT / "benchmark-v2"
+DEFAULT_BENCH = ROOT / "benchmark-v2"
+BENCH = DEFAULT_BENCH
 TASK_ROOT = BENCH / "tasks"
+BENCH_FAMILY = "benchmark-v2"
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -48,6 +50,19 @@ def _task_dirs(selected: set[str] | None = None) -> list[Path]:
     return dirs
 
 
+def _choose_tb(stage_dir: Path) -> Path | None:
+    for pattern in ("tb_ref.scs", "tb*_ref.scs", "tb*.scs", "*.scs"):
+        matches = sorted(stage_dir.glob(pattern))
+        if matches:
+            return matches[0]
+    return None
+
+
+def _ahdl_includes(tb_path: Path) -> list[str]:
+    text = tb_path.read_text(encoding="utf-8", errors="ignore")
+    return re.findall(r'^\s*ahdl_include\s+"([^"]+)"', text, flags=re.MULTILINE)
+
+
 def _stage_gold(task_dir: Path, stage_dir: Path) -> tuple[Path, Path]:
     if stage_dir.exists():
         shutil.rmtree(stage_dir)
@@ -56,7 +71,15 @@ def _stage_gold(task_dir: Path, stage_dir: Path) -> tuple[Path, Path]:
     for src in gold.iterdir():
         if src.is_file():
             shutil.copy2(src, stage_dir / src.name)
-    return stage_dir / "dut.va", stage_dir / "tb_ref.scs"
+    tb = _choose_tb(stage_dir)
+    if tb is None:
+        return stage_dir / "dut.va", stage_dir / "tb_ref.scs"
+    includes = _ahdl_includes(tb)
+    if includes and (stage_dir / includes[0]).exists():
+        return stage_dir / includes[0], tb
+    vas = sorted(stage_dir.glob("*.va"))
+    dut = vas[0] if vas else stage_dir / "dut.va"
+    return dut, tb
 
 
 def _stage_candidate(
@@ -110,18 +133,19 @@ def _run_checker(task_dir: Path, csv_path: Path) -> tuple[float, list[str], dict
     return (1.0 if ok else 0.0), notes, result
 
 
-def _status(scores: dict[str, float]) -> str:
-    if scores.get("dut_compile", 0.0) < 1.0:
+def _status(scores: dict[str, float], required_axes: list[str] | None = None) -> str:
+    axes = required_axes or ["dut_compile", "tb_compile", "sim_correct"]
+    if "dut_compile" in axes and scores.get("dut_compile", 0.0) < 1.0:
         return "FAIL_DUT_COMPILE"
-    if scores.get("tb_compile", 0.0) < 1.0:
+    if "tb_compile" in axes and scores.get("tb_compile", 0.0) < 1.0:
         return "FAIL_TB_COMPILE"
-    if scores.get("sim_correct", 0.0) < 1.0:
+    if "sim_correct" in axes and scores.get("sim_correct", 0.0) < 1.0:
         return "FAIL_SIM_CORRECTNESS"
     return "PASS"
 
 
-def _weighted(scores: dict[str, float]) -> float:
-    axes = ["dut_compile", "tb_compile", "sim_correct"]
+def _weighted(scores: dict[str, float], required_axes: list[str] | None = None) -> float:
+    axes = required_axes or ["dut_compile", "tb_compile", "sim_correct"]
     return round(sum(scores.get(axis, 0.0) for axis in axes) / len(axes), 4)
 
 
@@ -136,6 +160,7 @@ def validate_evas(
 ) -> dict[str, Any]:
     meta = _read_json(task_dir / "meta.json")
     task_id = meta["task_id"]
+    required_axes = meta.get("scoring", ["dut_compile", "tb_compile", "sim_correct"])
     stage_dir = case_out / "staged"
     _dut, tb = _stage_candidate(task_dir, stage_dir, candidate_root=candidate_root, model=model, sample_idx=sample_idx)
     output_dir = case_out / "evas_output"
@@ -157,18 +182,21 @@ def validate_evas(
         notes.append("evas_runtime_error=" + runtime)
     notes.extend(parse_evas_log_diagnostics(combined))
     checker_result = {}
-    if proc.returncode == 0 and csv_path.exists():
+    if "sim_correct" not in required_axes:
+        scores["sim_correct"] = 1.0
+        notes.append("sim_correct_not_required")
+    elif proc.returncode == 0 and csv_path.exists():
         sim_score, checker_notes, checker_result = _run_checker(task_dir, csv_path)
         scores["sim_correct"] = sim_score
         notes.extend(checker_notes)
     else:
         notes.append("tran.csv missing")
-    scores["weighted_total"] = _weighted(scores)
+    scores["weighted_total"] = _weighted(scores, required_axes)
     result = {
         "task_id": task_id,
         "backend": "evas",
         "source": "candidate" if candidate_root else "gold",
-        "status": _status(scores),
+        "status": _status(scores, required_axes),
         "scores": scores,
         "notes": notes,
         "checker_result": checker_result,
@@ -196,11 +224,12 @@ def validate_spectre(
 ) -> dict[str, Any]:
     meta = _read_json(task_dir / "meta.json")
     task_id = meta["task_id"]
+    required_axes = meta.get("scoring", ["dut_compile", "tb_compile", "sim_correct"])
     stage_dir = case_out / "staged"
     _dut, tb = _stage_candidate(task_dir, stage_dir, candidate_root=candidate_root, model=model, sample_idx=sample_idx)
     strict_status, strict_scores, strict_notes = spectre_strict_preflight(
-        family="benchmark-v2",
-        required_axes=["dut_compile", "tb_compile", "sim_correct"],
+        family=meta.get("family", BENCH_FAMILY),
+        required_axes=required_axes,
         staged_tb=tb,
         staged_va_paths=sorted(stage_dir.glob("*.va")),
     )
@@ -229,7 +258,10 @@ def validate_spectre(
             "tb_compile": 1.0 if returncode == 0 and csv_ok else 0.0,
             "sim_correct": 0.0,
         }
-        if returncode == 0 and csv_ok:
+        if "sim_correct" not in required_axes:
+            scores["sim_correct"] = 1.0
+            notes.append("sim_correct_not_required")
+        elif returncode == 0 and csv_ok:
             sim_score, checker_notes, checker_result = _run_checker(task_dir, csv_path)
             scores["sim_correct"] = sim_score
             notes.extend(checker_notes)
@@ -252,13 +284,13 @@ def validate_spectre(
         notes.append(f"spectre_exception={type(exc).__name__}: {str(exc)[:300]}")
         extra = {}
 
-    scores["weighted_total"] = _weighted(scores)
+    scores["weighted_total"] = _weighted(scores, required_axes)
     result = {
         "task_id": task_id,
         "backend": "spectre",
         "source": "candidate" if candidate_root else "gold",
         "spectre_mode": spectre_mode,
-        "status": _status(scores),
+        "status": _status(scores, required_axes),
         "scores": scores,
         "notes": notes,
         "checker_result": checker_result,
@@ -275,14 +307,14 @@ def _aggregate(results: list[dict[str, Any]], backend: str) -> dict[str, Any]:
     model_like = [
         {
             "task_id": r["task_id"],
-            "family": "benchmark-v2",
+            "family": BENCH_FAMILY,
             "required_axes": ["dut_compile", "tb_compile", "sim_correct"],
             "scores": r.get("scores", {}),
             "status": r.get("status", "FAIL_INFRA"),
         }
         for r in results
     ]
-    aggregate = build_model_results(f"benchmark-v2-gold-{backend}", model_like, 0.0, 1.0)
+    aggregate = build_model_results(f"{BENCH_FAMILY}-gold-{backend}", model_like, 0.0, 1.0)
     aggregate["backend"] = backend
     aggregate["pass_tasks"] = [r["task_id"] for r in results if r.get("status") == "PASS"]
     aggregate["fail_tasks"] = [
@@ -294,8 +326,12 @@ def _aggregate(results: list[dict[str, Any]], backend: str) -> dict[str, Any]:
 
 
 def main() -> int:
+    global BENCH, TASK_ROOT, BENCH_FAMILY
+
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--backend", choices=["evas", "spectre", "both"], default="both")
+    ap.add_argument("--bench-dir", default=str(DEFAULT_BENCH), help="Benchmark root containing tasks/ and common_checker.py.")
+    ap.add_argument("--family", default="benchmark-v2", help="Family label used in aggregate result files.")
     ap.add_argument("--output-dir", default="results/benchmark-v2-gold-validation-2026-04-29")
     ap.add_argument("--candidate-dir", default="", help="Optional generated-root to validate instead of benchmark-v2 gold.")
     ap.add_argument("--model", default="completion-package-v0", help="Model slug under --candidate-dir.")
@@ -307,6 +343,12 @@ def main() -> int:
     ap.add_argument("--spectre-mode", default="spectre", choices=["spectre", "aps", "x", "cx", "ax", "mx", "lx", "vx"])
     ap.add_argument("--keep-remote-files", action="store_true")
     args = ap.parse_args()
+
+    BENCH = Path(args.bench_dir)
+    if not BENCH.is_absolute():
+        BENCH = ROOT / BENCH
+    TASK_ROOT = BENCH / "tasks"
+    BENCH_FAMILY = args.family
 
     out_root = Path(args.output_dir)
     if not out_root.is_absolute():

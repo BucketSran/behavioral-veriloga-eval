@@ -1,0 +1,82 @@
+// 1.5-bit pipeline MDAC stage — EVAS-compatible gold
+// Samples VIN on PHI1 rising edge. On PHI2 rising edge:
+//   computes 2-bit sub-ADC output D1,D0 and residue VRES = 2*vin - dac_out.
+// Thresholds: ±Vref/4 relative to Vcm = VDD/2.
+// Residue output is centered at Vcm = VDD/2.
+
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 50p
+
+module pipeline_stage(VDD, VSS, PHI1, PHI2, VIN, VREF, VRES, D1, D0);
+
+inout VDD, VSS;
+input PHI1, PHI2;
+input VIN, VREF;
+output VRES;
+output D1, D0;
+
+electrical VDD, VSS;
+electrical PHI1, PHI2;
+electrical VIN, VREF;
+electrical VRES;
+electrical D1, D0;
+
+parameter real vth   = 0.45;
+parameter real vdd   = 0.9;
+parameter real tedge = 200p;
+
+real vin_s;       // sampled VIN
+real vcm;
+real vin_rel;
+real vref_qtr;
+real vres_level;
+real d1_level;
+real d0_level;
+
+analog begin
+    @(initial_step) begin
+        vin_s      = 0.0;
+        vres_level = vdd / 2.0;
+        d1_level   = 0.0;
+        d0_level   = 0.0;
+        $strobe("[pipeline_stage] INIT");
+    end
+
+    @(cross(V(PHI1) - vth, +1)) begin
+        vin_s = V(VIN);
+    end
+
+    @(cross(V(PHI2) - vth, +1)) begin
+        vcm      = V(VDD) / 2.0;
+        vref_qtr = V(VREF) / 4.0;
+        vin_rel  = vin_s - vcm;
+
+        if (vin_rel > vref_qtr) begin
+            // Upper region: D1=1, D0=0, residue = 2*vin - Vref
+            d1_level   = V(VDD);
+            d0_level   = 0.0;
+            vres_level = vcm + 2.0 * vin_rel - V(VREF) / 2.0;
+        end else if (vin_rel < -vref_qtr) begin
+            // Lower region: D1=0, D0=0, residue = 2*vin + Vref
+            d1_level   = 0.0;
+            d0_level   = 0.0;
+            vres_level = vcm + 2.0 * vin_rel + V(VREF) / 2.0;
+        end else begin
+            // Middle region: D1=0, D0=1, residue = 2*vin
+            d1_level   = 0.0;
+            d0_level   = V(VDD);
+            vres_level = vcm + 2.0 * vin_rel;
+        end
+
+        // Clamp residue to [0, VDD]
+        if (vres_level > V(VDD)) vres_level = V(VDD);
+        if (vres_level < 0.0)   vres_level = 0.0;
+    end
+
+    V(VRES) <+ transition(vres_level, 0, tedge, tedge);
+    V(D1)   <+ transition(d1_level,   0, tedge, tedge);
+    V(D0)   <+ transition(d0_level,   0, tedge, tedge);
+end
+
+endmodule

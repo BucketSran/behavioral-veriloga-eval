@@ -1,0 +1,48 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dco_gain_step_ref (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical vctrl,
+    output electrical vout
+);
+    parameter real f0 = 400.0e6 from (0:inf);
+    parameter real Kvco = 200.0e6 from [0:inf);
+    parameter real fmin = 200.0e6 from (0:inf);
+    parameter real fmax = 700.0e6 from (0:inf);
+    parameter real tedge = 100p from (0:inf);
+
+    real vh;
+    real vl;
+    real freq_hz;
+    real half_period;
+    real t_next;
+    integer state;
+
+    analog begin
+        vh = V(VDD);
+        vl = V(VSS);
+
+        @(initial_step) begin
+            state = 0;
+            freq_hz = f0 + Kvco * V(vctrl);
+            if (freq_hz < fmin) freq_hz = fmin;
+            if (freq_hz > fmax) freq_hz = fmax;
+            half_period = 0.5 / freq_hz;
+            t_next = $abstime + half_period;
+        end
+
+        @(timer(t_next)) begin
+            state = 1 - state;
+            freq_hz = f0 + Kvco * V(vctrl);
+            if (freq_hz < fmin) freq_hz = fmin;
+            if (freq_hz > fmax) freq_hz = fmax;
+            $bound_step(1.0 / (96.0 * freq_hz));
+            half_period = 0.5 / freq_hz;
+            t_next = t_next + half_period;
+        end
+
+        V(vout) <+ vl + (vh - vl) * transition(state ? 1.0 : 0.0, 0.0, tedge, tedge);
+    end
+endmodule

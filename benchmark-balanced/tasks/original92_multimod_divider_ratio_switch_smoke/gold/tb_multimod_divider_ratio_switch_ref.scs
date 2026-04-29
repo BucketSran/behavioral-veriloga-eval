@@ -1,0 +1,19 @@
+simulator lang=spectre
+global 0
+
+Vclk (clk_in 0) vsource type=pulse val0=0 val1=0.9 delay=0.2n rise=20p fall=20p width=0.5n period=1n
+Vratio (ratio_ctrl 0) vsource type=pwl wave=[ \
+    0      4.0 \
+    100n   4.0 \
+    100.1n 5.0 \
+    200n   5.0 \
+    200.1n 4.0 \
+    320n   4.0 \
+]
+
+XDUT (clk_in ratio_ctrl div_out) multimod_divider_ratio_switch_ref
+
+tran tran stop=320n maxstep=20p errpreset=conservative
+save clk_in ratio_ctrl div_out
+
+ahdl_include "multimod_divider_ratio_switch_ref.va"

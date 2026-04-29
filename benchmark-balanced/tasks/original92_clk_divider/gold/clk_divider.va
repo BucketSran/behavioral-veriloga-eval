@@ -1,0 +1,60 @@
+// Programmable clock divider — EVAS-compatible gold
+// 8-bit programmable ratio (1–255), 50% output duty cycle,
+// synchronous reset, LOCK asserts after first full output period.
+
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 50p
+
+module clk_divider(
+    input  electrical CLK_IN,
+    input  electrical RST_N,
+    output electrical CLK_OUT,
+    output electrical LOCK
+);
+
+parameter integer div_ratio = 8;
+parameter real    vth       = 0.45;
+parameter real    vdd       = 0.9;
+parameter real    tedge     = 100p;
+
+integer cnt;
+integer locked;
+real    clk_level;
+real    lock_level;
+
+analog begin
+    @(initial_step) begin
+        cnt        = 0;
+        locked     = 0;
+        clk_level  = 0.0;
+        lock_level = 0.0;
+        $strobe("[clk_divider] INIT | div_ratio=%0d", div_ratio);
+    end
+
+    @(cross(V(RST_N) - vth, -1)) begin
+        cnt        = 0;
+        locked     = 0;
+        clk_level  = 0.0;
+        lock_level = 0.0;
+        $strobe("[clk_divider] RESET at t=%.3f ns", $abstime * 1e9);
+    end
+
+    @(cross(V(CLK_IN) - vth, +1)) begin
+        if (V(RST_N) > vth) begin
+            cnt = cnt + 1;
+            if (cnt >= div_ratio) begin
+                cnt    = 0;
+                locked = 1;
+            end
+            // 50% duty: high for first half, low for second half
+            clk_level  = (cnt < (div_ratio / 2)) ? vdd : 0.0;
+            lock_level = locked ? vdd : 0.0;
+        end
+    end
+
+    V(CLK_OUT) <+ transition(clk_level,  0, tedge, tedge);
+    V(LOCK)    <+ transition(lock_level, 0, tedge, tedge);
+end
+
+endmodule

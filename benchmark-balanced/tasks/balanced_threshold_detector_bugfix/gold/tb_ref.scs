@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "dut.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0
+Vsig (sense_level 0) vsource type=pwl wave=[ 0 0 20n 0.2 45n 0.7 70n 0.3 95n 0.85 120n 0.1 ]
+
+XDUT (sense_level vdd vss decision_level) balanced_threshold_detector
+
+tran tran stop=120n maxstep=500p
+save sense_level decision_level

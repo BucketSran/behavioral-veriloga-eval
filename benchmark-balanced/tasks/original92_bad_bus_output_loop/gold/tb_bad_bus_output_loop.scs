@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "dut_fixed.va"
+
+VVDD (VDD 0) vsource dc=0.9
+VVSS (VSS 0) vsource dc=0
+
+VCODE0 (CODE_0 0) vsource type=pulse val0=0 val1=0.9 delay=2n rise=50p fall=50p width=10n period=20n
+VCODE1 (CODE_1 0) vsource type=pulse val0=0 val1=0.9 delay=2n rise=50p fall=50p width=20n period=40n
+VCODE2 (CODE_2 0) vsource type=pulse val0=0 val1=0.9 delay=2n rise=50p fall=50p width=40n period=80n
+VCODE3 (CODE_3 0) vsource type=pulse val0=0 val1=0.9 delay=2n rise=50p fall=50p width=80n period=160n
+
+XDUT (VDD VSS CODE_3 CODE_2 CODE_1 CODE_0 DOUT_3 DOUT_2 DOUT_1 DOUT_0) bin4_out
+
+tran tran stop=200n maxstep=100p
+save CODE_0 CODE_1 CODE_2 CODE_3 DOUT_0 DOUT_1 DOUT_2 DOUT_3

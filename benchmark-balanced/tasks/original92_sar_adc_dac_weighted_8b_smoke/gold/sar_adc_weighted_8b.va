@@ -1,0 +1,148 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+`define NUM_BITS 8
+`default_transition 30p
+
+// 8-bit SAR ADC with configurable binary weights.
+//
+// Default weights (MSB→LSB): 128, 64, 32, 16, 8, 4, 2, 1
+// total_sum = 255.  Input [0, vdd] → code [0, 255].
+//
+// Algorithm: at each step i (MSB first), tentatively assert bit i.
+//   If (partial_sum + weight[i]) / total_sum * vdd ≤ vsampled → keep bit.
+//
+// Sampling phase: explicitly sample VIN on CLKS falling edge.
+// Conversion: on rising edge of CLKS (after rst_n is released).
+// RST_N: active-low synchronous reset — clears all output bits.
+//
+// Output mapping: DOUT[7] = MSB (weight 128), DOUT[0] = LSB (weight 1).
+// Matches dac_weighted_8b pin-for-pin for a zero-error round-trip.
+
+module sar_adc_weighted_8b(
+    input  electrical               VIN,
+    input  electrical               CLKS,
+    input  electrical               RST_N,
+    output electrical [`NUM_BITS-1:0] DOUT
+);
+
+parameter real vdd = 0.9;
+parameter real vth = 0.45;
+
+real weight[`NUM_BITS:1];   // weight[8]=MSB, weight[1]=LSB
+real total_sum;
+real vsampled, vdac_partial;
+integer dout_bits[`NUM_BITS:1];
+
+analog begin
+    @(initial_step) begin
+        weight[8] = 128; weight[7] = 64; weight[6] = 32; weight[5] = 16;
+        weight[4] = 8;   weight[3] = 4;  weight[2] = 2;  weight[1] = 1;
+
+        total_sum = 255;
+
+        dout_bits[8] = 0; dout_bits[7] = 0; dout_bits[6] = 0; dout_bits[5] = 0;
+        dout_bits[4] = 0; dout_bits[3] = 0; dout_bits[2] = 0; dout_bits[1] = 0;
+
+        $strobe("[sar_adc_weighted_8b] INIT | vdd=%.3gV | total_sum=%g", vdd, total_sum);
+    end
+
+    // Explicit sample on CLKS falling edge (end of sampling phase)
+    @(cross(V(CLKS) - vth, -1)) begin
+        vsampled = V(VIN);
+    end
+
+    // SAR conversion on rising edge of CLKS
+    // Use explicit bit-by-bit operations instead of for-loop for Spectre compatibility
+    @(cross(V(CLKS) - vth, +1)) begin
+        if (V(RST_N) < vth) begin
+            // Synchronous reset: clear all output bits
+            dout_bits[8] = 0; dout_bits[7] = 0; dout_bits[6] = 0; dout_bits[5] = 0;
+            dout_bits[4] = 0; dout_bits[3] = 0; dout_bits[2] = 0; dout_bits[1] = 0;
+        end else begin
+            // SAR successive-approximation (explicit bit-by-bit for Spectre compatibility)
+            vdac_partial = 0.0;
+
+            // Bit 8 (MSB, weight 128)
+            if ((vdac_partial + weight[8]) / total_sum * vdd <= vsampled) begin
+                dout_bits[8] = 1;
+                vdac_partial = vdac_partial + weight[8];
+            end else begin
+                dout_bits[8] = 0;
+            end
+
+            // Bit 7 (weight 64)
+            if ((vdac_partial + weight[7]) / total_sum * vdd <= vsampled) begin
+                dout_bits[7] = 1;
+                vdac_partial = vdac_partial + weight[7];
+            end else begin
+                dout_bits[7] = 0;
+            end
+
+            // Bit 6 (weight 32)
+            if ((vdac_partial + weight[6]) / total_sum * vdd <= vsampled) begin
+                dout_bits[6] = 1;
+                vdac_partial = vdac_partial + weight[6];
+            end else begin
+                dout_bits[6] = 0;
+            end
+
+            // Bit 5 (weight 16)
+            if ((vdac_partial + weight[5]) / total_sum * vdd <= vsampled) begin
+                dout_bits[5] = 1;
+                vdac_partial = vdac_partial + weight[5];
+            end else begin
+                dout_bits[5] = 0;
+            end
+
+            // Bit 4 (weight 8)
+            if ((vdac_partial + weight[4]) / total_sum * vdd <= vsampled) begin
+                dout_bits[4] = 1;
+                vdac_partial = vdac_partial + weight[4];
+            end else begin
+                dout_bits[4] = 0;
+            end
+
+            // Bit 3 (weight 4)
+            if ((vdac_partial + weight[3]) / total_sum * vdd <= vsampled) begin
+                dout_bits[3] = 1;
+                vdac_partial = vdac_partial + weight[3];
+            end else begin
+                dout_bits[3] = 0;
+            end
+
+            // Bit 2 (weight 2)
+            if ((vdac_partial + weight[2]) / total_sum * vdd <= vsampled) begin
+                dout_bits[2] = 1;
+                vdac_partial = vdac_partial + weight[2];
+            end else begin
+                dout_bits[2] = 0;
+            end
+
+            // Bit 1 (LSB, weight 1)
+            if ((vdac_partial + weight[1]) / total_sum * vdd <= vsampled) begin
+                dout_bits[1] = 1;
+                vdac_partial = vdac_partial + weight[1];
+            end else begin
+                dout_bits[1] = 0;
+            end
+
+            $strobe("[sar_adc_weighted_8b] t=%.3f ns | vin=%.5gV | code=%d%d%d%d%d%d%d%d",
+                    $abstime*1e9, vsampled,
+                    dout_bits[8], dout_bits[7], dout_bits[6], dout_bits[5],
+                    dout_bits[4], dout_bits[3], dout_bits[2], dout_bits[1]);
+        end
+    end
+
+    // DOUT[7]=MSB (weight[8]=128), DOUT[0]=LSB (weight[1]=1)
+    V(DOUT[7]) <+ transition(dout_bits[8] ? vdd : 0, 0);
+    V(DOUT[6]) <+ transition(dout_bits[7] ? vdd : 0, 0);
+    V(DOUT[5]) <+ transition(dout_bits[6] ? vdd : 0, 0);
+    V(DOUT[4]) <+ transition(dout_bits[5] ? vdd : 0, 0);
+    V(DOUT[3]) <+ transition(dout_bits[4] ? vdd : 0, 0);
+    V(DOUT[2]) <+ transition(dout_bits[3] ? vdd : 0, 0);
+    V(DOUT[1]) <+ transition(dout_bits[2] ? vdd : 0, 0);
+    V(DOUT[0]) <+ transition(dout_bits[1] ? vdd : 0, 0);
+end
+
+endmodule

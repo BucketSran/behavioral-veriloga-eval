@@ -1,0 +1,116 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+// Reference programmable clock divider for spec-to-va task.
+// - 8-bit ratio code (1..255)
+// - synchronous active-low reset
+// - lock goes high after first complete output period
+module clk_divider_ref (
+    input electrical clk_in,
+    input electrical rst_n,
+    input electrical div_code_0,
+    input electrical div_code_1,
+    input electrical div_code_2,
+    input electrical div_code_3,
+    input electrical div_code_4,
+    input electrical div_code_5,
+    input electrical div_code_6,
+    input electrical div_code_7,
+    output electrical clk_out,
+    output electrical lock
+);
+
+parameter real vdd = 0.9;
+parameter real vth = 0.45;
+parameter real trf = 10p;
+parameter real td  = 0p;
+
+integer ratio;
+integer count;
+integer prev_ratio;
+integer out_state;
+integer lock_state;
+integer edge_count;
+integer low_len;
+integer high_len;
+
+analog begin
+    @(initial_step) begin
+        ratio = 1;
+        count = 0;
+        prev_ratio = 1;
+        out_state = 0;
+        lock_state = 0;
+        edge_count = 0;
+        low_len = 1;
+        high_len = 1;
+    end
+
+    @(cross(V(clk_in) - vth, +1)) begin
+        ratio = (V(div_code_0) > vth ? 1 : 0)
+              + (V(div_code_1) > vth ? 2 : 0)
+              + (V(div_code_2) > vth ? 4 : 0)
+              + (V(div_code_3) > vth ? 8 : 0)
+              + (V(div_code_4) > vth ? 16 : 0)
+              + (V(div_code_5) > vth ? 32 : 0)
+              + (V(div_code_6) > vth ? 64 : 0)
+              + (V(div_code_7) > vth ? 128 : 0);
+
+        if (ratio < 1)
+            ratio = 1;
+
+        if (V(rst_n) < vth) begin
+            count = 0;
+            prev_ratio = ratio;
+            out_state = 0;
+            lock_state = 0;
+            edge_count = 0;
+        end else if (ratio == 1) begin
+            prev_ratio = ratio;
+            edge_count = edge_count + 1;
+            out_state = 1;
+            count = 0;
+            if (edge_count >= 1)
+                lock_state = 1;
+        end else begin
+            if (ratio != prev_ratio) begin
+                prev_ratio = ratio;
+                count = 0;
+                out_state = 0;
+                lock_state = 0;
+                edge_count = 0;
+            end
+
+            edge_count = edge_count + 1;
+            if (edge_count >= ratio)
+                lock_state = 1;
+
+            // Use floor(N/2) and ceil(N/2) segment lengths for odd ratios.
+            low_len = ratio >> 1;
+            if (low_len < 1)
+                low_len = 1;
+            high_len = ratio - low_len;
+
+            if (count <= 0)
+                count = (out_state == 0) ? low_len : high_len;
+
+            count = count - 1;
+            if (count <= 0)
+                out_state = (out_state == 0) ? 1 : 0;
+        end
+    end
+
+    @(cross(V(clk_in) - vth, -1)) begin
+        if (V(rst_n) < vth) begin
+            out_state = 0;
+        end else if (ratio == 1) begin
+            out_state = 0;
+            lock_state = 1;
+        end
+    end
+
+    V(clk_out) <+ transition(out_state ? vdd : 0.0, td, trf, trf);
+    V(lock)    <+ transition(lock_state ? vdd : 0.0, td, trf, trf);
+end
+
+endmodule

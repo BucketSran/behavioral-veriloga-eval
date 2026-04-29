@@ -1,0 +1,27 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module above_threshold_startup_ref (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical vin,
+    output electrical out
+);
+
+parameter real vth = 0.45;
+parameter real tedge = 50p from (0:inf);
+
+real target;
+real vh;
+real vl;
+
+analog begin
+    vh = V(VDD);
+    vl = V(VSS);
+
+    @(above(V(vin) - vth)) target = 1.0;
+
+    V(out) <+ vl + (vh - vl) * transition(target, 0.0, tedge, tedge);
+end
+
+endmodule

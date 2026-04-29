@@ -1,0 +1,17 @@
+syntax:
+  must_include:
+    - "@(cross("
+    - "transition("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "xor_pd_output_toggles"
+    - "xor_pd_duty_cycle_proportional_to_phase"
+
+parity:
+  required: true
+  spectre_result_path: "behavioral-veriloga-eval/results/gold-dual-suite-final/xor_pd_smoke/spectre/tran_spectre.csv"
+  tolerance_notes: "Dual validation closed on 2026-04-17; EVAS gold-suite was rechecked on 2026-04-19."

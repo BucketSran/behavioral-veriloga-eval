@@ -1,0 +1,21 @@
+// sar_logic_10b gold smoke testbench
+// 10-bit SAR logic, same as sar_logic but standalone task.
+// CLKS at 10 MHz, DCOMP alternates, run 5us.
+simulator lang=spectre
+global 0
+
+ahdl_include "sar_logic.va"
+
+Vvdd  (vdd 0) vsource dc=0.9
+Vvss  (vss 0) vsource dc=0.0
+Vclks (clks 0) vsource type=pulse val0=0 val1=0.9 period=100n width=50n rise=1n fall=1n
+Vdcomp (dcomp 0) vsource type=pulse val0=0 val1=0.9 period=600n width=600n rise=1n fall=1n \
+    delay=50n
+
+IDUT (vdd vss clks dcomp \
+      dp_dac_9 dp_dac_8 dp_dac_7 dp_dac_6 dp_dac_5 \
+      dp_dac_4 dp_dac_3 dp_dac_2 dp_dac_1 dp_dac_0 rdy) \
+    sar_logic vth=0.45 vdd=0.9 tedge=1n
+
+tran tran stop=5u maxstep=5n
+save rdy dp_dac_9 dp_dac_0

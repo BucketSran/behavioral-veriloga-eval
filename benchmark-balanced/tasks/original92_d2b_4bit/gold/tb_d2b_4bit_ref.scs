@@ -1,0 +1,16 @@
+// d2b_4bit gold smoke testbench
+// VIN ramps 0→0.9V over 100ns, run 110ns.
+// Check: DOUT3..DOUT0 decode monotonically with VIN (0→15).
+simulator lang=spectre
+global 0
+
+ahdl_include "_va_d2b_4b.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0.0
+Vvin (vin 0) vsource type=pwl wave=[0 0  100n 0.9  110n 0.9]
+
+IDUT (vdd vss vin DOUT3 DOUT2 DOUT1 DOUT0) _va_d2b_4b tedge=50p dt=1n
+
+tran tran stop=110n maxstep=2n
+save vin DOUT3 DOUT2 DOUT1 DOUT0

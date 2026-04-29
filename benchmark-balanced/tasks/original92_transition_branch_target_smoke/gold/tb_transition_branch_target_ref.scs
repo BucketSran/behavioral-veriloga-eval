@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+Vvdd (VDD 0) vsource dc=0.9 type=dc
+Vvss (VSS 0) vsource dc=0.0 type=dc
+Vmode (mode 0) vsource type=pwl wave=[0 0 24.9n 0 25.1n 0.9 54.9n 0.9 55.1n 0 90n 0]
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=10n period=20n width=2n rise=50p fall=50p
+
+IDUT (VDD VSS mode clk out) transition_branch_target_ref
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+tran tran stop=90n maxstep=20p errpreset=conservative
+save mode clk out
+
+ahdl_include "./transition_branch_target_ref.va"

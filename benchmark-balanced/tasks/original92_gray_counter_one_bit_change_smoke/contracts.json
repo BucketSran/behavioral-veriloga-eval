@@ -1,0 +1,30 @@
+{
+  "task_id": "gray_counter_one_bit_change_smoke",
+  "contracts": [
+    {
+      "name": "csv_has_observables",
+      "type": "signal_present",
+      "signals": ["time", "clk", "rst", "g0", "g1", "g2", "g3"],
+      "diagnostic_hint": "Gray counter clock, reset, and bit outputs must be saved.",
+      "repair_family": "runtime-interface-minimal-harness"
+    },
+    {
+      "name": "clock_edges_present",
+      "type": "edge_count",
+      "signal": "clk",
+      "threshold": 0.45,
+      "min_edges": 8,
+      "diagnostic_hint": "Clock stimulus is absent or not visible; preserve/repair harness before behavior.",
+      "repair_family": "clock-event-generator-or-reset-release"
+    },
+    {
+      "name": "gray_code_changes",
+      "type": "code_coverage",
+      "bits": ["g3", "g2", "g1", "g0"],
+      "threshold": 0.45,
+      "min_unique": 4,
+      "diagnostic_hint": "Gray counter state is stuck or covers too few states.",
+      "repair_family": "clock-event-generator-or-reset-release"
+    }
+  ]
+}

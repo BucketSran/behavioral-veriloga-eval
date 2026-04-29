@@ -1,0 +1,17 @@
+syntax:
+  must_include:
+    - "@(cross("
+    - "transition("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "output_shows_hysteresis_window"
+    - "upward_and_downward_trip_points_are_separated"
+
+parity:
+  required: true
+  spectre_result_path: "behavioral-veriloga-eval/results/gold-dual-suite-expansion-2026-04-19/comparator_hysteresis_smoke/spectre/tran_spectre.csv"
+  tolerance_notes: "Requires EVAS/Spectre dual validation on hysteresis trip timing and hold-window behavior."

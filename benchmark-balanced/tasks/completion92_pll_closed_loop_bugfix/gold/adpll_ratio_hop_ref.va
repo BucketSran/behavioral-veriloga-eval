@@ -1,0 +1,160 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module adpll_ratio_hop_ref (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical ref_clk,
+    input  electrical ratio_ctrl,
+    output electrical fb_clk,
+    output electrical vout,
+    output electrical vctrl_mon,
+    output electrical lock
+);
+    parameter real f_center = 240.0e6 from (0:inf);
+    parameter real freq_step_hz = 5.0e6 from (0:inf);
+    parameter real f_min = 120.0e6 from (0:inf);
+    parameter real f_max = 420.0e6 from (0:inf);
+    parameter integer code_min = 0 from [0:inf);
+    parameter integer code_max = 63 from [1:inf);
+    parameter integer code_center = 32 from [0:inf);
+    parameter integer code_init = 24 from [0:inf);
+    parameter integer ratio_min = 2 from [1:inf);
+    parameter integer ratio_max = 16 from [2:inf);
+    parameter real tedge = 200p from (0:inf);
+    parameter real lock_tol = 2.0n from (0:inf);
+    parameter integer lock_count_target = 5 from [1:inf);
+
+    real vh;
+    real vl;
+    real vth;
+    real t_ref_prev;
+    real t_ref_last;
+    real t_fb_last;
+    real ref_period;
+    real phase_err;
+    real dco_freq;
+    real desired_freq;
+    real dco_half_period;
+    real t_next_toggle;
+    real code_norm;
+    real ratio_sample;
+
+    integer ctrl_code;
+    integer desired_code;
+    integer ratio_cur;
+    integer ratio_prev;
+    integer dco_state;
+    integer fb_state;
+    integer div_cnt;
+    integer lock_state;
+    integer lock_streak;
+
+    analog begin
+        vh = V(VDD);
+        vl = V(VSS);
+        vth = 0.5 * (vh + vl);
+        ratio_sample = V(ratio_ctrl);
+        ratio_cur = (ratio_sample < 5.0) ? 4 : 6;
+
+        @(initial_step) begin
+            t_ref_prev = -1.0;
+            t_ref_last = -1.0;
+            t_fb_last = -1.0;
+            ref_period = 20e-9;
+            phase_err = 0.0;
+
+            ctrl_code = code_init;
+            if (ctrl_code < code_min) ctrl_code = code_min;
+            if (ctrl_code > code_max) ctrl_code = code_max;
+
+            ratio_prev = ratio_cur;
+            dco_state = 0;
+            fb_state = 0;
+            div_cnt = 0;
+            lock_state = 0;
+            lock_streak = 0;
+
+            dco_freq = f_center + freq_step_hz * (ctrl_code - code_center);
+            if (dco_freq < f_min) dco_freq = f_min;
+            if (dco_freq > f_max) dco_freq = f_max;
+            dco_half_period = 0.5 / dco_freq;
+            t_next_toggle = $abstime + dco_half_period;
+        end
+
+        @(cross(V(ref_clk) - vth, +1)) begin
+            if (ratio_cur != ratio_prev) begin
+                ratio_prev = ratio_cur;
+                div_cnt = 0;
+                lock_state = 0;
+                lock_streak = 0;
+            end
+
+            t_ref_prev = t_ref_last;
+            t_ref_last = $abstime;
+            if (t_ref_prev >= 0.0) begin
+                ref_period = t_ref_last - t_ref_prev;
+            end
+            if (ref_period < 1e-15) begin
+                ref_period = 20e-9;
+            end
+
+            desired_freq = ratio_cur / ref_period;
+            if (desired_freq < f_min) desired_freq = f_min;
+            if (desired_freq > f_max) desired_freq = f_max;
+
+            desired_code = code_init + 10 * (ratio_cur - 4);
+            if (desired_code < code_min) desired_code = code_min;
+            if (desired_code > code_max) desired_code = code_max;
+
+            if (ctrl_code < desired_code) begin
+                ctrl_code = ctrl_code + 1;
+                lock_streak = 0;
+            end else if (ctrl_code > desired_code) begin
+                ctrl_code = ctrl_code - 1;
+                lock_streak = 0;
+            end else begin
+                lock_streak = lock_streak + 1;
+            end
+
+            lock_state = (lock_streak >= lock_count_target) ? 1 : 0;
+        end
+
+        @(timer(t_next_toggle)) begin
+            dco_state = 1 - dco_state;
+
+            if (dco_state == 1) begin
+                div_cnt = div_cnt + 1;
+                if (div_cnt >= ratio_cur) begin
+                    div_cnt = 0;
+                    fb_state = 1;
+                end
+            end else if (fb_state == 1) begin
+                fb_state = 0;
+            end
+
+            dco_freq = f_center + freq_step_hz * (ctrl_code - code_center);
+            if (dco_freq < f_min) dco_freq = f_min;
+            if (dco_freq > f_max) dco_freq = f_max;
+
+            $bound_step(1.0 / (96.0 * dco_freq));
+
+            dco_half_period = 0.5 / dco_freq;
+            t_next_toggle = t_next_toggle + dco_half_period;
+        end
+
+        @(cross(V(fb_clk) - vth, +1)) begin
+            t_fb_last = $abstime;
+        end
+
+        code_norm = ctrl_code / code_max;
+        if (code_norm < 0.0) code_norm = 0.0;
+        if (code_norm > 1.0) code_norm = 1.0;
+
+        V(vout) <+ vl + (vh - vl) * transition(dco_state ? 1.0 : 0.0, 0.0, tedge, tedge);
+        V(fb_clk) <+ vl + (vh - vl) * transition(fb_state ? 1.0 : 0.0, 0.0, tedge, tedge);
+        V(vctrl_mon) <+ vl + (vh - vl) * code_norm;
+        V(lock) <+ vl + (vh - vl) * transition(lock_state ? 1.0 : 0.0, 0.0, tedge, tedge);
+    end
+
+endmodule

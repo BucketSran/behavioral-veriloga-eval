@@ -1,0 +1,62 @@
+{
+  "id": "dwa_ptr_gen_no_overlap_smoke",
+  "task_id": "completion92_calibration_bugfix",
+  "task_name": "DWA Pointer Generator No-Overlap Smoke Test",
+  "family": "bugfix",
+  "category": "calibration",
+  "domain": "voltage",
+  "difficulty": "medium",
+  "expected_backend": "evas",
+  "source": {
+    "type": "example",
+    "path": "behavioral-veriloga-eval/examples/calibration/dwa_ptr_gen"
+  },
+  "tier": "verified",
+  "verification_status": "passed",
+  "owner": "team",
+  "created_at": "2026-04-18",
+  "must_include": [
+    "@(cross(",
+    "transition("
+  ],
+  "must_not_include": [
+    "I(",
+    "ddt("
+  ],
+  "inputs": [
+    "prompt.md"
+  ],
+  "artifacts": [
+    "dut.va",
+    "tb_dwa_ptr_gen_no_overlap.scs",
+    "tran.csv"
+  ],
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "checks": {
+    "dut_compile": "required",
+    "tb_compile": "required",
+    "tran_generated": "required",
+    "sim_correct": "required",
+    "parity_required": true
+  },
+  "evidence": {
+    "result_path": "behavioral-veriloga-eval/results/gold-dual-suite-benchmark-expansion/dwa_ptr_gen_no_overlap_smoke",
+    "pr_link": "codex/upstream-complete-pr",
+    "notes": "Promoted from examples/calibration/dwa_ptr_gen; EVAS+Spectre dual validation closed on 2026-04-18 with no-overlap rotation checks enabled."
+  },
+  "benchmark_split": "benchmark-balanced",
+  "source_collection": "original92_taskform_completion_v1",
+  "source_task_id": "dwa_ptr_gen_no_overlap_smoke",
+  "source_family": "end-to-end",
+  "source_relative_path": "tasks/end-to-end/voltage/dwa_ptr_gen_no_overlap_smoke",
+  "core_function": "calibration",
+  "task_form": "bugfix",
+  "balanced_role": "taskform_completion_for_original92_core",
+  "completion_target_form": "bugfix",
+  "completion_method": "source_gold_recontextualized_as_missing_task_form",
+  "promotion_status": "structural_completion_pending_gold_revalidation"
+}

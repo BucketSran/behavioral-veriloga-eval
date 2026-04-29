@@ -1,0 +1,18 @@
+syntax:
+  must_include:
+    - "@(cross("
+    - "transition("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "ptr_is_one_hot_after_reset"
+    - "cell_en_nonzero_after_reset"
+    - "dwa_rotation_correct"
+
+parity:
+  required: true
+  spectre_result_path: "behavioral-veriloga-eval/results/gold-dual-suite-final/dwa_ptr_gen_smoke/spectre/tran_spectre.csv"
+  tolerance_notes: "dual-validated; Spectre parity artifact path backfilled from final dual-suite run"

@@ -1,0 +1,17 @@
+syntax:
+  must_include:
+    - "@(cross("
+    - "transition("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "frame_pulse_present_for_each_loaded_word"
+    - "serialized_bits_match_word0xA5_then_0x3C"
+    - "frame_pulse_width_is_single_bit_window"
+
+parity:
+  required: false
+  tolerance_notes: "EVAS-primary P2 expansion task; bridge-backed dual validation is deferred."

@@ -1,0 +1,24 @@
+syntax:
+  must_include:
+    - "electrical"
+    - "@(cross("
+    - "transition("
+    - "serial_out"
+    - "state_0"
+  must_not_include:
+    - "I("
+    - "ddt("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "prbs7_sequence_advances"
+    - "serial_output_has_transitions"
+    - "parallel_state_bus_updates"
+
+parity:
+  required: true
+  spectre_result_path: "[TODO]"
+  tolerance_notes: "[TODO]"

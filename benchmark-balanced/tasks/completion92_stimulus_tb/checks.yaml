@@ -1,0 +1,14 @@
+syntax:
+  must_include:
+    - "@(above("
+    - "transition("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "above_threshold_startup"
+parity:
+  required: true
+  tolerance_notes: "Task-aware parity checks that pure above() startup semantics produce a latched HIGH output when vin is already above threshold at t=0."

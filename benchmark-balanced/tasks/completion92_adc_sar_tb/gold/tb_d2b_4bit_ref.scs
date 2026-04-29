@@ -1,0 +1,16 @@
+// d2b_4bit gold smoke testbench
+// VIN ramps 0→0.9V over 100ns. Timer-sampled 4-bit quantizer.
+// Check: DOUT code is monotonically non-decreasing with VIN.
+simulator lang=spectre
+global 0
+
+ahdl_include "d2b_4bit.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0.0
+Vvin (vin  0) vsource type=pwl wave=[0 0.0  100n 0.9]
+
+IDUT (vdd vss vin DOUT3 DOUT2 DOUT1 DOUT0) d2b_4bit tedge=50p dt=2n
+
+tran tran stop=100n maxstep=2n
+save vin DOUT3 DOUT2 DOUT1 DOUT0

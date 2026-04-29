@@ -1,0 +1,21 @@
+// adpll_lock gold smoke testbench
+// 50 MHz reference (period=20ns), div_ratio=8, f_center=760 MHz.
+// Loop locks at ~80ns. Run 5us.
+// Check: fb_clk freq matches ref_clk in late window, lock asserts within 1us.
+simulator lang=spectre
+global 0
+
+ahdl_include "adpll_va_idtmod.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0.0
+
+Vref (ref_clk 0) vsource type=pulse val0=0 val1=0.9 period=20n width=10n rise=200p fall=200p
+
+IDUT (vdd vss ref_clk fb_clk dco_clk vctrl_mon lock) adpll_va_idtmod \
+    div_ratio=8 f_center=760e6 freq_step_hz=5e6 f_min=500e6 f_max=1.2e9 \
+    code_min=0 code_max=63 code_center=32 code_init=40 \
+    tedge=1n lock_tol=12n lock_count_target=4
+
+tran tran stop=5u maxstep=5n
+save ref_clk fb_clk lock vctrl_mon

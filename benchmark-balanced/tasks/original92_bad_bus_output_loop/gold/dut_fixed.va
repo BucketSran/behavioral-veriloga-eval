@@ -1,0 +1,22 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+// Fixed version: drive each output bit independently.
+module bin4_out (VDD, VSS, CODE, DOUT);
+    inout VDD, VSS;
+    input [3:0] CODE;
+    output [3:0] DOUT;
+    electrical VDD, VSS;
+    electrical [3:0] CODE, DOUT;
+
+    parameter real vth = 0.45;
+    parameter real td  = 0p;
+    parameter real trf = 20p;
+
+    analog begin
+        V(DOUT[0]) <+ V(VDD, VSS) * transition((V(CODE[0]) > vth) ? 1.0 : 0.0, td, trf, trf);
+        V(DOUT[1]) <+ V(VDD, VSS) * transition((V(CODE[1]) > vth) ? 1.0 : 0.0, td, trf, trf);
+        V(DOUT[2]) <+ V(VDD, VSS) * transition((V(CODE[2]) > vth) ? 1.0 : 0.0, td, trf, trf);
+        V(DOUT[3]) <+ V(VDD, VSS) * transition((V(CODE[3]) > vth) ? 1.0 : 0.0, td, trf, trf);
+    end
+endmodule

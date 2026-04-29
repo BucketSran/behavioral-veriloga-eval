@@ -1,0 +1,49 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+// Continuous differential comparator with hysteresis.
+// OUTP switches HIGH only after diff crosses +vhys/2 on the way up,
+// and returns LOW only after diff crosses -vhys/2 on the way down.
+module cmp_hysteresis (
+    input  electrical VINN,
+    input  electrical VINP,
+    output electrical OUTN,
+    output electrical OUTP,
+    inout  electrical VSS,
+    inout  electrical VDD
+);
+
+parameter real vhys = 10e-3 from (0:inf);
+parameter real tedge = 50p from [0:inf);
+
+integer out_state;
+real vh;
+real vl;
+real diff;
+
+analog begin
+    vh = V(VDD);
+    vl = V(VSS);
+    diff = V(VINP) - V(VINN);
+
+    @(initial_step) begin
+        out_state = (diff > 0.5 * vhys);
+    end
+
+    @(cross(diff - 0.5 * vhys, +1)) begin
+        out_state = 1;
+        $strobe("[cmp_hysteresis] t=%.3f ns | rising trip | diff=%.3fmV",
+                $abstime * 1e9, diff * 1e3);
+    end
+
+    @(cross(diff + 0.5 * vhys, -1)) begin
+        out_state = 0;
+        $strobe("[cmp_hysteresis] t=%.3f ns | falling trip | diff=%.3fmV",
+                $abstime * 1e9, diff * 1e3);
+    end
+
+    V(OUTP) <+ vl + (vh - vl) * transition(out_state ? 1.0 : 0.0, 0.0, tedge, tedge);
+    V(OUTN) <+ vl + (vh - vl) * transition(out_state ? 0.0 : 1.0, 0.0, tedge, tedge);
+end
+
+endmodule

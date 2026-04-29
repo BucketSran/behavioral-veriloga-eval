@@ -1,0 +1,23 @@
+syntax:
+  must_include:
+    - "electrical"
+    - "@(cross("
+    - "transition("
+    - "prescaler_out"
+    - "mod_0"
+  must_not_include:
+    - "I("
+    - "ddt("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "prescaler_divides_by_control_word"
+    - "mod_switch_increases_ratio_by_one"
+
+parity:
+  required: true
+  spectre_result_path: "[TODO]"
+  tolerance_notes: "[TODO]"

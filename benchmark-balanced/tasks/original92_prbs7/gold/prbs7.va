@@ -1,0 +1,74 @@
+// PRBS-7 generator — EVAS-compatible gold
+// 7-bit LFSR with XOR feedback taps at positions 7 and 6.
+// Polynomial: x^7 + x^6 + 1 (maximal-length, period=127).
+// Serial output PRBS_OUT + parallel 7-bit state bus S6..S0.
+
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 50p
+
+module prbs7(
+    input  electrical CLK,
+    input  electrical RSTB,
+    output electrical PRBS_OUT,
+    output electrical S0,
+    output electrical S1,
+    output electrical S2,
+    output electrical S3,
+    output electrical S4,
+    output electrical S5,
+    output electrical S6
+);
+
+parameter integer seed  = 1;
+parameter real    vth   = 0.45;
+parameter real    vdd   = 0.9;
+parameter real    tedge = 100p;
+
+// sr[0]=bit1 (newest), sr[6]=bit7 (oldest/output)
+integer sr[6:0];
+integer i;
+integer fb;
+real    s_level[6:0];
+real    out_level;
+
+analog begin
+    @(initial_step or cross(V(RSTB) - vth, -1)) begin
+        for (i = 0; i < 7; i = i + 1)
+            sr[i] = (seed >> i) & 1;
+        // Guarantee non-zero state
+        if (sr[0] == 0 && sr[1] == 0 && sr[2] == 0 && sr[3] == 0 &&
+            sr[4] == 0 && sr[5] == 0 && sr[6] == 0)
+            sr[0] = 1;
+        for (i = 0; i < 7; i = i + 1)
+            s_level[i] = sr[i] ? vdd : 0.0;
+        out_level = sr[6] ? vdd : 0.0;
+        $strobe("[prbs7] INIT/RST | state=%0d%0d%0d%0d%0d%0d%0d",
+                sr[6],sr[5],sr[4],sr[3],sr[2],sr[1],sr[0]);
+    end
+
+    @(cross(V(CLK) - vth, +1)) begin
+        if (V(RSTB) > vth) begin
+            // PRBS-7: feedback = bit7 XOR bit6 = sr[6] XOR sr[5]
+            fb = sr[6] ^ sr[5];
+            // Shift: sr[6]←sr[5]←...←sr[1]←sr[0]←fb
+            for (i = 6; i > 0; i = i - 1)
+                sr[i] = sr[i - 1];
+            sr[0] = fb;
+            for (i = 0; i < 7; i = i + 1)
+                s_level[i] = sr[i] ? vdd : 0.0;
+            out_level = sr[6] ? vdd : 0.0;
+        end
+    end
+
+    V(PRBS_OUT) <+ transition(out_level,     0, tedge, tedge);
+    V(S0)       <+ transition(s_level[0],    0, tedge, tedge);
+    V(S1)       <+ transition(s_level[1],    0, tedge, tedge);
+    V(S2)       <+ transition(s_level[2],    0, tedge, tedge);
+    V(S3)       <+ transition(s_level[3],    0, tedge, tedge);
+    V(S4)       <+ transition(s_level[4],    0, tedge, tedge);
+    V(S5)       <+ transition(s_level[5],    0, tedge, tedge);
+    V(S6)       <+ transition(s_level[6],    0, tedge, tedge);
+end
+
+endmodule

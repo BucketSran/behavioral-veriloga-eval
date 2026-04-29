@@ -1,0 +1,61 @@
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 30p
+
+// Ideal 4-bit clocked ADC — EVAS-compatible.
+// Samples vin on each rising edge of clk -> 4-bit binary code on dout[3:0].
+// Output bits stored as piecewise-constant real vars (b3..b0) so that
+// the gold stays Spectre-clean / low-warning instead of relying on the
+// original continuous-target transition() form.
+
+module adc_ideal_4b (
+    input  electrical        vin,
+    input  electrical        clk,
+    input  electrical        vdd,
+    input  electrical        vss,
+    input  electrical        rst_n,
+    output electrical [3:0]  dout
+);
+
+    integer code;
+    real    vstep, v_in, v_supply, vth;
+    // piecewise-constant output levels (updated only inside @(cross) block)
+    real    b3, b2, b1, b0;
+
+    analog begin
+        @(initial_step) begin
+            code = 0;
+            b3 = 0.0; b2 = 0.0; b1 = 0.0; b0 = 0.0;
+            $strobe("[adc_ideal_4b] INIT | vdd_vss=%.3gV", V(vdd, vss));
+        end
+
+        v_supply = V(vdd, vss);
+        vth      = (V(vdd) + V(vss)) / 2.0;
+        vstep    = v_supply / 16.0;
+
+        // Sample on rising clock edge
+        @(cross(V(clk, vss) - vth, +1)) begin
+            if (V(rst_n, vss) < vth) begin
+                code = 0;
+            end else begin
+                v_in = V(vin, vss);
+                code = v_in / vstep;
+                if (code <  0) code =  0;
+                if (code > 15) code = 15;
+            end
+            // Compute bit levels inside event block (reads V() here is OK)
+            b3 = ((code >> 3) & 1) ? V(vdd) : V(vss);
+            b2 = ((code >> 2) & 1) ? V(vdd) : V(vss);
+            b1 = ((code >> 1) & 1) ? V(vdd) : V(vss);
+            b0 = ((code >> 0) & 1) ? V(vdd) : V(vss);
+            $strobe("[adc_ideal_4b] t=%.3f ns | vin=%g | code=%d", $abstime*1e9, v_in, code);
+        end
+
+        // Drive outputs using the explicit low-warning gold style.
+        V(dout[3]) <+ transition(b3, 0, 30p, 30p);
+        V(dout[2]) <+ transition(b2, 0, 30p, 30p);
+        V(dout[1]) <+ transition(b1, 0, 30p, 30p);
+        V(dout[0]) <+ transition(b0, 0, 30p, 30p);
+    end
+
+endmodule

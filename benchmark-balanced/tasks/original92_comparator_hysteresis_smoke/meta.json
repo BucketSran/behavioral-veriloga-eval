@@ -1,0 +1,61 @@
+{
+  "id": "comparator_hysteresis_smoke",
+  "task_id": "original92_comparator_hysteresis_smoke",
+  "task_name": "Comparator Hysteresis Sweep Smoke Test",
+  "family": "end-to-end",
+  "category": "comparator",
+  "domain": "voltage",
+  "difficulty": "medium",
+  "expected_backend": "evas",
+  "source": {
+    "type": "example",
+    "path": "behavioral-veriloga-eval/examples/comparator/comparator"
+  },
+  "tier": "verified",
+  "verification_status": "passed",
+  "owner": "team",
+  "created_at": "2026-04-19",
+  "must_include": [
+    "@(cross(",
+    "transition("
+  ],
+  "must_not_include": [
+    "I(",
+    "ddt(",
+    "idt("
+  ],
+  "inputs": [
+    "prompt.md"
+  ],
+  "artifacts": [
+    "dut.va",
+    "tb_cmp_hysteresis.scs",
+    "tran.csv"
+  ],
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "checks": {
+    "dut_compile": "required",
+    "tb_compile": "required",
+    "tran_generated": "required",
+    "sim_correct": "required",
+    "parity_required": true
+  },
+  "evidence": {
+    "result_path": "behavioral-veriloga-eval/results/gold-dual-suite-expansion-2026-04-19/comparator_hysteresis_smoke",
+    "pr_link": "[TODO]",
+    "notes": "Added on 2026-04-19 to extend comparator coverage toward stateful threshold-history behavior and EVAS/Spectre cross-trigger parity."
+  },
+  "benchmark_split": "benchmark-balanced",
+  "source_collection": "original92",
+  "source_task_id": "comparator_hysteresis_smoke",
+  "source_family": "end-to-end",
+  "source_relative_path": "tasks/end-to-end/voltage/comparator_hysteresis_smoke",
+  "core_function": "comparator",
+  "task_form": "end-to-end",
+  "balanced_role": "imported_original92",
+  "promotion_status": "imported_original92_with_normalized_metadata"
+}

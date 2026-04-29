@@ -1,0 +1,18 @@
+syntax:
+  must_include:
+    - "@(cross("
+    - "transition("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "adc_covers_full_code_range"
+    - "dac_output_in_range"
+    - "quantization_error_within_one_lsb"
+
+parity:
+  required: true
+  spectre_result_path: "behavioral-veriloga-eval/results/gold-dual-suite-final/adc_dac_ideal_4b_smoke/spectre/tran_spectre.csv"
+  tolerance_notes: "dual-validated after digital-aware parity alignment update on 2026-04-16"

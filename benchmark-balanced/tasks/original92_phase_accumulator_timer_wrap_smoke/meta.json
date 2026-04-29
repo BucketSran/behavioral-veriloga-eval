@@ -1,0 +1,62 @@
+{
+  "id": "phase_accumulator_timer_wrap_smoke",
+  "task_id": "original92_phase_accumulator_timer_wrap_smoke",
+  "task_name": "Phase Accumulator Timer Wrap Smoke Test",
+  "family": "end-to-end",
+  "category": "pll-clock",
+  "domain": "voltage",
+  "difficulty": "medium",
+  "expected_backend": "evas",
+  "source": {
+    "type": "parity-audit",
+    "path": "vaEvas/refine-logs/EXPERIMENT_PLAN.md"
+  },
+  "tier": "verified",
+  "verification_status": "passed",
+  "owner": "codex",
+  "created_at": "2026-04-20",
+  "must_include": [
+    "@(timer(",
+    "transition("
+  ],
+  "must_not_include": [
+    "I(",
+    "ddt(",
+    "idt(",
+    "idtmod("
+  ],
+  "inputs": [
+    "prompt.md"
+  ],
+  "artifacts": [
+    "phase_accumulator_timer_wrap_ref.va",
+    "tb_phase_accumulator_timer_wrap_ref.scs",
+    "tran.csv"
+  ],
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "checks": {
+    "dut_compile": "required",
+    "tb_compile": "required",
+    "tran_generated": "required",
+    "sim_correct": "required",
+    "parity_required": true
+  },
+  "evidence": {
+    "result_path": "behavioral-veriloga-eval/results/gold-dual-r14-r18-2026-04-20/phase_accumulator_timer_wrap_smoke",
+    "pr_link": "[TODO]",
+    "notes": "Added on 2026-04-20 as R017. EVAS-only and Spectre dual validation passed; task-aware parity measured 3/3 wrap-window match and about 100 ps edge delta."
+  },
+  "benchmark_split": "benchmark-balanced",
+  "source_collection": "original92",
+  "source_task_id": "phase_accumulator_timer_wrap_smoke",
+  "source_family": "end-to-end",
+  "source_relative_path": "tasks/end-to-end/voltage/phase_accumulator_timer_wrap_smoke",
+  "core_function": "pll-clock",
+  "task_form": "end-to-end",
+  "balanced_role": "imported_original92",
+  "promotion_status": "imported_original92_with_normalized_metadata"
+}

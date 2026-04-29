@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "dut.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0
+Vsig (raw_level 0) vsource type=pwl wave=[ 0 0.0 25n 0.1 50n 0.45 75n 0.85 100n 0.9 120n 0.35 ]
+
+XDUT (raw_level vdd vss limited_level) balanced_analog_limiter
+
+tran tran stop=120n maxstep=500p
+save raw_level limited_level

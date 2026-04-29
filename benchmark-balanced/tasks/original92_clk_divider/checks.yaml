@@ -1,0 +1,24 @@
+syntax:
+  must_include:
+    - "electrical"
+    - "@(cross("
+    - "transition("
+    - "lock"
+  must_not_include:
+    - "I("
+    - "ddt("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "ratio_code_clamped_to_1_255"
+    - "synchronous_reset_clears_state"
+    - "output_clock_divides_input"
+    - "lock_asserts_after_first_full_period"
+
+parity:
+  required: true
+  spectre_result_path: "[TODO]"
+  tolerance_notes: "[TODO]"

@@ -1,0 +1,15 @@
+syntax:
+  must_include:
+    - "@(initial_step)"
+    - "@(timer("
+    - "transition("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "timer_absolute_grid_edges"
+parity:
+  required: true
+  tolerance_notes: "Task-aware parity compares clk_out rising-edge count and edge timing against the absolute timer grid."

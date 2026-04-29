@@ -1,0 +1,66 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module serializer_frame_alignment_ref (
+    vdd, vss, clk, load,
+    din7, din6, din5, din4, din3, din2, din1, din0,
+    sout, frame
+);
+    inout vdd, vss;
+    input clk, load;
+    input din7, din6, din5, din4, din3, din2, din1, din0;
+    output sout, frame;
+    electrical vdd, vss, clk, load;
+    electrical din7, din6, din5, din4, din3, din2, din1, din0;
+    electrical sout, frame;
+
+    parameter real vth = 0.45;
+    parameter real trf = 40p;
+
+    integer shreg;
+    integer bit_idx;
+    integer active;
+    real sout_val, frame_val, vdd_now;
+
+    analog begin
+        @(initial_step) begin
+            shreg = 0;
+            bit_idx = 7;
+            active = 0;
+            sout_val = 0.0;
+            frame_val = 0.0;
+        end
+
+        @(cross(V(clk, vss) - vth, +1)) begin
+            vdd_now = V(vdd, vss);
+            if (V(load, vss) > vth) begin
+                shreg = 0;
+                if (V(din0, vss) > vth) shreg = shreg + 1;
+                if (V(din1, vss) > vth) shreg = shreg + 2;
+                if (V(din2, vss) > vth) shreg = shreg + 4;
+                if (V(din3, vss) > vth) shreg = shreg + 8;
+                if (V(din4, vss) > vth) shreg = shreg + 16;
+                if (V(din5, vss) > vth) shreg = shreg + 32;
+                if (V(din6, vss) > vth) shreg = shreg + 64;
+                if (V(din7, vss) > vth) shreg = shreg + 128;
+                bit_idx = 7;
+                active = 1;
+                frame_val = 0.0;
+            end else if (active == 1) begin
+                sout_val = (((shreg >> bit_idx) & 1) == 1) ? vdd_now : 0.0;
+                frame_val = (bit_idx == 7) ? vdd_now : 0.0;
+                if (bit_idx == 0) begin
+                    bit_idx = 7;
+                    active = 0;
+                end else begin
+                    bit_idx = bit_idx - 1;
+                end
+            end else begin
+                frame_val = 0.0;
+            end
+        end
+
+        V(sout, vss) <+ transition(sout_val, 0, trf, trf);
+        V(frame, vss) <+ transition(frame_val, 0, trf, trf);
+    end
+endmodule

@@ -1,0 +1,38 @@
+{
+  "task_id": "adpll_timer_smoke",
+  "contracts": [
+    {
+      "name": "csv_has_observables",
+      "type": "signal_present",
+      "signals": ["time", "ref_clk", "fb_clk", "lock", "vctrl_mon"],
+      "diagnostic_hint": "ADPLL checker-visible clock and control signals must be saved.",
+      "repair_family": "runtime-interface-minimal-harness"
+    },
+    {
+      "name": "reference_clock_edges_present",
+      "type": "edge_count",
+      "signal": "ref_clk",
+      "threshold": 0.45,
+      "min_edges": 10,
+      "diagnostic_hint": "Reference clock stimulus is present; preserve the harness if this passes.",
+      "repair_family": "clock-event-generator-or-reset-release"
+    },
+    {
+      "name": "feedback_clock_edges_present",
+      "type": "edge_count",
+      "signal": "fb_clk",
+      "threshold": 0.45,
+      "min_edges": 10,
+      "diagnostic_hint": "Feedback oscillator is not producing enough edges.",
+      "repair_family": "clock-event-generator-or-reset-release"
+    },
+    {
+      "name": "control_voltage_activity",
+      "type": "output_span",
+      "signal": "vctrl_mon",
+      "min_span": 0.01,
+      "diagnostic_hint": "Loop control voltage is stuck; repair loop update or monitor drive.",
+      "repair_family": "pll-dco-counter-feedback-loop"
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+// Phase-Frequency Detector (UP/DN outputs)
+// Rising edge of REF sets UP high.
+// Rising edge of DIV sets DN high.
+// When both UP and DN are high, both are reset to 0.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module pfd_updn(
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical REF,
+    input  electrical DIV,
+    output electrical UP,
+    output electrical DN
+);
+
+parameter real vth   = 0.45;
+parameter real tedge = 20p;
+
+integer up_state;
+integer dn_state;
+real up_level;
+real dn_level;
+
+analog begin
+    @(initial_step) begin
+        up_state = 0;
+        dn_state = 0;
+        up_level = 0.0;
+        dn_level = 0.0;
+    end
+
+    @(cross(V(REF) - vth, +1)) begin
+        up_state = 1;
+        if (dn_state) begin
+            up_state = 0;
+            dn_state = 0;
+        end
+        up_level = up_state ? V(VDD) : V(VSS);
+        dn_level = dn_state ? V(VDD) : V(VSS);
+    end
+
+    @(cross(V(DIV) - vth, +1)) begin
+        dn_state = 1;
+        if (up_state) begin
+            up_state = 0;
+            dn_state = 0;
+        end
+        up_level = up_state ? V(VDD) : V(VSS);
+        dn_level = dn_state ? V(VDD) : V(VSS);
+    end
+
+    V(UP) <+ transition(up_level, 0, tedge, tedge);
+    V(DN) <+ transition(dn_level, 0, tedge, tedge);
+end
+
+endmodule

@@ -1,0 +1,20 @@
+// and_gate gold smoke testbench
+// Test all 4 input combinations over 8 ns.
+// Truth table: (0,0)->0, (0,1)->0, (1,0)->0, (1,1)->1
+simulator lang=spectre
+global 0
+
+ahdl_include "and_gate_ref.va"
+
+// Test sequence: walk through all combinations
+// 0-2ns: A=0, B=0 -> Y=0
+// 2-4ns: A=0, B=1 -> Y=0
+// 4-6ns: A=1, B=0 -> Y=0
+// 6-8ns: A=1, B=1 -> Y=1
+Va (a 0) vsource type=pwl wave=[0n 0 2n 0 2.1n 1.8 4n 1.8 4.1n 0 6n 0 6.1n 1.8 8n 1.8]
+Vb (b 0) vsource type=pwl wave=[0n 0 4n 0 4.1n 1.8 8n 1.8]
+
+IDUT (a b y) and_gate vdd=1.8 tedge=10p
+
+tran tran stop=8n maxstep=100p
+save a b y

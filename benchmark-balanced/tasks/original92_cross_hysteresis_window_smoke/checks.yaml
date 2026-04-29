@@ -1,0 +1,32 @@
+syntax:
+  must_include:
+    - "@(cross("
+    - "transition("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "cross_hysteresis_window"
+parity:
+  required: true
+  tolerance_notes: "Task-aware parity compares interpolated rise/fall trip times for the hysteresis window."
+time_refinement:
+  method: bound_step_guard
+  guards:
+    - signal: vin
+      ref: VSS
+      threshold: 0.6
+      window_v: 0.04
+      near_step: 1p
+    - signal: vin
+      ref: VSS
+      threshold: 0.3
+      window_v: 0.04
+      near_step: 1p
+    - signal: out
+      ref: VSS
+      threshold: 0.45
+      window_v: 0.08
+      near_step: 1p

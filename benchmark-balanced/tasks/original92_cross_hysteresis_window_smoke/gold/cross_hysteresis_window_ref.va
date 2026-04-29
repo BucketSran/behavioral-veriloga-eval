@@ -1,0 +1,22 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cross_hysteresis_window_ref (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical vin,
+    output electrical out
+);
+parameter real vhi = 0.9;
+parameter real vlo = 0.0;
+parameter real vth_rise = 0.6;
+parameter real vth_fall = 0.3;
+parameter real tedge = 200p;
+integer state_q;
+analog begin
+    @(initial_step) state_q = 0;
+    @(cross(V(vin, VSS) - vth_rise, +1)) state_q = 1;
+    @(cross(V(vin, VSS) - vth_fall, -1)) state_q = 0;
+    V(out, VSS) <+ transition(state_q ? vhi : vlo, 0.0, tedge, tedge);
+end
+endmodule

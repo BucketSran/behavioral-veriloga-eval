@@ -1,0 +1,16 @@
+syntax:
+  must_include:
+    - "@(initial_step)"
+    - "@(timer("
+    - "$bound_step("
+    - "transition("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "bound_step_period_guard"
+parity:
+  required: true
+  tolerance_notes: "Yellow-boundary audit: compare bounded-step event consistency and guard-window observability, not solver-level waveform-perfect equivalence."

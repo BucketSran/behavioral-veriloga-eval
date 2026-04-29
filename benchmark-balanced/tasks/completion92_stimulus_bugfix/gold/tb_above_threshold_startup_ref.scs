@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+Vvdd (VDD 0) vsource dc=0.9 type=dc
+Vvss (VSS 0) vsource dc=0.0 type=dc
+Vvin (vin 0) vsource dc=0.9 type=dc
+
+IDUT (VDD VSS vin out) above_threshold_startup_ref vth=0.45 tedge=50p
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+tran tran stop=8n maxstep=50p errpreset=conservative
+save vin out
+
+ahdl_include "./above_threshold_startup_ref.va"

@@ -1,0 +1,50 @@
+// 4-bit static analog-to-binary converter — EVAS-compatible gold
+// Module: _va_d2b_4b
+// Purely combinational (timer-driven for EVAS compatibility).
+// Input: VIN 0..VDD; Outputs: DOUT3..DOUT0 (MSB..LSB).
+
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 30p
+
+module _va_d2b_4b(
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical VIN,
+    output electrical DOUT3,
+    output electrical DOUT2,
+    output electrical DOUT1,
+    output electrical DOUT0
+);
+
+parameter real tedge = 50p;
+parameter real dt    = 1n;   // update every 1ns for near-continuous tracking
+
+real b3, b2, b1, b0;
+integer code;
+real vstep;
+
+analog begin
+    @(initial_step) begin
+        b3 = 0.0; b2 = 0.0; b1 = 0.0; b0 = 0.0;
+        $strobe("[_va_d2b_4b] INIT");
+    end
+
+    @(timer(dt)) begin
+        vstep = V(VDD) / 16.0;
+        code = floor(V(VIN) / vstep);
+        if (code < 0)  code = 0;
+        if (code > 15) code = 15;
+        b3 = ((code >> 3) & 1) ? V(VDD) : V(VSS);
+        b2 = ((code >> 2) & 1) ? V(VDD) : V(VSS);
+        b1 = ((code >> 1) & 1) ? V(VDD) : V(VSS);
+        b0 = ((code >> 0) & 1) ? V(VDD) : V(VSS);
+    end
+
+    V(DOUT3) <+ transition(b3, 0, tedge, tedge);
+    V(DOUT2) <+ transition(b2, 0, tedge, tedge);
+    V(DOUT1) <+ transition(b1, 0, tedge, tedge);
+    V(DOUT0) <+ transition(b0, 0, tedge, tedge);
+end
+
+endmodule

@@ -1,0 +1,15 @@
+// clk_burst_gen gold smoke testbench
+// 100ns input clock period, div=8, RST_N deasserts at 235ns, run 3000ns.
+// Check: CLK_OUT hi_frac in (0.05, 0.4), rising_edges ≥ 4.
+simulator lang=spectre
+global 0
+
+ahdl_include "clk_burst_gen.va"
+
+VCLK   (CLK   0) vsource type=pulse val0=0 val1=0.9 period=100n width=50n rise=1n fall=1n
+VRST_N (RST_N 0) vsource type=pwl wave=[0 0  234n 0  236n 0.9  3000n 0.9]
+
+IDUT (CLK RST_N CLK_OUT) clk_burst_gen div=8 vdd=0.9 vth=0.45
+
+tran tran stop=3000n maxstep=5n
+save CLK RST_N CLK_OUT

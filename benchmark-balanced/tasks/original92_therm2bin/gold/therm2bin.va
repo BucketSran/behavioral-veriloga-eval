@@ -1,0 +1,49 @@
+// Thermometer-to-binary encoder — EVAS-compatible gold
+// 15-bit thermometer input T0..T14, 4-bit binary output B3..B0.
+// Bubble-error tolerant: counts total number of active (HIGH) inputs.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+module therm2bin(
+    input  electrical T0,  T1,  T2,  T3,  T4,
+    input  electrical T5,  T6,  T7,  T8,  T9,
+    input  electrical T10, T11, T12, T13, T14,
+    output electrical B3, B2, B1, B0
+);
+
+parameter real vth = 0.45;
+parameter real vdd = 0.9;
+
+real cnt;
+integer code;
+
+analog begin
+    // Count active inputs (bubble-tolerant: popcount, not priority encode)
+    cnt = 0.0;
+    if (V(T0)  > vth) cnt = cnt + 1.0;
+    if (V(T1)  > vth) cnt = cnt + 1.0;
+    if (V(T2)  > vth) cnt = cnt + 1.0;
+    if (V(T3)  > vth) cnt = cnt + 1.0;
+    if (V(T4)  > vth) cnt = cnt + 1.0;
+    if (V(T5)  > vth) cnt = cnt + 1.0;
+    if (V(T6)  > vth) cnt = cnt + 1.0;
+    if (V(T7)  > vth) cnt = cnt + 1.0;
+    if (V(T8)  > vth) cnt = cnt + 1.0;
+    if (V(T9)  > vth) cnt = cnt + 1.0;
+    if (V(T10) > vth) cnt = cnt + 1.0;
+    if (V(T11) > vth) cnt = cnt + 1.0;
+    if (V(T12) > vth) cnt = cnt + 1.0;
+    if (V(T13) > vth) cnt = cnt + 1.0;
+    if (V(T14) > vth) cnt = cnt + 1.0;
+
+    code = floor(cnt + 0.5);
+
+    // 4-bit binary output (direct contribution)
+    V(B3) <+ ((code >> 3) & 1) ? vdd : 0.0;
+    V(B2) <+ ((code >> 2) & 1) ? vdd : 0.0;
+    V(B1) <+ ((code >> 1) & 1) ? vdd : 0.0;
+    V(B0) <+ ((code >> 0) & 1) ? vdd : 0.0;
+end
+
+endmodule

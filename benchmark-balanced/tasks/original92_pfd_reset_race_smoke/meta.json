@@ -1,0 +1,62 @@
+{
+  "id": "pfd_reset_race_smoke",
+  "task_name": "PFD Reset Race Smoke Test",
+  "family": "end-to-end",
+  "category": "phase-detector",
+  "domain": "voltage",
+  "difficulty": "medium",
+  "expected_backend": "evas",
+  "source": {
+    "type": "benchmark-gold",
+    "path": "behavioral-veriloga-eval/tasks/end-to-end/voltage/pfd_reset_race_smoke/gold"
+  },
+  "tier": "verified",
+  "verification_status": "passed",
+  "owner": "team",
+  "created_at": "2026-04-19",
+  "must_include": [
+    "@(cross(",
+    "transition("
+  ],
+  "must_not_include": [
+    "I(",
+    "ddt(",
+    "idt("
+  ],
+  "inputs": [
+    "prompt.md"
+  ],
+  "artifacts": [
+    "dut.va",
+    "tb_pfd_reset_race.scs",
+    "tran.csv"
+  ],
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "parity_policy": "default",
+  "checks": {
+    "dut_compile": "required",
+    "tb_compile": "required",
+    "tran_generated": "required",
+    "sim_correct": "required",
+    "parity_required": true
+  },
+  "evidence": {
+    "result_path": "behavioral-veriloga-eval/results/gold-suite-pfd-reset-race-2026-04-19/pfd_reset_race_smoke",
+    "pr_link": "[TODO]",
+    "notes": "Added on 2026-04-19 to stress PFD reset behavior under near-simultaneous ref/div edges whose lead/lag relationship swaps mid-run."
+  },
+  "task_id": "original92_pfd_reset_race_smoke",
+  "benchmark_split": "benchmark-balanced",
+  "source_collection": "original92",
+  "source_task_id": "pfd_reset_race_smoke",
+  "source_family": "end-to-end",
+  "source_relative_path": "tasks/end-to-end/voltage/pfd_reset_race_smoke",
+  "core_function": "phase-detector",
+  "task_form": "end-to-end",
+  "balanced_role": "imported_original92",
+  "promotion_status": "imported_original92_with_normalized_metadata"
+}

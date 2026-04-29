@@ -1,0 +1,56 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module nrz_prbs_jitter_ref(vdd, vss, clk, enable, sout_p, sout_n);
+    inout vdd, vss;
+    input clk, enable;
+    output sout_p, sout_n;
+    electrical vdd, vss, clk, enable, sout_p, sout_n;
+
+    parameter real vth = 0.45;
+    parameter real trf = 30p;
+    parameter real tj = 20p;
+
+    integer lfsr;
+    integer edge_count;
+    integer bit_now;
+    integer fb;
+    real outp_val, outn_val, edge_delay;
+    real vdd_now;
+
+    analog begin
+        @(initial_step) begin
+            lfsr = 93;
+            edge_count = 0;
+            bit_now = 1;
+            outp_val = 0.9;
+            outn_val = 0.0;
+            edge_delay = 0.0;
+        end
+
+        @(cross(V(clk, vss) - vth, +1)) begin
+            edge_count = edge_count + 1;
+            vdd_now = V(vdd, vss);
+            if (V(enable, vss) > vth) begin
+                if (((edge_count % 20) >= 14) && ((edge_count % 20) <= 16)) begin
+                    bit_now = bit_now;
+                end else begin
+                    fb = (((lfsr >> 6) & 1) ^ ((lfsr >> 5) & 1));
+                    lfsr = (((lfsr << 1) & 126) | fb);
+                    bit_now = (lfsr & 1);
+                end
+            end
+
+            if ((edge_count % 4) == 0) edge_delay = 0.0;
+            else if ((edge_count % 4) == 1) edge_delay = tj;
+            else if ((edge_count % 4) == 2) edge_delay = 2.0 * tj;
+            else edge_delay = tj;
+
+            outp_val = (bit_now == 1) ? vdd_now : 0.0;
+            outn_val = (bit_now == 1) ? 0.0 : vdd_now;
+        end
+
+        V(sout_p, vss) <+ transition(outp_val, edge_delay, trf, trf);
+        V(sout_n, vss) <+ transition(outn_val, edge_delay, trf, trf);
+    end
+endmodule

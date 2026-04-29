@@ -1,0 +1,62 @@
+{
+  "task_id": "completion92_data_converter_bugfix",
+  "task_name": "Ideal 4-bit ADC\u2192DAC Round-Trip Smoke Test",
+  "family": "bugfix",
+  "category": "data-converter",
+  "domain": "voltage",
+  "difficulty": "medium",
+  "expected_backend": "evas",
+  "source": {
+    "type": "example",
+    "path": "behavioral-veriloga-eval/examples/data-converter/adc_dac_ideal_4b"
+  },
+  "tier": "verified",
+  "verification_status": "passed",
+  "owner": "liangyuxuan",
+  "created_at": "2026-04-05",
+  "must_include": [
+    "@(cross(",
+    "transition("
+  ],
+  "must_not_include": [
+    "I(",
+    "ddt("
+  ],
+  "inputs": [
+    "prompt.md"
+  ],
+  "artifacts": [
+    "adc.va",
+    "dac.va",
+    "tb_adc_dac_ramp.scs",
+    "tran.csv"
+  ],
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "checks": {
+    "dut_compile": "required",
+    "tb_compile": "required",
+    "tran_generated": "required",
+    "sim_correct": "required",
+    "parity_required": true
+  },
+  "evidence": {
+    "result_path": "behavioral-veriloga-eval/results/gold-dual-suite-final/adc_dac_ideal_4b_smoke",
+    "pr_link": "[TODO]",
+    "notes": "Converted from examples/data-converter/adc_dac_ideal_4b; uses ramp testbench; dual validation backfill 2026-04-16; parity closure 2026-04-16"
+  },
+  "benchmark_split": "benchmark-balanced",
+  "source_collection": "original92_taskform_completion_v1",
+  "source_task_id": "adc_dac_ideal_4b_smoke",
+  "source_family": "end-to-end",
+  "source_relative_path": "tasks/end-to-end/voltage/adc_dac_ideal_4b_smoke",
+  "core_function": "data-converter",
+  "task_form": "bugfix",
+  "balanced_role": "taskform_completion_for_original92_core",
+  "completion_target_form": "bugfix",
+  "completion_method": "source_gold_recontextualized_as_missing_task_form",
+  "promotion_status": "structural_completion_pending_gold_revalidation"
+}

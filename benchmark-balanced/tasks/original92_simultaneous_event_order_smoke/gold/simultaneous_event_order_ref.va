@@ -1,0 +1,31 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module simultaneous_event_order_ref (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical ref,
+    output electrical out
+);
+parameter real vth = 0.45;
+parameter real tedge = 200p;
+real next_t;
+real target_q;
+integer cycle_q;
+analog begin
+    @(initial_step) begin
+        next_t = 10n;
+        target_q = 0.0;
+        cycle_q = 0;
+    end
+    @(timer(next_t)) begin
+        cycle_q = cycle_q + 1;
+        target_q = 0.1 * cycle_q;
+        next_t = next_t + 20n;
+    end
+    @(cross(V(ref, VSS) - vth, +1)) begin
+        target_q = 0.2 * cycle_q;
+    end
+    V(out, VSS) <+ transition(target_q * V(VDD, VSS), 0.0, tedge, tedge);
+end
+endmodule

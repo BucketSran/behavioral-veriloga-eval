@@ -1,0 +1,16 @@
+syntax:
+  must_include:
+    - "parameter real"
+    - "parameter integer"
+    - "@(timer("
+    - "transition("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "parameter_type_override"
+parity:
+  required: true
+  tolerance_notes: "Task-aware parity verifies that both simulators honor instance-line overrides for real amplitude and integer pulse-count parameters."

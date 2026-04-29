@@ -1,0 +1,17 @@
+// comparator gold smoke testbench
+// VINP steps from 0V to 0.9V at t≈1ns; VINN held at 0.45V.
+// Check: out_p mean before t<2ns ≈ 0V; after t≥2ns ≈ 0.9V (delta > 0.2).
+simulator lang=spectre
+global 0
+
+ahdl_include "comparator.va"
+
+Vvdd  (vdd  0) vsource dc=0.9
+Vvss  (vss  0) vsource dc=0.0
+Vvinp (vinp 0) vsource type=pwl wave=[0 0.0  0.9n 0.0  1.1n 0.9  30n 0.9]
+Vvinn (vinn 0) vsource dc=0.45
+
+IDUT (vdd vss vinp vinn out_p) comparator
+
+tran tran stop=30n maxstep=0.5n
+save vinp vinn out_p

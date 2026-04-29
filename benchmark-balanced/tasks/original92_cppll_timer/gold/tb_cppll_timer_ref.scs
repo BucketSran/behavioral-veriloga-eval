@@ -1,0 +1,16 @@
+// Gold testbench for timer-based CPPLL spec-to-va task.
+simulator lang=spectre
+global 0
+
+ahdl_include "cppll_timer_ref.va"
+
+VDD_SRC (VDD 0) vsource type=dc dc=0.9
+VSS_SRC (VSS 0) vsource type=dc dc=0
+VREF (ref_clk 0) vsource type=pulse val0=0 val1=0.9 period=20n width=10n rise=200p fall=200p
+
+XDUT (VDD VSS ref_clk fb_clk dco_clk vctrl_mon lock) cppll_timer_ref \
+    div_ratio=8 f_center=800e6 kvco_hz_per_v=220e6 f_min=500e6 f_max=1.2e9 \
+    kp=2.5e6 ki=8.0e4 vctrl_init=0.45 tedge=1n lock_tol=2.5n lock_count_target=4
+
+tran tran stop=5u errpreset=conservative
+save ref_clk fb_clk dco_clk vctrl_mon lock

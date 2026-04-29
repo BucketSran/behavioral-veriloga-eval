@@ -1,0 +1,37 @@
+// sar_adc_dac_weighted_8b gold smoke testbench
+// 8-bit SAR ADC + DAC round-trip. fs=50MHz, fin=100kHz, stop=10us.
+// ~500 ADC samples covering 1 full sine cycle (10us period) -> >=48 unique codes.
+// (Extended from 5us@1MHz: slower fin gives finer vin resolution per sample.)
+// Theory: 500 samples across 256 code bins, ~2 samples per bin -> high code coverage.
+simulator lang=spectre
+global 0
+
+ahdl_include "sar_adc_weighted_8b.va"
+ahdl_include "dac_weighted_8b.va"
+ahdl_include "sh_ideal.va"
+
+parameters vdd=0.9 fin=100e3
+
+Vvdd (vdd 0) vsource dc=vdd
+Vvss (vss 0) vsource dc=0
+
+// 50 MHz sampling clock (period=20ns)
+Vclks (clks 0) vsource type=pulse val0=0 val1=vdd period=20n \
+               rise=500p fall=500p
+
+// Reset active-low for first 3 clock cycles (0-60ns)
+Vrst_n (rst_n 0) vsource type=pwl wave=[0 0  59n 0  60n vdd  10000n vdd]
+
+// Full-swing sine: 100 kHz, covers all 256 codes over many cycles
+Vvin (vin 0) vsource type=sine sinedc=0.45 ampl=0.45 freq=fin
+
+IADC (vin clks rst_n dout_7 dout_6 dout_5 dout_4 dout_3 dout_2 dout_1 dout_0) \
+      sar_adc_weighted_8b vdd=vdd
+
+IDAC (dout_7 dout_6 dout_5 dout_4 dout_3 dout_2 dout_1 dout_0 vout) \
+      dac_weighted_8b vdd=vdd
+
+ISH (vin clks vdd vss rst_n vin_sh) sh_ideal
+
+tran tran stop=10u maxstep=5n
+save vin vin_sh clks rst_n vout dout_7 dout_6 dout_5 dout_4 dout_3 dout_2 dout_1 dout_0

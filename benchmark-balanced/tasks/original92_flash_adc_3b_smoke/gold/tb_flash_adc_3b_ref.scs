@@ -1,0 +1,18 @@
+// flash_adc_3b gold smoke testbench
+// Ramp input 0->0.9V over 800ns, 100MHz clock. All 8 codes expected.
+simulator lang=spectre
+global 0
+
+ahdl_include "flash_adc_3b.va"
+
+Vvdd (vdd 0) vsource dc=0.9 type=dc
+Vvss (vss 0) vsource dc=0.0 type=dc
+
+Vvin (vin 0) vsource type=pwl wave=[0 0 800e-9 0.9]
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=5n rise=100p fall=100p
+
+IDUT (vdd vss vin clk dout2 dout1 dout0) flash_adc_3b vrefp=0.9 vrefn=0.0 vth=0.45 tedge=100p
+
+tran tran stop=820n maxstep=2n
+save vin clk dout2 dout1 dout0

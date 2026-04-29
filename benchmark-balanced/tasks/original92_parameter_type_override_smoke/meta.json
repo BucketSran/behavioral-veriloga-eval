@@ -1,0 +1,63 @@
+{
+  "id": "parameter_type_override_smoke",
+  "task_id": "original92_parameter_type_override_smoke",
+  "task_name": "Parameter Type Override Smoke Test",
+  "family": "end-to-end",
+  "category": "stimulus",
+  "domain": "voltage",
+  "difficulty": "easy",
+  "expected_backend": "evas",
+  "source": {
+    "type": "parity-audit",
+    "path": "vaEvas/refine-logs/EXPERIMENT_PLAN.md"
+  },
+  "tier": "verified",
+  "verification_status": "passed",
+  "owner": "codex",
+  "created_at": "2026-04-20",
+  "must_include": [
+    "parameter real",
+    "parameter integer",
+    "@(timer(",
+    "transition("
+  ],
+  "must_not_include": [
+    "I(",
+    "ddt(",
+    "idt("
+  ],
+  "inputs": [
+    "prompt.md"
+  ],
+  "artifacts": [
+    "parameter_type_override_ref.va",
+    "tb_parameter_type_override_ref.scs",
+    "tran.csv"
+  ],
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "checks": {
+    "dut_compile": "required",
+    "tb_compile": "required",
+    "tran_generated": "required",
+    "sim_correct": "required",
+    "parity_required": true
+  },
+  "evidence": {
+    "result_path": "vaEvas/behavioral-veriloga-eval/results/gold-dual-r020-param-2026-04-20/parameter_type_override_smoke",
+    "pr_link": "[TODO]",
+    "notes": "Added on 2026-04-20 as the third R020 green-expansion case. EVAS-only and Spectre dual validation both passed on 2026-04-20. This case validates instance-line overrides for both real and integer Verilog-A parameters by checking overridden pulse amplitude and overridden pulse count."
+  },
+  "benchmark_split": "benchmark-balanced",
+  "source_collection": "original92",
+  "source_task_id": "parameter_type_override_smoke",
+  "source_family": "end-to-end",
+  "source_relative_path": "tasks/end-to-end/voltage/parameter_type_override_smoke",
+  "core_function": "stimulus",
+  "task_form": "end-to-end",
+  "balanced_role": "imported_original92",
+  "promotion_status": "imported_original92_with_normalized_metadata"
+}
