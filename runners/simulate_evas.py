@@ -15,6 +15,11 @@ import tempfile
 import warnings
 from pathlib import Path
 
+try:
+    from signature_guardrail import check_signature_bundle, spec_from_meta
+except ImportError:  # pragma: no cover - supports pytest imports from repo root
+    from runners.signature_guardrail import check_signature_bundle, spec_from_meta
+
 
 GRAY_COUNTER_SETTLE_TIME_S = 2e-9
 
@@ -4171,6 +4176,32 @@ def run_case(
         out_dir = output_root.resolve() if output_root else run_dir / "output"
         out_dir.mkdir(parents=True, exist_ok=True)
         dut_dst, tb_dst = copy_inputs(run_dir, dut_path, tb_path)
+        dut_signature_findings, tb_signature_findings = check_signature_bundle(
+            dut_dst.read_text(encoding="utf-8"),
+            tb_dst.read_text(encoding="utf-8"),
+            spec_from_meta(meta),
+        )
+        signature_findings = [*dut_signature_findings, *tb_signature_findings]
+        if signature_findings:
+            notes = ["signature_guardrail_failed", *signature_findings]
+            return {
+                "task_id": task_id,
+                "status": "FAIL_DUT_COMPILE" if dut_signature_findings else "FAIL_TB_COMPILE",
+                "backend_used": "evas",
+                "scores": {
+                    "dut_compile": 0.0,
+                    "tb_compile": 0.0,
+                    "sim_correct": 0.0,
+                    "weighted_total": 0.0,
+                },
+                "artifacts": [
+                    str(dut_dst),
+                    str(tb_dst),
+                ],
+                "notes": notes,
+                "stdout_tail": "",
+            }
+
         proc = run_evas(run_dir, tb_dst, out_dir, timeout_s)
         combined = (proc.stdout or "") + "\n" + (proc.stderr or "")
 

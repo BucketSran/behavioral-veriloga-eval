@@ -70,6 +70,57 @@ def must_include(entry: dict) -> list[str]:
     return sorted(set(items))
 
 
+def signature_requirements(entry: dict) -> dict:
+    """Preserve benchmark-critical signatures as executable metadata."""
+    text = f"{entry['prompt']} {entry['expected_output']}"
+    is_tb_generation = family_for(entry) == "tb-generation"
+    lower = text.lower()
+    required_tokens: list[str] = []
+    required_tb_tokens: list[str] = []
+    required_ports: list[str] = []
+    required_parameters: list[str] = []
+
+    if is_tb_generation:
+        for token in ("simulator lang=spectre", "ahdl_include", "tran"):
+            if token in must_include(entry):
+                required_tb_tokens.append(token)
+    else:
+        critical_tokens = {
+            "idtmod(": ["idtmod"],
+            "$bound_step(": ["bound_step", "$bound_step"],
+            "flicker_noise(": ["flicker_noise"],
+        }
+        for token, aliases in critical_tokens.items():
+            if any(alias in lower for alias in aliases):
+                required_tokens.append(token)
+
+    port_aliases = {
+        "OUTP": ["outp"],
+        "OUTN": ["outn"],
+        "VCTR": ["vctr", "control voltage"],
+        "VDD": ["vdd"],
+        "VSS": ["vss"],
+    }
+    for port, aliases in port_aliases.items():
+        if any(alias in lower for alias in aliases):
+            required_ports.append(port)
+
+    parameter_aliases = {
+        "Kvco": ["kvco"],
+    }
+    for param, aliases in parameter_aliases.items():
+        if any(alias in lower for alias in aliases):
+            required_parameters.append(param)
+
+    return {
+        "required_ports": sorted(set(required_ports)),
+        "required_parameters": sorted(set(required_parameters)),
+        "required_tokens": required_tokens,
+        "required_tb_tokens": required_tb_tokens,
+        "forbidden_tokens": must_not_include(entry),
+    }
+
+
 def must_not_include(entry: dict) -> list[str]:
     return ["I(", "ddt("]
 
@@ -127,6 +178,7 @@ def write_case(entry: dict) -> None:
         "expected_backend": "evas",
         "must_include": must_include(entry),
         "must_not_include": must_not_include(entry),
+        "signature_requirements": signature_requirements(entry),
         "inputs": ["prompt.md"],
         "artifacts": ["candidate.out"],
         "scoring": scoring_for(entry),
