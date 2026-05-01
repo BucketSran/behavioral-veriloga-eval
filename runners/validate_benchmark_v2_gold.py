@@ -15,7 +15,15 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from score import build_model_results, spectre_strict_preflight
+from score import (
+    all_save_signals,
+    build_model_results,
+    choose_gold_tb,
+    find_tb_file,
+    find_va_file,
+    spectre_strict_preflight,
+    stage_candidate_case,
+)
 from simulate_evas import parse_evas_log_diagnostics, parse_evas_runtime_error, parse_evas_timing, run_evas
 from spectre_validate_baseline import (
     DEFAULT_ENV,
@@ -63,7 +71,7 @@ def _ahdl_includes(tb_path: Path) -> list[str]:
     return re.findall(r'^\s*ahdl_include\s+"([^"]+)"', text, flags=re.MULTILINE)
 
 
-def _stage_gold(task_dir: Path, stage_dir: Path) -> tuple[Path, Path]:
+def _stage_gold(task_dir: Path, stage_dir: Path) -> tuple[Path, Path, list[str]]:
     if stage_dir.exists():
         shutil.rmtree(stage_dir)
     stage_dir.mkdir(parents=True)
@@ -73,13 +81,13 @@ def _stage_gold(task_dir: Path, stage_dir: Path) -> tuple[Path, Path]:
             shutil.copy2(src, stage_dir / src.name)
     tb = _choose_tb(stage_dir)
     if tb is None:
-        return stage_dir / "dut.va", stage_dir / "tb_ref.scs"
+        return stage_dir / "dut.va", stage_dir / "tb_ref.scs", ["missing_gold_tb"]
     includes = _ahdl_includes(tb)
     if includes and (stage_dir / includes[0]).exists():
-        return stage_dir / includes[0], tb
+        return stage_dir / includes[0], tb, []
     vas = sorted(stage_dir.glob("*.va"))
     dut = vas[0] if vas else stage_dir / "dut.va"
-    return dut, tb
+    return dut, tb, []
 
 
 def _stage_candidate(
@@ -89,29 +97,66 @@ def _stage_candidate(
     candidate_root: Path | None,
     model: str,
     sample_idx: int,
-) -> tuple[Path, Path]:
+) -> tuple[Path, Path, list[str]]:
     if candidate_root is None:
         return _stage_gold(task_dir, stage_dir)
     sample_dir = candidate_root / model / task_dir.name / f"sample_{sample_idx}"
     if not sample_dir.is_dir():
         raise FileNotFoundError(f"missing candidate sample: {sample_dir}")
+
+    meta = _read_json(task_dir / "meta.json")
+    family = meta.get("family", "end-to-end")
+    required_axes = meta.get("scoring", ["dut_compile", "tb_compile", "sim_correct"])
+    gold_dir = task_dir / "gold"
+
     if stage_dir.exists():
         shutil.rmtree(stage_dir)
     stage_dir.mkdir(parents=True)
-    for src in sample_dir.iterdir():
-        if src.is_file() and src.suffix.lower() in {".va", ".scs", ".csv", ".txt", ".json"}:
-            shutil.copy2(src, stage_dir / src.name)
-    dut = stage_dir / "dut.va"
-    tb = stage_dir / "tb_ref.scs"
-    if not tb.exists():
-        tbs = sorted(stage_dir.glob("*.scs"))
-        if tbs:
-            tb = tbs[0]
-    if not dut.exists():
-        vas = sorted(stage_dir.glob("*.va"))
-        if vas:
-            dut = vas[0]
-    return dut, tb
+
+    generated_va = find_va_file(sample_dir)
+    generated_tb = find_tb_file(sample_dir)
+    gold_tb = choose_gold_tb(gold_dir)
+    auxiliary_gold_vas: list[Path] = []
+    contract_save_signals = all_save_signals(gold_tb) if gold_tb and gold_tb.exists() else None
+
+    if family in ("spec-to-va", "bugfix"):
+        dut_path = generated_va
+        tb_path = gold_tb
+    elif family == "tb-generation":
+        auxiliary_gold_vas = sorted(gold_dir.glob("*.va"))
+        dut_path = auxiliary_gold_vas[0] if auxiliary_gold_vas else None
+        tb_path = generated_tb
+    else:
+        dut_path = generated_va
+        tb_path = generated_tb
+
+    missing = []
+    if dut_path is None or not dut_path.exists():
+        missing.append("dut.va")
+    if tb_path is None or not tb_path.exists():
+        missing.append("testbench.scs")
+    if missing:
+        notes = [f"missing_generated_files={','.join(missing)}"]
+        if dut_path is not None and dut_path.exists():
+            shutil.copy2(dut_path, stage_dir / dut_path.name)
+        if tb_path is not None and tb_path.exists():
+            shutil.copy2(tb_path, stage_dir / tb_path.name)
+        staged_dut = stage_dir / (dut_path.name if dut_path is not None else "dut.va")
+        staged_tb = stage_dir / (tb_path.name if tb_path is not None else "tb_ref.scs")
+        return staged_dut, staged_tb, notes
+
+    return stage_candidate_case(
+        family=family,
+        gold_dir=gold_dir,
+        sample_dir=sample_dir,
+        dut_path=dut_path,
+        tb_path=tb_path,
+        stage_dir=stage_dir,
+        auxiliary_gold_vas=auxiliary_gold_vas,
+        save_policy="contract",
+        required_axes=required_axes,
+        contract_save_signals=contract_save_signals,
+    )
 
 
 def _load_checker(task_dir: Path):
@@ -162,7 +207,9 @@ def validate_evas(
     task_id = meta["task_id"]
     required_axes = meta.get("scoring", ["dut_compile", "tb_compile", "sim_correct"])
     stage_dir = case_out / "staged"
-    _dut, tb = _stage_candidate(task_dir, stage_dir, candidate_root=candidate_root, model=model, sample_idx=sample_idx)
+    _dut, tb, staging_notes = _stage_candidate(
+        task_dir, stage_dir, candidate_root=candidate_root, model=model, sample_idx=sample_idx
+    )
     output_dir = case_out / "evas_output"
     if output_dir.exists():
         shutil.rmtree(output_dir)
@@ -176,7 +223,7 @@ def validate_evas(
         "tb_compile": 1.0 if ("Transient Analysis" in combined or csv_path.exists()) else 0.0,
         "sim_correct": 0.0,
     }
-    notes = [f"returncode={proc.returncode}"]
+    notes = [*staging_notes, f"returncode={proc.returncode}"]
     runtime = parse_evas_runtime_error(combined)
     if runtime:
         notes.append("evas_runtime_error=" + runtime)
@@ -226,7 +273,9 @@ def validate_spectre(
     task_id = meta["task_id"]
     required_axes = meta.get("scoring", ["dut_compile", "tb_compile", "sim_correct"])
     stage_dir = case_out / "staged"
-    _dut, tb = _stage_candidate(task_dir, stage_dir, candidate_root=candidate_root, model=model, sample_idx=sample_idx)
+    _dut, tb, staging_notes = _stage_candidate(
+        task_dir, stage_dir, candidate_root=candidate_root, model=model, sample_idx=sample_idx
+    )
     strict_status, strict_scores, strict_notes = spectre_strict_preflight(
         family=meta.get("family", BENCH_FAMILY),
         required_axes=required_axes,
@@ -242,7 +291,7 @@ def validate_spectre(
     spectre_dir.mkdir(parents=True)
     sim._work_dir = spectre_dir
 
-    notes = list(strict_notes)
+    notes = [*staging_notes, *strict_notes]
     checker_result = {}
     try:
         bridge_console = io.StringIO()

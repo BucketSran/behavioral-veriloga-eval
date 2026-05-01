@@ -35,6 +35,7 @@ import os
 import re
 import sys
 import textwrap
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -258,6 +259,32 @@ def list_task_dirs(families: tuple[str, ...] = ALL_FAMILIES,
             if meta.get("tier") == "scope-guard":
                 continue
             result.append((task_id, task_dir))
+    return result
+
+
+def list_bench_task_dirs(
+    bench_dir: Path,
+    families: tuple[str, ...] = ALL_FAMILIES,
+    selected: set[str] | None = None,
+) -> list[tuple[str, Path]]:
+    """Discover tasks from a benchmark root such as benchmark-balanced/."""
+    task_root = bench_dir / "tasks"
+    result: list[tuple[str, Path]] = []
+    family_set = set(families)
+    for meta_path in sorted(task_root.glob("*/meta.json")):
+        task_dir = meta_path.parent
+        if not (task_dir / "prompt.md").exists():
+            continue
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        family = meta.get("family", "end-to-end")
+        if family not in family_set:
+            continue
+        task_id = meta.get("task_id") or meta.get("id") or task_dir.name
+        if selected and task_id not in selected:
+            continue
+        if meta.get("tier") == "scope-guard":
+            continue
+        result.append((task_id, task_dir))
     return result
 
 
@@ -958,6 +985,13 @@ def was_truncated(usage: dict, max_tokens: int) -> bool:
     return finish in {"max_tokens", "length"} or (max_tokens > 0 and out_tokens >= max_tokens)
 
 
+def _usage_count(usage: dict, key: str) -> int:
+    try:
+        return int(usage.get(key, 0) or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
 def artifact_retry_prompt(prompt_text: str, missing: list[str]) -> str:
     missing_list = ", ".join(missing)
     return prompt_text + f"""
@@ -1164,6 +1198,7 @@ def generate_one_task(
     """
     meta = read_meta(task_dir)
     family = meta.get("family", "end-to-end")
+    task_start = time.perf_counter()
 
     sample_dir = output_root / model_slug / task_id / f"sample_{sample_idx}"
     sample_dir.mkdir(parents=True, exist_ok=True)
@@ -1205,6 +1240,10 @@ def generate_one_task(
         "public_spec_mode": public_spec_mode,
         "artifact_retry_on_truncation": artifact_retry_on_truncation,
         "artifact_retry_max_tokens": artifact_retry_max_tokens,
+        "source_collection": meta.get("source_collection"),
+        "task_form": meta.get("task_form"),
+        "core_function": meta.get("core_function") or meta.get("category"),
+        "benchmark_split": meta.get("benchmark_split"),
     }
 
     if dry_run:
@@ -1228,13 +1267,28 @@ def generate_one_task(
             (sample_dir / f"{task_id}_placeholder.va").write_text(placeholder_va)
         if family in ("end-to-end", "tb-generation"):
             (sample_dir / f"tb_{task_id}_placeholder.scs").write_text(placeholder_scs)
-        gen_meta = {**gen_meta_base, "status": "dry_run", "input_tokens": 0, "output_tokens": 0}
+        gen_meta = {
+            **gen_meta_base,
+            "status": "dry_run",
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "api_elapsed_s": 0.0,
+            "api_call_count": 0,
+            "task_elapsed_s": round(time.perf_counter() - task_start, 3),
+        }
         (sample_dir / "generation_meta.json").write_text(json.dumps(gen_meta, indent=2))
         return gen_meta
 
     # Real LLM call
+    api_elapsed_s = 0.0
+    api_call_count = 0
     try:
+        call_start = time.perf_counter()
         response_text, usage = call_model(model, prompt_text, temperature, top_p, max_tokens)
+        api_elapsed_s += time.perf_counter() - call_start
+        api_call_count += 1
+        total_input_tokens = _usage_count(usage, "input_tokens")
+        total_output_tokens = _usage_count(usage, "output_tokens")
     except Exception as exc:
         gen_meta = {
             **gen_meta_base,
@@ -1242,6 +1296,9 @@ def generate_one_task(
             "error": str(exc)[:400],
             "input_tokens": 0,
             "output_tokens": 0,
+            "api_elapsed_s": round(api_elapsed_s, 3),
+            "api_call_count": api_call_count,
+            "task_elapsed_s": round(time.perf_counter() - task_start, 3),
         }
         (sample_dir / "generation_meta.json").write_text(json.dumps(gen_meta, indent=2))
         return gen_meta
@@ -1265,9 +1322,14 @@ def generate_one_task(
             "retry_max_tokens": retry_max_tokens,
         }
         try:
+            retry_call_start = time.perf_counter()
             retry_response_text, retry_usage = call_model(
                 model, retry_prompt, temperature, top_p, retry_max_tokens
             )
+            api_elapsed_s += time.perf_counter() - retry_call_start
+            api_call_count += 1
+            total_input_tokens += _usage_count(retry_usage, "input_tokens")
+            total_output_tokens += _usage_count(retry_usage, "output_tokens")
             retry_blocks = extract_code_blocks(retry_response_text)
             first_score = len(present_artifact_kinds_from_blocks(blocks) & required_artifact_kinds(family))
             retry_score = len(present_artifact_kinds_from_blocks(retry_blocks) & required_artifact_kinds(family))
@@ -1360,7 +1422,14 @@ def generate_one_task(
         "saved_files": saved_files,
         "raw_response_length": len(response_text),
         "artifact_retry": artifact_retry_meta,
+        "api_elapsed_s": round(api_elapsed_s, 3),
+        "api_call_count": api_call_count,
+        "task_elapsed_s": round(time.perf_counter() - task_start, 3),
         **usage,
+        "input_tokens": total_input_tokens,
+        "output_tokens": total_output_tokens,
+        "selected_response_input_tokens": _usage_count(usage, "input_tokens"),
+        "selected_response_output_tokens": _usage_count(usage, "output_tokens"),
     }
     (sample_dir / "generation_meta.json").write_text(json.dumps(gen_meta, indent=2))
 
@@ -1382,6 +1451,14 @@ def main() -> int:
                     help="Model name, e.g. claude-sonnet-4-6 or gpt-4o")
     ap.add_argument("--output-dir", default="generated",
                     help="Root output directory. Default: generated/")
+    ap.add_argument(
+        "--bench-dir",
+        default="",
+        help=(
+            "Optional benchmark root containing tasks/. "
+            "Use this for benchmark-v2 or benchmark-balanced instead of the official tasks/ tree."
+        ),
+    )
     ap.add_argument("--task", action="append", default=[],
                     help="Generate only these task_ids (repeatable). Omit for all.")
     ap.add_argument("--family", action="append", choices=list(ALL_FAMILIES),
@@ -1464,7 +1541,14 @@ def main() -> int:
 
     families = tuple(args.family) if args.family else ALL_FAMILIES
     selected = set(args.task) if args.task else None
-    task_list = list_task_dirs(families=families, selected=selected)
+    bench_dir = Path(args.bench_dir) if args.bench_dir else None
+    if bench_dir is not None and not bench_dir.is_absolute():
+        bench_dir = ROOT / bench_dir
+    task_list = (
+        list_bench_task_dirs(bench_dir, families=families, selected=selected)
+        if bench_dir is not None
+        else list_task_dirs(families=families, selected=selected)
+    )
 
     if not task_list:
         print("[generate] No tasks found.")
@@ -1475,7 +1559,8 @@ def main() -> int:
           f"  checker={args.include_checker}  skill={args.include_skill}"
           f"  public_spec_mode={args.public_spec_mode}"
           f"  artifact_retry={args.artifact_retry_on_truncation}"
-          f"  dry_run={args.dry_run}  workers={args.max_workers}")
+          f"  dry_run={args.dry_run}  workers={args.max_workers}"
+          f"  bench_dir={bench_dir if bench_dir else 'official-tasks'}")
 
     total_input_tokens = 0
     total_output_tokens = 0
@@ -1502,8 +1587,10 @@ def main() -> int:
             out_tok = int(gen_meta.get("output_tokens", 0) or 0)
             total_input_tokens += int(gen_meta.get("input_tokens", 0) or 0)
             total_output_tokens += out_tok
+            task_elapsed = gen_meta.get("task_elapsed_s")
             suffix = f"  ERROR: {gen_meta.get('error','')[:80]}" if status == "api_error" else ""
-            print(f"{status}  ({out_tok} out_tokens){suffix}")
+            elapsed_note = f", {task_elapsed}s" if task_elapsed is not None else ""
+            print(f"{status}  ({out_tok} out_tokens{elapsed_note}){suffix}")
     else:
         worker_count = min(args.max_workers, len(task_list))
         print(f"[generate] parallel dispatch with {worker_count} workers")
@@ -1535,8 +1622,10 @@ def main() -> int:
                 out_tok = int(gen_meta.get("output_tokens", 0) or 0)
                 total_input_tokens += int(gen_meta.get("input_tokens", 0) or 0)
                 total_output_tokens += out_tok
+                task_elapsed = gen_meta.get("task_elapsed_s")
                 suffix = f"  ERROR: {gen_meta.get('error','')[:80]}" if status == "api_error" else ""
-                print(f"  {task_id} ... {status}  ({out_tok} out_tokens){suffix}")
+                elapsed_note = f", {task_elapsed}s" if task_elapsed is not None else ""
+                print(f"  {task_id} ... {status}  ({out_tok} out_tokens{elapsed_note}){suffix}")
 
     print(f"\n[generate] done  total_in={total_input_tokens}  total_out={total_output_tokens}")
     print(f"  output: {out_root / model_slug}/")
