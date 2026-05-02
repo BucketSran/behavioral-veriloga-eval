@@ -1,0 +1,26 @@
+// Library name: vaEvas
+// Cell name:    tb_edge_event_comparator
+// View name:    schematic
+simulator lang=spectre
+global 0
+
+// Power
+Vsupply_hi (supply_hi 0) vsource dc=0.9 type=dc
+Vsupply_lo (supply_lo 0) vsource dc=0.0 type=dc
+
+// SIG_A: 50MHz clock
+Vsig_a (sig_a 0) vsource type=pulse val0=0 val1=0.9 period=20n width=10n rise=100p fall=100p
+
+// SIG_B: 50MHz clock with 5ns (90-degree) phase shift
+Vsig_b (sig_b 0) vsource type=pulse val0=0 val1=0.9 period=20n delay=5n width=10n rise=100p fall=100p
+
+// DUT (port order: SUPPLY_HI SUPPLY_LO SIG_A SIG_B MATCH_OUT)
+IDUT (supply_hi supply_lo sig_a sig_b match_out) edge_event_comparator vth=0.45 tedge=50p
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+
+tran tran stop=200n maxstep=100p errpreset=conservative
+
+save sig_a sig_b match_out
+
+ahdl_include "edge_event_comparator.va"

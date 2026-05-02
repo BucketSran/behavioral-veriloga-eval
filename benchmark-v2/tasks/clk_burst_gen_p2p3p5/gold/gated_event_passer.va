@@ -1,0 +1,23 @@
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 30p
+module gated_event_passer (
+    input electrical event_in, input electrical clear_n, output electrical burst_out
+);
+parameter integer div = 6; parameter real vdd = 1.2; parameter real vth = 0.6;
+integer counter_q; integer gate_q; integer clk_hi;
+analog begin
+    @(initial_step) begin counter_q = 0; gate_q = 0; clk_hi = 0; end
+    @(cross(V(event_in) - vth, +1)) begin
+        clk_hi = 1;
+        if (V(clear_n) < vth) begin counter_q = 0; gate_q = 0; end
+        else begin
+            gate_q = (counter_q < 2) ? 1 : 0;
+            counter_q = counter_q + 1;
+            if (counter_q >= div) counter_q = 0;
+        end
+    end
+    @(cross(V(event_in) - vth, -1)) clk_hi = 0;
+    V(burst_out) <+ transition((gate_q && clk_hi) ? vdd : 0.0);
+end
+endmodule

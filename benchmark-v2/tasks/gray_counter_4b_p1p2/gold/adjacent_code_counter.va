@@ -1,0 +1,62 @@
+// 4-bit adjacent-code counter — EVAS-compatible
+// On each rising STROBE edge (when ENABLE=1), increments a binary counter
+// and drives output as the corresponding 4-bit code where consecutive
+// values differ by exactly one bit.
+// RESET_N (active-low reset) resets counter to 0.
+// Pure voltage-domain.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module adjacent_code_counter(
+    inout  electrical SUPPLY_HI,
+    inout  electrical SUPPLY_LO,
+    input  electrical STROBE,
+    input  electrical ENABLE,
+    input  electrical RESET_N,
+    output electrical QB3,
+    output electrical QB2,
+    output electrical QB1,
+    output electrical QB0
+);
+
+parameter real vth   = 0.45;
+parameter real tedge = 100p;
+
+integer bin_cnt;
+integer code_val;
+real    qb3_level;
+real    qb2_level;
+real    qb1_level;
+real    qb0_level;
+
+analog begin
+    @(initial_step or cross(V(RESET_N) - vth, -1)) begin
+        bin_cnt   = 0;
+        code_val  = 0;
+        qb3_level = V(SUPPLY_LO);
+        qb2_level = V(SUPPLY_LO);
+        qb1_level = V(SUPPLY_LO);
+        qb0_level = V(SUPPLY_LO);
+    end
+
+    @(cross(V(STROBE) - vth, +1)) begin
+        if (V(RESET_N) > vth && V(ENABLE) > vth) begin
+            bin_cnt  = (bin_cnt + 1) & 15;
+            code_val = bin_cnt ^ (bin_cnt >> 1);
+            qb3_level = ((code_val >> 3) & 1) ? V(SUPPLY_HI) : V(SUPPLY_LO);
+            qb2_level = ((code_val >> 2) & 1) ? V(SUPPLY_HI) : V(SUPPLY_LO);
+            qb1_level = ((code_val >> 1) & 1) ? V(SUPPLY_HI) : V(SUPPLY_LO);
+            qb0_level = ((code_val >> 0) & 1) ? V(SUPPLY_HI) : V(SUPPLY_LO);
+        end
+    end
+
+    V(QB3) <+ transition(qb3_level, 0, tedge, tedge);
+    V(QB2) <+ transition(qb2_level, 0, tedge, tedge);
+    V(QB1) <+ transition(qb1_level, 0, tedge, tedge);
+    V(QB0) <+ transition(qb0_level, 0, tedge, tedge);
+end
+
+endmodule

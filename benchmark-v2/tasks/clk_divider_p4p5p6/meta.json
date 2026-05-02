@@ -1,0 +1,22 @@
+{
+  "task_id": "clk_divider_p4p5p6",
+  "family": "end-to-end",
+  "category": "digital-logic",
+  "domain": "voltage",
+  "difficulty": "hard",
+  "expected_backend": "evas",
+  "source_type": "seed_92_perturbation",
+  "source_seed": "clk_div_smoke",
+  "mechanism_family": "digital-logic",
+  "perturbation_axes": ["negative_constraint", "parameter", "system_composition"],
+  "perturbation_level": "P6",
+  "evas_compatible": true,
+  "spectre_parity_required": true,
+  "status": "draft",
+  "must_include": ["@(cross(", "transition("],
+  "must_not_include": ["@(timer(", "@(delay("],
+  "inputs": ["prompt.md"],
+  "artifacts": ["dut.va", "tb_event_divider_with_pulse.scs", "tran.csv"],
+  "scoring": ["dut_compile", "tb_compile", "sim_correct"],
+  "review_notes": ""
+}

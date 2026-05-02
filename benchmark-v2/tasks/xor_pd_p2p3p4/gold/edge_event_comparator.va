@@ -1,0 +1,50 @@
+// Event edge comparator — EVAS-compatible
+// Output is HIGH when SIG_A and SIG_B are at different logic levels.
+// Average output voltage encodes the relative timing offset between the two inputs.
+// Pure voltage-domain.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module edge_event_comparator(
+    inout  electrical SUPPLY_HI,
+    inout  electrical SUPPLY_LO,
+    input  electrical SIG_A,
+    input  electrical SIG_B,
+    output electrical MATCH_OUT
+);
+
+parameter real vth   = 0.45;
+parameter real tedge = 50p;
+
+integer sig_a_hi;
+integer sig_b_hi;
+integer xor_out;
+real    match_level;
+
+analog begin
+    @(initial_step) begin
+        sig_a_hi    = 0;
+        sig_b_hi    = 0;
+        xor_out     = 0;
+        match_level = 0.0;
+    end
+
+    @(cross(V(SIG_A) - vth, +1) or cross(V(SIG_A) - vth, -1)) begin
+        sig_a_hi    = (V(SIG_A) > vth) ? 1 : 0;
+        xor_out     = sig_a_hi ^ sig_b_hi;
+        match_level = xor_out ? V(SUPPLY_HI) : V(SUPPLY_LO);
+    end
+
+    @(cross(V(SIG_B) - vth, +1) or cross(V(SIG_B) - vth, -1)) begin
+        sig_b_hi    = (V(SIG_B) > vth) ? 1 : 0;
+        xor_out     = sig_a_hi ^ sig_b_hi;
+        match_level = xor_out ? V(SUPPLY_HI) : V(SUPPLY_LO);
+    end
+
+    V(MATCH_OUT) <+ transition(match_level, 0, tedge, tedge);
+end
+
+endmodule

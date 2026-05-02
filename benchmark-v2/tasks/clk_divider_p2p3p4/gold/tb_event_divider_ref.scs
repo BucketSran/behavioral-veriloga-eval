@@ -1,0 +1,15 @@
+// event_divider gold smoke testbench
+// 100 MHz input event cadence, divide-by-4 output. Run 300ns.
+// Check: toggled edge count ≈ cadence/4 (ratio 3-5).
+simulator lang=spectre
+global 0
+
+ahdl_include "event_divider.va"
+
+Vcadence (cadence_in 0) vsource type=pulse val0=0 val1=0.9 period=10n width=5n rise=100p fall=100p
+Vclear   (clear      0) vsource type=pwl wave=[0 0  4.9n 0  5n 0.9  300n 0.9]
+
+IDUT (cadence_in clear toggled) event_divider vth=0.45 vdd=0.9
+
+tran tran stop=300n maxstep=1n
+save cadence_in toggled

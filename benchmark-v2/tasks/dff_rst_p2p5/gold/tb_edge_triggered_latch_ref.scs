@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "edge_triggered_latch.va"
+
+Vsupply_hi (supply_hi 0) vsource dc=0.9
+Vsupply_lo (supply_lo 0) vsource dc=0.0
+
+Vstrobe (strobe 0) vsource type=pulse val0=0 val1=0.9 period=5n width=2.5n rise=10p fall=10p
+
+Vsample_in (sample_in 0) vsource type=pwl wave=[0n 0  5n 0  5.1n 0.9  15n 0.9  15.1n 0  25n 0  25.1n 0.9  35n 0.9  35.1n 0  50n 0]
+
+Vforce_low (force_low 0) vsource type=pwl wave=[0n 0  22n 0  22.1n 0.9  28n 0.9  28.1n 0  50n 0]
+
+IDUT (supply_hi supply_lo sample_in strobe force_low state state_n) edge_triggered_latch tedge=50p
+
+tran tran stop=50n maxstep=50p
+save strobe sample_in force_low state state_n
