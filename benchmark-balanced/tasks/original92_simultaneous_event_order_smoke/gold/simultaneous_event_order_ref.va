@@ -18,6 +18,8 @@ analog begin
         target_q = 0.0;
         cycle_q = 0;
     end
+    // Timer fires at 10 ns + k*20 ns. The testbench ref pulse crosses vth
+    // shortly after each timer event, avoiding exact-touch / same-time races.
     @(timer(next_t)) begin
         cycle_q = cycle_q + 1;
         target_q = 0.1 * cycle_q;

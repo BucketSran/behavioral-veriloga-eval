@@ -1,0 +1,80 @@
+{
+  "version": 2,
+  "owner": "Terminal B",
+  "date": "2026-04-26",
+  "scope": "B-owned ADC-DAC draft. Safe for isolated B mini runs via --cards-path; Terminal A should review before integration into docs/CONTRACT_REPAIR_CARDS.json.",
+  "description": "Draft ADC-DAC repair cards selected from public contract failures and veriloga-skills references.",
+  "cards": [
+    {
+      "id": "adc_dac_reconstruction_chain",
+      "title": "Preserve ADC-DAC Artifact Boundary And Couple Code To Reconstruction",
+      "source": "../veriloga-skills/veriloga/references/categories/adc-sar.md; ../veriloga-skills/veriloga/references/categories/dac.md",
+      "priority": 10,
+      "match": {
+        "task_keywords_all": [
+          "adc",
+          "dac"
+        ],
+        "failed_hard_all": [
+          "dout*_code_changes",
+          "vout_moves"
+        ],
+        "passed_any": [
+          "vin_input_activity",
+          "clk_edges_present"
+        ]
+      },
+      "text": [
+        "Preserve passed contracts: keep `vin`, `clk`, `rst_n`, `vout`, and `dout_3..0` observable; keep the input ramp and clock/reset behavior; do not rewrite the testbench when it is compile-clean.",
+        "Preserve the multi-file artifact boundary: keep `adc_ideal_4b.va` and `dac_ideal_4b.va`, keep module names `adc_ideal_4b` and `dac_ideal_4b`, and do not rename generated files to `_ref` names.",
+        "The Spectre testbench must include the exact emitted filenames: `ahdl_include \"adc_ideal_4b.va\"` and `ahdl_include \"dac_ideal_4b.va\"`. Do not include `adc_ideal_4b_ref.va` or `dac_ideal_4b_ref.va` unless you also emit those exact files, which this repair should not do.",
+        "If the current testbench already instantiates `adc_ideal_4b` and `dac_ideal_4b`, keep those instance module names and make only include filenames match the emitted files.",
+        "Use one held integer ADC code as the source of truth. On each rising `clk` after `rst_n` release, compute the clipped quantized code from `vin` and the public supply/reference range.",
+        "Drive `dout_3`, `dout_2`, `dout_1`, and `dout_0` from fixed bit positions of the held ADC code, with `dout_3` as MSB and `dout_0` as LSB.",
+        "In the DAC, decode the same scalar bit order into one integer code and drive `vout = vss + code/16.0 * (vdd-vss)`.",
+        "Do not tie `vout` directly to raw `vin` and do not leave `vout` constant; `vout` should be a quantized reconstruction coupled to the decoded code.",
+        "Keep `transition()` contributions unconditional and driven from held target variables."
+      ]
+    },
+    {
+      "id": "evas_compatible_quantizer_math",
+      "title": "Use EVAS-Compatible Quantizer Math",
+      "source": "../veriloga-skills/veriloga/references/categories/adc-sar.md",
+      "priority": 8,
+      "match": {
+        "task_keywords_any": [
+          "adc",
+          "adc_dac",
+          "quantizer"
+        ],
+        "failed_hard_any": [
+          "dout*_code_changes",
+          "monotonic_code_vs_input*"
+        ],
+        "passed_any": [
+          "vin_input_activity"
+        ]
+      },
+      "text": [
+        "When implementing quantizers in EVAS-compatible Verilog-A, use analog-expression numeric functions such as `floor(...)`, then explicitly store the result into an integer.",
+        "Avoid Verilog/SystemVerilog-style system-task math such as `$floor(...)` when EVAS feedback shows code coverage is stuck despite visible input activity.",
+        "Keep clipping explicit: if code is below zero, set it to zero; if code exceeds the maximum 4-bit value, set it to fifteen.",
+        "Declare temporary `real` and `integer` variables at module scope rather than relying on fragile block-local declarations inside event bodies."
+      ]
+    }
+  ],
+  "proposals": [
+    {
+      "target_card_id": "adc_dac_reconstruction_chain",
+      "operation": "replace_or_append_text",
+      "rationale": "adc_dac_ideal_4b_smoke has visible vin/clk/reset but unique_codes=1 and vout_span=0. The failed candidate is nearly correct except the ADC quantizer uses $floor(...), while a passing control uses EVAS-compatible floor(...). Prior repair also regressed the multi-file ADC/DAC artifact boundary.",
+      "leakage_risk": "low"
+    },
+    {
+      "target_card_id": "evas_compatible_quantizer_math",
+      "operation": "add_card",
+      "rationale": "Quantizer tasks can compile but remain behavior-stuck if unsupported numeric function forms are used.",
+      "leakage_risk": "low"
+    }
+  ]
+}

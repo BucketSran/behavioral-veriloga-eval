@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "skills": [
+    {
+      "id": "conditional_transition_target_buffer",
+      "version": "0.1",
+      "description": "Move conditional transition() contributions into held target variables and unconditional contributions.",
+      "triggers": [
+        "spectre_strict:conditional_transition",
+        "transition() contribution is inside"
+      ],
+      "guidance_file": "SKILL.md",
+      "fixer": "transition_target_buffer",
+      "judge": "spectre_strict_preflight",
+      "safe_autofix": true
+    },
+    {
+      "id": "module_name_linkage",
+      "version": "0.1",
+      "description": "Align a generated Verilog-A module declaration with the model name requested by the public Spectre harness.",
+      "triggers": [
+        "spectre_strict:undefined_module="
+      ],
+      "guidance_file": "SKILL.md",
+      "fixer": "module_name",
+      "judge": "spectre_strict_preflight",
+      "safe_autofix": true
+    },
+    {
+      "id": "parameter_default_range",
+      "version": "0.1",
+      "description": "Remove Spectre-incompatible parameter range clauses when the generated default violates the declared range or the range uses empty upper-bound syntax.",
+      "triggers": [
+        "spectre_strict:parameter_default_range=",
+        "spectre_strict:parameter_open_upper_range="
+      ],
+      "guidance_file": "SKILL.md",
+      "fixer": "parameter_default_range",
+      "judge": "spectre_strict_preflight",
+      "safe_autofix": true
+    },
+    {
+      "id": "pwl_monotonic_time",
+      "version": "0.1",
+      "description": "Make Spectre PWL source time vectors strictly increasing.",
+      "triggers": [
+        "spectre_strict:nonincreasing_pwl_time="
+      ],
+      "guidance_file": "SKILL.md",
+      "fixer": "pwl_monotonic_time",
+      "judge": "spectre_strict_preflight",
+      "safe_autofix": true
+    },
+    {
+      "id": "instance_parameter_keyword",
+      "version": "0.1",
+      "description": "Remove unsupported Spectre instance `parameters` keywords while preserving assignments.",
+      "triggers": [
+        "spectre_strict:instance_parameters_keyword="
+      ],
+      "guidance_file": "SKILL.md",
+      "fixer": "instance_parameter_keyword",
+      "judge": "spectre_strict_preflight",
+      "safe_autofix": true
+    },
+    {
+      "id": "vector_scalar_interface",
+      "version": "0.1",
+      "description": "Materialize vector ports as scalar nodes and fixed-index contributions when the public Spectre harness uses scalar nodes.",
+      "triggers": [
+        "spectre_strict:dynamic_analog_vector_index=",
+        "spectre_strict:instance_port_count_mismatch="
+      ],
+      "guidance_file": "SKILL.md",
+      "fixer": "vector_unroll",
+      "judge": "spectre_strict_preflight",
+      "safe_autofix": true
+    },
+    {
+      "id": "sourced_port_drive_boundary",
+      "version": "0.1",
+      "description": "Judge-only skill for detecting DUT-driven ports tied to source-fixed nodes.",
+      "triggers": [
+        "spectre_strict:sourced_port_voltage_drive="
+      ],
+      "guidance_file": "SKILL.md",
+      "fixer": null,
+      "judge": "spectre_strict_preflight",
+      "safe_autofix": false
+    },
+    {
+      "id": "missing_testbench_artifact",
+      "version": "0.1",
+      "description": "Judge-only skill for generated candidates missing a required Spectre testbench artifact.",
+      "triggers": [
+        "missing_generated_files=testbench.scs",
+        "missing_generated_files: testbench.scs",
+        "spectre_strict:missing_staged_tb"
+      ],
+      "guidance_file": "SKILL.md",
+      "fixer": null,
+      "judge": "artifact_presence",
+      "safe_autofix": false
+    },
+    {
+      "id": "sourced_port_role_repair",
+      "version": "0.1",
+      "description": "Detach generated driven ports from source-fixed Spectre nodes using only strict preflight port-role diagnostics and public instance/module signatures.",
+      "triggers": [
+        "spectre_strict:sourced_port_voltage_drive="
+      ],
+      "guidance_file": "SKILL.md",
+      "fixer": "sourced_port_role_repair",
+      "judge": "spectre_strict_preflight",
+      "safe_autofix": true
+    },
+    {
+      "id": "missing_testbench_generation",
+      "version": "0.1",
+      "description": "Materialize a minimal public-interface Spectre smoke testbench when a generated candidate omitted the required testbench artifact.",
+      "triggers": [
+        "missing_generated_files=testbench.scs",
+        "missing_generated_files: testbench.scs",
+        "spectre_strict:missing_staged_tb"
+      ],
+      "guidance_file": "SKILL.md",
+      "fixer": "missing_testbench_skeleton",
+      "judge": "artifact_presence",
+      "safe_autofix": true
+    },
+    {
+      "id": "dynamic_scatter_index_materialization",
+      "version": "0.1",
+      "description": "Materialize runtime electrical-vector scatter writes into scalar guarded contributions after public scalar-node expansion.",
+      "triggers": [
+        "spectre_strict:dynamic_analog_vector_index="
+      ],
+      "guidance_file": "SKILL.md",
+      "fixer": "dynamic_scatter_materialization",
+      "judge": "spectre_strict_preflight",
+      "safe_autofix": true
+    },
+    {
+      "id": "wrong_function_regeneration_gate",
+      "version": "0.1",
+      "description": "Judge/gate skill for cases where a module-name repair reveals that the generated body implements the wrong public function.",
+      "triggers": [
+        "spectre_strict:undefined_module=",
+        "spectre_strict:instance_port_count_mismatch="
+      ],
+      "guidance_file": "SKILL.md",
+      "fixer": null,
+      "judge": "spectre_strict_preflight",
+      "safe_autofix": false
+    }
+  ]
+}

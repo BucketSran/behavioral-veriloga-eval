@@ -24,6 +24,38 @@ def _num(value: Any) -> float:
         return 0.0
 
 
+def _normalized_required_axes(required_axes: list[str] | None = None) -> list[str]:
+    aliases = {
+        "syntax": "dut_compile",
+        "routing": "tb_compile",
+        "simulation": "sim_correct",
+        "behavior": "sim_correct",
+    }
+    axes = required_axes or ["dut_compile", "tb_compile", "sim_correct"]
+    normalized: list[str] = []
+    for axis in axes:
+        mapped = aliases.get(axis, axis)
+        if mapped not in normalized:
+            normalized.append(mapped)
+    return normalized or ["dut_compile", "tb_compile", "sim_correct"]
+
+
+def _strict_result_status(data: dict[str, Any]) -> str:
+    """Normalize legacy-axis PASS labels before table aggregation."""
+    raw_status = str(data.get("status", ""))
+    scores = data.get("scores") or {}
+    axes = _normalized_required_axes(data.get("required_axes"))
+    if raw_status == "FAIL_INFRA":
+        return raw_status
+    if "dut_compile" in axes and _num(scores.get("dut_compile")) < 1.0:
+        return "FAIL_DUT_COMPILE"
+    if "tb_compile" in axes and _num(scores.get("tb_compile")) < 1.0:
+        return "FAIL_TB_COMPILE"
+    if "sim_correct" in axes and _num(scores.get("sim_correct")) < 1.0:
+        return "FAIL_SIM_CORRECTNESS"
+    return "PASS" if raw_status else ""
+
+
 def _load_bench_meta(bench_dir: Path | None) -> dict[str, dict[str, Any]]:
     if bench_dir is None:
         return {}
@@ -95,12 +127,12 @@ def _collect_result_maps(result_dirs: list[Path]) -> dict[str, dict[str, str]]:
         for path in sorted(result_dir.glob("*/evas_result.json")):
             data = _read_json(path)
             task_id = data.get("task_id") or path.parent.name
-            status_by_task[task_id][label] = data.get("status", "")
+            status_by_task[task_id][label] = _strict_result_status(data)
             status_by_task[task_id][f"{label}:backend"] = "evas"
         for path in sorted(result_dir.glob("*/spectre_result.json")):
             data = _read_json(path)
             task_id = data.get("task_id") or path.parent.name
-            status_by_task[task_id][label] = data.get("status", "")
+            status_by_task[task_id][label] = _strict_result_status(data)
             status_by_task[task_id][f"{label}:backend"] = "spectre"
     return status_by_task
 

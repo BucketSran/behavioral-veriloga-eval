@@ -12,11 +12,23 @@ import json
 import os
 import re
 import shutil
+import textwrap
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
 from build_repair_prompt import build_evas_guided_repair_prompt, metric_gap_summary
-from generate import call_model, extract_module_signature, list_task_dirs, read_meta
+from compile_skill_library import render_compile_skill_guidance, select_compile_skills
+from compile_vector_unroll_guard import apply_vector_unroll_guard
+from generate import (
+    build_enhancement_payload,
+    build_prompt,
+    call_model,
+    extract_module_signature,
+    list_bench_task_dirs,
+    list_task_dirs,
+    read_meta,
+)
 from interface_parameter_guard import check_interface_parameters, format_issue_notes
 from run_model_assisted_loop import _model_slug, _save_generated_response
 from score import find_generated_dir, score_one_task
@@ -309,6 +321,34 @@ def _progress_rank(task_id: str, result: dict) -> tuple:
             _metric_float(metrics, "post_lock", 0.0),
         )
     return base
+
+
+def _compile_closure_rank(task_id: str, result: dict) -> tuple:
+    """Rank candidates for official G compile-gate closure.
+
+    This deliberately avoids behavior metric-gap information.  A candidate
+    wins once the syntax/interface/runtime/observable gate is clear; after that
+    behavior correctness is only reported by final scoring, not optimized here.
+    """
+    scores = result.get("scores", {})
+    gate_state = _syntax_zero_gate_state(result)
+    return (
+        int(gate_state["cleared"]),
+        float(scores.get("dut_compile", 0.0)),
+        float(scores.get("tb_compile", 0.0)),
+        _failure_phase_score(result),
+        -len(gate_state["issues"]),
+        -_syntax_blocker_count(result),
+        int(result.get("status") == "PASS"),
+        float(scores.get("weighted_total", 0.0)),
+        task_id,
+    )
+
+
+def _result_rank(task_id: str, result: dict, *, compile_only_closure: bool = False) -> tuple:
+    if compile_only_closure:
+        return _compile_closure_rank(task_id, result)
+    return _progress_rank(task_id, result)
 
 
 def _copy_sample(src: Path, dst: Path) -> None:
@@ -674,10 +714,17 @@ def _syntax_zero_gate_policy_section(layer: str, result: dict) -> str:
             "- A loop around `transition()` is legal only when the loop variable is a module-scope `genvar`. A loop with `integer i` is runtime control flow and must not contain `V(out[i]) <+ transition(...)`.",
             "- If there are fewer than about 32 public outputs, prefer explicit unrolled contributions for the compile-clean repair: `V(out_0) <+ transition(out0_t, 0, tr, tf);`, `V(out_1) <+ transition(out1_t, 0, tr, tf);`, and so on.",
         ])
+    if "conditional_cross=" in notes or "@(cross" in notes and "conditional" in notes:
+        strong_templates.extend([
+            "- `@(cross(...))` event statements must not be nested inside runtime `if`, `else`, `case`, `for`, or `while` branches. Declare each cross event unconditionally at analog top level.",
+            "- To keep conditional behavior, move the condition inside the event body: `@(cross(expr,+1)) begin if (enable_or_mode) state = ...; end`.",
+            "- For hysteresis, use separate unconditional rising and falling cross events, each with its fixed threshold expression, and gate only the state update inside the event body.",
+        ])
     if "dynamic_analog_vector_index=" in notes:
         strong_templates.extend([
             "- Runtime integer indices inside `V(bus[i])` are not allowed. Replace each offending access with fixed-index code, for example `V(bus[0])`, `V(bus[1])`, ... through the required width.",
             "- For output buses, prefer explicit unrolled contributions for this repair. Do not use `V(out[i])` with `integer i` inside an analog loop.",
+            "- If the testbench connects scalar nodes such as `d15 d14 ... d0`, declare scalar ports such as `din_15, din_14, ...` instead of one vector port, then unroll every `V(din_k)` access explicitly.",
         ])
     if "unsupported_tb_directives=" in notes or "single_quote" in notes:
         strong_templates.extend([
@@ -687,6 +734,21 @@ def _syntax_zero_gate_policy_section(layer: str, result: dict) -> str:
     if "model " in notes and " not found" in notes:
         strong_templates.extend([
             "- If EVAS reports `Model ... not found`, make the instance model name exactly match the `module` identifier in the generated Verilog-A file and make `ahdl_include` point to that file.",
+        ])
+    if "undefined_module=" in notes:
+        strong_templates.extend([
+            "- If EVAS reports `undefined_module=<name>`, the generated Verilog-A must declare `module <name>(...)` or the Spectre instance must use the actual declared module name. Do not leave a filename/module-name mismatch.",
+            "- For bugfix/spec-to-VA tasks, preserve the exact DUT module name requested by the public prompt and verifier harness; helper modules may be included only in addition to that DUT module.",
+        ])
+    if "instance_port_count_mismatch=" in notes:
+        strong_templates.extend([
+            "- If an instance has more scalar nodes than the module port list, rewrite the Verilog-A module port list to the same scalar ports used by the Spectre instance, in the same order.",
+            "- Do not rely on Verilog-A vector ports when the Spectre testbench uses scalar node names; unroll the ports and contributions explicitly.",
+        ])
+    if "sourced_port_voltage_drive=" in notes:
+        strong_templates.extend([
+            "- Do not connect a DUT supply or input port directly to literal `0` in the instance when strict preflight flags it. Use a named node such as `vss` and drive it with `Vss (vss 0) vsource dc=0`.",
+            "- Keep output ports on unsourced nodes; only stimulus/supply nodes should be driven by `vsource` elements.",
         ])
     if "cannot find va file" in notes:
         strong_templates.extend([
@@ -709,6 +771,11 @@ def _syntax_zero_gate_policy_section(layer: str, result: dict) -> str:
     if "tran.csv missing" in notes or "tb_not_executed" in notes:
         strong_templates.extend([
             "- `tran.csv missing` means the run did not reach a usable transient waveform. First ensure the TB has one valid `tran` statement, all included VA modules compile, all instances reference existing modules, and the `save` list names real nodes.",
+        ])
+    if "missing_generated_files" in notes or "testbench.scs" in notes:
+        strong_templates.extend([
+            "- End-to-end and testbench-generation tasks must output a complete fenced `spectre` testbench block as well as any required Verilog-A block. A Verilog-A-only response is not acceptable for compile closure.",
+            "- If the prompt is long, output a minimal compile-clean testbench: `simulator lang=spectre`, needed `ahdl_include` lines, supplies/stimulus, one `XDUT` instance, required `save` nodes, and one `tran` statement.",
         ])
 
     template_text = ""
@@ -736,6 +803,180 @@ def _syntax_zero_gate_policy_section(layer: str, result: dict) -> str:
         "target for this round is zero syntax/interface/runtime/observable errors; behavior optimization starts only "
         "after DUT compile, TB compile, strict preflight, simulation execution, and required observables are stable.\n"
     )
+
+
+def _compile_closure_gate_cleared(result: dict) -> bool:
+    return bool(_syntax_zero_gate_state(result).get("cleared"))
+
+
+def _file_block(path: Path) -> str:
+    lang = "spectre" if path.suffix.lower() == ".scs" else "verilog-a"
+    text = path.read_text(encoding="utf-8", errors="ignore").rstrip()
+    return f"# File: {path.name}\n```{lang}\n{text}\n```"
+
+
+def _candidate_sections(sample_dir: Path) -> list[str]:
+    sections: list[str] = []
+    for va_path in sorted(sample_dir.glob("*.va")):
+        sections.append(_file_block(va_path))
+    for tb_path in sorted(sample_dir.glob("*.scs")):
+        sections.append(_file_block(tb_path))
+    if not sections:
+        sections.append("No previous candidate files were found.")
+    return sections
+
+
+def _compile_gate_score_summary(result: dict) -> str:
+    scores = result.get("scores", {})
+    notes = result.get("evas_notes") or result.get("notes") or []
+    spectre_notes = result.get("spectre_notes", [])
+    all_notes = [str(note) for note in notes]
+    all_notes.extend(str(note) for note in spectre_notes if note not in notes)
+    note_text = "\n".join(f"- {note}" for note in all_notes[:24]) or "- <none>"
+    diagnostics = "\n".join(f"- {note}" for note in _concrete_diagnostics(result)) or "- <none>"
+    gate_state = _syntax_zero_gate_state(result)
+    issues = "\n".join(f"- {issue}" for issue in gate_state["issues"]) or "- <none>"
+    return textwrap.dedent(
+        f"""\
+        Current validator status: {result.get("status", "<unknown>")}
+        Current gate layer: {gate_state["layer"]}
+        Gate cleared: {gate_state["cleared"]}
+
+        Scores:
+        - dut_compile: {scores.get("dut_compile", "<missing>")}
+        - tb_compile: {scores.get("tb_compile", "<missing>")}
+        - sim_correct: {scores.get("sim_correct", "<missing>")}
+        - weighted_total: {scores.get("weighted_total", "<missing>")}
+
+        Gate issues:
+        {issues}
+
+        Concrete compile/interface/runtime diagnostics:
+        {diagnostics}
+
+        Validator notes:
+        {note_text}
+        """
+    ).strip()
+
+
+def _compile_history_section(history: list[dict]) -> str:
+    if not history:
+        return "No previous compile-closure repair rounds."
+    lines = ["Previous compile-closure rounds:"]
+    for item in history[-4:]:
+        diagnostics = item.get("concrete_diagnostics") or item.get("evas_notes") or []
+        diag_text = "; ".join(str(note) for note in diagnostics[:4]) or "<none>"
+        lines.append(
+            f"- R{item.get('round')}: status={item.get('status')} "
+            f"layer={item.get('result_layer')} progress={item.get('progress_label')} diagnostics={diag_text}"
+        )
+    return "\n".join(lines)
+
+
+def _compile_skill_guidance_section(result: dict, *, enabled: bool) -> str:
+    if not enabled:
+        return "# Routed Compile Skills\nCompile skill guidance disabled for this run."
+    notes = [str(note) for note in (result.get("evas_notes") or result.get("notes") or [])]
+    notes.extend(_concrete_diagnostics(result))
+    selected = select_compile_skills(notes)
+    if not selected:
+        return "# Routed Compile Skills\nNo compile skills matched the current validator notes."
+    skill_ids = [skill.id for skill in selected]
+    guidance = render_compile_skill_guidance(skill_ids)
+    return (
+        "# Routed Compile Skills\n"
+        f"Selected compile skills: {', '.join(skill_ids)}\n\n"
+        f"{guidance.strip()}"
+    )
+
+
+def _compile_only_closure_prompt(
+    *,
+    task_dir: Path,
+    sample_dir: Path,
+    result: dict,
+    history: list[dict],
+    round_idx: int,
+    public_spec_mode: str,
+    include_mechanism: bool,
+    include_compile_skills: bool,
+) -> str:
+    """Build official-G compile-closure prompt without behavior checker leakage."""
+    meta = read_meta(task_dir)
+    family = meta.get("family", "end-to-end")
+    original_prompt = build_prompt(
+        task_dir,
+        include_checker=False,
+        include_skill=False,
+        public_spec_mode=public_spec_mode,
+        enhancement_mode="none",
+    )
+    mechanism_payload = build_enhancement_payload(task_dir, "mechanism") if include_mechanism else {"text": ""}
+    condition_label = (
+        "official Condition G compile-closure step"
+        if include_mechanism
+        else "Condition C compile-closure ablation step"
+    )
+    allowed_guidance = (
+        "the public Condition G mechanism guidance, "
+        if include_mechanism
+        else ""
+    )
+    candidate_text = "\n\n".join(_candidate_sections(sample_dir))
+    layer = _classify_repair_layer(result)
+    gate_policy = _syntax_zero_gate_policy_section(layer, result)
+    score_text = _compile_gate_score_summary(result)
+    history_text = _compile_history_section(history)
+    compile_skill_text = _compile_skill_guidance_section(result, enabled=include_compile_skills)
+
+    return textwrap.dedent(
+        f"""\
+        You are running the {condition_label} for the vaEVAS ADFGI benchmark.
+
+        Scope:
+        - This is a compile/interface/runtime/observable gate repair, not a behavior-optimization round.
+        - Use only the public task prompt/spec, {allowed_guidance}the current candidate files, and validator compile/runtime notes.
+        - Do not use gold code, checker source, hidden expected values, private thresholds, or behavior metric-gap targets.
+        - Do not tune semantic constants, gains, ratios, thresholds, quantization policy, lock criteria, or state-machine behavior unless the edit is directly required to clear the compile/interface/runtime/observable gate.
+        - Once the candidate reaches a behavior-only failure or PASS, the runner stops instead of asking you to repair behavior.
+
+        Artifact contract:
+        - Task family: `{family}`.
+        - Preserve required module names, port order, parameters, filenames, include relationships, saved observables, and public waveform-column names from the task.
+        - Output complete replacement code blocks only.
+        - Do not include explanations outside code blocks.
+        - Use fenced `verilog-a` blocks for Verilog-A files and fenced `spectre` blocks for Spectre testbenches.
+        - Prefer the smallest compile-clean edit; copy unchanged code exactly when possible.
+        - While fixing the current failure, do not revert any fix that resolved a prior round's failure.
+
+        Attempt round: {round_idx}
+
+        # Current Gate Feedback
+
+        {score_text}
+
+        {gate_policy.strip()}
+
+        # Compile-Closure History
+
+        {history_text}
+
+        {compile_skill_text}
+
+        # Public Condition G Mechanism Guidance
+
+        {mechanism_payload.get("text", "").strip() or "Mechanism guidance disabled for this run."}
+
+        # Original Public Task Prompt
+
+        {original_prompt.strip()}
+
+        # Current Candidate Files
+
+        {candidate_text}
+        """
+    ).strip() + "\n"
 
 
 def _score_quick(
@@ -779,14 +1020,31 @@ def _score_quick(
     return result
 
 
-def _task_lookup(task_ids: list[str]) -> list[tuple[str, Path]]:
+def _task_lookup(task_ids: list[str], bench_dir: str = "") -> list[tuple[str, Path]]:
     selected = set(task_ids)
-    tasks = [(tid, path) for tid, path in list_task_dirs(selected=selected)]
+    if bench_dir:
+        bench_path = Path(bench_dir)
+        if not bench_path.is_absolute():
+            bench_path = ROOT / bench_path
+        tasks = [(tid, path) for tid, path in list_bench_task_dirs(bench_path, selected=selected)]
+    else:
+        tasks = [(tid, path) for tid, path in list_task_dirs(selected=selected)]
     found = {tid for tid, _ in tasks}
     missing = sorted(selected - found)
     if missing:
         raise SystemExit(f"Missing task ids: {', '.join(missing)}")
     return tasks
+
+
+def _existing_result_path(result_root: str, task_id: str) -> Path | None:
+    if not result_root:
+        return None
+    task_root = Path(result_root) / task_id
+    for filename in ("result.json", "evas_result.json"):
+        candidate = task_root / filename
+        if candidate.exists():
+            return candidate
+    return None
 
 
 def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
@@ -814,7 +1072,7 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
             if idx == 0:
                 raise SystemExit(f"Missing source sample for {model_slug}/{task_id}")
             continue
-        result_path = Path(result_root) / task_id / "result.json" if result_root else None
+        result_path = _existing_result_path(result_root, task_id)
         if result_path and result_path.exists():
             result = json.loads(result_path.read_text(encoding="utf-8"))
             print(f"[adaptive] {task_id} R0 candidate{idx} reuse_result={result_path}")
@@ -829,7 +1087,7 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
                 timeout_s=args.timeout_s,
                 quick_maxstep=args.quick_maxstep,
             )
-        rank = _progress_rank(task_id, result)
+        rank = _result_rank(task_id, result, compile_only_closure=args.compile_only_closure)
         initial_candidates.append(
             {
                 "idx": idx,
@@ -848,7 +1106,7 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
     selected_candidate = max(initial_candidates, key=lambda item: item["rank"])
     best_sample = selected_candidate["sample"]
     best_result = selected_candidate["result"]
-    best_rank = _progress_rank(task_id, best_result)
+    best_rank = _result_rank(task_id, best_result, compile_only_closure=args.compile_only_closure)
     best_layer = _classify_repair_layer(best_result)
     anchor_sample = best_sample
     anchor_result = best_result
@@ -860,35 +1118,52 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
     for round_idx in range(1, args.max_rounds + 1):
         if best_result.get("status") == "PASS":
             break
+        if args.compile_only_closure and _compile_closure_gate_cleared(best_result):
+            print(f"[adaptive] {task_id} compile-closure gate clear; stop before behavior repair")
+            break
+        round_start = time.perf_counter()
         layer = _classify_repair_layer(anchor_result)
-        prompt = build_evas_guided_repair_prompt(
-            task_dir,
-            anchor_sample,
-            anchor_result,
-            history=history,
-            include_skill=not args.no_repair_skill,
-            include_contract_diagnosis=not args.disable_contract_diagnosis,
-            public_spec_mode=args.repair_public_spec_mode,
-            loop_context={
-                "attempt_round": round_idx,
-                "best_round": history[-1]["round"] if history else 0,
-                "best_status": best_result.get("status"),
-                "best_scores": best_result.get("scores", {}),
-                "best_metric_gap": metric_gap_summary(task_dir, best_result),
-                "best_failure_subtype": _failure_subtype(best_result),
-            },
-        )
-        if args.layered_only_repair:
-            prompt += _layer_policy_section(layer, task_dir)
-        if args.syntax_zero_gate:
-            prompt += _syntax_zero_gate_policy_section(layer, anchor_result)
-        elif args.freeze_gold_harness_on_behavior and anchor_result.get("status") == "FAIL_SIM_CORRECTNESS":
-            prompt += _layer_policy_section("behavior", task_dir)
+        if args.compile_only_closure:
+            prompt = _compile_only_closure_prompt(
+                task_dir=task_dir,
+                sample_dir=anchor_sample,
+                result=anchor_result,
+                history=history,
+                round_idx=round_idx,
+                public_spec_mode=args.repair_public_spec_mode,
+                include_mechanism=not args.no_repair_skill,
+                include_compile_skills=args.compile_skill_guidance,
+            )
+        else:
+            prompt = build_evas_guided_repair_prompt(
+                task_dir,
+                anchor_sample,
+                anchor_result,
+                history=history,
+                include_skill=not args.no_repair_skill,
+                include_contract_diagnosis=not args.disable_contract_diagnosis,
+                public_spec_mode=args.repair_public_spec_mode,
+                loop_context={
+                    "attempt_round": round_idx,
+                    "best_round": history[-1]["round"] if history else 0,
+                    "best_status": best_result.get("status"),
+                    "best_scores": best_result.get("scores", {}),
+                    "best_metric_gap": metric_gap_summary(task_dir, best_result),
+                    "best_failure_subtype": _failure_subtype(best_result),
+                },
+            )
+            if args.layered_only_repair:
+                prompt += _layer_policy_section(layer, task_dir)
+            if args.syntax_zero_gate:
+                prompt += _syntax_zero_gate_policy_section(layer, anchor_result)
+            elif args.freeze_gold_harness_on_behavior and anchor_result.get("status") == "FAIL_SIM_CORRECTNESS":
+                prompt += _layer_policy_section("behavior", task_dir)
         sample_dir = gen_root / f"adaptive_round{round_idx}"
         sample_dir.mkdir(parents=True, exist_ok=True)
         (sample_dir / "repair_prompt.md").write_text(prompt, encoding="utf-8")
 
         print(f"[adaptive] CALL {model_slug}/{task_id} R{round_idx} ... ", end="", flush=True)
+        api_start = time.perf_counter()
         response_text, usage = call_model(
             args.model,
             prompt,
@@ -896,6 +1171,7 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
             args.top_p,
             args.max_tokens,
         )
+        api_elapsed_s = time.perf_counter() - api_start
         (sample_dir / "raw_response.txt").write_text(response_text, encoding="utf-8")
         saved = _save_generated_response(
             response_text=response_text,
@@ -906,13 +1182,17 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
         frozen_tbs: list[str] = []
         frozen_duts: list[str] = []
         frozen_harness: list[str] = []
-        syntax_gate_state = _syntax_zero_gate_state(anchor_result) if args.syntax_zero_gate else {}
+        syntax_gate_state = (
+            _syntax_zero_gate_state(anchor_result)
+            if args.syntax_zero_gate or args.compile_only_closure
+            else {}
+        )
         if args.layered_only_repair:
             if layer == "observable":
                 frozen_duts = _freeze_veriloga_from(anchor_sample, sample_dir)
             elif layer == "behavior":
                 frozen_harness = _freeze_gold_harness(task_dir, sample_dir)
-        elif args.syntax_zero_gate:
+        elif args.syntax_zero_gate or args.compile_only_closure:
             if layer in {"compile_tb", "observable"}:
                 frozen_duts = _freeze_veriloga_from(anchor_sample, sample_dir)
         elif anchor_result.get("status") == "FAIL_SIM_CORRECTNESS":
@@ -920,6 +1200,11 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
                 frozen_harness = _freeze_gold_harness(task_dir, sample_dir)
             elif args.freeze_tb_on_behavior:
                 frozen_tbs = _freeze_testbench_from(best_sample, sample_dir)
+        vector_unroll_guard_edits = (
+            apply_vector_unroll_guard(sample_dir, notes=anchor_result.get("evas_notes", []))
+            if args.compile_only_closure
+            else []
+        )
         _json_write(
             sample_dir / "generation_meta.json",
             {
@@ -933,9 +1218,15 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
                 "frozen_testbench_from_best": frozen_tbs,
                 "frozen_dut_from_anchor": frozen_duts,
                 "frozen_gold_harness": frozen_harness,
+                "vector_unroll_guard_edits": vector_unroll_guard_edits,
                 "repair_layer": layer,
                 "syntax_zero_gate": bool(args.syntax_zero_gate),
+                "compile_only_closure": bool(args.compile_only_closure),
+                "compile_skill_guidance": bool(args.compile_skill_guidance),
                 "syntax_zero_gate_state": syntax_gate_state,
+                "api_elapsed_s": round(api_elapsed_s, 3),
+                "api_call_count": 1,
+                "task_elapsed_s": round(time.perf_counter() - round_start, 3),
                 "generated_at": datetime.now(timezone.utc).isoformat(),
                 **usage,
             },
@@ -954,7 +1245,7 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
             timeout_s=args.timeout_s,
             quick_maxstep=args.quick_maxstep,
         )
-        rank = _progress_rank(task_id, result)
+        rank = _result_rank(task_id, result, compile_only_closure=args.compile_only_closure)
         result_layer = _classify_repair_layer(result)
         improved = rank > best_rank
         print(
@@ -971,7 +1262,7 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
                 "scores": result.get("scores", {}),
                 "evas_notes": result.get("evas_notes", []),
                 "concrete_diagnostics": _concrete_diagnostics(result),
-                "metric_gap": metric_gap_summary(task_dir, result),
+                "metric_gap": {} if args.compile_only_closure else metric_gap_summary(task_dir, result),
                 "failure_subtype": _failure_subtype(result),
                 "metrics": _extract_metrics(result),
                 "progress_label": "improved" if improved else "stalled",
@@ -996,12 +1287,21 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
             anchor_result = best_result
             anchor_policy = "best_so_far_after_stall"
         history[-1]["next_anchor_policy"] = anchor_policy
-        if result.get("status") == "PASS" or no_progress >= args.patience:
+        if (
+            result.get("status") == "PASS"
+            or (args.compile_only_closure and _compile_closure_gate_cleared(best_result))
+            or no_progress >= args.patience
+        ):
             break
 
     _copy_sample(best_sample, final_dir)
     materialized_syntax_edits = (
-        _materialize_syntax_zero_sanitizers(final_dir) if args.syntax_zero_gate else []
+        _materialize_syntax_zero_sanitizers(final_dir) if args.syntax_zero_gate or args.compile_only_closure else []
+    )
+    materialized_vector_unroll_edits = (
+        apply_vector_unroll_guard(final_dir, notes=best_result.get("evas_notes", []))
+        if args.compile_only_closure
+        else []
     )
     _json_write(
         final_dir / "generation_meta.json",
@@ -1016,7 +1316,11 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
             "best_scores": best_result.get("scores", {}),
             "best_metrics": _extract_metrics(best_result),
             "syntax_zero_gate": bool(args.syntax_zero_gate),
+            "compile_only_closure": bool(args.compile_only_closure),
+            "compile_skill_guidance": bool(args.compile_skill_guidance),
+            "compile_closure_gate_state": _syntax_zero_gate_state(best_result),
             "materialized_syntax_edits": materialized_syntax_edits,
+            "materialized_vector_unroll_edits": materialized_vector_unroll_edits,
             "initial_candidates": [
                 {
                     "idx": item["idx"],
@@ -1042,6 +1346,11 @@ def parse_args() -> argparse.Namespace:
     ap.add_argument("--model", default="kimi-k2.5")
     ap.add_argument("--all", action="store_true", help="Run all benchmark tasks instead of the small default pilot set.")
     ap.add_argument("--task", action="append", default=[])
+    ap.add_argument(
+        "--bench-dir",
+        default="",
+        help="Optional benchmark root containing tasks/. Use for benchmark-balanced repair runs.",
+    )
     ap.add_argument("--workers", type=int, default=1, help="Task-level parallel workers. Use 1 for serial mode.")
     ap.add_argument("--resume", action="store_true", help="Skip tasks that already have a best result and final sample.")
     ap.add_argument("--source-generated-dir", default="generated-table2-evas-guided-repair-3round-skill")
@@ -1093,13 +1402,29 @@ def parse_args() -> argparse.Namespace:
             "and preserve working layers where possible."
         ),
     )
+    ap.add_argument(
+        "--compile-only-closure",
+        action="store_true",
+        help=(
+            "Official Condition G mode: use mechanism guidance plus validator gate notes to close "
+            "compile/interface/runtime/observable errors, then stop before behavior repair."
+        ),
+    )
+    ap.add_argument(
+        "--compile-skill-guidance",
+        action="store_true",
+        help=(
+            "Route current compile diagnostics through runners/compile_skills and inject the matched "
+            "skill guidance into compile-only LLM repair prompts. Use for C-SKILL style ablations."
+        ),
+    )
     return ap.parse_args()
 
 
 def main() -> int:
     args = parse_args()
     _load_env_file(Path(args.env_file))
-    tasks = _task_lookup([] if args.all else (args.task or DEFAULT_TASKS))
+    tasks = _task_lookup([] if args.all else (args.task or DEFAULT_TASKS), args.bench_dir)
     results = []
 
     def _runner_exception_result(task_id: str, task_dir: Path, exc: BaseException) -> dict:
@@ -1142,10 +1467,12 @@ def main() -> int:
         "workers": worker_count,
         "condition_flags": {
             "syntax_zero_gate": bool(args.syntax_zero_gate),
+            "compile_only_closure": bool(args.compile_only_closure),
             "layered_only_repair": bool(args.layered_only_repair),
             "repair_public_spec_mode": args.repair_public_spec_mode,
             "no_repair_skill": bool(args.no_repair_skill),
             "disable_contract_diagnosis": bool(args.disable_contract_diagnosis),
+            "bench_dir": args.bench_dir,
         },
         "results": [
             {

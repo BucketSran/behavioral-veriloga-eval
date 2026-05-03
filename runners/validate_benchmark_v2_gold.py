@@ -106,7 +106,7 @@ def _stage_candidate(
 
     meta = _read_json(task_dir / "meta.json")
     family = meta.get("family", "end-to-end")
-    required_axes = meta.get("scoring", ["dut_compile", "tb_compile", "sim_correct"])
+    required_axes = _normalized_required_axes(meta.get("scoring", ["dut_compile", "tb_compile", "sim_correct"]))
     gold_dir = task_dir / "gold"
 
     if stage_dir.exists():
@@ -178,8 +178,24 @@ def _run_checker(task_dir: Path, csv_path: Path) -> tuple[float, list[str], dict
     return (1.0 if ok else 0.0), notes, result
 
 
-def _status(scores: dict[str, float], required_axes: list[str] | None = None) -> str:
+def _normalized_required_axes(required_axes: list[str] | None = None) -> list[str]:
+    aliases = {
+        "syntax": "dut_compile",
+        "routing": "tb_compile",
+        "simulation": "sim_correct",
+        "behavior": "sim_correct",
+    }
     axes = required_axes or ["dut_compile", "tb_compile", "sim_correct"]
+    normalized: list[str] = []
+    for axis in axes:
+        mapped = aliases.get(axis, axis)
+        if mapped not in normalized:
+            normalized.append(mapped)
+    return normalized or ["dut_compile", "tb_compile", "sim_correct"]
+
+
+def _status(scores: dict[str, float], required_axes: list[str] | None = None) -> str:
+    axes = _normalized_required_axes(required_axes)
     if "dut_compile" in axes and scores.get("dut_compile", 0.0) < 1.0:
         return "FAIL_DUT_COMPILE"
     if "tb_compile" in axes and scores.get("tb_compile", 0.0) < 1.0:
@@ -190,8 +206,67 @@ def _status(scores: dict[str, float], required_axes: list[str] | None = None) ->
 
 
 def _weighted(scores: dict[str, float], required_axes: list[str] | None = None) -> float:
-    axes = required_axes or ["dut_compile", "tb_compile", "sim_correct"]
+    axes = _normalized_required_axes(required_axes)
     return round(sum(scores.get(axis, 0.0) for axis in axes) / len(axes), 4)
+
+
+def _passes_required_axes(result: dict[str, Any]) -> bool:
+    scores = result.get("scores", {})
+    required_axes = _normalized_required_axes(result.get("required_axes"))
+    return all(float(scores.get(axis, 0.0) or 0.0) >= 1.0 for axis in required_axes)
+
+
+def _missing_artifact_result(
+    *,
+    task_id: str,
+    backend: str,
+    source: str,
+    required_axes: list[str],
+    raw_required_axes: list[str],
+    notes: list[str],
+    staged_dir: Path,
+    staged_tb: Path,
+) -> dict[str, Any] | None:
+    staged_va_paths = sorted(staged_dir.glob("*.va"))
+    missing_dut = not staged_va_paths
+    missing_tb = not staged_tb.exists()
+    if not missing_dut and not missing_tb:
+        return None
+
+    scores = {
+        "dut_compile": 0.0 if missing_dut else 1.0,
+        "tb_compile": 0.0 if missing_tb else 1.0,
+        "sim_correct": 0.0,
+    }
+    if "sim_correct" not in required_axes:
+        scores["sim_correct"] = 1.0
+    scores["weighted_total"] = _weighted(scores, required_axes)
+
+    artifact_notes = list(notes)
+    if missing_dut:
+        artifact_notes.append("spectre_strict:missing_staged_dut")
+    if missing_tb:
+        artifact_notes.append("spectre_strict:missing_staged_tb")
+
+    return {
+        "task_id": task_id,
+        "backend": backend,
+        "source": source,
+        "required_axes": required_axes,
+        "raw_required_axes": raw_required_axes,
+        "status": _status(scores, required_axes),
+        "scores": scores,
+        "notes": artifact_notes,
+        "checker_result": {},
+        "strict_preflight_status": _status(scores, required_axes),
+        "strict_preflight_scores": scores,
+        "timing": {},
+        "artifacts": {
+            "staged_dir": str(staged_dir),
+            "tb": str(staged_tb),
+            "tran_csv": None,
+        },
+    }
 
 
 def validate_evas(
@@ -205,7 +280,8 @@ def validate_evas(
 ) -> dict[str, Any]:
     meta = _read_json(task_dir / "meta.json")
     task_id = meta["task_id"]
-    required_axes = meta.get("scoring", ["dut_compile", "tb_compile", "sim_correct"])
+    raw_required_axes = meta.get("scoring", ["dut_compile", "tb_compile", "sim_correct"])
+    required_axes = _normalized_required_axes(raw_required_axes)
     stage_dir = case_out / "staged"
     _dut, tb, staging_notes = _stage_candidate(
         task_dir, stage_dir, candidate_root=candidate_root, model=model, sample_idx=sample_idx
@@ -214,6 +290,54 @@ def validate_evas(
     if output_dir.exists():
         shutil.rmtree(output_dir)
     output_dir.mkdir(parents=True)
+    missing_result = _missing_artifact_result(
+        task_id=task_id,
+        backend="evas",
+        source="candidate" if candidate_root else "gold",
+        required_axes=required_axes,
+        raw_required_axes=raw_required_axes,
+        notes=staging_notes,
+        staged_dir=stage_dir,
+        staged_tb=tb,
+    )
+    if missing_result is not None:
+        missing_result["evas_mode"] = "spectre-strict"
+        (case_out / "evas_console.log").write_text("", encoding="utf-8")
+        (case_out / "evas_result.json").write_text(json.dumps(missing_result, indent=2), encoding="utf-8")
+        return missing_result
+
+    strict_status, strict_scores, strict_notes = spectre_strict_preflight(
+        family=meta.get("family", BENCH_FAMILY),
+        required_axes=required_axes,
+        staged_tb=tb,
+        staged_va_paths=sorted(stage_dir.glob("*.va")),
+    )
+    notes = [*staging_notes, *strict_notes]
+    if strict_status is not None and strict_scores is not None:
+        result = {
+            "task_id": task_id,
+            "backend": "evas",
+            "evas_mode": "spectre-strict",
+            "source": "candidate" if candidate_root else "gold",
+            "required_axes": required_axes,
+            "raw_required_axes": raw_required_axes,
+            "status": strict_status,
+            "scores": strict_scores,
+            "notes": notes,
+            "checker_result": {},
+            "strict_preflight_status": strict_status,
+            "strict_preflight_scores": strict_scores,
+            "timing": {},
+            "artifacts": {
+                "staged_dir": str(stage_dir),
+                "tb": str(tb),
+                "tran_csv": None,
+            },
+        }
+        (case_out / "evas_console.log").write_text("", encoding="utf-8")
+        (case_out / "evas_result.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
+        return result
+
     proc = run_evas(stage_dir, tb, output_dir, timeout_s)
     combined = (proc.stdout or "") + "\n" + (proc.stderr or "")
     (case_out / "evas_console.log").write_text(combined, encoding="utf-8")
@@ -223,7 +347,7 @@ def validate_evas(
         "tb_compile": 1.0 if ("Transient Analysis" in combined or csv_path.exists()) else 0.0,
         "sim_correct": 0.0,
     }
-    notes = [*staging_notes, f"returncode={proc.returncode}"]
+    notes.append(f"returncode={proc.returncode}")
     runtime = parse_evas_runtime_error(combined)
     if runtime:
         notes.append("evas_runtime_error=" + runtime)
@@ -242,11 +366,16 @@ def validate_evas(
     result = {
         "task_id": task_id,
         "backend": "evas",
+        "evas_mode": "spectre-strict",
         "source": "candidate" if candidate_root else "gold",
+        "required_axes": required_axes,
+        "raw_required_axes": raw_required_axes,
         "status": _status(scores, required_axes),
         "scores": scores,
         "notes": notes,
         "checker_result": checker_result,
+        "strict_preflight_status": None,
+        "strict_preflight_scores": None,
         "timing": parse_evas_timing(combined),
         "artifacts": {
             "staged_dir": str(stage_dir),
@@ -271,11 +400,27 @@ def validate_spectre(
 ) -> dict[str, Any]:
     meta = _read_json(task_dir / "meta.json")
     task_id = meta["task_id"]
-    required_axes = meta.get("scoring", ["dut_compile", "tb_compile", "sim_correct"])
+    raw_required_axes = meta.get("scoring", ["dut_compile", "tb_compile", "sim_correct"])
+    required_axes = _normalized_required_axes(raw_required_axes)
     stage_dir = case_out / "staged"
     _dut, tb, staging_notes = _stage_candidate(
         task_dir, stage_dir, candidate_root=candidate_root, model=model, sample_idx=sample_idx
     )
+    missing_result = _missing_artifact_result(
+        task_id=task_id,
+        backend="spectre",
+        source="candidate" if candidate_root else "gold",
+        required_axes=required_axes,
+        raw_required_axes=raw_required_axes,
+        notes=staging_notes,
+        staged_dir=stage_dir,
+        staged_tb=tb,
+    )
+    if missing_result is not None:
+        missing_result["spectre_mode"] = spectre_mode
+        (case_out / "spectre_result.json").write_text(json.dumps(missing_result, indent=2), encoding="utf-8")
+        return missing_result
+
     strict_status, strict_scores, strict_notes = spectre_strict_preflight(
         family=meta.get("family", BENCH_FAMILY),
         required_axes=required_axes,
@@ -339,6 +484,8 @@ def validate_spectre(
         "backend": "spectre",
         "source": "candidate" if candidate_root else "gold",
         "spectre_mode": spectre_mode,
+        "required_axes": required_axes,
+        "raw_required_axes": raw_required_axes,
         "status": _status(scores, required_axes),
         "scores": scores,
         "notes": notes,
@@ -357,7 +504,7 @@ def _aggregate(results: list[dict[str, Any]], backend: str) -> dict[str, Any]:
         {
             "task_id": r["task_id"],
             "family": BENCH_FAMILY,
-            "required_axes": ["dut_compile", "tb_compile", "sim_correct"],
+            "required_axes": _normalized_required_axes(r.get("required_axes")),
             "scores": r.get("scores", {}),
             "status": r.get("status", "FAIL_INFRA"),
         }
@@ -365,11 +512,11 @@ def _aggregate(results: list[dict[str, Any]], backend: str) -> dict[str, Any]:
     ]
     aggregate = build_model_results(f"{BENCH_FAMILY}-gold-{backend}", model_like, 0.0, 1.0)
     aggregate["backend"] = backend
-    aggregate["pass_tasks"] = [r["task_id"] for r in results if r.get("status") == "PASS"]
+    aggregate["pass_tasks"] = [r["task_id"] for r in results if _passes_required_axes(r)]
     aggregate["fail_tasks"] = [
         {"task_id": r["task_id"], "status": r.get("status"), "notes": r.get("notes", [])[-5:]}
         for r in results
-        if r.get("status") != "PASS"
+        if not _passes_required_axes(r)
     ]
     return aggregate
 

@@ -46,6 +46,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 ALL_FAMILIES = ("end-to-end", "spec-to-va", "bugfix", "tb-generation")
 PUBLIC_SPECTRE_RULES_PATH = ROOT / "specs" / "spectre_veriloga_public_rules.md"
+LEGO_MECHANISM_SKILLS_PATH = ROOT / "docs" / "LEGO_MECHANISM_SKILLS.json"
+ENHANCEMENT_PAYLOAD_VERSIONS = {
+    "none": "none",
+    "mechanism": "g-mechanism-skills-v1-2026-05-02",
+    "functional-ir": "i-public-functional-ir-v1-2026-05-02",
+}
 
 
 def family_task_root(family: str) -> Path:
@@ -66,6 +72,12 @@ def _load_public_spectre_rules() -> str:
     if not PUBLIC_SPECTRE_RULES_PATH.exists():
         return ""
     return PUBLIC_SPECTRE_RULES_PATH.read_text(encoding="utf-8").strip()
+
+
+def _load_json(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def _normalize_port_name(port_item: str) -> str | None:
@@ -118,6 +130,265 @@ def _extract_tb_supply_contract(tb_path: Path, ports: list[str]) -> tuple[str, s
     if found_vss is not None and found_vss not in {"0", "0.0"}:
         vss_node = ports[1]
     return vdd_node, vss_node, vdd_value
+
+
+def _public_task_text(task_dir: Path, meta: dict) -> str:
+    """Build the public-only text used for mechanism retrieval.
+
+    Condition-G mechanism routing must not use task identity.  Keep retrieval
+    limited to the prompt plus public functional/interface descriptors.
+    """
+    prompt = (task_dir / "prompt.md").read_text(encoding="utf-8", errors="ignore")
+    ports = _extract_public_ports(prompt)
+    observables = _extract_public_observables(prompt)
+    events = _event_features(prompt)
+    public_function = [
+        str(meta.get("core_function") or meta.get("category") or ""),
+        str(meta.get("task_form") or meta.get("family") or ""),
+    ]
+    parts = [
+        prompt,
+        "public ports: " + " ".join(ports),
+        "public observables: " + " ".join(observables),
+        "public event features: " + " ".join(events),
+        "public function tags: " + " ".join(public_function),
+    ]
+    return "\n".join(parts).lower()
+
+
+def _keywords_from_text(text: str) -> set[str]:
+    return {tok for tok in re.findall(r"[a-zA-Z_][a-zA-Z0-9_]{2,}", text.lower())}
+
+
+def _extract_public_ports(prompt_text: str) -> list[str]:
+    ports: list[str] = []
+    for match in re.finditer(r"[-*]\s*`([A-Za-z_]\w*)`\s*:", prompt_text):
+        port = match.group(1)
+        if port not in ports:
+            ports.append(port)
+    return ports[:16]
+
+
+def _extract_public_observables(prompt_text: str) -> list[str]:
+    observables: list[str] = []
+    lowered = prompt_text.lower()
+    anchor = lowered.find("required public waveform columns")
+    if anchor < 0:
+        anchor = lowered.find("required waveform columns")
+    if anchor >= 0:
+        window = prompt_text[anchor : anchor + 800]
+        for token in re.findall(r"`([A-Za-z_][A-Za-z0-9_\\[\\].]*)`", window):
+            if token not in observables:
+                observables.append(token)
+    return observables[:20]
+
+
+def _event_features(prompt_text: str) -> list[str]:
+    lowered = prompt_text.lower()
+    features = []
+    for name, desc in [
+        ("initial_step", "initialize all state and output targets deterministically"),
+        ("cross", "use threshold-crossing events only for true side changes"),
+        ("above", "use level events for startup/threshold conditions"),
+        ("timer", "schedule periodic or absolute-time state updates explicitly"),
+        ("transition", "drive observable voltages through transition(target, delay, rise, fall)"),
+        ("pulse", "align clock/pulse stimulus thresholds with the DUT event detector"),
+        ("pwl", "keep piecewise-linear stimulus times strictly increasing"),
+    ]:
+        if name in lowered:
+            features.append(f"{name}: {desc}")
+    return features
+
+
+def _load_mechanism_skills() -> list[dict]:
+    data = _load_json(LEGO_MECHANISM_SKILLS_PATH)
+    skills = data.get("skills", [])
+    return [item for item in skills if isinstance(item, dict)]
+
+
+def _skill_terms(skill: dict) -> set[str]:
+    terms: set[str] = set()
+    for key in ("skill_id", "title", "mechanism_family"):
+        terms.update(_keywords_from_text(str(skill.get(key, ""))))
+    for key in ("aliases", "concepts"):
+        for item in skill.get(key, []) or []:
+            terms.update(_keywords_from_text(str(item)))
+    for key in (skill.get("slot_schema") or {}).keys():
+        terms.update(_keywords_from_text(str(key)))
+    return terms
+
+
+def _select_mechanism_skills(task_dir: Path, meta: dict, limit: int = 2) -> list[tuple[dict, int]]:
+    public_text = _public_task_text(task_dir, meta)
+    task_terms = _keywords_from_text(public_text)
+    scored: list[tuple[dict, int]] = []
+    for skill in _load_mechanism_skills():
+        score = len(task_terms & _skill_terms(skill))
+        core = str(meta.get("core_function") or meta.get("category") or "").replace("-", "_")
+        if core and core.lower() in " ".join(_skill_terms(skill)):
+            score += 4
+        if score > 0:
+            scored.append((skill, score))
+    scored.sort(key=lambda item: (-item[1], str(item[0].get("skill_id", ""))))
+    return scored[:limit]
+
+
+def _generic_mechanism_lines(meta: dict) -> list[str]:
+    core = meta.get("core_function") or meta.get("category") or "voltage_behavior"
+    form = meta.get("task_form") or meta.get("family") or "task"
+    return [
+        f"- Mechanism family: `{core}` / `{form}`.",
+        "- Declare persistent state at module scope; initialize it in `@(initial_step)`.",
+        "- Use public clock, reset, threshold, and stimulus names from the prompt; do not invent hidden control ports.",
+        "- Keep one source of truth for each public code, state, or output target.",
+        "- Drive all observable voltages continuously with `V(out) <+ transition(target, 0, tr, tr)` outside runtime branches.",
+        "- Keep testbench save names exactly aligned with the public waveform-column contract.",
+    ]
+
+
+def _build_mechanism_payload(task_dir: Path, meta: dict) -> dict:
+    matches = _select_mechanism_skills(task_dir, meta)
+    lines = [
+        "## Circuit Mechanism Guidance (Condition G, public non-gold)",
+        "",
+        f"Payload version: `{ENHANCEMENT_PAYLOAD_VERSIONS['mechanism']}`.",
+        "Use this as high-level implementation guidance. It is not checker source and not gold code.",
+        "",
+    ]
+    ids: list[str] = []
+    if matches:
+        lines.append("Matched mechanism skills:")
+        for skill, score in matches:
+            sid = str(skill.get("skill_id", "unknown"))
+            ids.append(sid)
+            lines.append(f"- `{sid}` score={score}: {skill.get('title', sid)}")
+        for skill, _score in matches:
+            lines.extend(["", f"### {skill.get('title', skill.get('skill_id', 'Mechanism'))}"])
+            concepts = skill.get("concepts", [])[:6]
+            if concepts:
+                lines.append("- Concepts: " + ", ".join(f"`{item}`" for item in concepts))
+            skeleton = skill.get("implementation_skeleton", [])[:6]
+            if skeleton:
+                lines.append("- Implementation skeleton:")
+                for item in skeleton:
+                    lines.append(f"  - {item}")
+            expectations = skill.get("checker_expectations", [])[:4]
+            if expectations:
+                lines.append("- Public behavior expectations:")
+                for item in expectations:
+                    lines.append(f"  - {item}")
+            constraints = skill.get("spectre_constraints", [])[:4]
+            if constraints:
+                lines.append("- Spectre-safe constraints:")
+                for item in constraints:
+                    lines.append(f"  - {item}")
+            anti = skill.get("anti_patterns", [])[:4]
+            if anti:
+                lines.append("- Avoid:")
+                for item in anti:
+                    lines.append(f"  - {item}")
+        status = "matched"
+    else:
+        ids = ["generic_voltage_behavior"]
+        lines.append("No specialized mechanism skill matched; use the generic voltage-behavior mechanism scaffold:")
+        lines.extend(_generic_mechanism_lines(meta))
+        status = "generic"
+    text = "\n".join(lines).strip() + "\n"
+    return {
+        "mode": "mechanism",
+        "version": ENHANCEMENT_PAYLOAD_VERSIONS["mechanism"],
+        "status": status,
+        "ids": ids,
+        "text": text,
+    }
+
+
+def _build_functional_ir_payload(task_dir: Path, meta: dict) -> dict:
+    prompt_text = (task_dir / "prompt.md").read_text(encoding="utf-8", errors="ignore")
+    ports = _extract_public_ports(prompt_text)
+    observables = _extract_public_observables(prompt_text)
+    events = _event_features(prompt_text)
+    core = meta.get("core_function") or meta.get("category") or "voltage_behavior"
+    form = meta.get("task_form") or meta.get("family") or "task"
+    source = meta.get("source_collection") or "benchmark"
+    state_clues = []
+    lowered = prompt_text.lower()
+    for keyword, hint in [
+        ("reset", "reset_state"),
+        ("clock", "sample_or_update_on_clock_edge"),
+        ("code", "held_integer_code"),
+        ("counter", "integer_counter_state"),
+        ("pointer", "wrapped_pointer_state"),
+        ("threshold", "threshold_decision_state"),
+        ("window", "inside_or_outside_window_state"),
+        ("lock", "lock_or_settle_state"),
+        ("pulse", "pulse_target_and_clear_time"),
+        ("sample", "sampled_hold_state"),
+    ]:
+        if keyword in lowered and hint not in state_clues:
+            state_clues.append(hint)
+    if not state_clues:
+        state_clues = ["minimal_target_state"]
+    lines = [
+        "## Functional IR / Materialized Behavior Plan (Condition I, public non-gold)",
+        "",
+        f"Payload version: `{ENHANCEMENT_PAYLOAD_VERSIONS['functional-ir']}`.",
+        "This IR is derived only from the public prompt and task metadata. Do not treat it as gold code.",
+        "",
+        "### Task IR",
+        f"- task_id: `{meta.get('task_id') or task_dir.name}`",
+        f"- source_collection: `{source}`",
+        f"- core_function: `{core}`",
+        f"- task_form: `{form}`",
+        "- ports: " + (", ".join(f"`{port}`" for port in ports) if ports else "infer from module contract"),
+        "- public_observables: " + (", ".join(f"`{item}`" for item in observables) if observables else "`time` plus requested outputs"),
+        "- state_model: " + ", ".join(f"`{item}`" for item in state_clues),
+        "",
+        "### Event / Dataflow Plan",
+    ]
+    if events:
+        for item in events:
+            lines.append(f"- {item}")
+    else:
+        lines.append("- Use `@(initial_step)` for initialization and continuous contributions for public outputs.")
+    lines.extend(
+        [
+            "- Convert public input voltages into decisions with explicit thresholds tied to VDD/VSS or prompt constants.",
+            "- Update integer/real state first; derive all public output targets from that same state.",
+            "- Keep transition contributions outside event-only branches so outputs remain continuously driven.",
+            "- For testbenches, materialize stimulus and save columns so the public observables appear in `tran.csv`.",
+            "",
+            "### Guardrails",
+            "- Do not copy checker source, private thresholds, or gold implementation details.",
+            "- Do not add hidden ports or change the requested module/testbench interface.",
+            "- Prefer deterministic Pass@1 behavior over realistic but unobservable subcircuit detail.",
+        ]
+    )
+    text = "\n".join(lines).strip() + "\n"
+    return {
+        "mode": "functional-ir",
+        "version": ENHANCEMENT_PAYLOAD_VERSIONS["functional-ir"],
+        "status": "public_ir",
+        "ids": [str(core), str(form)],
+        "text": text,
+    }
+
+
+def build_enhancement_payload(task_dir: Path, enhancement_mode: str = "none") -> dict:
+    meta = read_meta(task_dir)
+    if enhancement_mode == "none":
+        return {
+            "mode": "none",
+            "version": ENHANCEMENT_PAYLOAD_VERSIONS["none"],
+            "status": "not_requested",
+            "ids": [],
+            "text": "",
+        }
+    if enhancement_mode == "mechanism":
+        return _build_mechanism_payload(task_dir, meta)
+    if enhancement_mode == "functional-ir":
+        return _build_functional_ir_payload(task_dir, meta)
+    raise ValueError(f"unknown enhancement_mode: {enhancement_mode}")
 
 
 _TRAN_RE = re.compile(r"^\s*tran\s+\w+.*$", re.IGNORECASE | re.MULTILINE)
@@ -326,6 +597,7 @@ def build_prompt(
     include_skill: bool = False,
     include_public_contract: bool = True,
     public_spec_mode: str = "legacy-extracted",
+    enhancement_mode: str = "none",
 ) -> str:
     """Read prompt.md and optionally include buggy DUT for bugfix tasks.
 
@@ -340,6 +612,7 @@ def build_prompt(
             Spectre/Verilog-A compatibility rules without checker/gold-derived
             contracts. "legacy-extracted" preserves the older helper contracts
             extracted from checker/gold harness files.
+        enhancement_mode: Optional G/I public guidance payload.
     """
     prompt_md = (task_dir / "prompt.md").read_text(encoding="utf-8")
     raw_has_public_eval_contract = "public evaluation contract (non-gold)" in prompt_md.lower()
@@ -538,6 +811,10 @@ endmodule
         skill_lines = _inject_skill_knowledge(task_id)
         if skill_lines:
             prompt_md += "\n\n" + "\n".join(skill_lines)
+
+    enhancement_payload = build_enhancement_payload(task_dir, enhancement_mode)
+    if enhancement_payload.get("text"):
+        prompt_md += "\n\n" + enhancement_payload["text"]
 
     return prompt_md
 
@@ -1187,6 +1464,7 @@ def generate_one_task(
     include_checker: bool = False,
     include_skill: bool = False,
     public_spec_mode: str = "legacy-extracted",
+    enhancement_mode: str = "none",
     artifact_retry_on_truncation: bool = False,
     artifact_retry_max_tokens: int = 8192,
 ) -> dict:
@@ -1211,6 +1489,7 @@ def generate_one_task(
             if (
                 existing.get("status") in ("generated", "no_code_extracted")
                 and meta_has_required_artifacts(existing, family)
+                and existing.get("enhancement_mode", "none") == enhancement_mode
             ):
                 return existing
         except Exception:
@@ -1224,7 +1503,9 @@ def generate_one_task(
         include_checker=include_checker,
         include_skill=include_skill,
         public_spec_mode=public_spec_mode,
+        enhancement_mode=enhancement_mode,
     )
+    enhancement_payload = build_enhancement_payload(task_dir, enhancement_mode)
     gen_meta_base = {
         "model": model,
         "model_slug": model_slug,
@@ -1238,6 +1519,11 @@ def generate_one_task(
         "include_checker": include_checker,
         "include_skill": include_skill,
         "public_spec_mode": public_spec_mode,
+        "enhancement_mode": enhancement_mode,
+        "enhancement_payload_version": enhancement_payload.get("version"),
+        "enhancement_payload_status": enhancement_payload.get("status"),
+        "enhancement_payload_ids": enhancement_payload.get("ids", []),
+        "enhancement_payload_chars": len(enhancement_payload.get("text", "")),
         "artifact_retry_on_truncation": artifact_retry_on_truncation,
         "artifact_retry_max_tokens": artifact_retry_max_tokens,
         "source_collection": meta.get("source_collection"),
@@ -1489,6 +1775,16 @@ def main() -> int:
         ),
     )
     ap.add_argument(
+        "--enhancement-mode",
+        choices=["none", "mechanism", "functional-ir"],
+        default="none",
+        help=(
+            "Optional ADFGI enhancement payload. "
+            "mechanism = condition G circuit mechanism guidance; "
+            "functional-ir = condition I public functional/materialized IR."
+        ),
+    )
+    ap.add_argument(
         "--max-workers",
         type=int,
         default=4,
@@ -1558,6 +1854,7 @@ def main() -> int:
           f"  temp={args.temperature}  sample={args.sample_idx}"
           f"  checker={args.include_checker}  skill={args.include_skill}"
           f"  public_spec_mode={args.public_spec_mode}"
+          f"  enhancement_mode={args.enhancement_mode}"
           f"  artifact_retry={args.artifact_retry_on_truncation}"
           f"  dry_run={args.dry_run}  workers={args.max_workers}"
           f"  bench_dir={bench_dir if bench_dir else 'official-tasks'}")
@@ -1580,6 +1877,7 @@ def main() -> int:
                 include_checker=args.include_checker,
                 include_skill=args.include_skill,
                 public_spec_mode=args.public_spec_mode,
+                enhancement_mode=args.enhancement_mode,
                 artifact_retry_on_truncation=args.artifact_retry_on_truncation,
                 artifact_retry_max_tokens=args.artifact_retry_max_tokens,
             )
@@ -1609,6 +1907,7 @@ def main() -> int:
                 include_checker=args.include_checker,
                 include_skill=args.include_skill,
                 public_spec_mode=args.public_spec_mode,
+                enhancement_mode=args.enhancement_mode,
                 artifact_retry_on_truncation=args.artifact_retry_on_truncation,
                 artifact_retry_max_tokens=args.artifact_retry_max_tokens,
             )

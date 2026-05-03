@@ -51,6 +51,12 @@ By default it does **not** use:
 3. gold code;
 4. R26 same-task artifact paths.
 
+The balanced Condition-G generator follows the same public-functional boundary:
+mechanism-card routing may use `prompt.md`, public port/observable text, public
+event clues, and public functional labels such as `core_function` or
+`task_form`, but it must not use `task_id`, `task_name`, directory names,
+source-task ids, source paths, checker internals, result paths, or gold code.
+
 It extracts functional concepts such as:
 
 1. `sample_event`

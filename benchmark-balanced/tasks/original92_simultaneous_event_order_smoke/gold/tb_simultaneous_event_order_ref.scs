@@ -3,6 +3,9 @@ global 0
 
 Vvdd (VDD 0) vsource dc=0.9 type=dc
 Vvss (VSS 0) vsource dc=0.0 type=dc
+// True crossing: ref rises from 0 to 0.9 V after each timer event and crosses
+// the DUT's 0.45 V threshold about 25 ps later. This intentionally avoids an
+// exact-threshold touch at the timer timestamp.
 Vref (ref 0) vsource type=pulse val0=0 val1=0.9 delay=10n period=20n width=2n rise=50p fall=50p
 
 IDUT (VDD VSS ref out) simultaneous_event_order_ref

@@ -1,0 +1,143 @@
+{
+  "version": 1,
+  "description": "Repair cards distilled from Codex/system-relation analysis. Used to isolate system-graph knowledge.",
+  "cards": [
+    {
+      "id": "pll_system_feedback_graph",
+      "title": "Preserve The PLL Feedback-Control-Lock Relation Graph",
+      "source": "docs/SYSTEM_CONTRACT_GRAPHS.json; ../veriloga-skills/veriloga/references/categories/pll-clock.md",
+      "priority": 36,
+      "match": {
+        "repair_family_any": [
+          "pll-dco-counter-feedback-loop",
+          "prompt-spec:ratio_edge_window",
+          "prompt-spec:ratio_hop_window",
+          "prompt-spec:lock_after_ratio_stable",
+          "prompt-spec:control_to_frequency_step"
+        ],
+        "prompt_template_any": [
+          "ratio_edge_window",
+          "ratio_hop_window",
+          "lock_after_ratio_stable",
+          "control_to_frequency_step",
+          "timer_future_event_liveness"
+        ]
+      },
+      "text": [
+        "Repair PLL tasks as one coupled system: reference edges, DCO/oscillator edges, feedback divider edges, control movement, and lock assertion must all describe the same loop.",
+        "Preserve the public parameter and port interface exactly; derive private helper names from public parameters instead of replacing them.",
+        "Generate one oscillator/DCO cadence state, derive feedback from a divider/counter on that cadence, and compare feedback against reference edges.",
+        "Update the control monitor from phase/frequency error and tie oscillator cadence to that same control state; do not make `vctrl_mon` a cosmetic moving signal.",
+        "Assert lock only after the late-window reference/feedback ratio is stable; on ratio hop or frequency step, allow lock to drop and reacquire after the new relation settles.",
+        "Avoid independent shortcuts such as a free-running feedback timer plus forced lock. Those can satisfy one observable while breaking the system relation."
+      ]
+    },
+    {
+      "id": "dwa_system_rotating_window_graph",
+      "title": "Preserve The DWA Pointer-Window-Enable Relation Graph",
+      "source": "docs/BEHAVIOR_CONTRACT_TEMPLATES.md; ../veriloga-skills/veriloga/references/categories/dac.md",
+      "priority": 34,
+      "match": {
+        "repair_family_any": [
+          "dwa-pointer-thermometer-mask",
+          "prompt-spec:onehot_no_overlap"
+        ],
+        "prompt_template_any": [
+          "onehot_no_overlap",
+          "thermometer_dac_code_to_output_span"
+        ]
+      },
+      "text": [
+        "Treat DWA as a state relation between sampled input code, pointer state, selected cell window, and scalar observable bits.",
+        "Keep one integer pointer as the only source of truth. Initialize it from reset/parameter state, then update it once per valid clock edge.",
+        "Decode the sampled input code into an active-cell count, clamp it to the cell array size, and form the complete cell-enable mask before driving any output.",
+        "For wraparound, split the contiguous window across the array boundary using modulo arithmetic. For no-overlap, advance the pointer so consecutive selected sets do not reuse cells.",
+        "Drive `ptr_*` as a one-hot view of the held pointer and `cell_en_*` as the held selected mask; expose scalar nodes with stable names for every bit.",
+        "Do not repair DWA by only changing save aliases or by independently toggling cell enables. The pointer, active count, wrap behavior, and no-overlap rule must stay coupled."
+      ]
+    },
+    {
+      "id": "pfd_bbpd_system_edge_pulse_graph",
+      "title": "Preserve The Edge-Order To UP/DN Pulse Relation",
+      "source": "../veriloga-skills/veriloga/references/categories/pll-clock.md",
+      "priority": 28,
+      "match": {
+        "repair_family_any": [
+          "pfd-latched-pulse-delayed-clear",
+          "pfd-windowed-latched-pulse-symmetry",
+          "bbpd-data-clock-lead-lag",
+          "prompt-spec:paired_edge_response",
+          "prompt-spec:bbpd_data_clock_lead_lag",
+          "prompt-spec:pulse_non_overlap"
+        ],
+        "prompt_template_any": [
+          "paired_edge_response",
+          "bbpd_data_clock_lead_lag",
+          "pulse_non_overlap",
+          "pulse_width_window"
+        ]
+      },
+      "text": [
+        "Repair PFD/BBPD tasks by preserving the mapping from two input edge streams to finite UP/DN pulses.",
+        "Record recent edge times or latch states for both sides. The leading side determines which pulse is emitted; the trailing side clears or bounds the response.",
+        "Keep UP and DN as independent held states, then clear them after a finite delay so pulses are visible but mostly non-overlapping.",
+        "For BBPD, data is an edge stream relative to the clock, not a static logic input. Retimed data and UP/DN pulses should come from the same sampled edge-order relation.",
+        "Keep all `@(cross())` event controls unconditional in the analog block and drive outputs with unconditional `transition()` contributions from held states."
+      ]
+    },
+    {
+      "id": "adc_dac_system_quantize_reconstruct_graph",
+      "title": "Preserve The ADC Code And DAC Reconstruction Relation",
+      "source": "docs/SYSTEM_CONTRACT_GRAPHS.json; ../veriloga-skills/veriloga/references/categories/adc-sar.md; ../veriloga-skills/veriloga/references/categories/dac.md",
+      "priority": 30,
+      "match": {
+        "repair_family_any": [
+          "clocked-quantizer-code-update",
+          "segmented-dac-differential-weighted-sum",
+          "prompt-spec:quantized_reconstruction",
+          "prompt-spec:monotonic_code_vs_input",
+          "prompt-spec:differential_code_response",
+          "prompt-spec:sar_sequence"
+        ],
+        "prompt_template_any": [
+          "quantized_reconstruction",
+          "monotonic_code_vs_input",
+          "sample_after_clock",
+          "sar_sequence",
+          "differential_code_response",
+          "thermometer_dac_code_to_output_span"
+        ]
+      },
+      "text": [
+        "Treat converter repairs as a chain: sample/reset state, quantized code, internal trial/control code, and analog reconstruction must agree.",
+        "If code coverage fails, repair sampling/reset/code update first. If code coverage passes but output span fails, preserve the code path and repair code-to-output decoding.",
+        "Use one held integer code or trial code as the source of truth for all public code-bit outputs and DAC/reconstruction targets.",
+        "For SAR/CDAC/calibration cases, make the trial/control bits move during the sequence, then freeze the final state and assert ready/settled only after completion.",
+        "For differential DAC outputs, compute one differential signal from the decoded code and drive positive/negative outputs with opposite polarity around common mode.",
+        "Do not make `vout` track raw `vin` continuously when the prompt asks for quantized reconstruction; the analog output should follow the same code that drives the bits."
+      ]
+    },
+    {
+      "id": "serializer_system_load_shift_frame_graph",
+      "title": "Preserve The Serializer Load-Shift-Frame Relation",
+      "source": "../veriloga-skills/veriloga/references/categories/digital-logic.md",
+      "priority": 24,
+      "match": {
+        "repair_family_any": [
+          "sequence-frame-alignment",
+          "prompt-spec:sequence_alignment"
+        ],
+        "prompt_template_any": [
+          "sequence_alignment"
+        ]
+      },
+      "text": [
+        "Treat serializer tasks as a state machine, not as independent toggles on `sout` and `frame`.",
+        "Latch the parallel input word only on the specified load event, then shift exactly one bit per valid clock edge.",
+        "Keep a bit index and a held shift register as the source of truth. The serialized output should come from the current index before the index advances.",
+        "Assert the frame marker only for the first serialized bit of each loaded word, then clear it for the remaining bits.",
+        "Preserve scalar observable names and drive `sout`/`frame` from held targets with unconditional `transition()` contributions."
+      ]
+    }
+  ]
+}

@@ -414,6 +414,146 @@ def spectre_instance_models(tb_path: Path) -> list[str]:
     return models
 
 
+def _module_port_orders(va_paths: list[Path]) -> dict[str, list[str]]:
+    """Return Verilog-A module port order keyed by module name."""
+    orders: dict[str, list[str]] = {}
+    keywords = {"input", "output", "inout", "electrical", "wire", "real", "integer"}
+    for va_path in va_paths:
+        text = _strip_line_comments(va_path.read_text(encoding="utf-8", errors="ignore"))
+        for match in re.finditer(r"\bmodule\s+([A-Za-z_][A-Za-z0-9_$]*)\s*\((.*?)\)\s*;", text, flags=re.DOTALL):
+            module = match.group(1)
+            ports: list[str] = []
+            for raw_item in match.group(2).replace("\n", " ").split(","):
+                item = re.sub(r"\[[^\]]+\]", " ", raw_item)
+                tokens = [tok for tok in re.split(r"\s+", item.strip()) if tok]
+                candidates = [
+                    tok
+                    for tok in tokens
+                    if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_$]*", tok) and tok.lower() not in keywords
+                ]
+                if candidates:
+                    width = 1
+                    range_match = re.search(r"\[\s*(\d+)\s*:\s*(\d+)\s*\]", raw_item)
+                    if range_match:
+                        width = abs(int(range_match.group(1)) - int(range_match.group(2))) + 1
+                    ports.extend([candidates[-1]] * width)
+            orders[module] = ports
+    return orders
+
+
+def _spectre_instance_records(tb_path: Path) -> list[tuple[int, str, list[str], str, str]]:
+    """Return `(lineno, instance, nodes, model, tail)` for Spectre instances."""
+    text = _strip_line_comments(tb_path.read_text(encoding="utf-8", errors="ignore"))
+    records: list[tuple[int, str, list[str], str, str]] = []
+    pending = ""
+    start_lineno = 0
+    skip_prefixes = ("simulator ", "global ", "ahdl_include", "include ", "save ", "tran ", "parameters ")
+
+    for lineno, raw_line in enumerate(text.splitlines(), start=1):
+        stripped = raw_line.strip()
+        if not stripped:
+            continue
+        if pending:
+            pending += " " + stripped.rstrip("\\").strip()
+        else:
+            start_lineno = lineno
+            pending = stripped.rstrip("\\").strip()
+        if stripped.endswith("\\"):
+            continue
+
+        lowered = pending.lower()
+        if not lowered.startswith(skip_prefixes):
+            match = re.match(
+                r"^([A-Za-z_][A-Za-z0-9_.$]*)\s*\(([^)]*)\)\s+([A-Za-z_][A-Za-z0-9_.$]*)\b(.*)$",
+                pending,
+            )
+            if match:
+                inst = match.group(1)
+                nodes = [node for node in re.split(r"\s+", match.group(2).strip()) if node]
+                records.append((start_lineno, inst, nodes, match.group(3), match.group(4).strip()))
+        pending = ""
+        start_lineno = 0
+
+    return records
+
+
+def spectre_instance_port_count_mismatch_lines(tb_path: Path, va_paths: list[Path]) -> list[str]:
+    module_ports = _module_port_orders(va_paths)
+    bad: list[str] = []
+    for lineno, inst, nodes, model, _tail in _spectre_instance_records(tb_path):
+        if model.lower() in SPECTRE_PRIMITIVE_MODELS or model not in module_ports:
+            continue
+        ports = module_ports[model]
+        if len(nodes) != len(ports):
+            bad.append(f"{lineno}:{inst}:{model}:nodes={len(nodes)}:ports={len(ports)}")
+    return bad
+
+
+def spectre_parameters_keyword_instance_lines(tb_path: Path) -> list[str]:
+    bad: list[str] = []
+    for lineno, inst, _nodes, model, tail in _spectre_instance_records(tb_path):
+        if model.lower() in SPECTRE_PRIMITIVE_MODELS:
+            continue
+        if re.search(r"\bparameters\b", tail):
+            bad.append(f"{lineno}:{inst}:{model}:parameters_keyword")
+    return bad
+
+
+def _spectre_vsource_nodes(tb_path: Path) -> set[str]:
+    nodes: set[str] = {"0"}
+    text = _strip_line_comments(tb_path.read_text(encoding="utf-8", errors="ignore"))
+    pattern = re.compile(r"^\s*[A-Za-z_][A-Za-z0-9_.$]*\s*\(([^)]*)\)\s+vsource\b", re.IGNORECASE)
+    for line in text.splitlines():
+        match = pattern.search(line)
+        if not match:
+            continue
+        parts = [node for node in re.split(r"\s+", match.group(1).strip()) if node]
+        nodes.update(parts[:2])
+    return nodes
+
+
+def _module_single_ended_voltage_drives(va_paths: list[Path]) -> dict[str, set[str]]:
+    drives: dict[str, set[str]] = {}
+    for va_path in va_paths:
+        text = _strip_line_comments(va_path.read_text(encoding="utf-8", errors="ignore"))
+        modules = list(re.finditer(r"\bmodule\s+([A-Za-z_][A-Za-z0-9_$]*)\b", text))
+        if not modules:
+            continue
+        for idx, match in enumerate(modules):
+            module = match.group(1)
+            start = match.end()
+            end = modules[idx + 1].start() if idx + 1 < len(modules) else len(text)
+            body = text[start:end]
+            hits = set()
+            for drive in re.finditer(r"\bV\s*\(\s*([A-Za-z_][A-Za-z0-9_$]*)\s*\)\s*<\+", body):
+                hits.add(drive.group(1))
+            if hits:
+                drives.setdefault(module, set()).update(hits)
+    return drives
+
+
+def spectre_sourced_port_drive_hits(tb_path: Path, va_paths: list[Path]) -> list[str]:
+    """Detect Verilog-A ports driven while mapped to a vsource-fixed node."""
+    source_nodes = _spectre_vsource_nodes(tb_path)
+    if not source_nodes:
+        return []
+    module_ports = _module_port_orders(va_paths)
+    module_drives = _module_single_ended_voltage_drives(va_paths)
+    bad: list[str] = []
+    for lineno, inst, nodes, model, _tail in _spectre_instance_records(tb_path):
+        ports = module_ports.get(model)
+        drives = module_drives.get(model)
+        if not ports or not drives:
+            continue
+        for idx, port in enumerate(ports):
+            if port not in drives or idx >= len(nodes):
+                continue
+            node = nodes[idx]
+            if node in source_nodes:
+                bad.append(f"{lineno}:{inst}:{model}:{port}->{node}")
+    return bad
+
+
 def spectre_colon_instance_lines(tb_path: Path) -> list[int]:
     text = _strip_line_comments(tb_path.read_text(encoding="utf-8", errors="ignore"))
     bad_lines: list[int] = []
@@ -561,7 +701,7 @@ def spectre_malformed_pwl_wave_lines(tb_path: Path) -> list[str]:
     """
     bad: list[str] = []
     for lineno, body, compact in _spectre_pwl_wave_blocks(tb_path):
-        body = body.replace(",", " ")
+        body = body.replace(",", " ").replace("\\", " ")
         tokens = [tok for tok in re.split(r"\s+", body.strip()) if tok]
         if len(tokens) < 4 or len(tokens) % 2 != 0:
             bad.append(f"{lineno}:tokens={len(tokens)}:{compact}")
@@ -576,7 +716,7 @@ def spectre_nonincreasing_pwl_time_lines(tb_path: Path) -> list[str]:
     """
     bad: list[str] = []
     for lineno, body, compact in _spectre_pwl_wave_blocks(tb_path):
-        tokens = [tok for tok in re.split(r"\s+", body.replace(",", " ").strip()) if tok]
+        tokens = [tok for tok in re.split(r"\s+", body.replace(",", " ").replace("\\", " ").strip()) if tok]
         if len(tokens) < 4 or len(tokens) % 2 != 0:
             continue
         times: list[float] = []
@@ -881,6 +1021,69 @@ def _parameter_port_conflict_hits(va_path: Path) -> list[str]:
     return hits
 
 
+def _parameter_default_range_hits(va_path: Path) -> list[str]:
+    """Detect parameter defaults outside their Spectre `from` range.
+
+    Spectre rejects even a default like `parameter real vlo = 0 from (0:inf);`
+    before transient simulation starts. EVAS can evaluate the model, so strict
+    preflight needs to keep this as a compile-time parity guardrail.
+    """
+    text = _strip_line_comments(va_path.read_text(encoding="utf-8", errors="ignore"))
+    hits: list[str] = []
+    pattern = re.compile(
+        r"\bparameter\s+(?:real|integer)\s+([A-Za-z_]\w*)\s*=\s*"
+        r"([^;\s]+)\s+from\s*([\[\(])\s*([^:\]]+)\s*:\s*([^\]\)]+)\s*([\]\)])",
+        re.IGNORECASE,
+    )
+
+    def _bound_value(raw: str) -> float | None:
+        token = raw.strip()
+        if token.lower() in {"inf", "+inf", "infinity", "+infinity"}:
+            return float("inf")
+        if token.lower() in {"-inf", "-infinity"}:
+            return float("-inf")
+        return _spectre_numeric_token(token)
+
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        for match in pattern.finditer(line):
+            name = match.group(1)
+            value = _spectre_numeric_token(match.group(2))
+            low_open = match.group(3) == "("
+            low = _bound_value(match.group(4))
+            high = _bound_value(match.group(5))
+            high_open = match.group(6) == ")"
+            if value is None or low is None or high is None:
+                continue
+
+            violates_low = value <= low if low_open else value < low
+            violates_high = value >= high if high_open else value > high
+            if violates_low or violates_high:
+                compact = re.sub(r"\s+", " ", line.strip())
+                hits.append(f"{va_path.name}:{lineno}:{name}:{compact}")
+    return hits
+
+
+def _parameter_open_upper_range_hits(va_path: Path) -> list[str]:
+    """Detect Spectre-incompatible empty upper bounds in `from` ranges.
+
+    Spectre rejects declarations like `from (0:)` and `from [0:)` during AHDL
+    read-in. EVAS may otherwise parse/evaluate them, so strict preflight must
+    catch the syntax before EVAS can false-accept a candidate.
+    """
+    text = _strip_line_comments(va_path.read_text(encoding="utf-8", errors="ignore"))
+    hits: list[str] = []
+    pattern = re.compile(
+        r"\bparameter\s+(?:real|integer)\s+([A-Za-z_]\w*)\s*=\s*"
+        r"[^;]+?\s+from\s*[\[\(]\s*[^:\]\)]*\s*:\s*[\]\)]",
+        re.IGNORECASE,
+    )
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        for match in pattern.finditer(line):
+            compact = re.sub(r"\s+", " ", line.strip())
+            hits.append(f"{va_path.name}:{lineno}:{match.group(1)}:{compact}")
+    return hits
+
+
 def _random_distribution_seed_hits(va_path: Path) -> list[str]:
     """Detect Spectre-incompatible random distribution calls with real seeds."""
     text = _strip_line_comments(va_path.read_text(encoding="utf-8", errors="ignore"))
@@ -1054,6 +1257,22 @@ def spectre_strict_preflight(
             f"{','.join(missing_models)};available_modules={','.join(sorted(module_names)) or '<none>'}"
         )
 
+    port_count_mismatches = spectre_instance_port_count_mismatch_lines(staged_tb, staged_va_paths)
+    if port_count_mismatches:
+        _record_failure("module_linkage")
+        notes.append(
+            "spectre_strict:instance_port_count_mismatch="
+            + ",".join(port_count_mismatches[:8])
+        )
+
+    instance_parameter_keywords = spectre_parameters_keyword_instance_lines(staged_tb)
+    if instance_parameter_keywords:
+        _record_failure("tb_syntax")
+        notes.append(
+            "spectre_strict:instance_parameters_keyword="
+            + ",".join(instance_parameter_keywords[:8])
+        )
+
     colon_lines = spectre_colon_instance_lines(staged_tb)
     if colon_lines:
         _record_failure("module_linkage")
@@ -1116,6 +1335,14 @@ def spectre_strict_preflight(
         notes.append(
             "spectre_strict:duplicate_vsource_branch="
             + ",".join(duplicate_vsource_hits[:8])
+        )
+
+    sourced_port_drive_hits = spectre_sourced_port_drive_hits(staged_tb, staged_va_paths)
+    if sourced_port_drive_hits:
+        _record_failure("tb_syntax")
+        notes.append(
+            "spectre_strict:sourced_port_voltage_drive="
+            + ",".join(sourced_port_drive_hits[:8])
         )
 
     interface_parameter_issues = check_interface_parameter_paths(
@@ -1194,6 +1421,20 @@ def spectre_strict_preflight(
             notes.append(
                 "spectre_strict:parameter_port_conflict="
                 + ",".join(parameter_conflict_hits[:12])
+            )
+        parameter_range_hits = _parameter_default_range_hits(va_path)
+        if parameter_range_hits:
+            _record_failure("ahdl_syntax")
+            notes.append(
+                "spectre_strict:parameter_default_range="
+                + ",".join(parameter_range_hits[:12])
+            )
+        parameter_open_upper_hits = _parameter_open_upper_range_hits(va_path)
+        if parameter_open_upper_hits:
+            _record_failure("ahdl_syntax")
+            notes.append(
+                "spectre_strict:parameter_open_upper_range="
+                + ",".join(parameter_open_upper_hits[:12])
             )
         random_seed_hits = _random_distribution_seed_hits(va_path)
         if random_seed_hits:

@@ -1042,12 +1042,35 @@ def _stream_simultaneous_event_order_csv(csv_path: Path) -> tuple[float, list[st
     if any(count == 0 for count in counts):
         return 0.0, ["insufficient_window_samples"]
     levels = [total / count for total, count in zip(sums, counts)]
-    monotonic = all(levels[i] <= levels[i + 1] + 0.05 for i in range(len(levels) - 1))
-    span = levels[-1] - levels[0]
-    ok = monotonic and span > 0.15
+    ok, shape_note = _simultaneous_event_order_levels_ok(levels)
     return (1.0 if ok else 0.0), [
-        f"plateau_levels={[round(v, 3) for v in levels]} span={span:.3f}"
+        f"plateau_levels={[round(v, 3) for v in levels]} {shape_note}"
     ]
+
+
+def _simultaneous_event_order_levels_ok(levels: list[float]) -> tuple[bool, str]:
+    """Check the stable timer-then-cross plateau ramp.
+
+    The task is intended to avoid exact-threshold touch and same-time event
+    races. Correct outputs form four settled, roughly evenly spaced increasing
+    plateaus. A loose monotonic-span check admits unstable exact-touch artifacts
+    such as [mid, mid, mid, high], so enforce balanced increments instead.
+    """
+    if len(levels) != 4:
+        return False, f"invalid_level_count={len(levels)}"
+    diffs = [levels[i + 1] - levels[i] for i in range(3)]
+    span = levels[-1] - levels[0]
+    step = span / 3.0
+    min_step = min(diffs)
+    max_step = max(diffs)
+    min_allowed = max(0.02, 0.35 * step)
+    max_allowed = max(0.08, 1.80 * step)
+    ok = span > 0.15 and step > 0.04 and min_step >= min_allowed and max_step <= max_allowed
+    note = (
+        f"span={span:.3f} diffs={[round(v, 3) for v in diffs]} "
+        f"step={step:.3f} min_allowed={min_allowed:.3f} max_allowed={max_allowed:.3f}"
+    )
+    return ok, note
 
 
 def _stream_adc_dac_ideal_4b_csv(csv_path: Path) -> tuple[float, list[str]]:
@@ -3871,10 +3894,8 @@ def check_simultaneous_event_order(rows: list[dict[str, float]]) -> tuple[bool, 
         if not vals:
             return False, "insufficient_window_samples"
         levels.append(sum(vals) / len(vals))
-    monotonic = all(levels[i] <= levels[i + 1] + 0.05 for i in range(len(levels) - 1))
-    span = levels[-1] - levels[0]
-    ok = monotonic and span > 0.15
-    return ok, f"plateau_levels={[round(v,3) for v in levels]} span={span:.3f}"
+    ok, shape_note = _simultaneous_event_order_levels_ok(levels)
+    return ok, f"plateau_levels={[round(v,3) for v in levels]} {shape_note}"
 
 
 def check_timer_absolute_grid(rows: list[dict[str, float]]) -> tuple[bool, str]:
