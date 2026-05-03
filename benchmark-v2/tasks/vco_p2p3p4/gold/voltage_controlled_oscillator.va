@@ -1,0 +1,57 @@
+// Voltage-Controlled Oscillator - EVAS-compatible
+// Generates a square wave whose frequency is a linear function
+// of the control voltage. Pure voltage-domain.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module voltage_controlled_oscillator(
+    inout  electrical vdd,
+    inout  electrical vss,
+    input  electrical tune_voltage,
+    output electrical periodic_out
+);
+
+parameter real vmin    = 0.0;
+parameter real vmax    = 0.9;
+parameter real fmin    = 10e6;
+parameter real fmax    = 100e6;
+parameter real vth     = 0.45;
+parameter real tedge   = 50p;
+
+real freq;
+real half_period;
+real next_toggle;
+real out_val;
+integer initialized;
+
+analog begin
+    @(initial_step) begin
+        out_val = V(vss);
+        next_toggle = 0.0;
+        initialized = 0;
+    end
+
+    // Compute frequency from control voltage
+    if (V(tune_voltage) <= vmin)
+        freq = fmin;
+    else if (V(tune_voltage) >= vmax)
+        freq = fmax;
+    else
+        freq = fmin + (fmax - fmin) * (V(tune_voltage) - vmin) / (vmax - vmin);
+
+    half_period = 0.5 / freq;
+
+    @(timer(half_period)) begin
+        if (out_val > vth)
+            out_val = V(vss);
+        else
+            out_val = V(vdd);
+    end
+
+    V(periodic_out) <+ transition(out_val, 0, tedge, tedge);
+end
+
+endmodule

@@ -1,0 +1,44 @@
+// Charge Pump - EVAS-compatible behavioral model
+// Integrates UP/DN pulses onto a control voltage node.
+// Each UP rising edge increments vctrl by charge_step.
+// Each DN rising edge decrements vctrl by charge_step.
+// Pure voltage-domain behavioral model (no real current).
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module charge_pump(
+    inout  electrical vdd,
+    inout  electrical vss,
+    input  electrical lead_pulse,
+    input  electrical lag_pulse,
+    output electrical pump_out
+);
+
+parameter real vth        = 0.45;
+parameter real charge_step= 0.02;
+parameter real tedge      = 50p;
+
+real out_level;
+
+analog begin
+    @(initial_step) begin
+        out_level = (V(vdd) - V(vss)) / 2.0;
+    end
+
+    @(cross(V(lead_pulse) - vth, +1)) begin
+        out_level = out_level + charge_step;
+        if (out_level > V(vdd)) out_level = V(vdd);
+    end
+
+    @(cross(V(lag_pulse) - vth, +1)) begin
+        out_level = out_level - charge_step;
+        if (out_level < V(vss)) out_level = V(vss);
+    end
+
+    V(pump_out) <+ transition(out_level, 0, tedge, tedge);
+end
+
+endmodule

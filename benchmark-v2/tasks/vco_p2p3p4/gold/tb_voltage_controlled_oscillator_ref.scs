@@ -1,0 +1,19 @@
+simulator lang=spectre
+global 0
+
+Vvdd (vdd 0) vsource dc=0.9 type=dc
+Vvss (vss 0) vsource dc=0.0 type=dc
+
+// Control voltage: step through 0V, 0.225V, 0.45V, 0.675V, 0.9V
+// Each step lasts 2us for frequency measurement
+Vtune (tune_voltage 0) vsource type=pwl wave=[0 0.0  2000e-9 0.0  2000.001e-9 0.225  4000e-9 0.225  4000.001e-9 0.45  6000e-9 0.45  6000.001e-9 0.675  8000e-9 0.675  8000.001e-9 0.9  10000e-9 0.9]
+
+IDUT (vdd vss tune_voltage periodic_out) voltage_controlled_oscillator vmin=0.0 vmax=0.9 fmin=10e6 fmax=100e6 vth=0.45 tedge=50p
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+
+tran tran stop=10000n maxstep=1n
+
+save tune_voltage periodic_out
+
+ahdl_include "./voltage_controlled_oscillator.va"

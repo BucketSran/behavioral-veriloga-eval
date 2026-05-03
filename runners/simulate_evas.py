@@ -2387,6 +2387,108 @@ def check_serializer_8b(rows: list[dict[str, float]]) -> tuple[bool, str]:
     return True, f"0xA5_serialized_ok mode=edge_only mismatches={mismatches}"
 
 
+def check_vco(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    """VCO: output frequency proportional to control voltage."""
+    if not rows or not {"tune_voltage", "periodic_out"}.issubset(rows[0]):
+        return False, "missing tune_voltage/periodic_out"
+    vth = 0.45
+    times = [r["time"] for r in rows]
+    out = [r["periodic_out"] for r in rows]
+    edges = rising_edges(out, times)
+    if len(edges) < 50:
+        return False, f"too_few_edges={len(edges)}"
+    # Check 4 voltage regions: 0.225V, 0.45V, 0.675V, 0.9V
+    regions = [0.225, 0.45, 0.675, 0.9]
+    expected_f = [10e6 + 90e6*(v/0.9) for v in regions]
+    errors = []
+    for vctrl, f_exp in zip(regions, expected_f):
+        idx = regions.index(vctrl)
+        t_start = 2000e-9 * (idx + 1) + 400e-9
+        t_end = t_start + 1500e-9
+        period_edges = [t for t in edges if t_start < t < t_end]
+        if len(period_edges) < 4:
+            errors.append(f"vctrl={vctrl:.3f}_too_few_edges={len(period_edges)}")
+            continue
+        f_meas = (len(period_edges) - 1) / (period_edges[-1] - period_edges[0])
+        err = abs(f_meas - f_exp) / f_exp
+        if err > 0.3:
+            errors.append(f"vctrl={vctrl:.3f}_freq_err={err:.2f}")
+    if errors:
+        return False, ";".join(errors[:3])
+    return True, f"edges={len(edges)}"
+
+
+def check_charge_pump(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    """Charge pump: output steps up/down on lead/lag pulses."""
+    if not rows or not {"lead_pulse", "lag_pulse", "pump_out"}.issubset(rows[0]):
+        return False, "missing lead_pulse/lag_pulse/pump_out"
+    vth = 0.45
+    times = [r["time"] for r in rows]
+    lead = [r["lead_pulse"] for r in rows]
+    lag = [r["lag_pulse"] for r in rows]
+    out = [r["pump_out"] for r in rows]
+    lead_edges = rising_edges(lead, times)
+    lag_edges = rising_edges(lag, times)
+    # Check initial value ~0.45
+    initial = out[0]
+    if abs(initial - 0.45) > 0.1:
+        return False, f"bad_initial={initial:.3f}"
+    # After lead pulses, pump_out should be higher
+    # Find row after last lead edge
+    last_lead_t = lead_edges[-1] if lead_edges else 0
+    settle_idx = next((i for i, t in enumerate(times) if t >= last_lead_t + 2e-9), len(rows) - 1)
+    post_lead = out[settle_idx]
+    expected_post_lead = 0.45 + len(lead_edges) * 0.02
+    if abs(post_lead - expected_post_lead) > 0.03:
+        return False, f"post_lead={post_lead:.3f}_exp={expected_post_lead:.3f}"
+    # After lag pulses, should have decreased
+    last_lag_t = lag_edges[-1] if lag_edges else 0
+    settle_idx2 = next((i for i, t in enumerate(times) if t >= last_lag_t + 2e-9), len(rows) - 1)
+    post_lag = out[settle_idx2]
+    expected_post_lag = expected_post_lead - len(lag_edges) * 0.02
+    if abs(post_lag - expected_post_lag) > 0.03:
+        return False, f"post_lag={post_lag:.3f}_exp={expected_post_lag:.3f}"
+    return True, f"lead_edges={len(lead_edges)} lag_edges={len(lag_edges)}"
+
+
+def check_window_comparator(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    """Window comparator: exactly one output high in each region."""
+    if not rows or not {"signal_in", "above_hi", "in_window", "below_lo"}.issubset(rows[0]):
+        return False, "missing signal_in/above_hi/in_window/below_lo"
+    vth = 0.45
+    # Check 5 regions at midpoint times
+    checks = [
+        (50e-9, "below_lo"),
+        (150e-9, "below_lo"),
+        (250e-9, "in_window"),
+        (350e-9, "above_hi"),
+        (450e-9, "above_hi"),
+    ]
+    failures = []
+    for t_target, expected in checks:
+        window = [r for r in rows if t_target - 5e-9 <= r["time"] <= t_target + 5e-9]
+        if not window:
+            failures.append(f"no_samples@{t_target*1e9:.0f}ns")
+            continue
+        r = window[-1]
+        above = r["above_hi"] > vth
+        win = r["in_window"] > vth
+        below = r["below_lo"] > vth
+        count = sum([above, win, below])
+        if count != 1:
+            failures.append(f"ambiguous@{t_target*1e9:.0f}ns_count={count}")
+            continue
+        if expected == "below_lo" and not below:
+            failures.append(f"exp_below@{t_target*1e9:.0f}ns")
+        elif expected == "in_window" and not win:
+            failures.append(f"exp_window@{t_target*1e9:.0f}ns")
+        elif expected == "above_hi" and not above:
+            failures.append(f"exp_above@{t_target*1e9:.0f}ns")
+    if failures:
+        return False, ";".join(failures[:3])
+    return True, "three_region_output_correct"
+
+
 def check_serializer_frame_alignment(rows: list[dict[str, float]]) -> tuple[bool, str]:
     required = {"clk", "frame", "sout"}
     if not rows or not required.issubset(rows[0]):
@@ -3516,6 +3618,10 @@ CHECKS = {
     "dac_therm_16b_p2p3p4":       check_dac_therm_16b,
     "noise_gen_p2p3p4":           check_noise_gen,
     "serializer_8b_p2p3p4":       check_serializer_8b,
+    # Route B - external architectures
+    "vco_p2p3p4":                  check_vco,
+    "charge_pump_p2p3p4":          check_charge_pump,
+    "window_comparator_p2p3p4":    check_window_comparator,
 }
 
 

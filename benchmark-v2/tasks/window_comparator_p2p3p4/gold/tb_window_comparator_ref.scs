@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+Vvdd (vdd 0) vsource dc=0.9 type=dc
+Vvss (vss 0) vsource dc=0.0 type=dc
+
+// Ramp vin from 0 to 0.9V over 900ns
+Vvin (signal_in 0) vsource type=pwl wave=[0 0.0  100e-9 0.0  101e-9 0.15  200e-9 0.15  201e-9 0.45  300e-9 0.45  301e-9 0.75  400e-9 0.75  401e-9 0.9  500e-9 0.9]
+
+IDUT (vdd vss signal_in above_hi in_window below_lo) window_comparator vref_hi=0.7 vref_lo=0.2 tedge=50p
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+
+tran tran stop=500n maxstep=1n
+
+save signal_in above_hi in_window below_lo
+
+ahdl_include "./window_comparator.va"

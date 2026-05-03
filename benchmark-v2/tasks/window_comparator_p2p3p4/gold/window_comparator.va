@@ -1,0 +1,38 @@
+// Window Comparator - EVAS-compatible
+// Compares input voltage against two reference thresholds.
+// Three digital outputs indicate which region the input is in.
+// Pure voltage-domain.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module window_comparator(
+    inout  electrical vdd,
+    inout  electrical vss,
+    input  electrical signal_in,
+    output electrical above_hi,
+    output electrical in_window,
+    output electrical below_lo
+);
+
+parameter real vref_hi = 0.7;
+parameter real vref_lo = 0.2;
+parameter real tedge   = 50p;
+
+real above_level;
+real window_level;
+real below_level;
+
+analog begin
+    above_level  = (V(signal_in) > vref_hi) ? V(vdd) : V(vss);
+    window_level = (V(signal_in) >= vref_lo && V(signal_in) <= vref_hi) ? V(vdd) : V(vss);
+    below_level  = (V(signal_in) < vref_lo) ? V(vdd) : V(vss);
+
+    V(above_hi)  <+ transition(above_level,  0, tedge, tedge);
+    V(in_window) <+ transition(window_level,  0, tedge, tedge);
+    V(below_lo)  <+ transition(below_level,  0, tedge, tedge);
+end
+
+endmodule

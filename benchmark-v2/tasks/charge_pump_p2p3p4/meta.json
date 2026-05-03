@@ -1,0 +1,42 @@
+{
+  "task_id": "charge_pump_p2p3p4",
+  "family": "end-to-end",
+  "category": "pll-clock",
+  "domain": "voltage",
+  "difficulty": "medium",
+  "expected_backend": "evas",
+  "source_type": "external_architecture",
+  "source_seed": "external_architecture",
+  "mechanism_family": "pll-clock",
+  "perturbation_axes": [
+    "external_architecture"
+  ],
+  "perturbation_level": "N/A",
+  "evas_compatible": true,
+  "spectre_parity_required": true,
+  "status": "draft",
+  "must_include": [
+    "@(cross(",
+    "transition("
+  ],
+  "must_not_include": [
+    "I(",
+    "ddt(",
+    "idt("
+  ],
+  "external_source_license": "MIT",
+  "inputs": [
+    "prompt.md"
+  ],
+  "artifacts": [
+    "dut.va",
+    "tb_charge_pump.scs",
+    "tran.csv"
+  ],
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "review_notes": "Charge Pump: integrates UP/DN digital pulses onto an analog control voltage."
+}
