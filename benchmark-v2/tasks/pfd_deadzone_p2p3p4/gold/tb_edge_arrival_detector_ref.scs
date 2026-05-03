@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+Vvdd (vdd 0) vsource dc=0.9 type=dc
+Vvss (vss 0) vsource dc=0.0 type=dc
+
+Vfirst (first_edge 0) vsource type=pulse val0=0 val1=0.9 period=20n width=10n rise=20p fall=20p
+Vsecond (second_edge 0) vsource type=pulse val0=0 val1=0.9 period=20n width=10n rise=20p fall=20p delay=100p
+
+IDUT (vdd vss first_edge second_edge lead_flag dn) edge_arrival_detector vth=0.45 tedge=20p
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+
+tran tran stop=300n maxstep=5p errpreset=conservative
+
+save first_edge second_edge lead_flag dn
+
+ahdl_include "./edge_arrival_detector.va"

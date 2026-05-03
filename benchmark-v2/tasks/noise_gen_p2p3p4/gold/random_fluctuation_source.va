@@ -1,0 +1,26 @@
+// Random fluctuation source - EVAS-compatible
+// Adds a Gaussian fluctuation to an input base signal.
+// Pure voltage-domain.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module random_fluctuation_source(
+    input  electrical base_signal,
+    output electrical fluctuated_out
+);
+
+parameter real sigma = 0.01;
+
+real base;
+real fluct;
+
+analog begin
+    base  = V(base_signal);
+    fluct = base + sigma * $rdist_normal(0, 0, 1);
+    V(fluctuated_out) <+ transition(fluct);
+end
+
+endmodule

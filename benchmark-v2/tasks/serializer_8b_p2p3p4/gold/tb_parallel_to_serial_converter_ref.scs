@@ -1,0 +1,27 @@
+simulator lang=spectre
+global 0
+
+Vvdd (vdd 0) vsource dc=0.9 type=dc
+Vvss (vss 0) vsource dc=0.0 type=dc
+
+Vp7 (p7 0) vsource dc=0.9 type=dc
+Vp6 (p6 0) vsource dc=0.0 type=dc
+Vp5 (p5 0) vsource dc=0.9 type=dc
+Vp4 (p4 0) vsource dc=0.0 type=dc
+Vp3 (p3 0) vsource dc=0.0 type=dc
+Vp2 (p2 0) vsource dc=0.9 type=dc
+Vp1 (p1 0) vsource dc=0.0 type=dc
+Vp0 (p0 0) vsource dc=0.9 type=dc
+
+Vlatch (latch_cmd 0) vsource type=pulse val0=0 val1=0.9 period=200n delay=5n width=12.5n rise=100p fall=100p
+Vclk (shift_clock 0) vsource type=pulse val0=0 val1=0.9 period=5n delay=10n width=2.5n rise=100p fall=100p
+
+IDUT (vdd vss p7 p6 p5 p4 p3 p2 p1 p0 latch_cmd shift_clock serial_stream) parallel_to_serial_converter vth=0.45 tedge=100p
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+
+tran tran stop=300n maxstep=1n
+
+save latch_cmd shift_clock serial_stream p7 p0
+
+ahdl_include "./parallel_to_serial_converter.va"

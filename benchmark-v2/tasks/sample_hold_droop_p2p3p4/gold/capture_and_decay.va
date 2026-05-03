@@ -1,0 +1,54 @@
+// Capture-and-decay module - EVAS-compatible
+// On rising edge of sample_cmd, captures V(analog_in).
+// Between edges, output decays exponentially toward 0 with time-constant tau.
+// Pure voltage-domain.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module capture_and_decay(
+    inout  electrical vdd,
+    inout  electrical vss,
+    input  electrical sample_cmd,
+    input  electrical analog_in,
+    output electrical held_value
+);
+
+parameter real vth = 0.45;
+parameter real trf = 40p;
+parameter real tau = 120n;
+parameter real dt  = 0.5n;
+
+real captured;
+real out_val;
+real alpha;
+integer captured_valid;
+
+analog begin
+    @(initial_step) begin
+        captured = 0.0;
+        out_val  = 0.0;
+        captured_valid = 0;
+    end
+
+    @(cross(V(sample_cmd) - vth, +1)) begin
+        captured = V(analog_in);
+        if (captured > V(vdd)) captured = V(vdd);
+        if (captured < V(vss)) captured = V(vss);
+        out_val = captured;
+        captured_valid = 1;
+    end
+
+    @(timer(dt)) begin
+        if (captured_valid) begin
+            alpha = exp(-dt / tau);
+            out_val = out_val * alpha;
+        end
+    end
+
+    V(held_value) <+ transition(out_val, 0, trf, trf);
+end
+
+endmodule

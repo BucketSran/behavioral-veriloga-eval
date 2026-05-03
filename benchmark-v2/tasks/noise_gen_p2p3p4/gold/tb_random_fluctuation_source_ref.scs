@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+Vbase (base_signal 0) vsource dc=1.0 type=dc
+
+IDUT (base_signal fluctuated_out) random_fluctuation_source sigma=0.1
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+
+tran tran stop=500n maxstep=1n
+
+save base_signal fluctuated_out
+
+ahdl_include "./random_fluctuation_source.va"

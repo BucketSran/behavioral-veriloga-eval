@@ -68,12 +68,14 @@ def evaluate_noise_gen_csv(csv_path: Path) -> tuple[float, list[str]]:
     with csv_path.open(newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         fields = set(reader.fieldnames or [])
-        if not {"vin_i", "vout_o"}.issubset(fields):
+        in_col = "vin_i" if "vin_i" in fields else ("base_signal" if "base_signal" in fields else None)
+        out_col = "vout_o" if "vout_o" in fields else ("fluctuated_out" if "fluctuated_out" in fields else None)
+        if in_col is None or out_col is None:
             missing_cols = True
         else:
             for row in reader:
                 try:
-                    x = float(row["vout_o"]) - float(row["vin_i"])
+                    x = float(row[out_col]) - float(row[in_col])
                 except (TypeError, ValueError):
                     continue
                 count += 1
@@ -982,6 +984,55 @@ _TASK_ALIAS_CANDIDATES: dict[str, dict[str, tuple[str, ...]]] = {
         "dout2": ("qb2",),
         "dout1": ("qb1",),
         "dout0": ("qb0",),
+    },
+    # batch 2+3 perturbation tasks
+    "mux_4to1_p2p3p4": {
+        "sel1": ("pick_1",),
+        "sel0": ("pick_0",),
+        "y": ("routed",),
+        "d0": ("lane_0",),
+        "d1": ("lane_1",),
+        "d2": ("lane_2",),
+        "d3": ("lane_3",),
+    },
+    "pfd_deadzone_p2p3p4": {
+        "ref": ("first_edge",),
+        "div": ("second_edge",),
+        "up": ("lead_flag",),
+    },
+    "sample_hold_droop_p2p3p4": {
+        "vin": ("analog_in",),
+        "clk": ("sample_cmd",),
+        "vout": ("held_value",),
+    },
+    "dac_therm_16b_p2p3p4": {
+        "rst_n": ("clear",),
+        "vout": ("level_out",),
+        "d0": ("active_lines_0",),
+        "d1": ("active_lines_1",),
+        "d2": ("active_lines_2",),
+        "d3": ("active_lines_3",),
+        "d4": ("active_lines_4",),
+        "d5": ("active_lines_5",),
+        "d6": ("active_lines_6",),
+        "d7": ("active_lines_7",),
+        "d8": ("active_lines_8",),
+        "d9": ("active_lines_9",),
+        "d10": ("active_lines_10",),
+        "d11": ("active_lines_11",),
+        "d12": ("active_lines_12",),
+        "d13": ("active_lines_13",),
+        "d14": ("active_lines_14",),
+        "d15": ("active_lines_15",),
+    },
+    "noise_gen_p2p3p4": {
+        "vin_i": ("base_signal",),
+        "vout_o": ("fluctuated_out",),
+    },
+    "serializer_8b_p2p3p4": {
+        "load": ("latch_cmd",),
+        "clk": ("shift_clock",),
+        "sout": ("serial_stream",),
     },
 }
 
@@ -3458,6 +3509,13 @@ CHECKS = {
     "clk_burst_gen_p2p3p5":       check_clk_burst_gen,
     "pfd_updn_p2p3p4":            check_pfd_updn,
     "flash_adc_3b_p2p3p4":        check_flash_adc_3b,
+    # batch 2+3 perturbation tasks
+    "mux_4to1_p2p3p4":            check_mux_4to1,
+    "pfd_deadzone_p2p3p4":        check_pfd_deadzone,
+    "sample_hold_droop_p2p3p4":   check_sample_hold_droop,
+    "dac_therm_16b_p2p3p4":       check_dac_therm_16b,
+    "noise_gen_p2p3p4":           check_noise_gen,
+    "serializer_8b_p2p3p4":       check_serializer_8b,
 }
 
 
@@ -3468,7 +3526,7 @@ def has_behavior_check(task_id: str) -> bool:
 def evaluate_behavior(task_id: str, csv_path: Path) -> tuple[float, list[str]]:
     if task_id not in CHECKS:
         return 0.0, [f"no behavior check implemented for {task_id}"]
-    if task_id in {"noise_gen", "noise_gen_smoke"}:
+    if task_id in {"noise_gen", "noise_gen_smoke", "noise_gen_p2p3p4"}:
         return evaluate_noise_gen_csv(csv_path)
     streaming_result = evaluate_streaming_behavior(task_id, csv_path)
     if streaming_result is not None:

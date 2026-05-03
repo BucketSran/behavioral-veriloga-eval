@@ -1,0 +1,68 @@
+// Parallel-to-serial converter - EVAS-compatible
+// Latches 8 parallel data pins on a latch command edge,
+// then shifts them out MSB-first on each shift clock edge.
+// Pure voltage-domain.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module parallel_to_serial_converter(
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical p7,
+    input  electrical p6,
+    input  electrical p5,
+    input  electrical p4,
+    input  electrical p3,
+    input  electrical p2,
+    input  electrical p1,
+    input  electrical p0,
+    input  electrical latch_cmd,
+    input  electrical shift_clock,
+    output electrical serial_stream
+);
+
+parameter real vth   = 0.45;
+parameter real tedge = 100p;
+
+integer shift_reg[7:0];
+integer load_pending;
+integer bit_idx;
+real    sout_level;
+
+analog begin
+    @(initial_step) begin
+        load_pending = 0;
+        bit_idx = 0;
+        sout_level = V(VSS);
+    end
+
+    // Latch parallel data on rising edge of latch_cmd
+    @(cross(V(latch_cmd) - vth, +1)) begin
+        shift_reg[7] = (V(p7) > vth) ? 1 : 0;
+        shift_reg[6] = (V(p6) > vth) ? 1 : 0;
+        shift_reg[5] = (V(p5) > vth) ? 1 : 0;
+        shift_reg[4] = (V(p4) > vth) ? 1 : 0;
+        shift_reg[3] = (V(p3) > vth) ? 1 : 0;
+        shift_reg[2] = (V(p2) > vth) ? 1 : 0;
+        shift_reg[1] = (V(p1) > vth) ? 1 : 0;
+        shift_reg[0] = (V(p0) > vth) ? 1 : 0;
+        load_pending = 1;
+        bit_idx = 0;
+    end
+
+    // Shift out MSB-first on rising edge of shift_clock
+    @(cross(V(shift_clock) - vth, +1)) begin
+        if (V(latch_cmd) < vth && load_pending) begin
+            sout_level = shift_reg[7 - bit_idx] ? V(VDD) : V(VSS);
+            if (bit_idx < 7) bit_idx = bit_idx + 1;
+            else load_pending = 0;
+        end
+    end
+
+    V(serial_stream) <+ transition(sout_level, 0, tedge, tedge);
+end
+
+endmodule

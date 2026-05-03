@@ -1,0 +1,23 @@
+simulator lang=spectre
+global 0
+
+Vvdd (vdd 0) vsource dc=0.9 type=dc
+Vvss (vss 0) vsource dc=0.0 type=dc
+
+Vlane0 (lane_0 0) vsource dc=0.1 type=dc
+Vlane1 (lane_1 0) vsource dc=0.3 type=dc
+Vlane2 (lane_2 0) vsource dc=0.6 type=dc
+Vlane3 (lane_3 0) vsource dc=0.8 type=dc
+
+Vpick1 (pick_1 0) vsource type=pwl wave=[0 0  200e-9 0  201e-9 0.9  400e-9 0.9]
+Vpick0 (pick_0 0) vsource type=pwl wave=[0 0  100e-9 0  101e-9 0.9  200e-9 0.9  201e-9 0  300e-9 0  301e-9 0.9  400e-9 0.9]
+
+IDUT (vdd vss lane_3 lane_2 lane_1 lane_0 pick_1 pick_0 routed) signal_router vth=0.45 tedge=100p
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+
+tran tran stop=420n maxstep=1n errpreset=conservative
+
+save lane_0 lane_1 lane_2 lane_3 pick_1 pick_0 routed
+
+ahdl_include "./signal_router.va"

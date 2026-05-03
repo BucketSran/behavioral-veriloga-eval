@@ -1,0 +1,54 @@
+// 4-lane signal router - EVAS-compatible
+// Routes one of four analog input lanes to a single output
+// based on a 2-pin selection code. Pure voltage-domain.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module signal_router(
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical lane_3,
+    input  electrical lane_2,
+    input  electrical lane_1,
+    input  electrical lane_0,
+    input  electrical pick_1,
+    input  electrical pick_0,
+    output electrical routed
+);
+
+parameter real vth   = 0.45;
+parameter real tedge = 100p;
+
+integer sel;
+real    routed_val;
+
+analog begin
+    @(initial_step) begin
+        sel = 0;
+        if      (V(pick_1) > vth && V(pick_0) > vth) routed_val = V(lane_3);
+        else if (V(pick_1) > vth)                     routed_val = V(lane_2);
+        else if (V(pick_0) > vth)                     routed_val = V(lane_1);
+        else                                          routed_val = V(lane_0);
+    end
+
+    @(cross(V(pick_1) - vth, +1) or cross(V(pick_1) - vth, -1) or
+      cross(V(pick_0) - vth, +1) or cross(V(pick_0) - vth, -1) or
+      cross(V(lane_3) - vth, +1) or cross(V(lane_3) - vth, -1) or
+      cross(V(lane_2) - vth, +1) or cross(V(lane_2) - vth, -1) or
+      cross(V(lane_1) - vth, +1) or cross(V(lane_1) - vth, -1) or
+      cross(V(lane_0) - vth, +1) or cross(V(lane_0) - vth, -1)) begin
+
+        sel = ((V(pick_1) > vth) ? 2 : 0) + ((V(pick_0) > vth) ? 1 : 0);
+        if      (sel == 3) routed_val = V(lane_3);
+        else if (sel == 2) routed_val = V(lane_2);
+        else if (sel == 1) routed_val = V(lane_1);
+        else               routed_val = V(lane_0);
+    end
+
+    V(routed) <+ transition(routed_val, 0, tedge, tedge);
+end
+
+endmodule

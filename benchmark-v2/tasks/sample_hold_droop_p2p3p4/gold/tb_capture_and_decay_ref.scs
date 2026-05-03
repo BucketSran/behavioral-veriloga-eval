@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+Vvdd (vdd 0) vsource dc=0.9 type=dc
+Vvss (vss 0) vsource dc=0.0 type=dc
+
+Vsample (sample_cmd 0) vsource type=pulse val0=0 val1=0.9 delay=1n rise=50p fall=50p width=9n period=20n
+Vanalog (analog_in 0) vsource type=pwl wave=[0 0.15 25e-9 0.15  25.001e-9 0.80 65e-9 0.80  65.001e-9 0.35 105e-9 0.35  105.001e-9 0.75 165e-9 0.75  165.001e-9 0.75 170e-9 0.75]
+
+XDUT (vdd vss sample_cmd analog_in held_value) capture_and_decay vth=0.45 tau=120n dt=0.5n trf=40p
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+
+tran tran stop=170n maxstep=0.1n
+
+save analog_in sample_cmd held_value
+
+ahdl_include "./capture_and_decay.va"
