@@ -1,0 +1,11 @@
+simulator lang=spectre
+global 0
+ahdl_include "pseudo_random_source.va"
+Vvdd (supply_hi 0) vsource dc=0.9
+Vvss (supply_lo 0) vsource dc=0.0
+Vclk (advance 0) vsource type=pulse val0=0 val1=0.9 period=1n width=0.5n rise=50p fall=50p
+Vrstb (init_n 0) vsource type=pwl wave=[0 0 100.9n 0 101n 0.9 500n 0.9]
+Ven (run 0) vsource dc=0.9
+IDUT (prbs_out supply_hi supply_lo advance run init_n) pseudo_random_source seed=123
+tran tran stop=500n maxstep=2n
+save advance init_n prbs_out

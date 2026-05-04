@@ -1,0 +1,42 @@
+{
+  "task_id": "vco_p2p3p4",
+  "family": "end-to-end",
+  "category": "oscillator",
+  "domain": "voltage",
+  "difficulty": "medium",
+  "expected_backend": "evas",
+  "source_type": "external_architecture",
+  "source_seed": "external_architecture",
+  "mechanism_family": "oscillator",
+  "perturbation_axes": [
+    "external_architecture"
+  ],
+  "perturbation_level": "N/A",
+  "evas_compatible": true,
+  "spectre_parity_required": true,
+  "status": "draft",
+  "must_include": [
+    "@(cross(",
+    "transition(",
+    "@(timer("
+  ],
+  "must_not_include": [
+    "I(",
+    "ddt("
+  ],
+  "external_source_license": "MIT",
+  "inputs": [
+    "prompt.md"
+  ],
+  "artifacts": [
+    "dut.va",
+    "tb_voltage_controlled_oscillator.scs",
+    "tran.csv"
+  ],
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "review_notes": "Voltage-Controlled Oscillator: maps control voltage linearly to output frequency."
+}

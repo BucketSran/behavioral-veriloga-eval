@@ -1,0 +1,15 @@
+// event_divider_with_pulse gold smoke testbench
+// 125 MHz cadence (period=8ns), divide-by-5 output, tick pulse at wrap.
+// Run 400ns → ~50 cadence cycles → 10 complete divide cycles.
+simulator lang=spectre
+global 0
+
+ahdl_include "event_divider_with_pulse.va"
+
+Vcadence (cadence 0) vsource type=pulse val0=0 val1=1.2 period=8n width=4n rise=80p fall=80p
+Vclear   (clear   0) vsource type=pwl wave=[0 0  3.9n 0  4n 1.2  400n 1.2]
+
+IDUT (cadence clear toggled tick) event_divider_with_pulse vth=0.6 vdd=1.2 tedge=80p
+
+tran tran stop=400n maxstep=1n
+save cadence toggled tick

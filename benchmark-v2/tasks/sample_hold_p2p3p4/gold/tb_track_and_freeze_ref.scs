@@ -1,0 +1,19 @@
+// track_and_freeze gold smoke testbench
+// Pulse on sample_cmd, varying signal on analog_in. Run 1us.
+// Check: held_value captures analog_in at command edges, freezes between edges.
+simulator lang=spectre
+global 0
+
+ahdl_include "track_and_freeze.va"
+
+Vsupply_hi  (supply_hi  0) vsource dc=0.9 type=dc
+Vsupply_lo  (supply_lo  0) vsource dc=0.0 type=dc
+
+Vanalog_in  (analog_in  0) vsource type=pwl wave=[0 0 1e-6 0.9]
+
+Vsample_cmd (sample_cmd 0) vsource type=pulse val0=0 val1=0.9 period=20n width=10n rise=200p fall=200p
+
+IDUT (supply_hi supply_lo analog_in sample_cmd held_value) track_and_freeze vth=0.45 tedge=100p
+
+tran tran stop=1u maxstep=2n
+save analog_in sample_cmd held_value

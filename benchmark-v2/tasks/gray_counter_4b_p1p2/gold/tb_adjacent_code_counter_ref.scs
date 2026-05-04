@@ -1,0 +1,29 @@
+// Library name: vaEvas
+// Cell name:    tb_adjacent_code_counter
+// View name:    schematic
+simulator lang=spectre
+global 0
+
+// Power
+Vsupply_hi (supply_hi 0) vsource dc=0.9 type=dc
+Vsupply_lo (supply_lo 0) vsource dc=0.0 type=dc
+
+// Enable: always on
+Ven (enable 0) vsource dc=0.9 type=dc
+
+// Reset: deassert (go high) after 50ns
+Vreset_n (reset_n 0) vsource type=pwl wave=[0 0 50e-9 0 51e-9 0.9 2e-6 0.9]
+
+// Strobe: 100MHz (period=10ns)
+Vstrobe (strobe 0) vsource type=pulse val0=0 val1=0.9 period=10n width=5n rise=100p fall=100p
+
+// DUT (port order: SUPPLY_HI SUPPLY_LO STROBE ENABLE RESET_N QB3 QB2 QB1 QB0)
+IDUT (supply_hi supply_lo strobe enable reset_n qb3 qb2 qb1 qb0) adjacent_code_counter vth=0.45 tedge=100p
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+
+tran tran stop=2u maxstep=500p errpreset=conservative
+
+save strobe reset_n qb3 qb2 qb1 qb0
+
+ahdl_include "./adjacent_code_counter.va"

@@ -1,0 +1,8 @@
+simulator lang=spectre
+global 0
+ahdl_include "gated_event_passer.va"
+Vevent_in (event_in 0) vsource type=pulse val0=0 val1=1.2 period=50n width=25n rise=1n fall=1n
+Vclear_n (clear_n 0) vsource type=pwl wave=[0 0 115n 0 117n 1.2 2000n 1.2]
+IDUT (event_in clear_n burst_out) gated_event_passer div=6 vdd=1.2 vth=0.6
+tran tran stop=2000n maxstep=5n
+save event_in clear_n burst_out

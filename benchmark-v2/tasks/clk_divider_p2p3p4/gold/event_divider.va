@@ -1,0 +1,43 @@
+// Divide-by-4 event divider — EVAS-compatible
+// toggled output flips every 2 rising edges of cadence → complete cycle every 4.
+
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 10p
+
+module event_divider(
+    input  electrical cadence,
+    input  electrical clear,
+    output electrical toggled
+);
+
+parameter real vth   = 0.45;
+parameter real vdd   = 0.9;
+parameter real tedge = 100p;
+
+integer cnt;
+real    out_level;
+
+analog begin
+    @(initial_step) begin
+        cnt       = 0;
+        out_level = 0.0;
+    end
+
+    @(cross(V(clear) - vth, -1)) begin
+        cnt       = 0;
+        out_level = 0.0;
+    end
+
+    @(cross(V(cadence) - vth, +1)) begin
+        if (V(clear) > vth) begin
+            cnt = cnt + 1;
+            if (cnt >= 4) cnt = 0;
+            out_level = (cnt < 2) ? vdd : 0.0;
+        end
+    end
+
+    V(toggled) <+ transition(out_level, 0, tedge, tedge);
+end
+
+endmodule

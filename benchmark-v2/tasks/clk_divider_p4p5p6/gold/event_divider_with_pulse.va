@@ -1,0 +1,54 @@
+// Event divider with completion pulse — EVAS-compatible
+// toggled: divide-by-5 output, 2-high/3-low pattern
+// tick: one-cadence-period pulse at cycle wrap (cnt==0)
+
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 10p
+
+module event_divider_with_pulse(
+    input  electrical cadence,
+    input  electrical clear,
+    output electrical toggled,
+    output electrical tick
+);
+
+parameter real vth   = 0.6;
+parameter real vdd   = 1.2;
+parameter real tedge = 80p;
+
+integer cnt;
+real    toggled_level;
+real    tick_level;
+
+analog begin
+    @(initial_step) begin
+        cnt           = 0;
+        toggled_level = 0.0;
+        tick_level    = 0.0;
+    end
+
+    @(cross(V(clear) - vth, -1)) begin
+        cnt           = 0;
+        toggled_level = 0.0;
+        tick_level    = 0.0;
+    end
+
+    @(cross(V(cadence) - vth, +1)) begin
+        if (V(clear) > vth) begin
+            cnt = cnt + 1;
+            if (cnt >= 5) cnt = 0;
+
+            // toggled: 2-high / 3-low for divide-by-5
+            toggled_level = (cnt < 2) ? vdd : 0.0;
+
+            // tick: one-cadence-period pulse at wrap (cnt==0)
+            tick_level = (cnt == 0) ? vdd : 0.0;
+        end
+    end
+
+    V(toggled) <+ transition(toggled_level, 0, tedge, tedge);
+    V(tick)    <+ transition(tick_level,    0, tedge, tedge);
+end
+
+endmodule

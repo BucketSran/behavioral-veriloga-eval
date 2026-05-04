@@ -1,0 +1,70 @@
+// Weighted-sum converter - EVAS-compatible
+// Counts the number of active input lines and drives an output
+// voltage proportional to that count. Pure voltage-domain.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module weighted_sum_converter(
+    input  electrical  active_lines_15,
+    input  electrical  active_lines_14,
+    input  electrical  active_lines_13,
+    input  electrical  active_lines_12,
+    input  electrical  active_lines_11,
+    input  electrical  active_lines_10,
+    input  electrical  active_lines_9,
+    input  electrical  active_lines_8,
+    input  electrical  active_lines_7,
+    input  electrical  active_lines_6,
+    input  electrical  active_lines_5,
+    input  electrical  active_lines_4,
+    input  electrical  active_lines_3,
+    input  electrical  active_lines_2,
+    input  electrical  active_lines_1,
+    input  electrical  active_lines_0,
+    input  electrical  clear,
+    output electrical  level_out
+);
+
+parameter real vstep = 1.0;
+parameter real tr    = 10p;
+parameter real vth   = 0.4;
+
+integer ones_cnt;
+real    v_target;
+
+analog begin
+    @(initial_step) begin
+        ones_cnt = 0;
+        v_target = 0.0;
+    end
+
+    if (V(clear) < vth) begin
+        v_target = 0.0;
+    end else begin
+        ones_cnt = 0;
+        if (V(active_lines_0)  > vth) ones_cnt = ones_cnt + 1;
+        if (V(active_lines_1)  > vth) ones_cnt = ones_cnt + 1;
+        if (V(active_lines_2)  > vth) ones_cnt = ones_cnt + 1;
+        if (V(active_lines_3)  > vth) ones_cnt = ones_cnt + 1;
+        if (V(active_lines_4)  > vth) ones_cnt = ones_cnt + 1;
+        if (V(active_lines_5)  > vth) ones_cnt = ones_cnt + 1;
+        if (V(active_lines_6)  > vth) ones_cnt = ones_cnt + 1;
+        if (V(active_lines_7)  > vth) ones_cnt = ones_cnt + 1;
+        if (V(active_lines_8)  > vth) ones_cnt = ones_cnt + 1;
+        if (V(active_lines_9)  > vth) ones_cnt = ones_cnt + 1;
+        if (V(active_lines_10) > vth) ones_cnt = ones_cnt + 1;
+        if (V(active_lines_11) > vth) ones_cnt = ones_cnt + 1;
+        if (V(active_lines_12) > vth) ones_cnt = ones_cnt + 1;
+        if (V(active_lines_13) > vth) ones_cnt = ones_cnt + 1;
+        if (V(active_lines_14) > vth) ones_cnt = ones_cnt + 1;
+        if (V(active_lines_15) > vth) ones_cnt = ones_cnt + 1;
+        v_target = ones_cnt * vstep;
+    end
+
+    V(level_out) <+ transition(v_target, 0, tr, tr);
+end
+
+endmodule

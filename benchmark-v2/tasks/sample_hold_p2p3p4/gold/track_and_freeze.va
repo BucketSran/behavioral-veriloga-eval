@@ -1,0 +1,34 @@
+// Track and Freeze — EVAS-compatible
+// Captures V(analog_in) on rising edge of sample_cmd; freezes value at V(held_value) until next capture.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module track_and_freeze(
+    inout  electrical supply_hi,
+    inout  electrical supply_lo,
+    input  electrical analog_in,
+    input  electrical sample_cmd,
+    output electrical held_value
+);
+
+parameter real vth  = 0.45;
+parameter real tedge = 100p;
+
+real captured;
+
+analog begin
+    @(initial_step) begin
+        captured = 0.0;
+    end
+
+    @(cross(V(sample_cmd) - vth, +1)) begin
+        captured = V(analog_in);
+    end
+
+    V(held_value) <+ transition(captured, 0, tedge, tedge);
+end
+
+endmodule

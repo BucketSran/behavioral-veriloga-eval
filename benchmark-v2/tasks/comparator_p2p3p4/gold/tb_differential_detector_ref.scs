@@ -1,0 +1,17 @@
+// differential_detector gold smoke testbench
+// sense_plus steps from 0V to 0.9V at t≈1ns; sense_minus held at 0.45V.
+// Check: decision mean before t<2ns ≈ 0V; after t≥2ns ≈ 0.9V.
+simulator lang=spectre
+global 0
+
+ahdl_include "differential_detector.va"
+
+Vsupply_hi  (supply_hi  0) vsource dc=0.9
+Vsupply_lo  (supply_lo  0) vsource dc=0.0
+Vsense_plus (sense_plus 0) vsource type=pwl wave=[0 0.0  0.9n 0.0  1.1n 0.9  30n 0.9]
+Vsense_minus (sense_minus 0) vsource dc=0.45
+
+IDUT (supply_hi supply_lo sense_plus sense_minus decision) differential_detector
+
+tran tran stop=30n maxstep=0.5n
+save sense_plus sense_minus decision

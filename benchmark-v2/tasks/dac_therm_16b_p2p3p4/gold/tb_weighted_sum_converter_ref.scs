@@ -1,0 +1,31 @@
+simulator lang=spectre
+global 0
+
+Vclear (clear 0) vsource type=pwl wave=[0 0  4e-9 0  5e-9 0.9  2000e-9 0.9]
+
+Vline0 (active_lines_0 0) vsource type=pwl wave=[0 0  200e-9 0  205e-9 0.9  2000e-9 0.9]
+Vline1 (active_lines_1 0) vsource type=pwl wave=[0 0  200e-9 0  205e-9 0.9  2000e-9 0.9]
+Vline2 (active_lines_2 0) vsource type=pwl wave=[0 0  200e-9 0  205e-9 0.9  2000e-9 0.9]
+Vline3 (active_lines_3 0) vsource type=pwl wave=[0 0  200e-9 0  205e-9 0.9  2000e-9 0.9]
+Vline4 (active_lines_4 0) vsource type=pwl wave=[0 0  400e-9 0  405e-9 0.9  2000e-9 0.9]
+Vline5 (active_lines_5 0) vsource type=pwl wave=[0 0  400e-9 0  405e-9 0.9  2000e-9 0.9]
+Vline6 (active_lines_6 0) vsource type=pwl wave=[0 0  400e-9 0  405e-9 0.9  2000e-9 0.9]
+Vline7 (active_lines_7 0) vsource type=pwl wave=[0 0  400e-9 0  405e-9 0.9  2000e-9 0.9]
+Vline8 (active_lines_8 0) vsource type=pwl wave=[0 0  600e-9 0  605e-9 0.9  2000e-9 0.9]
+Vline9 (active_lines_9 0) vsource type=pwl wave=[0 0  600e-9 0  605e-9 0.9  2000e-9 0.9]
+Vline10 (active_lines_10 0) vsource type=pwl wave=[0 0  600e-9 0  605e-9 0.9  2000e-9 0.9]
+Vline11 (active_lines_11 0) vsource type=pwl wave=[0 0  600e-9 0  605e-9 0.9  2000e-9 0.9]
+Vline12 (active_lines_12 0) vsource type=pwl wave=[0 0  800e-9 0  805e-9 0.9  2000e-9 0.9]
+Vline13 (active_lines_13 0) vsource type=pwl wave=[0 0  800e-9 0  805e-9 0.9  2000e-9 0.9]
+Vline14 (active_lines_14 0) vsource type=pwl wave=[0 0  800e-9 0  805e-9 0.9  2000e-9 0.9]
+Vline15 (active_lines_15 0) vsource type=pwl wave=[0 0  800e-9 0  805e-9 0.9  2000e-9 0.9]
+
+IDUT (active_lines_15 active_lines_14 active_lines_13 active_lines_12 active_lines_11 active_lines_10 active_lines_9 active_lines_8 active_lines_7 active_lines_6 active_lines_5 active_lines_4 active_lines_3 active_lines_2 active_lines_1 active_lines_0 clear level_out) weighted_sum_converter vstep=1.0 vth=0.4
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+
+tran tran stop=2000n maxstep=1n
+
+save active_lines_0 active_lines_1 active_lines_2 active_lines_3 active_lines_4 active_lines_5 active_lines_6 active_lines_7 active_lines_8 active_lines_9 active_lines_10 active_lines_11 active_lines_12 active_lines_13 active_lines_14 active_lines_15 clear level_out
+
+ahdl_include "./weighted_sum_converter.va"

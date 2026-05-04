@@ -1,0 +1,28 @@
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 10p
+module edge_arrival_comparator(
+    inout electrical supply_hi, inout electrical supply_lo,
+    input electrical early_edge, input electrical late_edge,
+    output electrical adv, output electrical ret
+);
+parameter real vth = 0.45; parameter real tedge = 50p;
+integer adv_state; integer ret_state; real adv_level; real ret_level;
+analog begin
+    @(initial_step) begin adv_state=0; ret_state=0; adv_level=0.0; ret_level=0.0; end
+    @(cross(V(early_edge)-vth, +1)) begin
+        adv_state=1;
+        if(ret_state) begin adv_state=0; ret_state=0; end
+        adv_level = adv_state ? V(supply_hi) : V(supply_lo);
+        ret_level = ret_state ? V(supply_hi) : V(supply_lo);
+    end
+    @(cross(V(late_edge)-vth, +1)) begin
+        ret_state=1;
+        if(adv_state) begin adv_state=0; ret_state=0; end
+        adv_level = adv_state ? V(supply_hi) : V(supply_lo);
+        ret_level = ret_state ? V(supply_hi) : V(supply_lo);
+    end
+    V(adv) <+ transition(adv_level, 0, tedge, tedge);
+    V(ret) <+ transition(ret_level, 0, tedge, tedge);
+end
+endmodule

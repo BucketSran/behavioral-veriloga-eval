@@ -68,12 +68,14 @@ def evaluate_noise_gen_csv(csv_path: Path) -> tuple[float, list[str]]:
     with csv_path.open(newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         fields = set(reader.fieldnames or [])
-        if not {"vin_i", "vout_o"}.issubset(fields):
+        in_col = "vin_i" if "vin_i" in fields else ("base_signal" if "base_signal" in fields else None)
+        out_col = "vout_o" if "vout_o" in fields else ("fluctuated_out" if "fluctuated_out" in fields else None)
+        if in_col is None or out_col is None:
             missing_cols = True
         else:
             for row in reader:
                 try:
-                    x = float(row["vout_o"]) - float(row["vin_i"])
+                    x = float(row[out_col]) - float(row[in_col])
                 except (TypeError, ValueError):
                     continue
                 count += 1
@@ -921,6 +923,116 @@ _TASK_ALIAS_CANDIDATES: dict[str, dict[str, tuple[str, ...]]] = {
     },
     "sar_adc_dac_weighted_8b_smoke": {
         "vin_sh": ("vin",),
+    },
+    # benchmark-v2 perturbation tasks — maps check-target → CSV-column
+    "gray_counter_4b_p1p2": {
+        "clk": ("strobe",),
+        "rstb": ("reset_n",),
+        "g3": ("qb3",),
+        "g2": ("qb2",),
+        "g1": ("qb1",),
+        "g0": ("qb0",),
+    },
+    "clk_divider_p2p3p4": {
+        "clk_in": ("cadence_in","cadence",),
+        "clk_out": ("toggled",),
+    },
+    "clk_divider_p4p5p6": {
+        "clk_in": ("cadence",),
+        "clk_out": ("toggled",),
+    },
+    "xor_pd_p2p3p4": {
+        "ref": ("sig_a",),
+        "div": ("sig_b",),
+        "pd_out": ("match_out",),
+    },
+    "dff_rst_p2p5": {
+        "d": ("sample_in",),
+        "clk": ("strobe",),
+        "rst": ("force_low",),
+        "q": ("state",),
+        "qb": ("state_n",),
+    },
+    "comparator_p2p3p4": {
+        "vinp": ("sense_plus",),
+        "vinn": ("sense_minus",),
+        "out_p": ("decision",),
+    },
+    "sample_hold_p2p3p4": {
+        "in": ("analog_in",),
+        "clk": ("sample_cmd",),
+        "out": ("held_value",),
+    },
+    "lfsr_p2p3p4": {
+        "dpn": ("prbs_out",),
+        "rstb": ("init_n",),
+    },
+    "clk_burst_gen_p2p3p5": {
+        "CLK": ("event_in",),
+        "RST_N": ("clear_n",),
+        "CLK_OUT": ("burst_out",),
+    },
+    "pfd_updn_p2p3p4": {
+        "ref": ("early_edge",),
+        "div": ("late_edge",),
+        "up": ("adv",),
+        "dn": ("ret",),
+    },
+    "flash_adc_3b_p2p3p4": {
+        "vin": ("analog_level",),
+        "clk": ("sample_strobe",),
+        "dout2": ("qb2",),
+        "dout1": ("qb1",),
+        "dout0": ("qb0",),
+    },
+    # batch 2+3 perturbation tasks
+    "mux_4to1_p2p3p4": {
+        "sel1": ("pick_1",),
+        "sel0": ("pick_0",),
+        "y": ("routed",),
+        "d0": ("lane_0",),
+        "d1": ("lane_1",),
+        "d2": ("lane_2",),
+        "d3": ("lane_3",),
+    },
+    "pfd_deadzone_p2p3p4": {
+        "ref": ("first_edge",),
+        "div": ("second_edge",),
+        "up": ("lead_flag",),
+    },
+    "sample_hold_droop_p2p3p4": {
+        "vin": ("analog_in",),
+        "clk": ("sample_cmd",),
+        "vout": ("held_value",),
+    },
+    "dac_therm_16b_p2p3p4": {
+        "rst_n": ("clear",),
+        "vout": ("level_out",),
+        "d0": ("active_lines_0",),
+        "d1": ("active_lines_1",),
+        "d2": ("active_lines_2",),
+        "d3": ("active_lines_3",),
+        "d4": ("active_lines_4",),
+        "d5": ("active_lines_5",),
+        "d6": ("active_lines_6",),
+        "d7": ("active_lines_7",),
+        "d8": ("active_lines_8",),
+        "d9": ("active_lines_9",),
+        "d10": ("active_lines_10",),
+        "d11": ("active_lines_11",),
+        "d12": ("active_lines_12",),
+        "d13": ("active_lines_13",),
+        "d14": ("active_lines_14",),
+        "d15": ("active_lines_15",),
+    },
+    "noise_gen_p2p3p4": {
+        "vin_i": ("base_signal",),
+        "vout_o": ("fluctuated_out",),
+    },
+    "serializer_8b_p2p3p4": {
+        "load": ("latch_cmd",),
+        "clk": ("shift_clock",),
+        "sout": ("serial_stream",),
     },
 }
 
@@ -2275,6 +2387,108 @@ def check_serializer_8b(rows: list[dict[str, float]]) -> tuple[bool, str]:
     return True, f"0xA5_serialized_ok mode=edge_only mismatches={mismatches}"
 
 
+def check_vco(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    """VCO: output frequency proportional to control voltage."""
+    if not rows or not {"tune_voltage", "periodic_out"}.issubset(rows[0]):
+        return False, "missing tune_voltage/periodic_out"
+    vth = 0.45
+    times = [r["time"] for r in rows]
+    out = [r["periodic_out"] for r in rows]
+    edges = rising_edges(out, times)
+    if len(edges) < 50:
+        return False, f"too_few_edges={len(edges)}"
+    # Check 4 voltage regions: 0.225V, 0.45V, 0.675V, 0.9V
+    regions = [0.225, 0.45, 0.675, 0.9]
+    expected_f = [10e6 + 90e6*(v/0.9) for v in regions]
+    errors = []
+    for vctrl, f_exp in zip(regions, expected_f):
+        idx = regions.index(vctrl)
+        t_start = 2000e-9 * (idx + 1) + 400e-9
+        t_end = t_start + 1500e-9
+        period_edges = [t for t in edges if t_start < t < t_end]
+        if len(period_edges) < 4:
+            errors.append(f"vctrl={vctrl:.3f}_too_few_edges={len(period_edges)}")
+            continue
+        f_meas = (len(period_edges) - 1) / (period_edges[-1] - period_edges[0])
+        err = abs(f_meas - f_exp) / f_exp
+        if err > 0.3:
+            errors.append(f"vctrl={vctrl:.3f}_freq_err={err:.2f}")
+    if errors:
+        return False, ";".join(errors[:3])
+    return True, f"edges={len(edges)}"
+
+
+def check_charge_pump(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    """Charge pump: output steps up/down on lead/lag pulses."""
+    if not rows or not {"lead_pulse", "lag_pulse", "pump_out"}.issubset(rows[0]):
+        return False, "missing lead_pulse/lag_pulse/pump_out"
+    vth = 0.45
+    times = [r["time"] for r in rows]
+    lead = [r["lead_pulse"] for r in rows]
+    lag = [r["lag_pulse"] for r in rows]
+    out = [r["pump_out"] for r in rows]
+    lead_edges = rising_edges(lead, times)
+    lag_edges = rising_edges(lag, times)
+    # Check initial value ~0.45
+    initial = out[0]
+    if abs(initial - 0.45) > 0.1:
+        return False, f"bad_initial={initial:.3f}"
+    # After lead pulses, pump_out should be higher
+    # Find row after last lead edge
+    last_lead_t = lead_edges[-1] if lead_edges else 0
+    settle_idx = next((i for i, t in enumerate(times) if t >= last_lead_t + 2e-9), len(rows) - 1)
+    post_lead = out[settle_idx]
+    expected_post_lead = 0.45 + len(lead_edges) * 0.02
+    if abs(post_lead - expected_post_lead) > 0.03:
+        return False, f"post_lead={post_lead:.3f}_exp={expected_post_lead:.3f}"
+    # After lag pulses, should have decreased
+    last_lag_t = lag_edges[-1] if lag_edges else 0
+    settle_idx2 = next((i for i, t in enumerate(times) if t >= last_lag_t + 2e-9), len(rows) - 1)
+    post_lag = out[settle_idx2]
+    expected_post_lag = expected_post_lead - len(lag_edges) * 0.02
+    if abs(post_lag - expected_post_lag) > 0.03:
+        return False, f"post_lag={post_lag:.3f}_exp={expected_post_lag:.3f}"
+    return True, f"lead_edges={len(lead_edges)} lag_edges={len(lag_edges)}"
+
+
+def check_window_comparator(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    """Window comparator: exactly one output high in each region."""
+    if not rows or not {"signal_in", "above_hi", "in_window", "below_lo"}.issubset(rows[0]):
+        return False, "missing signal_in/above_hi/in_window/below_lo"
+    vth = 0.45
+    # Check 5 regions at midpoint times
+    checks = [
+        (50e-9, "below_lo"),
+        (150e-9, "below_lo"),
+        (250e-9, "in_window"),
+        (350e-9, "above_hi"),
+        (450e-9, "above_hi"),
+    ]
+    failures = []
+    for t_target, expected in checks:
+        window = [r for r in rows if t_target - 5e-9 <= r["time"] <= t_target + 5e-9]
+        if not window:
+            failures.append(f"no_samples@{t_target*1e9:.0f}ns")
+            continue
+        r = window[-1]
+        above = r["above_hi"] > vth
+        win = r["in_window"] > vth
+        below = r["below_lo"] > vth
+        count = sum([above, win, below])
+        if count != 1:
+            failures.append(f"ambiguous@{t_target*1e9:.0f}ns_count={count}")
+            continue
+        if expected == "below_lo" and not below:
+            failures.append(f"exp_below@{t_target*1e9:.0f}ns")
+        elif expected == "in_window" and not win:
+            failures.append(f"exp_window@{t_target*1e9:.0f}ns")
+        elif expected == "above_hi" and not above:
+            failures.append(f"exp_above@{t_target*1e9:.0f}ns")
+    if failures:
+        return False, ";".join(failures[:3])
+    return True, "three_region_output_correct"
+
+
 def check_serializer_frame_alignment(rows: list[dict[str, float]]) -> tuple[bool, str]:
     required = {"clk", "frame", "sout"}
     if not rows or not required.issubset(rows[0]):
@@ -2602,6 +2816,51 @@ def check_gray_counter_4b(rows: list[dict[str, float]]) -> tuple[bool, str]:
     if not expected_grays.issubset(unique_codes):
         return False, f"missing_gray_codes count={16 - len(expected_grays & unique_codes)}"
     return True, f"unique_codes={len(unique_codes)} bad_transitions={bad_transitions}"
+
+
+def check_gray_counter_4b_v2(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    """Same as check_gray_counter_4b but uses time-based settling (5 ns after edge).
+
+    The v2 perturbation testbenches can have maxstep/tedge combos that make
+    the original 8-index settle land on a mid-transition sample. Switching to
+    a fixed 5 ns post-edge settle avoids transitional values.
+    """
+    required = {"clk", "rstb", "g3", "g2", "g1", "g0"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing clk/rstb/g3/g2/g1/g0"
+    vth = max(r["clk"] for r in rows) * 0.5
+    clk = [r["clk"] for r in rows]
+    times = [r["time"] for r in rows]
+    times_ns = [t * 1e9 for t in times]
+    edge_idx = [i for i in range(1, len(clk)) if clk[i - 1] <= vth < clk[i]]
+    codes: list[int] = []
+    for idx in edge_idx:
+        target_t = times[idx] + 5e-9
+        settle = idx
+        while settle < len(rows) - 1 and times[settle] < target_t:
+            settle += 1
+        settle = min(settle, len(rows) - 1)
+        code = (
+            (1 if rows[settle]["g3"] > vth else 0) << 3
+            | (1 if rows[settle]["g2"] > vth else 0) << 2
+            | (1 if rows[settle]["g1"] > vth else 0) << 1
+            | (1 if rows[settle]["g0"] > vth else 0)
+        )
+        codes.append(code)
+    post_reset = [codes[i] for i, idx in enumerate(edge_idx) if times_ns[idx] > 55.0]
+    if len(post_reset) < 20:
+        return False, f"not_enough_post_reset_edges={len(post_reset)}"
+    bad_transitions = 0
+    for a, b in zip(post_reset[:-1], post_reset[1:]):
+        if bin(a ^ b).count("1") != 1:
+            bad_transitions += 1
+    unique_codes = set(post_reset)
+    expected_grays = {i ^ (i >> 1) for i in range(16)}
+    if bad_transitions > 0:
+        return False, f"gray_property_violated bad_transitions={bad_transitions}"
+    if not expected_grays.issubset(unique_codes):
+        return False, f"missing_gray_codes count={16 - len(expected_grays & unique_codes)}"
+    return True, f"all_gray_ok unique_codes={len(unique_codes)}"
 
 
 def check_gray_counter_one_bit_change(rows: list[dict[str, float]]) -> tuple[bool, str]:
@@ -3340,6 +3599,29 @@ CHECKS = {
     "wrong_edge_sample_hold_bug": check_sample_hold,
     "inverted_comparator_logic_bug": check_inverted_comparator_logic_bug,
     "swapped_pfd_outputs_bug": check_pfd_updn,
+    # benchmark-v2 perturbation tasks
+    "gray_counter_4b_p1p2":       check_gray_counter_4b_v2,
+    "clk_divider_p2p3p4":         check_clk_div,
+    "clk_divider_p4p5p6":         check_clk_div,
+    "xor_pd_p2p3p4":              check_xor_pd,
+    "dff_rst_p2p5":               check_dff_rst,
+    "comparator_p2p3p4":          check_comparator,
+    "sample_hold_p2p3p4":         check_sample_hold,
+    "lfsr_p2p3p4":                check_lfsr,
+    "clk_burst_gen_p2p3p5":       check_clk_burst_gen,
+    "pfd_updn_p2p3p4":            check_pfd_updn,
+    "flash_adc_3b_p2p3p4":        check_flash_adc_3b,
+    # batch 2+3 perturbation tasks
+    "mux_4to1_p2p3p4":            check_mux_4to1,
+    "pfd_deadzone_p2p3p4":        check_pfd_deadzone,
+    "sample_hold_droop_p2p3p4":   check_sample_hold_droop,
+    "dac_therm_16b_p2p3p4":       check_dac_therm_16b,
+    "noise_gen_p2p3p4":           check_noise_gen,
+    "serializer_8b_p2p3p4":       check_serializer_8b,
+    # Route B - external architectures
+    "vco_p2p3p4":                  check_vco,
+    "charge_pump_p2p3p4":          check_charge_pump,
+    "window_comparator_p2p3p4":    check_window_comparator,
 }
 
 
@@ -3350,7 +3632,7 @@ def has_behavior_check(task_id: str) -> bool:
 def evaluate_behavior(task_id: str, csv_path: Path) -> tuple[float, list[str]]:
     if task_id not in CHECKS:
         return 0.0, [f"no behavior check implemented for {task_id}"]
-    if task_id in {"noise_gen", "noise_gen_smoke"}:
+    if task_id in {"noise_gen", "noise_gen_smoke", "noise_gen_p2p3p4"}:
         return evaluate_noise_gen_csv(csv_path)
     streaming_result = evaluate_streaming_behavior(task_id, csv_path)
     if streaming_result is not None:

@@ -1,0 +1,25 @@
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 10p
+module level_to_code_converter(
+    inout electrical supply_hi, inout electrical supply_lo,
+    input electrical analog_level, input electrical sample_strobe,
+    output electrical qb2, output electrical qb1, output electrical qb0
+);
+parameter real ref_hi = 0.9; parameter real ref_lo = 0.0; parameter real vth = 0.45; parameter real tedge = 100p;
+real lsb; integer code; real b2, b1, b0;
+analog begin
+    @(initial_step) begin lsb = (ref_hi - ref_lo)/8.0; code=0; b2=0.0; b1=0.0; b0=0.0; end
+    @(cross(V(sample_strobe)-vth, +1)) begin
+        lsb = (ref_hi - ref_lo)/8.0;
+        code = floor((V(analog_level)-ref_lo)/lsb);
+        if(code<0) code=0; if(code>7) code=7;
+        b2 = ((code>>2)&1) ? V(supply_hi) : V(supply_lo);
+        b1 = ((code>>1)&1) ? V(supply_hi) : V(supply_lo);
+        b0 = ((code>>0)&1) ? V(supply_hi) : V(supply_lo);
+    end
+    V(qb2) <+ transition(b2,0,tedge,tedge);
+    V(qb1) <+ transition(b1,0,tedge,tedge);
+    V(qb0) <+ transition(b0,0,tedge,tedge);
+end
+endmodule

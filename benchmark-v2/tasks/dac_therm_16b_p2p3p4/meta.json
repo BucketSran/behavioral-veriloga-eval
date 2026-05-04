@@ -1,0 +1,41 @@
+{
+  "task_id": "dac_therm_16b_p2p3p4",
+  "family": "end-to-end",
+  "category": "data-converter",
+  "domain": "voltage",
+  "difficulty": "easy",
+  "expected_backend": "evas",
+  "source_type": "seed_92_perturbation",
+  "source_seed": "dac_therm_16b_smoke",
+  "mechanism_family": "data-converter",
+  "perturbation_axes": [
+    "semantic_alias",
+    "keyword_removal",
+    "negative_constraint"
+  ],
+  "perturbation_level": "P3",
+  "evas_compatible": true,
+  "spectre_parity_required": true,
+  "status": "draft",
+  "must_include": [
+    "transition("
+  ],
+  "must_not_include": [
+    "I(",
+    "ddt("
+  ],
+  "inputs": [
+    "prompt.md"
+  ],
+  "artifacts": [
+    "dut.va",
+    "tb_weighted_sum_converter.scs",
+    "tran.csv"
+  ],
+  "scoring": [
+    "dut_compile",
+    "tb_compile",
+    "sim_correct"
+  ],
+  "review_notes": ""
+}

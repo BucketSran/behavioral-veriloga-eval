@@ -1,0 +1,48 @@
+// Single-bit storage element with priority override — EVAS-compatible
+// On rising STROBE edge: if FORCE_LOW high, STATE=0; else STATE samples SAMPLE_IN.
+// STATE_N is always complement of STATE.
+
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 10p
+
+module edge_triggered_latch(
+    inout  electrical SUPPLY_HI,
+    inout  electrical SUPPLY_LO,
+    input  electrical SAMPLE_IN,
+    input  electrical STROBE,
+    input  electrical FORCE_LOW,
+    output electrical STATE,
+    output electrical STATE_N
+);
+
+parameter real tedge = 50p;
+
+real state_val;
+real state_n_val;
+real threshold;
+
+analog begin
+    @(initial_step) begin
+        state_val = V(SUPPLY_LO);
+        threshold = (V(SUPPLY_HI) - V(SUPPLY_LO)) / 2.0 + V(SUPPLY_LO);
+    end
+
+    @(cross(V(STROBE) - threshold, +1)) begin
+        threshold = (V(SUPPLY_HI) - V(SUPPLY_LO)) / 2.0 + V(SUPPLY_LO);
+        if (V(FORCE_LOW) > threshold) begin
+            state_val = V(SUPPLY_LO);
+        end else if (V(SAMPLE_IN) > threshold) begin
+            state_val = V(SUPPLY_HI);
+        end else begin
+            state_val = V(SUPPLY_LO);
+        end
+    end
+
+    state_n_val = V(SUPPLY_HI) - state_val + V(SUPPLY_LO);
+
+    V(STATE)   <+ transition(state_val,   0, tedge, tedge);
+    V(STATE_N) <+ transition(state_n_val, 0, tedge, tedge);
+end
+
+endmodule

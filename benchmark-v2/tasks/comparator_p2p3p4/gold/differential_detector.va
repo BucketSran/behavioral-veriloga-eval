@@ -1,0 +1,37 @@
+// Differential detector — EVAS-compatible
+// Output DECISION goes high when SENSE_PLUS > SENSE_MINUS, low otherwise.
+// Continuously updates via cross events on the differential input.
+
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 10p
+
+module differential_detector(
+    inout  electrical SUPPLY_HI,
+    inout  electrical SUPPLY_LO,
+    input  electrical SENSE_PLUS,
+    input  electrical SENSE_MINUS,
+    output electrical DECISION
+);
+
+parameter real tedge = 100p;
+
+real out_level;
+
+analog begin
+    @(initial_step) begin
+        out_level = (V(SENSE_PLUS) > V(SENSE_MINUS)) ? V(SUPPLY_HI) : V(SUPPLY_LO);
+    end
+
+    @(cross(V(SENSE_PLUS) - V(SENSE_MINUS), +1)) begin
+        out_level = V(SUPPLY_HI);
+    end
+
+    @(cross(V(SENSE_PLUS) - V(SENSE_MINUS), -1)) begin
+        out_level = V(SUPPLY_LO);
+    end
+
+    V(DECISION) <+ transition(out_level, 0, tedge, tedge);
+end
+
+endmodule
