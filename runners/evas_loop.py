@@ -592,6 +592,9 @@ def main() -> int:
         elif provider == "openai" and not os.environ.get("OPENAI_API_KEY"):
             print("[evas_loop] ERROR: OPENAI_API_KEY not set.")
             return 1
+        elif provider == "mimo" and not os.environ.get("MIMO_API_KEY"):
+            print("[evas_loop] ERROR: MIMO_API_KEY not set.")
+            return 1
         elif provider == "bailian":
             key = args.bailian_api_key or os.environ.get("BAILIAN_API_KEY", "")
             if not key:

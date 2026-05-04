@@ -292,12 +292,12 @@ def main() -> int:
         "rows": rows,
         "aggregates": aggregate_rows,
     }
-    json_path = output_prefix.with_suffix(".json")
+    json_path = Path(f"{output_prefix}.json")
     json_path.parent.mkdir(parents=True, exist_ok=True)
     json_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-    _write_csv(output_prefix.with_suffix(".rows.csv"), rows)
-    _write_csv(output_prefix.with_suffix(".groups.csv"), aggregate_rows)
-    _write_markdown(output_prefix.with_suffix(".md"), aggregate_rows)
+    _write_csv(Path(f"{output_prefix}.rows.csv"), rows)
+    _write_csv(Path(f"{output_prefix}.groups.csv"), aggregate_rows)
+    _write_markdown(Path(f"{output_prefix}.md"), aggregate_rows)
     print(f"[cost-summary] rows={len(rows)} groups={len(aggregate_rows)}")
     print(f"[cost-summary] wrote {json_path}")
     return 0

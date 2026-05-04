@@ -8,6 +8,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "runners"))
 
+from generate import detect_provider  # noqa: E402
+
+
+def test_detect_provider_supports_mimo_models() -> None:
+    assert detect_provider("mimo-v2.5-pro") == "mimo"
+    assert detect_provider("xiaomi/mimo-v2.5-pro") == "mimo"
+
 import generate  # noqa: E402
 
 

@@ -14,6 +14,9 @@ Output layout:
 Supported providers (auto-detected from model name):
   anthropic  : claude-*  (requires ANTHROPIC_API_KEY)
   openai     : gpt-*, o1*, o3*, o4*  (requires OPENAI_API_KEY)
+  mimo       : mimo-* or xiaomi/mimo-* (requires MIMO_API_KEY)
+               Uses OpenAI-compatible Xiaomi MiMo endpoint.
+               Base URL defaults to https://api.xiaomimimo.com/v1
   bailian    : qwen*, glm*, kimi*, minimax*, MiniMax*
                Uses Anthropic SDK with Alibaba Cloud DashScope endpoint.
                Requires BAILIAN_API_KEY (or set via --bailian-api-key).
@@ -1311,6 +1314,7 @@ def infer_tb_name(scs_code: str) -> str:
 # Full constructed URL: https://coding.dashscope.aliyuncs.com/apps/anthropic/v1/messages
 _BAILIAN_BASE_URL = "https://coding.dashscope.aliyuncs.com/apps/anthropic"
 _BAILIAN_MODEL_PREFIXES = ("qwen", "glm", "kimi", "minimax")
+_MIMO_DEFAULT_BASE_URL = "https://api.xiaomimimo.com/v1"
 
 
 def detect_provider(model: str) -> str:
@@ -1319,12 +1323,15 @@ def detect_provider(model: str) -> str:
         return "anthropic"
     if any(model_lower.startswith(p) for p in ("gpt-", "o1", "o3", "o4", "text-")):
         return "openai"
+    if model_lower.startswith("mimo") or model_lower.startswith("xiaomi/mimo"):
+        return "mimo"
     if any(model_lower.startswith(p) for p in _BAILIAN_MODEL_PREFIXES):
         return "bailian"
     raise ValueError(
         f"Cannot auto-detect provider for model '{model}'. "
         "Model name should start with 'claude' (Anthropic), 'gpt-/o1/o3/o4' (OpenAI), "
-        "or 'qwen/glm/kimi/minimax' (Bailian/DashScope)."
+        "'mimo' or 'xiaomi/mimo' (Xiaomi MiMo), or 'qwen/glm/kimi/minimax' "
+        "(Bailian/DashScope)."
     )
 
 
@@ -1370,6 +1377,39 @@ def call_openai(model: str, system: str, user: str,
         sys.exit("[generate] ERROR: OPENAI_API_KEY not set.")
 
     client = openai.OpenAI(api_key=api_key)
+    response = client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ],
+        temperature=temperature,
+        max_tokens=max_tokens,
+    )
+    text = response.choices[0].message.content or ""
+    usage_obj = response.usage
+    usage = {
+        "input_tokens": usage_obj.prompt_tokens if usage_obj else 0,
+        "output_tokens": usage_obj.completion_tokens if usage_obj else 0,
+        "finish_reason": response.choices[0].finish_reason,
+    }
+    return text, usage
+
+
+def call_mimo(model: str, system: str, user: str,
+              temperature: float, max_tokens: int) -> tuple[str, dict]:
+    """Call Xiaomi MiMo OpenAI-compatible API. Returns (response_text, usage_dict)."""
+    try:
+        import openai  # type: ignore
+    except ImportError:
+        sys.exit("[generate] ERROR: 'openai' package not installed. Run: pip install openai")
+
+    api_key = os.environ.get("MIMO_API_KEY")
+    if not api_key:
+        sys.exit("[generate] ERROR: MIMO_API_KEY not set.")
+
+    base_url = os.environ.get("MIMO_BASE_URL", _MIMO_DEFAULT_BASE_URL)
+    client = openai.OpenAI(api_key=api_key, base_url=base_url, timeout=300.0)
     response = client.chat.completions.create(
         model=model,
         messages=[
@@ -1439,6 +1479,8 @@ def call_model(model: str, prompt: str, temperature: float,
         return call_anthropic(model, SYSTEM_PROMPT, prompt, temperature, max_tokens)
     elif provider == "openai":
         return call_openai(model, SYSTEM_PROMPT, prompt, temperature, max_tokens)
+    elif provider == "mimo":
+        return call_mimo(model, SYSTEM_PROMPT, prompt, temperature, max_tokens)
     elif provider == "bailian":
         return call_bailian(model, SYSTEM_PROMPT, prompt, temperature, max_tokens,
                             api_key=_bailian_api_key_override)
@@ -1825,6 +1867,10 @@ def main() -> int:
         elif provider == "openai":
             if not os.environ.get("OPENAI_API_KEY"):
                 print("[generate] ERROR: OPENAI_API_KEY is not set.")
+                return 1
+        elif provider == "mimo":
+            if not os.environ.get("MIMO_API_KEY"):
+                print("[generate] ERROR: MIMO_API_KEY is not set.")
                 return 1
         elif provider == "bailian":
             key = args.bailian_api_key or os.environ.get("BAILIAN_API_KEY", "")

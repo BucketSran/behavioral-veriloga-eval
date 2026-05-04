@@ -91,6 +91,32 @@ def list_all_task_dirs(families: tuple[str, ...] = ALL_FAMILIES,
     return result
 
 
+def list_bench_task_dirs(
+    bench_dir: Path,
+    families: tuple[str, ...] = ALL_FAMILIES,
+    selected: set[str] | None = None,
+) -> list[tuple[str, Path]]:
+    """Return scoreable task dirs from a benchmark root such as benchmark-balanced/."""
+    task_root = bench_dir / "tasks"
+    result: list[tuple[str, Path]] = []
+    family_set = set(families)
+    for meta_path in sorted(task_root.glob("*/meta.json")):
+        task_dir = meta_path.parent
+        if not (task_dir / "gold").is_dir():
+            continue
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        family = meta.get("family", "end-to-end")
+        if family not in family_set:
+            continue
+        task_id = meta.get("task_id") or meta.get("id") or task_dir.name
+        if selected and task_id not in selected:
+            continue
+        if meta.get("tier") == "scope-guard":
+            continue
+        result.append((task_id, task_dir))
+    return result
+
+
 def _checks_yaml_declares_sim_correct(task_dir: Path) -> bool:
     checks_path = task_dir / "checks.yaml"
     if not checks_path.exists():
@@ -2038,6 +2064,14 @@ def main() -> int:
         help="Root for scoring results. Default: results/model-eval-<model>/",
     )
     ap.add_argument(
+        "--bench-dir",
+        default="",
+        help=(
+            "Optional benchmark root containing tasks/. Use this for benchmark-v2 "
+            "or benchmark-balanced instead of the official tasks/ tree."
+        ),
+    )
+    ap.add_argument(
         "--task", action="append", default=[],
         help="Score only these task_ids (repeatable). Omit for all.",
     )
@@ -2089,7 +2123,14 @@ def main() -> int:
     families = tuple(args.family) if args.family else ALL_FAMILIES
     selected = set(args.task) if args.task else None
 
-    task_list = list_all_task_dirs(families=families, selected=selected)
+    bench_dir = Path(args.bench_dir) if args.bench_dir else None
+    if bench_dir is not None and not bench_dir.is_absolute():
+        bench_dir = ROOT / bench_dir
+    task_list = (
+        list_bench_task_dirs(bench_dir, families=families, selected=selected)
+        if bench_dir is not None
+        else list_all_task_dirs(families=families, selected=selected)
+    )
     if not task_list:
         print("[score] No tasks found.")
         return 1
