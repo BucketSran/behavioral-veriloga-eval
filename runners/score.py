@@ -798,6 +798,34 @@ def _has_verilog_initial_begin(va_path: Path) -> bool:
     return bool(re.search(r"(?m)^\s*initial\s+begin\b", _strip_line_comments(text)))
 
 
+def _module_header_backslash_continuation_hits(va_path: Path) -> list[str]:
+    """Detect shell-style `\` continuations inside Verilog-A module headers.
+
+    Spectre testbenches require backslashes for continued instance lines, but
+    Verilog-A module declarations do not.  A generated header such as
+    `module foo (a, \` can pass EVAS parsing heuristics while Spectre VACOMP
+    reports a syntax error during AHDL read-in.
+    """
+    lines = _strip_line_comments(va_path.read_text(encoding="utf-8", errors="ignore")).splitlines()
+    hits: list[str] = []
+    in_header = False
+    header_start = 0
+    for lineno, line in enumerate(lines, start=1):
+        stripped = line.strip()
+        if not in_header and re.search(r"\bmodule\s+[A-Za-z_][A-Za-z0-9_$]*\s*\(", stripped):
+            in_header = True
+            header_start = lineno
+        if not in_header:
+            continue
+        if stripped.endswith("\\"):
+            compact = re.sub(r"\s+", " ", stripped)
+            hits.append(f"{va_path.name}:{lineno}:header_start={header_start}:{compact}")
+        if re.search(r"\)\s*;", stripped):
+            in_header = False
+            header_start = 0
+    return hits
+
+
 def _has_transition_inside_conditional(va_path: Path) -> bool:
     """Heuristic for a Spectre AHDL restriction EVAS may otherwise miss."""
     text = _strip_line_comments(va_path.read_text(encoding="utf-8", errors="ignore"))
@@ -1393,6 +1421,13 @@ def spectre_strict_preflight(
         if _has_verilog_initial_begin(va_path):
             _record_failure("ahdl_syntax")
             notes.append(f"spectre_strict:verilog_initial_begin={va_path.name}")
+        header_backslash_hits = _module_header_backslash_continuation_hits(va_path)
+        if header_backslash_hits:
+            _record_failure("ahdl_syntax")
+            notes.append(
+                "spectre_strict:module_header_backslash_continuation="
+                + ",".join(header_backslash_hits[:8])
+            )
         if _has_transition_inside_conditional(va_path):
             _record_failure("ahdl_syntax")
             notes.append(f"spectre_strict:conditional_transition={va_path.name}")

@@ -296,3 +296,32 @@ def test_instance_parameter_keyword_skill_handles_continued_instance(tmp_path: P
     assert "parameters vdd=0.9" in updated
     assert "      parameters vdd=vdd" not in updated
     assert "      vdd=vdd vth=0.45" in updated
+
+
+def test_module_header_backslash_skill_rewrites_only_header_continuations(tmp_path: Path) -> None:
+    sample = tmp_path / "sample_0"
+    sample.mkdir()
+    va = sample / "dut.va"
+    va.write_text(
+        "module dut(in, out, \\\n"
+        "           vdd, vss);\n"
+        "  input in; output out; inout vdd, vss;\n"
+        "  electrical in, out, vdd, vss;\n"
+        "  analog begin\n"
+        "    V(out) <+ V(in);\n"
+        "  end\n"
+        "endmodule\n",
+        encoding="utf-8",
+    )
+
+    manifest = apply_compile_skill_actions(
+        sample,
+        notes=["spectre_strict:module_header_backslash_continuation=dut.va:1:header_start=1"],
+    )
+    updated = va.read_text(encoding="utf-8")
+
+    assert any(skill["id"] == "module_header_backslash_continuation" for skill in manifest["selected_skills"])
+    assert any("module_header_backslash_removed:dut.va:lines=1" in edit for edit in manifest["edits"])
+    assert "module dut(in, out," in updated
+    assert "\\\n" not in updated
+    assert "V(out) <+ V(in);" in updated

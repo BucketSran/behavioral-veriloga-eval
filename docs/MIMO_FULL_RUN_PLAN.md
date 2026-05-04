@@ -7,8 +7,12 @@ This plan runs the unified `D` condition on `benchmark-balanced` with Xiaomi MiM
 - Benchmark: `benchmark-balanced` full 143 tasks.
 - Model: `mimo-v2.5-pro`.
 - Prompt condition: `D = spectre-strict-v3`, one-shot generation, no repair.
+- Thinking mode: must be recorded. Prefer a smoke-tested thinking-disabled or
+  lowest-reasoning setting for model-to-model comparison; otherwise label the
+  run as provider default and do not compare it as equivalent to controlled
+  Kimi rows.
 - Validator: spectre-strict EVAS through `runners/validate_benchmark_v2_gold.py --candidate-dir ... --bench-dir benchmark-balanced`.
-- Accounting: `generation_meta.json` plus `summarize_experiment_costs.py` grouped tables.
+- Accounting: `generation_meta.json` plus `summarize_experiment_costs.py` grouped tables. Record input tokens, output tokens, hidden reasoning tokens when reported, cached input tokens when reported, and API elapsed time.
 
 ## Command
 
@@ -23,11 +27,22 @@ Optional knobs:
 ```bash
 MODEL=mimo-v2.5-pro
 MIMO_BASE_URL=https://api.xiaomimimo.com/v1
+MIMO_THINKING_TYPE=disabled
+MIMO_REASONING_EFFORT=low
+MIMO_EXTRA_BODY_JSON='{"thinking":{"type":"disabled"}}'
 GEN_WORKERS=2
 MAX_TOKENS=4096
 TIMEOUT_S=240
 DATE_TAG=2026-05-04
 ```
+
+The exact thinking/reasoning parameter names are provider-specific. Before a
+full run, execute a one-task smoke test and confirm:
+
+- `reasoning_tokens / output_tokens` is low or zero when the provider reports it.
+- `raw_response_length > 0`.
+- Required fenced code blocks are extracted.
+- The selected setting appears in `generation_meta.json`.
 
 ## Expected Artifacts
 

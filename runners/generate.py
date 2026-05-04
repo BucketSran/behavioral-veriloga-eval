@@ -1410,15 +1410,35 @@ def call_mimo(model: str, system: str, user: str,
 
     base_url = os.environ.get("MIMO_BASE_URL", _MIMO_DEFAULT_BASE_URL)
     client = openai.OpenAI(api_key=api_key, base_url=base_url, timeout=300.0)
-    response = client.chat.completions.create(
-        model=model,
-        messages=[
+    extra_body: dict = {}
+    extra_body_raw = os.environ.get("MIMO_EXTRA_BODY_JSON", "").strip()
+    if extra_body_raw:
+        try:
+            parsed = json.loads(extra_body_raw)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"MIMO_EXTRA_BODY_JSON is not valid JSON: {exc}") from exc
+        if not isinstance(parsed, dict):
+            raise ValueError("MIMO_EXTRA_BODY_JSON must decode to a JSON object")
+        extra_body = parsed
+    thinking_type = os.environ.get("MIMO_THINKING_TYPE", "").strip()
+    if thinking_type and "thinking" not in extra_body:
+        extra_body["thinking"] = {"type": thinking_type}
+    reasoning_effort = os.environ.get("MIMO_REASONING_EFFORT", "").strip()
+    if reasoning_effort and "reasoning_effort" not in extra_body:
+        extra_body["reasoning_effort"] = reasoning_effort
+
+    request_kwargs = {
+        "model": model,
+        "messages": [
             {"role": "system", "content": system},
             {"role": "user", "content": user},
         ],
-        temperature=temperature,
-        max_tokens=max_tokens,
-    )
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+    }
+    if extra_body:
+        request_kwargs["extra_body"] = extra_body
+    response = client.chat.completions.create(**request_kwargs)
     text = response.choices[0].message.content or ""
     usage_obj = response.usage
     usage = {
@@ -1426,6 +1446,17 @@ def call_mimo(model: str, system: str, user: str,
         "output_tokens": usage_obj.completion_tokens if usage_obj else 0,
         "finish_reason": response.choices[0].finish_reason,
     }
+    if usage_obj:
+        completion_details = getattr(usage_obj, "completion_tokens_details", None)
+        prompt_details = getattr(usage_obj, "prompt_tokens_details", None)
+        reasoning_tokens = getattr(completion_details, "reasoning_tokens", None)
+        cached_tokens = getattr(prompt_details, "cached_tokens", None)
+        if reasoning_tokens is not None:
+            usage["reasoning_tokens"] = reasoning_tokens
+        if cached_tokens is not None:
+            usage["cached_input_tokens"] = cached_tokens
+    if extra_body:
+        usage["mimo_extra_body_keys"] = sorted(extra_body.keys())
     return text, usage
 
 

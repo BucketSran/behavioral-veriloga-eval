@@ -27,7 +27,12 @@ set +a
 : "${VB_REMOTE_PORT:=65081}"
 : "${VB_LOCAL_PORT:=65082}"
 
+STARTED_TUNNEL=0
+
 cleanup() {
+  if [[ "$STARTED_TUNNEL" != "1" ]]; then
+    return
+  fi
   local pids
   pids="$(lsof -tiTCP:${VB_LOCAL_PORT} -sTCP:LISTEN -n -P || true)"
   if [[ -n "$pids" ]]; then
@@ -37,19 +42,24 @@ cleanup() {
 
 trap cleanup EXIT
 
-echo "starting temporary bridge tunnel on localhost:${VB_LOCAL_PORT}" >&2
-SSH_ARGS=(
-  -f
-  -o BatchMode=yes
-  -o StrictHostKeyChecking=no
-  -o ExitOnForwardFailure=yes
-)
+if lsof -tiTCP:"${VB_LOCAL_PORT}" -sTCP:LISTEN -n -P >/dev/null 2>&1; then
+  echo "reusing existing bridge tunnel on localhost:${VB_LOCAL_PORT}" >&2
+else
+  echo "starting temporary bridge tunnel on localhost:${VB_LOCAL_PORT}" >&2
+  SSH_ARGS=(
+    -f
+    -o BatchMode=yes
+    -o StrictHostKeyChecking=no
+    -o ExitOnForwardFailure=yes
+  )
 
-if [[ -n "${VB_JUMP_HOST:-}" ]]; then
-  SSH_ARGS+=(-J "${VB_JUMP_USER:-$VB_REMOTE_USER}@${VB_JUMP_HOST}")
+  if [[ -n "${VB_JUMP_HOST:-}" ]]; then
+    SSH_ARGS+=(-J "${VB_JUMP_USER:-$VB_REMOTE_USER}@${VB_JUMP_HOST}")
+  fi
+
+  ssh "${SSH_ARGS[@]}" "${VB_REMOTE_USER}@${VB_REMOTE_HOST}" -L "${VB_LOCAL_PORT}:127.0.0.1:${VB_REMOTE_PORT}" -N
+  STARTED_TUNNEL=1
 fi
-
-ssh "${SSH_ARGS[@]}" "${VB_REMOTE_USER}@${VB_REMOTE_HOST}" -L "${VB_LOCAL_PORT}:127.0.0.1:${VB_REMOTE_PORT}" -N
 
 python3 "$ROOT_DIR/runners/bridge_preflight.py" --bridge-repo "$BRIDGE_REPO" >/dev/null
 export VAEVAS_BRIDGE_WRAPPER=1

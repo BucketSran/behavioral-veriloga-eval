@@ -29,13 +29,58 @@ because they can pass candidates that real Spectre would reject.
 | Required slices | Report full 143, plus `original92`, `completion92`, and `supplement`. |
 | Task-form breakdown | Report `bugfix`, `dut-only/spec-to-va`, `end-to-end`, and `tb-generation`. |
 | Model label | Record the exact model name in run metadata and tables, e.g. `kimi-k2.5`. |
-| Generation accounting | Record input tokens, output tokens, total tokens, per-task elapsed time, and total API elapsed time. |
+| Model thinking mode | Cross-model comparisons must explicitly record and, when supported, control the provider reasoning/thinking mode. Examples: `thinking=disabled`, `reasoning_effort=low`, `default/provider-unknown`, or `none` for deterministic no-new-LLM rows. |
+| Generation accounting | Record input tokens, output tokens, hidden reasoning tokens when the API reports them, cached input tokens when available, total tokens, per-task elapsed time, and total API elapsed time. |
 | Per-group cost columns | Every reported slice or task type must include average tokens per task and average API time per task. |
 | Validator | Use **spectre-strict EVAS**: Spectre-aligned preflight, then EVAS simulation, then checker. |
 | Result status | Main pass metric is spectre-strict EVAS `PASS / total`; also report failure categories and axis rates when available. |
 | Retry policy | One-shot unless the condition definition explicitly includes repair. Artifact retry must not be mixed into A/D one-shot rows. |
 | Compile-guarded rows | A row that claims compile closure must report `FAIL_DUT_COMPILE`, `FAIL_TB_COMPILE`, and compile-pass rate explicitly. |
 | Archival runs | Historical `full92`, partial, pilot, or non-fixed-stage runs may be cited only as archival diagnostics, not as current ADFGI mainline results. |
+
+## Model Thinking / Reasoning Control
+
+Model comparisons are valid only when the generation mode is part of the
+experimental condition. Some OpenAI-compatible reasoning models can spend most
+or all of their output budget on hidden reasoning tokens before emitting final
+code. That behavior changes both cost and artifact extraction probability, so it
+must not be silently mixed with ordinary code-generation mode.
+
+| Case | Protocol |
+| --- | --- |
+| Same model, same ADFGI condition | Keep `temperature`, `max_tokens`, `top_p`, endpoint, and thinking/reasoning controls fixed. |
+| Different AI models | Prefer the closest common mode: code-only final answer, no visible reasoning, and provider reasoning disabled or set to the lowest supported effort. If a provider cannot disable reasoning, label the row as `default/provider-unknown` and do not treat it as directly equivalent to a controlled row. |
+| Deterministic no-new-LLM rows (`C-PLUS`, `C-SKILLPLUS`, `C-ULTRA`) | Record `reasoning_mode=none` for the local fixer layer and inherit the source candidate's model/thinking mode in the manifest. |
+| Repair-loop rows | Record the thinking mode for every LLM repair call; do not mix default-thinking and thinking-disabled repair rounds in one row. |
+
+For Xiaomi MiMo runs, the runner supports generic provider knobs through
+`MIMO_EXTRA_BODY_JSON`, plus convenience environment variables
+`MIMO_THINKING_TYPE` and `MIMO_REASONING_EFFORT`. The exact accepted values are
+provider-specific and must be smoke-tested before a full 143 run.
+
+## Prompt Input Optimization Track
+
+Prompt input size is a follow-up optimization axis, not a replacement for the
+current ADFGI definitions. Any compressed prompt row must preserve the public
+task contract exactly: module names, port names/order, required waveform
+columns, numeric constants, and Spectre-strict compatibility rules that affect
+compile/simulation behavior.
+
+The intended route is a segment-aware compression study:
+
+| Segment | Compression policy |
+| --- | --- |
+| Public task contract, interfaces, observables, numeric thresholds | Lossless; do not paraphrase or token-drop. |
+| Public Spectre/Verilog-A compatibility rules | Compress into a short hard-ban card, then ablate against the full rule set. |
+| Generic output discipline | Compress aggressively; keep code-fence and file-order requirements. |
+| Mechanism/skill guidance | Retrieve only task-relevant cards and cap top-k/character budget. |
+| Buggy source or candidate repair context | Use code-aware compression only if identifiers, literals, and module signatures are preserved. |
+
+Candidate methods and literature are tracked in
+`docs/PROMPT_TOKEN_OPTIMIZATION_RESEARCH.md`. A compressed-prompt result must
+report the same pass/failure metrics as ADFGI plus `prompt_chars`,
+`prompt_tokens`, `reasoning_tokens`, no-code rate, and EVAS/Spectre parity on a
+small audit slice before it can be promoted.
 
 ## Unified ADFGI Conditions
 
@@ -47,7 +92,8 @@ because they can pass candidates that real Spectre would reject.
 | `C` | `D` plus LLM-based compile-first closure; no mechanism guidance and no behavior repair. The loop uses public prompt/spec, current candidate files, validator compile/runtime/observable notes, and same-task short repair history. | Rerun complete after parity fixes: `75/143`; residual compile failures are `18/143`. |
 | `C-SKILL` | `D` plus LLM-based compile-first closure with public compile-skill guidance injected into compile repair prompts; no mechanism guidance and no behavior repair. | Diagnostic rerun complete: `78/143`. After strict-front-end parity fixes, targeted EVAS+Spectre audit on the 35 D residual compile/interface failures gives EVAS `11/35`, Spectre `11/35`, pass mismatch `0/35`. |
 | `C-PLUS` / `C-SKILLPLUS` | `C` plus compile-skill routed deterministic local compile guards applied only to C residual compile/interface failures; no new LLM calls, no mechanism guidance, and no behavior repair. Skills are selected from public validator notes through `runners/compile_skills/registry.json`; fixer and judge-only actions are recorded in the manifest. | Skillized rerun complete under the current validator: `80/143`; residual compile failures are `8/143`. Targeted EVAS+Spectre audit on the earlier 17 C residual compile failures gives pass mismatch `0/17`. This is a compile-skill ablation, not an official G row. |
-| `C-ULTRA(full)` | `C` plus compile-skill routed deterministic local fixers with per-action EVAS quick accept/reject and batch fallback transaction for coupled safe fixes; no new LLM calls, no mechanism guidance, and no behavior repair. | Full ULTRA rerun complete: `81/143`; residual compile failures are `7/143`. Targeted EVAS+Spectre audit on the 18 C residual compile/interface failures after parity fixes gives EVAS `6/18`, Spectre `6/18`, pass mismatch `0/18`. This is the maintained rollback-oriented compile-skill ablation. |
+| `C-ULTRA(full)` | `C` plus compile-skill routed deterministic local fixers with per-action EVAS quick accept/reject and batch fallback transaction for coupled safe fixes; no new LLM calls, no mechanism guidance, and no behavior repair. | Full ULTRA rerun complete: `81/143`; residual compile failures are `7/143`. Targeted EVAS+Spectre audit on the 18 C residual compile/interface failures after parity fixes gives EVAS `6/18`, Spectre `6/18`, pass mismatch `0/18`. This remains the conservative Spectre-audited maintained compile-skill ablation. |
+| `C-ULTRA-ADVANCED` | `C-ULTRA(full)` plus advanced public compile skills for sourced port-role repair, missing testbench generation, and dynamic scatter/index materialization; no new LLM calls and no mechanism guidance. | Strict-EVAS result: `83/143`. R6 targeted EVAS+Spectre audit on the 7 advanced residual tasks after adding the backslash module-header guard gives EVAS `2/7`, Spectre `2/7`, pass mismatch `0/7`, and matching failure taxonomy (`FAIL_SIM_CORRECTNESS=4`, `FAIL_DUT_COMPILE=1`). Both advanced PASS deltas are Spectre-confirmed; the remaining compile failure is `completion92_calibration_bugfix`, which requires wrong-function regeneration for missing `v2b_4b`. |
 | `G` | Circuit-mechanism guidance plus hard compile guard / compile closure. Mechanism-card retrieval must use only `prompt.md`, public port/observable text, event clues, and public functional labels; it must not use `task_id`, `task_name`, directory names, source task ids, gold code, or checker internals for routing. The accepted candidate for each task must pass Spectre-strict preflight and EVAS compile before behavior scoring. Compile repair may use compiler/preflight diagnostics but must not use gold/checker behavior feedback. | Public-only rerun complete: `G0_public=65/143`; `G_public_v2=76/143` with `FAIL_DUT_COMPILE=2`, `FAIL_TB_COMPILE=5`. This does **not** satisfy the official G compile KPI. The earlier `75/143` and `88/143` runs used the old identity-routed mechanism retrieval and are diagnostic only. |
 | `I` | Functional-IR / materialized-IR enhanced condition. | Full balanced rerun complete: `67/143` under spectre-strict EVAS. |
 

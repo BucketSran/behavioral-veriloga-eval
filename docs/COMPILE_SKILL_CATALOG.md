@@ -126,13 +126,28 @@ Accepted advanced actions:
 | `original92_dwa_ptr_gen_smoke` | `missing_testbench_generation` + bootstrap `conditional_transition_target_buffer` | `FAIL_TB_COMPILE -> FAIL_SIM_CORRECTNESS` |
 | `original92_parameter_type_override_smoke` | `sourced_port_role_repair` | `FAIL_TB_COMPILE -> PASS` |
 
-Spectre audit status: attempted three times on the 7-task advanced set, but the
-bridge failed before simulation with SSH upload timeout:
+Spectre audit status: the 2026-05-05 R5 retry completed after rebuilding the
+bridge through `thu-sui`.
 
-`Failed to upload files: Connection timed out during banner exchange`
+Result on the 7-task advanced audit set:
 
-Therefore `C-ULTRA-ADVANCED` is currently an EVAS-validated candidate row, not
-yet a Spectre-audited maintained row.
+| Backend | Pass@1 | Pass/fail mismatch |
+| --- | ---: | ---: |
+| EVAS | 2/7 | 0/7 |
+| Spectre | 2/7 | 0/7 |
+
+The two advanced PASS deltas (`completion92_testbench_e2e` and
+`original92_parameter_type_override_smoke`) are confirmed by Spectre. The R5
+audit exposed one failure-domain drift on `original92_dwa_ptr_gen_smoke`, where
+Spectre reported `VACOMP-2259` for a backslash-continued Verilog-A module
+header. The `module_header_backslash_continuation` preflight/skill was then
+added, and the R6 patched audit gives matching EVAS/Spectre failure taxonomy:
+`FAIL_SIM_CORRECTNESS=4`, `FAIL_DUT_COMPILE=1`.
+
+Therefore `C-ULTRA-ADVANCED` is targeted Spectre pass/fail and failure-domain
+audited on the 7-task advanced slice. The remaining compile failure is
+`completion92_calibration_bugfix`, which still requires wrong-function
+regeneration for missing `v2b_4b`.
 
 Artifacts:
 
@@ -140,16 +155,22 @@ Artifacts:
 - `results/balanced-CULTRA-ADVANCED-skill-acceptreject-kimi-k2.5-quick-2026-05-03`
 - `results/balanced-CULTRA-ADVANCED-skill-acceptreject-kimi-k2.5-spectre-strict-evas-2026-05-03`
 - `results/balanced-CULTRA-ADVANCED-skill-acceptreject-kimi-k2.5-both-advanced7-r3-2026-05-03`
+- `results/balanced-CULTRA-ADVANCED-skill-acceptreject-kimi-k2.5-both-advanced7-r5-2026-05-05`
+- `generated-balanced-CULTRA-ADVANCED-backslashfix7-kimi-k2.5-2026-05-05`
+- `results/balanced-CULTRA-ADVANCED-backslashfix7-kimi-k2.5-both-advanced7-r6-2026-05-05`
 
 ## Current Residual Compile Failures
 
-Current Spectre-audited maintained row: `C-ULTRA(full)` on
+Current conservative Spectre-audited maintained row: `C-ULTRA(full)` on
 `benchmark-balanced`.
 
 Result: `81/143`, with residual compile/interface failures `7/143`.
 
-Current EVAS-only advanced row: `C-ULTRA-ADVANCED`, result `83/143`, with
-residual compile/interface failures `1/143`.
+Current advanced candidate row: `C-ULTRA-ADVANCED`, result `83/143` under
+strict EVAS. After the backslash module-header guard, its 7-task targeted
+EVAS+Spectre audit has pass mismatch `0/7` and matching failure taxonomy. The
+remaining compile failure is `completion92_calibration_bugfix`, a wrong-function
+case requiring regeneration of missing `v2b_4b`.
 
 | Task | Advanced status | Failure class | Current skill status | Why not solved locally |
 | --- | --- | --- | --- | --- |
@@ -188,7 +209,7 @@ The next compile-skill work should be added in this order.
 
 | Priority | Proposed skill | Layer | Goal | Acceptance evidence |
 | --- | --- | --- | --- | --- |
-| P0 | Spectre audit retry for advanced skills | Final audit | Re-run the 7-task advanced set once `virtuoso-bridge-lite` SSH upload is healthy. | EVAS/Spectre pass mismatch `0/7` or explicit Spectre compile reasons. |
+| DONE | Backslash module-header guard | Strict preflight + compile skill | Detect and rewrite Verilog-A module headers using shell-style `\` line continuation. | R6 audit closes `original92_dwa_ptr_gen_smoke` failure-domain drift under EVAS+Spectre. |
 | P0 | `missing_testbench_generation` refinement | Prompt-side plus local accept/reject | Improve missing-TB cases where a smoke skeleton reveals deeper DUT legality problems. | `original92_dwa_ptr_gen_smoke` moves beyond TB compile without task-id templates. |
 | P1 | `dynamic_scatter_index_materialization` hardening | Local accept/reject plus guidance | Generalize scatter materialization beyond the observed DWA shape. | Additional dynamic-vector cases compile-clean under EVAS and Spectre. |
 | P1 | Prompt-side wrong-function regeneration | LLM repair | Regenerate the missing public module after `wrong_function_regeneration_gate` fires. | The replacement module compiles under EVAS/Spectre without using task-id templates or hidden gold code. |

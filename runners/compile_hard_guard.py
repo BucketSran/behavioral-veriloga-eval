@@ -263,6 +263,33 @@ def _apply_instance_parameter_keyword_guard(sample_dir: Path, notes: list[str] |
     return edits
 
 
+def _apply_module_header_backslash_guard(sample_dir: Path, notes: list[str] | None) -> list[str]:
+    text = _notes_text(notes).lower()
+    if "module_header_backslash_continuation=" not in text:
+        return []
+    edits: list[str] = []
+    for va_path in sorted(sample_dir.glob("*.va")):
+        lines = va_path.read_text(encoding="utf-8", errors="ignore").splitlines()
+        in_header = False
+        changed = 0
+        updated_lines: list[str] = []
+        for line in lines:
+            stripped = line.strip()
+            if not in_header and re.search(r"\bmodule\s+[A-Za-z_][A-Za-z0-9_$]*\s*\(", stripped):
+                in_header = True
+            updated = line
+            if in_header and line.rstrip().endswith("\\"):
+                updated = line.rstrip()[:-1].rstrip()
+                changed += 1
+            updated_lines.append(updated)
+            if in_header and re.search(r"\)\s*;", stripped):
+                in_header = False
+        if changed:
+            va_path.write_text("\n".join(updated_lines) + "\n", encoding="utf-8")
+            edits.append(f"module_header_backslash_removed:{va_path.name}:lines={changed}")
+    return edits
+
+
 def _apply_sourced_port_role_repair_guard(sample_dir: Path, notes: list[str] | None) -> list[str]:
     """Detach DUT-driven ports from source-fixed nodes when strict preflight proves the conflict.
 
@@ -558,6 +585,8 @@ def _apply_fixer_action(sample_dir: Path, *, fixer: str, notes: list[str] | None
         return _apply_pwl_monotonic_guard(sample_dir, notes)
     if fixer == "instance_parameter_keyword":
         return _apply_instance_parameter_keyword_guard(sample_dir, notes)
+    if fixer == "module_header_backslash":
+        return _apply_module_header_backslash_guard(sample_dir, notes)
     if fixer == "sourced_port_role_repair":
         return _apply_sourced_port_role_repair_guard(sample_dir, notes)
     if fixer == "missing_testbench_skeleton":
@@ -582,11 +611,12 @@ def apply_compile_skill_actions(sample_dir: Path, *, notes: list[str] | None = N
         "parameter_default_range": 1,
         "pwl_monotonic_time": 2,
         "instance_parameter_keyword": 3,
-        "missing_testbench_skeleton": 4,
-        "sourced_port_role_repair": 5,
-        "dynamic_scatter_materialization": 6,
-        "vector_unroll": 7,
-        "transition_target_buffer": 8,
+        "module_header_backslash": 4,
+        "missing_testbench_skeleton": 5,
+        "sourced_port_role_repair": 6,
+        "dynamic_scatter_materialization": 7,
+        "vector_unroll": 8,
+        "transition_target_buffer": 9,
         None: 99,
     }
     selected = sorted(selected, key=lambda skill: (fixer_order.get(skill.fixer, 50), skill.id))

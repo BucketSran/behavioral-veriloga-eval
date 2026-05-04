@@ -113,7 +113,7 @@ Full strict-EVAS results:
 | `C-SKILLPLUS` | `80/143` |
 | `C-ULTRA` per-action only | `79/143` |
 | `C-ULTRA(full)` with batch fallback | `81/143` |
-| `C-ULTRA-ADVANCED` with three advanced skills | `83/143` EVAS-only pending Spectre audit retry |
+| `C-ULTRA-ADVANCED` with advanced skills plus module-header backslash guard | `83/143` strict EVAS; targeted EVAS+Spectre R6 audited |
 
 Targeted EVAS+Spectre audits:
 
@@ -123,6 +123,7 @@ Targeted EVAS+Spectre audits:
 | `C-SKILLPLUS` | 17 C residual compile/interface failures | `5/17` | `5/17` | `0/17` |
 | `C-ULTRA` | 17 C residual compile/interface failures | `4/17` | `4/17` | `0/17` |
 | `C-ULTRA(full)` | 18 C residual compile/interface failures after parity fixes | `6/18` | `6/18` | `0/18` |
+| `C-ULTRA-ADVANCED` | 7 advanced residual tasks after backslash guard | `2/7` | `2/7` | `0/7` |
 
 `C-SKILLPLUS` verifies that the skillized execution path preserves the earlier
 hard-guard improvement while making the mechanism reusable and auditable.
@@ -138,9 +139,12 @@ preflight skill.
 `missing_testbench_generation`, and
 `dynamic_scatter_index_materialization`.  It improves full strict-EVAS from
 `81/143` to `83/143` and reduces residual compile/interface failures from
-`7/143` to `1/143`.  A 7-task EVAS+Spectre audit was attempted three times, but
-all runs failed at the `virtuoso-bridge-lite` upload layer with SSH banner timeout,
-so this row is not yet Spectre-audited.
+`7/143` to `1/143`.  The R5 audit exposed one EVAS/Spectre failure-domain drift:
+Spectre rejected a backslash-continued Verilog-A module header that EVAS had
+accepted.  The `module_header_backslash_continuation` preflight/skill closes
+that gap.  The R6 7-task EVAS+Spectre audit gives EVAS `2/7`, Spectre `2/7`,
+pass mismatch `0/7`, and matching failure taxonomy
+(`FAIL_SIM_CORRECTNESS=4`, `FAIL_DUT_COMPILE=1`).
 
 ## Residual Compile Boundary
 
