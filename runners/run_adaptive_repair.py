@@ -21,13 +21,19 @@ from build_repair_prompt import build_evas_guided_repair_prompt, metric_gap_summ
 from compile_skill_library import render_compile_skill_guidance, select_compile_skills
 from compile_vector_unroll_guard import apply_vector_unroll_guard
 from generate import (
+    artifact_retry_prompt,
     build_enhancement_payload,
     build_prompt,
     call_model,
     extract_module_signature,
+    extract_code_blocks,
     list_bench_task_dirs,
     list_task_dirs,
+    missing_required_artifacts,
+    present_artifact_kinds_from_blocks,
     read_meta,
+    required_artifact_kinds,
+    was_truncated,
 )
 from interface_parameter_guard import check_interface_parameters, format_issue_notes
 from run_model_assisted_loop import _model_slug, _save_generated_response
@@ -563,6 +569,19 @@ def _freeze_veriloga_from(src_sample: Path, dst_sample: Path) -> list[str]:
     return copied
 
 
+def _freeze_dut_from_anchor_or_gold(task_dir: Path, src_sample: Path, dst_sample: Path) -> list[str]:
+    """Preserve DUT files while repairing generated testbench behavior."""
+    copied = _freeze_veriloga_from(src_sample, dst_sample)
+    if copied:
+        return copied
+    gold_dir = task_dir / "gold"
+    for src in sorted(gold_dir.glob("*.va")):
+        dst = dst_sample / src.name
+        shutil.copy2(src, dst)
+        copied.append(src.name)
+    return copied
+
+
 def _main_module_name(task_dir: Path) -> str | None:
     prompt = task_dir.joinpath("prompt.md").read_text(encoding="utf-8", errors="ignore")
     for pattern in _MAIN_MODULE_PATTERNS:
@@ -627,6 +646,7 @@ def _freeze_gold_harness(task_dir: Path, dst_sample: Path) -> list[str]:
     if not gold_dir.exists():
         return []
     protected_modules = _protected_dut_modules(task_dir, dst_sample)
+    candidate_modules = _declared_modules(sorted(dst_sample.glob("*.va")))
     copied: list[str] = []
 
     for existing in dst_sample.glob("*.scs"):
@@ -635,6 +655,9 @@ def _freeze_gold_harness(task_dir: Path, dst_sample: Path) -> list[str]:
     for src in sorted(gold_dir.glob("*.scs")):
         shutil.copy2(src, dst_sample / src.name)
         copied.append(src.name)
+
+    if not candidate_modules:
+        return copied
 
     for src in sorted(gold_dir.glob("*.va")):
         signature = extract_module_signature(src)
@@ -698,10 +721,39 @@ def _layer_policy_section(layer: str, task_dir: Path) -> str:
             "Use the verifier supply parameter (for example `vdd`) for output HIGH and verifier initialization parameters "
             "for reset state when those names are present.\n"
         )
+    if layer == "behavior_tb":
+        return (
+            "\n\n# Layered Only-Repair Policy: Testbench Behavior\n"
+            "The current failure is behavior correctness for a generated testbench. The runner will preserve the DUT "
+            "Verilog-A files and evaluate only your repaired Spectre testbench/harness. Do not change DUT behavior. "
+            "Focus on public stimulus coverage, instance wiring, save columns, threshold cases, transient stop/maxstep, "
+            "and measurement timing required by the prompt.\n"
+        )
     return (
         "\n\n# Layered Only-Repair Policy: Infrastructure\n"
         "The failure is not yet classified as compile, observable, or behavior. Make the smallest change needed to expose "
         "a concrete EVAS diagnostic, and do not rewrite working layers.\n"
+    )
+
+
+def _strict_code_output_section(family: str) -> str:
+    if family in {"spec-to-va", "bugfix"}:
+        required = "exactly one complete fenced `verilog-a` code block"
+    elif family == "tb-generation":
+        required = "exactly one complete fenced `spectre` code block"
+    else:
+        required = "the minimum complete fenced code blocks required by the task"
+    return textwrap.dedent(
+        f"""\
+
+        # Strict Artifact Output Contract
+
+        Output {required} and nothing else.
+        Start with the opening fence immediately. Do not include analysis, prose,
+        alternatives, markdown headings, or explanations.
+        The file must be complete and simulation-ready. Stop immediately after the
+        closing code fence.
+        """
     )
 
 
@@ -900,6 +952,174 @@ def _candidate_sections(sample_dir: Path) -> list[str]:
     if not sections:
         sections.append("No previous candidate files were found.")
     return sections
+
+
+def _truncate_middle(text: str, max_chars: int, *, label: str = "content") -> str:
+    if max_chars <= 0 or len(text) <= max_chars:
+        return text
+    marker = f"\n/* ... {label} truncated for compact controller ... */\n"
+    keep = max(0, max_chars - len(marker))
+    head = keep // 2
+    tail = keep - head
+    return text[:head].rstrip() + marker + text[-tail:].lstrip()
+
+
+def _compact_candidate_sections(sample_dir: Path, *, max_chars: int) -> str:
+    files = sorted([*sample_dir.glob("*.va"), *sample_dir.glob("*.scs")])
+    if not files:
+        return "No previous candidate files were found."
+    if max_chars <= 0:
+        return "Candidate files are omitted by compact-controller budget."
+
+    sections: list[str] = []
+    remaining = max_chars
+    for idx, path in enumerate(files):
+        if remaining <= 0:
+            break
+        files_left = len(files) - idx
+        budget = max(800, remaining // files_left)
+        text = path.read_text(encoding="utf-8", errors="ignore").rstrip()
+        text = _truncate_middle(text, budget, label=path.name)
+        lang = "spectre" if path.suffix.lower() == ".scs" else "verilog-a"
+        section = f"# Current file: {path.name}\n```{lang}\n{text}\n```"
+        sections.append(section)
+        remaining -= len(section)
+    omitted = len(files) - len(sections)
+    if omitted > 0:
+        sections.append(f"# Compact note\n{omitted} additional candidate file(s) omitted by budget.")
+    return "\n\n".join(sections)
+
+
+def _compact_result_summary(task_dir: Path, result: dict) -> str:
+    scores = result.get("scores", {})
+    notes = [str(note) for note in (result.get("evas_notes") or result.get("notes") or [])]
+    metrics = _extract_metrics(result)
+    diagnostics = _concrete_diagnostics(result)
+    metric_gap = metric_gap_summary(task_dir, result)
+    metric_gap_text = json.dumps(metric_gap, sort_keys=True, ensure_ascii=False) if metric_gap else "{}"
+    metric_text = json.dumps(metrics, sort_keys=True, ensure_ascii=False) if metrics else "{}"
+    note_text = "\n".join(f"- {note}" for note in notes[:8]) or "- <none>"
+    diagnostic_text = "\n".join(f"- {note}" for note in diagnostics[:8]) or "- <none>"
+    return textwrap.dedent(
+        f"""\
+        Status: {result.get("status", "<unknown>")}
+        Repair layer: {_classify_repair_layer(result)}
+        Failure subtype: {_failure_subtype(result)}
+        Scores: dut_compile={scores.get("dut_compile", "<missing>")}, tb_compile={scores.get("tb_compile", "<missing>")}, sim_correct={scores.get("sim_correct", "<missing>")}, weighted_total={scores.get("weighted_total", "<missing>")}
+        Extracted EVAS metrics: {metric_text}
+        Metric gap summary: {metric_gap_text}
+
+        Concrete diagnostics:
+        {diagnostic_text}
+
+        EVAS notes:
+        {note_text}
+        """
+    ).strip()
+
+
+def _compact_controller_policy(layer: str, result: dict) -> str:
+    notes = " ".join(str(note) for note in result.get("evas_notes", [])).lower()
+    lines = [
+        "Act as a controller, not a free-form explainer: choose one narrow repair target, then output complete replacement artifact(s).",
+        "Preserve module names, port names/order, parameters, saved waveform names, and working behavior unless the listed EVAS failure requires changing them.",
+        "Do not include analysis in the response; the runner only needs fenced code artifacts.",
+    ]
+    if layer == "compile_dut":
+        lines.append("Primary target: repair DUT Verilog-A legality and interface compatibility before behavior tuning.")
+    elif layer == "compile_tb":
+        lines.append("Primary target: repair Spectre testbench syntax, include paths, instance model names, node order, save list, and tran statement.")
+    elif layer == "runtime_interface":
+        lines.append("Primary target: make simulation execute and produce the required tran.csv waveform columns before tuning semantics.")
+    elif layer == "observable":
+        lines.append("Primary target: repair stimulus coverage, reset timing, saved observables, or transient duration so EVAS can measure behavior.")
+    elif layer == "behavior":
+        lines.append("Primary target: keep the runnable interface stable and repair only the semantic logic exposed by EVAS metrics.")
+    else:
+        lines.append("Primary target: expose a concrete EVAS diagnostic with the smallest coherent implementation fix.")
+    if "tran.csv missing" in notes or "returncode=1" in notes:
+        lines.append("The current blocker is a runtime artifact failure; do not spend tokens on broad redesign until the CSV-producing path is stable.")
+    if "missing_generated_files" in notes:
+        lines.append("The current blocker includes missing artifacts; output all required fenced artifact kinds in this response.")
+    return "\n".join(f"- {line}" for line in lines)
+
+
+def _compact_controller_should_use(mode: str, layer: str, result: dict) -> bool:
+    if mode == "off":
+        return False
+    if mode == "always":
+        return True
+    if mode != "fallback":
+        return False
+    if layer in {"compile_dut", "compile_tb", "runtime_interface", "observable", "infra"}:
+        return True
+    notes = " ".join(str(note) for note in result.get("evas_notes", [])).lower()
+    return any(marker in notes for marker in ("tran.csv missing", "returncode=1", "missing_generated_files"))
+
+
+def _compact_controller_prompt(
+    task_dir: Path,
+    sample_dir: Path,
+    result: dict,
+    *,
+    history: list[dict],
+    round_idx: int,
+    public_spec_mode: str,
+    max_candidate_chars: int,
+) -> str:
+    meta = read_meta(task_dir)
+    family = meta.get("family", "end-to-end")
+    task_text = build_prompt(
+        task_dir,
+        include_checker=False,
+        include_skill=False,
+        include_public_contract=False,
+        public_spec_mode=public_spec_mode,
+        enhancement_mode="none",
+    ).strip()
+    layer = _classify_repair_layer(result)
+    history_lines = ["No previous compact-controller rounds."]
+    if history:
+        history_lines = []
+        for item in history[-3:]:
+            history_lines.append(
+                f"- R{item.get('round')}: status={item.get('status')} "
+                f"result_layer={item.get('result_layer')} progress={item.get('progress_label')} "
+                f"failure={item.get('failure_subtype')}"
+            )
+    return textwrap.dedent(
+        f"""\
+        # Compact-Controller Repair Mode v1
+
+        Round: {round_idx}
+        Task: {meta.get("task_id") or meta.get("id") or task_dir.name}
+        Family: {family}
+
+        ## Public Task Contract
+
+        {task_text}
+
+        ## Current EVAS Result
+
+        {_compact_result_summary(task_dir, result)}
+
+        ## Controller Policy
+
+        {_compact_controller_policy(layer, result)}
+
+        ## Recent Repair History
+
+        {chr(10).join(history_lines)}
+
+        ## Current Candidate Artifacts
+
+        {_compact_candidate_sections(sample_dir, max_chars=max_candidate_chars)}
+
+        ## Required Response
+
+        Output complete replacement artifact(s) for this task as fenced code blocks only.
+        """
+    ).strip()
 
 
 def _compile_gate_score_summary(result: dict, *, compact: bool = False) -> str:
@@ -1495,6 +1715,10 @@ def _combine_repair_usage(repair_usage: dict, plan_usage: dict | None = None) ->
     return combined
 
 
+def _artifact_kind_score(blocks: dict[str, list[str]], family: str) -> int:
+    return len(present_artifact_kinds_from_blocks(blocks) & required_artifact_kinds(family))
+
+
 def _compile_only_closure_prompt(
     *,
     task_dir: Path,
@@ -1747,6 +1971,7 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
         plan_api_elapsed_s = 0.0
         plan_parse_status = "not_requested"
         plan_execute_text = ""
+        compact_controller_used = False
         if args.compile_only_closure:
             if args.compile_plan_execute:
                 print(f"[adaptive] CALL {model_slug}/{task_id} R{round_idx} ", end="", flush=True)
@@ -1775,29 +2000,46 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
                 plan_execute_text=plan_execute_text,
             )
         else:
-            prompt = build_evas_guided_repair_prompt(
-                task_dir,
-                anchor_sample,
-                anchor_result,
-                history=history,
-                include_skill=not args.no_repair_skill,
-                include_contract_diagnosis=not args.disable_contract_diagnosis,
-                public_spec_mode=args.repair_public_spec_mode,
-                loop_context={
-                    "attempt_round": round_idx,
-                    "best_round": history[-1]["round"] if history else 0,
-                    "best_status": best_result.get("status"),
-                    "best_scores": best_result.get("scores", {}),
-                    "best_metric_gap": metric_gap_summary(task_dir, best_result),
-                    "best_failure_subtype": _failure_subtype(best_result),
-                },
-            )
-            if args.layered_only_repair:
-                prompt += _layer_policy_section(layer, task_dir)
-            if args.syntax_zero_gate:
-                prompt += _syntax_zero_gate_policy_section(layer, anchor_result)
-            elif args.freeze_gold_harness_on_behavior and anchor_result.get("status") == "FAIL_SIM_CORRECTNESS":
-                prompt += _layer_policy_section("behavior", task_dir)
+            compact_controller_used = _compact_controller_should_use(args.compact_controller, layer, anchor_result)
+            if compact_controller_used:
+                prompt = _compact_controller_prompt(
+                    task_dir,
+                    anchor_sample,
+                    anchor_result,
+                    history=history,
+                    round_idx=round_idx,
+                    public_spec_mode=args.compact_controller_public_spec_mode,
+                    max_candidate_chars=args.compact_controller_max_candidate_chars,
+                )
+            else:
+                prompt = build_evas_guided_repair_prompt(
+                    task_dir,
+                    anchor_sample,
+                    anchor_result,
+                    history=history,
+                    include_skill=not args.no_repair_skill,
+                    include_contract_diagnosis=not args.disable_contract_diagnosis,
+                    public_spec_mode=args.repair_public_spec_mode,
+                    loop_context={
+                        "attempt_round": round_idx,
+                        "best_round": history[-1]["round"] if history else 0,
+                        "best_status": best_result.get("status"),
+                        "best_scores": best_result.get("scores", {}),
+                        "best_metric_gap": metric_gap_summary(task_dir, best_result),
+                        "best_failure_subtype": _failure_subtype(best_result),
+                    },
+                )
+                if args.layered_only_repair:
+                    prompt += _layer_policy_section(layer, task_dir)
+                if args.syntax_zero_gate:
+                    prompt += _syntax_zero_gate_policy_section(layer, anchor_result)
+                elif args.freeze_gold_harness_on_behavior and anchor_result.get("status") == "FAIL_SIM_CORRECTNESS":
+                    prompt += _layer_policy_section("behavior", task_dir)
+                elif args.freeze_dut_on_behavior and anchor_result.get("status") == "FAIL_SIM_CORRECTNESS":
+                    prompt += _layer_policy_section("behavior_tb", task_dir)
+        family = read_meta(task_dir).get("family", "end-to-end")
+        if args.strict_code_output:
+            prompt += _strict_code_output_section(family)
         (sample_dir / "repair_prompt.md").write_text(prompt, encoding="utf-8")
 
         if not args.compile_plan_execute:
@@ -1812,13 +2054,59 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
             args.top_p,
             args.max_tokens,
         )
+        repair_api_call_count = 1
+        artifact_retry_meta: dict = {"attempted": False, "used": False}
         api_elapsed_s = time.perf_counter() - api_start
-        combined_usage = _combine_repair_usage(usage, plan_usage if args.compile_plan_execute else None)
         (sample_dir / "raw_response.txt").write_text(response_text, encoding="utf-8")
+        blocks = extract_code_blocks(response_text)
+        missing_after_first = missing_required_artifacts(family, blocks)
+        if (
+            args.artifact_retry_on_truncation
+            and missing_after_first
+            and was_truncated(usage, args.max_tokens)
+        ):
+            retry_max_tokens = max(args.max_tokens, args.artifact_retry_max_tokens)
+            retry_prompt = artifact_retry_prompt(prompt, missing_after_first)
+            if args.strict_code_output:
+                retry_prompt += _strict_code_output_section(family)
+            artifact_retry_meta = {
+                "attempted": True,
+                "used": False,
+                "reason": "truncated_missing_required_artifacts",
+                "missing_after_first": missing_after_first,
+                "first_finish_reason": usage.get("finish_reason"),
+                "first_output_tokens": usage.get("output_tokens"),
+                "retry_max_tokens": retry_max_tokens,
+            }
+            try:
+                retry_start = time.perf_counter()
+                retry_response_text, retry_usage = call_model(
+                    args.model,
+                    retry_prompt,
+                    args.temperature if round_idx == 1 else max(args.temperature, 0.2),
+                    args.top_p,
+                    retry_max_tokens,
+                )
+                api_elapsed_s += time.perf_counter() - retry_start
+                repair_api_call_count += 1
+                (sample_dir / "raw_response_retry.txt").write_text(retry_response_text, encoding="utf-8")
+                retry_blocks = extract_code_blocks(retry_response_text)
+                artifact_retry_meta["retry_finish_reason"] = retry_usage.get("finish_reason")
+                artifact_retry_meta["retry_output_tokens"] = retry_usage.get("output_tokens")
+                artifact_retry_meta["missing_after_retry"] = missing_required_artifacts(family, retry_blocks)
+                if _artifact_kind_score(retry_blocks, family) >= _artifact_kind_score(blocks, family):
+                    response_text = retry_response_text
+                    usage = retry_usage
+                    blocks = retry_blocks
+                    artifact_retry_meta["used"] = True
+                    (sample_dir / "raw_response.txt").write_text(response_text, encoding="utf-8")
+            except Exception as exc:  # noqa: BLE001
+                artifact_retry_meta["error"] = str(exc)[:400]
+        combined_usage = _combine_repair_usage(usage, plan_usage if args.compile_plan_execute else None)
         saved = _save_generated_response(
             response_text=response_text,
             sample_dir=sample_dir,
-            family=read_meta(task_dir).get("family", "end-to-end"),
+            family=family,
             task_dir=task_dir,
         )
         frozen_tbs: list[str] = []
@@ -1840,6 +2128,8 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
         elif anchor_result.get("status") == "FAIL_SIM_CORRECTNESS":
             if args.freeze_gold_harness_on_behavior:
                 frozen_harness = _freeze_gold_harness(task_dir, sample_dir)
+            elif args.freeze_dut_on_behavior:
+                frozen_duts = _freeze_dut_from_anchor_or_gold(task_dir, anchor_sample, sample_dir)
             elif args.freeze_tb_on_behavior:
                 frozen_tbs = _freeze_testbench_from(best_sample, sample_dir)
         vector_unroll_guard_edits = (
@@ -1868,13 +2158,20 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
                 "compile_context_engineering": bool(args.compile_context_engineering),
                 "compile_compact_diagnostics": bool(args.compile_compact_diagnostics),
                 "compile_plan_execute": bool(args.compile_plan_execute),
+                "strict_code_output": bool(args.strict_code_output),
+                "compact_controller": args.compact_controller,
+                "compact_controller_used": bool(compact_controller_used),
+                "compact_controller_public_spec_mode": args.compact_controller_public_spec_mode,
+                "compact_controller_max_candidate_chars": args.compact_controller_max_candidate_chars,
+                "prompt_chars": len(prompt),
+                "artifact_retry": artifact_retry_meta,
                 "compile_plan_parse_status": plan_parse_status,
                 "compile_plan": plan or {},
                 "syntax_zero_gate_state": syntax_gate_state,
                 "api_elapsed_s": round(api_elapsed_s + plan_api_elapsed_s, 3),
                 "repair_api_elapsed_s": round(api_elapsed_s, 3),
                 "plan_api_elapsed_s": round(plan_api_elapsed_s, 3),
-                "api_call_count": 2 if args.compile_plan_execute else 1,
+                "api_call_count": repair_api_call_count + (1 if args.compile_plan_execute else 0),
                 "task_elapsed_s": round(time.perf_counter() - round_start, 3),
                 "generated_at": datetime.now(timezone.utc).isoformat(),
                 **combined_usage,
@@ -1973,6 +2270,9 @@ def run_task(args: argparse.Namespace, task_id: str, task_dir: Path) -> dict:
             "compile_context_engineering": bool(args.compile_context_engineering),
             "compile_compact_diagnostics": bool(args.compile_compact_diagnostics),
             "compile_plan_execute": bool(args.compile_plan_execute),
+            "compact_controller": args.compact_controller,
+            "compact_controller_public_spec_mode": args.compact_controller_public_spec_mode,
+            "compact_controller_max_candidate_chars": args.compact_controller_max_candidate_chars,
             "compile_closure_gate_state": _syntax_zero_gate_state(best_result),
             "materialized_syntax_edits": materialized_syntax_edits,
             "materialized_vector_unroll_edits": materialized_vector_unroll_edits,
@@ -2044,10 +2344,53 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Disable task-local behavior contract diagnosis for clean EVAS-only F experiments.",
     )
+    ap.add_argument(
+        "--strict-code-output",
+        action="store_true",
+        help="Append a strict code-only artifact contract to repair prompts to reduce empty/truncated responses.",
+    )
+    ap.add_argument(
+        "--artifact-retry-on-truncation",
+        action="store_true",
+        help="Retry once when a truncated response is missing the required fenced artifact type.",
+    )
+    ap.add_argument(
+        "--artifact-retry-max-tokens",
+        type=int,
+        default=8192,
+        help="Max output tokens for the artifact-completeness retry. Default: 8192.",
+    )
+    ap.add_argument(
+        "--compact-controller",
+        choices=["off", "fallback", "always"],
+        default="off",
+        help=(
+            "Use a compact controller-style repair prompt for behavior repair. "
+            "`fallback` applies it to compile/runtime/observable artifact blockers; "
+            "`always` uses it for every non-compile-only repair round."
+        ),
+    )
+    ap.add_argument(
+        "--compact-controller-public-spec-mode",
+        choices=["prompt-only", "spectre-strict-v3", "spectre-strict-v3-compact", "legacy-extracted"],
+        default="prompt-only",
+        help=(
+            "Public task reconstruction mode inside compact-controller prompts. "
+            "Default prompt-only keeps token pressure low and avoids legacy extracted contracts."
+        ),
+    )
+    ap.add_argument(
+        "--compact-controller-max-candidate-chars",
+        type=int,
+        default=6000,
+        help="Maximum characters of current candidate artifacts included in compact-controller prompts.",
+    )
     ap.add_argument("--freeze-tb-on-behavior", action="store_true",
                     help="For behavior failures, keep the best-so-far testbench and only evaluate generated DUT changes.")
     ap.add_argument("--freeze-gold-harness-on-behavior", action="store_true",
                     help="For behavior failures, use benchmark gold stimulus/save harness while preserving generated DUT code.")
+    ap.add_argument("--freeze-dut-on-behavior", action="store_true",
+                    help="For behavior failures, preserve DUT Verilog-A files and only evaluate generated testbench changes.")
     ap.add_argument("--layered-only-repair", action="store_true",
                     help="Automatically route compile/observable/behavior failures to the narrowest editable layer.")
     ap.add_argument(

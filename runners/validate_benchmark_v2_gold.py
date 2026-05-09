@@ -79,6 +79,15 @@ def _ahdl_includes(tb_path: Path) -> list[str]:
     return re.findall(r'^\s*ahdl_include\s+"([^"]+)"', text, flags=re.MULTILINE)
 
 
+def _candidate_va_for_gold_tb(sample_dir: Path, gold_tb: Path | None) -> Path | None:
+    if gold_tb is not None and gold_tb.exists():
+        for include in _ahdl_includes(gold_tb):
+            candidate = sample_dir / Path(include).name
+            if candidate.exists():
+                return candidate
+    return find_va_file(sample_dir)
+
+
 def _stage_gold(task_dir: Path, stage_dir: Path) -> tuple[Path, Path, list[str]]:
     if stage_dir.exists():
         shutil.rmtree(stage_dir)
@@ -121,9 +130,9 @@ def _stage_candidate(
         shutil.rmtree(stage_dir)
     stage_dir.mkdir(parents=True)
 
-    generated_va = find_va_file(sample_dir)
-    generated_tb = find_tb_file(sample_dir)
     gold_tb = choose_gold_tb(gold_dir)
+    generated_va = _candidate_va_for_gold_tb(sample_dir, gold_tb)
+    generated_tb = find_tb_file(sample_dir)
     auxiliary_gold_vas: list[Path] = []
     contract_save_signals = all_save_signals(gold_tb) if gold_tb and gold_tb.exists() else None
 
@@ -211,6 +220,24 @@ def _status(scores: dict[str, float], required_axes: list[str] | None = None) ->
     if "sim_correct" in axes and scores.get("sim_correct", 0.0) < 1.0:
         return "FAIL_SIM_CORRECTNESS"
     return "PASS"
+
+
+def _is_spectre_infra_failure(returncode: Any, execution_status: str, errors: list[Any]) -> bool:
+    if returncode is not None:
+        return False
+    text = " ".join(str(item) for item in errors).lower()
+    if execution_status.lower() in {"error", "failed"} and any(
+        marker in text
+        for marker in (
+            "connection timed out",
+            "banner exchange",
+            "failed to upload files",
+            "ssh",
+            "network",
+        )
+    ):
+        return True
+    return False
 
 
 def _weighted(scores: dict[str, float], required_axes: list[str] | None = None) -> float:
@@ -488,15 +515,20 @@ def validate_spectre(
             spectre_result = sim.run_simulation(netlist, {"include_files": include_files})
         (case_out / "bridge_console.log").write_text(bridge_console.getvalue(), encoding="utf-8")
         returncode = spectre_result.metadata.get("returncode")
+        execution_status = getattr(spectre_result.status, "value", str(spectre_result.status))
+        spectre_errors = spectre_result.errors
         csv_path = case_out / "tran.csv"
         csv_ok, csv_note = _write_spectre_csv(spectre_result.data or {}, csv_path)
         notes.append(csv_note)
+        infra_failure = _is_spectre_infra_failure(returncode, execution_status, spectre_errors)
         scores = {
             "dut_compile": 1.0 if returncode == 0 else 0.0,
             "tb_compile": 1.0 if returncode == 0 and csv_ok else 0.0,
             "sim_correct": 0.0,
         }
-        if "sim_correct" not in required_axes:
+        if infra_failure:
+            notes.append("spectre_infra_failure=remote_upload_or_ssh_timeout")
+        elif "sim_correct" not in required_axes:
             scores["sim_correct"] = 1.0
             notes.append("sim_correct_not_required")
         elif returncode == 0 and csv_ok:
@@ -511,18 +543,20 @@ def validate_spectre(
         remote_match = re.search(r"(/tmp/virtuoso_bridge_[^/]+/virtuoso_bridge_spectre/[0-9a-f]+)/", command)
         extra = {
             "spectre_returncode": returncode,
-            "spectre_execution_status": getattr(spectre_result.status, "value", str(spectre_result.status)),
-            "spectre_errors": spectre_result.errors,
+            "spectre_execution_status": execution_status,
+            "spectre_errors": spectre_errors,
             "spectre_warnings": spectre_result.warnings[:20],
             "spectre_remote_dir": remote_match.group(1) + "/" if remote_match else None,
             "spectre_command": command,
+            "spectre_infra_failure": infra_failure,
         }
     except Exception as exc:  # noqa: BLE001
         scores = {"dut_compile": 0.0, "tb_compile": 0.0, "sim_correct": 0.0}
         notes.append(f"spectre_exception={type(exc).__name__}: {str(exc)[:300]}")
-        extra = {}
+        extra = {"spectre_infra_failure": True}
 
     scores["weighted_total"] = _weighted(scores, required_axes)
+    status = "FAIL_INFRA" if extra.get("spectre_infra_failure") else _status(scores, required_axes)
     result = {
         "task_id": task_id,
         "backend": "spectre",
@@ -530,7 +564,7 @@ def validate_spectre(
         "spectre_mode": spectre_mode,
         "required_axes": required_axes,
         "raw_required_axes": raw_required_axes,
-        "status": _status(scores, required_axes),
+        "status": status,
         "scores": scores,
         "notes": notes,
         "checker_result": checker_result,
