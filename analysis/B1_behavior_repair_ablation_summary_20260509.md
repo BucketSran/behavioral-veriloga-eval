@@ -40,6 +40,7 @@ All rows below validate materialized `adaptive_round1` candidates with
 | strict + retry + no-skill + no-contract DUT / MiMo / 8192 | 8 DUT tasks | EVAS | 2/8 | `vbm1_edge_detector_dut`, `vbm1_vco_phase_integrator_dut` | `results/b1-ablation-strict-retry-noskill-nocontract-dut-mimo-mt8192-round1-evas-20260509` |
 | strict + retry + no-skill + no-contract DUT / MiMo / 32768 | 8 DUT tasks | EVAS | 2/8 | `vbm1_edge_detector_dut`, `vbm1_vco_phase_integrator_dut` | `results/b1-ablation-strict-retry-noskill-nocontract-dut-mimo-mt32768-round1-evas-20260509` |
 | compact-controller runner smoke / MiMo / 32768 | 3 DUT tasks | EVAS | 2/3 | `vbm1_edge_detector_dut`, `vbm1_resettable_counter_divider_dut` | `results/b1-compact-controller-runner-smoke-mimo-mt32768-evas-20260509` |
+| compact-controller fallback DUT / MiMo / 32768 | 8 DUT tasks | EVAS | 3/8 | `vbm1_edge_detector_dut`, `vbm1_resettable_counter_divider_dut`, `vbm1_vco_phase_integrator_dut` | `results/b1-compact-controller-fallback-dut-mimo-mt32768-evas-20260511` |
 | full-form-routed TB / MiMo / 8192 / fixed | 2 TB tasks | EVAS | 0/2 | none | `results/b1-ablation-full-tb-mimo-mt8192-fixed-round1-evas-20260509` |
 | strict + retry EVAS-positive audit | 2 DUT tasks | Spectre | 0/2 infra | none | `results/b1-ablation-strict-retry-noskill-nocontract-dut-mimo-mt8192-round1-spectre-jin-classified-20260509` |
 | gold edge-detector infra check | 1 gold task | Spectre | 0/1 infra | none | `results/b1-spectre-infra-gold-edge-detector-jin-classified-20260509` |
@@ -78,13 +79,18 @@ All rows below validate materialized `adaptive_round1` candidates with
    only 5252 characters but still took 358.925 seconds, so high token ceilings
    plus compact prompts should be paired with wall-time controls in the next
    loop.
-9. The Spectre evidence is currently `INFRA_BLOCKED`, not candidate rejection:
+9. Full 8-task compact-controller fallback improved official EVAS from 2/8 to
+   3/8 by adding `vbm1_resettable_counter_divider_dut`.  The admission table
+   shows only resettable triggered compact fallback; pure behavior-layer tasks
+   used 12k-15k prompts and did not improve.  This means fallback is useful but
+   too narrow for the next B1 wave.
+10. The Spectre evidence is currently `INFRA_BLOCKED`, not candidate rejection:
    gold `vbm1_edge_detector_dut` also failed with
    `Connection timed out during banner exchange`.
-10. The safe loop remains EVAS screen first, then immediate Spectre audit for
+11. The safe loop remains EVAS screen first, then immediate Spectre audit for
    every EVAS-accepted candidate before claiming success; the audit must only be
    considered decisive when it returns a real Spectre returncode and `tran.csv`.
-11. TB-side repair generated code for both TB smoke tasks, but the offset
+12. TB-side repair generated code for both TB smoke tasks, but the offset
    comparator failed TB parsing because of an uncontinued multiline PWL source,
    and the segmented DAC failed correctness.
 
@@ -111,6 +117,8 @@ All rows below validate materialized `adaptive_round1` candidates with
   `tasklists/B1_compact_controller_smoke_20260509.txt`
 - Compact-controller unit test:
   `tests/test_compact_controller_repair.py`
+- Full fallback admission table:
+  `analysis/B1_compact_controller_fallback_admission_20260511.md`
 
 ## Next Step
 
@@ -124,6 +132,9 @@ Run the next EVAS-only smoke wave while Spectre is infrastructure-blocked:
   mode reduced prompts from 12k-16k chars to about 5.2k-5.4k chars and produced
   complete artifacts, but first-order still failed; this isolates generation
   control from behavior correctness.
+- Extend the controller trigger.  The 2026-05-11 full fallback run reached 3/8
+  official EVAS, but only resettable used compact.  Next, route known behavior
+  families through compact mechanism prompts instead of full adaptive prompts.
 - For `vbm1_resettable_counter_divider_dut`, move from artifact recovery to a
   targeted behavior repair: ratio=5 produced 40 output edges from 80 input edges,
   indicating divide-by-2 behavior rather than divide-by-5 behavior.

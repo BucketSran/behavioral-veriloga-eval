@@ -382,3 +382,59 @@ python3 runners/validate_benchmark_v2_gold.py \
 Observed official EVAS result: 2/3 pass.  The adaptive quick summary under-
 reported `vbm1_resettable_counter_divider_dut`; use the official validation
 root for claims.
+
+## Full 8-Task Compact-Controller Fallback
+
+Adaptive repair command:
+
+```bash
+python3 runners/run_adaptive_repair.py \
+  --model mimo-v2.5-pro \
+  --bench-dir benchmark-vabench-main-v1 \
+  --source-generated-dir generated-b1-ablation-strict-retry-noskill-nocontract-dut-mimo-mt8192-round1-20260509 \
+  --initial-result-root results/b1-ablation-strict-retry-noskill-nocontract-dut-mimo-mt8192-round1-evas-20260509 \
+  --generated-root generated-b1-compact-controller-fallback-dut-mimo-mt32768-20260511 \
+  --output-root results/b1-compact-controller-fallback-dut-mimo-mt32768-adaptive-20260511 \
+  --max-rounds 1 \
+  --patience 1 \
+  --workers 1 \
+  --timeout-s 60 \
+  --quick-maxstep 1n \
+  --max-tokens 32768 \
+  --strict-code-output \
+  --artifact-retry-on-truncation \
+  --artifact-retry-max-tokens 32768 \
+  --compact-controller fallback \
+  --compact-controller-public-spec-mode prompt-only \
+  --compact-controller-max-candidate-chars 6000 \
+  --no-repair-skill \
+  --disable-contract-diagnosis \
+  --freeze-gold-harness-on-behavior \
+  --env-file .env.table2 \
+  --task vbm1_background_calibration_accumulator_bugfix \
+  --task vbm1_cdac_calibration_dut \
+  --task vbm1_first_order_lowpass_dut \
+  --task vbm1_vco_phase_integrator_dut \
+  --task vbm1_edge_detector_dut \
+  --task vbm1_resettable_counter_divider_dut \
+  --task vbm1_barrel_pointer_window_bugfix \
+  --task vbm1_leaky_hold_dut
+```
+
+Authoritative EVAS validation:
+
+```bash
+python3 runners/validate_benchmark_v2_gold.py \
+  --backend evas \
+  --bench-dir benchmark-vabench-main-v1 \
+  --task-file tasklists/B1_behavior_repair_dut_smoke_20260509.txt \
+  --candidate-dir generated-b1-compact-controller-fallback-dut-mimo-mt32768-20260511 \
+  --model mimo-v2.5-pro \
+  --sample-idx 0 \
+  --output-dir results/b1-compact-controller-fallback-dut-mimo-mt32768-evas-20260511 \
+  --timeout-s 60 \
+  --max-workers 2
+```
+
+Observed official EVAS result: 3/8 pass.  Admission table:
+`analysis/B1_compact_controller_fallback_admission_20260511.md`.
