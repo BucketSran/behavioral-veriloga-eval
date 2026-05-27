@@ -1,0 +1,32 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dac_binary_clk_3b_code_event_level(code_event, c0, c1, c2, out_level);
+  input code_event, c0, c1, c2;
+  output out_level;
+  electrical code_event, c0, c1, c2, out_level;
+
+  parameter real vdd = 1.2;
+  parameter real vss = 0.0;
+  parameter real vth = 0.6;
+  parameter real trise = 1n;
+  parameter real tfall = 1n;
+
+  integer code;
+  real target_v;
+
+  analog begin
+    @(initial_step) begin
+      code = 0;
+      target_v = vss;
+    end
+    @(cross(V(code_event) - vth, +1)) begin
+      code = 0;
+      if (V(c0) > vth) code = code + 1;
+      if (V(c1) > vth) code = code + 2;
+      if (V(c2) > vth) code = code + 4;
+      target_v = vss + (vdd - vss) * (code / 7.0);
+    end
+    V(out_level) <+ transition(target_v, 0.0, trise, tfall);
+  end
+endmodule

@@ -1,0 +1,30 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module hysteresis_cmp_window_offset(sense_in, decision_out);
+  input sense_in;
+  output decision_out;
+  electrical sense_in, decision_out;
+
+  parameter real vhigh = 1.2;
+  parameter real vlow = 0.0;
+  parameter real vth_rise = 0.65;
+  parameter real vth_fall = 0.35;
+  parameter real trise = 500p;
+  parameter real tfall = 500p;
+
+  real vtarget;
+
+  analog begin
+    @(initial_step) begin
+      vtarget = vlow;
+    end
+    @(cross(V(sense_in) - vth_rise, +1)) begin
+      vtarget = vhigh;
+    end
+    @(cross(V(sense_in) - vth_fall, -1)) begin
+      vtarget = vlow;
+    end
+    V(decision_out) <+ transition(vtarget, 0.0, trise, tfall);
+  end
+endmodule

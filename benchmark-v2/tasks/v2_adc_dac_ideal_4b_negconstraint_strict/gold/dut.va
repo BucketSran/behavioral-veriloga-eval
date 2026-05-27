@@ -1,0 +1,70 @@
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 30p
+
+module adc_ideal_4b_renamed (
+    input  electrical analog_in,
+    input  electrical sample_event,
+    input  electrical vdd,
+    input  electrical vss,
+    input  electrical rst_n,
+    output electrical q3,
+    output electrical q2,
+    output electrical q1,
+    output electrical q0
+);
+    integer code;
+    real vstep, v_in, v_supply, vth;
+    real b3, b2, b1, b0;
+    analog begin
+        @(initial_step) begin
+            code = 0; b3 = 0.0; b2 = 0.0; b1 = 0.0; b0 = 0.0;
+        end
+        v_supply = V(vdd, vss);
+        vth = (V(vdd) + V(vss)) / 2.0;
+        vstep = v_supply / 16.0;
+        @(cross(V(sample_event, vss) - vth, +1)) begin
+            if (V(rst_n, vss) < vth) begin
+                code = 0;
+            end else begin
+                v_in = V(analog_in, vss);
+                code = v_in / vstep;
+                if (code < 0) code = 0;
+                if (code > 15) code = 15;
+            end
+            b3 = ((code >> 3) & 1) ? V(vdd) : V(vss);
+            b2 = ((code >> 2) & 1) ? V(vdd) : V(vss);
+            b1 = ((code >> 1) & 1) ? V(vdd) : V(vss);
+            b0 = ((code >> 0) & 1) ? V(vdd) : V(vss);
+        end
+        V(q3) <+ transition(b3, 0, 30p, 30p);
+        V(q2) <+ transition(b2, 0, 30p, 30p);
+        V(q1) <+ transition(b1, 0, 30p, 30p);
+        V(q0) <+ transition(b0, 0, 30p, 30p);
+    end
+endmodule
+
+module dac_ideal_4b_renamed (
+    input  electrical q3,
+    input  electrical q2,
+    input  electrical q1,
+    input  electrical q0,
+    input  electrical vdd,
+    input  electrical vss,
+    input  electrical rst_n,
+    output electrical recon_level
+);
+    real bin_val, vstep, v_supply, vth, v_target;
+    analog begin
+        v_supply = V(vdd, vss);
+        vth = (V(vdd) + V(vss)) / 2.0;
+        vstep = v_supply / 16.0;
+        bin_val = 0.0;
+        if (V(q0, vss) > vth) bin_val = bin_val + 1.0;
+        if (V(q1, vss) > vth) bin_val = bin_val + 2.0;
+        if (V(q2, vss) > vth) bin_val = bin_val + 4.0;
+        if (V(q3, vss) > vth) bin_val = bin_val + 8.0;
+        v_target = (V(rst_n, vss) < vth) ? V(vss) : (V(vss) + bin_val * vstep);
+        V(recon_level) <+ v_target;
+    end
+endmodule

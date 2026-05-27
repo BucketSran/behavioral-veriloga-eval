@@ -1,0 +1,10 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "dut.va"
+
+Vin (sense_in 0) vsource type=pwl wave=[0n 0.0  45n 1.0  65n 1.0  100n 0.0  120n 0.0]
+Xdut (sense_in decision_out) hysteresis_cmp_window_offset
+
+tran tran stop=120n maxstep=100p
+save sense_in decision_out

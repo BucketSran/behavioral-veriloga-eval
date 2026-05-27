@@ -1,0 +1,37 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dac_binary_clk_6b_refclk_recon_level(refclk, b0, b1, b2, b3, b4, b5, recon_level);
+  input refclk, b0, b1, b2, b3, b4, b5;
+  output recon_level;
+  electrical refclk, b0, b1, b2, b3, b4, b5, recon_level;
+
+  parameter real vdd = 1.2;
+  parameter real vss = 0.0;
+  parameter real vth = 0.6;
+  parameter real trise = 1n;
+  parameter real tfall = 1n;
+
+  integer code;
+  real target_v;
+
+  analog begin
+    @(initial_step) begin
+      code = 0;
+      target_v = vss;
+    end
+
+    @(cross(V(refclk) - vth, +1)) begin
+      code = 0;
+      if (V(b0) > vth) code = code + 1;
+      if (V(b1) > vth) code = code + 2;
+      if (V(b2) > vth) code = code + 4;
+      if (V(b3) > vth) code = code + 8;
+      if (V(b4) > vth) code = code + 16;
+      if (V(b5) > vth) code = code + 32;
+      target_v = vss + (vdd - vss) * (code / 63.0);
+    end
+
+    V(recon_level) <+ transition(target_v, 0.0, trise, tfall);
+  end
+endmodule

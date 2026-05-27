@@ -1,0 +1,20 @@
+simulator lang=spectre
+global 0
+
+parameters vdd=1.2 period=20n
+
+ahdl_include "dut.va"
+
+Vclk (cadence 0) vsource type=pulse val0=0 val1=vdd delay=5n rise=100p fall=100p width=8n period=period
+
+Vb0 (bit0 0) vsource type=pwl wave=[0 0  19n 0  21n vdd  39n vdd  41n 0  59n 0  61n vdd]
+Vb1 (bit1 0) vsource type=pwl wave=[0 0  39n 0  41n vdd  79n vdd  81n 0]
+Vb2 (bit2 0) vsource type=pwl wave=[0 0  79n 0  81n vdd]
+Vb3 (bit3 0) vsource dc=0
+Vb4 (bit4 0) vsource dc=0
+
+Xdut (cadence bit0 bit1 bit2 bit3 bit4 held_level) dac_binary_clk_5b_cadence_held_level
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27
+tran tran stop=120n maxstep=100p write="spectre.ic" writefinal="spectre.fc"
+saveOptions options save=allpub

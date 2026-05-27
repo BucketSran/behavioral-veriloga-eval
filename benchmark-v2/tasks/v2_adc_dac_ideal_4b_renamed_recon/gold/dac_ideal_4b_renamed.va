@@ -1,0 +1,28 @@
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 30p
+
+module dac_ideal_4b_renamed (
+    input  electrical q3,
+    input  electrical q2,
+    input  electrical q1,
+    input  electrical q0,
+    input  electrical vdd,
+    input  electrical vss,
+    input  electrical rst_n,
+    output electrical recon_level
+);
+    real bin_val, vstep, v_supply, vth, v_target;
+    analog begin
+        v_supply = V(vdd, vss);
+        vth = (V(vdd) + V(vss)) / 2.0;
+        vstep = v_supply / 16.0;
+        bin_val = 0.0;
+        if (V(q0, vss) > vth) bin_val = bin_val + 1.0;
+        if (V(q1, vss) > vth) bin_val = bin_val + 2.0;
+        if (V(q2, vss) > vth) bin_val = bin_val + 4.0;
+        if (V(q3, vss) > vth) bin_val = bin_val + 8.0;
+        v_target = (V(rst_n, vss) < vth) ? V(vss) : (V(vss) + bin_val * vstep);
+        V(recon_level) <+ v_target;
+    end
+endmodule

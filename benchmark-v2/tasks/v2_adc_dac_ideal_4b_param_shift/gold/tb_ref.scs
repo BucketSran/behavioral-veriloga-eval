@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "adc_ideal_4b_renamed.va"
+ahdl_include "dac_ideal_4b_renamed.va"
+
+parameters vdd=1.0
+Vvdd (vdd 0) vsource dc=vdd
+Vvss (vss 0) vsource dc=0
+Vclk (sample_event 0) vsource type=pulse val0=0 val1=vdd period=1n rise=50p fall=50p
+Vrst (rst_n 0) vsource type=pwl wave=[0 0  9.5n 0  10n vdd  50n vdd]
+Vvin (analog_in 0) vsource type=pwl wave=[0 0  50n 1.0]
+
+IADC (analog_in sample_event vdd vss rst_n q3 q2 q1 q0) adc_ideal_4b_renamed
+IDAC (q3 q2 q1 q0 vdd vss rst_n recon_level) dac_ideal_4b_renamed
+
+tran tran stop=50n maxstep=100p
+save analog_in sample_event rst_n recon_level q3 q2 q1 q0

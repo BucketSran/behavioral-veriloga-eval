@@ -1,0 +1,36 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dac_binary_clk_5b_cadence_held_level(cadence, bit0, bit1, bit2, bit3, bit4, held_level);
+  input cadence, bit0, bit1, bit2, bit3, bit4;
+  output held_level;
+  electrical cadence, bit0, bit1, bit2, bit3, bit4, held_level;
+
+  parameter real vdd = 1.2;
+  parameter real vss = 0.0;
+  parameter real vth = 0.6;
+  parameter real trise = 1n;
+  parameter real tfall = 1n;
+
+  integer code;
+  real target_v;
+
+  analog begin
+    @(initial_step) begin
+      code = 0;
+      target_v = vss;
+    end
+
+    @(cross(V(cadence) - vth, +1)) begin
+      code = 0;
+      if (V(bit0) > vth) code = code + 1;
+      if (V(bit1) > vth) code = code + 2;
+      if (V(bit2) > vth) code = code + 4;
+      if (V(bit3) > vth) code = code + 8;
+      if (V(bit4) > vth) code = code + 16;
+      target_v = vss + (vdd - vss) * (code / 31.0);
+    end
+
+    V(held_level) <+ transition(target_v, 0.0, trise, tfall);
+  end
+endmodule
