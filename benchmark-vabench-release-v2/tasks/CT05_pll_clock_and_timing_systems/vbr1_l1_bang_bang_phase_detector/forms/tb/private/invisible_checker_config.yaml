@@ -1,0 +1,37 @@
+schema_version: "vabench-release-v2-checks"
+task_id: "vbr1_l1_bang_bang_phase_detector:tb"
+checker:
+  task_id: "vbr1_l1_bang_bang_phase_detector_tb"
+  function: "check_bbpd_data_edge_alignment"
+  source: "runners/simulate_evas.py"
+# The remaining fields are inherited from release-v1 and remain private
+# evaluator configuration until human review and fresh v2 dual rerun.
+syntax:
+  must_include:
+    - "@(cross("
+    - "@(timer("
+    - "transition("
+    - "tran"
+    - "save"
+  must_not_include:
+    - "I("
+    - "ddt("
+    - "idt("
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "up_pulses_dominate_in_lead_window"
+    - "dn_pulses_dominate_in_lag_window"
+    - "up_dn_overlap_fraction_low"
+  public_observables:
+    - "clk"
+    - "data"
+    - "up"
+    - "dn"
+    - "retimed_data"
+parity:
+  reference: "spectre"
+  status: "pending_until_evas_spectre_rerun"
+  notes:
+    - "Fresh EVAS/Spectre dual validation is required after strengthening this testbench checker contract."

@@ -1,0 +1,28 @@
+schema_version: "vabench-release-v2-checks"
+task_id: "vbr1_l1_binary_weighted_voltage_dac:dut"
+checker:
+  task_id: "vbr1_l1_binary_weighted_voltage_dac_dut"
+  function: "check_simple_binary_dac_4b"
+  source: "runners/simulate_evas.py"
+# The remaining fields are inherited from release-v1 and remain private
+# evaluator configuration until human review and fresh v2 dual rerun.
+syntax:
+  must_include:
+    - "transition("
+  must_not_include:
+    - "I("
+    - "ddt("
+    - "idt("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "all_16_binary_codes_match_ideal_levels"
+    - "code_bits_match_expected_sampled_sequence"
+    - "monotonic_output"
+    - "zero_and_full_scale_codes_reach_references"
+parity:
+  required: true
+  tolerance_notes: "Check the mathematical binary code-to-voltage mapping; structural DAC variants live in separate tasks."

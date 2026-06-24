@@ -1,0 +1,91 @@
+{
+  "schema_version": "vabench-release-v2-invisible-spec-checker-map",
+  "task_id": "vbr1_l1_peak_detector:dut",
+  "source_agent_visible_spec": "public/agent_visible_spec.md",
+  "source_invisible_checker_config": "private/invisible_checker_config.yaml",
+  "source_checker": {
+    "file": "runners/simulate_evas.py",
+    "task_aliases": [
+      "vbm1_peak_detector_dut",
+      "vbr1_l1_peak_detector",
+      "vbr1_l1_peak_detector:dut",
+      "vbr1_l1_peak_detector_dut"
+    ]
+  },
+  "auditor": {
+    "forbidden_public_terms": [
+      "check_peak_detector",
+      "first_peak_is_held",
+      "reset_clears_peak",
+      "second_peak_updates_to_larger_value"
+    ]
+  },
+  "requirement_links": [
+    {
+      "id": "public_contract_supports_first_peak_is_held",
+      "public_requirement": "The agent-visible functional specification and public support artifacts define the observable behavior without exposing checker internals.",
+      "public_anchor_terms": [
+        "Required Output",
+        "Public Task Summary",
+        "peak",
+        "detector",
+        "peak_detector.va"
+      ],
+      "checker_config_ids": [
+        "first_peak_is_held"
+      ],
+      "checker_functions": [
+        "check_peak_detector"
+      ],
+      "private_policy_terms": [
+        "first_peak_is_held",
+        "check_peak_detector",
+        "private checker configuration"
+      ]
+    },
+    {
+      "id": "public_contract_supports_reset_clears_peak",
+      "public_requirement": "The agent-visible functional specification and public support artifacts define the observable behavior without exposing checker internals.",
+      "public_anchor_terms": [
+        "Required Output",
+        "Public Task Summary",
+        "peak",
+        "detector",
+        "peak_detector.va"
+      ],
+      "checker_config_ids": [
+        "reset_clears_peak"
+      ],
+      "checker_functions": [
+        "check_peak_detector"
+      ],
+      "private_policy_terms": [
+        "reset_clears_peak",
+        "check_peak_detector",
+        "private checker configuration"
+      ]
+    },
+    {
+      "id": "public_contract_supports_second_peak_updates_to_larger_value",
+      "public_requirement": "The agent-visible functional specification and public support artifacts define the observable behavior without exposing checker internals.",
+      "public_anchor_terms": [
+        "Required Output",
+        "Public Task Summary",
+        "peak",
+        "detector",
+        "peak_detector.va"
+      ],
+      "checker_config_ids": [
+        "second_peak_updates_to_larger_value"
+      ],
+      "checker_functions": [
+        "check_peak_detector"
+      ],
+      "private_policy_terms": [
+        "second_peak_updates_to_larger_value",
+        "check_peak_detector",
+        "private checker configuration"
+      ]
+    }
+  ]
+}

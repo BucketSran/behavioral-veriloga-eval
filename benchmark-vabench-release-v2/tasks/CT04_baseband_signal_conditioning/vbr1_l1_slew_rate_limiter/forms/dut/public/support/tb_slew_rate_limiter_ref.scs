@@ -1,0 +1,11 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "slew_rate_limiter.va"
+
+Vin (vin 0) vsource type=pwl wave=[0 0 20n 0 21n 0.8 95n 0.8 96n 0.1 170n 0.1]
+
+XDUT (vin vout) slew_rate_limiter
+
+tran tran stop=170n maxstep=500p
+save vin vout

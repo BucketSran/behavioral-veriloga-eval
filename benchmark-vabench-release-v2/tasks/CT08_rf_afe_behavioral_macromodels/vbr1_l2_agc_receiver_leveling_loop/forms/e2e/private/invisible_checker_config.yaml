@@ -1,0 +1,31 @@
+schema_version: "vabench-release-v2-checks"
+task_id: "vbr1_l2_agc_receiver_leveling_loop:e2e"
+checker:
+  task_id: "vbr1_l2_agc_receiver_leveling_loop_e2e"
+  function: "check_agc_receiver_leveling_loop"
+  source: "runners/simulate_evas.py"
+# The remaining fields are inherited from release-v1 and remain private
+# evaluator configuration until human review and fresh v2 dual rerun.
+syntax:
+  must_include:
+    - "transition("
+    - "@(cross("
+  must_not_include:
+    - "I("
+    - "ddt("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "agc_reduces_gain_on_large_input"
+    - "leveled_output_amplitude"
+    - "lock_metric_after_settling"
+    - "rssi_monitor_rises_on_overload"
+    - "gain_monitor_decreases_after_high_rssi"
+parity:
+  reference: "spectre"
+  status: "pending_fresh_dual_rerun"
+  notes:
+    - "Fresh dual rerun required after adding gain_mon/rssi_mon intermediate observability."

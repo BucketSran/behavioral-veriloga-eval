@@ -1,0 +1,85 @@
+{
+  "schema_version": "vabench-release-v2",
+  "task_id": "vbr1_l2_comparator_measurement_flow:e2e",
+  "agent_prompt": "agent_prompt.md",
+  "agent_visible_spec": "public/agent_visible_spec.md",
+  "agent_visible": {
+    "prompt": "agent_prompt.md",
+    "support_files": [],
+    "target_files": [
+      "comparator_offset_search_ref.va",
+      "tb_comparator_offset_search_ref.scs"
+    ],
+    "spec": "public/agent_visible_spec.md"
+  },
+  "agent_hidden": [
+    {
+      "path": "task_release_card.json",
+      "reason": "private task metadata and provenance"
+    },
+    {
+      "path": "private/invisible_checker_config.yaml",
+      "reason": "agent-invisible checker IDs, thresholds, sample windows, and expected outcomes"
+    },
+    {
+      "path": "private/invisible_spec_checker_map.json",
+      "reason": "agent-invisible public-spec to private-checker map and leak audit terms"
+    },
+    {
+      "path": "private/gold/comparator_offset_search_ref.va",
+      "reason": "gold answer"
+    },
+    {
+      "path": "private/gold/tb_comparator_offset_search_ref.scs",
+      "reason": "gold answer"
+    }
+  ],
+  "render_policy": {
+    "render_agent_visible_contract_only": true,
+    "render_agent_prompt_only": false,
+    "render_support_files_only_if_listed": true,
+    "support_files_must_live_under_public_support": true,
+    "never_render_checker_files": true,
+    "never_render_private_directory": true,
+    "never_render_gold_fixed_artifacts": true,
+    "generic_runner_rules_allowed": true,
+    "never_render_task_release_card": true
+  },
+  "leak_audit": {
+    "forbidden_phrases": [
+      "check_comparator_measurement_flow",
+      "comparator_output_high_after_trip",
+      "comparator_output_low_before_trip",
+      "measurement_outputs_hold_after_valid",
+      "measurement_valid_latches_after_trip",
+      "offset_estimate_near_static_offset",
+      "outp_first_trip_near_static_offset",
+      "trip_voltage_near_inn_plus_offset",
+      "valid_first_assertion_near_trip",
+      "vbr1_l2_comparator_measurement_flow_e2e"
+    ],
+    "allowed_public_concepts": [
+      "agent-visible functional behavior and interfaces",
+      "public support files listed in agent_visible_files.json",
+      "generic voltage-domain Verilog-A and Spectre syntax rules"
+    ]
+  },
+  "contract_audit": {
+    "required_public_anchors": [
+      {
+        "id": "target_artifacts",
+        "all_of": [
+          "comparator_offset_search_ref.va",
+          "tb_comparator_offset_search_ref.scs"
+        ]
+      },
+      {
+        "id": "public_task_summary",
+        "all_of": [
+          "Public Task Summary",
+          "Domain"
+        ]
+      }
+    ]
+  }
+}

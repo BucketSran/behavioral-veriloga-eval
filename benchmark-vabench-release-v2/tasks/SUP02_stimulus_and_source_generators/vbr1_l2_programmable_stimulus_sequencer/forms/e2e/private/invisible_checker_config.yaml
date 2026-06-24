@@ -1,0 +1,30 @@
+schema_version: "vabench-release-v2-checks"
+task_id: "vbr1_l2_programmable_stimulus_sequencer:e2e"
+checker:
+  task_id: "vbr1_l2_programmable_stimulus_sequencer_e2e"
+  function: "check_programmable_stimulus_sequencer"
+  source: "runners/simulate_evas.py"
+# The remaining fields are inherited from release-v1 and remain private
+# evaluator configuration until human review and fresh v2 dual rerun.
+syntax:
+  must_include:
+    - "transition("
+    - "@(cross("
+  must_not_include:
+    - "I("
+    - "ddt("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "ramp_segment_monotonic"
+    - "swept_chirp_segment_frequency_increases"
+    - "burst_prbs_gate_schedule"
+    - "mode_switch_continuity"
+parity:
+  reference: "spectre"
+  status: "certified"
+  notes:
+    - "Current release dual_certification report certifies this form as EVAS/Spectre pass; rerun is required after checker/gold behavior changes."

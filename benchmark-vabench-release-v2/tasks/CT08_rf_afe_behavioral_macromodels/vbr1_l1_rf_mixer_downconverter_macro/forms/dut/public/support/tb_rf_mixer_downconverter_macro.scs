@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "rf_mixer_downconverter_macro.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=4n width=2n rise=50p fall=50p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 80n 0]
+Vvin (vin 0) vsource type=pwl wave=[0 0.45 8n 0.45 8.1n 0.66 34n 0.66 34.1n 0.24 58n 0.24 58.1n 0.55 80n 0.55]
+
+XDUT (clk rst vin out metric) rf_mixer_downconverter_macro
+
+tran tran stop=80n maxstep=0.5n
+save clk rst vin out metric

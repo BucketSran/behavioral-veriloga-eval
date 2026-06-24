@@ -40,6 +40,20 @@ def output_path(root: Path, config: dict, key: str) -> Path:
     return root / config["outputs"][key]
 
 
+def prompt_boundary_statuses(root: Path, config: dict) -> dict[str, str]:
+    report_path = output_path(root, config, "prompt_boundary_audit")
+    if not report_path.exists():
+        return {}
+    report = load_json(report_path)
+    statuses: dict[str, str] = {}
+    for item in report.get("results", []):
+        task_id = item.get("task_id")
+        if not task_id:
+            continue
+        statuses[task_id] = "pass" if item.get("status") == "PASS" else "fail"
+    return statuses
+
+
 def task_card_paths(root: Path, config: dict) -> list[Path]:
     discovery = config.get("task_discovery", {})
     globs = discovery.get("task_card_globs") or ["tasks/**/task_release_card.json"]
@@ -65,7 +79,7 @@ def manifest_spec_path(manifest: dict) -> str:
     return manifest.get("agent_visible_spec", "public/agent_visible_spec.md")
 
 
-def task_form_rows(root: Path, repo_root: Path, config: dict) -> list[dict]:
+def task_form_rows(root: Path, repo_root: Path, config: dict, prompt_statuses: dict[str, str]) -> list[dict]:
     rows = []
     for release_task_path in task_card_paths(root, config):
         release_task = load_json(release_task_path)
@@ -120,6 +134,10 @@ def task_form_rows(root: Path, repo_root: Path, config: dict) -> list[dict]:
             repo_root,
         )
         invisible_spec_checker_map = rel(spec_checker_map_path, repo_root)
+        prompt_boundary = prompt_statuses.get(
+            release_task["id"],
+            certification.get("prompt_boundary", "unknown"),
+        )
         rows.append(
             {
                 "task_id": release_task["id"],
@@ -143,7 +161,7 @@ def task_form_rows(root: Path, repo_root: Path, config: dict) -> list[dict]:
                 "private_gold": [
                     rel(form_dir / path, repo_root) for path in map(Path, artifacts.get("private_gold", []))
                 ],
-                "prompt_boundary": certification.get("prompt_boundary", "unknown"),
+                "prompt_boundary": prompt_boundary,
                 "static": certification.get("static", "unknown"),
                 "evas": certification.get("evas", "unknown"),
                 "spectre": certification.get("spectre", "unknown"),
@@ -247,7 +265,7 @@ def write_manifest_csv(path: Path, forms: list[dict]) -> None:
         "agent_visible_files",
     ]
     with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer = csv.DictWriter(handle, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         for row in forms:
             writer.writerow({field: row[field] for field in fields})
@@ -447,7 +465,7 @@ def main() -> int:
     root = args.root
     repo_root = root.resolve().parent
     config = load_config(root, args.config)
-    forms = task_form_rows(root, repo_root, config)
+    forms = task_form_rows(root, repo_root, config, prompt_boundary_statuses(root, config))
     entries = entry_rows(forms)
     package_manifest = {
         "date": args.date,

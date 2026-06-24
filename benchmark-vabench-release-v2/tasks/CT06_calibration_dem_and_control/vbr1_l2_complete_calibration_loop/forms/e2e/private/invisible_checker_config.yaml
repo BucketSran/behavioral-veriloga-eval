@@ -1,0 +1,31 @@
+schema_version: "vabench-release-v2-checks"
+task_id: "vbr1_l2_complete_calibration_loop:e2e"
+checker:
+  task_id: "vbr1_l2_complete_calibration_loop_e2e"
+  function: "check_release_complete_calibration_loop"
+  source: "runners/simulate_evas.py"
+# The remaining fields are inherited from release-v1 and remain private
+# evaluator configuration until human review and fresh v2 dual rerun.
+syntax:
+  must_include:
+    - "transition("
+    - "@(cross("
+  must_not_include:
+    - "I("
+    - "ddt("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "raw_error_is_corrected"
+    - "bounded_negative_feedback_response"
+    - "metric_tracks_convergence"
+    - "trim_moves_opposite_to_error"
+    - "residual_monitor_tracks_correction"
+parity:
+  reference: "spectre"
+  status: "pending_fresh_dual_rerun"
+  notes:
+    - "Fresh dual rerun required after adding trim_mon/residual_mon intermediate observability."

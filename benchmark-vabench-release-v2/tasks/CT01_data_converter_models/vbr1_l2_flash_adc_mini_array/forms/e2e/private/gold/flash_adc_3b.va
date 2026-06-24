@@ -1,0 +1,87 @@
+// 3-bit flash ADC mini-array (behavioral, EVAS-compatible).
+// Seven threshold comparators form a thermometer vector; the encoder converts
+// the number of asserted comparator outputs into a 3-bit binary code.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module flash_adc_3b(
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical VIN,
+    input  electrical CLK,
+    output electrical CMP0,
+    output electrical CMP1,
+    output electrical CMP2,
+    output electrical CMP3,
+    output electrical CMP4,
+    output electrical CMP5,
+    output electrical CMP6,
+    output electrical DOUT2,
+    output electrical DOUT1,
+    output electrical DOUT0
+);
+
+parameter real vrefp  = 0.9;
+parameter real vrefn  = 0.0;
+parameter real vth    = 0.45;
+parameter real tedge  = 100p;
+
+real lsb;
+integer code;
+integer c0, c1, c2, c3, c4, c5, c6;
+real cmp0_level, cmp1_level, cmp2_level, cmp3_level;
+real cmp4_level, cmp5_level, cmp6_level;
+real b2, b1, b0;
+
+analog begin
+    @(initial_step) begin
+        lsb  = (vrefp - vrefn) / 8.0;
+        code = 0;
+        c0 = 0; c1 = 0; c2 = 0; c3 = 0; c4 = 0; c5 = 0; c6 = 0;
+        cmp0_level = V(VSS); cmp1_level = V(VSS); cmp2_level = V(VSS);
+        cmp3_level = V(VSS); cmp4_level = V(VSS); cmp5_level = V(VSS);
+        cmp6_level = V(VSS);
+        b2 = 0.0; b1 = 0.0; b0 = 0.0;
+        $strobe("[flash_adc_3b] INIT | lsb=%.4gV", lsb);
+    end
+
+    @(cross(V(CLK) - vth, +1)) begin
+        lsb  = (vrefp - vrefn) / 8.0;
+        c0 = (V(VIN) >= vrefn + 1.0 * lsb) ? 1 : 0;
+        c1 = (V(VIN) >= vrefn + 2.0 * lsb) ? 1 : 0;
+        c2 = (V(VIN) >= vrefn + 3.0 * lsb) ? 1 : 0;
+        c3 = (V(VIN) >= vrefn + 4.0 * lsb) ? 1 : 0;
+        c4 = (V(VIN) >= vrefn + 5.0 * lsb) ? 1 : 0;
+        c5 = (V(VIN) >= vrefn + 6.0 * lsb) ? 1 : 0;
+        c6 = (V(VIN) >= vrefn + 7.0 * lsb) ? 1 : 0;
+        code = c0 + c1 + c2 + c3 + c4 + c5 + c6;
+        cmp0_level = c0 ? V(VDD) : V(VSS);
+        cmp1_level = c1 ? V(VDD) : V(VSS);
+        cmp2_level = c2 ? V(VDD) : V(VSS);
+        cmp3_level = c3 ? V(VDD) : V(VSS);
+        cmp4_level = c4 ? V(VDD) : V(VSS);
+        cmp5_level = c5 ? V(VDD) : V(VSS);
+        cmp6_level = c6 ? V(VDD) : V(VSS);
+        b2 = ((code >> 2) & 1) ? V(VDD) : V(VSS);
+        b1 = ((code >> 1) & 1) ? V(VDD) : V(VSS);
+        b0 = ((code >> 0) & 1) ? V(VDD) : V(VSS);
+        $strobe("[flash_adc_3b] t=%.3f ns | vin=%.4gV therm=%d%d%d%d%d%d%d code=%d",
+                $abstime*1e9, V(VIN), c6, c5, c4, c3, c2, c1, c0, code);
+    end
+
+    V(CMP0)  <+ transition(cmp0_level, 0, tedge, tedge);
+    V(CMP1)  <+ transition(cmp1_level, 0, tedge, tedge);
+    V(CMP2)  <+ transition(cmp2_level, 0, tedge, tedge);
+    V(CMP3)  <+ transition(cmp3_level, 0, tedge, tedge);
+    V(CMP4)  <+ transition(cmp4_level, 0, tedge, tedge);
+    V(CMP5)  <+ transition(cmp5_level, 0, tedge, tedge);
+    V(CMP6)  <+ transition(cmp6_level, 0, tedge, tedge);
+    V(DOUT2) <+ transition(b2, 0, tedge, tedge);
+    V(DOUT1) <+ transition(b1, 0, tedge, tedge);
+    V(DOUT0) <+ transition(b0, 0, tedge, tedge);
+end
+
+endmodule

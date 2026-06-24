@@ -1,0 +1,36 @@
+schema_version: "vabench-release-v2-checks"
+task_id: "vbr1_l1_slew_rate_limiter:dut"
+checker:
+  task_id: "vbr1_l1_slew_rate_limiter_dut"
+  function: "check_slew_rate_limiter"
+  source: "runners/simulate_evas.py"
+# The remaining fields are inherited from release-v1 and remain private
+# evaluator configuration until human review and fresh v2 dual rerun.
+syntax:
+  must_include:
+    - "@(timer("
+    - "transition("
+  must_not_include:
+    - "I("
+    - "ddt("
+    - "idt("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  dut_companion_role: "function_checked_dut"
+  strong_benchmark_claim: true
+  checks:
+    - "input_up_down_steps_exercised"
+    - "rising_slew_is_limited"
+    - "high_level_eventually_reached"
+    - "falling_slew_is_limited"
+    - "low_level_eventually_reached"
+    - "lagged_response_not_passthrough"
+  public_observables:
+    - "vin"
+    - "vout"
+parity:
+  required: true
+  tolerance_notes: "Use level windows; do not require exact per-row step size at transition boundaries."

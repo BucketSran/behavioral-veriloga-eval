@@ -1,0 +1,94 @@
+{
+  "schema_version": "vabench-release-v2-invisible-spec-checker-map",
+  "task_id": "vbr1_l1_vco_phase_integrator:dut",
+  "source_agent_visible_spec": "public/agent_visible_spec.md",
+  "source_invisible_checker_config": "private/invisible_checker_config.yaml",
+  "source_checker": {
+    "file": "runners/simulate_evas.py",
+    "task_aliases": [
+      "vbm1_vco_phase_integrator_dut",
+      "vbr1_l1_vco_phase_integrator",
+      "vbr1_l1_vco_phase_integrator:dut",
+      "vbr1_l1_vco_phase_integrator_dut"
+    ]
+  },
+  "auditor": {
+    "forbidden_public_terms": [
+      "check_vco_phase_integrator",
+      "clock_toggles_on_phase_wrap",
+      "late_edge_rate_exceeds_early_edge_rate",
+      "phase_span_covers_nearly_full_wrap"
+    ]
+  },
+  "requirement_links": [
+    {
+      "id": "public_contract_supports_phase_span_covers_nearly_full_wrap",
+      "public_requirement": "The agent-visible functional specification and public support artifacts define the observable behavior without exposing checker internals.",
+      "public_anchor_terms": [
+        "Required Output",
+        "Public Task Summary",
+        "vco",
+        "phase",
+        "integrator",
+        "vco_phase_integrator.va"
+      ],
+      "checker_config_ids": [
+        "phase_span_covers_nearly_full_wrap"
+      ],
+      "checker_functions": [
+        "check_vco_phase_integrator"
+      ],
+      "private_policy_terms": [
+        "phase_span_covers_nearly_full_wrap",
+        "check_vco_phase_integrator",
+        "private checker configuration"
+      ]
+    },
+    {
+      "id": "public_contract_supports_clock_toggles_on_phase_wrap",
+      "public_requirement": "The agent-visible functional specification and public support artifacts define the observable behavior without exposing checker internals.",
+      "public_anchor_terms": [
+        "Required Output",
+        "Public Task Summary",
+        "vco",
+        "phase",
+        "integrator",
+        "vco_phase_integrator.va"
+      ],
+      "checker_config_ids": [
+        "clock_toggles_on_phase_wrap"
+      ],
+      "checker_functions": [
+        "check_vco_phase_integrator"
+      ],
+      "private_policy_terms": [
+        "clock_toggles_on_phase_wrap",
+        "check_vco_phase_integrator",
+        "private checker configuration"
+      ]
+    },
+    {
+      "id": "public_contract_supports_late_edge_rate_exceeds_early_edge_rate",
+      "public_requirement": "The agent-visible functional specification and public support artifacts define the observable behavior without exposing checker internals.",
+      "public_anchor_terms": [
+        "Required Output",
+        "Public Task Summary",
+        "vco",
+        "phase",
+        "integrator",
+        "vco_phase_integrator.va"
+      ],
+      "checker_config_ids": [
+        "late_edge_rate_exceeds_early_edge_rate"
+      ],
+      "checker_functions": [
+        "check_vco_phase_integrator"
+      ],
+      "private_policy_terms": [
+        "late_edge_rate_exceeds_early_edge_rate",
+        "check_vco_phase_integrator",
+        "private checker configuration"
+      ]
+    }
+  ]
+}

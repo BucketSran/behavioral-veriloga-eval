@@ -1,0 +1,37 @@
+schema_version: "vabench-release-v2-checks"
+task_id: "vbr1_l1_threshold_comparator:dut"
+checker:
+  task_id: "vbr1_l1_threshold_comparator_dut"
+  function: "check_release_threshold_comparator"
+  source: "runners/simulate_evas.py"
+# The remaining fields are inherited from release-v1 and remain private
+# evaluator configuration until human review and fresh v2 dual rerun.
+syntax:
+  must_include:
+    - "transition("
+  must_not_include:
+    - "I("
+    - "ddt("
+    - "idt("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  dut_companion_role: "function_checked_dut"
+  strong_benchmark_claim: true
+  checks:
+    - "low_for_negative_diff"
+    - "high_for_positive_diff"
+    - "rising_trip_near_zero_diff"
+    - "falling_trip_near_zero_diff"
+    - "rail_referenced_output_levels"
+  public_observables:
+    - "vinp"
+    - "vinn"
+    - "out_p"
+parity:
+  reference: "spectre"
+  status: "pending"
+  notes:
+    - "Fresh dual evidence required after bidirectional threshold stimulus/checker tightening."

@@ -9,14 +9,14 @@ not fresh EVAS/Spectre certification evidence.
 
 | Metric | Value |
 | --- | ---: |
-| entries | `5` |
-| forms | `5` |
-| prompt-boundary pass forms | `5` |
-| spec-checker map forms | `5` |
-| public/private requirement links | `10` |
-| score candidate forms | `4` |
+| entries | `23` |
+| forms | `23` |
+| prompt-boundary pass forms | `23` |
+| spec-checker map forms | `23` |
+| public/private requirement links | `89` |
+| score candidate forms | `19` |
 | final score-enabled forms | `0` |
-| fresh dual-certification pending forms | `5` |
+| fresh dual-certification pending forms | `23` |
 
 ## Claim Boundary
 
@@ -28,8 +28,26 @@ not fresh EVAS/Spectre certification evidence.
 
 | Task | Form | Prompt Boundary | Score Enabled | Fresh Dual Pending |
 | --- | --- | --- | --- | --- |
+| `vbr1_l1_binary_weighted_voltage_dac:dut` | `spec-to-va` | `pass` | `False` | `True` |
+| `vbr1_l2_flash_adc_mini_array:e2e` | `end-to-end` | `pass` | `False` | `True` |
 | `vbr1_l2_weighted_sar_adc_dac_loop:e2e` | `end-to-end` | `pass` | `False` | `True` |
+| `vbr1_l1_threshold_comparator:dut` | `spec-to-va` | `pass` | `False` | `True` |
 | `vbr1_l1_window_comparator_detector:tb` | `tb-generation` | `pass` | `False` | `True` |
+| `vbr1_l2_comparator_measurement_flow:e2e` | `end-to-end` | `pass` | `False` | `True` |
+| `vbr1_l1_acquisition_limited_sample_and_hold:bugfix` | `bugfix` | `pass` | `False` | `True` |
 | `vbr1_l1_aperture_delay_track_and_hold:dut` | `spec-to-va` | `pass` | `False` | `True` |
 | `vbr1_l1_first_order_lowpass:bugfix` | `bugfix` | `pass` | `False` | `True` |
+| `vbr1_l1_slew_rate_limiter:dut` | `spec-to-va` | `pass` | `False` | `True` |
+| `vbr1_l2_amplifier_filter_chain:e2e` | `end-to-end` | `pass` | `False` | `True` |
+| `vbr1_l1_bang_bang_phase_detector:tb` | `tb-generation` | `pass` | `False` | `True` |
+| `vbr1_l1_vco_phase_integrator:dut` | `spec-to-va` | `pass` | `False` | `True` |
+| `vbr1_l1_gain_trim_controller:dut` | `spec-to-va` | `pass` | `False` | `True` |
+| `vbr1_l2_complete_calibration_loop:e2e` | `end-to-end` | `pass` | `False` | `True` |
+| `vbr1_l1_ptat_ctat_reference_generator:dut` | `spec-to-va` | `pass` | `False` | `True` |
+| `vbr1_l2_ldo_load_step_recovery_flow:e2e` | `end-to-end` | `pass` | `False` | `True` |
+| `vbr1_l1_rf_mixer_downconverter_macro:dut` | `spec-to-va` | `pass` | `False` | `True` |
+| `vbr1_l2_agc_receiver_leveling_loop:e2e` | `end-to-end` | `pass` | `False` | `True` |
+| `vbr1_l1_peak_detector:dut` | `spec-to-va` | `pass` | `False` | `True` |
 | `vbr1_l2_gain_extraction_convergence_measurement_flow:e2e` | `end-to-end` | `pass` | `False` | `True` |
+| `vbr1_l1_lfsr_prbs_generator:bugfix` | `bugfix` | `pass` | `False` | `True` |
+| `vbr1_l2_programmable_stimulus_sequencer:e2e` | `end-to-end` | `pass` | `False` | `True` |

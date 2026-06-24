@@ -1,0 +1,28 @@
+schema_version: "vabench-release-v2-checks"
+task_id: "vbr1_l1_peak_detector:dut"
+checker:
+  task_id: "vbm1_peak_detector_dut"
+  function: "check_peak_detector"
+  source: "runners/simulate_evas.py"
+# The remaining fields are inherited from release-v1 and remain private
+# evaluator configuration until human review and fresh v2 dual rerun.
+syntax:
+  must_include:
+    - "@(timer("
+    - "transition("
+  must_not_include:
+    - "I("
+    - "ddt("
+    - "idt("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "first_peak_is_held"
+    - "reset_clears_peak"
+    - "second_peak_updates_to_larger_value"
+parity:
+  required: true
+  tolerance_notes: "Use broad windows around peaks; do not depend on exact timer alignment."

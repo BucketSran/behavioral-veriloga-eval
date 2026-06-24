@@ -1,0 +1,19 @@
+// flash_adc_3b mini-array gold testbench
+// Step through the midpoint of every 3-bit bin; checker observes seven
+// comparator outputs plus the encoded 3-bit output.
+simulator lang=spectre
+global 0
+
+ahdl_include "flash_adc_3b.va"
+
+Vvdd (vdd 0) vsource dc=0.9 type=dc
+Vvss (vss 0) vsource dc=0.0 type=dc
+
+Vvin (vin 0) vsource type=pwl wave=[0 0.05625 9.5n 0.05625 10n 0.16875 19.5n 0.16875 20n 0.28125 29.5n 0.28125 30n 0.39375 39.5n 0.39375 40n 0.50625 49.5n 0.50625 50n 0.61875 59.5n 0.61875 60n 0.73125 69.5n 0.73125 70n 0.84375 86n 0.84375]
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=5n rise=100p fall=100p delay=5n
+
+IDUT (vdd vss vin clk cmp0 cmp1 cmp2 cmp3 cmp4 cmp5 cmp6 dout2 dout1 dout0) flash_adc_3b vrefp=0.9 vrefn=0.0 vth=0.45 tedge=100p
+
+tran tran stop=86n maxstep=200p
+save vin clk cmp0 cmp1 cmp2 cmp3 cmp4 cmp5 cmp6 dout2 dout1 dout0

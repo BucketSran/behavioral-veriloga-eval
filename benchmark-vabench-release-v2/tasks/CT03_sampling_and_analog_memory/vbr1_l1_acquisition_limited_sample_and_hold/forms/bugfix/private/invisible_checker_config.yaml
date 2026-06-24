@@ -1,0 +1,40 @@
+schema_version: "vabench-release-v2-checks"
+task_id: "vbr1_l1_acquisition_limited_sample_and_hold:bugfix"
+checker:
+  task_id: "vbr1_l1_acquisition_limited_sample_and_hold_bugfix"
+  function: "check_acquisition_limited_sample_hold"
+  source: "runners/simulate_evas.py"
+# The remaining fields are inherited from release-v1 and remain private
+# evaluator configuration until human review and fresh v2 dual rerun.
+syntax:
+  must_include:
+    - "transition("
+    - "@(cross("
+  must_not_include:
+    - "I("
+    - "ddt("
+    - "idt("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  dut_companion_role: "function_checked_dut"
+  strong_benchmark_claim: true
+  checks:
+    - "finite_acquisition_does_not_jump_to_vin"
+    - "longer_sample_window_settles_closer_to_vin"
+    - "falling_sample_edge_holds_last_acquired_value"
+    - "reset_returns_to_initial_level"
+    - "metric_marks_tracking_window"
+  public_observables:
+    - "sample"
+    - "rst"
+    - "vin"
+    - "vout"
+    - "metric"
+parity:
+  reference: "spectre"
+  status: "pending"
+  notes:
+    - "Fresh EVAS/Spectre dual validation is required after adding this release entry."

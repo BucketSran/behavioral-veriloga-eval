@@ -1,0 +1,32 @@
+schema_version: "vabench-release-v2-checks"
+task_id: "vbr1_l2_comparator_measurement_flow:e2e"
+checker:
+  task_id: "vbr1_l2_comparator_measurement_flow_e2e"
+  function: "check_comparator_measurement_flow"
+  source: "runners/simulate_evas.py"
+# The remaining fields are inherited from release-v1 and remain private
+# evaluator configuration until human review and fresh v2 dual rerun.
+syntax:
+  must_include:
+    - "@(cross("
+    - "transition("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "comparator_output_low_before_trip"
+    - "comparator_output_high_after_trip"
+    - "outp_first_trip_near_static_offset"
+    - "measurement_valid_latches_after_trip"
+    - "valid_first_assertion_near_trip"
+    - "trip_voltage_near_inn_plus_offset"
+    - "offset_estimate_near_static_offset"
+    - "measurement_outputs_hold_after_valid"
+
+parity:
+  reference: "spectre"
+  status: "certified"
+  notes:
+    - "Current release dual_certification report certifies this form as EVAS/Spectre pass; rerun is required after checker/gold behavior changes."

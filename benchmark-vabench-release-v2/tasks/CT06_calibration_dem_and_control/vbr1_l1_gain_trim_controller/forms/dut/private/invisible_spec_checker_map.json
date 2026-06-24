@@ -1,0 +1,118 @@
+{
+  "schema_version": "vabench-release-v2-invisible-spec-checker-map",
+  "task_id": "vbr1_l1_gain_trim_controller:dut",
+  "source_agent_visible_spec": "public/agent_visible_spec.md",
+  "source_invisible_checker_config": "private/invisible_checker_config.yaml",
+  "source_checker": {
+    "file": "runners/simulate_evas.py",
+    "task_aliases": [
+      "vbm1_gain_trim_controller_dut",
+      "vbr1_l1_gain_trim_controller",
+      "vbr1_l1_gain_trim_controller:dut",
+      "vbr1_l1_gain_trim_controller_dut"
+    ]
+  },
+  "auditor": {
+    "forbidden_public_terms": [
+      "check_gain_trim_controller",
+      "gain_control_reaches_high_and_low_clamps",
+      "high_measured_value_decreases_control",
+      "low_measured_value_increases_control",
+      "reset_gain_control_near_0p30"
+    ]
+  },
+  "requirement_links": [
+    {
+      "id": "public_contract_supports_reset_gain_control_near_0p30",
+      "public_requirement": "The agent-visible functional specification and public support artifacts define the observable behavior without exposing checker internals.",
+      "public_anchor_terms": [
+        "Required Output",
+        "Public Task Summary",
+        "gain",
+        "trim",
+        "controller",
+        "gain_trim_controller.va"
+      ],
+      "checker_config_ids": [
+        "reset_gain_control_near_0p30"
+      ],
+      "checker_functions": [
+        "check_gain_trim_controller"
+      ],
+      "private_policy_terms": [
+        "reset_gain_control_near_0p30",
+        "check_gain_trim_controller",
+        "private checker configuration"
+      ]
+    },
+    {
+      "id": "public_contract_supports_low_measured_value_increases_control",
+      "public_requirement": "The agent-visible functional specification and public support artifacts define the observable behavior without exposing checker internals.",
+      "public_anchor_terms": [
+        "Required Output",
+        "Public Task Summary",
+        "gain",
+        "trim",
+        "controller",
+        "gain_trim_controller.va"
+      ],
+      "checker_config_ids": [
+        "low_measured_value_increases_control"
+      ],
+      "checker_functions": [
+        "check_gain_trim_controller"
+      ],
+      "private_policy_terms": [
+        "low_measured_value_increases_control",
+        "check_gain_trim_controller",
+        "private checker configuration"
+      ]
+    },
+    {
+      "id": "public_contract_supports_high_measured_value_decreases_control",
+      "public_requirement": "The agent-visible functional specification and public support artifacts define the observable behavior without exposing checker internals.",
+      "public_anchor_terms": [
+        "Required Output",
+        "Public Task Summary",
+        "gain",
+        "trim",
+        "controller",
+        "gain_trim_controller.va"
+      ],
+      "checker_config_ids": [
+        "high_measured_value_decreases_control"
+      ],
+      "checker_functions": [
+        "check_gain_trim_controller"
+      ],
+      "private_policy_terms": [
+        "high_measured_value_decreases_control",
+        "check_gain_trim_controller",
+        "private checker configuration"
+      ]
+    },
+    {
+      "id": "public_contract_supports_gain_control_reaches_high_and_low_clamps",
+      "public_requirement": "The agent-visible functional specification and public support artifacts define the observable behavior without exposing checker internals.",
+      "public_anchor_terms": [
+        "Required Output",
+        "Public Task Summary",
+        "gain",
+        "trim",
+        "controller",
+        "gain_trim_controller.va"
+      ],
+      "checker_config_ids": [
+        "gain_control_reaches_high_and_low_clamps"
+      ],
+      "checker_functions": [
+        "check_gain_trim_controller"
+      ],
+      "private_policy_terms": [
+        "gain_control_reaches_high_and_low_clamps",
+        "check_gain_trim_controller",
+        "private checker configuration"
+      ]
+    }
+  ]
+}

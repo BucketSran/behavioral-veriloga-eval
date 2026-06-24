@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "simple_binary_voltage_dac_4b.va"
+
+Vref (vref 0) vsource dc=0.9
+Vss (vss 0) vsource dc=0
+// Code samples at 5/15/.../155 ns cover every 4-bit code from 0 through 15.
+Vb0 (code_0 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0.9 19.5n 0.9 20n 0 29.5n 0 30n 0.9 39.5n 0.9 40n 0 49.5n 0 50n 0.9 59.5n 0.9 60n 0 69.5n 0 70n 0.9 79.5n 0.9 80n 0 89.5n 0 90n 0.9 99.5n 0.9 100n 0 109.5n 0 110n 0.9 119.5n 0.9 120n 0 129.5n 0 130n 0.9 139.5n 0.9 140n 0 149.5n 0 150n 0.9 165n 0.9]
+Vb1 (code_1 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0 19.5n 0 20n 0.9 29.5n 0.9 30n 0.9 39.5n 0.9 40n 0 49.5n 0 50n 0 59.5n 0 60n 0.9 69.5n 0.9 70n 0.9 79.5n 0.9 80n 0 89.5n 0 90n 0 99.5n 0 100n 0.9 109.5n 0.9 110n 0.9 119.5n 0.9 120n 0 129.5n 0 130n 0 139.5n 0 140n 0.9 149.5n 0.9 150n 0.9 165n 0.9]
+Vb2 (code_2 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0 19.5n 0 20n 0 29.5n 0 30n 0 39.5n 0 40n 0.9 49.5n 0.9 50n 0.9 59.5n 0.9 60n 0.9 69.5n 0.9 70n 0.9 79.5n 0.9 80n 0 89.5n 0 90n 0 99.5n 0 100n 0 109.5n 0 110n 0 119.5n 0 120n 0.9 129.5n 0.9 130n 0.9 139.5n 0.9 140n 0.9 149.5n 0.9 150n 0.9 165n 0.9]
+Vb3 (code_3 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0 19.5n 0 20n 0 29.5n 0 30n 0 39.5n 0 40n 0 49.5n 0 50n 0 59.5n 0 60n 0 69.5n 0 70n 0 79.5n 0 80n 0.9 89.5n 0.9 90n 0.9 99.5n 0.9 100n 0.9 109.5n 0.9 110n 0.9 119.5n 0.9 120n 0.9 129.5n 0.9 130n 0.9 139.5n 0.9 140n 0.9 149.5n 0.9 150n 0.9 165n 0.9]
+
+XDUT (code_0 code_1 code_2 code_3 vref vss aout) simple_binary_voltage_dac_4b
+
+tran tran stop=165n maxstep=500p
+save code_0 code_1 code_2 code_3 aout

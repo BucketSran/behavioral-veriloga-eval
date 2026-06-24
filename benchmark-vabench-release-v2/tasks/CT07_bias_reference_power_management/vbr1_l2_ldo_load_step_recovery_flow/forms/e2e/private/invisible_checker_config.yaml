@@ -1,0 +1,31 @@
+schema_version: "vabench-release-v2-checks"
+task_id: "vbr1_l2_ldo_load_step_recovery_flow:e2e"
+checker:
+  task_id: "vbr1_l2_ldo_load_step_recovery_flow_e2e"
+  function: "check_ldo_load_step_recovery_flow"
+  source: "runners/simulate_evas.py"
+# The remaining fields are inherited from release-v1 and remain private
+# evaluator configuration until human review and fresh v2 dual rerun.
+syntax:
+  must_include:
+    - "transition("
+    - "@(cross("
+  must_not_include:
+    - "I("
+    - "ddt("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "load_step_transient_droop_visible"
+    - "closed_loop_recovery_after_step"
+    - "metric_marks_recovered_regulation"
+    - "load_monitor_tracks_step"
+    - "control_monitor_responds_to_droop"
+parity:
+  reference: "spectre"
+  status: "pending_fresh_dual_rerun"
+  notes:
+    - "Fresh dual rerun required after adding load_mon/ctrl_mon intermediate observability."

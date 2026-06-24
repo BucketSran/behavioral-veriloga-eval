@@ -1,0 +1,28 @@
+schema_version: "vabench-release-v2-checks"
+task_id: "vbr1_l1_lfsr_prbs_generator:bugfix"
+checker:
+  task_id: "vbr1_l1_lfsr_prbs_generator_bugfix"
+  function: "check_prbs7"
+  source: "runners/simulate_evas.py"
+# The remaining fields are inherited from release-v1 and remain private
+# evaluator configuration until human review and fresh v2 dual rerun.
+syntax:
+  must_include:
+    - "transition("
+  must_not_include:
+    - "I("
+    - "ddt("
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "reset_loads_nonzero_seed"
+    - "enabled_clock_edges_advance_lfsr_state"
+    - "feedback_uses_prbs7_taps"
+parity:
+  reference: "spectre"
+  status: "pass"
+  notes:
+    - "Certified by release dual evidence for this form."

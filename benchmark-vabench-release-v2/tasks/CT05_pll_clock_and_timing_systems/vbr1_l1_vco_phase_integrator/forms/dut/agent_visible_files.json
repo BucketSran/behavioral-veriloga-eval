@@ -1,0 +1,81 @@
+{
+  "schema_version": "vabench-release-v2",
+  "task_id": "vbr1_l1_vco_phase_integrator:dut",
+  "agent_prompt": "agent_prompt.md",
+  "agent_visible_spec": "public/agent_visible_spec.md",
+  "agent_visible": {
+    "prompt": "agent_prompt.md",
+    "support_files": [
+      {
+        "alias": "tb_vco_phase_integrator_ref.scs",
+        "source_path": "public/support/tb_vco_phase_integrator_ref.scs",
+        "render": true,
+        "writable_by_agent": false
+      }
+    ],
+    "target_files": [
+      "vco_phase_integrator.va"
+    ],
+    "spec": "public/agent_visible_spec.md"
+  },
+  "agent_hidden": [
+    {
+      "path": "task_release_card.json",
+      "reason": "private task metadata and provenance"
+    },
+    {
+      "path": "private/invisible_checker_config.yaml",
+      "reason": "agent-invisible checker IDs, thresholds, sample windows, and expected outcomes"
+    },
+    {
+      "path": "private/invisible_spec_checker_map.json",
+      "reason": "agent-invisible public-spec to private-checker map and leak audit terms"
+    },
+    {
+      "path": "private/gold/vco_phase_integrator.va",
+      "reason": "gold answer"
+    }
+  ],
+  "render_policy": {
+    "render_agent_visible_contract_only": true,
+    "render_agent_prompt_only": false,
+    "render_support_files_only_if_listed": true,
+    "support_files_must_live_under_public_support": true,
+    "never_render_checker_files": true,
+    "never_render_private_directory": true,
+    "never_render_gold_fixed_artifacts": true,
+    "generic_runner_rules_allowed": true,
+    "never_render_task_release_card": true
+  },
+  "leak_audit": {
+    "forbidden_phrases": [
+      "check_vco_phase_integrator",
+      "clock_toggles_on_phase_wrap",
+      "late_edge_rate_exceeds_early_edge_rate",
+      "phase_span_covers_nearly_full_wrap",
+      "vbr1_l1_vco_phase_integrator_dut"
+    ],
+    "allowed_public_concepts": [
+      "agent-visible functional behavior and interfaces",
+      "public support files listed in agent_visible_files.json",
+      "generic voltage-domain Verilog-A and Spectre syntax rules"
+    ]
+  },
+  "contract_audit": {
+    "required_public_anchors": [
+      {
+        "id": "target_artifacts",
+        "all_of": [
+          "vco_phase_integrator.va"
+        ]
+      },
+      {
+        "id": "public_task_summary",
+        "all_of": [
+          "Public Task Summary",
+          "Domain"
+        ]
+      }
+    ]
+  }
+}

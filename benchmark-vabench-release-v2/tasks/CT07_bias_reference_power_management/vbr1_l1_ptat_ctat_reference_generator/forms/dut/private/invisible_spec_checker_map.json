@@ -1,0 +1,93 @@
+{
+  "schema_version": "vabench-release-v2-invisible-spec-checker-map",
+  "task_id": "vbr1_l1_ptat_ctat_reference_generator:dut",
+  "source_agent_visible_spec": "public/agent_visible_spec.md",
+  "source_invisible_checker_config": "private/invisible_checker_config.yaml",
+  "source_checker": {
+    "file": "runners/simulate_evas.py",
+    "task_aliases": [
+      "vbr1_l1_ptat_ctat_reference_generator",
+      "vbr1_l1_ptat_ctat_reference_generator:dut",
+      "vbr1_l1_ptat_ctat_reference_generator_dut"
+    ]
+  },
+  "auditor": {
+    "forbidden_public_terms": [
+      "check_ptat_ctat_reference_generator",
+      "ctat_compensation_flattens_reference",
+      "ptat_branch_monotonic_with_temperature",
+      "reference_common_mode_bounded"
+    ]
+  },
+  "requirement_links": [
+    {
+      "id": "public_contract_supports_ptat_branch_monotonic_with_temperature",
+      "public_requirement": "The agent-visible functional specification and public support artifacts define the observable behavior without exposing checker internals.",
+      "public_anchor_terms": [
+        "Required Output",
+        "Public Task Summary",
+        "ptat",
+        "ctat",
+        "reference",
+        "ptat_ctat_reference_generator.va"
+      ],
+      "checker_config_ids": [
+        "ptat_branch_monotonic_with_temperature"
+      ],
+      "checker_functions": [
+        "check_ptat_ctat_reference_generator"
+      ],
+      "private_policy_terms": [
+        "ptat_branch_monotonic_with_temperature",
+        "check_ptat_ctat_reference_generator",
+        "private checker configuration"
+      ]
+    },
+    {
+      "id": "public_contract_supports_ctat_compensation_flattens_reference",
+      "public_requirement": "The agent-visible functional specification and public support artifacts define the observable behavior without exposing checker internals.",
+      "public_anchor_terms": [
+        "Required Output",
+        "Public Task Summary",
+        "ptat",
+        "ctat",
+        "reference",
+        "ptat_ctat_reference_generator.va"
+      ],
+      "checker_config_ids": [
+        "ctat_compensation_flattens_reference"
+      ],
+      "checker_functions": [
+        "check_ptat_ctat_reference_generator"
+      ],
+      "private_policy_terms": [
+        "ctat_compensation_flattens_reference",
+        "check_ptat_ctat_reference_generator",
+        "private checker configuration"
+      ]
+    },
+    {
+      "id": "public_contract_supports_reference_common_mode_bounded",
+      "public_requirement": "The agent-visible functional specification and public support artifacts define the observable behavior without exposing checker internals.",
+      "public_anchor_terms": [
+        "Required Output",
+        "Public Task Summary",
+        "ptat",
+        "ctat",
+        "reference",
+        "ptat_ctat_reference_generator.va"
+      ],
+      "checker_config_ids": [
+        "reference_common_mode_bounded"
+      ],
+      "checker_functions": [
+        "check_ptat_ctat_reference_generator"
+      ],
+      "private_policy_terms": [
+        "reference_common_mode_bounded",
+        "check_ptat_ctat_reference_generator",
+        "private checker configuration"
+      ]
+    }
+  ]
+}

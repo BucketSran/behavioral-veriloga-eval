@@ -1,0 +1,31 @@
+schema_version: "vabench-release-v2-checks"
+task_id: "vbr1_l1_ptat_ctat_reference_generator:dut"
+checker:
+  task_id: "vbr1_l1_ptat_ctat_reference_generator_dut"
+  function: "check_ptat_ctat_reference_generator"
+  source: "runners/simulate_evas.py"
+# The remaining fields are inherited from release-v1 and remain private
+# evaluator configuration until human review and fresh v2 dual rerun.
+syntax:
+  must_include:
+    - "transition("
+    - "@(cross("
+  must_not_include:
+    - "I("
+    - "ddt("
+dut_companion_role: "function_checked_dut"
+strong_benchmark_claim: true
+dut_compile:
+  backend: "evas"
+tb_compile:
+  backend: "evas"
+sim_correct:
+  checks:
+    - "ptat_branch_monotonic_with_temperature"
+    - "ctat_compensation_flattens_reference"
+    - "reference_common_mode_bounded"
+parity:
+  reference: "spectre"
+  status: "pending_until_evas_spectre_rerun"
+  notes:
+    - "Designed release source; no imported historical EVAS/Spectre dual evidence yet."

@@ -1,0 +1,82 @@
+{
+  "schema_version": "vabench-release-v2",
+  "task_id": "vbr1_l2_complete_calibration_loop:e2e",
+  "agent_prompt": "agent_prompt.md",
+  "agent_visible_spec": "public/agent_visible_spec.md",
+  "agent_visible": {
+    "prompt": "agent_prompt.md",
+    "support_files": [],
+    "target_files": [
+      "complete_calibration_loop.va",
+      "tb_complete_calibration_loop.scs"
+    ],
+    "spec": "public/agent_visible_spec.md"
+  },
+  "agent_hidden": [
+    {
+      "path": "task_release_card.json",
+      "reason": "private task metadata and provenance"
+    },
+    {
+      "path": "private/invisible_checker_config.yaml",
+      "reason": "agent-invisible checker IDs, thresholds, sample windows, and expected outcomes"
+    },
+    {
+      "path": "private/invisible_spec_checker_map.json",
+      "reason": "agent-invisible public-spec to private-checker map and leak audit terms"
+    },
+    {
+      "path": "private/gold/complete_calibration_loop.va",
+      "reason": "gold answer"
+    },
+    {
+      "path": "private/gold/tb_complete_calibration_loop.scs",
+      "reason": "gold answer"
+    }
+  ],
+  "render_policy": {
+    "render_agent_visible_contract_only": true,
+    "render_agent_prompt_only": false,
+    "render_support_files_only_if_listed": true,
+    "support_files_must_live_under_public_support": true,
+    "never_render_checker_files": true,
+    "never_render_private_directory": true,
+    "never_render_gold_fixed_artifacts": true,
+    "generic_runner_rules_allowed": true,
+    "never_render_task_release_card": true
+  },
+  "leak_audit": {
+    "forbidden_phrases": [
+      "bounded_negative_feedback_response",
+      "check_release_complete_calibration_loop",
+      "metric_tracks_convergence",
+      "raw_error_is_corrected",
+      "residual_monitor_tracks_correction",
+      "trim_moves_opposite_to_error",
+      "vbr1_l2_complete_calibration_loop_e2e"
+    ],
+    "allowed_public_concepts": [
+      "agent-visible functional behavior and interfaces",
+      "public support files listed in agent_visible_files.json",
+      "generic voltage-domain Verilog-A and Spectre syntax rules"
+    ]
+  },
+  "contract_audit": {
+    "required_public_anchors": [
+      {
+        "id": "target_artifacts",
+        "all_of": [
+          "complete_calibration_loop.va",
+          "tb_complete_calibration_loop.scs"
+        ]
+      },
+      {
+        "id": "public_task_summary",
+        "all_of": [
+          "Public Task Summary",
+          "Domain"
+        ]
+      }
+    ]
+  }
+}
