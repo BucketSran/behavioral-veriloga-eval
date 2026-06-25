@@ -128,20 +128,24 @@ const I18N = {
     navAccuracy: "Accuracy",
     navNews: "News",
     navContributors: "Contributors",
+    navBlog: "Blog",
+    navRun: "Run",
+    navData: "Data",
+    navGithub: "GitHub",
     languageToggle: "中文",
     languageToggleAria: "Switch site language to Chinese",
     footerGenerated: "Generated from vaBench release reports.",
     homeEyebrow: "Behavioral Verilog-A evaluation",
     homeTitle: "vaBench 300",
     homeText:
-      "A benchmark and evaluation framework for analog and mixed-signal behavioral Verilog-A tasks. EVAS provides a fast development gate; Spectre remains the final judge for reported scores.",
-    homePrimaryAction: "Run a model",
-    homeSecondaryAction: "View leaderboard",
+      "Measuring frontier models on analog and mixed-signal behavioral Verilog-A tasks with EVAS fast gates and Spectre final judging.",
+    homePrimaryAction: "Run vaBench",
+    homeSecondaryAction: "Browse data",
     featureBenchmarkEyebrow: "Benchmark",
-    featureBenchmarkTitle: "300 released rows",
+    featureBenchmarkTitle: "300 certified forms",
     featureBenchmarkBody: "Browse tasks by category, level, form, score surface, and provenance.",
     featureLeaderboardEyebrow: "Leaderboard",
-    featureLeaderboardTitle: "Model results",
+    featureLeaderboardTitle: "Spectre final judge",
     featureLeaderboardBody: "Separate verified Spectre-scored runs from integration smoke tests.",
     featureProtocolEyebrow: "Protocol",
     featureProtocolTitle: "EVAS/Spectre gates",
@@ -149,11 +153,35 @@ const I18N = {
     featureAccuracyEyebrow: "Accuracy",
     featureAccuracyTitle: "Precision evidence",
     featureAccuracyBody: "See whether EVAS and Spectre are bit-identical, equivalent, or numerically different.",
-    homeLeaderboardEyebrow: "Leaderboard status",
-    homeLeaderboardTitle: "Ready for model submissions",
+    homeLeaderboardEyebrow: "Leaderboard",
+    homeLeaderboardTitle: "Leaderboard",
+    homeLeaderboardBody:
+      "Verified rows require Spectre final judging. EVAS-only runs and API smoke tests stay visible as integration evidence, not ranked benchmark scores.",
+    homeLeaderboardFootnote:
+      "Core leaderboard denominator: 265 core score forms. The 35 certified support forms are reported separately.",
+    leaderboardVersionCurrent: "v300",
+    leaderboardVersionCore: "Core score",
+    leaderboardVersionSupport: "Support forms",
+    leaderboardMetricScore: "Pass@1",
+    leaderboardMetricJudge: "Spectre judge",
     homeNewsEyebrow: "News",
     homeNewsTitle: "Latest updates",
     viewAllNews: "View all news",
+    whyEyebrow: "Why vaBench",
+    whyTitle: "Built for behavioral circuit modeling",
+    whyBody:
+      "vaBench is a public benchmark for analog and mixed-signal behavioral Verilog-A generation. It keeps task content, reference artifacts, deterministic checkers, EVAS fast gates, and Spectre final judging visible as separate pieces of evidence.",
+    taskExamplesEyebrow: "Task examples",
+    taskExamplesTitle: "A few rows from vaBench 300",
+    taskExamplesBody:
+      "Each example links to the exact prompt, reference artifacts, checker contract, certification status, and EVAS/Spectre precision evidence.",
+    viewAllTasks: "All 300 tasks",
+    homeReadEyebrow: "Read the protocol",
+    homeReadTitle: "How vaBench is scored and certified",
+    homeReadBody:
+      "The protocol separates public benchmark tasks, core score forms, support forms, EVAS fast gates, Spectre final judging, and tolerance-gated parity evidence.",
+    homeReadProtocol: "Open protocol",
+    homeReadAccuracy: "View accuracy",
     leaderboardEyebrow: "Leaderboard",
     leaderboardPageTitle: "vaBench model leaderboard",
     leaderboardPageText:
@@ -346,6 +374,13 @@ const I18N = {
     noVerifiedRunsDetail: "Run a model with --final-judge spectre before adding a ranked row.",
     notRanked: "not ranked",
     integrationSmokePassed: "integration smoke passed",
+    scorePlotPending: "Awaiting first full Spectre-scored model run",
+    scorePlotPendingBody: "The chart appears here after a model completes the 265-form core score roster.",
+    scorePlotAxis: "Pass@1",
+    smokeTestedModels: "Smoke-tested models",
+    smokeEvasShort: "1 row generated/scored; behavior failed",
+    connectedModels: "Connected models",
+    taskExampleCta: "Open task",
     notRun: "not run",
     generatedScoredFailed: "generated and EVAS-scored 1 row; candidate failed behavior correctness",
     listRoster: "list roster",
@@ -396,6 +431,7 @@ const I18N = {
     detailAuditedMismatch: "audited mismatch count",
     detailFunctionEntries: "function-level entries behind rows",
     detailFunctionFamilies: "analog and mixed-signal families",
+    detailConnectedModels: "smoke-tested or verified model entries",
     detailSpectreAligned: "aligned within stated tolerance gates",
     detailNotAsserted: "not asserted",
     detailNotBitExact: "not a bit-exact promise",
@@ -497,20 +533,24 @@ const I18N = {
     navAccuracy: "精度",
     navNews: "更新",
     navContributors: "贡献者",
+    navBlog: "Blog",
+    navRun: "Run",
+    navData: "Data",
+    navGithub: "GitHub",
     languageToggle: "English",
     languageToggleAria: "切换为英文界面",
     footerGenerated: "由 vaBench release reports 生成。",
     homeEyebrow: "行为级 Verilog-A 评测",
     homeTitle: "vaBench 300",
     homeText:
-      "面向模拟与混合信号行为级 Verilog-A 任务的 benchmark 和评测框架。EVAS 是快速开发门控；论文和排行榜分数仍以 Spectre 为最终判定。",
-    homePrimaryAction: "运行模型",
-    homeSecondaryAction: "查看排行榜",
+      "用 EVAS fast gates 和 Spectre final judging 评测 frontier models 在 analog 和 mixed-signal behavioral Verilog-A 任务上的表现。",
+    homePrimaryAction: "运行 vaBench",
+    homeSecondaryAction: "浏览数据",
     featureBenchmarkEyebrow: "Benchmark",
-    featureBenchmarkTitle: "300 个 released rows",
+    featureBenchmarkTitle: "300 个已认证题型",
     featureBenchmarkBody: "按类别、层级、表单、计分面和来源浏览题目。",
     featureLeaderboardEyebrow: "排行榜",
-    featureLeaderboardTitle: "模型结果",
+    featureLeaderboardTitle: "Spectre final judge",
     featureLeaderboardBody: "区分 Spectre 计分的 verified runs 和接入 smoke tests。",
     featureProtocolEyebrow: "协议",
     featureProtocolTitle: "EVAS/Spectre gates",
@@ -518,11 +558,35 @@ const I18N = {
     featureAccuracyEyebrow: "精度",
     featureAccuracyTitle: "精度证据",
     featureAccuracyBody: "查看 EVAS 与 Spectre 是完全相同、gate 内等价，还是存在数值差异。",
-    homeLeaderboardEyebrow: "排行榜状态",
-    homeLeaderboardTitle: "已准备接收模型提交",
+    homeLeaderboardEyebrow: "排行榜",
+    homeLeaderboardTitle: "排行榜",
+    homeLeaderboardBody:
+      "Verified rows 需要 Spectre final judge。仅 EVAS 的运行和 API smoke tests 会作为接入证据展示，不进入正式 ranked benchmark score。",
+    homeLeaderboardFootnote:
+      "主排行榜分母是 265 个核心计分题型；35 个已认证 support 题型单独报告。",
+    leaderboardVersionCurrent: "v300",
+    leaderboardVersionCore: "核心计分",
+    leaderboardVersionSupport: "Support 题型",
+    leaderboardMetricScore: "Pass@1",
+    leaderboardMetricJudge: "Spectre 判定",
     homeNewsEyebrow: "更新",
     homeNewsTitle: "最近更新",
     viewAllNews: "查看所有更新",
+    whyEyebrow: "为什么是 vaBench",
+    whyTitle: "为 behavioral circuit modeling 设计",
+    whyBody:
+      "vaBench 是面向 analog 和 mixed-signal behavioral Verilog-A 生成的公开 benchmark。它把题目内容、参考产物、确定性 checker、EVAS 快速 gate 和 Spectre final judge 作为分开的证据公开展示。",
+    taskExamplesEyebrow: "题目示例",
+    taskExamplesTitle: "vaBench 300 中的部分题目",
+    taskExamplesBody:
+      "每个示例都能打开原始题面、参考产物、checker contract、认证状态和 EVAS/Spectre 精度证据。",
+    viewAllTasks: "查看全部 300 题",
+    homeReadEyebrow: "阅读协议",
+    homeReadTitle: "vaBench 如何计分和认证",
+    homeReadBody:
+      "协议把公开 benchmark 题目、核心计分题型、support 题型、EVAS 快速 gate、Spectre final judge 和容差等价证据分开说明。",
+    homeReadProtocol: "打开协议",
+    homeReadAccuracy: "查看精度",
     leaderboardEyebrow: "排行榜",
     leaderboardPageTitle: "vaBench 模型排行榜",
     leaderboardPageText:
@@ -715,6 +779,13 @@ const I18N = {
     noVerifiedRunsDetail: "模型需要用 --final-judge spectre 跑完后，才加入排行。",
     notRanked: "不排名",
     integrationSmokePassed: "接入 smoke 通过",
+    scorePlotPending: "等待第一次完整 Spectre 计分模型运行",
+    scorePlotPendingBody: "模型跑完 265 个核心计分题型后，图表会显示在这里。",
+    scorePlotAxis: "Pass@1",
+    smokeTestedModels: "Smoke-tested 模型",
+    smokeEvasShort: "已生成/评分 1 行；行为未通过",
+    connectedModels: "已接入模型",
+    taskExampleCta: "打开题目",
     notRun: "未运行",
     generatedScoredFailed: "已生成并用 EVAS 评分 1 行；候选行为正确性失败",
     listRoster: "查看名单",
@@ -765,6 +836,7 @@ const I18N = {
     detailAuditedMismatch: "已审计 mismatch 数",
     detailFunctionEntries: "行背后的功能级 entries",
     detailFunctionFamilies: "模拟与混合信号功能族",
+    detailConnectedModels: "已 smoke-test 或 verified 的模型接入",
     detailSpectreAligned: "在所列容差 gate 内对齐",
     detailNotAsserted: "不宣称",
     detailNotBitExact: "不承诺 bit-exact",
@@ -1336,6 +1408,142 @@ function metricCard(label, value, detail) {
   return card;
 }
 
+function connectedModelCount() {
+  const names = new Set();
+  VERIFIED_LEADERBOARD_ROWS.forEach((row) => {
+    if (row.model) {
+      names.add(row.model);
+    }
+  });
+  SMOKE_ROWS.forEach((row) => {
+    if (row.model) {
+      names.add(row.model);
+    }
+  });
+  return names.size;
+}
+
+function renderHomeScorePlot() {
+  const container = byId("home-score-plot");
+  if (!container) {
+    return;
+  }
+  const axis = make("div", "score-axis");
+  [0, 20, 40, 60, 80, 100].forEach((tick) => {
+    axis.append(make("span", "", `${tick}%`));
+  });
+  const body = make("div", "score-plot-body");
+  if (VERIFIED_LEADERBOARD_ROWS.length === 0) {
+    body.append(make("strong", "", t("scorePlotPending")), make("p", "", t("scorePlotPendingBody")), pill("pending", t("notRanked")));
+  }
+  container.replaceChildren(make("span", "score-plot-label", t("scorePlotAxis")), axis, body);
+}
+
+function renderHomeLeaderboardPreview() {
+  const preview = byId("home-leaderboard-preview");
+  if (!preview) {
+    return;
+  }
+  const panel = make("div", "leaderboard-card");
+  const table = document.createElement("table");
+  const thead = document.createElement("thead");
+  const header = document.createElement("tr");
+  [t("thModel"), t("thStatus"), t("thEVAS"), t("thSpectre")].forEach((label) => header.append(make("th", "", label)));
+  thead.append(header);
+  const tbody = document.createElement("tbody");
+  if (VERIFIED_LEADERBOARD_ROWS.length > 0) {
+    VERIFIED_LEADERBOARD_ROWS.slice(0, 5).forEach((row) => {
+      const tr = document.createElement("tr");
+      [
+        [t("thModel"), row.model],
+        ["Pass@1", percent(row.pass_rate)],
+        [t("thSpectre"), row.judge || "Spectre"],
+      ].forEach(([label, value]) => {
+        const td = make("td", "", value);
+        td.dataset.label = label;
+        tr.append(td);
+      });
+      tbody.append(tr);
+    });
+  } else {
+    SMOKE_ROWS.forEach((row) => {
+      const tr = document.createElement("tr");
+      const modelCell = make("td", "", row.model);
+      modelCell.dataset.label = t("thModel");
+      const statusCell = make("td", "", "");
+      statusCell.dataset.label = t("thStatus");
+      statusCell.append(pill(row.status, t("integrationSmokePassed")));
+      const evasCell = make("td", "table-note", t("smokeEvasShort"));
+      evasCell.dataset.label = t("thEVAS");
+      const spectreCell = make("td", "", state.language === "zh" ? t("notRun") : row.spectre);
+      spectreCell.dataset.label = t("thSpectre");
+      tr.append(modelCell, statusCell, evasCell, spectreCell);
+      tbody.append(tr);
+    });
+  }
+  table.append(thead, tbody);
+  const wrap = make("div", "table-wrap compact-table");
+  wrap.append(table);
+  panel.append(make("h3", "", t("smokeTestedModels")), wrap);
+  preview.replaceChildren(panel);
+}
+
+function selectHomeTaskExamples(rows) {
+  const picked = [];
+  const seenCategories = new Set();
+  const candidates = [...rows]
+    .filter((row) => row.release_entry_id && row.form && row.certification === "certified")
+    .sort((a, b) => {
+      const scoreA = (a.counted_in_score ? 0 : 1) + (a.difficulty === "D3" ? -0.2 : 0);
+      const scoreB = (b.counted_in_score ? 0 : 1) + (b.difficulty === "D3" ? -0.2 : 0);
+      return scoreA - scoreB;
+    });
+  for (const row of candidates) {
+    if (picked.length >= 6) {
+      break;
+    }
+    if (seenCategories.has(row.category)) {
+      continue;
+    }
+    picked.push(row);
+    seenCategories.add(row.category);
+  }
+  for (const row of candidates) {
+    if (picked.length >= 6) {
+      break;
+    }
+    if (!picked.includes(row)) {
+      picked.push(row);
+    }
+  }
+  return picked;
+}
+
+function renderHomeTaskExamples() {
+  const container = byId("home-task-examples");
+  if (!container) {
+    return;
+  }
+  const rows = state.payloads.tasks?.rows || [];
+  const examples = selectHomeTaskExamples(rows);
+  container.replaceChildren(
+    ...examples.map((row) => {
+      const anchor = make("a", "task-example-card");
+      anchor.href = taskHref(row);
+      const meta = make("div", "task-example-meta");
+      meta.append(pill(row.level, row.level), pill(row.form, row.form), pill(row.difficulty, row.difficulty));
+      anchor.append(
+        make("span", "news-meta", categoryLabel(row.category)),
+        make("strong", "", row.base_function || row.release_entry_id),
+        make("p", "", `${row.release_entry_id}:${row.form}`),
+        meta,
+        make("span", "text-link table-link", t("taskExampleCta")),
+      );
+      return anchor;
+    }),
+  );
+}
+
 function option(value, label) {
   const element = document.createElement("option");
   element.value = value;
@@ -1416,27 +1624,19 @@ function renderNewsList(id, limit) {
 function renderHome() {
   const summary = state.payloads.summary?.summary || {};
   const model = state.payloads.modelRoster?.summary || {};
-  const backend = state.payloads.summary?.summary || {};
+  const categories = state.payloads.categories?.rows || [];
   const metrics = byId("home-metrics");
   if (metrics) {
     metrics.replaceChildren(
       metricCard(t("metricBenchmarkRows"), number(summary.form_count), t("detailSingleDenominator")),
-      metricCard(t("metricScoredRows"), number(model.scored_model_row_count || summary.scored_form_count), t("detailModelRoster")),
-      metricCard(t("metricFourBackend"), statusLabel(summary.four_backend_status), t("detailCertifiedSurfaces")),
-      metricCard(t("metricMismatch"), number(backend.evas_pass_spectre_fail_count), t("detailAuditedMismatch")),
+      metricCard(t("metricReleaseEntries"), number(summary.entry_count), t("detailFunctionEntries")),
+      metricCard(t("metricCategories"), number(categories.length), t("detailFunctionFamilies")),
+      metricCard(t("connectedModels"), number(connectedModelCount() || model.connected_model_count || 0), t("detailConnectedModels")),
     );
   }
-  const preview = byId("home-leaderboard-preview");
-  if (preview) {
-    const panel = make("div", "empty-state");
-    panel.append(
-      pill("pending", t("noVerifiedRuns")),
-      make("p", "", t("noVerifiedRunsDetail")),
-      make("a", "text-link", t("homePrimaryAction")),
-    );
-    panel.querySelector("a").href = "run-model-eval.html";
-    preview.replaceChildren(panel);
-  }
+  renderHomeScorePlot();
+  renderHomeLeaderboardPreview();
+  renderHomeTaskExamples();
   renderNewsList("home-news-list", 3);
 }
 
