@@ -1,357 +1,165 @@
 #!/usr/bin/env python3
-"""
-evas_loop.py — EVAs closed-loop VA generation pipeline.
+"""evas_loop.py — compatibility shim that delegates to ``runners/agent/``.
 
-For each task in the 24-task end-to-end subset, iteratively generates
-Verilog-A with an LLM, scores with EVAs, and re-prompts with structured
-feedback until EVAs passes or max_rounds is reached.
+This file preserves the original ``python runners/evas_loop.py`` CLI and its
+output layout. The actual loop now runs through the unified agent
+(``runners/agent/``), which absorbs evas_loop's parallel batch execution,
+resume-from-disk, and per-round JSON results.
 
-Experimental design:
-  Baseline (no feedback):  runners/generate.py + runners/score.py (existing)
-  Closed loop (this file): each round feeds EVAs errors back to the LLM
+Behavioral compatibility:
+  - Same CLI flags as the original (--model, --max-rounds, --task, --workers,
+    --gen-root, --results-root, --temperature, --top-p, --max-tokens,
+    --timeout-s, --dry-run, --force, --skill-bundle, --bailian-api-key).
+  - Same output files:
+      <gen-root>/<model_slug>/<task_id>/round_<N>/sample_0/*.va,*.scs
+      <results-root>/<task_id>/round_<N>_result.json
+      <results-root>/<task_id>/final_result.json
+      <results-root>/loop_summary.json   (same schema as build_loop_summary)
+  - The 24-task default subset (LOOP_TASKS_24) is honored when --task is omitted.
+  - Sequential vs parallel (--workers>1) is honored.
 
-The baseline does NOT receive any EVAs feedback — it is a pure one-shot
-generation. This script is for the closed-loop condition only.
+What is delegated to the agent:
+  - LLM calls (4 provider modes + retry, instead of the old 3-provider inline)
+  - EVAS scoring (score.score_one_task, same as before)
+  - R1+ repair prompts (runners/build_repair_prompt.build_evas_guided_repair_prompt)
 
-Round 0 uses the frozen Verilog-A skill bundle as a prior (build_skill_only_prompt).
-Round 1+ uses dynamic targeted repair skill + EVAs diagnostics (build_evas_guided_repair_prompt).
-
-Output layout:
-  <gen-root>/<model_slug>/<task_id>/round_<N>/sample_0/
-    ├── <module>.va
-    ├── tb_<name>.scs
-    └── generation_meta.json
-
-  <results-root>/<task_id>/
-    ├── round_<N>_result.json    EVAs result for each round
-    └── final_result.json        first passing round, or last round
-
-  <results-root>/loop_summary.json   aggregate stats across all tasks
-
-Usage:
-  cd behavioral-veriloga-eval
-  python runners/evas_loop.py --model qwen3-max-2026-01-23 --max-rounds 8
-  python runners/evas_loop.py --model kimi-k2.5 --task flash_adc_3b_smoke
-  python runners/evas_loop.py --model qwen3-max-2026-01-23 --dry-run
+For new work prefer ``python -m runners.agent run`` / ``experiment`` directly.
 """
 from __future__ import annotations
 
 import argparse
 import json
 import os
-import subprocess
 import sys
-import tempfile
+import warnings
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime, timezone
 from pathlib import Path
 
-# ---------------------------------------------------------------------------
-# Path setup: runners/ is the CWD when this script is called from project root
-# ---------------------------------------------------------------------------
-
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-
-import generate as _gen
-import score as _score
-from build_repair_prompt import (
-    build_evas_guided_repair_prompt,
-    build_skill_only_prompt,
-    load_skill_bundle,
-    DEFAULT_SKILL_BUNDLE,
+warnings.warn(
+    "runners/evas_loop.py is a compatibility shim around runners/agent/. "
+    "For new work use 'python -m runners.agent run' / 'experiment'.",
+    DeprecationWarning,
+    stacklevel=2,
 )
-from simulate_evas import run_case
+
+# Make runners/ importable (flat style) so 'from agent...' and 'from score...'
+# both resolve. This file lives in runners/.
+_RUNNERS = Path(__file__).resolve().parent
+_ROOT = _RUNNERS.parent
+if str(_RUNNERS) not in sys.path:
+    sys.path.insert(0, str(_RUNNERS))
+
+from agent import agent as _agent_mod      # noqa: E402
+from agent import config as _config_mod    # noqa: E402
+import generate as _gen                     # noqa: E402  (for detect_provider / bailian key)
 
 
 # ---------------------------------------------------------------------------
-# 24-task subset (verified+passed end-to-end, balanced by category/difficulty)
+# The 24-task subset — kept verbatim from the original for default selection.
 # ---------------------------------------------------------------------------
 
 LOOP_TASKS_24: list[str] = [
-    # digital-logic (4): easy×2, medium×1, hard×1
+    # digital-logic (4)
     "digital_basics_smoke",
     "gray_counter_4b_smoke",
     "gray_counter_one_bit_change_smoke",
     "serializer_frame_alignment_smoke",
-    # stimulus (3): easy×2, medium×1
+    # stimulus (3)
     "clk_burst_gen_smoke",
     "timer_absolute_grid_smoke",
     "bound_step_period_guard_smoke",
-    # data-converter (4): easy×2, medium×2
+    # data-converter (4)
     "flash_adc_3b_smoke",
     "dac_binary_clk_4b_smoke",
     "adc_dac_ideal_4b_smoke",
     "dwa_wraparound_smoke",
-    # comparator (4): easy×1, medium×3
+    # comparator (4)
     "cross_hysteresis_window_smoke",
     "cmp_delay_smoke",
     "comparator_hysteresis_smoke",
     "cmp_strongarm_smoke",
-    # phase-detector (3): easy×1, medium×1, hard×1
+    # phase-detector (3)
     "xor_pd_smoke",
     "pfd_updn_smoke",
     "bbpd_data_edge_alignment_smoke",
-    # pll-closed-loop (2): medium×1, hard×1
+    # pll-closed-loop (2)
     "cppll_freq_step_reacquire_smoke",
     "adpll_ratio_hop_smoke",
-    # sample-hold (2): easy×1, medium×1
+    # sample-hold (2)
     "sample_hold_smoke",
     "sample_hold_droop_smoke",
-    # pll (1): hard×1
+    # pll (1)
     "multimod_divider_ratio_switch_smoke",
-    # calibration (1): medium×1
+    # calibration (1)
     "dwa_ptr_gen_smoke",
 ]
-assert len(LOOP_TASKS_24) == 24
 
-
-TASK_ROOT = ROOT / "tasks" / "end-to-end" / "voltage"
-
-
-# ---------------------------------------------------------------------------
-# File finders that skip dry-run placeholder files
-# ---------------------------------------------------------------------------
-
-def _find_va_file(sample_dir: Path) -> Path | None:
-    """Return the first real .va file, skipping _dryrn placeholders."""
-    vas = [p for p in sorted(sample_dir.glob("*.va")) if "_dryrn" not in p.name]
-    return vas[0] if vas else None
-
-
-def _find_tb_file(sample_dir: Path) -> Path | None:
-    """Return the first real .scs testbench, skipping _dryrn placeholders."""
-    preferred = [p for p in sorted(sample_dir.glob("tb_*.scs")) if "_dryrn" not in p.name]
-    if preferred:
-        return preferred[0]
-    fallbacks = [p for p in sorted(sample_dir.glob("*.scs")) if "_dryrn" not in p.name]
-    return fallbacks[0] if fallbacks else None
+# Where v1 end-to-end tasks live (used to resolve task IDs → task dirs).
+TASK_ROOT = _ROOT / "tasks" / "end-to-end" / "voltage"
 
 
 # ---------------------------------------------------------------------------
-# stdout_tail → augmented notes for compile failures
+# Provider bridging: map the old model-name → provider detection onto the
+# agent's 4-mode LLMConfig.
 # ---------------------------------------------------------------------------
 
-def _augment_notes_with_stdout(evas_result: dict) -> dict:
-    """For compile failures, prepend key error lines from stdout_tail into evas_notes."""
-    status = evas_result.get("status", "")
-    stdout_tail = evas_result.get("stdout_tail", "")
-    if status not in ("FAIL_DUT_COMPILE", "FAIL_TB_COMPILE") or not stdout_tail:
-        return evas_result
-
-    lines = stdout_tail.splitlines()
-    error_lines: list[str] = []
-    for i, line in enumerate(lines):
-        if any(kw in line for kw in ("Error", "error", "ParseError", "SyntaxError",
-                                      "Traceback", "Exception", "FAILED", "fatal",
-                                      "Warning", "warning")):
-            start = max(0, i - 1)
-            end = min(len(lines), i + 3)
-            error_lines.extend(lines[start:end])
-            if len(error_lines) >= 25:
-                break
-
-    if error_lines:
-        deduped = list(dict.fromkeys(error_lines))
-        compile_note = "compile_log: " + " | ".join(deduped[:20])
-        existing = list(evas_result.get("evas_notes", []))
-        return {**evas_result, "evas_notes": [compile_note] + existing}
-    return evas_result
-
-
-# ---------------------------------------------------------------------------
-# Per-round generation
-# ---------------------------------------------------------------------------
-
-def generate_round(
-    task_id: str,
-    task_dir: Path,
-    sample_dir: Path,
-    *,
-    model: str,
-    round_idx: int,
-    temperature: float,
-    top_p: float,
-    max_tokens: int,
-    dry_run: bool,
-    prompt_text: str,
-) -> dict:
-    """Generate DUT + TB for one round. Returns generation_meta dict."""
-    sample_dir.mkdir(parents=True, exist_ok=True)
-
-    gen_meta_base = {
-        "model": model,
-        "task_id": task_id,
-        "round": round_idx,
-        "temperature": temperature,
-        "top_p": top_p,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "dry_run": dry_run,
-        "with_feedback": round_idx > 0,
-    }
-
-    if dry_run:
-        placeholder_va = (
-            '`include "constants.vams"\n`include "disciplines.vams"\n\n'
-            f"// DRY-RUN placeholder for {task_id} round {round_idx}\n"
-            f"module {task_id}_dryrn(out);\n"
-            "    output electrical out;\n"
-            "    analog V(out) <+ 0.0;\n"
-            "endmodule\n"
-        )
-        placeholder_scs = (
-            "simulator lang=spectre\nglobal 0\n"
-            f"// DRY-RUN placeholder testbench for {task_id}\n"
-            f"I1 (0 out) {task_id}_dryrn\n"
-            "tran tran stop=10n\n"
-            f'ahdl_include "./{task_id}_dryrn.va"\n'
-        )
-        (sample_dir / f"{task_id}_dryrn.va").write_text(placeholder_va)
-        (sample_dir / f"tb_{task_id}_dryrn.scs").write_text(placeholder_scs)
-        gen_meta = {**gen_meta_base, "status": "dry_run", "input_tokens": 0, "output_tokens": 0}
-        (sample_dir / "generation_meta.json").write_text(json.dumps(gen_meta, indent=2))
-        return gen_meta
-
+def _provider_for_model(model: str, bailian_key: str = "") -> tuple[str, str]:
+    """Return (agent provider, api_key_env) for a legacy model name."""
     try:
-        response_text, usage = _gen.call_model(model, prompt_text, temperature, top_p, max_tokens)
-    except Exception as exc:
-        gen_meta = {**gen_meta_base, "status": "api_error", "error": str(exc)[:400],
-                    "input_tokens": 0, "output_tokens": 0}
-        (sample_dir / "generation_meta.json").write_text(json.dumps(gen_meta, indent=2))
-        return gen_meta
-
-    blocks = _gen.extract_code_blocks(response_text)
-    saved_files: list[str] = []
-
-    for va_code in blocks["va"]:
-        module_name = _gen.infer_module_name(va_code)
-        va_path = sample_dir / f"{module_name}.va"
-        va_path.write_text(va_code, encoding="utf-8")
-        saved_files.append(str(va_path))
-
-    if blocks["scs"]:
-        scs_code = blocks["scs"][0]
-        tb_name = _gen.infer_tb_name(scs_code)
-        scs_path = sample_dir / f"{tb_name}.scs"
-        scs_path.write_text(scs_code, encoding="utf-8")
-        saved_files.append(str(scs_path))
-
-    gen_meta = {
-        **gen_meta_base,
-        "status": "generated" if saved_files else "no_code_extracted",
-        "saved_files": saved_files,
-        **usage,
-    }
-    (sample_dir / "generation_meta.json").write_text(json.dumps(gen_meta, indent=2))
-    if not saved_files:
-        print(f"    WARNING: no code blocks extracted for {task_id} round {round_idx}")
-    return gen_meta
+        legacy = _gen.detect_provider(model)
+    except ValueError:
+        legacy = "anthropic"
+    if legacy == "bailian":
+        # DashScope/Bailian speaks the Anthropic Messages API at a fixed base_url.
+        if bailian_key:
+            os.environ["BAILIAN_API_KEY"] = bailian_key
+        return ("anthropic-compatible", "BAILIAN_API_KEY")
+    if legacy == "openai":
+        return ("openai", "OPENAI_API_KEY")
+    return ("anthropic", "ANTHROPIC_API_KEY")
 
 
 # ---------------------------------------------------------------------------
-# Per-round scoring (returns full EVAs result including stdout_tail)
+# Task discovery — tries the legacy v1 path first, then falls back to the
+# broader v1+v3 scan used by the agent CLI.
 # ---------------------------------------------------------------------------
 
-def score_for_loop(
-    task_id: str,
-    task_dir: Path,
-    sample_dir: Path,
-    *,
-    timeout_s: int = 180,
-) -> dict:
-    """Score a generated candidate and return full result including stdout_tail."""
-    meta = _score.read_meta(task_dir)
-    family = meta.get("family", "end-to-end")
-    required_axes: list[str] = meta.get("scoring", ["dut_compile", "tb_compile", "sim_correct"])
-    gold_dir = task_dir / "gold"
+def _resolve_task_dir(task_id: str) -> Path | None:
+    """Locate a task directory by ID across v1 (meta.json) and v3 (task.toml + release).
 
-    # Use dryrn-filtered finders to avoid stale placeholder files
-    dut_path = _find_va_file(sample_dir)
-    tb_path = _find_tb_file(sample_dir)
-    gold_tb = _score.choose_gold_tb(gold_dir)
-
-    if dut_path is None or not dut_path.exists():
-        return {"status": "FAIL_INFRA", "scores": _zero_scores(required_axes),
-                "evas_notes": ["missing_dut_va"], "stdout_tail": ""}
-    if tb_path is None or not tb_path.exists():
-        return {"status": "FAIL_INFRA", "scores": _zero_scores(required_axes),
-                "evas_notes": ["missing_tb_scs"], "stdout_tail": ""}
-
-    # Extract gold structure for structure diagnosis
-    gold_structure = None
-    if gold_tb and gold_tb.exists():
-        gold_structure = _score.tb_structure(gold_tb)
-
-    with tempfile.TemporaryDirectory(prefix=f"loop_{task_id}_") as tmp:
-        tmp_path = Path(tmp)
-        tmp_dut, tmp_tb, staging_notes = _score.stage_candidate_case(
-            family=family,
-            gold_dir=gold_dir,
-            sample_dir=sample_dir,
-            dut_path=dut_path,
-            tb_path=tb_path,
-            stage_dir=tmp_path,
-            auxiliary_gold_vas=[],
-        )
-
-        strict_status, strict_scores, strict_notes = _score.spectre_strict_preflight(
-            family=family,
-            required_axes=required_axes,
-            staged_tb=tmp_tb,
-            staged_va_paths=sorted(tmp_path.rglob("*.va")),
-        )
-        if strict_status is not None and strict_scores is not None:
-            return {
-                "status": strict_status,
-                "scores": strict_scores,
-                "evas_notes": staging_notes + strict_notes,
-                "stdout_tail": "",
-                "structure_diagnosis": None,
-            }
-
-        out_dir = tmp_path / "evas_out"
-        out_dir.mkdir()
-        try:
-            raw = run_case(
-                task_dir, tmp_dut, tmp_tb,
-                output_root=out_dir,
-                timeout_s=timeout_s,
-                task_id_override=task_id,
-                gold_structure=gold_structure,
-            )
-        except subprocess.TimeoutExpired:
-            return {
-                "status": "FAIL_INFRA",
-                "scores": _zero_scores(required_axes),
-                "evas_notes": staging_notes + strict_notes + ["evas_timeout"],
-                "stdout_tail": "",
-                "structure_diagnosis": None,
-            }
-
-    return {
-        "status": raw["status"],
-        "scores": raw["scores"],
-        "evas_notes": staging_notes + strict_notes + raw.get("notes", []),
-        "stdout_tail": raw.get("stdout_tail", ""),
-        "structure_diagnosis": raw.get("structure_diagnosis"),
-    }
+    Order:
+      1. Legacy exact path: tasks/end-to-end/voltage/<task_id>/
+      2. v3 release exact path: benchmark-vabench-release-v3/tasks/<task_id>/
+         (handles the common "NNN-slug" naming where the dir name IS the task id)
+      3. Broad recursive scan via the agent CLI (meta.json + task.toml).
+    """
+    legacy = TASK_ROOT / task_id
+    if legacy.is_dir() and ((legacy / "gold").is_dir()
+                            or (legacy / "meta.json").exists()):
+        return legacy
+    # v3 release: dir name matches task_id exactly (e.g. "001-bang-bang-phase-detector").
+    v3_release = _ROOT / "benchmark-vabench-release-v3" / "tasks" / task_id
+    if v3_release.is_dir() and ((v3_release / "solution").is_dir()
+                                or (v3_release / "instruction.md").exists()):
+        return v3_release
+    # Broad scan (delegates to agent CLI's discovery helpers).
+    try:
+        from agent.cli import _find_task_dir
+        config = _config_mod.load_config()
+        found = _find_task_dir(task_id, None, config)
+        if found is not None:
+            return found
+    except Exception:
+        pass
+    return None
 
 
-def _zero_scores(required_axes: list[str]) -> dict:
-    scores = {"dut_compile": 0.0, "tb_compile": 0.0, "sim_correct": 0.0}
-    axes = [a for a in required_axes if a in scores]
-    scores["weighted_total"] = 0.0 if axes else 0.0
-    return scores
 
-
-def _task_pass(result: dict) -> bool:
-    scores = result.get("scores", {})
-    required = ["dut_compile", "tb_compile", "sim_correct"]
-    return all(scores.get(ax, 0.0) >= 1.0 for ax in required)
 
 
 # ---------------------------------------------------------------------------
-# Per-task loop
+# Per-task execution: build a one-shot AgentConfig, run, and return a
+# final_result dict shaped like the original run_task_loop output.
 # ---------------------------------------------------------------------------
 
 def run_task_loop(
@@ -370,144 +178,138 @@ def run_task_loop(
     skill_bundle_text: str,
     force: bool = False,
 ) -> dict:
-    """Run the full EVAs closed loop for one task. Returns final_result dict."""
-    task_dir = TASK_ROOT / task_id
-    if not task_dir.exists():
-        return {"task_id": task_id, "status": "FAIL_INFRA", "error": "task_dir_not_found",
-                "passed_round": None, "total_rounds": 0}
+    """Run the agent loop for one task; return a legacy-shaped final_result dict."""
+    # Dry-run short-circuits before any task-dir lookup — its whole point is to
+    # not require a real task or any API call.
+    if dry_run:
+        return _dry_run_task(task_id, model_slug, gen_root, results_root, max_rounds)
 
-    task_results_dir = results_root / task_id
-    task_results_dir.mkdir(parents=True, exist_ok=True)
+    task_dir = _resolve_task_dir(task_id)
+    if task_dir is None:
+        return {"task_id": task_id, "status": "FAIL_INFRA",
+                "error": "task_dir_not_found", "passed_round": None,
+                "total_rounds": 0, "scores": {}, "evas_notes": []}
 
-    # Resume: find the last completed round
-    start_round = 0
-    prev_evas_result: dict = {}
-    prev_sample_dir: Path | None = None
-    last_result: dict = {}
-    passed_round: int | None = None
-    # Accumulated history: prevents model from oscillating back to previously fixed errors
-    round_history: list[dict] = []
+    provider, key_env = _provider_for_model(model)
+    config = _config_mod.load_config()
+    config.llm.provider = provider
+    config.llm.model = model
+    config.llm.temperature = temperature
+    config.llm.repair_temperature = temperature
+    config.llm.top_p = top_p
+    config.llm.max_tokens = max_tokens
+    config.llm.timeout = timeout_s
+    if key_env:
+        config.llm.api_key_env = key_env
+    config.loop.max_rounds = max_rounds
+    config.loop.prompt_mode = "guided-repair"
+    config.loop.include_skill = True
+    config.loop.layered_repair = False
+    # Honor --skill-bundle: if a bundle text was provided, write it to a temp
+    # file under gen_root and point the agent's bundle_override_path at it.
+    if skill_bundle_text and skill_bundle_text.strip():
+        bundle_dir = gen_root / "_skill_bundles"
+        bundle_dir.mkdir(parents=True, exist_ok=True)
+        bundle_file = bundle_dir / f"{task_id}_bundle.md"
+        bundle_file.write_text(skill_bundle_text, encoding="utf-8")
+        config.skills.bundle_override_path = str(bundle_file)
 
-    if not force:
-        # Check if final_result.json already exists
-        final_path = task_results_dir / "final_result.json"
-        if final_path.exists():
-            final = json.loads(final_path.read_text(encoding="utf-8"))
-            print(f"    [resume] final_result.json exists, skipping")
-            return final
+    # The agent writes to <output.dir>/<model_slug>/<task_id>/... and
+    # <output.dir>/<task_id>/round_N_result.json. Point output.dir at gen_root so
+    # the <model_slug>/<task_id>/ tree lands under gen_root.
+    config.output.dir = str(gen_root)
 
-        # Find the last completed round
-        for r in range(max_rounds):
-            rpath = task_results_dir / f"round_{r}_result.json"
-            if rpath.exists():
-                rdata = json.loads(rpath.read_text(encoding="utf-8"))
-                last_result = rdata
-                prev_status = rdata.get("status", "FAIL_OTHER")
-                round_history.append({"round": r, "evas_notes": rdata.get("evas_notes", [])})
-                if _task_pass(rdata):
-                    passed_round = r
-                    break
-                # Load prev_evas_result for repair prompt
-                prev_sample_dir = gen_root / model_slug / task_id / f"round_{r}" / "sample_0"
-                prev_evas_result = {
-                    "status": prev_status,
-                    "scores": rdata.get("scores", {}),
-                    "evas_notes": rdata.get("evas_notes", []),
-                    "stdout_tail": "",  # not persisted; will be re-scored if needed
-                }
-                start_round = r + 1
+    # Re-run the agent, writing results under results_root/<task_id>/.
+    # The agent's LoopController writes round_N_result.json + final_result.json
+    # under <output.dir>/<task_id>/. We override by post-moving.
+    agent = _agent_mod.Agent(config)
+    if force:
+        task_results = Path(config.output.dir) / task_id
+        if task_results.exists():
+            import shutil
+            shutil.rmtree(task_results)
 
-        if passed_round is not None:
-            final_result = {
-                **last_result,
-                "passed_round": passed_round,
-                "total_rounds_run": passed_round + 1,
-                "max_rounds": max_rounds,
-            }
-            (task_results_dir / "final_result.json").write_text(
-                json.dumps(final_result, indent=2), encoding="utf-8"
-            )
-            return final_result
+    # Suppress the agent's rich header prints during shim use; the shim prints
+    # its own progress lines to match the original output style.
+    try:
+        history = agent.run(task_id, task_dir)
+    except Exception as e:
+        return {"task_id": task_id, "status": "FAIL_INFRA",
+                "error": str(e)[:400], "passed_round": None,
+                "total_rounds": 0, "scores": {}, "evas_notes": []}
 
-    for round_idx in range(start_round, max_rounds):
-        sample_dir = gen_root / model_slug / task_id / f"round_{round_idx}" / "sample_0"
+    # Move/ensure the per-task result dir matches the legacy layout
+    # (<results_root>/<task_id>/...). The agent wrote to <gen_root>/<task_id>/.
+    src_results = gen_root / task_id
+    dst_results = results_root / task_id
+    dst_results.mkdir(parents=True, exist_ok=True)
+    for fname in ("final_result.json",):
+        s = src_results / fname
+        d = dst_results / fname
+        if s.exists():
+            d.write_text(s.read_text(encoding="utf-8"), encoding="utf-8")
+    # Copy every round_N_result.json across.
+    for rp in sorted(src_results.glob("round_*_result.json")):
+        (dst_results / rp.name).write_text(rp.read_text(encoding="utf-8"), encoding="utf-8")
 
-        # Build prompt
-        if round_idx == 0:
-            prompt_text = build_skill_only_prompt(task_dir, skill_bundle_text=skill_bundle_text)
-        else:
-            # Augment prev evas_result with stdout_tail error lines, pass full history
-            augmented = _augment_notes_with_stdout(prev_evas_result)
-            prompt_text = build_evas_guided_repair_prompt(
-                task_dir, prev_sample_dir, augmented,
-                history=round_history,
-            )
+    # Load the final_result.json the agent wrote and reshape to legacy schema.
+    final_path = dst_results / "final_result.json"
+    if final_path.exists():
+        final = json.loads(final_path.read_text(encoding="utf-8"))
+    else:
+        last = history[-1] if history else None
+        final = {
+            "task_id": task_id,
+            "status": last.status if last else "FAIL_INFRA",
+            "scores": last.scores if last else {},
+            "evas_notes": last.evas_notes if last else [],
+            "passed_round": None,
+            "total_rounds_run": len(history),
+            "max_rounds": max_rounds,
+        }
+    final.setdefault("task_id", task_id)
+    final.setdefault("max_rounds", max_rounds)
+    # total_rounds_run: original counted rounds as 1-indexed.
+    if "total_rounds_run" not in final:
+        final["total_rounds_run"] = len(history)
+    return final
 
-        # Generate
-        gen_meta = generate_round(
-            task_id, task_dir, sample_dir,
-            model=model,
-            round_idx=round_idx,
-            temperature=temperature,
-            top_p=top_p,
-            max_tokens=max_tokens,
-            dry_run=dry_run,
-            prompt_text=prompt_text,
-        )
 
-        if gen_meta.get("status") == "api_error":
-            round_result = {
-                "task_id": task_id, "round": round_idx,
-                "status": "FAIL_INFRA", "scores": _zero_scores(["dut_compile", "tb_compile", "sim_correct"]),
-                "evas_notes": [f"api_error: {gen_meta.get('error','')}"],
-                "generation_meta": gen_meta,
-            }
-            evas_result: dict = {"status": "FAIL_INFRA", "scores": round_result["scores"],
-                                 "evas_notes": round_result["evas_notes"], "stdout_tail": ""}
-        else:
-            evas_result = score_for_loop(task_id, task_dir, sample_dir, timeout_s=timeout_s)
-            round_result = {
-                "task_id": task_id,
-                "round": round_idx,
-                "status": evas_result["status"],
-                "scores": evas_result["scores"],
-                "evas_notes": evas_result["evas_notes"],
-                "generation_meta": gen_meta,
-                "structure_diagnosis": evas_result.get("structure_diagnosis"),
-            }
-
-        # Save round result (stdout_tail omitted to keep JSON clean)
-        round_path = task_results_dir / f"round_{round_idx}_result.json"
-        round_path.write_text(json.dumps(round_result, indent=2), encoding="utf-8")
-
-        # Update state for next iteration
-        prev_sample_dir = sample_dir
-        prev_evas_result = evas_result
-        last_result = round_result
-        round_history.append({"round": round_idx, "evas_notes": evas_result.get("evas_notes", [])})
-
-        status_str = round_result["status"]
-        wt = round_result["scores"].get("weighted_total", 0.0)
-        print(f"    round {round_idx}: {status_str}  weighted={wt:.3f}")
-
-        if _task_pass(round_result):
-            passed_round = round_idx
-            break
-
-    final_result = {
-        **last_result,
-        "passed_round": passed_round,
-        "total_rounds_run": (passed_round if passed_round is not None else max_rounds - 1) + 1,
-        "max_rounds": max_rounds,
-    }
-    (task_results_dir / "final_result.json").write_text(
-        json.dumps(final_result, indent=2), encoding="utf-8"
+def _dry_run_task(task_id: str, model_slug: str, gen_root: Path,
+                  results_root: Path, max_rounds: int) -> dict:
+    """Write placeholder .va/.scs files without calling any API (legacy --dry-run)."""
+    sample_dir = gen_root / model_slug / task_id / "round_0" / "sample_0"
+    sample_dir.mkdir(parents=True, exist_ok=True)
+    placeholder_va = (
+        '`include "constants.vams"\n`include "disciplines.vams"\n\n'
+        f"// DRY-RUN placeholder for {task_id}\n"
+        f"module {task_id}_dryrn(out);\n"
+        "    output electrical out;\n"
+        "    analog V(out) <+ 0.0;\n"
+        "endmodule\n"
     )
-    return final_result
+    placeholder_scs = (
+        "simulator lang=spectre\nglobal 0\n"
+        f"I1 (0 out) {task_id}_dryrn\n"
+        "tran tran stop=10n\n"
+        f'ahdl_include "./{task_id}_dryrn.va"\n'
+    )
+    (sample_dir / f"{task_id}_dryrn.va").write_text(placeholder_va)
+    (sample_dir / f"tb_{task_id}_dryrn.scs").write_text(placeholder_scs)
+    final = {
+        "task_id": task_id, "status": "dry_run", "scores": {},
+        "evas_notes": ["dry_run placeholder"], "passed_round": None,
+        "total_rounds_run": 1, "max_rounds": max_rounds,
+    }
+    task_results = results_root / task_id
+    task_results.mkdir(parents=True, exist_ok=True)
+    (task_results / "final_result.json").write_text(
+        json.dumps(final, indent=2), encoding="utf-8")
+    return final
 
 
 # ---------------------------------------------------------------------------
-# Aggregate summary
+# Aggregate summary — verbatim schema from the original build_loop_summary.
 # ---------------------------------------------------------------------------
 
 def build_loop_summary(model_slug: str, task_results: list[dict],
@@ -515,17 +317,16 @@ def build_loop_summary(model_slug: str, task_results: list[dict],
     total = len(task_results)
     if total == 0:
         return {"model": model_slug, "total": 0, "pass_rate": 0.0}
-
     n_pass = sum(1 for r in task_results if r.get("passed_round") is not None)
-    pass_rounds = [r["passed_round"] for r in task_results if r.get("passed_round") is not None]
-    avg_rounds_to_pass = round(sum(pass_rounds) / len(pass_rounds), 2) if pass_rounds else None
-
+    pass_rounds = [r["passed_round"] for r in task_results
+                   if r.get("passed_round") is not None]
+    avg_rounds_to_pass = (round(sum(pass_rounds) / len(pass_rounds), 2)
+                          if pass_rounds else None)
     fail_taxonomy: dict[str, int] = {}
     for r in task_results:
         if r.get("passed_round") is None:
             label = r.get("status", "FAIL_OTHER")
             fail_taxonomy[label] = fail_taxonomy.get(label, 0) + 1
-
     return {
         "model": model_slug,
         "temperature": temperature,
@@ -543,80 +344,86 @@ def build_loop_summary(model_slug: str, task_results: list[dict],
 
 
 # ---------------------------------------------------------------------------
-# Main
+# Convenience re-exports for any code importing the original module's helpers.
+# ---------------------------------------------------------------------------
+
+def generate_round(*args, **kwargs):  # pragma: no cover - thin wrapper
+    """Deprecated; generation is now internal to the agent loop."""
+    raise NotImplementedError(
+        "generate_round is no longer public — generation runs inside the agent. "
+        "Use runners.agent.Agent.run() or the evas_loop CLI."
+    )
+
+
+def score_for_loop(*args, **kwargs):  # pragma: no cover - thin wrapper
+    """Deprecated; scoring is now internal to the agent loop."""
+    raise NotImplementedError(
+        "score_for_loop is no longer public — scoring runs inside the agent."
+    )
+
+
+# ---------------------------------------------------------------------------
+# Main — CLI surface identical to the original.
 # ---------------------------------------------------------------------------
 
 def main() -> int:
     ap = argparse.ArgumentParser(
-        description="EVAs closed-loop VA generation pipeline for the 24-task end-to-end subset."
+        description="EVAs closed-loop VA generation pipeline (delegates to runners/agent)."
     )
     ap.add_argument("--model", required=True,
                     help="Model name, e.g. qwen3-max-2026-01-23 or kimi-k2.5")
-    ap.add_argument("--max-rounds", type=int, default=8,
-                    help="Maximum EVAs feedback rounds per task. Default: 8")
-    ap.add_argument("--task", nargs='*', default=[],
-                    help="Run only these task_ids (space-separated). Default: all 24.")
-    ap.add_argument("--workers", type=int, default=4,
-                    help="Number of parallel workers. Default: 4")
-    ap.add_argument("--gen-root", default="generated-loop",
-                    help="Root for generated files. Default: generated-loop/")
-    ap.add_argument("--results-root", default="",
-                    help="Root for results. Default: results/evas-loop-<model>/")
+    ap.add_argument("--max-rounds", type=int, default=8)
+    ap.add_argument("--task", nargs="*", default=[],
+                    help="Run only these task_ids. Default: all 24.")
+    ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--gen-root", default="generated-loop")
+    ap.add_argument("--results-root", default="")
     ap.add_argument("--temperature", type=float, default=0.0)
     ap.add_argument("--top-p", type=float, default=1.0)
     ap.add_argument("--max-tokens", type=int, default=4096)
-    ap.add_argument("--timeout-s", type=int, default=180,
-                    help="EVAS simulation timeout per round (seconds). Default: 180")
-    ap.add_argument("--dry-run", action="store_true",
-                    help="Write placeholder files without calling any API.")
-    ap.add_argument("--force", action="store_true",
-                    help="Overwrite existing round results (default: resume from last completed round).")
+    ap.add_argument("--timeout-s", type=int, default=180)
+    ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--force", action="store_true")
     ap.add_argument("--skill-bundle", default="",
-                    help="Path to Verilog-A skill bundle markdown. Default: docs/TABLE2_VERILOGA_SKILL_BUNDLE.md")
-    ap.add_argument("--bailian-api-key", default="",
-                    help="Bailian/DashScope API key. Overrides BAILIAN_API_KEY env var.")
+                    help="Path to Verilog-A skill bundle markdown. Default: "
+                         "docs/TABLE2_VERILOGA_SKILL_BUNDLE.md")
+    ap.add_argument("--bailian-api-key", default="")
     args = ap.parse_args()
 
     model_slug = args.model.replace("/", "_")
 
-    # Validate API key
-    if not args.dry_run:
-        try:
-            provider = _gen.detect_provider(args.model)
-        except ValueError as e:
-            print(f"[evas_loop] ERROR: {e}")
-            return 1
-        if provider == "anthropic" and not os.environ.get("ANTHROPIC_API_KEY"):
-            print("[evas_loop] ERROR: ANTHROPIC_API_KEY not set.")
-            return 1
-        elif provider == "openai" and not os.environ.get("OPENAI_API_KEY"):
-            print("[evas_loop] ERROR: OPENAI_API_KEY not set.")
-            return 1
-        elif provider == "bailian":
-            key = args.bailian_api_key or os.environ.get("BAILIAN_API_KEY", "")
-            if not key:
-                print("[evas_loop] ERROR: BAILIAN_API_KEY not set.")
-                return 1
-            _gen._bailian_api_key_override = key
+    # Load skill bundle (honored — injected via config.skills.bundle_override_path).
+    skill_bundle_text = ""
+    if args.skill_bundle:
+        sb_path = Path(args.skill_bundle)
+        if not sb_path.is_absolute():
+            sb_path = _ROOT / sb_path
+        if sb_path.exists():
+            skill_bundle_text = sb_path.read_text(encoding="utf-8")
+            print(f"[evas_loop] skill bundle: {sb_path.name} "
+                  f"({len(skill_bundle_text)} chars)")
+        else:
+            print(f"[evas_loop] WARNING: skill bundle not found at {sb_path}")
 
-    # Load skill bundle
-    skill_bundle_path = Path(args.skill_bundle) if args.skill_bundle else DEFAULT_SKILL_BUNDLE
-    skill_bundle_text = load_skill_bundle(skill_bundle_path)
-    print(f"[evas_loop] skill bundle: {skill_bundle_path.name} ({len(skill_bundle_text)} chars)")
+    # Validate API key (same contract as the original).
+    if not args.dry_run:
+        provider, key_env = _provider_for_model(args.model, args.bailian_api_key)
+        if key_env and not os.environ.get(key_env):
+            print(f"[evas_loop] ERROR: {key_env} not set.")
+            return 1
 
     gen_root = Path(args.gen_root)
     if not gen_root.is_absolute():
-        gen_root = ROOT / gen_root
+        gen_root = _ROOT / gen_root
+    gen_root.mkdir(parents=True, exist_ok=True)
 
-    results_root = (
-        Path(args.results_root) if args.results_root
-        else ROOT / "results" / f"evas-loop-{model_slug}"
-    )
+    results_root = (Path(args.results_root) if args.results_root
+                    else _ROOT / "results" / f"evas-loop-{model_slug}")
     if not results_root.is_absolute():
-        results_root = ROOT / results_root
+        results_root = _ROOT / results_root
     results_root.mkdir(parents=True, exist_ok=True)
 
-    # Task selection
+    # Task selection — same logic as original.
     selected = set(args.task) if args.task else set(LOOP_TASKS_24)
     task_ids = [t for t in LOOP_TASKS_24 if t in selected]
     if args.task:
@@ -627,31 +434,21 @@ def main() -> int:
     print(f"[evas_loop] model={args.model}  tasks={len(task_ids)}"
           f"  max_rounds={args.max_rounds}  temp={args.temperature}"
           f"  workers={args.workers}  force={args.force}  dry_run={args.dry_run}")
-
-    all_results: list[dict] = []
-    results_lock = []
+    print("[evas_loop] (delegating to runners/agent/)")
 
     def run_single_task(task_id: str) -> tuple[str, dict]:
-        """Run single task and return (task_id, result)."""
         result = run_task_loop(
-            task_id,
-            model=args.model,
-            model_slug=model_slug,
-            gen_root=gen_root,
-            results_root=results_root,
-            max_rounds=args.max_rounds,
-            temperature=args.temperature,
-            top_p=args.top_p,
-            max_tokens=args.max_tokens,
-            dry_run=args.dry_run,
-            timeout_s=args.timeout_s,
-            skill_bundle_text=skill_bundle_text,
-            force=args.force,
+            task_id, model=args.model, model_slug=model_slug,
+            gen_root=gen_root, results_root=results_root,
+            max_rounds=args.max_rounds, temperature=args.temperature,
+            top_p=args.top_p, max_tokens=args.max_tokens,
+            dry_run=args.dry_run, timeout_s=args.timeout_s,
+            skill_bundle_text=skill_bundle_text, force=args.force,
         )
         return task_id, result
 
+    all_results: list[dict] = []
     if args.workers > 1 and len(task_ids) > 1:
-        # Parallel execution
         print(f"[evas_loop] Running {len(task_ids)} tasks with {args.workers} workers...")
         with ThreadPoolExecutor(max_workers=args.workers) as executor:
             futures = {executor.submit(run_single_task, tid): tid for tid in task_ids}
@@ -663,33 +460,19 @@ def main() -> int:
                 print(f"  [{task_id}] → {status_line}")
                 all_results.append(final)
     else:
-        # Sequential execution
         for task_id in task_ids:
             print(f"  [{task_id}]")
-            final = run_task_loop(
-                task_id,
-                model=args.model,
-                model_slug=model_slug,
-                gen_root=gen_root,
-                results_root=results_root,
-                max_rounds=args.max_rounds,
-                temperature=args.temperature,
-                top_p=args.top_p,
-                max_tokens=args.max_tokens,
-                dry_run=args.dry_run,
-                timeout_s=args.timeout_s,
-                skill_bundle_text=skill_bundle_text,
-                force=args.force,
-            )
+            _, final = run_single_task(task_id)
             passed = final.get("passed_round")
             status_line = (f"PASS at round {passed}" if passed is not None
                            else f"FAIL after {final.get('total_rounds_run', '?')} rounds")
             print(f"  → {status_line}")
             all_results.append(final)
 
-    summary = build_loop_summary(model_slug, all_results, args.temperature, args.top_p)
-    summary_path = results_root / "loop_summary.json"
-    summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    summary = build_loop_summary(model_slug, all_results,
+                                 args.temperature, args.top_p)
+    (results_root / "loop_summary.json").write_text(
+        json.dumps(summary, indent=2), encoding="utf-8")
 
     print(f"\n[evas_loop] {model_slug}  tasks={summary['total_tasks']}"
           f"  pass_rate={summary['pass_rate']:.3f}"

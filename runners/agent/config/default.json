@@ -1,0 +1,35 @@
+{
+  "llm": {
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-6",
+    "temperature": 0.0,
+    "repair_temperature": 0.3,
+    "max_tokens": 4096,
+    "top_p": 1.0,
+    "timeout": 120,
+    "base_url": "",
+    "api_key_env": ""
+  },
+  "paths": {
+    "veriloga_skills": "../../../veriloga-skills",
+    "behavioral_eval": "../.."
+  },
+  "loop": {
+    "max_rounds": 8,
+    "stall_limit": 2,
+    "regress_limit": 2,
+    "prompt_mode": "guided-repair",
+    "include_skill": true,
+    "layered_repair": false
+  },
+  "skills": {
+    "enabled": true,
+    "max_chars": 3000,
+    "categories_dir": "../veriloga-skills/veriloga/references/categories"
+  },
+  "output": {
+    "dir": "./output",
+    "save_artifacts": true,
+    "save_prompts": true
+  }
+}

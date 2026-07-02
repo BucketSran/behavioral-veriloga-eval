@@ -969,6 +969,9 @@ def score_one_task(
         "generation_meta": gen_meta,
         "evas_notes": evas_result.get("notes", []),
         "evas_timing": evas_result.get("timing", {}),
+        # Pass through run_case's stdout_tail so callers (e.g. the agent's
+        # _augment_notes_with_stdout) can surface compiler errors in repair prompts.
+        "stdout_tail": evas_result.get("stdout_tail", ""),
     }
     result["evas_notes"] = staging_notes + result["evas_notes"]
     _save_result(result, output_dir)
