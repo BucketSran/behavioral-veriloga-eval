@@ -32,7 +32,7 @@ Implement:
 
 - `freq_q = center_freq + vco_gain * V(vin)`
 - `phase_q = idtmod(freq_q, 0.0, 1.0)` (modulo-1 phase accumulator)
-- `out = vco_amp * sin(M_TWO_PI * phase_q)` (unipolar sine, ranges `0 V` to `vco_amp`)
+- `out = vco_amp * sin(M_TWO_PI * phase_q)` (bipolar sine, ranges `-vco_amp` to `+vco_amp`)
 - `metric = vco_amp * phase_q` (voltage-coded instantaneous wrapped phase, `0 V` to `vco_amp`)
 - call `$bound_step(1.0 / (vco_ppc * freq_q))` every step so the sine is resolved
   with at least `vco_ppc` timepoints per cycle

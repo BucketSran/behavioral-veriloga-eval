@@ -32,11 +32,11 @@
     "why_wrong": "Differential VCO With Clip And Idtmod: flips the dFdV sign so the frequency moves the wrong way with the differential control and the reintegrated phase diverges."
   },
   {
-    "id": "neg_005_single_ended_output",
+    "id": "neg_005_no_clip",
     "files": [
-      "neg_005_single_ended_output/differential_vco_clip_idtmod.va"
+      "neg_005_no_clip/differential_vco_clip_idtmod.va"
     ],
     "expected": "compile_but_fail_full_behavior",
-    "why_wrong": "Differential VCO With Clip And Idtmod: drives both arms with the same polarity so outp and outm no longer bracket the common mode symmetrically."
+    "why_wrong": "Differential VCO With Clip And Idtmod: keeps the clip( macro textually present but applies it to the constant Fnom, leaving the signal-path frequency unclamped. Under the hidden deck the raw frequency exceeds Fmax so the reintegrating checker (which clamps to 80 MHz) diverges."
   }
 ]

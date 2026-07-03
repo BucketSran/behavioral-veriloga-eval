@@ -8,7 +8,7 @@
         "neg_001_zero/fracn_pll_timer_ref.va"
       ],
       "expected": "compile_but_fail_full_behavior",
-      "description": "Fractional-N Divider Accumulator Flow: keeps all outputs at the low rail so there is no DCO, feedback, lock, or control behavior."
+      "description": "Fractional-N Divider Accumulator Flow: hardcodes all outputs to zero so there are no fb edges and the edge-count checks fail."
     },
     {
       "id": "neg_002_lock_stuck_high",
@@ -16,7 +16,7 @@
         "neg_002_lock_stuck_high/fracn_pll_timer_ref.va"
       ],
       "expected": "compile_but_fail_full_behavior",
-      "description": "Fractional-N Divider Accumulator Flow: generates the clocks but drives lock high continuously so the disturbance and reacquire behavior is missing."
+      "description": "Fractional-N Divider Accumulator Flow: drives lock high unconditionally so it never drops during the reference disturbance and the disturb-low fraction check fails."
     },
     {
       "id": "neg_003_wrong_integer_divider",
@@ -24,7 +24,7 @@
         "neg_003_wrong_integer_divider/fracn_pll_timer_ref.va"
       ],
       "expected": "compile_but_fail_full_behavior",
-      "description": "Fractional-N Divider Accumulator Flow: uses the wrong base integer divider so the late-window feedback cadence cannot track the reference."
+      "description": "Fractional-N Divider Accumulator Flow: compares div_cnt >= div_target+1 so the integer divide is one too large and the late fb cadence diverges."
     },
     {
       "id": "neg_004_no_loop_correction",
@@ -32,15 +32,15 @@
         "neg_004_no_loop_correction/fracn_pll_timer_ref.va"
       ],
       "expected": "compile_but_fail_full_behavior",
-      "description": "Fractional-N Divider Accumulator Flow: keeps the control voltage fixed instead of correcting after the reference frequency step."
+      "description": "Fractional-N Divider Accumulator Flow: resets vctrl to init on every ref edge so the loop never corrects and vctrl does not move during reacquire."
     },
     {
-      "id": "neg_005_vctrl_out_of_range",
+      "id": "neg_005_wrong_fraction_word",
       "files": [
-        "neg_005_vctrl_out_of_range/fracn_pll_timer_ref.va"
+        "neg_005_wrong_fraction_word/fracn_pll_timer_ref.va"
       ],
       "expected": "compile_but_fail_full_behavior",
-      "description": "Fractional-N Divider Accumulator Flow: reports a control-voltage monitor outside the supply rails while otherwise preserving most clock behavior."
+      "description": "Fractional-N Divider Accumulator Flow: overrides frac_word_eff to a different legal fraction word (6 instead of 3) so the effective average ratio shifts from div_int - 3/acc_modulus to div_int - 6/acc_modulus; the late-window DCO-to-fb divide ratio no longer matches the expected 7.625 and the fractional-ratio checker fails."
     }
   ]
 }

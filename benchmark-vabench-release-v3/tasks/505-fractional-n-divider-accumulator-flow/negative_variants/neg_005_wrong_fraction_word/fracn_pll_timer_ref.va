@@ -52,6 +52,8 @@ module fracn_pll_timer_ref (
     integer acc;          // fractional accumulator
     integer lock_state;
     integer lock_streak;
+    integer frac_word_eff; // frac_word clamped to [0, acc_modulus) so the documented
+                           // average ratio div_int - frac_word/acc_modulus stays valid
 
     analog begin
         vh = V(VDD);
@@ -60,6 +62,21 @@ module fracn_pll_timer_ref (
         vth = 0.5 * (vh + vl);
 
         @(initial_step) begin
+            // The effective average divide ratio is documented as
+            // div_int - frac_word/acc_modulus, which only holds for
+            // 0 <= frac_word < acc_modulus. Clamp out-of-range overrides so the
+            // swallow-one-per-overflow pattern cannot saturate the accumulator.
+            frac_word_eff = frac_word;
+            if (frac_word_eff < 0) frac_word_eff = 0;
+            if (frac_word_eff >= acc_modulus) frac_word_eff = acc_modulus - 1;
+            // neg_005_wrong_fraction_word: override the dither pattern to a
+            // different legal fraction word (6 instead of 3) so the effective
+            // average ratio shifts from div_int - 3/acc_modulus to
+            // div_int - 6/acc_modulus. The accumulator now swallows twice as
+            // often, the late-window DCO-to-fb divide ratio no longer matches
+            // the expected div_int - frac_word/acc_modulus, and the
+            // fractional-ratio checker fails.
+            frac_word_eff = 6;
             t_ref_prev = -1.0;
             t_ref_last = -1.0;
             t_fb_last = -1.0;
@@ -120,7 +137,7 @@ module fracn_pll_timer_ref (
                     fb_state = 1 - fb_state;
                     // Advance the fractional accumulator; on overflow swallow one
                     // DCO cycle next time (effective divider div_int-1).
-                    acc = acc + frac_word;
+                    acc = acc + frac_word_eff;
                     if (acc >= acc_modulus) begin
                         acc = acc - acc_modulus;
                         div_target = div_int - 1;
@@ -143,7 +160,7 @@ module fracn_pll_timer_ref (
 
         V(dco_clk) <+ vl + (vh - vl) * transition(dco_state ? 1.0 : 0.0, 0.0, tedge, tedge);
         V(fb_clk) <+ vl + (vh - vl) * transition(fb_state ? 1.0 : 0.0, 0.0, tedge, tedge);
-        V(vctrl_mon) <+ 5.0 * vctrl;
+        V(vctrl_mon) <+ vctrl;
         V(lock) <+ vl + (vh - vl) * transition(lock_state ? 1.0 : 0.0, 0.0, tedge, tedge);
     end
 

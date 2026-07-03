@@ -50,6 +50,8 @@ module fracn_pll_timer_ref (
     integer div_cnt;
     integer div_target;   // effective divider this cycle (dithered by accumulator)
     integer acc;          // fractional accumulator
+    integer frac_word_eff; // frac_word clamped to [0, acc_modulus) so the documented
+                           // average ratio div_int - frac_word/acc_modulus stays valid
     integer lock_state;
     integer lock_streak;
 
@@ -71,6 +73,13 @@ module fracn_pll_timer_ref (
             if (vctrl > vh) vctrl = vh;
             dco_state = 0;
             fb_state = 0;
+            // Clamp frac_word into [0, acc_modulus) so the documented average
+            // ratio div_int - frac_word/acc_modulus stays valid even for illegal
+            // overrides (the swallow-one-per-overflow pattern would otherwise
+            // saturate the accumulator when frac_word >= acc_modulus).
+            frac_word_eff = frac_word;
+            if (frac_word_eff < 0) frac_word_eff = 0;
+            if (frac_word_eff >= acc_modulus) frac_word_eff = acc_modulus - 1;
             div_cnt = 0;
             acc = 0;
             div_target = div_int;
@@ -120,7 +129,7 @@ module fracn_pll_timer_ref (
                     fb_state = 1 - fb_state;
                     // Advance the fractional accumulator; on overflow swallow one
                     // DCO cycle next time (effective divider div_int-1).
-                    acc = acc + frac_word;
+                    acc = acc + frac_word_eff;
                     if (acc >= acc_modulus) begin
                         acc = acc - acc_modulus;
                         div_target = div_int - 1;

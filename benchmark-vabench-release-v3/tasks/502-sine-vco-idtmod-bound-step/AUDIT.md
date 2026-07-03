@@ -11,9 +11,11 @@ plus a `$bound_step()` points-per-cycle limit.
 Recast from the Cadence example
 `BehavModelVAMS_M08_Operation/.solutions/VCO1.va` (VCO1 sine oscillator). The
 original uses an offset sine `vco_amp + vco_amp*sin(...)`; this recast drops the
-DC offset so the output is a unipolar `vco_amp*sin(2*pi*phase_q)` and adds a
-voltage-coded wrapped-phase `metric` observable for calibration. The structural
-`I()`/RC form of the loop is not used here; this is the oscillator-only model.
+DC offset so the output is a bipolar `vco_amp*sin(2*pi*phase_q)` ranging
+`-vco_amp` to `+vco_amp`, and adds a voltage-coded wrapped-phase `metric`
+observable for calibration. The checker, gold, and all negatives are bipolar
+and consistent. The structural `I()`/RC form of the loop is not used here; this
+is the oscillator-only model.
 Dropped `I()`/device instantiations per the v3 PLL-category voltage-domain
 contract (`must_not_include: I(, ddt(, idt(`).
 

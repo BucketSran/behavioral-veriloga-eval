@@ -12927,15 +12927,16 @@
       - negative_variants/neg_002_drive_metric_zero/differential_vco_clip_idtmod.va
       - negative_variants/neg_003_wrong_phase_modulus/differential_vco_clip_idtmod.va
       - negative_variants/neg_004_gain_sign_flipped/differential_vco_clip_idtmod.va
-      - negative_variants/neg_005_single_ended_output/differential_vco_clip_idtmod.va
+      - negative_variants/neg_005_no_clip/differential_vco_clip_idtmod.va
     checks:
       - outp_tracks_reintegrated_phase
       - outm_tracks_inverted_reintegrated_phase
       - metric_tracks_wrapped_phase_voltage
       - differential_inputs_set_frequency
+      - frequency_clamped_to_Fmin_Fmax_band
       - no_current_domain_contribution
   notes:
-    - "PLL differential VCO recast from Cadence VCO_ams.vams; voltage-domain idtmod differential oscillator with a clip macro and frequency clamp."
+    - "PLL differential VCO recast from Cadence VCO_ams.vams; voltage-domain idtmod differential oscillator with a clip macro and frequency clamp. The hidden deck drives the differential input past Fmax (raw 100 MHz) so the clamp is exercised behaviorally; neg_005_no_clip removes the clamp from the signal path to fail that coverage."
 504-charge-pump-pfd-state-machine: |
   # vabench-release-v2-checks
   version: 1
@@ -13007,11 +13008,12 @@
       - negative_variants/neg_002_lock_stuck_high/fracn_pll_timer_ref.va
       - negative_variants/neg_003_wrong_integer_divider/fracn_pll_timer_ref.va
       - negative_variants/neg_004_no_loop_correction/fracn_pll_timer_ref.va
-      - negative_variants/neg_005_vctrl_out_of_range/fracn_pll_timer_ref.va
+      - negative_variants/neg_005_wrong_fraction_word/fracn_pll_timer_ref.va
     checks:
       - fracn_reacquires_after_reference_step
       - late_window_tracks_new_reference
+      - late_window_dco_to_fb_divide_ratio_matches_fractional_average
       - vctrl_stays_bounded
       - vctrl_changes_during_reacquire
   notes:
-    - "Fractional-N PLL system flow; closes the v1-proposed vbr11_l2_fractional_n_pll_divider_flow gap. Modeled after 097 CPPLL with a dithering fractional accumulator. Spectre-verified."
+    - "Fractional-N PLL system flow; closes the v1-proposed vbr11_l2_fractional_n_pll_divider_flow gap. Modeled after 097 CPPLL with a dithering fractional accumulator. The late-window DCO-to-fb divide ratio is checked against the documented effective average div_int - frac_word/acc_modulus so a wrong fraction word fails behaviorally (neg_005_wrong_fraction_word)."

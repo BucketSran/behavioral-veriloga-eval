@@ -10657,6 +10657,34 @@ def check_v3_505_fractional_n_divider_accumulator_flow(rows: list[dict[str, floa
         return False, "non_positive_period"
     freq_ratio = ref_period / fb_period
 
+    # Behavioral coverage for the fractional accumulator (reviewer section 3d):
+    # the late-window average DCO-to-fb divide ratio must match the documented
+    # effective ratio div_int - frac_word/acc_modulus. The hidden deck overrides
+    # div_int=8, frac_word=3, acc_modulus=8 -> expected 7.625. This catches a
+    # wrong fraction word directly rather than only via the indirect lock/ratio
+    # checks. dco_clk is in required_columns / the save list.
+    if "dco_clk" in rows[0]:
+        dco_edges = rising_edges([r["dco_clk"] for r in rows], times, threshold=vth)
+        dco_late = [t for t in dco_edges if 4.5e-6 <= t <= 5.9e-6]
+        if len(fb_late) >= 2 and len(dco_late) >= 4:
+            # average DCO rising edges per fb period; -1 on each side accounts for
+            # the open interval at both ends of the late window.
+            measured_divide = (len(dco_late) - 1) / (len(fb_late) - 1)
+            expected_divide = 8.0 - 3.0 / 8.0  # hidden-deck div_int/frac_word/acc_modulus
+            if abs(measured_divide - expected_divide) > 0.35:
+                return False, (
+                    f"fractional_divide_ratio_mismatch measured={measured_divide:.3f} "
+                    f"expected~{expected_divide:.3f}"
+                )
+            divide_ok = True
+            divide_note = f"divide={measured_divide:.3f}"
+        else:
+            divide_ok = False
+            divide_note = f"divide=insufficient_dco={len(dco_late)}"
+    else:
+        divide_ok = True  # cannot measure; do not block (column contract enforced upstream)
+        divide_note = "divide=dco_clk_absent"
+
     lock_edges = rising_edges([r["lock"] for r in rows], times, threshold=vth)
     pre_lock_edges = [t for t in lock_edges if t < 2.0e-6]
     post_lock_edges = [t for t in lock_edges if 2.2e-6 <= t <= 5.9e-6]
@@ -10678,12 +10706,14 @@ def check_v3_505_fractional_n_divider_accumulator_flow(rows: list[dict[str, floa
         and 0.95 <= freq_ratio <= 1.05
         and vctrl_in_range
         and vctrl_span >= 0.02
+        and divide_ok
     )
     return ok, (
         f"pre_lock_edges={len(pre_lock_edges)} "
         f"disturb_lock_low_frac={disturb_low_frac:.3f} "
         f"post_lock_edges={len(post_lock_edges)} "
         f"late_freq_ratio={freq_ratio:.4f} "
+        f"{divide_note} "
         f"vctrl_min={vctrl_min:.3f} vctrl_max={vctrl_max:.3f} vctrl_span={vctrl_span:.3f}"
     )
 

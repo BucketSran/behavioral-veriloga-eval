@@ -1,12 +1,14 @@
 // Hidden testbench for differential_vco_clip_idtmod.
-// V(vinp,vinm)=0.55-0.45=0.10 => freq=20e6+160e6*0.10=36 MHz (~28 ns/cycle).
+// V(vinp,vinm)=0.75-0.25=0.50 => raw freq=20e6+160e6*0.50=100 MHz, which exceeds
+// Fmax=80 MHz and must be clamped to 80 MHz (~12.5 ns/cycle). This exercises the
+// clip macro behaviorally, not just as a syntax must_include.
 simulator lang=spectre
 global 0
 
 ahdl_include "differential_vco_clip_idtmod.va"
 
-Vinp (vinp 0) vsource dc=0.55 type=dc
-Vinm (vinm 0) vsource dc=0.45 type=dc
+Vinp (vinp 0) vsource dc=0.75 type=dc
+Vinm (vinm 0) vsource dc=0.25 type=dc
 
 XDUT (vinp vinm outp outm metric) differential_vco_clip_idtmod
 

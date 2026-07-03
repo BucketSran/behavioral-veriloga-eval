@@ -30,8 +30,8 @@ Support these public parameters and legal overrides:
 | Parameter | Default | Unit / range | Contract |
 | --- | ---: | --- | --- |
 | `div_int` | `8` | integer, `[1:inf)` | Base integer division ratio. |
-| `frac_word` | `3` | integer, `[0:inf)` | Fractional accumulator increment per feedback edge. |
-| `acc_modulus` | `8` | integer, `[1:inf)` | Fractional accumulator modulus; effective average ratio is `div_int - frac_word/acc_modulus`. |
+| `frac_word` | `3` | integer, `[0:acc_modulus)` | Fractional accumulator increment per feedback edge. Must be strictly less than `acc_modulus`; out-of-range overrides are clamped into `[0, acc_modulus)` so the swallow-one-per-overflow pattern stays well-defined. |
+| `acc_modulus` | `8` | integer, `[1:inf)` | Fractional accumulator modulus. The effective average divide ratio is `div_int - frac_word/acc_modulus` (e.g. `8 - 3/8 = 7.625` with the defaults); this only holds for `0 <= frac_word < acc_modulus`. |
 | `f_center` | `800.0e6` | Hz, `(0:inf)` | DCO center frequency at the common-mode control voltage. |
 | `kvco_hz_per_v` | `350.0e6` | Hz/V, `(0:inf)` | DCO frequency sensitivity to `vctrl_mon`. |
 | `f_min` | `300.0e6` | Hz, `(0:inf)` | Lower clamp for generated DCO frequency. |
@@ -52,7 +52,10 @@ Required observable behavior:
 - Generate `fb_clk` by dividing the DCO with an effective ratio that is dithered
   by a fractional accumulator: maintain an accumulator that increments by
   `frac_word` on each feedback edge; on overflow (modulo `acc_modulus`) swallow
-  one DCO cycle so the next divide count is `div_int - 1`, otherwise `div_int`.
+  one DCO cycle so the **next** divide count is `div_int - 1` (the swallow takes
+  effect on the feedback cycle *after* the overflow edge), otherwise `div_int`.
+  The long-run average DCO-to-fb divide ratio is `div_int - frac_word/acc_modulus`
+  and is checked behaviorally in the late window (after the reference step).
 - Update a bounded control-voltage monitor on `vctrl_mon` from the PFD phase
   error (proportional + bounded integral).
 - Drive `lock` high after stable tracking, low or unstable during the

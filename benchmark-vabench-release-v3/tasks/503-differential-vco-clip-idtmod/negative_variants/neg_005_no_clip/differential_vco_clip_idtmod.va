@@ -1,5 +1,8 @@
-// neg_005_single_ended_output: drives both arms with the same polarity instead
-// of a differential pair, so outp and outm no longer bracket Vcm symmetrically.
+// neg_005_no_clip: the `clip(` macro is still defined and still textually present
+// (so the syntax must_include for "clip(" passes), but the frequency is computed
+// from the unclamped raw value. Under the hidden deck V(vinp,vinm)=0.50 the raw
+// frequency is 100 MHz (above Fmax=80 MHz); the reintegrating checker expects the
+// clamped 80 MHz, so both the sine output and the metric diverge and fail.
 `include "constants.vams"
 `include "disciplines.vams"
 
@@ -23,10 +26,13 @@ module differential_vco_clip_idtmod (
     real phase_q;
 
     analog begin
-        freq_q = `clip(Fnom + dFdV * V(vinp, vinm), Fmin, Fmax);
+        // Macro is referenced (keeps must_include "clip(" satisfied) but the
+        // clamp is applied to the constant Fnom, leaving the signal path
+        // unclamped. freq_q therefore follows the raw Fnom + dFdV*V(vinp,vinm).
+        freq_q = `clip(Fnom, Fmin, Fmax) + dFdV * V(vinp, vinm);
         phase_q = idtmod(freq_q, 0.0, 1.0);
         V(outp) <+ Vcm + Vac * sin(`M_TWO_PI * phase_q);
-        V(outm) <+ Vcm + Vac * sin(`M_TWO_PI * phase_q);
+        V(outm) <+ Vcm - Vac * sin(`M_TWO_PI * phase_q);
         V(metric) <+ 0.9 * phase_q;
     end
 endmodule
