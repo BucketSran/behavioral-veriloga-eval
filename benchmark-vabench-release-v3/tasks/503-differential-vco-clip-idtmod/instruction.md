@@ -54,12 +54,15 @@ Public parameters and legal overrides:
 | `Vcm` | `0.45` | V | Common-mode output center voltage. |
 | `Vac` | `0.4` | V, `(0:inf)` | Per-arm sine amplitude. |
 
-The hidden testbench holds `V(vinp)` and `V(vinm)` constant so the differential
-control is a fixed offset; the output is a pure differential sine whose
-frequency is set by the clipped frequency. The evaluator re-integrates the
-phase from the differential input and checks that `outp` and `outm` bracket
-`Vcm` symmetrically around `Vcm + Vac*sin(...)` and `Vcm - Vac*sin(...)`, and
-that `metric` follows `0.9*phase_q`.
+The verification harness may exercise constant differential-control windows in
+which `V(vinp)` and `V(vinm)` are held fixed, so the output is a pure
+differential sine whose frequency is the clipped value of
+`Fnom + dFdV * V(vinp, vinm)`. Over any such window the candidate outputs are
+expected to bracket `Vcm` symmetrically — `outp = Vcm + Vac*sin(M_TWO_PI*phase_q)`
+and `outm = Vcm - Vac*sin(M_TWO_PI*phase_q)` — and `metric` to track
+`0.9*phase_q`, where `phase_q` is the modulo-1 phase accumulator above. The
+clamp must take effect whenever the unclipped frequency would fall outside
+`[Fmin, Fmax]`.
 
 ## Output
 

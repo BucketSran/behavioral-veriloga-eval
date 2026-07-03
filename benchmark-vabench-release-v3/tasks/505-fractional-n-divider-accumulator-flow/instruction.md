@@ -19,7 +19,7 @@ module fracn_pll_timer_ref (
 ## Required Behavior
 
 This task asks for the `fracn_pll_timer_ref` behavioral module, not a Spectre
-testbench. The evaluator supplies a reference-step clock source and instantiates
+testbench. The harness supplies a reference-step clock source and instantiates
 your module in a fractional-N PLL tracking/reacquire scenario.
 
 This is a behavioral continuous-time task. Do not use `I(...)`, `ddt(...)`, or
@@ -60,14 +60,24 @@ Required observable behavior:
 
 Use voltage-coded logic with a mid-supply decision threshold where applicable,
 drive high logic outputs near `VDD` and low outputs near `VSS`. Keep the model
-pure behavioral Verilog-A. Do not use transistor-level devices, AC/noise
-analysis, checker logic, or private test hooks.
+pure behavioral Verilog-A. Do not use transistor-level devices or AC/noise
+analysis.
 
-The supplied reference-step support clock uses public defaults
-`period_pre = 20 ns`, `period_post = 19.5 ns`, `t_switch = 2 us`, and
-`tedge = 100 ps`. That support source is not the candidate implementation, but
-the fractional-N model must work when the harness supplies a legal nearby
-reference cadence.
+## Support clock (`ref_step_clk.va`)
 
-Only the target artifact is graded as the candidate implementation; companion
-support files are supplied by the harness for this task.
+This task supplies a companion support artifact `ref_step_clk.va` that generates
+the reference clock with a frequency step; the harness authors it and you do
+not. Its public contract is:
+
+```verilog
+module ref_step_clk (inout VDD, inout VSS, output CLK);
+    parameter real period_pre  = 20n   from (0:inf);
+    parameter real period_post = 19.5n from (0:inf);
+    parameter real t_switch    = 2u    from (0:inf);
+    parameter real tedge       = 100p  from (0:inf);
+endmodule
+```
+
+`CLK` is a square wave swinging `VSS..VDD` whose half-period is `0.5*period_pre`
+before `t_switch` and `0.5*period_post` afterwards. The candidate DUT must
+operate correctly for any legal overrides with `period_pre != period_post`.

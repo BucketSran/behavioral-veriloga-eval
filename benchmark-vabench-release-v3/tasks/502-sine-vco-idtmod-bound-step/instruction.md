@@ -46,10 +46,12 @@ Public parameters and legal overrides:
 | `vco_amp` | `0.9` | V, `(0:inf)` | Sine and metric peak amplitude. |
 | `vco_ppc` | `40` | integer, `[4:inf)` | Minimum points per output cycle enforced via `$bound_step`. |
 
-The hidden testbench holds `V(vin)` constant over each measurement window so the
-output is a pure sine whose frequency is set by `center_freq + vco_gain * V(vin)`.
-The evaluator re-integrates the phase from `V(vin)` and checks that `out` follows
-`vco_amp * sin(M_TWO_PI * phase_q)` and that `metric` follows `vco_amp * phase_q`.
+The verification harness may exercise constant-control measurement windows in
+which `V(vin)` is held fixed, so the output is a pure sine whose frequency is
+set by `center_freq + vco_gain * V(vin)`. Over any such window the candidate
+output is expected to track `vco_amp * sin(M_TWO_PI * phase_q)` and `metric` to
+track `vco_amp * phase_q`, where `phase_q` is the modulo-1 phase accumulator
+above.
 
 ## Output
 

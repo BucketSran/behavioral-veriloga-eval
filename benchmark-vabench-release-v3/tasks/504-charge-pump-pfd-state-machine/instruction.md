@@ -63,14 +63,32 @@ Public parameters and legal overrides:
 | `metric_mid` | `0.45` | V | Metric voltage for state `0`. |
 | `metric_hi` | `0.8` | V | Metric voltage for state `+1`. |
 
-The hidden testbench drives `ref` and `fb` as same-frequency square waves with a
-fixed phase offset, so the detector state repeatedly takes a consistent sign and
-the control voltage ramps monotonically toward the corresponding rail. The
-evaluator checks that `vctrl` moves in the direction implied by the lead/lag
-relation and that `metric` reports the detector state polarity.
+The verification harness drives `ref` and `fb` as same-frequency clock waves with
+a fixed phase offset, so the detector state repeatedly takes a consistent sign
+and the control voltage ramps monotonically toward the corresponding rail.
+Over such a window `vctrl` is expected to move in the direction implied by the
+lead/lag relation (reference leading feedback ramps toward `vctrl_max`;
+feedback leading reference ramps toward `vctrl_min`) and `metric` is expected to
+report the detector-state polarity.
 
-The evaluator supplies a companion support artifact `ref_fb_clk.va` that
-generates the two phase-offset clock waves; you do not author it.
+## Support clock (`ref_fb_clk.va`)
+
+This task supplies a companion support artifact `ref_fb_clk.va` that generates
+the two phase-offset clock waves; the harness authors it and you do not. Its
+public contract is:
+
+```verilog
+module ref_fb_clk (inout VDD, inout VSS, output ref, output fb);
+    parameter real period      = 200n from (0:inf);
+    parameter real phase_lead  = 20n  from [0:inf);
+    parameter real tedge       = 100p from (0:inf);
+endmodule
+```
+
+`ref` and `fb` are equal-period square waves swinging `VSS..VDD`. `phase_lead >= 0`
+shifts `fb` later than `ref` by that amount (so a positive `phase_lead` means
+**reference leads feedback**). The candidate DUT must operate correctly for any
+legal `phase_lead` override in `[0:inf)`.
 
 ## Output
 
