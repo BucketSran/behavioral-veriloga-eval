@@ -1,0 +1,46 @@
+{
+  "task": "503-differential-vco-clip-idtmod",
+  "negative_count": 5,
+  "cases": [
+    {
+      "id": "neg_001_drive_outputs_zero",
+      "files": [
+        "neg_001_drive_outputs_zero/differential_vco_clip_idtmod.va"
+      ],
+      "expected": "compile_but_fail_full_behavior",
+      "description": "Differential VCO With Clip And Idtmod: keeps the sin() terms but multiplies them by zero so both differential arms are flat at the common mode."
+    },
+    {
+      "id": "neg_002_drive_metric_zero",
+      "files": [
+        "neg_002_drive_metric_zero/differential_vco_clip_idtmod.va"
+      ],
+      "expected": "compile_but_fail_full_behavior",
+      "description": "Differential VCO With Clip And Idtmod: keeps the differential sine but drives the wrapped-phase metric to zero so the metric trace fails."
+    },
+    {
+      "id": "neg_003_wrong_phase_modulus",
+      "files": [
+        "neg_003_wrong_phase_modulus/differential_vco_clip_idtmod.va"
+      ],
+      "expected": "compile_but_fail_full_behavior",
+      "description": "Differential VCO With Clip And Idtmod: uses a 0.5 idtmod modulus so the phase wraps twice per cycle and the sine and metric diverge from the modulo-1 reference."
+    },
+    {
+      "id": "neg_004_gain_sign_flipped",
+      "files": [
+        "neg_004_gain_sign_flipped/differential_vco_clip_idtmod.va"
+      ],
+      "expected": "compile_but_fail_full_behavior",
+      "description": "Differential VCO With Clip And Idtmod: flips the dFdV sign so the frequency moves the wrong way with the differential control and the reintegrated phase diverges."
+    },
+    {
+      "id": "neg_005_single_ended_output",
+      "files": [
+        "neg_005_single_ended_output/differential_vco_clip_idtmod.va"
+      ],
+      "expected": "compile_but_fail_full_behavior",
+      "description": "Differential VCO With Clip And Idtmod: drives both arms with the same polarity so outp and outm no longer bracket the common mode symmetrically."
+    }
+  ]
+}

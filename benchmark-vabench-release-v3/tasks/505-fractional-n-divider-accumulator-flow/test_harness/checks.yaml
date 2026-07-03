@@ -1,0 +1,39 @@
+# vabench-release-v2-checks
+version: 1
+task_id: v3_505_fractional_n_divider_accumulator_flow
+backend: evas
+status: behavior-certified-candidate
+checker:
+  task_id: v3_505_fractional_n_divider_accumulator_flow
+  metric: sampled_fractional_n_divider_accumulator_flow
+required_columns:
+  - time
+  - ref_clk
+  - fb_clk
+  - dco_clk
+  - vctrl_mon
+  - lock
+syntax:
+  must_include:
+    - "@(cross("
+    - "@(timer("
+    - "transition("
+  must_not_include:
+    - "I("
+    - "ddt("
+sim_correct:
+  positive:
+    - solution/fracn_pll_timer_ref.va
+  negative:
+    - negative_variants/neg_001_zero/fracn_pll_timer_ref.va
+    - negative_variants/neg_002_lock_stuck_high/fracn_pll_timer_ref.va
+    - negative_variants/neg_003_wrong_integer_divider/fracn_pll_timer_ref.va
+    - negative_variants/neg_004_no_loop_correction/fracn_pll_timer_ref.va
+    - negative_variants/neg_005_vctrl_out_of_range/fracn_pll_timer_ref.va
+  checks:
+    - fracn_reacquires_after_reference_step
+    - late_window_tracks_new_reference
+    - vctrl_stays_bounded
+    - vctrl_changes_during_reacquire
+notes:
+  - "Fractional-N PLL system flow; closes the v1-proposed vbr11_l2_fractional_n_pll_divider_flow gap. Recast after the 097 CPPLL flow with a dithering fractional accumulator."

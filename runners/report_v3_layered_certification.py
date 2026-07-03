@@ -94,6 +94,11 @@ TIER_TO_LAYER = {
         "compile_supported_kcl_candidate",
         "KCL/current-contribution syntax compiles; MNA/KCL behavior is not certified.",
     ),
+    "behavior-extension-candidate": (
+        "behavioral_language_extension",
+        "compile_supported_candidate",
+        "Behavioral PLL/clock-timing extension candidate; behavior is Spectre-verified on this branch and EVAS parity is pending.",
+    ),
 }
 
 

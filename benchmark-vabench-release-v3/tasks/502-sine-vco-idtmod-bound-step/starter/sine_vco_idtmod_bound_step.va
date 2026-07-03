@@ -1,0 +1,23 @@
+// Starter stub for sine_vco_idtmod_bound_step.
+// Same module signature and parameters as the solution; the analog body is a
+// placeholder that the candidate implementation must replace.
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sine_vco_idtmod_bound_step (
+    input  electrical vin,
+    output electrical out,
+    output electrical metric
+);
+    parameter real center_freq = 20.0e6 from (0:inf);
+    parameter real vco_gain = 40.0e6 exclude 0.0;
+    parameter real vco_amp = 0.9 from (0:inf);
+    parameter integer vco_ppc = 40 from [4:inf);
+
+    analog begin
+        // TODO: implement the idtmod phase integrator, sine output, and $bound_step.
+        V(out) <+ 0.0;
+        V(metric) <+ 0.0;
+    end
+endmodule

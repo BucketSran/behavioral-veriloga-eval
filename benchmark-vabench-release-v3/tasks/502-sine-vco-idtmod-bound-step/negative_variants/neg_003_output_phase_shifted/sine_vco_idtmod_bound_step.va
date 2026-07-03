@@ -1,0 +1,26 @@
+// neg_003_output_phase_shifted: drives out with a quarter-cycle phase shift
+// (cosine instead of sine) so the reintegrated-phase check fails at every sample.
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sine_vco_idtmod_bound_step (
+    input  electrical vin,
+    output electrical out,
+    output electrical metric
+);
+    parameter real center_freq = 20.0e6 from (0:inf);
+    parameter real vco_gain = 40.0e6 exclude 0.0;
+    parameter real vco_amp = 0.9 from (0:inf);
+    parameter integer vco_ppc = 40 from [4:inf);
+
+    real freq_q;
+    real phase_q;
+
+    analog begin
+        freq_q = center_freq + vco_gain * V(vin);
+        phase_q = idtmod(freq_q, 0.0, 1.0);
+        V(out) <+ vco_amp * sin(`M_TWO_PI * phase_q + `M_PI/2.0);
+        V(metric) <+ vco_amp * phase_q;
+        $bound_step(1.0 / (vco_ppc * freq_q));
+    end
+endmodule

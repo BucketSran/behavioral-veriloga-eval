@@ -1,0 +1,14 @@
+// Hidden testbench for differential_vco_clip_idtmod.
+// V(vinp,vinm)=0.55-0.45=0.10 => freq=20e6+160e6*0.10=36 MHz (~28 ns/cycle).
+simulator lang=spectre
+global 0
+
+ahdl_include "differential_vco_clip_idtmod.va"
+
+Vinp (vinp 0) vsource dc=0.55 type=dc
+Vinm (vinm 0) vsource dc=0.45 type=dc
+
+XDUT (vinp vinm outp outm metric) differential_vco_clip_idtmod
+
+tran tran stop=1.5u maxstep=5n
+save vinp vinm outp outm metric

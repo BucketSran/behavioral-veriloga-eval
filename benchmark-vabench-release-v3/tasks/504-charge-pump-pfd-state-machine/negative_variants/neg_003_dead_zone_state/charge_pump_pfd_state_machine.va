@@ -1,0 +1,55 @@
+// neg_003_dead_zone_state: clamps the detector state to 0 (dead zone) so neither
+// ref nor fb edges ever move the control voltage.
+`include "constants.vams"
+`include "disciplines.vams"
+
+module charge_pump_pfd_state_machine (
+    input  electrical ref,
+    input  electrical fb,
+    output electrical vctrl,
+    output electrical metric
+);
+    parameter real vth = 0.45;
+    parameter real tstep = 1.0e-9 from (0:inf);
+    parameter real pump_rate = 60.0e6 from [0:inf);
+    parameter real vctrl_init = 0.45;
+    parameter real vctrl_min = 0.05;
+    parameter real vctrl_max = 0.85;
+    parameter real tedge = 200p from (0:inf);
+    parameter real metric_lo = 0.1;
+    parameter real metric_mid = 0.45;
+    parameter real metric_hi = 0.8;
+
+    integer state_q;
+    real vctrl_q;
+    real metric_q;
+
+    analog begin
+        @(initial_step) begin
+            state_q = 0;
+            vctrl_q = vctrl_init;
+            if (vctrl_q < vctrl_min) vctrl_q = vctrl_min;
+            if (vctrl_q > vctrl_max) vctrl_q = vctrl_max;
+            metric_q = metric_mid;
+        end
+
+        @(cross(V(ref) - vth, +1)) begin
+            // dead zone: never increments.
+        end
+
+        @(cross(V(fb) - vth, +1)) begin
+            // dead zone: never decrements.
+        end
+
+        @(timer(0, tstep)) begin
+            vctrl_q = vctrl_q + state_q * pump_rate * tstep;
+            if (vctrl_q < vctrl_min) vctrl_q = vctrl_min;
+            if (vctrl_q > vctrl_max) vctrl_q = vctrl_max;
+        end
+
+        metric_q = (state_q < 0) ? metric_lo : (state_q > 0) ? metric_hi : metric_mid;
+
+        V(vctrl) <+ transition(vctrl_q, 0.0, tedge, tedge);
+        V(metric) <+ transition(metric_q, 0.0, tedge, tedge);
+    end
+endmodule

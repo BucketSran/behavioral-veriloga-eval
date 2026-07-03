@@ -1,0 +1,46 @@
+{
+  "task": "505-fractional-n-divider-accumulator-flow",
+  "negative_count": 5,
+  "cases": [
+    {
+      "id": "neg_001_zero",
+      "files": [
+        "neg_001_zero/fracn_pll_timer_ref.va"
+      ],
+      "expected": "compile_but_fail_full_behavior",
+      "description": "Fractional-N Divider Accumulator Flow: keeps all outputs at the low rail so there is no DCO, feedback, lock, or control behavior."
+    },
+    {
+      "id": "neg_002_lock_stuck_high",
+      "files": [
+        "neg_002_lock_stuck_high/fracn_pll_timer_ref.va"
+      ],
+      "expected": "compile_but_fail_full_behavior",
+      "description": "Fractional-N Divider Accumulator Flow: generates the clocks but drives lock high continuously so the disturbance and reacquire behavior is missing."
+    },
+    {
+      "id": "neg_003_wrong_integer_divider",
+      "files": [
+        "neg_003_wrong_integer_divider/fracn_pll_timer_ref.va"
+      ],
+      "expected": "compile_but_fail_full_behavior",
+      "description": "Fractional-N Divider Accumulator Flow: uses the wrong base integer divider so the late-window feedback cadence cannot track the reference."
+    },
+    {
+      "id": "neg_004_no_loop_correction",
+      "files": [
+        "neg_004_no_loop_correction/fracn_pll_timer_ref.va"
+      ],
+      "expected": "compile_but_fail_full_behavior",
+      "description": "Fractional-N Divider Accumulator Flow: keeps the control voltage fixed instead of correcting after the reference frequency step."
+    },
+    {
+      "id": "neg_005_vctrl_out_of_range",
+      "files": [
+        "neg_005_vctrl_out_of_range/fracn_pll_timer_ref.va"
+      ],
+      "expected": "compile_but_fail_full_behavior",
+      "description": "Fractional-N Divider Accumulator Flow: reports a control-voltage monitor outside the supply rails while otherwise preserving most clock behavior."
+    }
+  ]
+}

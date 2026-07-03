@@ -1,0 +1,17 @@
+// Visible smoke testbench for charge_pump_pfd_state_machine.
+// ref_fb_clk drives fb leading ref by 30 ns (both 4 MHz squares => period=250n):
+// the detector state goes negative and vctrl ramps down.
+simulator lang=spectre
+global 0
+
+ahdl_include "ref_fb_clk.va"
+ahdl_include "charge_pump_pfd_state_machine.va"
+
+VDD (VDD 0) vsource dc=0.9 type=dc
+VSS (VSS 0) vsource dc=0.0 type=dc
+
+XREF (VDD VSS ref fb) ref_fb_clk period=250n phase_lead=-30n tedge=100p
+XDUT (ref fb vctrl metric) charge_pump_pfd_state_machine
+
+tran tran stop=1.2u maxstep=1n
+save ref fb vctrl metric
