@@ -10662,14 +10662,20 @@ def check_v3_505_fractional_n_divider_accumulator_flow(rows: list[dict[str, floa
     # effective ratio div_int - frac_word/acc_modulus. The hidden deck overrides
     # div_int=8, frac_word=3, acc_modulus=8 -> expected 7.625. This catches a
     # wrong fraction word directly rather than only via the indirect lock/ratio
-    # checks. dco_clk is in required_columns / the save list.
+    # checks. dco_clk is in required_columns / the save list. Note: fb_clk is a
+    # toggle that flips once per div_target DCO rising edges, so one fb *period*
+    # (rising-edge to rising-edge) spans 2 * div_target DCO rising edges; the
+    # documented ratio is per fb *toggle* (half period), so divide by 2.
     if "dco_clk" in rows[0]:
         dco_edges = rising_edges([r["dco_clk"] for r in rows], times, threshold=vth)
         dco_late = [t for t in dco_edges if 4.5e-6 <= t <= 5.9e-6]
         if len(fb_late) >= 2 and len(dco_late) >= 4:
-            # average DCO rising edges per fb period; -1 on each side accounts for
-            # the open interval at both ends of the late window.
-            measured_divide = (len(dco_late) - 1) / (len(fb_late) - 1)
+            # DCO rising edges per fb full period (rising-to-rising); the divider
+            # toggles fb each div_target DCO edges, so a full fb period is
+            # 2 * effective_divider. -1 on each side accounts for the open
+            # interval at both ends of the late window.
+            dco_per_fb_period = (len(dco_late) - 1) / (len(fb_late) - 1)
+            measured_divide = dco_per_fb_period / 2.0
             expected_divide = 8.0 - 3.0 / 8.0  # hidden-deck div_int/frac_word/acc_modulus
             if abs(measured_divide - expected_divide) > 0.35:
                 return False, (

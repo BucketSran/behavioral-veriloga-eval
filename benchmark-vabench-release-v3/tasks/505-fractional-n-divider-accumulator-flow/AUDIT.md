@@ -41,6 +41,12 @@ contributions only, no `I(...)`/`ddt(...)`/`idt(...)`.
 
 ## Certification Status
 
-Verified against **Spectre 21.1 (thu-sui) as ground truth** on this branch:
-gold PASS, all five negatives rejected. EVAS parity is `needs_rerun` (EVAS is
-not the reference; this task was tuned against Spectre).
+Behavior-extension-candidate. Verified against **Spectre 21.1** (ground truth,
+via the thu-sui bridge) and the EVAS Python engine: gold PASS on both; all five
+negatives rejected on both. The checker measures the late-window average
+DCO-to-fb divide ratio against the documented effective average
+`div_int - frac_word/acc_modulus` (hidden deck: 7.625), so `neg_005_wrong_fraction_word`
+(overrides the dither to ratio 7.25) fails behaviorally rather than only via the
+indirect lock/ratio checks. A `frac_word < acc_modulus` guard in the gold clamps
+illegal overrides so the documented average-ratio formula stays well-defined.
+Spectre and EVAS agree.

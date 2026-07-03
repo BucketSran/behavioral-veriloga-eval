@@ -97,7 +97,7 @@ TIER_TO_LAYER = {
     "behavior-extension-candidate": (
         "behavioral_language_extension",
         "compile_supported_candidate",
-        "Behavioral PLL/clock-timing extension candidate; behavior is Spectre-verified on this branch and EVAS parity is pending.",
+        "Behavioral PLL/clock-timing extension candidate; behavior verified against both Spectre 21.1 (ground truth) and the EVAS Python engine (gold PASS + all negatives rejected on both).",
     ),
 }
 

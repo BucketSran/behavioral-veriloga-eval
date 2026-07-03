@@ -38,13 +38,16 @@ contract (`must_not_include: I(, ddt(, idt(`).
   `runners/simulate_evas.py`).
 - Reintegrates phase with the shared `_v3_integrated_mod_phase_values` helper
   (modulus 1.0) and compares the sine/phase observables over a windowed stride.
-- Note: `$bound_step` has no effect on the EVAS Python engine's timestep
-  selection, so this task enforces the construct via the `must_include` syntax
-  guard rather than via a behavioral negative variant. The behavioral
-  negatives (flat output, zero metric, phase shift, gain-sign flip, amplitude
-  halving) all diverge from the reintegrated-phase reference.
+- Note: `$bound_step` is treated as a syntax/modeling contract (it is captured
+  via the `must_include` guard). The EVAS Python engine does not derive its
+  timestep from `$bound_step`, so this task does not claim the behavior checker
+  fully proves the points-per-cycle effect; under Spectre the construct is
+  honored natively. The behavioral negatives (flat output, zero metric, phase
+  shift, gain-sign flip, amplitude halving) all diverge from the
+  reintegrated-phase reference.
 
 ## Certification Status
 
-Syntax-extension-candidate. EVAS behavior check is the reference for this
-branch; Spectre parity is `needs_rerun`.
+Behavior-extension-candidate. Verified against **Spectre 21.1** (ground truth,
+via the thu-sui bridge) and the EVAS Python engine: gold PASS on both; all five
+negatives rejected on both. Spectre and EVAS agree.

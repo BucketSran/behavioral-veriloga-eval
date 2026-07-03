@@ -44,5 +44,10 @@ contribution are dropped per the v3 PLL-category voltage-domain contract.
 
 ## Certification Status
 
-Syntax-extension-candidate. EVAS behavior check is the reference for this
-branch; Spectre parity is `needs_rerun`.
+Behavior-extension-candidate. Verified against **Spectre 21.1** (ground truth,
+via the thu-sui bridge) and the EVAS Python engine: gold PASS on both; all five
+negatives rejected on both. Note: this task relies on a Verilog-A support clock
+(`ref_fb_clk.va`) rather than a Spectre `vsource type=square` stimulus, because
+EVAS did not previously fire `@cross` on square-driven nodes (EVAS defect D1,
+tracked separately in `Arcadia-1/EVAS#68`). Under Spectre both stimulus forms
+work; the support-clock form is used so EVAS and Spectre agree.

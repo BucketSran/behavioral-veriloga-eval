@@ -45,5 +45,9 @@ current-domain form is not used. Voltage contributions only.
 
 ## Certification Status
 
-Syntax-extension-candidate. EVAS behavior check is the reference for this
-branch; Spectre parity is `needs_rerun`.
+Behavior-extension-candidate. Verified against **Spectre 21.1** (ground truth,
+via the thu-sui bridge) and the EVAS Python engine: gold PASS on both; all five
+negatives rejected on both. The hidden deck drives the differential input past
+`Fmax` (raw 100 MHz, clamped to 80 MHz) so the `clip` macro is exercised
+behaviorally, and `neg_005_no_clip` removes the clamp from the signal path to
+fail that coverage. Spectre and EVAS agree.
