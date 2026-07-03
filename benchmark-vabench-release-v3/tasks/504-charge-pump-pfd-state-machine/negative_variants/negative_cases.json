@@ -1,0 +1,42 @@
+[
+  {
+    "id": "neg_001_drive_vctrl_mid",
+    "files": [
+      "neg_001_drive_vctrl_mid/charge_pump_pfd_state_machine.va"
+    ],
+    "expected": "compile_but_fail_full_behavior",
+    "why_wrong": "Charge Pump PFD State Machine: holds vctrl at the initial mid value so it never ramps toward the lead polarity and the late-window rail check fails."
+  },
+  {
+    "id": "neg_002_drive_metric_mid",
+    "files": [
+      "neg_002_drive_metric_mid/charge_pump_pfd_state_machine.va"
+    ],
+    "expected": "compile_but_fail_full_behavior",
+    "why_wrong": "Charge Pump PFD State Machine: keeps the vctrl ramp but reports the detector-state metric stuck at mid so the polarity check fails."
+  },
+  {
+    "id": "neg_003_dead_zone_state",
+    "files": [
+      "neg_003_dead_zone_state/charge_pump_pfd_state_machine.va"
+    ],
+    "expected": "compile_but_fail_full_behavior",
+    "why_wrong": "Charge Pump PFD State Machine: clamps the detector state to zero so edge crossings never move the control voltage and vctrl never reaches the rail."
+  },
+  {
+    "id": "neg_004_gain_sign_flipped",
+    "files": [
+      "neg_004_gain_sign_flipped/charge_pump_pfd_state_machine.va"
+    ],
+    "expected": "compile_but_fail_full_behavior",
+    "why_wrong": "Charge Pump PFD State Machine: integrates the control voltage with the wrong sign so it ramps opposite to the lead/lag relation."
+  },
+  {
+    "id": "neg_005_vctrl_unclamped",
+    "files": [
+      "neg_005_vctrl_unclamped/charge_pump_pfd_state_machine.va"
+    ],
+    "expected": "compile_but_fail_full_behavior",
+    "why_wrong": "Charge Pump PFD State Machine: drops the control-voltage clamps so vctrl rails past the supply bounds under a consistent lead."
+  }
+]

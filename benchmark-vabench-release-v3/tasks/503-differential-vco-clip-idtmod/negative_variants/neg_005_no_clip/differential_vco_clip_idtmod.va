@@ -1,0 +1,38 @@
+// neg_005_no_clip: the `clip(` macro is still defined and still textually present
+// (so the syntax must_include for "clip(" passes), but the frequency is computed
+// from the unclamped raw value. Under the hidden deck V(vinp,vinm)=0.50 the raw
+// frequency is 100 MHz (above Fmax=80 MHz); the reintegrating checker expects the
+// clamped 80 MHz, so both the sine output and the metric diverge and fail.
+`include "constants.vams"
+`include "disciplines.vams"
+
+`define clip(x, LO, HI) ((x < LO) ? LO : (x > HI) ? HI : x)
+
+module differential_vco_clip_idtmod (
+    input  electrical vinp,
+    input  electrical vinm,
+    output electrical outp,
+    output electrical outm,
+    output electrical metric
+);
+    parameter real Fnom = 20.0e6 from (0:inf);
+    parameter real dFdV = 160.0e6 exclude 0.0;
+    parameter real Fmin = 5.0e6 from (0:inf);
+    parameter real Fmax = 80.0e6 from (0:inf);
+    parameter real Vcm = 0.45;
+    parameter real Vac = 0.4 from (0:inf);
+
+    real freq_q;
+    real phase_q;
+
+    analog begin
+        // Macro is referenced (keeps must_include "clip(" satisfied) but the
+        // clamp is applied to the constant Fnom, leaving the signal path
+        // unclamped. freq_q therefore follows the raw Fnom + dFdV*V(vinp,vinm).
+        freq_q = `clip(Fnom, Fmin, Fmax) + dFdV * V(vinp, vinm);
+        phase_q = idtmod(freq_q, 0.0, 1.0);
+        V(outp) <+ Vcm + Vac * sin(`M_TWO_PI * phase_q);
+        V(outm) <+ Vcm - Vac * sin(`M_TWO_PI * phase_q);
+        V(metric) <+ 0.9 * phase_q;
+    end
+endmodule

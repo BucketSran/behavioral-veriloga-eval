@@ -1,0 +1,38 @@
+# vabench-release-v2-checks
+version: 1
+task_id: v3_502_sine_vco_idtmod_bound_step
+backend: evas
+status: behavior-certified-candidate
+checker:
+  task_id: v3_502_sine_vco_idtmod_bound_step
+  metric: sampled_sine_vco_idtmod_bound_step
+required_columns:
+  - time
+  - vin
+  - out
+  - metric
+syntax:
+  must_include:
+    - "idtmod("
+    - "$bound_step("
+    - "sin("
+  must_not_include:
+    - "I("
+    - "ddt("
+sim_correct:
+  positive:
+    - solution/sine_vco_idtmod_bound_step.va
+  negative:
+    - negative_variants/neg_001_drive_out_zero/sine_vco_idtmod_bound_step.va
+    - negative_variants/neg_002_drive_metric_zero/sine_vco_idtmod_bound_step.va
+    - negative_variants/neg_003_output_phase_shifted/sine_vco_idtmod_bound_step.va
+    - negative_variants/neg_004_gain_sign_flipped/sine_vco_idtmod_bound_step.va
+    - negative_variants/neg_005_output_scale_low/sine_vco_idtmod_bound_step.va
+  checks:
+    - sine_out_tracks_reintegrated_phase
+    - metric_tracks_wrapped_phase_voltage
+    - vin_controls_output_frequency
+    - bound_step_enforces_points_per_cycle
+    - no_current_domain_contribution
+notes:
+  - "PLL task recast from Cadence VCO1.va; pure voltage-domain idtmod sine VCO with $bound_step."

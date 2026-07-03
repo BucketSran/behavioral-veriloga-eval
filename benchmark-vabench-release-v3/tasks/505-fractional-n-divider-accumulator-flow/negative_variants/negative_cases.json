@@ -1,0 +1,42 @@
+[
+  {
+    "id": "neg_001_zero",
+    "files": [
+      "neg_001_zero/fracn_pll_timer_ref.va"
+    ],
+    "expected": "compile_but_fail_full_behavior",
+    "why_wrong": "Fractional-N Divider Accumulator Flow: hardcodes all outputs to zero so there are no fb edges and the edge-count checks fail."
+  },
+  {
+    "id": "neg_002_lock_stuck_high",
+    "files": [
+      "neg_002_lock_stuck_high/fracn_pll_timer_ref.va"
+    ],
+    "expected": "compile_but_fail_full_behavior",
+    "why_wrong": "Fractional-N Divider Accumulator Flow: drives lock high unconditionally so it never drops during the reference disturbance and the disturb-low fraction check fails."
+  },
+  {
+    "id": "neg_003_wrong_integer_divider",
+    "files": [
+      "neg_003_wrong_integer_divider/fracn_pll_timer_ref.va"
+    ],
+    "expected": "compile_but_fail_full_behavior",
+    "why_wrong": "Fractional-N Divider Accumulator Flow: compares div_cnt >= div_target+1 so the integer divide is one too large and the late fb cadence diverges."
+  },
+  {
+    "id": "neg_004_no_loop_correction",
+    "files": [
+      "neg_004_no_loop_correction/fracn_pll_timer_ref.va"
+    ],
+    "expected": "compile_but_fail_full_behavior",
+    "why_wrong": "Fractional-N Divider Accumulator Flow: resets vctrl to init on every ref edge so the loop never corrects and vctrl does not move during reacquire."
+  },
+  {
+    "id": "neg_005_wrong_fraction_word",
+    "files": [
+      "neg_005_wrong_fraction_word/fracn_pll_timer_ref.va"
+    ],
+    "expected": "compile_but_fail_full_behavior",
+    "why_wrong": "Fractional-N Divider Accumulator Flow: overrides frac_word_eff to a different legal fraction word (6 instead of 3) so the effective average ratio shifts from div_int - 3/acc_modulus to div_int - 6/acc_modulus; the late-window DCO-to-fb divide ratio no longer matches the expected 7.625 and the fractional-ratio checker fails."
+  }
+]

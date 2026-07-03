@@ -1,0 +1,13 @@
+// Visible smoke testbench for sine_vco_idtmod_bound_step.
+// Constant vin = 0.2 V => freq_q = 20.0e6 + 40.0e6*0.2 = 28 MHz.
+simulator lang=spectre
+global 0
+
+ahdl_include "sine_vco_idtmod_bound_step.va"
+
+Vvin (vin 0) vsource dc=0.2 type=dc
+
+XDUT (vin out metric) sine_vco_idtmod_bound_step
+
+tran tran stop=1.5u maxstep=8n
+save vin out metric

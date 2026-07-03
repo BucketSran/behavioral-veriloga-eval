@@ -1,0 +1,14 @@
+// Hidden testbench for sine_vco_idtmod_bound_step.
+// Constant vin = 0.4 V => freq_q = 20.0e6 + 40.0e6*0.4 = 36 MHz (~14 ns/cycle).
+// maxstep=8n alone would under-resolve; $bound_step(1/(40*36e6))~0.69n enforces 40 pts/cycle.
+simulator lang=spectre
+global 0
+
+ahdl_include "sine_vco_idtmod_bound_step.va"
+
+Vvin (vin 0) vsource dc=0.4 type=dc
+
+XDUT (vin out metric) sine_vco_idtmod_bound_step
+
+tran tran stop=1.5u maxstep=8n
+save vin out metric

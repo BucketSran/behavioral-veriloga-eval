@@ -196,11 +196,19 @@ def v2_checks_syntax_failures(checks_config: dict[str, object], run_dir: Path) -
 
 
 def read_task_artifact_targets(task_dir: Path) -> list[str]:
+    return _read_task_artifact_list(task_dir, "target")
+
+
+def read_task_artifact_supports(task_dir: Path) -> list[str]:
+    return _read_task_artifact_list(task_dir, "support")
+
+
+def _read_task_artifact_list(task_dir: Path, key: str) -> list[str]:
     task_toml = task_dir / "task.toml"
     if not task_toml.exists():
         return []
     text = task_toml.read_text(encoding="utf-8", errors="ignore")
-    match = re.search(r"(?m)^\s*target\s*=\s*(\[[^\n]*\])", text)
+    match = re.search(rf"(?m)^\s*{re.escape(key)}\s*=\s*(\[[^\n]*\])", text)
     if not match:
         return []
     try:
@@ -10253,6 +10261,272 @@ def check_v3_cdac_feedback_dac(rows: list[dict[str, float]]) -> tuple[bool, str]
     )
 
 
+def _v3_integrated_mod_phase_values(
+    rows: list[dict[str, float]],
+    *,
+    freq_fn,
+    modulus: float,
+) -> list[float]:
+    phase = 0.0
+    phases = [phase]
+    for prev, row in zip(rows, rows[1:]):
+        dt = max(0.0, row["time"] - prev["time"])
+        if prev.get("rst", 0.0) <= 0.45 and row.get("rst", 0.0) <= 0.45:
+            f0 = freq_fn(prev)
+            f1 = freq_fn(row)
+            phase = (phase + 0.5 * (f0 + f1) * dt) % modulus
+        phases.append(phase)
+    return phases
+
+
+def check_v3_502_sine_vco_idtmod_bound_step(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    # PLL sine VCO recast from Cadence VCO1.va: freq_q = center_freq + vco_gain*V(vin),
+    # phase_q = idtmod(freq_q,0,1), out = vco_amp*sin(2*pi*phase_q), metric = vco_amp*phase_q.
+    required = {"time", "vin", "out", "metric"}
+    if not rows or not required.issubset(rows[0]):
+        missing = sorted(required - set(rows[0].keys())) if rows else sorted(required)
+        return False, "missing_columns=" + ",".join(missing)
+    center_freq = 20.0e6
+    vco_gain = 40.0e6
+    vco_amp = 0.9
+    phases = _v3_integrated_mod_phase_values(
+        rows,
+        freq_fn=lambda row: center_freq + vco_gain * row["vin"],
+        modulus=1.0,
+    )
+    two_pi = 2.0 * math.pi
+    stride = max(1, len(rows) // 160)
+    checked = 0
+    max_out_err = 0.0
+    max_metric_err = 0.0
+    out_span_lo = None
+    out_span_hi = None
+    for index in range(0, len(rows), stride):
+        if rows[index]["time"] < 8.0e-9:
+            continue
+        phase = phases[index]
+        out_expected = vco_amp * math.sin(two_pi * phase)
+        metric_expected = vco_amp * phase
+        out_err = abs(rows[index]["out"] - out_expected)
+        out_span_lo = out_expected if out_span_lo is None else min(out_span_lo, out_expected)
+        out_span_hi = out_expected if out_span_hi is None else max(out_span_hi, out_expected)
+        max_out_err = max(max_out_err, out_err)
+        checked += 1
+        if out_err > 0.08:
+            return False, (
+                f"out@{rows[index]['time'] * 1e9:g}ns={rows[index]['out']:.4f} "
+                f"expected={out_expected:.4f} tol=0.0800"
+            )
+        if 0.05 < phase < 0.95:
+            metric_err = abs(rows[index]["metric"] - metric_expected)
+            max_metric_err = max(max_metric_err, metric_err)
+            if metric_err > 0.06:
+                return False, (
+                    f"metric@{rows[index]['time'] * 1e9:g}ns={rows[index]['metric']:.4f} "
+                    f"expected={metric_expected:.4f} tol=0.0600"
+                )
+    if checked < 20:
+        return False, f"insufficient_samples={checked}"
+    out_span = (out_span_hi - out_span_lo) if (out_span_lo is not None) else 0.0
+    if out_span < 0.6 * vco_amp:
+        return False, f"insufficient_out_dynamic_range={out_span:.4f}"
+    return True, (
+        f"out_samples={checked} out_span={out_span:.4f} "
+        f"max_out_err={max_out_err:.4f} max_metric_err={max_metric_err:.4f}"
+    )
+
+
+def check_v3_503_differential_vco_clip_idtmod(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"time", "vinp", "vinm", "outp", "outm", "metric"}
+    if not rows or not required.issubset(rows[0]):
+        missing = sorted(required - set(rows[0].keys())) if rows else sorted(required)
+        return False, "missing_columns=" + ",".join(missing)
+    fnom = 20.0e6
+    dfdv = 160.0e6
+    fmin = 5.0e6
+    fmax = 80.0e6
+    vcm = 0.45
+    vac = 0.4
+
+    def _clip(x: float) -> float:
+        return fmin if x < fmin else (fmax if x > fmax else x)
+
+    phases = _v3_integrated_mod_phase_values(
+        rows,
+        freq_fn=lambda row: _clip(fnom + dfdv * (row["vinp"] - row["vinm"])),
+        modulus=1.0,
+    )
+    two_pi = 2.0 * math.pi
+    stride = max(1, len(rows) // 160)
+    checked = 0
+    max_err = 0.0
+    outp_span_lo = None
+    outp_span_hi = None
+    for index in range(0, len(rows), stride):
+        if rows[index]["time"] < 8.0e-9:
+            continue
+        phase = phases[index]
+        outp_expected = vcm + vac * math.sin(two_pi * phase)
+        outm_expected = vcm - vac * math.sin(two_pi * phase)
+        metric_expected = 0.9 * phase
+        outp_err = abs(rows[index]["outp"] - outp_expected)
+        outm_err = abs(rows[index]["outm"] - outm_expected)
+        max_err = max(max_err, outp_err, outm_err)
+        checked += 1
+        outp_span_lo = outp_expected if outp_span_lo is None else min(outp_span_lo, outp_expected)
+        outp_span_hi = outp_expected if outp_span_hi is None else max(outp_span_hi, outp_expected)
+        if outp_err > 0.08:
+            return False, (
+                f"outp@{rows[index]['time'] * 1e9:g}ns={rows[index]['outp']:.4f} "
+                f"expected={outp_expected:.4f} tol=0.0800"
+            )
+        if outm_err > 0.08:
+            return False, (
+                f"outm@{rows[index]['time'] * 1e9:g}ns={rows[index]['outm']:.4f} "
+                f"expected={outm_expected:.4f} tol=0.0800"
+            )
+        if 0.05 < phase < 0.95:
+            metric_err = abs(rows[index]["metric"] - metric_expected)
+            max_err = max(max_err, metric_err)
+            if metric_err > 0.06:
+                return False, (
+                    f"metric@{rows[index]['time'] * 1e9:g}ns={rows[index]['metric']:.4f} "
+                    f"expected={metric_expected:.4f} tol=0.0600"
+                )
+    if checked < 20:
+        return False, f"insufficient_samples={checked}"
+    outp_span = (outp_span_hi - outp_span_lo) if (outp_span_lo is not None) else 0.0
+    if outp_span < 0.5 * vac:
+        return False, f"insufficient_outp_dynamic_range={outp_span:.4f}"
+    return True, f"samples={checked} outp_span={outp_span:.4f} max_err={max_err:.4f}"
+
+
+def check_v3_504_charge_pump_pfd_state_machine(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"time", "ref", "fb", "vctrl", "metric"}
+    if not rows or not required.issubset(rows[0]):
+        missing = sorted(required - set(rows[0].keys())) if rows else sorted(required)
+        return False, "missing_columns=" + ",".join(missing)
+    t_end = rows[-1]["time"]
+    if t_end < 600e-9:
+        return False, f"trace_too_short={t_end*1e9:g}ns"
+    vctrl_min = 0.05
+    vctrl_max = 0.85
+    metric_hi = 0.8
+    vctrl_init = 0.45
+
+    def _window_mean(lo_frac: float, hi_frac: float, key: str) -> float:
+        lo_t = lo_frac * t_end
+        hi_t = hi_frac * t_end
+        vals = [r[key] for r in rows if lo_t <= r["time"] <= hi_t]
+        return sum(vals) / len(vals) if vals else 0.0
+
+    late_vctrl = _window_mean(0.55, 0.95, "vctrl")
+    if late_vctrl < vctrl_max - 0.06:
+        return False, f"vctrl_did_not_reach_top_rail late={late_vctrl:.4f}"
+    vmax_obs = max(r["vctrl"] for r in rows)
+    if vmax_obs < vctrl_init + 0.10:
+        return False, f"vctrl_never_moved max={vmax_obs:.4f}"
+    vmin_obs = min(r["vctrl"] for r in rows)
+    if vmin_obs < vctrl_min - 0.02 or vmax_obs > vctrl_max + 0.02:
+        return False, f"vctrl_out_of_clamp min={vmin_obs:.4f} max={vmax_obs:.4f}"
+
+    late_metric_rows = [r for r in rows if 0.55 * t_end <= r["time"] <= 0.95 * t_end]
+    if not late_metric_rows:
+        return False, "no_late_metric_samples"
+    metric_lo = 0.1
+    hi_count = sum(1 for r in late_metric_rows if abs(r["metric"] - metric_hi) < 0.12)
+    lo_count = sum(1 for r in late_metric_rows if abs(r["metric"] - metric_lo) < 0.12)
+    hi_frac = hi_count / len(late_metric_rows)
+    lo_frac = lo_count / len(late_metric_rows)
+    if hi_frac < 0.02:
+        return False, f"metric_no_positive_pulses hi_frac={hi_frac:.3f}"
+    if lo_frac > 0.02:
+        return False, f"metric_negative_pulses_present lo_frac={lo_frac:.3f}"
+    return True, (
+        f"late_vctrl={late_vctrl:.4f} "
+        f"vctrl_range=[{vmin_obs:.4f},{vmax_obs:.4f}] metric_hi_frac={hi_frac:.3f}"
+    )
+
+
+def check_v3_505_fractional_n_divider_accumulator_flow(rows: list[dict[str, float]]) -> tuple[bool, str]:
+    required = {"ref_clk", "fb_clk", "lock", "vctrl_mon"}
+    if not rows or not required.issubset(rows[0]):
+        return False, "missing ref_clk/fb_clk/lock/vctrl_mon"
+
+    vth = 0.45
+    times = [r["time"] for r in rows]
+    ref_edges = rising_edges([r["ref_clk"] for r in rows], times, threshold=vth)
+    fb_edges = rising_edges([r["fb_clk"] for r in rows], times, threshold=vth)
+    if len(ref_edges) < 12 or len(fb_edges) < 12:
+        return False, f"not_enough_edges ref={len(ref_edges)} fb={len(fb_edges)}"
+
+    ref_late = [t for t in ref_edges if 4.5e-6 <= t <= 5.9e-6]
+    fb_late = [t for t in fb_edges if 4.5e-6 <= t <= 5.9e-6]
+    if len(ref_late) < 4 or len(fb_late) < 4:
+        return False, f"not_enough_late_edges ref_late={len(ref_late)} fb_late={len(fb_late)}"
+
+    ref_periods = [b - a for a, b in zip(ref_late, ref_late[1:])]
+    fb_periods = [b - a for a, b in zip(fb_late, fb_late[1:])]
+    ref_period = sum(ref_periods) / len(ref_periods)
+    fb_period = sum(fb_periods) / len(fb_periods)
+    if ref_period <= 0.0 or fb_period <= 0.0:
+        return False, "non_positive_period"
+    freq_ratio = ref_period / fb_period
+
+    if "dco_clk" in rows[0]:
+        dco_edges = rising_edges([r["dco_clk"] for r in rows], times, threshold=vth)
+        dco_late = [t for t in dco_edges if 4.5e-6 <= t <= 5.9e-6]
+        if len(fb_late) >= 2 and len(dco_late) >= 4:
+            dco_per_fb_period = (len(dco_late) - 1) / (len(fb_late) - 1)
+            measured_divide = dco_per_fb_period / 2.0
+            expected_divide = 8.0 - 3.0 / 8.0
+            if abs(measured_divide - expected_divide) > 0.35:
+                return False, (
+                    f"fractional_divide_ratio_mismatch measured={measured_divide:.3f} "
+                    f"expected~{expected_divide:.3f}"
+                )
+            divide_ok = True
+            divide_note = f"divide={measured_divide:.3f}"
+        else:
+            divide_ok = False
+            divide_note = f"divide=insufficient_dco={len(dco_late)}"
+    else:
+        divide_ok = True
+        divide_note = "divide=dco_clk_absent"
+
+    lock_edges = rising_edges([r["lock"] for r in rows], times, threshold=vth)
+    pre_lock_edges = [t for t in lock_edges if t < 2.0e-6]
+    post_lock_edges = [t for t in lock_edges if 2.2e-6 <= t <= 5.9e-6]
+
+    disturb_low_frac = 1.0 - weighted_logic_high_fraction_window(
+        rows, "lock", vth, 2.05e-6, 2.8e-6
+    )
+
+    vctrl_vals = [r["vctrl_mon"] for r in rows]
+    vctrl_min = min(vctrl_vals)
+    vctrl_max = max(vctrl_vals)
+    vctrl_span = vctrl_max - vctrl_min
+    vctrl_in_range = all(-1e-6 <= v <= 0.95 for v in vctrl_vals)
+
+    ok = (
+        bool(pre_lock_edges)
+        and disturb_low_frac >= 0.25
+        and bool(post_lock_edges)
+        and 0.95 <= freq_ratio <= 1.05
+        and vctrl_in_range
+        and vctrl_span >= 0.02
+        and divide_ok
+    )
+    return ok, (
+        f"pre_lock_edges={len(pre_lock_edges)} "
+        f"disturb_lock_low_frac={disturb_low_frac:.3f} "
+        f"post_lock_edges={len(post_lock_edges)} "
+        f"late_freq_ratio={freq_ratio:.4f} "
+        f"{divide_note} "
+        f"vctrl_min={vctrl_min:.3f} vctrl_max={vctrl_max:.3f} vctrl_span={vctrl_span:.3f}"
+    )
+
+
 def check_sc_integrator(rows: list[dict[str, float]]) -> tuple[bool, str]:
     if not rows:
         return False, "empty"
@@ -15021,6 +15295,18 @@ for _alias, _source_checker_id in V3_CANDIDATE_090_111_CHECK_ALIASES.items():
     if _source_checker_id in STREAMING_BEHAVIOR_CHECKS:
         STREAMING_BEHAVIOR_CHECKS[_alias] = STREAMING_BEHAVIOR_CHECKS[_source_checker_id]
 
+V3_PLL_502_505_CHECK_ALIASES = {
+    "v3_502_sine_vco_idtmod_bound_step": check_v3_502_sine_vco_idtmod_bound_step,
+    "502-sine-vco-idtmod-bound-step": check_v3_502_sine_vco_idtmod_bound_step,
+    "v3_503_differential_vco_clip_idtmod": check_v3_503_differential_vco_clip_idtmod,
+    "503-differential-vco-clip-idtmod": check_v3_503_differential_vco_clip_idtmod,
+    "v3_504_charge_pump_pfd_state_machine": check_v3_504_charge_pump_pfd_state_machine,
+    "504-charge-pump-pfd-state-machine": check_v3_504_charge_pump_pfd_state_machine,
+    "v3_505_fractional_n_divider_accumulator_flow": check_v3_505_fractional_n_divider_accumulator_flow,
+    "505-fractional-n-divider-accumulator-flow": check_v3_505_fractional_n_divider_accumulator_flow,
+}
+CHECKS.update(V3_PLL_502_505_CHECK_ALIASES)
+
 VALIDATED_FAST_CHECKER_TASKS = frozenset(STREAMING_BEHAVIOR_CHECKS)
 
 
@@ -15311,13 +15597,14 @@ def run_case(
 
         t0 = time.perf_counter()
         task_artifact_targets = read_task_artifact_targets(task_dir)
+        task_artifact_supports = read_task_artifact_supports(task_dir)
         dut_dst, tb_dst = copy_inputs(
             run_dir,
             dut_path,
             tb_path,
-            target_filenames=task_artifact_targets,
+            target_filenames=[*task_artifact_targets, *task_artifact_supports],
             primary_target_filename=task_artifact_targets[0] if task_artifact_targets else None,
-            companion_search_dirs=(task_dir / "solution", task_dir / "starter"),
+            companion_search_dirs=(dut_path.parent, task_dir / "solution", task_dir / "starter"),
         )
         timing_split["copy_inputs_s"] = time.perf_counter() - t0
 

@@ -1,0 +1,41 @@
+# vabench-release-v2-checks
+version: 1
+task_id: v3_503_differential_vco_clip_idtmod
+backend: evas
+status: behavior-certified-candidate
+checker:
+  task_id: v3_503_differential_vco_clip_idtmod
+  metric: sampled_differential_vco_clip_idtmod
+required_columns:
+  - time
+  - vinp
+  - vinm
+  - outp
+  - outm
+  - metric
+syntax:
+  must_include:
+    - "idtmod("
+    - "sin("
+    - "clip("
+  must_not_include:
+    - "I("
+    - "ddt("
+sim_correct:
+  positive:
+    - solution/differential_vco_clip_idtmod.va
+  negative:
+    - negative_variants/neg_001_drive_outputs_zero/differential_vco_clip_idtmod.va
+    - negative_variants/neg_002_drive_metric_zero/differential_vco_clip_idtmod.va
+    - negative_variants/neg_003_wrong_phase_modulus/differential_vco_clip_idtmod.va
+    - negative_variants/neg_004_gain_sign_flipped/differential_vco_clip_idtmod.va
+    - negative_variants/neg_005_no_clip/differential_vco_clip_idtmod.va
+  checks:
+    - outp_tracks_reintegrated_phase
+    - outm_tracks_inverted_reintegrated_phase
+    - metric_tracks_wrapped_phase_voltage
+    - differential_inputs_set_frequency
+    - frequency_clamped_to_Fmin_Fmax_band
+    - no_current_domain_contribution
+notes:
+  - "PLL differential VCO recast from Cadence VCO_ams.vams; voltage-domain idtmod differential oscillator with a clip macro and frequency clamp. The hidden deck drives the differential input past Fmax (raw 100 MHz) so the clamp is exercised behaviorally, not only via must_include; neg_005_no_clip removes the clamp from the signal path to fail that coverage."

@@ -48,6 +48,46 @@ def test_run_case_removes_stale_tran_csv_before_evas(monkeypatch, tmp_path: Path
     assert result["evas_engine_used"] == "evas2"
 
 
+def test_copy_inputs_stages_task_toml_support_artifacts(tmp_path: Path) -> None:
+    task_dir = tmp_path / "task"
+    solution = task_dir / "solution"
+    hidden = task_dir / "test_hidden"
+    variant = task_dir / "negative_variants" / "neg_001"
+    run_dir = tmp_path / "run"
+    solution.mkdir(parents=True)
+    hidden.mkdir(parents=True)
+    variant.mkdir(parents=True)
+    run_dir.mkdir()
+    (task_dir / "task.toml").write_text(
+        '\n'.join([
+            "[artifacts]",
+            'target = ["main.va"]',
+            'support = ["helper.va"]',
+        ]),
+        encoding="utf-8",
+    )
+    dut = variant / "main.va"
+    tb = hidden / "hidden.scs"
+    dut.write_text("module main; endmodule\n", encoding="utf-8")
+    tb.write_text('ahdl_include "main.va"\nahdl_include "helper.va"\n', encoding="utf-8")
+    (solution / "helper.va").write_text("module helper; endmodule\n", encoding="utf-8")
+
+    targets = simulate_evas.read_task_artifact_targets(task_dir)
+    supports = simulate_evas.read_task_artifact_supports(task_dir)
+
+    simulate_evas.copy_inputs(
+        run_dir,
+        dut,
+        tb,
+        target_filenames=[*targets, *supports],
+        primary_target_filename=targets[0],
+        companion_search_dirs=(dut.parent, solution),
+    )
+
+    assert (run_dir / "main.va").read_text(encoding="utf-8") == "module main; endmodule\n"
+    assert (run_dir / "helper.va").read_text(encoding="utf-8") == "module helper; endmodule\n"
+
+
 def test_run_evas_defaults_to_strict_rust_evas2(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.delenv("EVAS_ENGINE", raising=False)
     monkeypatch.delenv("VAEVAS_DEFAULT_EVAS_ENGINE", raising=False)

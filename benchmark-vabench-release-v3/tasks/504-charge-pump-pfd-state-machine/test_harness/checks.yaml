@@ -1,0 +1,38 @@
+# vabench-release-v2-checks
+version: 1
+task_id: v3_504_charge_pump_pfd_state_machine
+backend: evas
+status: behavior-certified-candidate
+checker:
+  task_id: v3_504_charge_pump_pfd_state_machine
+  metric: sampled_charge_pump_pfd_state_machine
+required_columns:
+  - time
+  - ref
+  - fb
+  - vctrl
+  - metric
+syntax:
+  must_include:
+    - "@(cross("
+    - "@(timer("
+    - "transition("
+  must_not_include:
+    - "I("
+    - "ddt("
+sim_correct:
+  positive:
+    - solution/charge_pump_pfd_state_machine.va
+  negative:
+    - negative_variants/neg_001_drive_vctrl_mid/charge_pump_pfd_state_machine.va
+    - negative_variants/neg_002_drive_metric_mid/charge_pump_pfd_state_machine.va
+    - negative_variants/neg_003_dead_zone_state/charge_pump_pfd_state_machine.va
+    - negative_variants/neg_004_gain_sign_flipped/charge_pump_pfd_state_machine.va
+    - negative_variants/neg_005_vctrl_unclamped/charge_pump_pfd_state_machine.va
+  checks:
+    - vctrl_ramps_toward_lead_polarity
+    - metric_reports_detector_state_polarity
+    - vctrl_stays_within_clamp
+    - no_current_domain_contribution
+notes:
+  - "PLL charge-pump PFD recast from Cadence chargepump.va; voltage-domain @cross tri-state detector with a sampled loop-filter integrator."

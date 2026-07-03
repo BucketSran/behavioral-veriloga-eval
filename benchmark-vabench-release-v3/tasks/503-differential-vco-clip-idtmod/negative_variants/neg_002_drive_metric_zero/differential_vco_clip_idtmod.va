@@ -1,0 +1,31 @@
+// neg_002_drive_metric_zero: keeps the differential sine but drives metric to zero.
+`include "constants.vams"
+`include "disciplines.vams"
+
+`define clip(x, LO, HI) ((x < LO) ? LO : (x > HI) ? HI : x)
+
+module differential_vco_clip_idtmod (
+    input  electrical vinp,
+    input  electrical vinm,
+    output electrical outp,
+    output electrical outm,
+    output electrical metric
+);
+    parameter real Fnom = 20.0e6 from (0:inf);
+    parameter real dFdV = 160.0e6 exclude 0.0;
+    parameter real Fmin = 5.0e6 from (0:inf);
+    parameter real Fmax = 80.0e6 from (0:inf);
+    parameter real Vcm = 0.45;
+    parameter real Vac = 0.4 from (0:inf);
+
+    real freq_q;
+    real phase_q;
+
+    analog begin
+        freq_q = `clip(Fnom + dFdV * V(vinp, vinm), Fmin, Fmax);
+        phase_q = idtmod(freq_q, 0.0, 1.0);
+        V(outp) <+ Vcm + Vac * sin(`M_TWO_PI * phase_q);
+        V(outm) <+ Vcm - Vac * sin(`M_TWO_PI * phase_q);
+        V(metric) <+ 0.0;
+    end
+endmodule

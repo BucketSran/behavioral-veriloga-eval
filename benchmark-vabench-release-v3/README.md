@@ -1,6 +1,6 @@
 # Behavioral Verilog-A v3
 
-This directory is a clean, RTL-Forge-style packaging of 287 Verilog-A
+This directory is a clean, RTL-Forge-style packaging of 304 Verilog-A
 DUT/support/testbench/e2e tasks.
 
 Partitions:
@@ -11,6 +11,9 @@ Partitions:
 - `090`-`111`: additional useful Verilog-A module tasks promoted into v3.
 - `112`-`282`: certified source-import DUT tasks.
 - `283`-`287`: explicit absorption of the obsolete v2 five-task slice.
+- `288`-`300`: additional source-import analog/logic extension tasks.
+- `502`-`505`: PLL/clock-timing extension tasks covering VCO phase
+  integration, PFD/charge-pump state, and fractional-N divider flow.
 
 Each task is self-contained under `tasks/NNN-name/`:
 
