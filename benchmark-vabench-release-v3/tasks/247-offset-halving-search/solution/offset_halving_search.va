@@ -4,18 +4,36 @@ input clk, dcmpp;
 output vinp, vinn;
 electrical clk, dcmpp, vinp, vinn;
 parameter real vdd = 0.9;
+parameter real step_initial = 0.16;
+parameter real step_min = 0.02;
+parameter real diff_limit = 0.12;
 real vin, step;
-integer sign;
+integer decision_high, locked;
 analog begin
     @(initial_step) begin
         vin = 0.0;
-        step = 0.1;
-        sign = 1;
+        step = step_initial;
+        locked = 0;
     end
     @(cross(V(clk) - 0.5 * vdd, -1)) begin
-        sign = V(dcmpp) > 0.5 * vdd;
-        vin = vin - (2 * sign - 1) * step;
-        step = step / 2.0;
+        if (locked == 0) begin
+            decision_high = V(dcmpp) > 0.5 * vdd;
+            if (decision_high)
+                vin = vin - step;
+            else
+                vin = vin + step;
+            if (vin > diff_limit)
+                vin = diff_limit;
+            if (vin < -diff_limit)
+                vin = -diff_limit;
+            if (step <= step_min)
+                locked = 1;
+            else begin
+                step = step / 2.0;
+                if (step < step_min)
+                    locked = 1;
+            end
+        end
     end
     V(vinp) <+ transition(0.5 * vdd + 0.5 * vin, 0, 10p, 10p);
     V(vinn) <+ transition(0.5 * vdd - 0.5 * vin, 0, 10p, 10p);

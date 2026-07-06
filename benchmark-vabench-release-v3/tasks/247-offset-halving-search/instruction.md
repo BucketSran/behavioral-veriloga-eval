@@ -1,4 +1,4 @@
-# Offset Halving Search
+# Offset Trim Halving Search
 
 ## Task Contract
 
@@ -6,7 +6,7 @@
 - Level: `L1`.
 - Category: comparator calibration/control primitive.
 - Target artifact: `offset_halving_search.va`.
-- Role: comparator-directed differential offset search with fixed step halving.
+- Role: bounded comparator-directed differential offset trim with halving and lockout.
 - Output boundary: implement only the requested public Verilog-A DUT artifact.
 
 ## Public Verilog-A Interface
@@ -17,15 +17,15 @@ Declare the public module exactly as:
 module offset_halving_search(clk, dcmpp, vinp, vinn);
 ```
 
-`clk` is the update clock, `dcmpp` is the comparator decision input, and `vinp/vinn` are generated differential stimulus outputs. All ports are electrical.
+`clk` is the update clock, `dcmpp` is the comparator decision input, and `vinp`/`vinn` are generated differential trim stimulus outputs. All ports are electrical.
 
 ## Public Parameter Contract
 
-Provide overrideable parameter `vdd = 0.9`. Use `0.5*vdd` as the clock and decision threshold. Use a 0.1 V initial search step.
+Provide overrideable parameters `vdd = 0.9`, `step_initial = 0.16`, `step_min = 0.02`, and `diff_limit = 0.12`. Use `0.5*vdd` as the clock and decision threshold. `step_initial`, `step_min`, and `diff_limit` are differential-voltage quantities.
 
 ## Required Behavior
 
-Initialize the differential residue to zero. On each falling `clk` crossing, sample `dcmpp`, update the signed search residue opposite the comparator decision, and halve the step for the next update. Drive `vinp` and `vinn` symmetrically around `0.5*vdd` from the current residue.
+Initialize the differential trim residue to zero and the active step to `step_initial`. On each falling `clk` crossing before lockout, sample `dcmpp`: a high decision moves the differential trim negative and a low decision moves it positive. Clamp the signed residue to `+/-diff_limit`. Halve the active step after each update; once the next step would be below `step_min`, lock the trim code and hold the existing residue for later clock edges. Drive `vinp` and `vinn` symmetrically around `0.5*vdd` from the current residue.
 
 ## Modeling Constraints
 

@@ -4278,6 +4278,23 @@
   checker:
     task_id: v3_cdac_8b_monodown
     metric: event_weighted_residue
+  sim_correct:
+    checks:
+      - sample_vin_on_falling_clks
+      - subtract_binary_down_steps_from_dctrl7_through_dctrl0
+      - hold_residue_between_events
+    public_observables:
+      - vin
+      - clks
+      - dctrl0
+      - dctrl1
+      - dctrl2
+      - dctrl3
+      - dctrl4
+      - dctrl5
+      - dctrl6
+      - dctrl7
+      - vres
   scoring:
     axes:
       - dut_compile
@@ -4296,6 +4313,16 @@
   checker:
     task_id: v3_offset_halving_search
     metric: stable_samples
+  sim_correct:
+    checks:
+      - comparator_decision_moves_trim_opposite_polarity
+      - residue_clamps_to_public_diff_limit
+      - step_halves_until_minimum_step_locks_output
+    public_observables:
+      - clk
+      - dcmpp
+      - vinp
+      - vinn
   scoring:
     axes:
       - dut_compile
@@ -4334,6 +4361,22 @@
   checker:
     task_id: v3_dac_restore_7bit_clocked
     metric: stable_samples
+  sim_correct:
+    checks:
+      - rising_clock_decodes_7bit_midrise_bipolar_level
+      - active_high_reset_restores_midscale_immediately
+      - clock_edges_during_reset_are_ignored_until_release
+    public_observables:
+      - clk
+      - rst
+      - d6
+      - d5
+      - d4
+      - d3
+      - d2
+      - d1
+      - d0
+      - vout
   scoring:
     axes:
       - dut_compile

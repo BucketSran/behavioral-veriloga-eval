@@ -14,10 +14,10 @@
 Declare the public module exactly as:
 
 ```verilog
-module cdac_8b_monodown(vin, clks, dctrl1, dctrl2, dctrl3, dctrl4, dctrl5, dctrl6, dctrl7, vres);
+module cdac_8b_monodown(vin, clks, dctrl0, dctrl1, dctrl2, dctrl3, dctrl4, dctrl5, dctrl6, dctrl7, vres);
 ```
 
-`vin` is the sampled analog input, `clks` is the sampling clock, `dctrl1..dctrl7` are decision/control edges, and `vres` is the residue output. All ports are electrical.
+`vin` is the sampled analog input, `clks` is the sampling clock, `dctrl7..dctrl0` are decision/control edges from MSB to LSB, and `vres` is the residue output. All ports are electrical.
 
 ## Public Parameter Contract
 
@@ -25,7 +25,7 @@ Provide overrideable parameter `vdd = 1.0`. Use `vdd/2` as the clock/control thr
 
 ## Required Behavior
 
-At initialization and on each falling `clks` crossing, sample `vin` into the held residue. On rising control crossings, subtract the corresponding binary-weighted fraction from the held residue: `dctrl7` subtracts 1/2, `dctrl6` 1/4, continuing down to `dctrl1` at 1/128. Hold the current residue value between events.
+At initialization and on each falling `clks` crossing, sample `vin` into the held residue. On rising control crossings, subtract the corresponding binary-weighted fraction from the held residue: `dctrl7` subtracts 1/2, `dctrl6` 1/4, continuing down to `dctrl0` at 1/256. Hold the current residue value between events.
 
 ## Modeling Constraints
 

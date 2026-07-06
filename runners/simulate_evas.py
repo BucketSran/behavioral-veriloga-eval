@@ -3595,10 +3595,10 @@ def required_trace_signals_for_checker(task_id: str) -> frozenset[str]:
         | frozenset({f"sp{idx}" for idx in range(1, 7)})
         | frozenset({f"sn{idx}" for idx in range(1, 7)}),
         "v3_245_cdac_8b_monodown": frozenset({"time", "vin", "clks", "vres"})
-        | frozenset({f"dctrl{idx}" for idx in range(1, 8)}),
+        | frozenset({f"dctrl{idx}" for idx in range(0, 8)}),
         "v3_246_va_dac_6b_se": frozenset({"time", "rdy", "aout"})
         | frozenset({f"din{idx}" for idx in range(6)}),
-        "v3_250_dac_restore_7bit_clocked": frozenset({"time", "clk", "vout"})
+        "v3_250_dac_restore_7bit_clocked": frozenset({"time", "clk", "rst", "vout"})
         | frozenset({f"d{idx}" for idx in range(7)}),
         "v3_251_dac_restore_6bit_1p8": frozenset({"time", "clk", "vout"})
         | frozenset({f"d{idx}" for idx in range(1, 7)}),
@@ -14956,7 +14956,7 @@ def check_v3_l3_sar2_logic_7b(rows: list[dict[str, float]]) -> tuple[bool, str]:
 
 
 def check_v3_cdac_8b_monodown(rows: list[dict[str, float]]) -> tuple[bool, str]:
-    required = {"time", "vin", "clks", "vres", *{f"dctrl{i}" for i in range(1, 8)}}
+    required = {"time", "vin", "clks", "vres", *{f"dctrl{i}" for i in range(0, 8)}}
     if not rows or not required.issubset(rows[0]):
         return False, "missing cdac 8b monodown signals"
     times = [row["time"] for row in rows]
@@ -14966,7 +14966,7 @@ def check_v3_cdac_8b_monodown(rows: list[dict[str, float]]) -> tuple[bool, str]:
         (t, "sample", None)
         for t in _threshold_crossings([row["clks"] for row in rows], times, threshold=threshold, direction="falling")
     ]
-    for bit in range(1, 8):
+    for bit in range(0, 8):
         signal = f"dctrl{bit}"
         events += [
             (t, "subtract", bit)
@@ -15025,8 +15025,8 @@ def check_v3_offset_halving_search(rows: list[dict[str, float]]) -> tuple[bool, 
     return _sample_many(
         rows,
         {
-            "vinp": [(0.5, 0.45), (1.0, 0.4), (2.0, 0.425), (3.0, 0.4375), (4.0, 0.43125)],
-            "vinn": [(0.5, 0.45), (1.0, 0.5), (2.0, 0.475), (3.0, 0.4625), (4.0, 0.46875)],
+            "vinp": [(0.5, 0.45), (1.0, 0.39), (2.0, 0.43), (3.0, 0.45), (4.0, 0.44), (5.0, 0.44), (6.0, 0.44)],
+            "vinn": [(0.5, 0.45), (1.0, 0.51), (2.0, 0.47), (3.0, 0.45), (4.0, 0.46), (5.0, 0.46), (6.0, 0.46)],
         },
         tol=0.01,
     )
@@ -15064,12 +15064,23 @@ def check_v3_dac_restore_4bit_clocked(rows: list[dict[str, float]]) -> tuple[boo
 
 
 def check_v3_dac_restore_7bit_clocked(rows: list[dict[str, float]]) -> tuple[bool, str]:
-    required = {"time", "clk", "vout", *{f"d{i}" for i in range(7)}}
+    required = {"time", "clk", "rst", "vout", *{f"d{i}" for i in range(7)}}
     if not rows or not required.issubset(rows[0]):
         return False, "missing dac restore 7bit clocked signals"
     return _sample_many(
         rows,
-        {"vout": [(0.5, -0.89296875), (1.5, -0.30234375), (2.5, 0.30234375), (3.5, 0.89296875)]},
+        {
+            "rst": [(3.5, 0.9), (4.0, 0.0)],
+            "vout": [
+                (0.5, -0.89296875),
+                (1.5, -0.30234375),
+                (2.5, 0.30234375),
+                (3.2, 0.0),
+                (3.5, 0.0),
+                (4.0, 0.0),
+                (4.5, 0.89296875),
+            ],
+        },
         tol=0.012,
     )
 

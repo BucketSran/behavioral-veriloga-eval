@@ -1,8 +1,8 @@
 `include "disciplines.vams"
-module cdac_8b_monodown(vin, clks, dctrl1, dctrl2, dctrl3, dctrl4, dctrl5, dctrl6, dctrl7, vres);
-input vin, clks, dctrl1, dctrl2, dctrl3, dctrl4, dctrl5, dctrl6, dctrl7;
+module cdac_8b_monodown(vin, clks, dctrl0, dctrl1, dctrl2, dctrl3, dctrl4, dctrl5, dctrl6, dctrl7, vres);
+input vin, clks, dctrl0, dctrl1, dctrl2, dctrl3, dctrl4, dctrl5, dctrl6, dctrl7;
 output vres;
-electrical vin, clks, dctrl1, dctrl2, dctrl3, dctrl4, dctrl5, dctrl6, dctrl7, vres;
+electrical vin, clks, dctrl0, dctrl1, dctrl2, dctrl3, dctrl4, dctrl5, dctrl6, dctrl7, vres;
 parameter real vdd = 1.0;
 real vres_v;
 analog begin
@@ -14,6 +14,7 @@ analog begin
     @(cross(V(dctrl3) - vdd / 2.0, +1)) vres_v = vres_v - 0.03125;
     @(cross(V(dctrl2) - vdd / 2.0, +1)) vres_v = vres_v - 0.015625;
     @(cross(V(dctrl1) - vdd / 2.0, +1)) vres_v = vres_v - 0.0078125;
+    @(cross(V(dctrl0) - vdd / 2.0, +1)) vres_v = vres_v - 0.00390625;
     V(vres) <+ transition(vres_v, 0, 10p, 10p);
 end
 endmodule
