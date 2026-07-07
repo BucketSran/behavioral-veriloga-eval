@@ -18,6 +18,16 @@ NEGATIVE_LIST_KEYS = ("cases", "negative_cases", "negative_variants", "variants"
 SLOW_GOLD_THRESHOLD_S = 20.0
 
 
+def scrub_note(note: str) -> str:
+    text = str(note)
+    if not text.startswith("checker_config="):
+        return text
+    marker = "benchmark-vabench-release-v3/"
+    if marker in text:
+        return f"checker_config={text[text.index(marker):]}"
+    return text
+
+
 def task_number(task_dir: Path) -> int | None:
     try:
         return int(task_dir.name.split("-", 1)[0])
@@ -235,6 +245,7 @@ def run_one(
     timeout_s: int,
     negative_case: dict[str, Any] | None = None,
     split: str = "hidden",
+    omit_stdout_tail: bool = False,
 ) -> dict[str, Any]:
     started = time.perf_counter()
     targets = read_task_artifact_targets(task_dir)
@@ -305,7 +316,7 @@ def run_one(
     expected_ok = kind == "gold"
     meets_expectation = status == "PASS" if expected_ok else status != "PASS"
     stdout_tail = str(result.get("stdout_tail", ""))
-    notes = [*selection_notes, *[str(note) for note in result.get("notes", [])]]
+    notes = [scrub_note(note) for note in [*selection_notes, *[str(note) for note in result.get("notes", [])]]]
     if status != "PASS" and not any(note.startswith("simulator_error=") for note in notes):
         failure_summary = simulator_failure_summary(stdout_tail)
         if failure_summary and failure_summary not in notes:
@@ -318,9 +329,10 @@ def run_one(
         "scores": result.get("scores", {}),
         "notes": notes,
         "failure_summary": first_failure_summary(status, notes),
-        "stdout_tail": stdout_tail[-4000:],
         "wall_s": round(time.perf_counter() - started, 6),
     })
+    if not omit_stdout_tail:
+        row["stdout_tail"] = stdout_tail[-4000:]
     return row
 
 
@@ -446,6 +458,11 @@ def main() -> int:
         action="store_true",
         help="Also run staged syntax/continuous/KCL candidates without sim_correct blocks.",
     )
+    parser.add_argument(
+        "--omit-stdout-tail",
+        action="store_true",
+        help="Omit raw simulator stdout tails from JSON rows to keep reports portable.",
+    )
     args = parser.parse_args()
 
     if args.gold_only and args.negatives_only:
@@ -455,7 +472,7 @@ def main() -> int:
     root = Path(args.root)
     sim_correct_slugs = read_sim_correct_task_slugs(Path(args.checks))
     task_filter = parse_task_filter(args.tasks)
-    cases: list[tuple[Path, str | None, int, dict[str, Any] | None]] = []
+    cases: list[tuple[Path, str | None, int, dict[str, Any] | None, str, bool]] = []
     skipped_tasks: list[str] = []
     for task_dir in sorted(p for p in root.iterdir() if p.is_dir()):
         if not task_in_requested_range(task_dir, task_filter, args.start, args.end):
@@ -467,10 +484,17 @@ def main() -> int:
             print(task_dir.name, "SKIP_STAGED", flush=True)
             continue
         if not args.negatives_only:
-            cases.append((task_dir, None, args.timeout, None, args.split))
+            cases.append((task_dir, None, args.timeout, None, args.split, args.omit_stdout_tail))
         if not args.gold_only:
             for negative_case in negative_variant_cases(task_dir):
-                cases.append((task_dir, str(negative_case["id"]), args.timeout, negative_case, args.split))
+                cases.append((
+                    task_dir,
+                    str(negative_case["id"]),
+                    args.timeout,
+                    negative_case,
+                    args.split,
+                    args.omit_stdout_tail,
+                ))
 
     rows: list[dict[str, Any]] = []
     started = time.perf_counter()

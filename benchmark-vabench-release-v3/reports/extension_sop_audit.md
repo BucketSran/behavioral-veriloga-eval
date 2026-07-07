@@ -1,43 +1,46 @@
 # v3 Extension SOP Audit
 
-Date: 2026-07-02
+Date: 2026-07-07
 
 ## Summary
 
-- Audited extension tasks: **201**
-- SOP-ready tasks: **201**
-- Tasks with executable visible+hidden SCS evidence: **201**
-- Tasks with behavior checker evidence: **201**
-- Tasks with complete manifest behavior contracts: **201**
-- Tasks with aligned negative case indexes: **201**
-- Tasks with task-specific negative descriptions: **201**
-- Tasks with distinct visible/hidden SCS stimuli: **201**
+- Audited extension tasks: **205**
+- SOP-ready tasks: **151**
+- Tasks with executable visible+hidden SCS evidence: **205**
+- Tasks with behavior checker evidence: **151**
+- Tasks with complete manifest behavior contracts: **205**
+- Tasks with aligned negative case indexes: **195**
+- Tasks with task-specific negative descriptions: **151**
+- Tasks with distinct visible/hidden SCS stimuli: **205**
 - Tasks with identical visible/hidden SCS stimuli: **0**
 - SOP-ready tasks with identical visible/hidden SCS stimuli: **0**
 - Staged tasks with identical visible/hidden SCS stimuli: **0**
 
 ## Issue Counts
 
+- `negative_cases_index_mismatch`: 10
+- `negative_descriptions_not_task_specific`: 54
 
 ## Warning Counts
 
-- `candidate_tier_not_score_ready`: 201
+- `candidate_tier_not_score_ready`: 204
 
 ## Range Summary
 
 | Range | Description | Tasks | Ready | Executable Tests | Behavior Eval | Contracts | Neg Index | Neg Desc | Distinct V/H | Top Issues |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
 | `301-340` | language-semantics voltage-domain candidates | 40 | 40 | 40 | 40 | 40 | 40 | 40 | 40 |  |
-| `341-360` | AMS mixed-signal candidates | 20 | 20 | 20 | 20 | 20 | 20 | 20 | 20 |  |
+| `341-360` | AMS mixed-signal candidates | 20 | 0 | 20 | 0 | 20 | 20 | 0 | 20 | `negative_descriptions_not_task_specific`: 20 |
 | `361-372` | noise and analysis candidates | 12 | 12 | 12 | 12 | 12 | 12 | 12 | 12 |  |
-| `373-434` | task/file/table/random/hierarchy syntax candidates | 62 | 62 | 62 | 62 | 62 | 62 | 62 | 62 |  |
-| `435-458` | manual syntax-completion candidates | 24 | 24 | 24 | 24 | 24 | 24 | 24 | 24 |  |
-| `459-470` | course-material gap-fill candidates | 12 | 12 | 12 | 12 | 12 | 12 | 12 | 12 |  |
-| `471-501` | LRM KCL/continuous-time and Cadence data-converter gap-fill candidates | 31 | 31 | 31 | 31 | 31 | 31 | 31 | 31 |  |
+| `373-434` | task/file/table/random/hierarchy syntax candidates | 62 | 44 | 62 | 44 | 62 | 55 | 44 | 62 | `negative_descriptions_not_task_specific`: 18<br>`negative_cases_index_mismatch`: 7 |
+| `435-458` | manual syntax-completion candidates | 24 | 17 | 24 | 17 | 24 | 24 | 17 | 24 | `negative_descriptions_not_task_specific`: 7 |
+| `459-470` | course-material gap-fill candidates | 12 | 11 | 12 | 11 | 12 | 12 | 11 | 12 | `negative_descriptions_not_task_specific`: 1 |
+| `471-501` | LRM KCL/continuous-time and Cadence data-converter gap-fill candidates | 31 | 23 | 31 | 23 | 31 | 28 | 23 | 31 | `negative_descriptions_not_task_specific`: 8<br>`negative_cases_index_mismatch`: 3 |
+| `502-505` | post-501 PLL/control extension additions | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |  |
 
 ## Highest Severity Finding
 
-Tasks 301-501 are staging-layer benchmark tasks outside the original full-300 denominator. Under the SOP they must retain concrete public behavior prompts, executable visible and hidden tests, repository behavior checkers, and five behavior-rejected negative variants.
+Tasks 301-505 are staging-layer benchmark tasks outside the original full-300 denominator. Under the SOP they must retain concrete public behavior prompts, executable visible and hidden tests, repository behavior checkers, and five behavior-rejected negative variants.
 
 ## Per-Task Rows
 
@@ -83,26 +86,26 @@ Tasks 301-501 are staging-layer benchmark tasks outside the original full-300 de
 | `338-math-trig-envelope-detector` | `syntax-extension-candidate` | True | - |
 | `339-random-seeded-dither-source` | `syntax-extension-candidate` | True | - |
 | `340-bound-step-clock-guard` | `syntax-extension-candidate` | True | - |
-| `341-wreal-gain-pass-through` | `ams-mixed-signal-candidate` | True | - |
-| `342-wreal-two-input-summer` | `ams-mixed-signal-candidate` | True | - |
-| `343-wreal-threshold-flag` | `ams-mixed-signal-candidate` | True | - |
-| `344-wreal-clamped-mux` | `ams-mixed-signal-candidate` | True | - |
-| `345-wreal-scale-offset` | `ams-mixed-signal-candidate` | True | - |
-| `346-logic-assign-inverter` | `ams-mixed-signal-candidate` | True | - |
-| `347-logic-assign-and-or` | `ams-mixed-signal-candidate` | True | - |
-| `348-logic-assign-xor-flag` | `ams-mixed-signal-candidate` | True | - |
-| `349-logic-assign-priority-mux` | `ams-mixed-signal-candidate` | True | - |
-| `350-logic-assign-reduction` | `ams-mixed-signal-candidate` | True | - |
-| `351-always-posedged-dff` | `ams-mixed-signal-candidate` | True | - |
-| `352-always-negedge-sampler` | `ams-mixed-signal-candidate` | True | - |
-| `353-always-resettable-toggle` | `ams-mixed-signal-candidate` | True | - |
-| `354-always-counter-two-bit` | `ams-mixed-signal-candidate` | True | - |
-| `355-always-enable-hold` | `ams-mixed-signal-candidate` | True | - |
-| `356-mixed-logic-enable-voltage-driver` | `ams-mixed-signal-candidate` | True | - |
-| `357-mixed-wreal-to-electrical-buffer` | `ams-mixed-signal-candidate` | True | - |
-| `358-mixed-electrical-threshold-logic-flag` | `ams-mixed-signal-candidate` | True | - |
-| `359-mixed-logic-clocked-voltage-sampler` | `ams-mixed-signal-candidate` | True | - |
-| `360-mixed-wreal-logic-select-driver` | `ams-mixed-signal-candidate` | True | - |
+| `341-rail-referenced-gain-buffer` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `342-weighted-balance-summer` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `343-supply-qualified-window-flag` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `344-power-mode-clamped-mux` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `345-bias-trim-affine-mapper` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `346-reset-polarity-qualifier` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `347-multi-condition-enable-combiner` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `348-phase-mismatch-qualifier` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `349-priority-fault-code-driver` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `350-lane-validity-reduction-monitor` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `351-comparator-decision-capture` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `352-falling-edge-calibration-sampler` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `353-resettable-phase-toggle-monitor` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `354-settling-progress-counter` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `355-enable-qualified-bias-hold` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `356-dynamic-supply-enable-driver` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `357-local-domain-buffer-translator` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `358-bias-window-threshold-bridge` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `359-clocked-power-ready-sampler` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `360-mode-selected-bias-driver` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
 | `361-white-noise-voltage-source` | `noise-analysis-candidate` | True | - |
 | `362-white-noise-gated-source` | `noise-analysis-candidate` | True | - |
 | `363-flicker-noise-voltage-source` | `noise-analysis-candidate` | True | - |
@@ -115,12 +118,12 @@ Tasks 301-501 are staging-layer benchmark tasks outside the original full-300 de
 | `370-ac-stim-phase-selector` | `noise-analysis-candidate` | True | - |
 | `371-combined-white-flicker-noise` | `noise-analysis-candidate` | True | - |
 | `372-analysis-aware-noise-metric` | `noise-analysis-candidate` | True | - |
-| `373-task-output-limiter` | `syntax-extension-candidate` | True | - |
-| `374-task-dual-output-update` | `syntax-extension-candidate` | True | - |
-| `375-task-event-counter-service` | `syntax-extension-candidate` | True | - |
-| `376-task-reset-sequencer` | `syntax-extension-candidate` | True | - |
-| `377-task-stateful-threshold-update` | `syntax-extension-candidate` | True | - |
-| `378-task-metric-normalizer` | `syntax-extension-candidate` | True | - |
+| `373-saturation-recovery-limiter` | `behavior-extension-candidate` | False | `negative_cases_index_mismatch`<br>`negative_descriptions_not_task_specific` |
+| `374-sampled-error-update-monitor` | `behavior-extension-candidate` | False | `negative_cases_index_mismatch`<br>`negative_descriptions_not_task_specific` |
+| `375-windowed-event-rate-monitor` | `behavior-extension-candidate` | False | `negative_cases_index_mismatch`<br>`negative_descriptions_not_task_specific` |
+| `376-reset-release-sequencer` | `behavior-extension-candidate` | False | `negative_cases_index_mismatch`<br>`negative_descriptions_not_task_specific` |
+| `377-adaptive-threshold-tracker` | `behavior-extension-candidate` | False | `negative_cases_index_mismatch`<br>`negative_descriptions_not_task_specific` |
+| `378-rail-normalized-metric-mapper` | `behavior-extension-candidate` | False | `negative_cases_index_mismatch`<br>`negative_descriptions_not_task_specific` |
 | `379-file-fgets-config-loader` | `syntax-extension-candidate` | True | - |
 | `380-file-feof-line-counter` | `syntax-extension-candidate` | True | - |
 | `381-file-fseek-offset-reader` | `syntax-extension-candidate` | True | - |
@@ -136,8 +139,8 @@ Tasks 301-501 are staging-layer benchmark tasks outside the original full-300 de
 | `391-rdist-exponential-jitter` | `syntax-extension-candidate` | True | - |
 | `392-rdist-poisson-count-noise` | `syntax-extension-candidate` | True | - |
 | `393-rdist-normal-offset-dither` | `syntax-extension-candidate` | True | - |
-| `394-rdist-chi-square-energy` | `syntax-extension-candidate` | True | - |
-| `395-rdist-t-tail-dither` | `syntax-extension-candidate` | True | - |
+| `394-deterministic-energy-accumulator` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `395-bounded-tail-dither-shaper` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
 | `396-rdist-erlang-latency` | `syntax-extension-candidate` | True | - |
 | `397-hierarchy-gain-child` | `syntax-extension-candidate` | True | - |
 | `398-hierarchy-two-stage-chain` | `syntax-extension-candidate` | True | - |
@@ -145,10 +148,10 @@ Tasks 301-501 are staging-layer benchmark tasks outside the original full-300 de
 | `400-hierarchy-named-port-map` | `syntax-extension-candidate` | True | - |
 | `401-hierarchy-ordered-port-map` | `syntax-extension-candidate` | True | - |
 | `402-hierarchy-shared-threshold-child` | `syntax-extension-candidate` | True | - |
-| `403-vector-bit-select-flag` | `syntax-extension-candidate` | True | - |
-| `404-vector-part-select-window` | `syntax-extension-candidate` | True | - |
-| `405-vector-concat-code-build` | `syntax-extension-candidate` | True | - |
-| `406-vector-replication-mask` | `syntax-extension-candidate` | True | - |
+| `403-calibration-bit-select-flag` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `404-vector-part-select-window` | `behavioral-control-candidate` | True | - |
+| `405-vector-concat-code-build` | `behavioral-control-candidate` | True | - |
+| `406-lane-mask-replication-driver` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
 | `407-vector-reduction-parity` | `syntax-extension-candidate` | True | - |
 | `408-vector-shift-and-mask-decoder` | `syntax-extension-candidate` | True | - |
 | `409-macro-functionlike-clamp` | `syntax-extension-candidate` | True | - |
@@ -157,13 +160,13 @@ Tasks 301-501 are staging-layer benchmark tasks outside the original full-300 de
 | `412-initial-final-step-lifecycle` | `syntax-extension-candidate` | True | - |
 | `413-while-loop-array-sum` | `syntax-extension-candidate` | True | - |
 | `414-parameter-range-real-control` | `syntax-extension-candidate` | True | - |
-| `415-logic-vector-assign-slice` | `ams-mixed-signal-candidate` | True | - |
-| `416-logic-vector-reduction-flag` | `ams-mixed-signal-candidate` | True | - |
-| `417-always-async-reset-counter` | `ams-mixed-signal-candidate` | True | - |
-| `418-always-enable-saturating-counter` | `ams-mixed-signal-candidate` | True | - |
-| `419-wreal-logic-threshold-bridge` | `ams-mixed-signal-candidate` | True | - |
-| `420-mixed-analog-digital-mode-latch` | `ams-mixed-signal-candidate` | True | - |
-| `421-task-local-variable-transform` | `syntax-extension-candidate` | True | - |
+| `415-explicit-sar-slice-router` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `416-ready-reduction-fault-monitor` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `417-async-reset-event-counter` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `418-enable-saturating-ready-counter` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `419-rail-aware-threshold-bridge` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `420-mode-latch-calibration-gate` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `421-calibration-affine-transform` | `behavior-extension-candidate` | False | `negative_cases_index_mismatch`<br>`negative_descriptions_not_task_specific` |
 | `422-file-fscanf-table-stimulus` | `syntax-extension-candidate` | True | - |
 | `423-file-profile-replay-controller` | `syntax-extension-candidate` | True | - |
 | `424-file-fscanf-multi-column-profile` | `syntax-extension-candidate` | True | - |
@@ -175,7 +178,7 @@ Tasks 301-501 are staging-layer benchmark tasks outside the original full-300 de
 | `430-rdist-seed-reproducibility` | `syntax-extension-candidate` | True | - |
 | `431-hierarchy-support-artifact-staging` | `syntax-extension-candidate` | True | - |
 | `432-hierarchy-nested-parameter-chain` | `syntax-extension-candidate` | True | - |
-| `433-preprocessor-ifndef-elsif-undef` | `syntax-extension-candidate` | True | - |
+| `433-configurable-startup-policy` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
 | `434-repeat-loop-accumulator` | `syntax-extension-candidate` | True | - |
 | `435-ddt-voltage-derivative-source` | `behavioral-continuous-time-candidate` | True | - |
 | `436-idt-voltage-integrator-source` | `behavioral-continuous-time-candidate` | True | - |
@@ -191,17 +194,17 @@ Tasks 301-501 are staging-layer benchmark tasks outside the original full-300 de
 | `446-fstrobe-file-line-writer` | `syntax-extension-candidate` | True | - |
 | `447-display-warning-debug-log` | `syntax-extension-candidate` | True | - |
 | `448-rdist-uniform-seeded-dither` | `syntax-extension-candidate` | True | - |
-| `449-generate-genvar-replicated-stage` | `ams-mixed-signal-candidate` | True | - |
+| `449-explicit-replicated-stage-chain` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
 | `450-custom-nature-discipline-voltage` | `syntax-extension-candidate` | True | - |
-| `451-connectmodule-electrical-bridge` | `syntax-extension-candidate` | True | - |
-| `452-connectrules-electrical-map` | `syntax-extension-candidate` | True | - |
-| `453-specify-specparam-delay` | `ams-mixed-signal-candidate` | True | - |
-| `454-multidimensional-array-state` | `syntax-extension-candidate` | True | - |
-| `455-packed-logic-bus-slice` | `ams-mixed-signal-candidate` | True | - |
+| `451-electrical-threshold-bridge` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `452-local-rail-domain-translator` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `453-edge-delay-qualified-driver` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `454-calibration-quadrant-mapper` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `455-explicit-bus-slice-router` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
 | `456-event-or-cross-timer` | `syntax-extension-candidate` | True | - |
 | `457-nested-function-pipeline` | `syntax-extension-candidate` | True | - |
-| `458-recursive-function-candidate` | `syntax-extension-candidate` | True | - |
-| `459-do-while-loop-accumulator` | `syntax-extension-candidate` | True | - |
+| `458-iterative-decay-estimator` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `459-bounded-window-accumulator` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
 | `460-analog-initial-block-state` | `syntax-extension-candidate` | True | - |
 | `461-vt-thermal-voltage-source` | `syntax-extension-candidate` | True | - |
 | `462-vt-temperature-argument` | `syntax-extension-candidate` | True | - |
@@ -232,15 +235,19 @@ Tasks 301-501 are staging-layer benchmark tasks outside the original full-300 de
 | `487-table-model-2d-array-surface` | `syntax-extension-candidate` | True | - |
 | `488-table-model-string-param-source` | `syntax-extension-candidate` | True | - |
 | `489-event-nested-or-expression` | `syntax-extension-candidate` | True | - |
-| `490-event-task-function-state-update` | `syntax-extension-candidate` | True | - |
+| `490-event-reacquire-lock-detector` | `behavior-extension-candidate` | False | `negative_cases_index_mismatch`<br>`negative_descriptions_not_task_specific` |
 | `491-kcl-capacitor-ddt-current` | `kcl-syntax-candidate` | True | - |
-| `492-kcl-inductor-idt-voltage` | `kcl-syntax-candidate` | True | - |
+| `492-kcl-inductor-idt-voltage` | `conservative-current/KCL-behavior-certified` | True | - |
 | `493-continuous-laplace-nd-filter` | `behavioral-continuous-time-candidate` | True | - |
 | `494-continuous-zi-nd-filter` | `behavioral-continuous-time-candidate` | True | - |
-| `495-slew-rate-dac4` | `data-converter-replacement-candidate` | True | - |
-| `496-first-order-sigma-delta-modulator` | `data-converter-replacement-candidate` | True | - |
-| `497-thermometer-bus-encoder` | `data-converter-replacement-candidate` | True | - |
-| `498-dc-aware-adc3bit` | `data-converter-replacement-candidate` | True | - |
-| `499-latched-bus-dac8` | `data-converter-replacement-candidate` | True | - |
-| `500-deterministic-mismatch-dac6` | `data-converter-replacement-candidate` | True | - |
-| `501-adc-static-linearity-monitor` | `data-converter-replacement-candidate` | True | - |
+| `495-supply-bias-validity-gate` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `496-reference-settling-window-monitor` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `497-power-enable-turnon-delay-gate` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `498-power-mode-supply-current-metric` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `499-dynamic-supply-level-driver` | `behavior-extension-candidate` | False | `negative_descriptions_not_task_specific` |
+| `500-rail-ramp-rate-startup-monitor` | `behavior-extension-candidate` | False | `negative_cases_index_mismatch`<br>`negative_descriptions_not_task_specific` |
+| `501-differential-common-mode-window-monitor` | `behavior-extension-candidate` | False | `negative_cases_index_mismatch`<br>`negative_descriptions_not_task_specific` |
+| `502-sine-vco-idtmod-bound-step` | `behavior-extension-candidate` | True | - |
+| `503-differential-vco-clip-idtmod` | `behavior-extension-candidate` | True | - |
+| `504-charge-pump-pfd-state-machine` | `behavior-extension-candidate` | True | - |
+| `505-fractional-n-divider-accumulator-flow` | `behavior-extension-candidate` | True | - |

@@ -27,6 +27,7 @@ RANGE_GROUPS = [
     (435, 458, "manual syntax-completion candidates"),
     (459, 470, "course-material gap-fill candidates"),
     (471, 501, "LRM KCL/continuous-time and Cadence data-converter gap-fill candidates"),
+    (502, 505, "post-501 PLL/control extension additions"),
 ]
 
 

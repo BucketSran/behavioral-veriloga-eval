@@ -25,6 +25,15 @@ BEHAVIOR_EXTENSION_EVIDENCE_JSON = REPORTS_ROOT / "behavior_certified_extension_
 EXTENSION_SOP_AUDIT_JSON = REPORTS_ROOT / "extension_sop_audit.json"
 STAGED_GOLD_PROBE_JSON = REPORTS_ROOT / "staged_promotion_gold_probe.json"
 
+SPECTRE_DIVERGENT_TASKS = {
+    "391-rdist-exponential-jitter": "seeded random exponential sequence differs from Spectre",
+    "392-rdist-poisson-count-noise": "seeded random poisson sequence differs from Spectre",
+    "393-rdist-normal-offset-dither": "seeded random normal sequence differs from Spectre",
+    "396-rdist-erlang-latency": "seeded random erlang sequence differs from Spectre",
+    "404-vector-part-select-window": "integer vector part-select behavior differs from Spectre",
+    "405-vector-concat-code-build": "integer vector concatenation behavior differs from Spectre",
+}
+
 
 CORE_TIERS = {
     "<none>",
@@ -94,10 +103,20 @@ TIER_TO_LAYER = {
         "compile_supported_continuous_time_candidate",
         "Continuous-time operator syntax compiles; dynamic-solver accuracy is not certified.",
     ),
+    "behavioral-control-candidate": (
+        "behavioral_language_extension",
+        "compile_supported_candidate",
+        "Integer/vector control behavior candidate; full Spectre-aligned behavior certification is pending.",
+    ),
     "kcl-syntax-candidate": (
         "conservative_kcl_syntax_extension",
         "compile_supported_kcl_candidate",
         "KCL/current-contribution syntax compiles; MNA/KCL behavior is not certified.",
+    ),
+    "conservative-current/KCL-behavior-certified": (
+        "conservative_kcl_syntax_extension",
+        "behavior_certified_extension",
+        "KCL/current-contribution behavior is certified only for the repository's voltage/current trace contract.",
     ),
 }
 
@@ -161,6 +180,46 @@ def read_layered_verification_summary() -> dict[str, Any]:
     return summary if isinstance(summary, dict) else {}
 
 
+def read_layered_verification_payload() -> dict[str, Any]:
+    verify_json = verify_layered_json()
+    if not verify_json.exists():
+        return {}
+    try:
+        payload = json.loads(verify_json.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def read_behavior_verified_extension_tasks() -> set[str]:
+    payload = read_layered_verification_payload()
+    rows = payload.get("rows", []) if isinstance(payload, dict) else []
+    gold_by_task: dict[str, dict[str, Any]] = {}
+    negative_by_task: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        task = str(row.get("task_slug") or "")
+        if not task:
+            continue
+        if row.get("kind") == "gold":
+            gold_by_task[task] = row
+        elif row.get("kind") == "negative":
+            negative_by_task.setdefault(task, []).append(row)
+    ready: set[str] = set()
+    for task, gold in gold_by_task.items():
+        negatives = negative_by_task.get(task, [])
+        gold_ok = gold.get("status") == "PASS" and gold.get("meets_expectation") is True
+        negatives_ok = (
+            len(negatives) >= 5
+            and all(row.get("status") != "PASS" for row in negatives)
+            and all(row.get("meets_expectation") is True for row in negatives)
+        )
+        if gold_ok and negatives_ok:
+            ready.add(task)
+    return ready
+
+
 def read_staged_gold_probe() -> dict[str, Any]:
     if not STAGED_GOLD_PROBE_JSON.exists():
         return {}
@@ -199,7 +258,7 @@ def read_checks_issue_urls() -> dict[str, list[str]]:
 def classify_task(
     key: str,
     task: dict[str, Any],
-    sop_ready_extension_tasks: set[str],
+    behavior_ready_extension_tasks: set[str],
     checks_issue_urls: dict[str, list[str]],
 ) -> dict[str, Any]:
     tier = str(task.get("tier") or "<none>")
@@ -209,13 +268,25 @@ def classify_task(
     number = task_number(key)
     in_original_full_300 = number <= 300
     extension_candidate = number > 300
-    sop_ready_extension = extension_candidate and key in sop_ready_extension_tasks
-    if sop_ready_extension:
+    behavior_ready_extension = extension_candidate and key in behavior_ready_extension_tasks
+    spectre_divergent = key in SPECTRE_DIVERGENT_TASKS
+    if behavior_ready_extension:
         certification_level = "behavior_certified_extension"
         claim_boundary = (
             "Extension task has SOP-ready behavior evidence: executable visible/hidden tests, "
             "repository behavior checker, and five rejected negative variants. It remains outside "
             "the original full-300 denominator."
+        )
+    if spectre_divergent:
+        certification_level = (
+            "behavior_certified_extension_spectre_divergent"
+            if behavior_ready_extension
+            else "spectre_divergent_candidate"
+        )
+        claim_boundary = (
+            "EVAS/checker behavior evidence exists, but the 2026-07-04 Spectre-parity audit records "
+            f"a retained-row behavior mismatch: {SPECTRE_DIVERGENT_TASKS[key]}. Recalibrate the "
+            "gold/checker contract against Spectre before full Spectre-certified or scored claims."
         )
     return {
         "task_key": key,
@@ -231,13 +302,19 @@ def classify_task(
         "extension_candidate": extension_candidate,
         "behavior_certified": certification_level.startswith("behavior_certified"),
         "score_claim": (
+            "excluded_spectre_divergent_pending_recalibration"
+            if spectre_divergent
+            else
             "original_full_300_policy"
             if in_original_full_300
             else "extension_behavior_certified_outside_original_300"
-            if sop_ready_extension
+            if behavior_ready_extension
             else "excluded_until_behavior_promotion"
         ),
         "claim_boundary": claim_boundary,
+        "spectre_parity_status": "spectre_divergent" if spectre_divergent else "not_marked_divergent",
+        "spectre_recalibration_required": spectre_divergent,
+        "spectre_divergence_reason": SPECTRE_DIVERGENT_TASKS.get(key, ""),
         "blocking_issue_urls": ";".join(checks_issue_urls.get(key, [])),
         "target": ";".join(task.get("target", [])),
         "syntax_focus": task.get("syntax_focus", ""),
@@ -325,6 +402,7 @@ def build_completion_audit(
             and all(issue.get("promotion_command") and issue.get("promotion_acceptance") for issue in blocking_issues)
         )
     )
+    spectre_divergent_count = int(summary.get("spectre_divergent_count", 0) or 0)
     requirements = [
         {
             "requirement": f"Scope covers all v3 extension tasks {extension_start:03d}-{extension_end:03d}.",
@@ -392,6 +470,19 @@ def build_completion_audit(
                 )
             ),
         },
+        {
+            "requirement": "No retained default row is marked spectre-divergent for a full Spectre-certified claim.",
+            "status": "satisfied" if spectre_divergent_count == 0 else "not_satisfied",
+            "evidence": (
+                "No spectre-divergent retained rows are listed."
+                if spectre_divergent_count == 0
+                else f"{spectre_divergent_count} retained row(s) require Spectre recalibration."
+            ),
+            "gap": "" if spectre_divergent_count == 0 else (
+                "Recalibrate the affected gold/checker contracts against Spectre before enabling a full "
+                "Spectre-certified or formal score-denominator claim."
+            ),
+        },
     ]
     is_complete = all(item["status"] == "satisfied" for item in requirements)
     return {
@@ -415,11 +506,14 @@ def build_report() -> dict[str, Any]:
     tasks = read_tasks()
     extension_start, extension_end = extension_bounds(tasks)
     sop_audit = read_sop_audit()
-    sop_ready_extension_tasks = read_sop_ready_extension_tasks()
+    behavior_ready_extension_tasks = (
+        read_sop_ready_extension_tasks()
+        | read_behavior_verified_extension_tasks()
+    )
     verification_summary = read_layered_verification_summary()
     checks_issue_urls = read_checks_issue_urls()
     rows = [
-        classify_task(key, tasks[key], sop_ready_extension_tasks, checks_issue_urls)
+        classify_task(key, tasks[key], behavior_ready_extension_tasks, checks_issue_urls)
         for key in sorted(tasks, key=task_number)
     ]
     extension_rows = [row for row in rows if row["extension_candidate"]]
@@ -442,6 +536,13 @@ def build_report() -> dict[str, Any]:
         "semantic_layer_counts": counter(rows, "semantic_layer"),
         "certification_level_counts": counter(rows, "certification_level"),
         "score_claim_counts": counter(rows, "score_claim"),
+        "spectre_parity_status_counts": counter(rows, "spectre_parity_status"),
+        "spectre_divergent_count": sum(row["spectre_recalibration_required"] for row in rows),
+        "spectre_divergent_tasks": [
+            row["task_key"]
+            for row in rows
+            if row["spectre_recalibration_required"]
+        ],
         "blocking_issue_counts": dict(sorted(Counter(
             issue_url
             for row in rows
@@ -478,7 +579,14 @@ def build_report() -> dict[str, Any]:
     return {
         "date": date.today().isoformat(),
         "release": "benchmark-vabench-release-v3",
-        "status": "layered_complete" if summary["compile_supported_candidate_count"] == 0 else "layered_partial",
+        "status": (
+            "layered_complete"
+            if summary["compile_supported_candidate_count"] == 0
+            and summary["spectre_divergent_count"] == 0
+            else "layered_partial_spectre_divergent"
+            if summary["spectre_divergent_count"]
+            else "layered_partial"
+        ),
         "summary": summary,
         "layers": [
             {
@@ -501,6 +609,7 @@ def build_report() -> dict[str, Any]:
         "claim_boundary": [
             "Only tasks 001-300 are part of the original behavior-certified full-300 claim.",
             f"Tasks {extension_start:03d}-{extension_end:03d} are behavior-certified extension rows outside the original full-300 denominator.",
+            "Rows marked spectre-divergent are excluded from full Spectre-certified and score-denominator claims until recalibrated.",
             "Continuous-time rows certify the repository's finite-difference/stateful behavioral response, not a general analog solver accuracy claim.",
             "KCL/current rows certify observable branch-current contribution behavior, not unknown-node MNA/KCL solving.",
             "AMS, noise/analysis, Cadence-helper, Cadence-derived data-converter, and table-model extension rows are certified only for their layer-specific transient/checker contracts.",
@@ -534,6 +643,9 @@ def write_csv(rows: list[dict[str, Any]]) -> None:
         "certification_level",
         "behavior_certified",
         "score_claim",
+        "spectre_parity_status",
+        "spectre_recalibration_required",
+        "spectre_divergence_reason",
         "claim_boundary",
         "blocking_issue_urls",
         "target",
@@ -762,6 +874,7 @@ def write_md(report: dict[str, Any]) -> None:
         f"- Behavior-certified extension rows: **{summary['behavior_certified_extension_count']}**",
         f"- Compile-supported candidate rows: **{summary['compile_supported_candidate_count']}**",
         f"- Unsupported candidate rows: **{summary['unsupported_candidate_count']}**",
+        f"- Spectre-divergent retained rows: **{summary['spectre_divergent_count']}**",
         "",
         "## Semantic Layers",
         "",
@@ -790,6 +903,23 @@ def write_md(report: dict[str, Any]) -> None:
             f"| {issue['issue_url']} | {issue['task_count']} | {layers} | "
             f"{issue['promotion_acceptance']} |"
         )
+    lines.extend([
+        "",
+        "## Spectre-Divergent Rows",
+        "",
+        "| Task | Reason |",
+        "| --- | --- |",
+    ])
+    divergent_rows = [
+        row for row in report["task_rows"]
+        if row["spectre_recalibration_required"]
+    ]
+    if divergent_rows:
+        for row in divergent_rows:
+            reason = str(row["spectre_divergence_reason"]).replace("|", "\\|")
+            lines.append(f"| `{row['task_key']}` | {reason} |")
+    else:
+        lines.append("| - | - |")
     lines.extend([
         "",
         "## Completion Audit",

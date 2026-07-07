@@ -1,0 +1,379 @@
+# vaBench v3 Score Denominator Manifest
+
+Date: 2026-07-07
+
+This manifest identifies the current v3 candidate score denominator without
+freezing a formal paper score claim.
+
+## Summary
+
+| Metric | Value |
+| --- | ---: |
+| status | `candidate_denominator_identified_not_frozen` |
+| planned entries | 505 |
+| release forms | 505 |
+| core entries | 333 |
+| support entries | 25 |
+| non-core entries | 147 |
+| EVAS behavior-verified entries | 505 |
+| candidate score entries | 333 |
+| candidate score forms | 333 |
+| counted entries | 0 |
+| counted forms | 0 |
+| spectre-divergent rows | 6 |
+
+## Claim Rule
+
+candidate_score_denominator=true marks current v3 standalone core L1/L2/L3 tasks with EVAS gold+negative evidence, excluding support-formal, SX/NA language rows, and retained spectre-divergent rows. counted_in_score remains false until the v3 score policy is explicitly frozen.
+
+## Spectre-Divergent Rows
+
+- `391-rdist-exponential-jitter`
+- `392-rdist-poisson-count-noise`
+- `393-rdist-normal-offset-dither`
+- `396-rdist-erlang-latency`
+- `404-vector-part-select-window`
+- `405-vector-concat-code-build`
+
+## Entry Exclusion Reasons
+
+- `non_core_level_excluded`: 147
+- `spectre_divergent_pending_recalibration`: 6
+- `support_formal_candidate_excluded_from_core_score`: 25
+- `v3_score_policy_not_frozen`: 333
+
+## Candidate Score Rows
+
+- `001-bang-bang-phase-detector`
+- `002-capacitive-sar-feedback-dac`
+- `003-pipeline-adc-stage`
+- `004-trim-calibration-controller`
+- `005-debounce-latch`
+- `006-element-shuffler`
+- `007-first-order-lowpass`
+- `008-gain-trim-controller`
+- `009-lock-detector`
+- `010-offset-comparator`
+- `011-pfd-up-dn-logic`
+- `012-clock-divider`
+- `013-resettable-integrator`
+- `014-sar-logic`
+- `015-segmented-dac`
+- `016-binary-weighted-voltage-dac`
+- `017-slew-rate-limiter`
+- `018-strongarm-style-latch-comparator`
+- `019-unit-element-thermometer-dac`
+- `021-vco-phase-integrator`
+- `022-bandgap-reference-macro-model`
+- `023-calibration-deadband-controller`
+- `024-charge-pump-abstraction`
+- `025-clocked-adc-quantizer`
+- `026-clocked-sample-and-hold`
+- `027-dac-mismatch-unit-weighting-model`
+- `028-digital-phase-accumulator-with-modulo-wrap`
+- `029-dwa-dem-encoder`
+- `030-higher-order-filter`
+- `031-hysteresis-comparator`
+- `032-ldo-regulator-macro-model`
+- `033-limiting-amplifier-frontend`
+- `034-lna-gain-compression-macro`
+- `035-log-rssi-power-detector`
+- `036-loop-filter-abstraction`
+- `037-pa-compression-macro`
+- `038-power-on-reset-detector`
+- `039-precision-rectifier-envelope-detector`
+- `040-programmable-gain-amplifier`
+- `041-propagation-delay-comparator`
+- `042-ptat-ctat-reference-generator`
+- `043-rf-mixer-downconverter-macro`
+- `044-sample-and-hold-with-droop-leakage`
+- `045-soft-hysteretic-limiter`
+- `046-successive-approximation-calibration-search-fsm`
+- `047-threshold-comparator`
+- `048-uvlo-brownout-detector`
+- `049-window-comparator-detector`
+- `052-dc-aware-adc3bit`
+- `053-latched-bus-dac8`
+- `054-thermometer-bus-encoder`
+- `055-slew-rate-dac4`
+- `056-correlated-double-sampler`
+- `057-first-order-sigma-delta-modulator`
+- `075-adc-static-linearity-monitor`
+- `080-acquisition-limited-sample-and-hold`
+- `081-aperture-delay-track-and-hold`
+- `082-bias-voltage-generator-with-enable-trim`
+- `083-crossing-metric-writer`
+- `084-peak-detector`
+- `085-burst-clock-source`
+- `086-dither-noise-like-deterministic-source`
+- `087-lfsr-prbs-generator`
+- `088-ramp-step-source`
+- `089-sine-periodic-voltage-source`
+- `090-adpll-ratio-hop-timer`
+- `091-agc-receiver-leveling-loop`
+- `092-amplifier-filter-chain`
+- `093-bbpd-data-edge-alignment`
+- `094-comparator-offset-search`
+- `095-complete-calibration-loop`
+- `096-converter-static-linearity-measurement`
+- `097-cppll-tracking-reacquire-timer`
+- `098-edge-crossing-interval-timer`
+- `099-dither-adder`
+- `100-final-step-file-metric`
+- `101-fixed-gain-amplifier`
+- `102-gain-estimator`
+- `103-iq-downconversion-chain`
+- `104-ldo-load-step-recovery`
+- `105-pipeline-adc-chain-4b`
+- `106-programmable-stimulus-sequencer`
+- `107-reference-step-clock`
+- `108-reference-startup-enable-flow`
+- `109-sample-hold-droop-front-end`
+- `111-clocked-sine-source`
+- `112-clocked-sar-comparator`
+- `113-clocked-dac-restore-4b`
+- `114-sample-and-hold-ideal`
+- `115-single-shot-pulse`
+- `116-clocked-comparator-reset-low`
+- `117-bipolar-dac-4b-continuous`
+- `118-clocked-dac-restore-7b`
+- `119-crossing-pulse-detector`
+- `120-not-gate-voltage`
+- `121-dff-reset-voltage`
+- `122-comparator-offset-calibration-loop`
+- `123-start-gated-offset-search`
+- `124-hysteresis-trip-characterizer`
+- `125-clocked-dac-4b-binary`
+- `126-latched-comparator-delay`
+- `127-sar-weighted-sum`
+- `128-two-input-and-gate`
+- `129-two-input-xor-gate`
+- `130-analog-mux-threshold`
+- `131-two-bit-counter-marker`
+- `132-max-detector-hold`
+- `133-time-diff-detector`
+- `134-differential-buffer`
+- `135-two-input-or-gate`
+- `136-sar-cdac-residue`
+- `137-two-input-nand-gate`
+- `138-two-input-nor-gate`
+- `139-three-input-and-gate`
+- `140-three-input-or-gate`
+- `141-three-input-xor-gate`
+- `142-attenuator-gain`
+- `143-deadband-window`
+- `144-differential-deadband`
+- `145-hard-voltage-clamp`
+- `146-smooth-comparator-tanh`
+- `147-limiter-rails`
+- `148-absolute-value`
+- `149-offset-gain-amplifier`
+- `150-safe-voltage-divider`
+- `151-polynomial-differential-vcvs`
+- `152-differential-gain-driver`
+- `153-limiting-differential-amplifier`
+- `154-analog-multiplier`
+- `155-three-way-threshold-mux`
+- `156-differential-amplifier-core`
+- `157-logarithmic-amplifier`
+- `158-soft-voltage-clamp`
+- `159-variable-gain-differential-amplifier`
+- `160-voltage-controlled-gain-amplifier`
+- `161-ideal-differential-opamp`
+- `162-half-adder-logic`
+- `163-full-adder-logic`
+- `164-half-subtractor-logic`
+- `165-full-subtractor-logic`
+- `166-rs-latch-voltage`
+- `167-ideal-adc-4bit-quantizer`
+- `168-ideal-dac-4bit-differential`
+- `169-two-period-sample-delay`
+- `170-clocked-four-input-mux`
+- `171-divide-by-eight-clock`
+- `172-flash-thermometer-centered-sum`
+- `173-weighted-sar-decoder-9b`
+- `174-control-word-encoder-7b`
+- `175-four-channel-edge-sampler`
+- `176-dual-modulus-divider-16-17`
+- `177-sar-5bit-serial-decoder`
+- `178-cyclic-decoder-12bit`
+- `179-flash-8level-sum-delay`
+- `180-flash-sum8-fraction`
+- `181-two-channel-sample-demux`
+- `182-differential-dac-calc-6b`
+- `183-flash-adc-threshold-taps`
+- `184-divide-by-two-toggle`
+- `185-dac-5v-weighted-7b`
+- `186-folded-flash-dac-4b`
+- `187-ref-flash-8level-decoder`
+- `188-ref-flash-15level-decoder`
+- `189-divide-by-8-9-switch`
+- `190-dac-restore-10bit-offset`
+- `191-dac-8bit-ideal-scalar`
+- `192-flash-data-align-pipeline`
+- `193-cyclic-decoder-10b`
+- `194-ideal-adc-out-7bits`
+- `195-va-lx-adc-ideal-4b`
+- `196-va-lx-dac-ideal-4b`
+- `197-l1-dac-4b-bipolar`
+- `198-l2-cdac-4b-residue`
+- `199-ideal-clkmux-8channel`
+- `200-dac-ideal-4b-offset`
+- `201-linear-pfd-gain`
+- `202-comparator-delay-overdrive-meter`
+- `203-comparator-offset-driver`
+- `204-pipe-2lane-edge-align`
+- `205-dac-serial-accumulator`
+- `206-sar-sum-weighted-11b`
+- `207-iterative-isar-dac`
+- `208-offset-bisection-driver`
+- `209-weighted-decoder-7b5`
+- `210-toggle-flip-flop`
+- `211-sync-8b-dffs-v2`
+- `212-onehot-progress-encoder`
+- `213-tdc-ideal-edge-delta`
+- `214-foreground-cload-calibrator`
+- `215-pipe15-data-align`
+- `216-clocked-mux4-sampler`
+- `217-dac7-code-generator`
+- `218-foreground-rdac-calibrator`
+- `219-offset-rdac-search-flow`
+- `220-spi-shift-mux`
+- `221-dff-set-reset-hold`
+- `222-sarfend-logic-4b`
+- `223-adc-sample-clock-sequencer`
+- `224-pipeline-counter-onehot`
+- `225-cdac-bidirect-residue`
+- `226-pfd-reset-pulse`
+- `227-trim-ctrl-4bit`
+- `228-linearity-rdac-offset-sweep`
+- `229-sar-das-logic-6b`
+- `230-sar-logic-4b-self-timed`
+- `231-pfd-tdomain-reset-window`
+- `232-pipe-adc-gain-control-loop`
+- `233-clock-sample-1600n-sequencer`
+- `234-l2-sar-logic-4b`
+- `235-phase-detector-chopper`
+- `236-single-adc-7b-weighted`
+- `237-qtz-differential-2level`
+- `238-l2-7b-dac-ready`
+- `239-l2-cdac-4b-switch`
+- `240-cdac-monodown-7b`
+- `241-cdac-6b-stage1-up`
+- `242-adc-zoom-timing-sequencer`
+- `243-l2-sar-logic-7b`
+- `244-l3-sar2-logic-7b`
+- `245-cdac-8b-monodown`
+- `246-va-dac-6b-se`
+- `247-offset-halving-search`
+- `248-sar-comparator-reset-high`
+- `249-dac-restore-4bit-clocked`
+- `250-dac-restore-7bit-clocked`
+- `251-dac-restore-6bit-1p8`
+- `252-sample-hold-5v-clock`
+- `253-sum5-signed-sar-weight`
+- `254-lt-readout-sar4`
+- `255-tool-4bit-sar-signed-dac`
+- `256-dac4bit-small-swing`
+- `257-comparator-reset-low-1p8`
+- `258-lt-read-sar6b-weighted`
+- `259-lt-read-sar7b-weighted`
+- `260-dac-serial-16b-nobridge`
+- `261-sar-13bit-serial-decoder`
+- `262-single-shot-timer-pulse`
+- `263-clocked-comparator-dual-output`
+- `264-dac4bit-bipolar-252m`
+- `265-bin2ther-2b`
+- `266-dff-set-reset`
+- `267-pfd-up-down-state`
+- `268-samplehold-rising-edge`
+- `269-trim-ctrl-5bit`
+- `270-therm8-to-bin4-count`
+- `271-coarse-qtz-3bit-residue`
+- `272-rs-phase-detector`
+- `273-level-shifter-offset`
+- `274-weighted-decoder-6bit`
+- `275-divide-by-two-toggle`
+- `276-accum3-pulse`
+- `277-xor-phase-detector`
+- `278-decision-router-logic`
+- `279-safe-analog-divider`
+- `280-vargain-diffamp-clip`
+- `281-programmable-divider-by-n`
+- `282-pfd-timer-reset`
+- `283-weighted-sar-adc-dac-loop`
+- `284-window-comparator-testbench`
+- `285-dual-track-sample-hold`
+- `286-first-order-lowpass-bugfix`
+- `287-gain-extraction-flow`
+- `288-absolute-value`
+- `289-deadband-voltage`
+- `290-deadband-diffamp`
+- `291-limiting-diffamp`
+- `292-hysteretic-comparator-receiver`
+- `293-flash-folded-dac4`
+- `294-subradix-dac10`
+- `295-clocked-adc3bit`
+- `296-cal4bit-modulo`
+- `297-mux4-priority`
+- `298-voltage-match-window`
+- `299-bipolar-dff-sample`
+- `300-pfd-active-low-reset`
+- `341-rail-referenced-gain-buffer`
+- `342-weighted-balance-summer`
+- `343-supply-qualified-window-flag`
+- `344-power-mode-clamped-mux`
+- `345-bias-trim-affine-mapper`
+- `346-reset-polarity-qualifier`
+- `347-multi-condition-enable-combiner`
+- `348-phase-mismatch-qualifier`
+- `349-priority-fault-code-driver`
+- `350-lane-validity-reduction-monitor`
+- `351-comparator-decision-capture`
+- `352-falling-edge-calibration-sampler`
+- `353-resettable-phase-toggle-monitor`
+- `354-settling-progress-counter`
+- `355-enable-qualified-bias-hold`
+- `356-dynamic-supply-enable-driver`
+- `357-local-domain-buffer-translator`
+- `358-bias-window-threshold-bridge`
+- `359-clocked-power-ready-sampler`
+- `360-mode-selected-bias-driver`
+- `373-saturation-recovery-limiter`
+- `374-sampled-error-update-monitor`
+- `375-windowed-event-rate-monitor`
+- `376-reset-release-sequencer`
+- `377-adaptive-threshold-tracker`
+- `378-rail-normalized-metric-mapper`
+- `394-deterministic-energy-accumulator`
+- `395-bounded-tail-dither-shaper`
+- `403-calibration-bit-select-flag`
+- `406-lane-mask-replication-driver`
+- `415-explicit-sar-slice-router`
+- `416-ready-reduction-fault-monitor`
+- `417-async-reset-event-counter`
+- `418-enable-saturating-ready-counter`
+- `419-rail-aware-threshold-bridge`
+- `420-mode-latch-calibration-gate`
+- `421-calibration-affine-transform`
+- `433-configurable-startup-policy`
+- `449-explicit-replicated-stage-chain`
+- `451-electrical-threshold-bridge`
+- `452-local-rail-domain-translator`
+- `453-edge-delay-qualified-driver`
+- `454-calibration-quadrant-mapper`
+- `455-explicit-bus-slice-router`
+- `458-iterative-decay-estimator`
+- `459-bounded-window-accumulator`
+- `490-event-reacquire-lock-detector`
+- `495-supply-bias-validity-gate`
+- `496-reference-settling-window-monitor`
+- `497-power-enable-turnon-delay-gate`
+- `498-power-mode-supply-current-metric`
+- `499-dynamic-supply-level-driver`
+- `500-rail-ramp-rate-startup-monitor`
+- `501-differential-common-mode-window-monitor`
+- `502-sine-vco-idtmod-bound-step`
+- `503-differential-vco-clip-idtmod`
+- `504-charge-pump-pfd-state-machine`
+- `505-fractional-n-divider-accumulator-flow`
