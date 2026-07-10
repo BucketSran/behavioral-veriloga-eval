@@ -760,6 +760,48 @@ def test_missing_evidence_is_separate_from_behavioral_failure(tmp_path: Path) ->
     assert "behavioral_failure" in issue_categories(failure_record, "gate2")
 
 
+def test_external_evidence_paths_override_stale_package_defaults(tmp_path: Path) -> None:
+    module = load_module()
+    numbering = write_fixture(tmp_path)
+    default_spectre = tmp_path / "reports" / "first_n_spectre" / "first1.json"
+    default_evas = tmp_path / "reports" / "tri_form_first120" / "local_evas_evidence.json"
+    external_spectre = tmp_path / "external_evidence" / "first1.json"
+    external_evas = tmp_path / "external_evidence" / "local_evas_evidence.json"
+
+    write_json(external_spectre, json.loads(default_spectre.read_text(encoding="utf-8")))
+    write_json(external_evas, json.loads(default_evas.read_text(encoding="utf-8")))
+
+    stale_spectre = json.loads(default_spectre.read_text(encoding="utf-8"))
+    stale_spectre["generated_at"] = "2026-07-11T00:00:00+00:00"
+    stale_spectre["rows"][0]["hashes"]["gold_bundle_sha256"] = "0" * 64
+    stale_spectre["rows"][0]["spectre"]["untriaged_warnings"] = ["package default is stale"]
+    write_json(default_spectre, stale_spectre)
+
+    stale_evas = json.loads(default_evas.read_text(encoding="utf-8"))
+    for record in stale_evas["records"]:
+        record["status"] = "fail"
+        record["returncode"] = 1
+    write_json(default_evas, stale_evas)
+
+    report = module.audit_release(
+        root=tmp_path,
+        numbering_plan_path=numbering,
+        canonical_first=1,
+        spectre_evidence_paths=[external_spectre],
+        local_evas_evidence_path=external_evas,
+    )
+
+    record = report["records"][0]
+    assert record["gate2"]["ready"] is True
+    assert record["gate2"]["spectre_evidence"] == str(external_spectre)
+    assert report["scope"]["spectre_evidence_paths"] == [str(external_spectre)]
+    assert report["scope"]["local_evas_evidence_path"] == str(external_evas)
+    assert "spectre_untriaged_warnings" not in issue_codes(record, "gate2")
+    assert "spectre_gold_bundle_sha256_mismatch" not in issue_codes(record, "gate2")
+    assert "evas_feedback_behavior_failure" not in issue_codes(record, "gate2")
+    assert "evas_score_behavior_failure" not in issue_codes(record, "gate2")
+
+
 def test_gate3_reports_partition_and_property_coverage(tmp_path: Path) -> None:
     module = load_module()
     numbering = write_fixture(tmp_path)
@@ -790,8 +832,10 @@ def test_gate3_reports_partition_and_property_coverage(tmp_path: Path) -> None:
 
 def test_cli_writes_requested_output(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     module = load_module()
-    numbering = write_fixture(tmp_path)
+    write_fixture(tmp_path)
     output = tmp_path / "out" / "audit.json"
+    spectre_evidence = tmp_path / "reports" / "first_n_spectre" / "first1.json"
+    local_evas_evidence = tmp_path / "reports" / "tri_form_first120" / "local_evas_evidence.json"
     monkeypatch.setattr(module, "ROOT", tmp_path)
     monkeypatch.setattr(
         sys,
@@ -800,6 +844,10 @@ def test_cli_writes_requested_output(tmp_path: Path, monkeypatch: pytest.MonkeyP
             "audit_v4_strict_readiness.py",
             "--canonical-first",
             "1",
+            "--spectre-evidence",
+            str(spectre_evidence),
+            "--local-evas-evidence",
+            str(local_evas_evidence),
             "--output",
             str(output),
         ],
@@ -809,4 +857,6 @@ def test_cli_writes_requested_output(tmp_path: Path, monkeypatch: pytest.MonkeyP
 
     payload = json.loads(output.read_text(encoding="utf-8"))
     assert payload["scope"]["canonical_first"] == 1
+    assert payload["scope"]["spectre_evidence_paths"] == [str(spectre_evidence)]
+    assert payload["scope"]["local_evas_evidence_path"] == str(local_evas_evidence)
     assert payload["summary"]["gate2"]["ready_count"] == 1
