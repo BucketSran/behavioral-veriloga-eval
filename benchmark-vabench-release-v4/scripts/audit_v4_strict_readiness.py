@@ -276,8 +276,15 @@ def find_public_leaks(
     return sorted(set(leaks))
 
 
-def load_spectre_evidence(root: Path) -> list[tuple[Path, dict[str, Any]]]:
-    candidates = sorted((root / "reports" / "first_n_spectre").glob("*.json"))
+def load_spectre_evidence(
+    root: Path,
+    evidence_paths: Iterable[Path] | None = None,
+) -> list[tuple[Path, dict[str, Any]]]:
+    candidates = (
+        [Path(path) for path in evidence_paths]
+        if evidence_paths is not None
+        else sorted((root / "reports" / "first_n_spectre").glob("*.json"))
+    )
     evidence: list[tuple[Path, dict[str, Any]]] = []
     for path in candidates:
         try:
@@ -289,8 +296,8 @@ def load_spectre_evidence(root: Path) -> list[tuple[Path, dict[str, Any]]]:
     return evidence
 
 
-def load_local_evas(root: Path) -> dict[str, list[dict[str, Any]]]:
-    path = root / "reports" / "tri_form_first120" / "local_evas_evidence.json"
+def load_local_evas(root: Path, evidence_path: Path | None = None) -> dict[str, list[dict[str, Any]]]:
+    path = evidence_path or root / "reports" / "tri_form_first120" / "local_evas_evidence.json"
     if not path.is_file():
         return {}
     try:
@@ -1055,6 +1062,8 @@ def audit_release(
     root: Path | None = None,
     numbering_plan_path: Path | None = None,
     canonical_first: int = 120,
+    spectre_evidence_paths: Iterable[Path] | None = None,
+    local_evas_evidence_path: Path | None = None,
 ) -> dict[str, Any]:
     root = root or ROOT
     numbering_plan_path = numbering_plan_path or root / "reports" / "v4_task_family_numbering" / "numbering_plan.json"
@@ -1074,8 +1083,8 @@ def audit_release(
                 gate="gate2",
             )
         )
-    spectre_evidence = load_spectre_evidence(root)
-    local_evas = load_local_evas(root)
+    spectre_evidence = load_spectre_evidence(root, spectre_evidence_paths)
+    local_evas = load_local_evas(root, local_evas_evidence_path)
 
     records: list[dict[str, Any]] = []
     for row in rows:
@@ -1140,6 +1149,10 @@ def audit_release(
             "numbering_plan": str(numbering_plan_path),
             "numbering_plan_sha256": numbering_hash,
             "toolchain_lock_sha256": toolchain_hash,
+            "spectre_evidence_paths": [str(path) for path, _payload in spectre_evidence],
+            "local_evas_evidence_path": str(local_evas_evidence_path)
+            if local_evas_evidence_path is not None
+            else str(root / "reports" / "tri_form_first120" / "local_evas_evidence.json"),
         },
         "summary": {"gate2": counts("gate2"), "gate3": counts("gate3")},
         "records": records,
@@ -1149,13 +1162,32 @@ def audit_release(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--canonical-first", type=int, default=120, metavar="N")
+    parser.add_argument(
+        "--spectre-evidence",
+        type=Path,
+        action="append",
+        default=None,
+        metavar="PATH",
+        help="First-N Spectre evidence JSON to audit. May be repeated. Defaults to reports/first_n_spectre/*.json.",
+    )
+    parser.add_argument(
+        "--local-evas-evidence",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help="Local EVAS evidence JSON to audit. Defaults to reports/tri_form_first120/local_evas_evidence.json.",
+    )
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
-    payload = audit_release(canonical_first=args.canonical_first)
+    payload = audit_release(
+        canonical_first=args.canonical_first,
+        spectre_evidence_paths=args.spectre_evidence,
+        local_evas_evidence_path=args.local_evas_evidence,
+    )
     write_json(args.output, payload)
     print(json.dumps(payload["summary"], indent=2, sort_keys=True))
     return 0
