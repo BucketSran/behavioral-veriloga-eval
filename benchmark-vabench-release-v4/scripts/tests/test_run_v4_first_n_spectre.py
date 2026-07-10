@@ -264,6 +264,13 @@ def test_only_evas_profile_sfe_105_is_benign() -> None:
     ) is False
 
 
+def test_ahdlcmi_cache_lock_timeout_is_benign_infrastructure_fallback() -> None:
+    module = load_module()
+
+    assert module.is_benign_warning("remote_ahdlcmi_cache_prepare_failed rc=75") is True
+    assert module.is_benign_warning("remote_ahdlcmi_cache_prepare_failed rc=1") is False
+
+
 def test_side_effect_exclusivity_ignores_only_spectre_owned_log(tmp_path: Path) -> None:
     module = load_module()
     output = tmp_path / "output"
