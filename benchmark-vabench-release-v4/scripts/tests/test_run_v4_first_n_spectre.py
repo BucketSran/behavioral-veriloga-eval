@@ -577,6 +577,7 @@ def write_legacy_spectre_cache_entry(
     mode: str = "ax",
     input_overrides: dict[str, str] | None = None,
     created_at: str = "2026-07-10T01:00:00+00:00",
+    historical_v1_inputs: bool = False,
 ) -> None:
     identity = {
         "backend": "sui-direct",
@@ -622,6 +623,17 @@ def write_legacy_spectre_cache_entry(
         "notes": [],
     }
     inputs = module.cache_inputs(case, mode=mode)
+    if historical_v1_inputs:
+        inputs = {
+            "task_id": inputs["task_id"],
+            "profile": inputs["profile"],
+            "deck_sha256": inputs["deck_sha256"],
+            "gold_bundle_sha256": inputs["candidate_bundle_sha256"],
+            "public_support_bundle_sha256": inputs["public_support_bundle_sha256"],
+            "harness_spec_sha256": inputs["harness_spec_sha256"],
+            "score_profile_sha256": inputs["profile_sha256"],
+            "spectre_mode": inputs["spectre_mode"],
+        }
     inputs.update(input_overrides or {})
     inputs["checker_sha256"] = "legacy-checker-only-field"
     row["cache"] = {
@@ -669,7 +681,9 @@ def test_legacy_cache_migration_reuses_raw_trace_after_checker_only_change(
     legacy_root = tmp_path / "legacy"
     legacy_entry = legacy_root / "001" / "score" / ("1" * 64)
     local_entry = tmp_path / "cache" / "001" / "score" / key
-    write_legacy_spectre_cache_entry(module, case, legacy_entry)
+    write_legacy_spectre_cache_entry(
+        module, case, legacy_entry, historical_v1_inputs=True
+    )
     monkeypatch.setattr(
         module,
         "evaluate_behavior_with_timeout",

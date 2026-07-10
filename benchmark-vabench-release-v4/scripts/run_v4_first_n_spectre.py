@@ -746,39 +746,58 @@ def _legacy_cache_created_at(entry: Path, manifest: dict[str, Any]) -> tuple[flo
 
 
 def _legacy_observed_inputs(row: dict[str, Any], manifest: dict[str, Any]) -> dict[str, str]:
+    raw: dict[str, str] = {}
     for candidate in (
         manifest.get("inputs"),
         (row.get("cache") or {}).get("inputs"),
     ):
         if isinstance(candidate, dict):
-            return {str(key): str(value) for key, value in candidate.items()}
+            for key, value in candidate.items():
+                raw.setdefault(str(key), str(value))
     hashes = row.get("hashes") or {}
     identity = row.get("spectre_identity") or {}
+    components = row.get("component_fingerprints") or {}
+    mode = raw.get("spectre_mode") or str(identity.get("mode") or "")
+    observed_backend = (
+        raw.get("backend_sha256")
+        or str((components.get("backend") or {}).get("spectre_sha256") or "")
+        or str(hashes.get("spectre_sha256") or hashes.get("spectre_backend_sha256") or "")
+    )
+    if not observed_backend and identity and mode:
+        observed_backend = backend_fingerprints(
+            {"spectre": identity, "evas": {}},
+            spectre_mode=mode,
+            spectre_identity=identity,
+        )["spectre_sha256"]
     return {
-        "task_id": str(row.get("task_id") or ""),
-        "profile": "score",
-        "backend": "spectre",
-        "backend_sha256": str(
-            hashes.get("spectre_sha256")
-            or hashes.get("spectre_backend_sha256")
-            or ""
-        ),
-        "deck_sha256": str(hashes.get("deck_sha256") or ""),
+        "task_id": raw.get("task_id") or str(row.get("task_id") or ""),
+        "profile": raw.get("profile") or "score",
+        "backend": raw.get("backend") or "spectre",
+        "backend_sha256": observed_backend,
+        "deck_sha256": raw.get("deck_sha256") or str(hashes.get("deck_sha256") or ""),
         "candidate_bundle_sha256": str(
-            hashes.get("candidate_bundle_sha256")
+            raw.get("candidate_bundle_sha256")
+            or raw.get("gold_bundle_sha256")
+            or hashes.get("candidate_bundle_sha256")
             or hashes.get("gold_bundle_sha256")
             or ""
         ),
         "public_support_bundle_sha256": str(
-            hashes.get("public_support_bundle_sha256") or ""
+            raw.get("public_support_bundle_sha256")
+            or hashes.get("public_support_bundle_sha256")
+            or ""
         ),
-        "harness_spec_sha256": str(hashes.get("harness_spec_sha256") or ""),
+        "harness_spec_sha256": str(
+            raw.get("harness_spec_sha256") or hashes.get("harness_spec_sha256") or ""
+        ),
         "profile_sha256": str(
-            hashes.get("profile_sha256")
+            raw.get("profile_sha256")
+            or raw.get("score_profile_sha256")
+            or hashes.get("profile_sha256")
             or hashes.get("score_profile_sha256")
             or ""
         ),
-        "spectre_mode": str(identity.get("mode") or ""),
+        "spectre_mode": mode,
     }
 
 
