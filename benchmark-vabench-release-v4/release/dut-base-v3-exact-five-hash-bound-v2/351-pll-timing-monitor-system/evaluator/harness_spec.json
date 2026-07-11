@@ -1,0 +1,101 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "pll_timing_monitor_top.va",
+      "phase_detector.va",
+      "divider.va",
+      "lock_detector.va",
+      "reacquire_timer.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=240n maxstep=100p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "ref_clk",
+      "fb_clk",
+      "rst",
+      "enable",
+      "up",
+      "down",
+      "lock",
+      "reacquire",
+      "div2_clk",
+      "phase_3",
+      "phase_2",
+      "phase_1",
+      "phase_0"
+    ]
+  },
+  "family_id": "351",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 240n 0]",
+          "Venable (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 205n 0.9 205.1n 0 218n 0 218.1n 0.9 240n 0.9]",
+          "Vref_clk (ref_clk 0) vsource type=pwl wave=[0 0 5.95n 0 6n 0.9 9n 0.9 9.05n 0 17.95n 0 18n 0.9 21n 0.9 21.05n 0 29.95n 0 30n 0.9 33n 0.9 33.05n 0 41.95n 0 42n 0.9 45n 0.9 45.05n 0 53.95n 0 54n 0.9 57n 0.9 57.05n 0 65.95n 0 66n 0.9 69n 0.9 69.05n 0 77.95n 0 78n 0.9 81n 0.9 81.05n 0 89.95n 0 90n 0.9 93n 0.9 93.05n 0 101.95n 0 102n 0.9 105n 0.9 105.05n 0 113.95n 0 114n 0.9 117n 0.9 117.05n 0 125.95n 0 126n 0.9 129n 0.9 129.05n 0 137.95n 0 138n 0.9 141n 0.9 141.05n 0 149.95n 0 150n 0.9 153n 0.9 153.05n 0 161.95n 0 162n 0.9 165n 0.9 165.05n 0 173.95n 0 174n 0.9 177n 0.9 177.05n 0 185.95n 0 186n 0.9 189n 0.9 189.05n 0 197.95n 0 198n 0.9 201n 0.9 201.05n 0 209.95n 0 210n 0.9 213n 0.9 213.05n 0 221.95n 0 222n 0.9 225n 0.9 225.05n 0 240n 0]",
+          "Vfb_clk (fb_clk 0) vsource type=pwl wave=[0 0 6.75n 0 6.8n 0.9 9.8n 0.9 9.85n 0 17.15n 0 17.2n 0.9 20.2n 0.9 20.25n 0 30.75n 0 30.8n 0.9 33.8n 0.9 33.85n 0 41.15n 0 41.2n 0.9 44.2n 0.9 44.25n 0 54.75n 0 54.8n 0.9 57.8n 0.9 57.85n 0 65.15n 0 65.2n 0.9 68.2n 0.9 68.25n 0 78.75n 0 78.8n 0.9 81.8n 0.9 81.85n 0 89.15n 0 89.2n 0.9 92.2n 0.9 92.25n 0 102.75n 0 102.8n 0.9 105.8n 0.9 105.85n 0 114.75n 0 114.8n 0.9 117.8n 0.9 117.85n 0 126.75n 0 126.8n 0.9 129.8n 0.9 129.85n 0 138.75n 0 138.8n 0.9 141.8n 0.9 141.85n 0 150.75n 0 150.8n 0.9 153.8n 0.9 153.85n 0 162.75n 0 162.8n 0.9 165.8n 0.9 165.85n 0 174.75n 0 174.8n 0.9 177.8n 0.9 177.85n 0 186.75n 0 186.8n 0.9 189.8n 0.9 189.85n 0 198.75n 0 198.8n 0.9 201.8n 0.9 201.85n 0 210.75n 0 210.8n 0.9 213.8n 0.9 213.85n 0 222.75n 0 222.8n 0.9 225.8n 0.9 225.85n 0 240n 0]",
+          "",
+          "XDUT (ref_clk fb_clk rst enable up down lock reacquire div2_clk phase_3 phase_2 phase_1 phase_0) pll_timing_monitor_top"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "240n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=240n maxstep=100p"
+        ],
+        "body_lines": [
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 240n 0]",
+          "Venable (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 206.5n 0.9 206.6n 0 218n 0 218.1n 0.9 240n 0.9]",
+          "Vref_clk (ref_clk 0) vsource type=pwl wave=[0 0 4.95n 0 5n 0.9 7.5n 0.9 7.55n 0 14.95n 0 15n 0.9 17.5n 0.9 17.55n 0 24.95n 0 25n 0.9 27.5n 0.9 27.55n 0 34.95n 0 35n 0.9 37.5n 0.9 37.55n 0 44.95n 0 45n 0.9 47.5n 0.9 47.55n 0 54.95n 0 55n 0.9 57.5n 0.9 57.55n 0 64.95n 0 65n 0.9 67.5n 0.9 67.55n 0 74.95n 0 75n 0.9 77.5n 0.9 77.55n 0 84.95n 0 85n 0.9 87.5n 0.9 87.55n 0 94.95n 0 95n 0.9 97.5n 0.9 97.55n 0 104.95n 0 105n 0.9 107.5n 0.9 107.55n 0 114.95n 0 115n 0.9 117.5n 0.9 117.55n 0 124.95n 0 125n 0.9 127.5n 0.9 127.55n 0 134.95n 0 135n 0.9 137.5n 0.9 137.55n 0 144.95n 0 145n 0.9 147.5n 0.9 147.55n 0 154.95n 0 155n 0.9 157.5n 0.9 157.55n 0 164.95n 0 165n 0.9 167.5n 0.9 167.55n 0 174.95n 0 175n 0.9 177.5n 0.9 177.55n 0 184.95n 0 185n 0.9 187.5n 0.9 187.55n 0 194.95n 0 195n 0.9 197.5n 0.9 197.55n 0 204.95n 0 205n 0.9 207.5n 0.9 207.55n 0 214.95n 0 215n 0.9 217.5n 0.9 217.55n 0 224.95n 0 225n 0.9 227.5n 0.9 227.55n 0 240n 0]",
+          "Vfb_clk (fb_clk 0) vsource type=pwl wave=[0 0 5.6n 0 5.65n 0.9 8.15n 0.9 8.2n 0 14.3n 0 14.35n 0.9 16.85n 0.9 16.9n 0 25.6n 0 25.65n 0.9 28.15n 0.9 28.2n 0 34.3n 0 34.35n 0.9 36.85n 0.9 36.9n 0 45.6n 0 45.65n 0.9 48.15n 0.9 48.2n 0 54.3n 0 54.35n 0.9 56.85n 0.9 56.9n 0 65.6n 0 65.65n 0.9 68.15n 0.9 68.2n 0 74.3n 0 74.35n 0.9 76.85n 0.9 76.9n 0 85.6n 0 85.65n 0.9 88.15n 0.9 88.2n 0 94.3n 0 94.35n 0.9 96.85n 0.9 96.9n 0 105.6n 0 105.65n 0.9 108.15n 0.9 108.2n 0 115.6n 0 115.65n 0.9 118.15n 0.9 118.2n 0 125.6n 0 125.65n 0.9 128.15n 0.9 128.2n 0 135.6n 0 135.65n 0.9 138.15n 0.9 138.2n 0 145.6n 0 145.65n 0.9 148.15n 0.9 148.2n 0 155.6n 0 155.65n 0.9 158.15n 0.9 158.2n 0 165.6n 0 165.65n 0.9 168.15n 0.9 168.2n 0 175.6n 0 175.65n 0.9 178.15n 0.9 178.2n 0 185.6n 0 185.65n 0.9 188.15n 0.9 188.2n 0 195.6n 0 195.65n 0.9 198.15n 0.9 198.2n 0 205.6n 0 205.65n 0.9 208.15n 0.9 208.2n 0 215.6n 0 215.65n 0.9 218.15n 0.9 218.2n 0 225.6n 0 225.65n 0.9 228.15n 0.9 228.2n 0 240n 0]",
+          "",
+          "XDUT (ref_clk fb_clk rst enable up down lock reacquire div2_clk phase_3 phase_2 phase_1 phase_0) pll_timing_monitor_top"
+        ]
+      },
+      "deterministic_seed": 1,
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "240n"
+      },
+      "simulatorOptions": {}
+    }
+  },
+  "property_ids": [
+    "P_RESET_DISABLE_CLEAR",
+    "P_PHASE_COMPARE",
+    "P_PHASE_CODE",
+    "P_DIVIDE_BY_FOUR_EDGES",
+    "P_LOCK_REACQUIRE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "2db7dc7617e544b2f76f34d1b97fa919f5093f26cd8a7e92e8c80ee402761a4a",
+    "family_spec_sha256": "ef0c80f7ac0211a174c187b5825cebdc71a40744c0c48373cd5765f35dd65948"
+  },
+  "task_id": "v4-351"
+}

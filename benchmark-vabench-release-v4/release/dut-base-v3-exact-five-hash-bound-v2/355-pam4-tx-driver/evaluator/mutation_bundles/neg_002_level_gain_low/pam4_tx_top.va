@@ -1,0 +1,66 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pam4_tx_top (
+    input  electrical bit_msb,
+    input  electrical bit_lsb,
+    input  electrical clk,
+    input  electrical rst,
+    input  electrical emph_en,
+    output electrical vout,
+    output electrical level_1,
+    output electrical level_0,
+    output electrical delta_dbg
+);
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real level_step = 0.3;
+    parameter real emph_step = 60e-3;
+    parameter real tr = 200e-12;
+
+    electrical level_v;
+
+    gray_mapper #(
+        .vdd(vdd),
+        .vss(vss),
+        .vth(vth),
+        .tr(tr)
+    ) u_gray_mapper (
+        .bit_msb(bit_msb),
+        .bit_lsb(bit_lsb),
+        .rst(rst),
+        .level_1(level_1),
+        .level_0(level_0)
+    );
+
+    level_dac #(
+        .vss(vss),
+        .vth(vth),
+        .level_step(level_step),
+        .tr(tr)
+    ) u_level_dac (
+        .level_1(level_1),
+        .level_0(level_0),
+        .rst(rst),
+        .level_v(level_v)
+    );
+
+    preemphasis_driver #(
+        .vdd(vdd),
+        .vss(vss),
+        .vth(vth),
+        .level_step(level_step),
+        .emph_step(emph_step),
+        .tr(tr)
+    ) u_preemphasis_driver (
+        .clk(clk),
+        .rst(rst),
+        .emph_en(emph_en),
+        .level_1(level_1),
+        .level_0(level_0),
+        .level_v(level_v),
+        .vout(vout),
+        .delta_dbg(delta_dbg)
+    );
+endmodule

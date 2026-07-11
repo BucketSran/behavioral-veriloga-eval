@@ -1,0 +1,20 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/pll_timing_monitor_top.va"
+ahdl_include "./dut/phase_detector.va"
+ahdl_include "./dut/divider.va"
+ahdl_include "./dut/lock_detector.va"
+ahdl_include "./dut/reacquire_timer.va"
+
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 240n 0]
+Venable (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 205n 0.9 205.1n 0 218n 0 218.1n 0.9 240n 0.9]
+Vref_clk (ref_clk 0) vsource type=pwl wave=[0 0 5.95n 0 6n 0.9 9n 0.9 9.05n 0 17.95n 0 18n 0.9 21n 0.9 21.05n 0 29.95n 0 30n 0.9 33n 0.9 33.05n 0 41.95n 0 42n 0.9 45n 0.9 45.05n 0 53.95n 0 54n 0.9 57n 0.9 57.05n 0 65.95n 0 66n 0.9 69n 0.9 69.05n 0 77.95n 0 78n 0.9 81n 0.9 81.05n 0 89.95n 0 90n 0.9 93n 0.9 93.05n 0 101.95n 0 102n 0.9 105n 0.9 105.05n 0 113.95n 0 114n 0.9 117n 0.9 117.05n 0 125.95n 0 126n 0.9 129n 0.9 129.05n 0 137.95n 0 138n 0.9 141n 0.9 141.05n 0 149.95n 0 150n 0.9 153n 0.9 153.05n 0 161.95n 0 162n 0.9 165n 0.9 165.05n 0 173.95n 0 174n 0.9 177n 0.9 177.05n 0 185.95n 0 186n 0.9 189n 0.9 189.05n 0 197.95n 0 198n 0.9 201n 0.9 201.05n 0 209.95n 0 210n 0.9 213n 0.9 213.05n 0 221.95n 0 222n 0.9 225n 0.9 225.05n 0 240n 0]
+Vfb_clk (fb_clk 0) vsource type=pwl wave=[0 0 6.75n 0 6.8n 0.9 9.8n 0.9 9.85n 0 17.15n 0 17.2n 0.9 20.2n 0.9 20.25n 0 30.75n 0 30.8n 0.9 33.8n 0.9 33.85n 0 41.15n 0 41.2n 0.9 44.2n 0.9 44.25n 0 54.75n 0 54.8n 0.9 57.8n 0.9 57.85n 0 65.15n 0 65.2n 0.9 68.2n 0.9 68.25n 0 78.75n 0 78.8n 0.9 81.8n 0.9 81.85n 0 89.15n 0 89.2n 0.9 92.2n 0.9 92.25n 0 102.75n 0 102.8n 0.9 105.8n 0.9 105.85n 0 114.75n 0 114.8n 0.9 117.8n 0.9 117.85n 0 126.75n 0 126.8n 0.9 129.8n 0.9 129.85n 0 138.75n 0 138.8n 0.9 141.8n 0.9 141.85n 0 150.75n 0 150.8n 0.9 153.8n 0.9 153.85n 0 162.75n 0 162.8n 0.9 165.8n 0.9 165.85n 0 174.75n 0 174.8n 0.9 177.8n 0.9 177.85n 0 186.75n 0 186.8n 0.9 189.8n 0.9 189.85n 0 198.75n 0 198.8n 0.9 201.8n 0.9 201.85n 0 210.75n 0 210.8n 0.9 213.8n 0.9 213.85n 0 222.75n 0 222.8n 0.9 225.8n 0.9 225.85n 0 240n 0]
+
+XDUT (ref_clk fb_clk rst enable up down lock reacquire div2_clk phase_3 phase_2 phase_1 phase_0) pll_timing_monitor_top
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=240n maxstep=100p
+save ref_clk fb_clk rst enable up down lock reacquire div2_clk phase_3 phase_2 phase_1 phase_0

@@ -1,0 +1,19 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/cdr_top.va"
+ahdl_include "./dut/bbpd.va"
+ahdl_include "./dut/loop_filter_code.va"
+ahdl_include "./dut/phase_rotator.va"
+
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 130n 0]
+Venable (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 130n 0.9]
+Vref_clk (ref_clk 0) vsource type=pulse val0=0 val1=0.9 delay=4.95n period=10n width=5n rise=50p fall=50p
+Vdata_edge (data_edge 0) vsource type=pwl wave=[0 0 15.775n 0 15.825n 0.9 15.840n 0.9 15.890n 0 15.900n 0 15.950n 0.9 16.700n 0.9 16.750n 0 25.950n 0 26.000n 0.9 26.750n 0.9 26.800n 0 35.900n 0 35.950n 0.9 36.700n 0.9 36.750n 0 45.850n 0 45.900n 0.9 46.650n 0.9 46.700n 0 55.800n 0 55.850n 0.9 56.600n 0.9 56.650n 0 66.225n 0 66.275n 0.9 67.025n 0.9 67.075n 0 76.175n 0 76.225n 0.9 76.975n 0.9 77.025n 0 130n 0]
+
+XDUT (data_edge ref_clk rst enable recovered_clk early late phase_4 phase_3 phase_2 phase_1 phase_0 lock) cdr_top unit_phase_delay=50p
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=130n maxstep=50p
+save data_edge ref_clk rst enable recovered_clk early late phase_4 phase_3 phase_2 phase_1 phase_0 lock

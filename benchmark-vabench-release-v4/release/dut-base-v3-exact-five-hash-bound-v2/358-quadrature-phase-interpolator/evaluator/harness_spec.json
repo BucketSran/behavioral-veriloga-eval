@@ -1,0 +1,107 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "quadrature_phase_interpolator.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=92n maxstep=200p"
+    ],
+    "body_lines": [
+      "Vclk_i (clk_i 0) vsource type=pwl wave=[0 0 9n 0 10n 0.9 12n 0.9 12.2n 0 20n 0.9 22n 0.9 22.2n 0 30n 0.9 32n 0.9 32.2n 0 40n 0.9 42n 0.9 42.2n 0 50n 0.9 52n 0.9 52.2n 0 60n 0.9 62n 0.9 62.2n 0 70n 0.9 72n 0.9 72.2n 0 80n 0.9 82n 0.9 82.2n 0 92n 0]",
+      "Vclk_q (clk_q 0) vsource type=pwl wave=[0 0 11.5n 0 12.5n 0.9 14.5n 0.9 14.7n 0 22.5n 0.9 24.5n 0.9 24.7n 0 32.5n 0.9 34.5n 0.9 34.7n 0 42.5n 0.9 44.5n 0.9 44.7n 0 52.5n 0.9 54.5n 0.9 54.7n 0 62.5n 0.9 64.5n 0.9 64.7n 0 72.5n 0.9 74.5n 0.9 74.7n 0 82.5n 0.9 84.5n 0.9 84.7n 0 92n 0]",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 52n 0 52.2n 0.9 55n 0.9 55.2n 0 92n 0]"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk_i",
+      "clk_q",
+      "rst",
+      "code_4",
+      "code_3",
+      "code_2",
+      "code_1",
+      "code_0",
+      "clk_out",
+      "quadrant_1",
+      "quadrant_0",
+      "phase_metric"
+    ]
+  },
+  "family_id": "358",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "c1e722533c71caa4c3f56a49cf44584eab2f89e10ea1898defbcc44c195f9cb3",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "11a591e3f01a72a1ee457855a283d435d34c24a74490704e8c692d082f6864f0",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vcode_0 (code_0 0) vsource type=pwl wave=[0 0 8n 0 8.2n 0 18n 0 18.2n 0 28n 0 28.2n 0.9 38n 0.9 38.2n 0.9 48n 0.9 48.2n 0 58n 0 58.2n 0.9 68n 0.9 68.2n 0.9 78n 0.9 78.2n 0.9 92n 0.9]",
+          "Vcode_1 (code_1 0) vsource type=pwl wave=[0 0 8n 0 8.2n 0 18n 0 18.2n 0 28n 0 28.2n 0 38n 0 38.2n 0.9 48n 0.9 48.2n 0.9 58n 0.9 58.2n 0.9 68n 0.9 68.2n 0 78n 0 78.2n 0.9 92n 0.9]",
+          "Vcode_2 (code_2 0) vsource type=pwl wave=[0 0 8n 0 8.2n 0 18n 0 18.2n 0.9 28n 0.9 28.2n 0 38n 0 38.2n 0.9 48n 0.9 48.2n 0 58n 0 58.2n 0.9 68n 0.9 68.2n 0.9 78n 0.9 78.2n 0.9 92n 0.9]",
+          "Vcode_3 (code_3 0) vsource type=pwl wave=[0 0 8n 0 8.2n 0 18n 0 18.2n 0 28n 0 28.2n 0.9 38n 0.9 38.2n 0.9 48n 0.9 48.2n 0 58n 0 58.2n 0 68n 0 68.2n 0.9 78n 0.9 78.2n 0.9 92n 0.9]",
+          "Vcode_4 (code_4 0) vsource type=pwl wave=[0 0 8n 0 8.2n 0 18n 0 18.2n 0 28n 0 28.2n 0 38n 0 38.2n 0 48n 0 48.2n 0.9 58n 0.9 58.2n 0.9 68n 0.9 68.2n 0.9 78n 0.9 78.2n 0.9 92n 0.9]",
+          "XDUT (clk_i clk_q rst code_4 code_3 code_2 code_1 code_0 clk_out quadrant_1 quadrant_0 phase_metric) quadrature_phase_interpolator",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vcode_0 (code_0 0) vsource type=pwl wave=[0 0 8n 0 8.2n 0 18n 0 18.2n 0.9 28n 0.9 28.2n 0 38n 0 38.2n 0 48n 0 48.2n 0.9 58n 0.9 58.2n 0 68n 0 68.2n 0 78n 0 78.2n 0.9 92n 0.9]",
+          "Vcode_1 (code_1 0) vsource type=pwl wave=[0 0 8n 0 8.2n 0.9 18n 0.9 18.2n 0.9 28n 0.9 28.2n 0 38n 0 38.2n 0 48n 0 48.2n 0 58n 0 58.2n 0 68n 0 68.2n 0.9 78n 0.9 78.2n 0 92n 0]",
+          "Vcode_2 (code_2 0) vsource type=pwl wave=[0 0 8n 0 8.2n 0 18n 0 18.2n 0.9 28n 0.9 28.2n 0 38n 0 38.2n 0.9 48n 0.9 48.2n 0 58n 0 58.2n 0 68n 0 68.2n 0.9 78n 0.9 78.2n 0.9 92n 0.9]",
+          "Vcode_3 (code_3 0) vsource type=pwl wave=[0 0 8n 0 8.2n 0 18n 0 18.2n 0 28n 0 28.2n 0.9 38n 0.9 38.2n 0.9 48n 0.9 48.2n 0 58n 0 58.2n 0.9 68n 0.9 68.2n 0.9 78n 0.9 78.2n 0 92n 0]",
+          "Vcode_4 (code_4 0) vsource type=pwl wave=[0 0 8n 0 8.2n 0 18n 0 18.2n 0 28n 0 28.2n 0 38n 0 38.2n 0 48n 0 48.2n 0.9 58n 0.9 58.2n 0.9 68n 0.9 68.2n 0.9 78n 0.9 78.2n 0 92n 0]",
+          "XDUT (clk_i clk_q rst code_4 code_3 code_2 code_1 code_0 clk_out quadrant_1 quadrant_0 phase_metric) quadrature_phase_interpolator",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ON_RESET_CLEAR_CLK_OUT_QUADRANT",
+    "P_OBSERVE_THE_RISING_EDGES_OF_CLK",
+    "P_DECODE_CODE_4_CODE_0_AS",
+    "P_GENERATE_CLK_OUT_EDGES_DELAYED_FROM",
+    "P_QUADRANT_1_QUADRANT_0_MUST_EXPOSE",
+    "P_PHASE_METRIC_MUST_EXPOSE_THE_DECODED"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "e08df6f200ca088643d191ea92eaebcd686784bb056639e80adf6a752f127bd8",
+    "family_spec_sha256": "4f3348c1878040f9ec850823b712b36c254e3a03af5a9206abb609f939da422f"
+  },
+  "task_id": "v4-358"
+}

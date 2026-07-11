@@ -1,0 +1,62 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module duty_meter(clk_in, rst, enable, duty_metric, measure_clk);
+    input clk_in, rst, enable;
+    output duty_metric, measure_clk;
+    electrical clk_in, rst, enable, duty_metric, measure_clk;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 100p;
+
+    integer have_rise;
+    integer measure_state;
+    real rise_t;
+    real fall_t;
+    real metric;
+    real period;
+
+    analog begin
+        @(initial_step) begin
+            have_rise = 0;
+            measure_state = 0;
+            rise_t = 0.0;
+            fall_t = 0.0;
+            metric = 0.0;
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            have_rise = 0;
+            measure_state = 0;
+            metric = 0.0;
+        end
+
+        @(cross(V(clk_in) - vth, +1)) begin
+            if (V(rst) <= vth && V(enable) > vth) begin
+                if (have_rise != 0 && fall_t > rise_t) begin
+                    period = $abstime - rise_t;
+                    if (period > 0.0) begin
+                        metric = (fall_t - rise_t) / period;
+                        if (metric < 0.0) metric = 0.0;
+                        if (metric > 1.0) metric = 1.0;
+                        measure_state = 1 - measure_state;
+                    end
+                end
+                rise_t = $abstime;
+                fall_t = -1.0;
+                have_rise = 1;
+            end
+        end
+
+        @(cross(V(clk_in) - vth, -1)) begin
+            if (V(rst) <= vth && V(enable) > vth && have_rise != 0) begin
+                fall_t = $abstime;
+            end
+        end
+
+        V(duty_metric) <+ transition(metric, 0, tr, tr);
+        V(measure_clk) <+ transition(measure_state ? vdd : vss, 0, tr, tr);
+    end
+endmodule

@@ -1,0 +1,42 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=72n maxstep=100p"
+    ],
+    "body_lines": [
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=8n width=2n delay=4n rise=50p fall=50p",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 72n 0]",
+      "Vtap1_1 (tap1_1 0) vsource type=pwl wave=[0 0 8n 0 72n 0]",
+      "Vtap1_0 (tap1_0 0) vsource type=pwl wave=[0 0 8n 0.9 72n 0.9]",
+      "Vtap2_1 (tap2_1 0) vsource type=pwl wave=[0 0 8n 0 72n 0]",
+      "Vtap2_0 (tap2_0 0) vsource type=pwl wave=[0 0 8n 0.9 72n 0.9]",
+      "Vvin (vin 0) vsource type=pwl wave=[0 0.3 18n 0.3 18.1n 0.62 42n 0.62 42.1n 0.4 72n 0.4]",
+      "",
+      "XDUT (vin clk rst tap1_1 tap1_0 tap2_1 tap2_0 decision fb_metric slicer_in_dbg) dfe_rx_top"
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "541b50fcecc4b9a2ca99ccb11afe5b78ab6d87dc0c2c6b1369e7e3057f67d232",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "72n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_RESET_CLEAR",
+    "P_TWO_TAP_FEEDBACK",
+    "P_CORRECTED_INPUT",
+    "P_CLOCKED_DECISION",
+    "P_HISTORY_ORDER"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

@@ -1,0 +1,603 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "duty_meter",
+              "trim_controller",
+              "delay_pair"
+            ],
+            "name": "dcc_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module dcc_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module dcc_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module dcc_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.5",
+                "name": "target_duty",
+                "override_behavior": "overrides target_duty for module dcc_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.03",
+                "name": "duty_tol",
+                "override_behavior": "overrides duty_tol for module dcc_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "5e-12",
+                "name": "trim_step",
+                "override_behavior": "overrides trim_step for module dcc_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "100p",
+                "name": "tr",
+                "override_behavior": "overrides tr for module dcc_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk_in",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "clk_out",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "trim_3",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "trim_2",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "trim_1",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "trim_0",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "duty_metric",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "locked",
+                "position": 9
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "dcc_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "duty_meter",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module duty_meter",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module duty_meter",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module duty_meter",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "100p",
+                "name": "tr",
+                "override_behavior": "overrides tr for module duty_meter",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk_in",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "duty_metric",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "measure_clk",
+                "position": 4
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "duty_meter.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "trim_controller",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module trim_controller",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module trim_controller",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module trim_controller",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.5",
+                "name": "target_duty",
+                "override_behavior": "overrides target_duty for module trim_controller",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.03",
+                "name": "duty_tol",
+                "override_behavior": "overrides duty_tol for module trim_controller",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "100p",
+                "name": "tr",
+                "override_behavior": "overrides tr for module trim_controller",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "measure_clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "duty_metric",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "trim_3",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "trim_2",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "trim_1",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "trim_0",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "locked",
+                "position": 8
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "trim_controller.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "delay_pair",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module delay_pair",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module delay_pair",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module delay_pair",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "5e-12",
+                "name": "trim_step",
+                "override_behavior": "overrides trim_step for module delay_pair",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "100p",
+                "name": "tr",
+                "override_behavior": "overrides tr for module delay_pair",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk_in",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "trim_3",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "trim_2",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "trim_1",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "trim_0",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "clk_out",
+                "position": 7
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "delay_pair.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "family_id": "359",
+  "identity": {
+    "category": "pll_clock_timing_systems",
+    "difficulty": "D5",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Duty-cycle Corrector"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Preserve the declared module graph, port order, parameter override behavior, and public trace observability.",
+    "Do not hard-code evaluator stimulus, stop times, sample windows, checker tolerances, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_DISABLE_CLEAR",
+      "observable_contract": "Reset or low enable clears trim, duty metric, lock, and output clock.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst",
+        "enable",
+        "clk_out",
+        "trim_3",
+        "trim_2",
+        "trim_1",
+        "trim_0",
+        "duty_metric",
+        "locked"
+      ]
+    },
+    {
+      "id": "P_DUTY_MEASUREMENT",
+      "observable_contract": "The metric reports high-time fraction over each complete input-clock cycle.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst",
+        "enable",
+        "duty_metric"
+      ]
+    },
+    {
+      "id": "P_TRIM_DIRECTION",
+      "observable_contract": "The trim code moves up below the target window and down above it, with rail saturation.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst",
+        "enable",
+        "trim_3",
+        "trim_2",
+        "trim_1",
+        "trim_0",
+        "duty_metric"
+      ]
+    },
+    {
+      "id": "P_EDGE_DELAY",
+      "observable_contract": "Rising edges pass without intentional delay while falling edges receive the latched trim-code delay.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "clk_out",
+        "rst",
+        "enable",
+        "trim_3",
+        "trim_2",
+        "trim_1",
+        "trim_0"
+      ]
+    },
+    {
+      "id": "P_LOCK_QUALIFICATION",
+      "observable_contract": "Lock asserts after three consecutive measured cycles inside the target window.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst",
+        "enable",
+        "duty_metric",
+        "locked"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1359",
+    "dut": "v4-359",
+    "testbench": "v4-859"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk_in",
+            "port_ref": "clk_in",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 2
+          },
+          {
+            "net": "clk_out",
+            "port_ref": "clk_out",
+            "position": 3
+          },
+          {
+            "net": "trim_3",
+            "port_ref": "trim_3",
+            "position": 4
+          },
+          {
+            "net": "trim_2",
+            "port_ref": "trim_2",
+            "position": 5
+          },
+          {
+            "net": "trim_1",
+            "port_ref": "trim_1",
+            "position": 6
+          },
+          {
+            "net": "trim_0",
+            "port_ref": "trim_0",
+            "position": 7
+          },
+          {
+            "net": "duty_metric",
+            "port_ref": "duty_metric",
+            "position": 8
+          },
+          {
+            "net": "locked",
+            "port_ref": "locked",
+            "position": 9
+          }
+        ],
+        "module_ref": "dcc_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk_in",
+      "rst",
+      "enable",
+      "clk_out",
+      "trim_3",
+      "trim_2",
+      "trim_1",
+      "trim_0",
+      "duty_metric",
+      "locked"
+    ]
+  }
+}

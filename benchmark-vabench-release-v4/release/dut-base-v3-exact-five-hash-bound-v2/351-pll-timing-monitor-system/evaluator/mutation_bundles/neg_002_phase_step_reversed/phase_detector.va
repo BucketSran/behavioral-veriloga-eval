@@ -1,0 +1,132 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module phase_detector(ref_clk, fb_clk, rst, enable, up, down, phase_3, phase_2, phase_1, phase_0, compare_tick, out_of_window);
+    input ref_clk, fb_clk, rst, enable;
+    output up, down, phase_3, phase_2, phase_1, phase_0, compare_tick, out_of_window;
+    electrical ref_clk, fb_clk, rst, enable, up, down, phase_3, phase_2, phase_1, phase_0, compare_tick, out_of_window;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter integer lock_window = 2;
+    parameter real tr = 200p from (0:inf);
+
+    integer phase_est;
+    integer seen_ref;
+    integer seen_fb;
+    integer first_edge;
+    integer up_state;
+    integer down_state;
+    integer tick_state;
+    integer out_state;
+    integer phase_code;
+    real tick_fall_time;
+
+    analog begin
+        @(initial_step) begin
+            phase_est = 0;
+            seen_ref = 0;
+            seen_fb = 0;
+            first_edge = 0;
+            up_state = 0;
+            down_state = 0;
+            tick_state = 0;
+            out_state = 0;
+            tick_fall_time = 1.0e99;
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            phase_est = 0;
+            seen_ref = 0;
+            seen_fb = 0;
+            first_edge = 0;
+            up_state = 0;
+            down_state = 0;
+            tick_state = 0;
+            out_state = 0;
+            tick_fall_time = 1.0e99;
+        end
+
+        @(cross(V(ref_clk) - vth, +1)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                phase_est = 0;
+                seen_ref = 0;
+                seen_fb = 0;
+                first_edge = 0;
+                up_state = 0;
+                down_state = 0;
+                tick_state = 0;
+                out_state = 0;
+            end else begin
+                if (seen_ref == 0 && seen_fb == 0) first_edge = 1;
+                seen_ref = 1;
+                if (seen_fb == 0) begin
+                    up_state = 1;
+                    down_state = 0;
+                end else begin
+                    up_state = 0;
+                    down_state = 0;
+                    if (first_edge == 1) phase_est = phase_est - 1;
+                    else if (first_edge == 2) phase_est = phase_est + 1;
+                    if (phase_est > 7) phase_est = 7;
+                    if (phase_est < -8) phase_est = -8;
+                    out_state = ((phase_est > lock_window) || (phase_est < -lock_window)) ? 1 : 0;
+                    tick_state = 1;
+                    tick_fall_time = $abstime + 2.0 * tr;
+                    seen_ref = 0;
+                    seen_fb = 0;
+                    first_edge = 0;
+                end
+            end
+        end
+
+        @(cross(V(fb_clk) - vth, +1)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                phase_est = 0;
+                seen_ref = 0;
+                seen_fb = 0;
+                first_edge = 0;
+                up_state = 0;
+                down_state = 0;
+                tick_state = 0;
+                out_state = 0;
+            end else begin
+                if (seen_ref == 0 && seen_fb == 0) first_edge = 2;
+                seen_fb = 1;
+                if (seen_ref == 0) begin
+                    up_state = 0;
+                    down_state = 1;
+                end else begin
+                    up_state = 0;
+                    down_state = 0;
+                    if (first_edge == 1) phase_est = phase_est - 1;
+                    else if (first_edge == 2) phase_est = phase_est + 1;
+                    if (phase_est > 7) phase_est = 7;
+                    if (phase_est < -8) phase_est = -8;
+                    out_state = ((phase_est > lock_window) || (phase_est < -lock_window)) ? 1 : 0;
+                    tick_state = 1;
+                    tick_fall_time = $abstime + 2.0 * tr;
+                    seen_ref = 0;
+                    seen_fb = 0;
+                    first_edge = 0;
+                end
+            end
+        end
+
+        @(timer(tick_fall_time)) begin
+            tick_state = 0;
+            tick_fall_time = 1.0e99;
+        end
+
+        phase_code = phase_est + 8;
+        V(up) <+ transition(up_state ? vdd : vss, 0, tr, tr);
+        V(down) <+ transition(down_state ? vdd : vss, 0, tr, tr);
+        V(phase_0) <+ transition((phase_code & 1) ? vdd : vss, 0, tr, tr);
+        V(phase_1) <+ transition((phase_code & 2) ? vdd : vss, 0, tr, tr);
+        V(phase_2) <+ transition((phase_code & 4) ? vdd : vss, 0, tr, tr);
+        V(phase_3) <+ transition((phase_code & 8) ? vdd : vss, 0, tr, tr);
+        V(compare_tick) <+ transition(tick_state ? vdd : vss, 0, tr, tr);
+        V(out_of_window) <+ transition(out_state ? vdd : vss, 0, tr, tr);
+    end
+endmodule

@@ -1,0 +1,72 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module preemphasis_driver (
+    input  electrical clk,
+    input  electrical rst,
+    input  electrical emph_en,
+    input  electrical level_1,
+    input  electrical level_0,
+    input  electrical level_v,
+    output electrical vout,
+    output electrical delta_dbg
+);
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real level_step = 0.3;
+    parameter real emph_step = 60e-3;
+    parameter real tr = 200e-12;
+
+    integer prev_level;
+    integer curr_level;
+    real delta;
+    real drive;
+    real vout_target;
+    real delta_target;
+
+    analog begin
+        @(initial_step) begin
+            prev_level = 0;
+            curr_level = 0;
+            delta = 0.0;
+            drive = vss;
+        end
+
+        @(cross(V(rst) - vth, +1)) begin
+            prev_level = 0;
+            curr_level = 0;
+            delta = 0.0;
+            drive = vss;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth) begin
+                prev_level = 0;
+                curr_level = 0;
+                delta = 0.0;
+                drive = vss;
+            end else begin
+                curr_level = 0;
+                if (V(level_0) > vth) curr_level = curr_level + 1;
+                if (V(level_1) > vth) curr_level = curr_level + 2;
+
+                delta = curr_level - prev_level;
+                drive = V(level_v);
+                if (V(emph_en) > vth) begin
+                    if (delta > 0.0) drive = drive + emph_step;
+                    else if (delta < 0.0) drive = drive - emph_step;
+                end
+
+                if (drive > vdd) drive = drive;
+                if (drive < vss) drive = drive;
+                prev_level = curr_level;
+            end
+        end
+
+        vout_target = drive;
+        delta_target = delta;
+        V(vout) <+ transition(vout_target, 0, tr, tr);
+        V(delta_dbg) <+ transition(delta_target, 0, tr, tr);
+    end
+endmodule

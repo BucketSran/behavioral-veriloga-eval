@@ -1,0 +1,33 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dcc_top(clk_in, rst, enable, clk_out, trim_3, trim_2, trim_1, trim_0, duty_metric, locked);
+    input clk_in, rst, enable;
+    output clk_out, trim_3, trim_2, trim_1, trim_0, duty_metric, locked;
+    electrical clk_in, rst, enable, clk_out, trim_3, trim_2, trim_1, trim_0, duty_metric, locked;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real target_duty = 0.5;
+    parameter real duty_tol = 0.03;
+    parameter real trim_step = 5e-12;
+    parameter real tr = 100p;
+
+    electrical measure_clk;
+
+    duty_meter #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr)) u_meter (
+        clk_in, rst, enable, duty_metric, measure_clk
+    );
+
+    trim_controller #(
+        .vdd(vdd), .vss(vss), .vth(vth), .target_duty(target_duty),
+        .duty_tol(duty_tol), .tr(tr)
+    ) u_controller (
+        measure_clk, duty_metric, rst, enable, trim_3, trim_2, trim_1, trim_0, locked
+    );
+
+    delay_pair #(.vdd(vdd), .vss(vss), .vth(vth), .trim_step(trim_step), .tr(tr)) u_delay (
+        clk_in, rst, enable, trim_3, trim_2, trim_1, trim_0, clk_out
+    );
+endmodule

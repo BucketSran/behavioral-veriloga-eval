@@ -1,0 +1,40 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module feedback_filter (
+    input  electrical tap1_1,
+    input  electrical tap1_0,
+    input  electrical tap2_1,
+    input  electrical tap2_0,
+    input  electrical hist1,
+    input  electrical hist2,
+    output electrical fb_metric
+);
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tap_lsb = 20e-3;
+    parameter real tr = 200e-12;
+
+    real tap1_code;
+    real tap2_code;
+    real d1_sign;
+    real d2_sign;
+    real fb_target;
+
+    analog begin
+        tap1_code = 0.0;
+        if (V(tap1_0) > vth) tap1_code = tap1_code + 1.0;
+        if (V(tap1_1) > vth) tap1_code = tap1_code + 2.0;
+
+        tap2_code = 0.0;
+        if (V(tap2_0) > vth) tap2_code = tap2_code + 1.0;
+        if (V(tap2_1) > vth) tap2_code = tap2_code + 2.0;
+
+        d1_sign = (V(hist1) > vth) ? 1.0 : -1.0;
+        d2_sign = (V(hist2) > vth) ? 1.0 : -1.0;
+        fb_target = tap_lsb * ((tap1_code * d1_sign) + (4.0 * d1_sign));
+
+        V(fb_metric) <+ transition(fb_target, 0, tr, tr);
+    end
+endmodule

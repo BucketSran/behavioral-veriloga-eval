@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/dcc_top.va"
+ahdl_include "./dut/duty_meter.va"
+ahdl_include "./dut/trim_controller.va"
+ahdl_include "./dut/delay_pair.va"
+
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 62n 0]
+Venable (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 50n 0.9 50.1n 0 62n 0]
+Vclk_in (clk_in 0) vsource type=pulse val0=0 val1=0.9 delay=5.95n period=3n width=1.35n rise=50p fall=50p
+
+XDUT (clk_in rst enable clk_out trim_3 trim_2 trim_1 trim_0 duty_metric locked) dcc_top tr=20p
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=62n maxstep=20p
+save clk_in rst enable clk_out trim_3 trim_2 trim_1 trim_0 duty_metric locked

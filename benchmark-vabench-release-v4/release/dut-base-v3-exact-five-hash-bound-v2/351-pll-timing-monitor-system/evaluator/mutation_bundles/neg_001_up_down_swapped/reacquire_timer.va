@@ -1,0 +1,50 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module reacquire_timer(compare_tick, out_of_window, lock, rst, enable, reacquire);
+    input compare_tick, out_of_window, lock, rst, enable;
+    output reacquire;
+    electrical compare_tick, out_of_window, lock, rst, enable, reacquire;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    integer was_locked;
+    integer bad_count;
+    integer reacquire_state;
+
+    analog begin
+        @(initial_step) begin
+            was_locked = 0;
+            bad_count = 0;
+            reacquire_state = 0;
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            was_locked = 0;
+            bad_count = 0;
+            reacquire_state = 0;
+        end
+
+        @(cross(V(compare_tick) - vth, +1)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                was_locked = 0;
+                bad_count = 0;
+                reacquire_state = 0;
+            end else begin
+                if (V(lock) > vth) was_locked = 1;
+                if (was_locked != 0 && V(out_of_window) > vth) begin
+                    bad_count = bad_count + 1;
+                    if (bad_count >= 2) reacquire_state = 1;
+                end else if (V(out_of_window) <= vth) begin
+                    bad_count = 0;
+                    reacquire_state = 0;
+                end
+            end
+        end
+
+        V(reacquire) <+ transition(reacquire_state ? vdd : vss, 0, tr, tr);
+    end
+endmodule

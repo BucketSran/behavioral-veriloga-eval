@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/pam4_tx_top.va"
+ahdl_include "./dut/gray_mapper.va"
+ahdl_include "./dut/level_dac.va"
+ahdl_include "./dut/preemphasis_driver.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=9n width=1.8n delay=4.5n rise=50p fall=50p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 81n 0]
+Vbit_msb (bit_msb 0) vsource type=pwl wave=[0 0 8n 0 8.1n 0.9 26n 0.9 26.1n 0 44n 0 44.1n 0.9 62n 0.9 62.1n 0 81n 0]
+Vbit_lsb (bit_lsb 0) vsource type=pwl wave=[0 0 17n 0 17.1n 0.9 35n 0.9 35.1n 0 53n 0 53.1n 0.9 71n 0.9 71.1n 0 81n 0]
+Vemph_en (emph_en 0) vsource type=pwl wave=[0 0 22n 0 22.1n 0.9 64n 0.9 64.1n 0 81n 0]
+
+XDUT (bit_msb bit_lsb clk rst emph_en vout level_1 level_0 delta_dbg) pam4_tx_top
+
+tran tran stop=81n maxstep=100p
+save bit_msb bit_lsb clk rst emph_en vout level_1 level_0 delta_dbg

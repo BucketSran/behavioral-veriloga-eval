@@ -1,0 +1,40 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=80n maxstep=100p"
+    ],
+    "body_lines": [
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=2n delay=4n rise=50p fall=50p",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 80n 0]",
+      "Vbit_msb (bit_msb 0) vsource type=pwl wave=[0 0 8n 0 28n 0 28.1n 0.9 48n 0.9 48.1n 0 68n 0 68.1n 0.9 80n 0.9]",
+      "Vbit_lsb (bit_lsb 0) vsource type=pwl wave=[0 0 8n 0 18n 0 18.1n 0.9 38n 0.9 38.1n 0 58n 0 58.1n 0.9 80n 0.9]",
+      "Vemph_en (emph_en 0) vsource type=pwl wave=[0 0 22n 0 22.1n 0.9 62n 0.9 62.1n 0 80n 0]",
+      "",
+      "XDUT (bit_msb bit_lsb clk rst emph_en vout level_1 level_0 delta_dbg) pam4_tx_top"
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "73ceb5f1d1d10b2e9f51c7a0968f48645440a22d86859180dc45c3ee87cc8ab9",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "80n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_RESET_CLEAR",
+    "P_GRAY_LEVEL_MAP",
+    "P_LEVEL_DAC",
+    "P_PREEMPHASIS",
+    "P_OUTPUT_CLAMP"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

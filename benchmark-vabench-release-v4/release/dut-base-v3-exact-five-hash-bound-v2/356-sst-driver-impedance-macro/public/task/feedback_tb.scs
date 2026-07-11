@@ -1,0 +1,19 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/sst_driver_macro.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=2n delay=4n rise=50p fall=50p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 160n 0]
+Venable (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 136n 0.9 136.1n 0 146n 0 146.1n 0.9 160n 0.9]
+Vdata (data 0) vsource type=pwl wave=[0 0 8n 0 18n 0 18.1n 0.9 28n 0.9 28.1n 0.9 38n 0.9 38.1n 0 48n 0 48.1n 0.9 58n 0.9 58.1n 0 68n 0 68.1n 0 78n 0 78.1n 0.9 88n 0.9 88.1n 0 98n 0 98.1n 0.9 108n 0.9 108.1n 0.9 118n 0.9 118.1n 0 128n 0 128.1n 0.9 138n 0.9 138.1n 0 148n 0 148.1n 0.9 158n 0.9 158.1n 0 160n 0]
+Vz_2 (z_2 0) vsource type=pwl wave=[0 0 8n 0 28n 0 28.1n 0 48n 0 48.1n 0 68n 0 68.1n 0 88n 0 88.1n 0.9 108n 0.9 108.1n 0.9 128n 0.9 128.1n 0.9 148n 0.9 148.1n 0.9 160n 0.9]
+Vz_1 (z_1 0) vsource type=pwl wave=[0 0 8n 0 28n 0 28.1n 0 48n 0 48.1n 0.9 68n 0.9 68.1n 0.9 88n 0.9 88.1n 0 108n 0 108.1n 0 128n 0 128.1n 0.9 148n 0.9 148.1n 0.9 160n 0.9]
+Vz_0 (z_0 0) vsource type=pwl wave=[0 0 8n 0 28n 0 28.1n 0.9 48n 0.9 48.1n 0 68n 0 68.1n 0.9 88n 0.9 88.1n 0 108n 0 108.1n 0.9 128n 0.9 128.1n 0 148n 0 148.1n 0.9 160n 0.9]
+
+XDUT (data enable clk rst z_2 z_1 z_0 vout swing_metric z_metric) sst_driver_macro
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=160n maxstep=100p
+save data enable clk rst z_2 z_1 z_0 vout swing_metric z_metric

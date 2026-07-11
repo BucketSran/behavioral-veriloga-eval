@@ -1,0 +1,19 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/ctle_equalizer.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=6n width=3n delay=1n rise=50p fall=50p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 84n 0]
+Vb0 (boost_0 0) vsource type=pwl wave=[0 0 18n 0 18.1n 0.9 42n 0.9 42.1n 0 64n 0 64.1n 0.9 84n 0.9]
+Vb1 (boost_1 0) vsource type=pwl wave=[0 0 30n 0 30.1n 0.9 56n 0.9 56.1n 0 84n 0]
+Vb2 (boost_2 0) vsource type=pwl wave=[0 0 48n 0 48.1n 0.9 84n 0.9]
+Vvin (vin 0) vsource type=pwl wave=[0 0.45 8n 0.45 8.1n 0.65 18n 0.65 18.1n 0.25 30n 0.25 30.1n 0.78 44n 0.78 44.1n 0.10 62n 0.10 62.1n 0.86 84n 0.86]
+
+XDUT (vin clk rst boost_2 boost_1 boost_0 vout edge_metric sat_flag) ctle_equalizer
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=84n maxstep=100p
+save vin clk rst boost_2 boost_1 boost_0 vout edge_metric sat_flag

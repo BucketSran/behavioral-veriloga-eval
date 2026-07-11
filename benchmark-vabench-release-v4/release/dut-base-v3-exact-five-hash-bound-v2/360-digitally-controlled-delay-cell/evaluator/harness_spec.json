@@ -1,0 +1,100 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "digitally_controlled_delay_cell.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop={stop_time} maxstep={maxstep}"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "in_clk",
+      "load",
+      "rst",
+      "code_5",
+      "code_4",
+      "code_3",
+      "code_2",
+      "code_1",
+      "code_0",
+      "out_clk",
+      "delay_metric",
+      "valid"
+    ]
+  },
+  "family_id": "360",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vinclk (in_clk 0) vsource type=pulse val0=0 val1=0.9 delay=4n period=12n width=6n rise=20p fall=20p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.5n 0.9 1.6n 0 94n 0 94.1n 0.9 99n 0.9 99.1n 0 120n 0]",
+          "Vload (load 0) vsource type=pwl wave=[0 0 2n 0 2.02n 0.9 2.5n 0.9 2.52n 0 34n 0 34.02n 0.9 34.5n 0.9 34.52n 0 70n 0 70.02n 0.9 70.5n 0.9 70.52n 0 120n 0]",
+          "Vcode5 (code_5 0) vsource type=pwl wave=[0 0 69n 0 69.1n 0.9 120n 0.9]",
+          "Vcode4 (code_4 0) vsource type=pwl wave=[0 0 33n 0 33.1n 0.9 69n 0.9 69.1n 0 120n 0]",
+          "Vcode3 (code_3 0) vsource type=pwl wave=[0 0 33n 0 33.1n 0.9 120n 0.9]",
+          "Vcode2 (code_2 0) vsource type=pwl wave=[0 0 69n 0 69.1n 0.9 120n 0.9]",
+          "Vcode1 (code_1 0) vsource type=pwl wave=[0 0 33n 0 33.1n 0.9 69n 0.9 69.1n 0 120n 0]",
+          "Vcode0 (code_0 0) vsource type=pwl wave=[0 0 69n 0 69.1n 0.9 120n 0.9]",
+          "XDUT (in_clk load rst code_5 code_4 code_3 code_2 code_1 code_0 out_clk delay_metric valid) digitally_controlled_delay_cell"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {
+        "maxstep": "5p",
+        "stop_time": "120n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vinclk (in_clk 0) vsource type=pulse val0=0 val1=0.9 delay=5n period=10n width=4n rise=20p fall=20p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.2n 0.9 1.3n 0 132n 0 132.1n 0.9 137n 0.9 137.1n 0 160n 0]",
+          "Vload (load 0) vsource type=pwl wave=[0 0 2n 0 2.02n 0.9 2.4n 0.9 2.42n 0 31n 0 31.02n 0.9 31.4n 0.9 31.42n 0 65n 0 65.02n 0.9 65.4n 0.9 65.42n 0 101n 0 101.02n 0.9 101.4n 0.9 101.42n 0 160n 0]",
+          "Vcode5 (code_5 0) vsource type=pwl wave=[0 0 64n 0 64.1n 0.9 100n 0.9 100.1n 0 160n 0]",
+          "Vcode4 (code_4 0) vsource type=pwl wave=[0 0 30n 0 30.1n 0.9 64n 0.9 64.1n 0 100n 0 100.1n 0.9 160n 0.9]",
+          "Vcode3 (code_3 0) vsource type=pwl wave=[0 0 30n 0 30.1n 0.9 100n 0.9 100.1n 0 160n 0]",
+          "Vcode2 (code_2 0) vsource type=pwl wave=[0 0 64n 0 64.1n 0.9 100n 0.9 100.1n 0 160n 0]",
+          "Vcode1 (code_1 0) vsource type=pwl wave=[0 0 30n 0 30.1n 0.9 64n 0.9 64.1n 0 160n 0]",
+          "Vcode0 (code_0 0) vsource type=pwl wave=[0 0 64n 0 64.1n 0.9 160n 0.9]",
+          "XDUT (in_clk load rst code_5 code_4 code_3 code_2 code_1 code_0 out_clk delay_metric valid) digitally_controlled_delay_cell"
+        ]
+      },
+      "deterministic_seed": 1,
+      "parameters": {
+        "maxstep": "5p",
+        "stop_time": "160n"
+      },
+      "simulatorOptions": {}
+    }
+  },
+  "property_ids": [
+    "P_RESET_CLEAR",
+    "P_CODE_CAPTURE_METRIC",
+    "P_EDGE_DELAY_MAPPING",
+    "P_PULSE_INTEGRITY_VALID"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "7803b66cfdb7992ad953a3a44c238dfc9b7dce234dadbacbce243df3acbb2091",
+    "family_spec_sha256": "ca78744f78268e2a317e0fc7ebf3682ad76cf4e1d9ff877861291bb369d113d7"
+  },
+  "task_id": "v4-360"
+}

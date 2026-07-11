@@ -1,0 +1,95 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module phase_rotator(ref_clk, rst, enable, phase_4, phase_3, phase_2, phase_1, phase_0, recovered_clk);
+    input ref_clk, rst, enable, phase_4, phase_3, phase_2, phase_1, phase_0;
+    output recovered_clk;
+    electrical ref_clk, rst, enable, phase_4, phase_3, phase_2, phase_1, phase_0, recovered_clk;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real unit_phase_delay = 5e-12;
+    parameter real tr = 200p;
+
+    integer out_state;
+    integer rise_token;
+    integer fall_token;
+    integer rise_seen;
+    integer fall_seen;
+    real rise_time;
+    real fall_time;
+    integer rise_id;
+    integer fall_id;
+    integer code;
+
+    analog begin
+        @(initial_step) begin
+            out_state = 0;
+            rise_token = 0;
+            fall_token = 0;
+            rise_seen = 0;
+            fall_seen = 0;
+            rise_time = 1.0e99;
+            fall_time = 1.0e99;
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            out_state = 0;
+            rise_token = rise_token + 1;
+            fall_token = fall_token + 1;
+            rise_seen = 0;
+            fall_seen = 0;
+            rise_time = 1.0e99;
+            fall_time = 1.0e99;
+        end
+
+        @(cross(V(ref_clk) - vth, +1)) begin
+            if (V(rst) <= vth && V(enable) > vth) begin
+                code = 0;
+                if (V(phase_0) > vth) code = code + 1;
+                if (V(phase_1) > vth) code = code + 2;
+                if (V(phase_2) > vth) code = code + 4;
+                if (V(phase_3) > vth) code = code + 8;
+                if (V(phase_4) > vth) code = code + 16;
+                rise_token = rise_token + 1;
+                rise_id = rise_token;
+                rise_seen = 1;
+                rise_time = $abstime + code * unit_phase_delay;
+            end
+        end
+
+        @(cross(V(ref_clk) - vth, -1)) begin
+            if (V(rst) <= vth && V(enable) > vth) begin
+                code = 0;
+                if (V(phase_0) > vth) code = code + 1;
+                if (V(phase_1) > vth) code = code + 2;
+                if (V(phase_2) > vth) code = code + 4;
+                if (V(phase_3) > vth) code = code + 8;
+                if (V(phase_4) > vth) code = code + 16;
+                fall_token = fall_token + 1;
+                fall_id = fall_token;
+                fall_seen = 1;
+                fall_time = $abstime + code * unit_phase_delay;
+            end
+        end
+
+        @(timer(rise_time)) begin
+            if (rise_seen != 0 && rise_id == rise_token && V(rst) <= vth && V(enable) > vth) begin
+                out_state = 1;
+                rise_seen = 0;
+            end
+            rise_time = 1.0e99;
+        end
+
+        @(timer(fall_time)) begin
+            if (fall_seen != 0 && fall_id == fall_token && V(rst) <= vth && V(enable) > vth) begin
+                out_state = 0;
+                fall_seen = 0;
+            end
+            fall_time = 1.0e99;
+        end
+
+        V(recovered_clk) <+ transition(out_state ? vdd : vss, 0, tr, tr);
+    end
+endmodule

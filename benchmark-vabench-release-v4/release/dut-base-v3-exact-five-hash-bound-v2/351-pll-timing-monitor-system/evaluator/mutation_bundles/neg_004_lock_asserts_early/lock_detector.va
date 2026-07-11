@@ -1,0 +1,43 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module lock_detector(compare_tick, out_of_window, rst, enable, lock);
+    input compare_tick, out_of_window, rst, enable;
+    output lock;
+    electrical compare_tick, out_of_window, rst, enable, lock;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    integer good_count;
+    integer lock_state;
+
+    analog begin
+        @(initial_step) begin
+            good_count = 0;
+            lock_state = 0;
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            good_count = 0;
+            lock_state = 0;
+        end
+
+        @(cross(V(compare_tick) - vth, +1)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                good_count = 0;
+                lock_state = 0;
+            end else if (V(out_of_window) > vth) begin
+                good_count = 0;
+                lock_state = 0;
+            end else begin
+                good_count = good_count + 1;
+                if (good_count >= 1) lock_state = 1;
+            end
+        end
+
+        V(lock) <+ transition(lock_state ? vdd : vss, 0, tr, tr);
+    end
+endmodule

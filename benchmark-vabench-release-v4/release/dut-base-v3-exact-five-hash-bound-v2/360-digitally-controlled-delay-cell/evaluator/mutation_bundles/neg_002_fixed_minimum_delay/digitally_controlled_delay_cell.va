@@ -1,0 +1,85 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module digitally_controlled_delay_cell(in_clk, load, rst, code_5, code_4, code_3, code_2, code_1, code_0, out_clk, delay_metric, valid);
+    input in_clk, load, rst, code_5, code_4, code_3, code_2, code_1, code_0;
+    output out_clk, delay_metric, valid;
+    electrical in_clk, load, rst, code_5, code_4, code_3, code_2, code_1, code_0, out_clk, delay_metric, valid;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real delay_min = 20e-12;
+    parameter real delay_lsb = 3e-12;
+    parameter real tr = 100p from (0:inf);
+
+    integer code;
+    integer loaded;
+    integer out_target;
+    integer valid_target;
+    real selected_delay;
+    real edge_delay;
+    real valid_delay;
+    real metric_v;
+
+    analog begin
+        @(initial_step) begin
+            code = 0;
+            loaded = 0;
+            out_target = 0;
+            valid_target = 0;
+            edge_delay = 0.0;
+            valid_delay = 0.0;
+            metric_v = vss;
+        end
+
+        @(cross(V(rst) - vth, +1)) begin
+            code = 0;
+            loaded = 0;
+            out_target = 0;
+            valid_target = 0;
+            edge_delay = 0.0;
+            valid_delay = 0.0;
+            metric_v = vss;
+        end
+
+        @(cross(V(load) - vth, +1)) begin
+            if (V(rst) > vth) begin
+                code = 0;
+                loaded = 0;
+                metric_v = vss;
+            end else begin
+                code = 0;
+                if (V(code_0) > vth) code = code + 1;
+                if (V(code_1) > vth) code = code + 2;
+                if (V(code_2) > vth) code = code + 4;
+                if (V(code_3) > vth) code = code + 8;
+                if (V(code_4) > vth) code = code + 16;
+                if (V(code_5) > vth) code = code + 32;
+                loaded = 1;
+                metric_v = vss + (vdd - vss) * code / 63.0;
+            end
+        end
+
+        @(cross(V(in_clk) - vth, +1) or cross(V(in_clk) - vth, -1)) begin
+            if (V(rst) > vth) begin
+                out_target = 0;
+                valid_target = 0;
+                edge_delay = 0.0;
+                valid_delay = 0.0;
+            end else if (loaded != 0) begin
+                selected_delay = delay_min;
+                edge_delay = selected_delay;
+                out_target = (V(in_clk) > vth) ? 1 : 0;
+                if ((out_target != 0) && (valid_target == 0)) begin
+                    valid_target = 1;
+                    valid_delay = selected_delay;
+                end
+            end
+        end
+
+        V(out_clk) <+ transition(out_target ? vdd : vss, edge_delay, tr, tr);
+        V(delay_metric) <+ transition(metric_v, 0, tr, tr);
+        V(valid) <+ transition(valid_target ? vdd : vss, valid_delay, tr, tr);
+    end
+endmodule

@@ -1,0 +1,55 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sst_driver_macro(data, enable, clk, rst, z_2, z_1, z_0, vout, swing_metric, z_metric);
+    input data, enable, clk, rst, z_2, z_1, z_0;
+    output vout, swing_metric, z_metric;
+    electrical data, enable, clk, rst, z_2, z_1, z_0;
+    electrical vout, swing_metric, z_metric;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real swing_min = 0.15;
+    parameter real swing_lsb = 25e-3;
+    parameter real tr = 200p from (0:inf);
+
+    integer data_latched;
+    integer trim_code;
+    real swing_value;
+    real output_value;
+    real swing_output;
+    real trim_output;
+
+    analog begin
+        @(initial_step) data_latched = 0;
+
+        @(cross(V(clk) - vth, +1) or cross(V(rst) - vth, +1) or
+          cross(V(enable) - vth, -1)) begin
+            if ((V(rst) > vth) || (V(enable) <= vth))
+                data_latched = 0;
+            else
+                data_latched = (V(data) > vth) ? 1 : 0;
+        end
+
+        trim_code = ((V(z_2) > vth) ? 4 : 0)
+                  + ((V(z_1) > vth) ? 2 : 0)
+                  + ((V(z_0) > vth) ? 1 : 0);
+        swing_value = swing_min + swing_lsb * trim_code;
+
+        if ((V(rst) > vth) || (V(enable) <= vth)) begin
+            output_value = vdd;
+            swing_output = 0.0;
+            trim_output = 0.0;
+        end else begin
+            output_value = data_latched ? (vcm + swing_value) : (vcm - swing_value);
+            swing_output = swing_value;
+            trim_output = vss + (vdd - vss) * trim_code / 7.0;
+        end
+
+        V(vout) <+ transition(output_value, 0, tr, tr);
+        V(swing_metric) <+ transition(swing_output, 0, tr, tr);
+        V(z_metric) <+ transition(trim_output, 0, tr, tr);
+    end
+endmodule

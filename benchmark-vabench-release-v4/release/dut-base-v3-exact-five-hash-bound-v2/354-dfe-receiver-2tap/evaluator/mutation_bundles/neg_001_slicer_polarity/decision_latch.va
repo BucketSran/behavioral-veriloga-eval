@@ -1,0 +1,58 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module decision_latch (
+    input  electrical clk,
+    input  electrical rst,
+    input  electrical slicer_in_dbg,
+    output electrical decision,
+    output electrical hist1,
+    output electrical hist2
+);
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200e-12;
+
+    integer current_bit;
+    integer prev1_bit;
+    integer prev2_bit;
+    real decision_target;
+    real hist1_target;
+    real hist2_target;
+
+    analog begin
+        @(initial_step) begin
+            current_bit = 0;
+            prev1_bit = 0;
+            prev2_bit = 0;
+        end
+
+        @(cross(V(rst) - vth, +1)) begin
+            current_bit = 0;
+            prev1_bit = 0;
+            prev2_bit = 0;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth) begin
+                current_bit = 0;
+                prev1_bit = 0;
+                prev2_bit = 0;
+            end else begin
+                prev2_bit = prev1_bit;
+                prev1_bit = (V(slicer_in_dbg) < vcm) ? 1 : 0;
+                current_bit = prev1_bit;
+            end
+        end
+
+        decision_target = (current_bit != 0) ? vdd : vss;
+        hist1_target = (prev1_bit != 0) ? vdd : vss;
+        hist2_target = (prev2_bit != 0) ? vdd : vss;
+
+        V(decision) <+ transition(decision_target, 0, tr, tr);
+        V(hist1) <+ transition(hist1_target, 0, tr, tr);
+        V(hist2) <+ transition(hist2_target, 0, tr, tr);
+    end
+endmodule

@@ -1,0 +1,20 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/ffe_tx_3tap.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=6n width=3n delay=1n rise=50p fall=50p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 96n 0]
+Vdata (data 0) vsource type=pwl wave=[0 0 8n 0 8.1n 0.9 20n 0.9 20.1n 0 32n 0 32.1n 0.9 44n 0.9 44.1n 0.9 56n 0.9 56.1n 0 70n 0 70.1n 0.9 96n 0.9]
+Vpre0 (pre_0 0) vsource type=pwl wave=[0 0.9 30n 0.9 30.1n 0 58n 0 58.1n 0.9 96n 0.9]
+Vpre1 (pre_1 0) vsource type=pwl wave=[0 0 42n 0 42.1n 0.9 76n 0.9 76.1n 0 96n 0]
+Vpost0 (post_0 0) vsource type=pwl wave=[0 0 24n 0 24.1n 0.9 52n 0.9 52.1n 0 96n 0]
+Vpost1 (post_1 0) vsource type=pwl wave=[0 0 48n 0 48.1n 0.9 82n 0.9 82.1n 0 96n 0]
+
+XDUT (data clk rst pre_1 pre_0 post_1 post_0 vout main_dbg pre_dbg post_dbg) ffe_tx_3tap
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=96n maxstep=100p
+save data clk rst pre_1 pre_0 post_1 post_0 vout main_dbg pre_dbg post_dbg

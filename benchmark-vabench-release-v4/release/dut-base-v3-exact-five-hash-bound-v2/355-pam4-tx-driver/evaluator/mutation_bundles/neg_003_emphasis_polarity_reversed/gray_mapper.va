@@ -1,0 +1,41 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module gray_mapper (
+    input  electrical bit_msb,
+    input  electrical bit_lsb,
+    input  electrical rst,
+    output electrical level_1,
+    output electrical level_0
+);
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 200e-12;
+
+    integer msb_bit;
+    integer lsb_bit;
+    integer level_code;
+    real level1_target;
+    real level0_target;
+
+    analog begin
+        if (V(rst) > vth) begin
+            level_code = 0;
+        end else begin
+            msb_bit = (V(bit_msb) > vth) ? 1 : 0;
+            lsb_bit = (V(bit_lsb) > vth) ? 1 : 0;
+
+            if ((msb_bit == 0) && (lsb_bit == 0)) level_code = 0;
+            else if ((msb_bit == 0) && (lsb_bit == 1)) level_code = 1;
+            else if ((msb_bit == 1) && (lsb_bit == 1)) level_code = 2;
+            else level_code = 3;
+        end
+
+        level1_target = ((level_code == 2) || (level_code == 3)) ? vdd : vss;
+        level0_target = ((level_code == 1) || (level_code == 3)) ? vdd : vss;
+
+        V(level_1) <+ transition(level1_target, 0, tr, tr);
+        V(level_0) <+ transition(level0_target, 0, tr, tr);
+    end
+endmodule

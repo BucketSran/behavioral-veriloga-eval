@@ -1,0 +1,101 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "pam4_tx_top.va",
+      "gray_mapper.va",
+      "level_dac.va",
+      "preemphasis_driver.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop={stop_time} maxstep={maxstep}"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "bit_msb",
+      "bit_lsb",
+      "clk",
+      "rst",
+      "emph_en",
+      "vout",
+      "level_1",
+      "level_0",
+      "delta_dbg"
+    ]
+  },
+  "family_id": "355",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=80n maxstep=100p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=2n delay=4n rise=50p fall=50p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 80n 0]",
+          "Vbit_msb (bit_msb 0) vsource type=pwl wave=[0 0 8n 0 28n 0 28.1n 0.9 48n 0.9 48.1n 0 68n 0 68.1n 0.9 80n 0.9]",
+          "Vbit_lsb (bit_lsb 0) vsource type=pwl wave=[0 0 8n 0 18n 0 18.1n 0.9 38n 0.9 38.1n 0 58n 0 58.1n 0.9 80n 0.9]",
+          "Vemph_en (emph_en 0) vsource type=pwl wave=[0 0 22n 0 22.1n 0.9 62n 0.9 62.1n 0 80n 0]",
+          "",
+          "XDUT (bit_msb bit_lsb clk rst emph_en vout level_1 level_0 delta_dbg) pam4_tx_top"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "80n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=81n maxstep=100p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=9n width=1.8n delay=4.5n rise=50p fall=50p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 81n 0]",
+          "Vbit_msb (bit_msb 0) vsource type=pwl wave=[0 0 8n 0 8.1n 0.9 26n 0.9 26.1n 0 44n 0 44.1n 0.9 62n 0.9 62.1n 0 81n 0]",
+          "Vbit_lsb (bit_lsb 0) vsource type=pwl wave=[0 0 17n 0 17.1n 0.9 35n 0.9 35.1n 0 53n 0 53.1n 0.9 71n 0.9 71.1n 0 81n 0]",
+          "Vemph_en (emph_en 0) vsource type=pwl wave=[0 0 22n 0 22.1n 0.9 64n 0.9 64.1n 0 81n 0]",
+          "",
+          "XDUT (bit_msb bit_lsb clk rst emph_en vout level_1 level_0 delta_dbg) pam4_tx_top"
+        ]
+      },
+      "deterministic_seed": 1,
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "81n"
+      },
+      "simulatorOptions": {}
+    }
+  },
+  "property_ids": [
+    "P_RESET_CLEAR",
+    "P_GRAY_LEVEL_MAP",
+    "P_LEVEL_DAC",
+    "P_PREEMPHASIS",
+    "P_OUTPUT_CLAMP"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "a968dab31bb2d1e68132e2ff204d9fe5b60ba65420037f3bbb40f44d0c578dbf",
+    "family_spec_sha256": "0da82fac2756b44f8b1036107a4a06ddae152fb592cccecf812805f291f61af3"
+  },
+  "task_id": "v4-355"
+}

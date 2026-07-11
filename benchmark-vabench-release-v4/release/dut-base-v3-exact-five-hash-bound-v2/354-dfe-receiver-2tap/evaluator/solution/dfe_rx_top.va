@@ -1,0 +1,71 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dfe_rx_top (
+    input  electrical vin,
+    input  electrical clk,
+    input  electrical rst,
+    input  electrical tap1_1,
+    input  electrical tap1_0,
+    input  electrical tap2_1,
+    input  electrical tap2_0,
+    output electrical decision,
+    output electrical fb_metric,
+    output electrical slicer_in_dbg
+);
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tap_lsb = 20e-3;
+    parameter real tr = 200e-12;
+
+    electrical decision_raw;
+    electrical hist1;
+    electrical hist2;
+
+    feedback_filter #(
+        .vdd(vdd),
+        .vss(vss),
+        .vth(vth),
+        .tap_lsb(tap_lsb),
+        .tr(tr)
+    ) u_feedback_filter (
+        .tap1_1(tap1_1),
+        .tap1_0(tap1_0),
+        .tap2_1(tap2_1),
+        .tap2_0(tap2_0),
+        .hist1(hist1),
+        .hist2(hist2),
+        .fb_metric(fb_metric)
+    );
+
+    slicer #(
+        .vdd(vdd),
+        .vss(vss),
+        .vcm(vcm),
+        .vth(vth),
+        .tr(tr)
+    ) u_slicer (
+        .vin(vin),
+        .rst(rst),
+        .fb_metric(fb_metric),
+        .decision_raw(decision_raw),
+        .slicer_in_dbg(slicer_in_dbg)
+    );
+
+    decision_latch #(
+        .vdd(vdd),
+        .vss(vss),
+        .vcm(vcm),
+        .vth(vth),
+        .tr(tr)
+    ) u_decision_latch (
+        .clk(clk),
+        .rst(rst),
+        .slicer_in_dbg(slicer_in_dbg),
+        .decision(decision),
+        .hist1(hist1),
+        .hist2(hist2)
+    );
+endmodule

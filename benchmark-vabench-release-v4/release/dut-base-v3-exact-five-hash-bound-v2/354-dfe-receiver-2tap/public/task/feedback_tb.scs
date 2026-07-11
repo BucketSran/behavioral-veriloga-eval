@@ -1,0 +1,22 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/dfe_rx_top.va"
+ahdl_include "./dut/slicer.va"
+ahdl_include "./dut/feedback_filter.va"
+ahdl_include "./dut/decision_latch.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=8n width=2n delay=4n rise=50p fall=50p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 72n 0]
+Vtap1_1 (tap1_1 0) vsource type=pwl wave=[0 0 8n 0 72n 0]
+Vtap1_0 (tap1_0 0) vsource type=pwl wave=[0 0 8n 0.9 72n 0.9]
+Vtap2_1 (tap2_1 0) vsource type=pwl wave=[0 0 8n 0 72n 0]
+Vtap2_0 (tap2_0 0) vsource type=pwl wave=[0 0 8n 0.9 72n 0.9]
+Vvin (vin 0) vsource type=pwl wave=[0 0.3 18n 0.3 18.1n 0.62 42n 0.62 42.1n 0.4 72n 0.4]
+
+XDUT (vin clk rst tap1_1 tap1_0 tap2_1 tap2_0 decision fb_metric slicer_in_dbg) dfe_rx_top
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=72n maxstep=100p
+save vin clk rst tap1_1 tap1_0 tap2_1 tap2_0 decision fb_metric slicer_in_dbg

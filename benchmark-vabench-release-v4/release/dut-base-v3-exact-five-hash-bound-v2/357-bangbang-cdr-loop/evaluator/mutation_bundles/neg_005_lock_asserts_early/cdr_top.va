@@ -1,0 +1,39 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cdr_top(data_edge, ref_clk, rst, enable, recovered_clk, early, late, phase_4, phase_3, phase_2, phase_1, phase_0, lock);
+    input data_edge, ref_clk, rst, enable;
+    output recovered_clk, early, late, phase_4, phase_3, phase_2, phase_1, phase_0, lock;
+    electrical data_edge, ref_clk, rst, enable, recovered_clk, early, late, phase_4, phase_3, phase_2, phase_1, phase_0, lock;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter integer phase_center = 16;
+    parameter real unit_phase_delay = 5e-12;
+    parameter integer lock_window = 2;
+    parameter real tr = 200p;
+
+    electrical decision_clk;
+    electrical phase_error;
+
+    phase_rotator #(
+        .vdd(vdd), .vss(vss), .vth(vth), .unit_phase_delay(unit_phase_delay), .tr(tr)
+    ) u_rotator (
+        ref_clk, rst, enable, phase_4, phase_3, phase_2, phase_1, phase_0, recovered_clk
+    );
+
+    bbpd #(
+        .vdd(vdd), .vss(vss), .vth(vth), .unit_phase_delay(unit_phase_delay), .tr(tr)
+    ) u_bbpd (
+        data_edge, recovered_clk, rst, enable, early, late, decision_clk, phase_error
+    );
+
+    loop_filter_code #(
+        .vdd(vdd), .vss(vss), .vth(vth), .phase_center(phase_center),
+        .lock_window(lock_window), .tr(tr)
+    ) u_filter (
+        decision_clk, early, late, phase_error, rst, enable,
+        phase_4, phase_3, phase_2, phase_1, phase_0, lock
+    );
+endmodule

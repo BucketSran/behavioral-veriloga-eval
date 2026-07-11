@@ -1,0 +1,103 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "cdr_top.va",
+      "bbpd.va",
+      "loop_filter_code.va",
+      "phase_rotator.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop={stop_time} maxstep={maxstep}"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "data_edge",
+      "ref_clk",
+      "rst",
+      "enable",
+      "recovered_clk",
+      "early",
+      "late",
+      "phase_4",
+      "phase_3",
+      "phase_2",
+      "phase_1",
+      "phase_0",
+      "lock"
+    ]
+  },
+  "family_id": "357",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=130n maxstep=50p"
+        ],
+        "body_lines": [
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 130n 0]",
+          "Venable (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 130n 0.9]",
+          "Vref_clk (ref_clk 0) vsource type=pulse val0=0 val1=0.9 delay=4.95n period=10n width=5n rise=50p fall=50p",
+          "Vdata_edge (data_edge 0) vsource type=pwl wave=[0 0 15.775n 0 15.825n 0.9 15.840n 0.9 15.890n 0 15.900n 0 15.950n 0.9 16.700n 0.9 16.750n 0 25.950n 0 26.000n 0.9 26.750n 0.9 26.800n 0 35.900n 0 35.950n 0.9 36.700n 0.9 36.750n 0 45.850n 0 45.900n 0.9 46.650n 0.9 46.700n 0 55.800n 0 55.850n 0.9 56.600n 0.9 56.650n 0 66.225n 0 66.275n 0.9 67.025n 0.9 67.075n 0 76.175n 0 76.225n 0.9 76.975n 0.9 77.025n 0 130n 0]",
+          "",
+          "XDUT (data_edge ref_clk rst enable recovered_clk early late phase_4 phase_3 phase_2 phase_1 phase_0 lock) cdr_top unit_phase_delay=50p"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {
+        "maxstep": "50p",
+        "stop_time": "130n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=130n maxstep=50p"
+        ],
+        "body_lines": [
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 130n 0]",
+          "Venable (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 130n 0.9]",
+          "Vref_clk (ref_clk 0) vsource type=pulse val0=0 val1=0.9 delay=5.95n period=12n width=6n rise=50p fall=50p",
+          "Vdata_edge (data_edge 0) vsource type=pwl wave=[0 0 18.630n 0 18.680n 0.9 19.430n 0.9 19.480n 0 30.670n 0 30.720n 0.9 31.470n 0.9 31.520n 0 42.710n 0 42.760n 0.9 43.510n 0.9 43.560n 0 54.750n 0 54.800n 0.9 55.550n 0.9 55.600n 0 66.275n 0 66.325n 0.9 67.075n 0.9 67.125n 0 78.315n 0 78.365n 0.9 79.115n 0.9 79.165n 0 130n 0]",
+          "",
+          "XDUT (data_edge ref_clk rst enable recovered_clk early late phase_4 phase_3 phase_2 phase_1 phase_0 lock) cdr_top unit_phase_delay=40p"
+        ]
+      },
+      "deterministic_seed": 1,
+      "parameters": {
+        "maxstep": "50p",
+        "stop_time": "130n"
+      },
+      "simulatorOptions": {}
+    }
+  },
+  "property_ids": [
+    "P_RESET_DISABLE_CLEAR",
+    "P_BANGBANG_DECISION",
+    "P_PHASE_CODE_UPDATE",
+    "P_PHASE_ROTATION",
+    "P_LOCK_QUALIFICATION"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "34c68ebfc1d4118adbd6e3b5c77a9db7f70f6fff4595dee415d7f3a83006a4e5",
+    "family_spec_sha256": "52923cc7835f9815e4345afd3083b1b959f3c199e2700f1b72eeb80bb474f01d"
+  },
+  "task_id": "v4-357"
+}

@@ -1,0 +1,57 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module trim_controller(measure_clk, duty_metric, rst, enable, trim_3, trim_2, trim_1, trim_0, locked);
+    input measure_clk, duty_metric, rst, enable;
+    output trim_3, trim_2, trim_1, trim_0, locked;
+    electrical measure_clk, duty_metric, rst, enable, trim_3, trim_2, trim_1, trim_0, locked;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real target_duty = 0.5;
+    parameter real duty_tol = 0.03;
+    parameter real tr = 100p;
+
+    integer trim_code;
+    integer good_count;
+    integer locked_state;
+
+    analog begin
+        @(initial_step) begin
+            trim_code = 0;
+            good_count = 0;
+            locked_state = 0;
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            trim_code = 0;
+            good_count = 0;
+            locked_state = 0;
+        end
+
+        @(cross(V(measure_clk) - vth, +1) or cross(V(measure_clk) - vth, -1)) begin
+            if (V(rst) <= vth && V(enable) > vth) begin
+                if (V(duty_metric) < target_duty - duty_tol) begin
+                    if (trim_code < 15) trim_code = trim_code + 1;
+                    good_count = 0;
+                    locked_state = 0;
+                end else if (V(duty_metric) > target_duty + duty_tol) begin
+                    if (trim_code > 0) trim_code = trim_code - 1;
+                    good_count = 0;
+                    locked_state = 0;
+                end else begin
+                    good_count = good_count + 1;
+                    if (good_count >= 1) locked_state = 1;
+                end
+                locked_state = 1;
+            end
+        end
+
+        V(trim_3) <+ transition(((trim_code / 8) % 2) ? vdd : vss, 0, tr, tr);
+        V(trim_2) <+ transition(((trim_code / 4) % 2) ? vdd : vss, 0, tr, tr);
+        V(trim_1) <+ transition(((trim_code / 2) % 2) ? vdd : vss, 0, tr, tr);
+        V(trim_0) <+ transition((trim_code % 2) ? vdd : vss, 0, tr, tr);
+        V(locked) <+ transition(locked_state ? vdd : vss, 0, tr, tr);
+    end
+endmodule

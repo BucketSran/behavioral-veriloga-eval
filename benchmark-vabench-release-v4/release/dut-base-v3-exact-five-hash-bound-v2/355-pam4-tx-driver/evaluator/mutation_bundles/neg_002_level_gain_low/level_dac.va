@@ -1,0 +1,30 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module level_dac (
+    input  electrical level_1,
+    input  electrical level_0,
+    input  electrical rst,
+    output electrical level_v
+);
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real level_step = 0.3;
+    parameter real tr = 200e-12;
+
+    real code;
+    real level_target;
+
+    analog begin
+        if (V(rst) > vth) begin
+            code = 0.0;
+        end else begin
+            code = 0.0;
+            if (V(level_0) > vth) code = code + 1.0;
+            if (V(level_1) > vth) code = code + 2.0;
+        end
+
+        level_target = vss + (code * level_step * 0.5);
+        V(level_v) <+ transition(level_target, 0, tr, tr);
+    end
+endmodule

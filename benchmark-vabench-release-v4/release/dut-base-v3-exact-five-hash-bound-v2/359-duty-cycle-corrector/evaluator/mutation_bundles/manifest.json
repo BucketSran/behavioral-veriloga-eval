@@ -1,0 +1,132 @@
+{
+  "family_id": "359",
+  "gold_bundle_sha256": "cac286515bd7527771df2cbb921b37d00f9dec51f7fa3f9acd6f2b100a1d2314",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "duty_meter.va": "245973ebcacc76a546f2fbdda7141dc334cbcd92399b83a9518ccac7cf64dc3d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DUTY_MEASUREMENT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_reports_low_fraction/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "duty_meter.va"
+      ],
+      "fault_class": "metric_error",
+      "id": "neg_001_reports_low_fraction",
+      "trigger_condition": "a complete asymmetric input cycle occurs",
+      "violated_property_ids": [
+        "P_DUTY_MEASUREMENT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "trim_controller.va": "396cacc846b9d57edefc7a1a224a8a9cdf23c4236770abd7345351a391450fdc"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_TRIM_DIRECTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_trim_direction_reversed/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "trim_controller.va"
+      ],
+      "fault_class": "wrong_polarity",
+      "id": "neg_002_trim_direction_reversed",
+      "trigger_condition": "measured duty is below target",
+      "violated_property_ids": [
+        "P_TRIM_DIRECTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "delay_pair.va": "6f2e47486f46da6e25a073a77ddec9e6527cf6d37d0c71e4eb87870dc66ca4f6"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_EDGE_DELAY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_falling_edge_not_delayed/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "delay_pair.va"
+      ],
+      "fault_class": "timing_error",
+      "id": "neg_003_falling_edge_not_delayed",
+      "trigger_condition": "falling input edge occurs with nonzero trim",
+      "violated_property_ids": [
+        "P_EDGE_DELAY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "trim_controller.va": "970b4ae9da61212b89d1bd2412436891f000a69a3250e56392de1efe587cbf01"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LOCK_QUALIFICATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_lock_asserts_early/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "trim_controller.va"
+      ],
+      "fault_class": "wrong_qualification",
+      "id": "neg_004_lock_asserts_early",
+      "trigger_condition": "one in-window cycle completes",
+      "violated_property_ids": [
+        "P_LOCK_QUALIFICATION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "trim_controller.va": "6223e9adb4ae5bfb5e72e0285deb31d9df2ace3a528d17f36d76a8d050e7795d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_DISABLE_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_reset_trim_fullscale/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "trim_controller.va"
+      ],
+      "fault_class": "missing_reset",
+      "id": "neg_005_reset_trim_fullscale",
+      "trigger_condition": "reset or disable is asserted",
+      "violated_property_ids": [
+        "P_RESET_DISABLE_CLEAR"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

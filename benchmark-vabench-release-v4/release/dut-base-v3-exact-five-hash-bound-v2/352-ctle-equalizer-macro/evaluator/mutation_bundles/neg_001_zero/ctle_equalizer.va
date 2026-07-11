@@ -1,0 +1,69 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module ctle_equalizer(vin, clk, rst, boost_2, boost_1, boost_0, vout, edge_metric, sat_flag);
+    input vin, clk, rst, boost_2, boost_1, boost_0;
+    output vout, edge_metric, sat_flag;
+    electrical vin, clk, rst, boost_2, boost_1, boost_0, vout, edge_metric, sat_flag;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real base_gain = 1.0;
+    parameter real boost_step = 0.08;
+    parameter real tr = 120p from (0:inf);
+
+    real prev_in;
+    real out_value;
+    real metric_value;
+    real sat_value;
+    real delta_in;
+    real raw;
+    integer boost_code;
+
+    analog begin
+        @(initial_step) begin
+            prev_in = vcm;
+            out_value = vcm;
+            metric_value = vss;
+            sat_value = vss;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth) begin
+                prev_in = vcm;
+                out_value = vcm;
+                metric_value = vss;
+                sat_value = vss;
+            end else begin
+                boost_code = 0;
+                if (V(boost_0) > vth) boost_code = boost_code + 1;
+                if (V(boost_1) > vth) boost_code = boost_code + 2;
+                if (V(boost_2) > vth) boost_code = boost_code + 4;
+                delta_in = V(vin) - prev_in;
+                raw = vcm + base_gain * (V(vin) - vcm) + boost_step * boost_code * delta_in;
+                metric_value = boost_step * boost_code * delta_in;
+                if (metric_value < 0.0)
+                    metric_value = -metric_value;
+                sat_value = vss;
+                out_value = raw;
+                if (out_value > vdd) begin
+                    out_value = vdd;
+                    sat_value = vdd;
+                end
+                if (out_value < vss) begin
+                    out_value = vss;
+                    sat_value = vdd;
+                end
+                if (metric_value > vdd)
+                    metric_value = vdd;
+                prev_in = V(vin);
+            end
+        end
+
+        V(vout) <+ 0.0;
+        V(edge_metric) <+ 0.0;
+        V(sat_flag) <+ 0.0;
+    end
+endmodule

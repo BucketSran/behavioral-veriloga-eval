@@ -1,0 +1,136 @@
+{
+  "family_id": "354",
+  "gold_bundle_sha256": "e1c705fdbedaad5267a70b8db1108f0dbf8a6b1e72d458df083ba81d840e1e82",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "decision_latch.va": "1e8b9278557ede4a0510de291a2ddef89142772913534dee8dc931e13891608d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CLOCKED_DECISION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_slicer_polarity/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "decision_latch.va"
+      ],
+      "fault_class": "wrong_polarity",
+      "id": "neg_001_slicer_polarity",
+      "trigger_condition": "corrected input crosses VCM",
+      "violated_property_ids": [
+        "P_CLOCKED_DECISION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "slicer.va": "e5efca7828939f082cd68fea212d690c8495cf07d2840a163758708e4e64334e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CORRECTED_INPUT",
+          "P_TWO_TAP_FEEDBACK"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_feedback_sign/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "slicer.va"
+      ],
+      "fault_class": "wrong_polarity",
+      "id": "neg_002_feedback_sign",
+      "trigger_condition": "nonzero decision history and tap code",
+      "violated_property_ids": [
+        "P_CORRECTED_INPUT",
+        "P_TWO_TAP_FEEDBACK"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "feedback_filter.va": "41372060fdef6ca5b24ee7f4f7f3217cbf886f60499dd8305f3cebf738484d2f"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_TWO_TAP_FEEDBACK"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_second_tap_ignored/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "feedback_filter.va"
+      ],
+      "fault_class": "missing_tap",
+      "id": "neg_003_second_tap_ignored",
+      "trigger_condition": "tap2 code and second history bit are nonzero",
+      "violated_property_ids": [
+        "P_TWO_TAP_FEEDBACK"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "decision_latch.va": "8e48480a4750ee2069fe1bf4d72cefde40892c1cda11d643f837bad488d61e2a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CLOCKED_DECISION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_wrong_clock_edge/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "decision_latch.va"
+      ],
+      "fault_class": "wrong_edge",
+      "id": "neg_004_wrong_clock_edge",
+      "trigger_condition": "clock toggles with changing VIN",
+      "violated_property_ids": [
+        "P_CLOCKED_DECISION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "decision_latch.va": "1037cee69e0b82d8c361bc4bc423222547dfbdfcda13e77f301a0ddc485a97cf"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_HISTORY_ORDER",
+          "P_RESET_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_reset_preserves_history/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "decision_latch.va"
+      ],
+      "fault_class": "missing_reset",
+      "id": "neg_005_reset_preserves_history",
+      "trigger_condition": "reset is asserted after decisions",
+      "violated_property_ids": [
+        "P_HISTORY_ORDER",
+        "P_RESET_CLEAR"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

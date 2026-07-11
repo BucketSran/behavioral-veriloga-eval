@@ -1,0 +1,34 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module quadrature_phase_interpolator(clk_i, clk_q, rst, code_4, code_3, code_2, code_1, code_0, clk_out, quadrant_1, quadrant_0, phase_metric);
+    inout clk_i, clk_q, rst, code_4, code_3, code_2, code_1, code_0, clk_out, quadrant_1, quadrant_0, phase_metric;
+    electrical clk_i, clk_q, rst, code_4, code_3, code_2, code_1, code_0, clk_out, quadrant_1, quadrant_0, phase_metric;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vth = 0.45; parameter real unit_delay = 5e-12; parameter real tr = 100p from (0:inf); parameter real tick = 250p from (0:inf);
+    integer code, phase_code, quadrant; real ref_v, clk_v, q1_v, q0_v, metric_v;
+    analog begin
+        @(initial_step) begin clk_v = 0.0; q1_v = 0.0; q0_v = 0.0; metric_v = 0.0; end
+        @(timer(0, tick)) begin
+            if (V(rst) > vth) begin clk_v = 0.0; q1_v = 0.0; q0_v = 0.0; metric_v = 0.0; end
+            else begin
+                code = 0;
+                if (V(code_0) > vth) code = code + 1;
+                if (V(code_1) > vth) code = code + 2;
+                if (V(code_2) > vth) code = code + 4;
+                if (V(code_3) > vth) code = code + 8;
+                if (V(code_4) > vth) code = code + 16;
+                phase_code = code;
+                quadrant = (phase_code / 8);
+                ref_v = ((quadrant == 0) || (quadrant == 2)) ? V(clk_i) : V(clk_q);
+                clk_v = ref_v;
+                q1_v = ((quadrant == 2) || (quadrant == 3)) ? vdd : vss;
+                q0_v = ((quadrant == 1) || (quadrant == 3)) ? vdd : vss;
+                metric_v = vdd * phase_code / 31.0;
+            end
+        end
+        V(clk_out) <+ 0.5*transition(clk_v, unit_delay * (phase_code - 8 * quadrant), tr, tr);
+        V(quadrant_1) <+ 0.5*transition(q1_v, 0, tr, tr);
+        V(quadrant_0) <+ 0.5*transition(q0_v, 0, tr, tr);
+        V(phase_metric) <+ 0.5*transition(metric_v, 0, tr, tr);
+    end
+endmodule
