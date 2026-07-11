@@ -1,0 +1,12 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/cal4bit_modulo.va"
+
+Vain (ain 0) vsource type=pwl wave=[0 0 0.8n 0 0.85n 3 1.6n 3 1.65n 10 2.4n 10 2.45n 15 3.2n 15]
+XDUT (ain d0 d1 d2 d3) cal4bit_modulo
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=3.0n maxstep=5p
+save ain d0 d1 d2 d3

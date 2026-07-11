@@ -1,0 +1,98 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "mux4_priority.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=3.0n maxstep=5p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "in0",
+      "in1",
+      "in2",
+      "in3",
+      "out",
+      "sel0",
+      "sel1"
+    ]
+  },
+  "family_id": "246",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "651fba1487cdf861b813a95cbf4107fca61efd3080090fae5d6b0a3e310fae17",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "d811c73ff71676812b2abf09f92c29ab0750e02f731da429a86493993d40a42a",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vsel0 (sel0 0) vsource type=pwl wave=[0 0 0.8n 0 0.85n 0.9 1.6n 0.9 1.65n 0 2.4n 0 2.45n 0.9 3.2n 0.9]",
+          "Vsel1 (sel1 0) vsource type=pwl wave=[0 0 1.6n 0 1.65n 0.9 3.2n 0.9]",
+          "Vin0 (in0 0) vsource dc=0.1",
+          "Vin1 (in1 0) vsource dc=0.4",
+          "Vin2 (in2 0) vsource dc=-0.2",
+          "Vin3 (in3 0) vsource dc=0.8",
+          "XDUT (sel0 sel1 in0 in1 in2 in3 out) mux4_priority"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=2.6n maxstep=5p"
+        ],
+        "body_lines": [
+          "Vsel0 (sel0 0) vsource type=pwl wave=[0 0.9 0.7n 0.9 0.75n 0 1.4n 0 1.45n 0.9 2.1n 0.9 2.15n 0 2.8n 0]",
+          "Vsel1 (sel1 0) vsource type=pwl wave=[0 0 1.4n 0 1.45n 0.9 2.8n 0.9]",
+          "Vin0 (in0 0) vsource dc=-0.35",
+          "Vin1 (in1 0) vsource dc=0.25",
+          "Vin2 (in2 0) vsource dc=0.65",
+          "Vin3 (in3 0) vsource dc=-0.05",
+          "XDUT (sel0 sel1 in0 in1 in2 in3 out) mux4_priority"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_DECODE_THE_SELECT_CODE_AS_SEL0",
+    "P_PROVIDE_OVERRIDEABLE_PUBLIC_PARAMETER_VTH_0",
+    "P_USE_DETERMINISTIC_VOLTAGE_DOMAIN_VERILOG_A"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "6d4641bf20f32b29048bc59ba84c10703c2602f5f8a6125c76d8da95bb2f04d4",
+    "family_spec_sha256": "a2729a996daf3f6e3e7fea9e5687729a0dc0646787e0b6e3e5a9a07587acdfa1"
+  },
+  "task_id": "v4-246"
+}

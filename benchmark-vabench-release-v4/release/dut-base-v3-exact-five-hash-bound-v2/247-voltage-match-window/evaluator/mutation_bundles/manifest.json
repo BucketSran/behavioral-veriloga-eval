@@ -1,0 +1,142 @@
+{
+  "family_id": "247",
+  "gold_bundle_sha256": "9b6396aead73277bb3eb5513949c35a66bbdb9d0e7dc20259c999200a629d51d",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "voltage_match_window.va": "426847dd82554e6c85f75a6b31ba597ac9827d79f7ce5e5d4bc09d30e21cd736"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COMPARE_THE_ANALOG_VOLTAGE_DIFFERENCE_DIRECTLY",
+          "P_MATCH_TOL_0_05_V_FROM"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "voltage_match_window.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Keeps the output at its trivial zero behavior and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_COMPARE_THE_ANALOG_VOLTAGE_DIFFERENCE_DIRECTLY",
+        "P_MATCH_TOL_0_05_V_FROM"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "voltage_match_window.va": "edb3f717f3d613a1624326388e9fcb758a94ec49381f2f72d261ad47ba274728"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COMPARE_THE_ANALOG_VOLTAGE_DIFFERENCE_DIRECTLY",
+          "P_VH_0_9_V_MATCH_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_threshold_xnor/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "voltage_match_window.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_002_threshold_xnor",
+      "trigger_condition": "Uses an overly tight analog match_tol so near-match inputs fail while still passing digital-threshold cases.",
+      "violated_property_ids": [
+        "P_COMPARE_THE_ANALOG_VOLTAGE_DIFFERENCE_DIRECTLY",
+        "P_VH_0_9_V_MATCH_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "voltage_match_window.va": "3f61386b1ce30d353313f93ab53d07edc90a53f8adddea7dec92e81f5b7c7732"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COMPARE_THE_ANALOG_VOLTAGE_DIFFERENCE_DIRECTLY",
+          "P_TR_20_PS_FROM_0_INF"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_signed_comparator/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "voltage_match_window.va"
+      ],
+      "fault_class": "timing_or_state_update_fault",
+      "id": "neg_003_signed_comparator",
+      "trigger_condition": "Uses a signed greater-than comparator instead of an absolute voltage-difference window.",
+      "violated_property_ids": [
+        "P_COMPARE_THE_ANALOG_VOLTAGE_DIFFERENCE_DIRECTLY",
+        "P_TR_20_PS_FROM_0_INF"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "voltage_match_window.va": "c9892198effe9df2eac2d3cb64ef59046b3ceab6b742c3605e592c8b31455849"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COMPARE_THE_ANALOG_VOLTAGE_DIFFERENCE_DIRECTLY",
+          "P_MATCH_TOL_0_05_V_FROM_2"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_wrong_tolerance/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "voltage_match_window.va"
+      ],
+      "fault_class": "timing_or_state_update_fault",
+      "id": "neg_004_wrong_tolerance",
+      "trigger_condition": "Uses a much wider match window than the public tolerance contract.",
+      "violated_property_ids": [
+        "P_COMPARE_THE_ANALOG_VOLTAGE_DIFFERENCE_DIRECTLY",
+        "P_MATCH_TOL_0_05_V_FROM_2"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "voltage_match_window.va": "dcec2932016031de05003691aedc7ccf75e114dbb485fb484ae03bb587ab46a8"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COMPARE_THE_ANALOG_VOLTAGE_DIFFERENCE_DIRECTLY",
+          "P_USE_DETERMINISTIC_VOLTAGE_DOMAIN_VERILOG_A"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "voltage_match_window.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Scales the rail-coded match output by the wrong output gain.",
+      "violated_property_ids": [
+        "P_COMPARE_THE_ANALOG_VOLTAGE_DIFFERENCE_DIRECTLY",
+        "P_USE_DETERMINISTIC_VOLTAGE_DOMAIN_VERILOG_A"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

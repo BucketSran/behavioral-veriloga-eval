@@ -1,0 +1,86 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "cal4bit_modulo.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=3.0n maxstep=5p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "ain",
+      "d0",
+      "d1",
+      "d2",
+      "d3"
+    ]
+  },
+  "family_id": "245",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "44a6051ee42dad3c3f247db9e3084287a978015a9b429d37f7acc1c67800e5eb",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "cf20f94908a432a1e89a7883dede264a009ef63253bd8a0f513e7c501a3bb103",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vain (ain 0) vsource type=pwl wave=[0 0 0.8n 0 0.85n 3 1.6n 3 1.65n 10 2.4n 10 2.45n 15 3.2n 15]",
+          "XDUT (ain d0 d1 d2 d3) cal4bit_modulo"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=2.6n maxstep=5p"
+        ],
+        "body_lines": [
+          "Vain (ain 0) vsource type=pwl wave=[0 -2 0.7n -2 0.75n 1.9 1.4n 1.9 1.45n 7.2 2.1n 7.2 2.15n 18 2.8n 18]",
+          "XDUT (ain d0 d1 d2 d3) cal4bit_modulo"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_FLOOR_V_AIN_TO_AN_INTEGER",
+    "P_PROVIDE_OVERRIDEABLE_PUBLIC_PARAMETER_VH_0",
+    "P_USE_DETERMINISTIC_VOLTAGE_DOMAIN_VERILOG_A"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "fd67ac701f7fd246b111f7934a3c93497f05da8e4e653c2c19398cd5419410e8",
+    "family_spec_sha256": "d5f6f732b066902c4c7a4a66f6388fb84cf8698255418b65c009ae5d05c9d940"
+  },
+  "task_id": "v4-245"
+}

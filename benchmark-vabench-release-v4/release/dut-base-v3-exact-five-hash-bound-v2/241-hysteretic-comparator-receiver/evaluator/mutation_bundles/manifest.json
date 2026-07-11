@@ -1,0 +1,142 @@
+{
+  "family_id": "241",
+  "gold_bundle_sha256": "9330b27ae1085eca2fce00e980ef8d7a5c67e9d3aa10bff19a39334f46264fa3",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "hysteretic_comparator_receiver.va": "c942c8466ab96737330d8b2d3e769481a7c1036526b3706f503a4443e978ffff"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DEFINE_UPPER_TH_OFFSET_VHYS_2",
+          "P_VOUT_HIGH_0_9_V_HIGH"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_stuck_low/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "hysteretic_comparator_receiver.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_001_stuck_low",
+      "trigger_condition": "Never updates the receiver state, so high-threshold crossings do not drive the output high.",
+      "violated_property_ids": [
+        "P_DEFINE_UPPER_TH_OFFSET_VHYS_2",
+        "P_VOUT_HIGH_0_9_V_HIGH"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "hysteretic_comparator_receiver.va": "385e783e9c8d36b1bcd649e94e39924e9e27d5df4b4fbf65f66edd307aad02a0"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DEFINE_UPPER_TH_OFFSET_VHYS_2",
+          "P_VOUT_LOW_0_0_V_LOW"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_no_hysteresis/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "hysteretic_comparator_receiver.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_002_no_hysteresis",
+      "trigger_condition": "Uses a single offset threshold instead of separate upper and lower hysteresis thresholds.",
+      "violated_property_ids": [
+        "P_DEFINE_UPPER_TH_OFFSET_VHYS_2",
+        "P_VOUT_LOW_0_0_V_LOW"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "hysteretic_comparator_receiver.va": "e3a831383d1ed72b4035f662d2e7d81c939a02317ceb27004819bca5132832df"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DEFINE_UPPER_TH_OFFSET_VHYS_2",
+          "P_OFFSET_0_0_V_INPUT_REFERRED"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_no_delay/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "hysteretic_comparator_receiver.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_003_no_delay",
+      "trigger_condition": "Implements the hysteresis thresholds but ignores the required propagation delay.",
+      "violated_property_ids": [
+        "P_DEFINE_UPPER_TH_OFFSET_VHYS_2",
+        "P_OFFSET_0_0_V_INPUT_REFERRED"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "hysteretic_comparator_receiver.va": "66acfb18cd5b18a6f28325d44c47e3fdb4106abe1bcd699556fcefec05ac0dc7"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DEFINE_UPPER_TH_OFFSET_VHYS_2",
+          "P_VHYS_40_MV_FROM_0_INF"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_wrong_polarity/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "hysteretic_comparator_receiver.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_004_wrong_polarity",
+      "trigger_condition": "Swaps the high and low receiver states.",
+      "violated_property_ids": [
+        "P_DEFINE_UPPER_TH_OFFSET_VHYS_2",
+        "P_VHYS_40_MV_FROM_0_INF"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "hysteretic_comparator_receiver.va": "2920fb9128a63e02ad5e8f8e067bda236338460153602917eba528b459934a7b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DEFINE_UPPER_TH_OFFSET_VHYS_2",
+          "P_TD_400_PS_FROM_0_INF"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_wrong_output_level/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "hysteretic_comparator_receiver.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_005_wrong_output_level",
+      "trigger_condition": "Uses the right state transitions but drives the wrong high output rail.",
+      "violated_property_ids": [
+        "P_DEFINE_UPPER_TH_OFFSET_VHYS_2",
+        "P_TD_400_PS_FROM_0_INF"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

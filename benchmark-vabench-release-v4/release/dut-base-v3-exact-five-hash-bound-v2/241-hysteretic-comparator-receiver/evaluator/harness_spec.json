@@ -1,0 +1,89 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "hysteretic_comparator_receiver.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=7.0n maxstep=10p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "inm",
+      "inp",
+      "out"
+    ]
+  },
+  "family_id": "241",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "59f3db96883df70f9501da3df00cfbae1f7fc6be857e17c0364c856d003325a5",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "3ad822ccc727a75da902e3e22a411e91ae08e5ca97febd7b5c798d0629a18bbc",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vinp (inp 0) vsource type=pwl wave=[0 0.425 1.0n 0.425 1.2n 0.480 2.0n 0.480 2.2n 0.445 3.0n 0.445 3.2n 0.420 4.0n 0.420 4.2n 0.482 5.0n 0.482 5.2n 0.445 6.0n 0.445 6.2n 0.418 7.0n 0.418]",
+          "Vinm (inm 0) vsource dc=0.45",
+          "XDUT (inp inm out) hysteretic_comparator_receiver"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=6.8n maxstep=10p"
+        ],
+        "body_lines": [
+          "Vinp (inp 0) vsource type=pwl wave=[0 0.505 0.8n 0.505 1.0n 0.558 1.8n 0.558 2.0n 0.540 2.8n 0.540 3.0n 0.498 3.8n 0.498 4.0n 0.552 4.8n 0.552 5.0n 0.520 5.8n 0.520 6.0n 0.492 6.8n 0.492]",
+          "Vinm (inm 0) vsource type=pwl wave=[0 0.530 6.8n 0.530]",
+          "XDUT (inp inm out) hysteretic_comparator_receiver"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_DEFINE_UPPER_TH_OFFSET_VHYS_2",
+    "P_VOUT_HIGH_0_9_V_HIGH",
+    "P_VOUT_LOW_0_0_V_LOW",
+    "P_OFFSET_0_0_V_INPUT_REFERRED",
+    "P_VHYS_40_MV_FROM_0_INF",
+    "P_TD_400_PS_FROM_0_INF"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "1f355cd46fd7e4799d800dae6a63d8db70b0423cae10a2959d5d6e468e1eefce",
+    "family_spec_sha256": "f8383c53f5b4983c84583d2046410758e538c1d57f1e5e4f2baf611fe7c0b0ef"
+  },
+  "task_id": "v4-241"
+}

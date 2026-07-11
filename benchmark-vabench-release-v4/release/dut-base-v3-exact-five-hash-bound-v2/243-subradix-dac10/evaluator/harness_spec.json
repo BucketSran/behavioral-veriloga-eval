@@ -1,0 +1,112 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "subradix_dac10.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=3.0n maxstep=5p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vd0",
+      "vd1",
+      "vd2",
+      "vd3",
+      "vd4",
+      "vd5",
+      "vd6",
+      "vd7",
+      "vd8",
+      "vd9",
+      "vout"
+    ]
+  },
+  "family_id": "243",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "a03b853cd1f1746824e9606a0e5e47a3160019517548ccf1803f551d9c954593",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "c1b95d4ae8797d26ebf59193852ed9ca9513a18a8296ac64586194d2cc8dbfd5",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vd9 (vd9 0) vsource type=pwl wave=[0 0 0.8n 0 0.85n 0.9 1.6n 0.9 1.65n 0 2.4n 0 2.45n 0.9 3.2n 0.9]",
+          "Vd8 (vd8 0) vsource type=pwl wave=[0 0 0.8n 0 0.85n 0 1.6n 0 1.65n 0.9 2.4n 0.9 2.45n 0.9 3.2n 0.9]",
+          "Vd7 (vd7 0) vsource dc=0",
+          "Vd6 (vd6 0) vsource dc=0",
+          "Vd5 (vd5 0) vsource dc=0",
+          "Vd4 (vd4 0) vsource type=pwl wave=[0 0 1.6n 0 1.65n 0.9 3.2n 0.9]",
+          "Vd3 (vd3 0) vsource dc=0",
+          "Vd2 (vd2 0) vsource dc=0",
+          "Vd1 (vd1 0) vsource type=pwl wave=[0 0 2.4n 0 2.45n 0.9 3.2n 0.9]",
+          "Vd0 (vd0 0) vsource type=pwl wave=[0 0 0.8n 0 0.85n 0.9 1.6n 0.9 1.65n 0.9 3.2n 0.9]",
+          "XDUT (vd9 vd8 vd7 vd6 vd5 vd4 vd3 vd2 vd1 vd0 vout) subradix_dac10"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=3.4n maxstep=5p"
+        ],
+        "body_lines": [
+          "Vd9 (vd9 0) vsource type=pwl wave=[0 0 0.7n 0 0.75n 0.9 1.4n 0.9 1.45n 0 2.1n 0 2.15n 0.9 2.8n 0.9 2.85n 0 3.6n 0]",
+          "Vd8 (vd8 0) vsource type=pwl wave=[0 0.9 0.7n 0.9 0.75n 0 1.4n 0 1.45n 0.9 2.1n 0.9 2.15n 0.9 2.8n 0.9 2.85n 0 3.6n 0]",
+          "Vd7 (vd7 0) vsource type=pwl wave=[0 0 0.7n 0 0.75n 0.9 1.4n 0.9 1.45n 0.9 2.1n 0.9 2.15n 0 2.8n 0 2.85n 0.9 3.6n 0.9]",
+          "Vd6 (vd6 0) vsource dc=0",
+          "Vd5 (vd5 0) vsource type=pwl wave=[0 0.9 0.7n 0.9 0.75n 0 1.4n 0 1.45n 0 2.1n 0 2.15n 0.9 2.8n 0.9 2.85n 0 3.6n 0]",
+          "Vd4 (vd4 0) vsource type=pwl wave=[0 0 0.7n 0 0.75n 0 1.4n 0 1.45n 0.9 2.1n 0.9 2.15n 0.9 2.8n 0.9 2.85n 0 3.6n 0]",
+          "Vd3 (vd3 0) vsource dc=0.9",
+          "Vd2 (vd2 0) vsource type=pwl wave=[0 0 0.7n 0 0.75n 0.9 1.4n 0.9 1.45n 0 2.1n 0 2.15n 0.9 2.8n 0.9 2.85n 0.9 3.6n 0.9]",
+          "Vd1 (vd1 0) vsource type=pwl wave=[0 0.9 0.7n 0.9 0.75n 0 1.4n 0 1.45n 0.9 2.1n 0.9 2.15n 0 2.8n 0 2.85n 0.9 3.6n 0.9]",
+          "Vd0 (vd0 0) vsource type=pwl wave=[0 0 0.7n 0 0.75n 0.9 1.4n 0.9 1.45n 0.9 2.1n 0.9 2.15n 0 2.8n 0 2.85n 0.9 3.6n 0.9]",
+          "XDUT (vd9 vd8 vd7 vd6 vd5 vd4 vd3 vd2 vd1 vd0 vout) subradix_dac10"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_TREAT_EACH_INPUT_AS_LOGIC_ONE",
+    "P_VTH_0_45_V_DECISION_THRESHOLD",
+    "P_VREF_1_0_V_OUTPUT_FULL",
+    "P_VTH_0_45_V_DECISION_THRESHOLD_2",
+    "P_USE_DETERMINISTIC_VOLTAGE_DOMAIN_VERILOG_A"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "f9164e8ca9707815c53287e38eeab08f0c5c8ff1a90a5560c4bf974ee1feec80",
+    "family_spec_sha256": "13717f2f68c50d98885fede55f4ecb2d38ee9c00cd947be16b83ef81fe7f1e7a"
+  },
+  "task_id": "v4-243"
+}

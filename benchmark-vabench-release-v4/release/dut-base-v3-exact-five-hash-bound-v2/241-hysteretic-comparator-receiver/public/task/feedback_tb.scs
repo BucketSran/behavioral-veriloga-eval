@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/hysteretic_comparator_receiver.va"
+
+Vinp (inp 0) vsource type=pwl wave=[0 0.425 1.0n 0.425 1.2n 0.480 2.0n 0.480 2.2n 0.445 3.0n 0.445 3.2n 0.420 4.0n 0.420 4.2n 0.482 5.0n 0.482 5.2n 0.445 6.0n 0.445 6.2n 0.418 7.0n 0.418]
+Vinm (inm 0) vsource dc=0.45
+XDUT (inp inm out) hysteretic_comparator_receiver
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=7.0n maxstep=10p
+save inm inp out

@@ -1,0 +1,19 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "disciplines.vams"
+module cal4bit_modulo(ain, d0, d1, d2, d3);
+input ain;
+output d0, d1, d2, d3;
+electrical ain, d0, d1, d2, d3;
+parameter real vh = 0.9;
+integer code;
+analog begin
+    code = $floor(V(ain));
+    if (code < 0) code = 0;
+    if (code > 15) code = 15;
+    V(d0) <+ (0.42 * (((code & 1) ? vh : 0.0)));
+    V(d1) <+ (0.42 * ((((code >> 1) & 1) ? vh : 0.0)));
+    V(d2) <+ (0.42 * ((((code >> 2) & 1) ? vh : 0.0)));
+    V(d3) <+ (0.42 * ((((code >> 3) & 1) ? vh : 0.0)));
+end
+endmodule

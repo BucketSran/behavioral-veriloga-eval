@@ -1,0 +1,296 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "subradix_dac10",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.0",
+                "name": "vref",
+                "override_behavior": "overrides vref",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vd9",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vd8",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vd7",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vd6",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vd5",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vd4",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vd3",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vd2",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vd1",
+                "position": 8
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vd0",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 10
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "subradix_dac10.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "243",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Subradix DAC10"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_TREAT_EACH_INPUT_AS_LOGIC_ONE",
+      "observable_contract": "Treat each input as logic one when its voltage is greater than `vth`. Decode `vd9..vd0` as a sub-radix word whose adjacent bit weights follow radix `1.8`, with `vd0` weight one and `vd9` weight `1.8^9`. Scale the active-weight sum by the all-ones sub-radix weight sum so that all ones maps to `vref`.",
+      "required_signals": [
+        "time",
+        "vd0",
+        "vd1",
+        "vd2",
+        "vd3",
+        "vd4",
+        "vd5",
+        "vd6",
+        "vd7",
+        "vd8",
+        "vd9",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_VTH_0_45_V_DECISION_THRESHOLD",
+      "observable_contract": "`vth = 0.45 V`: decision threshold for each input bit.",
+      "required_signals": [
+        "time",
+        "vd0",
+        "vd1",
+        "vd2",
+        "vd3",
+        "vd4",
+        "vd5",
+        "vd6",
+        "vd7",
+        "vd8",
+        "vd9",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_VREF_1_0_V_OUTPUT_FULL",
+      "observable_contract": "`vref = 1.0 V`: output full-scale/reference voltage.",
+      "required_signals": [
+        "time",
+        "vd0",
+        "vd1",
+        "vd2",
+        "vd3",
+        "vd4",
+        "vd5",
+        "vd6",
+        "vd7",
+        "vd8",
+        "vd9",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_VTH_0_45_V_DECISION_THRESHOLD_2",
+      "observable_contract": "- `vth = 0.45 V`: decision threshold for each input bit. - `vref = 1.0 V`: output full-scale/reference voltage.",
+      "required_signals": [
+        "time",
+        "vd0",
+        "vd1",
+        "vd2",
+        "vd3",
+        "vd4",
+        "vd5",
+        "vd6",
+        "vd7",
+        "vd8",
+        "vd9",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_USE_DETERMINISTIC_VOLTAGE_DOMAIN_VERILOG_A",
+      "observable_contract": "Use deterministic voltage-domain Verilog-A and voltage contributions only. It is acceptable to express sub-radix weights with portable real arithmetic such as `pow(1.8, k)`. Do not emit a testbench, checker logic, out-of-band test hooks, hard-code testbench sample points, use current contributions, transistor-level devices, `ddt()`, `idt()`, or simulator side channels.",
+      "required_signals": [
+        "time",
+        "vd0",
+        "vd1",
+        "vd2",
+        "vd3",
+        "vd4",
+        "vd5",
+        "vd6",
+        "vd7",
+        "vd8",
+        "vd9",
+        "vout"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1243",
+    "dut": "v4-243",
+    "testbench": "v4-743"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vd9",
+            "port_ref": "vd9",
+            "position": 0
+          },
+          {
+            "net": "vd8",
+            "port_ref": "vd8",
+            "position": 1
+          },
+          {
+            "net": "vd7",
+            "port_ref": "vd7",
+            "position": 2
+          },
+          {
+            "net": "vd6",
+            "port_ref": "vd6",
+            "position": 3
+          },
+          {
+            "net": "vd5",
+            "port_ref": "vd5",
+            "position": 4
+          },
+          {
+            "net": "vd4",
+            "port_ref": "vd4",
+            "position": 5
+          },
+          {
+            "net": "vd3",
+            "port_ref": "vd3",
+            "position": 6
+          },
+          {
+            "net": "vd2",
+            "port_ref": "vd2",
+            "position": 7
+          },
+          {
+            "net": "vd1",
+            "port_ref": "vd1",
+            "position": 8
+          },
+          {
+            "net": "vd0",
+            "port_ref": "vd0",
+            "position": 9
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 10
+          }
+        ],
+        "module_ref": "subradix_dac10",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vd0",
+      "vd1",
+      "vd2",
+      "vd3",
+      "vd4",
+      "vd5",
+      "vd6",
+      "vd7",
+      "vd8",
+      "vd9",
+      "vout"
+    ]
+  }
+}

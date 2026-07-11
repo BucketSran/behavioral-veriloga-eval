@@ -1,0 +1,14 @@
+`include "disciplines.vams"
+module voltage_match_window(vin1, vin2, vout);
+input vin1, vin2;
+output vout;
+electrical vin1, vin2, vout;
+parameter real match_tol = 0.001 from [0:inf);
+parameter real vh = 0.9;
+parameter real tr = 20p from [0:inf);
+integer match;
+analog begin
+    match = abs(V(vin1) - V(vin2)) <= match_tol;
+    V(vout) <+ transition(match ? vh : 0.0, 0, tr);
+end
+endmodule

@@ -1,0 +1,17 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "disciplines.vams"
+module mux4_priority(sel0, sel1, in0, in1, in2, in3, out);
+input sel0, sel1, in0, in1, in2, in3;
+output out;
+electrical sel0, sel1, in0, in1, in2, in3, out;
+parameter real vth = 0.45;
+integer code;
+analog begin
+    code = (V(sel0) > vth ? 1 : 0) + (V(sel1) > vth ? 2 : 0);
+    if (code == 0) V(out) <+ (0.42 * (V(in0)));
+    else if (code == 1) V(out) <+ V(in1);
+    else if (code == 2) V(out) <+ V(in2);
+    else V(out) <+ V(in3);
+end
+endmodule

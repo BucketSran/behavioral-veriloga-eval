@@ -1,0 +1,11 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/voltage_match_window.va"
+
+Vin1 (vin1 0) vsource type=pwl wave=[0 0.30 0.7n 0.30 0.75n 0.55 1.4n 0.55 1.45n -0.10 2.1n -0.10 2.15n 0.90 2.8n 0.90]
+Vin2 (vin2 0) vsource type=pwl wave=[0 0.34 0.7n 0.34 0.75n 0.63 1.4n 0.63 1.45n -0.13 2.1n -0.13 2.15n 0.74 2.8n 0.74]
+XDUT (vin1 vin2 vout) voltage_match_window
+
+tran tran stop=2.6n maxstep=5p
+save vin1 vin2 vout

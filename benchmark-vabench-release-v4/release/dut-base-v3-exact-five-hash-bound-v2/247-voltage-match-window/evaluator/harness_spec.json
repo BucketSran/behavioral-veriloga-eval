@@ -1,0 +1,89 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "voltage_match_window.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=3.0n maxstep=5p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin1",
+      "vin2",
+      "vout"
+    ]
+  },
+  "family_id": "247",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "4846ad75e7dcede2f943b790b926dd70388b4bcd9a8ad9a019bbe0aa012d26ee",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "36ec82ac59eb53ff18f222ee0cb4110e02dc431bb7cc6ffdeb588dc558f2cc82",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin1 (vin1 0) vsource type=pwl wave=[0 0.10 0.8n 0.10 0.85n 0.35 1.6n 0.35 1.65n 0.62 2.4n 0.62 2.45n 0.80 3.2n 0.80]",
+          "Vin2 (vin2 0) vsource type=pwl wave=[0 0.12 0.8n 0.12 0.85n 0.50 1.6n 0.50 1.65n 0.58 2.4n 0.58 2.45n 0.20 3.2n 0.20]",
+          "XDUT (vin1 vin2 vout) voltage_match_window"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=2.6n maxstep=5p"
+        ],
+        "body_lines": [
+          "Vin1 (vin1 0) vsource type=pwl wave=[0 0.30 0.7n 0.30 0.75n 0.55 1.4n 0.55 1.45n -0.10 2.1n -0.10 2.15n 0.90 2.8n 0.90]",
+          "Vin2 (vin2 0) vsource type=pwl wave=[0 0.34 0.7n 0.34 0.75n 0.63 1.4n 0.63 1.45n -0.13 2.1n -0.13 2.15n 0.74 2.8n 0.74]",
+          "XDUT (vin1 vin2 vout) voltage_match_window"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_COMPARE_THE_ANALOG_VOLTAGE_DIFFERENCE_DIRECTLY",
+    "P_MATCH_TOL_0_05_V_FROM",
+    "P_VH_0_9_V_MATCH_OUTPUT",
+    "P_TR_20_PS_FROM_0_INF",
+    "P_MATCH_TOL_0_05_V_FROM_2",
+    "P_USE_DETERMINISTIC_VOLTAGE_DOMAIN_VERILOG_A"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "0ba1b21441f10f33b3e5dac89686c922b0bb8164c9b4692c8408ed5f22b560e2",
+    "family_spec_sha256": "1acd01f3bfffab52be6b8225841958f4f813c49cdbd8ee104f436d37dcb28866"
+  },
+  "task_id": "v4-247"
+}

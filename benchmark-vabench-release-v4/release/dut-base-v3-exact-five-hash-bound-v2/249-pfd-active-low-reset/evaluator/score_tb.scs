@@ -1,0 +1,12 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/pfd_active_low_reset.va"
+
+Vref (ref 0) vsource type=pwl wave=[0 0 0.60n 0 0.62n 0.9 0.84n 0.9 0.86n 0 1.38n 0 1.40n 0.9 1.50n 0.9 1.52n 0 2.68n 0 2.70n 0.9 2.92n 0.9 2.94n 0 3.00n 0 3.02n 0.9 3.24n 0.9 3.26n 0 3.8n 0]
+Vfb (fb 0) vsource type=pwl wave=[0 0 1.00n 0 1.02n 0.9 1.24n 0.9 1.26n 0 1.78n 0 1.80n 0.9 2.02n 0.9 2.04n 0 2.30n 0 2.32n 0.9 2.54n 0.9 2.56n 0 3.10n 0 3.12n 0.9 3.34n 0.9 3.36n 0 3.8n 0]
+Vrstb (rstb 0) vsource type=pwl wave=[0 0 0.32n 0 0.34n 0.9 1.54n 0.9 1.56n 0 2.20n 0 2.22n 0.9 3.8n 0.9]
+XDUT (ref fb rstb up down) pfd_active_low_reset
+
+tran tran stop=3.6n maxstep=2p
+save down fb ref rstb up

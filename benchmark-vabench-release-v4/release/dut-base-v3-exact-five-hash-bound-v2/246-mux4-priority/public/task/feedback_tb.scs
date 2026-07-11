@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/mux4_priority.va"
+
+Vsel0 (sel0 0) vsource type=pwl wave=[0 0 0.8n 0 0.85n 0.9 1.6n 0.9 1.65n 0 2.4n 0 2.45n 0.9 3.2n 0.9]
+Vsel1 (sel1 0) vsource type=pwl wave=[0 0 1.6n 0 1.65n 0.9 3.2n 0.9]
+Vin0 (in0 0) vsource dc=0.1
+Vin1 (in1 0) vsource dc=0.4
+Vin2 (in2 0) vsource dc=-0.2
+Vin3 (in3 0) vsource dc=0.8
+XDUT (sel0 sel1 in0 in1 in2 in3 out) mux4_priority
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=3.0n maxstep=5p
+save in0 in1 in2 in3 out sel0 sel1
