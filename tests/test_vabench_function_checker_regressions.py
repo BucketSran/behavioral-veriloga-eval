@@ -154,6 +154,59 @@ def test_sar_calibration_checker_uses_physical_settle_delay() -> None:
     assert ok, note
 
 
+def _hysteresis_rows_with_transition_microstep(*, weak_high: bool = False) -> list[dict[str, float]]:
+    rows: list[dict[str, float]] = []
+    for time_ns in range(83):
+        if time_ns < 25:
+            vinp = 0.54
+        elif time_ns <= 30:
+            vinp = 0.54 + (time_ns - 25) * (0.016 / 5.0)
+        elif time_ns < 60:
+            vinp = 0.556
+        elif time_ns <= 70:
+            vinp = 0.556 - (time_ns - 60) * (0.012 / 10.0)
+        else:
+            vinp = 0.544
+        high = 30 <= time_ns < 70
+        high_out = 0.7 if weak_high else 0.9
+        low_out = 0.3 if weak_high else 0.1
+        rows.append(
+            {
+                "time": time_ns * 1e-9,
+                "vinp": vinp,
+                "vinn": 0.55,
+                "vdd": 0.9,
+                "vss": 0.1,
+                "out_p": high_out if high else 0.1,
+                "out_n": low_out if high else 0.9,
+            }
+        )
+    rows.append(
+        {
+            "time": 69.201e-9,
+            "vinp": 0.545,
+            "vinn": 0.55,
+            "vdd": 0.9,
+            "vss": 0.1,
+            "out_p": 0.347,
+            "out_n": 0.653,
+        }
+    )
+    return sorted(rows, key=lambda row: row["time"])
+
+
+def test_hysteresis_checker_ignores_only_post_cross_transition_microsteps() -> None:
+    ok, note = sim.check_cmp_hysteresis(_hysteresis_rows_with_transition_microstep())
+    weak_ok, weak_note = sim.check_cmp_hysteresis(
+        _hysteresis_rows_with_transition_microstep(weak_high=True)
+    )
+
+    assert ok, note
+    assert "guarded_transition_samples=" in note
+    assert not weak_ok
+    assert "rail_or_complement_error" in weak_note
+
+
 def _cmp_delay_rows(*, mode: str = "good") -> list[dict[str, float]]:
     phases = [
         (0.0e-9, 4.0e-9, 10e-3),
