@@ -1,0 +1,121 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "comparator.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=5n maxstep=100p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "VDD",
+      "VSS",
+      "VINP",
+      "VINN",
+      "OUT_P"
+    ]
+  },
+  "family_id": "045",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "2ebb70b34c03e6d77388f981ba45213742f6cf9a62df3db50a5c58d2824e4314",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "a85f1b6008947a5d56c23fdf7b5d62963a17ed21ac0d142ab943b124772e64db",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop={stop_time} maxstep={maxstep}"
+        ],
+        "body_lines": [
+          "V_VDD (VDD 0) vsource dc=0.9",
+          "V_VSS (VSS 0) vsource dc=0",
+          "// Public feedback uses repeated differential crossings around a non-midrail VINN.",
+          "V_VINP (VINP 0) vsource type=pwl wave=[0 0.35 5n 0.35 7n 0.62 11n 0.62 13n 0.29 17n 0.29 19n 0.55 {stop_time} 0.55]",
+          "V_VINN (VINN 0) vsource dc=0.47",
+          "",
+          "XDUT (VDD VSS VINP VINN OUT_P) comparator",
+          ""
+        ],
+        "save_signals": [
+          "VDD",
+          "VSS",
+          "VINP",
+          "VINN",
+          "OUT_P"
+        ]
+      },
+      "parameters": {
+        "maxstep": "80p",
+        "stop_time": "24n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=30n maxstep=0.1n"
+        ],
+        "body_lines": [
+          "// threshold comparator bidirectional polarity testbench",
+          "// VINP starts below VINN, ramps above VINN, then ramps below VINN again.",
+          "// Public checks require low-for-negative-diff, high-for-positive-diff,",
+          "// one rising trip near zero differential, and one falling trip near zero differential.",
+          "",
+          "Vvdd  (VDD  0) vsource dc=0.9",
+          "Vvss  (VSS  0) vsource dc=0.0",
+          "Vvinp (VINP 0) vsource type=pwl wave=[0 0.42 5n 0.42 12n 0.48 18n 0.48 25n 0.42 30n 0.42]",
+          "Vvinn (VINN 0) vsource dc=0.45",
+          "",
+          "IDUT (VDD VSS VINP VINN OUT_P) comparator",
+          ""
+        ],
+        "save_signals": [
+          "VDD",
+          "VSS",
+          "VINP",
+          "VINN",
+          "OUT_P"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INITIAL_DECISION",
+    "P_RISING_DIFFERENTIAL",
+    "P_FALLING_DIFFERENTIAL",
+    "P_BIDIRECTIONAL_RESPONSE",
+    "P_RAIL_SMOOTHING"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "d3ee0c977a21aa4ee452aae9ac756e892f820227de58cda950ec76aa07135f93",
+    "family_spec_sha256": "7ae5aef2511a37e9cdb8cc5d6be1a50f5bf4a574076e4eb12c42279e4a9ad591"
+  },
+  "task_id": "v4-045"
+}

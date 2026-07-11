@@ -1,0 +1,41 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module leaky_hold(sample, rst, vin, vout);
+    input sample, rst, vin;
+    output vout;
+    electrical sample, rst, vin, vout;
+
+    parameter real vth = 0.45;
+    parameter real decay = 0.900 from (0:1];
+    parameter real leak_period = 1n from (0:inf);
+    parameter real tr = 500p from (0:inf);
+
+    real held;
+
+    analog begin
+        @(initial_step) begin
+            held = 0.0;
+        end
+
+        @(cross(V(sample) - vth, +1)) begin
+            if (V(rst) > vth)
+                held = 0.0;
+            else
+                held = 0.0;
+        end
+
+        @(timer(0, leak_period)) begin
+            if (V(rst) > vth)
+                held = 0.0;
+            else
+                held = held * decay;
+        end
+
+        V(vout) <+ transition(held, 0, tr, tr);
+    end
+endmodule
+
+// vaBench partial-pass negative 1 for sample_hold_with_droop_leakage:dut
+// Intended to preserve interface/smoke behavior while failing full checks.
+// Mutation note: boundary_near_miss.

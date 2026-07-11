@@ -1,0 +1,20 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module window_comparator_ref (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical vin,
+    output electrical out
+);
+    parameter real vlow=0.42; parameter real vhigh=0.48; parameter real tedge=200p;
+    integer inside_window;
+    analog begin
+        @(initial_step) inside_window = (V(vin,VSS) > vlow && V(vin,VSS) < vhigh);
+        @(cross(V(vin,VSS)-vlow,+1)) inside_window = (V(vin,VSS) < vhigh);
+        @(cross(V(vin,VSS)-vhigh,+1)) inside_window = 0;
+        @(cross(V(vin,VSS)-vhigh,-1)) inside_window = (V(vin,VSS) > vlow);
+        @(cross(V(vin,VSS)-vlow,-1)) inside_window = 0;
+        V(out,VSS) <+ transition(inside_window,0,tedge,tedge) * V(VDD,VSS);
+    end
+endmodule

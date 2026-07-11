@@ -1,0 +1,33 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "048",
+  "task_ids": {"dut": "v4-048", "testbench": "v4-548", "bugfix": "v4-1048"},
+  "identity": {"title": "Binary To Thermometer Decoder 8b", "category": "testbench_utility_modules", "level": "L1", "difficulty": "D1", "supported_scope": "voltage-coded unary DAC element-selection and AMS converter-support behavior in transient Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "bin_to_therm_8b.va", "modules": [{
+    "name": "bin_to_therm_8b", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "en", "direction": "input", "discipline": "electrical", "position": 0},
+      {"name": "b[7:0]", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "th[255:0]", "direction": "output", "discipline": "electrical", "position": 2}
+    ],
+    "parameters": [
+      {"name": "vdd", "type": "real", "default": 0.9, "units": "V", "valid_range": "vdd > 0", "override_behavior": "sets the thermometer-bus logic-high voltage"},
+      {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "0 < vth < vdd", "override_behavior": "sets en and binary-input decision thresholds"},
+      {"name": "tr", "type": "real", "default": 2e-11, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets every thermometer output transition smoothing"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "bin_to_therm_8b", "connections": [
+    {"port_ref": "en", "net": "en", "position": 0},
+    {"port_ref": "b[7:0]", "net": "b[7:0]", "position": 1},
+    {"port_ref": "th[255:0]", "net": "th[255:0]", "position": 2}
+  ]}]},
+  "properties": [
+    {"id": "P_UNSIGNED_CODE", "observable_contract": "The voltage-coded b[7:0] bus decodes as an unsigned integer from 0 through 255 with b[7] as the most significant bit.", "required_signals": ["time", "b[7:0]"]},
+    {"id": "P_DISABLED_ALL_LOW", "observable_contract": "When en is below vth, every th[255:0] output is low independent of the binary code.", "required_signals": ["time", "en", "b[7:0]", "th[255:0]"]},
+    {"id": "P_PREFIX_THERMOMETER", "observable_contract": "When enabled, exactly code outputs form a contiguous high prefix from th[0] through th[code-1], with all higher indices low.", "required_signals": ["time", "en", "b[7:0]", "th[255:0]"]},
+    {"id": "P_ENDPOINT_CODES", "observable_contract": "Enabled code 0 drives all outputs low; enabled code 255 drives th[0] through th[254] high and leaves th[255] low.", "required_signals": ["time", "en", "b[7:0]", "th[255:0]"]},
+    {"id": "P_LOGIC_LEVELS", "observable_contract": "High thermometer elements approach vdd and low elements approach 0 V with finite transition smoothing set by tr.", "required_signals": ["time", "th[255:0]"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "en", "b[7:0]", "th[255:0]"]},
+  "modeling_constraints": ["AMS role: unary DAC element-selection decoder for data-converter support, not a generic digital utility gate.", "Use deterministic voltage-coded combinational decoding suitable for unary DAC element selection.", "Use smooth voltage contributions and compact bus iteration; do not use current contributions or transistor-level devices.", "Do not add testbench logic, validation hooks, debug ports, or simulator-specific side channels."]
+}

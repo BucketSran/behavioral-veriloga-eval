@@ -1,0 +1,18 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module successive_approximation_calibration_search_fsm(clk, rst, vin, out, metric);
+input clk, rst, vin; output out, metric; electrical clk, rst, vin, out, metric;
+parameter real tr=100p; parameter real vth=0.45; parameter real target=0.45; parameter real step_init=0.18; parameter real vmin=0.05; parameter real vmax=0.85;
+real trialv, stepv, errv, donev; integer cycle;
+analog begin
+    @(initial_step) begin trialv=target; stepv=step_init; cycle=0; donev=0.0; end
+    @(cross(V(clk)-vth,+1)) begin
+        errv=V(vin)-target;
+        if (V(rst)>vth) begin trialv=target; stepv=step_init; cycle=0; donev=0.0; end
+        else if (donev < 0.45) begin if (errv > 0.0) trialv = trialv + 0.01; else if (errv < 0.0) trialv = trialv - 0.01; stepv = stepv * 0.5; cycle = cycle + 1; if (cycle >= 4) donev = 0.9; end
+        if (trialv>vmax) trialv=vmax; if (trialv<vmin) trialv=vmin;
+    end
+    V(out)<+transition(trialv,0,tr,tr); V(metric)<+transition(donev,0,tr,tr);
+end
+endmodule

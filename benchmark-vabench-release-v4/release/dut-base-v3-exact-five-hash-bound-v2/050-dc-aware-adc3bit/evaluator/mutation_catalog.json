@@ -1,0 +1,132 @@
+{
+  "family_id": "050",
+  "gold_bundle_sha256": "5271189b148f27a07944690e0af40cc31720542fd61311b6f8af1936e2164bf4",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "dc_aware_adc3bit.va": "78be2bc2c5ae4984fcf391a23db0e5963f4b82d47e19551f65ecd72517257df7"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_STATIC_CONVERSION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_force_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "dc_aware_adc3bit.va"
+      ],
+      "fault_class": "force_zero",
+      "id": "neg_001_force_zero",
+      "trigger_condition": "DC Aware ADC3bit: forces every output bit low, so only zero-code smoke checks can pass.",
+      "violated_property_ids": [
+        "P_STATIC_CONVERSION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "dc_aware_adc3bit.va": "94b7fe1ee6e5e100bc72481368bc1bdd0d49aaabfb135574d11fba6a9e97079b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_UNIFORM_QUANTIZATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_wrong_code_span/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "dc_aware_adc3bit.va"
+      ],
+      "fault_class": "wrong_code_span",
+      "id": "neg_002_wrong_code_span",
+      "trigger_condition": "DC Aware ADC3bit: uses seven bins instead of eight, shifting the ADC transition thresholds.",
+      "violated_property_ids": [
+        "P_UNIFORM_QUANTIZATION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "dc_aware_adc3bit.va": "a442b3a92c34670e7e7b272c482b7e5874bfe44f931d8657a8cff687b7ab9a3e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INPUT_CLIPPING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_reversed_bit_order/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "dc_aware_adc3bit.va"
+      ],
+      "fault_class": "reversed_bit_order",
+      "id": "neg_003_reversed_bit_order",
+      "trigger_condition": "DC Aware ADC3bit: drives the right three logic values in reversed MSB/LSB order.",
+      "violated_property_ids": [
+        "P_INPUT_CLIPPING"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "dc_aware_adc3bit.va": "fcd3de118b97cac88afb296bb5b152d9ff20f243c486484b589d5e6967ffe2be"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BINARY_BIT_ORDER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_no_clipping/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "dc_aware_adc3bit.va"
+      ],
+      "fault_class": "no_clipping",
+      "id": "neg_004_no_clipping",
+      "trigger_condition": "DC Aware ADC3bit: does not clip out-of-range inputs before quantization.",
+      "violated_property_ids": [
+        "P_BINARY_BIT_ORDER"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "dc_aware_adc3bit.va": "ca02c923be2b78c81d2267ad45caadefffb42c428e2aa11a2b983023c1879f52"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_LEVELS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_round_to_nearest/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "dc_aware_adc3bit.va"
+      ],
+      "fault_class": "round_to_nearest",
+      "id": "neg_005_round_to_nearest",
+      "trigger_condition": "DC Aware ADC3bit: rounds to the nearest code rather than using the required bin-floor quantizer.",
+      "violated_property_ids": [
+        "P_OUTPUT_LEVELS"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

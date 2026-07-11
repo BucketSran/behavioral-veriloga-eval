@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/comparator.va"
+
+V_VDD (VDD 0) vsource dc=0.9
+V_VSS (VSS 0) vsource dc=0
+// Public feedback uses repeated differential crossings around a non-midrail VINN.
+V_VINP (VINP 0) vsource type=pwl wave=[0 0.35 5n 0.35 7n 0.62 11n 0.62 13n 0.29 17n 0.29 19n 0.55 24n 0.55]
+V_VINN (VINN 0) vsource dc=0.47
+
+XDUT (VDD VSS VINP VINN OUT_P) comparator
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=24n maxstep=80p
+save VDD VSS VINP VINN OUT_P

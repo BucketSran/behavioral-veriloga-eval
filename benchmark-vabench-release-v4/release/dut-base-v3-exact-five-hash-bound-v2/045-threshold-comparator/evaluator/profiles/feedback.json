@@ -1,0 +1,48 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop={stop_time} maxstep={maxstep}"
+    ],
+    "body_lines": [
+      "V_VDD (VDD 0) vsource dc=0.9",
+      "V_VSS (VSS 0) vsource dc=0",
+      "// Public feedback uses repeated differential crossings around a non-midrail VINN.",
+      "V_VINP (VINP 0) vsource type=pwl wave=[0 0.35 5n 0.35 7n 0.62 11n 0.62 13n 0.29 17n 0.29 19n 0.55 {stop_time} 0.55]",
+      "V_VINN (VINN 0) vsource dc=0.47",
+      "",
+      "XDUT (VDD VSS VINP VINN OUT_P) comparator",
+      ""
+    ],
+    "save_signals": [
+      "VDD",
+      "VSS",
+      "VINP",
+      "VINN",
+      "OUT_P"
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "2bfa45359e6708c783493576bc5c1c6ab82534806f5e10336278cdeed7736cb5",
+  "parameters": {
+    "maxstep": "80p",
+    "stop_time": "24n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_INITIAL_DECISION",
+    "P_RISING_DIFFERENTIAL",
+    "P_FALLING_DIFFERENTIAL",
+    "P_BIDIRECTIONAL_RESPONSE",
+    "P_RAIL_SMOOTHING"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

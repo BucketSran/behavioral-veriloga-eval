@@ -1,0 +1,35 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "047",
+  "task_ids": {"dut": "v4-047", "testbench": "v4-547", "bugfix": "v4-1047"},
+  "identity": {"title": "Window Comparator Detector", "category": "comparator_decision", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "window_comparator_ref.va", "modules": [{
+    "name": "window_comparator_ref", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "VDD", "direction": "inout", "discipline": "electrical", "position": 0},
+      {"name": "VSS", "direction": "inout", "discipline": "electrical", "position": 1},
+      {"name": "vin", "direction": "input", "discipline": "electrical", "position": 2},
+      {"name": "out", "direction": "output", "discipline": "electrical", "position": 3}
+    ],
+    "parameters": [
+      {"name": "vlow", "type": "real", "default": 0.3, "units": "V", "valid_range": "vlow < vhigh", "override_behavior": "sets the exclusive lower window threshold relative to VSS"},
+      {"name": "vhigh", "type": "real", "default": 0.6, "units": "V", "valid_range": "vhigh > vlow", "override_behavior": "sets the exclusive upper window threshold relative to VSS"},
+      {"name": "tedge", "type": "real", "default": 2e-10, "units": "s", "valid_range": "tedge > 0", "override_behavior": "sets rail-referenced output transition smoothing"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "window_comparator_ref", "connections": [
+    {"port_ref": "VDD", "net": "VDD", "position": 0},
+    {"port_ref": "VSS", "net": "VSS", "position": 1},
+    {"port_ref": "vin", "net": "vin", "position": 2},
+    {"port_ref": "out", "net": "out", "position": 3}
+  ]}]},
+  "properties": [
+    {"id": "P_INITIAL_WINDOW_STATE", "observable_contract": "At initialization, out reflects whether vin relative to VSS lies strictly between vlow and vhigh.", "required_signals": ["time", "VSS", "vin", "out"]},
+    {"id": "P_INSIDE_WINDOW_HIGH", "observable_contract": "Out is at the VDD rail only while vlow < V(vin,VSS) < vhigh.", "required_signals": ["time", "VDD", "VSS", "vin", "out"]},
+    {"id": "P_BOUNDARY_EXCLUSION", "observable_contract": "Out is at the VSS rail when V(vin,VSS) is equal to or outside either window boundary.", "required_signals": ["time", "VSS", "vin", "out"]},
+    {"id": "P_BIDIRECTIONAL_CROSSINGS", "observable_contract": "Crossings of both vlow and vhigh in either direction update the retained in-window decision.", "required_signals": ["time", "vin", "out"]},
+    {"id": "P_RAIL_SMOOTHING", "observable_contract": "Out is rail-referenced to VDD and VSS with finite transition smoothing set by tedge.", "required_signals": ["time", "VDD", "VSS", "out"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "VDD", "VSS", "vin", "out"]},
+  "modeling_constraints": ["Use deterministic threshold-crossing state updates and voltage contributions only.", "Drive the output contribution outside crossing event blocks.", "Do not use current contributions, ddt(), idt(), validation hooks, or simulator-specific side channels."]
+}

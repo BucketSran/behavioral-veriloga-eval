@@ -1,0 +1,93 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "uvlo_brownout_detector.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=80n maxstep=0.5n"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric"
+    ]
+  },
+  "family_id": "046",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "90eabdcc6db3104fc7994cd8cc8662ad777ec9af71336bd62e58462500be13c6",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "b0264583cc22645270b571ad2102d68315d4bb8fc67f820e80257d990f4bd825",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "V_clk (clk 0) vsource type=pulse val0=0 val1=0.9 period=2n width=1n rise=50p fall=50p",
+          "V_rst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 80n 0]",
+          "V_vin (vin 0) vsource type=pwl wave=[0 0.50 9.9n 0.50 10n 0.70 27.9n 0.70 28n 0.58 42.9n 0.58 43n 0.52 54.9n 0.52 55n 0.62 66.9n 0.62 67n 0.68 80n 0.68]",
+          "",
+          "XDUT (clk rst vin out metric) uvlo_brownout_detector",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=2n width=1n rise=50p fall=50p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 80n 0]",
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.50 9.9n 0.50 10n 0.70 27.9n 0.70 28n 0.58 42.9n 0.58 43n 0.52 54.9n 0.52 55n 0.62 66.9n 0.62 67n 0.68 80n 0.68]",
+          "",
+          "XDUT (clk rst vin out metric) uvlo_brownout_detector",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RESET_FAULT",
+    "P_UPPER_TRIP_ASSERT",
+    "P_HYSTERESIS_HOLD",
+    "P_BROWNOUT_CLEAR",
+    "P_STATUS_DISTINCTION"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "1d6b3c89688d358c4465f3b97a2d7fa1df5682dc76e0d0dcf9de6f1b286e0582",
+    "family_spec_sha256": "3e3e3a29532d178b9f80f5db1a60c972e3d053b678be4248cc8acfaee44acfb8"
+  },
+  "task_id": "v4-046"
+}

@@ -1,0 +1,126 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "leaky_hold.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=5n maxstep=100p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "sample",
+      "rst",
+      "vin",
+      "vout"
+    ]
+  },
+  "family_id": "042",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "32c4f215ca9671fc88880c0228396d8b33a80e5d342f69875adccee4b8d32f5a",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "30078c432aa903024acad269fa20d72dea79c7b479ce73515af3331cce22ca4a",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop={stop_time} maxstep={maxstep}"
+        ],
+        "body_lines": [
+          "// Public feedback uses three non-periodic captures separated by a long droop interval.",
+          "V_sample (sample 0) vsource type=pwl wave=[0 0 14n 0 14.2n 0.9 17n 0.9 17.2n 0 68n 0 68.2n 0.9 71n 0.9 71.2n 0 145n 0 145.2n 0.9 148n 0.9 148.2n 0 {stop_time} 0]",
+          "V_rst (rst 0) vsource type=pwl wave=[0 0.9 4n 0.9 4.2n 0 112n 0 112.2n 0.9 130n 0.9 130.2n 0 {stop_time} 0]",
+          "V_vin (vin 0) vsource type=pwl wave=[0 0.26 38n 0.26 38.2n 0.78 98n 0.78 98.2n 0.33 {stop_time} 0.33]",
+          "",
+          "XDUT (sample rst vin vout) leaky_hold",
+          ""
+        ],
+        "save_signals": [
+          "sample",
+          "rst",
+          "vin",
+          "vout"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "162n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=170n maxstep=250p"
+        ],
+        "body_lines": [
+          "Vsample (sample 0) vsource type=pwl wave=[ \\",
+          "  0 0 \\",
+          "  20n 0 \\",
+          "  20.25n 0.9 \\",
+          "  24n 0.9 \\",
+          "  24.25n 0 \\",
+          "  80n 0 \\",
+          "  80.25n 0.9 \\",
+          "  84n 0.9 \\",
+          "  84.25n 0 \\",
+          "  145n 0 \\",
+          "  145.25n 0.9 \\",
+          "  149n 0.9 \\",
+          "  149.25n 0 \\",
+          "  170n 0 \\",
+          "]",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0 120n 0 120.25n 0.9 136n 0.9 136.25n 0 170n 0]",
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.20 30n 0.20 30.25n 0.72 90n 0.72 90.25n 0.34 150n 0.34 150.25n 0.62 170n 0.62]",
+          "",
+          "XDUT (sample rst vin vout) leaky_hold",
+          ""
+        ],
+        "save_signals": [
+          "sample",
+          "rst",
+          "vin",
+          "vout"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_SAMPLE_CAPTURE",
+    "P_HOLD_BETWEEN_EVENTS",
+    "P_PERIODIC_DROOP",
+    "P_RESET_CLEAR",
+    "P_SMOOTH_OUTPUT"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "1069510ae8fc82ffa9657811d92c2a6699c53e88fbdd658a3a327f3ba22bf6c8",
+    "family_spec_sha256": "606873e046d316a776913046cb9715d62d0f2610090fb41c8442a70e6ce8f896"
+  },
+  "task_id": "v4-042"
+}

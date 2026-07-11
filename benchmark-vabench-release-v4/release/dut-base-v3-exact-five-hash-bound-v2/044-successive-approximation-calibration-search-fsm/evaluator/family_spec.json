@@ -1,0 +1,40 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "044",
+  "task_ids": {"dut": "v4-044", "testbench": "v4-544", "bugfix": "v4-1044"},
+  "identity": {"title": "Successive Approximation Calibration Search FSM", "category": "calibration_control", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "successive_approximation_calibration_search_fsm.va", "modules": [{
+    "name": "successive_approximation_calibration_search_fsm", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "clk", "direction": "input", "discipline": "electrical", "position": 0},
+      {"name": "rst", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "vin", "direction": "input", "discipline": "electrical", "position": 2},
+      {"name": "out", "direction": "output", "discipline": "electrical", "position": 3},
+      {"name": "metric", "direction": "output", "discipline": "electrical", "position": 4}
+    ],
+    "parameters": [
+      {"name": "tr", "type": "real", "default": 1e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets out and metric transition smoothing"},
+      {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "vmin < vth < vmax", "override_behavior": "sets clk and rst logic threshold"},
+      {"name": "target", "type": "real", "default": 0.45, "units": "V", "valid_range": "vmin <= target <= vmax", "override_behavior": "sets zero-error decision point and reset trial value"},
+      {"name": "step_init", "type": "real", "default": 0.18, "units": "V", "valid_range": "step_init > 0", "override_behavior": "sets the first signed trial adjustment and reset step size"},
+      {"name": "vmin", "type": "real", "default": 0.05, "units": "V", "valid_range": "vmin < vmax", "override_behavior": "sets the lower trial-trim clamp"},
+      {"name": "vmax", "type": "real", "default": 0.85, "units": "V", "valid_range": "vmax > vmin", "override_behavior": "sets the upper trial-trim clamp"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "successive_approximation_calibration_search_fsm", "connections": [
+    {"port_ref": "clk", "net": "clk", "position": 0},
+    {"port_ref": "rst", "net": "rst", "position": 1},
+    {"port_ref": "vin", "net": "vin", "position": 2},
+    {"port_ref": "out", "net": "out", "position": 3},
+    {"port_ref": "metric", "net": "metric", "position": 4}
+  ]}]},
+  "properties": [
+    {"id": "P_RESET_SEARCH_STATE", "observable_contract": "Active reset restores out to target, the current step to step_init, the cycle count to zero, and metric low.", "required_signals": ["time", "clk", "rst", "out", "metric"]},
+    {"id": "P_SIGNED_TRIAL_UPDATE", "observable_contract": "On each active rising clk update before completion, vin above target increases out by the current step and vin below target decreases it.", "required_signals": ["time", "clk", "rst", "vin", "out"]},
+    {"id": "P_SUCCESSIVE_STEP_HALVING", "observable_contract": "The current step halves after every active decision update, yielding the public successive-approximation sequence from step_init.", "required_signals": ["time", "clk", "vin", "out"]},
+    {"id": "P_FOUR_STEP_DONE", "observable_contract": "Metric asserts after four active search updates and subsequent rising clocks hold the completed trial state until reset.", "required_signals": ["time", "clk", "rst", "vin", "out", "metric"]},
+    {"id": "P_TRIM_CLAMP", "observable_contract": "Out remains within vmin through vmax for every trial update.", "required_signals": ["time", "out"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "clk", "rst", "vin", "out", "metric"]},
+  "modeling_constraints": ["Use deterministic clocked voltage-domain calibration state.", "Do not use current contributions, transistor-level devices, AC/noise behavior, or KCL/KVL solving assumptions.", "Do not add validation logic, hidden state observables, or simulator-specific side channels."]
+}

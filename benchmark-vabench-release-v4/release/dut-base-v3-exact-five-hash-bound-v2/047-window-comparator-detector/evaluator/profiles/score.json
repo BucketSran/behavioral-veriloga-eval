@@ -1,0 +1,45 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=90n maxstep=20p errpreset=conservative"
+    ],
+    "body_lines": [
+      "Vvdd (VDD 0) vsource dc=0.9 type=dc",
+      "Vvss (VSS 0) vsource dc=0.0 type=dc",
+      "Vvin (vin 0) vsource type=pwl wave=[0 0 45n 0.9 90n 0]",
+      "",
+      "IDUT (VDD VSS vin out) window_comparator_ref",
+      "",
+      "simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12",
+      ""
+    ],
+    "save_signals": [
+      "VDD",
+      "VSS",
+      "vin",
+      "out"
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "1766f3e7de4004ae8de5857f1573a83dd33dc3b7c8b8bae347d264cd6510d158",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "100n"
+  },
+  "profile_name": "score",
+  "property_ids": [
+    "P_INITIAL_WINDOW_STATE",
+    "P_INSIDE_WINDOW_HIGH",
+    "P_BOUNDARY_EXCLUSION",
+    "P_BIDIRECTIONAL_CROSSINGS",
+    "P_RAIL_SMOOTHING"
+  ],
+  "public_visible": false,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {}
+}

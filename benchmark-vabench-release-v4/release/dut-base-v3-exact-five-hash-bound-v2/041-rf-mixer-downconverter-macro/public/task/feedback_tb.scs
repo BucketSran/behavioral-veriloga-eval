@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/rf_mixer_downconverter_macro.va"
+
+// Public feedback exercises both LO polarities at positive and negative RF offsets.
+V_clk (clk 0) vsource type=pulse val0=0 val1=0.9 period=3.2n delay=500p rise=40p fall=40p width=1.45n
+V_rst (rst 0) vsource type=pwl wave=[0 0.9 3.2n 0.9 3.3n 0 68n 0]
+V_vin (vin 0) vsource type=pwl wave=[0 0.45 7n 0.45 7.2n 0.70 33n 0.70 33.2n 0.20 57n 0.20 57.2n 0.95 68n 0.95]
+
+XDUT (clk rst vin out metric) rf_mixer_downconverter_macro
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=68n maxstep=100p
+save clk rst vin out metric

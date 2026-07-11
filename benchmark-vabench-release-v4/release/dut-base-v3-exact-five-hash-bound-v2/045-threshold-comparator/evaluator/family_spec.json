@@ -1,0 +1,35 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "045",
+  "task_ids": {"dut": "v4-045", "testbench": "v4-545", "bugfix": "v4-1045"},
+  "identity": {"title": "Threshold Comparator", "category": "comparator_decision", "level": "L1", "difficulty": "D1", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "comparator.va", "modules": [{
+    "name": "comparator", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "VDD", "direction": "inout", "discipline": "electrical", "position": 0},
+      {"name": "VSS", "direction": "inout", "discipline": "electrical", "position": 1},
+      {"name": "VINP", "direction": "input", "discipline": "electrical", "position": 2},
+      {"name": "VINN", "direction": "input", "discipline": "electrical", "position": 3},
+      {"name": "OUT_P", "direction": "output", "discipline": "electrical", "position": 4}
+    ],
+    "parameters": [
+      {"name": "tedge", "type": "real", "default": 1e-10, "units": "s", "valid_range": "tedge > 0", "override_behavior": "sets OUT_P rail-transition smoothing"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "comparator", "connections": [
+    {"port_ref": "VDD", "net": "VDD", "position": 0},
+    {"port_ref": "VSS", "net": "VSS", "position": 1},
+    {"port_ref": "VINP", "net": "VINP", "position": 2},
+    {"port_ref": "VINN", "net": "VINN", "position": 3},
+    {"port_ref": "OUT_P", "net": "OUT_P", "position": 4}
+  ]}]},
+  "properties": [
+    {"id": "P_INITIAL_DECISION", "observable_contract": "At initialization, OUT_P reflects the sign of VINP minus VINN.", "required_signals": ["time", "VINP", "VINN", "OUT_P"]},
+    {"id": "P_RISING_DIFFERENTIAL", "observable_contract": "When VINP crosses above VINN, OUT_P transitions to the VDD rail.", "required_signals": ["time", "VDD", "VINP", "VINN", "OUT_P"]},
+    {"id": "P_FALLING_DIFFERENTIAL", "observable_contract": "When VINP crosses below VINN, OUT_P transitions to the VSS rail.", "required_signals": ["time", "VSS", "VINP", "VINN", "OUT_P"]},
+    {"id": "P_BIDIRECTIONAL_RESPONSE", "observable_contract": "Repeated differential crossings in either direction update the retained decision without requiring a clock or reset.", "required_signals": ["time", "VINP", "VINN", "OUT_P"]},
+    {"id": "P_RAIL_SMOOTHING", "observable_contract": "OUT_P is rail-referenced and changes with finite transition smoothing set by tedge.", "required_signals": ["time", "VDD", "VSS", "OUT_P"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "VDD", "VSS", "VINP", "VINN", "OUT_P"]},
+  "modeling_constraints": ["Use deterministic event-driven voltage-domain comparator state.", "Drive the output contribution outside threshold-crossing event blocks.", "Do not use current contributions, ddt(), idt(), validation hooks, or simulator-specific side channels."]
+}

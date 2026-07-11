@@ -1,0 +1,13 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module rf_mixer_downconverter_macro(clk, rst, vin, out, metric);
+input clk, rst, vin; output out, metric; electrical clk, rst, vin, out, metric;
+parameter real tr=80p; parameter real vth=0.45; parameter real conv_gain=1.25; real basev,lov,mixv,metricv;
+analog begin
+    @(initial_step) begin metricv=0.0; mixv=0.45; end
+    if (V(rst)>vth) begin mixv=0.45; metricv=0.0; end
+    else begin basev=V(vin)-0.45; lov = 1.0; mixv = 0.45 + conv_gain * basev * lov; metricv = 0.9; if (mixv>0.88) mixv=0.88; if (mixv<0.02) mixv=0.02; end
+    V(out)<+mixv; V(metric)<+metricv;
+end
+endmodule

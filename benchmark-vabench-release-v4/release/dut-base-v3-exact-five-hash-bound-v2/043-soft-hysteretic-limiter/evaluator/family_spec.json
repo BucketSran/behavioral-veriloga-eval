@@ -1,0 +1,37 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "043",
+  "task_ids": {"dut": "v4-043", "testbench": "v4-543", "bugfix": "v4-1043"},
+  "identity": {"title": "Soft Hysteretic Limiter", "category": "baseband_signal_conditioning", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "soft_hysteretic_limiter.va", "modules": [{
+    "name": "soft_hysteretic_limiter", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "clk", "direction": "input", "discipline": "electrical", "position": 0},
+      {"name": "rst", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "vin", "direction": "input", "discipline": "electrical", "position": 2},
+      {"name": "out", "direction": "output", "discipline": "electrical", "position": 3},
+      {"name": "metric", "direction": "output", "discipline": "electrical", "position": 4}
+    ],
+    "parameters": [
+      {"name": "tr", "type": "real", "default": 1e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets out and metric transition smoothing"},
+      {"name": "gain", "type": "real", "default": 1.8, "units": null, "valid_range": "gain > 0", "override_behavior": "sets the sampled small-signal gain about 0.45 V common mode"},
+      {"name": "hys_step", "type": "real", "default": 0.08, "units": "V", "valid_range": "hys_step >= 0", "override_behavior": "sets the signed remembered offset after upper or lower threshold excursions"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "soft_hysteretic_limiter", "connections": [
+    {"port_ref": "clk", "net": "clk", "position": 0},
+    {"port_ref": "rst", "net": "rst", "position": 1},
+    {"port_ref": "vin", "net": "vin", "position": 2},
+    {"port_ref": "out", "net": "out", "position": 3},
+    {"port_ref": "metric", "net": "metric", "position": 4}
+  ]}]},
+  "properties": [
+    {"id": "P_RESET_NEUTRAL", "observable_contract": "Initialization or active reset sets out and metric to 0.45 V and clears the remembered hysteresis offset.", "required_signals": ["time", "clk", "rst", "out", "metric"]},
+    {"id": "P_HYSTERESIS_STATE_UPDATE", "observable_contract": "On rising clk crossings, vin above 0.62 V stores +hys_step, vin below 0.38 V stores -hys_step, and vin within the middle band preserves the prior offset.", "required_signals": ["time", "clk", "rst", "vin", "metric"]},
+    {"id": "P_GAINED_LIMITER_TRANSFER", "observable_contract": "The held output target is 0.45 V plus gain times vin minus 0.45 V plus the remembered hysteresis offset.", "required_signals": ["time", "clk", "vin", "out", "metric"]},
+    {"id": "P_OUTPUT_LIMITS", "observable_contract": "Out is clamped to 0.10 V through 0.82 V with finite transition smoothing.", "required_signals": ["time", "out"]},
+    {"id": "P_STATE_METRIC", "observable_contract": "Metric equals 0.45 V plus twice the remembered offset, producing 0.61 V and 0.29 V for the default high- and low-memory states.", "required_signals": ["time", "clk", "vin", "metric"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "clk", "rst", "vin", "out", "metric"]},
+  "modeling_constraints": ["Use deterministic event-updated voltage-domain state and finite output smoothing.", "Do not use current contributions, transistor-level devices, AC/noise analysis, ddt(), or idt().", "Do not add validation-only hooks, ports, or simulator-specific side channels."]
+}

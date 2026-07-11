@@ -1,0 +1,36 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "046",
+  "task_ids": {"dut": "v4-046", "testbench": "v4-546", "bugfix": "v4-1046"},
+  "identity": {"title": "UVLO Brownout Detector", "category": "bias_reference_power_management", "level": "L1", "difficulty": "D1", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "uvlo_brownout_detector.va", "modules": [{
+    "name": "uvlo_brownout_detector", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "clk", "direction": "input", "discipline": "electrical", "position": 0},
+      {"name": "rst", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "vin", "direction": "input", "discipline": "electrical", "position": 2},
+      {"name": "out", "direction": "output", "discipline": "electrical", "position": 3},
+      {"name": "metric", "direction": "output", "discipline": "electrical", "position": 4}
+    ],
+    "parameters": [
+      {"name": "tr", "type": "real", "default": 1e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets out and metric transition smoothing"},
+      {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "0 < vth < 0.9", "override_behavior": "sets clk and rst voltage-coded logic threshold"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "uvlo_brownout_detector", "connections": [
+    {"port_ref": "clk", "net": "clk", "position": 0},
+    {"port_ref": "rst", "net": "rst", "position": 1},
+    {"port_ref": "vin", "net": "vin", "position": 2},
+    {"port_ref": "out", "net": "out", "position": 3},
+    {"port_ref": "metric", "net": "metric", "position": 4}
+  ]}]},
+  "properties": [
+    {"id": "P_RESET_FAULT", "observable_contract": "Active reset clears the power-good out signal and drives metric to the public fault code 0.9 V.", "required_signals": ["time", "clk", "rst", "out", "metric"]},
+    {"id": "P_UPPER_TRIP_ASSERT", "observable_contract": "On a sampled update, vin strictly greater than 0.65 V asserts power-good out.", "required_signals": ["time", "clk", "rst", "vin", "out"]},
+    {"id": "P_HYSTERESIS_HOLD", "observable_contract": "For sampled vin values from 0.55 V through 0.65 V inclusive, out preserves its previous power-good state.", "required_signals": ["time", "clk", "vin", "out"]},
+    {"id": "P_BROWNOUT_CLEAR", "observable_contract": "On a sampled update, vin strictly less than 0.55 V clears out to the brownout state.", "required_signals": ["time", "clk", "rst", "vin", "out"]},
+    {"id": "P_STATUS_DISTINCTION", "observable_contract": "Metric is the checker-observable status code: 0.1 V when out is power-good high and 0.9 V when reset, undervoltage, or brownout is active.", "required_signals": ["time", "vin", "out", "metric"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "clk", "rst", "vin", "out", "metric"]},
+  "modeling_constraints": ["Use deterministic sampled voltage-domain hysteresis state.", "Do not use current contributions, transistor-level devices, AC/noise analysis, or KCL/KVL regulation loops.", "Do not add validation-only state, ports, or simulator-specific side channels."]
+}

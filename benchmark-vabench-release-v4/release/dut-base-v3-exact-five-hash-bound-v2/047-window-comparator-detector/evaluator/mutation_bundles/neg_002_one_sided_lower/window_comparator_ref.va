@@ -1,0 +1,18 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module window_comparator_ref (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical vin,
+    output electrical out
+);
+    parameter real vlow=0.3; parameter real tedge=200p;
+    integer above_low;
+    analog begin
+        @(initial_step) above_low = (V(vin,VSS) > vlow);
+        @(cross(V(vin,VSS)-vlow,+1)) above_low = 1;
+        @(cross(V(vin,VSS)-vlow,-1)) above_low = 0;
+        V(out,VSS) <+ transition(above_low,0,tedge,tedge) * V(VDD,VSS);
+    end
+endmodule

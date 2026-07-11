@@ -1,0 +1,36 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "042",
+  "task_ids": {"dut": "v4-042", "testbench": "v4-542", "bugfix": "v4-1042"},
+  "identity": {"title": "Sample And Hold With Droop Leakage", "category": "sampling_analog_memory", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "leaky_hold.va", "modules": [{
+    "name": "leaky_hold", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "sample", "direction": "input", "discipline": "electrical", "position": 0},
+      {"name": "rst", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "vin", "direction": "input", "discipline": "electrical", "position": 2},
+      {"name": "vout", "direction": "output", "discipline": "electrical", "position": 3}
+    ],
+    "parameters": [
+      {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "vth > 0", "override_behavior": "sets sample and rst voltage-coded logic threshold"},
+      {"name": "decay", "type": "real", "default": 0.985, "units": null, "valid_range": "0 < decay <= 1", "override_behavior": "sets the multiplicative held-value retention factor per leakage update"},
+      {"name": "leak_period", "type": "real", "default": 1e-9, "units": "s", "valid_range": "leak_period > 0", "override_behavior": "sets the periodic leakage update interval"},
+      {"name": "tr", "type": "real", "default": 5e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets vout transition smoothing"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "leaky_hold", "connections": [
+    {"port_ref": "sample", "net": "sample", "position": 0},
+    {"port_ref": "rst", "net": "rst", "position": 1},
+    {"port_ref": "vin", "net": "vin", "position": 2},
+    {"port_ref": "vout", "net": "vout", "position": 3}
+  ]}]},
+  "properties": [
+    {"id": "P_SAMPLE_CAPTURE", "observable_contract": "Each rising sample crossing while reset is inactive captures the instantaneous vin voltage into the held state.", "required_signals": ["time", "sample", "rst", "vin", "vout"]},
+    {"id": "P_HOLD_BETWEEN_EVENTS", "observable_contract": "Between sample and leakage events, vout reflects the retained held state rather than continuously tracking vin.", "required_signals": ["time", "sample", "vin", "vout"]},
+    {"id": "P_PERIODIC_DROOP", "observable_contract": "At every leak_period update while reset is inactive, the held value is multiplied by decay.", "required_signals": ["time", "rst", "vout"]},
+    {"id": "P_RESET_CLEAR", "observable_contract": "Active reset clears the held state to 0 V at sampling or leakage update events.", "required_signals": ["time", "sample", "rst", "vout"]},
+    {"id": "P_SMOOTH_OUTPUT", "observable_contract": "Vout approaches each held-state target with the finite transition smoothing set by tr.", "required_signals": ["time", "vout"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "sample", "rst", "vin", "vout"]},
+  "modeling_constraints": ["Use deterministic event-driven voltage-domain sample and leakage updates.", "Use voltage contributions only; do not use current contributions, ddt(), or idt().", "Do not add validation hooks, hidden observables, or simulator-specific side channels."]
+}

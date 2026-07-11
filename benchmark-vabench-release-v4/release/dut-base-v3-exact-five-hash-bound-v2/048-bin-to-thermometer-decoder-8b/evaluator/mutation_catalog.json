@@ -1,0 +1,161 @@
+{
+  "family_id": "048",
+  "gold_bundle_sha256": "9e32c45a70f130b297d3443cb6ce32a317e57607c999ff26020d9e68d087ee7e",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "bin_to_therm_8b.va": "47926d358d1370734a2861a87c78abb8db497b88a99cfe171ba31b7fe6fa8ed0"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ENDPOINT_CODES",
+          "P_PREFIX_THERMOMETER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_off_by_one_count/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "bin_to_therm_8b.va"
+      ],
+      "fault_class": "off_by_one_count",
+      "id": "neg_001_off_by_one_count",
+      "trigger_condition": "Drives code+1 outputs high when enabled.",
+      "violated_property_ids": [
+        "P_ENDPOINT_CODES",
+        "P_PREFIX_THERMOMETER"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "bin_to_therm_8b.va": "4d51082189aea50df957f0bb756d1bf77a7b4a7861d8293b4604549c0e152a25"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PREFIX_THERMOMETER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_reversed_thermometer_bus/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "bin_to_therm_8b.va"
+      ],
+      "fault_class": "reversed_thermometer_bus",
+      "id": "neg_002_reversed_thermometer_bus",
+      "trigger_condition": "Drives a cumulative count from th255 downward instead of from th0 upward.",
+      "violated_property_ids": [
+        "P_PREFIX_THERMOMETER"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "bin_to_therm_8b.va": "4fb32881eec6d3ee77fe7cc57af369a9b30c4ac4cb246286bfaff9f4975a9a10"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DISABLED_ALL_LOW"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_enable_ignored/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "bin_to_therm_8b.va"
+      ],
+      "fault_class": "enable_ignored",
+      "id": "neg_003_enable_ignored",
+      "trigger_condition": "Decodes the code even when en is low.",
+      "violated_property_ids": [
+        "P_DISABLED_ALL_LOW"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "bin_to_therm_8b.va": "b4bcceb9659545efc00e2cdce524b49723d57980d5753c26f53bb9d49be57169"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ENDPOINT_CODES",
+          "P_PREFIX_THERMOMETER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_missing_top_cell/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "bin_to_therm_8b.va"
+      ],
+      "fault_class": "missing_top_cell",
+      "id": "neg_004_missing_top_cell",
+      "trigger_condition": "Drives one fewer output high for every nonzero code.",
+      "violated_property_ids": [
+        "P_ENDPOINT_CODES",
+        "P_PREFIX_THERMOMETER"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "bin_to_therm_8b.va": "7a63f17b2166df5c516c8d017e17d5c2dd4adc2510b44641dcc9d1ad383d7815"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_UNSIGNED_CODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_reversed_bit_order/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "bin_to_therm_8b.va"
+      ],
+      "fault_class": "reversed_bit_order",
+      "id": "neg_005_reversed_bit_order",
+      "trigger_condition": "Treats b0 as the most significant bit and b7 as the least significant bit.",
+      "violated_property_ids": [
+        "P_UNSIGNED_CODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "bin_to_therm_8b.va": "8286fee161f2f05c40285bdf38616b66848f7ad7e91f8c330aa4b610546a236d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LOGIC_LEVELS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_006_weak_high_level/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "bin_to_therm_8b.va"
+      ],
+      "fault_class": "weak_high_output_level",
+      "id": "neg_006_weak_high_level",
+      "trigger_condition": "Drives asserted thermometer elements to 0.3 V instead of the declared vdd level.",
+      "violated_property_ids": [
+        "P_LOGIC_LEVELS"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

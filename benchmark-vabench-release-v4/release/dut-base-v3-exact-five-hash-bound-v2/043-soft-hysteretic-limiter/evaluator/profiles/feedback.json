@@ -1,0 +1,47 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop={stop_time} maxstep={maxstep}"
+    ],
+    "body_lines": [
+      "// Public feedback drives high/low limiting and two distinct dead-band holds.",
+      "V_clk (clk 0) vsource type=pulse val0=0 val1=0.9 period=2.5n delay=700p rise=40p fall=40p width=1.1n",
+      "V_rst (rst 0) vsource type=pwl wave=[0 0.9 3.4n 0.9 3.5n 0 {stop_time} 0]",
+      "V_vin (vin 0) vsource type=pwl wave=[0 0.45 10n 0.45 10.2n 0.88 28n 0.88 28.2n 0.49 39n 0.49 39.2n 0.12 58n 0.12 58.2n 0.41 69n 0.41 69.2n 0.76 {stop_time} 0.76]",
+      "",
+      "XDUT (clk rst vin out metric) soft_hysteretic_limiter",
+      ""
+    ],
+    "save_signals": [
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric"
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "f053f744ee4ea09cf3a97afe3e477ea2c9d0c44152e3bf2b47a8eac980f02273",
+  "parameters": {
+    "maxstep": "125p",
+    "stop_time": "74n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_RESET_NEUTRAL",
+    "P_HYSTERESIS_STATE_UPDATE",
+    "P_GAINED_LIMITER_TRANSFER",
+    "P_OUTPUT_LIMITS",
+    "P_STATE_METRIC"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

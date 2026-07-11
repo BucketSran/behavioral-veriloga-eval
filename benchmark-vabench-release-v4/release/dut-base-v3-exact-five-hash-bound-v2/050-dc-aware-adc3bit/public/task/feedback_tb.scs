@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/dc_aware_adc3bit.va"
+
+Vin (vin 0) vsource type=pwl wave=[0n -0.02 1n -0.02 1.02n 0.14 3n 0.14 3.02n 0.31 5n 0.31 5.02n 0.58 7n 0.58 7.02n 0.76 9n 0.76 9.02n 0.92 11n 0.92 11.02n 1.08]
+
+XDUT (vin d2 d1 d0) dc_aware_adc3bit
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=13n maxstep=10p
+save vin d2 d1 d0

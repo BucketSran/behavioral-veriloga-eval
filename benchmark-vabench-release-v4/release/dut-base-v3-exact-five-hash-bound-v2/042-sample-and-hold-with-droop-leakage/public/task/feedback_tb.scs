@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/leaky_hold.va"
+
+// Public feedback uses three non-periodic captures separated by a long droop interval.
+V_sample (sample 0) vsource type=pwl wave=[0 0 14n 0 14.2n 0.9 17n 0.9 17.2n 0 68n 0 68.2n 0.9 71n 0.9 71.2n 0 145n 0 145.2n 0.9 148n 0.9 148.2n 0 162n 0]
+V_rst (rst 0) vsource type=pwl wave=[0 0.9 4n 0.9 4.2n 0 112n 0 112.2n 0.9 130n 0.9 130.2n 0 162n 0]
+V_vin (vin 0) vsource type=pwl wave=[0 0.26 38n 0.26 38.2n 0.78 98n 0.78 98.2n 0.33 162n 0.33]
+
+XDUT (sample rst vin vout) leaky_hold
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=162n maxstep=200p
+save sample rst vin vout

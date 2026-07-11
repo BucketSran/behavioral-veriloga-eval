@@ -1,0 +1,42 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module window_comparator_ref (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical vin,
+    output electrical out
+);
+parameter real vlow = 0.3;
+parameter real vhigh = 0.6;
+parameter real tedge = 200p;
+integer inside_window;
+
+analog begin
+    @(initial_step) begin
+        inside_window = (V(vin, VSS) > vlow && V(vin, VSS) < vhigh);
+    end
+
+    @(cross(V(vin, VSS) - vlow, +1)) begin
+        inside_window = (V(vin, VSS) < vhigh);
+    end
+
+    @(cross(V(vin, VSS) - vhigh, +1)) begin
+        inside_window = 0;
+    end
+
+    @(cross(V(vin, VSS) - vhigh, -1)) begin
+        inside_window = (V(vin, VSS) > vlow);
+    end
+
+    @(cross(V(vin, VSS) - vlow, -1)) begin
+        inside_window = 0;
+    end
+
+    V(out, VSS) <+ transition(inside_window ? 0.0 : 1.0, 0.0, tedge, tedge) * V(VDD, VSS);
+end
+endmodule
+
+// vaBench partial-pass negative 3 for window_comparator_detector:dut
+// Intended to preserve interface/smoke behavior while failing full checks.
+// Mutation note: polarity_direction_near_miss.

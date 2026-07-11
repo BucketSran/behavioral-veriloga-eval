@@ -1,0 +1,132 @@
+{
+  "family_id": "047",
+  "gold_bundle_sha256": "c8ff063b9ee0df9634585ffabce4a54d52e249da6b00b0f8b02c29ca233f3f51",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "window_comparator_ref.va": "c1be17afd9a87849fb007288be2063eaa406d978a288f124c055f8b4bc85328b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INITIAL_WINDOW_STATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_inverted_output/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "window_comparator_ref.va"
+      ],
+      "fault_class": "inverted_output",
+      "id": "neg_001_inverted_output",
+      "trigger_condition": "Drives the output rail high outside the window and low inside the window.",
+      "violated_property_ids": [
+        "P_INITIAL_WINDOW_STATE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "window_comparator_ref.va": "6ca32f32b5d5e8d36266dc78b0792548aaaff3e86c9506c72ab9cba1e699ddf2"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INSIDE_WINDOW_HIGH"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_one_sided_lower/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "window_comparator_ref.va"
+      ],
+      "fault_class": "one_sided_lower",
+      "id": "neg_002_one_sided_lower",
+      "trigger_condition": "Uses only the lower threshold, so above-window inputs remain high.",
+      "violated_property_ids": [
+        "P_INSIDE_WINDOW_HIGH"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "window_comparator_ref.va": "085b6b762c951d3f1884b4d48029262ddd74b0464ffa548616f5e79093eda90d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BOUNDARY_EXCLUSION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_narrow_window/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "window_comparator_ref.va"
+      ],
+      "fault_class": "narrow_window",
+      "id": "neg_003_narrow_window",
+      "trigger_condition": "Uses a much narrower internal window than the public 0.3 V to 0.6 V function contract.",
+      "violated_property_ids": [
+        "P_BOUNDARY_EXCLUSION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "window_comparator_ref.va": "573c049b9dc8c7a58ee051036d6efb18f063578afca682377f2607ba6721aeef"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BIDIRECTIONAL_CROSSINGS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_stuck_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "window_comparator_ref.va"
+      ],
+      "fault_class": "stuck_low",
+      "id": "neg_004_stuck_low",
+      "trigger_condition": "Preserves the interface and transition contribution but never asserts the in-window output.",
+      "violated_property_ids": [
+        "P_BIDIRECTIONAL_CROSSINGS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "window_comparator_ref.va": "930f499473b5654f2798aafd948e22f16e3751d3bf666cf03608a3319f6f1ea2"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RAIL_SMOOTHING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "window_comparator_ref.va"
+      ],
+      "fault_class": "metric_scale_low",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Window Comparator Detector: preserves the threshold event logic but drives the opposite in-window decision.",
+      "violated_property_ids": [
+        "P_RAIL_SMOOTHING"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

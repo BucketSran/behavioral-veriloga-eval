@@ -1,0 +1,28 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "leaky_hold.va"
+
+Vsample (sample 0) vsource type=pwl wave=[ \
+  0 0 \
+  20n 0 \
+  20.25n 0.9 \
+  24n 0.9 \
+  24.25n 0 \
+  80n 0 \
+  80.25n 0.9 \
+  84n 0.9 \
+  84.25n 0 \
+  145n 0 \
+  145.25n 0.9 \
+  149n 0.9 \
+  149.25n 0 \
+  170n 0 \
+]
+Vrst (rst 0) vsource type=pwl wave=[0 0 120n 0 120.25n 0.9 136n 0.9 136.25n 0 170n 0]
+Vvin (vin 0) vsource type=pwl wave=[0 0.20 30n 0.20 30.25n 0.72 90n 0.72 90.25n 0.34 150n 0.34 150.25n 0.62 170n 0.62]
+
+XDUT (sample rst vin vout) leaky_hold
+
+tran tran stop=170n maxstep=250p
+save sample rst vin vout

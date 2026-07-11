@@ -1,0 +1,88 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "dc_aware_adc3bit.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=13n maxstep=10p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "d2",
+      "d1",
+      "d0"
+    ]
+  },
+  "family_id": "050",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "8b9641539fb28b11fe310cdbf37f77fc663453ab0db220ae0a0660e05a7ac111",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "0136152799557cad7e6a7b2a7740813d6696ee98043866b07f395f28965d8957",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0n -0.02 1n -0.02 1.02n 0.14 3n 0.14 3.02n 0.31 5n 0.31 5.02n 0.58 7n 0.58 7.02n 0.76 9n 0.76 9.02n 0.92 11n 0.92 11.02n 1.08]",
+          "",
+          "XDUT (vin d2 d1 d0) dc_aware_adc3bit",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0n -0.05 1n -0.05 1.02n 0.04 3n 0.04 3.02n 0.19 5n 0.19 5.02n 0.38 7n 0.38 7.02n 0.62 9n 0.62 9.02n 0.87 11n 0.87 11.02n 1.1]",
+          "",
+          "XDUT (vin d2 d1 d0) dc_aware_adc3bit",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_STATIC_CONVERSION",
+    "P_UNIFORM_QUANTIZATION",
+    "P_INPUT_CLIPPING",
+    "P_BINARY_BIT_ORDER",
+    "P_OUTPUT_LEVELS"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "e96f6e2b0683abbbb224fd4e45eaaaaf3b4d5631d7470d01f8bba8237c2cd0ce",
+    "family_spec_sha256": "2882cdfb0fa38db8d336c8e286949affcbdfc5a91dc48bb1f542cdba3f01f2a6"
+  },
+  "task_id": "v4-050"
+}

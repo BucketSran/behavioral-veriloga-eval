@@ -1,0 +1,184 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "050",
+  "task_ids": {
+    "dut": "v4-050",
+    "testbench": "v4-550",
+    "bugfix": "v4-1050"
+  },
+  "identity": {
+    "title": "DC Aware ADC3bit",
+    "category": "data_converter",
+    "level": "L1",
+    "difficulty": "D2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"
+  },
+  "artifact_contract": {
+    "mode": "single_file",
+    "files": [
+      {
+        "path": "dc_aware_adc3bit.va",
+        "modules": [
+          {
+            "name": "dc_aware_adc3bit",
+            "role": "entry",
+            "depends_on": [],
+            "ports": [
+              {
+                "name": "vin",
+                "direction": "input",
+                "discipline": "electrical",
+                "position": 0
+              },
+              {
+                "name": "d2",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 1
+              },
+              {
+                "name": "d1",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 2
+              },
+              {
+                "name": "d0",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 3
+              }
+            ],
+            "parameters": [
+              {
+                "name": "vref",
+                "type": "real",
+                "default": 1,
+                "units": "V",
+                "valid_range": "vref > 0",
+                "override_behavior": "sets the analog full-scale reference and uniform quantization span"
+              },
+              {
+                "name": "vh",
+                "type": "real",
+                "default": 0.9,
+                "units": "V",
+                "valid_range": "vh > 0",
+                "override_behavior": "sets the voltage-coded output high level"
+              },
+              {
+                "name": "tr",
+                "type": "real",
+                "default": 2e-11,
+                "units": "s",
+                "valid_range": "tr > 0",
+                "override_behavior": "sets output transition smoothing"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "source_path_template": "./dut/{artifact_path}",
+    "instances": [
+      {
+        "name": "XDUT",
+        "module_ref": "dc_aware_adc3bit",
+        "connections": [
+          {
+            "port_ref": "vin",
+            "net": "vin",
+            "position": 0
+          },
+          {
+            "port_ref": "d2",
+            "net": "d2",
+            "position": 1
+          },
+          {
+            "port_ref": "d1",
+            "net": "d1",
+            "position": 2
+          },
+          {
+            "port_ref": "d0",
+            "net": "d0",
+            "position": 3
+          }
+        ]
+      }
+    ]
+  },
+  "properties": [
+    {
+      "id": "P_STATIC_CONVERSION",
+      "observable_contract": "The output code represents the current vin level without requiring a clock or prior transient event.",
+      "required_signals": [
+        "time",
+        "vin",
+        "d2",
+        "d1",
+        "d0"
+      ]
+    },
+    {
+      "id": "P_UNIFORM_QUANTIZATION",
+      "observable_contract": "The 0-to-vref input span is divided into eight ordered uniform code regions producing unsigned codes 0 through 7.",
+      "required_signals": [
+        "time",
+        "vin",
+        "d2",
+        "d1",
+        "d0"
+      ]
+    },
+    {
+      "id": "P_INPUT_CLIPPING",
+      "observable_contract": "Inputs at or below 0 V produce code 0, and inputs at or above vref produce code 7.",
+      "required_signals": [
+        "time",
+        "vin",
+        "d2",
+        "d1",
+        "d0"
+      ]
+    },
+    {
+      "id": "P_BINARY_BIT_ORDER",
+      "observable_contract": "d2 is the most significant output bit and d0 is the least significant output bit.",
+      "required_signals": [
+        "time",
+        "d2",
+        "d1",
+        "d0"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_LEVELS",
+      "observable_contract": "Each output bit approaches 0 V for logic low and vh for logic high with finite transition smoothing.",
+      "required_signals": [
+        "time",
+        "d2",
+        "d1",
+        "d0"
+      ]
+    }
+  ],
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "d2",
+      "d1",
+      "d0"
+    ]
+  },
+  "modeling_constraints": [
+    "Use deterministic static voltage-domain quantization.",
+    "Use smooth voltage contributions for all output bits.",
+    "Do not introduce a clock, hidden state, current contributions, ddt(), idt(), validation hooks, or simulator-specific side channels."
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "window_comparator_ref.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=5n maxstep=20p errpreset=conservative"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "VDD",
+      "VSS",
+      "vin",
+      "out"
+    ]
+  },
+  "family_id": "047",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "a86c038903f7a1066b1996a91573a538aaa0da023058c275e8a91b8709b5a587",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "1ff1cb3db956df7140d12ac37fe06173dc4530293ffdbf73f90a1e312832a558",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "V_VDD (VDD 0) vsource dc=0.9",
+          "V_VSS (VSS 0) vsource dc=0",
+          "V_vin (vin 0) vsource type=pwl wave=[0 0 2.5n 0.9 5n 0]",
+          "",
+          "XDUT (VDD VSS vin out) window_comparator_ref",
+          "",
+          "simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=90n maxstep=20p errpreset=conservative"
+        ],
+        "body_lines": [
+          "Vvdd (VDD 0) vsource dc=0.9 type=dc",
+          "Vvss (VSS 0) vsource dc=0.0 type=dc",
+          "Vvin (vin 0) vsource type=pwl wave=[0 0 45n 0.9 90n 0]",
+          "",
+          "IDUT (VDD VSS vin out) window_comparator_ref",
+          "",
+          "simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12",
+          ""
+        ],
+        "save_signals": [
+          "VDD",
+          "VSS",
+          "vin",
+          "out"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INITIAL_WINDOW_STATE",
+    "P_INSIDE_WINDOW_HIGH",
+    "P_BOUNDARY_EXCLUSION",
+    "P_BIDIRECTIONAL_CROSSINGS",
+    "P_RAIL_SMOOTHING"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "dae39afe6bc965da094298e0a0f18dea0b0c0a9f1c68c28b70b4887513c7aa67",
+    "family_spec_sha256": "4d9104674d180465df2340a8a887383268ad3ac63582a8d7b3d2de1ea1461af7"
+  },
+  "task_id": "v4-047"
+}

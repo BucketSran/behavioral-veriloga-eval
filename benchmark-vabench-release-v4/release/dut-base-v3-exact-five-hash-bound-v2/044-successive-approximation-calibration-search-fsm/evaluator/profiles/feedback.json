@@ -1,0 +1,47 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop={stop_time} maxstep={maxstep}"
+    ],
+    "body_lines": [
+      "// Public feedback alternates signed decisions, then changes vin after done to test hold.",
+      "V_clk (clk 0) vsource type=pulse val0=0 val1=0.9 period=3n delay=900p rise=50p fall=50p width=1.25n",
+      "V_rst (rst 0) vsource type=pwl wave=[0 0.9 4.2n 0.9 4.3n 0 {stop_time} 0]",
+      "V_vin (vin 0) vsource type=pwl wave=[0 0.45 5.8n 0.45 6n 0.72 8.8n 0.72 9n 0.21 11.8n 0.21 12n 0.69 14.8n 0.69 15n 0.24 18n 0.24 18.2n 0.82 {stop_time} 0.82]",
+      "",
+      "XDUT (clk rst vin out metric) successive_approximation_calibration_search_fsm",
+      ""
+    ],
+    "save_signals": [
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric"
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "72b8afd48ead124449eb1db7a28acec16ec5464348c8f028840e4a9866501131",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "30n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_RESET_SEARCH_STATE",
+    "P_SIGNED_TRIAL_UPDATE",
+    "P_SUCCESSIVE_STEP_HALVING",
+    "P_FOUR_STEP_DONE",
+    "P_TRIM_CLAMP"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

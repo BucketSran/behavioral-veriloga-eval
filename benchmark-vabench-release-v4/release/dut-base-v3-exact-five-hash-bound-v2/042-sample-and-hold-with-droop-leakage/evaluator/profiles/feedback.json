@@ -1,0 +1,46 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop={stop_time} maxstep={maxstep}"
+    ],
+    "body_lines": [
+      "// Public feedback uses three non-periodic captures separated by a long droop interval.",
+      "V_sample (sample 0) vsource type=pwl wave=[0 0 14n 0 14.2n 0.9 17n 0.9 17.2n 0 68n 0 68.2n 0.9 71n 0.9 71.2n 0 145n 0 145.2n 0.9 148n 0.9 148.2n 0 {stop_time} 0]",
+      "V_rst (rst 0) vsource type=pwl wave=[0 0.9 4n 0.9 4.2n 0 112n 0 112.2n 0.9 130n 0.9 130.2n 0 {stop_time} 0]",
+      "V_vin (vin 0) vsource type=pwl wave=[0 0.26 38n 0.26 38.2n 0.78 98n 0.78 98.2n 0.33 {stop_time} 0.33]",
+      "",
+      "XDUT (sample rst vin vout) leaky_hold",
+      ""
+    ],
+    "save_signals": [
+      "sample",
+      "rst",
+      "vin",
+      "vout"
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "2dba636685fb4eda0f3ee446e96ad2c7663e10cdf7249ad96b7b1b74fb1b284d",
+  "parameters": {
+    "maxstep": "200p",
+    "stop_time": "162n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_SAMPLE_CAPTURE",
+    "P_HOLD_BETWEEN_EVENTS",
+    "P_PERIODIC_DROOP",
+    "P_RESET_CLEAR",
+    "P_SMOOTH_OUTPUT"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

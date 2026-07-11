@@ -1,0 +1,37 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "041",
+  "task_ids": {"dut": "v4-041", "testbench": "v4-541", "bugfix": "v4-1041"},
+  "identity": {"title": "RF Mixer Downconverter Macro", "category": "rf_afe_behavioral_macromodels", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "rf_mixer_downconverter_macro.va", "modules": [{
+    "name": "rf_mixer_downconverter_macro", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "clk", "direction": "input", "discipline": "electrical", "position": 0},
+      {"name": "rst", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "vin", "direction": "input", "discipline": "electrical", "position": 2},
+      {"name": "out", "direction": "output", "discipline": "electrical", "position": 3},
+      {"name": "metric", "direction": "output", "discipline": "electrical", "position": 4}
+    ],
+    "parameters": [
+      {"name": "tr", "type": "real", "default": 8e-11, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets smoothing for discontinuous output and metric target changes"},
+      {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "0 < vth < 0.9", "override_behavior": "sets rst logic threshold and LO polarity decision threshold"},
+      {"name": "conv_gain", "type": "real", "default": 1.25, "units": null, "valid_range": "conv_gain > 0", "override_behavior": "sets conversion gain applied to the input deviation about 0.45 V"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "rf_mixer_downconverter_macro", "connections": [
+    {"port_ref": "clk", "net": "clk", "position": 0},
+    {"port_ref": "rst", "net": "rst", "position": 1},
+    {"port_ref": "vin", "net": "vin", "position": 2},
+    {"port_ref": "out", "net": "out", "position": 3},
+    {"port_ref": "metric", "net": "metric", "position": 4}
+  ]}]},
+  "properties": [
+    {"id": "P_RESET_COMMON_MODE", "observable_contract": "Active reset drives out to 0.45 V common mode and metric low.", "required_signals": ["time", "rst", "out", "metric"]},
+    {"id": "P_LO_POLARITY", "observable_contract": "With reset inactive, clk above vth selects LO coefficient +1 and clk at or below vth selects coefficient -1.", "required_signals": ["time", "clk", "rst", "vin", "out"]},
+    {"id": "P_DOWNCONVERSION_TRANSFER", "observable_contract": "The baseband target is 0.45 V plus conv_gain times vin minus 0.45 V times the selected LO coefficient.", "required_signals": ["time", "clk", "vin", "out"]},
+    {"id": "P_ACTIVE_METRIC", "observable_contract": "Metric is 0.9 V while reset is inactive and conversion is active, and low during reset.", "required_signals": ["time", "rst", "metric"]},
+    {"id": "P_OUTPUT_CLAMP", "observable_contract": "Out is clamped to 0.02 V through 0.88 V and changes with finite smoothing.", "required_signals": ["time", "out"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "clk", "rst", "vin", "out", "metric"]},
+  "modeling_constraints": ["Use deterministic voltage-domain behavior and smooth discontinuous target changes.", "Do not use current contributions, transistor-level devices, S-parameters, AC/noise behavior, or link-level decoding.", "Do not add validation logic, hard-coded sample points, or simulator-specific side channels."]
+}

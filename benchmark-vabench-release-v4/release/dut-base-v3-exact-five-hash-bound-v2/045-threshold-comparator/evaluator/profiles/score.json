@@ -1,0 +1,50 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=30n maxstep=0.1n"
+    ],
+    "body_lines": [
+      "// threshold comparator bidirectional polarity testbench",
+      "// VINP starts below VINN, ramps above VINN, then ramps below VINN again.",
+      "// Public checks require low-for-negative-diff, high-for-positive-diff,",
+      "// one rising trip near zero differential, and one falling trip near zero differential.",
+      "",
+      "Vvdd  (VDD  0) vsource dc=0.9",
+      "Vvss  (VSS  0) vsource dc=0.0",
+      "Vvinp (VINP 0) vsource type=pwl wave=[0 0.42 5n 0.42 12n 0.48 18n 0.48 25n 0.42 30n 0.42]",
+      "Vvinn (VINN 0) vsource dc=0.45",
+      "",
+      "IDUT (VDD VSS VINP VINN OUT_P) comparator",
+      ""
+    ],
+    "save_signals": [
+      "VDD",
+      "VSS",
+      "VINP",
+      "VINN",
+      "OUT_P"
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "2bfa45359e6708c783493576bc5c1c6ab82534806f5e10336278cdeed7736cb5",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "100n"
+  },
+  "profile_name": "score",
+  "property_ids": [
+    "P_INITIAL_DECISION",
+    "P_RISING_DIFFERENTIAL",
+    "P_FALLING_DIFFERENTIAL",
+    "P_BIDIRECTIONAL_RESPONSE",
+    "P_RAIL_SMOOTHING"
+  ],
+  "public_visible": false,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {}
+}
