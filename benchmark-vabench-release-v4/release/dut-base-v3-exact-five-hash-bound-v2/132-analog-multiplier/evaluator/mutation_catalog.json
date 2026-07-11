@@ -1,0 +1,132 @@
+{
+  "family_id": "132",
+  "gold_bundle_sha256": "563f376900201981387d06165cdea09c3e00b9edaa8afb19057d8ba51c04ffcc",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "analog_multiplier_gain.va": "7f1940b252f44af7d4814850cb5577de20a4ecdd4f9ef240e282549579c56d9e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ANALOG_PRODUCT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "analog_multiplier_gain.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_ANALOG_PRODUCT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "analog_multiplier_gain.va": "4a242c69f24965f81b9ea2f12cb0676722436566f966e2582dd89dd6a5fa54c7"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_MULTIPLICATIVE_NOT_ADDITIVE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_adds_inputs/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "analog_multiplier_gain.va"
+      ],
+      "fault_class": "adds_inputs",
+      "id": "neg_002_adds_inputs",
+      "trigger_condition": "Adds the inputs instead of multiplying them.",
+      "violated_property_ids": [
+        "P_MULTIPLICATIVE_NOT_ADDITIVE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "analog_multiplier_gain.va": "ae0df7a6e74aa1dfd02499724e1cfe84febed9ad721c3cdfb9ea424e2bd81619"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_GAIN_PARAMETER_APPLIED"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_missing_gain/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "analog_multiplier_gain.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_003_missing_gain",
+      "trigger_condition": "Omits the multiplier gain parameter.",
+      "violated_property_ids": [
+        "P_GAIN_PARAMETER_APPLIED"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "analog_multiplier_gain.va": "5c551d9435d359b3d1ede7b464a6ec801a4c006f7075c1549bca9952ca34d994"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_MULTIPLICATIVE_NOT_ADDITIVE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_square_first_input/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "analog_multiplier_gain.va"
+      ],
+      "fault_class": "square_first_input",
+      "id": "neg_004_square_first_input",
+      "trigger_condition": "Squares the first input instead of multiplying both inputs.",
+      "violated_property_ids": [
+        "P_MULTIPLICATIVE_NOT_ADDITIVE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "analog_multiplier_gain.va": "12672ca3113d7847c43b6b9f8e2bea2735a1a8fa988c66155994c4e7c2b5dcbf"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ANALOG_PRODUCT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "analog_multiplier_gain.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Analog Multiplier: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_ANALOG_PRODUCT"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/analog_multiplier_gain.va"
+
+Vin1 (sigin1 0) vsource type=pwl wave=[0 -0.30 8n -0.30 8.1n 0.60 18n 0.60 18.1n -0.70 32n -0.70]
+Vin2 (sigin2 0) vsource type=pwl wave=[0 0.40 8n 0.40 8.1n -0.20 18n -0.20 18.1n 0.50 32n 0.50]
+
+XDUT (sigin1 sigin2 sigout) analog_multiplier_gain gain=2
+
+
+tran tran stop=28n maxstep=25p
+save sigin1 sigin2 sigout

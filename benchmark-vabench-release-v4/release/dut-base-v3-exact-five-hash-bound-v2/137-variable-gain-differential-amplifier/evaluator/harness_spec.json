@@ -1,0 +1,93 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "variable_gain_differential_amplifier.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=40n maxstep=25p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "sigctrl_n",
+      "sigctrl_p",
+      "sigin_n",
+      "sigin_p",
+      "sigout"
+    ]
+  },
+  "family_id": "137",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "40fb0b9535d1fa16b57172558c98a9b900248ae2cfa501c20fc62130bf6a9cbb",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "59d96687d86d66972f3694900466ca41b8a706eed8bc29519a315552725180d9",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vp (sigin_p 0) vsource type=pwl wave=[0 0.25 10n 0.25 10.1n 0.55 20n 0.55 20.1n 0.75 30n 0.75 30.1n 0.15 45n 0.15]",
+          "Vn (sigin_n 0) vsource dc=0.45",
+          "Vcp (sigctrl_p 0) vsource type=pwl wave=[0 0.95 10n 0.95 10.1n 1.45 20n 1.45 20.1n 1.65 30n 1.65 30.1n 1.45 45n 1.45]",
+          "Vcn (sigctrl_n 0) vsource dc=0.45",
+          "",
+          "XDUT (sigin_p sigin_n sigctrl_p sigctrl_n sigout) variable_gain_differential_amplifier",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vp (sigin_p 0) vsource type=pwl wave=[0 0.05 8n 0.05 8.1n 0.55 18n 0.55 18.1n 0.80 28n 0.80 28.1n 0.35 45n 0.35]",
+          "Vn (sigin_n 0) vsource dc=0.45",
+          "Vcp (sigctrl_p 0) vsource type=pwl wave=[0 1.45 8n 1.45 8.1n 1.45 18n 1.45 18.1n 1.65 28n 1.65 28.1n 0.95 45n 0.95]",
+          "Vcn (sigctrl_n 0) vsource dc=0.45",
+          "",
+          "XDUT (sigin_p sigin_n sigctrl_p sigctrl_n sigout) variable_gain_differential_amplifier",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_DIFFERENTIAL_SIGNAL_AND_CONTROL",
+    "P_VARIABLE_GAIN_MIDPOINT",
+    "P_OUTPUT_CLAMP"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "f12b55724667fc92cc5543e56a3da707d83b276c694be4378ce07e2ee5429cea",
+    "family_spec_sha256": "99e22b16ceea6fd6db2d03748f4cd91375a301b81ffe9913b5a274e6b3f153aa"
+  },
+  "task_id": "v4-137"
+}

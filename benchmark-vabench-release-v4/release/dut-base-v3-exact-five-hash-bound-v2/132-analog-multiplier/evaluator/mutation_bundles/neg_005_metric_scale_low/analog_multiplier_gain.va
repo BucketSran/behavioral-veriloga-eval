@@ -1,0 +1,15 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one public contract.
+`include "disciplines.vams"
+
+module analog_multiplier_gain(sigin1, sigin2, sigout);
+input sigin1, sigin2;
+output sigout;
+electrical sigin1, sigin2, sigout;
+parameter real gain = 1;
+
+analog begin
+    V(sigout) <+ (0.42 * (gain * V(sigin1) * V(sigin2)));
+end
+
+endmodule

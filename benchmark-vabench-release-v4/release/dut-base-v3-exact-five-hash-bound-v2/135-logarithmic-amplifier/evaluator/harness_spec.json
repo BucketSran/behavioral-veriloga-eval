@@ -1,0 +1,85 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "logarithmic_amplifier.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=40n maxstep=25p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "sigin",
+      "sigout"
+    ]
+  },
+  "family_id": "135",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "d3f66b9d8c567554bf793dc38c92fc31ad29ae3dd37ac4ba299e9d78d1b1e4d8",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "b56a8feb3cccdf545db897004cfd328df0ddefc3d9392d4b44ae3b1109a08e6f",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (sigin 0) vsource type=pwl wave=[0 0.2 10n 0.2 10.1n 0.7 20n 0.7 20.1n -0.3 30n -0.3 30.1n 1.2 45n 1.2]",
+          "",
+          "XDUT (sigin sigout) logarithmic_amplifier",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (sigin 0) vsource type=pwl wave=[0 0.25 8n 0.25 8.1n -0.4 18n -0.4 18.1n 1.5 28n 1.5 28.1n 0.2 45n 0.2]",
+          "",
+          "XDUT (sigin sigout) logarithmic_amplifier",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INPUT_OFFSET_SUBTRACTION",
+    "P_ABSOLUTE_MAGNITUDE",
+    "P_MAGNITUDE_FLOOR",
+    "P_NATURAL_LOG_OUTPUT"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "c10b099d7b5646c4ee7981bffb9ae487ec1a97db9ab373d79b38242874f9336e",
+    "family_spec_sha256": "5167db504b93186000791fdbc91d719d97dd1e2f454f6b0c41c43f795a4f7159"
+  },
+  "task_id": "v4-135"
+}

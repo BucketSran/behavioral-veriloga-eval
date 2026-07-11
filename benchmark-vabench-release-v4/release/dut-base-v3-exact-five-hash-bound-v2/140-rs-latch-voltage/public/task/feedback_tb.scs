@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/rs_latch_voltage.va"
+
+Vs (vin_s 0) vsource type=pwl wave=[0 0 9n 0 9.1n 0.9 14n 0.9 14.1n 0 49n 0 49.1n 0.9 54n 0.9 54.1n 0 80n 0]
+Vr (vin_r 0) vsource type=pwl wave=[0 0 29n 0 29.1n 0.9 34n 0.9 34.1n 0 80n 0]
+
+XDUT (vin_s vin_r vout_q vout_qbar) rs_latch_voltage
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=70n maxstep=25p
+save vin_r vin_s vout_q vout_qbar

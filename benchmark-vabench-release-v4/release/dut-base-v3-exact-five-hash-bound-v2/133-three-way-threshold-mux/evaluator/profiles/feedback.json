@@ -1,0 +1,37 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "body_lines": [
+      "Vin1 (sigin1 0) vsource dc=0.1",
+      "Vin2 (sigin2 0) vsource dc=0.5",
+      "Vin3 (sigin3 0) vsource dc=0.9",
+      "Vcp (cntrlp 0) vsource type=pwl wave=[0 0.0 10n 0.0 10.1n 0.45 20n 0.45 20.1n 0.90 35n 0.90]",
+      "Vcm (cntrlm 0) vsource dc=0.45",
+      "",
+      "XDUT (sigin1 sigin2 sigin3 cntrlp cntrlm sigout) three_way_threshold_mux sigth_high=0.2 sigth_low=-0.2",
+      ""
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "84816f22b1bd42e132c1d7c64c64eb8f127cdd5918423b379c27f4dbe196035d",
+  "parameters": {
+    "maxstep": "200p",
+    "stop_time": "100n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_DIFFERENTIAL_CONTROL",
+    "P_LOW_REGION_SELECTS_SIGIN1",
+    "P_MIDDLE_REGION_SELECTS_SIGIN2",
+    "P_HIGH_REGION_SELECTS_SIGIN3"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

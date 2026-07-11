@@ -1,0 +1,89 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "rs_latch_voltage.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=70n maxstep=25p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin_r",
+      "vin_s",
+      "vout_q",
+      "vout_qbar"
+    ]
+  },
+  "family_id": "140",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "6ae4e83dc384e8db4e1e0cb812e0df0974b9bb7274f05ee2b2e9fdafcd16643e",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "76fe00f0ee704a84db089ffcd706b118aca25fe90f40ea87c108173c4fa61f63",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vs (vin_s 0) vsource type=pwl wave=[0 0 9n 0 9.1n 0.9 14n 0.9 14.1n 0 49n 0 49.1n 0.9 54n 0.9 54.1n 0 80n 0]",
+          "Vr (vin_r 0) vsource type=pwl wave=[0 0 29n 0 29.1n 0.9 34n 0.9 34.1n 0 80n 0]",
+          "",
+          "XDUT (vin_s vin_r vout_q vout_qbar) rs_latch_voltage",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vs (vin_s 0) vsource type=pwl wave=[0 0 6n 0 6.1n 0.9 12n 0.9 12.1n 0 40n 0 40.1n 0.9 46n 0.9 46.1n 0 80n 0]",
+          "Vr (vin_r 0) vsource type=pwl wave=[0 0 24n 0 24.1n 0.9 30n 0.9 30.1n 0 58n 0 58.1n 0.9 64n 0.9 64.1n 0 80n 0]",
+          "",
+          "XDUT (vin_s vin_r vout_q vout_qbar) rs_latch_voltage",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_LOGIC_THRESHOLDS_OUTPUT_AMPLITUDE",
+    "P_SET_RESET_PRIORITY",
+    "P_HOLD_STATE",
+    "P_QBAR_COMPLEMENT"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "0eef88dcc58f191a6cca56d7d95e93322c8a632d78e10fd95dc943982e6fce6c",
+    "family_spec_sha256": "c590a9dac1b970520868f440ed1d57dee29839130ab29415feee5a5cd5c954d9"
+  },
+  "task_id": "v4-140"
+}

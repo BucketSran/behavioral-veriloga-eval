@@ -1,0 +1,22 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one public contract.
+`include "disciplines.vams"
+
+module logarithmic_amplifier(sigin, sigout);
+input sigin;
+output sigout;
+electrical sigin, sigout;
+
+real adjusted;
+real magnitude;
+
+analog begin
+    adjusted = V(sigin) - 0.2;
+    magnitude = abs(adjusted);
+    if (magnitude < 0.1) begin
+        magnitude = 0.1;
+    end
+    V(sigout) <+ (0.42 * (ln(magnitude)));
+end
+
+endmodule

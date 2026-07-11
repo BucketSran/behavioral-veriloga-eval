@@ -1,0 +1,5 @@
+`include "disciplines.vams"
+module ideal_differential_opamp(vinp, vinn, voutp, voutn);
+input vinp, vinn; output voutp, voutn; electrical vinp, vinn, voutp, voutn; real diff;
+analog begin diff=2.0*(V(vinp)-V(vinn)); V(voutp)<+diff; V(voutn)<+-diff; end
+endmodule

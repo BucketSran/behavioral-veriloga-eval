@@ -1,0 +1,85 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "soft_voltage_clamp_behavior.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=40n maxstep=25p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "vout"
+    ]
+  },
+  "family_id": "136",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "7c121cb44ef1fc9387877e9e980944ff65071c2d800f22242b42aae435c6ff01",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "8f67f70e085b091b81015eb68898db244a1dd85b7cbf1bc9503baca3bb026f6e",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0 -0.4 10n -0.4 10.1n 0.2 20n 0.2 20.1n 0.8 30n 0.8 30.1n 0.5 45n 0.5]",
+          "",
+          "XDUT (vin vout 0) soft_voltage_clamp_behavior",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0 -0.6 8n -0.6 8.1n 0.1 18n 0.1 18.1n 0.75 28n 0.75 28.1n 0.4 38n 0.4 38.1n 0 45n 0]",
+          "",
+          "XDUT (vin vout 0) soft_voltage_clamp_behavior",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_REFERENCED_INPUT_OUTPUT",
+    "P_LINEAR_MIDDLE_REGION",
+    "P_SOFT_LOWER_LIMIT",
+    "P_SOFT_UPPER_LIMIT"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "498290dd8d65c1b54201e5d93959ffb966ff8407c88e7aac7de8ff815edc463e",
+    "family_spec_sha256": "7ac8efe6d6ce658ff193410cda91c06de8f2ef0329fc49ff60f482e578a81e6f"
+  },
+  "task_id": "v4-136"
+}

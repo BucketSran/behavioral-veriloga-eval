@@ -1,0 +1,15 @@
+`include "disciplines.vams"
+
+module differential_amplifier_core(sigin_p, sigin_n, sigout);
+input sigin_p, sigin_n;
+output sigout;
+electrical sigin_p, sigin_n, sigout;
+
+real diff;
+
+analog begin
+    diff = V(sigin_p, sigin_n);
+    V(sigout) <+ 2.0 * (diff - 0.05);
+end
+
+endmodule

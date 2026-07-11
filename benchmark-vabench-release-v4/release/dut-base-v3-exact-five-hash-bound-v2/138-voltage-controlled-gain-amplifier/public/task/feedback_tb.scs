@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/voltage_controlled_gain_amplifier.va"
+
+Vp (vin_p 0) vsource type=pwl wave=[0 0.25 10n 0.25 10.1n 0.55 20n 0.55 20.1n 0.85 30n 0.85 30.1n 0.05 45n 0.05]
+Vn (vin_n 0) vsource dc=0.45
+Vcp (vctrl_p 0) vsource type=pwl wave=[0 0.95 10n 0.95 10.1n 1.45 20n 1.45 20.1n 2.45 30n 2.45 30.1n 2.45 45n 2.45]
+Vcn (vctrl_n 0) vsource dc=0.45
+
+XDUT (vin_p vin_n vctrl_p vctrl_n vout) voltage_controlled_gain_amplifier
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=40n maxstep=25p
+save vctrl_n vctrl_p vin_n vin_p vout

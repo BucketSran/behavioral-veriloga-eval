@@ -1,0 +1,132 @@
+{
+  "family_id": "134",
+  "gold_bundle_sha256": "f3d2bdc1d4a98d909d1eddfc553c57a15c9b1a0c9fd25799e7c88b28a1c1716a",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "differential_amplifier_core.va": "96013846400a9a4fbbac3543d9e8a82627a57ceac2689e8e9809c1d99903efeb"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_GAIN_TWO_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "differential_amplifier_core.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_GAIN_TWO_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "differential_amplifier_core.va": "1c4454a355b7289d2aecd5ca6da5be01c18c09914d78c9b9c9e5e44972da1f7a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DIFFERENTIAL_INPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_single_ended_input/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "differential_amplifier_core.va"
+      ],
+      "fault_class": "single_ended_input",
+      "id": "neg_002_single_ended_input",
+      "trigger_condition": "Uses sigin_p single-ended instead of the differential input.",
+      "violated_property_ids": [
+        "P_DIFFERENTIAL_INPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "differential_amplifier_core.va": "f3db0ae1afee0acf4c83d276b097c2fcb12b69854e3439fda2244c01ceecd43a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INPUT_OFFSET"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_missing_offset/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "differential_amplifier_core.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_003_missing_offset",
+      "trigger_condition": "Does not subtract the 0.05 input offset.",
+      "violated_property_ids": [
+        "P_INPUT_OFFSET"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "differential_amplifier_core.va": "a2e43c98e5d6c3b83e5aa3bcdffee10a831115f044a0c9022a917157b4aa92ff"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_GAIN_TWO_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_wrong_gain/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "differential_amplifier_core.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_004_wrong_gain",
+      "trigger_condition": "Uses gain 1 instead of gain 2.",
+      "violated_property_ids": [
+        "P_GAIN_TWO_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "differential_amplifier_core.va": "935d5cff4f25050d0e1a282315ca5b44935a9ddba4d969deba19fcc750ebee4d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_GAIN_TWO_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "differential_amplifier_core.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Scales the amplified differential output too low while preserving the module/interface shape.",
+      "violated_property_ids": [
+        "P_GAIN_TWO_OUTPUT"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

@@ -1,0 +1,132 @@
+{
+  "family_id": "138",
+  "gold_bundle_sha256": "37a44bb4ec9dc2bebff2540983809d319a9f0fd26831022696e44d2d2ded4cfe",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "voltage_controlled_gain_amplifier.va": "3e99766807498fb06d2809c8f9de0544fb9cdfffdb22b1dec02f539cbe0ea86f"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INPUT_OFFSET_AND_GAIN"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "voltage_controlled_gain_amplifier.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_INPUT_OFFSET_AND_GAIN"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "voltage_controlled_gain_amplifier.va": "0086237b6d4d14a20abd550b24fb4444af7ced5049f1e95ca277c47309e6ac92"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INPUT_OFFSET_AND_GAIN"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_missing_input_offset/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "voltage_controlled_gain_amplifier.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_002_missing_input_offset",
+      "trigger_condition": "Omits the 0.05 input offset.",
+      "violated_property_ids": [
+        "P_INPUT_OFFSET_AND_GAIN"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "voltage_controlled_gain_amplifier.va": "d1040b36dc4a5eba2318428004d9b76fdf6d593aec97fb2e559503023bc63ceb"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DIFFERENTIAL_CONTROL"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_single_ended_control/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "voltage_controlled_gain_amplifier.va"
+      ],
+      "fault_class": "single_ended_control",
+      "id": "neg_003_single_ended_control",
+      "trigger_condition": "Uses single-ended control voltage instead of differential control.",
+      "violated_property_ids": [
+        "P_DIFFERENTIAL_CONTROL"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "voltage_controlled_gain_amplifier.va": "95af0554cbf07d7039d709d552f9b7c4429b8e2b3c94ca37f1bb397439f717ba"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_UNIPOLAR_OUTPUT_CLAMP"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_no_clamp/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "voltage_controlled_gain_amplifier.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_004_no_clamp",
+      "trigger_condition": "Does not clamp output to [0.1,0.9].",
+      "violated_property_ids": [
+        "P_UNIPOLAR_OUTPUT_CLAMP"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "voltage_controlled_gain_amplifier.va": "40e634aba5930185e72b31330bb7bd191faafff119ed19b71275856bc92f3610"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INPUT_OFFSET_AND_GAIN"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "voltage_controlled_gain_amplifier.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Scales the limited voltage-controlled output too low while preserving the module/interface shape.",
+      "violated_property_ids": [
+        "P_INPUT_OFFSET_AND_GAIN"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

@@ -1,0 +1,87 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "limiting_differential_amplifier.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=40n maxstep=25p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "sigin_n",
+      "sigin_p",
+      "sigout"
+    ]
+  },
+  "family_id": "131",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "34bfe69e8613826a12b3047d659b78891e6af2781bd9eca5570975e72e0e7fb7",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "f43a8ee636d91aaf5c4470482a350a760c9171c7428437410d48a81dd2c7599c",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vp (sigin_p 0) vsource type=pwl wave=[0 0.15 10n 0.15 10.1n 0.50 20n 0.50 20.1n 0.75 30n 0.75 30.1n 0.60 45n 0.60]",
+          "Vn (sigin_n 0) vsource dc=0.45",
+          "",
+          "XDUT (sigin_p sigin_n sigout) limiting_differential_amplifier gain=3 sigout_high=0.8 sigout_low=-0.4 sigin_offset=0.05",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vp (sigin_p 0) vsource type=pwl wave=[0 0.05 8n 0.05 8.1n 0.50 18n 0.50 18.1n 0.80 28n 0.80 28.1n 0.60 45n 0.60]",
+          "Vn (sigin_n 0) vsource dc=0.40",
+          "",
+          "XDUT (sigin_p sigin_n sigout) limiting_differential_amplifier gain=3 sigout_high=0.8 sigout_low=-0.4 sigin_offset=0.05",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_OFFSET_CORRECTED_DIFFERENTIAL_GAIN",
+    "P_OUTPUT_MIDPOINT_REFERENCE",
+    "P_OUTPUT_RAIL_CLAMP"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "f8eb61b67f4966dd6e053a8882cbdae17ae402d6a795c9acb076d52eefddad45",
+    "family_spec_sha256": "61d07a32aecfd8c66c4b5f8a221a9cff5082d2c825f9e1fe094da53ef8656277"
+  },
+  "task_id": "v4-131"
+}

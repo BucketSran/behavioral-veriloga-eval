@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/logarithmic_amplifier.va"
+
+Vin (sigin 0) vsource type=pwl wave=[0 0.2 10n 0.2 10.1n 0.7 20n 0.7 20.1n -0.3 30n -0.3 30.1n 1.2 45n 1.2]
+
+XDUT (sigin sigout) logarithmic_amplifier
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=40n maxstep=25p
+save sigin sigout

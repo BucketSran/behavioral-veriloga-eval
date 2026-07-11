@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/variable_gain_differential_amplifier.va"
+
+Vp (sigin_p 0) vsource type=pwl wave=[0 0.05 8n 0.05 8.1n 0.55 18n 0.55 18.1n 0.80 28n 0.80 28.1n 0.35 45n 0.35]
+Vn (sigin_n 0) vsource dc=0.45
+Vcp (sigctrl_p 0) vsource type=pwl wave=[0 1.45 8n 1.45 8.1n 1.45 18n 1.45 18.1n 1.65 28n 1.65 28.1n 0.95 45n 0.95]
+Vcn (sigctrl_n 0) vsource dc=0.45
+
+XDUT (sigin_p sigin_n sigctrl_p sigctrl_n sigout) variable_gain_differential_amplifier
+
+
+tran tran stop=40n maxstep=25p
+save sigctrl_n sigctrl_p sigin_n sigin_p sigout

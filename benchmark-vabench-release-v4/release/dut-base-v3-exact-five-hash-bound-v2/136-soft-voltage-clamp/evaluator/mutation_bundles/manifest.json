@@ -1,0 +1,140 @@
+{
+  "family_id": "136",
+  "gold_bundle_sha256": "aa90f38c71fa82f079e18f0c89fc59dddf3fda3a364c5ebe0e7097817308cccf",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "soft_voltage_clamp_behavior.va": "df2cffe06adf32391df8ae14edb127f0ebbfc626f2c2193c16c0399f6b764e56"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LINEAR_MIDDLE_REGION",
+          "P_REFERENCED_INPUT_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "soft_voltage_clamp_behavior.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_LINEAR_MIDDLE_REGION",
+        "P_REFERENCED_INPUT_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "soft_voltage_clamp_behavior.va": "72f920b0ff98733d1a39277bd7601983af7bd8970bc00f740c4ff701da137a50"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SOFT_LOWER_LIMIT",
+          "P_SOFT_UPPER_LIMIT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_hard_clamp/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "soft_voltage_clamp_behavior.va"
+      ],
+      "fault_class": "hard_clamp",
+      "id": "neg_002_hard_clamp",
+      "trigger_condition": "Uses hard clamp rails instead of the exponential soft clamp.",
+      "violated_property_ids": [
+        "P_SOFT_LOWER_LIMIT",
+        "P_SOFT_UPPER_LIMIT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "soft_voltage_clamp_behavior.va": "ee039acd9ba0b8fdc1a743d5e85468936bd5dd04b0de7af57297462ecc7a4d92"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LINEAR_MIDDLE_REGION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_knee_points/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "soft_voltage_clamp_behavior.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_003_wrong_knee_points",
+      "trigger_condition": "Uses the final rail values as soft-clamp knees.",
+      "violated_property_ids": [
+        "P_LINEAR_MIDDLE_REGION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "soft_voltage_clamp_behavior.va": "7fbc285eb815046b780546dc2b967e3f46f8d79d37a6a317a58311886bbb7b0f"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SOFT_LOWER_LIMIT",
+          "P_SOFT_UPPER_LIMIT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_half_soft_fraction/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "soft_voltage_clamp_behavior.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_004_half_soft_fraction",
+      "trigger_condition": "Uses half of the intended exponential soft-clamp fraction.",
+      "violated_property_ids": [
+        "P_SOFT_LOWER_LIMIT",
+        "P_SOFT_UPPER_LIMIT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "soft_voltage_clamp_behavior.va": "e0e35b3f6ab423e8a27c31900ad2b17b47f8f0b9300ab98aab92ab42a00fe7a8"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SOFT_LOWER_LIMIT",
+          "P_SOFT_UPPER_LIMIT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "soft_voltage_clamp_behavior.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Soft Voltage Clamp: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_SOFT_LOWER_LIMIT",
+        "P_SOFT_UPPER_LIMIT"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}
