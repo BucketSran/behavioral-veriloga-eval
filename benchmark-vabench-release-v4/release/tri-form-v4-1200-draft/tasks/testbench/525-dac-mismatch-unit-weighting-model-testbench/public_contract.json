@@ -1,0 +1,224 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "dac_mismatch_unit_weighting_model",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vhi",
+                "override_behavior": "sets the all-active output endpoint",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vhi > vlo"
+              },
+              {
+                "default": 0.0,
+                "name": "vlo",
+                "override_behavior": "sets the all-zero output endpoint",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vlo < vhi"
+              },
+              {
+                "default": 1e-10,
+                "name": "tr",
+                "override_behavior": "sets output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b0",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b1",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b2",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b3",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "dac_mismatch_unit_weighting_model.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "025",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "DAC Mismatch Unit Weighting Model"
+  },
+  "modeling_constraints": [
+    "Use the public fixed nonideal weights and deterministic voltage-domain reconstruction.",
+    "Use smoothed voltage contributions only.",
+    "Do not use current contributions, ddt(), idt(), validation hooks, or simulator-specific side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ZERO_AND_FULL_SCALE",
+      "observable_contract": "All-zero input maps to vlo and all-active input maps to vhi after transition settling.",
+      "required_signals": [
+        "time",
+        "b0",
+        "b1",
+        "b2",
+        "b3",
+        "out"
+      ]
+    },
+    {
+      "id": "P_NONIDEAL_WEIGHT_SUM",
+      "observable_contract": "Inputs b0 through b3 contribute fixed positive weights 1.00, 2.02, 3.96, and 8.08 normalized by their all-active sum.",
+      "required_signals": [
+        "time",
+        "b0",
+        "b1",
+        "b2",
+        "b3",
+        "out"
+      ]
+    },
+    {
+      "id": "P_LOGIC_THRESHOLD",
+      "observable_contract": "Each bit is independently interpreted using the public fixed 0.45 V decision threshold.",
+      "required_signals": [
+        "time",
+        "b0",
+        "b1",
+        "b2",
+        "b3",
+        "out"
+      ]
+    },
+    {
+      "id": "P_BOUNDED_OUTPUT",
+      "observable_contract": "For every input pattern, the settled output remains within the vlo-to-vhi interval.",
+      "required_signals": [
+        "time",
+        "b0",
+        "b1",
+        "b2",
+        "b3",
+        "out"
+      ]
+    },
+    {
+      "id": "P_MISMATCH_OBSERVABILITY",
+      "observable_contract": "Single-bit output increments preserve the stated nonideal weighting rather than ideal powers-of-two weighting.",
+      "required_signals": [
+        "time",
+        "b0",
+        "b1",
+        "b2",
+        "b3",
+        "out"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/dac_mismatch_unit_weighting_model.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-525",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "b0",
+            "port_ref": "b0",
+            "position": 0
+          },
+          {
+            "net": "b1",
+            "port_ref": "b1",
+            "position": 1
+          },
+          {
+            "net": "b2",
+            "port_ref": "b2",
+            "position": 2
+          },
+          {
+            "net": "b3",
+            "port_ref": "b3",
+            "position": 3
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 4
+          }
+        ],
+        "module_ref": "dac_mismatch_unit_weighting_model",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "b0",
+      "b1",
+      "b2",
+      "b3",
+      "out"
+    ]
+  }
+}

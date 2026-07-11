@@ -1,0 +1,256 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "flash_adc_3b",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vrefp",
+                "override_behavior": "sets upper conversion endpoint",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vrefp > vrefn"
+              },
+              {
+                "default": 0.0,
+                "name": "vrefn",
+                "override_behavior": "sets lower conversion endpoint",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vrefn < vrefp"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets rising clock decision threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real"
+              },
+              {
+                "default": 1e-10,
+                "name": "tedge",
+                "override_behavior": "sets output-bit transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tedge > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "VDD",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "VSS",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "VIN",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "CLK",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "DOUT2",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "DOUT1",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "DOUT0",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "flash_adc_3b.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "023",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Clocked ADC Quantizer"
+  },
+  "modeling_constraints": [
+    "Use rising-edge event-driven quantization and held state.",
+    "Use smoothed voltage contributions only.",
+    "Do not use current contributions, transistor-level devices, ddt(), idt(), or validation side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RISING_EDGE_QUANTIZATION",
+      "observable_contract": "At each rising CLK crossing, VIN is quantized into one of eight uniform bins spanning vrefn to vrefp.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "dout2",
+        "dout1",
+        "dout0"
+      ]
+    },
+    {
+      "id": "P_CODE_CLAMP",
+      "observable_contract": "Samples at or outside the conversion endpoints produce codes clamped to the inclusive range 0 through 7.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "dout2",
+        "dout1",
+        "dout0"
+      ]
+    },
+    {
+      "id": "P_BINARY_RAIL_ENCODING",
+      "observable_contract": "DOUT2 through DOUT0 encode the held code from MSB to LSB using VDD for one and VSS for zero.",
+      "required_signals": [
+        "time",
+        "vdd",
+        "vss",
+        "dout2",
+        "dout1",
+        "dout0"
+      ]
+    },
+    {
+      "id": "P_CODE_MONOTONICITY",
+      "observable_contract": "For increasing VIN samples across the conversion range, the sampled three-bit code is nondecreasing.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "dout2",
+        "dout1",
+        "dout0"
+      ]
+    },
+    {
+      "id": "P_SAMPLE_HOLD",
+      "observable_contract": "The output code remains stable between rising CLK crossings even when VIN changes.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "dout2",
+        "dout1",
+        "dout0"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/flash_adc_3b.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-523",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vdd",
+            "port_ref": "VDD",
+            "position": 0
+          },
+          {
+            "net": "vss",
+            "port_ref": "VSS",
+            "position": 1
+          },
+          {
+            "net": "vin",
+            "port_ref": "VIN",
+            "position": 2
+          },
+          {
+            "net": "clk",
+            "port_ref": "CLK",
+            "position": 3
+          },
+          {
+            "net": "dout2",
+            "port_ref": "DOUT2",
+            "position": 4
+          },
+          {
+            "net": "dout1",
+            "port_ref": "DOUT1",
+            "position": 5
+          },
+          {
+            "net": "dout0",
+            "port_ref": "DOUT0",
+            "position": 6
+          }
+        ],
+        "module_ref": "flash_adc_3b",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vdd",
+      "vss",
+      "vin",
+      "clk",
+      "dout2",
+      "dout1",
+      "dout0"
+    ]
+  }
+}

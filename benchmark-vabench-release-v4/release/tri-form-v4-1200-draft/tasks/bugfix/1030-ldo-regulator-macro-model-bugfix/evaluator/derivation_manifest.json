@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-030",
+    "canonical_task_slug": "030-ldo-regulator-macro-model",
+    "family_spec_sha256": "8bda7644ea899a74d9817a7394268380e0861bc22028e5c46b5de985dd6668fc",
+    "mutation_catalog_sha256": "f6b843682b232dbd65f062977ff7dc895f9ba9275631ca1b006e2c63c95f8475",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "030",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_boundary",
+    "testbench_suite": [
+      "neg_001_boundary",
+      "neg_003_polarity_direction",
+      "neg_004_state_reset",
+      "neg_005_metric_writeout",
+      "neg_002_timing_window"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "df4d1f7da7cd11a8239ef9ccc0961f866cb005124fbb7cb6ab297890e0c56090",
+    "changed_artifacts": [
+      "ldo_regulator_macro_model.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_boundary",
+    "rationale": "Select fault class boundary_semantic_error under trigger 'a public endpoint, threshold, saturation, or settling boundary is exercised' because it exercises P_CLOCKED_HOLD, P_INITIAL_AND_RESET_STATE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 28,
+    "source_preferred_seed": "neg_001_boundary",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-022",
+    "canonical_task_slug": "022-charge-pump-abstraction",
+    "family_spec_sha256": "cc2ac8db47a2d5e5fbd9415bab63709e23e7670284ccd5e3423c986e71ca140f",
+    "mutation_catalog_sha256": "d2a6260716c73f32b60c7fffd7e30aa32e4cf4d738bb126ab309d5f596945e45",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "022",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_boundary",
+    "testbench_suite": [
+      "neg_001_boundary",
+      "neg_003_polarity_direction",
+      "neg_004_state_reset",
+      "neg_005_metric_writeout",
+      "neg_002_timing_window"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "7616fd708e5dd02740fb788cf4339d7c6c4823cc1af0a27335e5c3a0bd15a78f",
+    "changed_artifacts": [
+      "charge_pump_abstraction.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_boundary",
+    "rationale": "Select fault class boundary_semantic_error under trigger 'a public endpoint, threshold, saturation, or settling boundary is exercised' because it exercises P_RESET_MIDSCALE, P_SAMPLED_HOLD as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 28,
+    "source_preferred_seed": "neg_001_boundary",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

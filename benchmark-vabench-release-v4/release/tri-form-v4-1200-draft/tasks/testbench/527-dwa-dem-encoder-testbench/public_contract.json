@@ -1,0 +1,478 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "dwa_ptr_gen",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets logic-high output level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > 0"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets input logic threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "0 < vth < vdd"
+              },
+              {
+                "default": 0,
+                "name": "ptr_init",
+                "override_behavior": "sets reset pointer position in the circular element array",
+                "type": "integer",
+                "units": "index",
+                "valid_range": "0 <= ptr_init <= 15"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk_i",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst_ni",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "code_msb_i[3:0]",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "cell_en_o[15:0]",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "ptr_o[15:0]",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "dwa_ptr_gen.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "v2b_4b",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets output high level and twice the clock threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > 0"
+              },
+              {
+                "default": 1e-10,
+                "name": "tedge",
+                "override_behavior": "sets output-bit transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tedge > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out_3",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out_2",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out_1",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out_0",
+                "position": 5
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "v2b_4b.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "027",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "calibration_control",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "DWA DEM Encoder"
+  },
+  "modeling_constraints": [
+    "Keep both public source files and both public module interfaces; the helper-to-encoder connection is part of the system binding.",
+    "Use voltage contributions and event-driven sampled state only.",
+    "Do not use current contributions, ddt(), idt(), debug strobes, pass/fail ports, or simulator-specific side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_V2B_ROUND_AND_CLAMP",
+      "observable_contract": "On each rising helper clock crossing, vin rounds to the nearest integer and clamps to a four-bit code from 0 through 15.",
+      "required_signals": [
+        "time",
+        "clk_i",
+        "vin_node",
+        "code_3",
+        "code_2",
+        "code_1",
+        "code_0"
+      ]
+    },
+    {
+      "id": "P_ACTIVE_LOW_RESET_POINTER",
+      "observable_contract": "A sampled active-low reset initializes ptr to the one-hot ptr_init position.",
+      "required_signals": [
+        "time",
+        "clk_i",
+        "rst_ni",
+        "ptr_15",
+        "ptr_14",
+        "ptr_13",
+        "ptr_12",
+        "ptr_11",
+        "ptr_10",
+        "ptr_9",
+        "ptr_8",
+        "ptr_7",
+        "ptr_6",
+        "ptr_5",
+        "ptr_4",
+        "ptr_3",
+        "ptr_2",
+        "ptr_1",
+        "ptr_0"
+      ]
+    },
+    {
+      "id": "P_ROTATING_POINTER_UPDATE",
+      "observable_contract": "Each post-reset rising edge advances the circular pointer by the sampled unsigned code modulo 16.",
+      "required_signals": [
+        "time",
+        "clk_i",
+        "rst_ni",
+        "code_3",
+        "code_2",
+        "code_1",
+        "code_0",
+        "ptr_15",
+        "ptr_14",
+        "ptr_13",
+        "ptr_12",
+        "ptr_11",
+        "ptr_10",
+        "ptr_9",
+        "ptr_8",
+        "ptr_7",
+        "ptr_6",
+        "ptr_5",
+        "ptr_4",
+        "ptr_3",
+        "ptr_2",
+        "ptr_1",
+        "ptr_0"
+      ]
+    },
+    {
+      "id": "P_POINTER_ONE_HOT",
+      "observable_contract": "Ptr remains exactly one-hot at the updated circular pointer position.",
+      "required_signals": [
+        "time",
+        "ptr_15",
+        "ptr_14",
+        "ptr_13",
+        "ptr_12",
+        "ptr_11",
+        "ptr_10",
+        "ptr_9",
+        "ptr_8",
+        "ptr_7",
+        "ptr_6",
+        "ptr_5",
+        "ptr_4",
+        "ptr_3",
+        "ptr_2",
+        "ptr_1",
+        "ptr_0"
+      ]
+    },
+    {
+      "id": "P_DWA_SELECTED_MASK",
+      "observable_contract": "Cell_en implements the public rotating span and LSB boundary-cell rule for the sampled code, including the code-zero boundary-cell case.",
+      "required_signals": [
+        "time",
+        "code_3",
+        "code_2",
+        "code_1",
+        "code_0",
+        "cell_en_15",
+        "cell_en_14",
+        "cell_en_13",
+        "cell_en_12",
+        "cell_en_11",
+        "cell_en_10",
+        "cell_en_9",
+        "cell_en_8",
+        "cell_en_7",
+        "cell_en_6",
+        "cell_en_5",
+        "cell_en_4",
+        "cell_en_3",
+        "cell_en_2",
+        "cell_en_1",
+        "cell_en_0",
+        "ptr_15",
+        "ptr_14",
+        "ptr_13",
+        "ptr_12",
+        "ptr_11",
+        "ptr_10",
+        "ptr_9",
+        "ptr_8",
+        "ptr_7",
+        "ptr_6",
+        "ptr_5",
+        "ptr_4",
+        "ptr_3",
+        "ptr_2",
+        "ptr_1",
+        "ptr_0"
+      ]
+    },
+    {
+      "id": "P_SYSTEM_CODE_BINDING",
+      "observable_contract": "The four helper outputs feed the DWA code bus in MSB-to-LSB order without bit reversal.",
+      "required_signals": [
+        "time",
+        "vin_node",
+        "code_3",
+        "code_2",
+        "code_1",
+        "code_0",
+        "cell_en_15",
+        "cell_en_14",
+        "cell_en_13",
+        "cell_en_12",
+        "cell_en_11",
+        "cell_en_10",
+        "cell_en_9",
+        "cell_en_8",
+        "cell_en_7",
+        "cell_en_6",
+        "cell_en_5",
+        "cell_en_4",
+        "cell_en_3",
+        "cell_en_2",
+        "cell_en_1",
+        "cell_en_0",
+        "ptr_15",
+        "ptr_14",
+        "ptr_13",
+        "ptr_12",
+        "ptr_11",
+        "ptr_10",
+        "ptr_9",
+        "ptr_8",
+        "ptr_7",
+        "ptr_6",
+        "ptr_5",
+        "ptr_4",
+        "ptr_3",
+        "ptr_2",
+        "ptr_1",
+        "ptr_0"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/dwa_ptr_gen.va",
+    "supplied_dut/v2b_4b.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-527",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 1
+          },
+          {
+            "net": "code_bus[3]",
+            "port_ref": "out_3",
+            "position": 2
+          },
+          {
+            "net": "code_bus[2]",
+            "port_ref": "out_2",
+            "position": 3
+          },
+          {
+            "net": "code_bus[1]",
+            "port_ref": "out_1",
+            "position": 4
+          },
+          {
+            "net": "code_bus[0]",
+            "port_ref": "out_0",
+            "position": 5
+          }
+        ],
+        "module_ref": "v2b_4b",
+        "name": "XV2B"
+      },
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk_i",
+            "position": 0
+          },
+          {
+            "net": "rst_n",
+            "port_ref": "rst_ni",
+            "position": 1
+          },
+          {
+            "net": "code_bus[3:0]",
+            "port_ref": "code_msb_i[3:0]",
+            "position": 2
+          },
+          {
+            "net": "cell_en[15:0]",
+            "port_ref": "cell_en_o[15:0]",
+            "position": 3
+          },
+          {
+            "net": "ptr[15:0]",
+            "port_ref": "ptr_o[15:0]",
+            "position": 4
+          }
+        ],
+        "module_ref": "dwa_ptr_gen",
+        "name": "XDWA"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk_i",
+      "rst_ni",
+      "vin_node",
+      "code_3",
+      "code_2",
+      "code_1",
+      "code_0",
+      "cell_en_15",
+      "cell_en_14",
+      "cell_en_13",
+      "cell_en_12",
+      "cell_en_11",
+      "cell_en_10",
+      "cell_en_9",
+      "cell_en_8",
+      "cell_en_7",
+      "cell_en_6",
+      "cell_en_5",
+      "cell_en_4",
+      "cell_en_3",
+      "cell_en_2",
+      "cell_en_1",
+      "cell_en_0",
+      "ptr_15",
+      "ptr_14",
+      "ptr_13",
+      "ptr_12",
+      "ptr_11",
+      "ptr_10",
+      "ptr_9",
+      "ptr_8",
+      "ptr_7",
+      "ptr_6",
+      "ptr_5",
+      "ptr_4",
+      "ptr_3",
+      "ptr_2",
+      "ptr_1",
+      "ptr_0"
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-024",
+    "canonical_task_slug": "024-clocked-sample-and-hold",
+    "family_spec_sha256": "de1878d78481f36f19294418f4792cbddca439bd426a736441392d3f0b2e865f",
+    "mutation_catalog_sha256": "bfd5f99c440a268f942a78e8d7e6fdfdbbdb71f85f23e3124d7a77d0ff864668",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "024",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_falling_edge_sample",
+    "testbench_suite": [
+      "neg_004_absolute_ground_reference",
+      "neg_002_high_phase_transparent",
+      "neg_001_falling_edge_sample",
+      "neg_003_wrong_initial_state",
+      "neg_005_slow_output_transition"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "1d2b98b5a9c8e3011f2daa3bdbf77c7c9a73bb38fe40cb57674f591d86265e4b",
+    "changed_artifacts": [
+      "sample_hold.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_falling_edge_sample",
+    "rationale": "Select fault class sampling_edge_polarity_error under trigger 'IN changes between a rising and the following falling CLK crossing.' because it exercises P_INTERSAMPLE_HOLD, P_RISING_EDGE_SAMPLE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 23,
+    "source_preferred_seed": "neg_004_absolute_ground_reference",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

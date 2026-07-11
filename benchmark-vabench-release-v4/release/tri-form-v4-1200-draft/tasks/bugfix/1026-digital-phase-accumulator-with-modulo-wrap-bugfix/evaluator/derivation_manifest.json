@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-026",
+    "canonical_task_slug": "026-digital-phase-accumulator-with-modulo-wrap",
+    "family_spec_sha256": "afe111b6b06696708b2de0a1a7cc65651d6595bfff2cd825b4110e4401347556",
+    "mutation_catalog_sha256": "ec5266356d86cf2fff2c95a35d9d564a0848af80e7a91468b51cd88879d126dc",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "026",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_boundary",
+    "testbench_suite": [
+      "neg_001_boundary",
+      "neg_003_polarity_direction",
+      "neg_004_state_reset",
+      "neg_005_metric_writeout",
+      "neg_002_timing_window"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "58b31905f39f19b92741797e496e7e661be7830cb0210681f87c36544b938c17",
+    "changed_artifacts": [
+      "phase_accumulator_timer_wrap_ref.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_boundary",
+    "rationale": "Select fault class boundary_semantic_error under trigger 'a public endpoint, threshold, saturation, or settling boundary is exercised' because it exercises P_TIMER_INCREMENT as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 25,
+    "source_preferred_seed": "neg_001_boundary",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}
