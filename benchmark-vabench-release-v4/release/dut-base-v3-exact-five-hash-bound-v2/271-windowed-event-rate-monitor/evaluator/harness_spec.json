@@ -1,0 +1,97 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "windowed_event_rate_monitor.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=15n maxstep=10p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "rst",
+      "event_in",
+      "gate",
+      "rate",
+      "average",
+      "time"
+    ]
+  },
+  "family_id": "271",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "6d1693a39b8be55d54f380fbb84d1c56632b4514b12fa0256d787e074a104001",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "fc3dcca5cd9e9902eea64489d242b6f233a45cfa0970d02da55b4f778dc331d9",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=250p period=1n width=450p rise=25p fall=25p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1n 0.9 1.05n 0 10.4n 0 10.45n 0.9 11.3n 0.9 11.35n 0 15n 0]",
+          "Vgate (gate 0) vsource type=pwl wave=[0 0 1.4n 0 1.45n 0.9 7.3n 0.9 7.35n 0 9n 0 9.05n 0.9 15n 0.9]",
+          "Vevent (event_in 0) vsource type=pwl wave=[0 0 2n 0 2.05n 0.9 3n 0.9 3.05n 0 4n 0 4.05n 0.9 6n 0.9 6.05n 0 9.5n 0 9.55n 0.9 10.2n 0.9 10.25n 0 12.2n 0 12.25n 0.9 15n 0.9]",
+          "",
+          "XDUT (clk rst event_in gate rate average) windowed_event_rate_monitor",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=17n maxstep=10p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=420p period=1.1n width=460p rise=25p fall=25p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.3n 0.9 1.35n 0 8.5n 0 8.55n 0.9 9.4n 0.9 9.45n 0 17n 0]",
+          "Vgate (gate 0) vsource type=pwl wave=[0 0 1.8n 0 1.85n 0.9 6.5n 0.9 6.55n 0 7.8n 0 7.85n 0.9 13.2n 0.9 13.25n 0 14.2n 0 14.25n 0.9 17n 0.9]",
+          "Vevent (event_in 0) vsource type=pwl wave=[0 0 2.2n 0 2.25n 0.9 5.7n 0.9 5.75n 0 8.2n 0 8.25n 0.9 9.1n 0.9 9.15n 0 10.1n 0 10.15n 0.9 12.3n 0.9 12.35n 0 15n 0 15.05n 0.9 17n 0.9]",
+          "",
+          "XDUT (clk rst event_in gate rate average) windowed_event_rate_monitor",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INITIALIZE_EVENT_COUNT_SAMPLE_COUNT_RATE",
+    "P_FOR_THE_SAME_GATED_SAMPLE_WINDOW"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "67ca2696a2da5ba2bf135ae812d740d5ad2335523ca63f343a3e8ea5b1ffe026",
+    "family_spec_sha256": "759f61a88b370ff0676e35df04a53cc09913a78a7dd9fe234dc3d80d7b38152a"
+  },
+  "task_id": "v4-271"
+}

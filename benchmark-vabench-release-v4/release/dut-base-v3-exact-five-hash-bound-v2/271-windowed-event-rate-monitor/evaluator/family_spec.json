@@ -1,0 +1,188 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "windowed_event_rate_monitor",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vhi",
+                "override_behavior": "overrides vhi",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "5",
+                "name": "window_count",
+                "override_behavior": "overrides window_count",
+                "type": "integer",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "60p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "event_in",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "gate",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "rate",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "average",
+                "position": 5
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "windowed_event_rate_monitor.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "271",
+  "identity": {
+    "category": "measurement_instrumentation_flows",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Windowed Event Rate Monitor"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_INITIALIZE_EVENT_COUNT_SAMPLE_COUNT_RATE",
+      "observable_contract": "Initialize `event_count`, `sample_count`, `rate`, and `average` to zero. On each rising clock crossing, clear the measurement window and both observables when `rst` is high or `gate <= vth`. Otherwise increment `sample_count`, increment `event_count` when `event_in > vth`, and drive `rate = vhi * clip01(event_count / window_count)`.",
+      "required_signals": [
+        "time",
+        "average",
+        "clk",
+        "event_in",
+        "gate",
+        "rate",
+        "rst"
+      ]
+    },
+    {
+      "id": "P_FOR_THE_SAME_GATED_SAMPLE_WINDOW",
+      "observable_contract": "For the same gated sample window, drive `average = vhi * clip01(event_count / sample_count)`. Hold the last observable values between rising clock crossings.",
+      "required_signals": [
+        "time",
+        "average",
+        "clk",
+        "event_in",
+        "gate",
+        "rate",
+        "rst"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1271",
+    "dut": "v4-271",
+    "testbench": "v4-771"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "event_in",
+            "port_ref": "event_in",
+            "position": 2
+          },
+          {
+            "net": "gate",
+            "port_ref": "gate",
+            "position": 3
+          },
+          {
+            "net": "rate",
+            "port_ref": "rate",
+            "position": 4
+          },
+          {
+            "net": "average",
+            "port_ref": "average",
+            "position": 5
+          }
+        ],
+        "module_ref": "windowed_event_rate_monitor",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "average",
+      "clk",
+      "event_in",
+      "gate",
+      "rate",
+      "rst"
+    ]
+  }
+}

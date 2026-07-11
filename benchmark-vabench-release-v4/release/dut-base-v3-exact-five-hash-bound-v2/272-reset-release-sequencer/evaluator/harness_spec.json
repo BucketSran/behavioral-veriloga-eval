@@ -1,0 +1,99 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "reset_release_sequencer.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=14n maxstep=10p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "rst",
+      "supply_ok",
+      "bias_ok",
+      "stage1",
+      "stage2",
+      "ready",
+      "progress",
+      "time"
+    ]
+  },
+  "family_id": "272",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "1a40e94d305378bc9d1b5abb74a6e9d92db583d34171c33bb4d56a6c4f5adeae",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "7b7dab22be5e0c9190cbdf79152264935edfa625c301c136b4e19708dad66ab4",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=200p period=1n width=420p rise=25p fall=25p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.1n 0.9 1.15n 0 8.5n 0 8.55n 0.9 9.4n 0.9 9.45n 0 14n 0]",
+          "Vsupply (supply_ok 0) vsource type=pwl wave=[0 0 1.6n 0 1.65n 0.9 6.4n 0.9 6.45n 0 7.4n 0 7.45n 0.9 14n 0.9]",
+          "Vbias (bias_ok 0) vsource type=pwl wave=[0 0 2.2n 0 2.25n 0.9 5.2n 0.9 5.25n 0 5.9n 0 5.95n 0.9 14n 0.9]",
+          "",
+          "XDUT (clk rst supply_ok bias_ok stage1 stage2 ready progress) reset_release_sequencer",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=17n maxstep=10p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=350p period=1.15n width=470p rise=25p fall=25p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.4n 0.9 1.45n 0 9.3n 0 9.35n 0.9 10.2n 0.9 10.25n 0 17n 0]",
+          "Vsupply (supply_ok 0) vsource type=pwl wave=[0 0 1.9n 0 1.95n 0.9 7.1n 0.9 7.15n 0 8n 0 8.05n 0.9 13n 0.9 13.05n 0 14n 0 14.05n 0.9 17n 0.9]",
+          "Vbias (bias_ok 0) vsource type=pwl wave=[0 0 2.5n 0 2.55n 0.9 5.9n 0.9 5.95n 0 6.7n 0 6.75n 0.9 17n 0.9]",
+          "",
+          "XDUT (clk rst supply_ok bias_ok stage1 stage2 ready progress) reset_release_sequencer",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INITIALIZE_THE_INTERNAL_STAGE_COUNT_AND",
+    "P_AFTER_UPDATING_THE_STAGE_COUNT_DRIVE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "66c6ce0b001e3db48006ff540cdbe0e580a2f2d18e6ad5def6a1f5d1e33d188c",
+    "family_spec_sha256": "b96bd9693c7c6c54af56b14ee0690930afe08245a0d3675bd9b6660cf838fb9d"
+  },
+  "task_id": "v4-272"
+}

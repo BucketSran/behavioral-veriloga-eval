@@ -1,0 +1,266 @@
+{
+  "agent_visible_files": [
+    "instruction.md",
+    "public_contract.json",
+    "feedback_tb.scs"
+  ],
+  "artifact_boundary": {
+    "public_readonly_support": [],
+    "solver_owned_artifacts": [
+      "reset_release_sequencer.va"
+    ]
+  },
+  "canonical_dut_id": "272",
+  "canonical_dut_slug": "272-reset-release-sequencer",
+  "canonical_instruction": "instruction.md",
+  "category": "bias_reference_power_management",
+  "counted_in_score": true,
+  "difficulty": "D2",
+  "feedback_oracle": {
+    "command": "vabench-feedback --task . --submission ../submission",
+    "feedback_channels": [
+      "ahdl_like_preflight",
+      "evas_simulation",
+      "behavior_property_diagnostics"
+    ],
+    "profile_exposed": false,
+    "public_tb": "feedback_tb.scs",
+    "public_tb_exposed": true,
+    "queryable_by_agentic_modes": true,
+    "raw_scs_exposed": true
+  },
+  "form": "dut",
+  "gate2_status": "gate2_ready",
+  "interface": {
+    "artifact_mode": "single_file",
+    "modules": [
+      {
+        "depends_on": [],
+        "file": "reset_release_sequencer.va",
+        "module": "reset_release_sequencer",
+        "parameters": [
+          {
+            "default": "0.45",
+            "name": "vth",
+            "override_behavior": "overrides vth",
+            "type": "real",
+            "units": "",
+            "valid_range": "finite"
+          },
+          {
+            "default": "0.9",
+            "name": "vhi",
+            "override_behavior": "overrides vhi",
+            "type": "real",
+            "units": "",
+            "valid_range": "finite"
+          },
+          {
+            "default": "3",
+            "name": "final_stage",
+            "override_behavior": "overrides final_stage",
+            "type": "integer",
+            "units": "",
+            "valid_range": "finite"
+          },
+          {
+            "default": "60p",
+            "name": "tr",
+            "override_behavior": "overrides tr",
+            "type": "real",
+            "units": "",
+            "valid_range": "finite"
+          }
+        ],
+        "ports": [
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "clk",
+            "position": 0
+          },
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "rst",
+            "position": 1
+          },
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "supply_ok",
+            "position": 2
+          },
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "bias_ok",
+            "position": 3
+          },
+          {
+            "direction": "output",
+            "discipline": "electrical",
+            "name": "stage1",
+            "position": 4
+          },
+          {
+            "direction": "output",
+            "discipline": "electrical",
+            "name": "stage2",
+            "position": 5
+          },
+          {
+            "direction": "output",
+            "discipline": "electrical",
+            "name": "ready",
+            "position": 6
+          },
+          {
+            "direction": "output",
+            "discipline": "electrical",
+            "name": "progress",
+            "position": 7
+          }
+        ],
+        "role": "entry"
+      }
+    ]
+  },
+  "language": "verilog-a",
+  "level": "L1",
+  "observable_contract": [
+    {
+      "description": "Initialize the internal stage count and all observables to zero. On each rising clock crossing, clear the stage count when `rst` is high, `supply_ok <= vth`, or `bias_ok <= vth`. Otherwise increment the stage count by one until it reaches `final_stage`.",
+      "id": "P_INITIALIZE_THE_INTERNAL_STAGE_COUNT_AND",
+      "required_signals": [
+        "time",
+        "bias_ok",
+        "clk",
+        "progress",
+        "ready",
+        "rst",
+        "stage1",
+        "stage2",
+        "supply_ok"
+      ]
+    },
+    {
+      "description": "After updating the stage count, drive `stage1 = vhi` when `stage_count >= 1`, `stage2 = vhi` when `stage_count >= 2`, and `ready = vhi` when `stage_count >= final_stage`; otherwise drive each of those observables to `0 V`. Drive `progress = vhi * clip01(stage_count / final_stage)`. Hold the last observable values between rising clock crossings.",
+      "id": "P_AFTER_UPDATING_THE_STAGE_COUNT_DRIVE",
+      "required_signals": [
+        "time",
+        "bias_ok",
+        "clk",
+        "progress",
+        "ready",
+        "rst",
+        "stage1",
+        "stage2",
+        "supply_ok"
+      ]
+    }
+  ],
+  "oracle_policy": {
+    "checker_private": true,
+    "feedback_and_score_share_checker_family": true,
+    "feedback_oracle_materialized": true,
+    "no_model_visible_raw_scs": false,
+    "no_model_visible_starter": true,
+    "proposal_only": false,
+    "public_feedback_tb_exposed": true,
+    "score_tb_private": true,
+    "single_public_contract": true,
+    "testbench_and_checker_split_required": true
+  },
+  "output_artifacts": [
+    {
+      "modules": [
+        "reset_release_sequencer"
+      ],
+      "path": "reset_release_sequencer.va"
+    }
+  ],
+  "parameters": [
+    {
+      "default": "0.45",
+      "name": "vth",
+      "override_behavior": "overrides vth",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "0.9",
+      "name": "vhi",
+      "override_behavior": "overrides vhi",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "3",
+      "name": "final_stage",
+      "override_behavior": "overrides final_stage",
+      "type": "integer",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "60p",
+      "name": "tr",
+      "override_behavior": "overrides tr",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    }
+  ],
+  "public_observables": [
+    "bias_ok",
+    "clk",
+    "progress",
+    "ready",
+    "rst",
+    "stage1",
+    "stage2",
+    "supply_ok"
+  ],
+  "schema_version": "v4-public-contract-v1",
+  "score_oracle": {
+    "checker_profile_exposed": false,
+    "private_score_tb_exposed": false,
+    "profile_exposed": false,
+    "queryable_by_agentic_modes": false,
+    "raw_scs_exposed": false
+  },
+  "status": "gate2_ready",
+  "target_artifacts": [
+    "reset_release_sequencer.va"
+  ],
+  "task_id": "v4_272_reset_release_sequencer",
+  "task_slug": "376-reset-release-sequencer",
+  "title": "Reset Release Sequencer",
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "bias_ok",
+      "clk",
+      "progress",
+      "ready",
+      "rst",
+      "stage1",
+      "stage2",
+      "supply_ok"
+    ]
+  },
+  "track": "ams_function_dut",
+  "validation_status": {
+    "evas_feedback_score_gold": "pass",
+    "gate2": "dut_base_sealed",
+    "next_gate": "canonical_suite_unification_pending",
+    "semantic_negative_certification": "pass",
+    "spectre_score_gold": "clean_pass",
+    "tri_form_gate2": "pending",
+    "tri_form_gate3": "pending",
+    "untriaged_warning_count": 0
+  }
+}

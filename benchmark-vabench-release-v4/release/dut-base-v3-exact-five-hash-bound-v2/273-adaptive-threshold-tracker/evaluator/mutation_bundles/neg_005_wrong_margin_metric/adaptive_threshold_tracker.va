@@ -1,0 +1,74 @@
+`include "disciplines.vams"
+
+module adaptive_threshold_tracker(clk, rst, vin, adapt, trip, threshold_mon, margin_metric);
+input clk, rst, vin, adapt;
+output trip, threshold_mon, margin_metric;
+electrical clk, rst, vin, adapt, trip, threshold_mon, margin_metric;
+
+parameter real vth = 0.45;
+parameter real vhi = 0.9;
+parameter real threshold_init = 0.45;
+parameter real threshold_min = 0.25;
+parameter real threshold_max = 0.70;
+parameter real adapt_alpha = 0.75;
+parameter real margin_fullscale = 0.45;
+parameter real tr = 60p;
+
+real threshold_q;
+real old_threshold;
+real trip_v;
+real threshold_mon_v;
+real margin_metric_v;
+
+analog function real clip01;
+    input x;
+    real x;
+    begin
+        if (x < 0.0) clip01 = 0.0;
+        else if (x > 1.0) clip01 = 1.0;
+        else clip01 = x;
+    end
+endfunction
+
+analog function real clamp_range;
+    input x;
+    input lo;
+    input hi;
+    real x, lo, hi;
+    begin
+        if (x < lo) clamp_range = lo;
+        else if (x > hi) clamp_range = hi;
+        else clamp_range = x;
+    end
+endfunction
+
+analog begin
+    @(initial_step) begin
+        threshold_q = threshold_init;
+        trip_v = 0.0;
+        threshold_mon_v = threshold_init;
+        margin_metric_v = 0.0;
+    end
+
+    @(cross(V(clk) - vth, +1)) begin
+        if (V(rst) > vth) begin
+            threshold_q = threshold_init;
+            trip_v = 0.0;
+            threshold_mon_v = threshold_q;
+            margin_metric_v = 0.0;
+        end else begin
+            old_threshold = threshold_q;
+            trip_v = (V(vin) > old_threshold) ? vhi : 0.0;
+            margin_metric_v = vhi * clip01((V(vin) - old_threshold) / margin_fullscale);
+            if (V(adapt) > vth) begin
+                threshold_q = clamp_range(adapt_alpha * old_threshold + (1.0 - adapt_alpha) * V(vin), threshold_min, threshold_max);
+            end
+            threshold_mon_v = threshold_q;
+        end
+    end
+
+    V(trip) <+ transition(trip_v, 0.0, tr, tr);
+    V(threshold_mon) <+ transition(threshold_mon_v, 0.0, tr, tr);
+    V(margin_metric) <+ transition(margin_metric_v, 0.0, tr, tr);
+end
+endmodule

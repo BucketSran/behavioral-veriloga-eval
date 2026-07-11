@@ -1,0 +1,100 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "rail_normalized_metric_mapper.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=12n maxstep=10p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "meas",
+      "vdd",
+      "vss",
+      "en",
+      "norm",
+      "valid",
+      "time"
+    ]
+  },
+  "family_id": "274",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "bea2523080c7b3c1955d9c3ce99b2cdce552f295f04c977aeb17a0779c0fb201",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "2338bd2a416751a72f117c01a58c043dd4d23e4cb0f3a944ac869c630d3f66c0",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vvss (vss 0) vsource type=pwl wave=[0 0.1 6n 0.1 6.05n -0.08 12n -0.08]",
+          "Vvdd (vdd 0) vsource type=pwl wave=[0 0.92 4n 0.92 4.05n 1.28 8n 1.28 8.05n 0.48 10n 0.48 10.05n 0.94 12n 0.94]",
+          "Vmeas (meas 0) vsource type=pwl wave=[0 0.47 2n 0.47 2.05n 0.88 4n 0.88 4.05n 0.55 5n 0.55 5.05n 1.4 6n 1.4 6.05n 0.2 8n 0.2 8.05n 0.44 10n 0.44 10.05n -0.12 12n -0.12]",
+          "Ven (en 0) vsource type=pwl wave=[0 0.9 6.6n 0.9 6.65n 0 7.8n 0 7.85n 0.9 12n 0.9]",
+          "",
+          "XDUT (meas vdd vss en norm valid) rail_normalized_metric_mapper",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=15n maxstep=10p"
+        ],
+        "body_lines": [
+          "Vvss (vss 0) vsource type=pwl wave=[0 -0.08 5n -0.08 5.05n 0.12 11n 0.12 11.05n -0.06 15n -0.06]",
+          "Vvdd (vdd 0) vsource type=pwl wave=[0 0.77 3.2n 0.77 3.25n 1.18 7.5n 1.18 7.55n 1.34 10n 1.34 10.05n 0.5 12.5n 0.5 12.55n 0.96 15n 0.96]",
+          "Vmeas (meas 0) vsource type=pwl wave=[0 0.2 2n 0.2 2.05n 0.7 4.8n 0.7 4.85n 1.26 7.2n 1.26 7.25n 0.54 9.5n 0.54 9.55n -0.12 12n -0.12 12.05n 0.42 15n 0.42]",
+          "Ven (en 0) vsource type=pwl wave=[0 0.9 8.4n 0.9 8.45n 0 9.2n 0 9.25n 0.9 15n 0.9]",
+          "",
+          "XDUT (meas vdd vss en norm valid) rail_normalized_metric_mapper",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_NORMALIZE_MEAS_RELATIVE_TO_THE_LOCAL",
+    "P_CLIP_THE_NORMALIZED_METRIC_TO_THE",
+    "P_ASSERT_VALID_ONLY_WHEN_ENABLE_IS",
+    "P_CLEAR_NORM_AND_VALID_WHILE_DISABLED",
+    "P_USE_LOCAL_ANALOG_HELPER_FUNCTIONS_RATHER"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "ca2353bbe35a0c061b2863d2acac24dfe57227fbb933f605831f1833d4a043fb",
+    "family_spec_sha256": "d5fb3d54dde604ceb4b49f7b6c40e01eddba43890690c871ba4b858fc51dae82"
+  },
+  "task_id": "v4-274"
+}

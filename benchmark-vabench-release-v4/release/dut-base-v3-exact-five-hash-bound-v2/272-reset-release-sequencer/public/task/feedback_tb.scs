@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/reset_release_sequencer.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=200p period=1n width=420p rise=25p fall=25p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.1n 0.9 1.15n 0 8.5n 0 8.55n 0.9 9.4n 0.9 9.45n 0 14n 0]
+Vsupply (supply_ok 0) vsource type=pwl wave=[0 0 1.6n 0 1.65n 0.9 6.4n 0.9 6.45n 0 7.4n 0 7.45n 0.9 14n 0.9]
+Vbias (bias_ok 0) vsource type=pwl wave=[0 0 2.2n 0 2.25n 0.9 5.2n 0.9 5.25n 0 5.9n 0 5.95n 0.9 14n 0.9]
+
+XDUT (clk rst supply_ok bias_ok stage1 stage2 ready progress) reset_release_sequencer
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=14n maxstep=10p
+save clk rst supply_ok bias_ok stage1 stage2 ready progress time

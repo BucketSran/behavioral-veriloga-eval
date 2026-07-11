@@ -1,0 +1,234 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "adaptive_threshold_tracker",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vhi",
+                "override_behavior": "overrides vhi",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "threshold_init",
+                "override_behavior": "overrides threshold_init",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.25",
+                "name": "threshold_min",
+                "override_behavior": "overrides threshold_min",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.70",
+                "name": "threshold_max",
+                "override_behavior": "overrides threshold_max",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.75",
+                "name": "adapt_alpha",
+                "override_behavior": "overrides adapt_alpha",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "margin_fullscale",
+                "override_behavior": "overrides margin_fullscale",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "60p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "adapt",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "trip",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "threshold_mon",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "margin_metric",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "adaptive_threshold_tracker.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "273",
+  "identity": {
+    "category": "comparator_decision",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Adaptive Threshold Tracker"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_INITIALIZE_THE_STORED_THRESHOLD_TO_THRESHOLD",
+      "observable_contract": "Initialize the stored threshold to `threshold_init`, `threshold_mon` to `threshold_init`, and the other observables to zero. On each rising clock crossing, reset the stored threshold and outputs to those initial values while `rst` is high. Otherwise compare `vin` against the previously stored threshold: drive `trip = vhi` when `V(vin) > old_threshold`, otherwise drive `trip = 0 V`. Drive `margin_metric = vhi * clip01(abs(V(vin) - old_threshold) / margin_fullscale)`.",
+      "required_signals": [
+        "time",
+        "adapt",
+        "clk",
+        "margin_metric",
+        "rst",
+        "threshold_mon",
+        "trip",
+        "vin"
+      ]
+    },
+    {
+      "id": "P_WHEN_ADAPT_VTH_UPDATE_THE_STORED",
+      "observable_contract": "When `adapt > vth`, update the stored threshold after the comparison using `threshold = clamp(adapt_alpha * old_threshold + (1.0 - adapt_alpha) * V(vin), threshold_min, threshold_max)`. Drive `threshold_mon` with the resulting next-sample threshold. Hold the last observable values between rising clock crossings.",
+      "required_signals": [
+        "time",
+        "adapt",
+        "clk",
+        "margin_metric",
+        "rst",
+        "threshold_mon",
+        "trip",
+        "vin"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1273",
+    "dut": "v4-273",
+    "testbench": "v4-773"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 2
+          },
+          {
+            "net": "adapt",
+            "port_ref": "adapt",
+            "position": 3
+          },
+          {
+            "net": "trip",
+            "port_ref": "trip",
+            "position": 4
+          },
+          {
+            "net": "threshold_mon",
+            "port_ref": "threshold_mon",
+            "position": 5
+          },
+          {
+            "net": "margin_metric",
+            "port_ref": "margin_metric",
+            "position": 6
+          }
+        ],
+        "module_ref": "adaptive_threshold_tracker",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "adapt",
+      "clk",
+      "margin_metric",
+      "rst",
+      "threshold_mon",
+      "trip",
+      "vin"
+    ]
+  }
+}

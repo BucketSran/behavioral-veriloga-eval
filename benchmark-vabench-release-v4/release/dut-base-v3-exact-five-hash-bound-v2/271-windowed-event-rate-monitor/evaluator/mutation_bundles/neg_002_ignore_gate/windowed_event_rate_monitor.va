@@ -1,0 +1,71 @@
+`include "disciplines.vams"
+
+module windowed_event_rate_monitor(clk, rst, event_in, gate, rate, average);
+input clk, rst, event_in, gate;
+output rate, average;
+electrical clk, rst, event_in, gate, rate, average;
+
+parameter real vth = 0.45;
+parameter real vhi = 0.9;
+parameter integer window_count = 5;
+parameter real tr = 60p;
+
+integer event_count;
+integer sample_count;
+real rate_v;
+real average_v;
+real ratio_v;
+
+analog function real clip01;
+    input x;
+    real x;
+    begin
+        if (x < 0.0) clip01 = 0.0;
+        else if (x > 1.0) clip01 = 1.0;
+        else clip01 = x;
+    end
+endfunction
+
+analog function real clamp_range;
+    input x;
+    input lo;
+    input hi;
+    real x, lo, hi;
+    begin
+        if (x < lo) clamp_range = lo;
+        else if (x > hi) clamp_range = hi;
+        else clamp_range = x;
+    end
+endfunction
+
+analog begin
+    @(initial_step) begin
+        event_count = 0;
+        sample_count = 0;
+        rate_v = 0.0;
+        average_v = 0.0;
+    end
+
+    @(cross(V(clk) - vth, +1)) begin
+        if (V(rst) > vth) begin
+            event_count = 0;
+            sample_count = 0;
+            rate_v = 0.0;
+            average_v = 0.0;
+        end else begin
+            sample_count = sample_count + 1;
+            if (V(event_in) > vth) event_count = event_count + 1;
+            rate_v = vhi * clip01((1.0 * event_count) / window_count);
+            if (sample_count > 0) begin
+                ratio_v = (1.0 * event_count) / sample_count;
+            end else begin
+                ratio_v = 0.0;
+            end
+            average_v = vhi * clip01(ratio_v);
+        end
+    end
+
+    V(rate) <+ transition(rate_v, 0.0, tr, tr);
+    V(average) <+ transition(average_v, 0.0, tr, tr);
+end
+endmodule

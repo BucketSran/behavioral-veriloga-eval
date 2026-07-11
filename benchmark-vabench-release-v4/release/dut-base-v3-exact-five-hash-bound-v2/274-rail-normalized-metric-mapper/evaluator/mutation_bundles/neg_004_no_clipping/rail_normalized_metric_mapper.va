@@ -1,0 +1,56 @@
+`include "disciplines.vams"
+
+module rail_normalized_metric_mapper(meas, vdd, vss, en, norm, valid);
+input meas, vdd, vss, en;
+output norm, valid;
+electrical meas, vdd, vss, en, norm, valid;
+
+parameter real vth = 0.45;
+parameter real vhi = 0.9;
+parameter real span_min = 0.60;
+parameter real span_max = 1.20;
+parameter real tr = 50p;
+
+real span_v;
+real local_meas_v;
+real enabled_v;
+real norm_v;
+real valid_v;
+
+analog function real clip01;
+    input x;
+    real x;
+    begin
+        if (x < 0.0) clip01 = 0.0;
+        else if (x > 1.0) clip01 = 1.0;
+        else clip01 = x;
+    end
+endfunction
+
+analog function real clamp_range;
+    input x;
+    input lo;
+    input hi;
+    real x, lo, hi;
+    begin
+        if (x < lo) clamp_range = lo;
+        else if (x > hi) clamp_range = hi;
+        else clamp_range = x;
+    end
+endfunction
+
+analog begin
+    span_v = V(vdd, vss);
+    local_meas_v = V(meas) - V(vss);
+    enabled_v = (V(en) > vth) ? 1.0 : 0.0;
+    if ((enabled_v > 0.5) && (span_v >= span_min)) begin
+        norm_v = vhi * local_meas_v / span_v;
+    end else begin
+        norm_v = 0.0;
+    end
+    valid_v = ((enabled_v > 0.5) && (span_v >= span_min) && (span_v <= span_max) && (local_meas_v >= 0.0) && (local_meas_v <= span_v)) ? vhi : 0.0;
+
+    V(norm) <+ norm_v;
+    V(valid) <+ valid_v;
+end
+endmodule
