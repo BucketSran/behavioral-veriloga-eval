@@ -1,0 +1,112 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "ptat_ctat_reference_generator.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=5n maxstep=100p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "rst",
+      "vin"
+    ]
+  },
+  "family_id": "040",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "d928876cb862f58049c04a4c19e4b43e6887dc47dbced32c4aac3e298288f04d",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "1502562e5d7488064a263ef530890ba720d8ad74897655dd53691166f96e0f86",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop={stop_time} maxstep={maxstep}"
+        ],
+        "body_lines": [
+          "// Public feedback sweeps below-range, nominal, and above-range inputs.",
+          "V_clk (clk 0) vsource type=pulse val0=0 val1=0.9 period=2.5n delay=600p rise=40p fall=40p width=1.1n",
+          "V_rst (rst 0) vsource type=pwl wave=[0 0.9 3.2n 0.9 3.3n 0 {stop_time} 0]",
+          "V_vin (vin 0) vsource type=pwl wave=[0 -0.08 20n -0.08 20.2n 0.50 44n 0.50 44.2n 1.02 {stop_time} 1.02]",
+          "",
+          "XDUT (clk rst vin out metric) ptat_ctat_reference_generator",
+          ""
+        ],
+        "save_signals": [
+          "clk",
+          "rst",
+          "vin",
+          "out",
+          "metric"
+        ]
+      },
+      "parameters": {
+        "maxstep": "125p",
+        "stop_time": "76n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=80n maxstep=0.5n"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=2n width=1n rise=50p fall=50p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 80n 0]",
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.15 18n 0.15 18.1n 0.45 42n 0.45 42.1n 0.80 80n 0.80]",
+          "",
+          "XDUT (clk rst vin out metric) ptat_ctat_reference_generator",
+          ""
+        ],
+        "save_signals": [
+          "clk",
+          "rst",
+          "vin",
+          "out",
+          "metric"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RESET_REFERENCE",
+    "P_INPUT_CLAMP",
+    "P_PTAT_TREND",
+    "P_CTAT_PTAT_AVERAGE",
+    "P_REFERENCE_BOUNDS"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "028958a5d44fd3537e26256f5034f9281b5d05e050ca0e9bb66136ef831c3b54",
+    "family_spec_sha256": "50d74d4b3ff7d95fd09f56b97b8cd354d42bb3d1872b84c78471de10e8ca91d2"
+  },
+  "task_id": "v4-040"
+}

@@ -1,0 +1,47 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop={stop_time} maxstep={maxstep}"
+    ],
+    "body_lines": [
+      "// Public feedback sweeps below-range, nominal, and above-range inputs.",
+      "V_clk (clk 0) vsource type=pulse val0=0 val1=0.9 period=2.5n delay=600p rise=40p fall=40p width=1.1n",
+      "V_rst (rst 0) vsource type=pwl wave=[0 0.9 3.2n 0.9 3.3n 0 {stop_time} 0]",
+      "V_vin (vin 0) vsource type=pwl wave=[0 -0.08 20n -0.08 20.2n 0.50 44n 0.50 44.2n 1.02 {stop_time} 1.02]",
+      "",
+      "XDUT (clk rst vin out metric) ptat_ctat_reference_generator",
+      ""
+    ],
+    "save_signals": [
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric"
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "8994be5dfe46782f662583a196c6885533345c1ac5bb13c9ac1b3b4fe26c14dd",
+  "parameters": {
+    "maxstep": "125p",
+    "stop_time": "76n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_RESET_REFERENCE",
+    "P_INPUT_CLAMP",
+    "P_PTAT_TREND",
+    "P_CTAT_PTAT_AVERAGE",
+    "P_REFERENCE_BOUNDS"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

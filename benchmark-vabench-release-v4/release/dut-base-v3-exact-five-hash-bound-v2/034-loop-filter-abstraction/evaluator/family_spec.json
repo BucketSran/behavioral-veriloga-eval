@@ -1,0 +1,56 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "034",
+  "task_ids": {"dut": "v4-034", "testbench": "v4-534", "bugfix": "v4-1034"},
+  "identity": {
+    "title": "Loop Filter Abstraction",
+    "category": "pll_clock_timing",
+    "level": "L1",
+    "difficulty": "D2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"
+  },
+  "artifact_contract": {
+    "mode": "single_file",
+    "files": [{
+      "path": "loop_filter_abstraction.va",
+      "modules": [{
+        "name": "loop_filter_abstraction", "role": "entry", "depends_on": [],
+        "ports": [
+          {"name": "clk", "direction": "input", "discipline": "electrical", "position": 0},
+          {"name": "rst", "direction": "input", "discipline": "electrical", "position": 1},
+          {"name": "vin", "direction": "input", "discipline": "electrical", "position": 2},
+          {"name": "out", "direction": "output", "discipline": "electrical", "position": 3},
+          {"name": "metric", "direction": "output", "discipline": "electrical", "position": 4}
+        ],
+        "parameters": [
+          {"name": "tr", "type": "real", "default": 1e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets rise and fall smoothing for out and metric"},
+          {"name": "deadband", "type": "real", "default": 0.05, "units": "V", "valid_range": "deadband >= 0", "override_behavior": "sets the sampled error magnitude below which proportional and integral state hold"}
+        ]
+      }]
+    }]
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}",
+    "instances": [{"name": "XDUT", "module_ref": "loop_filter_abstraction", "connections": [
+      {"port_ref": "clk", "net": "clk", "position": 0},
+      {"port_ref": "rst", "net": "rst", "position": 1},
+      {"port_ref": "vin", "net": "vin", "position": 2},
+      {"port_ref": "out", "net": "out", "position": 3},
+      {"port_ref": "metric", "net": "metric", "position": 4}
+    ]}]
+  },
+  "properties": [
+    {"id": "P_RESET_STATE", "observable_contract": "Active reset restores the proportional state to 0.45 V, the step to 0.20 V, the integral residual and accepted-update count to zero, and metric to 0 V.", "required_signals": ["time", "clk", "rst", "out", "metric"]},
+    {"id": "P_DEADBAND_HOLD", "observable_contract": "At a rising clk crossing, an error vin - 0.45 V whose magnitude does not exceed deadband produces no proportional, integral, step, or count update.", "required_signals": ["time", "clk", "rst", "vin", "out", "metric"]},
+    {"id": "P_SIGNED_UPDATE", "observable_contract": "Each accepted positive error increases the proportional state by the current step and each accepted negative error decreases it, while the integral residual accumulates 0.04 times the sampled error.", "required_signals": ["time", "clk", "vin", "out"]},
+    {"id": "P_STEP_HALVING", "observable_contract": "The proportional step halves after every accepted update, producing successively smaller proportional corrections for equal-sign errors.", "required_signals": ["time", "clk", "vin", "out"]},
+    {"id": "P_LOCK_COUNT_METRIC", "observable_contract": "Metric remains low for fewer than four accepted updates and is 0.9 V once the accepted-update count reaches four; reset clears it.", "required_signals": ["time", "clk", "rst", "vin", "metric"]},
+    {"id": "P_PROPORTIONAL_CLAMP", "observable_contract": "The proportional state is clamped to 0.05 V through 0.85 V before the accumulated integral residual is added to form out.", "required_signals": ["time", "clk", "vin", "out"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "clk", "rst", "vin", "out", "metric"]},
+  "modeling_constraints": [
+    "Use deterministic voltage-domain event-driven state updates and voltage contributions only.",
+    "Do not use current contributions, ddt(), idt(), transistor-level devices, or validation-only observables.",
+    "Do not encode a particular stimulus schedule, stop time, or checker sample window."
+  ]
+}

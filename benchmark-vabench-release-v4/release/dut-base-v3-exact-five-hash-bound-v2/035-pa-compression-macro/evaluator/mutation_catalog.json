@@ -1,0 +1,190 @@
+{
+  "family_id": "035",
+  "gold_bundle_sha256": "e26920fe8366d04fe47c1218d386e41907c0f1a28a37e7a2d2751b2a41e204a9",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "pa_compression_macro.va": "4a77e8796f1ac1ddc05d968a921563f56ee545a5a10730cc316d432aea7632cf"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LINEAR_REGION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_wrong_gain/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pa_compression_macro.va"
+      ],
+      "fault_class": "linear_gain_error",
+      "id": "neg_001_wrong_gain",
+      "trigger_condition": "a rising clock samples a moderate positive or negative vin displacement while reset is inactive",
+      "violated_property_ids": [
+        "P_LINEAR_REGION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pa_compression_macro.va": "b7f76f5599449365fe265b517958c6fc8cc23fb70fa537c948976f441013f465"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SYMMETRIC_COMPRESSION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_compression_bypass/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pa_compression_macro.va"
+      ],
+      "fault_class": "compression_transfer_omission",
+      "id": "neg_002_compression_bypass",
+      "trigger_condition": "a rising clock samples a vin that makes the unconstrained target exceed either compression boundary",
+      "violated_property_ids": [
+        "P_SYMMETRIC_COMPRESSION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pa_compression_macro.va": "a96fd991896e23afe0012991408e8dd0a26e5e673227b030bb2aeaeacc4cacb4"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LINEAR_REGION",
+          "P_SYMMETRIC_COMPRESSION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_inverted_drive/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pa_compression_macro.va"
+      ],
+      "fault_class": "drive_polarity_error",
+      "id": "neg_003_inverted_drive",
+      "trigger_condition": "a rising clock samples non-common-mode vin on either side of 0.45 V while reset is inactive",
+      "violated_property_ids": [
+        "P_LINEAR_REGION",
+        "P_SYMMETRIC_COMPRESSION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pa_compression_macro.va": "b3dcd5566d10ad0bb8b809bada2df9b8c874e1e71a924806ae076835da5b931d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LINEAR_REGION",
+          "P_RESET_COMMON_MODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_reset_ignored/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pa_compression_macro.va"
+      ],
+      "fault_class": "reset_override_omission",
+      "id": "neg_004_reset_ignored",
+      "trigger_condition": "a reset event leaves the sampled amplifier latched at common mode instead of returning to normal post-reset operation",
+      "violated_property_ids": [
+        "P_LINEAR_REGION",
+        "P_RESET_COMMON_MODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pa_compression_macro.va": "99c8c417a4184f3d538968f5b92a98c8483e324e2c65c7f61ecbab9631b2cc5e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LINEAR_REGION",
+          "P_SYMMETRIC_COMPRESSION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_stuck_linear/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pa_compression_macro.va"
+      ],
+      "fault_class": "compression_metric_omission",
+      "id": "neg_005_metric_stuck_linear",
+      "trigger_condition": "a rising clock samples vin that enters either high-side or low-side compression",
+      "violated_property_ids": [
+        "P_LINEAR_REGION",
+        "P_SYMMETRIC_COMPRESSION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pa_compression_macro.va": "cd891342eb12752dc3f03553be5fb7acc9a6dd9713aecdec4216faef63b40fa2"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_CLAMP"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_006_output_clamp_bypass/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pa_compression_macro.va"
+      ],
+      "fault_class": "output_clamp_omission",
+      "id": "neg_006_output_clamp_bypass",
+      "trigger_condition": "a rising clock samples a drive strong enough that the compressed target lies outside 0.02 V through 0.88 V",
+      "violated_property_ids": [
+        "P_OUTPUT_CLAMP"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pa_compression_macro.va": "249dec12032fcf7ae3620ea1978b4db8bf1811ef2e618afbc75d27421eb39527"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CLOCKED_UPDATE",
+          "P_LINEAR_REGION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_007_asynchronous_tracking/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pa_compression_macro.va"
+      ],
+      "fault_class": "clocked_hold_omission",
+      "id": "neg_007_asynchronous_tracking",
+      "trigger_condition": "vin changes while reset is inactive and no rising clk crossing occurs",
+      "violated_property_ids": [
+        "P_CLOCKED_UPDATE",
+        "P_LINEAR_REGION"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

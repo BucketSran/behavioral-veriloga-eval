@@ -1,0 +1,184 @@
+{
+  "family_id": "032",
+  "gold_bundle_sha256": "d6f6e7e5f297791983360da4ddfdab942203c4585bdf591bfbf03f86675a2843",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "lna_gain_compression_macro.va": "db14a01906e96d3c0ec55242ad378fdda5117f5f754c8ad298dd22ec2606c5d7"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SMALL_SIGNAL_GAIN"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_reduced_small_signal_gain/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "lna_gain_compression_macro.va"
+      ],
+      "fault_class": "small_signal_gain_magnitude_error",
+      "id": "neg_001_reduced_small_signal_gain",
+      "trigger_condition": "a rising clock samples vin within the linear transfer region while reset is inactive",
+      "violated_property_ids": [
+        "P_SMALL_SIGNAL_GAIN"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "lna_gain_compression_macro.va": "2901393f7ad18fa06b64d3c1f0d0895a4356eeb396d3c5b80e980db3c9d94228"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_POSITIVE_COMPRESSION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_positive_compression_bypass/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "lna_gain_compression_macro.va"
+      ],
+      "fault_class": "positive_compression_bypass",
+      "id": "neg_002_positive_compression_bypass",
+      "trigger_condition": "a rising clock samples vin such that the linear prediction is above 0.76 V but below the final 0.86 V clamp",
+      "violated_property_ids": [
+        "P_POSITIVE_COMPRESSION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "lna_gain_compression_macro.va": "f32762ca1029da29a8abb70f22f7eab9d8a354f170c5d950358c0134897aeeff"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_NEGATIVE_COMPRESSION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_negative_compression_bypass/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "lna_gain_compression_macro.va"
+      ],
+      "fault_class": "negative_compression_bypass",
+      "id": "neg_003_negative_compression_bypass",
+      "trigger_condition": "a rising clock samples vin such that the linear prediction is below 0.14 V but above the final 0.04 V clamp",
+      "violated_property_ids": [
+        "P_NEGATIVE_COMPRESSION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "lna_gain_compression_macro.va": "d87b9ecbb7177e7b246b054fee281d164a47e5072fb4b1278dda94eb3c6139bc"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_NEGATIVE_COMPRESSION",
+          "P_POSITIVE_COMPRESSION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_compression_metric_stuck_low/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "lna_gain_compression_macro.va"
+      ],
+      "fault_class": "compression_metric_omission",
+      "id": "neg_004_compression_metric_stuck_low",
+      "trigger_condition": "a sampled positive or negative compression condition is active",
+      "violated_property_ids": [
+        "P_NEGATIVE_COMPRESSION",
+        "P_POSITIVE_COMPRESSION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "lna_gain_compression_macro.va": "604f82b988a9000727ff08031bf1a9f6197708722daca08c443c8f604bb74cae"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FINAL_OUTPUT_CLAMP"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_output_clamp_bypass/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "lna_gain_compression_macro.va"
+      ],
+      "fault_class": "output_clamp_omission",
+      "id": "neg_005_output_clamp_bypass",
+      "trigger_condition": "a sampled input produces a compressed output above 0.86 V or below 0.04 V before final clamping",
+      "violated_property_ids": [
+        "P_FINAL_OUTPUT_CLAMP"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "lna_gain_compression_macro.va": "d2d6a1338dd4b9d12fc55a033717914669eb34dc2bfbda8c38a97d7e930bbe62"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CLOCKED_HOLD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_006_asynchronous_input_tracking/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "lna_gain_compression_macro.va"
+      ],
+      "fault_class": "asynchronous_input_tracking",
+      "id": "neg_006_asynchronous_input_tracking",
+      "trigger_condition": "vin changes between two rising clock edges while reset is inactive",
+      "violated_property_ids": [
+        "P_CLOCKED_HOLD"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "lna_gain_compression_macro.va": "06ad8c49441839c33c4de81629fa9d7f37424de4bd2b106a2c67e652816e419b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INITIAL_AND_RESET_COMMON_MODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_007_reset_ignored/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "lna_gain_compression_macro.va"
+      ],
+      "fault_class": "active_high_reset_ignored",
+      "id": "neg_007_reset_ignored",
+      "trigger_condition": "reset is asserted after a non-common-mode output has been sampled",
+      "violated_property_ids": [
+        "P_INITIAL_AND_RESET_COMMON_MODE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

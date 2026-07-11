@@ -1,0 +1,43 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "038",
+  "task_ids": {"dut": "v4-038", "testbench": "v4-538", "bugfix": "v4-1038"},
+  "identity": {"title": "Programmable Gain Amplifier", "category": "baseband_signal_conditioning", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "programmable_gain_amplifier.va", "modules": [{
+    "name": "programmable_gain_amplifier", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "clk", "direction": "input", "discipline": "electrical", "position": 0},
+      {"name": "rst", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "gain_sel", "direction": "input", "discipline": "electrical", "position": 2},
+      {"name": "vin", "direction": "input", "discipline": "electrical", "position": 3},
+      {"name": "out", "direction": "output", "discipline": "electrical", "position": 4},
+      {"name": "metric", "direction": "output", "discipline": "electrical", "position": 5}
+    ],
+    "parameters": [
+      {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "vmin < vth < vmax", "override_behavior": "sets clk, rst, and gain_sel logic threshold"},
+      {"name": "vcm", "type": "real", "default": 0.45, "units": "V", "valid_range": "vmin <= vcm <= vmax", "override_behavior": "sets the input and output common-mode reference"},
+      {"name": "gain_low", "type": "real", "default": 0.8, "units": null, "valid_range": "gain_low > 0", "override_behavior": "sets the sampled low-gain transfer slope"},
+      {"name": "gain_high", "type": "real", "default": 2.4, "units": null, "valid_range": "gain_high > 0", "override_behavior": "sets the sampled high-gain transfer slope"},
+      {"name": "vmin", "type": "real", "default": 0.0, "units": "V", "valid_range": "vmin < vmax", "override_behavior": "sets the lower output clamp"},
+      {"name": "vmax", "type": "real", "default": 0.9, "units": "V", "valid_range": "vmax > vmin", "override_behavior": "sets the upper output clamp"},
+      {"name": "tr", "type": "real", "default": 2e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets out and metric transition smoothing"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "programmable_gain_amplifier", "connections": [
+    {"port_ref": "clk", "net": "clk", "position": 0},
+    {"port_ref": "rst", "net": "rst", "position": 1},
+    {"port_ref": "gain_sel", "net": "gain_sel", "position": 2},
+    {"port_ref": "vin", "net": "vin", "position": 3},
+    {"port_ref": "out", "net": "out", "position": 4},
+    {"port_ref": "metric", "net": "metric", "position": 5}
+  ]}]},
+  "properties": [
+    {"id": "P_RESET_UNITY", "observable_contract": "While rst is active, the sampled gain is unity, out is vcm, and metric is low.", "required_signals": ["time", "clk", "rst", "out", "metric"]},
+    {"id": "P_SAMPLED_GAIN_SELECT", "observable_contract": "Each rising clk crossing with reset inactive samples gain_sel, selecting gain_high above vth and gain_low below vth; the selection holds between crossings.", "required_signals": ["time", "clk", "rst", "gain_sel", "vin", "out"]},
+    {"id": "P_COMMON_MODE_GAIN", "observable_contract": "The unclamped output target is vcm plus the sampled gain times vin minus vcm.", "required_signals": ["time", "vin", "out"]},
+    {"id": "P_OUTPUT_CLAMP", "observable_contract": "Out is limited to the inclusive vmin through vmax range with finite smoothing.", "required_signals": ["time", "out"]},
+    {"id": "P_CLIP_METRIC", "observable_contract": "Metric is high exactly when the unclamped target lies outside vmin through vmax, and low otherwise; reset forces it low.", "required_signals": ["time", "rst", "vin", "out", "metric"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "clk", "rst", "gain_sel", "vin", "out", "metric"]},
+  "modeling_constraints": ["Use deterministic voltage-domain behavior with sampled gain state.", "Use voltage contributions only and finite smoothing for driven outputs.", "Do not add undeclared ports, files, debug outputs, pass/fail flags, or validation state."]
+}

@@ -1,0 +1,14 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module precision_rectifier_envelope_detector(clk, rst, vin, rect, env, metric);
+    input clk, rst, vin; output rect, env, metric; electrical clk, rst, vin, rect, env, metric;
+    parameter real vth=0.45; parameter real vcm=0.45; parameter real tr=150p from (0:inf); real rect_v; real env_state; real metric_v;
+    analog begin
+        @(initial_step) begin env_state=vcm; metric_v=0.0; end
+        rect_v = V(vin); if (rect_v > 0.9) rect_v=0.9; if (rect_v < 0.0) rect_v=0.0;
+        @(cross(V(clk)-vth,+1)) begin if (V(rst)>vth) env_state=vcm; else begin env_state = rect_v; end end
+        metric_v = 0.0;
+        V(rect)<+rect_v; V(env)<+transition(env_state,0,tr,tr); V(metric)<+metric_v;
+    end
+endmodule

@@ -1,0 +1,16 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module ptat_ctat_reference_generator(clk, rst, vin, out, metric);
+input clk, rst, vin; output out, metric; electrical clk, rst, vin, out, metric;
+parameter real tr=100p; parameter real vth=0.45; real tempv, ptat, ctat, refv, metricv;
+analog begin
+    @(initial_step) begin refv=0.45; metricv=0.0; end
+    @(cross(V(clk)-vth,+1)) begin
+        if (V(rst)>vth) begin refv=0.45; metricv=0.0; end
+        else begin tempv=V(vin); if (tempv<0.0) tempv=0.0; if (tempv>0.9) tempv=0.9; ptat = 0.18 + 0.34 * tempv; ctat = 0.78 - 0.34 * tempv; refv = 0.5 * ptat + 0.5 * ctat; metricv = 0.2; end
+        if (refv>0.9) refv=0.9; if (refv<0.0) refv=0.0;
+    end
+    V(out)<+transition(refv,0,tr,tr); V(metric)<+transition(metricv,0,tr,tr);
+end
+endmodule

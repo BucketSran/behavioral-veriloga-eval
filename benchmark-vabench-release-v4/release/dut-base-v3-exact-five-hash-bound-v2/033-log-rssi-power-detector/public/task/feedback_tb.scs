@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/log_rssi_power_detector.va"
+
+V_fb_clk (clk 0) vsource type=pulse val0=0 val1=0.9 period=1.7n width=0.76n rise=40p fall=40p
+V_fb_rst (rst 0) vsource type=pwl wave=[0 0.9 2.4n 0.9 2.5n 0 68n 0]
+V_fb_level (vin 0) vsource type=pwl wave=[0 0.45 8.9n 0.45 9n 0.51 25.9n 0.51 26n 0.61 45.9n 0.61 46n 0.73 63.9n 0.73 64n 0.43 68n 0.43]
+
+XFB_DUT (clk rst vin out metric) log_rssi_power_detector
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=68n maxstep=0.35n
+save clk rst vin out metric

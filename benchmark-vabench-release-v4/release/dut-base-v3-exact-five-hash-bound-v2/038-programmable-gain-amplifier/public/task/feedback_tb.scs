@@ -1,0 +1,35 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/programmable_gain_amplifier.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=8n width=4n delay=2n rise=80p fall=80p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2.2n 0.9 2.3n 0 86n 0]
+Vgain (gain_sel 0) vsource type=pwl wave=[ \
+    0 0 \
+    21n 0 21.2n 0.9 \
+    49n 0.9 49.2n 0 \
+    69n 0 69.2n 0.9 \
+    86n 0.9 \
+]
+Vvin (vin 0) vsource type=pwl wave=[ \
+    0 0.45 \
+    18n 0.42 \
+    23n 0.74 \
+    35n 0.74 \
+    36n 0.18 \
+    50n 0.18 \
+    54n 0.58 \
+    68n 0.58 \
+    72n 0.84 \
+    84n 0.84 \
+    86n 0.45 \
+]
+
+XDUT (clk rst gain_sel vin out metric) programmable_gain_amplifier
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=86n maxstep=250p
+save clk rst gain_sel vin out metric

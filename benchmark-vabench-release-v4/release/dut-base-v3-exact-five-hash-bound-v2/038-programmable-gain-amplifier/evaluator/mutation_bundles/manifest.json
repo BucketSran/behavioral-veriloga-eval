@@ -1,0 +1,190 @@
+{
+  "family_id": "038",
+  "gold_bundle_sha256": "58c39f47b99c567513c6400fb2d1966d11ece98a7cb14ee000a39023ccf7b4c1",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "programmable_gain_amplifier.va": "6ca609734b2576edd022af916a13d980b29e814be138a63a4a093d4cde7a773b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COMMON_MODE_GAIN",
+          "P_SAMPLED_GAIN_SELECT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero_gain/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "programmable_gain_amplifier.va"
+      ],
+      "fault_class": "sampled_gain_zero",
+      "id": "neg_001_zero_gain",
+      "trigger_condition": "a rising clock samples either gain_sel state while reset is inactive",
+      "violated_property_ids": [
+        "P_COMMON_MODE_GAIN",
+        "P_SAMPLED_GAIN_SELECT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "programmable_gain_amplifier.va": "801cc8c132f2fb97fe742b82bdb2b2c038c071f0d7bf98d18d1572960f29fe6b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COMMON_MODE_GAIN",
+          "P_SAMPLED_GAIN_SELECT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_inverted_gain_select/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "programmable_gain_amplifier.va"
+      ],
+      "fault_class": "gain_select_polarity_error",
+      "id": "neg_002_inverted_gain_select",
+      "trigger_condition": "gain_sel changes state before an active rising clock edge",
+      "violated_property_ids": [
+        "P_COMMON_MODE_GAIN",
+        "P_SAMPLED_GAIN_SELECT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "programmable_gain_amplifier.va": "94bfd47eed6724911bceaa6c49ca5971dedd13593dcdf633b8b86c8e07521885"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COMMON_MODE_GAIN",
+          "P_SAMPLED_GAIN_SELECT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_fixed_unity_gain/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "programmable_gain_amplifier.va"
+      ],
+      "fault_class": "gain_state_stuck_unity",
+      "id": "neg_003_fixed_unity_gain",
+      "trigger_condition": "gain_sel requests either configured gain after reset has deasserted",
+      "violated_property_ids": [
+        "P_COMMON_MODE_GAIN",
+        "P_SAMPLED_GAIN_SELECT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "programmable_gain_amplifier.va": "6643dd41a3b2556ee4ccbb378e64c42454772525bccff97b2f3024bfd6256324"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COMMON_MODE_GAIN",
+          "P_SAMPLED_GAIN_SELECT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_fixed_high_gain/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "programmable_gain_amplifier.va"
+      ],
+      "fault_class": "gain_state_stuck_high",
+      "id": "neg_004_fixed_high_gain",
+      "trigger_condition": "gain_sel is low at an active rising clock edge",
+      "violated_property_ids": [
+        "P_COMMON_MODE_GAIN",
+        "P_SAMPLED_GAIN_SELECT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "programmable_gain_amplifier.va": "686664012157b81e69ea3b2ce125377d73a0eab6ea675abb12251e210d717cc5"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CLIP_METRIC"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_clip_metric_stuck_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "programmable_gain_amplifier.va"
+      ],
+      "fault_class": "clip_metric_omission",
+      "id": "neg_005_clip_metric_stuck_low",
+      "trigger_condition": "the sampled gain and vin produce an unclamped target outside a clamp limit",
+      "violated_property_ids": [
+        "P_CLIP_METRIC"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "programmable_gain_amplifier.va": "254804b8af39f2841066c0f161f98be3f64dc8d1a137b4b36cf1bf6074bc90ad"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_UNITY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_006_reset_ignored/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "programmable_gain_amplifier.va"
+      ],
+      "fault_class": "reset_override_omission",
+      "id": "neg_006_reset_ignored",
+      "trigger_condition": "rst is active during a clock crossing or between sampled gain updates",
+      "violated_property_ids": [
+        "P_RESET_UNITY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "programmable_gain_amplifier.va": "1d61fd1677d7a170c3afb41f34af106960cf8dc29baee8cce6037e821a9310a3"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_CLAMP"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_007_output_clamp_bypass/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "programmable_gain_amplifier.va"
+      ],
+      "fault_class": "output_clamp_omission",
+      "id": "neg_007_output_clamp_bypass",
+      "trigger_condition": "the sampled gain and vin produce an unclamped target above vmax or below vmin",
+      "violated_property_ids": [
+        "P_OUTPUT_CLAMP"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

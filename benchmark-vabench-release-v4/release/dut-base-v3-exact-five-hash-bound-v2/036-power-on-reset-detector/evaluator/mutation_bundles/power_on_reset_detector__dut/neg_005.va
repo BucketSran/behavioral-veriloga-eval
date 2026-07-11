@@ -1,0 +1,15 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module power_on_reset_detector(clk, rst, vin, out, metric);
+input clk, rst, vin; output out, metric; electrical clk, rst, vin, out, metric;
+parameter real tr=100p; parameter real vth=0.45; parameter real vtrip=0.62; real resetv, metricv; integer release_count;
+analog begin
+    @(initial_step) begin resetv=0.9; metricv=0.0; release_count=0; end
+    @(cross(V(clk)-vth,+1)) begin
+        if (V(rst)>vth || V(vin)<vtrip) begin resetv=0.9; metricv=0.0; release_count=0; end
+        else begin release_count = release_count + 1; if (release_count >= 4) begin resetv=0.9; metricv=0.0; end else begin resetv=0.9; metricv=0.2; end end
+    end
+    V(out)<+transition(resetv,0,tr,tr); V(metric)<+transition(metricv,0,tr,tr);
+end
+endmodule

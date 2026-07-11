@@ -1,0 +1,36 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "040",
+  "task_ids": {"dut": "v4-040", "testbench": "v4-540", "bugfix": "v4-1040"},
+  "identity": {"title": "PTAT CTAT Reference Generator", "category": "bias_reference_power_management", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "ptat_ctat_reference_generator.va", "modules": [{
+    "name": "ptat_ctat_reference_generator", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "clk", "direction": "input", "discipline": "electrical", "position": 0},
+      {"name": "rst", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "vin", "direction": "input", "discipline": "electrical", "position": 2},
+      {"name": "out", "direction": "output", "discipline": "electrical", "position": 3},
+      {"name": "metric", "direction": "output", "discipline": "electrical", "position": 4}
+    ],
+    "parameters": [
+      {"name": "tr", "type": "real", "default": 1e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets output and metric transition smoothing"},
+      {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "0 < vth < 0.9", "override_behavior": "sets clk and rst logic threshold"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "ptat_ctat_reference_generator", "connections": [
+    {"port_ref": "clk", "net": "clk", "position": 0},
+    {"port_ref": "rst", "net": "rst", "position": 1},
+    {"port_ref": "vin", "net": "vin", "position": 2},
+    {"port_ref": "out", "net": "out", "position": 3},
+    {"port_ref": "metric", "net": "metric", "position": 4}
+  ]}]},
+  "properties": [
+    {"id": "P_RESET_REFERENCE", "observable_contract": "Reset initializes out to 0.45 V and metric to 0 V until a valid rising-clock update.", "required_signals": ["time", "clk", "rst", "out", "metric"]},
+    {"id": "P_INPUT_CLAMP", "observable_contract": "Each rising clk update with reset inactive samples vin and clamps the temperature/control value to 0 V through 0.9 V.", "required_signals": ["time", "clk", "rst", "vin", "out", "metric"]},
+    {"id": "P_PTAT_TREND", "observable_contract": "Metric reports the PTAT branch 0.18 V plus 0.34 times the clamped sampled input and therefore increases monotonically with vin.", "required_signals": ["time", "clk", "vin", "metric"]},
+    {"id": "P_CTAT_PTAT_AVERAGE", "observable_contract": "Out is the equal-weight average of PTAT = 0.18 V + 0.34*vin_clamped and CTAT = 0.78 V - 0.34*vin_clamped.", "required_signals": ["time", "clk", "vin", "out", "metric"]},
+    {"id": "P_REFERENCE_BOUNDS", "observable_contract": "Out remains within the public 0 V through 0.9 V voltage range with finite transition smoothing.", "required_signals": ["time", "out"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "clk", "rst", "vin", "out", "metric"]},
+  "modeling_constraints": ["Use deterministic sampled voltage-domain behavior.", "Do not use current contributions, transistor-level devices, AC/noise analysis, or KCL/KVL regulation loops.", "Do not add undeclared ports, validation hooks, or simulator-specific side channels."]
+}

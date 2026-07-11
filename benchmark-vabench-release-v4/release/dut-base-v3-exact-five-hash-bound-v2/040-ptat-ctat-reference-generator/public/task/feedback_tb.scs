@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/ptat_ctat_reference_generator.va"
+
+// Public feedback sweeps below-range, nominal, and above-range inputs.
+V_clk (clk 0) vsource type=pulse val0=0 val1=0.9 period=2.5n delay=600p rise=40p fall=40p width=1.1n
+V_rst (rst 0) vsource type=pwl wave=[0 0.9 3.2n 0.9 3.3n 0 76n 0]
+V_vin (vin 0) vsource type=pwl wave=[0 -0.08 20n -0.08 20.2n 0.50 44n 0.50 44.2n 1.02 76n 1.02]
+
+XDUT (clk rst vin out metric) ptat_ctat_reference_generator
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=76n maxstep=125p
+save clk rst vin out metric

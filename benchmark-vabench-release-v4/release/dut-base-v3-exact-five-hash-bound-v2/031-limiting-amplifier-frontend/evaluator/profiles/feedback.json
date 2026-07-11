@@ -1,0 +1,47 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=70n maxstep=0.35n"
+    ],
+    "body_lines": [
+      "V_fb_clk (clk 0) vsource type=pulse val0=0 val1=0.9 period=1.7n width=0.76n rise=40p fall=40p",
+      "V_fb_rst (rst 0) vsource type=pwl wave=[0 0.9 2.4n 0.9 2.5n 0 61.8n 0 61.9n 0.9 64.2n 0.9 64.3n 0 70n 0]",
+      "V_fb_signal (vin 0) vsource type=pwl wave=[0 0.45 7.9n 0.45 8n 0.51 25.9n 0.51 26n 0.76 45.9n 0.76 46n 0.20 63.9n 0.20 64n 0.40 70n 0.40]",
+      "",
+      "XFB_DUT (clk rst vin out metric) limiting_amplifier_frontend",
+      ""
+    ],
+    "save_signals": [
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric"
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "f35afa7f5f1b906355c45d19b3459022372d4f7c778fe4f81314c747def827a0",
+  "parameters": {
+    "maxstep": "200p",
+    "stop_time": "100n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_INITIAL_AND_RESET_COMMON_MODE",
+    "P_LINEAR_REGION",
+    "P_POSITIVE_LIMITING",
+    "P_NEGATIVE_LIMITING",
+    "P_OUTPUT_CLAMP",
+    "P_CLOCKED_HOLD"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

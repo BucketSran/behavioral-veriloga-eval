@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/programmable_gain_amplifier.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=8n width=4n delay=2n rise=80p fall=80p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 90n 0]
+Vgain (gain_sel 0) vsource type=pwl wave=[0 0 18n 0 20n 0.9 48n 0.9 50n 0 70n 0 72n 0.9 90n 0.9]
+Vvin (vin 0) vsource type=pwl wave=[0 0.45 8n 0.60 16n 0.30 24n 0.72 34n 0.72 36n 0.20 46n 0.20 54n 0.55 68n 0.55 70n 0.85 83n 0.85 86n 0.10 90n 0.45]
+
+XDUT (clk rst gain_sel vin out metric) programmable_gain_amplifier
+
+
+tran tran stop=90n maxstep=250p
+save clk rst gain_sel vin out metric

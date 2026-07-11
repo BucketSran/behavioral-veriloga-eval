@@ -1,0 +1,15 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module limiting_amplifier_frontend(clk, rst, vin, out, metric);
+input clk, rst, vin; output out, metric; electrical clk, rst, vin, out, metric;
+parameter real tr=100p; parameter real vth=0.45; real x,yv,metricv;
+analog begin
+    @(initial_step) begin yv=0.45; metricv=0.0; end
+    @(cross(V(clk)-vth,+1)) begin
+        if (V(rst)>vth) begin yv=0.45; metricv=0.0; end
+        else begin x=V(vin)-0.45; yv = 0.45 + 0.2 * x; metricv = 0.1; if (yv>0.86) yv=0.86; if (yv<0.04) yv=0.04; end
+    end
+    V(out)<+transition(yv,0,tr,tr); V(metric)<+transition(metricv,0,tr,tr);
+end
+endmodule

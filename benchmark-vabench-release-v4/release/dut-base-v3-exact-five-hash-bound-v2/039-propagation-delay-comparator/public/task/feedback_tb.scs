@@ -1,0 +1,23 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/cmp_delay.va"
+ahdl_include "./dut/edge_interval_timer.va"
+
+Vvdd (vdd 0) vsource dc=0.9 type=dc
+Vgnd (gnd 0) vsource dc=0.0 type=dc
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=1n delay=100p \
+        rise=50p fall=50p width=450p
+
+Vvinp (vinp 0) vsource type=pwl wave=[0 0.455 3.9e-9 0.455 4e-9 0.4505 7.9e-9 0.4505 8e-9 0.45005 11.9e-9 0.45005 12e-9 0.450005 16e-9 0.450005]
+Vvinn (vinn 0) vsource type=pwl wave=[0 0.445 3.9e-9 0.445 4e-9 0.4495 7.9e-9 0.4495 8e-9 0.44995 11.9e-9 0.44995 12e-9 0.449995 16e-9 0.449995]
+
+IDUT (clk vinn vinp out_n out_p lp_int lm_int gnd vdd) cmp_delay
+IEIT (clk out_p delay_ps) edge_interval_timer VTH=0.45
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=16n maxstep=10p
+save clk vinp vinn out_p out_n lp_int lm_int delay_ps gnd vdd

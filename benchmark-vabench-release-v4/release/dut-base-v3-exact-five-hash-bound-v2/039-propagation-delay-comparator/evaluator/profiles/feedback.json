@@ -1,0 +1,43 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "body_lines": [
+      "Vvdd (vdd 0) vsource dc=0.9 type=dc",
+      "Vgnd (gnd 0) vsource dc=0.0 type=dc",
+      "",
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=1n delay=100p \\",
+      "        rise=50p fall=50p width=450p",
+      "",
+      "Vvinp (vinp 0) vsource type=pwl wave=[0 0.455 3.9e-9 0.455 4e-9 0.4505 7.9e-9 0.4505 8e-9 0.45005 11.9e-9 0.45005 12e-9 0.450005 16e-9 0.450005]",
+      "Vvinn (vinn 0) vsource type=pwl wave=[0 0.445 3.9e-9 0.445 4e-9 0.4495 7.9e-9 0.4495 8e-9 0.44995 11.9e-9 0.44995 12e-9 0.449995 16e-9 0.449995]",
+      "",
+      "IDUT (clk vinn vinp out_n out_p lp_int lm_int gnd vdd) cmp_delay",
+      "IEIT (clk out_p delay_ps) edge_interval_timer VTH=0.45",
+      ""
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "89eadcc2b5f4f2dfa2b7b6affdc185b456bd01aae25a1e591d9f0112d08bf649",
+  "parameters": {
+    "maxstep": "200p",
+    "stop_time": "100n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_CLOCKED_DECISION",
+    "P_FALLING_RESET",
+    "P_DELAY_MAGNITUDE_TREND",
+    "P_DELAY_CLAMP",
+    "P_EDGE_INTERVAL_MEASUREMENT",
+    "P_BUNDLE_BINDING"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

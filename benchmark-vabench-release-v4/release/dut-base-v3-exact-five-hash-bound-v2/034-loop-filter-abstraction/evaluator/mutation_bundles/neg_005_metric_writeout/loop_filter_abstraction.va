@@ -1,0 +1,47 @@
+// vaBench partial-pass negative 5 for loop_filter_abstraction:dut
+// Intended to preserve interface/smoke behavior while failing full checks.
+`include "constants.vams"
+`include "disciplines.vams"
+
+module loop_filter_abstraction(clk, rst, vin, out, metric);
+input clk, rst, vin;
+output out, metric;
+electrical clk, rst, vin, out, metric;
+parameter real tr = 100p;
+parameter real deadband = 0.05;
+real state, step, integ, errv, donev;
+integer cycle;
+analog begin
+    @(initial_step) begin
+        state = 0.45;
+        step = 0.20;
+        integ = 0.0;
+        cycle = 0;
+        donev = 0.0;
+    end
+    @(cross(V(clk) - 0.45, +1)) begin
+        errv = V(vin) - 0.45;
+        if (V(rst) > 0.45) begin
+            state = 0.45;
+            step = 0.20;
+            integ = 0.0;
+            cycle = 0;
+            donev = 0.0;
+        end else if (errv > deadband || errv < -deadband) begin
+            if (errv > 0.0) begin
+                state = state;
+            end else begin
+                state = state;
+            end
+            integ = 0.0;
+            step = step * 0.5;
+            cycle = cycle + 1;
+            donev = 0.0;
+        end
+        if (state > 0.85) state = 0.85;
+        if (state < 0.05) state = 0.05;
+    end
+    V(out) <+ transition(state + integ, 0, tr, tr);
+    V(metric) <+ transition(0.0 /* near-miss metric writeout */, 0, tr, tr);
+end
+endmodule

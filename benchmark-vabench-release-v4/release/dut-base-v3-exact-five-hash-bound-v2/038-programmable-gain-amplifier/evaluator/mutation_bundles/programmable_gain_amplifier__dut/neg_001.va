@@ -1,0 +1,17 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module programmable_gain_amplifier(clk, rst, gain_sel, vin, out, metric);
+    input clk, rst, gain_sel, vin; output out, metric; electrical clk, rst, gain_sel, vin, out, metric;
+    parameter real vth=0.45; parameter real vcm=0.45; parameter real gain_low=0.8; parameter real gain_high=2.4; parameter real vmin=0.0; parameter real vmax=0.9; parameter real tr=200p from (0:inf);
+    real gain_value; real raw; real bounded; real clipped;
+    analog begin
+        @(initial_step) gain_value=1.0;
+        @(cross(V(clk)-vth,+1)) begin if (V(rst)>vth) gain_value=1.0; else begin gain_value = 0.0; end end
+        raw = vcm + gain_value*(V(vin)-vcm); bounded=raw; clipped=0.0;
+        if (bounded>vmax) begin bounded=vmax; clipped=1.0; end
+        if (bounded<vmin) begin bounded=vmin; clipped=1.0; end
+        if (V(rst)>vth) begin bounded=vcm; clipped=0.0; end
+        V(out)<+bounded; V(metric)<+transition(0.0,0,tr,tr);
+    end
+endmodule

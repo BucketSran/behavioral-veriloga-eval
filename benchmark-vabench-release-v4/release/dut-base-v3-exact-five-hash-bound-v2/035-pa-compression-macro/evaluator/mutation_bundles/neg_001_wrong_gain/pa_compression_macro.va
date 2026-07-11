@@ -1,0 +1,28 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pa_compression_macro(clk, rst, vin, out, metric);
+input clk, rst, vin;
+output out, metric;
+electrical clk, rst, vin, out, metric;
+parameter real tr = 100p;
+parameter real vth = 0.45;
+parameter real gain = 3.0;
+real x, drivev, yv, metricv;
+analog begin
+    @(initial_step) begin yv = 0.45; metricv = 0.0; end
+    @(cross(V(clk) - vth, +1)) begin
+        if (V(rst) > vth) begin yv = 0.45; metricv = 0.0; end
+        else begin
+            x = V(vin) - 0.45;
+            drivev = 0.45 + 0.2 * x;
+            yv = drivev;
+            metricv = 0.1;
+            if (yv > 0.88) yv = 0.88;
+            if (yv < 0.02) yv = 0.02;
+        end
+    end
+    V(out) <+ transition(yv, 0, tr, tr);
+    V(metric) <+ transition(metricv, 0, tr, tr);
+end
+endmodule

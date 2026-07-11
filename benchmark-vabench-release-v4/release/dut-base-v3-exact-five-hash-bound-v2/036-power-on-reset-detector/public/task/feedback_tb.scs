@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/power_on_reset_detector.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=2n width=1n rise=50p fall=50p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 80n 0]
+Vvin (vin 0) vsource type=pwl wave=[0 0.20 7.9n 0.20 8n 0.75 44.7n 0.75 44.8n 0.50 53.9n 0.50 54n 0.75 80n 0.75]
+
+XDUT (clk rst vin out metric) power_on_reset_detector
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=80n maxstep=0.5n
+save clk rst vin out metric

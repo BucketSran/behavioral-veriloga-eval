@@ -1,0 +1,15 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module log_rssi_power_detector(clk, rst, vin, out, metric);
+input clk, rst, vin; output out, metric; electrical clk, rst, vin, out, metric;
+parameter real tr=100p; parameter real vth=0.45; real ampv,rssiv,metricv;
+analog begin
+    @(initial_step) begin rssiv=0.12; metricv=0.0; end
+    @(cross(V(clk)-vth,+1)) begin
+        if (V(rst)>vth) begin rssiv=0.12; metricv=0.0; end
+        else begin ampv=V(vin)-0.45; if (ampv<0.0) ampv=-ampv; if (ampv < 0.035) rssiv=0.72; else if (ampv < 0.11) rssiv=0.54; else if (ampv < 0.22) rssiv=0.30; else rssiv=0.12; metricv=0.9; if (rssiv>0.82) rssiv=0.82; if (rssiv<0.08) rssiv=0.08; if (metricv>0.9) metricv=0.9; if (metricv<0.0) metricv=0.0; end
+    end
+    V(out)<+transition(rssiv,0,tr,tr); V(metric)<+transition(metricv,0,tr,tr);
+end
+endmodule

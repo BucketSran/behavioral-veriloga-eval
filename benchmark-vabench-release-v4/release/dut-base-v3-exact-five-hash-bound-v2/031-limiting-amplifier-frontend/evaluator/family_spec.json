@@ -1,0 +1,30 @@
+{
+  "schema_version": "v4-family-spec-v1", "family_id": "031",
+  "task_ids": {"dut": "v4-031", "testbench": "v4-531", "bugfix": "v4-1031"},
+  "identity": {"title": "Limiting Amplifier Frontend", "category": "rf_afe_behavioral_macromodels", "level": "L1", "difficulty": "D1", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "limiting_amplifier_frontend.va", "modules": [{
+    "name": "limiting_amplifier_frontend", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "clk", "direction": "input", "discipline": "electrical", "position": 0}, {"name": "rst", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "vin", "direction": "input", "discipline": "electrical", "position": 2}, {"name": "out", "direction": "output", "discipline": "electrical", "position": 3},
+      {"name": "metric", "direction": "output", "discipline": "electrical", "position": 4}
+    ],
+    "parameters": [
+      {"name": "tr", "type": "real", "default": 1e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets output transition smoothing"},
+      {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "finite real", "override_behavior": "sets clk and rst logic threshold"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "limiting_amplifier_frontend", "connections": [
+    {"port_ref": "clk", "net": "clk", "position": 0}, {"port_ref": "rst", "net": "rst", "position": 1}, {"port_ref": "vin", "net": "vin", "position": 2}, {"port_ref": "out", "net": "out", "position": 3}, {"port_ref": "metric", "net": "metric", "position": 4}
+  ]}]},
+  "properties": [
+    {"id": "P_INITIAL_AND_RESET_COMMON_MODE", "observable_contract": "Initialization sets out to 0.45 V and metric to 0 V; an active-high reset sampled on a rising clk crossing restores the same state.", "required_signals": ["time", "clk", "rst", "out", "metric"]},
+    {"id": "P_LINEAR_REGION", "observable_contract": "For sampled input deviation from -0.09 V through 0.09 V, out equals 0.45 V plus 1.7 times the deviation and metric is 0 V.", "required_signals": ["time", "clk", "vin", "out", "metric"]},
+    {"id": "P_POSITIVE_LIMITING", "observable_contract": "Above the positive boundary, out follows 0.73 V plus 0.45 times excess deviation and metric is 0.85 V.", "required_signals": ["time", "clk", "vin", "out", "metric"]},
+    {"id": "P_NEGATIVE_LIMITING", "observable_contract": "Below the negative boundary, out follows 0.17 V plus 0.45 times excess negative deviation and metric is 0.85 V.", "required_signals": ["time", "clk", "vin", "out", "metric"]},
+    {"id": "P_OUTPUT_CLAMP", "observable_contract": "The final held output remains within 0.04 V through 0.86 V.", "required_signals": ["time", "out"]},
+    {"id": "P_CLOCKED_HOLD", "observable_contract": "Out and metric update only on rising clock crossings and hold between samples.", "required_signals": ["time", "clk", "vin", "out", "metric"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "clk", "rst", "vin", "out", "metric"]},
+  "modeling_constraints": ["Use deterministic rising-edge sampled piecewise limiting behavior.", "Use smoothed voltage contributions only.", "Do not hard-code validation timing or use simulator-specific side channels."]
+}
