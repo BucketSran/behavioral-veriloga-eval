@@ -1,0 +1,138 @@
+{
+  "family_id": "009",
+  "gold_bundle_sha256": "b8c003ad1caf9e45aec4c2aa5ff571b57d23585e26913737effc80c0ffe85d86",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "lock_detector.va": "5084a51f92dc649569eaf3bc82da1430a765dd7f1a2a3563560ae4858e59f12e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ALIGNMENT_STREAK",
+          "P_PREMATURE_LOCK"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_requires_four_hits/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "lock_detector.va"
+      ],
+      "fault_class": "acquisition_count_error",
+      "id": "neg_001_requires_four_hits",
+      "trigger_condition": "the third consecutive aligned reference event occurs after reset release",
+      "violated_property_ids": [
+        "P_ALIGNMENT_STREAK",
+        "P_PREMATURE_LOCK"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "lock_detector.va": "0d20d731c5b01aec33f7a3c1eec1b8b1b28f254810a74edd55759e1841744164"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ALIGNMENT_STREAK",
+          "P_MISS_BREAKS_STREAK"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_tolerance_too_wide/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "lock_detector.va"
+      ],
+      "fault_class": "alignment_window_error",
+      "id": "neg_002_tolerance_too_wide",
+      "trigger_condition": "a reference edge is more than tol but less than 6 ns from the most recent feedback edge",
+      "violated_property_ids": [
+        "P_ALIGNMENT_STREAK",
+        "P_MISS_BREAKS_STREAK"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "lock_detector.va": "ef4cb219eb025b96f64e7c4a8ba261bce715876c71c61c9f4ecd3113cc3190c3"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_MISS_BREAKS_STREAK"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_does_not_reset_on_mismatch/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "lock_detector.va"
+      ],
+      "fault_class": "mismatch_clear_omission",
+      "id": "neg_003_does_not_reset_on_mismatch",
+      "trigger_condition": "an out-of-window reference event occurs after lock has asserted",
+      "violated_property_ids": [
+        "P_MISS_BREAKS_STREAK"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "lock_detector.va": "55fc5d83655a1cda0655ec3223d2157c782183c0b4a10a94d1ce915e0dc4e7ce"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_REACQUIRE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_reset_ignored/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "lock_detector.va"
+      ],
+      "fault_class": "reset_state_clear_omission",
+      "id": "neg_004_reset_ignored",
+      "trigger_condition": "active-low reset is asserted after the detector has acquired lock",
+      "violated_property_ids": [
+        "P_RESET_REACQUIRE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "lock_detector.va": "1e0bbf68f6a0af20d9e80ca853074b0fb566666c1718d968bf3eeb321fbf19b0"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ALIGNMENT_STREAK",
+          "P_PREMATURE_LOCK"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_counts_feedback_events/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "lock_detector.va"
+      ],
+      "fault_class": "feedback_event_counting_error",
+      "id": "neg_005_counts_feedback_events",
+      "trigger_condition": "multiple feedback edges occur before three legal reference comparisons",
+      "violated_property_ids": [
+        "P_ALIGNMENT_STREAK",
+        "P_PREMATURE_LOCK"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

@@ -1,0 +1,74 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "002",
+  "task_ids": {"dut": "v4-002", "testbench": "v4-502", "bugfix": "v4-1002"},
+  "identity": {
+    "title": "Capacitive Weighted SAR Feedback DAC",
+    "category": "data_converter",
+    "level": "L1",
+    "difficulty": "D2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"
+  },
+  "artifact_contract": {
+    "mode": "single_file",
+    "files": [{
+      "path": "cdac_cal.va",
+      "modules": [{
+        "name": "cdac_cal",
+        "role": "entry",
+        "depends_on": [],
+        "ports": [
+          {"name": "VDD", "direction": "input", "discipline": "electrical", "position": 0},
+          {"name": "VSS", "direction": "input", "discipline": "electrical", "position": 1},
+          {"name": "CLK", "direction": "input", "discipline": "electrical", "position": 2},
+          {"name": "D9", "direction": "input", "discipline": "electrical", "position": 3},
+          {"name": "D8", "direction": "input", "discipline": "electrical", "position": 4},
+          {"name": "D7", "direction": "input", "discipline": "electrical", "position": 5},
+          {"name": "D6", "direction": "input", "discipline": "electrical", "position": 6},
+          {"name": "D5", "direction": "input", "discipline": "electrical", "position": 7},
+          {"name": "D4", "direction": "input", "discipline": "electrical", "position": 8},
+          {"name": "D3", "direction": "input", "discipline": "electrical", "position": 9},
+          {"name": "D2", "direction": "input", "discipline": "electrical", "position": 10},
+          {"name": "D1", "direction": "input", "discipline": "electrical", "position": 11},
+          {"name": "D0", "direction": "input", "discipline": "electrical", "position": 12},
+          {"name": "CAL0", "direction": "input", "discipline": "electrical", "position": 13},
+          {"name": "CAL1", "direction": "input", "discipline": "electrical", "position": 14},
+          {"name": "VDAC_P", "direction": "output", "discipline": "electrical", "position": 15},
+          {"name": "VDAC_N", "direction": "output", "discipline": "electrical", "position": 16}
+        ],
+        "parameters": [
+          {"name": "vcm", "type": "real", "default": 0.45, "units": "V", "valid_range": "V(VSS) <= vcm <= V(VDD)", "override_behavior": "sets output common mode"},
+          {"name": "swing", "type": "real", "default": 0.6, "units": "V", "valid_range": "swing >= 0", "override_behavior": "sets differential output swing scale"},
+          {"name": "tt", "type": "real", "default": 2e-11, "units": "s", "valid_range": "tt > 0", "override_behavior": "sets output transition smoothing"}
+        ]
+      }]
+    }]
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "source_path_template": "./dut/{artifact_path}",
+    "instances": [{
+      "name": "XDUT",
+      "module_ref": "cdac_cal",
+      "connections": [
+        {"port_ref": "VDD", "net": "VDD", "position": 0}, {"port_ref": "VSS", "net": "VSS", "position": 1},
+        {"port_ref": "CLK", "net": "CLK", "position": 2}, {"port_ref": "D9", "net": "D9", "position": 3},
+        {"port_ref": "D8", "net": "D8", "position": 4}, {"port_ref": "D7", "net": "D7", "position": 5},
+        {"port_ref": "D6", "net": "D6", "position": 6}, {"port_ref": "D5", "net": "D5", "position": 7},
+        {"port_ref": "D4", "net": "D4", "position": 8}, {"port_ref": "D3", "net": "D3", "position": 9},
+        {"port_ref": "D2", "net": "D2", "position": 10}, {"port_ref": "D1", "net": "D1", "position": 11},
+        {"port_ref": "D0", "net": "D0", "position": 12}, {"port_ref": "CAL0", "net": "CAL0", "position": 13},
+        {"port_ref": "CAL1", "net": "CAL1", "position": 14}, {"port_ref": "VDAC_P", "net": "VDAC_P", "position": 15},
+        {"port_ref": "VDAC_N", "net": "VDAC_N", "position": 16}
+      ]
+    }]
+  },
+  "properties": [
+    {"id": "P_CLOCKED_HOLD", "observable_contract": "The DAC samples code and calibration inputs on rising CLK edges and holds the resulting output between edges.", "required_signals": ["time", "CLK", "D9", "D8", "D7", "D6", "D5", "D4", "D3", "D2", "D1", "D0", "CAL0", "CAL1", "VDAC_P", "VDAC_N"]},
+    {"id": "P_CODE_MONOTONICITY", "observable_contract": "Increasing effective code increases VDAC_P minus VDAC_N.", "required_signals": ["time", "CLK", "D9", "D8", "D7", "D6", "D5", "D4", "D3", "D2", "D1", "D0", "CAL0", "CAL1", "VDAC_P", "VDAC_N"]},
+    {"id": "P_CALIBRATION_WEIGHT", "observable_contract": "CAL0 contributes one calibration unit, CAL1 contributes two, and each unit offsets the main code by 32 codes.", "required_signals": ["time", "CLK", "CAL0", "CAL1", "VDAC_P", "VDAC_N"]},
+    {"id": "P_DIFFERENTIAL_COMMON_MODE", "observable_contract": "VDAC_P and VDAC_N are complementary about vcm.", "required_signals": ["time", "VDAC_P", "VDAC_N"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "VDD", "VSS", "CLK", "D9", "D8", "D7", "D6", "D5", "D4", "D3", "D2", "D1", "D0", "CAL0", "CAL1", "VDAC_P", "VDAC_N"]},
+  "modeling_constraints": ["Use deterministic voltage-domain behavior and smooth output transitions.", "Do not use current contributions, ddt(), idt(), validation logic, or simulator-specific side channels."]
+}

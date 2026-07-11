@@ -1,0 +1,90 @@
+// 1.5-bit pipeline ADC MDAC stage behavioral model.
+// PHI1 samples VIN. PHI2 computes a 2-bit sub-ADC decision and the residue:
+// lower region:  VRES = Vcm + 2*(VIN - Vcm) + VREF/2
+// middle region: VRES = Vcm + 2*(VIN - Vcm)
+// upper region:  VRES = Vcm + 2*(VIN - Vcm) - VREF/2
+
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 50p
+
+module pipeline_stage(VDD, VSS, PHI1, PHI2, VIN, VREF, VRES, D1, D0);
+
+inout VDD, VSS;
+input PHI1, PHI2;
+input VIN, VREF;
+output VRES;
+output D1, D0;
+
+electrical VDD, VSS;
+electrical PHI1, PHI2;
+electrical VIN, VREF;
+electrical VRES;
+electrical D1, D0;
+
+parameter real vth = 0.45;
+parameter real vdd = 0.9;
+parameter real tedge = 200p;
+
+real vin_s;
+real vcm;
+real vin_rel;
+real vref_qtr;
+real vres_level;
+real d1_level;
+real d0_level;
+real vres_drive;
+real d1_drive;
+real d0_drive;
+
+analog begin
+    @(initial_step) begin
+        vin_s = 0.0;
+        vres_level = vdd / 2.0;
+        d1_level = 0.0;
+        d0_level = 0.0;
+        vres_drive = vres_level - V(VSS);
+        d1_drive = d1_level - V(VSS);
+        d0_drive = d0_level - V(VSS);
+    end
+
+    @(cross(V(PHI1) - vth, +1)) begin
+        vin_s = V(VIN);
+    end
+
+    @(cross(V(PHI2) - vth, +1)) begin
+        vcm = V(VDD) / 2.0;
+        vref_qtr = V(VREF) / 4.0;
+        vin_rel = vin_s - vcm;
+
+        if (vin_rel > vref_qtr) begin
+            d1_level = V(VDD);
+            d0_level = V(VSS);
+            vres_level = vcm + 2.0 * vin_rel + V(VREF) / 2.0;
+        end else if (vin_rel < -vref_qtr) begin
+            d1_level = V(VSS);
+            d0_level = V(VSS);
+            vres_level = vcm + 2.0 * vin_rel - V(VREF) / 2.0;
+        end else begin
+            d1_level = V(VSS);
+            d0_level = V(VDD);
+            vres_level = vcm + 2.0 * vin_rel;
+        end
+
+        if (vres_level > V(VDD)) vres_level = V(VDD);
+        if (vres_level < V(VSS)) vres_level = V(VSS);
+        vres_drive = vres_level - V(VSS);
+        d1_drive = d1_level - V(VSS);
+        d0_drive = d0_level - V(VSS);
+    end
+
+    V(VRES, VSS) <+ transition(vres_drive, 0, tedge, tedge);
+    V(D1, VSS) <+ transition(d1_drive, 0, tedge, tedge);
+    V(D0, VSS) <+ transition(d0_drive, 0, tedge, tedge);
+end
+
+endmodule
+
+// vaBench partial-pass negative 3 for pipeline_adc_stage:dut
+// Intended to preserve interface/smoke behavior while failing full checks.
+// Mutation note: polarity_direction_near_miss.

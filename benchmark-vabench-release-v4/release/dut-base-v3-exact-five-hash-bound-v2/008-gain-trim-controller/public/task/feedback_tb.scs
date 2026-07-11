@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/gain_trim_controller.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=7n rise=100p fall=100p width=6n period=20n
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 22n 0.9 22.2n 0 660n 0]
+Vmeas (meas 0) vsource type=pwl wave=[0 0.2 252n 0.2 252.2n 0.45 302n 0.45 302.2n 0.7 660n 0.7]
+Vtarget (target 0) vsource dc=0.45
+
+XDUT (clk rst meas target gain_ctrl) gain_trim_controller
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=660n maxstep=200p
+save clk rst meas target gain_ctrl

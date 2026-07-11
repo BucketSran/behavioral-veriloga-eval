@@ -1,0 +1,94 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "cdac_calibration.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=220n maxstep=500p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "rst",
+      "err",
+      "trim"
+    ]
+  },
+  "family_id": "004",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "d556346e847235ca36ef57aa2795ea4712ee032c47ca2a7b0b93e4cace770689",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "ac3b5551d22ca11172a6705271a49f26dfe67c02ca60d13177b2cd9d5c160d02",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=220n maxstep=200p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=5n rise=100p fall=100p width=2n period=8n",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 14n 0.9 14.2n 0 220n 0]",
+          "Verr (err 0) vsource type=pwl wave=[0 0.9 86n 0.9 86.2n 0 202n 0 202.2n 0.9 220n 0.9]",
+          "",
+          "XDUT (clk rst err trim) cdac_calibration",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=6n rise=100p fall=100p width=2n period=8n",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 15n 0.9 15.2n 0 220n 0]",
+          "Verr (err 0) vsource type=pwl wave=[0 0.9 87n 0.9 87.2n 0 203n 0 203.2n 0.9 220n 0.9]",
+          "",
+          "XDUT (clk rst err trim) cdac_calibration",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INITIAL_AND_RESET",
+    "P_CLOCKED_STEP",
+    "P_TRIM_CLAMP",
+    "P_CLOCKED_HOLD"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "9eed146927f43708248f693b182693f6eddb6591d5b050170e68d4acad803001",
+    "family_spec_sha256": "fd38ec40548d730a456db488979ec6ebf6430566eff455370934297d435fd1c4"
+  },
+  "task_id": "v4-004"
+}

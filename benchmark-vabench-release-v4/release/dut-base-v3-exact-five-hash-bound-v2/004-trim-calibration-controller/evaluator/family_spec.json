@@ -1,0 +1,34 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "004",
+  "task_ids": {"dut": "v4-004", "testbench": "v4-504", "bugfix": "v4-1004"},
+  "identity": {"title": "Trim Calibration Controller", "category": "calibration_control", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {
+    "mode": "single_file",
+    "files": [{"path": "cdac_calibration.va", "modules": [{
+      "name": "cdac_calibration", "role": "entry", "depends_on": [],
+      "ports": [
+        {"name": "clk", "direction": "input", "discipline": "electrical", "position": 0},
+        {"name": "rst", "direction": "input", "discipline": "electrical", "position": 1},
+        {"name": "err", "direction": "input", "discipline": "electrical", "position": 2},
+        {"name": "trim", "direction": "output", "discipline": "electrical", "position": 3}
+      ],
+      "parameters": [
+        {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "vth > 0", "override_behavior": "sets clk, rst, and err decision threshold"},
+        {"name": "tr", "type": "real", "default": 5e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets trim transition smoothing"}
+      ]
+    }]}]
+  },
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "cdac_calibration", "connections": [
+    {"port_ref": "clk", "net": "clk", "position": 0}, {"port_ref": "rst", "net": "rst", "position": 1},
+    {"port_ref": "err", "net": "err", "position": 2}, {"port_ref": "trim", "net": "trim", "position": 3}
+  ]}]},
+  "properties": [
+    {"id": "P_INITIAL_AND_RESET", "observable_contract": "trim initializes to 0.45 V and returns to 0.45 V on a rising clk edge while rst is high.", "required_signals": ["time", "clk", "rst", "trim"]},
+    {"id": "P_CLOCKED_STEP", "observable_contract": "Each rising clk edge outside reset adds 0.06 V for high err and subtracts 0.06 V for low err.", "required_signals": ["time", "clk", "rst", "err", "trim"]},
+    {"id": "P_TRIM_CLAMP", "observable_contract": "trim is clamped to the inclusive 0.05 V to 0.85 V range.", "required_signals": ["time", "trim"]},
+    {"id": "P_CLOCKED_HOLD", "observable_contract": "trim holds its state between rising clk updates.", "required_signals": ["time", "clk", "trim"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "clk", "rst", "err", "trim"]},
+  "modeling_constraints": ["Use deterministic voltage-domain behavior.", "Drive trim with a finite smoothed voltage contribution.", "Do not hard-code evaluator stimulus or sample times."]
+}

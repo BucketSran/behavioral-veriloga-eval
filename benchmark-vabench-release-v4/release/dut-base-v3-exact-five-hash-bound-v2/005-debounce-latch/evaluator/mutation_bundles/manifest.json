@@ -1,0 +1,186 @@
+{
+  "family_id": "005",
+  "gold_bundle_sha256": "ad050334cd2e41648e614d3b1e1454e8192adf7aabdf23cb5ef36aea4f4217f8",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "debounce_latch.va": "dfc8f42c14e269751a35f975bcef2f3ccc0873b684f86f8d619db1966d760a90"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_EVENT_HOLD",
+          "P_RISE_QUALIFICATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_no_final_sig_recheck/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "debounce_latch.va"
+      ],
+      "fault_class": "qualification_recheck_omission",
+      "id": "neg_001_no_final_sig_recheck",
+      "trigger_condition": "sig falls before qualification expiry",
+      "violated_property_ids": [
+        "P_EVENT_HOLD",
+        "P_RISE_QUALIFICATION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "debounce_latch.va": "62450f5aaee354ec7d3996a5547c13c8f120655821c7ee3c219fe454c0759874"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RISE_QUALIFICATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_immediate_set_on_rise/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "debounce_latch.va"
+      ],
+      "fault_class": "qualification_delay_bypass",
+      "id": "neg_002_immediate_set_on_rise",
+      "trigger_condition": "sig rises while reset is released",
+      "violated_property_ids": [
+        "P_RISE_QUALIFICATION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "debounce_latch.va": "6fb791e8f6c5a5f1a57a9e3f5f71636c0c85563b1b7fa26941c95d1de0c0aa1a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ACTIVE_LOW_RESET"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_arms_while_reset_low/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "debounce_latch.va"
+      ],
+      "fault_class": "reset_gating_omission",
+      "id": "neg_003_arms_while_reset_low",
+      "trigger_condition": "sig rises while rst_n is low",
+      "violated_property_ids": [
+        "P_ACTIVE_LOW_RESET"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "debounce_latch.va": "a9adc90bebdf513b2e66c8b3e5aa6beb6efd5705d01ef2630671f78477d25055"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ACTIVE_LOW_RESET",
+          "P_EVENT_HOLD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_reset_does_not_cancel_timer/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "debounce_latch.va"
+      ],
+      "fault_class": "reset_timer_cancel_omission",
+      "id": "neg_004_reset_does_not_cancel_timer",
+      "trigger_condition": "reset interrupts an armed qualification interval",
+      "violated_property_ids": [
+        "P_ACTIVE_LOW_RESET",
+        "P_EVENT_HOLD"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "debounce_latch.va": "f15703dcbc5f432538b1fe09956b3849616ab33d16ec658f9074b81bd4c51e89"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RISE_QUALIFICATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_never_qualifies_high/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "debounce_latch.va"
+      ],
+      "fault_class": "missing_qualification_commit",
+      "id": "neg_005_never_qualifies_high",
+      "trigger_condition": "sig remains high beyond the qualification interval",
+      "violated_property_ids": [
+        "P_RISE_QUALIFICATION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "debounce_latch.va": "2b063bbb50733d177183465607df04ea1c7c4ad77c87131b0b245f9df0d8a1aa"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_EVENT_HOLD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_006_spurious_timer_glitch/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "debounce_latch.va"
+      ],
+      "fault_class": "unauthorized_timer_event",
+      "id": "neg_006_spurious_timer_glitch",
+      "trigger_condition": "an internal timer fires without a legal public event",
+      "violated_property_ids": [
+        "P_EVENT_HOLD"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "debounce_latch.va": "47ec5a344f34beb13129d43b7a954f5ad8bc2fc6269c56b4b6399a85fe9694ed"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FALL_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_007_missing_fall_clear/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "debounce_latch.va"
+      ],
+      "fault_class": "fall_clear_omission",
+      "id": "neg_007_missing_fall_clear",
+      "trigger_condition": "sig falls after out has qualified high",
+      "violated_property_ids": [
+        "P_FALL_CLEAR"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

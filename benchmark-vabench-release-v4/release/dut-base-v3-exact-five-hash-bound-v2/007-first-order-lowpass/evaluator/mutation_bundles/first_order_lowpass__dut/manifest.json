@@ -1,0 +1,94 @@
+{
+  "certification_status": "simulator_certified_behavior_rejected",
+  "gate2_status": "gate2_semantic_validated_candidate",
+  "negative_count": 5,
+  "negatives": [
+    {
+      "expected": "FAIL_FULL_CHECKER",
+      "id": "neg_001_too_slow_alpha",
+      "kind": "Uses the required timer form but alpha is 0.002 instead of 0.025, so late settling is far too slow.",
+      "note": "Uses the required timer form but alpha is 0.002 instead of 0.025, so late settling is far too slow.",
+      "sha256": "5f7c30f0a76899cd0060e04c40a8d2208356e6a08a102a6863debcc70bbaaafb",
+      "source": "negative_variants/neg_001_too_slow_alpha/first_order_lowpass.va",
+      "source_kind": "hidden_behavior_negative_source_file",
+      "target_artifacts": [
+        "first_order_lowpass.va"
+      ],
+      "validation_evidence": {
+        "full_checker_lane": "evas_behavior_rejected",
+        "publication_status": "gate2_semantic_validated_candidate",
+        "score_oracle_result": "SCORE_BEHAVIOR_FAIL"
+      }
+    },
+    {
+      "expected": "FAIL_FULL_CHECKER",
+      "id": "neg_002_passthrough_timer",
+      "kind": "Updates y directly to V(vin) on every timer event, making the DUT effectively a delayed passthrough instead of a first-order lowpass.",
+      "note": "Updates y directly to V(vin) on every timer event, making the DUT effectively a delayed passthrough instead of a first-order lowpass.",
+      "sha256": "21fa124deb58437bc2a28a4532e54ab86498b319def3f9702c7b02acf99376ae",
+      "source": "negative_variants/neg_002_passthrough_timer/first_order_lowpass.va",
+      "source_kind": "hidden_behavior_negative_source_file",
+      "target_artifacts": [
+        "first_order_lowpass.va"
+      ],
+      "validation_evidence": {
+        "full_checker_lane": "evas_behavior_rejected",
+        "publication_status": "gate2_semantic_validated_candidate",
+        "score_oracle_result": "SCORE_BEHAVIOR_FAIL"
+      }
+    },
+    {
+      "expected": "FAIL_FULL_CHECKER",
+      "id": "neg_003_inverted_input",
+      "kind": "Filters 0.9 - V(vin), causing the step response direction and final value to be wrong.",
+      "note": "Filters 0.9 - V(vin), causing the step response direction and final value to be wrong.",
+      "sha256": "19c3a0ff7eb1ea80ba7069f3b8314daa9e351a86a7ff382aa62450e6d076e52c",
+      "source": "negative_variants/neg_003_inverted_input/first_order_lowpass.va",
+      "source_kind": "hidden_behavior_negative_source_file",
+      "target_artifacts": [
+        "first_order_lowpass.va"
+      ],
+      "validation_evidence": {
+        "full_checker_lane": "evas_behavior_rejected",
+        "publication_status": "gate2_semantic_validated_candidate",
+        "score_oracle_result": "SCORE_BEHAVIOR_FAIL"
+      }
+    },
+    {
+      "expected": "FAIL_FULL_CHECKER",
+      "id": "neg_004_output_clamped",
+      "kind": "Implements the correct recurrence until y exceeds 0.35 V, then clips the state and misses the expected late level.",
+      "note": "Implements the correct recurrence until y exceeds 0.35 V, then clips the state and misses the expected late level.",
+      "sha256": "517ea5274876261142876ac66f24f0139e75f1dc61eeed21b49e0f187f094b1b",
+      "source": "negative_variants/neg_004_output_clamped/first_order_lowpass.va",
+      "source_kind": "hidden_behavior_negative_source_file",
+      "target_artifacts": [
+        "first_order_lowpass.va"
+      ],
+      "validation_evidence": {
+        "full_checker_lane": "evas_behavior_rejected",
+        "publication_status": "gate2_semantic_validated_candidate",
+        "score_oracle_result": "SCORE_BEHAVIOR_FAIL"
+      }
+    },
+    {
+      "expected": "FAIL_FULL_CHECKER",
+      "id": "neg_005_stuck_zero",
+      "kind": "Keeps y at 0.0 on every timer event while preserving the interface and output transition call.",
+      "note": "Keeps y at 0.0 on every timer event while preserving the interface and output transition call.",
+      "sha256": "b22a5d988c4905ef4882d06df12f5d22b5b7f6fc017b6b5bd02d83c0180c9e78",
+      "source": "negative_variants/neg_005_stuck_zero/first_order_lowpass.va",
+      "source_kind": "hidden_behavior_negative_source_file",
+      "target_artifacts": [
+        "first_order_lowpass.va"
+      ],
+      "validation_evidence": {
+        "full_checker_lane": "evas_behavior_rejected",
+        "publication_status": "gate2_semantic_validated_candidate",
+        "score_oracle_result": "SCORE_BEHAVIOR_FAIL"
+      }
+    }
+  ],
+  "policy": "five_task_specific_semantic_negative_sources",
+  "task_id": "v4_007_first_order_lowpass"
+}

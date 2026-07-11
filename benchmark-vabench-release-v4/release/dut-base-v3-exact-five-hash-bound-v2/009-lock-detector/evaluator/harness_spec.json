@@ -1,0 +1,171 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "lock_detector.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=90n maxstep=100p"
+    ],
+    "body_lines": [
+      "Vrst (rst_n 0) vsource type=pwl wave=[ \\",
+      "  0 0 \\"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "ref_clk",
+      "fb_clk",
+      "rst_n",
+      "lock"
+    ]
+  },
+  "family_id": "009",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "387f3a824957f69cf380f0472e718704196abd2b0f3d163d85d116bf18e1a3c3",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "4b9ff0424e4f6c10df8546195a20dd318bbcb55b66653131d59c12a0481ad015",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=115n maxstep=100p"
+        ],
+        "body_lines": [
+          "  5n 0 \\",
+          "  5.2n 0.9 \\",
+          "  55n 0.9 \\",
+          "  55.2n 0 \\",
+          "  62n 0 \\",
+          "  62.2n 0.9 \\",
+          "  93n 0.9 \\",
+          "  93.2n 0 \\",
+          "  115n 0 \\",
+          "]",
+          "",
+          "Vref (ref_clk 0) vsource type=pwl wave=[ \\",
+          "  0 0 \\",
+          "  11.9n 0 12.0n 0.9 13.0n 0.9 13.1n 0 \\",
+          "  21.9n 0 22.0n 0.9 23.0n 0.9 23.1n 0 \\",
+          "  31.9n 0 32.0n 0.9 33.0n 0.9 33.1n 0 \\",
+          "  41.9n 0 42.0n 0.9 43.0n 0.9 43.1n 0 \\",
+          "  51.9n 0 52.0n 0.9 53.0n 0.9 53.1n 0 \\",
+          "  67.9n 0 68.0n 0.9 69.0n 0.9 69.1n 0 \\",
+          "  77.9n 0 78.0n 0.9 79.0n 0.9 79.1n 0 \\",
+          "  87.9n 0 88.0n 0.9 89.0n 0.9 89.1n 0 \\",
+          "  107.9n 0 108.0n 0.9 109.0n 0.9 109.1n 0 \\",
+          "  115n 0 \\",
+          "]",
+          "",
+          "Vfb (fb_clk 0) vsource type=pwl wave=[ \\",
+          "  0 0 \\",
+          "  6.0n 0 6.1n 0.9 6.3n 0.9 6.4n 0 \\",
+          "  8.0n 0 8.1n 0.9 8.3n 0.9 8.4n 0 \\",
+          "  10.0n 0 10.1n 0.9 10.3n 0.9 10.4n 0 \\",
+          "  10.9n 0 11.0n 0.9 12.0n 0.9 12.1n 0 \\",
+          "  20.9n 0 21.0n 0.9 22.0n 0.9 22.1n 0 \\",
+          "  30.9n 0 31.0n 0.9 32.0n 0.9 32.1n 0 \\",
+          "  40.9n 0 41.0n 0.9 42.0n 0.9 42.1n 0 \\",
+          "  46.9n 0 47.0n 0.9 48.0n 0.9 48.1n 0 \\",
+          "  66.9n 0 67.0n 0.9 68.0n 0.9 68.1n 0 \\",
+          "  76.9n 0 77.0n 0.9 78.0n 0.9 78.1n 0 \\",
+          "  86.9n 0 87.0n 0.9 88.0n 0.9 88.1n 0 \\",
+          "  106.9n 0 107.0n 0.9 108.0n 0.9 108.1n 0 \\",
+          "  115n 0 \\",
+          "]",
+          "",
+          "XDUT (ref_clk fb_clk rst_n lock) lock_detector",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=210n maxstep=100p"
+        ],
+        "body_lines": [
+          "  8n 0 \\",
+          "  8.2n 0.9 \\",
+          "  93.0n 0.9 \\",
+          "  93.2n 0 \\",
+          "  103.0n 0 \\",
+          "  103.2n 0.9 \\",
+          "  210n 0.9 \\",
+          "]",
+          "",
+          "Vref (ref_clk 0) vsource type=pwl wave=[ \\",
+          "  0 0 \\",
+          "  19.9n 0 20.0n 0.9 23.0n 0.9 23.2n 0 \\",
+          "  39.9n 0 40.0n 0.9 43.0n 0.9 43.2n 0 \\",
+          "  59.9n 0 60.0n 0.9 63.0n 0.9 63.2n 0 \\",
+          "  79.9n 0 80.0n 0.9 83.0n 0.9 83.2n 0 \\",
+          "  109.9n 0 110.0n 0.9 113.0n 0.9 113.2n 0 \\",
+          "  129.9n 0 130.0n 0.9 133.0n 0.9 133.2n 0 \\",
+          "  149.9n 0 150.0n 0.9 153.0n 0.9 153.2n 0 \\",
+          "  169.9n 0 170.0n 0.9 173.0n 0.9 173.2n 0 \\",
+          "  189.9n 0 190.0n 0.9 193.0n 0.9 193.2n 0 \\",
+          "  210n 0 \\",
+          "]",
+          "",
+          "Vfb (fb_clk 0) vsource type=pwl wave=[ \\",
+          "  0 0 \\",
+          "  19.0n 0 19.1n 0.9 22.0n 0.9 22.2n 0 \\",
+          "  39.0n 0 39.1n 0.9 42.0n 0.9 42.2n 0 \\",
+          "  59.0n 0 59.1n 0.9 62.0n 0.9 62.2n 0 \\",
+          "  79.0n 0 79.1n 0.9 82.0n 0.9 82.2n 0 \\",
+          "  109.0n 0 109.1n 0.9 112.0n 0.9 112.2n 0 \\",
+          "  129.0n 0 129.1n 0.9 132.0n 0.9 132.2n 0 \\",
+          "  149.0n 0 149.1n 0.9 152.0n 0.9 152.2n 0 \\",
+          "  164.0n 0 164.1n 0.9 167.0n 0.9 167.2n 0 \\",
+          "  189.0n 0 189.1n 0.9 192.0n 0.9 192.2n 0 \\",
+          "  210n 0 \\",
+          "]",
+          "",
+          "XDUT (ref_clk fb_clk rst_n lock) lock_detector",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ALIGNMENT_STREAK",
+    "P_PREMATURE_LOCK",
+    "P_MISS_BREAKS_STREAK",
+    "P_RESET_REACQUIRE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "fab95f210a1ef00924a603d9de45aef5d851340fd6183b4bbb8c71e4c1adcc1f",
+    "family_spec_sha256": "6eb54297af6b6bbdc9cccc98df60e93c238c5c2889be02fdbe5e24c9d153ca74"
+  },
+  "task_id": "v4-009"
+}

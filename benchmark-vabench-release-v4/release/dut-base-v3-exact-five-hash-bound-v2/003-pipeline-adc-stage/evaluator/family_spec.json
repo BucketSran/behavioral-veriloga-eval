@@ -1,0 +1,42 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "003",
+  "task_ids": {"dut": "v4-003", "testbench": "v4-503", "bugfix": "v4-1003"},
+  "identity": {"title": "Pipeline ADC Stage", "category": "data_converter", "level": "L1", "difficulty": "D3", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {
+    "mode": "single_file",
+    "files": [{"path": "pipeline_stage.va", "modules": [{
+      "name": "pipeline_stage", "role": "entry", "depends_on": [],
+      "ports": [
+        {"name": "VDD", "direction": "input", "discipline": "electrical", "position": 0}, {"name": "VSS", "direction": "input", "discipline": "electrical", "position": 1},
+        {"name": "PHI1", "direction": "input", "discipline": "electrical", "position": 2}, {"name": "PHI2", "direction": "input", "discipline": "electrical", "position": 3},
+        {"name": "VIN", "direction": "input", "discipline": "electrical", "position": 4}, {"name": "VREF", "direction": "input", "discipline": "electrical", "position": 5},
+        {"name": "VRES", "direction": "output", "discipline": "electrical", "position": 6}, {"name": "D1", "direction": "output", "discipline": "electrical", "position": 7},
+        {"name": "D0", "direction": "output", "discipline": "electrical", "position": 8}
+      ],
+      "parameters": [
+        {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "V(VSS) < vth < V(VDD)", "override_behavior": "sets PHI1 and PHI2 decision threshold"},
+        {"name": "vdd", "type": "real", "default": 0.9, "units": "V", "valid_range": "vdd > 0", "override_behavior": "sets nominal initialized output high level"},
+        {"name": "tedge", "type": "real", "default": 2e-10, "units": "s", "valid_range": "tedge > 0", "override_behavior": "sets output transition smoothing"}
+      ]
+    }]}]
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}",
+    "instances": [{"name": "XDUT", "module_ref": "pipeline_stage", "connections": [
+      {"port_ref": "VDD", "net": "VDD", "position": 0}, {"port_ref": "VSS", "net": "VSS", "position": 1},
+      {"port_ref": "PHI1", "net": "PHI1", "position": 2}, {"port_ref": "PHI2", "net": "PHI2", "position": 3},
+      {"port_ref": "VIN", "net": "VIN", "position": 4}, {"port_ref": "VREF", "net": "VREF", "position": 5},
+      {"port_ref": "VRES", "net": "VRES", "position": 6}, {"port_ref": "D1", "net": "D1", "position": 7},
+      {"port_ref": "D0", "net": "D0", "position": 8}
+    ]}]
+  },
+  "properties": [
+    {"id": "P_TWO_PHASE_SAMPLING", "observable_contract": "VIN is sampled on a rising PHI1 edge and converted on a rising PHI2 edge.", "required_signals": ["time", "PHI1", "PHI2", "VIN", "VRES", "D1", "D0"]},
+    {"id": "P_SUBADC_REGIONS", "observable_contract": "Upper, middle, and lower sampled-input regions produce decision codes 10, 01, and 00 respectively.", "required_signals": ["time", "PHI2", "VIN", "VREF", "D1", "D0"]},
+    {"id": "P_RESIDUE_MAPPING", "observable_contract": "The residue is gain-two with the specified half-reference subtraction, no offset, or addition for the three regions.", "required_signals": ["time", "PHI2", "VIN", "VREF", "VRES", "D1", "D0"]},
+    {"id": "P_RESIDUE_CLAMP", "observable_contract": "VRES remains within the VSS-to-VDD supply range.", "required_signals": ["time", "VDD", "VSS", "VRES"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "VDD", "VSS", "PHI1", "PHI2", "VIN", "VREF", "VRES", "D1", "D0"]},
+  "modeling_constraints": ["Use deterministic voltage-domain behavior.", "Do not use current contributions, ddt(), idt(), validation logic, or simulator-specific side channels."]
+}

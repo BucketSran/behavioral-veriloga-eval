@@ -1,0 +1,63 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "001",
+  "task_ids": {"dut": "v4-001", "testbench": "v4-501", "bugfix": "v4-1001"},
+  "identity": {
+    "title": "Bang-Bang Phase Detector",
+    "category": "pll_clock_timing",
+    "level": "L1",
+    "difficulty": "D2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"
+  },
+  "artifact_contract": {
+    "mode": "single_file",
+    "files": [{
+      "path": "bbpd_ref.va",
+      "modules": [{
+        "name": "bbpd_ref",
+        "role": "entry",
+        "depends_on": [],
+        "ports": [
+          {"name": "data", "direction": "input", "discipline": "electrical", "position": 0},
+          {"name": "clk", "direction": "input", "discipline": "electrical", "position": 1},
+          {"name": "retimed_data", "direction": "input", "discipline": "electrical", "position": 2},
+          {"name": "up", "direction": "output", "discipline": "electrical", "position": 3},
+          {"name": "down", "direction": "output", "discipline": "electrical", "position": 4}
+        ],
+        "parameters": [
+          {"name": "vdd", "type": "real", "default": 0.9, "units": "V", "valid_range": "vdd > 0", "override_behavior": "sets the voltage-coded output high level"},
+          {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "0 < vth < vdd", "override_behavior": "sets the data, clock, and retimed-data decision threshold"},
+          {"name": "trf", "type": "real", "default": 1e-11, "units": "s", "valid_range": "trf > 0", "override_behavior": "sets output rise and fall smoothing"},
+          {"name": "td", "type": "real", "default": 0.0, "units": "s", "valid_range": "td >= 0", "override_behavior": "sets output transition delay"}
+        ]
+      }]
+    }]
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "source_path_template": "./dut/{artifact_path}",
+    "instances": [{
+      "name": "XDUT",
+      "module_ref": "bbpd_ref",
+      "connections": [
+        {"port_ref": "data", "net": "data", "position": 0},
+        {"port_ref": "clk", "net": "clk", "position": 1},
+        {"port_ref": "retimed_data", "net": "retimed_data", "position": 2},
+        {"port_ref": "up", "net": "up", "position": 3},
+        {"port_ref": "down", "net": "down", "position": 4}
+      ]
+    }]
+  },
+  "properties": [
+    {"id": "P_DIRECTION", "observable_contract": "Each data transition selects UP for clock-high/retimed-low, DOWN for clock-low/retimed-high, and neither otherwise.", "required_signals": ["time", "data", "clk", "retimed_data", "up", "down"]},
+    {"id": "P_MUTUAL_EXCLUSION", "observable_contract": "UP and DOWN are never asserted simultaneously.", "required_signals": ["time", "up", "down"]},
+    {"id": "P_PULSE_CLEAR", "observable_contract": "An asserted correction output returns low after the next clock transition.", "required_signals": ["time", "clk", "up", "down"]},
+    {"id": "P_RAIL_LEVELS", "observable_contract": "Asserted outputs approach vdd and inactive outputs approach 0 V with finite smoothing.", "required_signals": ["time", "up", "down"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "data", "clk", "retimed_data", "up", "down"]},
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavior.",
+    "Keep event-triggered state updates separate from unconditional output contributions.",
+    "Do not add undeclared artifacts, ports, debug outputs, or validation state."
+  ]
+}

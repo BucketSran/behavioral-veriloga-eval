@@ -1,0 +1,51 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module lock_detector(ref_clk, fb_clk, rst_n, lock);
+    input ref_clk, fb_clk, rst_n;
+    output lock;
+    electrical ref_clk, fb_clk, rst_n, lock;
+    parameter real vth = 0.45;
+    parameter real vdd = 0.9;
+    parameter real tol = 2n;
+    parameter integer need = 3;
+    parameter real tr = 500p;
+
+    real last_ref;
+    integer streak;
+    integer locked;
+
+    analog begin
+        @(initial_step) begin
+            last_ref = -1.0;
+            streak = 0;
+            locked = 0;
+        end
+
+        @(cross(V(rst_n) - vth, -1)) begin
+            last_ref = -1.0;
+            streak = 0;
+            locked = 0;
+        end
+
+        @(cross(V(ref_clk) - vth, +1)) last_ref = $abstime;
+
+        @(cross(V(fb_clk) - vth, +1)) begin
+            if (V(rst_n) < vth) begin
+                last_ref = -1.0;
+                streak = 0;
+                locked = 0;
+            end else begin
+                if ((last_ref >= 0.0) && (abs($abstime - last_ref) <= tol)) begin
+                    streak = streak + 1;
+                    if (streak >= need) locked = 1;
+                end else begin
+                    streak = streak + 1;
+                    if (streak >= need) locked = 1;
+                end
+            end
+        end
+
+        V(lock) <+ transition(locked ? vdd : 0.0, 0, tr, tr);
+    end
+endmodule

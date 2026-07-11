@@ -1,0 +1,29 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/cdac_cal.va"
+
+Vvdd (VDD 0) vsource dc=0.9
+Vvss (VSS 0) vsource dc=0
+Vclk (CLK 0) vsource type=pulse val0=0 val1=0.9 delay=1n rise=20p fall=20p width=1n period=4n
+
+Vd9 (D9 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0.9 10.9n 0.9 11n 0 14.9n 0 15n 0.9 18.9n 0.9 19n 0 22.9n 0 23n 0 26.9n 0 27n 0.9 30.9n 0.9 31n 0 34.9n 0 35n 0.9 40n 0.9]
+Vd8 (D8 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0 10.9n 0 11n 0.9 14.9n 0.9 15n 0.9 18.9n 0.9 19n 0.9 22.9n 0.9 23n 0 26.9n 0 27n 0.9 30.9n 0.9 31n 0.9 34.9n 0.9 35n 0 40n 0]
+Vd7 (D7 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0 10.9n 0 11n 0 14.9n 0 15n 0 18.9n 0 19n 0.9 22.9n 0.9 23n 0 26.9n 0 27n 0.9 30.9n 0.9 31n 0.9 34.9n 0.9 35n 0 40n 0]
+Vd6 (D6 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0 10.9n 0 11n 0 14.9n 0 15n 0 18.9n 0 19n 0.9 22.9n 0.9 23n 0 26.9n 0 27n 0 30.9n 0 31n 0.9 34.9n 0.9 35n 0 40n 0]
+Vd5 (D5 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0 10.9n 0 11n 0 14.9n 0 15n 0 18.9n 0 19n 0.9 22.9n 0.9 23n 0 26.9n 0 27n 0 30.9n 0 31n 0 34.9n 0 35n 0.9 40n 0.9]
+Vd4 (D4 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0 10.9n 0 11n 0 14.9n 0 15n 0 18.9n 0 19n 0.9 22.9n 0.9 23n 0 26.9n 0 27n 0 30.9n 0 31n 0 34.9n 0 35n 0.9 40n 0.9]
+Vd3 (D3 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0 10.9n 0 11n 0 14.9n 0 15n 0 18.9n 0 19n 0.9 22.9n 0.9 23n 0 26.9n 0 27n 0 30.9n 0 31n 0 34.9n 0 35n 0.9 40n 0.9]
+Vd2 (D2 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0 10.9n 0 11n 0 14.9n 0 15n 0 18.9n 0 19n 0.9 22.9n 0.9 23n 0 26.9n 0 27n 0.9 30.9n 0.9 31n 0 34.9n 0 35n 0.9 40n 0.9]
+Vd1 (D1 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0 10.9n 0 11n 0 14.9n 0 15n 0 18.9n 0 19n 0.9 22.9n 0.9 23n 0 26.9n 0 27n 0 30.9n 0 31n 0.9 34.9n 0.9 35n 0 40n 0]
+Vd0 (D0 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0 10.9n 0 11n 0 14.9n 0 15n 0 18.9n 0 19n 0.9 22.9n 0.9 23n 0.9 26.9n 0.9 27n 0 30.9n 0 31n 0 34.9n 0 35n 0.9 40n 0.9]
+Vcal0 (CAL0 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0 10.9n 0 11n 0.9 14.9n 0.9 15n 0 18.9n 0 19n 0.9 22.9n 0.9 23n 0.9 26.9n 0.9 27n 0 30.9n 0 31n 0 34.9n 0 35n 0.9 40n 0.9]
+Vcal1 (CAL1 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0 6.9n 0 7n 0.9 10.9n 0.9 11n 0.9 14.9n 0.9 15n 0 18.9n 0 19n 0.9 22.9n 0.9 23n 0 26.9n 0 27n 0.9 30.9n 0.9 31n 0 34.9n 0 35n 0.9 40n 0.9]
+
+XDUT (VDD VSS CLK D9 D8 D7 D6 D5 D4 D3 D2 D1 D0 CAL0 CAL1 VDAC_P VDAC_N) cdac_cal
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=40n maxstep=20p
+save VDD VSS CLK D9 D8 D7 D6 D5 D4 D3 D2 D1 D0 CAL0 CAL1 VDAC_P VDAC_N

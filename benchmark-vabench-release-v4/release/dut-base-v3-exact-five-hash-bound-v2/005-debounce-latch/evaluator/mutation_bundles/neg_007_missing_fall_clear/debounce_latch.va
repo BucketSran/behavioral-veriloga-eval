@@ -1,0 +1,46 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module debounce_latch(sig, rst_n, out);
+    input sig, rst_n;
+    output out;
+    electrical sig, rst_n, out;
+
+    parameter real vth = 0.45;
+    parameter real vdd = 0.9;
+    parameter real stable = 12n;
+    parameter real tr = 500p;
+
+    integer state;
+    real candidate_t;
+    integer armed;
+
+    analog begin
+        @(initial_step) begin
+            state = 0;
+            armed = 0;
+            candidate_t = -1.0;
+        end
+        @(cross(V(rst_n) - vth, -1)) begin
+            state = 0;
+            armed = 0;
+            candidate_t = -1.0;
+        end
+        @(cross(V(sig) - vth, +1)) begin
+            if (V(rst_n) > vth) begin
+                armed = 1;
+                candidate_t = $abstime + stable;
+            end
+        end
+        @(cross(V(sig) - vth, -1)) begin
+            armed = 0;
+            candidate_t = -1.0;
+        end
+        @(timer(candidate_t)) begin
+            if (armed && V(sig) > vth && V(rst_n) > vth)
+                state = 1;
+        end
+
+        V(out) <+ transition(state ? vdd : 0.0, 0, tr, tr);
+    end
+endmodule

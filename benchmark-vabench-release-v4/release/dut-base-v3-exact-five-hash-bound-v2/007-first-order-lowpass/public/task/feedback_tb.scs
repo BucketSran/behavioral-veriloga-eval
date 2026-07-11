@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/first_order_lowpass.va"
+
+Vin (vin 0) vsource type=pwl wave=[0 0 18n 0 18.4n 0.8 160n 0.8]
+
+XDUT (vin vout) first_order_lowpass
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=160n maxstep=500p
+save vin vout

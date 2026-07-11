@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/element_shuffler.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=10n rise=200p fall=200p width=5n period=20n
+Vrst (rst_n 0) vsource type=pwl wave=[0 0 8n 0 9n 0.9 134n 0.9 135n 0 144n 0 145n 0.9 225n 0.9]
+
+XDUT (clk rst_n out0 out1 out2 out3) element_shuffler
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=225n maxstep=200p
+save clk rst_n out0 out1 out2 out3

@@ -1,0 +1,11 @@
+`include "constants.vams"
+`include "disciplines.vams"
+module gain_trim_controller(clk,rst,meas,target,gain_ctrl);
+    input clk,rst,meas,target; output gain_ctrl; electrical clk,rst,meas,target,gain_ctrl;
+    parameter real vth=0.45; parameter real tr=500p; real ctrl;
+    analog begin
+        @(initial_step) ctrl=0.3;
+        @(cross(V(clk)-vth,+1)) ctrl=0.3;
+        V(gain_ctrl) <+ transition(ctrl,0,tr,tr);
+    end
+endmodule

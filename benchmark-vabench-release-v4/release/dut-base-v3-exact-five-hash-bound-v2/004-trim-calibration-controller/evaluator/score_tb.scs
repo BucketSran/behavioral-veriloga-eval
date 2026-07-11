@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/cdac_calibration.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=6n rise=100p fall=100p width=2n period=8n
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 15n 0.9 15.2n 0 220n 0]
+Verr (err 0) vsource type=pwl wave=[0 0.9 87n 0.9 87.2n 0 203n 0 203.2n 0.9 220n 0.9]
+
+XDUT (clk rst err trim) cdac_calibration
+
+
+tran tran stop=220n maxstep=500p
+save clk rst err trim

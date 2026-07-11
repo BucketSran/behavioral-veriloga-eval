@@ -1,0 +1,29 @@
+{
+  "schema_version": "v4-family-spec-v1", "family_id": "010",
+  "task_ids": {"dut": "v4-010", "testbench": "v4-510", "bugfix": "v4-1010"},
+  "identity": {"title": "Offset Comparator", "category": "comparator_decision", "level": "L1", "difficulty": "D1", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "cmp_offset_ref.va", "modules": [{
+    "name": "cmp_offset_ref", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "VDD", "direction": "input", "discipline": "electrical", "position": 0}, {"name": "VSS", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "CLK", "direction": "input", "discipline": "electrical", "position": 2}, {"name": "VINP", "direction": "input", "discipline": "electrical", "position": 3},
+      {"name": "VINN", "direction": "input", "discipline": "electrical", "position": 4}, {"name": "OUT_P", "direction": "output", "discipline": "electrical", "position": 5}
+    ],
+    "parameters": [
+      {"name": "vos", "type": "real", "default": 0.005, "units": "V", "valid_range": "vos >= 0", "override_behavior": "sets positive input-referred decision offset"},
+      {"name": "tt", "type": "real", "default": 2e-11, "units": "s", "valid_range": "tt > 0", "override_behavior": "sets output transition smoothing"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "cmp_offset_ref", "connections": [
+    {"port_ref": "VDD", "net": "VDD", "position": 0}, {"port_ref": "VSS", "net": "VSS", "position": 1}, {"port_ref": "CLK", "net": "CLK", "position": 2},
+    {"port_ref": "VINP", "net": "VINP", "position": 3}, {"port_ref": "VINN", "net": "VINN", "position": 4}, {"port_ref": "OUT_P", "net": "OUT_P", "position": 5}
+  ]}]},
+  "properties": [
+    {"id": "P_RISING_EDGE_SAMPLE", "observable_contract": "OUT_P updates only on CLK rising crossings through the local rail midpoint.", "required_signals": ["time", "VDD", "VSS", "CLK", "VINP", "VINN", "OUT_P"]},
+    {"id": "P_OFFSET_DECISION", "observable_contract": "OUT_P latches high only when VINP relative to VINN is greater than the positive vos threshold.", "required_signals": ["time", "CLK", "VINP", "VINN", "OUT_P"]},
+    {"id": "P_LATCH_HOLD", "observable_contract": "OUT_P holds its sampled decision between rising clock edges.", "required_signals": ["time", "CLK", "VINP", "VINN", "OUT_P"]},
+    {"id": "P_RAIL_REFERENCE", "observable_contract": "OUT_P low and high levels track VSS and VDD respectively with finite smoothing.", "required_signals": ["time", "VDD", "VSS", "OUT_P"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "VDD", "VSS", "CLK", "VINP", "VINN", "OUT_P"]},
+  "modeling_constraints": ["Use deterministic voltage-domain behavior and voltage contributions only.", "Keep sampled state updates in event blocks and output contribution unconditional.", "Do not expose undeclared state or validation outputs."]
+}

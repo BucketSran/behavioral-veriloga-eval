@@ -1,0 +1,36 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "008",
+  "task_ids": {"dut": "v4-008", "testbench": "v4-508", "bugfix": "v4-1008"},
+  "identity": {"title": "Gain Trim Controller", "category": "calibration_control", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {
+    "mode": "single_file",
+    "files": [{"path": "gain_trim_controller.va", "modules": [{
+      "name": "gain_trim_controller", "role": "entry", "depends_on": [],
+      "ports": [
+        {"name": "clk", "direction": "input", "discipline": "electrical", "position": 0},
+        {"name": "rst", "direction": "input", "discipline": "electrical", "position": 1},
+        {"name": "meas", "direction": "input", "discipline": "electrical", "position": 2},
+        {"name": "target", "direction": "input", "discipline": "electrical", "position": 3},
+        {"name": "gain_ctrl", "direction": "output", "discipline": "electrical", "position": 4}
+      ],
+      "parameters": [
+        {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "vth > 0", "override_behavior": "sets clk and rst decision threshold"},
+        {"name": "tr", "type": "real", "default": 5e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets gain_ctrl transition smoothing"}
+      ]
+    }]}]
+  },
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "gain_trim_controller", "connections": [
+    {"port_ref": "clk", "net": "clk", "position": 0}, {"port_ref": "rst", "net": "rst", "position": 1},
+    {"port_ref": "meas", "net": "meas", "position": 2}, {"port_ref": "target", "net": "target", "position": 3},
+    {"port_ref": "gain_ctrl", "net": "gain_ctrl", "position": 4}
+  ]}]},
+  "properties": [
+    {"id": "P_INITIAL_AND_RESET", "observable_contract": "gain_ctrl initializes to 0.30 V and returns to 0.30 V on a rising clk edge while rst is high.", "required_signals": ["time", "clk", "rst", "gain_ctrl"]},
+    {"id": "P_ERROR_DIRECTION", "observable_contract": "On rising clk edges, gain_ctrl increases by 0.05 V below target-0.02 V and decreases by 0.05 V above target+0.02 V.", "required_signals": ["time", "clk", "rst", "meas", "target", "gain_ctrl"]},
+    {"id": "P_DEADBAND_HOLD", "observable_contract": "gain_ctrl holds when meas is within the inclusive target deadband.", "required_signals": ["time", "clk", "meas", "target", "gain_ctrl"]},
+    {"id": "P_CONTROL_CLAMP", "observable_contract": "gain_ctrl remains within the inclusive 0.05 V to 0.85 V range.", "required_signals": ["time", "gain_ctrl"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "clk", "rst", "meas", "target", "gain_ctrl"]},
+  "modeling_constraints": ["Use deterministic voltage-domain behavior.", "Update state only on rising clk crossings and drive gain_ctrl with finite transition smoothing.", "Do not hard-code evaluator stimulus or sample times."]
+}

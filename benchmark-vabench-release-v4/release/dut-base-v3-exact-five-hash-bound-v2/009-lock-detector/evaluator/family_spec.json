@@ -1,0 +1,30 @@
+{
+  "schema_version": "v4-family-spec-v1", "family_id": "009",
+  "task_ids": {"dut": "v4-009", "testbench": "v4-509", "bugfix": "v4-1009"},
+  "identity": {"title": "Lock Detector", "category": "pll_clock_timing", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "lock_detector.va", "modules": [{
+    "name": "lock_detector", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "ref_clk", "direction": "input", "discipline": "electrical", "position": 0}, {"name": "fb_clk", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "rst_n", "direction": "input", "discipline": "electrical", "position": 2}, {"name": "lock", "direction": "output", "discipline": "electrical", "position": 3}
+    ],
+    "parameters": [
+      {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "0 < vth < vdd", "override_behavior": "sets input logic thresholds"},
+      {"name": "vdd", "type": "real", "default": 0.9, "units": "V", "valid_range": "vdd > 0", "override_behavior": "sets lock high level"},
+      {"name": "tol", "type": "real", "default": 2e-9, "units": "s", "valid_range": "tol >= 0", "override_behavior": "sets maximum ref-to-feedback edge separation"},
+      {"name": "need", "type": "integer", "default": 3, "units": null, "valid_range": "need >= 1", "override_behavior": "sets consecutive aligned reference events required for lock"},
+      {"name": "tr", "type": "real", "default": 5e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets lock transition smoothing"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "lock_detector", "connections": [
+    {"port_ref": "ref_clk", "net": "ref_clk", "position": 0}, {"port_ref": "fb_clk", "net": "fb_clk", "position": 1}, {"port_ref": "rst_n", "net": "rst_n", "position": 2}, {"port_ref": "lock", "net": "lock", "position": 3}
+  ]}]},
+  "properties": [
+    {"id": "P_ALIGNMENT_STREAK", "observable_contract": "lock asserts only after need consecutive reference edges whose most recent feedback edge is within tol.", "required_signals": ["time", "ref_clk", "fb_clk", "rst_n", "lock"]},
+    {"id": "P_PREMATURE_LOCK", "observable_contract": "lock remains low before the need-th consecutive aligned reference event.", "required_signals": ["time", "ref_clk", "fb_clk", "lock"]},
+    {"id": "P_MISS_BREAKS_STREAK", "observable_contract": "A reference event outside tol breaks the streak and clears lock.", "required_signals": ["time", "ref_clk", "fb_clk", "lock"]},
+    {"id": "P_RESET_REACQUIRE", "observable_contract": "Active-low reset clears stored edge history, streak, and lock and requires a fresh post-reset acquisition.", "required_signals": ["time", "ref_clk", "fb_clk", "rst_n", "lock"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "ref_clk", "fb_clk", "rst_n", "lock"]},
+  "modeling_constraints": ["Use deterministic voltage-domain edge timing.", "Use voltage contributions with finite smoothing only.", "Do not hard-code evaluator stimulus, stop times, or sample windows."]
+}

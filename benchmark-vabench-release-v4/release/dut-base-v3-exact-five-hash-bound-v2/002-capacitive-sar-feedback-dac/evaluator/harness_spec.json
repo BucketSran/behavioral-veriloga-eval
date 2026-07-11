@@ -1,0 +1,133 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "cdac_cal.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=28n maxstep=20p"
+    ],
+    "body_lines": [
+      "Vvdd (VDD 0) vsource dc=0.9",
+      "Vvss (VSS 0) vsource dc=0",
+      "Vclk (CLK 0) vsource type=pulse val0=0 val1=0.9 delay=1n rise=20p fall=20p width=1n period=4n"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "VDD",
+      "VSS",
+      "CLK",
+      "D9",
+      "D8",
+      "D7",
+      "D6",
+      "D5",
+      "D4",
+      "D3",
+      "D2",
+      "D1",
+      "D0",
+      "CAL0",
+      "CAL1",
+      "VDAC_P",
+      "VDAC_N"
+    ]
+  },
+  "family_id": "002",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "6a0f0341a11190d22433b50bc301f52beca0a8a7ab790d4394a49ea25f677624",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "5e79b07b642532d5b5e1e18ff90b31e47ce937a0ef7e6aff81f56aceb4fadc32",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=40n maxstep=20p"
+        ],
+        "body_lines": [
+          "",
+          "Vd9 (D9 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0.9 10.9n 0.9 11n 0 14.9n 0 15n 0.9 18.9n 0.9 19n 0 22.9n 0 23n 0 26.9n 0 27n 0.9 30.9n 0.9 31n 0 34.9n 0 35n 0.9 40n 0.9]",
+          "Vd8 (D8 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0 10.9n 0 11n 0.9 14.9n 0.9 15n 0.9 18.9n 0.9 19n 0.9 22.9n 0.9 23n 0 26.9n 0 27n 0.9 30.9n 0.9 31n 0.9 34.9n 0.9 35n 0 40n 0]",
+          "Vd7 (D7 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0 10.9n 0 11n 0 14.9n 0 15n 0 18.9n 0 19n 0.9 22.9n 0.9 23n 0 26.9n 0 27n 0.9 30.9n 0.9 31n 0.9 34.9n 0.9 35n 0 40n 0]",
+          "Vd6 (D6 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0 10.9n 0 11n 0 14.9n 0 15n 0 18.9n 0 19n 0.9 22.9n 0.9 23n 0 26.9n 0 27n 0 30.9n 0 31n 0.9 34.9n 0.9 35n 0 40n 0]",
+          "Vd5 (D5 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0 10.9n 0 11n 0 14.9n 0 15n 0 18.9n 0 19n 0.9 22.9n 0.9 23n 0 26.9n 0 27n 0 30.9n 0 31n 0 34.9n 0 35n 0.9 40n 0.9]",
+          "Vd4 (D4 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0 10.9n 0 11n 0 14.9n 0 15n 0 18.9n 0 19n 0.9 22.9n 0.9 23n 0 26.9n 0 27n 0 30.9n 0 31n 0 34.9n 0 35n 0.9 40n 0.9]",
+          "Vd3 (D3 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0 10.9n 0 11n 0 14.9n 0 15n 0 18.9n 0 19n 0.9 22.9n 0.9 23n 0 26.9n 0 27n 0 30.9n 0 31n 0 34.9n 0 35n 0.9 40n 0.9]",
+          "Vd2 (D2 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0 10.9n 0 11n 0 14.9n 0 15n 0 18.9n 0 19n 0.9 22.9n 0.9 23n 0 26.9n 0 27n 0.9 30.9n 0.9 31n 0 34.9n 0 35n 0.9 40n 0.9]",
+          "Vd1 (D1 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0 10.9n 0 11n 0 14.9n 0 15n 0 18.9n 0 19n 0.9 22.9n 0.9 23n 0 26.9n 0 27n 0 30.9n 0 31n 0.9 34.9n 0.9 35n 0 40n 0]",
+          "Vd0 (D0 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0 10.9n 0 11n 0 14.9n 0 15n 0 18.9n 0 19n 0.9 22.9n 0.9 23n 0.9 26.9n 0.9 27n 0 30.9n 0 31n 0 34.9n 0 35n 0.9 40n 0.9]",
+          "Vcal0 (CAL0 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0.9 6.9n 0.9 7n 0 10.9n 0 11n 0.9 14.9n 0.9 15n 0 18.9n 0 19n 0.9 22.9n 0.9 23n 0.9 26.9n 0.9 27n 0 30.9n 0 31n 0 34.9n 0 35n 0.9 40n 0.9]",
+          "Vcal1 (CAL1 0) vsource type=pwl wave=[0 0 2.9n 0 3n 0 6.9n 0 7n 0.9 10.9n 0.9 11n 0.9 14.9n 0.9 15n 0 18.9n 0 19n 0.9 22.9n 0.9 23n 0 26.9n 0 27n 0.9 30.9n 0.9 31n 0 34.9n 0 35n 0.9 40n 0.9]",
+          "",
+          "XDUT (VDD VSS CLK D9 D8 D7 D6 D5 D4 D3 D2 D1 D0 CAL0 CAL1 VDAC_P VDAC_N) cdac_cal",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=68n maxstep=20p"
+        ],
+        "body_lines": [
+          "Vd0 (D0 0) vsource type=pwl wave=[0n 0 2n 0 5.9n 0 6n 0.9 9.9n 0.9 10n 0 13.9n 0 14n 0.9 17.9n 0.9 18n 0.9 21.9n 0.9 22n 0.9 25.9n 0.9 26n 0 29.9n 0 30n 0 33.9n 0 34n 0 37.9n 0 38n 0 41.9n 0 42n 0 45.9n 0 46n 0 49.9n 0 50n 0.9 53.9n 0.9 54n 0.9 57.9n 0.9 58n 0.9 61.9n 0.9 62n 0.9 68n 0.9]",
+          "Vd1 (D1 0) vsource type=pwl wave=[0n 0 2n 0 5.9n 0 6n 0 9.9n 0 10n 0.9 13.9n 0.9 14n 0.9 17.9n 0.9 18n 0.9 21.9n 0.9 22n 0.9 25.9n 0.9 26n 0 29.9n 0 30n 0 33.9n 0 34n 0 37.9n 0 38n 0 41.9n 0 42n 0 45.9n 0 46n 0 49.9n 0 50n 0.9 53.9n 0.9 54n 0.9 57.9n 0.9 58n 0.9 61.9n 0.9 62n 0.9 68n 0.9]",
+          "Vd2 (D2 0) vsource type=pwl wave=[0n 0 2n 0 5.9n 0 6n 0 9.9n 0 10n 0 13.9n 0 14n 0 17.9n 0 18n 0.9 21.9n 0.9 22n 0.9 25.9n 0.9 26n 0 29.9n 0 30n 0 33.9n 0 34n 0 37.9n 0 38n 0 41.9n 0 42n 0 45.9n 0 46n 0 49.9n 0 50n 0.9 53.9n 0.9 54n 0.9 57.9n 0.9 58n 0.9 61.9n 0.9 62n 0.9 68n 0.9]",
+          "Vd3 (D3 0) vsource type=pwl wave=[0n 0 2n 0 5.9n 0 6n 0 9.9n 0 10n 0 13.9n 0 14n 0 17.9n 0 18n 0 21.9n 0 22n 0.9 25.9n 0.9 26n 0 29.9n 0 30n 0 33.9n 0 34n 0 37.9n 0 38n 0 41.9n 0 42n 0 45.9n 0 46n 0 49.9n 0 50n 0.9 53.9n 0.9 54n 0.9 57.9n 0.9 58n 0.9 61.9n 0.9 62n 0.9 68n 0.9]",
+          "Vd4 (D4 0) vsource type=pwl wave=[0n 0 2n 0 5.9n 0 6n 0 9.9n 0 10n 0 13.9n 0 14n 0 17.9n 0 18n 0 21.9n 0 22n 0 25.9n 0 26n 0.9 29.9n 0.9 30n 0 33.9n 0 34n 0 37.9n 0 38n 0 41.9n 0 42n 0 45.9n 0 46n 0 49.9n 0 50n 0.9 53.9n 0.9 54n 0.9 57.9n 0.9 58n 0.9 61.9n 0.9 62n 0.9 68n 0.9]",
+          "Vd5 (D5 0) vsource type=pwl wave=[0n 0 2n 0 5.9n 0 6n 0 9.9n 0 10n 0 13.9n 0 14n 0 17.9n 0 18n 0 21.9n 0 22n 0 25.9n 0 26n 0 29.9n 0 30n 0.9 33.9n 0.9 34n 0 37.9n 0 38n 0 41.9n 0 42n 0 45.9n 0 46n 0 49.9n 0 50n 0.9 53.9n 0.9 54n 0.9 57.9n 0.9 58n 0.9 61.9n 0.9 62n 0.9 68n 0.9]",
+          "Vd6 (D6 0) vsource type=pwl wave=[0n 0 2n 0 5.9n 0 6n 0 9.9n 0 10n 0 13.9n 0 14n 0 17.9n 0 18n 0 21.9n 0 22n 0 25.9n 0 26n 0 29.9n 0 30n 0 33.9n 0 34n 0.9 37.9n 0.9 38n 0 41.9n 0 42n 0 45.9n 0 46n 0 49.9n 0 50n 0.9 53.9n 0.9 54n 0.9 57.9n 0.9 58n 0.9 61.9n 0.9 62n 0.9 68n 0.9]",
+          "Vd7 (D7 0) vsource type=pwl wave=[0n 0 2n 0 5.9n 0 6n 0 9.9n 0 10n 0 13.9n 0 14n 0 17.9n 0 18n 0 21.9n 0 22n 0 25.9n 0 26n 0 29.9n 0 30n 0 33.9n 0 34n 0 37.9n 0 38n 0.9 41.9n 0.9 42n 0 45.9n 0 46n 0 49.9n 0 50n 0.9 53.9n 0.9 54n 0.9 57.9n 0.9 58n 0.9 61.9n 0.9 62n 0.9 68n 0.9]",
+          "Vd8 (D8 0) vsource type=pwl wave=[0n 0 2n 0 5.9n 0 6n 0 9.9n 0 10n 0 13.9n 0 14n 0 17.9n 0 18n 0 21.9n 0 22n 0 25.9n 0 26n 0 29.9n 0 30n 0 33.9n 0 34n 0 37.9n 0 38n 0 41.9n 0 42n 0.9 45.9n 0.9 46n 0 49.9n 0 50n 0 53.9n 0 54n 0.9 57.9n 0.9 58n 0 61.9n 0 62n 0.9 68n 0.9]",
+          "Vd9 (D9 0) vsource type=pwl wave=[0n 0 2n 0 5.9n 0 6n 0 9.9n 0 10n 0 13.9n 0 14n 0 17.9n 0 18n 0 21.9n 0 22n 0 25.9n 0 26n 0 29.9n 0 30n 0 33.9n 0 34n 0 37.9n 0 38n 0 41.9n 0 42n 0 45.9n 0 46n 0.9 49.9n 0.9 50n 0 53.9n 0 54n 0 57.9n 0 58n 0.9 61.9n 0.9 62n 0.9 68n 0.9]",
+          "Vcal0 (CAL0 0) vsource type=pwl wave=[0n 0 2n 0 5.9n 0 6n 0.9 9.9n 0.9 10n 0 13.9n 0 14n 0.9 17.9n 0.9 18n 0 21.9n 0 22n 0.9 25.9n 0.9 26n 0 29.9n 0 30n 0.9 33.9n 0.9 34n 0 37.9n 0 38n 0.9 41.9n 0.9 42n 0 45.9n 0 46n 0.9 49.9n 0.9 50n 0 53.9n 0 54n 0.9 57.9n 0.9 58n 0 61.9n 0 62n 0.9 68n 0.9]",
+          "Vcal1 (CAL1 0) vsource type=pwl wave=[0n 0 2n 0 5.9n 0 6n 0 9.9n 0 10n 0.9 13.9n 0.9 14n 0.9 17.9n 0.9 18n 0 21.9n 0 22n 0 25.9n 0 26n 0.9 29.9n 0.9 30n 0.9 33.9n 0.9 34n 0 37.9n 0 38n 0 41.9n 0 42n 0.9 45.9n 0.9 46n 0.9 49.9n 0.9 50n 0 53.9n 0 54n 0 57.9n 0 58n 0.9 61.9n 0.9 62n 0.9 68n 0.9]",
+          "",
+          "XDUT (VDD VSS CLK D9 D8 D7 D6 D5 D4 D3 D2 D1 D0 CAL0 CAL1 VDAC_P VDAC_N) cdac_cal",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_CLOCKED_HOLD",
+    "P_CODE_MONOTONICITY",
+    "P_CALIBRATION_WEIGHT",
+    "P_DIFFERENTIAL_COMMON_MODE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "f510a89ced10d5849fe37dbe62fde1dc57e7949a1acafb61b0e1abd15edfbfcc",
+    "family_spec_sha256": "6e0b2955719b62ed92c44542bc4f6328d510489e7cd1c11a8721c1029445d4cc"
+  },
+  "task_id": "v4-002"
+}

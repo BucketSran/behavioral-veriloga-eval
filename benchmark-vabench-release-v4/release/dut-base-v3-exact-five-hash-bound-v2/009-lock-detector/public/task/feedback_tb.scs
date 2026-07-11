@@ -1,0 +1,56 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/lock_detector.va"
+
+Vrst (rst_n 0) vsource type=pwl wave=[ \
+  0 0 \
+  5n 0 \
+  5.2n 0.9 \
+  55n 0.9 \
+  55.2n 0 \
+  62n 0 \
+  62.2n 0.9 \
+  93n 0.9 \
+  93.2n 0 \
+  115n 0 \
+]
+
+Vref (ref_clk 0) vsource type=pwl wave=[ \
+  0 0 \
+  11.9n 0 12.0n 0.9 13.0n 0.9 13.1n 0 \
+  21.9n 0 22.0n 0.9 23.0n 0.9 23.1n 0 \
+  31.9n 0 32.0n 0.9 33.0n 0.9 33.1n 0 \
+  41.9n 0 42.0n 0.9 43.0n 0.9 43.1n 0 \
+  51.9n 0 52.0n 0.9 53.0n 0.9 53.1n 0 \
+  67.9n 0 68.0n 0.9 69.0n 0.9 69.1n 0 \
+  77.9n 0 78.0n 0.9 79.0n 0.9 79.1n 0 \
+  87.9n 0 88.0n 0.9 89.0n 0.9 89.1n 0 \
+  107.9n 0 108.0n 0.9 109.0n 0.9 109.1n 0 \
+  115n 0 \
+]
+
+Vfb (fb_clk 0) vsource type=pwl wave=[ \
+  0 0 \
+  6.0n 0 6.1n 0.9 6.3n 0.9 6.4n 0 \
+  8.0n 0 8.1n 0.9 8.3n 0.9 8.4n 0 \
+  10.0n 0 10.1n 0.9 10.3n 0.9 10.4n 0 \
+  10.9n 0 11.0n 0.9 12.0n 0.9 12.1n 0 \
+  20.9n 0 21.0n 0.9 22.0n 0.9 22.1n 0 \
+  30.9n 0 31.0n 0.9 32.0n 0.9 32.1n 0 \
+  40.9n 0 41.0n 0.9 42.0n 0.9 42.1n 0 \
+  46.9n 0 47.0n 0.9 48.0n 0.9 48.1n 0 \
+  66.9n 0 67.0n 0.9 68.0n 0.9 68.1n 0 \
+  76.9n 0 77.0n 0.9 78.0n 0.9 78.1n 0 \
+  86.9n 0 87.0n 0.9 88.0n 0.9 88.1n 0 \
+  106.9n 0 107.0n 0.9 108.0n 0.9 108.1n 0 \
+  115n 0 \
+]
+
+XDUT (ref_clk fb_clk rst_n lock) lock_detector
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=115n maxstep=100p
+save ref_clk fb_clk rst_n lock

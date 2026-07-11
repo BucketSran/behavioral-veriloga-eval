@@ -1,0 +1,100 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "gain_trim_controller.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=120n maxstep=500p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "rst",
+      "meas",
+      "target",
+      "gain_ctrl"
+    ]
+  },
+  "family_id": "008",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "a285b7a734ffb6c6bd1d40b61a8184ecbf9d43efd9862bfa2da9fffdd58bb01d",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "5d45e4e03867ba264947b43584dd4ed5dbd06189c3ace161b99df3ed920a2f16",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=660n maxstep=200p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=7n rise=100p fall=100p width=6n period=20n",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 22n 0.9 22.2n 0 660n 0]",
+          "Vmeas (meas 0) vsource type=pwl wave=[0 0.2 252n 0.2 252.2n 0.45 302n 0.45 302.2n 0.7 660n 0.7]",
+          "Vtarget (target 0) vsource dc=0.45",
+          "",
+          "XDUT (clk rst meas target gain_ctrl) gain_trim_controller",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=660n maxstep=500p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=10n rise=200p fall=200p width=5n period=20n",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 15n 0.9 16n 0 660n 0]",
+          "Vmeas (meas 0) vsource type=pwl wave=[0 0.2 260n 0.2 261n 0.46 300n 0.46 301n 0.7 660n 0.7]",
+          "Vtarget (target 0) vsource dc=0.45",
+          "",
+          "XDUT (clk rst meas target gain_ctrl) gain_trim_controller",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INITIAL_AND_RESET",
+    "P_ERROR_DIRECTION",
+    "P_DEADBAND_HOLD",
+    "P_CONTROL_CLAMP"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "ecc79398baa8ef43d99e5fdee3f157f9fefde66705dd82b4404ebfdfb410a210",
+    "family_spec_sha256": "aea6623ab44ad6de1c689c766cf5f825777c81dead35a187355ad2025890f299"
+  },
+  "task_id": "v4-008"
+}

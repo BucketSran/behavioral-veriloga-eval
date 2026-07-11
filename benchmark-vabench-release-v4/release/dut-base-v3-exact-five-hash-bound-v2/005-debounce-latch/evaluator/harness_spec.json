@@ -1,0 +1,88 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "debounce_latch.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=140n maxstep=500p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "sig",
+      "rst_n",
+      "out"
+    ]
+  },
+  "family_id": "005",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "34a607aa095a53dfd7096dc52e9ce30febb1671ff4869e29e803b888d63838b0",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "0e1d31ccd63516eec69a112c9165e4558d9bc54739a348bb20a9266c10464350",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vsig (sig 0) vsource type=pwl wave=[0 0 5n 0 5.05n 0.9 24n 0.9 24.05n 0 31n 0 31.05n 0.9 36n 0.9 36.05n 0 71n 0 71.05n 0.9 132n 0.9 132.05n 0 140n 0]",
+          "Vrst (rst_n 0) vsource type=pwl wave=[0 0 16n 0 16.05n 0.9 140n 0.9]",
+          "",
+          "XDUT (sig rst_n out) debounce_latch",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vsig (sig 0) vsource type=pwl wave=[0 0 5n 0 5.05n 0.9 24n 0.9 24.05n 0 31n 0 31.05n 0.9 36n 0.9 36.05n 0 54n 0 54.05n 0.9 68n 0.9 68.05n 0 71n 0 71.05n 0.9 132n 0.9 132.05n 0 140n 0]",
+          "Vrst (rst_n 0) vsource type=pwl wave=[0 0 16n 0 16.05n 0.9 55n 0.9 55.05n 0 65n 0 65.05n 0.9 140n 0.9]",
+          "",
+          "XDUT (sig rst_n out) debounce_latch",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ACTIVE_LOW_RESET",
+    "P_RISE_QUALIFICATION",
+    "P_FALL_CLEAR",
+    "P_EVENT_HOLD"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "139e3bf50a398b32a46ad8bd4ff824bc5e8c25b81f62108309465b2ba3c497cf",
+    "family_spec_sha256": "6a4eff93bfc7d4619ed1a5514716da42179825fa46a6f9599f075430f9baed45"
+  },
+  "task_id": "v4-005"
+}

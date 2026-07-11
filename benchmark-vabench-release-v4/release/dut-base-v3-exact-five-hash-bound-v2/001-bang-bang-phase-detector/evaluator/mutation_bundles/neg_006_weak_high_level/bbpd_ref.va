@@ -1,0 +1,34 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bbpd_ref (
+    input  electrical data,
+    input  electrical clk,
+    input  electrical retimed_data,
+    output electrical up,
+    output electrical down
+);
+parameter real vdd = 0.9;
+parameter real vth = 0.45;
+parameter real trf = 10p;
+parameter real td  = 0p;
+integer up_state;
+integer down_state;
+analog begin
+    @(initial_step) begin up_state = 0; down_state = 0; end
+    @(cross(V(data) - vth, +1) or cross(V(data) - vth, -1)) begin
+        if ((V(clk) > vth) && (V(retimed_data) <= vth)) begin
+            up_state = 1; down_state = 0;
+        end else if ((V(clk) <= vth) && (V(retimed_data) > vth)) begin
+            up_state = 0; down_state = 1;
+        end else begin
+            up_state = 0; down_state = 0;
+        end
+    end
+    @(cross(V(clk) - vth, +1) or cross(V(clk) - vth, -1)) begin
+        up_state = 0; down_state = 0;
+    end
+    V(up)   <+ transition(up_state ? 0.60 * vdd : 0.0, td, trf, trf);
+    V(down) <+ transition(down_state ? 0.60 * vdd : 0.0, td, trf, trf);
+end
+endmodule

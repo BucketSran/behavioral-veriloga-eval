@@ -1,0 +1,101 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "pipeline_stage.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=120n maxstep=500p"
+    ],
+    "body_lines": [
+      "Vvdd  (vdd  0) vsource dc=0.9",
+      "Vvss  (vss  0) vsource dc=0.0",
+      "Vvref (vref 0) vsource dc=0.9",
+      "Vphi1 (phi1 0) vsource type=pulse val0=0 val1=0.9 period=30n width=10n rise=200p fall=200p delay=3n",
+      "Vphi2 (phi2 0) vsource type=pulse val0=0 val1=0.9 period=30n width=10n rise=200p fall=200p delay=15n"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "phi1",
+      "phi2",
+      "vin",
+      "vref",
+      "vres",
+      "d1",
+      "d0",
+      "vdd",
+      "vss"
+    ]
+  },
+  "family_id": "003",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "7a366b1ddf6860e7b033b47f93e070e585d55643a2007e4bfb7b06148d15622e",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "6e49efd084ffa85d09b44f3484e50fe01ece81ce509fe3782927669bef564507",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vvin  (vin  0) vsource type=pwl wave=[0 0.45 9n 0.45 9.1n 0.72 39n 0.72 39.1n 0.18 69n 0.18 69.1n 1.05 99n 1.05 99.1n 0.45 120n 0.45]",
+          "",
+          "XDUT (vdd vss phi1 phi2 vin vref vres d1 d0) pipeline_stage vth=0.45 vdd=0.9 tedge=200p",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=300n maxstep=500p"
+        ],
+        "body_lines": [
+          "Vvin  (vin  0) vsource type=pwl wave=[0 0.45 9n 0.45 9.1n 0.72 39n 0.72 39.1n 0.18 69n 0.18 69.1n 0.90 99n 0.90 99.1n 0.00 129n 0.00 129.1n 0.676 159n 0.676 159.1n 0.674 189n 0.674 189.1n 0.226 219n 0.226 219.1n -0.15 249n -0.15 249.1n 1.05 279n 1.05 279.1n 0.45 300n 0.45]",
+          "",
+          "XDUT (vdd vss phi1 phi2 vin vref vres d1 d0) pipeline_stage vth=0.45 vdd=0.9 tedge=200p",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_TWO_PHASE_SAMPLING",
+    "P_SUBADC_REGIONS",
+    "P_RESIDUE_MAPPING",
+    "P_RESIDUE_CLAMP"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "f86b39c64d987e7bcd5cf35850ac17088fc726ae4fc21fd252adc580e9697666",
+    "family_spec_sha256": "ff644321a125572be576d4b3c7bf42b7ac500ba5942330d0eba31f15aa2a618d"
+  },
+  "task_id": "v4-003"
+}

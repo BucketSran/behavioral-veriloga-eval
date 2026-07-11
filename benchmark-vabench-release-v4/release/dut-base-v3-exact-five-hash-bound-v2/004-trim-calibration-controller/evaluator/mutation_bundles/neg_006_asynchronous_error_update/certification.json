@@ -1,0 +1,25 @@
+{
+  "diagnostics": {
+    "expected": "trigger=error changes between rising clock edges; violated_properties=P_CLOCKED_HOLD",
+    "observed": "EVAS: clock_edges=27 initial=0.45 edge_mismatches=13 hold_intervals=26 hold_violations=0 async_hold_failures=1 range=(0.050,0.850) coverage={'reset': 2, 'increment': 11, 'decrement': 14, 'upper_clamp': 3, 'lower_clamp': 1} mismatch_detail=clk@85.050ns_observed=0.790_expected=0.850;clk@93.050ns_observed=0.730_expected=0.790;clk@101.050ns_observed=0.670_expected=0.730;clk@109.050ns_observed=0.610_expected=0.670;clk@117.050ns_observed=0.550_expected=0.610 async_hold_detail=err@86.100ns_before=0.850_after=0.790; Spectre: clock_edges=27 initial=0.45 edge_mismatches=15 hold_intervals=26 hold_violations=1 async_hold_failures=2 range=(0.050,0.850) coverage={'reset': 2, 'increment': 11, 'decrement': 14, 'upper_clamp': 3, 'lower_clamp': 1} mismatch_detail=clk@85.050ns_observed=0.790_expected=0.850;clk@93.050ns_observed=0.730_expected=0.790;clk@101.050ns_observed=0.670_expected=0.730;clk@109.050ns_observed=0.610_expected=0.670;clk@117.050ns_observed=0.550_expected=0.610 hold_detail=199.050-204.800ns:0.0600 async_hold_detail=err@86.100ns_before=0.850_after=0.790;err@202.100ns_before=0.050_after=0.110",
+    "violated_property_ids": [
+      "P_CLOCKED_HOLD"
+    ]
+  },
+  "evaluators": {
+    "ahdl_like": "pass",
+    "evas": "compile_pass_behavior_fail",
+    "spectre": "compile_pass_behavior_fail"
+  },
+  "family_id": "004",
+  "inputs": {
+    "checker_profile_sha256": "9eed146927f43708248f693b182693f6eddb6591d5b050170e68d4acad803001",
+    "harness_spec_sha256": "e7d67d97f32d946b9895286c738af29774508ec81edb5f7c836db1c1e077021f",
+    "mutation_bundle_sha256": "2992f9162658dc47cfc79a9391ccdce09d7d4aeca66d94a287fb2b4da3251227",
+    "profile_sha256": "54e663f6aabf82562a759aa854971e34054bdbd25b3e66dfbaa65b7d2039351b"
+  },
+  "mutation_id": "neg_006_asynchronous_error_update",
+  "outcome": "killed_behaviorally",
+  "schema_version": "v4-negative-certification-v1",
+  "toolchain_lock_sha256": "9f937d769f2b2653034dc1f578001a89e7fcb92323764e1a91f4e8ab2cfb787a"
+}

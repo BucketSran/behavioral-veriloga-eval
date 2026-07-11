@@ -1,0 +1,11 @@
+`include "constants.vams"
+`include "disciplines.vams"
+module first_order_lowpass(vin,vout);
+    input vin; output vout; electrical vin,vout;
+    parameter real alpha=0.025; parameter real tr=200p; real y;
+    analog begin
+        @(initial_step) y=0.20;
+        @(timer(0,500p)) y = y + alpha*(V(vin)-y);
+        V(vout)<+transition(y,0,tr,tr);
+    end
+endmodule

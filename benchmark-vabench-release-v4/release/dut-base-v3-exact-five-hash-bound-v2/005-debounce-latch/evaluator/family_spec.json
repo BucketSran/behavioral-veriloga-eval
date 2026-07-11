@@ -1,0 +1,34 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "005",
+  "task_ids": {"dut": "v4-005", "testbench": "v4-505", "bugfix": "v4-1005"},
+  "identity": {"title": "Debounce Latch", "category": "comparator_decision", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {
+    "mode": "single_file",
+    "files": [{"path": "debounce_latch.va", "modules": [{
+      "name": "debounce_latch", "role": "entry", "depends_on": [],
+      "ports": [
+        {"name": "sig", "direction": "input", "discipline": "electrical", "position": 0},
+        {"name": "rst_n", "direction": "input", "discipline": "electrical", "position": 1},
+        {"name": "out", "direction": "output", "discipline": "electrical", "position": 2}
+      ],
+      "parameters": [
+        {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "0 < vth < vdd", "override_behavior": "sets sig and rst_n decision threshold"},
+        {"name": "vdd", "type": "real", "default": 0.9, "units": "V", "valid_range": "vdd > 0", "override_behavior": "sets output high level"},
+        {"name": "stable", "type": "real", "default": 1.2e-8, "units": "s", "valid_range": "stable >= 0", "override_behavior": "sets rising-decision qualification duration"},
+        {"name": "tr", "type": "real", "default": 5e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets output transition smoothing"}
+      ]
+    }]}]
+  },
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "debounce_latch", "connections": [
+    {"port_ref": "sig", "net": "sig", "position": 0}, {"port_ref": "rst_n", "net": "rst_n", "position": 1}, {"port_ref": "out", "net": "out", "position": 2}
+  ]}]},
+  "properties": [
+    {"id": "P_ACTIVE_LOW_RESET", "observable_contract": "out is low and pending qualification is cancelled whenever rst_n is below vth.", "required_signals": ["time", "rst_n", "out"]},
+    {"id": "P_RISE_QUALIFICATION", "observable_contract": "A sig rising edge sets out high only after sig and rst_n remain high for stable seconds.", "required_signals": ["time", "sig", "rst_n", "out"]},
+    {"id": "P_FALL_CLEAR", "observable_contract": "A sig falling edge clears out and cancels pending qualification.", "required_signals": ["time", "sig", "out"]},
+    {"id": "P_EVENT_HOLD", "observable_contract": "out holds between reset, sig-edge, and qualification-timer events.", "required_signals": ["time", "sig", "rst_n", "out"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "sig", "rst_n", "out"]},
+  "modeling_constraints": ["Use voltage contributions only.", "Keep event state updates separate from unconditional finite-smoothing output contribution.", "Do not use current contributions, ddt(), idt(), validation logic, or simulator-specific side channels."]
+}

@@ -1,0 +1,34 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/cmp_offset_ref.va"
+
+Vvdd (VDD 0) vsource dc=0.9
+Vvss (VSS 0) vsource dc=0.1
+Vclk (CLK 0) vsource type=pulse val0=0.1 val1=0.54 delay=1n rise=20p fall=20p width=1n period=4n
+
+Vinp (VINP 0) vsource type=pwl wave=[ \
+    0      0.538 \
+    4.1n   0.538 \
+    4.3n   0.549 \
+    8.1n   0.549 \
+    8.3n   0.554 \
+    12.2n  0.554 \
+    12.4n  0.558 \
+    16.1n  0.558 \
+    16.3n  0.566 \
+    20.2n  0.566 \
+    20.4n  0.549 \
+    24.2n  0.549 \
+    24.4n  0.537 \
+    28.0n  0.537 \
+]
+Vinn (VINN 0) vsource dc=0.550
+
+XDUT (VDD VSS CLK VINP VINN OUT_P) cmp_offset_ref
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=28n maxstep=20p
+save VDD VSS CLK VINP VINN OUT_P

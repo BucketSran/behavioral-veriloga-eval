@@ -1,0 +1,161 @@
+{
+  "family_id": "010",
+  "gold_bundle_sha256": "382c5f3adab444d81b21a96b1cc8f3e7177b2c64ebf1f8b6c79a04f2be6d15b9",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "cmp_offset_ref.va": "25010640ce6b0420c2421f0c82101dc916bbb545aa8c6fd5180fe358aa399979"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OFFSET_DECISION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero_offset/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "cmp_offset_ref.va"
+      ],
+      "fault_class": "offset_threshold_zero",
+      "id": "neg_001_zero_offset",
+      "trigger_condition": "a sampled differential input is positive but below vos",
+      "violated_property_ids": [
+        "P_OFFSET_DECISION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "cmp_offset_ref.va": "5eb57684e4314bef070ea52aa9447844186998d994be426127595790ea058632"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OFFSET_DECISION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_large_offset/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "cmp_offset_ref.va"
+      ],
+      "fault_class": "offset_threshold_excessive",
+      "id": "neg_002_large_offset",
+      "trigger_condition": "a sampled differential input exceeds vos but not the erroneous 15 mV threshold",
+      "violated_property_ids": [
+        "P_OFFSET_DECISION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "cmp_offset_ref.va": "9e59a1c057ca2af9fe72cb462e14190088f700a23e2f43ce42eea70a1ca678ff"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LATCH_HOLD",
+          "P_RISING_EDGE_SAMPLE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_falling_edge/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "cmp_offset_ref.va"
+      ],
+      "fault_class": "falling_edge_sampling",
+      "id": "neg_003_falling_edge",
+      "trigger_condition": "CLK has a rising sampling edge followed by an input transition before its falling edge",
+      "violated_property_ids": [
+        "P_LATCH_HOLD",
+        "P_RISING_EDGE_SAMPLE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "cmp_offset_ref.va": "299e5463faf4e2ca06d3b606955ae1a9d033d29b5149e1c7239b57a7e39e16e3"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LATCH_HOLD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_async_response/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "cmp_offset_ref.va"
+      ],
+      "fault_class": "asynchronous_decision",
+      "id": "neg_004_async_response",
+      "trigger_condition": "VINP changes between rising CLK edges",
+      "violated_property_ids": [
+        "P_LATCH_HOLD"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "cmp_offset_ref.va": "700aaf3f0e0a847b0432ebc8d1e3b3575b2d4a161ca2f773ad2d1348909612de"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RAIL_REFERENCE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_weak_high/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "cmp_offset_ref.va"
+      ],
+      "fault_class": "weak_high_rail",
+      "id": "neg_005_weak_high",
+      "trigger_condition": "a latched high decision is driven",
+      "violated_property_ids": [
+        "P_RAIL_REFERENCE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "cmp_offset_ref.va": "6aad38e1b3d8fbcffbc8eff7a20de849b2ed3ae17565df75ca0e01837a5ff41f"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RAIL_REFERENCE",
+          "P_RISING_EDGE_SAMPLE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_006_fixed_clock_midpoint/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "cmp_offset_ref.va"
+      ],
+      "fault_class": "fixed_clock_midpoint",
+      "id": "neg_006_fixed_clock_midpoint",
+      "trigger_condition": "CLK is sampled with a non-nominal local VDD/VSS midpoint",
+      "violated_property_ids": [
+        "P_RAIL_REFERENCE",
+        "P_RISING_EDGE_SAMPLE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}
