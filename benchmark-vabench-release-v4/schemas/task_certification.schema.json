@@ -1,0 +1,338 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vabench.local/schemas/v4/task_certification.schema.json",
+  "title": "vaBench v4 Gate 2 task certification",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "family_id",
+    "status",
+    "toolchain_lock_sha256",
+    "input_hashes",
+    "evaluators",
+    "checks",
+    "evidence_paths"
+  ],
+  "properties": {
+    "schema_version": {
+      "enum": [
+        "v4-task-certification-v1",
+        "v4-task-certification-v2",
+        "v4-task-certification-v3"
+      ]
+    },
+    "family_id": {"type": "string", "pattern": "^[0-9]{3}$"},
+    "status": {"const": "gate2_pass"},
+    "claim_boundary": {
+      "type": "object",
+      "required": ["release_kind", "completed_gate", "tri_form_gate2_complete", "tri_form_gate3_complete", "next_gate"],
+      "properties": {
+        "release_kind": {"const": "canonical_dut_base"},
+        "completed_gate": {"const": "dut_base_gate2"},
+        "tri_form_gate2_complete": {"const": false},
+        "tri_form_gate3_complete": {"const": false},
+        "next_gate": {"const": "canonical_suite_unification_pending"}
+      },
+      "additionalProperties": false
+    },
+    "toolchain_lock_sha256": {"$ref": "#/$defs/sha256"},
+    "release_snapshot_sha256": {"$ref": "#/$defs/sha256"},
+    "component_fingerprints": {
+      "oneOf": [
+        {"$ref": "#/$defs/component_fingerprints_v2"},
+        {"$ref": "#/$defs/component_fingerprints_v3"}
+      ]
+    },
+    "input_hashes": {
+      "type": "object",
+      "required": ["family_spec", "gold_bundle", "checker_profile", "harness_spec", "feedback_profile", "score_profile"],
+      "properties": {
+        "family_spec": {"$ref": "#/$defs/sha256"},
+        "gold_bundle": {"$ref": "#/$defs/sha256"},
+        "checker_profile": {"$ref": "#/$defs/sha256"},
+        "harness_spec": {"$ref": "#/$defs/sha256"},
+        "feedback_profile": {"$ref": "#/$defs/sha256"},
+        "score_profile": {"$ref": "#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    },
+    "evaluators": {
+      "type": "object",
+      "required": ["ahdl_like", "evas", "spectre"],
+      "properties": {
+        "ahdl_like": {
+          "type": "object",
+          "required": ["status", "ruleset_sha256", "untriaged_warning_count"],
+          "properties": {
+            "status": {"const": "pass"},
+            "ruleset_sha256": {"$ref": "#/$defs/sha256"},
+            "untriaged_warning_count": {"const": 0}
+          },
+          "additionalProperties": false
+        },
+        "evas": {
+          "type": "object",
+          "required": ["status", "actual_engine", "profile", "rust_core_abi", "build_sha256"],
+          "properties": {
+            "status": {"const": "pass"},
+            "implementation_track": {"enum": ["python-rust-hybrid", "standalone-rust"]},
+            "actual_engine": {"enum": ["evas-rust", "standalone-rust"]},
+            "allow_python_fallback": {"type": "boolean"},
+            "profile": {"type": "string", "minLength": 1},
+            "rust_core_abi": {"type": "integer", "minimum": 1},
+            "build_sha256": {"$ref": "#/$defs/sha256"}
+          },
+          "additionalProperties": false
+        },
+        "spectre": {
+          "type": "object",
+          "required": ["status", "version", "bridge_identity"],
+          "properties": {
+            "status": {"const": "pass"},
+            "version": {"type": "string", "minLength": 1},
+            "bridge_identity": {"type": "string", "minLength": 1}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "checks": {
+      "type": "object",
+      "required": ["gold_bundle", "public_properties", "certified_negatives", "parity"],
+      "properties": {
+        "gold_bundle": {
+          "type": "object",
+          "required": ["artifact_gate", "feedback_profile", "score_profile"],
+          "properties": {
+            "artifact_gate": {"const": "pass"},
+            "feedback_profile": {"const": "pass"},
+            "score_profile": {"const": "pass"}
+          },
+          "additionalProperties": false
+        },
+        "public_properties": {
+          "type": "object",
+          "required": ["status", "property_ids"],
+          "properties": {
+            "status": {"const": "pass"},
+            "property_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}}
+          },
+          "additionalProperties": false
+        },
+        "certified_negatives": {
+          "type": "object",
+          "required": ["status", "count"],
+          "properties": {
+            "status": {"const": "pass"},
+            "count": {"type": "integer", "minimum": 1}
+          },
+          "additionalProperties": false
+        },
+        "parity": {
+          "type": "object",
+          "required": ["status", "evas_pass_spectre_fail_count"],
+          "properties": {
+            "status": {"const": "pass"},
+            "evas_pass_spectre_fail_count": {"const": 0}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "evidence_paths": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "schema_version": {
+            "enum": ["v4-task-certification-v1", "v4-task-certification-v2"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "evaluators": {
+            "properties": {
+              "evas": {
+                "properties": {
+                  "actual_engine": {"const": "evas-rust"}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"schema_version": {"const": "v4-task-certification-v2"}}},
+      "then": {"required": ["release_snapshot_sha256", "component_fingerprints"]}
+    },
+    {
+      "if": {"properties": {"schema_version": {"const": "v4-task-certification-v3"}}},
+      "then": {
+        "required": ["release_snapshot_sha256", "component_fingerprints", "claim_boundary"],
+        "properties": {
+          "component_fingerprints": {"$ref": "#/$defs/component_fingerprints_v3"},
+          "evaluators": {
+            "properties": {
+              "evas": {
+                "required": ["implementation_track", "actual_engine", "allow_python_fallback"],
+                "properties": {
+                  "implementation_track": {"const": "standalone-rust"},
+                  "actual_engine": {"const": "standalone-rust"},
+                  "allow_python_fallback": {"const": false}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "fingerprint_map": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/sha256"}
+    },
+    "component_fingerprints_v2": {
+      "type": "object",
+      "required": ["schema_version", "policy_id", "state", "task_inputs", "oracle", "backend", "assembly"],
+      "properties": {
+        "schema_version": {"const": "v4-evidence-components-v2"},
+        "policy_id": {"const": "v4-dependency-scoped-evidence-v2"},
+        "state": {"enum": ["fresh", "carried_forward"]},
+        "task_inputs": {"$ref": "#/$defs/fingerprint_map"},
+        "oracle": {"$ref": "#/$defs/fingerprint_map"},
+        "backend": {
+          "allOf": [
+            {"$ref": "#/$defs/fingerprint_map"},
+            {"required": ["ahdl_like_sha256", "evas_sha256", "spectre_sha256"]}
+          ]
+        },
+        "assembly": {
+          "type": "object",
+          "required": ["policy_sha256", "release_snapshot_sha256"],
+          "properties": {
+            "policy_sha256": {"$ref": "#/$defs/sha256"},
+            "release_snapshot_sha256": {"$ref": "#/$defs/sha256"},
+            "carried_from_release_snapshot_sha256": {"$ref": "#/$defs/sha256"}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "component_state": {"enum": ["fresh", "carried_forward", "replayed"]},
+    "evidence_role": {
+      "enum": [
+        "standalone_evas_gold",
+        "standalone_evas_mutations",
+        "spectre_gold_carried",
+        "spectre_mutations_carried",
+        "checker_replay"
+      ]
+    },
+    "evidence_ref": {
+      "type": "object",
+      "required": ["role", "path", "sha256", "state"],
+      "properties": {
+        "role": {"$ref": "#/$defs/evidence_role"},
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "state": {"$ref": "#/$defs/component_state"}
+      },
+      "additionalProperties": false
+    },
+    "reuse_decision": {
+      "type": "object",
+      "required": ["component", "state", "evidence_roles"],
+      "properties": {
+        "component": {
+          "enum": ["task_inputs", "oracle", "ahdl_like", "evas", "spectre", "assembly"]
+        },
+        "state": {"$ref": "#/$defs/component_state"},
+        "evidence_roles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/evidence_role"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "component_fingerprints_v3": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "policy_id",
+        "state",
+        "task_inputs",
+        "oracle",
+        "backend",
+        "assembly",
+        "evidence_refs",
+        "reuse_decisions"
+      ],
+      "properties": {
+        "schema_version": {"const": "v4-evidence-components-v3"},
+        "policy_id": {"const": "v4-dependency-scoped-evidence-v3"},
+        "state": {"const": "composed"},
+        "task_inputs": {"$ref": "#/$defs/fingerprint_map"},
+        "oracle": {"$ref": "#/$defs/fingerprint_map"},
+        "backend": {
+          "type": "object",
+          "required": ["ahdl_like_sha256", "evas_sha256", "spectre_sha256"],
+          "properties": {
+            "ahdl_like_sha256": {"$ref": "#/$defs/sha256"},
+            "evas_sha256": {"$ref": "#/$defs/sha256"},
+            "spectre_sha256": {"$ref": "#/$defs/sha256"}
+          },
+          "additionalProperties": false
+        },
+        "assembly": {
+          "type": "object",
+          "required": ["policy_sha256", "release_snapshot_sha256"],
+          "properties": {
+            "policy_sha256": {"$ref": "#/$defs/sha256"},
+            "release_snapshot_sha256": {"$ref": "#/$defs/sha256"},
+            "carried_from_release_snapshot_sha256": {"$ref": "#/$defs/sha256"}
+          },
+          "additionalProperties": false
+        },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 5,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/evidence_ref"},
+          "allOf": [
+            {"contains": {"properties": {"role": {"const": "standalone_evas_gold"}}, "required": ["role"]}},
+            {"contains": {"properties": {"role": {"const": "standalone_evas_mutations"}}, "required": ["role"]}},
+            {"contains": {"properties": {"role": {"const": "spectre_gold_carried"}}, "required": ["role"]}},
+            {"contains": {"properties": {"role": {"const": "spectre_mutations_carried"}}, "required": ["role"]}},
+            {"contains": {"properties": {"role": {"const": "checker_replay"}}, "required": ["role"]}}
+          ]
+        },
+        "reuse_decisions": {
+          "type": "array",
+          "minItems": 6,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/reuse_decision"},
+          "allOf": [
+            {"contains": {"properties": {"component": {"const": "task_inputs"}}, "required": ["component"]}},
+            {"contains": {"properties": {"component": {"const": "oracle"}}, "required": ["component"]}},
+            {"contains": {"properties": {"component": {"const": "ahdl_like"}}, "required": ["component"]}},
+            {"contains": {"properties": {"component": {"const": "evas"}}, "required": ["component"]}},
+            {"contains": {"properties": {"component": {"const": "spectre"}}, "required": ["component"]}},
+            {"contains": {"properties": {"component": {"const": "assembly"}}, "required": ["component"]}}
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vabench.local/schemas/v4/standalone_rust_toolchain_lock.schema.json",
+  "title": "vaBench v4 standalone Rust evaluator toolchain lock",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "status",
+    "evas",
+    "spectre",
+    "benchmark",
+    "runtime"
+  ],
+  "properties": {
+    "schema_version": {"const": "v4-standalone-rust-toolchain-lock-v1"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "status": {"const": "valid"},
+    "evas": {
+      "type": "object",
+      "required": [
+        "distribution",
+        "implementation_track",
+        "frontend",
+        "runtime",
+        "source_package_version",
+        "runtime_metadata_version",
+        "git_commit",
+        "git_describe",
+        "dirty",
+        "source_root",
+        "module_path",
+        "executable_path",
+        "requested_engine",
+        "actual_engine",
+        "allow_python_fallback",
+        "profile",
+        "rust_core_abi",
+        "build_sha256",
+        "runtime_components",
+        "ahdl_like",
+        "smoke"
+      ],
+      "properties": {
+        "distribution": {"const": "evas-rust-frontend"},
+        "implementation_track": {"const": "standalone-rust"},
+        "frontend": {"const": "rust"},
+        "runtime": {"const": "rust"},
+        "source_package_version": {"type": "string", "minLength": 1},
+        "runtime_metadata_version": {"type": "string", "minLength": 1},
+        "git_commit": {"$ref": "#/$defs/git_sha"},
+        "git_describe": {"type": "string", "minLength": 1},
+        "dirty": {"const": false},
+        "source_root": {"type": "string", "minLength": 1},
+        "module_path": {"type": "string", "minLength": 1},
+        "executable_path": {"type": "string", "minLength": 1},
+        "requested_engine": {"const": "standalone-rust"},
+        "actual_engine": {"const": "standalone-rust"},
+        "allow_python_fallback": {"const": false},
+        "profile": {"const": "balanced"},
+        "rust_core_abi": {"type": "integer", "minimum": 1},
+        "build_sha256": {"$ref": "#/$defs/sha256"},
+        "runtime_components": {
+          "type": "object",
+          "required": ["rust_frontend_sha256", "rust_source_tree_sha256"],
+          "properties": {
+            "rust_frontend_sha256": {"$ref": "#/$defs/sha256"},
+            "rust_source_tree_sha256": {"$ref": "#/$defs/sha256"}
+          },
+          "additionalProperties": false
+        },
+        "ahdl_like": {
+          "type": "object",
+          "required": ["ruleset_id", "ruleset_sha256", "spectre_strict", "minimum_transition_s"],
+          "properties": {
+            "ruleset_id": {"type": "string", "minLength": 1},
+            "ruleset_sha256": {"$ref": "#/$defs/sha256"},
+            "spectre_strict": {"const": true},
+            "minimum_transition_s": {"type": "number", "exclusiveMinimum": 0}
+          },
+          "additionalProperties": false
+        },
+        "smoke": {
+          "type": "object",
+          "required": [
+            "status",
+            "log_sha256",
+            "trace_sha256",
+            "observed_engine",
+            "observed_profile",
+            "python_fallback_observed"
+          ],
+          "properties": {
+            "status": {"const": "pass"},
+            "log_sha256": {"$ref": "#/$defs/sha256"},
+            "trace_sha256": {"$ref": "#/$defs/sha256"},
+            "observed_engine": {"const": "standalone-rust"},
+            "observed_profile": {"const": "balanced"},
+            "python_fallback_observed": {"const": false}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "spectre": {
+      "type": "object",
+      "required": ["backend", "remote_host", "route", "path", "version", "cadence_cshrc", "transport_identity"],
+      "properties": {
+        "backend": {"const": "sui-direct"},
+        "remote_host": {"enum": ["thu-sui", "thu-wei"]},
+        "route": {"type": "string", "minLength": 1},
+        "path": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "cadence_cshrc": {"type": "string", "minLength": 1},
+        "transport_identity": {"type": "string", "pattern": "^sui-direct:ssh:thu-(sui|wei)(:proxyjump=thu-(jin|han))?$"}
+      },
+      "additionalProperties": false
+    },
+    "benchmark": {
+      "type": "object",
+      "required": ["git_commit", "dirty", "checker_registry_sha256", "harness_generator_sha256", "oracle_runner_sha256", "schema_set_sha256"],
+      "properties": {
+        "git_commit": {"$ref": "#/$defs/git_sha"},
+        "dirty": {"type": "boolean"},
+        "checker_registry_sha256": {"$ref": "#/$defs/sha256"},
+        "harness_generator_sha256": {"$ref": "#/$defs/sha256"},
+        "oracle_runner_sha256": {"$ref": "#/$defs/sha256"},
+        "schema_set_sha256": {"$ref": "#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    },
+    "runtime": {
+      "type": "object",
+      "required": ["python_version", "python_executable", "platform", "architecture", "python_role"],
+      "properties": {
+        "python_version": {"type": "string", "minLength": 1},
+        "python_executable": {"type": "string", "minLength": 1},
+        "platform": {"type": "string", "minLength": 1},
+        "architecture": {"type": "string", "minLength": 1},
+        "python_role": {"const": "orchestration-and-checker-only"}
+      },
+      "additionalProperties": false
+    },
+    "base_spectre_lock_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "git_sha": {"type": "string", "pattern": "^[a-f0-9]{40}$"}
+  },
+  "additionalProperties": false
+}

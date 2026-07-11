@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vabench.local/schemas/v4/mutation_catalog.schema.json",
+  "title": "vaBench v4 certified semantic mutation catalog",
+  "type": "object",
+  "required": ["schema_version", "family_id", "gold_bundle_sha256", "mutations"],
+  "properties": {
+    "schema_version": {"const": "v4-mutation-catalog-v1"},
+    "family_id": {"type": "string", "pattern": "^[0-9]{3}$"},
+    "gold_bundle_sha256": {"$ref": "#/$defs/sha256"},
+    "mutations": {
+      "type": "array",
+      "minItems": 5,
+      "items": {"$ref": "#/$defs/mutation"}
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "mutation": {
+      "type": "object",
+      "required": [
+        "id",
+        "fault_class",
+        "trigger_condition",
+        "violated_property_ids",
+        "changed_artifacts",
+        "artifact_hashes",
+        "certification"
+      ],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_]*$"},
+        "fault_class": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "trigger_condition": {"type": "string", "minLength": 1},
+        "violated_property_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^P_[A-Z0-9_]+$"}
+        },
+        "changed_artifacts": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*\\.va$"
+          }
+        },
+        "artifact_hashes": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {"$ref": "#/$defs/sha256"}
+        },
+        "certification": {
+          "type": "object",
+          "required": [
+            "status",
+            "profile",
+            "compile_status",
+            "simulation_status",
+            "behavior_status",
+            "activated_property_ids",
+            "evidence_path"
+          ],
+          "properties": {
+            "status": {"enum": ["pending", "pass", "fail"]},
+            "profile": {"enum": ["feedback", "score"]},
+            "compile_status": {"enum": ["pending", "pass", "fail"]},
+            "simulation_status": {"enum": ["pending", "pass", "fail"]},
+            "behavior_status": {"enum": ["pending", "killed_behaviorally", "survived", "invalid_run"]},
+            "activated_property_ids": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {"type": "string", "pattern": "^P_[A-Z0-9_]+$"}
+            },
+            "evidence_path": {"type": "string", "minLength": 1}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

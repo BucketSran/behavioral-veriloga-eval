@@ -1,0 +1,335 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vabench.local/schemas/v4/first_n_spectre_evidence.schema.json",
+  "title": "vaBench v4 canonical first-N Spectre sidecar evidence",
+  "type": "object",
+  "required": ["schema_version", "generated_at", "status", "dry_run", "numbering_plan", "toolchain_lock", "execution", "summary", "rows"],
+  "properties": {
+    "schema_version": {"enum": ["v4-first-n-spectre-evidence-v1", "v4-first-n-spectre-evidence-v2"]},
+    "evidence_policy": {"const": "v4-dependency-scoped-evidence-v2"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "status": {"enum": ["dry_run_materialized", "pass", "partial_failure", "fail"]},
+    "dry_run": {"type": "boolean"},
+    "numbering_plan": {"$ref": "#/$defs/numbering_plan"},
+    "toolchain_lock": {"$ref": "#/$defs/toolchain_lock"},
+    "execution": {"$ref": "#/$defs/execution"},
+    "summary": {"$ref": "#/$defs/summary"},
+    "rows": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/row"}}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "sha256_or_empty": {"type": "string", "pattern": "^(?:[a-f0-9]{64})?$"},
+    "nonempty_string": {"type": "string", "minLength": 1},
+    "string_list": {"type": "array", "items": {"type": "string"}},
+    "fingerprint_map": {
+      "type": "object",
+      "propertyNames": {"pattern": "^[a-z0-9_]+$"},
+      "additionalProperties": {"$ref": "#/$defs/sha256"}
+    },
+    "component_fingerprints": {
+      "type": "object",
+      "required": ["schema_version", "policy_id", "state", "task_inputs", "oracle", "backend", "assembly"],
+      "properties": {
+        "schema_version": {"const": "v4-evidence-components-v2"},
+        "policy_id": {"const": "v4-dependency-scoped-evidence-v2"},
+        "state": {"enum": ["fresh", "carried_forward", "stale_component", "blocked_missing_raw_evidence", "superseded"]},
+        "task_inputs": {"$ref": "#/$defs/fingerprint_map"},
+        "oracle": {"$ref": "#/$defs/fingerprint_map"},
+        "backend": {"$ref": "#/$defs/fingerprint_map"},
+        "assembly": {
+          "type": "object",
+          "required": ["policy_sha256", "release_snapshot_sha256"],
+          "properties": {
+            "policy_sha256": {"$ref": "#/$defs/sha256"},
+            "release_snapshot_sha256": {"$ref": "#/$defs/sha256"},
+            "carried_from_release_snapshot_sha256": {"$ref": "#/$defs/sha256"}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "relative_artifact": {
+      "type": "string",
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*\\.va$"
+    },
+    "numbering_plan": {
+      "type": "object",
+      "required": ["path", "sha256", "schema_version", "selection_mode", "requested_first_n", "requested_task_ids", "selected_rows"],
+      "properties": {
+        "path": {"$ref": "#/$defs/nonempty_string"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "schema_version": {"const": "v4-task-family-numbering-plan-v1"},
+        "selection_mode": {"enum": ["first_n", "task_ids"]},
+        "requested_first_n": {"type": ["integer", "null"], "minimum": 1, "maximum": 400},
+        "requested_task_ids": {"type": "array", "items": {"type": "string", "pattern": "^[0-9]{3}$"}, "uniqueItems": true},
+        "selected_rows": {"type": "integer", "minimum": 1, "maximum": 400}
+      },
+      "additionalProperties": false
+    },
+    "toolchain_lock": {
+      "type": "object",
+      "required": ["path", "sha256", "schema_version", "status"],
+      "properties": {
+        "path": {"$ref": "#/$defs/nonempty_string"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "schema_version": {"const": "v4-toolchain-lock-v1"},
+        "status": {"const": "valid"}
+      },
+      "additionalProperties": false
+    },
+    "execution": {
+      "type": "object",
+      "required": ["script", "script_sha256", "runner_api", "host", "backend", "mode", "route", "timeout_s", "sui_work_root", "case_root", "output_path", "keep_case_dirs", "fail_fast", "cache_enabled", "refresh_cache", "local_cache_root", "remote_cache_root", "started_at", "finished_at", "argv"],
+      "properties": {
+        "script": {"const": "scripts/run_v4_first_n_spectre.py"},
+        "script_sha256": {"$ref": "#/$defs/sha256"},
+        "runner_api": {"const": "runners.run_gold_dual_suite.run_spectre_case"},
+        "host": {"enum": ["thu-wei", "thu-sui"]},
+        "backend": {"const": "sui-direct"},
+        "mode": {"$ref": "#/$defs/nonempty_string"},
+        "route": {"$ref": "#/$defs/nonempty_string"},
+        "timeout_s": {"type": "integer", "minimum": 1},
+        "sui_work_root": {"$ref": "#/$defs/nonempty_string"},
+        "case_root": {"$ref": "#/$defs/nonempty_string"},
+        "output_path": {"$ref": "#/$defs/nonempty_string"},
+        "keep_case_dirs": {"type": "boolean"},
+        "fail_fast": {"type": "boolean"},
+        "cache_enabled": {"type": "boolean"},
+        "refresh_cache": {"type": "boolean"},
+        "local_cache_root": {"$ref": "#/$defs/nonempty_string"},
+        "remote_cache_root": {"type": "string"},
+        "started_at": {"type": "string", "format": "date-time"},
+        "finished_at": {"type": "string", "format": "date-time"},
+        "argv": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    },
+    "summary": {
+      "type": "object",
+      "required": ["requested_rows", "selected_rows", "materialized_rows", "executed_rows", "cache_hit_rows", "passed_rows", "failed_rows", "spectre_ok_rows", "behavior_pass_rows", "side_effect_required_rows", "side_effect_pass_rows", "warning_count", "untriaged_warning_count", "total_wall_time_s", "status_counts", "all_pass"],
+      "properties": {
+        "requested_rows": {"type": "integer", "minimum": 1},
+        "selected_rows": {"type": "integer", "minimum": 1},
+        "materialized_rows": {"type": "integer", "minimum": 0},
+        "executed_rows": {"type": "integer", "minimum": 0},
+        "cache_hit_rows": {"type": "integer", "minimum": 0},
+        "passed_rows": {"type": "integer", "minimum": 0},
+        "failed_rows": {"type": "integer", "minimum": 0},
+        "spectre_ok_rows": {"type": "integer", "minimum": 0},
+        "behavior_pass_rows": {"type": "integer", "minimum": 0},
+        "side_effect_required_rows": {"type": "integer", "minimum": 0},
+        "side_effect_pass_rows": {"type": "integer", "minimum": 0},
+        "warning_count": {"type": "integer", "minimum": 0},
+        "untriaged_warning_count": {"type": "integer", "minimum": 0},
+        "total_wall_time_s": {"type": "number", "minimum": 0},
+        "status_counts": {"type": "object", "propertyNames": {"pattern": "^[A-Z_]+$"}, "additionalProperties": {"type": "integer", "minimum": 0}},
+        "all_pass": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "materialization": {
+      "type": "object",
+      "required": ["status", "case_dir", "retained", "deck_path", "artifact_paths", "notes"],
+      "properties": {
+        "status": {"enum": ["complete", "fail"]},
+        "case_dir": {"type": "string"},
+        "retained": {"type": "boolean"},
+        "deck_path": {"type": "string"},
+        "artifact_paths": {"type": "array", "items": {"$ref": "#/$defs/relative_artifact"}, "uniqueItems": true},
+        "notes": {"$ref": "#/$defs/string_list"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "complete"}}, "required": ["status"]},
+          "then": {"properties": {"case_dir": {"minLength": 1}, "deck_path": {"minLength": 1}, "artifact_paths": {"minItems": 1}}},
+          "else": {"properties": {"notes": {"minItems": 1}}}
+        }
+      ],
+      "additionalProperties": false
+    },
+    "gold_artifact": {
+      "type": "object",
+      "required": ["path", "sha256"],
+      "properties": {"path": {"$ref": "#/$defs/relative_artifact"}, "sha256": {"$ref": "#/$defs/sha256"}},
+      "additionalProperties": false
+    },
+    "hashes": {
+      "type": "object",
+      "required": ["deck_sha256", "harness_spec_sha256", "score_profile_sha256", "family_spec_sha256", "gold_bundle_sha256", "gold_artifacts", "public_support_bundle_sha256", "public_support_artifacts", "checker_sha256", "checker_profile_sha256", "checker_registry_sha256", "toolchain_lock_sha256"],
+      "properties": {
+        "deck_sha256": {"$ref": "#/$defs/sha256_or_empty"},
+        "harness_spec_sha256": {"$ref": "#/$defs/sha256_or_empty"},
+        "score_profile_sha256": {"$ref": "#/$defs/sha256_or_empty"},
+        "family_spec_sha256": {"$ref": "#/$defs/sha256_or_empty"},
+        "gold_bundle_sha256": {"$ref": "#/$defs/sha256_or_empty"},
+        "gold_artifacts": {"type": "array", "items": {"$ref": "#/$defs/gold_artifact"}, "uniqueItems": true},
+        "public_support_bundle_sha256": {"$ref": "#/$defs/sha256_or_empty"},
+        "public_support_artifacts": {"type": "array", "items": {"$ref": "#/$defs/gold_artifact"}, "uniqueItems": true},
+        "checker_sha256": {"$ref": "#/$defs/sha256_or_empty"},
+        "checker_profile_sha256": {"$ref": "#/$defs/sha256_or_empty"},
+        "checker_registry_sha256": {"$ref": "#/$defs/sha256_or_empty"},
+        "toolchain_lock_sha256": {"$ref": "#/$defs/sha256"},
+        "ahdl_like_sha256": {"$ref": "#/$defs/sha256"},
+        "evas_sha256": {"$ref": "#/$defs/sha256"},
+        "spectre_sha256": {"$ref": "#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    },
+    "spectre_identity": {
+      "type": "object",
+      "required": ["backend", "mode", "host", "route", "path", "version", "cadence_cshrc", "transport_identity", "verification"],
+      "properties": {
+        "backend": {"const": "sui-direct"},
+        "mode": {"$ref": "#/$defs/nonempty_string"},
+        "host": {"enum": ["thu-wei", "thu-sui"]},
+        "route": {"$ref": "#/$defs/nonempty_string"},
+        "path": {"$ref": "#/$defs/nonempty_string"},
+        "version": {"$ref": "#/$defs/nonempty_string"},
+        "cadence_cshrc": {"$ref": "#/$defs/nonempty_string"},
+        "transport_identity": {"$ref": "#/$defs/nonempty_string"},
+        "verification": {"enum": ["not_probed_dry_run", "remote_probe_match"]}
+      },
+      "additionalProperties": false
+    },
+    "spectre_timing": {
+      "type": "object",
+      "properties": {
+        "tran_elapsed_s": {"type": "number", "minimum": 0},
+        "aggregate_elapsed_s": {"type": "number", "minimum": 0},
+        "reported_wall_s": {"type": "number", "minimum": 0},
+        "accepted_tran_steps": {"type": "number", "minimum": 0},
+        "ahdl_compile_elapsed_s": {"type": "number", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "spectre_result": {
+      "type": "object",
+      "required": ["ran", "ok", "rows", "signals", "errors", "warnings", "benign_warnings", "untriaged_warnings", "remote_run_dir", "timing", "wall_time_s"],
+      "properties": {
+        "ran": {"type": "boolean"},
+        "ok": {"type": ["boolean", "null"]},
+        "rows": {"type": "integer", "minimum": 0},
+        "signals": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "errors": {"$ref": "#/$defs/string_list"},
+        "warnings": {"$ref": "#/$defs/string_list"},
+        "benign_warnings": {"$ref": "#/$defs/string_list"},
+        "untriaged_warnings": {"$ref": "#/$defs/string_list"},
+        "remote_run_dir": {"type": "string"},
+        "timing": {"$ref": "#/$defs/spectre_timing"},
+        "wall_time_s": {"type": "number", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "behavior_result": {
+      "type": "object",
+      "required": ["ran", "score", "notes"],
+      "properties": {"ran": {"type": "boolean"}, "score": {"type": ["number", "null"], "minimum": 0, "maximum": 1}, "notes": {"$ref": "#/$defs/string_list"}},
+      "additionalProperties": false
+    },
+    "side_effect_result": {
+      "type": "object",
+      "required": ["required", "expected_files", "ran", "pass", "notes"],
+      "properties": {
+        "required": {"type": "boolean"},
+        "expected_files": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "ran": {"type": "boolean"},
+        "pass": {"type": ["boolean", "null"]},
+        "notes": {"$ref": "#/$defs/string_list"}
+      },
+      "additionalProperties": false
+    },
+    "cache": {
+      "type": "object",
+      "required": ["key", "profile", "inputs", "hit", "source", "cacheable", "local_entry", "remote_entry", "notes"],
+      "properties": {
+        "key": {"$ref": "#/$defs/sha256_or_empty"},
+        "profile": {"const": "score"},
+        "inputs": {"type": "object", "additionalProperties": {"type": "string"}},
+        "hit": {"type": "boolean"},
+        "source": {"enum": ["none", "local", "remote"]},
+        "cacheable": {"type": "boolean"},
+        "local_entry": {"type": "string"},
+        "remote_entry": {"type": "string"},
+        "notes": {"$ref": "#/$defs/string_list"}
+      },
+      "additionalProperties": false
+    },
+    "row": {
+      "type": "object",
+      "required": ["canonical_id", "canonical_slug", "source_slug", "task_id", "title", "category", "level", "status", "materialization", "hashes", "spectre_identity", "spectre", "behavior", "side_effect", "cache"],
+      "properties": {
+        "canonical_id": {"type": "string", "pattern": "^[0-9]{3}$"},
+        "canonical_slug": {"$ref": "#/$defs/nonempty_string"},
+        "source_slug": {"$ref": "#/$defs/nonempty_string"},
+        "task_id": {"type": "string", "pattern": "^v4-[0-9]{3}$"},
+        "title": {"type": "string"},
+        "category": {"type": "string"},
+        "level": {"type": "string"},
+        "status": {"enum": ["DRY_RUN", "PASS", "PASS_WITH_WARNINGS", "FAIL_SPECTRE", "FAIL_BEHAVIOR", "FAIL_SIDE_EFFECT", "FAIL_RUNNER"]},
+        "materialization": {"$ref": "#/$defs/materialization"},
+        "hashes": {"$ref": "#/$defs/hashes"},
+        "component_fingerprints": {"$ref": "#/$defs/component_fingerprints"},
+        "spectre_identity": {"$ref": "#/$defs/spectre_identity"},
+        "spectre": {"$ref": "#/$defs/spectre_result"},
+        "behavior": {"$ref": "#/$defs/behavior_result"},
+        "side_effect": {"$ref": "#/$defs/side_effect_result"},
+        "cache": {"$ref": "#/$defs/cache"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"materialization": {"properties": {"status": {"const": "complete"}}}}, "required": ["materialization"]},
+          "then": {
+            "properties": {
+              "hashes": {
+                "properties": {
+                  "deck_sha256": {"$ref": "#/$defs/sha256"},
+                  "harness_spec_sha256": {"$ref": "#/$defs/sha256"},
+                  "score_profile_sha256": {"$ref": "#/$defs/sha256"},
+                  "family_spec_sha256": {"$ref": "#/$defs/sha256"},
+                  "gold_bundle_sha256": {"$ref": "#/$defs/sha256"},
+                  "gold_artifacts": {"minItems": 1},
+                  "checker_sha256": {"$ref": "#/$defs/sha256"},
+                  "checker_profile_sha256": {"$ref": "#/$defs/sha256"},
+                  "checker_registry_sha256": {"$ref": "#/$defs/sha256"}
+                }
+              }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"schema_version": {"const": "v4-first-n-spectre-evidence-v2"}}, "required": ["schema_version"]},
+      "then": {
+        "required": ["evidence_policy"],
+        "properties": {
+          "rows": {
+            "items": {
+              "if": {"properties": {"materialization": {"properties": {"status": {"const": "complete"}}}}},
+              "then": {"required": ["component_fingerprints"]}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "dry_run_materialized"}}, "required": ["status"]},
+      "then": {
+        "properties": {
+          "dry_run": {"const": true},
+          "summary": {"properties": {"executed_rows": {"const": 0}, "passed_rows": {"const": 0}, "failed_rows": {"const": 0}, "spectre_ok_rows": {"const": 0}, "behavior_pass_rows": {"const": 0}, "side_effect_pass_rows": {"const": 0}, "warning_count": {"const": 0}, "untriaged_warning_count": {"const": 0}, "total_wall_time_s": {"const": 0}, "all_pass": {"const": true}}},
+          "rows": {"items": {"properties": {"status": {"const": "DRY_RUN"}, "spectre": {"properties": {"ran": {"const": false}, "ok": {"type": "null"}}}, "behavior": {"properties": {"ran": {"const": false}, "score": {"type": "null"}}}, "side_effect": {"properties": {"ran": {"const": false}, "pass": {"type": "null"}}}}}}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"dry_run": {"const": false}}, "required": ["dry_run"]},
+      "then": {"properties": {"status": {"enum": ["pass", "partial_failure", "fail"]}}}
+    }
+  ],
+  "additionalProperties": false
+}

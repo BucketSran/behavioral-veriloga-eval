@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vabench.local/schemas/v4/contract_review.schema.json",
+  "title": "vaBench v4 canonical contract review",
+  "type": "object",
+  "required": ["schema_version", "scope", "status", "issues"],
+  "properties": {
+    "schema_version": {"const": "v4-contract-review-v1"},
+    "scope": {
+      "type": "object",
+      "required": ["canonical_dut_ids", "reviewed_family_count"],
+      "properties": {
+        "canonical_dut_ids": {"type": "string"},
+        "reviewed_family_count": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "status": {"enum": ["open", "closed"]},
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "family_ids", "kind", "severity", "summary", "required_action"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "family_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {"type": "string", "pattern": "^[0-9]{3}$"}
+          },
+          "kind": {
+            "enum": [
+              "gate1_independence",
+              "prompt_gold_mismatch",
+              "prompt_metadata_mismatch",
+              "public_contract_mismatch",
+              "observable_contract_gap",
+              "parameter_contract_gap",
+              "harness_coverage_gap",
+              "runner_resource_requirement",
+              "classification_cleanup",
+              "gold_hygiene"
+            ]
+          },
+          "severity": {"enum": ["blocking", "review", "cleanup"]},
+          "status": {"enum": ["open", "resolved", "wont_fix"]},
+          "summary": {"type": "string", "minLength": 1},
+          "required_action": {"type": "string", "minLength": 1},
+          "resolution": {"type": "string", "minLength": 1},
+          "evidence_paths": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {"type": "string", "minLength": 1}
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

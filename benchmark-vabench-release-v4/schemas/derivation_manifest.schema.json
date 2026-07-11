@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vabench.local/schemas/v4/derivation_manifest.schema.json",
+  "title": "vaBench v4 tri-form mutation partition",
+  "type": "object",
+  "required": ["schema_version", "family_id", "mutation_catalog_sha256", "mutation_partition"],
+  "properties": {
+    "schema_version": {"const": "v4-derivation-manifest-v1"},
+    "family_id": {"type": "string", "pattern": "^[0-9]{3}$"},
+    "mutation_catalog_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "mutation_partition": {
+      "type": "object",
+      "required": ["bugfix_seed", "testbench_public_feedback", "testbench_private_score"],
+      "properties": {
+        "bugfix_seed": {"type": "array", "minItems": 1, "maxItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/mutation_id"}},
+        "testbench_public_feedback": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/mutation_id"}},
+        "testbench_private_score": {"type": "array", "minItems": 3, "uniqueItems": true, "items": {"$ref": "#/$defs/mutation_id"}}
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "mutation_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_]*$"}
+  },
+  "additionalProperties": false
+}

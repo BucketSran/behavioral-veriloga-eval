@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vabench.local/schemas/v4/toolchain_lock.schema.json",
+  "title": "vaBench v4 evaluator toolchain lock",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "status",
+    "evas",
+    "spectre",
+    "benchmark",
+    "runtime"
+  ],
+  "properties": {
+    "schema_version": {"const": "v4-toolchain-lock-v1"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "status": {"const": "valid"},
+    "evas": {
+      "type": "object",
+      "required": [
+        "distribution",
+        "implementation_track",
+        "frontend",
+        "runtime",
+        "source_package_version",
+        "runtime_metadata_version",
+        "release_tag",
+        "release_base_commit",
+        "patch_commit_count",
+        "git_commit",
+        "git_describe",
+        "dirty",
+        "release_relation",
+        "module_path",
+        "requested_engine",
+        "actual_engine",
+        "allow_python_fallback",
+        "profile",
+        "rust_core_abi",
+        "build_sha256",
+        "runtime_components",
+        "ahdl_like",
+        "smoke"
+      ],
+      "properties": {
+        "distribution": {"const": "evas-sim"},
+        "implementation_track": {"const": "python-rust-hybrid"},
+        "frontend": {"const": "python"},
+        "runtime": {"const": "rust"},
+        "source_package_version": {"const": "0.8.1"},
+        "runtime_metadata_version": {"const": "0.8.1"},
+        "release_tag": {"const": "v0.8.1"},
+        "release_base_commit": {"const": "e552d152f6be970610dcc58cd27b04b7e53b892f"},
+        "patch_commit_count": {"type": "integer", "minimum": 0},
+        "git_commit": {"$ref": "#/$defs/git_sha"},
+        "git_describe": {"type": "string", "pattern": "^v0\\.8\\.1(?:-[0-9]+-g[a-f0-9]+)?$"},
+        "dirty": {"const": false},
+        "release_relation": {"enum": ["exact_release_tag", "patched_release_descendant"]},
+        "module_path": {"type": "string", "minLength": 1},
+        "requested_engine": {"enum": ["evas-rust", "evas2"]},
+        "actual_engine": {"const": "evas-rust"},
+        "allow_python_fallback": {"const": false},
+        "profile": {"const": "balanced"},
+        "rust_core_abi": {"const": 20260711},
+        "build_sha256": {"$ref": "#/$defs/sha256"},
+        "runtime_components": {
+          "type": "object",
+          "required": ["netlist_runner_sha256", "spectre_parser_sha256", "rust_runtime_sha256", "python_package_sha256"],
+          "properties": {
+            "netlist_runner_sha256": {"$ref": "#/$defs/sha256"},
+            "spectre_parser_sha256": {"$ref": "#/$defs/sha256"},
+            "rust_runtime_sha256": {"$ref": "#/$defs/sha256"},
+            "python_package_sha256": {"$ref": "#/$defs/sha256"}
+          },
+          "additionalProperties": false
+        },
+        "ahdl_like": {
+          "type": "object",
+          "required": ["ruleset_id", "ruleset_sha256", "spectre_strict", "minimum_transition_s"],
+          "properties": {
+            "ruleset_id": {"const": "evas-ahdl-like-v0.8.1"},
+            "ruleset_sha256": {"$ref": "#/$defs/sha256"},
+            "spectre_strict": {"const": true},
+            "minimum_transition_s": {"type": "number", "exclusiveMinimum": 0}
+          },
+          "additionalProperties": false
+        },
+        "smoke": {
+          "type": "object",
+          "required": ["status", "log_sha256", "observed_engine", "observed_profile", "python_fallback_observed"],
+          "properties": {
+            "status": {"const": "pass"},
+            "log_sha256": {"$ref": "#/$defs/sha256"},
+            "observed_engine": {"const": "evas-rust"},
+            "observed_profile": {"const": "balanced"},
+            "python_fallback_observed": {"const": false}
+          },
+          "additionalProperties": false
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"release_relation": {"const": "exact_release_tag"}}},
+          "then": {
+            "properties": {
+              "git_commit": {"const": "e552d152f6be970610dcc58cd27b04b7e53b892f"},
+              "git_describe": {"const": "v0.8.1"},
+              "patch_commit_count": {"const": 0}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"release_relation": {"const": "patched_release_descendant"}}},
+          "then": {
+            "properties": {
+              "git_commit": {"not": {"const": "e552d152f6be970610dcc58cd27b04b7e53b892f"}},
+              "git_describe": {"pattern": "^v0\\.8\\.1-[1-9][0-9]*-g[a-f0-9]+$"},
+              "patch_commit_count": {"type": "integer", "minimum": 1}
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "spectre": {
+      "type": "object",
+      "required": ["backend", "remote_host", "route", "path", "version", "cadence_cshrc", "transport_identity"],
+      "properties": {
+        "backend": {"const": "sui-direct"},
+        "remote_host": {"enum": ["thu-sui", "thu-wei"]},
+        "route": {"type": "string", "minLength": 1},
+        "path": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "cadence_cshrc": {"type": "string", "minLength": 1},
+        "transport_identity": {"type": "string", "pattern": "^sui-direct:ssh:thu-(sui|wei)(:proxyjump=thu-(jin|han))?$"}
+      },
+      "additionalProperties": false
+    },
+    "benchmark": {
+      "type": "object",
+      "required": ["git_commit", "dirty", "checker_registry_sha256", "harness_generator_sha256", "oracle_runner_sha256", "schema_set_sha256"],
+      "properties": {
+        "git_commit": {"$ref": "#/$defs/git_sha"},
+        "dirty": {"type": "boolean"},
+        "checker_registry_sha256": {"$ref": "#/$defs/sha256"},
+        "harness_generator_sha256": {"$ref": "#/$defs/sha256"},
+        "oracle_runner_sha256": {"$ref": "#/$defs/sha256"},
+        "schema_set_sha256": {"$ref": "#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    },
+    "runtime": {
+      "type": "object",
+      "required": ["python_version", "python_executable", "platform", "architecture"],
+      "properties": {
+        "python_version": {"type": "string", "minLength": 1},
+        "python_executable": {"type": "string", "minLength": 1},
+        "platform": {"type": "string", "minLength": 1},
+        "architecture": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "git_sha": {"type": "string", "pattern": "^[a-f0-9]{40}$"}
+  },
+  "additionalProperties": false
+}

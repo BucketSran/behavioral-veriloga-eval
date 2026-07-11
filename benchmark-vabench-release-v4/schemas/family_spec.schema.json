@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vabench.local/schemas/v4/family_spec.schema.json",
+  "title": "vaBench v4 canonical DUT family specification",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "family_id",
+    "task_ids",
+    "identity",
+    "artifact_contract",
+    "testbench_binding",
+    "properties",
+    "trace_contract",
+    "modeling_constraints"
+  ],
+  "properties": {
+    "schema_version": {"const": "v4-family-spec-v1"},
+    "family_id": {"type": "string", "pattern": "^[0-9]{3}$"},
+    "task_ids": {
+      "type": "object",
+      "required": ["dut", "testbench", "bugfix"],
+      "properties": {
+        "dut": {"type": "string", "pattern": "^v4-[0-9]{3}$"},
+        "testbench": {"type": "string", "pattern": "^v4-[0-9]{3}$"},
+        "bugfix": {"type": "string", "pattern": "^v4-[0-9]{4}$"}
+      },
+      "additionalProperties": false
+    },
+    "identity": {
+      "type": "object",
+      "required": ["title", "category", "level", "difficulty", "supported_scope"],
+      "properties": {
+        "title": {"type": "string", "minLength": 1},
+        "category": {"type": "string", "minLength": 1},
+        "level": {"enum": ["L1", "L2"]},
+        "difficulty": {"type": "string", "minLength": 1},
+        "supported_scope": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "artifact_contract": {
+      "type": "object",
+      "required": ["mode", "files"],
+      "properties": {
+        "mode": {"enum": ["single_file", "system_bundle"]},
+        "files": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/artifact_file"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "support_contract": {
+      "type": "object",
+      "required": ["visibility", "source_root", "mount_root", "files"],
+      "properties": {
+        "visibility": {"const": "public_readonly"},
+        "source_root": {"const": "public_support"},
+        "mount_root": {"const": "support"},
+        "files": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/support_file"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "testbench_binding": {
+      "type": "object",
+      "required": ["dut_source_root", "source_path_template", "instances"],
+      "properties": {
+        "dut_source_root": {"type": "string", "minLength": 1},
+        "source_path_template": {"type": "string", "pattern": "\\{artifact_path\\}"},
+        "instances": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/binding_instance"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "properties": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "observable_contract", "required_signals"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^P_[A-Z0-9_]+$"},
+          "observable_contract": {"type": "string", "minLength": 1},
+          "required_signals": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string", "minLength": 1},
+            "uniqueItems": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "trace_contract": {
+      "type": "object",
+      "required": ["required_signals"],
+      "properties": {
+        "required_signals": {
+          "type": "array",
+          "minItems": 2,
+          "contains": {"const": "time"},
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "modeling_constraints": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "parameter": {
+      "type": "object",
+      "required": ["name", "type", "default", "units", "valid_range", "override_behavior"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "type": {"enum": ["real", "integer", "string"]},
+        "default": {},
+        "units": {"type": ["string", "null"]},
+        "valid_range": {"type": ["string", "object"]},
+        "override_behavior": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "port": {
+      "type": "object",
+      "required": ["name", "direction", "discipline", "position"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "direction": {"enum": ["input", "output", "inout"]},
+        "discipline": {"type": "string", "minLength": 1},
+        "position": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "module": {
+      "type": "object",
+      "required": ["name", "role", "depends_on", "ports", "parameters"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "role": {"enum": ["entry", "required_submodule"]},
+        "depends_on": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        },
+        "ports": {"type": "array", "items": {"$ref": "#/$defs/port"}},
+        "parameters": {"type": "array", "items": {"$ref": "#/$defs/parameter"}}
+      },
+      "additionalProperties": false
+    },
+    "artifact_file": {
+      "type": "object",
+      "required": ["path", "modules"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*\\.va$"
+        },
+        "modules": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/module"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "support_file": {
+      "type": "object",
+      "required": ["path", "sha256", "modules"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*\\.va$"
+        },
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "modules": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_$]*$"},
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "binding_connection": {
+      "type": "object",
+      "required": ["port_ref", "net", "position"],
+      "properties": {
+        "port_ref": {"type": "string", "minLength": 1},
+        "net": {"type": "string", "minLength": 1},
+        "position": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "binding_instance": {
+      "type": "object",
+      "required": ["name", "module_ref", "connections"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "module_ref": {"type": "string", "minLength": 1},
+        "connections": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/binding_connection"}
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

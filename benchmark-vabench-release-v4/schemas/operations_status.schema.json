@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vabench.local/schemas/v4/operations_status.schema.json",
+  "title": "vaBench v4 operational status",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "benchmark",
+    "sources",
+    "summary",
+    "blockers",
+    "families"
+  ],
+  "properties": {
+    "schema_version": {"const": "v4-operations-status-v1"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "benchmark": {
+      "type": "object",
+      "required": ["git_commit", "branch", "dirty", "schema_set_sha256", "generator_version"],
+      "properties": {
+        "git_commit": {"type": "string"},
+        "branch": {"type": "string"},
+        "dirty": {"type": "boolean"},
+        "schema_set_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "generator_version": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "sources": {"type": "object"},
+    "summary": {"type": "object"},
+    "blockers": {"type": "array", "items": {"type": "object"}},
+    "families": {"type": "array", "items": {"type": "object"}}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vabench.local/schemas/v4/negative_certification.schema.json",
+  "title": "vaBench v4 semantic-negative execution evidence",
+  "type": "object",
+  "required": ["schema_version", "family_id", "mutation_id", "toolchain_lock_sha256", "inputs", "evaluators", "outcome", "diagnostics"],
+  "properties": {
+    "schema_version": {"enum": ["v4-negative-certification-v1", "v4-negative-certification-v2"]},
+    "family_id": {"type": "string", "pattern": "^[0-9]{3}$"},
+    "mutation_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_]*$"},
+    "toolchain_lock_sha256": {"$ref": "#/$defs/sha256"},
+    "release_snapshot_sha256": {"$ref": "#/$defs/sha256"},
+    "component_fingerprints": {"$ref": "#/$defs/component_fingerprints"},
+    "inputs": {
+      "type": "object",
+      "required": ["mutation_bundle_sha256", "checker_profile_sha256", "harness_spec_sha256", "profile_sha256"],
+      "properties": {
+        "mutation_bundle_sha256": {"$ref": "#/$defs/sha256"},
+        "checker_profile_sha256": {"$ref": "#/$defs/sha256"},
+        "harness_spec_sha256": {"$ref": "#/$defs/sha256"},
+        "profile_sha256": {"$ref": "#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    },
+    "evaluators": {
+      "type": "object",
+      "required": ["ahdl_like", "evas", "spectre"],
+      "properties": {
+        "ahdl_like": {"enum": ["pass", "fail"]},
+        "evas": {"enum": ["compile_pass_behavior_fail", "survived", "invalid_run"]},
+        "spectre": {"enum": ["compile_pass_behavior_fail", "survived", "invalid_run"]}
+      },
+      "additionalProperties": false
+    },
+    "outcome": {"const": "killed_behaviorally"},
+    "diagnostics": {
+      "type": "object",
+      "required": ["violated_property_ids", "expected", "observed"],
+      "properties": {
+        "violated_property_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "pattern": "^P_[A-Z0-9_]+$"}},
+        "expected": {"type": "string", "minLength": 1},
+        "observed": {"type": "string", "minLength": 1},
+        "sample_time_s": {"type": "number", "minimum": 0},
+        "mismatch_count": {"type": "integer", "minimum": 1},
+        "metric_gap": {"type": "number", "minimum": 0}
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"schema_version": {"const": "v4-negative-certification-v2"}}},
+      "then": {"required": ["release_snapshot_sha256", "component_fingerprints"]}
+    }
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "fingerprint_map": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/sha256"}
+    },
+    "component_fingerprints": {
+      "type": "object",
+      "required": ["schema_version", "policy_id", "state", "task_inputs", "oracle", "backend", "assembly"],
+      "properties": {
+        "schema_version": {"const": "v4-evidence-components-v2"},
+        "policy_id": {"const": "v4-dependency-scoped-evidence-v2"},
+        "state": {"enum": ["fresh", "carried_forward"]},
+        "task_inputs": {"$ref": "#/$defs/fingerprint_map"},
+        "oracle": {"$ref": "#/$defs/fingerprint_map"},
+        "backend": {
+          "allOf": [
+            {"$ref": "#/$defs/fingerprint_map"},
+            {"required": ["ahdl_like_sha256", "evas_sha256", "spectre_sha256"]}
+          ]
+        },
+        "assembly": {
+          "type": "object",
+          "required": ["policy_sha256", "release_snapshot_sha256"],
+          "properties": {
+            "policy_sha256": {"$ref": "#/$defs/sha256"},
+            "release_snapshot_sha256": {"$ref": "#/$defs/sha256"},
+            "carried_from_release_snapshot_sha256": {"$ref": "#/$defs/sha256"}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
