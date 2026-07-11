@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/cascode_gain_cell_headroom.va"
+
+Vvin (vin 0) vsource type=pwl wave=[0 0.26 7n 0.26 7.1n 0.58 18n 0.58 18.1n 0.12 32n 0.12 32.1n 0.70 47n 0.70 47.1n 0.34 68n 0.34]
+Vbias (vbias 0) vsource type=pwl wave=[0 0.82 22n 0.82 22.1n 0.62 44n 0.62 44.1n 0.92 68n 0.92]
+Vdd (vdd_sense 0) vsource type=pwl wave=[0 1.0 34n 1.0 34.1n 0.74 54n 0.74 54.1n 0.9 68n 0.9]
+Ven (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 50n 0.9 50.1n 0 57n 0 57.1n 0.9 68n 0.9]
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.5n 0.9 1.6n 0 68n 0]
+
+XDUT (vin vbias vdd_sense enable rst vout gain_metric headroom_ok) cascode_gain_cell_headroom
+
+
+tran tran stop=68n maxstep=100p
+save vin vbias vdd_sense enable rst vout gain_metric headroom_ok

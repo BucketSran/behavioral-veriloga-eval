@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/source_follower_buffer_macro.va"
+
+Vvin (vin 0) vsource type=pwl wave=[0 0.62 7n 0.62 7.1n 0.18 18n 0.18 18.1n 0.82 32n 0.82 32.1n 0.42 48n 0.42 48.1n 0.90 68n 0.90]
+Vbias (vbias 0) vsource type=pwl wave=[0 0.85 24n 0.85 24.1n 0.58 43n 0.58 43.1n 0.72 68n 0.72]
+Ven (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 50n 0.9 50.1n 0 57n 0 57.1n 0.9 68n 0.9]
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.5n 0.9 1.6n 0 68n 0]
+
+XDUT (vin vbias enable rst vout headroom_metric valid) source_follower_buffer_macro
+
+
+tran tran stop=68n maxstep=100p
+save vin vbias enable rst vout headroom_metric valid

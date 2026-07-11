@@ -1,0 +1,28 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cmfb_loop_top(vop_in, von_in, clk, rst, enable, vop_out, von_out, trim_2, trim_1, trim_0, cm_error, locked);
+    input vop_in, von_in, clk, rst, enable;
+    output vop_out, von_out, trim_2, trim_1, trim_0, cm_error, locked;
+    electrical vop_in, von_in, clk, rst, enable, vop_out, von_out, trim_2, trim_1, trim_0, cm_error, locked;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real trim_lsb = 10e-3;
+    parameter real lock_tol = 10e-3;
+    parameter real tr = 200p from (0:inf);
+
+    electrical cm_error_raw, trim_corr;
+
+    cm_sensor #(.vcm(vcm), .tr(tr)) u_sensor (
+        vop_in, von_in, cm_error_raw
+    );
+    trim_controller #(.vdd(vdd), .vss(vss), .vth(vth), .trim_lsb(trim_lsb), .lock_tol(lock_tol), .tr(tr)) u_trim (
+        clk, rst, enable, cm_error_raw, trim_2, trim_1, trim_0, trim_corr, locked
+    );
+    output_balancer #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr)) u_balance (
+        vop_in, von_in, enable, rst, trim_corr, vop_out, von_out, cm_error
+    );
+endmodule

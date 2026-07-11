@@ -1,0 +1,45 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module source_follower_buffer_macro(vin, vbias, enable, rst, vout, headroom_metric, valid);
+    input vin, vbias, enable, rst;
+    output vout, headroom_metric, valid;
+    electrical vin, vbias, enable, rst, vout, headroom_metric, valid;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real vgs_drop = 0.12;
+    parameter real min_headroom = 0.10;
+    parameter real tr = 150p from (0:inf);
+
+    real out_value;
+    real max_out;
+    real metric_value;
+    real valid_value;
+
+    analog begin
+        if (V(rst) > vth || V(enable) <= vth || V(vbias) <= min_headroom) begin
+            out_value = vss;
+            metric_value = vss;
+            valid_value = vss;
+        end else begin
+            max_out = V(vbias) - min_headroom;
+            out_value = V(vin) - vgs_drop;
+            if (out_value < vss)
+                out_value = vss;
+            if (out_value > max_out)
+                out_value = max_out;
+            metric_value = V(vbias) - out_value;
+            if (metric_value > vdd)
+                metric_value = vdd;
+            if (metric_value < vss)
+                metric_value = vss;
+            valid_value = vdd;
+        end
+
+        V(vout) <+ 0.5*out_value;
+        V(headroom_metric) <+ 0.5*metric_value;
+        V(valid) <+ 0.5*transition(valid_value, 0, tr, tr);
+    end
+endmodule

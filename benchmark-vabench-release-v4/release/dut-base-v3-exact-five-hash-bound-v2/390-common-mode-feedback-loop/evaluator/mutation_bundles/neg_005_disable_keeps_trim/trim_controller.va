@@ -1,0 +1,66 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module trim_controller(clk, rst, enable, cm_error_raw, trim_2, trim_1, trim_0, trim_corr, locked);
+    input clk, rst, enable, cm_error_raw;
+    output trim_2, trim_1, trim_0, trim_corr, locked;
+    electrical clk, rst, enable, cm_error_raw, trim_2, trim_1, trim_0, trim_corr, locked;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real trim_lsb = 10e-3;
+    parameter real lock_tol = 10e-3;
+    parameter real tr = 200p from (0:inf);
+
+    integer trim_code;
+    integer lock_count;
+    real correction;
+    real residual;
+    real lock_value;
+
+    analog begin
+        @(initial_step) begin
+            trim_code = 0;
+            lock_count = 0;
+            lock_value = vss;
+        end
+
+        @(cross(V(clk) - vth, +1) or cross(V(rst) - vth, +1) or
+          cross(V(enable) - vth, -1)) begin
+            correction = trim_code * trim_lsb;
+            residual = V(cm_error_raw) - correction;
+            if ((V(rst) > vth)) begin
+                trim_code = 0;
+                lock_count = 0;
+                lock_value = vss;
+            end else begin
+                if ((residual > lock_tol) && (trim_code < 7))
+                    trim_code = trim_code + 1;
+                else if ((residual < -lock_tol) && (trim_code > 0))
+                    trim_code = trim_code - 1;
+
+                residual = V(cm_error_raw) - trim_code * trim_lsb;
+                if ((residual <= lock_tol) && (residual >= -lock_tol)) begin
+                    if (lock_count < 2)
+                        lock_count = lock_count + 1;
+                    if (lock_count >= 2)
+                        lock_value = vdd;
+                end else begin
+                    lock_count = 0;
+                    lock_value = vss;
+                end
+            end
+        end
+
+        correction = trim_code * trim_lsb;
+        if ((V(rst) > vth))
+            correction = 0.0;
+
+        V(trim_corr) <+ correction;
+        V(locked) <+ transition(lock_value, 0, tr, tr);
+        V(trim_0) <+ transition((trim_code % 2) ? vdd : vss, 0, tr, tr);
+        V(trim_1) <+ transition(((trim_code / 2) % 2) ? vdd : vss, 0, tr, tr);
+        V(trim_2) <+ transition(((trim_code / 4) % 2) ? vdd : vss, 0, tr, tr);
+    end
+endmodule

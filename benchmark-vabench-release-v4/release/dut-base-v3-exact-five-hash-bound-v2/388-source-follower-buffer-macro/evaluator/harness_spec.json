@@ -1,0 +1,100 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "source_follower_buffer_macro.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=72n maxstep=120p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "vbias",
+      "enable",
+      "rst",
+      "vout",
+      "headroom_metric",
+      "valid"
+    ]
+  },
+  "family_id": "388",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "5355ca7ba4288435357ac1c646c1e318719f54ce0f2887f7e5c2fecb5a45b01c",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "4b648e1525cc06337cc9f2d878bc2a76575216891db5bbb5ab6d7df23b2724e9",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.20 8n 0.20 8.1n 0.55 22n 0.55 22.1n 0.88 38n 0.88 38.1n 0.10 54n 0.10 54.1n 0.70 72n 0.70]",
+          "Vbias (vbias 0) vsource type=pwl wave=[0 0.75 28n 0.75 28.1n 0.55 46n 0.55 46.1n 0.90 72n 0.90]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.9 58n 0.9 58.1n 0 64n 0 64.1n 0.9 72n 0.9]",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 72n 0]",
+          "",
+          "XDUT (vin vbias enable rst vout headroom_metric valid) source_follower_buffer_macro",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=68n maxstep=100p"
+        ],
+        "body_lines": [
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.62 7n 0.62 7.1n 0.18 18n 0.18 18.1n 0.82 32n 0.82 32.1n 0.42 48n 0.42 48.1n 0.90 68n 0.90]",
+          "Vbias (vbias 0) vsource type=pwl wave=[0 0.85 24n 0.85 24.1n 0.58 43n 0.58 43.1n 0.72 68n 0.72]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 50n 0.9 50.1n 0 57n 0 57.1n 0.9 68n 0.9]",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.5n 0.9 1.6n 0 68n 0]",
+          "",
+          "XDUT (vin vbias enable rst vout headroom_metric valid) source_follower_buffer_macro",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RESET_OR_LOW_ENABLE_DRIVES_THE",
+    "P_WHEN_ENABLED_THE_OUTPUT_FOLLOWS_VIN",
+    "P_CLAMP_THE_OUTPUT_BETWEEN_VSS_AND",
+    "P_HEADROOM_METRIC_REPORTS_THE_REMAINING_VBIAS",
+    "P_VALID_IS_HIGH_ONLY_WHEN_ENABLED"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "e5815286f8f59bc64b3c03432bd43ba3b94610eb4a912ff06a490b1fd51949fa",
+    "family_spec_sha256": "3b7f91d0b1e9b73c0a61cbf62ce7ec855c5d69bd94710500ae1136bee5c63d28"
+  },
+  "task_id": "v4-388"
+}

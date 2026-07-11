@@ -1,0 +1,28 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module fm_vco_modulation_source(mod_in, enable, rst, osc_out, freq_metric, phase_marker, valid);
+    inout mod_in, enable, rst, osc_out, freq_metric, phase_marker, valid;
+    electrical mod_in, enable, rst, osc_out, freq_metric, phase_marker, valid;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vcm = 0.45; parameter real f0 = 10e6; parameter real kvco = 5e6; parameter real vth = 0.45; parameter real tr = 200p from (0:inf); parameter real tick = 500p from (0:inf);
+    real freq, phase, osc_v, metric_v, marker_v, valid_v; integer cycles;
+    analog function real min2; input a,b; real a,b; begin min2 = (a < b) ? a : b; end endfunction
+    analog function real max2; input a,b; real a,b; begin max2 = (a > b) ? a : b; end endfunction
+    analog begin
+        @(initial_step) begin phase = 0.0; osc_v = 0.0; metric_v = 0.0; marker_v = 0.0; valid_v = 0.0; cycles = 0; end
+        @(timer(0, tick)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin phase = 0.0; osc_v = 0.0; metric_v = 0.0; marker_v = 0.0; valid_v = 0.0; cycles = 0; end
+            else begin
+                freq = f0 + kvco * (V(mod_in) - vcm); if (freq < 1.0e6) freq = 1.0e6;
+                metric_v = min2(vdd, max2(vss, freq / 20.0e6 * vdd));
+                phase = phase + freq * tick;
+                if (phase >= 2.0) begin phase = phase - 2.0; osc_v = (osc_v > vth) ? vss : vdd; if (osc_v > vth) begin cycles = cycles + 1; marker_v = (marker_v > vth) ? vss : vdd; end end
+                valid_v = (cycles >= 1) ? vdd : vss;
+            end
+        end
+        V(osc_out) <+ transition(osc_v, 0, tr, tr);
+        V(freq_metric) <+ transition(metric_v, 0, tr, tr);
+        V(phase_marker) <+ transition(marker_v, 0, tr, tr);
+        V(valid) <+ transition(valid_v, 0, tr, tr);
+    end
+endmodule

@@ -1,0 +1,45 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module output_balancer(vop_in, von_in, enable, rst, trim_corr, vop_out, von_out, cm_error);
+    input vop_in, von_in, enable, rst, trim_corr;
+    output vop_out, von_out, cm_error;
+    electrical vop_in, von_in, enable, rst, trim_corr, vop_out, von_out, cm_error;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    real correction;
+    real out_p;
+    real out_n;
+    real residual;
+
+    analog begin
+        correction = V(trim_corr);
+        out_p = V(vop_in) - correction;
+        out_n = V(von_in) + correction;
+        residual = 0.5 * (out_p + out_n) - vcm;
+
+        if ((V(rst) > vth) || (V(enable) <= vth)) begin
+            out_p = V(vop_in);
+            out_n = V(von_in);
+            residual = 0.0;
+        end
+
+        if (out_p < vss)
+            out_p = vss;
+        if (out_p > vdd)
+            out_p = vdd;
+        if (out_n < vss)
+            out_n = vss;
+        if (out_n > vdd)
+            out_n = vdd;
+
+        V(vop_out) <+ out_p;
+        V(von_out) <+ out_n;
+        V(cm_error) <+ residual;
+    end
+endmodule

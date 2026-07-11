@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/pa_gain_compression_ampm_macro.va"
+
+Vvin (vin 0) vsource type=pwl wave=[0 0.50 20n 0.50 20.2n 0.58 48n 0.58 48.2n 0.34 74n 0.34 92n 0.34]
+Venvelope (envelope 0) vsource type=pwl wave=[0 0.45 24n 0.45 24.2n 0.62 50n 0.62 50.2n 0.84 78n 0.84 92n 0.84]
+Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 82n 0.9 82.2n 0 92n 0]
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]
+XDUT (vin envelope enable rst vout gain_metric phase_metric compressed) pa_gain_compression_ampm_macro
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=92n maxstep=200p
+save vin envelope enable rst vout gain_metric phase_metric compressed

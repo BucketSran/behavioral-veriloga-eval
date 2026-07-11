@@ -1,0 +1,80 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "lna_gain_compression_macro.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=92n maxstep=200p"
+    ],
+    "body_lines": [
+      "Vvin (vin 0) vsource type=pwl wave=[0 0.47 18n 0.47 18.2n 0.58 42n 0.58 42.2n 0.72 64n 0.72 64.2n 0.25 92n 0.25]",
+      "Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 82n 0.9 82.2n 0 92n 0]",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]",
+      "XDUT (vin enable rst vout gain_metric compression_flag) lna_gain_compression_macro",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "enable",
+      "rst",
+      "vout",
+      "gain_metric",
+      "compression_flag"
+    ]
+  },
+  "family_id": "387",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "70a17c331e0ddceb342223d0cab81a7db3d212650dac687256a9833163991df8",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "70a17c331e0ddceb342223d0cab81a7db3d212650dac687256a9833163991df8",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ON_RESET_OR_WHEN_DISABLED_DRIVE",
+    "P_WHEN_ENABLED_PROVIDE_HIGH_GAIN_FOR",
+    "P_REDUCE_EFFECTIVE_GAIN_MONOTONICALLY_WHEN_THE",
+    "P_EXPOSE_ACTIVE_GAIN_ON_GAIN_METRIC",
+    "P_CLAMP_VOUT_INSIDE_VSS_VDD"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "dbc08968fd4fa631f9fdede8f298d3102a583792c178863f27adb4e13b401cf0",
+    "family_spec_sha256": "1c05e7f21942f5296b834b9558b81406e63b5ff37c41bea93aded4b8862b5a6b"
+  },
+  "task_id": "v4-387"
+}

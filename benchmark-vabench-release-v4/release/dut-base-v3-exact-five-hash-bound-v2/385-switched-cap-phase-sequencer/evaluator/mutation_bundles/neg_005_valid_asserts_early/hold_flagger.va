@@ -1,0 +1,29 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module hold_flagger(clk, rst, enable, phase_code_1, phase_code_0, valid);
+    input clk, rst, enable, phase_code_1, phase_code_0;
+    output valid;
+    electrical clk, rst, enable, phase_code_1, phase_code_0, valid;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    integer saw_hold_end;
+
+    analog begin
+        @(initial_step)
+            saw_hold_end = 0;
+
+        @(cross(V(clk) - vth, +1)) begin
+            if ((V(rst) > vth) || (V(enable) <= vth))
+                saw_hold_end = 0;
+            else if ((V(phase_code_1) <= vth) && (V(phase_code_0) > vth))
+                saw_hold_end = 1;
+        end
+
+        V(valid) <+ transition(saw_hold_end ? vdd : vss, 0, tr, tr);
+    end
+endmodule

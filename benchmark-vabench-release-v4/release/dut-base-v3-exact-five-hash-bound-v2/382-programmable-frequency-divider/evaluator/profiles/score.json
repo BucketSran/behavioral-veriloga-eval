@@ -1,0 +1,41 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=110n maxstep=70p"
+    ],
+    "body_lines": [
+      "Vclk (clk_in 0) vsource type=pulse val0=0 val1=0.9 period=3.5n width=1.75n delay=0.8n rise=45p fall=45p",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.6n 0.9 1.7n 0 110n 0]",
+      "Ven (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 64n 0.9 64.1n 0 75n 0 75.1n 0.9 110n 0.9]",
+      "Vn0 (n_0 0) vsource type=pwl wave=[0 0.9 20n 0.9 20.1n 0 46n 0 46.1n 0.9 88n 0.9 88.1n 0 110n 0]",
+      "Vn1 (n_1 0) vsource type=pwl wave=[0 0 30n 0 30.1n 0.9 58n 0.9 58.1n 0 92n 0 92.1n 0.9 110n 0.9]",
+      "Vn2 (n_2 0) vsource type=pwl wave=[0 0 44n 0 44.1n 0.9 82n 0.9 82.1n 0 110n 0]",
+      "Vn3 (n_3 0) vsource type=pwl wave=[0 0 90n 0 90.1n 0.9 110n 0.9]",
+      "",
+      "XDUT (clk_in rst enable n_3 n_2 n_1 n_0 clk_div ratio_metric valid) programmable_frequency_divider",
+      ""
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "dc7b1d642e5be6920fa4f7348c62698f633cb7770901d640983f6bf1f270df1b",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "100n"
+  },
+  "profile_name": "score",
+  "property_ids": [
+    "P_RESET_OR_LOW_ENABLE_CLEARS_THE",
+    "P_ON_EACH_ENABLED_RISING_CLK_IN",
+    "P_TOGGLE_CLK_DIV_WHENEVER_N_ENABLED",
+    "P_RATIO_METRIC_EXPOSES_THE_SAMPLED_DIVISOR",
+    "P_VALID_IS_HIGH_AFTER_THE_FIRST"
+  ],
+  "public_visible": false,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {}
+}

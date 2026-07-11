@@ -1,0 +1,277 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "cascode_gain_cell_headroom",
+            "parameters": [
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.8",
+                "name": "gain",
+                "override_behavior": "overrides gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.16",
+                "name": "headroom_drop",
+                "override_behavior": "overrides headroom_drop",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "150p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vbias",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vdd_sense",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "gain_metric",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "headroom_ok",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "cascode_gain_cell_headroom.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "389",
+  "identity": {
+    "category": "analog_primitive",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Cascode Gain-cell Headroom Macro"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_OR_LOW_ENABLE_DRIVES_VOUT",
+      "observable_contract": "Reset or low `enable` drives `vout` to common mode and clears metrics.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vbias",
+        "vdd_sense",
+        "enable",
+        "rst",
+        "vout",
+        "gain_metric",
+        "headroom_ok"
+      ]
+    },
+    {
+      "id": "P_WHEN_ENABLED_COMPUTE_AN_INVERTING_GAIN",
+      "observable_contract": "When enabled, compute an inverting gain-cell output around common mode.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vbias",
+        "vdd_sense",
+        "enable",
+        "rst",
+        "vout",
+        "gain_metric",
+        "headroom_ok"
+      ]
+    },
+    {
+      "id": "P_CLAMP_THE_OUTPUT_BETWEEN_VSS_AND",
+      "observable_contract": "Clamp the output between `vss` and the available headroom limit.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vbias",
+        "vdd_sense",
+        "enable",
+        "rst",
+        "vout",
+        "gain_metric",
+        "headroom_ok"
+      ]
+    },
+    {
+      "id": "P_GAIN_METRIC_REPORTS_THE_ABSOLUTE_OUTPUT",
+      "observable_contract": "`gain_metric` reports the absolute output excursion from common mode.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vbias",
+        "vdd_sense",
+        "enable",
+        "rst",
+        "vout",
+        "gain_metric",
+        "headroom_ok"
+      ]
+    },
+    {
+      "id": "P_HEADROOM_OK_IS_HIGH_ONLY_WHEN",
+      "observable_contract": "`headroom_ok` is high only when the available headroom limit remains above common mode.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vbias",
+        "vdd_sense",
+        "enable",
+        "rst",
+        "vout",
+        "gain_metric",
+        "headroom_ok"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1389",
+    "dut": "v4-389",
+    "testbench": "v4-889"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "vbias",
+            "port_ref": "vbias",
+            "position": 1
+          },
+          {
+            "net": "vdd_sense",
+            "port_ref": "vdd_sense",
+            "position": 2
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 3
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 4
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 5
+          },
+          {
+            "net": "gain_metric",
+            "port_ref": "gain_metric",
+            "position": 6
+          },
+          {
+            "net": "headroom_ok",
+            "port_ref": "headroom_ok",
+            "position": 7
+          }
+        ],
+        "module_ref": "cascode_gain_cell_headroom",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "vbias",
+      "vdd_sense",
+      "enable",
+      "rst",
+      "vout",
+      "gain_metric",
+      "headroom_ok"
+    ]
+  }
+}

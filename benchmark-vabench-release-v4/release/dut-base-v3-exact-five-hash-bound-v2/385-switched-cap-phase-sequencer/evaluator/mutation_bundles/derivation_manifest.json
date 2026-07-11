@@ -1,0 +1,65 @@
+{
+  "schema_version": "v4-negative-derivation-diagnostics-v1",
+  "family_id": "385",
+  "mutation_catalog_sha256": "15c2a0bdcc0e5e00add31533819d99f8b890c1cbd2cb332b38f303123a0e4033",
+  "mutation_partition": {
+    "bugfix_seed": [
+      "neg_001_overlapping_phases"
+    ],
+    "testbench_private_score": [
+      "neg_003_swapped_sample_hold",
+      "neg_004_phase_code_lsb_stuck",
+      "neg_005_valid_asserts_early"
+    ],
+    "testbench_public_feedback": [
+      "neg_002_reset_not_cleared"
+    ]
+  },
+  "mutation_diagnostics": [
+    {
+      "id": "neg_001_overlapping_phases",
+      "fault_class": "phase_overlap",
+      "trigger_pattern": "the generator selects phase zero",
+      "diagnostic_pattern": "P_ONE_HOT_SEQUENCE mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=phase_overlap",
+      "violated_property_ids": [
+        "P_ONE_HOT_SEQUENCE"
+      ]
+    },
+    {
+      "id": "neg_002_reset_not_cleared",
+      "fault_class": "missing_reset",
+      "trigger_pattern": "rst is asserted while enable remains high",
+      "diagnostic_pattern": "P_RESET_DISABLE_CLEAR mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=missing_reset",
+      "violated_property_ids": [
+        "P_RESET_DISABLE_CLEAR"
+      ]
+    },
+    {
+      "id": "neg_003_swapped_sample_hold",
+      "fault_class": "wrong_command_mapping",
+      "trigger_pattern": "a sample phase is active",
+      "diagnostic_pattern": "P_COMMAND_MAPPING mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=wrong_command_mapping",
+      "violated_property_ids": [
+        "P_COMMAND_MAPPING"
+      ]
+    },
+    {
+      "id": "neg_004_phase_code_lsb_stuck",
+      "fault_class": "stuck_output",
+      "trigger_pattern": "phase one or phase three is active",
+      "diagnostic_pattern": "P_PHASE_CODE mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=stuck_output",
+      "violated_property_ids": [
+        "P_PHASE_CODE"
+      ]
+    },
+    {
+      "id": "neg_005_valid_asserts_early",
+      "fault_class": "qualification_count_error",
+      "trigger_pattern": "phase one is observed before a complete sequence",
+      "diagnostic_pattern": "P_VALID_AFTER_SEQUENCE mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=qualification_count_error",
+      "violated_property_ids": [
+        "P_VALID_AFTER_SEQUENCE"
+      ]
+    }
+  ]
+}

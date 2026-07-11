@@ -1,0 +1,59 @@
+{
+  "component_fingerprints": {
+    "assembly": {
+      "policy_sha256": "91f4e21b94263e796c846aedef282c79d4abeb7ccc415a0e6f1311f8816b33a4",
+      "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+    },
+    "backend": {
+      "ahdl_like_sha256": "91ce239e5f278a6d5dfcde85ca2d820c5133d8f8a3de26dc6477164e703342f3",
+      "evas_sha256": "2d71c227644956df64209b49d0da6ef55bc6934891020eb26d762e8cb8cc6df2",
+      "spectre_sha256": "ac4c1cf785d5eab74058944d52bf40869e83c94e19202ab72c8e8a250c4dc51b"
+    },
+    "oracle": {
+      "checker_binding_sha256": "9f88b259edd1ee25ab06f3fd73e2473aa458b7e1f16ce5523688cd597e765aa7",
+      "checker_implementation_sha256": "6bedebc949df82ee440613794f80179edc009125dd65d8dfcfd85488505499ca",
+      "checker_profile_sha256": "94d81ac7e0b2e627ba84f7278856104b0cbabda652af96b0c5d6c6cf442c9c15",
+      "diagnostic_policy_sha256": "69b217a349cb0e8a3eab574e7e6d1af03f069fea668b15b37868ef3d2e7deea3",
+      "oracle_runner_sha256": "e70bd46cd3abdfd8ed9658cb13f64bc96e27d364d51ed0fdcd05f8139e63af2b",
+      "property_activation_policy_sha256": "bac575aea4505de2ced1a82c2c87e10d517bb77e207ea6edd0e72f19f4c5e2a1"
+    },
+    "policy_id": "v4-dependency-scoped-evidence-v2",
+    "schema_version": "v4-evidence-components-v2",
+    "state": "carried_forward",
+    "task_inputs": {
+      "candidate_bundle_sha256": "b5b8696daa855afbfdef55320e99a90f7a898f13eed1374b11bbbe21daed220b",
+      "deck_sha256": "c30413e6426083f915e13edb7518103c8884c7b9e5683c869f595969905d7061",
+      "gold_bundle_sha256": "50abf05a0fb8eccd11caebccd5814f5311eeb9e7ec5d06b98c3ec684f40e9de7",
+      "harness_spec_sha256": "9f211510ea719915a2dba2ada567fa1bf99740d7c5a65351730a63a21a6a695a",
+      "mutation_bundle_sha256": "b5b8696daa855afbfdef55320e99a90f7a898f13eed1374b11bbbe21daed220b",
+      "profile_sha256": "a447b07f942eb8e9a214cf78a3f5d53d522bc7e4c591e2492af192ffee1ad696",
+      "property_contract_sha256": "ba4172a580b492fec51b9771ddbc18523e3b8040f6c8861e43b3a8e50314607c",
+      "public_support_bundle_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "trace_contract_sha256": "be023bc65e5d13884a7ed0f2ec41642cd2ff661486a54034d8323033ca1dc9f8"
+    }
+  },
+  "diagnostics": {
+    "expected": "trigger=valid remains high during reset, disable, or insufficient bias; violated_properties=P_VALID_IS_HIGH_ONLY_WHEN_ENABLED",
+    "observed": "EVAS: v4_source_follower checked=606 clamp_seen=True disabled=True vout_errors=0 metric_errors=0 valid_errors=76 clear_errors=76 errors=76; P_RESET_OR_LOW_ENABLE_DRIVES_THE mismatch_count=76; P_WHEN_ENABLED_THE_OUTPUT_FOLLOWS_VIN mismatch_count=0; P_CLAMP_THE_OUTPUT_BETWEEN_VSS_AND mismatch_count=0; P_HEADROOM_METRIC_REPORTS_THE_REMAINING_VBIAS mismatch_count=0; P_VALID_IS_HIGH_ONLY_WHEN_ENABLED mismatch_count=76; Spectre: v4_source_follower checked=33 clamp_seen=True disabled=True vout_errors=0 metric_errors=0 valid_errors=4 clear_errors=4 errors=4; P_RESET_OR_LOW_ENABLE_DRIVES_THE mismatch_count=4; P_WHEN_ENABLED_THE_OUTPUT_FOLLOWS_VIN mismatch_count=0; P_CLAMP_THE_OUTPUT_BETWEEN_VSS_AND mismatch_count=0; P_HEADROOM_METRIC_REPORTS_THE_REMAINING_VBIAS mismatch_count=0; P_VALID_IS_HIGH_ONLY_WHEN_ENABLED mismatch_count=4",
+    "violated_property_ids": [
+      "P_VALID_IS_HIGH_ONLY_WHEN_ENABLED"
+    ]
+  },
+  "evaluators": {
+    "ahdl_like": "pass",
+    "evas": "compile_pass_behavior_fail",
+    "spectre": "compile_pass_behavior_fail"
+  },
+  "family_id": "388",
+  "inputs": {
+    "checker_profile_sha256": "e5815286f8f59bc64b3c03432bd43ba3b94610eb4a912ff06a490b1fd51949fa",
+    "harness_spec_sha256": "9f211510ea719915a2dba2ada567fa1bf99740d7c5a65351730a63a21a6a695a",
+    "mutation_bundle_sha256": "b5b8696daa855afbfdef55320e99a90f7a898f13eed1374b11bbbe21daed220b",
+    "profile_sha256": "a447b07f942eb8e9a214cf78a3f5d53d522bc7e4c591e2492af192ffee1ad696"
+  },
+  "mutation_id": "neg_005_event_edge_wrong",
+  "outcome": "killed_behaviorally",
+  "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33",
+  "schema_version": "v4-negative-certification-v2",
+  "toolchain_lock_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+}

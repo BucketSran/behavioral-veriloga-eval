@@ -1,0 +1,132 @@
+{
+  "family_id": "390",
+  "gold_bundle_sha256": "7b56ed535ad2804aa4d749ddfc85956a9dfd8b8ad51db3eba13a4c4b69cd184d",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "trim_controller.va": "e53d866b2bf714f24de77a7c84ff9254e21c7130bc60f25913b3d116c8f4914a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_TRIM_DIRECTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_reversed_trim_direction/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "trim_controller.va"
+      ],
+      "fault_class": "wrong_control_polarity",
+      "id": "neg_001_reversed_trim_direction",
+      "trigger_condition": "positive common-mode error is applied",
+      "violated_property_ids": [
+        "P_TRIM_DIRECTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "output_balancer.va": "076cb2579e2f784219cc1311ff165d1e49325eb327f813a63e4fe033bf124ec7"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DIFFERENTIAL_PRESERVATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_same_sign_output_correction/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "output_balancer.va"
+      ],
+      "fault_class": "wrong_output_polarity",
+      "id": "neg_002_same_sign_output_correction",
+      "trigger_condition": "nonzero trim correction is active",
+      "violated_property_ids": [
+        "P_DIFFERENTIAL_PRESERVATION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "trim_controller.va": "6615d20a45538af2fd7945fd84263852ec39e8d4cd804d838dc95bc5550a963b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LOCK_QUALIFICATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_lock_after_one_update/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "trim_controller.va"
+      ],
+      "fault_class": "early_lock",
+      "id": "neg_003_lock_after_one_update",
+      "trigger_condition": "the residual first enters lock tolerance",
+      "violated_property_ids": [
+        "P_LOCK_QUALIFICATION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "output_balancer.va": "a8af0ace83955275b00a03668670476b6ce3de3049c75b2328aa254b479e5b96"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COMMON_MODE_ERROR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_cm_error_reports_input/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "output_balancer.va"
+      ],
+      "fault_class": "wrong_common_mode_metric",
+      "id": "neg_004_cm_error_reports_input",
+      "trigger_condition": "trim correction reduces output common-mode error",
+      "violated_property_ids": [
+        "P_COMMON_MODE_ERROR"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "trim_controller.va": "33717a1418714536d1d65ac8adf2aace4c000e4ebdc3e0098e65ca8c9b1f16b3"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_DISABLE_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_disable_keeps_trim/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "trim_controller.va"
+      ],
+      "fault_class": "missing_disable_clear",
+      "id": "neg_005_disable_keeps_trim",
+      "trigger_condition": "enable is deasserted after trim activity",
+      "violated_property_ids": [
+        "P_RESET_DISABLE_CLEAR"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

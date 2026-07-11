@@ -1,0 +1,24 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sample_switch_scheduler(phi1, phi2, phi3, phi4, sample_cmd, hold_cmd);
+    input phi1, phi2, phi3, phi4;
+    output sample_cmd, hold_cmd;
+    electrical phi1, phi2, phi3, phi4, sample_cmd, hold_cmd;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    analog begin
+        if ((V(phi3) > vth) || (V(phi4) > vth))
+            V(sample_cmd) <+ vdd;
+        else
+            V(sample_cmd) <+ vss;
+        if ((V(phi3) > vth) || (V(phi4) > vth))
+            V(hold_cmd) <+ vdd;
+        else
+            V(hold_cmd) <+ vss;
+    end
+endmodule

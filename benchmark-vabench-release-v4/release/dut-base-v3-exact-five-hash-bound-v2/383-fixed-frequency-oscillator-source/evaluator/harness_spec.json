@@ -1,0 +1,78 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "fixed_frequency_oscillator_source.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=92n maxstep=200p"
+    ],
+    "body_lines": [
+      "Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 54n 0.9 54.2n 0 64n 0 64.2n 0.9 92n 0.9]",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]",
+      "XDUT (enable rst osc_out period_metric valid) fixed_frequency_oscillator_source",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "enable",
+      "rst",
+      "osc_out",
+      "period_metric",
+      "valid"
+    ]
+  },
+  "family_id": "383",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "ccee89dfc6aff05f1109634a8f8ea3c0ece16ff6b81168917c137f5557d52c48",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "ccee89dfc6aff05f1109634a8f8ea3c0ece16ff6b81168917c137f5557d52c48",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ON_RESET_OR_WHEN_DISABLED_DRIVE",
+    "P_WHEN_ENABLED_GENERATE_A_PERIODIC_VOLTAGE",
+    "P_PERIOD_METRIC_MUST_EXPOSE_A_STABLE",
+    "P_ASSERT_VALID_AFTER_THE_FIRST_COMPLETE",
+    "P_RESET_OR_DISABLE_MUST_RESTART_THE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "c42ea8cd31f1b9257fef6acceb3d489bdbf26b8511930a82a9d4c4c44781f2f1",
+    "family_spec_sha256": "1469ed97771bc37e05a88b7460ae54cb22f6885714e7c2f5b8a6a37b24896f5d"
+  },
+  "task_id": "v4-383"
+}

@@ -1,0 +1,94 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "fm_vco_modulation_source.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=92n maxstep=200p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "mod_in",
+      "enable",
+      "rst",
+      "osc_out",
+      "freq_metric",
+      "phase_marker",
+      "valid"
+    ]
+  },
+  "family_id": "381",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "da06a9554b21a3aa9bd4296a8ccbeb3fbdb64f719bf59d28396a92d5cbe22aeb",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "81f0f0862d00fbc9107fb34263460f83d5f1d1b7b26be692a1ee0fa010b1dd2a",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vmod_in (mod_in 0) vsource type=pwl wave=[0 0.45 12n 0.45 12.2n 0.25 42n 0.25 42.2n 0.72 72n 0.72 92n 0.72]",
+          "Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 82n 0.9 82.2n 0 92n 0]",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]",
+          "XDUT (mod_in enable rst osc_out freq_metric phase_marker valid) fm_vco_modulation_source",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vmod_in (mod_in 0) vsource type=pwl wave=[0 0.45 10n 0.45 10.2n 0.65 44n 0.65 44.2n 0.3 70n 0.3 92n 0.3]",
+          "Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 82n 0.9 82.2n 0 92n 0]",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]",
+          "XDUT (mod_in enable rst osc_out freq_metric phase_marker valid) fm_vco_modulation_source",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ON_RESET_OR_WHEN_DISABLED_DRIVE",
+    "P_WHEN_ENABLED_GENERATE_A_DETERMINISTIC_BEHAVIOR",
+    "P_CLAMP_THE_COMMANDED_FREQUENCY_TO_A",
+    "P_OSC_OUT_MUST_TOGGLE_BETWEEN_VSS",
+    "P_PHASE_MARKER_MUST_PULSE_OR_TOGGLE",
+    "P_ASSERT_VALID_AFTER_THE_FIRST_COMPLETED"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "27d94a40f7d4383b4acd98ba3c5548ad1302777f1df3d419f067db7a808714e8",
+    "family_spec_sha256": "f2451f43e5f762418f1748235736da9e22edfd3b6fc5a778dfb1da6eea61e2f6"
+  },
+  "task_id": "v4-381"
+}

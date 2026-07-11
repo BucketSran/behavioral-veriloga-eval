@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/level_shifter_enable_rail_tracking.va"
+
+Vvin (vin 0) vsource type=pwl wave=[0 0 8n 0 8.1n 0.38 18n 0.38 18.1n 0.05 30n 0.05 30.1n 0.62 44n 0.62 44.1n 0.20 70n 0.20]
+Ven (enable 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.9 50n 0.9 50.1n 0 58n 0 58.1n 0.9 70n 0.9]
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 70n 0]
+Vddl (vddl 0) vsource type=pwl wave=[0 0.6 28n 0.6 28.1n 0.8 70n 0.8]
+Vddh (vddh 0) vsource type=pwl wave=[0 1.1 36n 1.1 36.1n 1.5 70n 1.5]
+
+XDUT (vin enable rst vddl vddh vout valid) level_shifter_enable_rail_tracking
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=70n maxstep=120p
+save vin enable rst vddl vddh vout valid

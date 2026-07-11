@@ -1,0 +1,47 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cascode_gain_cell_headroom(vin, vbias, vdd_sense, enable, rst, vout, gain_metric, headroom_ok);
+    input vin, vbias, vdd_sense, enable, rst;
+    output vout, gain_metric, headroom_ok;
+    electrical vin, vbias, vdd_sense, enable, rst, vout, gain_metric, headroom_ok;
+
+    parameter real vss = 0.0;
+    parameter real vcm = 0.6;
+    parameter real vth /*neg*/ = 0.6;
+    parameter real gain = 1.8;
+    parameter real headroom_drop = 0.16;
+    parameter real tr = 150p from (0:inf);
+
+    real rail_limit;
+    real out_value;
+    real metric_value;
+    real ok_value;
+
+    analog begin
+        rail_limit = V(vdd_sense);
+        if (V(vbias) < rail_limit)
+            rail_limit = V(vbias);
+        rail_limit = rail_limit - headroom_drop;
+
+        if (V(rst) > vth /*neg*/ || V(enable) <= vth /*neg*/) begin
+            out_value = vcm;
+            metric_value = vss;
+            ok_value = vss;
+        end else begin
+            out_value = vcm - gain * (V(vin) - vcm);
+            if (out_value < vss)
+                out_value = vss;
+            if (out_value > rail_limit)
+                out_value = rail_limit;
+            metric_value = out_value - vcm;
+            if (metric_value < 0.0)
+                metric_value = -metric_value;
+            ok_value = (rail_limit > vcm + 0.05) ? 0.9 : vss;
+        end
+
+        V(vout) <+ out_value;
+        V(gain_metric) <+ metric_value;
+        V(headroom_ok) <+ ok_value;
+    end
+endmodule

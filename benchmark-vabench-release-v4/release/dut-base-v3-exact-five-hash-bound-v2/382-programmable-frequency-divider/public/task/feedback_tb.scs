@@ -1,0 +1,20 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/programmable_frequency_divider.va"
+
+Vclk (clk_in 0) vsource type=pulse val0=0 val1=0.9 period=4n width=2n delay=1n rise=50p fall=50p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 120n 0]
+Ven (enable 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.9 78n 0.9 78.1n 0 90n 0 90.1n 0.9 120n 0.9]
+Vn0 (n_0 0) vsource type=pwl wave=[0 0 24n 0 24.1n 0.9 52n 0.9 52.1n 0 94n 0 94.1n 0.9 120n 0.9]
+Vn1 (n_1 0) vsource type=pwl wave=[0 0.9 38n 0.9 38.1n 0 70n 0 70.1n 0.9 120n 0.9]
+Vn2 (n_2 0) vsource type=pwl wave=[0 0 52n 0 52.1n 0.9 84n 0.9 84.1n 0 120n 0]
+Vn3 (n_3 0) vsource type=pwl wave=[0 0 96n 0 96.1n 0.9 120n 0.9]
+
+XDUT (clk_in rst enable n_3 n_2 n_1 n_0 clk_div ratio_metric valid) programmable_frequency_divider
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=120n maxstep=80p
+save clk_in rst enable n_3 n_2 n_1 n_0 clk_div ratio_metric valid

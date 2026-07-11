@@ -1,0 +1,109 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "programmable_frequency_divider.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=120n maxstep=80p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk_in",
+      "rst",
+      "enable",
+      "n_3",
+      "n_2",
+      "n_1",
+      "n_0",
+      "clk_div",
+      "ratio_metric",
+      "valid"
+    ]
+  },
+  "family_id": "382",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "8c0113df31cee839631b445fb503f4bdb99f99377eeb0a5fd529f0fe18aa048b",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "af2f697663bc33d16eccb34c7568487eda05608b4d1d20fc03abd9b2346fba87",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (clk_in 0) vsource type=pulse val0=0 val1=0.9 period=4n width=2n delay=1n rise=50p fall=50p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 120n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.9 78n 0.9 78.1n 0 90n 0 90.1n 0.9 120n 0.9]",
+          "Vn0 (n_0 0) vsource type=pwl wave=[0 0 24n 0 24.1n 0.9 52n 0.9 52.1n 0 94n 0 94.1n 0.9 120n 0.9]",
+          "Vn1 (n_1 0) vsource type=pwl wave=[0 0.9 38n 0.9 38.1n 0 70n 0 70.1n 0.9 120n 0.9]",
+          "Vn2 (n_2 0) vsource type=pwl wave=[0 0 52n 0 52.1n 0.9 84n 0.9 84.1n 0 120n 0]",
+          "Vn3 (n_3 0) vsource type=pwl wave=[0 0 96n 0 96.1n 0.9 120n 0.9]",
+          "",
+          "XDUT (clk_in rst enable n_3 n_2 n_1 n_0 clk_div ratio_metric valid) programmable_frequency_divider",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=110n maxstep=70p"
+        ],
+        "body_lines": [
+          "Vclk (clk_in 0) vsource type=pulse val0=0 val1=0.9 period=3.5n width=1.75n delay=0.8n rise=45p fall=45p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.6n 0.9 1.7n 0 110n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 64n 0.9 64.1n 0 75n 0 75.1n 0.9 110n 0.9]",
+          "Vn0 (n_0 0) vsource type=pwl wave=[0 0.9 20n 0.9 20.1n 0 46n 0 46.1n 0.9 88n 0.9 88.1n 0 110n 0]",
+          "Vn1 (n_1 0) vsource type=pwl wave=[0 0 30n 0 30.1n 0.9 58n 0.9 58.1n 0 92n 0 92.1n 0.9 110n 0.9]",
+          "Vn2 (n_2 0) vsource type=pwl wave=[0 0 44n 0 44.1n 0.9 82n 0.9 82.1n 0 110n 0]",
+          "Vn3 (n_3 0) vsource type=pwl wave=[0 0 90n 0 90.1n 0.9 110n 0.9]",
+          "",
+          "XDUT (clk_in rst enable n_3 n_2 n_1 n_0 clk_div ratio_metric valid) programmable_frequency_divider",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RESET_OR_LOW_ENABLE_CLEARS_THE",
+    "P_ON_EACH_ENABLED_RISING_CLK_IN",
+    "P_TOGGLE_CLK_DIV_WHENEVER_N_ENABLED",
+    "P_RATIO_METRIC_EXPOSES_THE_SAMPLED_DIVISOR",
+    "P_VALID_IS_HIGH_AFTER_THE_FIRST"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "a8f2d211e2a6567240dcae3429e7cc04087ebefae082d4561f487b274b152c15",
+    "family_spec_sha256": "3a29be845c02b9735c93f9bd12a33fdacd5bbb22b16de20136125da9d6bb2298"
+  },
+  "task_id": "v4-382"
+}

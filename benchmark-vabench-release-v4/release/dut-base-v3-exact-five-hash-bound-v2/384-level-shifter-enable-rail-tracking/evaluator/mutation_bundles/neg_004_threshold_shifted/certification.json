@@ -1,0 +1,60 @@
+{
+  "component_fingerprints": {
+    "assembly": {
+      "policy_sha256": "91f4e21b94263e796c846aedef282c79d4abeb7ccc415a0e6f1311f8816b33a4",
+      "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+    },
+    "backend": {
+      "ahdl_like_sha256": "91ce239e5f278a6d5dfcde85ca2d820c5133d8f8a3de26dc6477164e703342f3",
+      "evas_sha256": "2d71c227644956df64209b49d0da6ef55bc6934891020eb26d762e8cb8cc6df2",
+      "spectre_sha256": "ac4c1cf785d5eab74058944d52bf40869e83c94e19202ab72c8e8a250c4dc51b"
+    },
+    "oracle": {
+      "checker_binding_sha256": "c6981f1f86ec554bf98c70cbe16c624a3fbcd5b82ff536b1011a624ee62b1b40",
+      "checker_implementation_sha256": "21e83eafac66b8b2aefc86a412c9f6ed07877bfdcdc18630ebe823fe5b2f1603",
+      "checker_profile_sha256": "29048ce26c6d2c00f3d098d9a40903ec9cd63bdd34d9941e762de7f363e7c656",
+      "diagnostic_policy_sha256": "69b217a349cb0e8a3eab574e7e6d1af03f069fea668b15b37868ef3d2e7deea3",
+      "oracle_runner_sha256": "e70bd46cd3abdfd8ed9658cb13f64bc96e27d364d51ed0fdcd05f8139e63af2b",
+      "property_activation_policy_sha256": "87b99a367fd517fff5cb167511ec184dbade3a74a80a25adb683438793659361"
+    },
+    "policy_id": "v4-dependency-scoped-evidence-v2",
+    "schema_version": "v4-evidence-components-v2",
+    "state": "carried_forward",
+    "task_inputs": {
+      "candidate_bundle_sha256": "01e935b311a4e5aadbf03ac31b4f45d08b01b6bed123eed092281fc1a34d600a",
+      "deck_sha256": "849c7583febf9ac758e7cc670650b236f527d6ff90fa7939914aaa6001063620",
+      "gold_bundle_sha256": "6c218d4d5fb1134e925d32bedbbce14cae27d3e14095c787d7f785ec357f4867",
+      "harness_spec_sha256": "4747009961f17a936e5b695f2062ff478e4e78edf4db16d6da1268805afb2333",
+      "mutation_bundle_sha256": "01e935b311a4e5aadbf03ac31b4f45d08b01b6bed123eed092281fc1a34d600a",
+      "profile_sha256": "62351e0055062aa170e7ae9182ea4e210731df43b04b1b39ecac64b015984dbc",
+      "property_contract_sha256": "e2358ccb87148866716dba9f15e4fb12977c96f5ce975a6563239024dd7491fa",
+      "public_support_bundle_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "trace_contract_sha256": "6988008ec696424510a169d5c3c327d4fb9a52b740917273305b79bb51d8bcc5"
+    }
+  },
+  "diagnostics": {
+    "expected": "trigger=semantic threshold mutation from gold; violated_properties=P_WHEN_ENABLED_COMPARE_VIN_AGAINST_HALF,P_DRIVE_VOUT_TO_VDDH_FOR_A",
+    "observed": "EVAS: P_RESET_OR_LOW_ENABLE_DRIVES_VOUT checked=81 mismatch_count=0 expected=contract_satisfied observed=contract_satisfied sample_time=0 metric_gap=0 ; P_WHEN_ENABLED_COMPARE_VIN_AGAINST_HALF checked=443 mismatch_count=79 expected=high=1 threshold=0.3 observed=high=0 vin=0.38 sample_time=8.64e-09 metric_gap=1 ; P_DRIVE_VOUT_TO_VDDH_FOR_A checked=443 mismatch_count=79 expected=vout=1.1 observed=vout=0 sample_time=8.64e-09 metric_gap=1.1 ; P_VALID_IS_HIGH_ONLY_WHEN_ENABLED checked=524 mismatch_count=0 expected=contract_satisfied observed=contract_satisfied sample_time=0 metric_gap=0 ; P_THE_OUTPUT_HIGH_LEVEL_MUST_TRACK checked=188 mismatch_count=79 expected=vout_tracks_vddh=1.1 observed=vout=0 sample_time=8.64e-09 metric_gap=1.1; Spectre: P_RESET_OR_LOW_ENABLE_DRIVES_VOUT checked=7 mismatch_count=0 expected=contract_satisfied observed=contract_satisfied sample_time=0 metric_gap=0 ; P_WHEN_ENABLED_COMPARE_VIN_AGAINST_HALF checked=33 mismatch_count=4 expected=high=1 threshold=0.3 observed=high=0 vin=0.38 sample_time=8.72519958824e-09 metric_gap=1 ; P_DRIVE_VOUT_TO_VDDH_FOR_A checked=33 mismatch_count=4 expected=vout=1.1 observed=vout=0 sample_time=8.72519958824e-09 metric_gap=1.1 ; P_VALID_IS_HIGH_ONLY_WHEN_ENABLED checked=40 mismatch_count=0 expected=contract_satisfied observed=contract_satisfied sample_time=0 metric_gap=0 ; P_THE_OUTPUT_HIGH_LEVEL_MUST_TRACK checked=12 mismatch_count=4 expected=vout_tracks_vddh=1.1 observed=vout=0 sample_time=8.72519958824e-09 metric_gap=1.1",
+    "violated_property_ids": [
+      "P_DRIVE_VOUT_TO_VDDH_FOR_A",
+      "P_WHEN_ENABLED_COMPARE_VIN_AGAINST_HALF"
+    ]
+  },
+  "evaluators": {
+    "ahdl_like": "pass",
+    "evas": "compile_pass_behavior_fail",
+    "spectre": "compile_pass_behavior_fail"
+  },
+  "family_id": "384",
+  "inputs": {
+    "checker_profile_sha256": "c87757d605951aaecec55692fc6898f898bccd52d10068edb47ebfee46ba53e0",
+    "harness_spec_sha256": "4747009961f17a936e5b695f2062ff478e4e78edf4db16d6da1268805afb2333",
+    "mutation_bundle_sha256": "01e935b311a4e5aadbf03ac31b4f45d08b01b6bed123eed092281fc1a34d600a",
+    "profile_sha256": "62351e0055062aa170e7ae9182ea4e210731df43b04b1b39ecac64b015984dbc"
+  },
+  "mutation_id": "neg_004_threshold_shifted",
+  "outcome": "killed_behaviorally",
+  "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33",
+  "schema_version": "v4-negative-certification-v2",
+  "toolchain_lock_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+}

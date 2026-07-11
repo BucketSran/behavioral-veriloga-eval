@@ -1,0 +1,19 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/cmfb_loop_top.va"
+ahdl_include "./dut/cm_sensor.va"
+ahdl_include "./dut/trim_controller.va"
+ahdl_include "./dut/output_balancer.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=4n width=2n delay=1n rise=50p fall=50p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 84n 0]
+Ven (enable 0) vsource type=pwl wave=[0 0 3n 0 3.1n 0.9 64n 0.9 64.1n 0 70n 0 70.1n 0.9 84n 0.9]
+Vvop (vop_in 0) vsource type=pwl wave=[0 0.55 5n 0.55 5.1n 0.61 48n 0.61 48.1n 0.57 84n 0.57]
+Vvon (von_in 0) vsource type=pwl wave=[0 0.35 5n 0.35 5.1n 0.41 48n 0.41 48.1n 0.37 84n 0.37]
+XDUT (vop_in von_in clk rst enable vop_out von_out trim_2 trim_1 trim_0 cm_error locked) cmfb_loop_top
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=84n maxstep=100p
+save vop_in von_in clk rst enable vop_out von_out trim_2 trim_1 trim_0 cm_error locked

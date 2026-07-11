@@ -1,0 +1,103 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "cascode_gain_cell_headroom.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=72n maxstep=120p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "vbias",
+      "vdd_sense",
+      "enable",
+      "rst",
+      "vout",
+      "gain_metric",
+      "headroom_ok"
+    ]
+  },
+  "family_id": "389",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "0246405fdf8ed396c4178ed107bf134d1e37094afa58b72f8928e3df26fa6b58",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "baf9df5c409fd6f769dd8b1d6dfc0840b9d64ca861f55cdeea6a39ad8f4ce609",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.45 8n 0.45 8.1n 0.30 20n 0.30 20.1n 0.65 34n 0.65 34.1n 0.18 50n 0.18 50.1n 0.72 72n 0.72]",
+          "Vbias (vbias 0) vsource type=pwl wave=[0 0.88 26n 0.88 26.1n 0.60 48n 0.60 48.1n 0.95 72n 0.95]",
+          "Vdd (vdd_sense 0) vsource type=pwl wave=[0 0.95 38n 0.95 38.1n 0.72 56n 0.72 56.1n 1.0 72n 1.0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.9 58n 0.9 58.1n 0 64n 0 64.1n 0.9 72n 0.9]",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 72n 0]",
+          "",
+          "XDUT (vin vbias vdd_sense enable rst vout gain_metric headroom_ok) cascode_gain_cell_headroom",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=68n maxstep=100p"
+        ],
+        "body_lines": [
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.26 7n 0.26 7.1n 0.58 18n 0.58 18.1n 0.12 32n 0.12 32.1n 0.70 47n 0.70 47.1n 0.34 68n 0.34]",
+          "Vbias (vbias 0) vsource type=pwl wave=[0 0.82 22n 0.82 22.1n 0.62 44n 0.62 44.1n 0.92 68n 0.92]",
+          "Vdd (vdd_sense 0) vsource type=pwl wave=[0 1.0 34n 1.0 34.1n 0.74 54n 0.74 54.1n 0.9 68n 0.9]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 50n 0.9 50.1n 0 57n 0 57.1n 0.9 68n 0.9]",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.5n 0.9 1.6n 0 68n 0]",
+          "",
+          "XDUT (vin vbias vdd_sense enable rst vout gain_metric headroom_ok) cascode_gain_cell_headroom",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RESET_OR_LOW_ENABLE_DRIVES_VOUT",
+    "P_WHEN_ENABLED_COMPUTE_AN_INVERTING_GAIN",
+    "P_CLAMP_THE_OUTPUT_BETWEEN_VSS_AND",
+    "P_GAIN_METRIC_REPORTS_THE_ABSOLUTE_OUTPUT",
+    "P_HEADROOM_OK_IS_HIGH_ONLY_WHEN"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "1a2b417b6ff479348f3b40e55b4b873e3b69d9cfd827b2c33b33a0c33fce0a29",
+    "family_spec_sha256": "ffb07a42d4e5e35c16ef629151c625aa9455e1fca223bba3f6a7db14df94dacb"
+  },
+  "task_id": "v4-389"
+}

@@ -1,0 +1,25 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pa_gain_compression_ampm_macro(vin, envelope, enable, rst, vout, gain_metric, phase_metric, compressed);
+    inout vin, envelope, enable, rst, vout, gain_metric, phase_metric, compressed;
+    electrical vin, envelope, enable, rst, vout, gain_metric, phase_metric, compressed;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vcm = 0.45; parameter real small_gain = 3.0; parameter real comp_threshold = 0.2; parameter real vth = 0.45; parameter real tr = 200p from (0:inf);
+    real excess, gain, out_v, gain_v, phase_v, flag_v;
+    analog function real absval; input x; real x; begin absval = (x < 0.0) ? -x : x; end endfunction
+    analog function real max0; input x; real x; begin max0 = (x > 0.0) ? x : 0.0; end endfunction
+    analog function real clip; input x; real x; begin if (x < vss) clip = vss; else if (x > vdd) clip = vdd; else clip = x; end endfunction
+    analog begin
+        if (V(rst) > vth || V(enable) <= vth) begin out_v = vcm; gain_v = 0.0; phase_v = 0.0; flag_v = 0.0; end
+        else begin
+            excess = max0(absval(V(envelope) - vcm) - comp_threshold);
+            gain = small_gain / (1.0 + (excess / 0.25));
+            out_v = clip(vcm + gain * (V(vin) - vcm));
+            gain_v = clip(vdd * gain / small_gain); phase_v = clip(0.0); flag_v = (gain < small_gain * 0.85) ? vdd : vss;
+        end
+        V(vout) <+ out_v;
+        V(gain_metric) <+ gain_v;
+        V(phase_metric) <+ phase_v;
+        V(compressed) <+ flag_v;
+    end
+endmodule

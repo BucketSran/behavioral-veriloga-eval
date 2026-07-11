@@ -1,0 +1,34 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module level_shifter_enable_rail_tracking(vin, enable, rst, vddl, vddh, vout, valid);
+    input vin, enable, rst, vddl, vddh;
+    output vout, valid;
+    electrical vin, enable, rst, vddl, vddh, vout, valid;
+
+    parameter real vss = 0.0;
+    parameter real vth_default = 0.45;
+    parameter real min_high_rail = 0.2;
+    parameter real tr = 100p from (0:inf);
+
+    real input_threshold;
+    real out_logic;
+    real valid_logic;
+
+    analog begin
+        input_threshold = 0.5 * V(vddl);
+        if (input_threshold < 0.05)
+            input_threshold = vth_default;
+
+        if (V(rst) > vth_default || V(enable) <= vth_default || V(vddh) < min_high_rail) begin
+            out_logic = 0.0;
+            valid_logic = 0.0;
+        end else begin
+            out_logic = (V(vin) > input_threshold) ? 1.0 : 0.0;
+            valid_logic = 1.0;
+        end
+
+        V(vout) <+ 0.9 * transition(out_logic, 0, tr, tr);
+        V(valid) <+ V(vddh) * transition(valid_logic, 0, tr, tr);
+    end
+endmodule

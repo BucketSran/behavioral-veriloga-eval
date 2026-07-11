@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/hold_flagger.va"
+ahdl_include "./dut/nonoverlap_phase_gen.va"
+ahdl_include "./dut/sample_switch_scheduler.va"
+ahdl_include "./dut/switched_cap_phase_seq_top.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=9n width=3.5n rise=100p fall=100p delay=1n
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 180n 0 180.2n 0.9 192n 0.9 192.2n 0]
+Ven (enable 0) vsource type=pwl wave=[0 0 4n 0 4.2n 0.9 145n 0.9 145.2n 0 162n 0 162.2n 0.9 240n 0.9]
+XDUT (clk rst enable phi1 phi2 phi3 phi4 sample_cmd hold_cmd phase_code_1 phase_code_0 valid) switched_cap_phase_seq_top
+
+tran tran stop=240n maxstep=100p
+save clk rst enable phi1 phi2 phi3 phi4 sample_cmd hold_cmd phase_code_1 phase_code_0 valid

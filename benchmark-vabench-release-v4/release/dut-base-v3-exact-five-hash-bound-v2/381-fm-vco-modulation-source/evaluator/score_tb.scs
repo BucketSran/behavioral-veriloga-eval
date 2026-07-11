@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/fm_vco_modulation_source.va"
+
+Vmod_in (mod_in 0) vsource type=pwl wave=[0 0.45 10n 0.45 10.2n 0.65 44n 0.65 44.2n 0.3 70n 0.3 92n 0.3]
+Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 82n 0.9 82.2n 0 92n 0]
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]
+XDUT (mod_in enable rst osc_out freq_metric phase_marker valid) fm_vco_modulation_source
+
+
+tran tran stop=92n maxstep=200p
+save mod_in enable rst osc_out freq_metric phase_marker valid
