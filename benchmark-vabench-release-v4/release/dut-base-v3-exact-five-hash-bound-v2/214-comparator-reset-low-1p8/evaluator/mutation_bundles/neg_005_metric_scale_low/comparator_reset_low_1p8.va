@@ -1,0 +1,27 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "disciplines.vams"
+module comparator_reset_low_1p8(cmpck, vinn, vinp, dcmpn, dcmpp);
+input cmpck, vinn, vinp;
+output dcmpn, dcmpp;
+electrical cmpck, vinn, vinp, dcmpn, dcmpp;
+parameter real vdd = 1.8;
+parameter real td_cmp = 100p;
+real xoutp, xoutn;
+analog begin
+    @(initial_step) begin
+        xoutp = 0;
+        xoutn = 0;
+    end
+    @(cross(V(cmpck) - vdd / 2.0, +1)) begin
+        xoutp = V(vinp) > V(vinn);
+        xoutn = V(vinp) < V(vinn);
+    end
+    @(cross(V(cmpck) - vdd / 2.0, -1)) begin
+        xoutp = 0;
+        xoutn = 0;
+    end
+    V(dcmpp) <+ (0.42 * (transition(xoutp * vdd, td_cmp, 10p, 10p)));
+    V(dcmpn) <+ (0.42 * (transition(xoutn * vdd, td_cmp, 10p, 10p)));
+end
+endmodule

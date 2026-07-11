@@ -1,0 +1,28 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "disciplines.vams"
+module single_shot_timer_pulse(vin, vout);
+input vin;
+output vout;
+electrical vin, vout;
+parameter real pulse_width = 2n;
+parameter real vlogic_high = 0.9;
+parameter real vlogic_low = 0.0;
+parameter real vtrans = 0.45;
+parameter real tdel = 100p;
+parameter real trise = 10p;
+parameter real tfall = 10p;
+real out_v, turn_off;
+analog begin
+    @(initial_step) begin
+        out_v = vlogic_low;
+        turn_off = -1;
+    end
+    @(cross(V(vin) - vtrans, +1)) begin
+        out_v = vlogic_high;
+        turn_off = $abstime + pulse_width + trise;
+    end
+    @(timer(turn_off)) out_v = vlogic_low;
+    V(vout) <+ (0.42 * (transition(out_v, tdel, trise, tfall)));
+end
+endmodule

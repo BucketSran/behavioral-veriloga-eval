@@ -1,0 +1,10 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/single_shot_timer_pulse.va"
+
+Vin (vin 0) vsource type=pwl wave=[0 0 0.80n 0 0.82n 0.9 1.10n 0.9 1.12n 0 3.25n 0 3.27n 0.9 3.70n 0.9 3.72n 0 6.2n 0]
+XDUT (vin vout) single_shot_timer_pulse
+
+tran tran stop=6.0n maxstep=5p
+save vin vout

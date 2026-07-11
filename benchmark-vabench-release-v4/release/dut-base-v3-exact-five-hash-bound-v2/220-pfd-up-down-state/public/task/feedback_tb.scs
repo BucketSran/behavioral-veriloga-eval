@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/pfd_up_down_state.va"
+
+Vref (ref 0) vsource type=pwl wave=[0 0 1.1n 0 1.12n 1.2 1.3n 1.2 1.32n 0 2.0n 0 2.02n 1.2 2.2n 1.2 2.22n 0 3.0n 0]
+Vfb (fb 0) vsource type=pwl wave=[0 0 0.4n 0 0.42n 1.2 0.6n 1.2 0.62n 0 2.35n 0 2.37n 1.2 2.55n 1.2 2.57n 0 3.0n 0]
+XDUT (ref fb up down) pfd_up_down_state
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=2.8n maxstep=5p
+save ref fb up down

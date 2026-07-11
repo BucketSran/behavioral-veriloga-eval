@@ -1,0 +1,85 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "single_shot_timer_pulse.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=5.8n maxstep=5p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "vout"
+    ]
+  },
+  "family_id": "217",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "fff2bce87c5ed793c312564c74a0953a2d977038dd075bdb66cdecc31decfbfb",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "a9b6fe9df51d249822037e917858d86577f20a870cb8177cd49753938c11835f",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0 0 0.6n 0 0.62n 0.9 1.2n 0.9 1.22n 0 3.6n 0 3.62n 0.9 4.0n 0.9 4.02n 0 6n 0]",
+          "XDUT (vin vout) single_shot_timer_pulse"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=6.0n maxstep=5p"
+        ],
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0 0 0.80n 0 0.82n 0.9 1.10n 0.9 1.12n 0 3.25n 0 3.27n 0.9 3.70n 0.9 3.72n 0 6.2n 0]",
+          "XDUT (vin vout) single_shot_timer_pulse"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_DETECT_RISING_VIN_CROSSINGS_AT_VTRANS",
+    "P_ON_EACH_QUALIFYING_RISING_EDGE_DRIVE",
+    "P_USE_A_TIMER_TO_SCHEDULE_THE",
+    "P_GENERATE_ONE_OUTPUT_PULSE_PER_INPUT",
+    "P_HOLD_THE_LOW_OUTPUT_LEVEL_BETWEEN"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "b28888ca484a184ddb343fcc35d6965f1f70b4d294002c9c2d456451c814d55c",
+    "family_spec_sha256": "2090ec38a0d6ba8b40abf73410745c2126d03592554dcf568245fcb94a4d725d"
+  },
+  "task_id": "v4-217"
+}

@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/clocked_comparator_dual_output.va"
+
+Vclk (clk 0) vsource type=pwl wave=[0 0 0.2n 0 0.22n 1.0 0.8n 1.0 0.82n 0 1.4n 0 1.42n 1.0 2.0n 1.0 2.02n 0 2.7n 0]
+Vinp (vinp 0) vsource type=pwl wave=[0 0.7 1.0n 0.7 1.05n 0.2 2.7n 0.2]
+Vinn (vinn 0) vsource dc=0.5
+XDUT (clk vinn vinp outn outp) clocked_comparator_dual_output
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=2.5n maxstep=5p
+save clk vinn vinp outn outp

@@ -1,0 +1,25 @@
+`include "disciplines.vams"
+module clocked_comparator_dual_output(clk, vinn, vinp, outn, outp);
+input clk, vinn, vinp;
+output outn, outp;
+electrical clk, vinn, vinp, outn, outp;
+parameter real vdd = 1.0;
+parameter real td_cmp = 100p;
+real xoutp, xoutn;
+analog begin
+    @(initial_step) begin
+        xoutp = 0;
+        xoutn = 0;
+    end
+    @(cross(V(clk) - vdd / 2.0, +1)) begin
+        xoutp = (V(vinp) > V(vinn));
+        xoutn = (V(vinp) < V(vinn));
+    end
+    @(cross(V(clk) - vdd / 2.0, -1)) begin
+        xoutp = 0;
+        xoutn = 0;
+    end
+    V(outp) <+ transition(xoutp * vdd, td_cmp, 10p, 10p);
+    V(outn) <+ transition(xoutn * vdd, td_cmp, 10p, 10p);
+end
+endmodule

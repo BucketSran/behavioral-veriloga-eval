@@ -1,0 +1,18 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "disciplines.vams"
+module lt_readout_sar4(d0, d1, d2, d3, vout, gnd);
+input d0, d1, d2, d3, gnd;
+output vout;
+electrical d0, d1, d2, d3, vout, gnd;
+parameter real vth = 0.9;
+parameter real vref = 1.8;
+real out_v;
+analog begin
+    out_v = (V(d0) > vth ? 1.0 : 0.0)
+          + (V(d1) > vth ? 2.0 : 0.0)
+          + (V(d2) > vth ? 4.0 : 0.0)
+          + (V(d3) > vth ? 8.0 : 0.0);
+    V(vout) <+ (0.42 * (transition(out_v * vref / 16.0, 0, 10p, 10p)));
+end
+endmodule

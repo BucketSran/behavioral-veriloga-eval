@@ -1,0 +1,22 @@
+`include "disciplines.vams"
+module pfd_up_down_state(ref, fb, up, down);
+input ref, fb;
+output up, down;
+electrical ref, fb, up, down;
+parameter real vdd = 1.2;
+parameter real tdel = 10p;
+parameter real tr = 10p;
+parameter real tf = 10p;
+integer state;
+analog begin
+    @(initial_step) state = 0;
+    @(cross(V(ref) - vdd / 2.0, +1)) begin
+        if (state < 1) state = state + 1;
+    end
+    @(cross(V(fb) - vdd / 2.0, +1)) begin
+        if (state < 1) state = state + 1;
+    end
+    V(up) <+ transition((state == 1) ? vdd : 0, tdel, tr, tf);
+    V(down) <+ transition((state == -1) ? vdd : 0, tdel, tr, tf);
+end
+endmodule

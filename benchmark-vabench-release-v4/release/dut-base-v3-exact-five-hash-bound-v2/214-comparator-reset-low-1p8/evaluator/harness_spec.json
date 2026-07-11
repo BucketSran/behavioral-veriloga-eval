@@ -1,0 +1,88 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "comparator_reset_low_1p8.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=3.0n maxstep=5p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "cmpck",
+      "vinn",
+      "vinp",
+      "dcmpn",
+      "dcmpp"
+    ]
+  },
+  "family_id": "214",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "de6a5df85798f7e9dc932d01c32392cd3c26780f70ba50060d1b1062fda8b920",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "c9603cfbf5e021220884de161929a63c587c3936576f9cdf5050384e3916d99a",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (cmpck 0) vsource type=pulse val0=0 val1=1.8 delay=0.35n period=1n width=0.45n rise=20p fall=20p",
+          "Vinp (vinp 0) vsource type=pwl wave=[0 1.2 1.0n 1.2 1.05n 0.6 2.0n 0.6 2.05n 1.3 3.2n 1.3]",
+          "Vinn (vinn 0) vsource dc=0.9",
+          "XDUT (cmpck vinn vinp dcmpn dcmpp) comparator_reset_low_1p8"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=3.6n maxstep=5p"
+        ],
+        "body_lines": [
+          "Vclk (cmpck 0) vsource type=pulse val0=0 val1=1.8 delay=0.30n period=0.85n width=0.32n rise=20p fall=20p",
+          "Vinp (vinp 0) vsource type=pwl wave=[0 1.25 0.90n 1.25 0.95n 0.90 1.75n 0.90 1.80n 0.55 2.60n 0.55 2.65n 1.10 3.60n 1.10]",
+          "Vinn (vinn 0) vsource dc=0.9",
+          "XDUT (cmpck vinn vinp dcmpn dcmpp) comparator_reset_low_1p8"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INITIALIZE_BOTH_DECISION_OUTPUTS_LOW_WHENEVER"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "a2f307c5dca83b3f1a89161207893ba3bd60330280335ae5ea734c4470fdf16e",
+    "family_spec_sha256": "c27beadfe0d9c77f98ae9d7f114707c473efc661e6964cdd521f46c4aa341afe"
+  },
+  "task_id": "v4-214"
+}

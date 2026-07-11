@@ -1,0 +1,134 @@
+{
+  "family_id": "220",
+  "gold_bundle_sha256": "30fabc70ddfcd2343343d91d030e3d44d0cf2716940ffaf2275bd35462264cba",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "pfd_up_down_state.va": "8474f09b0988adbca3cad9734081f0e2ac0c8e0614e99f2b5812d2e3c607483c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DETECT_RISING_REF_AND_FB_CROSSINGS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pfd_up_down_state.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_DETECT_RISING_REF_AND_FB_CROSSINGS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pfd_up_down_state.va": "e57970fb652232c5853e15a6aea88737a7862c753abcd63e9d6db81fd8553320"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_MAINTAIN_AN_INTEGER_DETECTOR_STATE_BOUNDED"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_swapped_ref_fb/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pfd_up_down_state.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_002_swapped_ref_fb",
+      "trigger_condition": "Swaps REF and FB state effects, reversing UP/DOWN behavior.",
+      "violated_property_ids": [
+        "P_MAINTAIN_AN_INTEGER_DETECTOR_STATE_BOUNDED"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pfd_up_down_state.va": "7e36e779895ed170de21ef56901b626480034a6ccc98cac60cb6ec6b748e151c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_A_RISING_REF_EDGE_INCREMENTS_THE",
+          "P_DRIVE_DOWN_HIGH_WHEN_THE_STATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_no_fb_decrement/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pfd_up_down_state.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_003_no_fb_decrement",
+      "trigger_condition": "Ignores FB rising edges, so DOWN never asserts.",
+      "violated_property_ids": [
+        "P_A_RISING_REF_EDGE_INCREMENTS_THE",
+        "P_DRIVE_DOWN_HIGH_WHEN_THE_STATE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pfd_up_down_state.va": "ad1670b78d9c909266246b8619978304abbb131283e52200169ec91f0aef5f4d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_A_RISING_FB_EDGE_DECREMENTS_THE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_up_stuck_for_zero_state/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pfd_up_down_state.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_004_up_stuck_for_zero_state",
+      "trigger_condition": "Asserts UP whenever the state is nonnegative, including the neutral zero state.",
+      "violated_property_ids": [
+        "P_A_RISING_FB_EDGE_DECREMENTS_THE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pfd_up_down_state.va": "5f241404a8f80c54ddd0e2139b738caaf6f9ae0d05d743be03ee6a1e09de7697"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_UP_HIGH_WHEN_THE_STATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pfd_up_down_state.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "PFD Up Down State: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_DRIVE_UP_HIGH_WHEN_THE_STATE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}
