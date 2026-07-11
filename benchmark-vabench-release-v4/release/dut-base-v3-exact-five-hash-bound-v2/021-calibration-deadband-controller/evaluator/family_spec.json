@@ -1,0 +1,35 @@
+{
+  "schema_version": "v4-family-spec-v1", "family_id": "021",
+  "task_ids": {"dut": "v4-021", "testbench": "v4-521", "bugfix": "v4-1021"},
+  "identity": {"title": "Calibration Deadband Controller", "category": "calibration_control", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "calibration_deadband_controller.va", "modules": [{
+    "name": "calibration_deadband_controller", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "clk", "direction": "input", "discipline": "electrical", "position": 0}, {"name": "rst", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "vin", "direction": "input", "discipline": "electrical", "position": 2}, {"name": "out", "direction": "output", "discipline": "electrical", "position": 3},
+      {"name": "metric", "direction": "output", "discipline": "electrical", "position": 4}
+    ],
+    "parameters": [
+      {"name": "tr", "type": "real", "default": 1e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets output transition smoothing"},
+      {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "finite real", "override_behavior": "sets clk and rst logic threshold"},
+      {"name": "target", "type": "real", "default": 0.45, "units": "V", "valid_range": "vmin <= target <= vmax", "override_behavior": "sets initial, reset, and zero-error trim target"},
+      {"name": "deadband", "type": "real", "default": 0.05, "units": "V", "valid_range": "deadband >= 0", "override_behavior": "sets the symmetric no-update error interval"},
+      {"name": "step_size", "type": "real", "default": 0.06, "units": "V", "valid_range": "step_size > 0", "override_behavior": "sets trim increment or decrement per accepted update"},
+      {"name": "vmin", "type": "real", "default": 0.05, "units": "V", "valid_range": "vmin <= target and vmin < vmax", "override_behavior": "sets lower output clamp"},
+      {"name": "vmax", "type": "real", "default": 0.85, "units": "V", "valid_range": "vmax >= target and vmax > vmin", "override_behavior": "sets upper output clamp"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "calibration_deadband_controller", "connections": [
+    {"port_ref": "clk", "net": "clk", "position": 0}, {"port_ref": "rst", "net": "rst", "position": 1}, {"port_ref": "vin", "net": "vin", "position": 2}, {"port_ref": "out", "net": "out", "position": 3}, {"port_ref": "metric", "net": "metric", "position": 4}
+  ]}]},
+  "properties": [
+    {"id": "P_INITIAL_AND_RESET_TARGET", "observable_contract": "Out initializes to target and returns to target while rst is above vth; metric is low during reset.", "required_signals": ["time", "rst", "out", "metric"]},
+    {"id": "P_POSITIVE_ERROR_STEP", "observable_contract": "At a rising clock crossing with vin minus target greater than deadband, out increases by one step_size and metric goes high.", "required_signals": ["time", "clk", "rst", "vin", "out", "metric"]},
+    {"id": "P_NEGATIVE_ERROR_STEP", "observable_contract": "At a rising clock crossing with vin minus target less than negative deadband, out decreases by one step_size and metric goes high.", "required_signals": ["time", "clk", "rst", "vin", "out", "metric"]},
+    {"id": "P_DEADBAND_HOLD", "observable_contract": "At a rising clock crossing with signed error inside the inclusive deadband, out holds and metric remains low.", "required_signals": ["time", "clk", "rst", "vin", "out", "metric"]},
+    {"id": "P_OUTPUT_CLAMP", "observable_contract": "Repeated updates cannot drive out below vmin or above vmax.", "required_signals": ["time", "clk", "vin", "out"]},
+    {"id": "P_BETWEEN_EDGE_HOLD", "observable_contract": "Out state does not follow vin between rising clock crossings.", "required_signals": ["time", "clk", "vin", "out"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "clk", "rst", "vin", "out", "metric"]},
+  "modeling_constraints": ["Use deterministic rising-edge sampled state updates.", "Use voltage contributions only.", "Do not use current contributions, transistor-level devices, AC/noise analysis, or validation side channels."]
+}

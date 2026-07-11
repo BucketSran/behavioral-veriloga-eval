@@ -1,0 +1,18 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module calibration_deadband_controller(clk, rst, vin, out, metric);
+input clk, rst, vin; output out, metric; electrical clk, rst, vin, out, metric;
+parameter real tr=100p; parameter real vth=0.45; parameter real target=0.45; parameter real deadband=0.05; parameter real step_size=0.06; parameter real vmin=0.05; parameter real vmax=0.85;
+real trimv, errv, metricv;
+analog begin
+    @(initial_step) begin trimv=target; metricv=0.0; end
+    @(cross(V(clk)-vth,+1)) begin
+        errv=V(vin)-target;
+        if (V(rst)>vth) begin trimv=target; metricv=0.0; end
+        else begin if (errv > deadband) begin trimv = trimv + 0.01; metricv = 0.9; end else if (errv < -deadband) begin trimv = trimv - 0.01; metricv = 0.9; end else metricv = 0.0; end
+        if (trimv>vmax) trimv=vmax; if (trimv<vmin) trimv=vmin;
+    end
+    V(out)<+transition(trimv,0,tr,tr); V(metric)<+transition(metricv,0,tr,tr);
+end
+endmodule

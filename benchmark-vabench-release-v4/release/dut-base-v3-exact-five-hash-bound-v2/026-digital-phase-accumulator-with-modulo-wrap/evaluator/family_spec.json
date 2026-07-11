@@ -1,0 +1,29 @@
+{
+  "schema_version": "v4-family-spec-v1", "family_id": "026",
+  "task_ids": {"dut": "v4-026", "testbench": "v4-526", "bugfix": "v4-1026"},
+  "identity": {"title": "Digital Phase Accumulator With Modulo Wrap", "category": "pll_clock_timing", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "phase_accumulator_timer_wrap_ref.va", "modules": [{
+    "name": "phase_accumulator_timer_wrap_ref", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "VDD", "direction": "inout", "discipline": "electrical", "position": 0}, {"name": "VSS", "direction": "inout", "discipline": "electrical", "position": 1},
+      {"name": "clk_out", "direction": "output", "discipline": "electrical", "position": 2}, {"name": "phase_out", "direction": "output", "discipline": "electrical", "position": 3}
+    ],
+    "parameters": [
+      {"name": "dt", "type": "real", "default": 5e-9, "units": "s", "valid_range": "dt > 0", "override_behavior": "sets phase-state timer update interval"},
+      {"name": "phase_step", "type": "real", "default": 0.25, "units": "normalized cycle", "valid_range": "0 < phase_step < 1", "override_behavior": "sets normalized phase increment per timer event"},
+      {"name": "tedge", "type": "real", "default": 2e-10, "units": "s", "valid_range": "tedge > 0", "override_behavior": "sets output transition smoothing"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "phase_accumulator_timer_wrap_ref", "connections": [
+    {"port_ref": "VDD", "net": "VDD", "position": 0}, {"port_ref": "VSS", "net": "VSS", "position": 1}, {"port_ref": "clk_out", "net": "clk_out", "position": 2}, {"port_ref": "phase_out", "net": "phase_out", "position": 3}
+  ]}]},
+  "properties": [
+    {"id": "P_TIMER_INCREMENT", "observable_contract": "On every dt timer event, normalized phase advances by phase_step.", "required_signals": ["time", "phase_out", "VDD", "VSS"]},
+    {"id": "P_MODULO_WRAP", "observable_contract": "The phase state wraps modulo one and never grows unbounded.", "required_signals": ["time", "phase_out", "VDD", "VSS"]},
+    {"id": "P_PHASE_RAIL_SCALING", "observable_contract": "Phase_out equals wrapped normalized phase scaled by the local VDD-minus-VSS rail span.", "required_signals": ["time", "phase_out", "VDD", "VSS"]},
+    {"id": "P_PHASE_DERIVED_CLOCK", "observable_contract": "Clk_out is rail-high while normalized phase is below 0.5 and low while phase is at or above 0.5.", "required_signals": ["time", "clk_out", "phase_out", "VDD", "VSS"]},
+    {"id": "P_PARAMETERIZED_PERIOD", "observable_contract": "Changing dt or phase_step changes the observable phase and clock cadence according to the same update and wrap rules.", "required_signals": ["time", "clk_out", "phase_out", "VDD", "VSS"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "VDD", "VSS", "clk_out", "phase_out"]},
+  "modeling_constraints": ["Use deterministic timer-updated normalized phase with manual modulo wrap.", "Use rail-referenced smoothed voltage contributions only.", "Do not use current contributions, ddt(), idt(), validation hooks, or simulator-specific side channels."]
+}

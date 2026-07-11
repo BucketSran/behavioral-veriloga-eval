@@ -1,0 +1,21 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cmp_hysteresis (
+    input electrical VINN, input electrical VINP,
+    output electrical OUTN, output electrical OUTP,
+    inout electrical VSS, inout electrical VDD
+);
+parameter real vhys = 10e-3 from (0:inf);
+parameter real tedge = 50p from [0:inf);
+integer out_state;
+real vh, vl, diff;
+analog begin
+    vh = V(VDD); vl = V(VSS); diff = V(VINP) - V(VINN);
+    @(initial_step) out_state = (diff > 0.0);
+    @(cross(diff, +1)) out_state = 1;
+    @(cross(diff, -1)) out_state = 0;
+    V(OUTP) <+ vl + (vh - vl) * transition(out_state ? 1.0 : 0.0, 0.0, tedge, tedge);
+    V(OUTN) <+ vl + (vh - vl) * transition(out_state ? 0.0 : 1.0, 0.0, tedge, tedge);
+end
+endmodule

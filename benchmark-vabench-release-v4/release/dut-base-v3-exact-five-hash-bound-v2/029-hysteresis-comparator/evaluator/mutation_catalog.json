@@ -1,0 +1,132 @@
+{
+  "family_id": "029",
+  "gold_bundle_sha256": "eee9f267db9adadcc8dcddd3117b89532d2e7188ad358141eb6c423a303f4878",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "cmp_hysteresis.va": "897d628948053d97d851649f49f671c681c321769f27c00c958808ac60e87e66"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INITIAL_DECISION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_initial_state_inverted/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "cmp_hysteresis.va"
+      ],
+      "fault_class": "initial_decision_polarity_error",
+      "id": "neg_001_initial_state_inverted",
+      "trigger_condition": "The initial differential is below positive vhys over two before any threshold crossing.",
+      "violated_property_ids": [
+        "P_INITIAL_DECISION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "cmp_hysteresis.va": "d5fcc961198bbd98905466940c526a6a98a588d3c203e4a5f102fcb228fd08ad"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_POSITIVE_SWITCH_THRESHOLD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_positive_threshold_too_high/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "cmp_hysteresis.va"
+      ],
+      "fault_class": "positive_threshold_scale_error",
+      "id": "neg_002_positive_threshold_too_high",
+      "trigger_condition": "The rising differential enters the interval from positive vhys over two to positive vhys.",
+      "violated_property_ids": [
+        "P_POSITIVE_SWITCH_THRESHOLD"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "cmp_hysteresis.va": "2063677080ea61973667a5b23e75dd39480c64685c8dd13e67190231058b3817"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_NEGATIVE_SWITCH_THRESHOLD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_negative_threshold_at_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "cmp_hysteresis.va"
+      ],
+      "fault_class": "negative_threshold_offset_error",
+      "id": "neg_003_negative_threshold_at_zero",
+      "trigger_condition": "A previously high decision falls through zero but not through negative vhys over two.",
+      "violated_property_ids": [
+        "P_NEGATIVE_SWITCH_THRESHOLD"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "cmp_hysteresis.va": "5398a97f30a7ca38c514076dc646e6105a8d6ec80c994d6e195fe6d3ca8f9ef6"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_HYSTERESIS_HOLD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_no_hysteresis_hold/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "cmp_hysteresis.va"
+      ],
+      "fault_class": "hysteresis_state_hold_omission",
+      "id": "neg_004_no_hysteresis_hold",
+      "trigger_condition": "The differential reverses inside the documented hysteresis band after a legal positive trip.",
+      "violated_property_ids": [
+        "P_HYSTERESIS_HOLD"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "cmp_hysteresis.va": "54e0c265d811b9b2646b6b4dc67d8097db8dda53e52dc47021d82764c0bdc0da"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COMPLEMENTARY_RAIL_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_absolute_rail_outputs/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "cmp_hysteresis.va"
+      ],
+      "fault_class": "local_rail_reference_omission",
+      "id": "neg_005_absolute_rail_outputs",
+      "trigger_condition": "VSS is nonzero while the comparator drives either complementary output state.",
+      "violated_property_ids": [
+        "P_COMPLEMENTARY_RAIL_OUTPUT"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

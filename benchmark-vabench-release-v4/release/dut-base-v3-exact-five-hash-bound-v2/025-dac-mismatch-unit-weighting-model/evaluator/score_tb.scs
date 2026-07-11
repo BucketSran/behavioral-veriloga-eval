@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/dac_mismatch_unit_weighting_model.va"
+
+Vb0 (b0 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.5 10n 0.5 10.1n 0 20n 0 20.1n 0.5 40n 0.5]
+Vb1 (b1 0) vsource type=pwl wave=[0 0 12n 0 12.1n 0.9 40n 0.9]
+Vb2 (b2 0) vsource type=pwl wave=[0 0 20n 0 20.1n 0.9 40n 0.9]
+Vb3 (b3 0) vsource type=pwl wave=[0 0 30n 0 30.1n 0.9 40n 0.9]
+
+XDUT (b0 b1 b2 b3 out) dac_mismatch_unit_weighting_model
+
+
+tran tran stop=80n maxstep=0.5n
+save b0 b1 b2 b3 out

@@ -1,0 +1,28 @@
+{
+  "schema_version": "v4-family-spec-v1", "family_id": "024",
+  "task_ids": {"dut": "v4-024", "testbench": "v4-524", "bugfix": "v4-1024"},
+  "identity": {"title": "Clocked Sample And Hold", "category": "sampling_analog_memory", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "sample_hold.va", "modules": [{
+    "name": "sample_hold", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "VDD", "direction": "input", "discipline": "electrical", "position": 0}, {"name": "VSS", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "IN", "direction": "input", "discipline": "electrical", "position": 2}, {"name": "CLK", "direction": "input", "discipline": "electrical", "position": 3},
+      {"name": "OUT", "direction": "output", "discipline": "electrical", "position": 4}
+    ],
+    "parameters": [
+      {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "finite real", "override_behavior": "sets the rising CLK sampling threshold"},
+      {"name": "tedge", "type": "real", "default": 1e-10, "units": "s", "valid_range": "tedge > 0", "override_behavior": "sets OUT transition smoothing"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "sample_hold", "connections": [
+    {"port_ref": "VDD", "net": "vdd", "position": 0}, {"port_ref": "VSS", "net": "vss", "position": 1}, {"port_ref": "IN", "net": "vin", "position": 2}, {"port_ref": "CLK", "net": "clk", "position": 3}, {"port_ref": "OUT", "net": "vout", "position": 4}
+  ]}]},
+  "properties": [
+    {"id": "P_RISING_EDGE_SAMPLE", "observable_contract": "OUT acquires the IN voltage present at each rising CLK crossing through vth, subject only to transition smoothing.", "required_signals": ["time", "in", "clk", "out"]},
+    {"id": "P_INTERSAMPLE_HOLD", "observable_contract": "OUT retains the most recently sampled value between rising CLK crossings.", "required_signals": ["time", "in", "clk", "out"]},
+    {"id": "P_NO_HIGH_PHASE_TRACKING", "observable_contract": "Changes on IN while CLK remains high do not make OUT transparent before the next rising crossing.", "required_signals": ["time", "in", "clk", "out"]},
+    {"id": "P_LOCAL_RAIL_REFERENCE", "observable_contract": "The held analog voltage is driven as a smooth voltage-domain output referenced to the local VDD and VSS rails.", "required_signals": ["time", "vdd", "vss", "in", "out"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "vdd", "vss", "in", "clk", "out"]},
+  "modeling_constraints": ["Use deterministic rising-edge sampled state and intersample hold.", "Use smoothed voltage contributions only.", "Do not use current contributions, ddt(), idt(), extra observability ports, or validation side channels."]
+}

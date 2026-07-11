@@ -1,0 +1,39 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module higher_order_filter(clk, rst, vin, out, metric);
+input clk, rst, vin;
+output out, metric;
+electrical clk, rst, vin, out, metric;
+parameter real tr = 100p;
+parameter real gain = 1.8;
+parameter real alpha = 0.18;
+real s1, s2, y, target;
+analog begin
+    @(initial_step) begin
+        s1 = 0.45;
+        s2 = 0.45;
+        y = 0.45;
+        target = 0.45;
+    end
+    @(cross(V(clk) - 0.45, +1)) begin
+        if (V(rst) > 0.45) begin
+            s1 = 0.45;
+            s2 = 0.45;
+            y = 0.45;
+            target = 0.45;
+        end else begin
+            target = gain * (V(vin) - 0.45) + 0.45;
+            if (target > 0.9) target = 0.9;
+            if (target < 0.0) target = 0.0;
+            s1 = s1 + alpha * (target - s1);
+            s2 = s2 + alpha * (s1 - s2);
+            y = s2;
+            if (y > 0.9) y = 0.9;
+            if (y < 0.0) y = 0.0;
+        end
+    end
+    V(out) <+ transition(y, 0, tr, tr);
+    V(metric) <+ transition(s1 - s2 + 0.45, 0, tr, tr);
+end
+endmodule

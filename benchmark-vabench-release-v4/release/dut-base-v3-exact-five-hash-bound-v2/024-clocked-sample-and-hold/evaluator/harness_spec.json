@@ -1,0 +1,103 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "sample_hold.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=240n maxstep=1n"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vdd",
+      "vss",
+      "in",
+      "clk",
+      "out"
+    ]
+  },
+  "family_id": "024",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "a25cf66ac2be6513261755033b66b0811bfa9ce98c7d0323f6b21dfb9b7c7d9f",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "354c81e043b3af185839d4685953af6c7d9ac522d680ece8a68f9808cb1de49f",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "V_VDD (vdd 0) vsource dc=1.0",
+          "V_VSS (vss 0) vsource dc=0.1",
+          "V_IN (in vss) vsource type=pwl wave=[0 0 240n 0.9]",
+          "V_CLK (clk vss) vsource type=pulse val0=0 val1=0.9 period=20n delay=1n rise=200p fall=200p width=10n",
+          "",
+          "XDUT (vdd vss in clk out) sample_hold",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=1u maxstep=2n"
+        ],
+        "body_lines": [
+          "// sample_hold gold smoke testbench",
+          "// Ramp input 0->0.9V over 1us, 50MHz clock (period=20ns).",
+          "// Check: output steps at clock edges and holds between them.",
+          "",
+          "Vvdd (vdd 0) vsource dc=1.0 type=dc",
+          "Vvss (vss 0) vsource dc=0.1 type=dc",
+          "",
+          "Vin (in vss) vsource type=pwl wave=[0 0 1e-6 0.9]",
+          "",
+          "Vclk (clk vss) vsource type=pulse val0=0 val1=0.9 period=20n width=10n rise=200p fall=200p",
+          "",
+          "IDUT (vdd vss in clk out) sample_hold vth=0.45 tedge=100p",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RISING_EDGE_SAMPLE",
+    "P_INTERSAMPLE_HOLD",
+    "P_NO_HIGH_PHASE_TRACKING",
+    "P_LOCAL_RAIL_REFERENCE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "c81d165726013d66569bfaee46a36381a961fefeb295fdda2184b0468a6a409d",
+    "family_spec_sha256": "de1878d78481f36f19294418f4792cbddca439bd426a736441392d3f0b2e865f"
+  },
+  "task_id": "v4-024"
+}

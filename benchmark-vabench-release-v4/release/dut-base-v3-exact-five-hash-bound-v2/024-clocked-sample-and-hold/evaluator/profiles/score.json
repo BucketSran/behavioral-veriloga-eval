@@ -1,0 +1,43 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=1u maxstep=2n"
+    ],
+    "body_lines": [
+      "// sample_hold gold smoke testbench",
+      "// Ramp input 0->0.9V over 1us, 50MHz clock (period=20ns).",
+      "// Check: output steps at clock edges and holds between them.",
+      "",
+      "Vvdd (vdd 0) vsource dc=1.0 type=dc",
+      "Vvss (vss 0) vsource dc=0.1 type=dc",
+      "",
+      "Vin (in vss) vsource type=pwl wave=[0 0 1e-6 0.9]",
+      "",
+      "Vclk (clk vss) vsource type=pulse val0=0 val1=0.9 period=20n width=10n rise=200p fall=200p",
+      "",
+      "IDUT (vdd vss in clk out) sample_hold vth=0.45 tedge=100p",
+      ""
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "5df73a71310f72660ece2d4ea5b5f2e312bd7106c8050e09b1888789ab6dc22a",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "100n"
+  },
+  "profile_name": "score",
+  "property_ids": [
+    "P_RISING_EDGE_SAMPLE",
+    "P_INTERSAMPLE_HOLD",
+    "P_NO_HIGH_PHASE_TRACKING",
+    "P_LOCAL_RAIL_REFERENCE"
+  ],
+  "public_visible": false,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {}
+}

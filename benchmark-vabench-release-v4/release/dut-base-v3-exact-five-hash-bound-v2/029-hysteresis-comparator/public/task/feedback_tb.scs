@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/cmp_hysteresis.va"
+
+V_fb_vdd (vdd 0) vsource dc=0.9 type=dc
+V_fb_vss (vss 0) vsource dc=0.1 type=dc
+V_fb_vinn (vinn vss) vsource dc=0.45 type=dc
+V_fb_vinp (vinp vss) vsource type=pwl wave=[0 0.44 25n 0.44 30n 0.456 60n 0.456 70n 0.444 82n 0.444]
+
+XFB_DUT (vinn vinp out_n out_p vss vdd) cmp_hysteresis vhys=10m tedge=50p
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=82n maxstep=80p
+save vinp vinn out_p out_n vss vdd

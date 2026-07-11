@@ -1,0 +1,47 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=72n maxstep=0.35n"
+    ],
+    "body_lines": [
+      "V_fb_clk (clk 0) vsource type=pulse val0=0 val1=0.9 period=1.7n width=0.76n rise=40p fall=40p",
+      "V_fb_rst (rst 0) vsource type=pwl wave=[0 0.9 2.4n 0.9 2.5n 0 72n 0]",
+      "V_fb_load (vin 0) vsource type=pwl wave=[0 0.15 21.9n 0.15 22n 0.75 45.9n 0.75 46n 0.20 65.9n 0.20 66n 0.55 72n 0.55]",
+      "",
+      "XFB_DUT (clk rst vin out metric) ldo_regulator_macro_model",
+      ""
+    ],
+    "save_signals": [
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric"
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "4ff5a9d61fc7bf610421329c35e9e346817a165c5575caaaa61ed080505cb4a3",
+  "parameters": {
+    "maxstep": "200p",
+    "stop_time": "100n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_INITIAL_AND_RESET_STATE",
+    "P_LOAD_TARGET",
+    "P_FIRST_ORDER_REGULATION",
+    "P_REGULATED_OUTPUT_CLAMP",
+    "P_ERROR_METRIC",
+    "P_CLOCKED_HOLD"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

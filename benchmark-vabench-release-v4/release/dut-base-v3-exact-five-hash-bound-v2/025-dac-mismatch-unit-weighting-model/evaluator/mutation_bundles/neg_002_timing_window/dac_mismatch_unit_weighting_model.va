@@ -1,0 +1,24 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dac_mismatch_unit_weighting_model(b0, b1, b2, b3, out);
+input b0, b1, b2, b3;
+output out;
+electrical b0, b1, b2, b3, out;
+parameter real vhi = 0.9;
+parameter real vlo = 0.0;
+parameter real tr = 100p;
+real y;
+analog begin
+    y = (((V(b0) > 0.45) ? 1.00 : 0.00)
+       + ((V(b1) > 0.45) ? 2.00 : 0.00)
+       + ((V(b2) > 0.45) ? 4.00 : 0.00)
+       + ((V(b3) > 0.45) ? 8.00 : 0.00)) / 15.00;
+    // Nonideal unit weights are part of the public transfer contract.
+    V(out) <+ transition(vlo + (vhi - vlo) * y, 0, tr, tr);
+end
+endmodule
+
+// vaBench partial-pass negative 2 for dac_mismatch_unit_weighting_model:dut
+// Intended to preserve interface/smoke behavior while failing full checks.
+// Mutation note: idealized_binary_weights.

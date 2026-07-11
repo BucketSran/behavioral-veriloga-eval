@@ -1,0 +1,15 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module ldo_regulator_macro_model(clk, rst, vin, out, metric);
+input clk, rst, vin; output out, metric; electrical clk, rst, vin, out, metric;
+parameter real tr=100p; parameter real vth=0.45; real regv,targetv,loadv,errv,metricv;
+analog begin
+    @(initial_step) begin regv=0.60; metricv=0.9; end
+    @(cross(V(clk)-vth,+1)) begin
+        if (V(rst)>vth) begin regv=0.60; metricv=0.9; end
+        else begin loadv=V(vin); if (loadv<0.0) loadv=0.0; if (loadv>0.9) loadv=0.9; targetv = 0.62 - 0.055 * loadv; regv = regv + 0.35 * (targetv - regv); metricv = 0.0; if (regv>0.75) regv=0.75; if (regv<0.25) regv=0.25; end
+    end
+    V(out)<+transition(regv,0,tr,tr); V(metric)<+transition(metricv,0,tr,tr);
+end
+endmodule

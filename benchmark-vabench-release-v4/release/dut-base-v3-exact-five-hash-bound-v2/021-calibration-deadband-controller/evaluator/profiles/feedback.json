@@ -1,0 +1,47 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=72n maxstep=0.35n"
+    ],
+    "body_lines": [
+      "V_fb_clk (clk 0) vsource type=pulse val0=0 val1=0.9 period=1.6n width=0.7n rise=40p fall=40p",
+      "V_fb_rst (rst 0) vsource type=pwl wave=[0 0.9 2.4n 0.9 2.5n 0 64n 0 64.1n 0.9 67n 0.9 67.1n 0 72n 0]",
+      "V_fb_err (vin 0) vsource type=pwl wave=[0 0.45 7.9n 0.45 8n 0.49 13.9n 0.49 14n 0.72 27.9n 0.72 28n 0.46 33.9n 0.46 34n 0.20 47.9n 0.20 48n 0.44 55.9n 0.44 56n 0.75 63.9n 0.75 64n 0.45 72n 0.45]",
+      "",
+      "XFB_DUT (clk rst vin out metric) calibration_deadband_controller",
+      ""
+    ],
+    "save_signals": [
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric"
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "6b05d076633cc47a61bde4893ade26ac8078aaa9296e1ba16b9773b6adaf2609",
+  "parameters": {
+    "maxstep": "200p",
+    "stop_time": "100n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_INITIAL_AND_RESET_TARGET",
+    "P_POSITIVE_ERROR_STEP",
+    "P_NEGATIVE_ERROR_STEP",
+    "P_DEADBAND_HOLD",
+    "P_OUTPUT_CLAMP",
+    "P_BETWEEN_EDGE_HOLD"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

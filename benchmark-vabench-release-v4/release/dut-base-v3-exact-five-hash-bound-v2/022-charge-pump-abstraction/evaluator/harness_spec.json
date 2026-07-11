@@ -1,0 +1,117 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "charge_pump_abstraction.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=5n maxstep=100p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "rst",
+      "up",
+      "dn"
+    ]
+  },
+  "family_id": "022",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "f200ead5378e01d8db317054de096d3f4f3f73c5223ead42af1e614afd9c2bc1",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "497464ede3c8feffc91928c73becdcb7029759aad5f528028edc8be550e3bbc9",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=70n maxstep=0.35n"
+        ],
+        "body_lines": [
+          "V_fb_clk (clk 0) vsource type=pulse val0=0 val1=0.9 period=1.6n width=0.7n rise=40p fall=40p",
+          "V_fb_rst (rst 0) vsource type=pwl wave=[0 0.9 2.4n 0.9 2.5n 0 62n 0 62.1n 0.9 65n 0.9 65.1n 0 70n 0]",
+          "V_fb_up (up 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.9 19n 0.9 19.1n 0 49n 0 49.1n 0.9 54n 0.9 54.1n 0 70n 0]",
+          "V_fb_dn (dn 0) vsource type=pwl wave=[0 0 29n 0 29.1n 0.9 44n 0.9 44.1n 0 49n 0 49.1n 0.9 54n 0.9 54.1n 0 70n 0]",
+          "",
+          "XFB_DUT (clk rst up dn vctrl metric) charge_pump_abstraction",
+          ""
+        ],
+        "save_signals": [
+          "clk",
+          "rst",
+          "up",
+          "dn",
+          "vctrl",
+          "metric"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=80n maxstep=0.5n"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=2n width=1n rise=50p fall=50p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 62n 0 62.1n 0.9 66n 0.9 66.1n 0 80n 0]",
+          "Vup (up 0) vsource type=pwl wave=[0 0 5.8n 0 5.85n 0.9 6.35n 0.9 6.4n 0 7.8n 0 7.85n 0.9 8.35n 0.9 8.4n 0 9.8n 0 9.85n 0.9 10.35n 0.9 10.4n 0 11.8n 0 11.85n 0.9 12.35n 0.9 12.4n 0 13.8n 0 13.85n 0.9 14.35n 0.9 14.4n 0 15.8n 0 15.85n 0.9 16.35n 0.9 16.4n 0 17.8n 0 17.85n 0.9 18.35n 0.9 18.4n 0 80n 0]",
+          "Vdn (dn 0) vsource type=pwl wave=[0 0 31.8n 0 31.85n 0.9 32.35n 0.9 32.4n 0 33.8n 0 33.85n 0.9 34.35n 0.9 34.4n 0 35.8n 0 35.85n 0.9 36.35n 0.9 36.4n 0 37.8n 0 37.85n 0.9 38.35n 0.9 38.4n 0 39.8n 0 39.85n 0.9 40.35n 0.9 40.4n 0 80n 0]",
+          "",
+          "XDUT (clk rst up dn vctrl metric) charge_pump_abstraction",
+          ""
+        ],
+        "save_signals": [
+          "clk",
+          "rst",
+          "up",
+          "dn",
+          "vctrl",
+          "metric"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RESET_MIDSCALE",
+    "P_UP_ONLY_STEP",
+    "P_DN_ONLY_STEP",
+    "P_HOLD_CASES",
+    "P_CONTROL_CLAMP",
+    "P_SAMPLED_HOLD"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "2c0a7edc030d4ba9d5c2de7a4f50acd3c04ccbc22066de06e95c50cdb6700b15",
+    "family_spec_sha256": "cc2ac8db47a2d5e5fbd9415bab63709e23e7670284ccd5e3423c986e71ca140f"
+  },
+  "task_id": "v4-022"
+}

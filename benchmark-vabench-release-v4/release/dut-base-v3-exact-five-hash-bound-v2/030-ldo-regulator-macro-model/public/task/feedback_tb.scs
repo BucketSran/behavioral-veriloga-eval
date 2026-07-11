@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/ldo_regulator_macro_model.va"
+
+V_fb_clk (clk 0) vsource type=pulse val0=0 val1=0.9 period=1.7n width=0.76n rise=40p fall=40p
+V_fb_rst (rst 0) vsource type=pwl wave=[0 0.9 2.4n 0.9 2.5n 0 72n 0]
+V_fb_load (vin 0) vsource type=pwl wave=[0 0.15 21.9n 0.15 22n 0.75 45.9n 0.75 46n 0.20 65.9n 0.20 66n 0.55 72n 0.55]
+
+XFB_DUT (clk rst vin out metric) ldo_regulator_macro_model
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=72n maxstep=0.35n
+save clk rst vin out metric

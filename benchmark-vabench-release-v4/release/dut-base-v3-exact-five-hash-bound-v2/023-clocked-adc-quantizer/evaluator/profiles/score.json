@@ -1,0 +1,43 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=820n maxstep=2n"
+    ],
+    "body_lines": [
+      "// flash_adc_3b gold smoke testbench",
+      "// Ramp input 0->0.9V over 800ns, 100MHz clock. All 8 codes expected.",
+      "",
+      "Vvdd (vdd 0) vsource dc=0.9 type=dc",
+      "Vvss (vss 0) vsource dc=0.0 type=dc",
+      "",
+      "Vvin (vin 0) vsource type=pwl wave=[0 0 800e-9 0.9]",
+      "",
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=5n rise=100p fall=100p",
+      "",
+      "IDUT (vdd vss vin clk dout2 dout1 dout0) flash_adc_3b vrefp=0.9 vrefn=0.0 vth=0.45 tedge=100p",
+      ""
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "fdf7b333b2e932f5b9176592e584f14c08e1174097a491594df7c6b4a233b1e5",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "100n"
+  },
+  "profile_name": "score",
+  "property_ids": [
+    "P_RISING_EDGE_QUANTIZATION",
+    "P_CODE_CLAMP",
+    "P_BINARY_RAIL_ENCODING",
+    "P_CODE_MONOTONICITY",
+    "P_SAMPLE_HOLD"
+  ],
+  "public_visible": false,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {}
+}

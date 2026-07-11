@@ -1,0 +1,33 @@
+{
+  "schema_version": "v4-family-spec-v1", "family_id": "023",
+  "task_ids": {"dut": "v4-023", "testbench": "v4-523", "bugfix": "v4-1023"},
+  "identity": {"title": "Clocked ADC Quantizer", "category": "data_converter", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "flash_adc_3b.va", "modules": [{
+    "name": "flash_adc_3b", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "VDD", "direction": "input", "discipline": "electrical", "position": 0}, {"name": "VSS", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "VIN", "direction": "input", "discipline": "electrical", "position": 2}, {"name": "CLK", "direction": "input", "discipline": "electrical", "position": 3},
+      {"name": "DOUT2", "direction": "output", "discipline": "electrical", "position": 4}, {"name": "DOUT1", "direction": "output", "discipline": "electrical", "position": 5},
+      {"name": "DOUT0", "direction": "output", "discipline": "electrical", "position": 6}
+    ],
+    "parameters": [
+      {"name": "vrefp", "type": "real", "default": 0.9, "units": "V", "valid_range": "vrefp > vrefn", "override_behavior": "sets upper conversion endpoint"},
+      {"name": "vrefn", "type": "real", "default": 0.0, "units": "V", "valid_range": "vrefn < vrefp", "override_behavior": "sets lower conversion endpoint"},
+      {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "finite real", "override_behavior": "sets rising clock decision threshold"},
+      {"name": "tedge", "type": "real", "default": 1e-10, "units": "s", "valid_range": "tedge > 0", "override_behavior": "sets output-bit transition smoothing"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "flash_adc_3b", "connections": [
+    {"port_ref": "VDD", "net": "vdd", "position": 0}, {"port_ref": "VSS", "net": "vss", "position": 1}, {"port_ref": "VIN", "net": "vin", "position": 2}, {"port_ref": "CLK", "net": "clk", "position": 3},
+    {"port_ref": "DOUT2", "net": "dout2", "position": 4}, {"port_ref": "DOUT1", "net": "dout1", "position": 5}, {"port_ref": "DOUT0", "net": "dout0", "position": 6}
+  ]}]},
+  "properties": [
+    {"id": "P_RISING_EDGE_QUANTIZATION", "observable_contract": "At each rising CLK crossing, VIN is quantized into one of eight uniform bins spanning vrefn to vrefp.", "required_signals": ["time", "clk", "vin", "dout2", "dout1", "dout0"]},
+    {"id": "P_CODE_CLAMP", "observable_contract": "Samples at or outside the conversion endpoints produce codes clamped to the inclusive range 0 through 7.", "required_signals": ["time", "clk", "vin", "dout2", "dout1", "dout0"]},
+    {"id": "P_BINARY_RAIL_ENCODING", "observable_contract": "DOUT2 through DOUT0 encode the held code from MSB to LSB using VDD for one and VSS for zero.", "required_signals": ["time", "vdd", "vss", "dout2", "dout1", "dout0"]},
+    {"id": "P_CODE_MONOTONICITY", "observable_contract": "For increasing VIN samples across the conversion range, the sampled three-bit code is nondecreasing.", "required_signals": ["time", "clk", "vin", "dout2", "dout1", "dout0"]},
+    {"id": "P_SAMPLE_HOLD", "observable_contract": "The output code remains stable between rising CLK crossings even when VIN changes.", "required_signals": ["time", "clk", "vin", "dout2", "dout1", "dout0"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "vdd", "vss", "vin", "clk", "dout2", "dout1", "dout0"]},
+  "modeling_constraints": ["Use rising-edge event-driven quantization and held state.", "Use smoothed voltage contributions only.", "Do not use current contributions, transistor-level devices, ddt(), idt(), or validation side channels."]
+}

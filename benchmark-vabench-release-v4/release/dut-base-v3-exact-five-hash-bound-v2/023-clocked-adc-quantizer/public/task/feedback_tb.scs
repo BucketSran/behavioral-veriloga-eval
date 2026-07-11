@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/flash_adc_3b.va"
+
+V_VDD (vdd 0) vsource dc=0.9
+V_VSS (vss 0) vsource dc=0
+V_VIN (vin 0) vsource type=pwl wave=[0 0 220n 0.9]
+V_CLK (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n delay=100p rise=20p fall=20p width=5n
+
+XDUT (vdd vss vin clk dout2 dout1 dout0) flash_adc_3b
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=230n maxstep=200p
+save vdd vss vin clk dout2 dout1 dout0

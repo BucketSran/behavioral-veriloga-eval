@@ -1,0 +1,157 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "dwa_ptr_gen.va",
+      "v2b_4b.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=92n maxstep=200p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk_i",
+      "rst_ni",
+      "code_3",
+      "code_2",
+      "code_1",
+      "code_0",
+      "cell_en_15",
+      "cell_en_14",
+      "cell_en_13",
+      "cell_en_12",
+      "cell_en_11",
+      "cell_en_10",
+      "cell_en_9",
+      "cell_en_8",
+      "cell_en_7",
+      "cell_en_6",
+      "cell_en_5",
+      "cell_en_4",
+      "cell_en_3",
+      "cell_en_2",
+      "cell_en_1",
+      "cell_en_0",
+      "ptr_15",
+      "ptr_14",
+      "ptr_13",
+      "ptr_12",
+      "ptr_11",
+      "ptr_10",
+      "ptr_9",
+      "ptr_8",
+      "ptr_7",
+      "ptr_6",
+      "ptr_5",
+      "ptr_4",
+      "ptr_3",
+      "ptr_2",
+      "ptr_1",
+      "ptr_0",
+      "vin_node"
+    ]
+  },
+  "family_id": "027",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "1b821ab8458ceddcd675fcb980e9f916ee659b23c74b1ea94d42a2c0c4ccfb59",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "f9ae59264758ba3592cdc9c3cc779bdba2d61778974659e2ab7f82a167525b49",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (clk_i 0) vsource type=pulse val0=0 val1=0.9 period=8n delay=1.5n rise=0.2n fall=0.2n width=3.6n",
+          "Vrst_n (rst_ni 0) vsource type=pwl wave=[0 0 6n 0 6.2n 0.9 94n 0.9]",
+          "",
+          "Vvin (vin_node 0) vsource type=pwl \\",
+          "    wave=[0 6  11.5n 6  11.6n 9  19.5n 9  19.6n 4  27.5n 4  27.6n 11  35.5n 11 \\",
+          "          35.6n 7  43.5n 7  43.6n 12  51.5n 12  51.6n 5  59.5n 5  59.6n 10 \\",
+          "          67.5n 10  67.6n 3  75.5n 3  75.6n 8  94n 8]",
+          "",
+          "IV2B (clk_i vin_node code_3 code_2 code_1 code_0) v2b_4b vdd=0.9",
+          "",
+          "IDUT (clk_i rst_ni \\",
+          "      code_3 code_2 code_1 code_0 \\",
+          "      cell_en_15 cell_en_14 cell_en_13 cell_en_12 cell_en_11 cell_en_10 cell_en_9 cell_en_8 \\",
+          "      cell_en_7 cell_en_6 cell_en_5 cell_en_4 cell_en_3 cell_en_2 cell_en_1 cell_en_0 \\",
+          "      ptr_15 ptr_14 ptr_13 ptr_12 ptr_11 ptr_10 ptr_9 ptr_8 \\",
+          "      ptr_7 ptr_6 ptr_5 ptr_4 ptr_3 ptr_2 ptr_1 ptr_0) \\",
+          "      dwa_ptr_gen vdd=0.9 vth=0.45 ptr_init=0"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=100n maxstep=2n"
+        ],
+        "body_lines": [
+          "// dwa_ptr_gen gold smoke testbench",
+          "// 100 MHz clock, v2b_4b converts analog voltage to 4-bit code.",
+          "// Runs 100ns with maxstep=2ns. Saves all 32 bits (ptr[15:0] + cell_en[15:0]).",
+          "",
+          "Vclk (clk_i 0) vsource type=pulse val0=0 val1=0.9 period=10n delay=2n rise=0.5n fall=0.5n width=4.5n",
+          "Vrst_n (rst_ni 0) vsource type=pwl wave=[0 0 4.9n 0 5n 0.9 105n 0.9]",
+          "",
+          "Vvin (vin_node 0) vsource type=pwl \\",
+          "    wave=[0 3  13n 3  14n 7  23n 7  24n 2  33n 2  34n 5  43n 5 \\",
+          "          44n 1  53n 1  54n 8  63n 8  64n 4  73n 4  74n 6  105n 6]",
+          "",
+          "IV2B (clk_i vin_node code_3 code_2 code_1 code_0) v2b_4b vdd=0.9",
+          "",
+          "IDUT (clk_i rst_ni \\",
+          "      code_3 code_2 code_1 code_0 \\",
+          "      cell_en_15 cell_en_14 cell_en_13 cell_en_12 cell_en_11 cell_en_10 cell_en_9 cell_en_8 \\",
+          "      cell_en_7 cell_en_6 cell_en_5 cell_en_4 cell_en_3 cell_en_2 cell_en_1 cell_en_0 \\",
+          "      ptr_15 ptr_14 ptr_13 ptr_12 ptr_11 ptr_10 ptr_9 ptr_8 \\",
+          "      ptr_7 ptr_6 ptr_5 ptr_4 ptr_3 ptr_2 ptr_1 ptr_0) \\",
+          "      dwa_ptr_gen vdd=0.9 vth=0.45 ptr_init=0"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_V2B_ROUND_AND_CLAMP",
+    "P_ACTIVE_LOW_RESET_POINTER",
+    "P_ROTATING_POINTER_UPDATE",
+    "P_POINTER_ONE_HOT",
+    "P_DWA_SELECTED_MASK",
+    "P_SYSTEM_CODE_BINDING"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "e24c6a52cd995bf69799b169693ff3ceec7c783823bbce042ce93104d7924b5f",
+    "family_spec_sha256": "5b1e24c67416378ac9d0f046df59f6436793d0a9f712f625433a04bdd350f854"
+  },
+  "task_id": "v4-027"
+}

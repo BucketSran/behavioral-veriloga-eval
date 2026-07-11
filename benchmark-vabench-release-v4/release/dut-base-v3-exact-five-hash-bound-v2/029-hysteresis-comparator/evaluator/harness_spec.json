@@ -1,0 +1,122 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "cmp_hysteresis.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=5n maxstep=100p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vinn",
+      "vinp",
+      "out_n",
+      "out_p",
+      "vss",
+      "vdd"
+    ]
+  },
+  "family_id": "029",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "5e8b2b66a770eb5c9cd65597b11201d4ff1de388f3463d2f45d413c5933d8ddf",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "3f55bf818002ae72d3fe9a79d73f2ff3fca49a3c213963847c233af03a1e8aa3",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=82n maxstep=80p"
+        ],
+        "body_lines": [
+          "V_fb_vdd (vdd 0) vsource dc=0.9 type=dc",
+          "V_fb_vss (vss 0) vsource dc=0.1 type=dc",
+          "V_fb_vinn (vinn vss) vsource dc=0.45 type=dc",
+          "V_fb_vinp (vinp vss) vsource type=pwl wave=[0 0.44 25n 0.44 30n 0.456 60n 0.456 70n 0.444 82n 0.444]",
+          "",
+          "XFB_DUT (vinn vinp out_n out_p vss vdd) cmp_hysteresis vhys=10m tedge=50p",
+          ""
+        ],
+        "save_signals": [
+          "vinp",
+          "vinn",
+          "out_p",
+          "out_n",
+          "vss",
+          "vdd"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=80n maxstep=100p"
+        ],
+        "body_lines": [
+          "// Continuous hysteresis comparator sweep",
+          "",
+          "Vvdd (vdd 0) vsource dc=0.9 type=dc",
+          "Vvss (vss 0) vsource dc=0.1 type=dc",
+          "",
+          "Vvinp (vinp vss) vsource type=pwl wave=[0 0.44 40n 0.46 80n 0.44]",
+          "Vvinn (vinn vss) vsource dc=0.45 type=dc",
+          "",
+          "// DUT (port order: VINN VINP OUTN OUTP VSS VDD)",
+          "IDUT (vinn vinp out_n out_p vss vdd) cmp_hysteresis vhys=10m tedge=50p",
+          ""
+        ],
+        "save_signals": [
+          "vinp",
+          "vinn",
+          "out_p",
+          "out_n",
+          "vss",
+          "vdd"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INITIAL_DECISION",
+    "P_POSITIVE_SWITCH_THRESHOLD",
+    "P_NEGATIVE_SWITCH_THRESHOLD",
+    "P_HYSTERESIS_HOLD",
+    "P_COMPLEMENTARY_RAIL_OUTPUT"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "e86ac44c33d3d2c5a369bc3e7b01ec090d4196c6a0f3037c4b7c7f0e6396860b",
+    "family_spec_sha256": "796ef71d3155a4a57c71dd4f2dba96d18424fabd3436132ec80b4a926d62c4a1"
+  },
+  "task_id": "v4-029"
+}

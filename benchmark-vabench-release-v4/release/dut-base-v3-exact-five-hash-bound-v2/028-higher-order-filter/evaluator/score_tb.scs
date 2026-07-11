@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "higher_order_filter.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=2n width=1n rise=50p fall=50p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 80n 0]
+Vvin (vin 0) vsource type=pwl wave=[0 0.45 8n 0.45 12n 0.9 28n 0.9 31n 0.45 37n 0.45 42n 0.1 58n 0.1 61n 0.45 67n 0.45 72n 0.85 80n 0.85]
+
+XDUT (clk rst vin out metric) higher_order_filter
+
+tran tran stop=80n maxstep=0.5n
+save clk rst vin out metric

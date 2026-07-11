@@ -1,0 +1,22 @@
+// vaBench partial-pass negative 1 for dac_mismatch_unit_weighting_model:dut
+// Intended to preserve interface/smoke behavior while failing full checks.
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dac_mismatch_unit_weighting_model(b0, b1, b2, b3, out);
+input b0, b1, b2, b3;
+output out;
+electrical b0, b1, b2, b3, out;
+parameter real vhi = 0.9;
+parameter real vlo = 0.0;
+parameter real tr = 100p;
+real y;
+analog begin
+    y = (((V(b0) > 0.45) ? 0.950 : 0.00)
+       + ((V(b1) > 0.45) ? 2.02 : 0.00)
+       + ((V(b2) > 0.45) ? 3.96 : 0.00)
+       + ((V(b3) > 0.45) ? 8.08 : 0.00)) / 16.06;
+    // Nonideal unit weights are part of the public transfer contract.
+    V(out) <+ transition(vlo + (vhi - vlo) * y, 0, tr, tr);
+end
+endmodule

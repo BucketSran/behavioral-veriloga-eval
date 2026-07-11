@@ -1,0 +1,30 @@
+{
+  "schema_version": "v4-family-spec-v1", "family_id": "025",
+  "task_ids": {"dut": "v4-025", "testbench": "v4-525", "bugfix": "v4-1025"},
+  "identity": {"title": "DAC Mismatch Unit Weighting Model", "category": "data_converter", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "dac_mismatch_unit_weighting_model.va", "modules": [{
+    "name": "dac_mismatch_unit_weighting_model", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "b0", "direction": "input", "discipline": "electrical", "position": 0}, {"name": "b1", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "b2", "direction": "input", "discipline": "electrical", "position": 2}, {"name": "b3", "direction": "input", "discipline": "electrical", "position": 3},
+      {"name": "out", "direction": "output", "discipline": "electrical", "position": 4}
+    ],
+    "parameters": [
+      {"name": "vhi", "type": "real", "default": 0.9, "units": "V", "valid_range": "vhi > vlo", "override_behavior": "sets the all-active output endpoint"},
+      {"name": "vlo", "type": "real", "default": 0.0, "units": "V", "valid_range": "vlo < vhi", "override_behavior": "sets the all-zero output endpoint"},
+      {"name": "tr", "type": "real", "default": 1e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets output transition smoothing"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "dac_mismatch_unit_weighting_model", "connections": [
+    {"port_ref": "b0", "net": "b0", "position": 0}, {"port_ref": "b1", "net": "b1", "position": 1}, {"port_ref": "b2", "net": "b2", "position": 2}, {"port_ref": "b3", "net": "b3", "position": 3}, {"port_ref": "out", "net": "out", "position": 4}
+  ]}]},
+  "properties": [
+    {"id": "P_ZERO_AND_FULL_SCALE", "observable_contract": "All-zero input maps to vlo and all-active input maps to vhi after transition settling.", "required_signals": ["time", "b0", "b1", "b2", "b3", "out"]},
+    {"id": "P_NONIDEAL_WEIGHT_SUM", "observable_contract": "Inputs b0 through b3 contribute fixed positive weights 1.00, 2.02, 3.96, and 8.08 normalized by their all-active sum.", "required_signals": ["time", "b0", "b1", "b2", "b3", "out"]},
+    {"id": "P_LOGIC_THRESHOLD", "observable_contract": "Each bit is independently interpreted using the public fixed 0.45 V decision threshold.", "required_signals": ["time", "b0", "b1", "b2", "b3", "out"]},
+    {"id": "P_BOUNDED_OUTPUT", "observable_contract": "For every input pattern, the settled output remains within the vlo-to-vhi interval.", "required_signals": ["time", "b0", "b1", "b2", "b3", "out"]},
+    {"id": "P_MISMATCH_OBSERVABILITY", "observable_contract": "Single-bit output increments preserve the stated nonideal weighting rather than ideal powers-of-two weighting.", "required_signals": ["time", "b0", "b1", "b2", "b3", "out"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "b0", "b1", "b2", "b3", "out"]},
+  "modeling_constraints": ["Use the public fixed nonideal weights and deterministic voltage-domain reconstruction.", "Use smoothed voltage contributions only.", "Do not use current contributions, ddt(), idt(), validation hooks, or simulator-specific side channels."]
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": "v4-family-spec-v1", "family_id": "022",
+  "task_ids": {"dut": "v4-022", "testbench": "v4-522", "bugfix": "v4-1022"},
+  "identity": {"title": "Charge Pump Abstraction", "category": "pll_clock_timing", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "charge_pump_abstraction.va", "modules": [{
+    "name": "charge_pump_abstraction", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "clk", "direction": "input", "discipline": "electrical", "position": 0}, {"name": "rst", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "up", "direction": "input", "discipline": "electrical", "position": 2}, {"name": "dn", "direction": "input", "discipline": "electrical", "position": 3},
+      {"name": "vctrl", "direction": "output", "discipline": "electrical", "position": 4}, {"name": "metric", "direction": "output", "discipline": "electrical", "position": 5}
+    ],
+    "parameters": [
+      {"name": "tr", "type": "real", "default": 1e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets output transition smoothing"},
+      {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "finite real", "override_behavior": "sets clk, rst, up, and dn logic threshold"},
+      {"name": "step", "type": "real", "default": 0.06, "units": "V", "valid_range": "step > 0", "override_behavior": "sets control-voltage movement per sampled exclusive request"},
+      {"name": "vmin", "type": "real", "default": 0.05, "units": "V", "valid_range": "vmin < vmax", "override_behavior": "sets lower vctrl clamp"},
+      {"name": "vmax", "type": "real", "default": 0.85, "units": "V", "valid_range": "vmax > vmin", "override_behavior": "sets upper vctrl clamp"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "charge_pump_abstraction", "connections": [
+    {"port_ref": "clk", "net": "clk", "position": 0}, {"port_ref": "rst", "net": "rst", "position": 1}, {"port_ref": "up", "net": "up", "position": 2}, {"port_ref": "dn", "net": "dn", "position": 3}, {"port_ref": "vctrl", "net": "vctrl", "position": 4}, {"port_ref": "metric", "net": "metric", "position": 5}
+  ]}]},
+  "properties": [
+    {"id": "P_RESET_MIDSCALE", "observable_contract": "When rst is high, vctrl resets to the midpoint of vmin and vmax and metric is 0.45 V.", "required_signals": ["time", "rst", "vctrl", "metric"]},
+    {"id": "P_UP_ONLY_STEP", "observable_contract": "A rising clock crossing sampling up high and dn low increases vctrl by step and encodes metric at 0.75 V.", "required_signals": ["time", "clk", "rst", "up", "dn", "vctrl", "metric"]},
+    {"id": "P_DN_ONLY_STEP", "observable_contract": "A rising clock crossing sampling dn high and up low decreases vctrl by step and encodes metric at 0.15 V.", "required_signals": ["time", "clk", "rst", "up", "dn", "vctrl", "metric"]},
+    {"id": "P_HOLD_CASES", "observable_contract": "A rising clock crossing sampling both or neither request holds vctrl and encodes metric at 0.45 V.", "required_signals": ["time", "clk", "rst", "up", "dn", "vctrl", "metric"]},
+    {"id": "P_CONTROL_CLAMP", "observable_contract": "Repeated sampled movement cannot drive vctrl below vmin or above vmax.", "required_signals": ["time", "clk", "up", "dn", "vctrl"]},
+    {"id": "P_SAMPLED_HOLD", "observable_contract": "Changes on up or dn between rising clock crossings do not immediately change vctrl.", "required_signals": ["time", "clk", "up", "dn", "vctrl"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "clk", "rst", "up", "dn", "vctrl", "metric"]},
+  "modeling_constraints": ["Represent charge-pump requests as sampled voltage-domain state updates.", "Use voltage contributions only.", "Do not use current contributions, ddt(), idt(), transistor-level devices, or validation side channels."]
+}

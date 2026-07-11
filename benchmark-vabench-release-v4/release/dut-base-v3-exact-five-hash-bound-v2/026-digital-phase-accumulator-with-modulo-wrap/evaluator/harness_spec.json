@@ -1,0 +1,108 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "phase_accumulator_timer_wrap_ref.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=5n maxstep=100p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "VDD",
+      "VSS"
+    ]
+  },
+  "family_id": "026",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "6d014cc42d97b2d112c0b2a082f0e9f566680a033dff705d1274001fc45f7cef",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "8738b44abcec8a0d5e0f65a431221ffe56d0597f4843dab765552509a7c69077",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=72n maxstep=40p"
+        ],
+        "body_lines": [
+          "V_fb_vdd (VDD 0) vsource dc=0.9 type=dc",
+          "V_fb_vss (VSS 0) vsource dc=0 type=dc",
+          "",
+          "XFB_DUT (VDD VSS clk_out phase_out) phase_accumulator_timer_wrap_ref dt=4n phase_step=0.2 tedge=160p",
+          ""
+        ],
+        "save_signals": [
+          "VDD",
+          "VSS",
+          "clk_out",
+          "phase_out"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=75n maxstep=20p errpreset=conservative"
+        ],
+        "body_lines": [
+          "Vvdd (VDD 0) vsource dc=0.9 type=dc",
+          "Vvss (VSS 0) vsource dc=0.0 type=dc",
+          "",
+          "IDUT (VDD VSS clk_out phase_out) phase_accumulator_timer_wrap_ref",
+          "",
+          "simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12",
+          ""
+        ],
+        "save_signals": [
+          "VDD",
+          "VSS",
+          "clk_out",
+          "phase_out"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_TIMER_INCREMENT",
+    "P_MODULO_WRAP",
+    "P_PHASE_RAIL_SCALING",
+    "P_PHASE_DERIVED_CLOCK",
+    "P_PARAMETERIZED_PERIOD"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "3533798e01034fc6a2dfdf0d241144be0d09074fca6e784d57e8dba388754169",
+    "family_spec_sha256": "afe111b6b06696708b2de0a1a7cc65651d6595bfff2cd825b4110e4401347556"
+  },
+  "task_id": "v4-026"
+}

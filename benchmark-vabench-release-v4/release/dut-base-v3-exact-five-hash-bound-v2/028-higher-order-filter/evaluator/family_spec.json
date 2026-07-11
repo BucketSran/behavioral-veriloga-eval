@@ -1,0 +1,30 @@
+{
+  "schema_version": "v4-family-spec-v1", "family_id": "028",
+  "task_ids": {"dut": "v4-028", "testbench": "v4-528", "bugfix": "v4-1028"},
+  "identity": {"title": "Clocked Cascaded Two-Pole Filter", "category": "baseband_signal_conditioning", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "higher_order_filter.va", "modules": [{
+    "name": "higher_order_filter", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "clk", "direction": "input", "discipline": "electrical", "position": 0}, {"name": "rst", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "vin", "direction": "input", "discipline": "electrical", "position": 2}, {"name": "out", "direction": "output", "discipline": "electrical", "position": 3},
+      {"name": "metric", "direction": "output", "discipline": "electrical", "position": 4}
+    ],
+    "parameters": [
+      {"name": "tr", "type": "real", "default": 1e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets output transition smoothing"},
+      {"name": "gain", "type": "real", "default": 1.8, "units": "V/V", "valid_range": "gain > 0", "override_behavior": "sets input-deviation gain about 0.45 V common mode"},
+      {"name": "alpha", "type": "real", "default": 0.18, "units": "unitless", "valid_range": "0 < alpha <= 1", "override_behavior": "sets each cascaded sampled low-pass update coefficient"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "higher_order_filter", "connections": [
+    {"port_ref": "clk", "net": "clk", "position": 0}, {"port_ref": "rst", "net": "rst", "position": 1}, {"port_ref": "vin", "net": "vin", "position": 2}, {"port_ref": "out", "net": "out", "position": 3}, {"port_ref": "metric", "net": "metric", "position": 4}
+  ]}]},
+  "properties": [
+    {"id": "P_COMMON_MODE_INITIAL_RESET", "observable_contract": "Both cascaded states and observable out return to 0.45 V during initialization and active-high reset.", "required_signals": ["time", "rst", "out", "metric"]},
+    {"id": "P_GAINED_BOUNDED_TARGET", "observable_contract": "Each eligible rising edge forms a rail-bounded target from gain times the input deviation around 0.45 V.", "required_signals": ["time", "clk", "rst", "vin", "out"]},
+    {"id": "P_TWO_POLE_SAMPLED_SETTLING", "observable_contract": "Out follows the second of two cascaded alpha-weighted sampled low-pass states and therefore settles more slowly than a single direct update.", "required_signals": ["time", "clk", "vin", "out", "metric"]},
+    {"id": "P_LAG_METRIC", "observable_contract": "Metric exposes the centered lag between the two cascaded states during settling and returns toward its baseline after convergence.", "required_signals": ["time", "clk", "vin", "out", "metric"]},
+    {"id": "P_SIGNAL_RANGE", "observable_contract": "The driven output remains within the public 0 V through 0.9 V signal range.", "required_signals": ["time", "out"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "clk", "rst", "vin", "out", "metric"]},
+  "modeling_constraints": ["Use two deterministic cascaded rising-edge sampled low-pass states.", "Use voltage contributions only.", "Do not use current contributions, ddt(), validation hooks, or simulator-specific side channels."]
+}

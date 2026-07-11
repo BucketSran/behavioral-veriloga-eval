@@ -1,0 +1,30 @@
+{
+  "schema_version": "v4-family-spec-v1", "family_id": "030",
+  "task_ids": {"dut": "v4-030", "testbench": "v4-530", "bugfix": "v4-1030"},
+  "identity": {"title": "LDO Regulator Macro Model", "category": "bias_reference_power_management", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "ldo_regulator_macro_model.va", "modules": [{
+    "name": "ldo_regulator_macro_model", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "clk", "direction": "input", "discipline": "electrical", "position": 0}, {"name": "rst", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "vin", "direction": "input", "discipline": "electrical", "position": 2}, {"name": "out", "direction": "output", "discipline": "electrical", "position": 3},
+      {"name": "metric", "direction": "output", "discipline": "electrical", "position": 4}
+    ],
+    "parameters": [
+      {"name": "tr", "type": "real", "default": 1e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets output transition smoothing"},
+      {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "finite real", "override_behavior": "sets clk and rst logic threshold"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "ldo_regulator_macro_model", "connections": [
+    {"port_ref": "clk", "net": "clk", "position": 0}, {"port_ref": "rst", "net": "rst", "position": 1}, {"port_ref": "vin", "net": "vin", "position": 2}, {"port_ref": "out", "net": "out", "position": 3}, {"port_ref": "metric", "net": "metric", "position": 4}
+  ]}]},
+  "properties": [
+    {"id": "P_INITIAL_AND_RESET_STATE", "observable_contract": "Initialization or active-high reset sets out to 0.60 V and metric to 0.9 V.", "required_signals": ["time", "rst", "out", "metric"]},
+    {"id": "P_LOAD_TARGET", "observable_contract": "At each eligible rising clock crossing, vin is clamped to 0 through 0.9 V and target equals 0.62 V minus 0.055 times that load.", "required_signals": ["time", "clk", "rst", "vin", "out", "metric"]},
+    {"id": "P_FIRST_ORDER_REGULATION", "observable_contract": "Out advances by 0.35 of the remaining target error on each eligible rising clock crossing.", "required_signals": ["time", "clk", "vin", "out"]},
+    {"id": "P_REGULATED_OUTPUT_CLAMP", "observable_contract": "The held output remains within 0.25 V through 0.75 V.", "required_signals": ["time", "out"]},
+    {"id": "P_ERROR_METRIC", "observable_contract": "Metric equals 0.9 V minus four times the absolute output-to-target error, clamped to 0 through 0.9 V.", "required_signals": ["time", "vin", "out", "metric"]},
+    {"id": "P_CLOCKED_HOLD", "observable_contract": "Out and metric hold between rising clock crossings except for transition smoothing.", "required_signals": ["time", "clk", "vin", "out", "metric"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "clk", "rst", "vin", "out", "metric"]},
+  "modeling_constraints": ["Treat vin as a bounded load or disturbance control, not as a supply rail.", "Use voltage-domain sampled settling only.", "Do not use current contributions, transistor devices, AC/noise analysis, KCL/KVL regulation loops, or validation side channels."]
+}

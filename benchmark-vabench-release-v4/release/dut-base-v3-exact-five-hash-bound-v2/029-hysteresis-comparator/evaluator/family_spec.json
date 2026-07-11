@@ -1,0 +1,29 @@
+{
+  "schema_version": "v4-family-spec-v1", "family_id": "029",
+  "task_ids": {"dut": "v4-029", "testbench": "v4-529", "bugfix": "v4-1029"},
+  "identity": {"title": "Hysteresis Comparator", "category": "comparator_decision", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "cmp_hysteresis.va", "modules": [{
+    "name": "cmp_hysteresis", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "VINN", "direction": "input", "discipline": "electrical", "position": 0}, {"name": "VINP", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "OUTN", "direction": "output", "discipline": "electrical", "position": 2}, {"name": "OUTP", "direction": "output", "discipline": "electrical", "position": 3},
+      {"name": "VSS", "direction": "input", "discipline": "electrical", "position": 4}, {"name": "VDD", "direction": "input", "discipline": "electrical", "position": 5}
+    ],
+    "parameters": [
+      {"name": "vhys", "type": "real", "default": 0.01, "units": "V", "valid_range": "vhys >= 0", "override_behavior": "sets total differential hysteresis width centered at zero"},
+      {"name": "tedge", "type": "real", "default": 5e-11, "units": "s", "valid_range": "tedge > 0", "override_behavior": "sets complementary output transition smoothing"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "cmp_hysteresis", "connections": [
+    {"port_ref": "VINN", "net": "vinn", "position": 0}, {"port_ref": "VINP", "net": "vinp", "position": 1}, {"port_ref": "OUTN", "net": "out_n", "position": 2}, {"port_ref": "OUTP", "net": "out_p", "position": 3}, {"port_ref": "VSS", "net": "vss", "position": 4}, {"port_ref": "VDD", "net": "vdd", "position": 5}
+  ]}]},
+  "properties": [
+    {"id": "P_INITIAL_DECISION", "observable_contract": "OUTP initializes high only when the initial differential exceeds positive vhys over two; otherwise OUTP initializes low and OUTN high.", "required_signals": ["time", "vinp", "vinn", "out_p", "out_n"]},
+    {"id": "P_POSITIVE_SWITCH_THRESHOLD", "observable_contract": "The low OUTP state switches high only on a rising differential crossing of positive vhys over two.", "required_signals": ["time", "vinp", "vinn", "out_p", "out_n"]},
+    {"id": "P_NEGATIVE_SWITCH_THRESHOLD", "observable_contract": "The high OUTP state switches low only on a falling differential crossing of negative vhys over two.", "required_signals": ["time", "vinp", "vinn", "out_p", "out_n"]},
+    {"id": "P_HYSTERESIS_HOLD", "observable_contract": "The previous decision is retained while the differential remains inside the hysteresis band.", "required_signals": ["time", "vinp", "vinn", "out_p", "out_n"]},
+    {"id": "P_COMPLEMENTARY_RAIL_OUTPUT", "observable_contract": "OUTP and OUTN remain complementary and use the local VDD and VSS rail levels after smoothing.", "required_signals": ["time", "out_p", "out_n", "vdd", "vss"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "vinn", "vinp", "out_n", "out_p", "vss", "vdd"]},
+  "modeling_constraints": ["Update retained decision state only at initialization and differential threshold crossings.", "Drive complementary smoothed voltage contributions outside event blocks.", "Do not use current contributions, ddt(), idt(), validation hooks, or simulator-specific side channels."]
+}

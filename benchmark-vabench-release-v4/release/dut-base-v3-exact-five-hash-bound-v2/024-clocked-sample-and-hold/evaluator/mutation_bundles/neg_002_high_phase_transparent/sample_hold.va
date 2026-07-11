@@ -1,0 +1,26 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 10p
+
+module sample_hold(
+    inout electrical VDD,
+    inout electrical VSS,
+    input electrical IN,
+    input electrical CLK,
+    output electrical OUT
+);
+
+parameter real vth = 0.45;
+parameter real tedge = 100p;
+real held;
+
+analog begin
+    @(initial_step) held = 0.0;
+    @(timer(0, 100p)) begin
+        if (V(CLK, VSS) > vth)
+            held = V(IN, VSS);
+    end
+    V(OUT, VSS) <+ transition(held, 0, tedge, tedge);
+end
+endmodule

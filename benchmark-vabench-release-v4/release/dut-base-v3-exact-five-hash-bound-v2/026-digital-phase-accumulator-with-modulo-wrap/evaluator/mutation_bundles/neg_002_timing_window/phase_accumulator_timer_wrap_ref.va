@@ -1,0 +1,35 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module phase_accumulator_timer_wrap_ref (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    output electrical clk_out,
+    output electrical phase_out
+);
+parameter real dt = 5n from (0:inf);
+parameter real phase_step = 0.25 from (0:1);
+parameter real tedge = 200p from (0:inf);
+real next_t;
+real phase_q;
+integer clk_state;
+analog begin
+    @(initial_step) begin
+        next_t = dt;
+        phase_q = 0.0;
+        clk_state = 0;
+    end
+    @(timer(next_t)) begin
+        phase_q = phase_q;
+        if (phase_q >= 1.0) phase_q = phase_q - 1.0;
+        clk_state = 0;
+        next_t = next_t + dt;
+    end
+    V(clk_out, VSS) <+ V(VDD, VSS) * transition((clk_state) ? 1.0 : 0.0, 0.0, tedge, tedge);
+    V(phase_out, VSS) <+ V(VDD, VSS) * transition(phase_q, 0.0, tedge, tedge);
+end
+endmodule
+
+// vaBench partial-pass negative 2 for digital_phase_accumulator_with_modulo_wrap:dut
+// Intended to preserve interface/smoke behavior while failing full checks.
+// Mutation note: timing_window_near_miss.

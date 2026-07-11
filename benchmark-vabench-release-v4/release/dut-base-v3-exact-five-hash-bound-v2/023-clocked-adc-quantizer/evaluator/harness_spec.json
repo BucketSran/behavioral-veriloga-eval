@@ -1,0 +1,105 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "flash_adc_3b.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=230n maxstep=200p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vdd",
+      "vss",
+      "vin",
+      "clk",
+      "dout2",
+      "dout1",
+      "dout0"
+    ]
+  },
+  "family_id": "023",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "aebdce731c61aeabc842457d1ffb4327aad131334335efe627f1066676b7c384",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "f837eb0dd27272624ae6cbcb9899d3ebde247b4e719820af5da190dd59c5cd97",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "V_VDD (vdd 0) vsource dc=0.9",
+          "V_VSS (vss 0) vsource dc=0",
+          "V_VIN (vin 0) vsource type=pwl wave=[0 0 220n 0.9]",
+          "V_CLK (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n delay=100p rise=20p fall=20p width=5n",
+          "",
+          "XDUT (vdd vss vin clk dout2 dout1 dout0) flash_adc_3b",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=820n maxstep=2n"
+        ],
+        "body_lines": [
+          "// flash_adc_3b gold smoke testbench",
+          "// Ramp input 0->0.9V over 800ns, 100MHz clock. All 8 codes expected.",
+          "",
+          "Vvdd (vdd 0) vsource dc=0.9 type=dc",
+          "Vvss (vss 0) vsource dc=0.0 type=dc",
+          "",
+          "Vvin (vin 0) vsource type=pwl wave=[0 0 800e-9 0.9]",
+          "",
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=5n rise=100p fall=100p",
+          "",
+          "IDUT (vdd vss vin clk dout2 dout1 dout0) flash_adc_3b vrefp=0.9 vrefn=0.0 vth=0.45 tedge=100p",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RISING_EDGE_QUANTIZATION",
+    "P_CODE_CLAMP",
+    "P_BINARY_RAIL_ENCODING",
+    "P_CODE_MONOTONICITY",
+    "P_SAMPLE_HOLD"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "7b4350b360d411a3ec2c8a21e49494778f4caa4a8671c0b5284a899d5d99aa92",
+    "family_spec_sha256": "4d47713ebf463474cd85f8f706805824495be8c3df1d063bf675ae0906de6e7e"
+  },
+  "task_id": "v4-023"
+}
