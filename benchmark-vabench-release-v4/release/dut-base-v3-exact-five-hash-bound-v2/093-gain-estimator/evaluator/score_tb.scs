@@ -1,0 +1,21 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/gain_estimator.va"
+
+Vvdd (vdd 0) vsource type=dc dc=0.9
+Vvss (vss 0) vsource type=dc dc=0
+
+Vinp  (vinp  0) vsource type=sine sinedc=0.45 ampl=0.025 freq=25Meg
+Vinn  (vinn  0) vsource type=dc dc=0.45
+Voutp (voutp 0) vsource type=sine sinedc=0.45 ampl=0.15 freq=25Meg
+Voutn (voutn 0) vsource type=dc dc=0.45
+
+XGAIN (vdd vss vinp vinn voutp voutn gain_out valid) gain_estimator \
+    sample_period=0.8n start_time=24n gain_scale=10 min_input_span=0.02 tedge=200p
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+
+
+tran tran stop=260n maxstep=180p errpreset=conservative
+save vdd vss vinp vinn voutp voutn gain_out valid

@@ -1,0 +1,66 @@
+{
+  "cases": [
+    {
+      "id": "neg_001_zero",
+      "intent": "zero/stub output implementation copied from starter must not satisfy hidden behavior checker",
+      "mutation": "zero_stub_output",
+      "target": "ldo_load_step_recovery_flow.va",
+      "violated_property_ids": [
+        "P_RESET_REGULATION_STATE",
+        "P_BOUNDED_LOAD_AND_TARGET"
+      ]
+    },
+    {
+      "files": [
+        "neg_002_threshold_shifted/ldo_load_step_recovery_flow.va"
+      ],
+      "id": "neg_002_threshold_shifted",
+      "mutation": "threshold_boundary_error",
+      "violated_property_ids": [
+        "P_RESET_REGULATION_STATE",
+        "P_BOUNDED_LOAD_AND_TARGET"
+      ],
+      "why_wrong": "LDO Load Step Recovery: shifts the decision threshold, preserving nominal behavior while failing boundary checks."
+    },
+    {
+      "files": [
+        "neg_003_event_edge_wrong/ldo_load_step_recovery_flow.va"
+      ],
+      "id": "neg_003_event_edge_wrong",
+      "mutation": "event_edge_polarity_error",
+      "violated_property_ids": [
+        "P_BOUNDED_LOAD_AND_TARGET",
+        "P_HEAVY_LOAD_DROOP",
+        "P_LIGHT_LOAD_KICK"
+      ],
+      "why_wrong": "LDO Load Step Recovery: uses the opposite event edge, preserving interface behavior while failing timing windows."
+    },
+    {
+      "files": [
+        "neg_004_reset_polarity_wrong/ldo_load_step_recovery_flow.va"
+      ],
+      "id": "neg_004_reset_polarity_wrong",
+      "mutation": "reset_semantics_error",
+      "violated_property_ids": [
+        "P_RESET_REGULATION_STATE",
+        "P_BOUNDED_LOAD_AND_TARGET",
+        "P_RECOVERY_AND_SETTLING"
+      ],
+      "why_wrong": "LDO Load Step Recovery: uses the wrong reset polarity, preserving steady-state behavior while failing recovery checks."
+    },
+    {
+      "files": [
+        "neg_005_metric_scale_low/ldo_load_step_recovery_flow.va"
+      ],
+      "id": "neg_005_metric_scale_low",
+      "mutation": "metric_scaling_error",
+      "violated_property_ids": [
+        "P_RESET_REGULATION_STATE",
+        "P_CONTROL_MONITOR",
+        "P_RECOVERY_AND_SETTLING"
+      ],
+      "why_wrong": "LDO Load Step Recovery: scales the metric output, preserving the main path while failing measurement checks."
+    }
+  ],
+  "status": "concrete_semantic_negatives_static_formalized_runtime_pending"
+}

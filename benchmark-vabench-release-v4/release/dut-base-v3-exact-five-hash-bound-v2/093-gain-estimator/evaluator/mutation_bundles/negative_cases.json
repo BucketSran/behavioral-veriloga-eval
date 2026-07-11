@@ -1,0 +1,67 @@
+{
+  "cases": [
+    {
+      "id": "neg_001_zero",
+      "intent": "zero/stub output implementation copied from starter must not satisfy hidden behavior checker",
+      "mutation": "zero_stub_output",
+      "target": "gain_estimator.va",
+      "violated_property_ids": [
+        "P_START_TIME_GATING",
+        "P_PERIODIC_EXTREMA"
+      ]
+    },
+    {
+      "files": [
+        "neg_002_threshold_shifted/gain_estimator.va"
+      ],
+      "id": "neg_002_threshold_shifted",
+      "mutation": "threshold_boundary_error",
+      "violated_property_ids": [
+        "P_START_TIME_GATING",
+        "P_VALIDITY_THRESHOLD",
+        "P_SPAN_RATIO"
+      ],
+      "why_wrong": "Gain Estimator: shifts the decision threshold, preserving nominal behavior while failing boundary checks."
+    },
+    {
+      "files": [
+        "neg_003_event_edge_wrong/gain_estimator.va"
+      ],
+      "id": "neg_003_event_edge_wrong",
+      "mutation": "event_edge_polarity_error",
+      "violated_property_ids": [
+        "P_START_TIME_GATING",
+        "P_PERIODIC_EXTREMA",
+        "P_EVENT_UPDATED_TARGETS"
+      ],
+      "why_wrong": "Gain Estimator: uses the opposite event edge, preserving interface behavior while failing timing windows."
+    },
+    {
+      "files": [
+        "neg_004_reset_polarity_wrong/gain_estimator.va"
+      ],
+      "id": "neg_004_reset_polarity_wrong",
+      "mutation": "reset_semantics_error",
+      "violated_property_ids": [
+        "P_START_TIME_GATING",
+        "P_PERIODIC_EXTREMA"
+      ],
+      "why_wrong": "Gain Estimator: uses the wrong reset polarity, preserving steady-state behavior while failing recovery checks."
+    },
+    {
+      "files": [
+        "neg_005_metric_scale_low/gain_estimator.va"
+      ],
+      "id": "neg_005_metric_scale_low",
+      "mutation": "metric_scaling_error",
+      "violated_property_ids": [
+        "P_START_TIME_GATING",
+        "P_PERIODIC_EXTREMA",
+        "P_SPAN_RATIO",
+        "P_NORMALIZED_GAIN_OUTPUT"
+      ],
+      "why_wrong": "Gain Estimator: scales the metric output, preserving the main path while failing measurement checks."
+    }
+  ],
+  "status": "concrete_semantic_negatives_static_formalized_runtime_pending"
+}

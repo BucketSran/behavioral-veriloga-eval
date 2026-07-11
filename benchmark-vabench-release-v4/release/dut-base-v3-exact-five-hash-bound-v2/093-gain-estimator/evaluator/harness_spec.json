@@ -1,0 +1,112 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "gain_estimator.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=240n maxstep=200p errpreset=conservative"
+    ],
+    "body_lines": [
+      "Vvdd (vdd 0) vsource type=dc dc=0.9",
+      "Vvss (vss 0) vsource type=dc dc=0",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vdd",
+      "vss",
+      "vinp",
+      "vinn",
+      "voutp",
+      "voutn",
+      "gain_out",
+      "valid"
+    ]
+  },
+  "family_id": "093",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "d3a5717ac8c70b8cec62ce79a5ac86e26dde8cf655b6e2369cea478feac99481",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "588415dbf905460820d31c55b7e4140627081eb1f5d1e94a66ccf3724d5bd93d",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vinp  (vinp  0) vsource type=sine sinedc=0.45 ampl=0.03 freq=20Meg",
+          "Vinn  (vinn  0) vsource type=dc dc=0.45",
+          "Voutp (voutp 0) vsource type=sine sinedc=0.45 ampl=0.18 freq=20Meg",
+          "Voutn (voutn 0) vsource type=dc dc=0.45",
+          "",
+          "XGAIN (vdd vss vinp vinn voutp voutn gain_out valid) gain_estimator \\",
+          "    sample_period=1n start_time=20n gain_scale=10 min_input_span=0.02 tedge=200p",
+          "",
+          "simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=260n maxstep=180p errpreset=conservative"
+        ],
+        "body_lines": [
+          "Vinp  (vinp  0) vsource type=sine sinedc=0.45 ampl=0.025 freq=25Meg",
+          "Vinn  (vinn  0) vsource type=dc dc=0.45",
+          "Voutp (voutp 0) vsource type=sine sinedc=0.45 ampl=0.15 freq=25Meg",
+          "Voutn (voutn 0) vsource type=dc dc=0.45",
+          "",
+          "XGAIN (vdd vss vinp vinn voutp voutn gain_out valid) gain_estimator \\",
+          "    sample_period=0.8n start_time=24n gain_scale=10 min_input_span=0.02 tedge=200p",
+          "",
+          "simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_START_TIME_GATING",
+    "P_PERIODIC_EXTREMA",
+    "P_VALIDITY_THRESHOLD",
+    "P_SPAN_RATIO",
+    "P_NORMALIZED_GAIN_OUTPUT",
+    "P_EVENT_UPDATED_TARGETS"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "fa787f5e298d91a8df3b5db5f9efb3ca0fc11d51518dacd86b04e6c99ebe70f6",
+    "family_spec_sha256": "f4814c60da3ce742d75f49433bb59ac84eb1b7b552443025bfaa4ef42e9e4976"
+  },
+  "task_id": "v4-093"
+}

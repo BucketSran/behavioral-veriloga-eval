@@ -1,0 +1,59 @@
+// Two-stage 2-bit/stage pipeline ADC residue chain, behavioral model.
+// Stage 1 makes a 2-bit coarse decision, amplifies the residue by 4, and
+// stage 2 quantizes that residue into the lower 2 output bits.
+
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 100p
+
+module pipeline_adc_chain_4b(VDD, VSS, VIN, CLK, RES1, RES2, S1B1, S1B0, S2B1, S2B0, DOUT3, DOUT2, DOUT1, DOUT0);
+
+inout VDD, VSS;
+input VIN, CLK;
+output RES1, RES2;
+output S1B1, S1B0, S2B1, S2B0;
+output DOUT3, DOUT2, DOUT1, DOUT0;
+
+electrical VDD, VSS;
+electrical VIN, CLK;
+electrical RES1, RES2;
+electrical S1B1, S1B0, S2B1, S2B0;
+electrical DOUT3, DOUT2, DOUT1, DOUT0;
+
+parameter real vrefp = 0.9;
+parameter real vrefn = 0.0;
+parameter real vth = 0.45;
+parameter real tedge = 100p;
+
+integer s1_code;
+integer s2_code;
+integer final_code;
+real vin_s;
+real span;
+real center1;
+real center2;
+real res1_level;
+real res2_level;
+real s1b1_level;
+real s1b0_level;
+real s2b1_level;
+real s2b0_level;
+real d3_level;
+real d2_level;
+real d1_level;
+real d0_level;
+
+analog begin
+    V(RES1) <+ transition(0.0);
+    V(RES2) <+ transition(0.0);
+    V(S1B1) <+ transition(0.0);
+    V(S1B0) <+ transition(0.0);
+    V(S2B1) <+ transition(0.0);
+    V(S2B0) <+ transition(0.0);
+    V(DOUT3) <+ transition(0.0);
+    V(DOUT2) <+ transition(0.0);
+    V(DOUT1) <+ transition(0.0);
+    V(DOUT0) <+ transition(0.0);
+end
+
+endmodule

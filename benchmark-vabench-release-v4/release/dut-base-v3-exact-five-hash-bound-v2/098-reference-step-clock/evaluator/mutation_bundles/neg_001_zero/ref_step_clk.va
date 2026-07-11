@@ -1,0 +1,17 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module ref_step_clk (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    output electrical CLK
+);
+    parameter real period_pre = 20n from (0:inf);
+    parameter real period_post = 19.5n from (0:inf);
+    parameter real t_switch = 2u from [0:inf);
+    parameter real tedge = 100p from (0:inf);
+
+    analog begin
+        V(CLK) <+ V(VSS);
+    end
+endmodule

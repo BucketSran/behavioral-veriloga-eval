@@ -1,0 +1,18 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module programmable_stimulus_sequencer(clk, rst, mode, gate, out, metric);
+input clk, rst, mode, gate;
+output out, metric;
+electrical clk, rst, mode, gate, out, metric;
+parameter real tr = 80p;
+real y, metricv, ramp_frac, burst_level;
+real sweep_t, sweep_k, phase;
+integer prbs_state, feedback;
+
+analog begin
+    V(out) <+ transition(0.0);
+    V(metric) <+ transition(0.0);
+end
+
+endmodule

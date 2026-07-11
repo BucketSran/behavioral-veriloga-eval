@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/gain_amp_fixed.va"
+
+parameters vdd=0.9 gain=5.25
+
+Vinp (vin_p 0) vsource type=pwl wave=[0 0.48 10n 0.48 10.1n 0.51 25n 0.51 25.1n 0.40 45n 0.40 45.1n 0.52 65n 0.52 65.1n 0.43 90n 0.43]
+Vinn (vin_n 0) vsource type=pwl wave=[0 0.42 10n 0.42 10.1n 0.39 25n 0.39 25.1n 0.50 45n 0.50 45.1n 0.38 65n 0.38 65.1n 0.47 90n 0.47]
+
+XDUT (vin_p vin_n vout_p vout_n) gain_amp_fixed vdd=vdd ACTUAL_GAIN=gain
+
+
+tran tran stop=90n maxstep=100p
+save vin_p vin_n vout_p vout_n

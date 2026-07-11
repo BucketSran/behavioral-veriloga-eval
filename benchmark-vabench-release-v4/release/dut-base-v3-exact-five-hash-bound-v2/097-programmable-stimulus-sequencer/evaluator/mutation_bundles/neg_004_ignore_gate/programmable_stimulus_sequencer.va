@@ -1,0 +1,48 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module programmable_stimulus_sequencer(clk, rst, mode, gate, out, metric);
+    input clk, rst, mode, gate;
+    output out, metric;
+    electrical clk, rst, mode, gate, out, metric;
+    parameter real tr = 80p;
+    real y, metricv, ramp_frac, sweep_t, sweep_k, phase, burst_level;
+    integer prbs_state, feedback;
+    analog begin
+        @(initial_step) begin
+            y = 0.45;
+            metricv = 0.0;
+            burst_level = 0.45;
+            prbs_state = 7;
+        end
+        @(cross(V(clk) - 0.45, +1)) begin
+            if (V(rst) > 0.45) begin
+                prbs_state = 7;
+                burst_level = 0.45;
+            end else if (V(mode) > 0.60) begin
+                feedback = ((prbs_state >> 2) & 1) ^ ((prbs_state >> 1) & 1);
+                prbs_state = ((prbs_state & 3) << 1) | feedback;
+                burst_level = ((prbs_state & 1) > 0) ? 0.62 : 0.28;
+            end
+        end
+        if (V(rst) > 0.45) begin
+            y = 0.45; metricv = 0.0;
+        end else if (V(mode) < 0.30) begin
+            ramp_frac = ($abstime - 3.0e-9) / 23.0e-9;
+            if (ramp_frac < 0.0) ramp_frac = 0.0;
+            if (ramp_frac > 1.0) ramp_frac = 1.0;
+            y = 0.18 + 0.27 * ramp_frac; metricv = 0.20;
+        end else if (V(mode) < 0.60) begin
+            sweep_t = $abstime - 26.0e-9;
+            if (sweep_t < 0.0) sweep_t = 0.0;
+            if (sweep_t > 36.0e-9) sweep_t = 36.0e-9;
+            sweep_k = (116.666666e6 - 50.0e6) / 36.0e-9;
+            phase = 2.0 * `M_PI * (50.0e6 * sweep_t + 0.5 * sweep_k * sweep_t * sweep_t);
+            y = 0.45 + 0.15 * sin(phase); metricv = 0.50;
+        end else begin
+            y = burst_level; metricv = 0.80;
+        end
+        V(out) <+ transition(y, 0, tr, tr);
+        V(metric) <+ transition(metricv, 0, tr, tr);
+    end
+endmodule

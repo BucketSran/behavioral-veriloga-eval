@@ -1,0 +1,72 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "constants.vams"
+`include "disciplines.vams"
+
+module iq_downconversion_chain(clk, rst, vin, out, metric, lo_i, lo_q, mix_i, mix_q, phase_mon);
+input clk, rst, vin;
+output out, metric, lo_i, lo_q, mix_i, mix_q, phase_mon;
+electrical clk, rst, vin, out, metric, lo_i, lo_q, mix_i, mix_q, phase_mon;
+parameter real tr = 80p;
+parameter real vth = 0.45;
+real basev, iv, qv, icoef, qcoef, lo_i_v, lo_q_v, mix_i_v, mix_q_v, phase_v;
+integer phase;
+analog begin
+    @(initial_step) begin
+        phase = 3;
+        iv = 0.45;
+        qv = 0.45;
+        lo_i_v = 0.45;
+        lo_q_v = 0.45;
+        mix_i_v = 0.45;
+        mix_q_v = 0.45;
+        phase_v = 0.9;
+    end
+    @(cross(V(clk) - vth, +1)) begin
+        if (V(rst) > vth) begin
+            phase = 3;
+            iv = 0.45;
+            qv = 0.45;
+            lo_i_v = 0.45;
+            lo_q_v = 0.45;
+            mix_i_v = 0.45;
+            mix_q_v = 0.45;
+            phase_v = 0.9;
+        end else begin
+            phase = phase + 1;
+            if (phase > 3) phase = 0;
+            if (phase == 0) icoef = 1.0;
+            else if (phase == 1) icoef = 0.0;
+            else if (phase == 2) icoef = -1.0;
+            else icoef = 0.0;
+            if (phase == 0) qcoef = 0.0;
+            else if (phase == 1) qcoef = 1.0;
+            else if (phase == 2) qcoef = 0.0;
+            else qcoef = -1.0;
+            basev = V(vin) - 0.45;
+            lo_i_v = 0.45 + 0.40 * icoef;
+            lo_q_v = 0.45 + 0.40 * qcoef;
+            mix_i_v = 0.45 + 1.25 * basev * icoef;
+            mix_q_v = 0.45 + 1.25 * basev * qcoef;
+            if (mix_i_v > 0.88) mix_i_v = 0.88;
+            if (mix_i_v < 0.02) mix_i_v = 0.02;
+            if (mix_q_v > 0.88) mix_q_v = 0.88;
+            if (mix_q_v < 0.02) mix_q_v = 0.02;
+            iv = iv + 0.85 * (mix_i_v - iv);
+            qv = qv + 0.85 * (mix_q_v - qv);
+            if (iv > 0.88) iv = 0.88;
+            if (iv < 0.02) iv = 0.02;
+            if (qv > 0.88) qv = 0.88;
+            if (qv < 0.02) qv = 0.02;
+            phase_v = phase / 3.0 * 0.9;
+        end
+    end
+    V(out) <+ (0.42 * (transition(iv, 0, tr, tr)));
+    V(metric) <+ (0.42 * (transition(qv, 0, tr, tr)));
+    V(lo_i) <+ (0.42 * (transition(lo_i_v, 0, tr, tr)));
+    V(lo_q) <+ (0.42 * (transition(lo_q_v, 0, tr, tr)));
+    V(mix_i) <+ (0.42 * (transition(mix_i_v, 0, tr, tr)));
+    V(mix_q) <+ (0.42 * (transition(mix_q_v, 0, tr, tr)));
+    V(phase_mon) <+ transition(phase_v, 0, tr, tr);
+end
+endmodule

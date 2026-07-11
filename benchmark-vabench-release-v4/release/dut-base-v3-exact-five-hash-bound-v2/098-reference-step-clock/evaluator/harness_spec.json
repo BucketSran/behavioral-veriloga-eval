@@ -1,0 +1,99 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "ref_step_clk.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=3u maxstep=250p errpreset=conservative"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "VDD",
+      "VSS",
+      "CLK"
+    ]
+  },
+  "family_id": "098",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "5dd1089cacd5256af31d3e270b126b09f6691ebebb98d29592e21b98af0f4aff",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "b64602e9f2b0f9c825e433219cc92c4e5f3ec8990071140fdcae1b836b62d57d",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "// Visible smoke testbench for the standalone reference-step clock generator.",
+          "",
+          "VDD_SRC (VDD 0) vsource type=dc dc=0.9",
+          "VSS_SRC (VSS 0) vsource type=dc dc=0",
+          "",
+          "XREF (VDD VSS CLK) ref_step_clk \\",
+          "    period_pre=20n period_post=19.5n t_switch=2u tedge=100p",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=2.4u maxstep=250p errpreset=conservative"
+        ],
+        "body_lines": [
+          "// Hidden testbench for the standalone reference-step clock generator.",
+          "",
+          "VDD_SRC (VDD 0) vsource type=dc dc=0.9",
+          "VSS_SRC (VSS 0) vsource type=dc dc=0",
+          "",
+          "XREF (VDD VSS CLK) ref_step_clk \\",
+          "    period_pre=18n period_post=22n t_switch=1.3u tedge=80p",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_SUPPLY_REFERENCED_RAILS",
+    "P_PRE_SWITCH_PERIOD",
+    "P_POST_SWITCH_PERIOD",
+    "P_CADENCE_STEP",
+    "P_HALF_DUTY_CYCLE",
+    "P_PARAMETERIZED_TIMING"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "3f3fc7cc76d70111bccf730c70aaf87a2b2e06086591edece7b3e6fb9e2a9fb2",
+    "family_spec_sha256": "8f654d61171c2a4a68f399503485b66c1b40c9701bda1790b31e1781624e73fc"
+  },
+  "task_id": "v4-098"
+}

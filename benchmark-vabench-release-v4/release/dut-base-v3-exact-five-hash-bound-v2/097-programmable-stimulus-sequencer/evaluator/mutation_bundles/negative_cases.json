@@ -1,0 +1,62 @@
+{
+  "cases": [
+    {
+      "id": "neg_001_zero",
+      "intent": "zero output/metric stub",
+      "mutation": "zero_stub_output",
+      "target": "programmable_stimulus_sequencer.va",
+      "violated_property_ids": [
+        "P_RESET_IDLE",
+        "P_RAMP_MODE",
+        "P_CHIRP_MODE"
+      ]
+    },
+    {
+      "id": "neg_002_flat_ramp",
+      "intent": "ramp segment is flat",
+      "mutation": "behavioral_contract_near_miss",
+      "target": "programmable_stimulus_sequencer.va",
+      "violated_property_ids": [
+        "P_RESET_IDLE",
+        "P_RAMP_MODE"
+      ]
+    },
+    {
+      "id": "neg_003_fixed_sine_not_chirp",
+      "intent": "chirp segment is stuck at center",
+      "mutation": "periodic_source_spectral_error",
+      "target": "programmable_stimulus_sequencer.va",
+      "violated_property_ids": [
+        "P_RESET_IDLE",
+        "P_RAMP_MODE"
+      ]
+    },
+    {
+      "id": "neg_004_ignore_gate",
+      "intent": "burst segment ignores gate low interval",
+      "mutation": "behavioral_contract_near_miss",
+      "target": "programmable_stimulus_sequencer.va",
+      "violated_property_ids": [
+        "P_RESET_IDLE",
+        "P_RAMP_MODE",
+        "P_BURST_GATE",
+        "P_BURST_IDLE",
+        "P_CONTROL_DRIVEN_SELECTION"
+      ]
+    },
+    {
+      "files": [
+        "neg_005_metric_scale_low/programmable_stimulus_sequencer.va"
+      ],
+      "id": "neg_005_metric_scale_low",
+      "mutation": "metric_scaling_error",
+      "violated_property_ids": [
+        "P_RESET_IDLE",
+        "P_RAMP_MODE",
+        "P_CHIRP_MODE"
+      ],
+      "why_wrong": "Programmable Stimulus Sequencer: scales the metric output, preserving the main path while failing measurement checks."
+    }
+  ],
+  "status": "concrete_semantic_negatives_static_formalized_runtime_pending"
+}

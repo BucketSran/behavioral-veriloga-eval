@@ -1,0 +1,21 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/pipeline_adc_chain_4b.va"
+
+// pipeline_adc_chain_4b gold testbench
+// Drives one representative sample in every final 4-bit code bin. The
+// alternating lower/upper-half points exercise both pipeline residue levels.
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0.0
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=4n rise=100p fall=100p delay=5n
+Vvin (vin 0) vsource type=pwl wave=[0n 0.0140625 9.8n 0.0140625 10n 0.0984375 19.8n 0.0984375 20n 0.1265625 29.8n 0.1265625 30n 0.2109375 39.8n 0.2109375 40n 0.2390625 49.8n 0.2390625 50n 0.3234375 59.8n 0.3234375 60n 0.3515625 69.8n 0.3515625 70n 0.4359375 79.8n 0.4359375 80n 0.4640625 89.8n 0.4640625 90n 0.5484375 99.8n 0.5484375 100n 0.5765625 109.8n 0.5765625 110n 0.6609375 119.8n 0.6609375 120n 0.6890625 129.8n 0.6890625 130n 0.7734375 139.8n 0.7734375 140n 0.8015625 149.8n 0.8015625 150n 0.8859375 169n 0.8859375]
+
+IDUT (vdd vss vin clk res1 res2 s1b1 s1b0 s2b1 s2b0 dout3 dout2 dout1 dout0) pipeline_adc_chain_4b vrefp=0.9 vrefn=0.0 vth=0.45 tedge=100p
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=170n maxstep=200p
+save vdd vss vin clk res1 res2 s1b1 s1b0 s2b1 s2b0 dout3 dout2 dout1 dout0
