@@ -1,0 +1,59 @@
+{
+  "component_fingerprints": {
+    "assembly": {
+      "policy_sha256": "91f4e21b94263e796c846aedef282c79d4abeb7ccc415a0e6f1311f8816b33a4",
+      "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+    },
+    "backend": {
+      "ahdl_like_sha256": "91ce239e5f278a6d5dfcde85ca2d820c5133d8f8a3de26dc6477164e703342f3",
+      "evas_sha256": "2d71c227644956df64209b49d0da6ef55bc6934891020eb26d762e8cb8cc6df2",
+      "spectre_sha256": "ac4c1cf785d5eab74058944d52bf40869e83c94e19202ab72c8e8a250c4dc51b"
+    },
+    "oracle": {
+      "checker_binding_sha256": "53b4dd512fd1ac64685cdbbfb0ed72bb0df7d2551583a1c0d22a516707b298da",
+      "checker_implementation_sha256": "f70a39669da3f9ca50c83e12d65d8d3a98105fb24f2cd5b4087e5a0e40ef4ba4",
+      "checker_profile_sha256": "cb7ccab9f86a86f661a23546c3703bc86ee8fb5ba826316122954027607dd60a",
+      "diagnostic_policy_sha256": "69b217a349cb0e8a3eab574e7e6d1af03f069fea668b15b37868ef3d2e7deea3",
+      "oracle_runner_sha256": "e70bd46cd3abdfd8ed9658cb13f64bc96e27d364d51ed0fdcd05f8139e63af2b",
+      "property_activation_policy_sha256": "1498bc6aeaa5abb8a227875d50ecab4a63f3782f78a69be3bf43912758956629"
+    },
+    "policy_id": "v4-dependency-scoped-evidence-v2",
+    "schema_version": "v4-evidence-components-v2",
+    "state": "carried_forward",
+    "task_inputs": {
+      "candidate_bundle_sha256": "d8d9d7afc52c5a92663825d81d73d496859dd2debc796b96f0da6db7f268aa12",
+      "deck_sha256": "13721bbcd5c5f0388c441de5ad8d41a3a0622569b911df63919c6162a02137f2",
+      "gold_bundle_sha256": "0e0e047a2f27f11fc15f0e938f67aac2ab92dcd217ee06b15362f839e0434255",
+      "harness_spec_sha256": "071492b5017a4885a8342010ba94eb2f6fc23c1351c5fd7a7971d93948825ceb",
+      "mutation_bundle_sha256": "0b2c7ded7d81369f23ce8c845e97a0200b1abdbf8a9abf21b4de8793c1dc8682",
+      "profile_sha256": "17619c282eba25ce282b8986fc86796f0b74536883534db2c6f3ff7b4b68dacb",
+      "property_contract_sha256": "9254af1b33160b770cfd5b91f642aae0d4ee3552862b534e81233cecd2adf6b2",
+      "public_support_bundle_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "trace_contract_sha256": "6f9af3849fd9a3cab20faea76fa02cffb879653dac4531c6f5269e456a854297"
+    }
+  },
+  "diagnostics": {
+    "expected": "trigger=At least one trim code becomes nonzero.; violated_properties=P_CORRECTION_APPLICATION",
+    "observed": "EVAS: P_RESET_CLEAR status=PASS mismatch_count=0 allowed=0 checks=2 expected=codes=metric=lock=0,outputs=vcm observed=max_clear_gap=0 time=0 gap=0 | P_TRIM_DIRECTION status=PASS mismatch_count=0 allowed=1 checks=18 expected=signed_trim_steps_reduce_error observed=clock_checks=18 time=0 gap=0 | P_CORRECTION_APPLICATION status=FAIL mismatch_count=4 allowed=1 checks=20 expected=outputs_follow_exposed_signed_codes observed=samples=20 time=5.9025e-08 gap=0.035 | P_LOCK_HOLD status=PASS mismatch_count=0 allowed=1 checks=20 expected=lock_after_three_and_codes_hold_when_cal_off observed=checks=20 time=0 gap=0; Spectre: P_RESET_CLEAR status=PASS mismatch_count=0 allowed=0 checks=2 expected=codes=metric=lock=0,outputs=vcm observed=max_clear_gap=0 time=0 gap=0 | P_TRIM_DIRECTION status=PASS mismatch_count=0 allowed=1 checks=18 expected=signed_trim_steps_reduce_error observed=clock_checks=18 time=0 gap=0 | P_CORRECTION_APPLICATION status=FAIL mismatch_count=4 allowed=1 checks=20 expected=outputs_follow_exposed_signed_codes observed=samples=20 time=5.9025e-08 gap=0.035 | P_LOCK_HOLD status=PASS mismatch_count=0 allowed=1 checks=20 expected=lock_after_three_and_codes_hold_when_cal_off observed=checks=20 time=0 gap=0",
+    "violated_property_ids": [
+      "P_CORRECTION_APPLICATION"
+    ]
+  },
+  "evaluators": {
+    "ahdl_like": "pass",
+    "evas": "compile_pass_behavior_fail",
+    "spectre": "compile_pass_behavior_fail"
+  },
+  "family_id": "365",
+  "inputs": {
+    "checker_profile_sha256": "ff8a0e5a7d904325ce2539b3c291003330f62e8e480c2c7fa9dd15cfc6b337e6",
+    "harness_spec_sha256": "071492b5017a4885a8342010ba94eb2f6fc23c1351c5fd7a7971d93948825ceb",
+    "mutation_bundle_sha256": "0b2c7ded7d81369f23ce8c845e97a0200b1abdbf8a9abf21b4de8793c1dc8682",
+    "profile_sha256": "17619c282eba25ce282b8986fc86796f0b74536883534db2c6f3ff7b4b68dacb"
+  },
+  "mutation_id": "neg_003_corrector_ignores_codes",
+  "outcome": "killed_behaviorally",
+  "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33",
+  "schema_version": "v4-negative-certification-v2",
+  "toolchain_lock_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+}

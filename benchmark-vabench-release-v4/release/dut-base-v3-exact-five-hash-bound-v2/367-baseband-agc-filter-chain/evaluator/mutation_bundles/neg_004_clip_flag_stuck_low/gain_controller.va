@@ -1,0 +1,62 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module gain_controller(level_metric, target, clk, rst, enable, gain_3, gain_2, gain_1, gain_0, settled);
+    input level_metric, target, clk, rst, enable;
+    output gain_3, gain_2, gain_1, gain_0, settled;
+    electrical level_metric, target, clk, rst, enable;
+    electrical gain_3, gain_2, gain_1, gain_0, settled;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tol = 20e-3;
+    parameter real tr = 200p from (0:inf);
+
+    integer gain_code;
+    integer settle_count;
+    real settled_value;
+    real err;
+
+    analog begin
+        @(initial_step) begin
+            gain_code = 4;
+            settle_count = 0;
+            settled_value = vss;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if ((V(rst) > vth) || (V(enable) <= vth)) begin
+                gain_code = 4;
+                settle_count = 0;
+                settled_value = vss;
+            end else begin
+                err = V(target) - V(level_metric);
+                if (err > tol) begin
+                    if (gain_code < 15)
+                        gain_code = gain_code + 1;
+                    settle_count = 0;
+                end else if (err < -tol) begin
+                    if (gain_code > 0)
+                        gain_code = gain_code - 1;
+                    settle_count = 0;
+                end else begin
+                    settle_count = settle_count + 1;
+                end
+                settled_value = (settle_count >= 3) ? vdd : vss;
+            end
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            gain_code = 4;
+            settle_count = 0;
+            settled_value = vss;
+        end
+
+        V(gain_3) <+ transition((gain_code >= 8) ? vdd : vss, 0, tr, tr);
+        V(gain_2) <+ transition((((gain_code / 4) - 2 * (gain_code / 8)) >= 1) ? vdd : vss, 0, tr, tr);
+        V(gain_1) <+ transition((((gain_code / 2) - 2 * (gain_code / 4)) >= 1) ? vdd : vss, 0, tr, tr);
+        V(gain_0) <+ transition((gain_code - 2 * (gain_code / 2)) ? vdd : vss, 0, tr, tr);
+        V(settled) <+ transition(settled_value, 0, tr, tr);
+    end
+endmodule

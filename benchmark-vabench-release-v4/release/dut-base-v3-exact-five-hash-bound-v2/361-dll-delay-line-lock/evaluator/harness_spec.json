@@ -1,0 +1,100 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "dll_top.va",
+      "phase_detector.va",
+      "delay_line.va",
+      "lock_detector.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop={stop_time} maxstep={maxstep}"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "ref_clk",
+      "in_clk",
+      "rst",
+      "enable",
+      "delayed_clk",
+      "up",
+      "down",
+      "delay_4",
+      "delay_3",
+      "delay_2",
+      "delay_1",
+      "delay_0",
+      "lock"
+    ]
+  },
+  "family_id": "361",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=92n maxstep=20p"
+        ],
+        "body_lines": [
+          "Vref (ref_clk 0) vsource type=pulse val0=0 val1=0.9 delay=4.14n period=10n width=5n rise=10p fall=10p",
+          "Vin (in_clk 0) vsource type=pulse val0=0 val1=0.9 delay=4n period=10n width=5n rise=10p fall=10p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1n 0.9 1.1n 0 92n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 2n 0 2.1n 0.9 72n 0.9 72.1n 0 78n 0 78.1n 0.9 92n 0.9]",
+          "XDUT (ref_clk in_clk rst enable delayed_clk up down delay_4 delay_3 delay_2 delay_1 delay_0 lock) dll_top"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {
+        "maxstep": "20p",
+        "stop_time": "92n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=92n maxstep=20p"
+        ],
+        "body_lines": [
+          "Vref (ref_clk 0) vsource type=pulse val0=0 val1=0.9 delay=4.14n period=10n width=5n rise=10p fall=10p",
+          "Vin (in_clk 0) vsource type=pulse val0=0 val1=0.9 delay=4n period=10n width=5n rise=10p fall=10p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1n 0.9 1.1n 0 92n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 2n 0 2.1n 0.9 72n 0.9 72.1n 0 78n 0 78.1n 0.9 92n 0.9]",
+          "XDUT (ref_clk in_clk rst enable delayed_clk up down delay_4 delay_3 delay_2 delay_1 delay_0 lock) dll_top"
+        ]
+      },
+      "deterministic_seed": 1,
+      "parameters": {
+        "maxstep": "20p",
+        "stop_time": "92n"
+      },
+      "simulatorOptions": {}
+    }
+  },
+  "property_ids": [
+    "P_RESET_DISABLE_CLEAR",
+    "P_DELAY_LINE_DERIVATION",
+    "P_PHASE_CORRECTION",
+    "P_LOCK_QUALIFICATION"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "0fb6ca1b27d79795b2569a1fe9c7b824ef25c9e0a2597f616467675257230392",
+    "family_spec_sha256": "1971990c49c5f2e1590d0d57655a1d3269b175c6545106a3ac7557e0d9c37d27"
+  },
+  "task_id": "v4-361"
+}

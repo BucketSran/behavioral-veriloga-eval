@@ -1,0 +1,136 @@
+{
+  "family_id": "363",
+  "gold_bundle_sha256": "225a875dcd72ac454cda3623051ce4f86e780080b0b10539dc9c925a7efe44f8",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "accumulator.va": "16b66bc5de59d72918bbb073a6df5f9882e83b43d164b8e6d98915eafd8a3745"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FRACTIONAL_SELECTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_accumulator_modulus_15/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "accumulator.va"
+      ],
+      "fault_class": "accumulator_modulus_error",
+      "id": "neg_001_accumulator_modulus_15",
+      "trigger_condition": "The fractional accumulator reaches an exact state-plus-code sum of 15 before a divider decision.",
+      "violated_property_ids": [
+        "P_FRACTIONAL_SELECTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "multi_modulus_divider.va": "9eb0a75804fcf6d5011819859cec7f831af4fbe1ac42ae401ee3330b637808c1"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DCO_DERIVED_DIVIDER",
+          "P_FRACTIONAL_SELECTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_divider_ignores_carry/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "multi_modulus_divider.va"
+      ],
+      "fault_class": "modulus_selection_error",
+      "id": "neg_002_divider_ignores_carry",
+      "trigger_condition": "The accumulator produces a carry event.",
+      "violated_property_ids": [
+        "P_DCO_DERIVED_DIVIDER",
+        "P_FRACTIONAL_SELECTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "multi_modulus_divider.va": "e62bb63ab6caf2679b4a928f12aae3b059e5b87efba1edfaf98cc0bd9b8f1005"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DCO_DERIVED_DIVIDER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_divider_off_by_one/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "multi_modulus_divider.va"
+      ],
+      "fault_class": "divider_count_error",
+      "id": "neg_003_divider_off_by_one",
+      "trigger_condition": "Enabled rising DCO edges are counted.",
+      "violated_property_ids": [
+        "P_DCO_DERIVED_DIVIDER"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "accumulator.va": "10757039b4e20684dd344cb6e524f11c7bc410ddb02adf534f5ebbbdf6102f07"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FRACTION_MONOTONICITY",
+          "P_RATIO_WINDOW"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_fraction_mapping_reversed/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "accumulator.va"
+      ],
+      "fault_class": "fraction_mapping_reversal",
+      "id": "neg_004_fraction_mapping_reversed",
+      "trigger_condition": "Two or more distinct fractional commands complete equal-length ratio-monitor windows.",
+      "violated_property_ids": [
+        "P_FRACTION_MONOTONICITY",
+        "P_RATIO_WINDOW"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "ratio_monitor.va": "657169f0ba6c756fb0be136153c45678382d64689af4f93e9c787e0d5dfff371"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_DISABLE_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_reset_valid_not_cleared/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "ratio_monitor.va"
+      ],
+      "fault_class": "reset_disable_clear_error",
+      "id": "neg_005_reset_valid_not_cleared",
+      "trigger_condition": "Reset is asserted or enable is deasserted after monitor activity.",
+      "violated_property_ids": [
+        "P_RESET_DISABLE_CLEAR"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

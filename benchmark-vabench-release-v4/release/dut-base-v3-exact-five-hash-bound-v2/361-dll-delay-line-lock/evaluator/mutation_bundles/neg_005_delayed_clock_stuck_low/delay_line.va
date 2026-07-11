@@ -1,0 +1,95 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module delay_line(in_clk, rst, enable, delay_4, delay_3, delay_2, delay_1, delay_0, delayed_clk);
+    input in_clk, rst, enable, delay_4, delay_3, delay_2, delay_1, delay_0;
+    output delayed_clk;
+    electrical in_clk, rst, enable, delay_4, delay_3, delay_2, delay_1, delay_0, delayed_clk;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real unit_delay = 5e-12;
+    parameter real tr = 100p;
+
+    integer out_state;
+    integer rise_token;
+    integer fall_token;
+    integer rise_id;
+    integer fall_id;
+    integer rise_pending;
+    integer fall_pending;
+    integer code;
+    real rise_time;
+    real fall_time;
+
+    analog begin
+        @(initial_step) begin
+            out_state = 0;
+            rise_token = 0;
+            fall_token = 0;
+            rise_pending = 0;
+            fall_pending = 0;
+            rise_time = 1.0e99;
+            fall_time = 1.0e99;
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            out_state = 0;
+            rise_token = rise_token + 1;
+            fall_token = fall_token + 1;
+            rise_pending = 0;
+            fall_pending = 0;
+            rise_time = 1.0e99;
+            fall_time = 1.0e99;
+        end
+
+        @(cross(V(in_clk) - vth, +1)) begin
+            if (V(rst) <= vth && V(enable) > vth) begin
+                code = 0;
+                if (V(delay_0) > vth) code = code + 1;
+                if (V(delay_1) > vth) code = code + 2;
+                if (V(delay_2) > vth) code = code + 4;
+                if (V(delay_3) > vth) code = code + 8;
+                if (V(delay_4) > vth) code = code + 16;
+                rise_token = rise_token + 1;
+                rise_id = rise_token;
+                rise_pending = 1;
+                rise_time = $abstime + code * unit_delay;
+            end
+        end
+
+        @(cross(V(in_clk) - vth, -1)) begin
+            if (V(rst) <= vth && V(enable) > vth) begin
+                code = 0;
+                if (V(delay_0) > vth) code = code + 1;
+                if (V(delay_1) > vth) code = code + 2;
+                if (V(delay_2) > vth) code = code + 4;
+                if (V(delay_3) > vth) code = code + 8;
+                if (V(delay_4) > vth) code = code + 16;
+                fall_token = fall_token + 1;
+                fall_id = fall_token;
+                fall_pending = 1;
+                fall_time = $abstime + code * unit_delay;
+            end
+        end
+
+        @(timer(rise_time)) begin
+            if (rise_pending != 0 && rise_id == rise_token && V(rst) <= vth && V(enable) > vth) begin
+                out_state = 0;
+                rise_pending = 0;
+            end
+            rise_time = 1.0e99;
+        end
+
+        @(timer(fall_time)) begin
+            if (fall_pending != 0 && fall_id == fall_token && V(rst) <= vth && V(enable) > vth) begin
+                out_state = 0;
+                fall_pending = 0;
+            end
+            fall_time = 1.0e99;
+        end
+
+        V(delayed_clk) <+ transition(out_state ? vdd : vss, 0, tr, tr);
+    end
+endmodule

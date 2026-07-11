@@ -1,0 +1,134 @@
+{
+  "family_id": "361",
+  "gold_bundle_sha256": "b5d8dccc2c6902164102ffc3b486133f7d8e8e349cb7bee6c75cc1183f0b2796",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "delay_line.va": "3396aa9784b995b3f2770e7377dc7528bbf55b2dbccd7a862eb536e0916517bd"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DELAY_LINE_DERIVATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero_delay_line/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "delay_line.va"
+      ],
+      "fault_class": "delay_mapping_error",
+      "id": "neg_001_zero_delay_line",
+      "trigger_condition": "The reset delay_center code is active while enabled.",
+      "violated_property_ids": [
+        "P_DELAY_LINE_DERIVATION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "phase_detector.va": "9ebe3bd6abd12f06f928236bafa3610a8099acc503f62aab420ca84dfd2015d4"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PHASE_CORRECTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_phase_direction_swapped/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "phase_detector.va"
+      ],
+      "fault_class": "correction_polarity_error",
+      "id": "neg_002_phase_direction_swapped",
+      "trigger_condition": "The delayed edge and reference edge are separated beyond the coincidence band.",
+      "violated_property_ids": [
+        "P_PHASE_CORRECTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "lock_detector.va": "c6223adb343ffb5f43c8e820a4ee908543f87e10e603fb945ae312332a6fa440"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LOCK_QUALIFICATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_lock_after_one/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "lock_detector.va"
+      ],
+      "fault_class": "lock_qualification_error",
+      "id": "neg_003_lock_after_one",
+      "trigger_condition": "The first in-window comparison completes.",
+      "violated_property_ids": [
+        "P_LOCK_QUALIFICATION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "lock_detector.va": "9d17eed55654f0b6b117f50f79be1bf62254da81211bc425825a04aa1d3ea6a6"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_DISABLE_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_reset_code_zero/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "lock_detector.va"
+      ],
+      "fault_class": "reset_state_error",
+      "id": "neg_004_reset_code_zero",
+      "trigger_condition": "Reset or disabled operation is observed.",
+      "violated_property_ids": [
+        "P_RESET_DISABLE_CLEAR"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "delay_line.va": "eb130bdcbc48bda6325196e774e494ca717e21bc67a7067688d266f706686f23"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DELAY_LINE_DERIVATION",
+          "P_PHASE_CORRECTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_delayed_clock_stuck_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "delay_line.va"
+      ],
+      "fault_class": "clock_output_stuck",
+      "id": "neg_005_delayed_clock_stuck_low",
+      "trigger_condition": "Enabled input-clock rising edges occur.",
+      "violated_property_ids": [
+        "P_DELAY_LINE_DERIVATION",
+        "P_PHASE_CORRECTION"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

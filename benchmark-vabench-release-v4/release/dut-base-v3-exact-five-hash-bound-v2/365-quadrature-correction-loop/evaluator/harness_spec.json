@@ -1,0 +1,100 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "quad_corr_top.va",
+      "gain_trim.va",
+      "skew_estimator.va",
+      "corrector.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop={stop_time} maxstep={maxstep}"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "i_in",
+      "q_in",
+      "clk",
+      "rst",
+      "cal_en",
+      "i_out",
+      "q_out",
+      "gain_code_3",
+      "gain_code_2",
+      "gain_code_1",
+      "gain_code_0",
+      "phase_code_3",
+      "phase_code_2",
+      "phase_code_1",
+      "phase_code_0",
+      "error_metric",
+      "locked"
+    ]
+  },
+  "family_id": "365",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vi (i_in 0) vsource type=pwl wave=[0 0.62 76n 0.62 76.1n 0.52 150n 0.52]",
+          "Vq (q_in 0) vsource type=pwl wave=[0 0.55 76n 0.55 76.1n 0.54 150n 0.54]",
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=4n period=8n width=4n rise=50p fall=50p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.5n 0.9 1.6n 0 126n 0 126.1n 0.9 132n 0.9 132.1n 0 150n 0]",
+          "Vcal (cal_en 0) vsource type=pwl wave=[0 0 2n 0 2.1n 0.9 96n 0.9 96.1n 0 112n 0 112.1n 0.9 150n 0.9]",
+          "XDUT (i_in q_in clk rst cal_en i_out q_out gain_code_3 gain_code_2 gain_code_1 gain_code_0 phase_code_3 phase_code_2 phase_code_1 phase_code_0 error_metric locked) quad_corr_top"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "150n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vi (i_in 0) vsource type=pwl wave=[0 0.64 92n 0.64 92.1n 0.51 178n 0.51]",
+          "Vq (q_in 0) vsource type=pwl wave=[0 0.49 92n 0.49 92.1n 0.55 178n 0.55]",
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=5n period=9n width=4.5n rise=50p fall=50p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.8n 0.9 1.9n 0 151n 0 151.1n 0.9 157n 0.9 157.1n 0 178n 0]",
+          "Vcal (cal_en 0) vsource type=pwl wave=[0 0 2.5n 0 2.6n 0.9 116n 0.9 116.1n 0 134n 0 134.1n 0.9 178n 0.9]",
+          "XDUT (i_in q_in clk rst cal_en i_out q_out gain_code_3 gain_code_2 gain_code_1 gain_code_0 phase_code_3 phase_code_2 phase_code_1 phase_code_0 error_metric locked) quad_corr_top"
+        ]
+      },
+      "deterministic_seed": 1,
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "178n"
+      },
+      "simulatorOptions": {}
+    }
+  },
+  "property_ids": [
+    "P_RESET_CLEAR",
+    "P_TRIM_DIRECTION",
+    "P_CORRECTION_APPLICATION",
+    "P_LOCK_HOLD"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "ff8a0e5a7d904325ce2539b3c291003330f62e8e480c2c7fa9dd15cfc6b337e6",
+    "family_spec_sha256": "8c84dbb4c16bc89b6e27eb4b845b3f15062ceb24152f3d67a567f8283ccc8b29"
+  },
+  "task_id": "v4-365"
+}

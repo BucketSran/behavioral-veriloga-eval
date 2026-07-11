@@ -1,0 +1,58 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module filter_stage(vga_in, clk, rst, enable, vout, clip_flag);
+    input vga_in, clk, rst, enable;
+    output vout, clip_flag;
+    electrical vga_in, clk, rst, enable, vout, clip_flag;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real alpha = 0.25;
+    parameter real tr = 200p from (0:inf);
+
+    real filt_value;
+    real raw_value;
+    real clip_value;
+
+    analog function real clip;
+        input x;
+        real x;
+        begin
+            if (x < vss)
+                clip = vss;
+            else if (x > vdd)
+                clip = vdd;
+            else
+                clip = x;
+        end
+    endfunction
+
+    analog begin
+        @(initial_step) begin
+            filt_value = vcm;
+            clip_value = vss;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if ((V(rst) > vth) || (V(enable) <= vth)) begin
+                filt_value = vcm;
+                clip_value = vss;
+            end else begin
+                raw_value = V(vga_in);
+                clip_value = ((raw_value < vss) || (raw_value > vdd)) ? vdd : vss;
+                filt_value = clip(raw_value);
+            end
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            filt_value = vcm;
+            clip_value = vss;
+        end
+
+        V(vout) <+ transition(filt_value, 0, tr, tr);
+        V(clip_flag) <+ transition(clip_value, 0, tr, tr);
+    end
+endmodule

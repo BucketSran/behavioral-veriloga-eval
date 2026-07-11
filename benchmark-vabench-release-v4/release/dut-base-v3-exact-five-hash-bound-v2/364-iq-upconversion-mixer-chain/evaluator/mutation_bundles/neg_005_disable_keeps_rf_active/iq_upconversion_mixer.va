@@ -1,0 +1,89 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module iq_upconversion_mixer(i_in, q_in, lo_i, lo_q, rst, enable, rf_out, i_mix_dbg, q_mix_dbg, quad_ok);
+    input i_in, q_in, lo_i, lo_q, rst, enable;
+    output rf_out, i_mix_dbg, q_mix_dbg, quad_ok;
+    electrical i_in, q_in, lo_i, lo_q, rst, enable, rf_out, i_mix_dbg, q_mix_dbg, quad_ok;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real gain = 1.0;
+    parameter real tr = 200p from (0:inf);
+
+    integer seen_i;
+    integer seen_q;
+    integer lo_i_state;
+    integer lo_q_state;
+    real i_contrib;
+    real q_contrib;
+    real rf_v;
+    real i_v;
+    real q_v;
+    real ok_v;
+    real lo_i_sign;
+    real lo_q_sign;
+
+    analog begin
+        @(initial_step) begin
+            seen_i = 0;
+            seen_q = 0;
+            lo_i_state = (V(lo_i) > vth) ? 1 : -1;
+            lo_q_state = (V(lo_q) > vth) ? 1 : -1;
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            seen_i = 0;
+            seen_q = 0;
+            lo_i_state = -1;
+            lo_q_state = -1;
+        end
+
+        @(cross(V(enable) - vth, +1) or cross(V(rst) - vth, -1)) begin
+            if (V(rst) <= vth && V(enable) > vth) begin
+                lo_i_state = (V(lo_i) > vth) ? 1 : -1;
+                lo_q_state = (V(lo_q) > vth) ? 1 : -1;
+            end
+        end
+
+        @(cross(V(lo_i) - vth, +1) or cross(V(lo_i) - vth, -1)) begin
+            if (V(rst) <= vth && V(enable) > vth) begin
+                seen_i = 1;
+                lo_i_state = (V(lo_i) > vth) ? 1 : -1;
+            end
+        end
+
+        @(cross(V(lo_q) - vth, +1) or cross(V(lo_q) - vth, -1)) begin
+            if (V(rst) <= vth && V(enable) > vth) begin
+                seen_q = 1;
+                lo_q_state = (V(lo_q) > vth) ? 1 : -1;
+            end
+        end
+
+        lo_i_sign = transition((lo_i_state > 0) ? 1.0 : -1.0, 0, tr, tr);
+        lo_q_sign = transition((lo_q_state > 0) ? 1.0 : -1.0, 0, tr, tr);
+
+        if (V(rst) > vth) begin
+            i_v = vcm;
+            q_v = vcm;
+            rf_v = vcm;
+            ok_v = vss;
+        end else begin
+            i_contrib = gain * (V(i_in) - vcm) * lo_i_sign;
+            q_contrib = -gain * (V(q_in) - vcm) * lo_q_sign;
+            i_v = vcm + i_contrib;
+            q_v = vcm + q_contrib;
+            rf_v = vcm + i_contrib + q_contrib;
+            if (rf_v > vdd) rf_v = vdd;
+            if (rf_v < vss) rf_v = vss;
+            ok_v = (seen_i != 0 && seen_q != 0) ? vdd : vss;
+        end
+
+        V(rf_out) <+ rf_v;
+        V(i_mix_dbg) <+ i_v;
+        V(q_mix_dbg) <+ q_v;
+        V(quad_ok) <+ transition(ok_v, 0, tr, tr);
+    end
+endmodule

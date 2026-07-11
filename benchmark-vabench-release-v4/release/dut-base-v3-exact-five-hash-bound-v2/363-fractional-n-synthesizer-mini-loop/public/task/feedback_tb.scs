@@ -1,0 +1,22 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/fracn_synth_top.va"
+ahdl_include "./dut/accumulator.va"
+ahdl_include "./dut/multi_modulus_divider.va"
+ahdl_include "./dut/ratio_monitor.va"
+
+Vref (ref_clk 0) vsource type=pulse val0=0 val1=0.9 delay=2n period=16n width=8n rise=50p fall=50p
+Vdco (dco_clk 0) vsource type=pulse val0=0 val1=0.9 delay=1n period=500p width=250p rise=10p fall=10p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 330n 0]
+Ven (enable 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.9 295n 0.9 295.1n 0 305n 0 305.1n 0.9 330n 0.9]
+Vf3 (frac_3 0) vsource type=pwl wave=[0 0 190n 0 190.1n 0.9 330n 0.9]
+Vf2 (frac_2 0) vsource type=pwl wave=[0 0 190n 0 190.1n 0.9 330n 0.9]
+Vf1 (frac_1 0) vsource type=pwl wave=[0 0 90n 0 90.1n 0.9 190n 0.9 190.1n 0 301n 0 301.1n 0.9 330n 0.9]
+Vf0 (frac_0 0) vsource type=pwl wave=[0 0 90n 0 90.1n 0.9 330n 0.9]
+XDUT (ref_clk dco_clk rst enable frac_3 frac_2 frac_1 frac_0 div_clk div_sel avg_ratio_metric valid) fracn_synth_top
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=330n maxstep=100p
+save ref_clk dco_clk rst enable frac_3 frac_2 frac_1 frac_0 div_clk div_sel avg_ratio_metric valid

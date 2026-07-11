@@ -1,0 +1,73 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module corrector(i_in, q_in, rst, gain_code_3, gain_code_2, gain_code_1, gain_code_0, phase_code_3, phase_code_2, phase_code_1, phase_code_0, i_out, q_out);
+    input i_in, q_in, rst, gain_code_3, gain_code_2, gain_code_1, gain_code_0;
+    input phase_code_3, phase_code_2, phase_code_1, phase_code_0;
+    output i_out, q_out;
+    electrical i_in, q_in, rst, gain_code_3, gain_code_2, gain_code_1, gain_code_0;
+    electrical phase_code_3, phase_code_2, phase_code_1, phase_code_0, i_out, q_out;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real trim_lsb = 10e-3;
+    parameter real tr = 200p from (0:inf);
+
+    integer gain_code;
+    integer phase_code;
+    integer signed_gain;
+    integer signed_phase;
+    real i_dev;
+    real q_dev;
+    real gain_corr;
+    real phase_corr;
+    real i_value;
+    real q_value;
+    real i_drive;
+    real q_drive;
+
+    analog function real clip;
+        input x;
+        real x;
+        begin
+            if (x < vss)
+                clip = vss;
+            else if (x > vdd)
+                clip = vdd;
+            else
+                clip = x;
+        end
+    endfunction
+
+    analog begin
+        gain_code = ((V(gain_code_3) > vth) ? 8 : 0)
+                  + ((V(gain_code_2) > vth) ? 4 : 0)
+                  + ((V(gain_code_1) > vth) ? 2 : 0)
+                  + ((V(gain_code_0) > vth) ? 1 : 0);
+        phase_code = ((V(phase_code_3) > vth) ? 8 : 0)
+                   + ((V(phase_code_2) > vth) ? 4 : 0)
+                   + ((V(phase_code_1) > vth) ? 2 : 0)
+                   + ((V(phase_code_0) > vth) ? 1 : 0);
+        signed_gain = (gain_code >= 8) ? -(gain_code - 7) : gain_code;
+        signed_phase = (phase_code >= 8) ? -(phase_code - 7) : phase_code;
+        gain_corr = 0.0;
+        phase_corr = signed_phase * trim_lsb;
+        i_dev = V(i_in) - vcm;
+        q_dev = V(q_in) - vcm;
+        i_value = clip(vcm + i_dev - 0.5 * gain_corr);
+        q_value = clip(vcm + q_dev + 0.5 * gain_corr - phase_corr * i_dev / vcm);
+
+        if (V(rst) > vth) begin
+            i_drive = vcm;
+            q_drive = vcm;
+        end else begin
+            i_drive = i_value;
+            q_drive = q_value;
+        end
+
+        V(i_out) <+ i_drive;
+        V(q_out) <+ q_drive;
+    end
+endmodule

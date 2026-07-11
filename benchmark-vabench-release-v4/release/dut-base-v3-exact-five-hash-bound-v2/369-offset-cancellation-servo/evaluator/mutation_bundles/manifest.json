@@ -1,0 +1,132 @@
+{
+  "family_id": "369",
+  "gold_bundle_sha256": "1a0ffe2dce2f2d64ea5bcdc6ac37f4dca0f6963be1a0f569b176edf7ec6d6e23",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "error_integrator.va": "0c5daec96646f81116446e72d08836bbc5ce7015861c3025c4f77abfe02995bb"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_TRIM_SEARCH_DIRECTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_trim_direction_reversed/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "error_integrator.va"
+      ],
+      "fault_class": "trim_direction_reversed",
+      "id": "neg_001_trim_direction_reversed",
+      "trigger_condition": "positive and negative sampled offsets require opposite trim updates",
+      "violated_property_ids": [
+        "P_TRIM_SEARCH_DIRECTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "error_integrator.va": "dbd0fc25edf2a5a5bf7a5f292753c63db35f232a8f190e4315be5806eddc23bb"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DONE_QUALIFICATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_done_asserts_too_early/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "error_integrator.va"
+      ],
+      "fault_class": "premature_done",
+      "id": "neg_002_done_asserts_too_early",
+      "trigger_condition": "single in-tolerance update occurs before four stable calibration updates",
+      "violated_property_ids": [
+        "P_DONE_QUALIFICATION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "trim_dac.va": "429898acd5c39e430a71b218b75598e5e5ccb698c6229e622506622d084ee2bd"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CORRECTED_RESIDUAL"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_corrected_output_uncorrected/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "trim_dac.va"
+      ],
+      "fault_class": "correction_omitted",
+      "id": "neg_003_corrected_output_uncorrected",
+      "trigger_condition": "nonzero trim code should alter corrected_out relative to raw differential input",
+      "violated_property_ids": [
+        "P_CORRECTED_RESIDUAL"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "error_integrator.va": "01e0583a3e3e35ec6a8d9d73628e01c7f82d2988bd83b59f7cce0b749de7f859"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_DISABLE_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_reset_does_not_clear_outputs/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "error_integrator.va"
+      ],
+      "fault_class": "reset_state_not_cleared",
+      "id": "neg_004_reset_does_not_clear_outputs",
+      "trigger_condition": "reset asserted after nonzero trim or done state",
+      "violated_property_ids": [
+        "P_RESET_DISABLE_CLEAR"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "error_integrator.va": "5cc4e0b876a58a87c91cbe1cf7c77587602156e2b12343fdbf0aa2e8923fcc43"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ERROR_METRIC"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_error_metric_inverted/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "error_integrator.va"
+      ],
+      "fault_class": "error_metric_inverted",
+      "id": "neg_005_error_metric_inverted",
+      "trigger_condition": "nonzero residual error after an enabled trim update",
+      "violated_property_ids": [
+        "P_ERROR_METRIC"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

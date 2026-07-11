@@ -1,0 +1,108 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "fracn_synth_top.va",
+      "accumulator.va",
+      "multi_modulus_divider.va",
+      "ratio_monitor.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop={stop_time} maxstep={maxstep}"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "ref_clk",
+      "dco_clk",
+      "rst",
+      "enable",
+      "frac_3",
+      "frac_2",
+      "frac_1",
+      "frac_0",
+      "div_clk",
+      "div_sel",
+      "avg_ratio_metric",
+      "valid"
+    ]
+  },
+  "family_id": "363",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=330n maxstep=100p"
+        ],
+        "body_lines": [
+          "Vref (ref_clk 0) vsource type=pulse val0=0 val1=0.9 delay=2n period=16n width=8n rise=50p fall=50p",
+          "Vdco (dco_clk 0) vsource type=pulse val0=0 val1=0.9 delay=1n period=500p width=250p rise=10p fall=10p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 330n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.9 295n 0.9 295.1n 0 305n 0 305.1n 0.9 330n 0.9]",
+          "Vf3 (frac_3 0) vsource type=pwl wave=[0 0 190n 0 190.1n 0.9 330n 0.9]",
+          "Vf2 (frac_2 0) vsource type=pwl wave=[0 0 190n 0 190.1n 0.9 330n 0.9]",
+          "Vf1 (frac_1 0) vsource type=pwl wave=[0 0 90n 0 90.1n 0.9 190n 0.9 190.1n 0 301n 0 301.1n 0.9 330n 0.9]",
+          "Vf0 (frac_0 0) vsource type=pwl wave=[0 0 90n 0 90.1n 0.9 330n 0.9]",
+          "XDUT (ref_clk dco_clk rst enable frac_3 frac_2 frac_1 frac_0 div_clk div_sel avg_ratio_metric valid) fracn_synth_top"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "330n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=360n maxstep=100p"
+        ],
+        "body_lines": [
+          "Vref (ref_clk 0) vsource type=pulse val0=0 val1=0.9 delay=3n period=18n width=9n rise=50p fall=50p",
+          "Vdco (dco_clk 0) vsource type=pulse val0=0 val1=0.9 delay=1.3n period=600p width=300p rise=10p fall=10p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 360n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.9 320n 0.9 320.1n 0 332n 0 332.1n 0.9 360n 0.9]",
+          "Vf3 (frac_3 0) vsource type=pwl wave=[0 0 220n 0 220.1n 0.9 360n 0.9]",
+          "Vf2 (frac_2 0) vsource type=pwl wave=[0 0 105n 0 105.1n 0.9 220n 0.9 220.1n 0 328n 0 328.1n 0.9 360n 0.9]",
+          "Vf1 (frac_1 0) vsource type=pwl wave=[0 0 105n 0 105.1n 0.9 360n 0.9]",
+          "Vf0 (frac_0 0) vsource type=pwl wave=[0 0 220n 0 220.1n 0.9 360n 0.9]",
+          "XDUT (ref_clk dco_clk rst enable frac_3 frac_2 frac_1 frac_0 div_clk div_sel avg_ratio_metric valid) fracn_synth_top"
+        ]
+      },
+      "deterministic_seed": 1,
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "360n"
+      },
+      "simulatorOptions": {}
+    }
+  },
+  "property_ids": [
+    "P_RESET_DISABLE_CLEAR",
+    "P_FRACTIONAL_SELECTION",
+    "P_DCO_DERIVED_DIVIDER",
+    "P_RATIO_WINDOW",
+    "P_FRACTION_MONOTONICITY"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "bef0800a63117bbad7356bf347979073f8e2afb0a5d27a88f05dd010ad299ec2",
+    "family_spec_sha256": "9049b85075df6f56169fb9d3adec2281d050c98934c738242885e6a56fb83c3a"
+  },
+  "task_id": "v4-363"
+}

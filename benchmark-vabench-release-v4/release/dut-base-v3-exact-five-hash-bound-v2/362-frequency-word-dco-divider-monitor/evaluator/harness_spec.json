@@ -1,0 +1,97 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "frequency_word_dco.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop={stop_time} maxstep={maxstep}"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "enable",
+      "rst",
+      "fcw_5",
+      "fcw_4",
+      "fcw_3",
+      "fcw_2",
+      "fcw_1",
+      "fcw_0",
+      "dco_clk",
+      "div_clk",
+      "freq_metric"
+    ]
+  },
+  "family_id": "362",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Ven (enable 0) vsource type=pwl wave=[0 0 2n 0 2.1n 0.9 94n 0.9 94.1n 0 104n 0 104.1n 0.9 122n 0.9 122.1n 0 130n 0 130.1n 0.9 140n 0.9]",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1n 0.9 1.1n 0 124n 0 124.1n 0.9 129n 0.9 129.1n 0 140n 0]",
+          "Vf5 (fcw_5 0) vsource type=pwl wave=[0 0 68n 0 68.1n 0.9 140n 0.9]",
+          "Vf4 (fcw_4 0) vsource type=pwl wave=[0 0 38n 0 38.1n 0.9 68n 0.9 68.1n 0 140n 0]",
+          "Vf3 (fcw_3 0) vsource type=pwl wave=[0 0 38n 0 38.1n 0.9 140n 0.9]",
+          "Vf2 (fcw_2 0) vsource dc=0",
+          "Vf1 (fcw_1 0) vsource type=pwl wave=[0 0 68n 0 68.1n 0.9 140n 0.9]",
+          "Vf0 (fcw_0 0) vsource type=pwl wave=[0 0 38n 0 38.1n 0.9 140n 0.9]",
+          "XDUT (enable rst fcw_5 fcw_4 fcw_3 fcw_2 fcw_1 fcw_0 dco_clk div_clk freq_metric) frequency_word_dco"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {
+        "maxstep": "50p",
+        "stop_time": "140n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Ven (enable 0) vsource type=pwl wave=[0 0 3n 0 3.1n 0.9 118n 0.9 118.1n 0 131n 0 131.1n 0.9 162n 0.9 162.1n 0 171n 0 171.1n 0.9 190n 0.9]",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.2n 0.9 1.3n 0 164n 0 164.1n 0.9 170n 0.9 170.1n 0 190n 0]",
+          "Vf5 (fcw_5 0) vsource type=pwl wave=[0 0 82n 0 82.1n 0.9 190n 0.9]",
+          "Vf4 (fcw_4 0) vsource type=pwl wave=[0 0 44n 0 44.1n 0.9 82n 0.9 82.1n 0 190n 0]",
+          "Vf3 (fcw_3 0) vsource type=pwl wave=[0 0 82n 0 82.1n 0.9 190n 0.9]",
+          "Vf2 (fcw_2 0) vsource type=pwl wave=[0 0 44n 0 44.1n 0.9 190n 0.9]",
+          "Vf1 (fcw_1 0) vsource type=pwl wave=[0 0 82n 0 82.1n 0.9 190n 0.9]",
+          "Vf0 (fcw_0 0) vsource type=pwl wave=[0 0 44n 0 44.1n 0.9 82n 0.9 82.1n 0 190n 0]",
+          "XDUT (enable rst fcw_5 fcw_4 fcw_3 fcw_2 fcw_1 fcw_0 dco_clk div_clk freq_metric) frequency_word_dco"
+        ]
+      },
+      "deterministic_seed": 1,
+      "parameters": {
+        "maxstep": "50p",
+        "stop_time": "190n"
+      },
+      "simulatorOptions": {}
+    }
+  },
+  "property_ids": [
+    "P_RESET_DISABLE_STOP",
+    "P_FREQUENCY_WORD_MAPPING",
+    "P_DIVIDER_MONITOR",
+    "P_RESTART_MONOTONICITY"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "0beb093a5f0418adc7802af2085f012d96f5fb5ccb84d94dc71d6a0dda36be9b",
+    "family_spec_sha256": "0d68d74300154a21ca427e4402405566fb083f9575fa5bdb0025592e7c31dbfd"
+  },
+  "task_id": "v4-362"
+}

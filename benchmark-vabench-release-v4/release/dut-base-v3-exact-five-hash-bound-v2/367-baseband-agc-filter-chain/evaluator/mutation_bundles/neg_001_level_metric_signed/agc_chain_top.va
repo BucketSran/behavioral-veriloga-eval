@@ -1,0 +1,29 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module agc_chain_top(vin, target, clk, rst, enable, vout, gain_3, gain_2, gain_1, gain_0, level_metric, clip_flag, settled);
+    input vin, target, clk, rst, enable;
+    output vout, gain_3, gain_2, gain_1, gain_0, level_metric, clip_flag, settled;
+    electrical vin, target, clk, rst, enable;
+    electrical vout, gain_3, gain_2, gain_1, gain_0, level_metric, clip_flag, settled;
+    electrical vga_node;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real gain_min = 0.5;
+    parameter real gain_lsb = 0.1;
+    parameter real alpha = 0.25;
+    parameter real tol = 20e-3;
+    parameter real tr = 200p from (0:inf);
+
+    level_meter #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr))
+        u_meter(vin, clk, rst, enable, level_metric);
+    gain_controller #(.vdd(vdd), .vss(vss), .vth(vth), .tol(tol), .tr(tr))
+        u_ctrl(level_metric, target, clk, rst, enable, gain_3, gain_2, gain_1, gain_0, settled);
+    vga_stage #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .gain_min(gain_min), .gain_lsb(gain_lsb), .tr(tr))
+        u_vga(vin, rst, enable, gain_3, gain_2, gain_1, gain_0, vga_node);
+    filter_stage #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .alpha(alpha), .tr(tr))
+        u_filt(vga_node, clk, rst, enable, vout, clip_flag);
+endmodule

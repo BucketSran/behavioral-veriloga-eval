@@ -1,0 +1,36 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module tia_limiting_receiver(vin_proxy, clk, rst, enable, vout, decision, limit_flag, valid, amp_metric);
+    inout vin_proxy, clk, rst, enable, vout, decision, limit_flag, valid, amp_metric;
+    electrical vin_proxy, clk, rst, enable, vout, decision, limit_flag, valid, amp_metric;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vcm = 0.45; parameter real vth = 0.45; parameter real gain = 4.0; parameter real limit = 0.35; parameter real valid_min = 40e-3; parameter real tr = 200p from (0:inf); parameter real tick = 250p from (0:inf);
+    real prev_clk, raw, limited, vout_v, decision_v, flag_v, valid_v, amp_v; integer valid_count;
+    analog function real absval; input x; real x; begin absval = (x < 0.0) ? -x : x; end endfunction
+    analog function real min2; input a,b; real a,b; begin min2 = (a < b) ? a : b; end endfunction
+    analog function real max2; input a,b; real a,b; begin max2 = (a > b) ? a : b; end endfunction
+    analog begin
+        @(initial_step) begin prev_clk = 0.0; vout_v = vcm; decision_v = 0.0; flag_v = 0.0; valid_v = 0.0; amp_v = 0.0; valid_count = 0; end
+        @(timer(0, tick)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin vout_v = vcm; decision_v = 0.0; flag_v = 0.0; valid_v = 0.0; amp_v = 0.0; valid_count = 0; end
+            else begin
+                raw = gain * (V(vin_proxy) - vcm);
+                limited = min2(limit, max2(-limit, raw));
+                vout_v = vcm + limited;
+                amp_v = absval(limited);
+                flag_v = ((absval(raw) > limit)) ? vdd : vss;
+                if (V(clk) > vth && prev_clk <= vth) begin
+                    decision_v = ((limited >= 0.0)) ? vdd : vss;
+                    if (amp_v >= valid_min) valid_count = valid_count + 1; else valid_count = 0;
+                    valid_v = ((valid_count >= 2)) ? vdd : vss;
+                end
+            end
+            prev_clk = V(clk);
+        end
+        V(vout) <+ transition(vout_v, 0, tr, tr);
+        V(decision) <+ transition(decision_v, 0, tr, tr);
+        V(limit_flag) <+ transition(flag_v, 0, tr, tr);
+        V(valid) <+ transition(valid_v, 0, tr, tr);
+        V(amp_metric) <+ transition(amp_v, 0, tr, tr);
+    end
+endmodule

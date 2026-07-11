@@ -1,0 +1,96 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module frequency_word_dco(enable, rst, fcw_5, fcw_4, fcw_3, fcw_2, fcw_1, fcw_0, dco_clk, div_clk, freq_metric);
+    input enable, rst, fcw_5, fcw_4, fcw_3, fcw_2, fcw_1, fcw_0;
+    output dco_clk, div_clk, freq_metric;
+    electrical enable, rst, fcw_5, fcw_4, fcw_3, fcw_2, fcw_1, fcw_0, dco_clk, div_clk, freq_metric;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real f_min = 80.0e6;
+    parameter real f_step = 2.0e6;
+    parameter real f_max = 250.0e6;
+    parameter integer divide_ratio = 4 from [1:inf);
+    parameter real tr = 100p from (0:inf);
+
+    integer dco_state;
+    integer div_state;
+    integer div_edges;
+    integer code;
+    real f_target;
+    real next_edge_time;
+    real metric_v;
+
+    analog begin
+        @(initial_step) begin
+            dco_state = 0;
+            div_state = 0;
+            div_edges = 0;
+            next_edge_time = 1.0e99;
+            metric_v = vss;
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            dco_state = 0;
+            div_state = 0;
+            div_edges = 0;
+            next_edge_time = 1.0e99;
+            metric_v = vss;
+        end
+
+        @(cross(V(enable) - vth, +1)) begin
+            if (V(rst) <= vth) begin
+                dco_state = 0;
+                div_state = 0;
+                div_edges = 0;
+                code = 0;
+                if (V(fcw_0) > vth) code = code + 1;
+                if (V(fcw_1) > vth) code = code + 2;
+                if (V(fcw_2) > vth) code = code + 4;
+                if (V(fcw_3) > vth) code = code + 8;
+                if (V(fcw_4) > vth) code = code + 16;
+                if (V(fcw_5) > vth) code = code + 32;
+                f_target = f_min + f_step * code;
+                if (f_target > f_max) f_target = f_max;
+                metric_v = vss + (vdd - vss) * (f_target - f_min) / (f_max - f_min);
+                next_edge_time = $abstime + 0.5 / f_target;
+            end
+        end
+
+        @(timer(next_edge_time)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                dco_state = 0;
+                div_state = 0;
+                div_edges = 0;
+                next_edge_time = 1.0e99;
+                metric_v = vss;
+            end else begin
+                dco_state = 1 - dco_state;
+                if (dco_state != 0) begin
+                    div_edges = div_edges + 1;
+                    if (div_edges >= divide_ratio) begin
+                        div_edges = 0;
+                        div_state = 1 - div_state;
+                    end
+                end
+                code = 0;
+                if (V(fcw_0) > vth) code = code + 1;
+                if (V(fcw_1) > vth) code = code + 2;
+                if (V(fcw_2) > vth) code = code + 4;
+                if (V(fcw_3) > vth) code = code + 8;
+                if (V(fcw_4) > vth) code = code + 16;
+                if (V(fcw_5) > vth) code = code + 32;
+                f_target = f_min + f_step * code;
+                if (f_target > f_max) f_target = f_max;
+                metric_v = vss + (vdd - vss) * (f_target - f_min) / (f_max - f_min);
+                next_edge_time = $abstime + 0.5 / f_target;
+            end
+        end
+
+        V(dco_clk) <+ transition(dco_state ? vdd : vss, 0, tr, tr);
+        V(div_clk) <+ transition(div_state ? vdd : vss, 0, tr, tr);
+        V(freq_metric) <+ transition(metric_v, 0, tr, tr);
+    end
+endmodule

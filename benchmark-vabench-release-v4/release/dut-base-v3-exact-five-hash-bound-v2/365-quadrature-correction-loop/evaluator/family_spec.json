@@ -1,0 +1,802 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "gain_trim",
+              "skew_estimator",
+              "corrector"
+            ],
+            "name": "quad_corr_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides public vdd behavior for module quad_corr_top",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides public vss behavior for module quad_corr_top",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides public vcm behavior for module quad_corr_top",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides public vth behavior for module quad_corr_top",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "10e-3",
+                "name": "trim_lsb",
+                "override_behavior": "overrides public trim_lsb behavior for module quad_corr_top",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "15e-3",
+                "name": "error_tol",
+                "override_behavior": "overrides public error_tol behavior for module quad_corr_top",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides public tr behavior for module quad_corr_top",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "i_in",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "q_in",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "cal_en",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "i_out",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "q_out",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "gain_code_3",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "gain_code_2",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "gain_code_1",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "gain_code_0",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_code_3",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_code_2",
+                "position": 12
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_code_1",
+                "position": 13
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_code_0",
+                "position": 14
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "error_metric",
+                "position": 15
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "locked",
+                "position": 16
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "quad_corr_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "gain_trim",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides public vdd behavior for module gain_trim",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides public vss behavior for module gain_trim",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides public vcm behavior for module gain_trim",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides public vth behavior for module gain_trim",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "10e-3",
+                "name": "trim_lsb",
+                "override_behavior": "overrides public trim_lsb behavior for module gain_trim",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "15e-3",
+                "name": "error_tol",
+                "override_behavior": "overrides public error_tol behavior for module gain_trim",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides public tr behavior for module gain_trim",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "i_in",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "q_in",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "cal_en",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "gain_code_3",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "gain_code_2",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "gain_code_1",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "gain_code_0",
+                "position": 8
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "gain_trim.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "skew_estimator",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides public vdd behavior for module skew_estimator",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides public vss behavior for module skew_estimator",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides public vcm behavior for module skew_estimator",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides public vth behavior for module skew_estimator",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "10e-3",
+                "name": "trim_lsb",
+                "override_behavior": "overrides public trim_lsb behavior for module skew_estimator",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "15e-3",
+                "name": "error_tol",
+                "override_behavior": "overrides public error_tol behavior for module skew_estimator",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides public tr behavior for module skew_estimator",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "i_in",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "q_in",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "cal_en",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_code_3",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_code_2",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_code_1",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_code_0",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "error_metric",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "locked",
+                "position": 10
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "skew_estimator.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "corrector",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides public vdd behavior for module corrector",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides public vss behavior for module corrector",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides public vcm behavior for module corrector",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides public vth behavior for module corrector",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "10e-3",
+                "name": "trim_lsb",
+                "override_behavior": "overrides public trim_lsb behavior for module corrector",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides public tr behavior for module corrector",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "i_in",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "q_in",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "gain_code_3",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "gain_code_2",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "gain_code_1",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "gain_code_0",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "phase_code_3",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "phase_code_2",
+                "position": 8
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "phase_code_1",
+                "position": 9
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "phase_code_0",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "i_out",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "q_out",
+                "position": 12
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "corrector.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "family_id": "365",
+  "identity": {
+    "category": "rf_afe_behavioral_macromodels",
+    "difficulty": "D4",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Quadrature Correction Loop"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A suitable for transient simulation.",
+    "Use public voltage contributions only and preserve the declared artifact and module interfaces.",
+    "Do not hard-code evaluator stimulus, sample windows, checker tolerances, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_CLEAR",
+      "observable_contract": "Reset clears both trim buses, corrected outputs, error metric, and lock state.",
+      "required_signals": [
+        "time",
+        "rst",
+        "i_out",
+        "q_out",
+        "gain_code_3",
+        "gain_code_2",
+        "gain_code_1",
+        "gain_code_0",
+        "phase_code_3",
+        "phase_code_2",
+        "phase_code_1",
+        "phase_code_0",
+        "error_metric",
+        "locked"
+      ]
+    },
+    {
+      "id": "P_TRIM_DIRECTION",
+      "observable_contract": "Enabled calibration updates signed gain and phase trim codes in directions that reduce measured amplitude and quadrature errors.",
+      "required_signals": [
+        "time",
+        "i_in",
+        "q_in",
+        "clk",
+        "cal_en",
+        "gain_code_3",
+        "gain_code_2",
+        "gain_code_1",
+        "gain_code_0",
+        "phase_code_3",
+        "phase_code_2",
+        "phase_code_1",
+        "phase_code_0",
+        "error_metric"
+      ]
+    },
+    {
+      "id": "P_CORRECTION_APPLICATION",
+      "observable_contract": "Corrected I and Q outputs apply the currently exposed gain and phase trim codes and remain bounded by the supplies.",
+      "required_signals": [
+        "time",
+        "i_in",
+        "q_in",
+        "rst",
+        "i_out",
+        "q_out",
+        "gain_code_3",
+        "gain_code_2",
+        "gain_code_1",
+        "gain_code_0",
+        "phase_code_3",
+        "phase_code_2",
+        "phase_code_1",
+        "phase_code_0"
+      ]
+    },
+    {
+      "id": "P_LOCK_HOLD",
+      "observable_contract": "Lock asserts after three consecutive in-tolerance calibration updates, and disabling calibration holds codes while correction remains active.",
+      "required_signals": [
+        "time",
+        "clk",
+        "cal_en",
+        "gain_code_3",
+        "gain_code_2",
+        "gain_code_1",
+        "gain_code_0",
+        "phase_code_3",
+        "phase_code_2",
+        "phase_code_1",
+        "phase_code_0",
+        "error_metric",
+        "locked"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1365",
+    "dut": "v4-365",
+    "testbench": "v4-865"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "i_in",
+            "port_ref": "i_in",
+            "position": 0
+          },
+          {
+            "net": "q_in",
+            "port_ref": "q_in",
+            "position": 1
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "cal_en",
+            "port_ref": "cal_en",
+            "position": 4
+          },
+          {
+            "net": "i_out",
+            "port_ref": "i_out",
+            "position": 5
+          },
+          {
+            "net": "q_out",
+            "port_ref": "q_out",
+            "position": 6
+          },
+          {
+            "net": "gain_code_3",
+            "port_ref": "gain_code_3",
+            "position": 7
+          },
+          {
+            "net": "gain_code_2",
+            "port_ref": "gain_code_2",
+            "position": 8
+          },
+          {
+            "net": "gain_code_1",
+            "port_ref": "gain_code_1",
+            "position": 9
+          },
+          {
+            "net": "gain_code_0",
+            "port_ref": "gain_code_0",
+            "position": 10
+          },
+          {
+            "net": "phase_code_3",
+            "port_ref": "phase_code_3",
+            "position": 11
+          },
+          {
+            "net": "phase_code_2",
+            "port_ref": "phase_code_2",
+            "position": 12
+          },
+          {
+            "net": "phase_code_1",
+            "port_ref": "phase_code_1",
+            "position": 13
+          },
+          {
+            "net": "phase_code_0",
+            "port_ref": "phase_code_0",
+            "position": 14
+          },
+          {
+            "net": "error_metric",
+            "port_ref": "error_metric",
+            "position": 15
+          },
+          {
+            "net": "locked",
+            "port_ref": "locked",
+            "position": 16
+          }
+        ],
+        "module_ref": "quad_corr_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "i_in",
+      "q_in",
+      "clk",
+      "rst",
+      "cal_en",
+      "i_out",
+      "q_out",
+      "gain_code_3",
+      "gain_code_2",
+      "gain_code_1",
+      "gain_code_0",
+      "phase_code_3",
+      "phase_code_2",
+      "phase_code_1",
+      "phase_code_0",
+      "error_metric",
+      "locked"
+    ]
+  }
+}

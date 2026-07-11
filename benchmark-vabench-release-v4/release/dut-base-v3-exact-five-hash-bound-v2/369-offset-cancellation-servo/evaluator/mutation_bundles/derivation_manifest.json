@@ -1,0 +1,65 @@
+{
+  "schema_version": "v4-negative-derivation-diagnostics-v1",
+  "family_id": "369",
+  "mutation_catalog_sha256": "e92f8b1cd77beae89d79cb831edc9a177de83473080c70a2e987d9f922627342",
+  "mutation_partition": {
+    "bugfix_seed": [
+      "neg_001_trim_direction_reversed"
+    ],
+    "testbench_private_score": [
+      "neg_003_corrected_output_uncorrected",
+      "neg_004_reset_does_not_clear_outputs",
+      "neg_005_error_metric_inverted"
+    ],
+    "testbench_public_feedback": [
+      "neg_002_done_asserts_too_early"
+    ]
+  },
+  "mutation_diagnostics": [
+    {
+      "id": "neg_001_trim_direction_reversed",
+      "fault_class": "trim_direction_reversed",
+      "trigger_pattern": "positive and negative sampled offsets require opposite trim updates",
+      "diagnostic_pattern": "P_TRIM_SEARCH_DIRECTION mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=trim_direction_reversed",
+      "violated_property_ids": [
+        "P_TRIM_SEARCH_DIRECTION"
+      ]
+    },
+    {
+      "id": "neg_002_done_asserts_too_early",
+      "fault_class": "premature_done",
+      "trigger_pattern": "single in-tolerance update occurs before four stable calibration updates",
+      "diagnostic_pattern": "P_DONE_QUALIFICATION mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=premature_done",
+      "violated_property_ids": [
+        "P_DONE_QUALIFICATION"
+      ]
+    },
+    {
+      "id": "neg_003_corrected_output_uncorrected",
+      "fault_class": "correction_omitted",
+      "trigger_pattern": "nonzero trim code should alter corrected_out relative to raw differential input",
+      "diagnostic_pattern": "P_CORRECTED_RESIDUAL mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=correction_omitted",
+      "violated_property_ids": [
+        "P_CORRECTED_RESIDUAL"
+      ]
+    },
+    {
+      "id": "neg_004_reset_does_not_clear_outputs",
+      "fault_class": "reset_state_not_cleared",
+      "trigger_pattern": "reset asserted after nonzero trim or done state",
+      "diagnostic_pattern": "P_RESET_DISABLE_CLEAR mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=reset_state_not_cleared",
+      "violated_property_ids": [
+        "P_RESET_DISABLE_CLEAR"
+      ]
+    },
+    {
+      "id": "neg_005_error_metric_inverted",
+      "fault_class": "error_metric_inverted",
+      "trigger_pattern": "nonzero residual error after an enabled trim update",
+      "diagnostic_pattern": "P_ERROR_METRIC mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=error_metric_inverted",
+      "violated_property_ids": [
+        "P_ERROR_METRIC"
+      ]
+    }
+  ]
+}

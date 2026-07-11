@@ -1,0 +1,134 @@
+{
+  "family_id": "367",
+  "gold_bundle_sha256": "b7901764d3242b06c1d9e8785d3e69b262d37ad342467b4886e0cb92438f57f0",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "level_meter.va": "c7ca45fbac2a1c2d141fca8e1c89814ac9f33a704572b5c5875c524f086159df"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LEVEL_GAIN_CONTROL"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_level_metric_signed/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "level_meter.va"
+      ],
+      "fault_class": "level_measurement_error",
+      "id": "neg_001_level_metric_signed",
+      "trigger_condition": "vin is below vcm at a sampling edge.",
+      "violated_property_ids": [
+        "P_LEVEL_GAIN_CONTROL"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "gain_controller.va": "d66411737f8b118cd2daee59ff1bf877c91794413f6f4282a774f4dc31f26abc"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LEVEL_GAIN_CONTROL",
+          "P_VGA_FILTER_RESPONSE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_gain_direction_reversed/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "gain_controller.va"
+      ],
+      "fault_class": "gain_control_polarity_error",
+      "id": "neg_002_gain_direction_reversed",
+      "trigger_condition": "The measured level is below the target deadband.",
+      "violated_property_ids": [
+        "P_LEVEL_GAIN_CONTROL",
+        "P_VGA_FILTER_RESPONSE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "filter_stage.va": "b600593f81be0058e1e771756efef3ea4f5295a5f23200bec08232eb25fedcc5"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_VGA_FILTER_RESPONSE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_filter_no_smoothing/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "filter_stage.va"
+      ],
+      "fault_class": "filter_response_error",
+      "id": "neg_003_filter_no_smoothing",
+      "trigger_condition": "The VGA output steps away from the current filter state.",
+      "violated_property_ids": [
+        "P_VGA_FILTER_RESPONSE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "filter_stage.va": "a659d6b9fd85f469d96c3bb245bc653ee96f4f828ff3cf8190d671a719324040"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CLIP_AND_SETTLE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_clip_flag_stuck_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "filter_stage.va"
+      ],
+      "fault_class": "clip_status_error",
+      "id": "neg_004_clip_flag_stuck_low",
+      "trigger_condition": "The unclamped filtered output exceeds a supply rail.",
+      "violated_property_ids": [
+        "P_CLIP_AND_SETTLE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "gain_controller.va": "87f608b620b2927a84afecb238bdf180cbf709e31940eb5b01eda0c0f2e88aec"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_DISABLE_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_reset_gain_not_cleared/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "gain_controller.va"
+      ],
+      "fault_class": "reset_disable_clear_error",
+      "id": "neg_005_reset_gain_not_cleared",
+      "trigger_condition": "Reset is asserted or enable is deasserted after the gain code has moved.",
+      "violated_property_ids": [
+        "P_RESET_DISABLE_CLEAR"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

@@ -1,0 +1,66 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module multi_modulus_divider(dco_clk, rst, enable, carry, div_clk, div_sel, decision_tick);
+    input dco_clk, rst, enable, carry;
+    output div_clk, div_sel, decision_tick;
+    electrical dco_clk, rst, enable, carry, div_clk, div_sel, decision_tick;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter integer n_int = 8 from [1:inf);
+    parameter real tr = 100p from (0:inf);
+
+    integer count_state;
+    integer div_state;
+    integer sel_state;
+    integer tick_state;
+    real tick_fall_time;
+
+    analog begin
+        @(initial_step) begin
+            count_state = 0;
+            div_state = 0;
+            sel_state = 0;
+            tick_state = 0;
+            tick_fall_time = 1.0e99;
+        end
+
+        @(cross(V(dco_clk) - vth, +1)) begin
+            if ((V(rst) > vth) || (V(enable) <= vth)) begin
+                count_state = 0;
+                div_state = 0;
+                sel_state = 0;
+                tick_state = 0;
+                tick_fall_time = 1.0e99;
+            end else begin
+                count_state = count_state + 1;
+                if (count_state >= (n_int + 1 + ((V(carry) > vth) ? 1 : 0))) begin
+                    count_state = 0;
+                    div_state = 1 - div_state;
+                    sel_state = (V(carry) > vth) ? 1 : 0;
+                    tick_state = 1;
+                    tick_fall_time = $abstime + 2.0 * tr;
+                end
+            end
+        end
+
+        @(timer(tick_fall_time)) begin
+            tick_state = 0;
+            tick_fall_time = 1.0e99;
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            count_state = 0;
+            div_state = 0;
+            sel_state = 0;
+            tick_state = 0;
+            tick_fall_time = 1.0e99;
+        end
+
+        V(div_clk) <+ transition(div_state ? vdd : vss, 0, tr, tr);
+        V(div_sel) <+ transition(sel_state ? vdd : vss, 0, tr, tr);
+        V(decision_tick) <+ transition(tick_state ? vdd : vss, 0, tr, tr);
+    end
+endmodule

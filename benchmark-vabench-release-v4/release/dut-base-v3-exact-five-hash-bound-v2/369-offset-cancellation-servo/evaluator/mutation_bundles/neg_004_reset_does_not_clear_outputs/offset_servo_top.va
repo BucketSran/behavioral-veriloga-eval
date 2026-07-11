@@ -1,0 +1,24 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module offset_servo_top(vinp, vinn, clk, rst, cal_en, corrected_out, trim_4, trim_3, trim_2, trim_1, trim_0, error_metric, done);
+    input vinp, vinn, clk, rst, cal_en;
+    output corrected_out, trim_4, trim_3, trim_2, trim_1, trim_0, error_metric, done;
+    electrical vinp, vinn, clk, rst, cal_en;
+    electrical corrected_out, trim_4, trim_3, trim_2, trim_1, trim_0, error_metric, done;
+    electrical sampled_error;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real trim_lsb = 2e-3;
+    parameter real error_tol = 5e-3;
+    parameter real tr = 200p from (0:inf);
+
+    offset_sampler #(.vss(vss), .vth(vth), .tr(tr))
+        u_sampler(vinp, vinn, clk, rst, cal_en, sampled_error);
+    error_integrator #(.vdd(vdd), .vss(vss), .vth(vth), .trim_lsb(trim_lsb), .error_tol(error_tol), .tr(tr))
+        u_int(sampled_error, clk, rst, cal_en, trim_4, trim_3, trim_2, trim_1, trim_0, error_metric, done);
+    trim_dac #(.vdd(vdd), .vss(vss), .vth(vth), .trim_lsb(trim_lsb), .tr(tr))
+        u_dac(vinp, vinn, rst, trim_4, trim_3, trim_2, trim_1, trim_0, corrected_out);
+endmodule

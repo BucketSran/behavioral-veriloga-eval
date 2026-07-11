@@ -1,0 +1,196 @@
+{
+  "checks": {
+    "certified_negatives": {
+      "count": 5,
+      "status": "pass"
+    },
+    "gold_bundle": {
+      "artifact_gate": "pass",
+      "feedback_profile": "pass",
+      "score_profile": "pass"
+    },
+    "parity": {
+      "evas_pass_spectre_fail_count": 0,
+      "status": "pass"
+    },
+    "public_properties": {
+      "property_ids": [
+        "P_RESET_DISABLE_CLEAR",
+        "P_TRIM_SEARCH_DIRECTION",
+        "P_CORRECTED_RESIDUAL",
+        "P_ERROR_METRIC",
+        "P_DONE_QUALIFICATION"
+      ],
+      "status": "pass"
+    }
+  },
+  "claim_boundary": {
+    "completed_gate": "dut_base_gate2",
+    "next_gate": "canonical_suite_unification_pending",
+    "release_kind": "canonical_dut_base",
+    "tri_form_gate2_complete": false,
+    "tri_form_gate3_complete": false
+  },
+  "component_fingerprints": {
+    "assembly": {
+      "policy_sha256": "a685711027afdd1c08e503cf3a78c33fab494be55e01e7c14df1a9be7b9d0616",
+      "release_snapshot_sha256": "97f05b4212cf53c691a3b9296d9993d0dea1c0cf5a2b1bdf4fca9eab6246461c"
+    },
+    "backend": {
+      "ahdl_like_sha256": "91ce239e5f278a6d5dfcde85ca2d820c5133d8f8a3de26dc6477164e703342f3",
+      "evas_sha256": "0fe0ee9b93a236de08af3008712dfc5d1ffdf69821f84161bd1906ccc2f1f7b8",
+      "spectre_sha256": "ac4c1cf785d5eab74058944d52bf40869e83c94e19202ab72c8e8a250c4dc51b"
+    },
+    "evidence_refs": [
+      {
+        "path": "/private/tmp/vabench-v4-standalone-rust/gold-001-400-de7657c-reindexed-v2.json",
+        "role": "standalone_evas_gold",
+        "sha256": "26d7610b794a13039c8d234d83ee022207fad7f55fa4d986d8022584adadf333",
+        "state": "fresh"
+      },
+      {
+        "path": "/private/tmp/vabench-v4-standalone-rust/mutations-001-400/component-evidence-replayed-v3.json",
+        "role": "standalone_evas_mutations",
+        "sha256": "79e931acf09cb8a96b85848c1858d8f3f5a516716f0d33352343180b8bf9473d",
+        "state": "replayed"
+      },
+      {
+        "path": "/private/tmp/vabench-v4-spectre-refresh/001-319/spectre-1_60.json",
+        "role": "spectre_gold_carried",
+        "sha256": "7bdcf34a46457cf7a1c2526b893b0979c41ae810c8e863fe2ddfe27a0683affe",
+        "state": "carried_forward"
+      },
+      {
+        "path": "/private/tmp/vabench-v4-standalone-rust/spectre-mutations-carried-2051.json",
+        "role": "spectre_mutations_carried",
+        "sha256": "8b943774284f3a9c544d5e0a7cb56f0d8319e25bafc16f0e7b824bca94f48147",
+        "state": "carried_forward"
+      },
+      {
+        "path": "/private/tmp/vabench-v4-standalone-rust/spectre-mutation-checker-replay-2051.json",
+        "role": "checker_replay",
+        "sha256": "6d14fae3f06774364febf54b628ed5e1a9bbeba29cb442029162708579308918",
+        "state": "replayed"
+      }
+    ],
+    "oracle": {
+      "checker_binding_sha256": "3aa5a8b71cc0c0d3b3e0efe6b6b0645cf056b0bf2c3ca97c22f1d89f0e1c1f40",
+      "checker_implementation_sha256": "e42c9a97b4f4cea1a9eea321d10ca37e2c87caa447d25c60971158136f004df4",
+      "checker_profile_sha256": "609208aa64ff87dc923000644bcbc86800e4983254d45bb4e10d68950d866da4",
+      "diagnostic_policy_sha256": "69b217a349cb0e8a3eab574e7e6d1af03f069fea668b15b37868ef3d2e7deea3",
+      "oracle_runner_sha256": "51ae0ec873748e901bcf5e5b8ee4e56e0dc8a8a6c1e8efc6c7ce30898d99d8e7"
+    },
+    "policy_id": "v4-dependency-scoped-evidence-v3",
+    "reuse_decisions": [
+      {
+        "component": "task_inputs",
+        "evidence_roles": [
+          "standalone_evas_gold",
+          "standalone_evas_mutations"
+        ],
+        "state": "fresh"
+      },
+      {
+        "component": "oracle",
+        "evidence_roles": [
+          "checker_replay"
+        ],
+        "state": "replayed"
+      },
+      {
+        "component": "ahdl_like",
+        "evidence_roles": [
+          "standalone_evas_gold"
+        ],
+        "state": "fresh"
+      },
+      {
+        "component": "evas",
+        "evidence_roles": [
+          "standalone_evas_gold",
+          "standalone_evas_mutations"
+        ],
+        "state": "fresh"
+      },
+      {
+        "component": "spectre",
+        "evidence_roles": [
+          "spectre_gold_carried",
+          "spectre_mutations_carried"
+        ],
+        "state": "carried_forward"
+      },
+      {
+        "component": "assembly",
+        "evidence_roles": [
+          "standalone_evas_gold",
+          "standalone_evas_mutations",
+          "spectre_gold_carried",
+          "spectre_mutations_carried",
+          "checker_replay"
+        ],
+        "state": "fresh"
+      }
+    ],
+    "schema_version": "v4-evidence-components-v3",
+    "state": "composed",
+    "task_inputs": {
+      "checker_profile_sha256": "047a5a5bad94226be3632dfd57b11ba347405675eff791d59c53893a9d601870",
+      "family_spec_sha256": "75187efa6b83a65562a3c5d86db3edb5f9be4a7d5c96ca88563a7c1ef5b0ecbe",
+      "feedback_deck_sha256": "1ef2d0888417fb8c26e500c667d04419574652e8c60f581a8e2526219e321231",
+      "feedback_profile_sha256": "99619ec323e68759336b3a96bacba6c85008d9058a9bab50ef2417ee2844ecac",
+      "gold_bundle_sha256": "1a0ffe2dce2f2d64ea5bcdc6ac37f4dca0f6963be1a0f569b176edf7ec6d6e23",
+      "harness_spec_sha256": "4b99db9278e54dca6b73f2f41789d2199af73af4e8f8896c0408147e7f86d837",
+      "score_deck_sha256": "198832e21a4639207b836de9b2e85078443c76650b145ddc6e29dd7f9e5f72d5",
+      "score_profile_sha256": "d61658e1fc23bdd0bbf373334edee82892269e0285bed0b95207b21c98c42566"
+    }
+  },
+  "evaluators": {
+    "ahdl_like": {
+      "ruleset_sha256": "e392fa25de579cadc6aaf9e877b14fe0b80960532500758a9d9ae259d1a3592c",
+      "status": "pass",
+      "untriaged_warning_count": 0
+    },
+    "evas": {
+      "actual_engine": "standalone-rust",
+      "allow_python_fallback": false,
+      "build_sha256": "5d6e38c9da8e66308ac0f44c33364a172aee2af5280d45d2109e26a43e214367",
+      "implementation_track": "standalone-rust",
+      "profile": "balanced",
+      "rust_core_abi": 20260712,
+      "status": "pass"
+    },
+    "spectre": {
+      "bridge_identity": "sui-direct:ssh:thu-wei:proxyjump=thu-jin",
+      "status": "pass",
+      "version": "sub-version  21.1.0.509.isr12"
+    }
+  },
+  "evidence_paths": [
+    "/private/tmp/vabench-v4-spectre-refresh/001-319/spectre-121_180.json",
+    "/private/tmp/vabench-v4-spectre-refresh/001-319/spectre-181_240.json",
+    "/private/tmp/vabench-v4-spectre-refresh/001-319/spectre-1_60.json",
+    "/private/tmp/vabench-v4-spectre-refresh/001-319/spectre-241_280.json",
+    "/private/tmp/vabench-v4-spectre-refresh/001-319/spectre-281_319.json",
+    "/private/tmp/vabench-v4-spectre-refresh/001-319/spectre-61_120.json",
+    "/private/tmp/vabench-v4-spectre-refresh/spectre-320_400.json",
+    "/private/tmp/vabench-v4-standalone-rust/gold-001-400-de7657c-reindexed-v2.json",
+    "/private/tmp/vabench-v4-standalone-rust/mutation-218-neg006.json",
+    "/private/tmp/vabench-v4-standalone-rust/mutations-001-400/component-evidence-replayed-v3.json",
+    "/private/tmp/vabench-v4-standalone-rust/spectre-mutation-checker-replay-2051.json",
+    "/private/tmp/vabench-v4-standalone-rust/spectre-mutations-carried-2051.json"
+  ],
+  "family_id": "369",
+  "input_hashes": {
+    "checker_profile": "047a5a5bad94226be3632dfd57b11ba347405675eff791d59c53893a9d601870",
+    "family_spec": "75187efa6b83a65562a3c5d86db3edb5f9be4a7d5c96ca88563a7c1ef5b0ecbe",
+    "feedback_profile": "99619ec323e68759336b3a96bacba6c85008d9058a9bab50ef2417ee2844ecac",
+    "gold_bundle": "1a0ffe2dce2f2d64ea5bcdc6ac37f4dca0f6963be1a0f569b176edf7ec6d6e23",
+    "harness_spec": "4b99db9278e54dca6b73f2f41789d2199af73af4e8f8896c0408147e7f86d837",
+    "score_profile": "d61658e1fc23bdd0bbf373334edee82892269e0285bed0b95207b21c98c42566"
+  },
+  "release_snapshot_sha256": "97f05b4212cf53c691a3b9296d9993d0dea1c0cf5a2b1bdf4fca9eab6246461c",
+  "schema_version": "v4-task-certification-v3",
+  "status": "gate2_pass",
+  "toolchain_lock_sha256": "97f05b4212cf53c691a3b9296d9993d0dea1c0cf5a2b1bdf4fca9eab6246461c"
+}

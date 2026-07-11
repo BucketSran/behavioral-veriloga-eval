@@ -1,0 +1,60 @@
+{
+  "component_fingerprints": {
+    "assembly": {
+      "policy_sha256": "91f4e21b94263e796c846aedef282c79d4abeb7ccc415a0e6f1311f8816b33a4",
+      "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+    },
+    "backend": {
+      "ahdl_like_sha256": "91ce239e5f278a6d5dfcde85ca2d820c5133d8f8a3de26dc6477164e703342f3",
+      "evas_sha256": "2d71c227644956df64209b49d0da6ef55bc6934891020eb26d762e8cb8cc6df2",
+      "spectre_sha256": "ac4c1cf785d5eab74058944d52bf40869e83c94e19202ab72c8e8a250c4dc51b"
+    },
+    "oracle": {
+      "checker_binding_sha256": "032c6c17eb49b55a3fb8d12513f16be18c9b21c38d9bf7f9e130764dfff03722",
+      "checker_implementation_sha256": "76b532574257529bf74267b0ddbda9879cf5bc9f74d0e924cad743a183218b0e",
+      "checker_profile_sha256": "c9f98dacf4001ab3cb7803c366ce639d2e528cf428946ab24b2a1e9c1ac2e937",
+      "diagnostic_policy_sha256": "69b217a349cb0e8a3eab574e7e6d1af03f069fea668b15b37868ef3d2e7deea3",
+      "oracle_runner_sha256": "e70bd46cd3abdfd8ed9658cb13f64bc96e27d364d51ed0fdcd05f8139e63af2b",
+      "property_activation_policy_sha256": "9477cbdaa56cad404e8a92247ef36d96ba2f62ae6adc00789bbd6e170e8649f8"
+    },
+    "policy_id": "v4-dependency-scoped-evidence-v2",
+    "schema_version": "v4-evidence-components-v2",
+    "state": "carried_forward",
+    "task_inputs": {
+      "candidate_bundle_sha256": "d5d4438546e4bfa2489008f31b4aade69ed031591e356d9ae2f1ba659115755a",
+      "deck_sha256": "d88441e512b084d80788993b261898f85bf9ef6943f3ff1d82b153483f296788",
+      "gold_bundle_sha256": "7ba6c8ec38a84ee9f69ccab0d58568e3836a4a5e3c080275cb7bce790481c62b",
+      "harness_spec_sha256": "b81d10bafbcf420a36597f6417aa68dc7f3e3e4e0cca085981288da47835877c",
+      "mutation_bundle_sha256": "d5d4438546e4bfa2489008f31b4aade69ed031591e356d9ae2f1ba659115755a",
+      "profile_sha256": "6135722fcb58b91487c2ba10db486964f3733b594862d52e53056addeb0f265e",
+      "property_contract_sha256": "faf5a237e0359caa171cd6d63d41174cefe2e33a5d84d6941d548a59b9947016",
+      "public_support_bundle_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "trace_contract_sha256": "de4b2ba9c7524016fd572db8f5c7c3ef802378433fc5a23f552f018f2d8ec69f"
+    }
+  },
+  "diagnostics": {
+    "expected": "trigger=i_in differs from vcm while lo_i toggles.; violated_properties=P_IQ_SIGNED_MIXING,P_RF_SUM_CLAMP",
+    "observed": "EVAS: P_RESET_DISABLE_CLEAR status=PASS mismatch_count=0 allowed=0 checks=3 expected=rf=i_dbg=q_dbg=vcm,quad_ok=0 observed=max_clear_gap=0 time=0 gap=0 | P_IQ_SIGNED_MIXING status=FAIL mismatch_count=482 allowed=12 checks=605 expected=I=+LOI product,Q=-LOQ product observed=samples=605 time=2.08e-08 gap=0.12 | P_RF_SUM_CLAMP status=FAIL mismatch_count=482 allowed=12 checks=605 expected=rf=clip(i_dbg+q_dbg-vcm) observed=samples=605 time=2.08e-08 gap=0.12 | P_QUADRATURE_ACTIVITY status=PASS mismatch_count=0 allowed=19 checks=1944 expected=quad_ok_after_both_LO_cross observed=seen_i=True seen_q=True time=0 gap=0; Spectre: P_RESET_DISABLE_CLEAR status=PASS mismatch_count=0 allowed=0 checks=3 expected=rf=i_dbg=q_dbg=vcm,quad_ok=0 observed=max_clear_gap=0 time=0 gap=0 | P_IQ_SIGNED_MIXING status=FAIL mismatch_count=80 allowed=2 checks=102 expected=I=+LOI product,Q=-LOQ product observed=samples=102 time=2.05550525001e-08 gap=0.119974 | P_RF_SUM_CLAMP status=FAIL mismatch_count=80 allowed=2 checks=102 expected=rf=clip(i_dbg+q_dbg-vcm) observed=samples=102 time=2.05550525001e-08 gap=0.119974 | P_QUADRATURE_ACTIVITY status=PASS mismatch_count=0 allowed=3 checks=311 expected=quad_ok_after_both_LO_cross observed=seen_i=True seen_q=True time=0 gap=0",
+    "violated_property_ids": [
+      "P_IQ_SIGNED_MIXING",
+      "P_RF_SUM_CLAMP"
+    ]
+  },
+  "evaluators": {
+    "ahdl_like": "pass",
+    "evas": "compile_pass_behavior_fail",
+    "spectre": "compile_pass_behavior_fail"
+  },
+  "family_id": "364",
+  "inputs": {
+    "checker_profile_sha256": "fe093e9de2e8a07a28813963ff8ac5aff924d853822fab7373295c9056576cb3",
+    "harness_spec_sha256": "b81d10bafbcf420a36597f6417aa68dc7f3e3e4e0cca085981288da47835877c",
+    "mutation_bundle_sha256": "d5d4438546e4bfa2489008f31b4aade69ed031591e356d9ae2f1ba659115755a",
+    "profile_sha256": "6135722fcb58b91487c2ba10db486964f3733b594862d52e53056addeb0f265e"
+  },
+  "mutation_id": "neg_002_i_path_zero",
+  "outcome": "killed_behaviorally",
+  "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33",
+  "schema_version": "v4-negative-certification-v2",
+  "toolchain_lock_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+}

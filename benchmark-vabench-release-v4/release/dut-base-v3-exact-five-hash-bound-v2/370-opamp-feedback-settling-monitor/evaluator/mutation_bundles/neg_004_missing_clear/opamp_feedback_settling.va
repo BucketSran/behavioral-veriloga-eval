@@ -1,0 +1,31 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module opamp_feedback_settling(vin, clk, rst, enable, gain_2, gain_1, gain_0, vout, error_metric, settled);
+    inout vin, clk, rst, enable, gain_2, gain_1, gain_0, vout, error_metric, settled;
+    electrical vin, clk, rst, enable, gain_2, gain_1, gain_0, vout, error_metric, settled;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vcm = 0.45; parameter real vth = 0.45;
+    parameter real gain_lsb = 0.5; parameter real alpha = 0.3; parameter real settle_tol = 40e-3; parameter real tr = 200p from (0:inf); parameter real tick = 250p from (0:inf);
+    integer code, mapped_code, settle_count; real prev_clk, target, vout_v, err_v, settled_v;
+    analog function real absval; input x; real x; begin absval = (x < 0.0) ? -x : x; end endfunction
+    analog function real clip; input x; real x; begin if (x < vss) clip = vss; else if (x > vdd) clip = vdd; else clip = x; end endfunction
+    analog begin
+        @(initial_step) begin prev_clk = 0.0; settle_count = 0; vout_v = vcm; err_v = 0.0; settled_v = 0.0; end
+        @(timer(0, tick)) begin
+            if (0) begin settle_count = 0; vout_v = vcm; err_v = 0.0; settled_v = 0.0; end
+            else if (V(clk) > vth && prev_clk <= vth) begin
+                code = 0; if (V(gain_0) > vth) code = code + 1; if (V(gain_1) > vth) code = code + 2; if (V(gain_2) > vth) code = code + 4;
+                mapped_code = code;
+                target = clip(vcm + (1.0 + gain_lsb * mapped_code) * (V(vin) - vcm));
+                vout_v = clip(vout_v + alpha * (target - vout_v));
+                err_v = target - vout_v;
+                if (absval(err_v) < settle_tol) settle_count = settle_count + 1; else settle_count = 0;
+                settled_v = (settle_count >= 3) ? vdd : vss;
+            end
+            prev_clk = V(clk);
+        end
+        V(vout) <+ transition(vout_v, 0, tr, tr);
+        V(error_metric) <+ transition(err_v + vcm, 0, tr, tr);
+        V(settled) <+ transition(settled_v, 0, tr, tr);
+    end
+endmodule

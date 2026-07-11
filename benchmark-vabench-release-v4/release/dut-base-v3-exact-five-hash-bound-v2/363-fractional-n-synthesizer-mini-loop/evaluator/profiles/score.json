@@ -1,0 +1,40 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=360n maxstep=100p"
+    ],
+    "body_lines": [
+      "Vref (ref_clk 0) vsource type=pulse val0=0 val1=0.9 delay=3n period=18n width=9n rise=50p fall=50p",
+      "Vdco (dco_clk 0) vsource type=pulse val0=0 val1=0.9 delay=1.3n period=600p width=300p rise=10p fall=10p",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 360n 0]",
+      "Ven (enable 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.9 320n 0.9 320.1n 0 332n 0 332.1n 0.9 360n 0.9]",
+      "Vf3 (frac_3 0) vsource type=pwl wave=[0 0 220n 0 220.1n 0.9 360n 0.9]",
+      "Vf2 (frac_2 0) vsource type=pwl wave=[0 0 105n 0 105.1n 0.9 220n 0.9 220.1n 0 328n 0 328.1n 0.9 360n 0.9]",
+      "Vf1 (frac_1 0) vsource type=pwl wave=[0 0 105n 0 105.1n 0.9 360n 0.9]",
+      "Vf0 (frac_0 0) vsource type=pwl wave=[0 0 220n 0 220.1n 0.9 360n 0.9]",
+      "XDUT (ref_clk dco_clk rst enable frac_3 frac_2 frac_1 frac_0 div_clk div_sel avg_ratio_metric valid) fracn_synth_top"
+    ]
+  },
+  "deterministic_seed": 1,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "51e875534a87e24585fad14454d739263ed165d4272e2c538385d3efbd071a2d",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "360n"
+  },
+  "profile_name": "score",
+  "property_ids": [
+    "P_RESET_DISABLE_CLEAR",
+    "P_FRACTIONAL_SELECTION",
+    "P_DCO_DERIVED_DIVIDER",
+    "P_RATIO_WINDOW",
+    "P_FRACTION_MONOTONICITY"
+  ],
+  "public_visible": false,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {}
+}

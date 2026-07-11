@@ -1,0 +1,37 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module trim_dac(vinp, vinn, rst, trim_4, trim_3, trim_2, trim_1, trim_0, corrected_out);
+    input vinp, vinn, rst, trim_4, trim_3, trim_2, trim_1, trim_0;
+    output corrected_out;
+    electrical vinp, vinn, rst, trim_4, trim_3, trim_2, trim_1, trim_0, corrected_out;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real trim_lsb = 2e-3;
+    parameter real tr = 200p from (0:inf);
+
+    integer trim_code;
+    integer signed_trim;
+    real corrected_value;
+    real corrected_drive;
+
+    analog begin
+        trim_code = ((V(trim_4) > vth) ? 16 : 0)
+                  + ((V(trim_3) > vth) ? 8 : 0)
+                  + ((V(trim_2) > vth) ? 4 : 0)
+                  + ((V(trim_1) > vth) ? 2 : 0)
+                  + ((V(trim_0) > vth) ? 1 : 0);
+        if (trim_code >= 16)
+            signed_trim = -(trim_code - 15);
+        else
+            signed_trim = trim_code;
+        corrected_value = V(vinp);
+        if (V(rst) > vth)
+            corrected_drive = vss;
+        else
+            corrected_drive = corrected_value;
+        V(corrected_out) <+ corrected_drive;
+    end
+endmodule

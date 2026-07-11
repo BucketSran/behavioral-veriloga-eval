@@ -1,0 +1,93 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module error_integrator(sampled_error, clk, rst, cal_en, trim_4, trim_3, trim_2, trim_1, trim_0, error_metric, done);
+    input sampled_error, clk, rst, cal_en;
+    output trim_4, trim_3, trim_2, trim_1, trim_0, error_metric, done;
+    electrical sampled_error, clk, rst, cal_en;
+    electrical trim_4, trim_3, trim_2, trim_1, trim_0, error_metric, done;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real trim_lsb = 2e-3;
+    parameter real error_tol = 5e-3;
+    parameter real tr = 200p from (0:inf);
+
+    integer trim_code;
+    integer trim_state;
+    integer done_count;
+    real residual;
+    real done_value;
+
+    analog function integer signed_code;
+        input code;
+        integer code;
+        begin
+            if (code >= 16)
+                signed_code = -(code - 15);
+            else
+                signed_code = code;
+        end
+    endfunction
+
+    analog function real rabs;
+        input x;
+        real x;
+        begin
+            rabs = (x < 0.0) ? -x : x;
+        end
+    endfunction
+
+    analog begin
+        @(initial_step) begin
+            trim_code = 0;
+            trim_state = 0;
+            done_count = 0;
+            residual = vss;
+            done_value = vss;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth) begin
+                trim_code = 0;
+                trim_state = 0;
+                done_count = 0;
+                residual = vss;
+                done_value = vss;
+            end else if (V(cal_en) > vth) begin
+                residual = V(sampled_error) - trim_state * trim_lsb;
+                if (residual > error_tol) begin
+                    if (trim_state > -16)
+                        trim_state = trim_state - 1;
+                    done_count = 0;
+                end else if (residual < -error_tol) begin
+                    if (trim_state < 15)
+                        trim_state = trim_state + 1;
+                    done_count = 0;
+                end else begin
+                    done_count = done_count + 1;
+                end
+                trim_code = (trim_state >= 0) ? trim_state : (15 - trim_state);
+                residual = V(sampled_error) - trim_state * trim_lsb;
+                done_value = (done_count >= 4) ? vdd : vss;
+            end
+        end
+
+        @(cross(V(rst) - vth, +1)) begin
+            trim_code = 0;
+            trim_state = 0;
+            done_count = 0;
+            residual = vss;
+            done_value = vss;
+        end
+
+        V(trim_4) <+ transition((trim_code >= 16) ? vdd : vss, 0, tr, tr);
+        V(trim_3) <+ transition((((trim_code / 8) - 2 * (trim_code / 16)) >= 1) ? vdd : vss, 0, tr, tr);
+        V(trim_2) <+ transition((((trim_code / 4) - 2 * (trim_code / 8)) >= 1) ? vdd : vss, 0, tr, tr);
+        V(trim_1) <+ transition((((trim_code / 2) - 2 * (trim_code / 4)) >= 1) ? vdd : vss, 0, tr, tr);
+        V(trim_0) <+ transition((trim_code - 2 * (trim_code / 2)) ? vdd : vss, 0, tr, tr);
+        V(error_metric) <+ transition(residual, 0, tr, tr);
+        V(done) <+ transition(done_value, 0, tr, tr);
+    end
+endmodule

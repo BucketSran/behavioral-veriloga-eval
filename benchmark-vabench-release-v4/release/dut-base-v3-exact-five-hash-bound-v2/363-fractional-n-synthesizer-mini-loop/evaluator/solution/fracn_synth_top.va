@@ -1,0 +1,24 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module fracn_synth_top(ref_clk, dco_clk, rst, enable, frac_3, frac_2, frac_1, frac_0, div_clk, div_sel, avg_ratio_metric, valid);
+    input ref_clk, dco_clk, rst, enable, frac_3, frac_2, frac_1, frac_0;
+    output div_clk, div_sel, avg_ratio_metric, valid;
+    electrical ref_clk, dco_clk, rst, enable, frac_3, frac_2, frac_1, frac_0;
+    electrical div_clk, div_sel, avg_ratio_metric, valid;
+    electrical decision_tick, carry_bit;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter integer n_int = 8 from [1:inf);
+    parameter integer window_len = 16 from [1:inf);
+    parameter real tr = 100p from (0:inf);
+
+    accumulator #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr))
+        u_acc(decision_tick, rst, enable, frac_3, frac_2, frac_1, frac_0, carry_bit);
+    multi_modulus_divider #(.vdd(vdd), .vss(vss), .vth(vth), .n_int(n_int), .tr(tr))
+        u_div(dco_clk, rst, enable, carry_bit, div_clk, div_sel, decision_tick);
+    ratio_monitor #(.vdd(vdd), .vss(vss), .vth(vth), .n_int(n_int), .window_len(window_len), .tr(tr))
+        u_mon(decision_tick, rst, enable, div_sel, avg_ratio_metric, valid);
+endmodule

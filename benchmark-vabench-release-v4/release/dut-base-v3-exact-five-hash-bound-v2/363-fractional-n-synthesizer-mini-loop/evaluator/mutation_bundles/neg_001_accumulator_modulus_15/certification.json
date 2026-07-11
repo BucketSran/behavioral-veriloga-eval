@@ -1,0 +1,59 @@
+{
+  "component_fingerprints": {
+    "assembly": {
+      "policy_sha256": "91f4e21b94263e796c846aedef282c79d4abeb7ccc415a0e6f1311f8816b33a4",
+      "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+    },
+    "backend": {
+      "ahdl_like_sha256": "91ce239e5f278a6d5dfcde85ca2d820c5133d8f8a3de26dc6477164e703342f3",
+      "evas_sha256": "2d71c227644956df64209b49d0da6ef55bc6934891020eb26d762e8cb8cc6df2",
+      "spectre_sha256": "ac4c1cf785d5eab74058944d52bf40869e83c94e19202ab72c8e8a250c4dc51b"
+    },
+    "oracle": {
+      "checker_binding_sha256": "943ce49a8e1b66684a2c7a8e9637fd6a3f0c2cd02b83979e6fa28ee8b474193f",
+      "checker_implementation_sha256": "1621da32db95203e3baf2d5cd975a6399d234123dfc7717b13ec1db8283d290a",
+      "checker_profile_sha256": "2982da93460b28636c296d681177faf9086e3ba70c4a3966c529cdb3eaf978e7",
+      "diagnostic_policy_sha256": "69b217a349cb0e8a3eab574e7e6d1af03f069fea668b15b37868ef3d2e7deea3",
+      "oracle_runner_sha256": "e70bd46cd3abdfd8ed9658cb13f64bc96e27d364d51ed0fdcd05f8139e63af2b",
+      "property_activation_policy_sha256": "30f6315dac221fbda9bdbcdc84fdf9efc59985c8edd0c9b9ab2d00d207725972"
+    },
+    "policy_id": "v4-dependency-scoped-evidence-v2",
+    "schema_version": "v4-evidence-components-v2",
+    "state": "carried_forward",
+    "task_inputs": {
+      "candidate_bundle_sha256": "1988a49bcd92e63819545d5b14ca574a1a6943f1119c53894bd9a89bf8974562",
+      "deck_sha256": "75f03667a1c01a98281c633d2ed0f42bb76a4cec15fd5c2fd780ec87a4136f09",
+      "gold_bundle_sha256": "225a875dcd72ac454cda3623051ce4f86e780080b0b10539dc9c925a7efe44f8",
+      "harness_spec_sha256": "51e875534a87e24585fad14454d739263ed165d4272e2c538385d3efbd071a2d",
+      "mutation_bundle_sha256": "c0b0e02d749c0a11f1cee9e2e1e9ee0218013f9b4db63d4bcf9182d6bae04163",
+      "profile_sha256": "c0a20430dcd1ff13e3da83b52bf4ca6c9bc38cdbb3dd3ba6a89bf1e8a7f02f35",
+      "property_contract_sha256": "18368b9569f3e2b080d094718cf5e107c74046c3bc4404f73c080526f4a88256",
+      "public_support_bundle_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "trace_contract_sha256": "c8a29eecabf70ad632c82bc87b04a8aa64ed68ed145fbd61cbcae6dd0973c90a"
+    }
+  },
+  "diagnostics": {
+    "expected": "trigger=The fractional accumulator reaches an exact state-plus-code sum of 15 before a divider decision.; violated_properties=P_FRACTIONAL_SELECTION",
+    "observed": "EVAS: P_RESET_DISABLE_CLEAR status=PASS mismatch_count=0 allowed=0 checks=2 expected=all_public_outputs=0 observed=max_clear_gap=0 time=0 gap=0 | P_FRACTIONAL_SELECTION status=FAIL mismatch_count=2 allowed=0 checks=75 expected=code15_after_clear_selects_8_8_9 observed=moduli=[8, 9] probes=[(3.0505e-07, [0, 1, 0, 1, 1])] time=3.17555e-07 gap=1 | P_DCO_DERIVED_DIVIDER status=PASS mismatch_count=0 allowed=3 checks=72 expected=div_edges_after_8_or_9_dco_rises observed=intervals=72 time=0 gap=0 | P_RATIO_WINDOW status=PASS mismatch_count=0 allowed=0 checks=2 expected=metric=8+frac/16_on_window_valid observed=valid_events=4 high_fraction=0.0553 time=0 gap=0 | P_FRACTION_MONOTONICITY status=PASS mismatch_count=0 allowed=0 checks=2 expected=higher_fraction_nondecreasing_metric observed=points=[(0, 8.0), (3, 8.0625), (13, 8.5625)] time=0 gap=0; Spectre: P_RESET_DISABLE_CLEAR status=PASS mismatch_count=0 allowed=0 checks=2 expected=all_public_outputs=0 observed=max_clear_gap=0 time=0 gap=0 | P_FRACTIONAL_SELECTION status=FAIL mismatch_count=2 allowed=0 checks=75 expected=code15_after_clear_selects_8_8_9 observed=moduli=[8, 9] probes=[(3.0505000000000005e-07, [0, 1, 0, 1, 1])] time=3.175550025e-07 gap=1 | P_DCO_DERIVED_DIVIDER status=PASS mismatch_count=0 allowed=3 checks=72 expected=div_edges_after_8_or_9_dco_rises observed=intervals=72 time=0 gap=0 | P_RATIO_WINDOW status=PASS mismatch_count=0 allowed=0 checks=2 expected=metric=8+frac/16_on_window_valid observed=valid_events=4 high_fraction=0.0531 time=0 gap=0 | P_FRACTION_MONOTONICITY status=PASS mismatch_count=0 allowed=0 checks=2 expected=higher_fraction_nondecreasing_metric observed=points=[(0, 8.0), (3, 8.0625), (13, 8.5625)] time=0 gap=0",
+    "violated_property_ids": [
+      "P_FRACTIONAL_SELECTION"
+    ]
+  },
+  "evaluators": {
+    "ahdl_like": "pass",
+    "evas": "compile_pass_behavior_fail",
+    "spectre": "compile_pass_behavior_fail"
+  },
+  "family_id": "363",
+  "inputs": {
+    "checker_profile_sha256": "bef0800a63117bbad7356bf347979073f8e2afb0a5d27a88f05dd010ad299ec2",
+    "harness_spec_sha256": "51e875534a87e24585fad14454d739263ed165d4272e2c538385d3efbd071a2d",
+    "mutation_bundle_sha256": "c0b0e02d749c0a11f1cee9e2e1e9ee0218013f9b4db63d4bcf9182d6bae04163",
+    "profile_sha256": "c0a20430dcd1ff13e3da83b52bf4ca6c9bc38cdbb3dd3ba6a89bf1e8a7f02f35"
+  },
+  "mutation_id": "neg_001_accumulator_modulus_15",
+  "outcome": "killed_behaviorally",
+  "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33",
+  "schema_version": "v4-negative-certification-v2",
+  "toolchain_lock_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+}

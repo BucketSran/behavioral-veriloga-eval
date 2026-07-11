@@ -1,0 +1,32 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module polyphase_quadrature_filter(vin, clk, rst, enable, i_out, q_out, amp_metric, phase_metric, valid);
+    inout vin, clk, rst, enable, i_out, q_out, amp_metric, phase_metric, valid;
+    electrical vin, clk, rst, enable, i_out, q_out, amp_metric, phase_metric, valid;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vcm = 0.6; parameter real vth /*neg*/ = 0.6; parameter real alpha = 0.25; parameter real tr = 200p from (0:inf); parameter real tick = 250p from (0:inf);
+    real prev_clk, i_state, q_state, old_i, amp_v, phase_v, valid_v; integer count;
+    analog function real absval; input x; real x; begin absval = (x < 0.0) ? -x : x; end endfunction
+    analog function real min2; input a,b; real a,b; begin min2 = (a < b) ? a : b; end endfunction
+    analog begin
+        @(initial_step) begin prev_clk = 0.0; i_state = vcm; q_state = vcm; amp_v = 0.0; phase_v = 0.0; valid_v = 0.0; count = 0; end
+        @(timer(0, tick)) begin
+            if (V(rst) > vth /*neg*/ || V(enable) <= vth /*neg*/) begin i_state = vcm; q_state = vcm; amp_v = 0.0; phase_v = 0.0; valid_v = 0.0; count = 0; end
+            else if (V(clk) > vth /*neg*/ && prev_clk <= vth /*neg*/) begin
+                old_i = i_state;
+                i_state = i_state + (alpha) * (V(vin) - i_state);
+                q_state = q_state + alpha * (old_i - q_state);
+                count = count + 1;
+                amp_v = min2(vdd, absval(i_state - q_state) * 2.0);
+                phase_v = (i_state >= q_state) ? 0.65 : 0.25;
+                valid_v = ((count >= 4)) ? vdd : vss;
+            end
+            prev_clk = V(clk);
+        end
+        V(i_out) <+ transition(i_state, 0, tr, tr);
+        V(q_out) <+ transition(q_state, 0, tr, tr);
+        V(amp_metric) <+ transition(amp_v, 0, tr, tr);
+        V(phase_metric) <+ transition(phase_v, 0, tr, tr);
+        V(valid) <+ transition(valid_v, 0, tr, tr);
+    end
+endmodule

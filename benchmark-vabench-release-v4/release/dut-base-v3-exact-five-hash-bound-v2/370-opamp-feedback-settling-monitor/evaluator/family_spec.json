@@ -1,0 +1,352 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "opamp_feedback_settling",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.5",
+                "name": "gain_lsb",
+                "override_behavior": "overrides gain_lsb",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.3",
+                "name": "alpha",
+                "override_behavior": "overrides alpha",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "40e-3",
+                "name": "settle_tol",
+                "override_behavior": "overrides settle_tol",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "250p from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "gain_2",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "gain_1",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "gain_0",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "error_metric",
+                "position": 8
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "settled",
+                "position": 9
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "opamp_feedback_settling.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "370",
+  "identity": {
+    "category": "feedback_circuit_systems",
+    "difficulty": "D4",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Op-amp Feedback Settling Monitor"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_ENABLE_IS",
+      "observable_contract": "On reset or when `enable` is low, drive `vout` to `vcm`, clear `error_metric`, and clear `settled`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "gain_2",
+        "gain_1",
+        "gain_0",
+        "vout",
+        "error_metric",
+        "settled"
+      ]
+    },
+    {
+      "id": "P_DECODE_GAIN_2_GAIN_0_INTO",
+      "observable_contract": "Decode `gain_2..gain_0` into a closed-loop target gain of at least unity.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "gain_2",
+        "gain_1",
+        "gain_0",
+        "vout",
+        "error_metric",
+        "settled"
+      ]
+    },
+    {
+      "id": "P_UPDATE_VOUT_ONCE_PER_RISING_CLK",
+      "observable_contract": "Update `vout` once per rising `clk` edge toward the target closed-loop output using `alpha`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "gain_2",
+        "gain_1",
+        "gain_0",
+        "vout",
+        "error_metric",
+        "settled"
+      ]
+    },
+    {
+      "id": "P_CLAMP_VOUT_TO_THE_RANGE_VSS",
+      "observable_contract": "Clamp `vout` to the range `vss` through `vdd`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "gain_2",
+        "gain_1",
+        "gain_0",
+        "vout",
+        "error_metric",
+        "settled"
+      ]
+    },
+    {
+      "id": "P_ERROR_METRIC_MUST_EXPOSE_THE_SIGNED",
+      "observable_contract": "`error_metric` must expose the signed difference between the current output and the target closed-loop value.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "gain_2",
+        "gain_1",
+        "gain_0",
+        "vout",
+        "error_metric",
+        "settled"
+      ]
+    },
+    {
+      "id": "P_ASSERT_SETTLED_AFTER_THREE_CONSECUTIVE_UPDATES",
+      "observable_contract": "Assert `settled` after three consecutive updates where the absolute error is below `settle_tol`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "gain_2",
+        "gain_1",
+        "gain_0",
+        "vout",
+        "error_metric",
+        "settled"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1370",
+    "dut": "v4-370",
+    "testbench": "v4-870"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 3
+          },
+          {
+            "net": "gain_2",
+            "port_ref": "gain_2",
+            "position": 4
+          },
+          {
+            "net": "gain_1",
+            "port_ref": "gain_1",
+            "position": 5
+          },
+          {
+            "net": "gain_0",
+            "port_ref": "gain_0",
+            "position": 6
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 7
+          },
+          {
+            "net": "error_metric",
+            "port_ref": "error_metric",
+            "position": 8
+          },
+          {
+            "net": "settled",
+            "port_ref": "settled",
+            "position": 9
+          }
+        ],
+        "module_ref": "opamp_feedback_settling",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "clk",
+      "rst",
+      "enable",
+      "gain_2",
+      "gain_1",
+      "gain_0",
+      "vout",
+      "error_metric",
+      "settled"
+    ]
+  }
+}

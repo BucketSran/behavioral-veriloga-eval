@@ -1,0 +1,50 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module accumulator(decision_tick, rst, enable, frac_3, frac_2, frac_1, frac_0, carry);
+    input decision_tick, rst, enable, frac_3, frac_2, frac_1, frac_0;
+    output carry;
+    electrical decision_tick, rst, enable, frac_3, frac_2, frac_1, frac_0, carry;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 100p from (0:inf);
+
+    integer acc_state;
+    integer carry_state;
+    integer frac_code;
+
+    analog begin
+        @(initial_step) begin
+            acc_state = 0;
+            carry_state = 0;
+        end
+
+        @(cross(V(decision_tick) - vth, +1)) begin
+            if ((V(rst) > vth) || (V(enable) <= vth)) begin
+                acc_state = 0;
+                carry_state = 0;
+            end else begin
+                frac_code = 15 - (((V(frac_3) > vth) ? 8 : 0)
+                                + ((V(frac_2) > vth) ? 4 : 0)
+                                + ((V(frac_1) > vth) ? 2 : 0)
+                                + ((V(frac_0) > vth) ? 1 : 0));
+                acc_state = acc_state + frac_code;
+                if (acc_state >= 16) begin
+                    acc_state = acc_state - 16;
+                    carry_state = 1;
+                end else begin
+                    carry_state = 0;
+                end
+            end
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            acc_state = 0;
+            carry_state = 0;
+        end
+
+        V(carry) <+ transition(carry_state ? vdd : vss, 0, tr, tr);
+    end
+endmodule

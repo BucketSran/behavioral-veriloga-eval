@@ -1,0 +1,97 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module phase_detector(ref_clk, delayed_clk, rst, enable, up, down, decision_clk, edge_error);
+    input ref_clk, delayed_clk, rst, enable;
+    output up, down, decision_clk, edge_error;
+    electrical ref_clk, delayed_clk, rst, enable, up, down, decision_clk, edge_error;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real unit_delay = 5e-12;
+    parameter real tr = 100p;
+
+    integer have_ref;
+    integer have_delayed;
+    integer up_state;
+    integer down_state;
+    integer decision_state;
+    real ref_t;
+    real delayed_t;
+    real err_code;
+    real dt;
+
+    analog begin
+        @(initial_step) begin
+            have_ref = 0;
+            have_delayed = 0;
+            up_state = 0;
+            down_state = 0;
+            decision_state = 0;
+            err_code = 0.0;
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            have_ref = 0;
+            have_delayed = 0;
+            up_state = 0;
+            down_state = 0;
+            decision_state = 0;
+            err_code = 0.0;
+        end
+
+        @(cross(V(ref_clk) - vth, +1)) begin
+            if (V(rst) <= vth && V(enable) > vth) begin
+                ref_t = $abstime;
+                have_ref = 1;
+                if (have_delayed != 0) begin
+                    dt = ref_t - delayed_t;
+                    if (dt > unit_delay * 0.25) begin
+                        up_state = 1;
+                        down_state = 0;
+                    end else if (dt < -unit_delay * 0.25) begin
+                        up_state = 0;
+                        down_state = 1;
+                    end else begin
+                        up_state = 0;
+                        down_state = 0;
+                    end
+                    err_code = dt / unit_delay;
+                    decision_state = 1 - decision_state;
+                    have_ref = 0;
+                    have_delayed = 0;
+                end
+            end
+        end
+
+        @(cross(V(delayed_clk) - vth, +1)) begin
+            if (V(rst) <= vth && V(enable) > vth) begin
+                delayed_t = $abstime;
+                have_delayed = 1;
+                if (have_ref != 0) begin
+                    dt = ref_t - delayed_t;
+                    if (dt > unit_delay * 0.25) begin
+                        up_state = 1;
+                        down_state = 0;
+                    end else if (dt < -unit_delay * 0.25) begin
+                        up_state = 0;
+                        down_state = 1;
+                    end else begin
+                        up_state = 0;
+                        down_state = 0;
+                    end
+                    err_code = dt / unit_delay;
+                    decision_state = 1 - decision_state;
+                    have_ref = 0;
+                    have_delayed = 0;
+                end
+            end
+        end
+
+        V(up) <+ transition(up_state ? vdd : vss, 0, tr, tr);
+        V(down) <+ transition(down_state ? vdd : vss, 0, tr, tr);
+        V(decision_clk) <+ transition(decision_state ? vdd : vss, 0, tr, tr);
+        V(edge_error) <+ transition(err_code, 0, tr, tr);
+    end
+endmodule

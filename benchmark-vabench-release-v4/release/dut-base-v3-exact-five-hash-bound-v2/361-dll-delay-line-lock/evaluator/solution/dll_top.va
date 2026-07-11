@@ -1,0 +1,35 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dll_top(ref_clk, in_clk, rst, enable, delayed_clk, up, down, delay_4, delay_3, delay_2, delay_1, delay_0, lock);
+    input ref_clk, in_clk, rst, enable;
+    output delayed_clk, up, down, delay_4, delay_3, delay_2, delay_1, delay_0, lock;
+    electrical ref_clk, in_clk, rst, enable, delayed_clk, up, down, delay_4, delay_3, delay_2, delay_1, delay_0, lock;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter integer delay_center = 16;
+    parameter real unit_delay = 5e-12;
+    parameter integer lock_window = 1;
+    parameter real tr = 100p;
+
+    electrical decision_clk;
+    electrical edge_error;
+
+    delay_line #(.vdd(vdd), .vss(vss), .vth(vth), .unit_delay(unit_delay), .tr(tr)) u_delay (
+        in_clk, rst, enable, delay_4, delay_3, delay_2, delay_1, delay_0, delayed_clk
+    );
+
+    phase_detector #(.vdd(vdd), .vss(vss), .vth(vth), .unit_delay(unit_delay), .tr(tr)) u_pd (
+        ref_clk, delayed_clk, rst, enable, up, down, decision_clk, edge_error
+    );
+
+    lock_detector #(
+        .vdd(vdd), .vss(vss), .vth(vth), .delay_center(delay_center),
+        .lock_window(lock_window), .tr(tr)
+    ) u_lock (
+        decision_clk, up, down, edge_error, rst, enable,
+        delay_4, delay_3, delay_2, delay_1, delay_0, lock
+    );
+endmodule
