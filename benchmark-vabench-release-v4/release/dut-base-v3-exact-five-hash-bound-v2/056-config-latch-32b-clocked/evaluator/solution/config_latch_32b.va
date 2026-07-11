@@ -1,0 +1,20 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module config_latch_32b(
+    input electrical en,
+    input electrical [31:0] d,
+    output electrical [31:0] q
+);
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real tr = 20p;
+
+    genvar i;
+
+    analog begin
+        for (i = 0; i < 32; i = i + 1) begin
+            V(q[i]) <+ slew(((V(en) > vth) && (V(d[i]) > vth)) ? vdd : 0.0, 0.9 / (tr), -0.9 / (tr));
+        end
+    end
+endmodule

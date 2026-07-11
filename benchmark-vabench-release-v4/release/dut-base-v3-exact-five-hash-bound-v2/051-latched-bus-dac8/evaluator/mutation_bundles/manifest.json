@@ -1,0 +1,132 @@
+{
+  "family_id": "051",
+  "gold_bundle_sha256": "e46bc404deec3370f1596a0971098436c0b715d495f7d961d0297f0f5a2d0812",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "latched_bus_dac8.va": "d30c40c7fa1ca995a41831ec5fd6412201387a30d20f0a416fc05e9c6abd79fa"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RISING_EDGE_CAPTURE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_force_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "latched_bus_dac8.va"
+      ],
+      "fault_class": "force_zero",
+      "id": "neg_001_force_zero",
+      "trigger_condition": "Latched Bus DAC8: forces the output to zero instead of decoding the latched bus.",
+      "violated_property_ids": [
+        "P_RISING_EDGE_CAPTURE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "latched_bus_dac8.va": "353ce74134fc2df662ecc531228f6484064e119d2130ef4d85f872c5f7a6168c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_HOLD_BETWEEN_EDGES"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_transparent_bus/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "latched_bus_dac8.va"
+      ],
+      "fault_class": "transparent_bus",
+      "id": "neg_002_transparent_bus",
+      "trigger_condition": "Latched Bus DAC8: updates from the input bus continuously, so it fails hold-between-clock-edge behavior.",
+      "violated_property_ids": [
+        "P_HOLD_BETWEEN_EDGES"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "latched_bus_dac8.va": "bd714b52a508adc684fd5c8c0f5e904a9c4d0cc442667e3eeb319d3005c2e3d8"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ENDPOINTS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_falling_edge_update/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "latched_bus_dac8.va"
+      ],
+      "fault_class": "falling_edge_update",
+      "id": "neg_003_falling_edge_update",
+      "trigger_condition": "Latched Bus DAC8: samples on falling clock edges instead of rising update edges.",
+      "violated_property_ids": [
+        "P_ENDPOINTS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "latched_bus_dac8.va": "69ea06c1a308bd551756ca7aa67851e3ad35082ce80be2da69a30b39622e4f05"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BINARY_MONOTONICITY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_reversed_bit_order/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "latched_bus_dac8.va"
+      ],
+      "fault_class": "reversed_bit_order",
+      "id": "neg_004_reversed_bit_order",
+      "trigger_condition": "Latched Bus DAC8: treats b0 as the MSB and b7 as the LSB.",
+      "violated_property_ids": [
+        "P_BINARY_MONOTONICITY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "latched_bus_dac8.va": "294c13209d0a4736befc48c4517bece86809142ae364ce48f7d8003883535cec"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_SMOOTHING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_wrong_denominator/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "latched_bus_dac8.va"
+      ],
+      "fault_class": "wrong_denominator",
+      "id": "neg_005_wrong_denominator",
+      "trigger_condition": "Latched Bus DAC8: uses a 7-bit full-scale span for an 8-bit code, so the decoded output gain and endpoint mapping are wrong.",
+      "violated_property_ids": [
+        "P_OUTPUT_SMOOTHING"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

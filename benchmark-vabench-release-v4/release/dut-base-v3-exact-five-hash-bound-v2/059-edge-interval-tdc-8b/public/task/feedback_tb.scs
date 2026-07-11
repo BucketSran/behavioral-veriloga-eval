@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/edge_interval_tdc_8b.va"
+
+Vstart (start 0) vsource type=pwl wave=[0 0 10n 0 10.1n 0.9 11n 0 50n 0 50.1n 0.9 51n 0 100n 0 100.1n 0.9 101n 0 160n 0]
+Vstop (stop 0) vsource type=pwl wave=[0 0 18n 0 18.1n 0.9 19n 0 73n 0 73.1n 0.9 74n 0 139n 0 139.1n 0.9 140n 0 160n 0]
+XDUT (start stop valid code0 code1 code2 code3 code4 code5 code6 code7) edge_interval_tdc_8b
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=160n maxstep=100p
+save start stop valid code0 code1 code2 code3 code4 code5 code6 code7

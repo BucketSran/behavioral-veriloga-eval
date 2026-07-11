@@ -1,0 +1,92 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "first_order_sigma_delta_modulator.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=48n maxstep=20p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "vclk",
+      "bitout"
+    ]
+  },
+  "family_id": "055",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "44892f7f5aaffc41eee9ee90930d1ecd1efc1bea768d022e5feff5d26e66dd6b",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "8cd3de9cf81e3a4e0f70d334da758d7aa70c0107a858cbae4858c20f27e2dcaa",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0 0.25 20n 0.25 20.02n 0.75 48n 0.75]",
+          "Vclk (vclk 0) vsource type=pulse val0=0 val1=0.9 delay=0.25n period=1n width=0.35n rise=20p fall=20p",
+          "",
+          "XDUT (vin vclk bitout) first_order_sigma_delta_modulator",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=58n maxstep=20p"
+        ],
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0 0.20 18n 0.20 18.02n 0.60 36n 0.60 36.02n 0.85 58n 0.85]",
+          "Vclk (vclk 0) vsource type=pulse val0=0 val1=0.9 delay=0.30n period=0.8n width=0.28n rise=20p fall=20p",
+          "",
+          "XDUT (vin vclk bitout) first_order_sigma_delta_modulator",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RISING_EDGE_UPDATE",
+    "P_FIRST_ORDER_FEEDBACK",
+    "P_BINARY_OUTPUT",
+    "P_INPUT_DENSITY_ORDER",
+    "P_FEEDBACK_STABILITY"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "ab1e3bdb9e4b584d3e9171810dcc771098f9a839d43d7aa673bee12476829929",
+    "family_spec_sha256": "43aab179babd997455024e3a389931216c6ce89e82c00873af4515937b4ac403"
+  },
+  "task_id": "v4-055"
+}

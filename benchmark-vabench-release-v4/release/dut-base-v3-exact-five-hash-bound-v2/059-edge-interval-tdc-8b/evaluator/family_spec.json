@@ -1,0 +1,302 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "059",
+  "task_ids": {
+    "dut": "v4-059",
+    "testbench": "v4-559",
+    "bugfix": "v4-1059"
+  },
+  "identity": {
+    "title": "Edge Interval TDC 8b",
+    "category": "testbench_utility_modules",
+    "level": "L1",
+    "difficulty": "D1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"
+  },
+  "artifact_contract": {
+    "mode": "single_file",
+    "files": [
+      {
+        "path": "edge_interval_tdc_8b.va",
+        "modules": [
+          {
+            "name": "edge_interval_tdc_8b",
+            "role": "entry",
+            "depends_on": [],
+            "ports": [
+              {
+                "name": "start",
+                "direction": "input",
+                "discipline": "electrical",
+                "position": 0
+              },
+              {
+                "name": "stop",
+                "direction": "input",
+                "discipline": "electrical",
+                "position": 1
+              },
+              {
+                "name": "valid",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 2
+              },
+              {
+                "name": "code0",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 3
+              },
+              {
+                "name": "code1",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 4
+              },
+              {
+                "name": "code2",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 5
+              },
+              {
+                "name": "code3",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 6
+              },
+              {
+                "name": "code4",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 7
+              },
+              {
+                "name": "code5",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 8
+              },
+              {
+                "name": "code6",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 9
+              },
+              {
+                "name": "code7",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 10
+              }
+            ],
+            "parameters": [
+              {
+                "name": "vdd",
+                "type": "real",
+                "default": 0.9,
+                "units": "V",
+                "valid_range": "vdd > 0",
+                "override_behavior": "sets the voltage-coded code and valid high level"
+              },
+              {
+                "name": "vth",
+                "type": "real",
+                "default": 0.45,
+                "units": "V",
+                "valid_range": "0 < vth < vdd",
+                "override_behavior": "sets the start and stop rising-edge threshold"
+              },
+              {
+                "name": "tr",
+                "type": "real",
+                "default": 2e-11,
+                "units": "s",
+                "valid_range": "tr > 0",
+                "override_behavior": "sets output transition smoothing"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "source_path_template": "./dut/{artifact_path}",
+    "instances": [
+      {
+        "name": "XDUT",
+        "module_ref": "edge_interval_tdc_8b",
+        "connections": [
+          {
+            "port_ref": "start",
+            "net": "start",
+            "position": 0
+          },
+          {
+            "port_ref": "stop",
+            "net": "stop",
+            "position": 1
+          },
+          {
+            "port_ref": "valid",
+            "net": "valid",
+            "position": 2
+          },
+          {
+            "port_ref": "code0",
+            "net": "code0",
+            "position": 3
+          },
+          {
+            "port_ref": "code1",
+            "net": "code1",
+            "position": 4
+          },
+          {
+            "port_ref": "code2",
+            "net": "code2",
+            "position": 5
+          },
+          {
+            "port_ref": "code3",
+            "net": "code3",
+            "position": 6
+          },
+          {
+            "port_ref": "code4",
+            "net": "code4",
+            "position": 7
+          },
+          {
+            "port_ref": "code5",
+            "net": "code5",
+            "position": 8
+          },
+          {
+            "port_ref": "code6",
+            "net": "code6",
+            "position": 9
+          },
+          {
+            "port_ref": "code7",
+            "net": "code7",
+            "position": 10
+          }
+        ]
+      }
+    ]
+  },
+  "properties": [
+    {
+      "id": "P_START_ARMS",
+      "observable_contract": "Each rising start crossing begins a new interval measurement, records that edge time, and clears valid.",
+      "required_signals": [
+        "time",
+        "start",
+        "stop",
+        "valid",
+        "code0",
+        "code1",
+        "code2",
+        "code3",
+        "code4",
+        "code5",
+        "code6",
+        "code7"
+      ]
+    },
+    {
+      "id": "P_NEXT_STOP_COMPLETES",
+      "observable_contract": "The first rising stop crossing after an armed start completes that measurement; stop crossings while unarmed do not change the result.",
+      "required_signals": [
+        "time",
+        "start",
+        "stop",
+        "valid",
+        "code0",
+        "code1",
+        "code2",
+        "code3",
+        "code4",
+        "code5",
+        "code6",
+        "code7"
+      ]
+    },
+    {
+      "id": "P_INTERVAL_QUANTIZATION",
+      "observable_contract": "A completed interval is rounded to the nearest whole nanosecond and reported as an unsigned code.",
+      "required_signals": [
+        "time",
+        "start",
+        "stop",
+        "code0",
+        "code1",
+        "code2",
+        "code3",
+        "code4",
+        "code5",
+        "code6",
+        "code7"
+      ]
+    },
+    {
+      "id": "P_CODE_SATURATION",
+      "observable_contract": "Measured interval codes are saturated to the inclusive 8-bit range 0 through 255.",
+      "required_signals": [
+        "time",
+        "start",
+        "stop",
+        "code0",
+        "code1",
+        "code2",
+        "code3",
+        "code4",
+        "code5",
+        "code6",
+        "code7"
+      ]
+    },
+    {
+      "id": "P_VALID_AND_BIT_ORDER",
+      "observable_contract": "valid asserts after completion; code0 is the least significant bit and code7 is the most significant bit, using 0 V and vdd logic levels.",
+      "required_signals": [
+        "time",
+        "valid",
+        "code0",
+        "code1",
+        "code2",
+        "code3",
+        "code4",
+        "code5",
+        "code6",
+        "code7"
+      ]
+    }
+  ],
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "start",
+      "stop",
+      "valid",
+      "code0",
+      "code1",
+      "code2",
+      "code3",
+      "code4",
+      "code5",
+      "code6",
+      "code7"
+    ]
+  },
+  "modeling_constraints": [
+    "Use deterministic event state for arming, edge times, result code, and validity.",
+    "Use the public 1 ns code quantum without embedding any testbench stimulus times.",
+    "Use smooth voltage contributions for all outputs.",
+    "Do not add undeclared artifacts, validation hooks, current contributions, or simulator-specific side channels."
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "latched_bus_dac8.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=15n maxstep=20p"
+    ],
+    "body_lines": [
+      "Vclk (vclk 0) vsource type=pulse val0=0 val1=0.9 delay=0.25n period=3n width=0.8n rise=20p fall=20p"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vclk",
+      "b7",
+      "b6",
+      "b5",
+      "b4",
+      "b3",
+      "b2",
+      "b1",
+      "b0",
+      "vout"
+    ]
+  },
+  "family_id": "051",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "b4903191feb2bcac3a4f7e310d458626107ace884b502af1f68a06f2db1f74d5",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "4971f46c329977fa79d0d358316df962811e2a24c09f159ee0b0ffa2bdb761df",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vb7 (b7 0) vsource type=pwl wave=[0n 0 4.3n 0 4.32n 0.9 7.5n 0.9 7.52n 0 10.2n 0 10.22n 0.9]",
+          "Vb6 (b6 0) vsource type=pwl wave=[0n 0 1n 0 1.02n 0.9 7.5n 0.9 7.52n 0]",
+          "Vb5 (b5 0) vsource type=pwl wave=[0n 0 7.5n 0 7.52n 0.9]",
+          "Vb4 (b4 0) vsource type=pwl wave=[0n 0 1n 0 1.02n 0.9 4.3n 0.9 4.32n 0 7.5n 0 7.52n 0.9 10.2n 0.9 10.22n 0]",
+          "Vb3 (b3 0) vsource type=pwl wave=[0n 0 1n 0 1.02n 0.9 4.3n 0.9 4.32n 0 7.5n 0 7.52n 0.9 10.2n 0.9 10.22n 0]",
+          "Vb2 (b2 0) vsource type=pwl wave=[0n 0 7.5n 0 7.52n 0.9]",
+          "Vb1 (b1 0) vsource type=pwl wave=[0n 0 1n 0 1.02n 0.9 7.5n 0.9 7.52n 0 10.2n 0 10.22n 0.9]",
+          "Vb0 (b0 0) vsource type=pwl wave=[0n 0 4.3n 0 4.32n 0.9 7.5n 0.9 7.52n 0 10.2n 0 10.22n 0.9]",
+          "",
+          "XDUT (vclk b7 b6 b5 b4 b3 b2 b1 b0 vout) latched_bus_dac8",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vb7 (b7 0) vsource type=pwl wave=[0n 0 4.1n 0 4.12n 0.9 7.2n 0.9 7.22n 0 10.4n 0 10.42n 0.9]",
+          "Vb6 (b6 0) vsource type=pwl wave=[0n 0 1.1n 0 1.12n 0.9 4.1n 0.9 4.12n 0 10.4n 0 10.42n 0.9]",
+          "Vb5 (b5 0) vsource type=pwl wave=[0n 0 1.1n 0 1.12n 0.9 4.1n 0.9 4.12n 0 7.2n 0 7.22n 0.9]",
+          "Vb4 (b4 0) vsource type=pwl wave=[0n 0.9 4.1n 0.9 4.12n 0 10.4n 0 10.42n 0.9]",
+          "Vb3 (b3 0) vsource type=pwl wave=[0n 0 1.1n 0 1.12n 0.9 4.1n 0.9 4.12n 0 7.2n 0 7.22n 0.9 10.4n 0.9 10.42n 0]",
+          "Vb2 (b2 0) vsource type=pwl wave=[0n 0 1.1n 0 1.12n 0.9 4.1n 0.9 4.12n 0 7.2n 0 7.22n 0.9 10.4n 0.9 10.42n 0]",
+          "Vb1 (b1 0) vsource type=pwl wave=[0n 0 1.1n 0 1.12n 0.9 4.1n 0.9 4.12n 0]",
+          "Vb0 (b0 0) vsource type=pwl wave=[0n 0.9 1.1n 0.9 1.12n 0 7.2n 0 7.22n 0.9 10.4n 0.9 10.42n 0]",
+          "",
+          "XDUT (vclk b7 b6 b5 b4 b3 b2 b1 b0 vout) latched_bus_dac8",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RISING_EDGE_CAPTURE",
+    "P_HOLD_BETWEEN_EDGES",
+    "P_ENDPOINTS",
+    "P_BINARY_MONOTONICITY",
+    "P_OUTPUT_SMOOTHING"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "3d5e190b7ee035654a2c9f12b4438cf0e4f69fab91a12b4a1338d0b1fabe9a29",
+    "family_spec_sha256": "8fb0d2cd7b84adda9907600f92291d66852f487a2d20c232312c2531282d8d6e"
+  },
+  "task_id": "v4-051"
+}

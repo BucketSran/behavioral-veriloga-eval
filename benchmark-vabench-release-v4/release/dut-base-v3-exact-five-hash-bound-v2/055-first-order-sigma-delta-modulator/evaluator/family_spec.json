@@ -1,0 +1,176 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "055",
+  "task_ids": {
+    "dut": "v4-055",
+    "testbench": "v4-555",
+    "bugfix": "v4-1055"
+  },
+  "identity": {
+    "title": "First Order Sigma Delta Modulator",
+    "category": "data_converter",
+    "level": "L1",
+    "difficulty": "D3",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"
+  },
+  "artifact_contract": {
+    "mode": "single_file",
+    "files": [
+      {
+        "path": "first_order_sigma_delta_modulator.va",
+        "modules": [
+          {
+            "name": "first_order_sigma_delta_modulator",
+            "role": "entry",
+            "depends_on": [],
+            "ports": [
+              {
+                "name": "vin",
+                "direction": "input",
+                "discipline": "electrical",
+                "position": 0
+              },
+              {
+                "name": "vclk",
+                "direction": "input",
+                "discipline": "electrical",
+                "position": 1
+              },
+              {
+                "name": "bitout",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 2
+              }
+            ],
+            "parameters": [
+              {
+                "name": "vth_clk",
+                "type": "real",
+                "default": 0.45,
+                "units": "V",
+                "valid_range": "vth_clk > 0",
+                "override_behavior": "sets the rising-clock decision threshold"
+              },
+              {
+                "name": "vh",
+                "type": "real",
+                "default": 0.9,
+                "units": "V",
+                "valid_range": "vh > 0",
+                "override_behavior": "sets the one-bit output high level"
+              },
+              {
+                "name": "vref",
+                "type": "real",
+                "default": 1,
+                "units": "V",
+                "valid_range": "vref > 0",
+                "override_behavior": "sets the normalized one-bit feedback magnitude"
+              },
+              {
+                "name": "tr",
+                "type": "real",
+                "default": 2e-11,
+                "units": "s",
+                "valid_range": "tr > 0",
+                "override_behavior": "sets output transition smoothing"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "source_path_template": "./dut/{artifact_path}",
+    "instances": [
+      {
+        "name": "XDUT",
+        "module_ref": "first_order_sigma_delta_modulator",
+        "connections": [
+          {
+            "port_ref": "vin",
+            "net": "vin",
+            "position": 0
+          },
+          {
+            "port_ref": "vclk",
+            "net": "vclk",
+            "position": 1
+          },
+          {
+            "port_ref": "bitout",
+            "net": "bitout",
+            "position": 2
+          }
+        ]
+      }
+    ]
+  },
+  "properties": [
+    {
+      "id": "P_RISING_EDGE_UPDATE",
+      "observable_contract": "The one-bit output state updates only from accumulator decisions made on rising crossings of vclk through vth_clk.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vclk",
+        "bitout"
+      ]
+    },
+    {
+      "id": "P_FIRST_ORDER_FEEDBACK",
+      "observable_contract": "Each clocked decision reflects accumulation of the current normalized input minus the previous one-bit feedback state.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vclk",
+        "bitout"
+      ]
+    },
+    {
+      "id": "P_BINARY_OUTPUT",
+      "observable_contract": "bitout is voltage-coded low near 0 V or high near vh with finite transition smoothing.",
+      "required_signals": [
+        "time",
+        "vclk",
+        "bitout"
+      ]
+    },
+    {
+      "id": "P_INPUT_DENSITY_ORDER",
+      "observable_contract": "Over a sufficiently long common observation interval, a larger constant vin produces a nondecreasing fraction of high output bits.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vclk",
+        "bitout"
+      ]
+    },
+    {
+      "id": "P_FEEDBACK_STABILITY",
+      "observable_contract": "For an in-range constant input, the output stream continues to alternate as needed rather than running away as an open-loop accumulator.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vclk",
+        "bitout"
+      ]
+    }
+  ],
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "vclk",
+      "bitout"
+    ]
+  },
+  "modeling_constraints": [
+    "Use deterministic rising-edge accumulator updates and previous-bit feedback.",
+    "Drive bitout with a smooth unconditional voltage contribution.",
+    "Do not hard-code a public or private bit sequence, sample window, stimulus timing, validation hooks, or simulator-specific side channels."
+  ]
+}

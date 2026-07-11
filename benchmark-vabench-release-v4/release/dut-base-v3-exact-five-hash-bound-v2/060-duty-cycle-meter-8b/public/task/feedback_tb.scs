@@ -1,0 +1,12 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/duty_cycle_meter_8b.va"
+
+Vclk_in (clk_in 0) vsource type=pwl wave=[0 0 10n 0 10.1n 0.9 16n 0 30n 0 30.1n 0.9 40n 0 55n 0 55.1n 0.9 72n 0 90n 0 90.1n 0.9 100n 0 120n 0 120.1n 0.9 126n 0 150n 0]
+XDUT (clk_in valid duty0 duty1 duty2 duty3 duty4 duty5 duty6 duty7) duty_cycle_meter_8b
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=150n maxstep=100p
+save clk_in valid duty0 duty1 duty2 duty3 duty4 duty5 duty6 duty7

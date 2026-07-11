@@ -1,0 +1,21 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module masked_config_update_32b(
+    input electrical [31:0] old_cfg,
+    input electrical [31:0] new_cfg,
+    input electrical [31:0] mask,
+    output electrical [31:0] out_cfg
+);
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real tr = 20p;
+
+    genvar i;
+
+    analog begin
+        for (i = 0; i < 32; i = i + 1) begin
+            V(out_cfg[i]) <+ slew((V(new_cfg[i]) > vth) ? vdd : 0.0, 0.9 / (tr), -0.9 / (tr));
+        end
+    end
+endmodule

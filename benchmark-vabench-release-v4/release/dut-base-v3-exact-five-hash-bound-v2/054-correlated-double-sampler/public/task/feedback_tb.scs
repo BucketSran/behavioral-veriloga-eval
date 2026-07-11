@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/correlated_double_sampler.va"
+
+Vphi_reset (phi_reset 0) vsource type=pwl wave=[0n 0 1.00n 0 1.02n 0.9 1.25n 0.9 1.27n 0 5.00n 0 5.02n 0.9 5.25n 0.9 5.27n 0 9.00n 0 9.02n 0.9 9.25n 0.9 9.27n 0]
+Vphi_signal (phi_signal 0) vsource type=pwl wave=[0n 0 2.00n 0 2.02n 0.9 2.25n 0.9 2.27n 0 6.00n 0 6.02n 0.9 6.25n 0.9 6.27n 0 10.00n 0 10.02n 0.9 10.25n 0.9 10.27n 0]
+Vvin (vin 0) vsource type=pwl wave=[0n 0.45 0.80n 0.45 0.82n 0.62 1.60n 0.62 1.62n 0.78 4.80n 0.78 4.82n 0.68 5.60n 0.68 5.62n 0.40 8.80n 0.40 8.82n 0.25 9.60n 0.25 9.62n 0.95 12n 0.95]
+
+XDUT (phi_reset phi_signal vin vout valid) correlated_double_sampler
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=12n maxstep=10p
+save phi_reset phi_signal vin vout valid

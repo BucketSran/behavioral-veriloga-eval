@@ -1,0 +1,132 @@
+{
+  "family_id": "053",
+  "gold_bundle_sha256": "7e6a28ea6e1b9adb94a229d28eba230f61c560866fe744638630c9fb01a50912",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "slew_rate_dac4.va": "c49b56886ad86d3c81f08a1d876a0904768aee4292b361863a61dde7a94bb8c9"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BINARY_MAPPING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_force_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "slew_rate_dac4.va"
+      ],
+      "fault_class": "force_zero",
+      "id": "neg_001_force_zero",
+      "trigger_condition": "Slew Rate DAC4: forces the output to zero, so it compiles and idles plausibly but fails every nonzero code check.",
+      "violated_property_ids": [
+        "P_BINARY_MAPPING"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "slew_rate_dac4.va": "93a4077196e325975db57d520587eedcee753f45cc9ffd91c06a372450898e7a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ENDPOINTS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_direct_transition/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "slew_rate_dac4.va"
+      ],
+      "fault_class": "direct_transition",
+      "id": "neg_002_direct_transition",
+      "trigger_condition": "Slew Rate DAC4: decodes the binary input correctly but jumps directly to the target instead of enforcing the slew-rate limit.",
+      "violated_property_ids": [
+        "P_ENDPOINTS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "slew_rate_dac4.va": "17c2a0278f32b1b62e7d81995479b0e391a32538f2ff8db18c441e2a69da6859"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CODE_MONOTONICITY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_denominator/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "slew_rate_dac4.va"
+      ],
+      "fault_class": "wrong_denominator",
+      "id": "neg_003_wrong_denominator",
+      "trigger_condition": "Slew Rate DAC4: uses code divided by 16, passing monotonic smoke checks while missing the full-scale endpoint calibration.",
+      "violated_property_ids": [
+        "P_CODE_MONOTONICITY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "slew_rate_dac4.va": "9ea36f79e72812c0da3b4b1b068c1844cae8b21b52241597aed7a65339c9decf"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SLEW_LIMIT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_reversed_bit_order/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "slew_rate_dac4.va"
+      ],
+      "fault_class": "reversed_bit_order",
+      "id": "neg_004_reversed_bit_order",
+      "trigger_condition": "Slew Rate DAC4: treats d0 as the MSB and d3 as the LSB, so symmetric code smoke tests can pass but bit-order coverage fails.",
+      "violated_property_ids": [
+        "P_SLEW_LIMIT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "slew_rate_dac4.va": "51575124fa15a16574235368f620bb4bc7221ede966465965a04d7a16c57ce48"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SETTLED_TARGET"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_half_slew_rate/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "slew_rate_dac4.va"
+      ],
+      "fault_class": "half_slew_rate",
+      "id": "neg_005_half_slew_rate",
+      "trigger_condition": "Slew Rate DAC4: reaches the right endpoints eventually but slews at half the required rate, failing ramp-shape timing checks.",
+      "violated_property_ids": [
+        "P_SETTLED_TARGET"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

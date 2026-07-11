@@ -1,0 +1,24 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module edge_interval_tdc_8b(start, stop, valid, code0, code1, code2, code3, code4, code5, code6, code7);
+    input start, stop;
+    output valid, code0, code1, code2, code3, code4, code5, code6, code7;
+    electrical start, stop, valid, code0, code1, code2, code3, code4, code5, code6, code7;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real tr = 20p;
+
+    analog begin
+        V(valid) <+ transition(0.0, 0, tr, tr);
+        V(code0) <+ transition(0.0, 0, tr, tr);
+        V(code1) <+ transition(0.0, 0, tr, tr);
+        V(code2) <+ transition(0.0, 0, tr, tr);
+        V(code3) <+ transition(0.0, 0, tr, tr);
+        V(code4) <+ transition(0.0, 0, tr, tr);
+        V(code5) <+ transition(0.0, 0, tr, tr);
+        V(code6) <+ transition(0.0, 0, tr, tr);
+        V(code7) <+ transition(0.0, 0, tr, tr);
+    end
+endmodule

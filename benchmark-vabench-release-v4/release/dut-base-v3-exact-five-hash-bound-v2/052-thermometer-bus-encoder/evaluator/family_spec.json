@@ -1,0 +1,406 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "052",
+  "task_ids": {
+    "dut": "v4-052",
+    "testbench": "v4-552",
+    "bugfix": "v4-1052"
+  },
+  "identity": {
+    "title": "Thermometer Bus Encoder",
+    "category": "data_converter",
+    "level": "L1",
+    "difficulty": "D2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"
+  },
+  "artifact_contract": {
+    "mode": "single_file",
+    "files": [
+      {
+        "path": "thermometer_bus_encoder.va",
+        "modules": [
+          {
+            "name": "thermometer_bus_encoder",
+            "role": "entry",
+            "depends_on": [],
+            "ports": [
+              {
+                "name": "vin",
+                "direction": "input",
+                "discipline": "electrical",
+                "position": 0
+              },
+              {
+                "name": "t0",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 1
+              },
+              {
+                "name": "t1",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 2
+              },
+              {
+                "name": "t2",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 3
+              },
+              {
+                "name": "t3",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 4
+              },
+              {
+                "name": "t4",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 5
+              },
+              {
+                "name": "t5",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 6
+              },
+              {
+                "name": "t6",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 7
+              },
+              {
+                "name": "t7",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 8
+              },
+              {
+                "name": "t8",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 9
+              },
+              {
+                "name": "t9",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 10
+              },
+              {
+                "name": "t10",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 11
+              },
+              {
+                "name": "t11",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 12
+              },
+              {
+                "name": "t12",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 13
+              },
+              {
+                "name": "t13",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 14
+              },
+              {
+                "name": "t14",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 15
+              },
+              {
+                "name": "t15",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 16
+              }
+            ],
+            "parameters": [
+              {
+                "name": "vref",
+                "type": "real",
+                "default": 1,
+                "units": "V",
+                "valid_range": "vref > 0",
+                "override_behavior": "sets the analog full-scale reference and segment span"
+              },
+              {
+                "name": "vh",
+                "type": "real",
+                "default": 0.9,
+                "units": "V",
+                "valid_range": "vh > 0",
+                "override_behavior": "sets the voltage-coded segment high level"
+              },
+              {
+                "name": "tr",
+                "type": "real",
+                "default": 2e-11,
+                "units": "s",
+                "valid_range": "tr > 0",
+                "override_behavior": "sets segment-output transition smoothing"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "source_path_template": "./dut/{artifact_path}",
+    "instances": [
+      {
+        "name": "XDUT",
+        "module_ref": "thermometer_bus_encoder",
+        "connections": [
+          {
+            "port_ref": "vin",
+            "net": "vin",
+            "position": 0
+          },
+          {
+            "port_ref": "t0",
+            "net": "t0",
+            "position": 1
+          },
+          {
+            "port_ref": "t1",
+            "net": "t1",
+            "position": 2
+          },
+          {
+            "port_ref": "t2",
+            "net": "t2",
+            "position": 3
+          },
+          {
+            "port_ref": "t3",
+            "net": "t3",
+            "position": 4
+          },
+          {
+            "port_ref": "t4",
+            "net": "t4",
+            "position": 5
+          },
+          {
+            "port_ref": "t5",
+            "net": "t5",
+            "position": 6
+          },
+          {
+            "port_ref": "t6",
+            "net": "t6",
+            "position": 7
+          },
+          {
+            "port_ref": "t7",
+            "net": "t7",
+            "position": 8
+          },
+          {
+            "port_ref": "t8",
+            "net": "t8",
+            "position": 9
+          },
+          {
+            "port_ref": "t9",
+            "net": "t9",
+            "position": 10
+          },
+          {
+            "port_ref": "t10",
+            "net": "t10",
+            "position": 11
+          },
+          {
+            "port_ref": "t11",
+            "net": "t11",
+            "position": 12
+          },
+          {
+            "port_ref": "t12",
+            "net": "t12",
+            "position": 13
+          },
+          {
+            "port_ref": "t13",
+            "net": "t13",
+            "position": 14
+          },
+          {
+            "port_ref": "t14",
+            "net": "t14",
+            "position": 15
+          },
+          {
+            "port_ref": "t15",
+            "net": "t15",
+            "position": 16
+          }
+        ]
+      }
+    ]
+  },
+  "properties": [
+    {
+      "id": "P_PREFIX_CODE",
+      "observable_contract": "Active segment outputs always form a contiguous prefix beginning at t0; no higher segment may be high while a lower segment is low.",
+      "required_signals": [
+        "time",
+        "vin",
+        "t0",
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5",
+        "t6",
+        "t7",
+        "t8",
+        "t9",
+        "t10",
+        "t11",
+        "t12",
+        "t13",
+        "t14",
+        "t15"
+      ]
+    },
+    {
+      "id": "P_ORDERED_ACTIVATION",
+      "observable_contract": "As vin increases, segments activate in order t0 through t15 and the active-segment count never decreases.",
+      "required_signals": [
+        "time",
+        "vin",
+        "t0",
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5",
+        "t6",
+        "t7",
+        "t8",
+        "t9",
+        "t10",
+        "t11",
+        "t12",
+        "t13",
+        "t14",
+        "t15"
+      ]
+    },
+    {
+      "id": "P_UNIFORM_SEGMENTS",
+      "observable_contract": "The clipped 0-to-vref input span selects among sixteen equal-width thermometer segments.",
+      "required_signals": [
+        "time",
+        "vin",
+        "t0",
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5",
+        "t6",
+        "t7",
+        "t8",
+        "t9",
+        "t10",
+        "t11",
+        "t12",
+        "t13",
+        "t14",
+        "t15"
+      ]
+    },
+    {
+      "id": "P_INPUT_CLIPPING",
+      "observable_contract": "Inputs at or below 0 V produce no active segments, and inputs at or above vref produce all sixteen active segments.",
+      "required_signals": [
+        "time",
+        "vin",
+        "t0",
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5",
+        "t6",
+        "t7",
+        "t8",
+        "t9",
+        "t10",
+        "t11",
+        "t12",
+        "t13",
+        "t14",
+        "t15"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_LEVELS",
+      "observable_contract": "Each inactive segment approaches 0 V and each active segment approaches vh with finite transition smoothing.",
+      "required_signals": [
+        "time",
+        "t0",
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5",
+        "t6",
+        "t7",
+        "t8",
+        "t9",
+        "t10",
+        "t11",
+        "t12",
+        "t13",
+        "t14",
+        "t15"
+      ]
+    }
+  ],
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "t0",
+      "t1",
+      "t2",
+      "t3",
+      "t4",
+      "t5",
+      "t6",
+      "t7",
+      "t8",
+      "t9",
+      "t10",
+      "t11",
+      "t12",
+      "t13",
+      "t14",
+      "t15"
+    ]
+  },
+  "modeling_constraints": [
+    "Use deterministic combinational voltage-domain thermometer encoding.",
+    "Preserve segment order from t0 through t15.",
+    "Use smooth voltage contributions and do not emit a binary-coded word, hidden state, validation hooks, or simulator-specific side channels."
+  ]
+}

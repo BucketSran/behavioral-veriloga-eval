@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/thermometer_bus_encoder.va"
+
+Vin (vin 0) vsource type=pwl wave=[0 0.02 1n 0.02 1.05n 0.22 3n 0.22 3.05n 0.51 5n 0.51 5.05n 0.88 7n 0.88 7.05n 1.05 9n 1.05]
+
+XDUT (vin t0 t1 t2 t3 t4 t5 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15) thermometer_bus_encoder
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=9n maxstep=10p
+save vin t0 t1 t2 t3 t4 t5 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15

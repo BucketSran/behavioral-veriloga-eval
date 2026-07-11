@@ -1,0 +1,104 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "thermometer_bus_encoder.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=9n maxstep=10p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "t0",
+      "t1",
+      "t2",
+      "t3",
+      "t4",
+      "t5",
+      "t6",
+      "t7",
+      "t8",
+      "t9",
+      "t10",
+      "t11",
+      "t12",
+      "t13",
+      "t14",
+      "t15"
+    ]
+  },
+  "family_id": "052",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "153ab2f158a772372e75b3453a9a12eaf6e5fa5493218ebb31e298738756f0cf",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "836edcadb4b39f5cd8621e36bd4f5e22cc1c41fafcb59f8d9a15885950e84bbb",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0 0.02 1n 0.02 1.05n 0.22 3n 0.22 3.05n 0.51 5n 0.51 5.05n 0.88 7n 0.88 7.05n 1.05 9n 1.05]",
+          "",
+          "XDUT (vin t0 t1 t2 t3 t4 t5 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15) thermometer_bus_encoder",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=11n maxstep=10p"
+        ],
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0 -0.10 1n -0.10 1.05n 0.07 3n 0.07 3.05n 0.37 5n 0.37 5.05n 0.74 7n 0.74 7.05n 0.99 9n 0.99 9.05n 1.20 11n 1.20]",
+          "",
+          "XDUT (vin t0 t1 t2 t3 t4 t5 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15) thermometer_bus_encoder",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_PREFIX_CODE",
+    "P_ORDERED_ACTIVATION",
+    "P_UNIFORM_SEGMENTS",
+    "P_INPUT_CLIPPING",
+    "P_OUTPUT_LEVELS"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "18273c0965f7c282693f4bf249298b5b537c53da2c66d19e2306e42177af4bd5",
+    "family_spec_sha256": "18add0d9bb52d1b9aba2e435cb1d0a204657718c6a18c6850fdc6070786acf3f"
+  },
+  "task_id": "v4-052"
+}

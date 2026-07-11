@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/config_shift_reg_64b.va"
+
+Vclk (clk 0) vsource type=pwl wave=[0 0 3.9n 0 4n 0.9 5n 0.9 5.1n 0 9.5n 0 10n 0 13.9n 0 14n 0.9 15n 0.9 15.1n 0 19.5n 0 20n 0 23.9n 0 24n 0.9 25n 0.9 25.1n 0 29.5n 0 30n 0 33.9n 0 34n 0.9 35n 0.9 35.1n 0 39.5n 0 40n 0 43.9n 0 44n 0.9 45n 0.9 45.1n 0 49.5n 0 50n 0 53.9n 0 54n 0.9 55n 0.9 55.1n 0 59.5n 0 60n 0 63.9n 0 64n 0.9 65n 0.9 65.1n 0 69.5n 0 70n 0 73.9n 0 74n 0.9 75n 0.9 75.1n 0 79.5n 0 80n 0 83.9n 0 84n 0.9 85n 0.9 85.1n 0 89.5n 0 90n 0 93.9n 0 94n 0.9 95n 0.9 95.1n 0 99.5n 0 100n 0 103.9n 0 104n 0.9 105n 0.9 105.1n 0 109.5n 0 110n 0 113.9n 0 114n 0.9 115n 0.9 115.1n 0 119.5n 0]
+Vrst_n (rst_n 0) vsource type=pwl wave=[0 0.9 130n 0.9]
+Vserial_in (serial_in 0) vsource type=pwl wave=[0 0.9 9.5n 0.9 10n 0 19.5n 0 20n 0.9 29.5n 0.9 30n 0.9 39.5n 0.9 40n 0 49.5n 0 50n 0 59.5n 0 60n 0.9 69.5n 0.9 70n 0 79.5n 0 80n 0.9 89.5n 0.9 90n 0.9 99.5n 0.9 100n 0.9 109.5n 0.9 110n 0 119.5n 0]
+
+XDUT (clk rst_n serial_in q63 q62 q61 q60 q59 q58 q57 q56 q55 q54 q53 q52 q51 q50 q49 q48 q47 q46 q45 q44 q43 q42 q41 q40 q39 q38 q37 q36 q35 q34 q33 q32 q31 q30 q29 q28 q27 q26 q25 q24 q23 q22 q21 q20 q19 q18 q17 q16 q15 q14 q13 q12 q11 q10 q9 q8 q7 q6 q5 q4 q3 q2 q1 q0) config_shift_reg_64b
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=119n maxstep=100p
+save clk rst_n serial_in q0 q1 q2 q3 q4 q5 q6 q7 q8 q9 q10 q11 q12 q13 q14 q15 q16 q17 q18 q19 q20 q21 q22 q23 q24 q25 q26 q27 q28 q29 q30 q31 q32 q33 q34 q35 q36 q37 q38 q39 q40 q41 q42 q43 q44 q45 q46 q47 q48 q49 q50 q51 q52 q53 q54 q55 q56 q57 q58 q59 q60 q61 q62 q63

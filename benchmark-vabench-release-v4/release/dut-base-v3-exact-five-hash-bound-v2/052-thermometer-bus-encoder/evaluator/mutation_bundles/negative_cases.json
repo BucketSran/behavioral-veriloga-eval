@@ -1,0 +1,39 @@
+{
+  "negative_cases": [
+    {
+      "id": "neg_001_force_zero",
+      "why_wrong": "Thermometer Bus Encoder: leaves every thermometer output low, so it compiles but fails all nonzero input levels.",
+      "files": [
+        "neg_001_force_zero/thermometer_bus_encoder.va"
+      ]
+    },
+    {
+      "id": "neg_002_off_by_one",
+      "why_wrong": "Thermometer Bus Encoder: turns on one extra segment for nonzero inputs, passing prefix shape while failing exact segment counts.",
+      "files": [
+        "neg_002_off_by_one/thermometer_bus_encoder.va"
+      ]
+    },
+    {
+      "id": "neg_003_binary_code_outputs",
+      "why_wrong": "Thermometer Bus Encoder: emits binary-style bit values instead of a prefix thermometer word, so sparse smoke can look active but bus semantics fail.",
+      "files": [
+        "neg_003_binary_code_outputs/thermometer_bus_encoder.va"
+      ]
+    },
+    {
+      "id": "neg_004_reversed_thermometer_order",
+      "why_wrong": "Thermometer Bus Encoder: builds the active prefix from t15 downward, preserving segment count while violating bus order.",
+      "files": [
+        "neg_004_reversed_thermometer_order/thermometer_bus_encoder.va"
+      ]
+    },
+    {
+      "id": "neg_005_round_to_nearest",
+      "why_wrong": "Thermometer Bus Encoder: rounds the input bin instead of flooring it, passing endpoints while failing mid-bin hidden samples.",
+      "files": [
+        "neg_005_round_to_nearest/thermometer_bus_encoder.va"
+      ]
+    }
+  ]
+}
