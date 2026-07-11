@@ -1,0 +1,134 @@
+{
+  "family_id": "234",
+  "gold_bundle_sha256": "4157ddc509c4597540e878837b090b8b29dee2ef2809090c3bcb55298398ab0a",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "programmable_divider_by_n.va": "927dd2563b30c0b3e0f1437b0fe43a737dbd98750b582049928e8046402f690e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DIVIDE_RATIO_EDGE_COUNTING",
+          "P_OUTPUT_HIGH_LEVEL"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "programmable_divider_by_n.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Keeps the output at its trivial zero behavior and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_DIVIDE_RATIO_EDGE_COUNTING",
+        "P_OUTPUT_HIGH_LEVEL"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "programmable_divider_by_n.va": "659e4e8034b45017da94c9f2ab4cad8bbe974ab9509ccad1c442b577744f26c6"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DIVIDE_RATIO_EDGE_COUNTING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_floor_minus_one_ratio/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "programmable_divider_by_n.va"
+      ],
+      "fault_class": "floor_minus_one_ratio",
+      "id": "neg_002_floor_minus_one_ratio",
+      "trigger_condition": "Uses DIVCTRL-1 as the divider ratio.",
+      "violated_property_ids": [
+        "P_DIVIDE_RATIO_EDGE_COUNTING"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "programmable_divider_by_n.va": "08871865876082ca60c29a6e5cac6b37aae41c21641dc4f7c82ca3d9920668c5"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CLOCK_THRESHOLD_OBSERVABILITY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_threshold_too_high/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "programmable_divider_by_n.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_003_threshold_too_high",
+      "trigger_condition": "Uses a clock threshold above the high level, so the divider never counts edges.",
+      "violated_property_ids": [
+        "P_CLOCK_THRESHOLD_OBSERVABILITY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "programmable_divider_by_n.va": "3c388983c2a994aec6762838183e9b3087ee37ac0bdde39a61aaba4967d96415"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DIVIDE_RATIO_EDGE_COUNTING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_output_when_one/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "programmable_divider_by_n.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_004_output_when_one",
+      "trigger_condition": "Asserts OUT when the counter is one rather than zero.",
+      "violated_property_ids": [
+        "P_DIVIDE_RATIO_EDGE_COUNTING"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "programmable_divider_by_n.va": "def69d44adb3980867c9927cec21a29d9fc867cab7d4b96813daf52066c1ec28"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_HIGH_LEVEL"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "programmable_divider_by_n.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Programmable Divider By N: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_OUTPUT_HIGH_LEVEL"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

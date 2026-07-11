@@ -1,0 +1,60 @@
+{
+  "component_fingerprints": {
+    "assembly": {
+      "policy_sha256": "91f4e21b94263e796c846aedef282c79d4abeb7ccc415a0e6f1311f8816b33a4",
+      "release_snapshot_sha256": "ec25ff4e82bd73ef23394b05e71b73298f84f12139028d337e881ddcfddcd8f4"
+    },
+    "backend": {
+      "ahdl_like_sha256": "91ce239e5f278a6d5dfcde85ca2d820c5133d8f8a3de26dc6477164e703342f3",
+      "evas_sha256": "e48df10fee21fa1613eb87e8febd0226895e2482f2e91355645d2e93e71e04d7",
+      "spectre_sha256": "ac4c1cf785d5eab74058944d52bf40869e83c94e19202ab72c8e8a250c4dc51b"
+    },
+    "oracle": {
+      "checker_binding_sha256": "69a9774d6271e34e0d20185fcb955f6d3b28927f3759cad354cd3d6ee9ecb506",
+      "checker_implementation_sha256": "9a54f401aa08e834057e301ad2c2b02271282c004af9618fc442eb3bbbe2c243",
+      "checker_profile_sha256": "9ffcc081b037e40c2cb0170e2de504b302424537e6dddc8e4696d0dc963b44d9",
+      "diagnostic_policy_sha256": "69b217a349cb0e8a3eab574e7e6d1af03f069fea668b15b37868ef3d2e7deea3",
+      "oracle_runner_sha256": "daf6eeded735edd148687b998344d32a4943e8824bac2828f28e9107a7950567",
+      "property_activation_policy_sha256": "58341753e5d1ed886ace3ad172b68aab0ab6f5548e00807d46d3749f92f99f01"
+    },
+    "policy_id": "v4-dependency-scoped-evidence-v2",
+    "schema_version": "v4-evidence-components-v2",
+    "state": "carried_forward",
+    "task_inputs": {
+      "candidate_bundle_sha256": "c422aa6f0cd6645dfcf7165aeda6f6fc9b17c2fb5ee7efd91720ccfb35bbe715",
+      "deck_sha256": "2f75709a0d04745a11f9d9d18a5909e99f1b0f7ce697e96ed4fc1d99fbd382e5",
+      "gold_bundle_sha256": "410b764e9f400d73e3ef185028d5bb4aaba8373e0ec44eb854d6838933b7e2fd",
+      "harness_spec_sha256": "df075a94951a7d6f70d0730cbbede7e7b3309336f39eb848fc0c54a708ef4307",
+      "mutation_bundle_sha256": "c422aa6f0cd6645dfcf7165aeda6f6fc9b17c2fb5ee7efd91720ccfb35bbe715",
+      "profile_sha256": "3f5f2655ea964aefbaa6da2fca59f0d33f88ae27c7085ffa9f6bc382a32ec1b7",
+      "property_contract_sha256": "288537629a036c05c94bd956f90502dac9a6d82735eab0e51fd458b61df7f256",
+      "public_support_bundle_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "trace_contract_sha256": "b598f54ee45bc870fd0b35cb7b89ddb095cd765a09b27622e3a6e7c342d02af5"
+    }
+  },
+  "diagnostics": {
+    "expected": "trigger=Uses half the required divider gain.; violated_properties=P_USE_V_SIGDENOM_DIRECTLY_WHEN_ITS,P_DRIVE_SIGOUT_TO_GAIN_V_SIGNUMER",
+    "observed": "EVAS: safe_divider_error@1.550ns denom=0.0000 observed=-2.0000 expected=4.0000 max_err=6.0000; Spectre: safe_divider_error@1.550ns denom=0.0000 observed=-2.0000 expected=4.0000 max_err=6.0000",
+    "violated_property_ids": [
+      "P_DRIVE_SIGOUT_TO_GAIN_V_SIGNUMER",
+      "P_USE_V_SIGDENOM_DIRECTLY_WHEN_ITS"
+    ]
+  },
+  "evaluators": {
+    "ahdl_like": "pass",
+    "evas": "compile_pass_behavior_fail",
+    "spectre": "compile_pass_behavior_fail"
+  },
+  "family_id": "232",
+  "inputs": {
+    "checker_profile_sha256": "83c85b46343056c2c725ac39196201846efd3b62bad9f094a889cebff5ea9834",
+    "harness_spec_sha256": "df075a94951a7d6f70d0730cbbede7e7b3309336f39eb848fc0c54a708ef4307",
+    "mutation_bundle_sha256": "c422aa6f0cd6645dfcf7165aeda6f6fc9b17c2fb5ee7efd91720ccfb35bbe715",
+    "profile_sha256": "3f5f2655ea964aefbaa6da2fca59f0d33f88ae27c7085ffa9f6bc382a32ec1b7"
+  },
+  "mutation_id": "neg_004_half_gain",
+  "outcome": "killed_behaviorally",
+  "release_snapshot_sha256": "ec25ff4e82bd73ef23394b05e71b73298f84f12139028d337e881ddcfddcd8f4",
+  "schema_version": "v4-negative-certification-v2",
+  "toolchain_lock_sha256": "ec25ff4e82bd73ef23394b05e71b73298f84f12139028d337e881ddcfddcd8f4"
+}

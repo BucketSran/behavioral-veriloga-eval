@@ -1,0 +1,15 @@
+`include "disciplines.vams"
+module safe_analog_divider(signumer, sigdenom, sigout);
+input signumer, sigdenom;
+output sigout;
+electrical signumer, sigdenom, sigout;
+parameter real gain = 1.0;
+parameter real min_sigdenom = 0.2 from (0:inf);
+real denominator;
+analog begin
+    denominator = V(sigdenom);
+    if (abs(denominator) < min_sigdenom)
+        denominator = (denominator >= 0.0) ? min_sigdenom : -min_sigdenom;
+    V(sigout) <+ gain * V(signumer) / denominator;
+end
+endmodule

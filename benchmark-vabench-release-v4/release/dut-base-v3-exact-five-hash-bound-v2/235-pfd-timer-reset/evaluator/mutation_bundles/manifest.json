@@ -1,0 +1,134 @@
+{
+  "family_id": "235",
+  "gold_bundle_sha256": "112d32c37914b64558c9dfd1c6ac3012cf3a5d9dd4269bd8b8d50163cb31ad31",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "pfd_timer_reset.va": "662600411b3aeb7ad988adaaa50d1a0b441ead21737323d2c68359e07b0c9748"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_LEVELS_AND_TRANSITIONS",
+          "P_PFD_STATE_AND_POLARITY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pfd_timer_reset.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Keeps the output at its trivial zero behavior and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_OUTPUT_LEVELS_AND_TRANSITIONS",
+        "P_PFD_STATE_AND_POLARITY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pfd_timer_reset.va": "6b2ba487b7a181e59be75b14a926db156d60368020c70d3a91187843edcaf34a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DELAYED_MUTUAL_RESET"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_no_delayed_reset/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pfd_timer_reset.va"
+      ],
+      "fault_class": "state_reset_or_enable_error",
+      "id": "neg_002_no_delayed_reset",
+      "trigger_condition": "Never schedules the delayed reset when both PFD sides have occurred.",
+      "violated_property_ids": [
+        "P_DELAYED_MUTUAL_RESET"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pfd_timer_reset.va": "8a5667bcc5539c16de38d3d52e28d98889299d4570496715b9ed8689fff82988"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PFD_STATE_AND_POLARITY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_active_high_up_output/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pfd_timer_reset.va"
+      ],
+      "fault_class": "active_high_up_output",
+      "id": "neg_003_active_high_up_output",
+      "trigger_condition": "Drives UB active-high instead of active-low.",
+      "violated_property_ids": [
+        "P_PFD_STATE_AND_POLARITY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pfd_timer_reset.va": "b7472634f5d7ed00be23523f30461aa82d12bd9422d44a004bdb981d2dcc19ae"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DELAYED_MUTUAL_RESET"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_zero_reset_delay/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pfd_timer_reset.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_004_zero_reset_delay",
+      "trigger_condition": "Resets immediately instead of after the 100 ps delay.",
+      "violated_property_ids": [
+        "P_DELAYED_MUTUAL_RESET"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pfd_timer_reset.va": "8c80e6037c4c07ce971d69674d3e87e2943e67abb9fe600fcaa0e57baeac3cf2"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_LEVELS_AND_TRANSITIONS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pfd_timer_reset.va"
+      ],
+      "fault_class": "state_reset_or_enable_error",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "PFD Timer Reset: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_OUTPUT_LEVELS_AND_TRANSITIONS"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

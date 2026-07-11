@@ -1,0 +1,93 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "decision_router_logic.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=3.8n maxstep=5p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin1",
+      "vin2",
+      "valid",
+      "x",
+      "y",
+      "z",
+      "dm",
+      "dl"
+    ]
+  },
+  "family_id": "231",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "f0be6d3574d55dc4b6cd5eeebccca3b5ff31a56042df35e4791980cde1739413",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "4862ae1b88108b2db1a748ef8838d684af71400049080a50ab1cdace24006a29",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vvin1 (vin1 0) vsource type=pwl wave=[0 0 0.8n 0 0.85n 0 1.6n 0 1.65n 0 2.4n 0 2.45n 0.9 3.2n 0.9 3.25n 0.9 4.0n 0.9]",
+          "Vvin2 (vin2 0) vsource type=pwl wave=[0 0 0.8n 0 0.85n 0 1.6n 0 1.65n 0.9 2.4n 0.9 2.45n 0.9 3.2n 0.9 3.25n 0 4.0n 0]",
+          "Vvalid (valid 0) vsource type=pwl wave=[0 0 0.8n 0 0.85n 0.9 1.6n 0.9 1.65n 0.9 2.4n 0.9 2.45n 0.9 3.2n 0.9 3.25n 0.9 4.0n 0.9]",
+          "XDUT (vin1 vin2 valid x y z dm dl) decision_router_logic"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vvin1 (vin1 0) vsource type=pwl wave=[0 0 2.35n 0 2.40n 0.9 4.0n 0.9]",
+          "Vvin2 (vin2 0) vsource type=pwl wave=[0 0 1.55n 0 1.60n 0.9 3.15n 0.9 3.20n 0 4.0n 0]",
+          "Vvalid (valid 0) vsource type=pwl wave=[0 0 0.75n 0 0.80n 0.9 4.0n 0.9]",
+          "XDUT (vin1 vin2 valid x y z dm dl) decision_router_logic"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INTERPRET_VIN1_VIN2_AND_VALID_RELATIVE",
+    "P_DRIVE_DM_HIGH_WHEN_VIN1_IS",
+    "P_DRIVE_DL_HIGH_WHEN_VIN1_IS",
+    "P_DRIVE_X_HIGH_WHEN_VALID_IS",
+    "P_DRIVE_Y_HIGH_WHEN_VALID_IS",
+    "P_DRIVE_Z_HIGH_WHEN_VALID_IS"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "644d0f82648b0d832bc27ca4a1912b1f65226d0d0ca48a9ad34bb1ea2d45a381",
+    "family_spec_sha256": "875c27c0a2e52b1eac586a8d8a4111813ccf72efb157acb8c9b6f3c547c0c219"
+  },
+  "task_id": "v4-231"
+}

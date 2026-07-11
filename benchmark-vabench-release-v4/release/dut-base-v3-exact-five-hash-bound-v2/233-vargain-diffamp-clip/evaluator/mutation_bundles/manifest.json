@@ -1,0 +1,138 @@
+{
+  "family_id": "233",
+  "gold_bundle_sha256": "6f3fa4abb7f8a915d3525cc48b4e3f29de0502077339272af270ab7e0ee2286b",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "vargain_diffamp_clip.va": "2c68d015fc86e451b90c6f03326b946c6f4b9d70e30da384c36477d40c3f5ce8"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COMPUTE_THE_DIFFERENTIAL_SIGNAL_AS_V",
+          "P_DRIVE_SIGOUT_WITH_THE_CLIPPED_TARGET"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "vargain_diffamp_clip.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Keeps the output at its trivial zero behavior and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_COMPUTE_THE_DIFFERENTIAL_SIGNAL_AS_V",
+        "P_DRIVE_SIGOUT_WITH_THE_CLIPPED_TARGET"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "vargain_diffamp_clip.va": "3e5627c1fc92539052f8e4ce32aa2456019a2062a7a004990570ea05d8c2db7f"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SUBTRACT_SIGIN_OFFSET_FROM_THE_DIFFERENTIAL"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_missing_input_offset/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "vargain_diffamp_clip.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_002_missing_input_offset",
+      "trigger_condition": "Omits the required 50 mV input offset.",
+      "violated_property_ids": [
+        "P_SUBTRACT_SIGIN_OFFSET_FROM_THE_DIFFERENTIAL"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "vargain_diffamp_clip.va": "96924ef88f379f985af7335ff077d33638ea2138d441e7662bdea52041cdefe9"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COMPUTE_THE_DIFFERENTIAL_CONTROL_AS_V",
+          "P_MULTIPLY_THE_OFFSET_CORRECTED_SIGNAL_BY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_inverted_control_polarity/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "vargain_diffamp_clip.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_003_inverted_control_polarity",
+      "trigger_condition": "Reverses the control differential polarity.",
+      "violated_property_ids": [
+        "P_COMPUTE_THE_DIFFERENTIAL_CONTROL_AS_V",
+        "P_MULTIPLY_THE_OFFSET_CORRECTED_SIGNAL_BY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "vargain_diffamp_clip.va": "fbed5e4e1372308aea8098023e3ca4cb7f2d3ead1e04ff7dd857eb63877dd646"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CLAMP_THE_RESULT_TO_THE_PUBLIC"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_no_positive_clip/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "vargain_diffamp_clip.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_004_no_positive_clip",
+      "trigger_condition": "Clips only the negative rail and leaves positive outputs unclamped.",
+      "violated_property_ids": [
+        "P_CLAMP_THE_RESULT_TO_THE_PUBLIC"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "vargain_diffamp_clip.va": "3154329d0e2bdb1380bf7e59c78bcfecf6de3baa3cf108fb995ad4bdc9215cdc"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_SIGOUT_WITH_THE_CLIPPED_TARGET",
+          "P_MULTIPLY_THE_OFFSET_CORRECTED_SIGNAL_BY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "vargain_diffamp_clip.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Scales the clipped variable-gain output too low while preserving the module/interface shape.",
+      "violated_property_ids": [
+        "P_DRIVE_SIGOUT_WITH_THE_CLIPPED_TARGET",
+        "P_MULTIPLY_THE_OFFSET_CORRECTED_SIGNAL_BY"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

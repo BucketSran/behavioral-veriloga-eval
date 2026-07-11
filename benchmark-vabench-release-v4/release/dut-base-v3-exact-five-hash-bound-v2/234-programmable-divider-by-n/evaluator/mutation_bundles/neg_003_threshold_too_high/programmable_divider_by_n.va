@@ -1,0 +1,20 @@
+`include "disciplines.vams"
+module programmable_divider_by_n(clk, divctrl, out);
+input clk, divctrl;
+output out;
+electrical clk, divctrl, out;
+parameter real vth = 1.2;
+parameter real vh = 0.9;
+integer n;
+integer ratio;
+analog begin
+    @(initial_step) n = 0;
+    ratio = $floor(V(divctrl) + 0.5);
+    if (ratio < 1) ratio = 1;
+    @(cross(V(clk) - vth, +1)) begin
+        n = n + 1;
+        if (n >= ratio) n = 0;
+    end
+    V(out) <+ (n == 0) ? vh : 0.0;
+end
+endmodule

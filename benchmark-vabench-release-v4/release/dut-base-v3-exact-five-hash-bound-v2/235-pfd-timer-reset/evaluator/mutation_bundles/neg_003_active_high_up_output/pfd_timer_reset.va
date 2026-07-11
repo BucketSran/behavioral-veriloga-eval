@@ -1,0 +1,33 @@
+`include "disciplines.vams"
+module pfd_timer_reset(a, b, ub, d);
+input a, b;
+output ub, d;
+electrical a, b, ub, d;
+parameter real vth = 0.45;
+parameter real vh = 0.9;
+parameter real reset_delay = 100p;
+integer up, down;
+real trst;
+analog begin
+    @(initial_step) begin
+        up = 0;
+        down = 0;
+        trst = -1.0;
+    end
+    @(cross(V(a) - vth, +1)) begin
+        up = 1;
+        if (down == 1) trst = $abstime + reset_delay;
+    end
+    @(cross(V(b) - vth, +1)) begin
+        down = 1;
+        if (up == 1) trst = $abstime + reset_delay;
+    end
+    @(timer(trst)) begin
+        up = 0;
+        down = 0;
+        trst = -1.0;
+    end
+    V(ub) <+ transition(up * vh, 0, 10p);
+    V(d) <+ transition(down * vh, 0, 10p);
+end
+endmodule

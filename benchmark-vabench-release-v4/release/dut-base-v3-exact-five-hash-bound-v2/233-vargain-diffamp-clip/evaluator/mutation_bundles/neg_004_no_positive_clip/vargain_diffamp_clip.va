@@ -1,0 +1,16 @@
+`include "disciplines.vams"
+module vargain_diffamp_clip(sigin_p, sigin_n, sigctrl_p, sigctrl_n, sigout);
+input sigin_p, sigin_n, sigctrl_p, sigctrl_n;
+output sigout;
+electrical sigin_p, sigin_n, sigctrl_p, sigctrl_n, sigout;
+parameter real gain_const = 3.0;
+parameter real sigout_high = 1.0;
+parameter real sigout_low = -1.0;
+parameter real sigin_offset = 0.05;
+real sigout_val;
+analog begin
+    sigout_val = gain_const * V(sigctrl_p, sigctrl_n) * (V(sigin_p, sigin_n) - sigin_offset);
+    if (sigout_val < sigout_low) sigout_val = sigout_low;
+    V(sigout) <+ sigout_val;
+end
+endmodule

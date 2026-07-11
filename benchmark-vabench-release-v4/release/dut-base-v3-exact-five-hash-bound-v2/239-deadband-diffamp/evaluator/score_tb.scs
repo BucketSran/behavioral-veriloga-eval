@@ -1,0 +1,11 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/deadband_diffamp.va"
+
+Vin_p (sigin_p 0) vsource type=pwl wave=[0 -0.25 0.7n -0.25 0.75n 0.10 1.4n 0.10 1.45n 0.34 2.1n 0.34 2.15n -0.15 2.8n -0.15 2.85n 0.18 3.5n 0.18]
+Vin_n (sigin_n 0) vsource dc=0.05
+XDUT (sigin_p sigin_n sigout) deadband_diffamp
+
+tran tran stop=3.3n maxstep=5p
+save sigin_p sigin_n sigout

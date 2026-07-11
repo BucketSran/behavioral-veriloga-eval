@@ -1,0 +1,11 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/limiting_diffamp.va"
+
+Vin_p (sigin_p 0) vsource type=pwl wave=[0 -0.25 0.7n -0.25 0.75n -0.04 1.4n -0.04 1.45n 0.08 2.1n 0.08 2.15n 0.32 2.8n 0.32]
+Vin_n (sigin_n 0) vsource dc=0.03
+XDUT (sigin_p sigin_n sigout) limiting_diffamp
+
+tran tran stop=2.7n maxstep=5p
+save sigin_p sigin_n sigout
