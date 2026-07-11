@@ -1,0 +1,21 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/sar_cdac_residue.va"
+
+Vvin (vin 0) vsource type=pwl wave=[0 0.20 60n 0.20]
+Vclk (clk 0) vsource type=pwl wave=[0 0 4.9n 0 5n 0.9 7n 0.9 7.1n 0 60n 0]
+Vs6 (s6 0) vsource type=pwl wave=[0 0.9 9.9n 0.9 10n 0 60n 0]
+Vs5 (s5 0) vsource type=pwl wave=[0 0 14.9n 0 15n 0.9 60n 0.9]
+Vs4 (s4 0) vsource type=pwl wave=[0 0 19.9n 0 20n 0.9 60n 0.9]
+Vs3 (s3 0) vsource type=pwl wave=[0 0 24.9n 0 25n 0.9 60n 0.9]
+Vs2 (s2 0) vsource type=pwl wave=[0 0 29.9n 0 30n 0.9 60n 0.9]
+Vs1 (s1 0) vsource type=pwl wave=[0 0 34.9n 0 35n 0.9 60n 0.9]
+
+XDUT (vin clk s6 s5 s4 s3 s2 s1 vres) sar_cdac_residue
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=40n maxstep=25p
+save vin clk s6 s5 s4 s3 s2 s1 vres

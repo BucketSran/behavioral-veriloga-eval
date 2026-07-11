@@ -1,0 +1,9 @@
+`include "disciplines.vams"
+module attenuator_gain (vin, vout);
+input vin; output vout; electrical vin, vout;
+parameter real attenuation=0; real gain;
+analog begin
+    @(initial_step) gain = 1 / pow(10, attenuation/10);
+    V(vout) <+ gain * V(vin);
+end
+endmodule

@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/hysteresis_trip_characterizer.va"
+ahdl_include "./support/support_hysteretic_comparator.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0.0
+Vref (vref 0) vsource dc=0.50
+Vvin (vin 0) vsource type=pwl wave=[0 0.450 12n 0.555 24n 0.440 36n 0.560 48n 0.435 52n 0.435]
+
+// The public support comparator is mounted read-only from the declared support contract.
+XCMP (vdd vss vin vref cmp_out) support_hysteretic_comparator offset=-4m vhys=70m td=90p tr=25p
+XMEAS (vdd vss vin cmp_out trip_rise trip_fall hyst_width valid) hysteresis_trip_characterizer tr=15p
+
+
+tran tran stop=52n maxstep=20p
+save vdd vss vin cmp_out trip_rise trip_fall hyst_width valid

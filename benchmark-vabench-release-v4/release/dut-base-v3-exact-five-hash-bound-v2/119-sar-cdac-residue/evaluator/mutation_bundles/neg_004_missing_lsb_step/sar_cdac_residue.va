@@ -1,0 +1,14 @@
+`include "disciplines.vams"
+module sar_cdac_residue (VIN, CLK, S6, S5, S4, S3, S2, S1, VRES);
+input VIN, CLK, S6, S5, S4, S3, S2, S1; output VRES; electrical VIN, CLK, S6, S5, S4, S3, S2, S1, VRES;
+parameter real vdd=0.9; parameter real vrefp=0.9; parameter real vrefn=0; parameter real tr=1p; real vres;
+analog begin
+    @(initial_step or cross(V(CLK)-vdd/2.0,+1)) vres = V(VIN);
+    @(cross(V(S6)-vdd/2.0,-1)) vres = vres + 0.5*(vrefp-vrefn);
+    @(cross(V(S5)-vdd/2.0,+1)) vres = vres - 0.25*(vrefp-vrefn);
+    @(cross(V(S4)-vdd/2.0,+1)) vres = vres - 0.125*(vrefp-vrefn);
+    @(cross(V(S3)-vdd/2.0,+1)) vres = vres - 0.0625*(vrefp-vrefn);
+    @(cross(V(S2)-vdd/2.0,+1)) vres = vres - 0.03125*(vrefp-vrefn);
+    V(VRES) <+ transition(vres,0,tr,tr);
+end
+endmodule

@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/time_diff_detector.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=5n period=20n width=5n rise=100p fall=100p
+Vinp (vinp 0) vsource type=pwl wave=[0 0 11n 0 11.1n 0.9 14n 0.9 14.1n 0 30n 0 30.1n 0.9 33n 0.9 33.1n 0 54n 0 54.1n 0.9 58n 0.9 58.1n 0 75n 0]
+Vinn (vinn 0) vsource type=pwl wave=[0 0 9n 0 9.1n 0.9 12n 0.9 12.1n 0 34n 0 34.1n 0.9 37n 0.9 37.1n 0 56n 0 56.1n 0.9 60n 0.9 60.1n 0 75n 0]
+
+XDUT (clk vinp vinn vout) time_diff_detector vdd=0.9 scale=1e9 tr=1p
+
+
+tran tran stop=70n maxstep=25p
+save clk vinp vinn vout

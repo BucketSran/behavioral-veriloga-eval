@@ -1,0 +1,11 @@
+`include "disciplines.vams"
+module analog_mux_threshold (vin1, vin2, vsel, vout);
+input vin1, vin2, vsel; output vout; electrical vin1, vin2, vsel, vout;
+parameter real vth=0.45; integer selector; real vout_val;
+analog begin
+    @(initial_step) selector = (V(vsel)>vth) ? 1 : 0;
+    @(cross(V(vsel)-vth,+1)) selector = 1;
+    vout_val = (selector==1) ? V(vin1) : V(vin2);
+    V(vout) <+ vout_val;
+end
+endmodule

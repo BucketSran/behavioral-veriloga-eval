@@ -1,0 +1,157 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "differential_buffer",
+            "parameters": [],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "VINP",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "VINN",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "VOUTP",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "VOUTN",
+                "position": 3
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "differential_buffer.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "118",
+  "identity": {
+    "category": "mixed_signal",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Differential Buffer"
+  },
+  "modeling_constraints": [
+    "Use deterministic direct voltage contributions.",
+    "Preserve channel polarity, unity gain, and continuous pass-through behavior.",
+    "Do not add delay, gain control, rail clipping, retained state, current contributions, or validation-only hooks."
+  ],
+  "properties": [
+    {
+      "id": "P_POSITIVE_UNITY",
+      "observable_contract": "VOUTP continuously follows VINP with unity voltage gain and unchanged polarity.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "voutp"
+      ]
+    },
+    {
+      "id": "P_NEGATIVE_UNITY",
+      "observable_contract": "VOUTN continuously follows VINN with unity voltage gain and unchanged polarity.",
+      "required_signals": [
+        "time",
+        "vinn",
+        "voutn"
+      ]
+    },
+    {
+      "id": "P_CHANNEL_INDEPENDENCE",
+      "observable_contract": "Each output depends on its corresponding input and is not cross-coupled to the opposite input.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "voutp",
+        "voutn"
+      ]
+    },
+    {
+      "id": "P_DIFFERENTIAL_PRESERVATION",
+      "observable_contract": "The differential output VOUTP minus VOUTN equals the differential input VINP minus VINN.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "voutp",
+        "voutn"
+      ]
+    },
+    {
+      "id": "P_COMMON_MODE_PRESERVATION",
+      "observable_contract": "The output pair preserves the input pair common-mode voltage without conversion or rail logic.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "voutp",
+        "voutn"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1118",
+    "dut": "v4-118",
+    "testbench": "v4-618"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vinp",
+            "port_ref": "VINP",
+            "position": 0
+          },
+          {
+            "net": "vinn",
+            "port_ref": "VINN",
+            "position": 1
+          },
+          {
+            "net": "voutp",
+            "port_ref": "VOUTP",
+            "position": 2
+          },
+          {
+            "net": "voutn",
+            "port_ref": "VOUTN",
+            "position": 3
+          }
+        ],
+        "module_ref": "differential_buffer",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vinp",
+      "vinn",
+      "voutp",
+      "voutn"
+    ]
+  }
+}

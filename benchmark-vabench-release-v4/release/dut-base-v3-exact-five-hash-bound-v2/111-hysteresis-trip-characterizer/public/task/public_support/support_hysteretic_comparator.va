@@ -1,0 +1,37 @@
+// Public hysteretic comparator used as the device being characterized.
+`include "disciplines.vams"
+
+module support_hysteretic_comparator(vdd, vss, inp, inm, out);
+input vdd, vss, inp, inm;
+output out;
+electrical vdd, vss, inp, inm, out;
+
+parameter real offset = 0.0;
+parameter real vhys = 50m;
+parameter real td = 120p;
+parameter real tr = 30p;
+
+real upper_th;
+real lower_th;
+integer state;
+
+analog begin
+    upper_th = offset + 0.5 * vhys;
+    lower_th = offset - 0.5 * vhys;
+
+    @(initial_step) begin
+        state = (V(inp, inm) >= upper_th);
+    end
+
+    @(cross(V(inp, inm) - upper_th, +1)) begin
+        state = 1;
+    end
+
+    @(cross(V(inp, inm) - lower_th, -1)) begin
+        state = 0;
+    end
+
+    V(out, vss) <+ transition(state ? 1.0 : 0.0, td, tr, tr) * V(vdd, vss);
+end
+
+endmodule

@@ -1,0 +1,27 @@
+`include "disciplines.vams"
+
+module sar_weighted_sum (D10, D9, D8, D7, D6, D5, D4, D3, D2, D1, D0, VOUT);
+
+input D10, D9, D8, D7, D6, D5, D4, D3, D2, D1, D0;
+output VOUT;
+electrical D10, D9, D8, D7, D6, D5, D4, D3, D2, D1, D0, VOUT;
+
+parameter real vth = 0.45;
+real vout;
+
+analog begin
+    vout = 448 * (V(D10) > vth)
+         + 256 * (V(D9) > vth)
+         + 128 * (V(D8) > vth)
+         + 80 * (V(D7) > vth)
+         + 48 * (V(D6) > vth)
+         + 32 * (V(D5) > vth)
+         + 16 * (V(D4) > vth)
+         + 8 * (V(D3) > vth)
+         + 4 * (V(D2) > vth)
+         + 2 * (V(D1) > vth)
+         + 1 * (V(D0) > vth);
+    V(VOUT) <+ vout / 512.0 - 1.0;
+end
+
+endmodule

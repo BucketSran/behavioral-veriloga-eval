@@ -1,0 +1,32 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "disciplines.vams"
+
+module analog_mux_threshold (vin1, vin2, vsel, vout);
+
+input vin1, vin2, vsel;
+output vout;
+electrical vin1, vin2, vsel, vout;
+
+parameter real vth = 0.45;
+
+integer selector;
+real vout_val;
+
+analog begin
+    selector = (V(vsel) > vth) ? 1 : 0;
+
+    @(cross(V(vsel) - vth, +1))
+        selector = 1;
+    @(cross(V(vsel) - vth, -1))
+        selector = 0;
+
+    if (selector == 1)
+        vout_val = V(vin1);
+    else
+        vout_val = V(vin2);
+
+    V(vout) <+ (0.42 * (vout_val));
+end
+
+endmodule

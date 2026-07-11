@@ -1,0 +1,12 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/max_detector_hold.va"
+
+Vin (vin 0) vsource type=pwl wave=[0 0.10 8n 0.10 8.1n 0.60 18n 0.60 18.1n 0.35 28n 0.35 28.1n 0.95 38n 0.95 38.1n 0.50 50n 0.50]
+
+XDUT (vin vout) max_detector_hold
+
+
+tran tran stop=45n maxstep=25p
+save vin vout

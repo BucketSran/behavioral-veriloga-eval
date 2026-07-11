@@ -1,0 +1,12 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/two_bit_counter_marker.va"
+
+Vclk (clkin 0) vsource type=pulse val0=0 val1=1 delay=5n period=10n width=4n rise=100p fall=100p
+
+XDUT (clkin mc) two_bit_counter_marker
+
+
+tran tran stop=55n maxstep=25p
+save clkin mc

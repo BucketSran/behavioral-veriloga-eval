@@ -1,0 +1,16 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "disciplines.vams"
+
+module differential_buffer (VINP, VINN, VOUTP, VOUTN);
+
+input VINP, VINN;
+output VOUTP, VOUTN;
+electrical VINP, VINN, VOUTP, VOUTN;
+
+analog begin
+    V(VOUTP) <+ (0.42 * (V(VINP)));
+    V(VOUTN) <+ (0.42 * (V(VINN)));
+end
+
+endmodule

@@ -1,0 +1,134 @@
+{
+  "family_id": "117",
+  "gold_bundle_sha256": "062169e7a4ddeedc64dbfc98e2b3a5acc059e16e75b87217edf4f1b966c1128e",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "time_diff_detector.va": "ed8af67cf586ec4dc55774bcf8122295b68b5dce05803756c22be8f8d8ad1098"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FIRST_EDGE_CAPTURE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "time_diff_detector.va"
+      ],
+      "fault_class": "fault_001_zero",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero outputs and therefore fails the stable-sample semantic contract.",
+      "violated_property_ids": [
+        "P_FIRST_EDGE_CAPTURE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "time_diff_detector.va": "c50b52e0c23a0db2388d0fd66f68f9f7eca1127567bc1a760dcdf95145e3e500"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PREVIOUS_WINDOW_REPORT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_inverted_time_difference/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "time_diff_detector.va"
+      ],
+      "fault_class": "fault_002_inverted_time_difference",
+      "id": "neg_002_inverted_time_difference",
+      "trigger_condition": "Computes vinn time minus vinp time.",
+      "violated_property_ids": [
+        "P_PREVIOUS_WINDOW_REPORT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "time_diff_detector.va": "bec9068604d5aa0c1fa82c84d4f64dea8b1582e9a566cae52bf215f1c0f6c9f0"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_TRANSITION",
+          "P_SIGNED_DIFFERENCE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_half_scale/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "time_diff_detector.va"
+      ],
+      "fault_class": "fault_003_half_scale",
+      "id": "neg_003_half_scale",
+      "trigger_condition": "Uses one quarter of the requested time-to-voltage scale, avoiding the intended rail clipping.",
+      "violated_property_ids": [
+        "P_OUTPUT_TRANSITION",
+        "P_SIGNED_DIFFERENCE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "time_diff_detector.va": "18f402d21c03368b22f352bc0446b5a7412480ab9f72ac966921cb88fb1e094b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_CLIP"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_no_rearm_after_cycle/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "time_diff_detector.va"
+      ],
+      "fault_class": "fault_004_no_rearm_after_cycle",
+      "id": "neg_004_no_rearm_after_cycle",
+      "trigger_condition": "Fails to re-arm edge detection after each clock cycle.",
+      "violated_property_ids": [
+        "P_OUTPUT_CLIP"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "time_diff_detector.va": "98fd8a3d263b94b25f12c30dea383c6474395b5bfde47fc39b0c098b32049fed"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_WINDOW_REARM"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "time_diff_detector.va"
+      ],
+      "fault_class": "fault_005_metric_scale_low",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Time Diff Detector: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_WINDOW_REARM"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}
