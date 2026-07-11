@@ -1,0 +1,39 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=65n maxstep=20p"
+    ],
+    "body_lines": [
+      "Vvos (vos_ref 0) vsource dc=-0.017",
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=1.5n period=7n width=3.5n rise=80p fall=80p",
+      "",
+      "// The public support comparator is mounted read-only from the declared support contract.",
+      "XLOOP (vdd vss clk dcmpp vinp vinn offset_est valid) comparator_offset_calibration_loop",
+      "XCMP (vdd vss vinp vinn vos_ref dcmpp) support_offset_comparator td=60p tr=15p",
+      ""
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "70c10b599f1afadc76cdb59590c4cbc4e1607325aca940e3867c72bdb89430ba",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "100n"
+  },
+  "profile_name": "score",
+  "property_ids": [
+    "P_ZERO_INITIAL_ESTIMATE",
+    "P_FALLING_EDGE_UPDATE",
+    "P_DECISION_DIRECTION",
+    "P_SUCCESSIVE_STEP_HALVING",
+    "P_SYMMETRIC_DIFFERENTIAL_STIMULUS",
+    "P_VALID_COMPLETION"
+  ],
+  "public_visible": false,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {}
+}

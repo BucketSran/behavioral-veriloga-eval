@@ -1,0 +1,19 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module source_single_shot(vin, vout);
+    input vin;
+    output vout;
+    electrical vin, vout;
+    parameter real pulse_width = 10n from (0:inf);
+    parameter real vlogic_high = 0.9;
+    parameter real vlogic_low = 0.0;
+    parameter real vtrans = 0.45;
+    parameter real tdel = 1n from [0:inf);
+    parameter real trise = 20p;
+    parameter real tfall = 20p;
+
+    analog begin
+        V(vout) <+ transition(0.0, tdel, trise, tfall);
+    end
+endmodule

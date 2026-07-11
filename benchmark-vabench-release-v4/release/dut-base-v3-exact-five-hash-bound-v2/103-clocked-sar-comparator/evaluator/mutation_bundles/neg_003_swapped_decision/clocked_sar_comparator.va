@@ -1,0 +1,6 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module clocked_sar_comparator(CMPCK, VINN, VINP, DCMPN, DCMPP);
+input CMPCK,VINN,VINP; output DCMPN,DCMPP; electrical CMPCK,VINN,VINP,DCMPN,DCMPP; parameter real vdd=0.9; real xoutp,xoutn; analog begin @(initial_step or cross(V(CMPCK)-vdd/2.0,-1)) begin xoutp=1; xoutn=1; end @(cross(V(CMPCK)-vdd/2.0,+1)) begin xoutp=(V(VINP)<V(VINN)); xoutn=(V(VINP)>V(VINN)); end V(DCMPP)<+transition(xoutp*vdd,20p,5p,5p); V(DCMPN)<+transition(xoutn*vdd,20p,5p,5p); end
+endmodule

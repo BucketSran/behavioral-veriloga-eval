@@ -1,0 +1,6 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module source_crossing_pulse_detector(sigin, sigout);
+input sigin; output sigout; electrical sigin,sigout; parameter real sigcrossing=0.45; real sigout_val; analog begin @(initial_step) sigout_val=0.0; @(cross(V(sigin)-sigcrossing,0)) sigout_val=0.9; V(sigout)<+transition(sigout_val,1n,20p,20p); end
+endmodule

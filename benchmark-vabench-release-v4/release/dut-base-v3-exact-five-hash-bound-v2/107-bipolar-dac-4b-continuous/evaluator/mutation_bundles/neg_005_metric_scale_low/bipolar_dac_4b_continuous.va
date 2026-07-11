@@ -1,0 +1,31 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bipolar_dac_4b_continuous(vd3, vd2, vd1, vd0, vout);
+    input vd3, vd2, vd1, vd0;
+    output vout;
+    electrical vd3, vd2, vd1, vd0, vout;
+    parameter real vref = 0.9;
+    parameter real trise = 20p;
+    parameter real tfall = 20p;
+    parameter real tdel = 0;
+    parameter real vtrans = 0.45;
+    real code;
+    real vout_level;
+
+    analog begin
+        @(initial_step or cross(V(vd3) - vtrans, 0) or cross(V(vd2) - vtrans, 0) or
+          cross(V(vd1) - vtrans, 0) or cross(V(vd0) - vtrans, 0)) begin
+            code = 0;
+            code = code + ((V(vd3) > vtrans) ? 8 : 0);
+            code = code + ((V(vd2) > vtrans) ? 4 : 0);
+            code = code + ((V(vd1) > vtrans) ? 2 : 0);
+            code = code + ((V(vd0) > vtrans) ? 1 : 0);
+            vout_level = vref * (2.0 * code / 15.0 - 1.0);
+        end
+
+        V(vout) <+ (0.42 * (transition(vout_level, tdel, trise, tfall)));
+    end
+endmodule

@@ -1,0 +1,16 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module clocked_comparator_reset_low(CMPCK, VINN, VINP, DCMPN, DCMPP);
+    input CMPCK, VINN, VINP;
+    output DCMPN, DCMPP;
+    electrical CMPCK, VINN, VINP, DCMPN, DCMPP;
+    parameter real vdd = 0.9;
+    parameter real td_cmp = 100p;
+    parameter real tr = 10p;
+
+    analog begin
+        V(DCMPP) <+ transition(0.0, td_cmp, tr, tr);
+        V(DCMPN) <+ transition(0.0, td_cmp, tr, tr);
+    end
+endmodule

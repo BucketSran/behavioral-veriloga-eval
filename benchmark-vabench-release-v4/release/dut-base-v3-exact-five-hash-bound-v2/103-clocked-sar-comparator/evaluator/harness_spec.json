@@ -1,0 +1,97 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "clocked_sar_comparator.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=55n maxstep=50p"
+    ],
+    "body_lines": [
+      "Vclk (cmpck 0) vsource type=pulse val0=0 val1=0.9 delay=5n period=20n width=10n rise=100p fall=100p"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "cmpck",
+      "vinn",
+      "vinp",
+      "dcmpn",
+      "dcmpp"
+    ]
+  },
+  "family_id": "103",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "897aa397a742499bd84e6f9162762d7f4db0a24ed7384bf1c91af9e63d582e60",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "5843f8979afb290fdff8cc5187cd590d98318a4ca3a4ed4b74276e5557872573",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vinp (vinp 0) vsource type=pwl wave=[0 0.70 18n 0.70 19n 0.25 60n 0.25]",
+          "Vinn (vinn 0) vsource dc=0.45",
+          "",
+          "XDUT (cmpck vinn vinp dcmpn dcmpp) clocked_sar_comparator",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=62n maxstep=50p"
+        ],
+        "body_lines": [
+          "Vinp (vinp 0) vsource type=pwl wave=[0 0.70 18n 0.70 18.1n 0.25 38n 0.25 38.1n 0.45 62n 0.45]",
+          "Vinn (vinn 0) vsource dc=0.45",
+          "",
+          "XDUT (cmpck vinn vinp dcmpn dcmpp) clocked_sar_comparator",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INITIAL_PRECHARGE",
+    "P_FALLING_EDGE_PRECHARGE",
+    "P_POSITIVE_DIFFERENTIAL_DECISION",
+    "P_NEGATIVE_DIFFERENTIAL_DECISION",
+    "P_EQUAL_INPUT_DECISION",
+    "P_LATCHED_HOLD_AND_TIMING"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "2914038fbfec478ea9959fd3a6695095a335dafcf7d96e2982db032f39581e8c",
+    "family_spec_sha256": "be226a164ed3ef04554aa3ea70e84dc099a65a6ac10ab1104c72fcf8b35bc200"
+  },
+  "task_id": "v4-103"
+}

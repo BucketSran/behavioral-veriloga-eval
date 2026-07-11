@@ -1,0 +1,82 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "source_sample_hold.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=30n maxstep=50p"
+    ],
+    "body_lines": [
+      "Vclk (vclk 0) vsource type=pulse val0=0 val1=0.9 delay=5n period=10n width=4n rise=100p fall=100p",
+      "Vvin (vin 0) vsource type=pwl wave=[0 0.10 4n 0.20 14n 0.55 24n 0.30 34n 0.78 50n 0.40]",
+      "",
+      "XDUT (vin vout vclk) source_sample_hold",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vclk",
+      "vin",
+      "vout"
+    ]
+  },
+  "family_id": "104",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "37931097d6af77faf0d617a594222b97db9e3eb12c9afa3ae0d2b3494f083b5c",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "fd5ad3fb18a19c9ee51e63210a03753371728c7b5bc83abd66a2e1042fb8d6cb",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=45n maxstep=50p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RISING_EDGE_CAPTURE",
+    "P_INTEREDGE_HOLD",
+    "P_NO_FALLING_EDGE_CAPTURE",
+    "P_UNITY_SAMPLE_GAIN",
+    "P_PARAMETERIZED_THRESHOLD"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "a16cfe5ef79ae34fac06a67fa38e92bb42caf6afd272e8a8dbaecef915f08f0f",
+    "family_spec_sha256": "72eea8fa03055ea9db5a2ec5b907f8d8eb94607fac62087158e299415a93acc2"
+  },
+  "task_id": "v4-104"
+}

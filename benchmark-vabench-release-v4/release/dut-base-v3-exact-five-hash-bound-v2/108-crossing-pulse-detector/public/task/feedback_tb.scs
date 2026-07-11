@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/source_crossing_pulse_detector.va"
+
+Vin (sigin 0) vsource type=pwl wave=[0 0.1 4n 0.1 5n 0.8 14n 0.8 15n 0.1 24n 0.1 25n 0.8 34n 0.8 35n 0.1 45n 0.1]
+
+XDUT (sigin sigout) source_crossing_pulse_detector
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=28n maxstep=50p
+save sigin sigout

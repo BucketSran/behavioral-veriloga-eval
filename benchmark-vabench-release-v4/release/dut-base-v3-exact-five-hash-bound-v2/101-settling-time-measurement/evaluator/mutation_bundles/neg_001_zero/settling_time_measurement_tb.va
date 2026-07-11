@@ -1,0 +1,13 @@
+`include "constants.vams"
+`include "disciplines.vams"
+module settling_time_measurement_tb(step,vout,done);
+    input step; output vout,done; electrical step,vout,done; parameter real tr=300p; real y;
+
+analog begin
+    @(initial_step) y = 0.0;
+    @(timer(0,1n)) y = 0.0;
+    V(vout) <+ transition(0.0);
+    V(done) <+ transition(0.0);
+end
+
+endmodule

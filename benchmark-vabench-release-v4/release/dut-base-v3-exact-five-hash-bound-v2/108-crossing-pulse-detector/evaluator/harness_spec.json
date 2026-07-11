@@ -1,0 +1,81 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "source_crossing_pulse_detector.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=28n maxstep=50p"
+    ],
+    "body_lines": [
+      "Vin (sigin 0) vsource type=pwl wave=[0 0.1 4n 0.1 5n 0.8 14n 0.8 15n 0.1 24n 0.1 25n 0.8 34n 0.8 35n 0.1 45n 0.1]",
+      "",
+      "XDUT (sigin sigout) source_crossing_pulse_detector",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "sigin",
+      "sigout"
+    ]
+  },
+  "family_id": "108",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "b6f49d0984b85ccf71ecdc4405589f0fb6765d6ee5861375efcf28172ef51e24",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "26c26215e50330de1a0f1f84b6c9e74d6530bccbf7c3cbc6bff24367301d4c2b",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=45n maxstep=50p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RISING_CROSS_PULSE",
+    "P_FALLING_CROSS_PULSE",
+    "P_PULSE_WIDTH",
+    "P_LOW_BETWEEN_EVENTS",
+    "P_REPEATABLE_BIDIRECTIONAL_EVENTS",
+    "P_TRANSITION_TIMING"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "75466e7ffb3e30ef1061df63234cc0a151a06685a50d0011f72f676cd04d88a6",
+    "family_spec_sha256": "1ce5ad15308a750941790f01950acc2a04ab9337b71a3c36d0afda006fa744de"
+  },
+  "task_id": "v4-108"
+}

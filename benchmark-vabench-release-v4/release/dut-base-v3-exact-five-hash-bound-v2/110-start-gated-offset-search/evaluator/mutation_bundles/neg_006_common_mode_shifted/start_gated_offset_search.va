@@ -1,0 +1,60 @@
+`include "disciplines.vams"
+
+module start_gated_offset_search (CLK, VOUT, START, VINP, VINN);
+
+input CLK, VOUT, START;
+output VINP, VINN;
+electrical CLK, VOUT, START, VINP, VINN;
+
+parameter real vdd = 0.9;
+parameter real vcm = 0.7;
+parameter real vstart_th = 0.45;
+
+real vin = 0;
+real step = 20m;
+integer state = 1;
+integer sign = 1;
+integer enable = 0;
+
+analog begin
+    @(initial_step) begin
+        enable = 0;
+        vin = 0;
+        step = 20m;
+        state = 1;
+    end
+
+    @(cross(V(START) - vstart_th, +1)) begin
+        enable = 1;
+        vin = 0;
+        step = 20m;
+        state = 1;
+    end
+
+    @(cross(V(START) - vstart_th, -1)) begin
+        enable = 0;
+        vin = 0;
+        step = 20m;
+        state = 1;
+    end
+
+    @(cross(V(CLK) - 0.5 * vdd, -1)) begin
+        if (enable) begin
+            sign = (0.9 - V(VOUT)) < 0.5 * vdd;
+            if ((state != sign) && (step > 0u))
+                step = step / 2.0;
+            state = sign;
+            vin = vin + (2 * state - 1) * step;
+        end
+    end
+
+    if (enable) begin
+        V(VINP) <+ (vcm + 0.5 * vin);
+        V(VINN) <+ (vcm + 0.5 * vin);
+    end else begin
+        V(VINP) <+ vcm;
+        V(VINN) <+ vcm;
+    end
+end
+
+endmodule

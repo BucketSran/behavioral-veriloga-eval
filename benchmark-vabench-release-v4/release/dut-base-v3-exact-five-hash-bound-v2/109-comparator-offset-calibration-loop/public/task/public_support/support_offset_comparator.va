@@ -1,0 +1,30 @@
+// Public support comparator used to close the calibration loop.
+`include "disciplines.vams"
+
+module support_offset_comparator(vdd, vss, vinp, vinn, vos_ref, dcmpp);
+input vdd, vss, vinp, vinn, vos_ref;
+output dcmpp;
+electrical vdd, vss, vinp, vinn, vos_ref, dcmpp;
+
+parameter real td = 80p;
+parameter real tr = 20p;
+
+integer decision;
+
+analog begin
+    @(initial_step) begin
+        decision = (V(vinp, vinn) > V(vos_ref, vss));
+    end
+
+    @(cross(V(vinp, vinn) - V(vos_ref, vss), +1)) begin
+        decision = 1;
+    end
+
+    @(cross(V(vinp, vinn) - V(vos_ref, vss), -1)) begin
+        decision = 0;
+    end
+
+    V(dcmpp, vss) <+ transition(decision ? 1.0 : 0.0, td, tr, tr) * V(vdd, vss);
+end
+
+endmodule

@@ -1,0 +1,6 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bipolar_dac_4b_continuous(vd3, vd2, vd1, vd0, vout);
+input vd3,vd2,vd1,vd0; output vout; electrical vd3,vd2,vd1,vd0,vout; parameter real vref=0.9; parameter real vtrans=0.45; real code; analog begin code=((V(vd3)>vtrans)?1:0)+((V(vd2)>vtrans)?2:0)+((V(vd1)>vtrans)?4:0)+((V(vd0)>vtrans)?8:0); V(vout)<+transition(vref*(2.0*code/15.0-1.0),0,20p,20p); end
+endmodule

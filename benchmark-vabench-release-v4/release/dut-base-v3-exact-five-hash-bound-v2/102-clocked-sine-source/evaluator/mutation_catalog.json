@@ -1,0 +1,134 @@
+{
+  "family_id": "102",
+  "gold_bundle_sha256": "df9f041b7ff968034ad5e4ffdc2676dd266174724649e543925a2c609e2ae66c",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "vin_src.va": "291e768a53aedfc29da42b5a491bba9d8a5db493b0437f8b705d16ea34b0a51b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_COMMON_MODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "vin_src.va"
+      ],
+      "fault_class": "fault_001_zero",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives both stimulus outputs to zero.",
+      "violated_property_ids": [
+        "P_RESET_COMMON_MODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "vin_src.va": "133d3242d441ea105c5d3b2e0c085df17f16f934ae83db68dd486efa1af1ce9b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RISING_EDGE_SAMPLE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_static_common_mode/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "vin_src.va"
+      ],
+      "fault_class": "fault_002_static_common_mode",
+      "id": "neg_002_static_common_mode",
+      "trigger_condition": "Holds both outputs at common mode, so the composed gain flow sees no input signal.",
+      "violated_property_ids": [
+        "P_RISING_EDGE_SAMPLE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "vin_src.va": "fc3a50d281e1b0272df0a81f5b9afdf9c331b5b09525d27ad8752574c7788e46"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SAMPLED_SINE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_common_mode_sine/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "vin_src.va"
+      ],
+      "fault_class": "fault_003_common_mode_sine",
+      "id": "neg_003_common_mode_sine",
+      "trigger_condition": "Drives both outputs to the wrong high common-mode level with no differential stimulus.",
+      "violated_property_ids": [
+        "P_SAMPLED_SINE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "vin_src.va": "2a41a8047811ab167c3ff83e9aac4cba3ee66953e23e2fb135a2902aa15818e4"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_REFERENCE_SIDE_COMMON_MODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_reset_stuck/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "vin_src.va"
+      ],
+      "fault_class": "fault_004_reset_stuck",
+      "id": "neg_004_reset_stuck",
+      "trigger_condition": "Never updates after reset release.",
+      "violated_property_ids": [
+        "P_REFERENCE_SIDE_COMMON_MODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "vin_src.va": "abeb83b44698d5b7410d6649534a1268ef76a180be26abaa375003d26f1e329b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INTEREDGE_HOLD",
+          "P_SEEDED_REPEATABILITY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "vin_src.va"
+      ],
+      "fault_class": "fault_005_metric_scale_low",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Clocked Sine Source: preserves clocked sampling and deterministic noise but attenuates the sine stimulus too far.",
+      "violated_property_ids": [
+        "P_INTEREDGE_HOLD",
+        "P_SEEDED_REPEATABILITY"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

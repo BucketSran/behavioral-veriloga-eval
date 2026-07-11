@@ -1,0 +1,8 @@
+// vaBench generated partial-pass negative: event_edge_wrong
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "constants.vams"
+`include "disciplines.vams"
+module settling_time_measurement_tb(step,vout,done);
+    input step; output vout,done; electrical step,vout,done; parameter real tr=300p; real y;
+    analog begin @(initial_step) y=0.0; @(timer(0,1n)) y=y+0.04*(V(step)-y); V(vout)<+(0.42 * (transition(y,0,tr,tr))); V(done)<+(0.42 * (transition(($abstime>120n && y>0.75)?0.9:0.0,0,tr,tr))); end
+endmodule

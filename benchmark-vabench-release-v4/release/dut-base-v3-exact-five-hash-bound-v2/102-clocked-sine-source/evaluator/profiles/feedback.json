@@ -1,0 +1,60 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "body_lines": [
+      "// gain_extraction smoke testbench",
+      "// 50 MHz clock, ACTUAL_GAIN=8.64, DITHER_AMP=0.014063. Run 2us.",
+      "// Check: std(vamp_diff) / std(vin_diff) > 4.0.",
+      "",
+      "parameters vdd=0.9 ACTUAL_GAIN=8.64 DITHER_AMP=0.014063 fs=50e6 fin=1e6 VIN_NOISE=0.01",
+      "",
+      "Vvdd (vdd 0) vsource dc=vdd",
+      "Vvss (vss 0) vsource dc=0",
+      "",
+      "// 50 MHz clock",
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=vdd period=20n delay=5n rise=1n fall=1n width=9n",
+      "",
+      "// Reset deasserts at 40ns",
+      "Vrst_n (rst_n 0) vsource type=pwl wave=[0 0  39.5n 0  40n vdd  2u vdd]",
+      "Ven    (en    0) vsource dc=vdd",
+      "",
+      "// Public support modules are mounted read-only from the declared support contract.",
+      "// Clocked noisy sine input",
+      "IVIN  (clk rst_n vinp vinn) vin_src vdd=vdd vth=0.45 ampl=0.02 freq=fin sigma=VIN_NOISE SEED=0",
+      "",
+      "// LFSR (drives dither)",
+      "ILFSR (dpn vdd vss clk en rst_n) lfsr seed=42",
+      "",
+      "// Dither adder",
+      "IDITH (vinp vinn dpn vdin_p vdin_n) dither_adder vdd=vdd vth=0.45 DITHER_AMP=DITHER_AMP",
+      "",
+      "// Fixed-gain amplifier",
+      "IAMP  (vdin_p vdin_n vamp_p vamp_n) gain_amp_fixed vdd=vdd ACTUAL_GAIN=ACTUAL_GAIN",
+      ""
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "e0ac788ced58b6a0f110510829cf26788c983e49d9b57f785ea842041b1b2284",
+  "parameters": {
+    "maxstep": "200p",
+    "stop_time": "100n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_RESET_COMMON_MODE",
+    "P_RISING_EDGE_SAMPLE",
+    "P_SAMPLED_SINE",
+    "P_REFERENCE_SIDE_COMMON_MODE",
+    "P_INTEREDGE_HOLD",
+    "P_SEEDED_REPEATABILITY"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

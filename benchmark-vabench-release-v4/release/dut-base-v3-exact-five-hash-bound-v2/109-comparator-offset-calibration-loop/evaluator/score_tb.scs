@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/comparator_offset_calibration_loop.va"
+ahdl_include "./support/support_offset_comparator.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0.0
+Vvos (vos_ref 0) vsource dc=-0.017
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=1.5n period=7n width=3.5n rise=80p fall=80p
+
+// The public support comparator is mounted read-only from the declared support contract.
+XLOOP (vdd vss clk dcmpp vinp vinn offset_est valid) comparator_offset_calibration_loop
+XCMP (vdd vss vinp vinn vos_ref dcmpp) support_offset_comparator td=60p tr=15p
+
+
+tran tran stop=65n maxstep=20p
+save vdd vss clk dcmpp vinp vinn offset_est valid vos_ref

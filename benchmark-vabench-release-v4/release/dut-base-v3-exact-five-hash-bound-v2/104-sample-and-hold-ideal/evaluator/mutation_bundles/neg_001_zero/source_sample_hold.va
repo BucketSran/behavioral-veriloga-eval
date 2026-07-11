@@ -1,0 +1,14 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module source_sample_hold(vin, vout, vclk);
+    input vin, vclk;
+    output vout;
+    electrical vin, vout, vclk;
+    parameter real vtrans_clk = 0.45;
+    parameter real tr = 20p;
+
+    analog begin
+        V(vout) <+ transition(0.0, 0, tr, tr);
+    end
+endmodule
