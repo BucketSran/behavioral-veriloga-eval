@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/sampled_error_update_monitor.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=200p period=1n width=420p rise=25p fall=25p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.1n 0.9 1.15n 0 9.2n 0 9.25n 0.9 10.3n 0.9 10.35n 0 14n 0]
+Vsample (sample 0) vsource type=pwl wave=[0 0.2 3n 0.2 3.05n 0.67 6.8n 0.67 6.85n 0.55 10.5n 0.55 10.55n 0.3 14n 0.3]
+Vtarget (target 0) vsource type=pwl wave=[0 0.7 6.8n 0.7 6.85n 0.35 10.5n 0.35 10.55n 0.42 14n 0.42]
+Vcoef (coef 0) vsource type=pwl wave=[0 0.45 6.8n 0.45 6.85n 0.72 14n 0.72]
+
+XDUT (clk rst sample target coef out err_metric progress) sampled_error_update_monitor
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=14n maxstep=10p
+save clk rst sample target coef out err_metric progress time

@@ -1,0 +1,55 @@
+`include "disciplines.vams"
+
+module saturation_recovery_limiter(vin, en, out, sat, recovery_metric);
+input vin, en;
+output out, sat, recovery_metric;
+electrical vin, en, out, sat, recovery_metric;
+
+parameter real vth = 0.45;
+parameter real vhi = 0.9;
+parameter real vlo = 0.12;
+parameter real vlimit = 0.78;
+parameter real tr = 60p;
+
+real raw_v;
+real limited_v;
+real enabled_v;
+real sat_v;
+real out_v;
+real recovery_v;
+
+analog function real clip01;
+    input x;
+    real x;
+    begin
+        if (x < 0.0) clip01 = 0.0;
+        else if (x > 1.0) clip01 = 1.0;
+        else clip01 = x;
+    end
+endfunction
+
+analog function real clamp_range;
+    input x;
+    input lo;
+    input hi;
+    real x, lo, hi;
+    begin
+        if (x < lo) clamp_range = lo;
+        else if (x > hi) clamp_range = hi;
+        else clamp_range = x;
+    end
+endfunction
+
+analog begin
+    raw_v = V(vin);
+    enabled_v = (V(en) > vth) ? 1.0 : 0.0;
+    limited_v = clamp_range(raw_v, vlo, vlimit);
+    out_v = (enabled_v > 0.5) ? limited_v : 0.0;
+    sat_v = ((enabled_v > 0.5) && (abs(raw_v - limited_v) > 1.0e-9)) ? vhi : 0.0;
+    recovery_v = (enabled_v > 0.5) ? vhi * clip01(abs(raw_v - limited_v) / 0.20) : 0.0;
+
+    V(out) <+ out_v;
+    V(sat) <+ sat_v;
+    V(recovery_metric) <+ recovery_v;
+end
+endmodule

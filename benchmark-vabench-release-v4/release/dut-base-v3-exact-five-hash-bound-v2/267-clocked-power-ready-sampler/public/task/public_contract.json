@@ -1,0 +1,342 @@
+{
+  "agent_visible_files": [
+    "instruction.md",
+    "public_contract.json",
+    "feedback_tb.scs"
+  ],
+  "artifact_boundary": {
+    "public_readonly_support": [],
+    "solver_owned_artifacts": [
+      "clocked_power_ready_sampler.va"
+    ]
+  },
+  "canonical_dut_id": "267",
+  "canonical_dut_slug": "267-clocked-power-ready-sampler",
+  "canonical_instruction": "instruction.md",
+  "category": "reset_power_control",
+  "counted_in_score": true,
+  "difficulty": "D2",
+  "feedback_oracle": {
+    "command": "vabench-feedback --task . --submission ../submission",
+    "feedback_channels": [
+      "ahdl_like_preflight",
+      "evas_simulation",
+      "behavior_property_diagnostics"
+    ],
+    "profile_exposed": false,
+    "public_tb": "feedback_tb.scs",
+    "public_tb_exposed": true,
+    "queryable_by_agentic_modes": true,
+    "raw_scs_exposed": true
+  },
+  "form": "dut",
+  "gate2_status": "gate2_ready",
+  "interface": {
+    "artifact_mode": "single_file",
+    "modules": [
+      {
+        "depends_on": [],
+        "file": "clocked_power_ready_sampler.va",
+        "module": "clocked_power_ready_sampler",
+        "parameters": [
+          {
+            "default": "0.45",
+            "name": "vth",
+            "override_behavior": "overrides vth",
+            "type": "real",
+            "units": "",
+            "valid_range": "finite"
+          },
+          {
+            "default": "0.9",
+            "name": "vhi",
+            "override_behavior": "overrides vhi",
+            "type": "real",
+            "units": "",
+            "valid_range": "finite"
+          },
+          {
+            "default": "0.62",
+            "name": "span_min",
+            "override_behavior": "overrides span_min",
+            "type": "real",
+            "units": "",
+            "valid_range": "finite"
+          },
+          {
+            "default": "1.28",
+            "name": "span_max",
+            "override_behavior": "overrides span_max",
+            "type": "real",
+            "units": "",
+            "valid_range": "finite"
+          },
+          {
+            "default": "50p",
+            "name": "tr",
+            "override_behavior": "overrides tr",
+            "type": "real",
+            "units": "",
+            "valid_range": "finite"
+          }
+        ],
+        "ports": [
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "clk",
+            "position": 0
+          },
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "rst",
+            "position": 1
+          },
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "in0",
+            "position": 2
+          },
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "in1",
+            "position": 3
+          },
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "in2",
+            "position": 4
+          },
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "in3",
+            "position": 5
+          },
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "ctrl0",
+            "position": 6
+          },
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "ctrl1",
+            "position": 7
+          },
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "vdd",
+            "position": 8
+          },
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "vss",
+            "position": 9
+          },
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "en",
+            "position": 10
+          },
+          {
+            "direction": "output",
+            "discipline": "electrical",
+            "name": "out",
+            "position": 11
+          },
+          {
+            "direction": "output",
+            "discipline": "electrical",
+            "name": "flag",
+            "position": 12
+          },
+          {
+            "direction": "output",
+            "discipline": "electrical",
+            "name": "metric",
+            "position": 13
+          }
+        ],
+        "role": "entry"
+      }
+    ]
+  },
+  "language": "verilog-a",
+  "level": "L2",
+  "observable_contract": [
+    {
+      "description": "Measure analog inputs relative to the local `vss` rail and normalize by the current local supply span. Let `span = V(vdd, vss)` and treat the row as valid only when `V(en) > vth` and `span_min <= span <= span_max`. If `span` is below `0.05 V`, use `0.05 V` as the normalization span. Define `clip01(y)` as `y` limited to the range `[0, 1]` and `x0..x3 = clip01((V(inN) - V(vss)) / span)`.",
+      "id": "P_MEASURE_ANALOG_INPUTS_RELATIVE_TO_THE",
+      "required_signals": [
+        "time",
+        "clk",
+        "ctrl0",
+        "ctrl1",
+        "en",
+        "flag",
+        "in0",
+        "in1",
+        "in2",
+        "in3",
+        "metric",
+        "out",
+        "rst",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "description": "Initialize the ready count and all observables to `0 V`. On a rising crossing of `clk` or a rising crossing of `rst`, clear the count and all observables when `rst` is high or the row is not valid. Otherwise, increment a saturating count by one up to a maximum of `4` when both `x0 > 0.25` and `x1 > 0.20`; if that sampled condition is not met, clear the count to zero. Drive `out = vhi * clip01(count / 4.0)`, assert `flag = vhi` when `count >= 3`, and drive `metric = vhi * clip01(abs(x0 - x1))`. Hold the last observable values between update events.",
+      "id": "P_INITIALIZE_THE_READY_COUNT_AND_ALL",
+      "required_signals": [
+        "time",
+        "clk",
+        "ctrl0",
+        "ctrl1",
+        "en",
+        "flag",
+        "in0",
+        "in1",
+        "in2",
+        "in3",
+        "metric",
+        "out",
+        "rst",
+        "vdd",
+        "vss"
+      ]
+    }
+  ],
+  "oracle_policy": {
+    "checker_private": true,
+    "feedback_and_score_share_checker_family": true,
+    "feedback_oracle_materialized": true,
+    "no_model_visible_raw_scs": false,
+    "no_model_visible_starter": true,
+    "proposal_only": false,
+    "public_feedback_tb_exposed": true,
+    "score_tb_private": true,
+    "single_public_contract": true,
+    "testbench_and_checker_split_required": true
+  },
+  "output_artifacts": [
+    {
+      "modules": [
+        "clocked_power_ready_sampler"
+      ],
+      "path": "clocked_power_ready_sampler.va"
+    }
+  ],
+  "parameters": [
+    {
+      "default": "0.45",
+      "name": "vth",
+      "override_behavior": "overrides vth",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "0.9",
+      "name": "vhi",
+      "override_behavior": "overrides vhi",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "0.62",
+      "name": "span_min",
+      "override_behavior": "overrides span_min",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "1.28",
+      "name": "span_max",
+      "override_behavior": "overrides span_max",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "50p",
+      "name": "tr",
+      "override_behavior": "overrides tr",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    }
+  ],
+  "public_observables": [
+    "clk",
+    "ctrl0",
+    "ctrl1",
+    "en",
+    "flag",
+    "in0",
+    "in1",
+    "in2",
+    "in3",
+    "metric",
+    "out",
+    "rst",
+    "vdd",
+    "vss"
+  ],
+  "schema_version": "v4-public-contract-v1",
+  "score_oracle": {
+    "checker_profile_exposed": false,
+    "private_score_tb_exposed": false,
+    "profile_exposed": false,
+    "queryable_by_agentic_modes": false,
+    "raw_scs_exposed": false
+  },
+  "status": "gate2_ready",
+  "target_artifacts": [
+    "clocked_power_ready_sampler.va"
+  ],
+  "task_id": "v4_267_clocked_power_ready_sampler",
+  "task_slug": "359-clocked-power-ready-sampler",
+  "title": "Clocked Power Ready Sampler",
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "ctrl0",
+      "ctrl1",
+      "en",
+      "flag",
+      "in0",
+      "in1",
+      "in2",
+      "in3",
+      "metric",
+      "out",
+      "rst",
+      "vdd",
+      "vss"
+    ]
+  },
+  "track": "utility_control_dut",
+  "validation_status": {
+    "evas_feedback_score_gold": "pass",
+    "gate2": "dut_base_sealed",
+    "next_gate": "canonical_suite_unification_pending",
+    "semantic_negative_certification": "pass",
+    "spectre_score_gold": "clean_pass",
+    "tri_form_gate2": "pending",
+    "tri_form_gate3": "pending",
+    "untriaged_warning_count": 0
+  }
+}

@@ -1,0 +1,230 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "saturation_recovery_limiter",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vhi",
+                "override_behavior": "overrides vhi",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.12",
+                "name": "vlo",
+                "override_behavior": "overrides vlo",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.78",
+                "name": "vlimit",
+                "override_behavior": "overrides vlimit",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "60p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "en",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sat",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "recovery_metric",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "saturation_recovery_limiter.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "269",
+  "identity": {
+    "category": "signal_conditioning_and_measurement",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Saturation Recovery Limiter"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_CLAMP_THE_ENABLED_INPUT_BETWEEN_THE",
+      "observable_contract": "Clamp the enabled input between the public low and high limiter levels.",
+      "required_signals": [
+        "time",
+        "en",
+        "out",
+        "recovery_metric",
+        "sat",
+        "vin"
+      ]
+    },
+    {
+      "id": "P_DRIVE_A_SATURATION_FLAG_WHEN_EITHER",
+      "observable_contract": "Drive a saturation flag when either limiter boundary is active.",
+      "required_signals": [
+        "time",
+        "en",
+        "out",
+        "recovery_metric",
+        "sat",
+        "vin"
+      ]
+    },
+    {
+      "id": "P_CLEAR_OUTPUT_FLAG_AND_RECOVERY_METRIC",
+      "observable_contract": "Clear output, flag, and recovery metric while enable is low.",
+      "required_signals": [
+        "time",
+        "en",
+        "out",
+        "recovery_metric",
+        "sat",
+        "vin"
+      ]
+    },
+    {
+      "id": "P_COMPUTE_LIMITED_CLAMP_V_VIN_VLO",
+      "observable_contract": "Compute `limited = clamp(V(vin), vlo, vlimit)` while enabled and drive `out`",
+      "required_signals": [
+        "time",
+        "en",
+        "out",
+        "recovery_metric",
+        "sat",
+        "vin"
+      ]
+    },
+    {
+      "id": "P_DRIVE_SAT_VHI_WHEN_ENABLED_AND",
+      "observable_contract": "Drive `sat = vhi` when enabled and `V(vin)` is outside `[vlo, vlimit]`;",
+      "required_signals": [
+        "time",
+        "en",
+        "out",
+        "recovery_metric",
+        "sat",
+        "vin"
+      ]
+    },
+    {
+      "id": "P_DRIVE_THE_RECOVERY_METRIC_AS",
+      "observable_contract": "Drive the recovery metric as",
+      "required_signals": [
+        "time",
+        "en",
+        "out",
+        "recovery_metric",
+        "sat",
+        "vin"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1269",
+    "dut": "v4-269",
+    "testbench": "v4-769"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "en",
+            "port_ref": "en",
+            "position": 1
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 2
+          },
+          {
+            "net": "sat",
+            "port_ref": "sat",
+            "position": 3
+          },
+          {
+            "net": "recovery_metric",
+            "port_ref": "recovery_metric",
+            "position": 4
+          }
+        ],
+        "module_ref": "saturation_recovery_limiter",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "en",
+      "out",
+      "recovery_metric",
+      "sat",
+      "vin"
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/saturation_recovery_limiter.va"
+
+Vvin (vin 0) vsource type=pwl wave=[0 0.42 2n 0.42 2.05n 0.88 4n 0.88 4.05n 0.08 6n 0.08 6.05n 0.58 8n 0.58 8.05n 0.94 10n 0.94 10.05n 0.24 12n 0.24]
+Ven (en 0) vsource type=pwl wave=[0 0.9 8.6n 0.9 8.65n 0 10.2n 0 10.25n 0.9 12n 0.9]
+
+XDUT (vin en out sat recovery_metric) saturation_recovery_limiter
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=12n maxstep=10p
+save vin en out sat recovery_metric time

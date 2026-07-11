@@ -1,0 +1,262 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "sampled_error_update_monitor",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vhi",
+                "override_behavior": "overrides vhi",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.50",
+                "name": "err_fullscale",
+                "override_behavior": "overrides err_fullscale",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.040",
+                "name": "err_window",
+                "override_behavior": "overrides err_window",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "3",
+                "name": "ready_count",
+                "override_behavior": "overrides ready_count",
+                "type": "integer",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "60p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sample",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "target",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "coef",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "err_metric",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "progress",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "sampled_error_update_monitor.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "270",
+  "identity": {
+    "category": "calibration_control",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Sampled Error Update Monitor"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_CLEARS_STATE_AND_OBSERVABLES",
+      "observable_contract": "While rst is high at a rising clock edge, clear the stable count, out, err_metric, and progress.",
+      "required_signals": [
+        "clk",
+        "coef",
+        "err_metric",
+        "out",
+        "progress",
+        "rst",
+        "sample",
+        "target",
+        "time"
+      ]
+    },
+    {
+      "id": "P_CORRECTED_OUTPUT_USES_SAMPLE_TARGET_AND_COEF",
+      "observable_contract": "At each enabled rising clock edge, compute the clipped coefficient and drive the clamped corrected sample from sample, target, and coef.",
+      "required_signals": [
+        "clk",
+        "coef",
+        "err_metric",
+        "out",
+        "progress",
+        "rst",
+        "sample",
+        "target",
+        "time"
+      ]
+    },
+    {
+      "id": "P_ERROR_METRIC_REPORTS_ABSOLUTE_ERROR",
+      "observable_contract": "Drive err_metric from the bounded absolute target-minus-sample error.",
+      "required_signals": [
+        "clk",
+        "coef",
+        "err_metric",
+        "out",
+        "progress",
+        "rst",
+        "sample",
+        "target",
+        "time"
+      ]
+    },
+    {
+      "id": "P_PROGRESS_COUNTS_CONSECUTIVE_IN_WINDOW_SAMPLES",
+      "observable_contract": "Increment progress only for consecutive in-window sampled errors, clear it on an out-of-window sample, and saturate at ready_count.",
+      "required_signals": [
+        "clk",
+        "coef",
+        "err_metric",
+        "out",
+        "progress",
+        "rst",
+        "sample",
+        "target",
+        "time"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1270",
+    "dut": "v4-270",
+    "testbench": "v4-770"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "sample",
+            "port_ref": "sample",
+            "position": 2
+          },
+          {
+            "net": "target",
+            "port_ref": "target",
+            "position": 3
+          },
+          {
+            "net": "coef",
+            "port_ref": "coef",
+            "position": 4
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 5
+          },
+          {
+            "net": "err_metric",
+            "port_ref": "err_metric",
+            "position": 6
+          },
+          {
+            "net": "progress",
+            "port_ref": "progress",
+            "position": 7
+          }
+        ],
+        "module_ref": "sampled_error_update_monitor",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "coef",
+      "err_metric",
+      "out",
+      "progress",
+      "rst",
+      "sample",
+      "target"
+    ]
+  }
+}

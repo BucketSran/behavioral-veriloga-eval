@@ -1,0 +1,300 @@
+{
+  "agent_visible_files": [
+    "instruction.md",
+    "public_contract.json",
+    "feedback_tb.scs"
+  ],
+  "artifact_boundary": {
+    "public_readonly_support": [],
+    "solver_owned_artifacts": [
+      "saturation_recovery_limiter.va"
+    ]
+  },
+  "canonical_dut_id": "269",
+  "canonical_dut_slug": "269-saturation-recovery-limiter",
+  "canonical_instruction": "instruction.md",
+  "category": "signal_conditioning_and_measurement",
+  "counted_in_score": true,
+  "difficulty": "D2",
+  "feedback_oracle": {
+    "command": "vabench-feedback --task . --submission ../submission",
+    "feedback_channels": [
+      "ahdl_like_preflight",
+      "evas_simulation",
+      "behavior_property_diagnostics"
+    ],
+    "profile_exposed": false,
+    "public_tb": "feedback_tb.scs",
+    "public_tb_exposed": true,
+    "queryable_by_agentic_modes": true,
+    "raw_scs_exposed": true
+  },
+  "form": "dut",
+  "gate2_status": "gate2_ready",
+  "interface": {
+    "artifact_mode": "single_file",
+    "modules": [
+      {
+        "depends_on": [],
+        "file": "saturation_recovery_limiter.va",
+        "module": "saturation_recovery_limiter",
+        "parameters": [
+          {
+            "default": "0.45",
+            "name": "vth",
+            "override_behavior": "overrides vth",
+            "type": "real",
+            "units": "",
+            "valid_range": "finite"
+          },
+          {
+            "default": "0.9",
+            "name": "vhi",
+            "override_behavior": "overrides vhi",
+            "type": "real",
+            "units": "",
+            "valid_range": "finite"
+          },
+          {
+            "default": "0.12",
+            "name": "vlo",
+            "override_behavior": "overrides vlo",
+            "type": "real",
+            "units": "",
+            "valid_range": "finite"
+          },
+          {
+            "default": "0.78",
+            "name": "vlimit",
+            "override_behavior": "overrides vlimit",
+            "type": "real",
+            "units": "",
+            "valid_range": "finite"
+          },
+          {
+            "default": "60p",
+            "name": "tr",
+            "override_behavior": "overrides tr",
+            "type": "real",
+            "units": "",
+            "valid_range": "finite"
+          }
+        ],
+        "ports": [
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "vin",
+            "position": 0
+          },
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "en",
+            "position": 1
+          },
+          {
+            "direction": "output",
+            "discipline": "electrical",
+            "name": "out",
+            "position": 2
+          },
+          {
+            "direction": "output",
+            "discipline": "electrical",
+            "name": "sat",
+            "position": 3
+          },
+          {
+            "direction": "output",
+            "discipline": "electrical",
+            "name": "recovery_metric",
+            "position": 4
+          }
+        ],
+        "role": "entry"
+      }
+    ]
+  },
+  "language": "verilog-a",
+  "level": "L1",
+  "observable_contract": [
+    {
+      "description": "Clamp the enabled input between the public low and high limiter levels.",
+      "id": "P_CLAMP_THE_ENABLED_INPUT_BETWEEN_THE",
+      "required_signals": [
+        "time",
+        "en",
+        "out",
+        "recovery_metric",
+        "sat",
+        "vin"
+      ]
+    },
+    {
+      "description": "Drive a saturation flag when either limiter boundary is active.",
+      "id": "P_DRIVE_A_SATURATION_FLAG_WHEN_EITHER",
+      "required_signals": [
+        "time",
+        "en",
+        "out",
+        "recovery_metric",
+        "sat",
+        "vin"
+      ]
+    },
+    {
+      "description": "Clear output, flag, and recovery metric while enable is low.",
+      "id": "P_CLEAR_OUTPUT_FLAG_AND_RECOVERY_METRIC",
+      "required_signals": [
+        "time",
+        "en",
+        "out",
+        "recovery_metric",
+        "sat",
+        "vin"
+      ]
+    },
+    {
+      "description": "Compute `limited = clamp(V(vin), vlo, vlimit)` while enabled and drive `out`",
+      "id": "P_COMPUTE_LIMITED_CLAMP_V_VIN_VLO",
+      "required_signals": [
+        "time",
+        "en",
+        "out",
+        "recovery_metric",
+        "sat",
+        "vin"
+      ]
+    },
+    {
+      "description": "Drive `sat = vhi` when enabled and `V(vin)` is outside `[vlo, vlimit]`;",
+      "id": "P_DRIVE_SAT_VHI_WHEN_ENABLED_AND",
+      "required_signals": [
+        "time",
+        "en",
+        "out",
+        "recovery_metric",
+        "sat",
+        "vin"
+      ]
+    },
+    {
+      "description": "Drive the recovery metric as",
+      "id": "P_DRIVE_THE_RECOVERY_METRIC_AS",
+      "required_signals": [
+        "time",
+        "en",
+        "out",
+        "recovery_metric",
+        "sat",
+        "vin"
+      ]
+    }
+  ],
+  "oracle_policy": {
+    "checker_private": true,
+    "feedback_and_score_share_checker_family": true,
+    "feedback_oracle_materialized": true,
+    "no_model_visible_raw_scs": false,
+    "no_model_visible_starter": true,
+    "proposal_only": false,
+    "public_feedback_tb_exposed": true,
+    "score_tb_private": true,
+    "single_public_contract": true,
+    "testbench_and_checker_split_required": true
+  },
+  "output_artifacts": [
+    {
+      "modules": [
+        "saturation_recovery_limiter"
+      ],
+      "path": "saturation_recovery_limiter.va"
+    }
+  ],
+  "parameters": [
+    {
+      "default": "0.45",
+      "name": "vth",
+      "override_behavior": "overrides vth",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "0.9",
+      "name": "vhi",
+      "override_behavior": "overrides vhi",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "0.12",
+      "name": "vlo",
+      "override_behavior": "overrides vlo",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "0.78",
+      "name": "vlimit",
+      "override_behavior": "overrides vlimit",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "60p",
+      "name": "tr",
+      "override_behavior": "overrides tr",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    }
+  ],
+  "public_observables": [
+    "en",
+    "out",
+    "recovery_metric",
+    "sat",
+    "vin"
+  ],
+  "schema_version": "v4-public-contract-v1",
+  "score_oracle": {
+    "checker_profile_exposed": false,
+    "private_score_tb_exposed": false,
+    "profile_exposed": false,
+    "queryable_by_agentic_modes": false,
+    "raw_scs_exposed": false
+  },
+  "status": "gate2_ready",
+  "target_artifacts": [
+    "saturation_recovery_limiter.va"
+  ],
+  "task_id": "v4_269_saturation_recovery_limiter",
+  "task_slug": "373-saturation-recovery-limiter",
+  "title": "Saturation Recovery Limiter",
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "en",
+      "out",
+      "recovery_metric",
+      "sat",
+      "vin"
+    ]
+  },
+  "track": "measurement_dut",
+  "validation_status": {
+    "evas_feedback_score_gold": "pass",
+    "gate2": "dut_base_sealed",
+    "next_gate": "canonical_suite_unification_pending",
+    "semantic_negative_certification": "pass",
+    "spectre_score_gold": "clean_pass",
+    "tri_form_gate2": "pending",
+    "tri_form_gate3": "pending",
+    "untriaged_warning_count": 0
+  }
+}

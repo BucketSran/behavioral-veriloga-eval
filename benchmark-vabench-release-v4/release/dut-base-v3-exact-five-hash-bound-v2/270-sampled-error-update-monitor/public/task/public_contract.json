@@ -1,0 +1,328 @@
+{
+  "agent_visible_files": [
+    "instruction.md",
+    "public_contract.json",
+    "feedback_tb.scs"
+  ],
+  "artifact_boundary": {
+    "public_readonly_support": [],
+    "solver_owned_artifacts": [
+      "sampled_error_update_monitor.va"
+    ]
+  },
+  "canonical_dut_id": "270",
+  "canonical_dut_slug": "270-sampled-error-update-monitor",
+  "canonical_instruction": "instruction.md",
+  "category": "calibration_control",
+  "counted_in_score": true,
+  "difficulty": "D2",
+  "feedback_oracle": {
+    "command": "vabench-feedback --task . --submission ../submission",
+    "feedback_channels": [
+      "ahdl_like_preflight",
+      "evas_simulation",
+      "behavior_property_diagnostics"
+    ],
+    "profile_exposed": false,
+    "public_tb": "feedback_tb.scs",
+    "public_tb_exposed": true,
+    "queryable_by_agentic_modes": true,
+    "raw_scs_exposed": true
+  },
+  "form": "dut",
+  "gate2_status": "gate2_ready",
+  "interface": {
+    "artifact_mode": "single_file",
+    "modules": [
+      {
+        "depends_on": [],
+        "file": "sampled_error_update_monitor.va",
+        "module": "sampled_error_update_monitor",
+        "parameters": [
+          {
+            "default": "0.45",
+            "name": "vth",
+            "override_behavior": "overrides vth",
+            "type": "real",
+            "units": "",
+            "valid_range": "finite"
+          },
+          {
+            "default": "0.9",
+            "name": "vhi",
+            "override_behavior": "overrides vhi",
+            "type": "real",
+            "units": "",
+            "valid_range": "finite"
+          },
+          {
+            "default": "0.50",
+            "name": "err_fullscale",
+            "override_behavior": "overrides err_fullscale",
+            "type": "real",
+            "units": "",
+            "valid_range": "finite"
+          },
+          {
+            "default": "0.040",
+            "name": "err_window",
+            "override_behavior": "overrides err_window",
+            "type": "real",
+            "units": "",
+            "valid_range": "finite"
+          },
+          {
+            "default": "3",
+            "name": "ready_count",
+            "override_behavior": "overrides ready_count",
+            "type": "integer",
+            "units": "",
+            "valid_range": "finite"
+          },
+          {
+            "default": "60p",
+            "name": "tr",
+            "override_behavior": "overrides tr",
+            "type": "real",
+            "units": "",
+            "valid_range": "finite"
+          }
+        ],
+        "ports": [
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "clk",
+            "position": 0
+          },
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "rst",
+            "position": 1
+          },
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "sample",
+            "position": 2
+          },
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "target",
+            "position": 3
+          },
+          {
+            "direction": "input",
+            "discipline": "electrical",
+            "name": "coef",
+            "position": 4
+          },
+          {
+            "direction": "output",
+            "discipline": "electrical",
+            "name": "out",
+            "position": 5
+          },
+          {
+            "direction": "output",
+            "discipline": "electrical",
+            "name": "err_metric",
+            "position": 6
+          },
+          {
+            "direction": "output",
+            "discipline": "electrical",
+            "name": "progress",
+            "position": 7
+          }
+        ],
+        "role": "entry"
+      }
+    ]
+  },
+  "language": "verilog-a",
+  "level": "L2",
+  "observable_contract": [
+    {
+      "description": "While rst is high at a rising clock edge, clear the stable count, out, err_metric, and progress.",
+      "id": "P_RESET_CLEARS_STATE_AND_OBSERVABLES",
+      "required_signals": [
+        "clk",
+        "coef",
+        "err_metric",
+        "out",
+        "progress",
+        "rst",
+        "sample",
+        "target",
+        "time"
+      ]
+    },
+    {
+      "description": "At each enabled rising clock edge, compute the clipped coefficient and drive the clamped corrected sample from sample, target, and coef.",
+      "id": "P_CORRECTED_OUTPUT_USES_SAMPLE_TARGET_AND_COEF",
+      "required_signals": [
+        "clk",
+        "coef",
+        "err_metric",
+        "out",
+        "progress",
+        "rst",
+        "sample",
+        "target",
+        "time"
+      ]
+    },
+    {
+      "description": "Drive err_metric from the bounded absolute target-minus-sample error.",
+      "id": "P_ERROR_METRIC_REPORTS_ABSOLUTE_ERROR",
+      "required_signals": [
+        "clk",
+        "coef",
+        "err_metric",
+        "out",
+        "progress",
+        "rst",
+        "sample",
+        "target",
+        "time"
+      ]
+    },
+    {
+      "description": "Increment progress only for consecutive in-window sampled errors, clear it on an out-of-window sample, and saturate at ready_count.",
+      "id": "P_PROGRESS_COUNTS_CONSECUTIVE_IN_WINDOW_SAMPLES",
+      "required_signals": [
+        "clk",
+        "coef",
+        "err_metric",
+        "out",
+        "progress",
+        "rst",
+        "sample",
+        "target",
+        "time"
+      ]
+    }
+  ],
+  "oracle_policy": {
+    "checker_private": true,
+    "feedback_and_score_share_checker_family": true,
+    "feedback_oracle_materialized": true,
+    "no_model_visible_raw_scs": false,
+    "no_model_visible_starter": true,
+    "proposal_only": false,
+    "public_feedback_tb_exposed": true,
+    "score_tb_private": true,
+    "single_public_contract": true,
+    "testbench_and_checker_split_required": true
+  },
+  "output_artifacts": [
+    {
+      "modules": [
+        "sampled_error_update_monitor"
+      ],
+      "path": "sampled_error_update_monitor.va"
+    }
+  ],
+  "parameters": [
+    {
+      "default": "0.45",
+      "name": "vth",
+      "override_behavior": "overrides vth",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "0.9",
+      "name": "vhi",
+      "override_behavior": "overrides vhi",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "0.50",
+      "name": "err_fullscale",
+      "override_behavior": "overrides err_fullscale",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "0.040",
+      "name": "err_window",
+      "override_behavior": "overrides err_window",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "3",
+      "name": "ready_count",
+      "override_behavior": "overrides ready_count",
+      "type": "integer",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "60p",
+      "name": "tr",
+      "override_behavior": "overrides tr",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    }
+  ],
+  "public_observables": [
+    "clk",
+    "coef",
+    "err_metric",
+    "out",
+    "progress",
+    "rst",
+    "sample",
+    "target"
+  ],
+  "schema_version": "v4-public-contract-v1",
+  "score_oracle": {
+    "checker_profile_exposed": false,
+    "private_score_tb_exposed": false,
+    "profile_exposed": false,
+    "queryable_by_agentic_modes": false,
+    "raw_scs_exposed": false
+  },
+  "status": "gate2_ready",
+  "target_artifacts": [
+    "sampled_error_update_monitor.va"
+  ],
+  "task_id": "v4_270_sampled_error_update_monitor",
+  "task_slug": "374-sampled-error-update-monitor",
+  "title": "Sampled Error Update Monitor",
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "coef",
+      "err_metric",
+      "out",
+      "progress",
+      "rst",
+      "sample",
+      "target"
+    ]
+  },
+  "track": "utility_control_dut",
+  "validation_status": {
+    "evas_feedback_score_gold": "pass",
+    "gate2": "dut_base_sealed",
+    "next_gate": "canonical_suite_unification_pending",
+    "semantic_negative_certification": "pass",
+    "spectre_score_gold": "clean_pass",
+    "tri_form_gate2": "pending",
+    "tri_form_gate3": "pending",
+    "untriaged_warning_count": 0
+  }
+}
