@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/analog_mux_threshold.va"
+
+Vin1 (vin1 0) vsource type=pwl wave=[0 0.20 20n 0.20 20.1n 0.55 60n 0.55]
+Vin2 (vin2 0) vsource type=pwl wave=[0 0.75 30n 0.75 30.1n 0.45 60n 0.45]
+Vsel (vsel 0) vsource type=pwl wave=[0 0 10n 0 10.1n 0.9 30n 0.9 30.1n 0 60n 0]
+
+XDUT (vin1 vin2 vsel vout) analog_mux_threshold vth=0.45
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=45n maxstep=25p
+save vin1 vin2 vsel vout

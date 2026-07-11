@@ -1,0 +1,10 @@
+`include "disciplines.vams"
+module two_bit_counter_marker (CLKIN, MC);
+input CLKIN; output MC; electrical CLKIN, MC; integer mc=0;
+analog begin
+    @(initial_step) mc = 0;
+    @(cross(V(CLKIN)-0.5,+1)) mc = 1;
+    @(cross(V(CLKIN)-0.5,-1)) mc = 0;
+    V(MC) <+ transition(mc, 10p, 10p, 10p);
+end
+endmodule

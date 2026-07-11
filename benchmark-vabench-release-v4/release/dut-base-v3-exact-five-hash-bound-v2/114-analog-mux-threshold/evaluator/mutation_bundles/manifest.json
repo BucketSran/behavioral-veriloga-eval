@@ -1,0 +1,132 @@
+{
+  "family_id": "114",
+  "gold_bundle_sha256": "f3d3a311925552e58d63c7f68bbe9933cac00e6cba8eea62b1cc36c63bd1af1a",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "analog_mux_threshold.va": "a044f5200369ddb85466bb59e275f9d09b2fd66a1e65ee570fbc438469c8fd1d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_HIGH_SELECTS_VIN1"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "analog_mux_threshold.va"
+      ],
+      "fault_class": "fault_001_zero",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero outputs and therefore fails the stable-sample semantic contract.",
+      "violated_property_ids": [
+        "P_HIGH_SELECTS_VIN1"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "analog_mux_threshold.va": "1399532316739f228735b35c7c9c8c1b38f3d285b4ce761dd6f3f2fb3260dc02"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LOW_SELECTS_VIN2"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_swapped_mux_inputs/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "analog_mux_threshold.va"
+      ],
+      "fault_class": "fault_002_swapped_mux_inputs",
+      "id": "neg_002_swapped_mux_inputs",
+      "trigger_condition": "Selects the opposite mux input.",
+      "violated_property_ids": [
+        "P_LOW_SELECTS_VIN2"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "analog_mux_threshold.va": "299c017c87daa5ef45cebcde04bf0ffba3cceb364d405e435c54837235e189c0"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BIDIRECTIONAL_SELECTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_rising_only_select/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "analog_mux_threshold.va"
+      ],
+      "fault_class": "fault_003_rising_only_select",
+      "id": "neg_003_rising_only_select",
+      "trigger_condition": "Never updates selection on falling threshold crossings.",
+      "violated_property_ids": [
+        "P_BIDIRECTIONAL_SELECTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "analog_mux_threshold.va": "514dee235e6595dd0bc6da36b83edece1aa9b90d711f83b6e0979b8a9bde6736"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INITIAL_SELECTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_average_instead_of_select/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "analog_mux_threshold.va"
+      ],
+      "fault_class": "fault_004_average_instead_of_select",
+      "id": "neg_004_average_instead_of_select",
+      "trigger_condition": "Averages both inputs instead of selecting one.",
+      "violated_property_ids": [
+        "P_INITIAL_SELECTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "analog_mux_threshold.va": "0ec00b0b5aaf8d74e239eae208dfd2d79a424c2846e967ee40513880dd876e25"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_NO_MIXING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "analog_mux_threshold.va"
+      ],
+      "fault_class": "fault_005_metric_scale_low",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Analog Mux Threshold: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_NO_MIXING"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

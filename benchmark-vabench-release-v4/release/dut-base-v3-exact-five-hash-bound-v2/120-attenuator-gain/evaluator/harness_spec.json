@@ -1,0 +1,86 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "attenuator_gain.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=35n maxstep=25p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "vout"
+    ]
+  },
+  "family_id": "120",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "2b483a699e99031d9dc3d37151c9e4fea39acb3367fb4aacb44ba08da475bdc3",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "03b668b2770c84f742e134f6177cba50ec8a43be4e286d45c1e18a68fb981553",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0 0.2 10n 0.2 10.1n 0.8 20n 0.8 20.1n 0.4 40n 0.4]",
+          "",
+          "XDUT (vin vout) attenuator_gain attenuation=6.020599913279624",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0 -0.3 8n -0.3 8.1n 1.0 18n 1.0 18.1n 0.05 28n 0.05 28.1n 0.65 40n 0.65]",
+          "",
+          "XDUT (vin vout) attenuator_gain attenuation=6.020599913279624",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ZERO_DB_UNITY",
+    "P_DB_AMPLITUDE_RATIO",
+    "P_POLARITY_PRESERVATION",
+    "P_MONOTONIC_ATTENUATION",
+    "P_CONTINUOUS_RESPONSE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "306feef3e17db99922683565b1bb49b0d5d5ecb1efd065775902e681b12b1480",
+    "family_spec_sha256": "055aff6498bd1f10bab701189a5581ac55bef3526a02c98474a3a842e7270fdf"
+  },
+  "task_id": "v4-120"
+}

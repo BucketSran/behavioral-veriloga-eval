@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/latched_comparator_delay.va"
+
+Vdd (vdd 0) vsource dc=0.9
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=5n period=10n width=4n rise=100p fall=100p
+Vinn (vinn 0) vsource dc=0.45
+Vinp (vinp 0) vsource type=pwl wave=[0 0.56 11n 0.56 11.1n 0.48 21n 0.48 21.1n 0.55 31n 0.55 31.1n 0.42 60n 0.42]
+
+XDUT (dout 0 vdd clk vinn vinp) latched_comparator_delay td=700p tr=150p vos=50m vn=0 seed_init=17
+
+
+tran tran stop=45n maxstep=25p
+save vdd clk vinn vinp dout

@@ -1,0 +1,69 @@
+`include "disciplines.vams"
+
+module time_diff_detector (clk, vinp, vinn, vout);
+
+input clk, vinp, vinn;
+output vout;
+electrical clk, vinp, vinn, vout;
+
+parameter real vdd = 0.9;
+parameter real vth_clk = 0.45;
+parameter real vth_in = 0.45;
+parameter real td = 0;
+parameter real tr = 1p;
+parameter real scale = 1e9;
+
+real t_clk_fall;
+real t_vinp_rise;
+real t_vinn_rise;
+real vout_val;
+integer detect_enable_p;
+integer detect_enable_n;
+integer detected_p;
+integer detected_n;
+
+analog begin
+    @(initial_step) begin
+        detect_enable_p = 0;
+        detect_enable_n = 0;
+        detected_p = 0;
+        detected_n = 0;
+        t_clk_fall = 0;
+        t_vinp_rise = 0;
+        t_vinn_rise = 0;
+        vout_val = 0;
+    end
+
+    @(cross(V(clk) - vth_clk, +1)) begin
+        if (detected_p && detected_n) begin
+            vout_val = (t_vinp_rise - t_vinn_rise) * scale;
+            if (vout_val > vdd) vout_val = vdd;
+            if (vout_val < -vdd) vout_val = -vdd;
+        end
+        t_clk_fall = $abstime;
+        detect_enable_p = 1;
+        detect_enable_n = 1;
+        detected_p = 0;
+        detected_n = 0;
+        t_vinp_rise = 0;
+        t_vinn_rise = 0;
+    end
+
+    @(cross(V(vinp) - vth_in, +1)) begin
+        if (detect_enable_p && !detected_p) begin
+            t_vinp_rise = $abstime;
+            detected_p = 1;
+        end
+    end
+
+    @(cross(V(vinn) - vth_in, +1)) begin
+        if (detect_enable_n && !detected_n) begin
+            t_vinn_rise = $abstime;
+            detected_n = 1;
+        end
+    end
+
+    V(vout) <+ vout_val;
+end
+
+endmodule

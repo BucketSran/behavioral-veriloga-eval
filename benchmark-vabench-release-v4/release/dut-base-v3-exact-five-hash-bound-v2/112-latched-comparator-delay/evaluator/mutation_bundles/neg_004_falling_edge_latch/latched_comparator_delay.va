@@ -1,0 +1,35 @@
+`include "disciplines.vams"
+
+module latched_comparator_delay (DOUT, GND, VDD, CLK, VINN, VINP);
+
+output DOUT;
+inout GND, VDD;
+input CLK, VINN, VINP;
+electrical DOUT, GND, VDD, CLK, VINN, VINP;
+
+parameter real td = 1n;
+parameter real tr = 100p;
+parameter real vos = 0;
+parameter real vn = 1m;
+parameter real seed_init = 0;
+
+real vh, vl, vth;
+integer d = 0;
+integer seed;
+
+analog begin
+    @(initial_step) begin
+        vh = V(VDD);
+        vl = V(GND);
+        vth = (vh + vl) / 2.0;
+        seed = seed_init;
+    end
+
+    @(cross(V(CLK) - vth, -1)) begin
+        d = V(VINP) - V(VINN) > vos + $rdist_normal(seed, 0, vn);
+    end
+
+    V(DOUT) <+ transition(d ? vh : vl, td, tr);
+end
+
+endmodule

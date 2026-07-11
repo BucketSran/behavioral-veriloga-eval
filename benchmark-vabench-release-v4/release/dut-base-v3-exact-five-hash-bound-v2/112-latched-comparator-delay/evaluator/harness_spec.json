@@ -1,0 +1,94 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "latched_comparator_delay.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=45n maxstep=25p"
+    ],
+    "body_lines": [
+      "Vdd (vdd 0) vsource dc=0.9",
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=5n period=10n width=4n rise=100p fall=100p",
+      "Vinn (vinn 0) vsource dc=0.45"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vdd",
+      "clk",
+      "vinn",
+      "vinp",
+      "dout"
+    ]
+  },
+  "family_id": "112",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "311e28803757b40fca8443a3c26e095ba6a512ce1c4bc28aac7f38a86b3b44c8",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "e7d4e308dff8ea0b8c6e323a302d54bced76cd276d00f3c61c9f7b757fea53ae",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vinp (vinp 0) vsource type=pwl wave=[0 0.65 11n 0.65 11.1n 0.25 21n 0.25 21.1n 0.65 31n 0.65 31.1n 0.25 60n 0.25]",
+          "",
+          "XDUT (dout 0 vdd clk vinn vinp) latched_comparator_delay td=500p tr=100p vn=0",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vinp (vinp 0) vsource type=pwl wave=[0 0.56 11n 0.56 11.1n 0.48 21n 0.48 21.1n 0.55 31n 0.55 31.1n 0.42 60n 0.42]",
+          "",
+          "XDUT (dout 0 vdd clk vinn vinp) latched_comparator_delay td=700p tr=150p vos=50m vn=0 seed_init=17",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_SUPPLY_REFERENCED_THRESHOLD",
+    "P_RISING_EDGE_LATCH",
+    "P_OFFSET_DECISION",
+    "P_SEEDED_RANDOM_TERM",
+    "P_INTEREDGE_HOLD",
+    "P_DELAY_AND_SMOOTHING"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "734e25d690bcb12463816487a41a33a0f733c6d3dcf33b1b58bd0c5ffd517eee",
+    "family_spec_sha256": "8142f6d70c216de0efdd3d2e9228480999d40df3f96b65efd95281c7657d2e42"
+  },
+  "task_id": "v4-112"
+}

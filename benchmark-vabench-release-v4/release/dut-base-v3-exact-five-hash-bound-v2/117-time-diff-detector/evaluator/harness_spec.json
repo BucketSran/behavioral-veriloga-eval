@@ -1,0 +1,96 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "time_diff_detector.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=50n maxstep=25p"
+    ],
+    "body_lines": [
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=5n period=20n width=5n rise=100p fall=100p"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "vinp",
+      "vinn",
+      "vout"
+    ]
+  },
+  "family_id": "117",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "073621d591d65f294343b518697259b9cbd9e278539a03355ddc5e001b8ab86f",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "0817fc5b90eba4b161cb856bb98857e99dd917180b63c28894824deafb44dc03",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vinp (vinp 0) vsource type=pwl wave=[0 0 8n 0 8.1n 0.9 12n 0.9 12.1n 0 29n 0 29.1n 0.9 33n 0.9 33.1n 0 60n 0]",
+          "Vinn (vinn 0) vsource type=pwl wave=[0 0 10n 0 10.1n 0.9 14n 0.9 14.1n 0 27n 0 27.1n 0.9 31n 0.9 31.1n 0 60n 0]",
+          "",
+          "XDUT (clk vinp vinn vout) time_diff_detector vdd=0.9 scale=1e9 tr=1p",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=70n maxstep=25p"
+        ],
+        "body_lines": [
+          "Vinp (vinp 0) vsource type=pwl wave=[0 0 11n 0 11.1n 0.9 14n 0.9 14.1n 0 30n 0 30.1n 0.9 33n 0.9 33.1n 0 54n 0 54.1n 0.9 58n 0.9 58.1n 0 75n 0]",
+          "Vinn (vinn 0) vsource type=pwl wave=[0 0 9n 0 9.1n 0.9 12n 0.9 12.1n 0 34n 0 34.1n 0.9 37n 0.9 37.1n 0 56n 0 56.1n 0.9 60n 0.9 60.1n 0 75n 0]",
+          "",
+          "XDUT (clk vinp vinn vout) time_diff_detector vdd=0.9 scale=1e9 tr=1p",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_FIRST_EDGE_CAPTURE",
+    "P_PREVIOUS_WINDOW_REPORT",
+    "P_SIGNED_DIFFERENCE",
+    "P_OUTPUT_CLIP",
+    "P_WINDOW_REARM",
+    "P_OUTPUT_TRANSITION"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "2836041225525e9a90dfbe3f4de1764e5b1887685596581675c5fa09cc3309ba",
+    "family_spec_sha256": "dba1c78c7145ddf725c8f37612d79fa7e8633910e9e70ae884b958788147d915"
+  },
+  "task_id": "v4-117"
+}

@@ -1,0 +1,38 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "body_lines": [
+      "Vref (vref 0) vsource dc=0.45",
+      "Vvin (vin 0) vsource type=pwl wave=[0 0.420 10n 0.490 20n 0.420 30n 0.500 40n 0.410 44n 0.410]",
+      "",
+      "// The public support comparator is mounted read-only from the declared support contract.",
+      "XCMP (vdd vss vin vref cmp_out) support_hysteretic_comparator offset=5m vhys=50m td=120p tr=30p",
+      "XMEAS (vdd vss vin cmp_out trip_rise trip_fall hyst_width valid) hysteresis_trip_characterizer",
+      ""
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "ef0b639b9c77002ecf1e20403eee891022021332561fbc41a24b273961ba6ad2",
+  "parameters": {
+    "maxstep": "200p",
+    "stop_time": "100n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_SUPPLY_MIDPOINT_THRESHOLD",
+    "P_RISING_TRIP_CAPTURE",
+    "P_FALLING_TRIP_CAPTURE",
+    "P_LATEST_EDGE_REFRESH",
+    "P_HYSTERESIS_WIDTH_SIGN",
+    "P_VALID_AFTER_BOTH_DIRECTIONS"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

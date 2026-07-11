@@ -1,0 +1,12 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/attenuator_gain.va"
+
+Vin (vin 0) vsource type=pwl wave=[0 -0.3 8n -0.3 8.1n 1.0 18n 1.0 18.1n 0.05 28n 0.05 28.1n 0.65 40n 0.65]
+
+XDUT (vin vout) attenuator_gain attenuation=6.020599913279624
+
+
+tran tran stop=35n maxstep=25p
+save vin vout

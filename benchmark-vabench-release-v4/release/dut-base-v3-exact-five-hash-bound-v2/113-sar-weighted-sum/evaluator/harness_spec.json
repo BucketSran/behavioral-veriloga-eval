@@ -1,0 +1,119 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "sar_weighted_sum.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=35n maxstep=25p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "d10",
+      "d9",
+      "d8",
+      "d7",
+      "d6",
+      "d5",
+      "d4",
+      "d3",
+      "d2",
+      "d1",
+      "d0",
+      "vout"
+    ]
+  },
+  "family_id": "113",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "82eedf6a55c6d8b0b647778e29ffd5880490e59580d55f677f786c4beb57dcb3",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "e70590925146ac647de9d2a53cbce75d3892d788ff8bdcd5190a88ef90c78845",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vd10 (d10 0) vsource type=pwl wave=[0 0 6n 0 6.1n 0.9 40n 0.9]",
+          "Vd9 (d9 0) vsource type=pwl wave=[0 0 16n 0 16.1n 0.9 40n 0.9]",
+          "Vd8 (d8 0) vsource type=pwl wave=[0 0 26n 0 26.1n 0.9 40n 0.9]",
+          "Vd7 (d7 0) vsource type=pwl wave=[0 0 26n 0 26.1n 0.9 40n 0.9]",
+          "Vd6 (d6 0) vsource type=pwl wave=[0 0 26n 0 26.1n 0.9 40n 0.9]",
+          "Vd5 (d5 0) vsource type=pwl wave=[0 0 26n 0 26.1n 0.9 40n 0.9]",
+          "Vd4 (d4 0) vsource type=pwl wave=[0 0 26n 0 26.1n 0.9 40n 0.9]",
+          "Vd3 (d3 0) vsource type=pwl wave=[0 0 26n 0 26.1n 0.9 40n 0.9]",
+          "Vd2 (d2 0) vsource type=pwl wave=[0 0 26n 0 26.1n 0.9 40n 0.9]",
+          "Vd1 (d1 0) vsource type=pwl wave=[0 0 26n 0 26.1n 0.9 40n 0.9]",
+          "Vd0 (d0 0) vsource type=pwl wave=[0 0 26n 0 26.1n 0.9 40n 0.9]",
+          "",
+          "XDUT (d10 d9 d8 d7 d6 d5 d4 d3 d2 d1 d0 vout) sar_weighted_sum",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=45n maxstep=25p"
+        ],
+        "body_lines": [
+          "Vd10 (d10 0) vsource type=pwl wave=[0 0 26n 0 26.1n 0.9 50n 0.9]",
+          "Vd9 (d9 0) vsource type=pwl wave=[0 0 36n 0 36.1n 0.9 50n 0.9]",
+          "Vd8 (d8 0) vsource type=pwl wave=[0 0 36n 0 36.1n 0.9 50n 0.9]",
+          "Vd7 (d7 0) vsource type=pwl wave=[0 0 16n 0 16.1n 0.9 26n 0.9 26.1n 0 36n 0 36.1n 0.9 50n 0.9]",
+          "Vd6 (d6 0) vsource type=pwl wave=[0 0 6n 0 6.1n 0.9 16n 0.9 16.1n 0 36n 0 36.1n 0.9 50n 0.9]",
+          "Vd5 (d5 0) vsource type=pwl wave=[0 0 36n 0 36.1n 0.9 50n 0.9]",
+          "Vd4 (d4 0) vsource type=pwl wave=[0 0 36n 0 36.1n 0.9 50n 0.9]",
+          "Vd3 (d3 0) vsource type=pwl wave=[0 0 36n 0 36.1n 0.9 50n 0.9]",
+          "Vd2 (d2 0) vsource type=pwl wave=[0 0 36n 0 36.1n 0.9 50n 0.9]",
+          "Vd1 (d1 0) vsource type=pwl wave=[0 0 36n 0 36.1n 0.9 50n 0.9]",
+          "Vd0 (d0 0) vsource type=pwl wave=[0 0 36n 0 36.1n 0.9 50n 0.9]",
+          "",
+          "XDUT (d10 d9 d8 d7 d6 d5 d4 d3 d2 d1 d0 vout) sar_weighted_sum",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_THRESHOLD_DECODE",
+    "P_WEIGHT_ORDER",
+    "P_BIPOLAR_ENDPOINTS",
+    "P_MONOTONIC_CODE_WEIGHT",
+    "P_CONTINUOUS_DECODE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "815ac480bb9bd7d9d89e3bccf33df61dcb1f39f482e129299e649f17335bf525",
+    "family_spec_sha256": "f1c4ba0d8e5f52feff316b70904fcfcead2acd57f9bcb1cadb13272b49f6f6f8"
+  },
+  "task_id": "v4-113"
+}
