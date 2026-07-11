@@ -1,0 +1,5 @@
+`include "disciplines.vams"
+module soft_voltage_clamp_behavior(vin, vout, vgnd);
+input vin, vgnd; output vout; electrical vin, vout, vgnd; real vin_val; real vout_val;
+analog begin vin_val=V(vin,vgnd); if(vin_val>0.6) vout_val=0.6+0.2*(1.0-exp(-(vin_val-0.6)/0.2)); else if(vin_val<-0.2) vout_val=-0.2-0.2*(1.0-exp((vin_val+0.2)/0.2)); else vout_val=vin_val; V(vout,vgnd)<+vout_val; end
+endmodule

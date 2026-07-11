@@ -1,0 +1,136 @@
+{
+  "family_id": "133",
+  "gold_bundle_sha256": "20a3fe75b33725282eecf91a9df01d4a6176117d6f561a7fc65beb6e041bd744",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "three_way_threshold_mux.va": "9bedfa5bdbb3034f151cb00d5723e7e8d233d3ad259e57df90b276298b5d880b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_MIDDLE_REGION_SELECTS_SIGIN2"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "three_way_threshold_mux.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_MIDDLE_REGION_SELECTS_SIGIN2"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "three_way_threshold_mux.va": "f47f484b052dd921947ca6227675ab1f96497f6d8c6dfe28f907be178e0f5c76"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_HIGH_REGION_SELECTS_SIGIN3",
+          "P_LOW_REGION_SELECTS_SIGIN1"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_swapped_low_high_outputs/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "three_way_threshold_mux.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_002_swapped_low_high_outputs",
+      "trigger_condition": "Swaps the below-window and above-window selected inputs.",
+      "violated_property_ids": [
+        "P_HIGH_REGION_SELECTS_SIGIN3",
+        "P_LOW_REGION_SELECTS_SIGIN1"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "three_way_threshold_mux.va": "20ab62bc2d9c584f2b111cdebe849ca035f75f4fcbc466979c1a24d36fca6a51"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DIFFERENTIAL_CONTROL"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_uses_single_ended_control/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "three_way_threshold_mux.va"
+      ],
+      "fault_class": "uses_single_ended_control",
+      "id": "neg_003_uses_single_ended_control",
+      "trigger_condition": "Uses cntrlp single-ended instead of cntrlp-cntrlm.",
+      "violated_property_ids": [
+        "P_DIFFERENTIAL_CONTROL"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "three_way_threshold_mux.va": "ca139efb58b363a49359dbdcfe4f841996a7da419381367250c388d3437542d1"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_MIDDLE_REGION_SELECTS_SIGIN2"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_missing_middle_selection/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "three_way_threshold_mux.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_004_missing_middle_selection",
+      "trigger_condition": "Selects only the low or high input and never the middle input.",
+      "violated_property_ids": [
+        "P_MIDDLE_REGION_SELECTS_SIGIN2"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "three_way_threshold_mux.va": "9ef56eb4391f54f109a65860ffcf3a59e3f98d9cd681e3471960ea6fd07b7cf4"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_HIGH_REGION_SELECTS_SIGIN3",
+          "P_LOW_REGION_SELECTS_SIGIN1"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "three_way_threshold_mux.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Three Way Threshold Mux: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_HIGH_REGION_SELECTS_SIGIN3",
+        "P_LOW_REGION_SELECTS_SIGIN1"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

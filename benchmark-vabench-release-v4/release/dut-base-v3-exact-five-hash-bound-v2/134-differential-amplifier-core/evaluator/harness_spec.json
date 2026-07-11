@@ -1,0 +1,87 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "differential_amplifier_core.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=40n maxstep=25p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "sigin_n",
+      "sigin_p",
+      "sigout"
+    ]
+  },
+  "family_id": "134",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "402b7b2f1d3f14d1eb2e87c50fdc547149b2f4543f1aa08e9c976879361ecaad",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "6f8184e6a65fed774962fd06e802a6e7f6b7fcb92354d8eb7efe00fc4653b6d1",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vp (sigin_p 0) vsource type=pwl wave=[0 0.25 10n 0.25 10.1n 0.45 20n 0.45 20.1n 0.65 30n 0.65 30.1n 0.55 45n 0.55]",
+          "Vn (sigin_n 0) vsource dc=0.45",
+          "",
+          "XDUT (sigin_p sigin_n sigout) differential_amplifier_core",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vp (sigin_p 0) vsource type=pwl wave=[0 0.20 8n 0.20 8.1n 0.45 18n 0.45 18.1n 0.70 28n 0.70 28.1n 0.38 45n 0.38]",
+          "Vn (sigin_n 0) vsource dc=0.40",
+          "",
+          "XDUT (sigin_p sigin_n sigout) differential_amplifier_core",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_DIFFERENTIAL_INPUT",
+    "P_INPUT_OFFSET",
+    "P_GAIN_TWO_OUTPUT"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "a423667cc86eee18d68701e1b8a2ce2d8e2a4e3d33b4d47c0767a2d8bf4b63b0",
+    "family_spec_sha256": "f3cb58a47b0561c23f5edfe2bcc120964672afe102e665637232aa502b4eb797"
+  },
+  "task_id": "v4-134"
+}

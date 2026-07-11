@@ -1,0 +1,6 @@
+`include "disciplines.vams"
+module three_way_threshold_mux(sigin1, sigin2, sigin3, cntrlp, cntrlm, sigout);
+input sigin1, sigin2, sigin3, cntrlp, cntrlm; output sigout; electrical sigin1, sigin2, sigin3, cntrlp, cntrlm, sigout;
+parameter real sigth_high=1; parameter real sigth_low=-1;
+analog begin if(V(cntrlp,cntrlm)<0) V(sigout)<+V(sigin1); else V(sigout)<+V(sigin3); end
+endmodule

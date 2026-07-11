@@ -1,0 +1,132 @@
+{
+  "family_id": "137",
+  "gold_bundle_sha256": "72c111cbed7076cb44f82272723b0b98eb425adf1ea3735ba98a53eb5daf4345",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "variable_gain_differential_amplifier.va": "780d2e67d6fd53314e43c0a07fd837161abe55f80406ab6a83f124d48cedd449"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_VARIABLE_GAIN_MIDPOINT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "variable_gain_differential_amplifier.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_VARIABLE_GAIN_MIDPOINT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "variable_gain_differential_amplifier.va": "8badf4f88235d23a9246e884013d8652a5394b6828a45df6830ccc38439f0db9"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_VARIABLE_GAIN_MIDPOINT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_missing_midpoint/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "variable_gain_differential_amplifier.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_002_missing_midpoint",
+      "trigger_condition": "Omits the 0.2 output midpoint.",
+      "violated_property_ids": [
+        "P_VARIABLE_GAIN_MIDPOINT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "variable_gain_differential_amplifier.va": "961c0440e12fd9b8c478f129e951dc8e4bbd2354228eb2882bbabe6d305ae686"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DIFFERENTIAL_SIGNAL_AND_CONTROL"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_single_ended_control/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "variable_gain_differential_amplifier.va"
+      ],
+      "fault_class": "single_ended_control",
+      "id": "neg_003_single_ended_control",
+      "trigger_condition": "Uses sigctrl_p single-ended instead of differential control.",
+      "violated_property_ids": [
+        "P_DIFFERENTIAL_SIGNAL_AND_CONTROL"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "variable_gain_differential_amplifier.va": "fdbd6f1addffa24d8e27cb1876079d41eb3e308073e82df2cf6951d21e797282"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_CLAMP"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_no_clamp/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "variable_gain_differential_amplifier.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_004_no_clamp",
+      "trigger_condition": "Does not clamp the variable-gain output.",
+      "violated_property_ids": [
+        "P_OUTPUT_CLAMP"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "variable_gain_differential_amplifier.va": "d0de81eecaa3cb9c9f49dae5c7338b55b229db0ccd5c68328c27f4831c72a85d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_VARIABLE_GAIN_MIDPOINT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "variable_gain_differential_amplifier.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Scales the limited variable-gain output too low while preserving the module/interface shape.",
+      "violated_property_ids": [
+        "P_VARIABLE_GAIN_MIDPOINT"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

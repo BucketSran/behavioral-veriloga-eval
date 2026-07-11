@@ -1,0 +1,189 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "three_way_threshold_mux",
+            "parameters": [
+              {
+                "default": "1",
+                "name": "sigth_high",
+                "override_behavior": "overrides sigth_high",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "-1",
+                "name": "sigth_low",
+                "override_behavior": "overrides sigth_low",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigin1",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigin2",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigin3",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "cntrlp",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "cntrlm",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sigout",
+                "position": 5
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "three_way_threshold_mux.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "133",
+  "identity": {
+    "category": "mixed_signal",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Three Way Threshold Mux"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_DIFFERENTIAL_CONTROL",
+      "observable_contract": "Use `V(cntrlp, cntrlm)` as the mux control signal.",
+      "required_signals": [
+        "time",
+        "cntrlp",
+        "cntrlm",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_LOW_REGION_SELECTS_SIGIN1",
+      "observable_contract": "When control is below `sigth_low`, drive `sigout` from `sigin1`.",
+      "required_signals": [
+        "time",
+        "sigin1",
+        "cntrlp",
+        "cntrlm",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_MIDDLE_REGION_SELECTS_SIGIN2",
+      "observable_contract": "When control is in the inclusive window `[sigth_low, sigth_high]`, drive `sigout` from `sigin2`.",
+      "required_signals": [
+        "time",
+        "sigin2",
+        "cntrlp",
+        "cntrlm",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_HIGH_REGION_SELECTS_SIGIN3",
+      "observable_contract": "When control is above `sigth_high`, drive `sigout` from `sigin3`.",
+      "required_signals": [
+        "time",
+        "sigin3",
+        "cntrlp",
+        "cntrlm",
+        "sigout"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1133",
+    "dut": "v4-133",
+    "testbench": "v4-633"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "sigin1",
+            "port_ref": "sigin1",
+            "position": 0
+          },
+          {
+            "net": "sigin2",
+            "port_ref": "sigin2",
+            "position": 1
+          },
+          {
+            "net": "sigin3",
+            "port_ref": "sigin3",
+            "position": 2
+          },
+          {
+            "net": "cntrlp",
+            "port_ref": "cntrlp",
+            "position": 3
+          },
+          {
+            "net": "cntrlm",
+            "port_ref": "cntrlm",
+            "position": 4
+          },
+          {
+            "net": "sigout",
+            "port_ref": "sigout",
+            "position": 5
+          }
+        ],
+        "module_ref": "three_way_threshold_mux",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "cntrlm",
+      "cntrlp",
+      "sigin1",
+      "sigin2",
+      "sigin3",
+      "sigout"
+    ]
+  }
+}

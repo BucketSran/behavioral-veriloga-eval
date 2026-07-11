@@ -1,0 +1,5 @@
+`include "disciplines.vams"
+module logarithmic_amplifier(sigin, sigout);
+input sigin; output sigout; electrical sigin, sigout; real adjusted; real magnitude;
+analog begin adjusted=V(sigin)-0.2; magnitude=adjusted; if(magnitude<0.1) magnitude=0.1; V(sigout)<+ln(magnitude); end
+endmodule

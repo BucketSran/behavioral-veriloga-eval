@@ -1,0 +1,6 @@
+`include "disciplines.vams"
+module limiting_differential_amplifier(sigin_p, sigin_n, sigout);
+input sigin_p, sigin_n; output sigout; electrical sigin_p, sigin_n, sigout;
+parameter real gain=1; parameter real sigout_high=10; parameter real sigout_low=-10; parameter real sigin_offset=0; real sigout_ref, sigout_val;
+analog begin @(initial_step) sigout_ref=(sigout_high+sigout_low)/2; sigout_val=gain*V(sigin_p,sigin_n)+sigout_ref; if(sigout_val>sigout_high) sigout_val=sigout_high; else if(sigout_val<sigout_low) sigout_val=sigout_low; V(sigout)<+sigout_val; end
+endmodule

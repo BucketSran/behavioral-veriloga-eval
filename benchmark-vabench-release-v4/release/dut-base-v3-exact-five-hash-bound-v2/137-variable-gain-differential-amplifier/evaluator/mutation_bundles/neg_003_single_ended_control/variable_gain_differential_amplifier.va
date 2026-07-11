@@ -1,0 +1,5 @@
+`include "disciplines.vams"
+module variable_gain_differential_amplifier(sigin_p, sigin_n, sigctrl_p, sigctrl_n, sigout);
+input sigin_p, sigin_n, sigctrl_p, sigctrl_n; output sigout; electrical sigin_p, sigin_n, sigctrl_p, sigctrl_n, sigout; real sigout_val;
+analog begin sigout_val=2.0*V(sigctrl_p)*V(sigin_p,sigin_n)+0.2; if(sigout_val>0.8) sigout_val=0.8; else if(sigout_val<-0.4) sigout_val=-0.4; V(sigout)<+sigout_val; end
+endmodule

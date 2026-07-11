@@ -1,0 +1,90 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "analog_multiplier_gain.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=30n maxstep=25p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "sigin1",
+      "sigin2",
+      "sigout"
+    ]
+  },
+  "family_id": "132",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "e47b11552f615f2043392bbbd3340c140864646e7c1b8cf4a7d192ec210afd71",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "38fbf8ca5d32127902db440ef62c222de7447c46c25bfb0e2cb4e3ba273d75f6",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin1 (sigin1 0) vsource type=pwl wave=[0 0.2 10n 0.2 10.1n 0.8 20n 0.8 20.1n -0.4 35n -0.4]",
+          "Vin2 (sigin2 0) vsource type=pwl wave=[0 0.5 10n 0.5 10.1n 0.3 20n 0.3 20.1n 0.5 35n 0.5]",
+          "",
+          "XDUT (sigin1 sigin2 sigout) analog_multiplier_gain gain=2",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=28n maxstep=25p"
+        ],
+        "body_lines": [
+          "Vin1 (sigin1 0) vsource type=pwl wave=[0 -0.30 8n -0.30 8.1n 0.60 18n 0.60 18.1n -0.70 32n -0.70]",
+          "Vin2 (sigin2 0) vsource type=pwl wave=[0 0.40 8n 0.40 8.1n -0.20 18n -0.20 18.1n 0.50 32n 0.50]",
+          "",
+          "XDUT (sigin1 sigin2 sigout) analog_multiplier_gain gain=2",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ANALOG_PRODUCT",
+    "P_GAIN_PARAMETER_APPLIED",
+    "P_MULTIPLICATIVE_NOT_ADDITIVE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "d7705833e82d53f0fca3403eb9e84eddd52b7f3ee1cb385185dd8df8c95cc377",
+    "family_spec_sha256": "17141b1418cfffdc0dd71a67049776fb193bcc03250823ec0439be4d1636b53a"
+  },
+  "task_id": "v4-132"
+}

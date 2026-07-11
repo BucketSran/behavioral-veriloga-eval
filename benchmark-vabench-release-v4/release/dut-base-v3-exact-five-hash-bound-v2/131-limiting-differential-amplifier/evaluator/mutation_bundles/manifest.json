@@ -1,0 +1,132 @@
+{
+  "family_id": "131",
+  "gold_bundle_sha256": "dc5db552b8de785f10005eba1afe1475af5120beb70bd93694da2be0a0706f21",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "limiting_differential_amplifier.va": "5efd4683f6b429522a9aeba869f0dfb2ab2e5f52b9b2fbffe841d741774170c2"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OFFSET_CORRECTED_DIFFERENTIAL_GAIN"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "limiting_differential_amplifier.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_OFFSET_CORRECTED_DIFFERENTIAL_GAIN"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "limiting_differential_amplifier.va": "70201880a9d822dea281de72d3e18c843b59a012601b1493db3b956d5114ccdf"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OFFSET_CORRECTED_DIFFERENTIAL_GAIN"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_missing_input_offset/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "limiting_differential_amplifier.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_002_missing_input_offset",
+      "trigger_condition": "Does not subtract sigin_offset before amplification.",
+      "violated_property_ids": [
+        "P_OFFSET_CORRECTED_DIFFERENTIAL_GAIN"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "limiting_differential_amplifier.va": "948921f85e9e0b17c3bf0155bc2c427c3b03afa4b6004a6317d58a55ad364095"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_RAIL_CLAMP"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_no_clamp/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "limiting_differential_amplifier.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_003_no_clamp",
+      "trigger_condition": "Does not clamp the amplified output to the rails.",
+      "violated_property_ids": [
+        "P_OUTPUT_RAIL_CLAMP"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "limiting_differential_amplifier.va": "2d5ed9c50b0553f4a27e275573485aae032cf1311a68189781d31f6e413c052b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_MIDPOINT_REFERENCE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_wrong_reference/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "limiting_differential_amplifier.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_004_wrong_reference",
+      "trigger_condition": "Centers the amplifier at zero instead of the rail midpoint.",
+      "violated_property_ids": [
+        "P_OUTPUT_MIDPOINT_REFERENCE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "limiting_differential_amplifier.va": "76d7ac61571eadce2d739bb989cbf7a0007d3b0e015eedb424f9ddc101eff79c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OFFSET_CORRECTED_DIFFERENTIAL_GAIN"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "limiting_differential_amplifier.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Scales the limited output too low while preserving the module/interface shape.",
+      "violated_property_ids": [
+        "P_OFFSET_CORRECTED_DIFFERENTIAL_GAIN"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

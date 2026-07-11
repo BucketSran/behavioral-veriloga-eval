@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/ideal_differential_opamp.va"
+
+VinP (vinp 0) vsource type=pwl wave=[0 0.55 10n 0.55 10.1n 0.30 20n 0.30 20.1n 0.48 30n 0.48 30.1n 0.70 45n 0.70]
+VinN (vinn 0) vsource dc=0.45
+
+XDUT (vinp vinn voutp voutn) ideal_differential_opamp
+
+
+tran tran stop=40n maxstep=25p
+save vinn vinp voutn voutp

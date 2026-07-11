@@ -1,0 +1,132 @@
+{
+  "family_id": "140",
+  "gold_bundle_sha256": "529445ab6dfbe678810fbb1fd00ffccc04b185ecc920d08b866bbf87b3833eb4",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "rs_latch_voltage.va": "903c4a780ce58c8aafc998f3b947ba95ebe2b36c66f40e89a88a44697291f9e9"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SET_RESET_PRIORITY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "rs_latch_voltage.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero outputs and therefore fails the arithmetic/state contract.",
+      "violated_property_ids": [
+        "P_SET_RESET_PRIORITY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "rs_latch_voltage.va": "30522b6d7cb80c9a201c92b12a74b6572fc34288e99127f8d3f8c99e5be0a15b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_HOLD_STATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_no_hold/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "rs_latch_voltage.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_002_no_hold",
+      "trigger_condition": "Drops Q low whenever set is not asserted.",
+      "violated_property_ids": [
+        "P_HOLD_STATE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "rs_latch_voltage.va": "31d440d7bf7aa7164d6ad6ce9c9bb1c545dd6beea5b44f8e47062c5a5af6e567"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SET_RESET_PRIORITY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_swapped_set_reset/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "rs_latch_voltage.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_003_swapped_set_reset",
+      "trigger_condition": "Treats reset as set and set as reset.",
+      "violated_property_ids": [
+        "P_SET_RESET_PRIORITY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "rs_latch_voltage.va": "0fcefcca36b05ab95bed093a903fdf1e9432b6708fcf7bd5c9f61e05acc47d6b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_QBAR_COMPLEMENT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_qbar_not_complement/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "rs_latch_voltage.va"
+      ],
+      "fault_class": "qbar_not_complement",
+      "id": "neg_004_qbar_not_complement",
+      "trigger_condition": "Drives qbar equal to q.",
+      "violated_property_ids": [
+        "P_QBAR_COMPLEMENT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "rs_latch_voltage.va": "93e0d67e059592f8507a3ad3cf93e33a4a9bf38b7826abd3c5a2d8cae2a9a634"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LOGIC_THRESHOLDS_OUTPUT_AMPLITUDE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "rs_latch_voltage.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "RS Latch Voltage: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_LOGIC_THRESHOLDS_OUTPUT_AMPLITUDE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

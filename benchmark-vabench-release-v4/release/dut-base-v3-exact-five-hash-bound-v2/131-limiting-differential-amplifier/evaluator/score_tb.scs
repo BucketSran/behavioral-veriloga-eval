@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/limiting_differential_amplifier.va"
+
+Vp (sigin_p 0) vsource type=pwl wave=[0 0.05 8n 0.05 8.1n 0.50 18n 0.50 18.1n 0.80 28n 0.80 28.1n 0.60 45n 0.60]
+Vn (sigin_n 0) vsource dc=0.40
+
+XDUT (sigin_p sigin_n sigout) limiting_differential_amplifier gain=3 sigout_high=0.8 sigout_low=-0.4 sigin_offset=0.05
+
+
+tran tran stop=40n maxstep=25p
+save sigin_n sigin_p sigout

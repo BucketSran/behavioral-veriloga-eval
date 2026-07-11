@@ -1,0 +1,12 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/soft_voltage_clamp_behavior.va"
+
+Vin (vin 0) vsource type=pwl wave=[0 -0.6 8n -0.6 8.1n 0.1 18n 0.1 18.1n 0.75 28n 0.75 28.1n 0.4 38n 0.4 38.1n 0 45n 0]
+
+XDUT (vin vout 0) soft_voltage_clamp_behavior
+
+
+tran tran stop=40n maxstep=25p
+save vin vout
