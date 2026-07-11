@@ -1,0 +1,6 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module source_single_shot(vin, vout);
+input vin; output vout; electrical vin,vout; parameter real vtrans=0.45; real vout_val; analog begin @(initial_step) vout_val=0.0; @(cross(V(vin)-vtrans,+1)) vout_val=0.9; V(vout)<+transition(vout_val,1n,20p,20p); end
+endmodule

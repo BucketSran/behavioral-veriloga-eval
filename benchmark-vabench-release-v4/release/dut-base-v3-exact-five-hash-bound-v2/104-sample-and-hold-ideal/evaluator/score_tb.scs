@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/source_sample_hold.va"
+
+Vclk (vclk 0) vsource type=pulse val0=0 val1=0.9 delay=5n period=10n width=4n rise=100p fall=100p
+Vvin (vin 0) vsource type=pwl wave=[0 0.10 4n 0.20 14n 0.55 24n 0.30 34n 0.78 50n 0.40]
+
+XDUT (vin vout vclk) source_sample_hold
+
+
+tran tran stop=45n maxstep=50p
+save vclk vin vout

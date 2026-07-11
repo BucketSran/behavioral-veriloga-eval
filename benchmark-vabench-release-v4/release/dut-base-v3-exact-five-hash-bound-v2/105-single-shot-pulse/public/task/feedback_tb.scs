@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/source_single_shot.va"
+
+Vin (vin 0) vsource type=pwl wave=[0 0 4n 0 5n 0.9 8n 0.9 9n 0 24n 0 25n 0.9 28n 0.9 29n 0 45n 0]
+
+XDUT (vin vout) source_single_shot
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=22n maxstep=50p
+save vin vout

@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/clocked_sar_comparator.va"
+
+Vclk (cmpck 0) vsource type=pulse val0=0 val1=0.9 delay=5n period=20n width=10n rise=100p fall=100p
+Vinp (vinp 0) vsource type=pwl wave=[0 0.70 18n 0.70 19n 0.25 60n 0.25]
+Vinn (vinn 0) vsource dc=0.45
+
+XDUT (cmpck vinn vinp dcmpn dcmpp) clocked_sar_comparator
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=55n maxstep=50p
+save cmpck vinn vinp dcmpn dcmpp

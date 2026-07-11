@@ -1,0 +1,18 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module vin_src(CLK, RST_N, VOUT_P, VOUT_N);
+    input CLK, RST_N;
+    output VOUT_P, VOUT_N;
+    electrical CLK, RST_N, VOUT_P, VOUT_N;
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real ampl = 0.15;
+    parameter real freq = 300e3;
+    parameter real sigma = 0.01;
+    parameter integer SEED = 0;
+    analog begin
+        V(VOUT_P) <+ transition(vdd);
+        V(VOUT_N) <+ transition(vdd);
+    end
+endmodule

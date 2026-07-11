@@ -1,0 +1,115 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "comparator_offset_calibration_loop.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=70n maxstep=20p"
+    ],
+    "body_lines": [
+      "Vvdd (vdd 0) vsource dc=0.9",
+      "Vvss (vss 0) vsource dc=0.0"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vdd",
+      "vss",
+      "clk",
+      "dcmpp",
+      "vinp",
+      "vinn",
+      "offset_est",
+      "valid",
+      "vos_ref"
+    ],
+    "support_include_templates": [
+      "ahdl_include \"{support_source_root}/{support_artifact_path}\""
+    ]
+  },
+  "family_id": "109",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "5ef48510924a5ae04379fa437aaaaadaa325da09b762caf7a13daf393363666e",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "3ce0cfeeab50649153615a9a9629fa53b68f24fa8d5206315404a774d5ffcd3e",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vvos (vos_ref 0) vsource dc=0.023",
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=2n period=8n width=4n rise=100p fall=100p",
+          "",
+          "// The public support comparator is mounted read-only from the declared support contract.",
+          "XLOOP (vdd vss clk dcmpp vinp vinn offset_est valid) comparator_offset_calibration_loop",
+          "XCMP (vdd vss vinp vinn vos_ref dcmpp) support_offset_comparator",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=65n maxstep=20p"
+        ],
+        "body_lines": [
+          "Vvos (vos_ref 0) vsource dc=-0.017",
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=1.5n period=7n width=3.5n rise=80p fall=80p",
+          "",
+          "// The public support comparator is mounted read-only from the declared support contract.",
+          "XLOOP (vdd vss clk dcmpp vinp vinn offset_est valid) comparator_offset_calibration_loop",
+          "XCMP (vdd vss vinp vinn vos_ref dcmpp) support_offset_comparator td=60p tr=15p",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ZERO_INITIAL_ESTIMATE",
+    "P_FALLING_EDGE_UPDATE",
+    "P_DECISION_DIRECTION",
+    "P_SUCCESSIVE_STEP_HALVING",
+    "P_SYMMETRIC_DIFFERENTIAL_STIMULUS",
+    "P_VALID_COMPLETION"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "392a52259bfe13f3856c1458cf0f305766e15a4dcb676771a175b87ceb11064e",
+    "family_spec_sha256": "94552f14c076ce3fb4cccea94cc3b09466577ffb72995c8745c2bc0ce10eff48"
+  },
+  "support": {
+    "artifact_paths": [
+      "support_offset_comparator.va"
+    ],
+    "source_root": "./support"
+  },
+  "task_id": "v4-109"
+}

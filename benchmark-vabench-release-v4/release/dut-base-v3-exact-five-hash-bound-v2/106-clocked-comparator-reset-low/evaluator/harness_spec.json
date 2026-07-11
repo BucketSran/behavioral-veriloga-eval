@@ -1,0 +1,86 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "clocked_comparator_reset_low.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=42n maxstep=50p"
+    ],
+    "body_lines": [
+      "Vclk (cmpck 0) vsource type=pulse val0=0 val1=0.9 delay=5n period=20n width=10n rise=100p fall=100p",
+      "Vinp (vinp 0) vsource type=pwl wave=[0 0.70 18n 0.70 19n 0.25 60n 0.25]",
+      "Vinn (vinn 0) vsource dc=0.45",
+      "",
+      "XDUT (cmpck vinn vinp dcmpn dcmpp) clocked_comparator_reset_low",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "cmpck",
+      "vinn",
+      "vinp",
+      "dcmpn",
+      "dcmpp"
+    ]
+  },
+  "family_id": "106",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "a10005657472aca1acc1d2a423ca383aa6dcb387a2fca4516acd8a118c7046c9",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "29576a96d714f325072b3cdf81d41ec2a5fe7715153242d2a40eb84f8beb3fd4",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=55n maxstep=50p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INITIAL_RESET_LOW",
+    "P_FALLING_EDGE_RESET_LOW",
+    "P_POSITIVE_DIFFERENTIAL_DECISION",
+    "P_NEGATIVE_DIFFERENTIAL_DECISION",
+    "P_EQUAL_INPUT_RESET_STATE",
+    "P_LATCHED_HOLD_AND_TIMING"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "2c4ae04c861ea66a8518d28cc581baf04f5f096c7be51a69bcd93c4b5038bc69",
+    "family_spec_sha256": "e09e56aee257cb737883b36a36c4d78aed7d7b31cb425f097398606201b0872d"
+  },
+  "task_id": "v4-106"
+}

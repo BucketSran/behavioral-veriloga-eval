@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/bipolar_dac_4b_continuous.va"
+
+Vd3 (vd3 0) vsource type=pwl wave=[0 0 10n 0 10.2n 0 20n 0.9 20.2n 0.9 30n 0.9 30.2n 0.9 45n 0.9]
+Vd2 (vd2 0) vsource type=pwl wave=[0 0 10n 0.9 10.2n 0.9 20n 0 20.2n 0 30n 0.9 30.2n 0.9 45n 0.9]
+Vd1 (vd1 0) vsource type=pwl wave=[0 0 10n 0 10.2n 0 20n 0.9 20.2n 0.9 30n 0.9 30.2n 0.9 45n 0.9]
+Vd0 (vd0 0) vsource type=pwl wave=[0 0 10n 0.9 10.2n 0.9 20n 0 20.2n 0 30n 0.9 30.2n 0.9 45n 0.9]
+
+XDUT (vd3 vd2 vd1 vd0 vout) bipolar_dac_4b_continuous
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=42n maxstep=50p
+save vd3 vd2 vd1 vd0 vout

@@ -1,0 +1,95 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "bipolar_dac_4b_continuous.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=42n maxstep=50p"
+    ],
+    "body_lines": [
+      "Vd3 (vd3 0) vsource type=pwl wave=[0 0 10n 0 10.2n 0 20n 0.9 20.2n 0.9 30n 0.9 30.2n 0.9 45n 0.9]",
+      "Vd2 (vd2 0) vsource type=pwl wave=[0 0 10n 0.9 10.2n 0.9 20n 0 20.2n 0 30n 0.9 30.2n 0.9 45n 0.9]"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vd3",
+      "vd2",
+      "vd1",
+      "vd0",
+      "vout"
+    ]
+  },
+  "family_id": "107",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "e9f3c19863aea494d560b88a298a29d415624d3e6954f4861b18d0c58a129ba4",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "c2a2d9da5df7bb0197d16f995ca30413f15238037805ca8fae2c669ff91041ba",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vd1 (vd1 0) vsource type=pwl wave=[0 0 10n 0 10.2n 0 20n 0.9 20.2n 0.9 30n 0.9 30.2n 0.9 45n 0.9]",
+          "Vd0 (vd0 0) vsource type=pwl wave=[0 0 10n 0.9 10.2n 0.9 20n 0 20.2n 0 30n 0.9 30.2n 0.9 45n 0.9]",
+          "",
+          "XDUT (vd3 vd2 vd1 vd0 vout) bipolar_dac_4b_continuous",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vd1 (vd1 0) vsource type=pwl wave=[0 0 10n 0.9 10.2n 0.9 20n 0 20.2n 0 30n 0.9 30.2n 0.9 45n 0.9]",
+          "Vd0 (vd0 0) vsource type=pwl wave=[0 0.9 10n 0.9 10.2n 0 20n 0.9 20.2n 0.9 30n 0 30.2n 0 45n 0]",
+          "",
+          "XDUT (vd3 vd2 vd1 vd0 vout) bipolar_dac_4b_continuous",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_UNSIGNED_BIT_DECODE",
+    "P_NEGATIVE_FULL_SCALE",
+    "P_POSITIVE_FULL_SCALE",
+    "P_UNIFORM_CODE_STEP",
+    "P_MONOTONIC_TRANSFER",
+    "P_CONTINUOUS_REEVALUATION"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "9a5a4dc2295d71e7243961fa68590a4f6069fd0f39677e44aefe29a2c243c1c4",
+    "family_spec_sha256": "743665bdb84b6ce71d50c89689ccb984db5dd53539430ff9342ad2cb274e1254"
+  },
+  "task_id": "v4-107"
+}

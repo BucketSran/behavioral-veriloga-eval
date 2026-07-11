@@ -1,0 +1,38 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/vin_src.va"
+ahdl_include "./support/lfsr.va"
+ahdl_include "./support/dither_adder.va"
+ahdl_include "./support/gain_amp_fixed.va"
+
+// gain_extraction private coverage testbench for the vin_src support component.
+
+parameters vdd=0.9 ACTUAL_GAIN=7.2 DITHER_AMP=0.011 fs=50e6 fin=1.3e6 VIN_NOISE=0.006
+
+Vvdd (vdd 0) vsource dc=vdd
+Vvss (vss 0) vsource dc=0
+
+// 50 MHz clock
+Vclk (clk 0) vsource type=pulse val0=0 val1=vdd period=20n delay=5n rise=1n fall=1n width=9n
+
+// Reset deasserts at 32ns
+Vrst_n (rst_n 0) vsource type=pwl wave=[0 0  31.5n 0  32n vdd  1.8u vdd]
+Ven    (en    0) vsource dc=vdd
+
+// Public support modules are mounted read-only from the declared support contract.
+// Clocked noisy sine input
+IVIN  (clk rst_n vinp vinn) vin_src vdd=vdd vth=0.45 ampl=0.02 freq=fin sigma=VIN_NOISE SEED=0
+
+// LFSR (drives dither)
+ILFSR (dpn vdd vss clk en rst_n) lfsr seed=42
+
+// Dither adder
+IDITH (vinp vinn dpn vdin_p vdin_n) dither_adder vdd=vdd vth=0.45 DITHER_AMP=DITHER_AMP
+
+// Fixed-gain amplifier
+IAMP  (vdin_p vdin_n vamp_p vamp_n) gain_amp_fixed vdd=vdd ACTUAL_GAIN=ACTUAL_GAIN
+
+
+tran tran stop=1.8u maxstep=6n
+save clk rst_n vinp vinn vamp_p vamp_n

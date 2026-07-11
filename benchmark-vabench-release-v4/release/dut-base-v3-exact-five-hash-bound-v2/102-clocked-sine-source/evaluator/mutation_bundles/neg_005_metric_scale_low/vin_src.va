@@ -1,0 +1,41 @@
+// Attenuated differential: both rails track the same sampled sine, killing vin_diff
+// while preserving clocked update semantics (composed-flow fault on gain ratio).
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 30p
+
+module vin_src(
+    input  electrical CLK,
+    input  electrical RST_N,
+    output electrical VOUT_P,
+    output electrical VOUT_N
+);
+
+parameter real    vdd   = 0.9;
+parameter real    vth   = 0.45;
+parameter real    ampl  = 0.15;
+parameter real    freq  = 300e3;
+parameter real    sigma = 0.01;
+parameter integer SEED  = 0;
+
+real vp, vn;
+
+analog begin
+    @(initial_step) begin
+        vp = vdd / 2.0;
+        vn = vdd / 2.0;
+    end
+
+    @(cross(V(CLK) - vth, +1)) begin
+        if (V(RST_N) > vth) begin
+            vp = vdd/2.0 + ampl * sin(2.0 * `M_PI * freq * $abstime)
+                         + sigma * $rdist_normal(SEED, 0, 1);
+            vn = vp;
+        end
+    end
+
+    V(VOUT_P) <+ transition(vp, 0);
+    V(VOUT_N) <+ transition(vn, 0);
+end
+
+endmodule

@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/settling_time_measurement_tb.va"
+
+Vstep (step 0) vsource type=pwl wave=[0 0 20n 0 21n 0.8 160n 0.8]
+
+XDUT (step vout done) settling_time_measurement_tb
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=160n maxstep=500p
+save step vout done
