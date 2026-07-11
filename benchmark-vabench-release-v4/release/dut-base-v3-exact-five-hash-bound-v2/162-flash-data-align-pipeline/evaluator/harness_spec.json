@@ -1,0 +1,98 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "flash_data_align_pipeline.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=34n maxstep=20p"
+    ],
+    "body_lines": [
+      "Vclk (clk 0) vsource type=pwl wave=[0 0 1n 0 1.05n 0.9 1.50n 0.9 1.55n 0 7n 0 7.05n 0.9 7.50n 0.9 7.55n 0 13n 0 13.05n 0.9 13.50n 0.9 13.55n 0 19n 0 19.05n 0.9 19.50n 0.9 19.55n 0 25n 0 25.05n 0.9 25.50n 0.9 25.55n 0 31n 0 31.05n 0.9 31.50n 0.9 31.55n 0 37n 0 37.05n 0.9 37.50n 0.9 37.55n 0 43n 0 43.05n 0.9 43.50n 0.9 43.55n 0]",
+      "Vdin0 (din0 0) vsource type=pwl wave=[0 0.9]",
+      "Vdin1 (din1 0) vsource type=pwl wave=[0 0.9 17.95n 0.9 18n 0 23.95n 0 24n 0.9]",
+      "Vdin2 (din2 0) vsource type=pwl wave=[0 0.9 17.95n 0.9 18n 0 23.95n 0 24n 0.9 29.95n 0.9 30n 0 35.95n 0 36n 0.9]",
+      "Vdin3 (din3 0) vsource type=pwl wave=[0 0 5.95n 0 6n 0.9 17.95n 0.9 18n 0 23.95n 0 24n 0.9 29.95n 0.9 30n 0 35.95n 0 36n 0.9]",
+      "Vdin4 (din4 0) vsource type=pwl wave=[0 0 5.95n 0 6n 0.9 17.95n 0.9 18n 0 23.95n 0 24n 0.9 29.95n 0.9 30n 0 35.95n 0 36n 0.9 41.95n 0.9 42n 0]",
+      "Vdin5 (din5 0) vsource type=pwl wave=[0 0 11.95n 0 12n 0.9 17.95n 0.9 18n 0 23.95n 0 24n 0.9 29.95n 0.9 30n 0 35.95n 0 36n 0.9 41.95n 0.9 42n 0]",
+      "Vdin6 (din6 0) vsource type=pwl wave=[0 0 11.95n 0 12n 0.9 17.95n 0.9 18n 0 35.95n 0 36n 0.9 41.95n 0.9 42n 0]",
+      "Vdin7 (din7 0) vsource type=pwl wave=[0 0 11.95n 0 12n 0.9 17.95n 0.9 18n 0]",
+      "",
+      "XDUT (clk din0 din1 din2 din3 din4 din5 din6 din7 dout0 dout1 dout2 dout3) flash_data_align_pipeline",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "din0",
+      "din1",
+      "din2",
+      "din3",
+      "din4",
+      "din5",
+      "din6",
+      "din7",
+      "dout0",
+      "dout1",
+      "dout2",
+      "dout3"
+    ]
+  },
+  "family_id": "162",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "b7c88f3cac788a3eabebbe274b276d19fd2e166fe41783717129c55467f0c449",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "830f31cddced535c0cf1d5871835071734243b0555874d1748aeb2551603b811",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=48n maxstep=20p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_THERMOMETER_COUNT",
+    "P_FOUR_STAGE_ALIGNMENT",
+    "P_BINARY_OUTPUT_ORDER",
+    "P_EVENT_HELD_OUTPUTS"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "35ddd851bf804b6a82bb8478c0b73c07cbe341469152229b53114c2e341793db",
+    "family_spec_sha256": "640609763e55149c7b0f2b8a9d16a0330024e0914f0bd97a7d52797bf5d4d376"
+  },
+  "task_id": "v4-162"
+}

@@ -1,0 +1,134 @@
+{
+  "family_id": "166",
+  "gold_bundle_sha256": "bf6f7734015cdfb1c9a3bf798aaceab52e679d2f8eb8be5a2c00f8bba6229d6a",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "l2_cdac_4b_residue.va": "516454aa126abca2bf7163ba590b3fa4910aab8ade1944af85e3a19e6d09e7a9"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RETAINED_RESIDUE_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "l2_cdac_4b_residue.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_RETAINED_RESIDUE_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "l2_cdac_4b_residue.va": "72e346adfb590833853938045d5973528987381e9c3bfcd3d739f2d17d173fb9"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CONTROL_STEP_WEIGHTS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_wrong_msb_step/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "l2_cdac_4b_residue.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_002_wrong_msb_step",
+      "trigger_condition": "Applies a quarter-reference dctrl3 step instead of the required half-reference step.",
+      "violated_property_ids": [
+        "P_CONTROL_STEP_WEIGHTS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "l2_cdac_4b_residue.va": "af17f2a1e69fe2b3ebe260c77987bf8d7b0d5ab421b304ae2e7547d0304d9fc8"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CONTROL_STEP_WEIGHTS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_subtract_control_steps/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "l2_cdac_4b_residue.va"
+      ],
+      "fault_class": "subtract_control_steps",
+      "id": "neg_003_subtract_control_steps",
+      "trigger_condition": "Subtracts the dctrl2 control step instead of adding it to the residue.",
+      "violated_property_ids": [
+        "P_CONTROL_STEP_WEIGHTS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "l2_cdac_4b_residue.va": "90f36a5be9a84a9a6166426d458e12a8927bed0fd83c60f4a87fa26540899508"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CONTROL_STEP_WEIGHTS",
+          "P_FALLING_CLOCK_SAMPLE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_sample_on_rising_clock/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "l2_cdac_4b_residue.va"
+      ],
+      "fault_class": "timing_or_state_update_fault",
+      "id": "neg_004_sample_on_rising_clock",
+      "trigger_condition": "Omits the dctrl1 one-eighth residue increment.",
+      "violated_property_ids": [
+        "P_CONTROL_STEP_WEIGHTS",
+        "P_FALLING_CLOCK_SAMPLE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "l2_cdac_4b_residue.va": "7bf292b1d760d3016cc0204b35f795f28aa9b60451940fe202601362db0a5483"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RETAINED_RESIDUE_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "l2_cdac_4b_residue.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "L2 CDAC 4b Residue: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_RETAINED_RESIDUE_OUTPUT"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

@@ -1,0 +1,28 @@
+`include "disciplines.vams"
+
+module ideal_clkmux_8channel(clk, in0, in1, in2, in3, in4, in5, in6, in7, out, count_x);
+input clk, in0, in1, in2, in3, in4, in5, in6, in7;
+output out, count_x;
+electrical clk, in0, in1, in2, in3, in4, in5, in6, in7, out, count_x;
+
+integer count;
+real out_level;
+
+analog begin
+    @(initial_step) begin
+        count = 0;
+    end
+
+    @(cross(V(clk) - 0.5, +1)) begin
+        count = (count + 1) % 8;
+    end
+
+    out_level = (count == 0) ? V(in0) : (count == 1) ? V(in1) :
+                (count == 2) ? V(in2) : (count == 3) ? V(in3) :
+                (count == 4) ? V(in4) : (count == 5) ? V(in5) :
+                (count == 6) ? V(in6) : V(in7);
+    V(out) <+ out_level;
+    V(count_x) <+ transition(count, 0, 20p, 20p);
+end
+
+endmodule

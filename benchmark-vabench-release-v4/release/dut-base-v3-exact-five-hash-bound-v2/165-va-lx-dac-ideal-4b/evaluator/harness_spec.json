@@ -1,0 +1,86 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "va_lx_dac_ideal_4b.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=26n maxstep=20p"
+    ],
+    "body_lines": [
+      "Vrdy (rdy 0) vsource type=pwl wave=[0 0 1n 0 1.05n 1.8 1.50n 1.8 1.55n 0 11n 0 11.05n 1.8 11.50n 1.8 11.55n 0 21n 0 21.05n 1.8 21.50n 1.8 21.55n 0 31n 0 31.05n 1.8 31.50n 1.8 31.55n 0]",
+      "Vdin1 (din1 0) vsource type=pwl wave=[0 0 7.95n 0 8n 1.8 17.95n 1.8 18n 0 27.95n 0 28n 1.8]",
+      "Vdin2 (din2 0) vsource type=pwl wave=[0 0 17.95n 0 18n 1.8]",
+      "Vdin3 (din3 0) vsource type=pwl wave=[0 0 7.95n 0 8n 1.8]",
+      "Vdin4 (din4 0) vsource type=pwl wave=[0 0 17.95n 0 18n 1.8]",
+      "",
+      "XDUT (din1 din2 din3 din4 rdy aout) va_lx_dac_ideal_4b",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "din1",
+      "din2",
+      "din3",
+      "din4",
+      "rdy",
+      "aout"
+    ]
+  },
+  "family_id": "165",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "9026f5c137027d3c62d14d7eca406657c514b0944108d07c067a96017f5e543d",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "01ff2d34b1dee1a912d7697aa2edc4b5cca4b30711e2def3d6b19c7b0c6ae090",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=40n maxstep=20p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_READY_CLOCKED_SAMPLING",
+    "P_BINARY_BIT_ORDER",
+    "P_VDD_SCALED_DAC_OUTPUT"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "96335194bc5adaaa4faff42b8cf5a47e83de1a33520cc036a0b9bacdedb8832b",
+    "family_spec_sha256": "c005d52faa757bedea50347e8e7399bb2e095a41945e54ee85b8a2a536bea841"
+  },
+  "task_id": "v4-165"
+}

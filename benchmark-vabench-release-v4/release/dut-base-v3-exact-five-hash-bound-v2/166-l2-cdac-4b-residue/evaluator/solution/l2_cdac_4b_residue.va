@@ -1,0 +1,31 @@
+`include "disciplines.vams"
+
+module l2_cdac_4b_residue(vin, clks, dctrl1, dctrl2, dctrl3, vres);
+input vin, clks, dctrl1, dctrl2, dctrl3;
+output vres;
+electrical vin, clks, dctrl1, dctrl2, dctrl3, vres;
+
+parameter real vdd = 1;
+parameter real vrefp = 1;
+parameter real vrefn = 0;
+real vres_level;
+
+analog begin
+    @(initial_step or cross(V(clks) - vdd / 2.0, -1)) begin
+        vres_level = V(vin);
+    end
+
+    @(cross(V(dctrl3) - vdd / 2.0, +1)) begin
+        vres_level = vres_level + 0.5 * (vrefp - vrefn);
+    end
+    @(cross(V(dctrl2) - vdd / 2.0, +1)) begin
+        vres_level = vres_level + 0.25 * (vrefp - vrefn);
+    end
+    @(cross(V(dctrl1) - vdd / 2.0, +1)) begin
+        vres_level = vres_level + 0.125 * (vrefp - vrefn);
+    end
+
+    V(vres) <+ transition(vres_level, 0, 20p, 20p);
+end
+
+endmodule

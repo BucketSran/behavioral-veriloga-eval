@@ -1,0 +1,30 @@
+`include "disciplines.vams"
+module comparator_delay_overdrive_meter(vdd, vss, clk, vinp, vinn, outp, outn, delay_ps, overdrive_mv, polarity, valid);
+input vdd, vss, clk, vinp, vinn, outp, outn;
+output delay_ps, overdrive_mv, polarity, valid;
+electrical vdd, vss, clk, vinp, vinn, outp, outn, delay_ps, overdrive_mv, polarity, valid;
+parameter real tr = 20p;
+real t_clk, sampled_overdrive_mv, measured_delay_ps, diff;
+integer armed, valid_state, polarity_state;
+analog begin
+    @(initial_step) begin t_clk = 0.0; sampled_overdrive_mv = 0.0; measured_delay_ps = 0.0; armed = 0; valid_state = 0; polarity_state = 0; end
+    @(cross(V(clk, vss) - 0.5 * V(vdd, vss), +1)) begin
+        t_clk = $abstime;
+        diff = V(vinp, vinn);
+        if (diff < 0.0) diff = -diff;
+        sampled_overdrive_mv = 1.0e3 * diff;
+        armed = 1;
+        valid_state = 0;
+    end
+    @(cross(V(outp, vss) - 0.5 * V(vdd, vss), +1)) begin
+        if (armed == 1) begin measured_delay_ps = 0.5e12 * ($abstime - t_clk); polarity_state = 1; valid_state = 1; armed = 0; end
+    end
+    @(cross(V(outn, vss) - 0.5 * V(vdd, vss), +1)) begin
+        if (armed == 1) begin measured_delay_ps = 0.5e12 * ($abstime - t_clk); polarity_state = 0; valid_state = 1; armed = 0; end
+    end
+    V(delay_ps, vss) <+ transition(measured_delay_ps, 0.0, tr, tr);
+    V(overdrive_mv, vss) <+ transition(sampled_overdrive_mv, 0.0, tr, tr);
+    V(polarity, vss) <+ transition((valid_state && polarity_state) ? 1.0 : 0.0, 0.0, tr, tr) * V(vdd, vss);
+    V(valid, vss) <+ transition(valid_state ? 1.0 : 0.0, 0.0, tr, tr) * V(vdd, vss);
+end
+endmodule

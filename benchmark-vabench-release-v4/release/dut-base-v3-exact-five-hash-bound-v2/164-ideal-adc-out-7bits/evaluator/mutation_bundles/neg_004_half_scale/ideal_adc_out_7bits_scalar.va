@@ -1,0 +1,29 @@
+`include "disciplines.vams"
+
+module ideal_adc_out_7bits_scalar(din0, din1, din2, din3, din4, din5, din6, dout);
+input din0, din1, din2, din3, din4, din5, din6;
+output dout;
+electrical din0, din1, din2, din3, din4, din5, din6, dout;
+
+parameter real vth = 0.45;
+real out_value;
+
+analog begin
+    @(initial_step or cross(V(din0) - vth, 0) or cross(V(din1) - vth, 0) or
+      cross(V(din2) - vth, 0) or cross(V(din3) - vth, 0) or
+      cross(V(din4) - vth, 0) or cross(V(din5) - vth, 0) or
+      cross(V(din6) - vth, 0)) begin
+        out_value = 0;
+        out_value = out_value + ((V(din6) > vth) ? 16.0 / 64.0 : 0);
+        out_value = out_value + ((V(din5) > vth) ? 8.0 / 64.0 : 0);
+        out_value = out_value + ((V(din4) > vth) ? 4.0 / 64.0 : 0);
+        out_value = out_value + ((V(din3) > vth) ? 2.0 / 64.0 : 0);
+        out_value = out_value + ((V(din2) > vth) ? 1.0 / 64.0 : 0);
+        out_value = out_value + ((V(din1) > vth) ? 0.5 / 64.0 : 0);
+        out_value = out_value + ((V(din0) > vth) ? 0.25 / 64.0 : 0);
+    end
+
+    V(dout) <+ out_value;
+end
+
+endmodule

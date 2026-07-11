@@ -1,0 +1,60 @@
+`include "disciplines.vams"
+
+module support_overdrive_delay_comparator(vdd, vss, clk, vinp, vinn, outp, outn);
+input vdd, vss, clk, vinp, vinn;
+output outp, outn;
+electrical vdd, vss, clk, vinp, vinn, outp, outn;
+
+parameter real td_0 = 24p;
+parameter real tau = 5p;
+parameter real td_min = 25p;
+parameter real td_max = 140p;
+parameter real tr = 20p;
+
+real td;
+real out_delay;
+real diff;
+real diff_abs;
+integer outp_state;
+integer outn_state;
+
+analog begin
+    @(initial_step) begin
+        td = td_min;
+        out_delay = 0.0;
+        outp_state = 0;
+        outn_state = 0;
+    end
+
+    @(cross(V(clk, vss) - 0.5 * V(vdd, vss), +1)) begin
+        diff = V(vinp, vinn);
+        diff_abs = diff;
+        if (diff_abs < 0.0) begin
+            diff_abs = -diff_abs;
+        end
+        if (diff_abs < 1u) begin
+            diff_abs = 1u;
+        end
+        td = td_0 + tau * ln(V(vdd, vss) / diff_abs);
+        if (td < td_min) begin
+            td = td_min;
+        end
+        if (td > td_max) begin
+            td = td_max;
+        end
+        outp_state = (diff >= 0.0);
+        outn_state = (diff < 0.0);
+        out_delay = td;
+    end
+
+    @(cross(V(clk, vss) - 0.5 * V(vdd, vss), -1)) begin
+        outp_state = 0;
+        outn_state = 0;
+        out_delay = 0.0;
+    end
+
+    V(outp, vss) <+ transition(outp_state ? 1.0 : 0.0, out_delay, tr, tr) * V(vdd, vss);
+    V(outn, vss) <+ transition(outn_state ? 1.0 : 0.0, out_delay, tr, tr) * V(vdd, vss);
+end
+
+endmodule

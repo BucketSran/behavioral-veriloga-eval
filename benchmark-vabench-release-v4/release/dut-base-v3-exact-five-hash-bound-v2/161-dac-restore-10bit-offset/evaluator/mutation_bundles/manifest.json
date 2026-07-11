@@ -1,0 +1,136 @@
+{
+  "family_id": "161",
+  "gold_bundle_sha256": "80e8c40f0573e904d26be0628b7faa293c05fde6155a18d055e49187e9c66ad8",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "dac_restore_10bit_offset.va": "28104cf65e1942569b330f3a4ae4fe68fd49e6bb75f31dd319a40767c9421b4b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OFFSET_MIDRISE_OUTPUT",
+          "P_OUTPUT_SMOOTH_HOLD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "dac_restore_10bit_offset.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_OFFSET_MIDRISE_OUTPUT",
+        "P_OUTPUT_SMOOTH_HOLD"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "dac_restore_10bit_offset.va": "32b8bb7f6506104b91afd11316a1cb04570098ef61e6ef551ab6bf57032f7cc9"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CLOCKED_CODE_SAMPLING",
+          "P_OFFSET_MIDRISE_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_missing_code_offset/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "dac_restore_10bit_offset.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_002_missing_code_offset",
+      "trigger_condition": "Omits the -32 code offset.",
+      "violated_property_ids": [
+        "P_CLOCKED_CODE_SAMPLING",
+        "P_OFFSET_MIDRISE_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "dac_restore_10bit_offset.va": "2134e6160e1839587b569b1e3aa060f5a246cd11a65d3169d06c3418319fac92"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_WEIGHTED_REDUNDANT_CODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_missing_duplicate_d6/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "dac_restore_10bit_offset.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_003_missing_duplicate_d6",
+      "trigger_condition": "Omits the duplicated D6 64-LSB contribution.",
+      "violated_property_ids": [
+        "P_WEIGHTED_REDUNDANT_CODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "dac_restore_10bit_offset.va": "ce9d056833b64e89dbf7c9aeb3043f01ef42bf516f26ffe13d69fd23b794e909"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OFFSET_MIDRISE_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_wrong_lsb/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "dac_restore_10bit_offset.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_004_wrong_lsb",
+      "trigger_condition": "Uses twice the intended LSB size.",
+      "violated_property_ids": [
+        "P_OFFSET_MIDRISE_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "dac_restore_10bit_offset.va": "65d8c79069af12124e64626a66822630b6d690d1a2f89ec363b0f3f955226948"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OFFSET_MIDRISE_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "dac_restore_10bit_offset.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "DAC Restore 10bit Offset: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_OFFSET_MIDRISE_OUTPUT"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

@@ -1,0 +1,96 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "ideal_clkmux_8channel.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=12.5n maxstep=20p"
+    ],
+    "body_lines": [
+      "Vclk (clk 0) vsource type=pwl wave=[0 0 1n 0 1.05n 1.0 1.50n 1.0 1.55n 0 3n 0 3.05n 1.0 3.50n 1.0 3.55n 0 5n 0 5.05n 1.0 5.50n 1.0 5.55n 0 7n 0 7.05n 1.0 7.50n 1.0 7.55n 0 9n 0 9.05n 1.0 9.50n 1.0 9.55n 0 11n 0 11.05n 1.0 11.50n 1.0 11.55n 0 13n 0 13.05n 1.0 13.50n 1.0 13.55n 0 15n 0 15.05n 1.0 15.50n 1.0 15.55n 0]",
+      "Vin0 (in0 0) vsource dc=0.1",
+      "Vin1 (in1 0) vsource dc=0.2",
+      "Vin2 (in2 0) vsource dc=0.3",
+      "Vin3 (in3 0) vsource dc=0.4",
+      "Vin4 (in4 0) vsource dc=0.5",
+      "Vin5 (in5 0) vsource dc=0.6",
+      "Vin6 (in6 0) vsource dc=0.7",
+      "Vin7 (in7 0) vsource dc=0.8",
+      "",
+      "XDUT (clk in0 in1 in2 in3 in4 in5 in6 in7 out count_x) ideal_clkmux_8channel",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "out",
+      "count_x",
+      "in0",
+      "in1",
+      "in2",
+      "in3",
+      "in4",
+      "in5",
+      "in6",
+      "in7"
+    ]
+  },
+  "family_id": "167",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "fc567689b62f85c1cbbed36fa50c3d7a08e815587e6bd4a4dbce44e1143e2976",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "69362ecd775032033e2900a20f738134ac782ae67887d654b140b4d188502e21",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=18n maxstep=20p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_MODULO8_COUNTER",
+    "P_INCREMENT_BEFORE_SELECTION",
+    "P_ANALOG_CHANNEL_MUX",
+    "P_COUNTER_MONITOR_LEVEL"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "82e5da7970b2683ff3353e794c64b3a7b87de8d19d72f9c964040d96ac2d2da4",
+    "family_spec_sha256": "b5f628f7b51beb1e56da5d3484f0ef3fd17f16ff7b6d82097201dfc5f61881bd"
+  },
+  "task_id": "v4-167"
+}

@@ -1,0 +1,134 @@
+{
+  "family_id": "167",
+  "gold_bundle_sha256": "76cf4b9574d5f188830aacfd35b8d666e48bb0bfe356f63fa9c564beff031876",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "ideal_clkmux_8channel.va": "660cc0803dea6114ad87e244e57a5603db69967c095fbbe95f1e36318a4ef6eb"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ANALOG_CHANNEL_MUX",
+          "P_COUNTER_MONITOR_LEVEL"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "ideal_clkmux_8channel.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_ANALOG_CHANNEL_MUX",
+        "P_COUNTER_MONITOR_LEVEL"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "ideal_clkmux_8channel.va": "a56a9d0ad96f7944637b8fc476ec2ff4d6411e6e6b85bcc9d966ba45dda54dec"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_MODULO8_COUNTER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_modulo_seven/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "ideal_clkmux_8channel.va"
+      ],
+      "fault_class": "modulo_seven",
+      "id": "neg_002_modulo_seven",
+      "trigger_condition": "Wraps the channel counter modulo seven, skipping channel 7.",
+      "violated_property_ids": [
+        "P_MODULO8_COUNTER"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "ideal_clkmux_8channel.va": "4d2377c74c07d6b223817f7f7f0fbf93b2781ca789c6f7f2f404e6622e7599d1"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INCREMENT_BEFORE_SELECTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_no_initial_increment/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "ideal_clkmux_8channel.va"
+      ],
+      "fault_class": "state_reset_or_enable_error",
+      "id": "neg_003_no_initial_increment",
+      "trigger_condition": "Samples channel 0 on the first clock instead of incrementing before mux selection.",
+      "violated_property_ids": [
+        "P_INCREMENT_BEFORE_SELECTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "ideal_clkmux_8channel.va": "7a21516280e5c123a0213a7b367f10b4d748865f6567220d19806d19cc5aa210"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COUNTER_MONITOR_LEVEL"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_half_count_output/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "ideal_clkmux_8channel.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_004_half_count_output",
+      "trigger_condition": "Reports the counter monitor at half amplitude.",
+      "violated_property_ids": [
+        "P_COUNTER_MONITOR_LEVEL"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "ideal_clkmux_8channel.va": "dca3ee4298f654411da6940a5be112472e66a0a2368bb951a45a35bccf272947"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COUNTER_MONITOR_LEVEL"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "ideal_clkmux_8channel.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Ideal Clkmux 8channel: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_COUNTER_MONITOR_LEVEL"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

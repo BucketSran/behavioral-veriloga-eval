@@ -1,0 +1,86 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "l2_cdac_4b_residue.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=10n maxstep=20p"
+    ],
+    "body_lines": [
+      "Vvin (vin 0) vsource type=pwl wave=[0 0.1 11.95n 0.1 12n -0.2]",
+      "Vclks (clks 0) vsource type=pwl wave=[0 0 1n 0 1.05n 1.0 1.50n 1.0 1.55n 0 13n 0 13.05n 1.0 13.50n 1.0 13.55n 0]",
+      "Vdctrl3 (dctrl3 0) vsource type=pwl wave=[0 0 3n 0 3.05n 1 3.35n 1 3.40n 0]",
+      "Vdctrl2 (dctrl2 0) vsource type=pwl wave=[0 0 5n 0 5.05n 1 5.35n 1 5.40n 0 15n 0 15.05n 1 15.35n 1 15.40n 0]",
+      "Vdctrl1 (dctrl1 0) vsource type=pwl wave=[0 0 7n 0 7.05n 1 7.35n 1 7.40n 0]",
+      "",
+      "XDUT (vin clks dctrl1 dctrl2 dctrl3 vres) l2_cdac_4b_residue",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "clks",
+      "dctrl1",
+      "dctrl2",
+      "dctrl3",
+      "vres"
+    ]
+  },
+  "family_id": "166",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "f45113db1bb5d8cf19dee321daba0332c13378c4a571aa6b582c467c1c9c34ef",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "1cbd450db9dff225d0ea79e084c6c181983d7d85facdbf699ff546b7b2c7742d",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=20n maxstep=20p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_FALLING_CLOCK_SAMPLE",
+    "P_CONTROL_STEP_WEIGHTS",
+    "P_RETAINED_RESIDUE_OUTPUT"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "0436ed8fa4e01097af1806a97b4cf1b13ff6077ea7af705516e5df15c76b918c",
+    "family_spec_sha256": "c29230e402be77dfddfce10aff5e0c932c2a862742c4a8e5d885eeb9f0f7cc5b"
+  },
+  "task_id": "v4-166"
+}

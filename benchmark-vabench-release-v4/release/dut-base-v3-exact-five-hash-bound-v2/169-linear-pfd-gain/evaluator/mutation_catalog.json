@@ -1,0 +1,134 @@
+{
+  "family_id": "169",
+  "gold_bundle_sha256": "9050c46c6e25850e0b1a27a4c0b2cc781f7c0b76850aa732a764cc10e84efc1e",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "linear_pfd_gain.va": "15278b4e94e592069371b5a3554d7d512443708666da5571e75a6ad153d9c09c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CONTINUOUS_ANALOG_TRACKING",
+          "P_KPHI_GAIN_SCALE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "linear_pfd_gain.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_CONTINUOUS_ANALOG_TRACKING",
+        "P_KPHI_GAIN_SCALE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "linear_pfd_gain.va": "a458fc81e1d724d5b1885841bf8c7b51dac9fe4d82753ff7b4a1dea14202871b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DIFFERENTIAL_INPUT_POLARITY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_inverted_sign/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "linear_pfd_gain.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_002_inverted_sign",
+      "trigger_condition": "Computes the gain with in2-in1 polarity.",
+      "violated_property_ids": [
+        "P_DIFFERENTIAL_INPUT_POLARITY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "linear_pfd_gain.va": "561d570439848df1ccf20b190293b19e30aaa7df1aea0f0c77d4e871db8a999b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_KPHI_GAIN_SCALE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_unit_gain/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "linear_pfd_gain.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_003_unit_gain",
+      "trigger_condition": "Drops the required kphi scaling and emits only the raw input difference.",
+      "violated_property_ids": [
+        "P_KPHI_GAIN_SCALE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "linear_pfd_gain.va": "a0d4ce828ebcb8d2ce7794057d8540e561ba9a98b83566fd992de7e42f1bf0da"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DIFFERENTIAL_INPUT_POLARITY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_single_ended/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "linear_pfd_gain.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_004_single_ended",
+      "trigger_condition": "Ignores in2 and turns the PFD into a single-ended gain block.",
+      "violated_property_ids": [
+        "P_DIFFERENTIAL_INPUT_POLARITY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "linear_pfd_gain.va": "1e4d702703158ea1def944e848f394d5cb85d251dc2b726494c44b0d37615329"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_KPHI_GAIN_SCALE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "linear_pfd_gain.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Linear PFD Gain: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_KPHI_GAIN_SCALE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

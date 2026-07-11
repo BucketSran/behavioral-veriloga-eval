@@ -1,0 +1,14 @@
+`include "disciplines.vams"
+
+module linear_pfd_gain(in1, in2, out);
+input in1, in2;
+output out;
+electrical in1, in2, out;
+
+parameter real kphi = 2.03;
+
+analog begin
+    V(out) <+ kphi * (V(in2) - V(in1));
+end
+
+endmodule

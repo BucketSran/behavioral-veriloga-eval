@@ -1,0 +1,136 @@
+{
+  "family_id": "164",
+  "gold_bundle_sha256": "4179c55f585fbaa93237d2ff3b23fcab1d1602186f751a3e6b0e2e68a36cd4f2",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "ideal_adc_out_7bits_scalar.va": "21360750412c3a925468dfb457e3723a12001a08f4a444f9fc9c3c191108a99e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SCALED_SCALAR_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "ideal_adc_out_7bits_scalar.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_SCALED_SCALAR_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "ideal_adc_out_7bits_scalar.va": "963e4909db8e6ca9e03beb098383d92a83f0b78117b34f96c088e462ec8197be"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_WEIGHTED_GROUP_SUM"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_omit_msb/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "ideal_adc_out_7bits_scalar.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_002_omit_msb",
+      "trigger_condition": "Drops the din6 MSB contribution from the weighted scalar output.",
+      "violated_property_ids": [
+        "P_WEIGHTED_GROUP_SUM"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "ideal_adc_out_7bits_scalar.va": "e71d2c52a7ff6f605ab88c0a8db6efc0c394f72a4f38acbd5f47b780e247c145"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SCALED_SCALAR_OUTPUT",
+          "P_THRESHOLD_CODE_DETECTION",
+          "P_WEIGHTED_GROUP_SUM"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_reverse_lsb_msb/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "ideal_adc_out_7bits_scalar.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_003_reverse_lsb_msb",
+      "trigger_condition": "Adds a fixed offset to every decoded scalar output code.",
+      "violated_property_ids": [
+        "P_SCALED_SCALAR_OUTPUT",
+        "P_THRESHOLD_CODE_DETECTION",
+        "P_WEIGHTED_GROUP_SUM"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "ideal_adc_out_7bits_scalar.va": "fecafac97ede958083e3376a5b06c3acb7ecb747c4d72ceb5d51ff4a349b993a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SCALED_SCALAR_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_half_scale/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "ideal_adc_out_7bits_scalar.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_004_half_scale",
+      "trigger_condition": "Uses a denominator twice as large, halving every nonzero output code.",
+      "violated_property_ids": [
+        "P_SCALED_SCALAR_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "ideal_adc_out_7bits_scalar.va": "2e9bf635313f014bd72e15f52d30bcbf2c948feb37e82421af5df976440cc7e7"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SCALED_SCALAR_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "ideal_adc_out_7bits_scalar.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Ideal ADC Out 7bits: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_SCALED_SCALAR_OUTPUT"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

@@ -1,0 +1,22 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/flash_data_align_pipeline.va"
+
+Vclk (clk 0) vsource type=pwl wave=[0 0 1n 0 1.05n 0.9 1.50n 0.9 1.55n 0 7n 0 7.05n 0.9 7.50n 0.9 7.55n 0 13n 0 13.05n 0.9 13.50n 0.9 13.55n 0 19n 0 19.05n 0.9 19.50n 0.9 19.55n 0 25n 0 25.05n 0.9 25.50n 0.9 25.55n 0 31n 0 31.05n 0.9 31.50n 0.9 31.55n 0 37n 0 37.05n 0.9 37.50n 0.9 37.55n 0 43n 0 43.05n 0.9 43.50n 0.9 43.55n 0]
+Vdin0 (din0 0) vsource type=pwl wave=[0 0.9]
+Vdin1 (din1 0) vsource type=pwl wave=[0 0.9 17.95n 0.9 18n 0 23.95n 0 24n 0.9]
+Vdin2 (din2 0) vsource type=pwl wave=[0 0.9 17.95n 0.9 18n 0 23.95n 0 24n 0.9 29.95n 0.9 30n 0 35.95n 0 36n 0.9]
+Vdin3 (din3 0) vsource type=pwl wave=[0 0 5.95n 0 6n 0.9 17.95n 0.9 18n 0 23.95n 0 24n 0.9 29.95n 0.9 30n 0 35.95n 0 36n 0.9]
+Vdin4 (din4 0) vsource type=pwl wave=[0 0 5.95n 0 6n 0.9 17.95n 0.9 18n 0 23.95n 0 24n 0.9 29.95n 0.9 30n 0 35.95n 0 36n 0.9 41.95n 0.9 42n 0]
+Vdin5 (din5 0) vsource type=pwl wave=[0 0 11.95n 0 12n 0.9 17.95n 0.9 18n 0 23.95n 0 24n 0.9 29.95n 0.9 30n 0 35.95n 0 36n 0.9 41.95n 0.9 42n 0]
+Vdin6 (din6 0) vsource type=pwl wave=[0 0 11.95n 0 12n 0.9 17.95n 0.9 18n 0 35.95n 0 36n 0.9 41.95n 0.9 42n 0]
+Vdin7 (din7 0) vsource type=pwl wave=[0 0 11.95n 0 12n 0.9 17.95n 0.9 18n 0]
+
+XDUT (clk din0 din1 din2 din3 din4 din5 din6 din7 dout0 dout1 dout2 dout3) flash_data_align_pipeline
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=34n maxstep=20p
+save clk din0 din1 din2 din3 din4 din5 din6 din7 dout0 dout1 dout2 dout3

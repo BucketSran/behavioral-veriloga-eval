@@ -1,0 +1,256 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "comparator_delay_overdrive_meter",
+            "parameters": [
+              {
+                "default": "20p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vdd",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vss",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vinp",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vinn",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "outp",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "outn",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "delay_ps",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "overdrive_mv",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "polarity",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 10
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "comparator_delay_overdrive_meter.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "170",
+  "identity": {
+    "category": "comparator",
+    "difficulty": "D3",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Comparator Delay Overdrive Meter"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_CLOCK_ARMED_MEASUREMENT",
+      "observable_contract": "Each rising `clk` threshold crossing stores the launch time, captures absolute differential overdrive, and arms exactly one pending measurement.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vinp",
+        "vinn",
+        "overdrive_mv",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_DECISION_DELAY_CAPTURE",
+      "observable_contract": "The first qualifying `outp` or `outn` decision edge while armed reports the elapsed clock-to-decision delay in `delay_ps`.",
+      "required_signals": [
+        "time",
+        "clk",
+        "outp",
+        "outn",
+        "delay_ps",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ABSOLUTE_OVERDRIVE_METRIC",
+      "observable_contract": "`overdrive_mv` reports the absolute input differential magnitude at launch time.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vinp",
+        "vinn",
+        "overdrive_mv"
+      ]
+    },
+    {
+      "id": "P_POLARITY_AND_VALID_FLAG",
+      "observable_contract": "`polarity` reports the winning output decision direction and `valid` asserts only for a completed armed measurement.",
+      "required_signals": [
+        "time",
+        "outp",
+        "outn",
+        "polarity",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1170",
+    "dut": "v4-170",
+    "testbench": "v4-670"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vdd",
+            "port_ref": "vdd",
+            "position": 0
+          },
+          {
+            "net": "vss",
+            "port_ref": "vss",
+            "position": 1
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 2
+          },
+          {
+            "net": "vinp",
+            "port_ref": "vinp",
+            "position": 3
+          },
+          {
+            "net": "vinn",
+            "port_ref": "vinn",
+            "position": 4
+          },
+          {
+            "net": "outp",
+            "port_ref": "outp",
+            "position": 5
+          },
+          {
+            "net": "outn",
+            "port_ref": "outn",
+            "position": 6
+          },
+          {
+            "net": "delay_ps",
+            "port_ref": "delay_ps",
+            "position": 7
+          },
+          {
+            "net": "overdrive_mv",
+            "port_ref": "overdrive_mv",
+            "position": 8
+          },
+          {
+            "net": "polarity",
+            "port_ref": "polarity",
+            "position": 9
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 10
+          }
+        ],
+        "module_ref": "comparator_delay_overdrive_meter",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "support_contract": {
+    "files": [
+      {
+        "modules": [
+          "support_overdrive_delay_comparator"
+        ],
+        "path": "support_overdrive_delay_comparator.va",
+        "sha256": "8248b3a926f0b351041b3c63b74d4ec4822aafcf6d9f45c224f37e21626bcbf5"
+      }
+    ],
+    "mount_root": "support",
+    "source_root": "public_support",
+    "visibility": "public_readonly"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "vinp",
+      "vinn",
+      "outp",
+      "outn",
+      "delay_ps",
+      "overdrive_mv",
+      "polarity",
+      "valid"
+    ]
+  }
+}

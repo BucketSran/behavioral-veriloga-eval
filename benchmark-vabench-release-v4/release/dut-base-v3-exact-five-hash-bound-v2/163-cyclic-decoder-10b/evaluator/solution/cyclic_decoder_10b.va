@@ -1,0 +1,38 @@
+`include "disciplines.vams"
+
+module cyclic_decoder_10b(dp, dn, ready, clks, dout);
+input dp, dn, ready, clks;
+output dout;
+electrical dp, dn, ready, clks, dout;
+
+parameter real vth = 0.55;
+parameter integer nbit = 10;
+real sum, counter, sumresult;
+
+analog begin
+    @(initial_step) begin
+        counter = nbit - 1;
+        sum = 0;
+        sumresult = 0;
+    end
+
+    @(cross(V(clks) - vth, +1)) begin
+        sumresult = sum / (pow(2, nbit) - 1.0) - 0.5;
+        counter = nbit - 1;
+        sum = 0;
+    end
+
+    @(cross(V(ready) - vth, +1)) begin
+        if (V(dp) > vth) begin
+            sum = sum + pow(2, counter);
+        end
+        if ((V(dp) < vth) && (V(dn) > vth)) begin
+            sum = sum + 0.5 * pow(2, counter);
+        end
+        counter = counter - 1;
+    end
+
+    V(dout) <+ transition(sumresult, 1p, 1p, 1p);
+end
+
+endmodule

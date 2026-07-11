@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/dac_ideal_4b_offset.va"
+
+Vdin0 (din0 0) vsource type=pwl wave=[0 0 7.95n 0 8n 1.0 17.95n 1.0 18n 0 27.95n 0 28n 1.0]
+Vdin1 (din1 0) vsource type=pwl wave=[0 0 17.95n 0 18n 1.0]
+Vdin2 (din2 0) vsource type=pwl wave=[0 0 7.95n 0 8n 1.0 17.95n 1.0 18n 0 27.95n 0 28n 1.0]
+Vdin3 (din3 0) vsource type=pwl wave=[0 0 17.95n 0 18n 1.0]
+
+XDUT (din0 din1 din2 din3 dout) dac_ideal_4b_offset
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=40n maxstep=20p
+save din0 din1 din2 din3 dout

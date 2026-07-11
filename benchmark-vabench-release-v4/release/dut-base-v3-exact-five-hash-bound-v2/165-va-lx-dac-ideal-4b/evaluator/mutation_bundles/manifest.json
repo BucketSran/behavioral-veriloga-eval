@@ -1,0 +1,134 @@
+{
+  "family_id": "165",
+  "gold_bundle_sha256": "4c4e27f475048d476802dfaa5ce1f413b0d00eba10f4be26f646eea280a951d8",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "va_lx_dac_ideal_4b.va": "f876ae02b36af1a769aee137ace0952bd5bc9d6a20acd2bee581c62a1fda0a3a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_READY_CLOCKED_SAMPLING",
+          "P_VDD_SCALED_DAC_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "va_lx_dac_ideal_4b.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_READY_CLOCKED_SAMPLING",
+        "P_VDD_SCALED_DAC_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "va_lx_dac_ideal_4b.va": "bfe27f870a32b7622c1d244ba7983845e147fbebf9eba28ca963f0907a97148a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_VDD_SCALED_DAC_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_missing_vdd_scale/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "va_lx_dac_ideal_4b.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_002_missing_vdd_scale",
+      "trigger_condition": "Leaves the decoded DAC fraction unscaled by vdd.",
+      "violated_property_ids": [
+        "P_VDD_SCALED_DAC_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "va_lx_dac_ideal_4b.va": "865c81c044d0673f7d2d66800c8fdad6090bd10a69519a1b6ad1222c4498a3da"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BINARY_BIT_ORDER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_msb_weight/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "va_lx_dac_ideal_4b.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_003_wrong_msb_weight",
+      "trigger_condition": "Uses a quarter-scale MSB weight for din4.",
+      "violated_property_ids": [
+        "P_BINARY_BIT_ORDER"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "va_lx_dac_ideal_4b.va": "fa15ff3efa4831cc6c9d722bd37fd92023cc1aab752d99948299119680c9dc0b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BINARY_BIT_ORDER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_ignore_lsb/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "va_lx_dac_ideal_4b.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_004_ignore_lsb",
+      "trigger_condition": "Drops the din1 least-significant bit contribution.",
+      "violated_property_ids": [
+        "P_BINARY_BIT_ORDER"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "va_lx_dac_ideal_4b.va": "bae942ba2dd0998f97d53b7d1bc485a0fceb00060b54fadd448da94d554e86c7"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_VDD_SCALED_DAC_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "va_lx_dac_ideal_4b.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "VA Lx DAC Ideal 4b: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_VDD_SCALED_DAC_OUTPUT"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

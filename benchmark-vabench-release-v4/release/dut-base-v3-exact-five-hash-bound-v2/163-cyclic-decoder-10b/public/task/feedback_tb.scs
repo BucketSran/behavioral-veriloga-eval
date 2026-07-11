@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/cyclic_decoder_10b.va"
+
+Vready (ready 0) vsource type=pwl wave=[0 0 1n 0 1.05n 1.1 1.35n 1.1 1.40n 0 2n 0 2.05n 1.1 2.35n 1.1 2.40n 0 3n 0 3.05n 1.1 3.35n 1.1 3.40n 0 4n 0 4.05n 1.1 4.35n 1.1 4.40n 0 5n 0 5.05n 1.1 5.35n 1.1 5.40n 0 13n 0 13.05n 1.1 13.35n 1.1 13.40n 0 14n 0 14.05n 1.1 14.35n 1.1 14.40n 0 15n 0 15.05n 1.1 15.35n 1.1 15.40n 0 16n 0 16.05n 1.1 16.35n 1.1 16.40n 0]
+Vdp (dp 0) vsource type=pwl wave=[0 0 0.70n 0 0.75n 1.1 1.70n 1.1 1.75n 0 3.70n 0 3.75n 1.1 4.70n 1.1 4.75n 0 14.70n 0 14.75n 1.1]
+Vdn (dn 0) vsource type=pwl wave=[0 0 1.70n 0 1.75n 1.1 2.70n 1.1 2.75n 0 4.70n 0 4.75n 1.1 12.70n 1.1 12.75n 0 13.70n 0 13.75n 1.1 14.70n 1.1 14.75n 0]
+Vclks (clks 0) vsource type=pwl wave=[0 0 10n 0 10.05n 1.1 10.50n 1.1 10.55n 0 24n 0 24.05n 1.1 24.50n 1.1 24.55n 0]
+
+XDUT (dp dn ready clks dout) cyclic_decoder_10b
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=30n maxstep=20p
+save dp dn ready clks dout

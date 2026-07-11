@@ -1,0 +1,80 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "linear_pfd_gain.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=26n maxstep=20p"
+    ],
+    "body_lines": [
+      "Vin1 (in1 0) vsource type=pwl wave=[0 0.2 7.95n 0.2 8n 0.4 17.95n 0.4 18n 0.1 27.95n 0.1 28n 0.8]",
+      "Vin2 (in2 0) vsource type=pwl wave=[0 0.1 7.95n 0.1 8n 0.3 17.95n 0.3 18n 0.5 27.95n 0.5 28n 0.2]",
+      "",
+      "XDUT (in1 in2 out) linear_pfd_gain",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "in1",
+      "in2",
+      "out"
+    ]
+  },
+  "family_id": "169",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "4346e7b4797f9879dffc5e0b41cba1a15200dba24759e0fb9e0820d12b271c20",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "9cfcf46843ca10c5693161bb1849924926c20dac1f0b87fe4c0619734c8049fd",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=40n maxstep=20p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_DIFFERENTIAL_INPUT_POLARITY",
+    "P_KPHI_GAIN_SCALE",
+    "P_CONTINUOUS_ANALOG_TRACKING"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "9390273dbcff374c3317e34225f537107f8b2b609bc0f0f4e64499fa1c497f5f",
+    "family_spec_sha256": "a35a3352fcbedc984d344fe0bcd1903b24aec234ab88c4f4b25bca894be6ea6f"
+  },
+  "task_id": "v4-169"
+}

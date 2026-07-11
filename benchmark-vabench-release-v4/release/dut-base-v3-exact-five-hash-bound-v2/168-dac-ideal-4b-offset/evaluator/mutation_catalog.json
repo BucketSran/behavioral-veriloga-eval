@@ -1,0 +1,134 @@
+{
+  "family_id": "168",
+  "gold_bundle_sha256": "0ace22cd449f32fbab3d32abcd706eef59e069b8ae8b33ff75d286bddc85d236",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "dac_ideal_4b_offset.va": "519d600e61f1ec499cda2a4110e4219cdadad07c7d769821bb3b51230ceb7249"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_EVENT_UPDATED_OUTPUT",
+          "P_OFFSET_PLUS_SCALED_TRIM"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "dac_ideal_4b_offset.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_EVENT_UPDATED_OUTPUT",
+        "P_OFFSET_PLUS_SCALED_TRIM"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "dac_ideal_4b_offset.va": "ed32c1c406d50fa78b51b882256be72d6939d02b487ade5eb66bc39e48710cd4"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OFFSET_PLUS_SCALED_TRIM"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_missing_offset/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "dac_ideal_4b_offset.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_002_missing_offset",
+      "trigger_condition": "Starts from zero instead of the required fixed 0.239 offset.",
+      "violated_property_ids": [
+        "P_OFFSET_PLUS_SCALED_TRIM"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "dac_ideal_4b_offset.va": "b53d7fa2727dae3919f520f7ed69b96f9893a335f8324ad03030cf0561c5a11c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OFFSET_PLUS_SCALED_TRIM"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_scaling/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "dac_ideal_4b_offset.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_003_wrong_scaling",
+      "trigger_condition": "Uses a denominator of 32 instead of the specified 32*10/9 scaling.",
+      "violated_property_ids": [
+        "P_OFFSET_PLUS_SCALED_TRIM"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "dac_ideal_4b_offset.va": "1ff4a86e838f96b36f3cd27411ed3e06ad5718df2e21205cc0979d6ea0183107"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_THRESHOLDED_4BIT_CODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_swap_msb_lsb/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "dac_ideal_4b_offset.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_004_swap_msb_lsb",
+      "trigger_condition": "Swaps the din3 MSB and din0 LSB code weights.",
+      "violated_property_ids": [
+        "P_THRESHOLDED_4BIT_CODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "dac_ideal_4b_offset.va": "056458684ecfe6a5e534f58b950516d71132fab56d7f0db52cd9e4bc222ea546"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OFFSET_PLUS_SCALED_TRIM"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "dac_ideal_4b_offset.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "DAC Ideal 4b Offset: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_OFFSET_PLUS_SCALED_TRIM"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

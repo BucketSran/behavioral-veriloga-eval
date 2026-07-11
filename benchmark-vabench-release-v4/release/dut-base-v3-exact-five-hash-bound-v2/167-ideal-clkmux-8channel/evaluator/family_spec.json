@@ -1,0 +1,234 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "ideal_clkmux_8channel",
+            "parameters": [],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in0",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in1",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in2",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in3",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in4",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in5",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in6",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in7",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count_x",
+                "position": 10
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "ideal_clkmux_8channel.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "167",
+  "identity": {
+    "category": "timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Ideal Clkmux 8channel"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_MODULO8_COUNTER",
+      "observable_contract": "The internal selector starts at zero and increments modulo eight on each rising `clk` crossing through 0.5 V.",
+      "required_signals": [
+        "time",
+        "clk",
+        "count_x"
+      ]
+    },
+    {
+      "id": "P_INCREMENT_BEFORE_SELECTION",
+      "observable_contract": "The first qualifying clock event selects the incremented counter state rather than the reset state.",
+      "required_signals": [
+        "time",
+        "clk",
+        "count_x",
+        "out"
+      ]
+    },
+    {
+      "id": "P_ANALOG_CHANNEL_MUX",
+      "observable_contract": "`out` follows the input channel selected by the current counter value.",
+      "required_signals": [
+        "time",
+        "clk",
+        "out",
+        "in0",
+        "in1",
+        "in2",
+        "in3",
+        "in4",
+        "in5",
+        "in6",
+        "in7"
+      ]
+    },
+    {
+      "id": "P_COUNTER_MONITOR_LEVEL",
+      "observable_contract": "`count_x` reports the current selector count with the specified voltage scaling.",
+      "required_signals": [
+        "time",
+        "clk",
+        "count_x"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1167",
+    "dut": "v4-167",
+    "testbench": "v4-667"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "in0",
+            "port_ref": "in0",
+            "position": 1
+          },
+          {
+            "net": "in1",
+            "port_ref": "in1",
+            "position": 2
+          },
+          {
+            "net": "in2",
+            "port_ref": "in2",
+            "position": 3
+          },
+          {
+            "net": "in3",
+            "port_ref": "in3",
+            "position": 4
+          },
+          {
+            "net": "in4",
+            "port_ref": "in4",
+            "position": 5
+          },
+          {
+            "net": "in5",
+            "port_ref": "in5",
+            "position": 6
+          },
+          {
+            "net": "in6",
+            "port_ref": "in6",
+            "position": 7
+          },
+          {
+            "net": "in7",
+            "port_ref": "in7",
+            "position": 8
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 9
+          },
+          {
+            "net": "count_x",
+            "port_ref": "count_x",
+            "position": 10
+          }
+        ],
+        "module_ref": "ideal_clkmux_8channel",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "out",
+      "count_x",
+      "in0",
+      "in1",
+      "in2",
+      "in3",
+      "in4",
+      "in5",
+      "in6",
+      "in7"
+    ]
+  }
+}

@@ -1,0 +1,43 @@
+`include "disciplines.vams"
+
+module flash_data_align_pipeline(clk, din0, din1, din2, din3, din4, din5, din6, din7, dout0, dout1, dout2, dout3);
+input clk, din0, din1, din2, din3, din4, din5, din6, din7;
+output dout0, dout1, dout2, dout3;
+electrical clk, din0, din1, din2, din3, din4, din5, din6, din7, dout0, dout1, dout2, dout3;
+
+parameter real vth = 0.45;
+integer dregval, dreg1, dreg2, dreg3, dreg4, dreg_out;
+
+analog begin
+    @(initial_step) begin
+        dreg1 = 0;
+        dreg2 = 0;
+        dreg3 = 0;
+        dreg4 = 0;
+        dreg_out = 0;
+    end
+
+    @(cross(V(clk) - vth, +1)) begin
+        dregval = 0;
+        dregval = dregval + (V(din0) > vth);
+        dregval = dregval + (V(din1) > vth);
+        dregval = dregval + (V(din2) > vth);
+        dregval = dregval + (V(din3) > vth);
+        dregval = dregval + (V(din4) > vth);
+        dregval = dregval + (V(din5) > vth);
+        dregval = dregval + (V(din6) > vth);
+        dregval = dregval + (V(din7) > vth);
+        dreg_out = dreg4;
+        dreg4 = dreg3;
+        dreg3 = dreg2;
+        dreg2 = dreg1;
+        dreg1 = dregval;
+    end
+
+    V(dout3) <+ transition((dreg_out >> 3) & 1, 1p, 50p, 50p);
+    V(dout2) <+ transition((dreg_out >> 2) & 1, 1p, 50p, 50p);
+    V(dout1) <+ transition((dreg_out >> 1) & 1, 1p, 50p, 50p);
+    V(dout0) <+ transition(dreg_out & 1, 1p, 50p, 50p);
+end
+
+endmodule

@@ -1,0 +1,134 @@
+{
+  "family_id": "162",
+  "gold_bundle_sha256": "6d598f0daa8f8afbc6196b7c4ea54933378e18e3f29fa1b63672413f457151e8",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "flash_data_align_pipeline.va": "3f1bdd3159cf7e455ec01889a35aea2cccd9a371a60bf22141c00d93b88536fc"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BINARY_OUTPUT_ORDER",
+          "P_EVENT_HELD_OUTPUTS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "flash_data_align_pipeline.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_BINARY_OUTPUT_ORDER",
+        "P_EVENT_HELD_OUTPUTS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "flash_data_align_pipeline.va": "b74ecc7bae41788449ad4ce926357570bbba5ab76d089d76819f82de42af8170"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FOUR_STAGE_ALIGNMENT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_three_cycle_delay/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "flash_data_align_pipeline.va"
+      ],
+      "fault_class": "timing_or_state_update_fault",
+      "id": "neg_002_three_cycle_delay",
+      "trigger_condition": "Publishes the third pipeline stage instead of the required fourth-cycle aligned count.",
+      "violated_property_ids": [
+        "P_FOUR_STAGE_ALIGNMENT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "flash_data_align_pipeline.va": "0bd281eb8bdb02d8a9dcc8fa4a69116298c21752cb3d16fed9707fa1d040cb8d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_THERMOMETER_COUNT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_ignore_upper_inputs/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "flash_data_align_pipeline.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_003_ignore_upper_inputs",
+      "trigger_condition": "Counts only the lower four thermometer inputs, missing din4 through din7.",
+      "violated_property_ids": [
+        "P_THERMOMETER_COUNT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "flash_data_align_pipeline.va": "1a1a41643f074373bbf24eef564ba5aa5b6163cd54f1b92209604469ec4ae467"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BINARY_OUTPUT_ORDER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_swap_output_bits/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "flash_data_align_pipeline.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_004_swap_output_bits",
+      "trigger_condition": "Swaps the two least significant output bits while keeping timing intact.",
+      "violated_property_ids": [
+        "P_BINARY_OUTPUT_ORDER"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "flash_data_align_pipeline.va": "2af72431bad6b241a8621c610faa8c3728e8b6a870758b2cbdeb83b68f5de0c0"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BINARY_OUTPUT_ORDER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "flash_data_align_pipeline.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Flash Data Align Pipeline: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_BINARY_OUTPUT_ORDER"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}
