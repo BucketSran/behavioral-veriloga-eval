@@ -1,0 +1,35 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+`default_transition 30p
+
+module clk_burst_gen (
+    input  electrical CLK,
+    input  electrical RST_N,
+    output electrical CLK_OUT
+);
+
+parameter integer div = 8;
+parameter real    vdd = 0.9;
+parameter real    vth = 0.45;
+
+integer gate_q;
+integer clk_hi;
+
+analog begin
+    @(initial_step) begin
+        gate_q = 0;
+        clk_hi = 0;
+    end
+
+    @(cross(V(CLK) - vth, +1)) begin
+        clk_hi = 1;
+        gate_q = (V(RST_N) < vth) ? 0 : 1;
+    end
+
+    @(cross(V(CLK) - vth, -1))
+        clk_hi = 0;
+
+    V(CLK_OUT) <+ transition((gate_q && clk_hi) ? vdd : 0.0);
+end
+endmodule

@@ -1,0 +1,43 @@
+[
+  {
+    "id": "neg_001_zero",
+    "intent": "Drives CLK_OUT low for all cycles, missing the required two passed high phases.",
+    "target": "clk_burst_gen.va"
+  },
+  {
+    "id": "neg_002_pass_all_cycles",
+    "intent": "Preserves active-low reset but passes every non-reset CLK high phase instead of suppressing frame cycles 2..7.",
+    "target": "clk_burst_gen.va"
+  },
+  {
+    "id": "neg_003_one_cycle_burst",
+    "intent": "passes only one cycle per frame",
+    "target": "clk_burst_gen.va"
+  },
+  {
+    "id": "neg_004_wrong_div4",
+    "intent": "uses the wrong repeat frame",
+    "target": "clk_burst_gen.va"
+  },
+  {
+    "files": [
+      "neg_005_metric_scale_low/clk_burst_gen.va"
+    ],
+    "id": "neg_005_metric_scale_low",
+    "why_wrong": "Preserves burst timing but scales CLK_OUT high level below the public logic-high threshold."
+  },
+  {
+    "files": [
+      "neg_006_reset_ignored/clk_burst_gen.va"
+    ],
+    "id": "neg_006_reset_ignored",
+    "why_wrong": "Treats the active-low reset as active-high and emits clocks while RST_N is low."
+  },
+  {
+    "files": [
+      "neg_007_frame_start_offset/clk_burst_gen.va"
+    ],
+    "id": "neg_007_frame_start_offset",
+    "why_wrong": "Restarts the frame after the two-cycle burst window instead of at cycle zero."
+  }
+]

@@ -1,0 +1,159 @@
+{
+  "family_id": "078",
+  "gold_bundle_sha256": "6c406b5ffa481cbf8adbcc0f09a98843c9ccd5fb79bf5d7a0fb658a07333e612",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "prbs7_ref.va": "a1f79551487ba2b130c89b752970f7ff92a479a125781e1cdf3b4fe40feb406a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_SEED"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "prbs7_ref.va"
+      ],
+      "fault_class": "zero_output_state_stub",
+      "id": "neg_001_zero",
+      "trigger_condition": "stimulus exercises Zero output/state stub. against the public observable contract",
+      "violated_property_ids": [
+        "P_RESET_SEED"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "prbs7_ref.va": "238baccd87b3d18ed538620a0bca9b10fc71aeb4f996bcf2f81d8072fb80fbd3"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FEEDBACK_POLYNOMIAL"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_wrong_taps/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "prbs7_ref.va"
+      ],
+      "fault_class": "wrong_feedback_tap_relation_for_public_prbs7_polynomial",
+      "id": "neg_002_wrong_taps",
+      "trigger_condition": "Uses state_6 xor state_4 instead of the public state_6 xor state_5 feedback relation while preserving enable gating.",
+      "violated_property_ids": [
+        "P_FEEDBACK_POLYNOMIAL"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "prbs7_ref.va": "95e4c095ae9db55c9c7fca5e6c888d97cec7258a481a5467df74bc0778e7036c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ENABLE_GATING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_ignore_enable/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "prbs7_ref.va"
+      ],
+      "fault_class": "advances_lfsr_while_enable_is_low",
+      "id": "neg_003_ignore_enable",
+      "trigger_condition": "Advances the LFSR on every non-reset clock edge instead of holding state while en is low.",
+      "violated_property_ids": [
+        "P_ENABLE_GATING"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "prbs7_ref.va": "e6e387f2d2f61705f75d263610f59253f074f9ce732eb7a1a5974b1317928724"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SERIAL_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_wrong_serial_bit/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "prbs7_ref.va"
+      ],
+      "fault_class": "serial_out_driven_from_state0_instead_of_state6",
+      "id": "neg_004_wrong_serial_bit",
+      "trigger_condition": "Drives serial_out from state_0 instead of the public state_6 bit.",
+      "violated_property_ids": [
+        "P_SERIAL_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "prbs7_ref.va": "6464003f9ae4a53d06830851df9997822320112f13ea8abdbc090f197107e3f5"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_LEVELS",
+          "P_SERIAL_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "prbs7_ref.va"
+      ],
+      "fault_class": "serial_output_level_scaled_below_logic_threshold",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Preserves the exposed LFSR state recurrence but scales serial_out below the public logic threshold.",
+      "violated_property_ids": [
+        "P_OUTPUT_LEVELS",
+        "P_SERIAL_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "prbs7_ref.va": "df0533385136e1f4513f906fc9ac0fd14406f2626f439236da90dc2ddee4b8bb"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SHIFT_SEQUENCE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_006_shift_sequence_wrong/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "prbs7_ref.va"
+      ],
+      "fault_class": "state2_loads_state0_instead_of_state1",
+      "id": "neg_006_shift_sequence_wrong",
+      "trigger_condition": "each enabled clock must shift every exposed state bit toward the MSB exactly once",
+      "violated_property_ids": [
+        "P_SHIFT_SEQUENCE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

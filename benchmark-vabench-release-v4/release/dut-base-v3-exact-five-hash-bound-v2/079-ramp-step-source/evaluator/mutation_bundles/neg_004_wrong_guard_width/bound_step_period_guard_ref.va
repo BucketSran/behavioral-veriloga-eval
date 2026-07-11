@@ -1,0 +1,28 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bound_step_period_guard_ref(VDD, VSS, guard_out, phase_out);
+    inout VDD, VSS;
+    output guard_out, phase_out;
+    electrical VDD, VSS, guard_out, phase_out;
+    parameter real period = 8n from (0:inf);
+    parameter real pulse_w = 1.5n from (0:inf);
+    parameter real points_per_period = 16.0 from (0:inf);
+    parameter real tedge = 40p from (0:inf);
+    real cycle_start, next_cycle, phase, phase_norm, guard_target;
+    analog begin
+        @(initial_step) begin
+            cycle_start = 0.0;
+            next_cycle = period;
+        end
+        @(timer(next_cycle)) begin
+            cycle_start = next_cycle;
+            next_cycle = next_cycle + period;
+        end
+        phase = $abstime - cycle_start;
+        phase_norm = phase / period;
+        guard_target = (phase <= 0.5 * period) ? 1.0 : 0.0;
+        V(phase_out) <+ V(VSS) + (V(VDD) - V(VSS)) * phase_norm;
+        V(guard_out) <+ V(VSS) + (V(VDD) - V(VSS)) * transition(guard_target, 0, tedge, tedge);
+    end
+endmodule

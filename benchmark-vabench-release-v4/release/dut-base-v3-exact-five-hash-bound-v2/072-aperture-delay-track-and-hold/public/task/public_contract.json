@@ -1,0 +1,75 @@
+{
+  "agent_visible_files": [
+    "instruction.md",
+    "public_contract.json",
+    "feedback_tb.scs"
+  ],
+  "canonical_dut_id": "072",
+  "canonical_instruction": "instruction.md",
+  "category": "sampling_analog_memory",
+  "counted_in_score": true,
+  "difficulty": "D2",
+  "feedback_oracle": {
+    "command": "vabench-feedback --task . --submission ../submission",
+    "feedback_channels": [
+      "ahdl_like_preflight",
+      "evas_simulation",
+      "behavior_property_diagnostics"
+    ],
+    "profile_exposed": false,
+    "public_tb": "feedback_tb.scs",
+    "public_tb_exposed": true,
+    "queryable_by_agentic_modes": true,
+    "raw_scs_exposed": true
+  },
+  "form": "dut",
+  "gate2_status": "gate2_ready",
+  "language": "verilog-a",
+  "level": "L1",
+  "oracle_policy": {
+    "checker_private": true,
+    "feedback_and_score_share_checker_family": true,
+    "feedback_oracle_materialized": true,
+    "no_model_visible_raw_scs": false,
+    "no_model_visible_starter": true,
+    "proposal_only": false,
+    "public_feedback_tb_exposed": true,
+    "score_tb_private": true,
+    "single_public_contract": true,
+    "testbench_and_checker_split_required": true
+  },
+  "public_observables": [
+    "time",
+    "VDD",
+    "VSS",
+    "clk",
+    "vin",
+    "vout"
+  ],
+  "schema_version": "v4-public-contract-v1",
+  "score_oracle": {
+    "checker_profile_exposed": false,
+    "private_score_tb_exposed": false,
+    "profile_exposed": false,
+    "queryable_by_agentic_modes": false,
+    "raw_scs_exposed": false
+  },
+  "status": "gate2_ready",
+  "target_artifacts": [
+    "sample_hold_aperture_ref.va"
+  ],
+  "task_id": "v4_072_aperture_delay_track_and_hold",
+  "task_slug": "072-aperture-delay-track-and-hold",
+  "title": "Aperture Delay Track And Hold",
+  "track": "ams_function_dut",
+  "validation_status": {
+    "evas_feedback_score_gold": "pass",
+    "gate2": "dut_base_sealed",
+    "next_gate": "canonical_suite_unification_pending",
+    "semantic_negative_certification": "pass",
+    "spectre_score_gold": "clean_pass",
+    "tri_form_gate2": "pending",
+    "tri_form_gate3": "pending",
+    "untriaged_warning_count": 0
+  }
+}

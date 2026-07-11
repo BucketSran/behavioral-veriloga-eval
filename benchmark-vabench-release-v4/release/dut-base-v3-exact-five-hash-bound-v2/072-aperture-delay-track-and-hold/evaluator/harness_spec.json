@@ -1,0 +1,87 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "sample_hold_aperture_ref.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=100n maxstep=100p"
+    ],
+    "body_lines": [
+      "Vvdd (VDD 0) vsource dc=0.9",
+      "Vvss (VSS 0) vsource dc=0.0",
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=5n rise=20p fall=20p width=10n period=20n",
+      "Vin  (vin 0) vsource type=pwl wave=[ 0 0.05 5.05n 0.05 5.15n 0.10 24.90n 0.10 25.05n 0.10 25.15n 0.35 44.90n 0.35 45.05n 0.35 45.15n 0.60 64.90n 0.60 65.05n 0.60 65.15n 0.25 84.90n 0.25 85.05n 0.25 85.15n 0.70 104.90n 0.70 105.05n 0.70 105.15n 0.40 124.90n 0.40 125.05n 0.40 125.15n 0.80 140n 0.80 ]",
+      "",
+      "XDUT (VDD VSS clk vin vout) sample_hold_aperture_ref",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "clk",
+      "vout",
+      "VDD",
+      "VSS"
+    ]
+  },
+  "family_id": "072",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "9509ba78ec33d93151195c0c9f05bd58cc04cb3e3fd775b7101dd21635cad888",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "97f4ab5a695f65fe1b964372d6e1cf539b316180d4464589fa568e8a13ca52e1",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=140n maxstep=50p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INITIAL_VALUE",
+    "P_APERTURE_ARM",
+    "P_DELAYED_CAPTURE",
+    "P_HOLD",
+    "P_RAIL_OBSERVABILITY",
+    "P_OUTPUT_SMOOTHING"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "7ddaeaa1f179f68025224cef3e4058cc1465c98c046b3fdb31661d32e5f94eb9",
+    "family_spec_sha256": "c98697dbe527499fbf0b007b4e68fe9f3beada52d09ac3abc4c3fbc0f620f44d"
+  },
+  "task_id": "v4-072"
+}

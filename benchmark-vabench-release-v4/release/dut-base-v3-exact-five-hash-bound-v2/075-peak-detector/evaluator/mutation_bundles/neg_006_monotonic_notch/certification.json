@@ -1,0 +1,59 @@
+{
+  "component_fingerprints": {
+    "assembly": {
+      "policy_sha256": "91f4e21b94263e796c846aedef282c79d4abeb7ccc415a0e6f1311f8816b33a4",
+      "release_snapshot_sha256": "6b5e46397612f6ac536118be91bfd1294d3d5976b92a697e16d3fd441e59ac9f"
+    },
+    "backend": {
+      "ahdl_like_sha256": "91ce239e5f278a6d5dfcde85ca2d820c5133d8f8a3de26dc6477164e703342f3",
+      "evas_sha256": "03d62b0ed9b8bab38c068a8fc49e6d16d3ea7cbd7c7a0144feaf924f112a7a63",
+      "spectre_sha256": "ac4c1cf785d5eab74058944d52bf40869e83c94e19202ab72c8e8a250c4dc51b"
+    },
+    "oracle": {
+      "checker_binding_sha256": "cc2d9761214bb2c5f0fc22bc4541c1a91407c426438d2395f653cbc8b1020ebe",
+      "checker_implementation_sha256": "31b19e91be0318ac7c25c7088555b0704b4c397da68f4ae77e51b632f243c9d6",
+      "checker_profile_sha256": "11c919b9feb500db99e88e8418956f9147a8d597d910cab689a3a2829e65c835",
+      "diagnostic_policy_sha256": "69b217a349cb0e8a3eab574e7e6d1af03f069fea668b15b37868ef3d2e7deea3",
+      "oracle_runner_sha256": "daf6eeded735edd148687b998344d32a4943e8824bac2828f28e9107a7950567",
+      "property_activation_policy_sha256": "77e7745165f4d78f2d0ac8aa15be782ca60eeedb94e654cef515339a5132eea4"
+    },
+    "policy_id": "v4-dependency-scoped-evidence-v2",
+    "schema_version": "v4-evidence-components-v2",
+    "state": "fresh",
+    "task_inputs": {
+      "candidate_bundle_sha256": "b896af697488c106833590a52f446df841ec8cdac1458486d69d2b7b95bb3268",
+      "deck_sha256": "4477e02b57ea6254931abd1b67fe09a836681f6bb58cf56b3eecbeb9dc7afb32",
+      "gold_bundle_sha256": "6b734a4d328a4cb789fee17089325938b5f1198d938d34029e040326fc553018",
+      "harness_spec_sha256": "e53d464077741c2e5cd10d7256ffce16ba1a786411a9519aaee8fc8cd513aadc",
+      "mutation_bundle_sha256": "b896af697488c106833590a52f446df841ec8cdac1458486d69d2b7b95bb3268",
+      "profile_sha256": "04e8e1909a53d85bfda38c509179ea49d0f2b4e2b747d50d54f346d56671e434",
+      "property_contract_sha256": "de2acd181937e1d2c161820a350aba45cfa270bb78740db4953f335d5c283cf3",
+      "public_support_bundle_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "trace_contract_sha256": "e736e45058202d6a0d7b54b07e7a0f9f49d98c8cc9c8cc0b6b0ef44a2993652e"
+    }
+  },
+  "diagnostics": {
+    "expected": "trigger=between resets the held peak must never decrease; violated_properties=P_MONOTONIC_HOLD",
+    "observed": "EVAS: monotonic_hold observed=vout:0.620->0.570 expected=nondecreasing window=60.625ns; Spectre: monotonic_hold observed=vout:0.620->0.420 expected=nondecreasing window=60.500ns",
+    "violated_property_ids": [
+      "P_MONOTONIC_HOLD"
+    ]
+  },
+  "evaluators": {
+    "ahdl_like": "pass",
+    "evas": "compile_pass_behavior_fail",
+    "spectre": "compile_pass_behavior_fail"
+  },
+  "family_id": "075",
+  "inputs": {
+    "checker_profile_sha256": "bf33dfdba185d75424b7b882ce5abd7de7685fb236798787c3a1c081926a4bcb",
+    "harness_spec_sha256": "e53d464077741c2e5cd10d7256ffce16ba1a786411a9519aaee8fc8cd513aadc",
+    "mutation_bundle_sha256": "b896af697488c106833590a52f446df841ec8cdac1458486d69d2b7b95bb3268",
+    "profile_sha256": "04e8e1909a53d85bfda38c509179ea49d0f2b4e2b747d50d54f346d56671e434"
+  },
+  "mutation_id": "neg_006_monotonic_notch",
+  "outcome": "killed_behaviorally",
+  "release_snapshot_sha256": "6b5e46397612f6ac536118be91bfd1294d3d5976b92a697e16d3fd441e59ac9f",
+  "schema_version": "v4-negative-certification-v2",
+  "toolchain_lock_sha256": "6b5e46397612f6ac536118be91bfd1294d3d5976b92a697e16d3fd441e59ac9f"
+}

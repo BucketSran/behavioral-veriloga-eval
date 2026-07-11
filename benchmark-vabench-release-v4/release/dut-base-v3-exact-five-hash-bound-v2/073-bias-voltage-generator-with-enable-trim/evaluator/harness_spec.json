@@ -1,0 +1,93 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "bias_voltage_generator_with_enable_trim.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=80n maxstep=0.5n"
+    ],
+    "body_lines": [
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=2n width=1n rise=50p fall=50p",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 80n 0]"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric"
+    ]
+  },
+  "family_id": "073",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "38ecfaea22a69e0a83963d2f832c52e0258f6d5d46f6701b9f1c70dc88287bdb",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "8d3286355a6129eaef9e1beb949a0e8d145b9e286759518bcc3c5e87d508b10f",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.10 11.9n 0.10 12n 0.35 31.9n 0.35 32n 0.75 53.9n 0.75 54n 0.10 65.9n 0.10 66n 0.55 80n 0.55]",
+          "",
+          "XDUT (clk rst vin out metric) bias_voltage_generator_with_enable_trim",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.12 11.9n 0.12 12n 0.42 31.9n 0.42 32n 0.82 53.9n 0.82 54n 0.12 65.9n 0.12 66n 0.60 80n 0.60]",
+          "",
+          "XDUT (clk rst vin out metric) bias_voltage_generator_with_enable_trim",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_CLOCKED_UPDATE",
+    "P_DISABLE_RESET",
+    "P_TRIM_TARGET",
+    "P_SETTLING",
+    "P_MONOTONIC_TRIM",
+    "P_ENABLE_METRIC"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "feda42009a829f4ce7ddbd62a9a5612049786182782f7aada85500292116ddc8",
+    "family_spec_sha256": "90d54d0c495e7076dff22333fa2a40d2d0e526d484c2652c4922b89f1f37239a"
+  },
+  "task_id": "v4-073"
+}

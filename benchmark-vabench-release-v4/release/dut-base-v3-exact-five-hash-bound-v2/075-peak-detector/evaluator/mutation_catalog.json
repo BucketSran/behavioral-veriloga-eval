@@ -1,0 +1,182 @@
+{
+  "family_id": "075",
+  "gold_bundle_sha256": "6b734a4d328a4cb789fee17089325938b5f1198d938d34029e040326fc553018",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "peak_detector.va": "c25936e55460516ed3a9e5a1041f1cbfd7fc968ae687ed17ba242b8aae407ec0"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INITIAL_ZERO"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "peak_detector.va"
+      ],
+      "fault_class": "zero_stub_output_implementation_copied_from_starter_must_not_satisfy_hidden_beha",
+      "id": "neg_001_zero",
+      "trigger_condition": "stimulus exercises zero/stub output implementation copied from starter must not satisfy hidden behavior checker against the public observable contract",
+      "violated_property_ids": [
+        "P_INITIAL_ZERO"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "peak_detector.va": "67f91479633599df236441a7f8d9aaf282923c16fdd1fdd210c9f33fc30a12cf"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SAMPLED_MEASUREMENT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_threshold_shifted/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "peak_detector.va"
+      ],
+      "fault_class": "peak_accept_threshold_too_high_misses_valid_public_peak",
+      "id": "neg_002_threshold_shifted",
+      "trigger_condition": "Requires vin to exceed 0.60 V before updating the held peak, missing a valid 0.55 V public peak while retaining reset behavior.",
+      "violated_property_ids": [
+        "P_SAMPLED_MEASUREMENT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "peak_detector.va": "d4bed378c3a462ba93dd075cf900ea4c39cd3b189b5aa2e72c05ec2e882af6d3"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_MAX_RETENTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_event_edge_wrong/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "peak_detector.va"
+      ],
+      "fault_class": "peak_output_scaled_low_preserves_timing_but_loses_peak_amplitude",
+      "id": "neg_003_event_edge_wrong",
+      "trigger_condition": "Scales the peak output low while leaving sampling and reset structure intact.",
+      "violated_property_ids": [
+        "P_MAX_RETENTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "peak_detector.va": "fc9a3f758764e14ffbbd65215da619564171bab7364d66d3ae8f00828a29d202"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_reset_polarity_wrong/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "peak_detector.va"
+      ],
+      "fault_class": "reset_polarity_inverted_prevents_declared_reset_clear",
+      "id": "neg_004_reset_polarity_wrong",
+      "trigger_condition": "Clears the held peak when reset is low instead of when reset is high.",
+      "violated_property_ids": [
+        "P_RESET_CLEAR"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "peak_detector.va": "d3791afc8b42fdc2c124205f589e14d71f94f67bf1ee2f13a0df2651ef0f31bd"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_MAX_RETENTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "peak_detector.va"
+      ],
+      "fault_class": "tracks_latest_sample_instead_of_retaining_peak",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Tracks each periodic input sample instead of retaining the maximum value observed since reset.",
+      "violated_property_ids": [
+        "P_MAX_RETENTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "peak_detector.va": "15bcc86e8e5beb2bfeed0bd898f5c6099f70e74dfd622d4cf7e333d142eeefc3"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_MONOTONIC_HOLD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_006_monotonic_notch/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "peak_detector.va"
+      ],
+      "fault_class": "retained_peak_contains_a_transient_downward_notch",
+      "id": "neg_006_monotonic_notch",
+      "trigger_condition": "between resets the held peak must never decrease",
+      "violated_property_ids": [
+        "P_MONOTONIC_HOLD"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "peak_detector.va": "e086f454bd47b9021a69c211456001fdb05d50faca447a54be2a54342f621860"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_SMOOTHING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_007_no_transition_smoothing/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "peak_detector.va"
+      ],
+      "fault_class": "peak_output_transition_is_effectively_instantaneous",
+      "id": "neg_007_no_transition_smoothing",
+      "trigger_condition": "retained-peak updates must use the declared finite output transition",
+      "violated_property_ids": [
+        "P_OUTPUT_SMOOTHING"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

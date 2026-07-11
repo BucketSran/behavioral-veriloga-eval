@@ -1,0 +1,34 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module noise_gen (
+    input electrical  vin_i,
+    output electrical vout_o
+);
+
+    parameter real sigma = 0.01;
+    parameter real dt    = 0.5n;
+
+    real noise, vout, raw;
+    integer sample_idx;
+
+    analog begin
+        @(initial_step) begin
+            noise = 0.0;
+            vout = 0.0;
+            sample_idx = 0;
+        end
+
+        @(timer(0, dt)) begin
+            sample_idx = sample_idx + 1;
+            raw = sin(12.9898 * sample_idx)
+                + 0.6 * sin(78.233 * sample_idx + 0.37)
+                + 0.4 * sin(37.719 * sample_idx + 1.11);
+            noise = sigma * raw / 1.232;
+            vout = V(vin_i) + noise;
+        end
+
+        V(vout_o) <+ 0.42 * transition(vout, 0, dt/10, dt/10);
+    end
+
+endmodule

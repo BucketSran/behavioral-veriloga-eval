@@ -1,0 +1,12 @@
+`include "constants.vams"
+`include "disciplines.vams"
+module file_metric_writer(vin,done);
+    input vin; output done; electrical vin,done; parameter string filename="metric.out"; parameter real vth=0.45; parameter real tr=300p; integer fh; integer wrote;
+    
+    analog begin
+        @(initial_step) begin
+            wrote = 0;
+        end
+        V(done) <+ transition(0.0);
+    end
+endmodule

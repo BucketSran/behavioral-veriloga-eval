@@ -1,0 +1,13 @@
+// noise_gen private coverage testbench
+// Uses a shifted DC input and a different sampled-noise scale.
+simulator lang=spectre
+global 0
+
+ahdl_include "noise_gen_ref.va"
+
+Vvin (vin_i 0) vsource type=dc dc=0.75
+
+IDUT (vin_i vout_o) noise_gen sigma=0.08 dt=0.4n
+
+tran tran stop=420n maxstep=0.8n
+save vin_i vout_o

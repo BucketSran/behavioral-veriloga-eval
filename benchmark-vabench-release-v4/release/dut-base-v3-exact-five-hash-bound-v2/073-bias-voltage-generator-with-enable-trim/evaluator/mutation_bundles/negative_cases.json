@@ -1,0 +1,42 @@
+[
+  {
+    "id": "neg_001_zero",
+    "intent": "zero/stub output implementation copied from starter must not satisfy hidden behavior checker",
+    "target": "bias_voltage_generator_with_enable_trim.va"
+  },
+  {
+    "files": [
+      "neg_002_threshold_shifted/bias_voltage_generator_with_enable_trim.va"
+    ],
+    "id": "neg_002_threshold_shifted",
+    "why_wrong": "Raises the vin enable threshold from 0.25 V to 0.45 V, rejecting the public low-trim operating point while preserving reset and output scaling."
+  },
+  {
+    "files": [
+      "neg_003_event_edge_wrong/bias_voltage_generator_with_enable_trim.va"
+    ],
+    "id": "neg_003_event_edge_wrong",
+    "why_wrong": "Uses the correct clock/reset contract but an under-relaxed trim update coefficient, so the bias does not reach the low-trim target window."
+  },
+  {
+    "files": [
+      "neg_004_reset_polarity_wrong/bias_voltage_generator_with_enable_trim.va"
+    ],
+    "id": "neg_004_reset_polarity_wrong",
+    "why_wrong": "Treats reset polarity as active-low, keeping the bias disabled during the valid trim window."
+  },
+  {
+    "files": [
+      "neg_005_metric_scale_low/bias_voltage_generator_with_enable_trim.va"
+    ],
+    "id": "neg_005_metric_scale_low",
+    "why_wrong": "Scales only the metric output low while preserving the bias voltage path."
+  },
+  {
+    "files": [
+      "neg_006_nonmonotonic_upper_trim/bias_voltage_generator_with_enable_trim.va"
+    ],
+    "id": "neg_006_nonmonotonic_upper_trim",
+    "why_wrong": "Forces the upper trim target below the settled lower trim target."
+  }
+]

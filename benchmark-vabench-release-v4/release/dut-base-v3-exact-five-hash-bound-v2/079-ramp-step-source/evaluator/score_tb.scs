@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/bound_step_period_guard_ref.va"
+
+Vvdd (VDD 0) vsource dc=0.9 type=dc
+Vvss (VSS 0) vsource dc=0.0 type=dc
+
+IDUT (VDD VSS guard_out phase_out) bound_step_period_guard_ref \
+    period=10n pulse_w=2n points_per_period=20 tedge=60p
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+
+
+tran tran stop=55n maxstep=25n errpreset=conservative
+save guard_out phase_out VDD VSS

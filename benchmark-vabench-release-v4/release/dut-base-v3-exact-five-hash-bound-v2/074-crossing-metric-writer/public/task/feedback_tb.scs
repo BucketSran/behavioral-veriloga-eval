@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/file_metric_writer.va"
+
+Vin (vin 0) vsource type=pwl wave=[0 0 30n 0 31n 0.9 90n 0.9]
+
+XDUT (vin done) file_metric_writer filename="metric.out"
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=90n maxstep=500p
+save vin done

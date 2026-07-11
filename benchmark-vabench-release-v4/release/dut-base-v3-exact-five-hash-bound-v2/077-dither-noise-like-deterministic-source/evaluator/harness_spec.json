@@ -1,0 +1,96 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "noise_gen_ref.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=500n maxstep=1n"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin_i",
+      "vout_o"
+    ]
+  },
+  "family_id": "077",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "2e3385735938b55a16eebb6c806d474f761af843c9e4e0e5d64bee7a0f6fc9d0",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "e222b96a194193c0354c2a5a42e5870c0685a91a6714d05b6baf69be1e0482a3",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "// noise_gen gold smoke testbench",
+          "// DC input at 1.0V; noise_gen adds deterministic sampled dither (sigma=0.1V, dt=0.5ns).",
+          "// Runs 500ns. Check: std(noise) > 0.01V, max|noise| > 0.05V.",
+          "",
+          "Vvin (vin_i 0) vsource type=dc dc=1.0",
+          "",
+          "IDUT (vin_i vout_o) noise_gen sigma=0.1 dt=0.5n",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=420n maxstep=0.8n"
+        ],
+        "body_lines": [
+          "// noise_gen private coverage testbench",
+          "// Uses a shifted DC input and a different sampled-noise scale.",
+          "",
+          "Vvin (vin_i 0) vsource type=dc dc=0.75",
+          "",
+          "IDUT (vin_i vout_o) noise_gen sigma=0.08 dt=0.4n",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_PERIODIC_UPDATE",
+    "P_SAMPLE_HOLD",
+    "P_ADDITIVE_OUTPUT",
+    "P_DETERMINISTIC_SEQUENCE",
+    "P_ZERO_MEAN_DITHER"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "e1d5aae1f685d6eb083c6cd7eabe7d2694b003995b37c8708c94c7f3ba6a1a4c",
+    "family_spec_sha256": "d9424817d87ea5af6eb71dc5fb735c7ca572c06b6ddb737a16da79bb3518b18f"
+  },
+  "task_id": "v4-077"
+}

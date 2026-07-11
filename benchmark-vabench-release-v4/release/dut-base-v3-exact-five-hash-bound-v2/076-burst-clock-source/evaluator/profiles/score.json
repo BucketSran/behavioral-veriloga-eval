@@ -1,0 +1,40 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=2200n maxstep=4n"
+    ],
+    "body_lines": [
+      "// clk_burst_gen private coverage testbench",
+      "// 80 ns input clock period, div=8, reset releases after a non-frame-aligned delay.",
+      "",
+      "VCLK   (CLK   0) vsource type=pulse val0=0 val1=0.9 period=80n width=40n rise=800p fall=800p",
+      "VRST_N (RST_N 0) vsource type=pwl wave=[0 0  151n 0  152n 0.9  2200n 0.9]",
+      "",
+      "IDUT (CLK RST_N CLK_OUT) clk_burst_gen div=8 vdd=0.9 vth=0.45",
+      ""
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "696dcee5f7ade7552f0f946f1785dd9513fc77f34984b420e55aad7578a736b8",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "100n"
+  },
+  "profile_name": "score",
+  "property_ids": [
+    "P_ACTIVE_LOW_RESET",
+    "P_FRAME_START",
+    "P_TWO_CYCLE_BURST",
+    "P_QUIET_REMAINDER",
+    "P_FRAME_REPEAT",
+    "P_OUTPUT_LEVELS"
+  ],
+  "public_visible": false,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {}
+}

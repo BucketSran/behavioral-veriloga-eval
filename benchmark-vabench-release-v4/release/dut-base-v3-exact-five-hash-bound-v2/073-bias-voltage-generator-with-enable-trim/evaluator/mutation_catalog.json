@@ -1,0 +1,159 @@
+{
+  "family_id": "073",
+  "gold_bundle_sha256": "c35d23f101c6a5e533d0aa467bb96d71ab7dfa9fe8ad8a7847024a74272827d3",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "bias_voltage_generator_with_enable_trim.va": "dea86057f06d0ef014781f56d6b5d07f889b820a868ac174d34a3305c0874260"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CLOCKED_UPDATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "bias_voltage_generator_with_enable_trim.va"
+      ],
+      "fault_class": "zero_stub_output_implementation_copied_from_starter_must_not_satisfy_hidden_beha",
+      "id": "neg_001_zero",
+      "trigger_condition": "stimulus exercises zero/stub output implementation copied from starter must not satisfy hidden behavior checker against the public observable contract",
+      "violated_property_ids": [
+        "P_CLOCKED_UPDATE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "bias_voltage_generator_with_enable_trim.va": "91e208dd3a3ae7be9bced4b58c5db43d49208b495c0e6da48c3b80a04e3c1d0c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_TRIM_TARGET"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_threshold_shifted/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "bias_voltage_generator_with_enable_trim.va"
+      ],
+      "fault_class": "input_enable_threshold_too_high_rejects_valid_low_trim",
+      "id": "neg_002_threshold_shifted",
+      "trigger_condition": "Raises the vin enable threshold from 0.25 V to 0.45 V, rejecting the public low-trim operating point while preserving reset and output scaling.",
+      "violated_property_ids": [
+        "P_TRIM_TARGET"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "bias_voltage_generator_with_enable_trim.va": "e8f60b744843bb7c1bf37c68efe4b866f179572a20eea0e4406cdd1cac7bfc45"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SETTLING",
+          "P_TRIM_TARGET"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_event_edge_wrong/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "bias_voltage_generator_with_enable_trim.va"
+      ],
+      "fault_class": "trim_update_gain_too_low_under_settles_bias",
+      "id": "neg_003_event_edge_wrong",
+      "trigger_condition": "Uses the correct clock/reset contract but an under-relaxed trim update coefficient, so the bias does not reach the low-trim target window.",
+      "violated_property_ids": [
+        "P_SETTLING",
+        "P_TRIM_TARGET"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "bias_voltage_generator_with_enable_trim.va": "bc168b1ec3764aa478d64a2c7f70aebe59dfba2216ca2ec4a5a50f175e262d11"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DISABLE_RESET"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_reset_polarity_wrong/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "bias_voltage_generator_with_enable_trim.va"
+      ],
+      "fault_class": "reset_polarity_inverted_holds_bias_disabled_when_active",
+      "id": "neg_004_reset_polarity_wrong",
+      "trigger_condition": "Treats reset polarity as active-low, keeping the bias disabled during the valid trim window.",
+      "violated_property_ids": [
+        "P_DISABLE_RESET"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "bias_voltage_generator_with_enable_trim.va": "2158806e0565f131528d7d75ae1d143178903964648b9a3c62788154c99007c4"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ENABLE_METRIC"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "bias_voltage_generator_with_enable_trim.va"
+      ],
+      "fault_class": "metric_output_scaled_low_while_bias_path_is_correct",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Scales only the metric output low while preserving the bias voltage path.",
+      "violated_property_ids": [
+        "P_ENABLE_METRIC"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "bias_voltage_generator_with_enable_trim.va": "7b289d8ea734448ea5a0ed25a6ee8eb596b8f777df77ae7f6df39cef8ba642af"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_MONOTONIC_TRIM"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_006_nonmonotonic_upper_trim/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "bias_voltage_generator_with_enable_trim.va"
+      ],
+      "fault_class": "upper_trim_target_falls_below_lower_trim_target",
+      "id": "neg_006_nonmonotonic_upper_trim",
+      "trigger_condition": "increasing the enabled trim control must increase the settled bias target",
+      "violated_property_ids": [
+        "P_MONOTONIC_TRIM"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

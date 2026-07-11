@@ -1,0 +1,16 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bias_voltage_generator_with_enable_trim(clk, rst, vin, out, metric);
+input clk, rst, vin;
+output out, metric;
+electrical clk, rst, vin, out, metric;
+parameter real tr = 100p;
+parameter real vth = 0.45;
+real ctrlv, targetv, biasv, metricv;
+
+    analog begin
+        V(out) <+ transition(0.0);
+        V(metric) <+ transition(0.0);
+    end
+endmodule

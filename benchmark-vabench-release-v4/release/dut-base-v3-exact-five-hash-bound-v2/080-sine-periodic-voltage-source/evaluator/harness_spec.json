@@ -1,0 +1,77 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "multitone.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=500n maxstep=500p"
+    ],
+    "body_lines": [
+      "XDUT (0 OUT) multitone",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "OUT"
+    ]
+  },
+  "family_id": "080",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "64d7c81ac3cde761b759df215e63127c9f0762e42a3fd6ddac8cad20bb53c620",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "8c51b1b6cbbfc14ae850c9b4784c227e353302fa4bb4f4d77aeaf6ab3a37e2b3",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=650n maxstep=400p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_FIRST_TONE",
+    "P_SECOND_TONE",
+    "P_THIRD_TONE",
+    "P_LINEAR_SUPERPOSITION",
+    "P_ZERO_INITIAL_PHASE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "065303014a86ed380efd0d4ae8f40c4cc97fce618a714b1d721e9b40583f430d",
+    "family_spec_sha256": "fff541e9299fa2a25e9d24fe350ec1884bf90b083c3d2e39e7cb1cc4f55c8421"
+  },
+  "task_id": "v4-080"
+}

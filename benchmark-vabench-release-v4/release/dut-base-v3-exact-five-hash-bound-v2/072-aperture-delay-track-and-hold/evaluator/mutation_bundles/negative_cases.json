@@ -1,0 +1,29 @@
+[
+  {
+    "id": "neg_001_zero",
+    "intent": "zero/stub output implementation copied from starter must not satisfy hidden behavior checker",
+    "target": "sample_hold_aperture_ref.va"
+  },
+  {
+    "id": "neg_002_edge_sample_delayed_output",
+    "intent": "capturing vin at the clock edge instead of at the delayed aperture instant must not satisfy the hidden aperture-sensitive stimulus",
+    "target": "sample_hold_aperture_ref.va"
+  },
+  {
+    "id": "neg_003_half_gain_sample",
+    "intent": "delayed sampling with the wrong analog gain must not satisfy held-value checks",
+    "target": "sample_hold_aperture_ref.va"
+  },
+  {
+    "id": "neg_004_inverted_sample",
+    "intent": "delayed sampling with inverted rail-relative value must not satisfy held-value checks",
+    "target": "sample_hold_aperture_ref.va"
+  },
+  {
+    "files": [
+      "neg_005_metric_scale_low/sample_hold_aperture_ref.va"
+    ],
+    "id": "neg_005_metric_scale_low",
+    "why_wrong": "Captured value uses a 5 ns transition instead of the declared tedge, so post-aperture checks observe unsettled held values."
+  }
+]

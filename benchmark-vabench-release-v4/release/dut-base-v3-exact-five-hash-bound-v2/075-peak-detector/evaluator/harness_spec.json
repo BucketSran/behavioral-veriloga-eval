@@ -1,0 +1,93 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "peak_detector.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=180n maxstep=500p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "rst",
+      "vout"
+    ]
+  },
+  "family_id": "075",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "0c115246c29fa6663d7ed272246fb20eb0c78587844d264edf50c42b4e23ed7e",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "1885029dcdd8054f837066498ee4236af9f5f15ac9a619a9b2455021a96999a7",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0 0.1 30n 0.1 40n 0.55 80n 0.55 90n 0.25 130n 0.25 140n 0.7 175n 0.7]",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 10n 0.9 11n 0 120n 0 121n 0.9 135n 0.9 136n 0 180n 0]",
+          "",
+          "XDUT (vin rst vout) peak_detector",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=205n maxstep=500p"
+        ],
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0 0.05 20n 0.05 20.1n 0.62 70n 0.62 82n 0.30 118n 0.30 118.1n 0.82 195n 0.82]",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 8n 0.9 9n 0 96n 0 97n 0.9 114n 0.9 115n 0 205n 0]",
+          "",
+          "XDUT (vin rst vout) peak_detector",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INITIAL_ZERO",
+    "P_SAMPLED_MEASUREMENT",
+    "P_MAX_RETENTION",
+    "P_MONOTONIC_HOLD",
+    "P_RESET_CLEAR",
+    "P_OUTPUT_SMOOTHING"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "bf33dfdba185d75424b7b882ce5abd7de7685fb236798787c3a1c081926a4bcb",
+    "family_spec_sha256": "23194842a80ba3a3fdfb829b78156803d77ec92c803ddd011c0afeee1124fa5d"
+  },
+  "task_id": "v4-075"
+}

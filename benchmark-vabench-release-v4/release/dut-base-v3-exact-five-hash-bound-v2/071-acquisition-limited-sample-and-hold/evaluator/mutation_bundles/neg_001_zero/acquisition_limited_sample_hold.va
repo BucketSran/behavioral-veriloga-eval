@@ -1,0 +1,23 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module acquisition_limited_sample_hold(sample, rst, vin, vout, metric);
+    input sample, rst, vin;
+    output vout, metric;
+    electrical sample, rst, vin, vout, metric;
+
+    parameter real vth = 0.45;
+    parameter real vinit = 0.45;
+    parameter real alpha = 0.42 from (0:1];
+    parameter real tick = 1n from (0:inf);
+    parameter real tr = 200p from (0:inf);
+
+    real held;
+    real tracking;
+
+    
+    analog begin
+        V(vout) <+ transition(0.0);
+        V(metric) <+ transition(0.0);
+    end
+endmodule
