@@ -1,0 +1,202 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "uvlo_brownout_detector",
+            "parameters": [
+              {
+                "default": 1e-10,
+                "name": "tr",
+                "override_behavior": "sets out and metric transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets clk and rst voltage-coded logic threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "0 < vth < 0.9"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "metric",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "uvlo_brownout_detector.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/uvlo_brownout_detector.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "046",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "bias_reference_power_management",
+    "difficulty": "D1",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "UVLO Brownout Detector"
+  },
+  "modeling_constraints": [
+    "Use deterministic sampled voltage-domain hysteresis state.",
+    "Do not use current contributions, transistor-level devices, AC/noise analysis, or KCL/KVL regulation loops.",
+    "Do not add validation-only state, ports, or simulator-specific side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_RESET_FAULT",
+      "observable_contract": "Active reset clears the power-good out signal and drives metric to the public fault code 0.9 V.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_UPPER_TRIP_ASSERT",
+      "observable_contract": "On a sampled update, vin strictly greater than 0.65 V asserts power-good out.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "vin",
+        "out"
+      ]
+    },
+    {
+      "id": "P_HYSTERESIS_HOLD",
+      "observable_contract": "For sampled vin values from 0.55 V through 0.65 V inclusive, out preserves its previous power-good state.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "out"
+      ]
+    },
+    {
+      "id": "P_BROWNOUT_CLEAR",
+      "observable_contract": "On a sampled update, vin strictly less than 0.55 V clears out to the brownout state.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "vin",
+        "out"
+      ]
+    },
+    {
+      "id": "P_STATUS_DISTINCTION",
+      "observable_contract": "Metric is the checker-observable status code: 0.1 V when out is power-good high and 0.9 V when reset, undervoltage, or brownout is active.",
+      "required_signals": [
+        "time",
+        "vin",
+        "out",
+        "metric"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "uvlo_brownout_detector.va"
+  ],
+  "task_id": "v4-1046",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 2
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 3
+          },
+          {
+            "net": "metric",
+            "port_ref": "metric",
+            "position": 4
+          }
+        ],
+        "module_ref": "uvlo_brownout_detector",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric"
+    ]
+  }
+}

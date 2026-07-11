@@ -1,0 +1,233 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "successive_approximation_calibration_search_fsm",
+            "parameters": [
+              {
+                "default": 1e-10,
+                "name": "tr",
+                "override_behavior": "sets out and metric transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets clk and rst logic threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vmin < vth < vmax"
+              },
+              {
+                "default": 0.45,
+                "name": "target",
+                "override_behavior": "sets zero-error decision point and reset trial value",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vmin <= target <= vmax"
+              },
+              {
+                "default": 0.18,
+                "name": "step_init",
+                "override_behavior": "sets the first signed trial adjustment and reset step size",
+                "type": "real",
+                "units": "V",
+                "valid_range": "step_init > 0"
+              },
+              {
+                "default": 0.05,
+                "name": "vmin",
+                "override_behavior": "sets the lower trial-trim clamp",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vmin < vmax"
+              },
+              {
+                "default": 0.85,
+                "name": "vmax",
+                "override_behavior": "sets the upper trial-trim clamp",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vmax > vmin"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "metric",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "successive_approximation_calibration_search_fsm.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/successive_approximation_calibration_search_fsm.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "044",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "calibration_control",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Successive Approximation Calibration Search FSM"
+  },
+  "modeling_constraints": [
+    "Use deterministic clocked voltage-domain calibration state.",
+    "Do not use current contributions, transistor-level devices, AC/noise behavior, or KCL/KVL solving assumptions.",
+    "Do not add validation logic, hidden state observables, or simulator-specific side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_RESET_SEARCH_STATE",
+      "observable_contract": "Active reset restores out to target, the current step to step_init, the cycle count to zero, and metric low.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_SIGNED_TRIAL_UPDATE",
+      "observable_contract": "On each active rising clk update before completion, vin above target increases out by the current step and vin below target decreases it.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "vin",
+        "out"
+      ]
+    },
+    {
+      "id": "P_SUCCESSIVE_STEP_HALVING",
+      "observable_contract": "The current step halves after every active decision update, yielding the public successive-approximation sequence from step_init.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "out"
+      ]
+    },
+    {
+      "id": "P_FOUR_STEP_DONE",
+      "observable_contract": "Metric asserts after four active search updates and subsequent rising clocks hold the completed trial state until reset.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "vin",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_TRIM_CLAMP",
+      "observable_contract": "Out remains within vmin through vmax for every trial update.",
+      "required_signals": [
+        "time",
+        "out"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "successive_approximation_calibration_search_fsm.va"
+  ],
+  "task_id": "v4-1044",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 2
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 3
+          },
+          {
+            "net": "metric",
+            "port_ref": "metric",
+            "position": 4
+          }
+        ],
+        "module_ref": "successive_approximation_calibration_search_fsm",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric"
+    ]
+  }
+}

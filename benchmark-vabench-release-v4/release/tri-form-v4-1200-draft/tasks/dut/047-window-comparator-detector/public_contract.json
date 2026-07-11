@@ -1,0 +1,190 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "window_comparator_ref",
+            "parameters": [
+              {
+                "default": 0.3,
+                "name": "vlow",
+                "override_behavior": "sets the exclusive lower window threshold relative to VSS",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vlow < vhigh"
+              },
+              {
+                "default": 0.6,
+                "name": "vhigh",
+                "override_behavior": "sets the exclusive upper window threshold relative to VSS",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vhigh > vlow"
+              },
+              {
+                "default": 2e-10,
+                "name": "tedge",
+                "override_behavior": "sets rail-referenced output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tedge > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VDD",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VSS",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 3
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "window_comparator_ref.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "047",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "comparator_decision",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Window Comparator Detector"
+  },
+  "modeling_constraints": [
+    "Use deterministic threshold-crossing state updates and voltage contributions only.",
+    "Drive the output contribution outside crossing event blocks.",
+    "Do not use current contributions, ddt(), idt(), validation hooks, or simulator-specific side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_INITIAL_WINDOW_STATE",
+      "observable_contract": "At initialization, out reflects whether vin relative to VSS lies strictly between vlow and vhigh.",
+      "required_signals": [
+        "time",
+        "VSS",
+        "vin",
+        "out"
+      ]
+    },
+    {
+      "id": "P_INSIDE_WINDOW_HIGH",
+      "observable_contract": "Out is at the VDD rail only while vlow < V(vin,VSS) < vhigh.",
+      "required_signals": [
+        "time",
+        "VDD",
+        "VSS",
+        "vin",
+        "out"
+      ]
+    },
+    {
+      "id": "P_BOUNDARY_EXCLUSION",
+      "observable_contract": "Out is at the VSS rail when V(vin,VSS) is equal to or outside either window boundary.",
+      "required_signals": [
+        "time",
+        "VSS",
+        "vin",
+        "out"
+      ]
+    },
+    {
+      "id": "P_BIDIRECTIONAL_CROSSINGS",
+      "observable_contract": "Crossings of both vlow and vhigh in either direction update the retained in-window decision.",
+      "required_signals": [
+        "time",
+        "vin",
+        "out"
+      ]
+    },
+    {
+      "id": "P_RAIL_SMOOTHING",
+      "observable_contract": "Out is rail-referenced to VDD and VSS with finite transition smoothing set by tedge.",
+      "required_signals": [
+        "time",
+        "VDD",
+        "VSS",
+        "out"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "window_comparator_ref.va"
+  ],
+  "task_id": "v4-047",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "VDD",
+            "port_ref": "VDD",
+            "position": 0
+          },
+          {
+            "net": "VSS",
+            "port_ref": "VSS",
+            "position": 1
+          },
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 2
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 3
+          }
+        ],
+        "module_ref": "window_comparator_ref",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "VDD",
+      "VSS",
+      "vin",
+      "out"
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+// Ideal static comparator.
+// Output OUT_P goes high when VINP > VINN, low otherwise.
+// Driven by cross events on the differential input.
+
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 10p
+
+module comparator(
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical VINP,
+    input  electrical VINN,
+    output electrical OUT_P
+);
+
+parameter real tedge = 100p;
+
+real out_level;
+
+analog begin
+    @(initial_step) begin
+        out_level = (V(VINP) > V(VINN)) ? V(VDD) : V(VSS);
+    end
+
+    @(cross(V(VINP) - V(VINN), +1)) begin
+        out_level = V(VDD);
+    end
+
+    @(cross(V(VINP) - V(VINN), -1)) begin
+        out_level = V(VSS);
+    end
+
+    V(OUT_P) <+ transition(out_level, 0, tedge, tedge);
+end
+
+endmodule

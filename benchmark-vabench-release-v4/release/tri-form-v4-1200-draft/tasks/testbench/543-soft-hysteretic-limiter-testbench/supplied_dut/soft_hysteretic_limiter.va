@@ -1,0 +1,37 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module soft_hysteretic_limiter(clk, rst, vin, out, metric);
+input clk, rst, vin;
+output out, metric;
+electrical clk, rst, vin, out, metric;
+parameter real tr = 100p;
+parameter real gain = 1.8;
+parameter real hys_step = 0.08;
+real y, hys, target, metricv;
+analog begin
+    @(initial_step) begin
+        y = 0.45;
+        hys = 0.0;
+        target = 0.45;
+        metricv = 0.45;
+    end
+    @(cross(V(clk) - 0.45, +1)) begin
+        if (V(rst) > 0.45) begin
+            y = 0.45;
+            hys = 0.0;
+            target = 0.45;
+            metricv = 0.45;
+        end else begin
+            if (V(vin) > 0.62) hys = hys_step;
+            if (V(vin) < 0.38) hys = -hys_step;
+            target = gain * (V(vin) - 0.45) + 0.45 + hys;
+            y = target;
+            if (y > 0.82) y = 0.82; if (y < 0.10) y = 0.10;
+            metricv = 0.45 + 2.0 * hys;
+        end
+    end
+    V(out) <+ transition(y, 0, tr, tr);
+    V(metric) <+ transition(metricv, 0, tr, tr);
+end
+endmodule

@@ -1,0 +1,20 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/comparator.va"
+
+// threshold comparator bidirectional polarity testbench
+// VINP starts below VINN, ramps above VINN, then ramps below VINN again.
+// Public checks require low-for-negative-diff, high-for-positive-diff,
+// one rising trip near zero differential, and one falling trip near zero differential.
+
+Vvdd  (VDD  0) vsource dc=0.9
+Vvss  (VSS  0) vsource dc=0.0
+Vvinp (VINP 0) vsource type=pwl wave=[0 0.42 5n 0.42 12n 0.48 18n 0.48 25n 0.42 30n 0.42]
+Vvinn (VINN 0) vsource dc=0.45
+
+IDUT (VDD VSS VINP VINN OUT_P) comparator
+
+
+tran tran stop=30n maxstep=0.1n
+save VDD VSS VINP VINN OUT_P

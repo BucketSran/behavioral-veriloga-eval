@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-043",
+    "canonical_task_slug": "043-soft-hysteretic-limiter",
+    "family_spec_sha256": "0344839bc70c44c24d599fd53c9002220a60986b5ce87509f35bc7e95da61141",
+    "mutation_catalog_sha256": "d64912867cde0a77d7e7ed2b5d0b1c3362ceaa4bfe6e892cd4e2ca44f6ebcef6",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "043",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001",
+    "testbench_suite": [
+      "neg_001",
+      "neg_003",
+      "neg_004",
+      "neg_005",
+      "neg_002"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "8afcb801d76f0ae1298dd57f6dc6472295af602660daf0c3aea7a3c969ba28b4",
+    "changed_artifacts": [
+      "soft_hysteretic_limiter.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001",
+    "rationale": "Select fault class passes_nominal_smoke_cases_but_fails_an_endpoint under trigger 'Passes nominal/smoke cases but fails an endpoint, threshold, saturation, or settling boundary.' because it exercises P_RESET_NEUTRAL as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 25,
+    "source_preferred_seed": "neg_001",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

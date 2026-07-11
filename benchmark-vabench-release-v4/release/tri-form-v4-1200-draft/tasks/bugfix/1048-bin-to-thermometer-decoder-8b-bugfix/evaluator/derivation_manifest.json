@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-048",
+    "canonical_task_slug": "048-bin-to-thermometer-decoder-8b",
+    "family_spec_sha256": "eea718d574c2baceeab9380b1ee6865e551d81290be00c241808707fd0445573",
+    "mutation_catalog_sha256": "9bcfa85c327e8d17c8202215599ce4ca5a2384e5bf91345e9cbec17cb3b91d1e",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "048",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_off_by_one_count",
+    "testbench_suite": [
+      "neg_001_off_by_one_count",
+      "neg_002_reversed_thermometer_bus",
+      "neg_003_enable_ignored",
+      "neg_005_reversed_bit_order",
+      "neg_006_weak_high_level"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "75ede6fd03cada18e280cd602596b65a9c367b54ebc77f708705a0703c4d2bbd",
+    "changed_artifacts": [
+      "bin_to_therm_8b.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_off_by_one_count",
+    "rationale": "Select fault class off_by_one_count under trigger 'Drives code+1 outputs high when enabled.' because it exercises P_ENDPOINT_CODES, P_PREFIX_THERMOMETER as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 14,
+    "source_preferred_seed": "neg_001_off_by_one_count",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

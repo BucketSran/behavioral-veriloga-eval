@@ -1,0 +1,200 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "comparator",
+            "parameters": [
+              {
+                "default": 1e-10,
+                "name": "tedge",
+                "override_behavior": "sets OUT_P rail-transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tedge > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VDD",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VSS",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "VINP",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "VINN",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "OUT_P",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "comparator.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "045",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "comparator_decision",
+    "difficulty": "D1",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Threshold Comparator"
+  },
+  "modeling_constraints": [
+    "Use deterministic event-driven voltage-domain comparator state.",
+    "Drive the output contribution outside threshold-crossing event blocks.",
+    "Do not use current contributions, ddt(), idt(), validation hooks, or simulator-specific side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_INITIAL_DECISION",
+      "observable_contract": "At initialization, OUT_P reflects the sign of VINP minus VINN.",
+      "required_signals": [
+        "time",
+        "VINP",
+        "VINN",
+        "OUT_P"
+      ]
+    },
+    {
+      "id": "P_RISING_DIFFERENTIAL",
+      "observable_contract": "When VINP crosses above VINN, OUT_P transitions to the VDD rail.",
+      "required_signals": [
+        "time",
+        "VDD",
+        "VINP",
+        "VINN",
+        "OUT_P"
+      ]
+    },
+    {
+      "id": "P_FALLING_DIFFERENTIAL",
+      "observable_contract": "When VINP crosses below VINN, OUT_P transitions to the VSS rail.",
+      "required_signals": [
+        "time",
+        "VSS",
+        "VINP",
+        "VINN",
+        "OUT_P"
+      ]
+    },
+    {
+      "id": "P_BIDIRECTIONAL_RESPONSE",
+      "observable_contract": "Repeated differential crossings in either direction update the retained decision without requiring a clock or reset.",
+      "required_signals": [
+        "time",
+        "VINP",
+        "VINN",
+        "OUT_P"
+      ]
+    },
+    {
+      "id": "P_RAIL_SMOOTHING",
+      "observable_contract": "OUT_P is rail-referenced and changes with finite transition smoothing set by tedge.",
+      "required_signals": [
+        "time",
+        "VDD",
+        "VSS",
+        "OUT_P"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/comparator.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-545",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "VDD",
+            "port_ref": "VDD",
+            "position": 0
+          },
+          {
+            "net": "VSS",
+            "port_ref": "VSS",
+            "position": 1
+          },
+          {
+            "net": "VINP",
+            "port_ref": "VINP",
+            "position": 2
+          },
+          {
+            "net": "VINN",
+            "port_ref": "VINN",
+            "position": 3
+          },
+          {
+            "net": "OUT_P",
+            "port_ref": "OUT_P",
+            "position": 4
+          }
+        ],
+        "module_ref": "comparator",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "VDD",
+      "VSS",
+      "VINP",
+      "VINN",
+      "OUT_P"
+    ]
+  }
+}

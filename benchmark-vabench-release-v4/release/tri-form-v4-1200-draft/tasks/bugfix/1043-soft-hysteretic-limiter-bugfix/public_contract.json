@@ -1,0 +1,208 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "soft_hysteretic_limiter",
+            "parameters": [
+              {
+                "default": 1e-10,
+                "name": "tr",
+                "override_behavior": "sets out and metric transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              },
+              {
+                "default": 1.8,
+                "name": "gain",
+                "override_behavior": "sets the sampled small-signal gain about 0.45 V common mode",
+                "type": "real",
+                "units": null,
+                "valid_range": "gain > 0"
+              },
+              {
+                "default": 0.08,
+                "name": "hys_step",
+                "override_behavior": "sets the signed remembered offset after upper or lower threshold excursions",
+                "type": "real",
+                "units": "V",
+                "valid_range": "hys_step >= 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "metric",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "soft_hysteretic_limiter.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/soft_hysteretic_limiter.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "043",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "baseband_signal_conditioning",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Soft Hysteretic Limiter"
+  },
+  "modeling_constraints": [
+    "Use deterministic event-updated voltage-domain state and finite output smoothing.",
+    "Do not use current contributions, transistor-level devices, AC/noise analysis, ddt(), or idt().",
+    "Do not add validation-only hooks, ports, or simulator-specific side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_RESET_NEUTRAL",
+      "observable_contract": "Initialization or active reset sets out and metric to 0.45 V and clears the remembered hysteresis offset.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_HYSTERESIS_STATE_UPDATE",
+      "observable_contract": "On rising clk crossings, vin above 0.62 V stores +hys_step, vin below 0.38 V stores -hys_step, and vin within the middle band preserves the prior offset.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "vin",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_GAINED_LIMITER_TRANSFER",
+      "observable_contract": "The held output target is 0.45 V plus gain times vin minus 0.45 V plus the remembered hysteresis offset.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_LIMITS",
+      "observable_contract": "Out is clamped to 0.10 V through 0.82 V with finite transition smoothing.",
+      "required_signals": [
+        "time",
+        "out"
+      ]
+    },
+    {
+      "id": "P_STATE_METRIC",
+      "observable_contract": "Metric equals 0.45 V plus twice the remembered offset, producing 0.61 V and 0.29 V for the default high- and low-memory states.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "metric"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "soft_hysteretic_limiter.va"
+  ],
+  "task_id": "v4-1043",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 2
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 3
+          },
+          {
+            "net": "metric",
+            "port_ref": "metric",
+            "position": 4
+          }
+        ],
+        "module_ref": "soft_hysteretic_limiter",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric"
+    ]
+  }
+}

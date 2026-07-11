@@ -1,0 +1,205 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "rf_mixer_downconverter_macro",
+            "parameters": [
+              {
+                "default": 8e-11,
+                "name": "tr",
+                "override_behavior": "sets smoothing for discontinuous output and metric target changes",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets rst logic threshold and LO polarity decision threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "0 < vth < 0.9"
+              },
+              {
+                "default": 1.25,
+                "name": "conv_gain",
+                "override_behavior": "sets conversion gain applied to the input deviation about 0.45 V",
+                "type": "real",
+                "units": null,
+                "valid_range": "conv_gain > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "metric",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "rf_mixer_downconverter_macro.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/rf_mixer_downconverter_macro.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "041",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "rf_afe_behavioral_macromodels",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain transient behavioral Verilog-A",
+    "title": "RF Mixer Downconverter Macro"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavior and smooth discontinuous target changes.",
+    "Do not use current contributions, transistor-level devices, S-parameters, AC/noise behavior, or link-level decoding.",
+    "Do not add validation logic, hard-coded sample points, or simulator-specific side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_RESET_COMMON_MODE",
+      "observable_contract": "Active reset drives out to 0.45 V common mode and metric low.",
+      "required_signals": [
+        "time",
+        "rst",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_LO_POLARITY",
+      "observable_contract": "With reset inactive, clk above vth selects LO coefficient +1 and clk at or below vth selects coefficient -1.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "vin",
+        "out"
+      ]
+    },
+    {
+      "id": "P_DOWNCONVERSION_TRANSFER",
+      "observable_contract": "The baseband target is 0.45 V plus conv_gain times vin minus 0.45 V times the selected LO coefficient.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "out"
+      ]
+    },
+    {
+      "id": "P_ACTIVE_METRIC",
+      "observable_contract": "Metric is 0.9 V while reset is inactive and conversion is active, and low during reset.",
+      "required_signals": [
+        "time",
+        "rst",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_CLAMP",
+      "observable_contract": "Out is clamped to 0.02 V through 0.88 V and changes with finite smoothing.",
+      "required_signals": [
+        "time",
+        "out"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "rf_mixer_downconverter_macro.va"
+  ],
+  "task_id": "v4-1041",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 2
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 3
+          },
+          {
+            "net": "metric",
+            "port_ref": "metric",
+            "position": 4
+          }
+        ],
+        "module_ref": "rf_mixer_downconverter_macro",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric"
+    ]
+  }
+}

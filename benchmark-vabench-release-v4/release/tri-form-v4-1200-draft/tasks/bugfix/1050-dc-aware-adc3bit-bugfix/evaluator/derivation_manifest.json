@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-050",
+    "canonical_task_slug": "050-dc-aware-adc3bit",
+    "family_spec_sha256": "2882cdfb0fa38db8d336c8e286949affcbdfc5a91dc48bb1f542cdba3f01f2a6",
+    "mutation_catalog_sha256": "d1c7d6842e2c943390cee3a390870fe28e1c5ac78f74321c0e3d6b4f2bea05ae",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "050",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_wrong_code_span",
+    "testbench_suite": [
+      "neg_001_force_zero",
+      "neg_002_wrong_code_span",
+      "neg_004_no_clipping",
+      "neg_005_round_to_nearest",
+      "neg_003_reversed_bit_order"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "c7daae0e51ff0c833492412264ebd12193f7f6280c25a0f5acfd59c016cc26df",
+    "changed_artifacts": [
+      "dc_aware_adc3bit.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_wrong_code_span",
+    "rationale": "Select fault class wrong_code_span under trigger 'DC Aware ADC3bit: uses seven bins instead of eight, shifting the ADC transition thresholds.' because it exercises P_UNIFORM_QUANTIZATION as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_001_force_zero",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

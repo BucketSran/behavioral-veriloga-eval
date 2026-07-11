@@ -1,0 +1,47 @@
+`include "disciplines.vams"
+
+module dc_aware_adc3bit(vin, d2, d1, d0);
+input vin;
+output d2, d1, d0;
+electrical vin, d2, d1, d0;
+
+parameter real vref = 1.0;
+parameter real vh = 0.9;
+parameter real tr = 20p;
+
+real clipped;
+integer code;
+integer rem;
+integer bit2;
+integer bit1;
+integer bit0;
+
+analog begin
+    clipped = V(vin);
+    if (clipped < 0.0) clipped = 0.0;
+    if (clipped > vref) clipped = vref;
+
+    code = $floor(8.0 * clipped / vref);
+    if (code < 0) code = 0;
+    if (code > 7) code = 7;
+
+    rem = code;
+    if (rem >= 4) begin
+        bit2 = 1;
+        rem = rem - 4;
+    end else begin
+        bit2 = 0;
+    end
+    if (rem >= 2) begin
+        bit1 = 1;
+        rem = rem - 2;
+    end else begin
+        bit1 = 0;
+    end
+    bit0 = (rem >= 1) ? 1 : 0;
+
+    V(d2) <+ transition(bit2 ? vh : 0.0, 0, tr, tr);
+    V(d1) <+ transition(bit1 ? vh : 0.0, 0, tr, tr);
+    V(d0) <+ transition(bit0 ? vh : 0.0, 0, tr, tr);
+end
+endmodule
