@@ -1,0 +1,86 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module nonoverlap_clock_generator(clk_in, rst, enable, phi1, phi2, deadtime_metric, valid);
+    input clk_in, rst, enable;
+    output phi1, phi2, deadtime_metric, valid;
+    electrical clk_in, rst, enable, phi1, phi2, deadtime_metric, valid;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth /*neg*/ = 0.6;
+    parameter integer dead_ticks = 5 from [1:100];
+    parameter real tick = 200p from (0:inf);
+    parameter real tr = 100p from (0:inf);
+
+    integer active_phase;
+    integer pending_phase;
+    integer wait_ticks;
+    integer valid_state;
+    real phi1_v;
+    real phi2_v;
+    real metric_v;
+    real valid_v;
+
+    analog begin
+        @(initial_step) begin
+            active_phase = 0;
+            pending_phase = 0;
+            wait_ticks = 0;
+            valid_state = 0;
+        end
+
+        @(cross(V(clk_in) - vth /*neg*/, +1)) begin
+            if (V(rst) > vth /*neg*/ || V(enable) <= vth /*neg*/) begin
+                active_phase = 0;
+                pending_phase = 0;
+                wait_ticks = 0;
+                valid_state = 0;
+            end else begin
+                active_phase = 3;
+                pending_phase = 1;
+                wait_ticks = dead_ticks;
+            end
+        end
+
+        @(cross(V(clk_in) - vth /*neg*/, -1)) begin
+            if (V(rst) > vth /*neg*/ || V(enable) <= vth /*neg*/) begin
+                active_phase = 0;
+                pending_phase = 0;
+                wait_ticks = 0;
+                valid_state = 0;
+            end else begin
+                active_phase = 3;
+                pending_phase = 2;
+                wait_ticks = dead_ticks;
+            end
+        end
+
+        @(timer(0, tick)) begin
+            if (V(rst) > vth /*neg*/ || V(enable) <= vth /*neg*/) begin
+                active_phase = 0;
+                pending_phase = 0;
+                wait_ticks = 0;
+                valid_state = 0;
+            end else if (pending_phase != 0) begin
+                if (wait_ticks > 0)
+                    wait_ticks = wait_ticks - 1;
+                if (wait_ticks <= 0) begin
+                    active_phase = pending_phase;
+                    pending_phase = 0;
+                    valid_state = 1;
+                end
+            end
+        end
+
+        phi1_v = (V(rst) <= vth /*neg*/ && V(enable) > vth /*neg*/ && (active_phase == 1 || active_phase == 3)) ? vdd : vss;
+        phi2_v = (V(rst) <= vth /*neg*/ && V(enable) > vth /*neg*/ && (active_phase == 2 || active_phase == 3)) ? vdd : vss;
+        metric_v = (V(rst) <= vth /*neg*/ && V(enable) > vth /*neg*/ && pending_phase != 0 && active_phase == 0) ? vdd : vss;
+        valid_v = (V(rst) <= vth /*neg*/ && V(enable) > vth /*neg*/ && valid_state != 0) ? vdd : vss;
+
+        V(phi1) <+ phi1_v;
+        V(phi2) <+ phi2_v;
+        V(deadtime_metric) <+ metric_v;
+        V(valid) <+ valid_v;
+    end
+endmodule

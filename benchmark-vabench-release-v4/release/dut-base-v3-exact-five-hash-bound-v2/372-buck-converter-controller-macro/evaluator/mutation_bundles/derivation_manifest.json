@@ -1,0 +1,65 @@
+{
+  "schema_version": "v4-negative-derivation-diagnostics-v1",
+  "family_id": "372",
+  "mutation_catalog_sha256": "d089be0e590db17cf3af28f974d0f2e918882c6372ddc889dc8ba9cee77bdebc",
+  "mutation_partition": {
+    "bugfix_seed": [
+      "neg_001_missing_reset_clear"
+    ],
+    "testbench_private_score": [
+      "neg_003_double_soft_step",
+      "neg_004_pgood_asserts_early",
+      "neg_005_weak_pwm_high"
+    ],
+    "testbench_public_feedback": [
+      "neg_002_reversed_duty_direction"
+    ]
+  },
+  "mutation_diagnostics": [
+    {
+      "id": "neg_001_missing_reset_clear",
+      "fault_class": "missing_reset",
+      "trigger_pattern": "reset is asserted while enable remains high",
+      "diagnostic_pattern": "P_RESET_DISABLE_CLEAR mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=missing_reset",
+      "violated_property_ids": [
+        "P_RESET_DISABLE_CLEAR"
+      ]
+    },
+    {
+      "id": "neg_002_reversed_duty_direction",
+      "fault_class": "wrong_polarity",
+      "trigger_pattern": "vfb is below soft_ref",
+      "diagnostic_pattern": "P_DUTY_DIRECTION_BOUNDS mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=wrong_polarity",
+      "violated_property_ids": [
+        "P_DUTY_DIRECTION_BOUNDS"
+      ]
+    },
+    {
+      "id": "neg_003_double_soft_step",
+      "fault_class": "wrong_gain",
+      "trigger_pattern": "soft_ref is below vref during enabled clock updates",
+      "diagnostic_pattern": "P_SOFT_START_TRACKING mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=wrong_gain",
+      "violated_property_ids": [
+        "P_SOFT_START_TRACKING"
+      ]
+    },
+    {
+      "id": "neg_004_pgood_asserts_early",
+      "fault_class": "qualification_count_error",
+      "trigger_pattern": "the first in-tolerance clock update occurs",
+      "diagnostic_pattern": "P_POWER_GOOD_QUALIFICATION mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=qualification_count_error",
+      "violated_property_ids": [
+        "P_POWER_GOOD_QUALIFICATION"
+      ]
+    },
+    {
+      "id": "neg_005_weak_pwm_high",
+      "fault_class": "weak_rail",
+      "trigger_pattern": "the PWM state requests a high output",
+      "diagnostic_pattern": "P_PWM_ENCODING mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=weak_rail",
+      "violated_property_ids": [
+        "P_PWM_ENCODING"
+      ]
+    }
+  ]
+}

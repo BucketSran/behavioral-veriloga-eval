@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/buck_ctrl_top.va"
+ahdl_include "./dut/error_comparator.va"
+ahdl_include "./dut/power_good.va"
+ahdl_include "./dut/pwm_modulator.va"
+ahdl_include "./dut/soft_start.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=8n width=3n rise=100p fall=100p delay=1n
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 250n 0 250.2n 0.9 262n 0.9 262.2n 0]
+Ven (enable 0) vsource type=pwl wave=[0 0 4n 0 4.2n 0.9 205n 0.9 205.2n 0 222n 0 222.2n 0.9 320n 0.9]
+Vrefsrc (vref 0) vsource dc=0.62
+Vfb (vfb 0) vsource type=pwl wave=[0 0.18 72n 0.18 72.2n 0.62 128n 0.62 128.2n 0.76 176n 0.76 176.2n 0.57 240n 0.57 240.2n 0.62 320n 0.62]
+XDUT (vfb vref clk rst enable pwm duty_metric soft_ref pgood) buck_ctrl_top soft_step=0.025 pgood_tol=0.025
+
+tran tran stop=320n maxstep=100p
+save vfb vref clk rst enable pwm duty_metric soft_ref pgood

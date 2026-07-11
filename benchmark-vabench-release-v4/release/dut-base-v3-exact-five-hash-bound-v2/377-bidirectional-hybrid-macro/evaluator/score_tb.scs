@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/bidirectional_hybrid_macro.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=9n width=3.5n rise=100p fall=100p delay=1n
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 205n 0 205.2n 0.9 216n 0.9 216.2n 0]
+Va (port_a 0) vsource type=pwl wave=[0 0.45 18n 0.45 18.2n 0.80 78n 0.80 78.2n 0.24 138n 0.24 138.2n 0.61 240n 0.61]
+Vb (port_b 0) vsource type=pwl wave=[0 0.45 18n 0.45 18.2n 0.34 78n 0.34 78.2n 0.76 138n 0.76 138.2n 0.39 240n 0.39]
+Vt2 (trim_2 0) vsource type=pwl wave=[0 0 108n 0 108.2n 0.9 175n 0.9 175.2n 0 240n 0]
+Vt1 (trim_1 0) vsource type=pwl wave=[0 0.9 108n 0.9 108.2n 0 175n 0 175.2n 0.9 240n 0.9]
+Vt0 (trim_0 0) vsource type=pwl wave=[0 0.9 175n 0.9 175.2n 0 240n 0]
+XDUT (port_a port_b clk rst trim_2 trim_1 trim_0 sum_out diff_out forward_metric reverse_metric balance_ok) bidirectional_hybrid_macro
+
+tran tran stop=240n maxstep=100p
+save port_a port_b clk rst trim_2 trim_1 trim_0 sum_out diff_out forward_metric reverse_metric balance_ok

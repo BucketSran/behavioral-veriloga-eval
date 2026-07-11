@@ -1,0 +1,628 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "soft_start",
+              "error_comparator",
+              "pwm_modulator",
+              "power_good"
+            ],
+            "name": "buck_ctrl_top",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "overrides the public vdd behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > vss"
+              },
+              {
+                "default": 0,
+                "name": "vss",
+                "override_behavior": "overrides the public vss behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vdd"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "overrides the public vth behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vth is finite and preserves the public operating range"
+              },
+              {
+                "default": 0.05,
+                "name": "duty_min",
+                "override_behavior": "overrides the public duty_min behavior parameter consistently for this module",
+                "type": "real",
+                "units": null,
+                "valid_range": "0 <= duty_min < duty_max"
+              },
+              {
+                "default": 0.95,
+                "name": "duty_max",
+                "override_behavior": "overrides the public duty_max behavior parameter consistently for this module",
+                "type": "real",
+                "units": null,
+                "valid_range": "duty_min < duty_max <= 1"
+              },
+              {
+                "default": 0.025,
+                "name": "soft_step",
+                "override_behavior": "overrides the public soft_step behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "soft_step is finite and preserves the public operating range"
+              },
+              {
+                "default": 0.025,
+                "name": "pgood_tol",
+                "override_behavior": "overrides the public pgood_tol behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "pgood_tol is finite and preserves the public operating range"
+              },
+              {
+                "default": 2e-10,
+                "name": "tr",
+                "override_behavior": "overrides the public tr behavior parameter consistently for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vfb",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vref",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "pwm",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "duty_metric",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "soft_ref",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "pgood",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "buck_ctrl_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "error_comparator",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "overrides the public vdd behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > vss"
+              },
+              {
+                "default": 0,
+                "name": "vss",
+                "override_behavior": "overrides the public vss behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vdd"
+              },
+              {
+                "default": 2e-10,
+                "name": "tr",
+                "override_behavior": "overrides the public tr behavior parameter consistently for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vfb",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "soft_ref",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "duty_up",
+                "position": 2
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "error_comparator.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "power_good",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "overrides the public vdd behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > vss"
+              },
+              {
+                "default": 0,
+                "name": "vss",
+                "override_behavior": "overrides the public vss behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vdd"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "overrides the public vth behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vth is finite and preserves the public operating range"
+              },
+              {
+                "default": 0.025,
+                "name": "pgood_tol",
+                "override_behavior": "overrides the public pgood_tol behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "pgood_tol is finite and preserves the public operating range"
+              },
+              {
+                "default": 2e-10,
+                "name": "tr",
+                "override_behavior": "overrides the public tr behavior parameter consistently for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vfb",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vref",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "pgood",
+                "position": 5
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "power_good.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "pwm_modulator",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "overrides the public vdd behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > vss"
+              },
+              {
+                "default": 0,
+                "name": "vss",
+                "override_behavior": "overrides the public vss behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vdd"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "overrides the public vth behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vth is finite and preserves the public operating range"
+              },
+              {
+                "default": 0.05,
+                "name": "duty_min",
+                "override_behavior": "overrides the public duty_min behavior parameter consistently for this module",
+                "type": "real",
+                "units": null,
+                "valid_range": "0 <= duty_min < duty_max"
+              },
+              {
+                "default": 0.95,
+                "name": "duty_max",
+                "override_behavior": "overrides the public duty_max behavior parameter consistently for this module",
+                "type": "real",
+                "units": null,
+                "valid_range": "duty_min < duty_max <= 1"
+              },
+              {
+                "default": 2e-10,
+                "name": "tr",
+                "override_behavior": "overrides the public tr behavior parameter consistently for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "duty_up",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "pwm",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "duty_metric",
+                "position": 5
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "pwm_modulator.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "soft_start",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "overrides the public vdd behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > vss"
+              },
+              {
+                "default": 0,
+                "name": "vss",
+                "override_behavior": "overrides the public vss behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vdd"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "overrides the public vth behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vth is finite and preserves the public operating range"
+              },
+              {
+                "default": 0.025,
+                "name": "soft_step",
+                "override_behavior": "overrides the public soft_step behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "soft_step is finite and preserves the public operating range"
+              },
+              {
+                "default": 2e-10,
+                "name": "tr",
+                "override_behavior": "overrides the public tr behavior parameter consistently for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vref",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "soft_ref",
+                "position": 4
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "soft_start.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "family_id": "372",
+  "identity": {
+    "category": "power_management_systems",
+    "difficulty": "D4",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Buck Converter Controller Macro"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain transient behavior.",
+    "Use portable Spectre-compatible Verilog-A and voltage contributions for public outputs.",
+    "Do not use branch-current oracles, hidden pass/fail ports, checker side channels, or testbench code in the DUT bundle."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_DISABLE_CLEAR",
+      "observable_contract": "Reset or disabled operation clears PWM, duty metric, soft reference, and power-good.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "pwm",
+        "duty_metric",
+        "soft_ref",
+        "pgood"
+      ]
+    },
+    {
+      "id": "P_SOFT_START_TRACKING",
+      "observable_contract": "At enabled rising clock edges soft_ref moves toward vref by the configured soft-step and never overshoots the target.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "vref",
+        "soft_ref"
+      ]
+    },
+    {
+      "id": "P_DUTY_DIRECTION_BOUNDS",
+      "observable_contract": "The duty metric increases when vfb is below soft_ref, decreases otherwise, and remains within the configured duty bounds.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "vfb",
+        "soft_ref",
+        "duty_metric"
+      ]
+    },
+    {
+      "id": "P_PWM_ENCODING",
+      "observable_contract": "PWM high samples are rail-valid and their enabled-cycle activity is consistent with a nonzero bounded duty command.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "pwm",
+        "duty_metric"
+      ]
+    },
+    {
+      "id": "P_POWER_GOOD_QUALIFICATION",
+      "observable_contract": "Power-good asserts only after three consecutive enabled clock updates with vfb within pgood_tol of vref and clears when qualification is lost.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "vfb",
+        "vref",
+        "pgood"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1372",
+    "dut": "v4-372",
+    "testbench": "v4-872"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vfb",
+            "port_ref": "vfb",
+            "position": 0
+          },
+          {
+            "net": "vref",
+            "port_ref": "vref",
+            "position": 1
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 4
+          },
+          {
+            "net": "pwm",
+            "port_ref": "pwm",
+            "position": 5
+          },
+          {
+            "net": "duty_metric",
+            "port_ref": "duty_metric",
+            "position": 6
+          },
+          {
+            "net": "soft_ref",
+            "port_ref": "soft_ref",
+            "position": 7
+          },
+          {
+            "net": "pgood",
+            "port_ref": "pgood",
+            "position": 8
+          }
+        ],
+        "module_ref": "buck_ctrl_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vfb",
+      "vref",
+      "clk",
+      "rst",
+      "enable",
+      "pwm",
+      "duty_metric",
+      "soft_ref",
+      "pgood"
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module am_modulator_source_macro(carrier_in, mod_in, enable, rst, vout, envelope_dbg, valid);
+    inout carrier_in, mod_in, enable, rst, vout, envelope_dbg, valid;
+    electrical carrier_in, mod_in, enable, rst, vout, envelope_dbg, valid;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vcm = 0.45; parameter real mod_index = 0.5; parameter real vth = 0.45; parameter real tr = 200p from (0:inf);
+    real mult, out_v, dbg_v, valid_v;
+    analog function real clip; input x; real x; begin if (x < vss) clip = vss; else if (x > vdd) clip = vdd; else clip = x; end endfunction
+    analog begin
+        if (0) begin out_v = vcm; dbg_v = 0.0; valid_v = 0.0; end
+        else begin mult = 1.0 + mod_index * ((V(mod_in) - vcm) / vcm); out_v = clip(vcm + (V(carrier_in) - vcm) * mult); dbg_v = clip(mult * vcm); valid_v = vdd; end
+        V(vout) <+ out_v;
+        V(envelope_dbg) <+ dbg_v;
+        V(valid) <+ valid_v;
+    end
+endmodule

@@ -1,0 +1,38 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=76n maxstep=100p"
+    ],
+    "body_lines": [
+      "Vclk (clk_in 0) vsource type=pulse val0=0 val1=0.9 period=8n width=4n delay=1.5n rise=60p fall=60p",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.8n 0.9 1.9n 0 76n 0]",
+      "Ven (enable 0) vsource type=pwl wave=[0 0 6n 0 6.1n 0.9 44n 0.9 44.1n 0 53n 0 53.1n 0.9 76n 0.9]",
+      "",
+      "XDUT (clk_in rst enable phi1 phi2 deadtime_metric valid) nonoverlap_clock_generator",
+      ""
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "9d94eb958301213ede83d77d4a66e48d7f088e821060d5c79b3774bf5b7965c7",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "100n"
+  },
+  "profile_name": "score",
+  "property_ids": [
+    "P_RESET_OR_A_LOW_ENABLE_CLEARS",
+    "P_A_RISING_CLK_IN_REQUEST_EVENTUALLY",
+    "P_DURING_EACH_HANDOFF_BOTH_PHI1_AND",
+    "P_PHI1_AND_PHI2_MUST_NEVER_BE",
+    "P_DEADTIME_METRIC_IS_HIGH_ONLY_WHILE",
+    "P_VALID_BECOMES_HIGH_AFTER_THE_FIRST"
+  ],
+  "public_visible": false,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {}
+}

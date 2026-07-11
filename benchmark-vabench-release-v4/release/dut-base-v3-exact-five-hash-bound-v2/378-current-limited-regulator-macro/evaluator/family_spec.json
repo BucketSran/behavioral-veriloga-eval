@@ -1,0 +1,263 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "current_limited_regulator_macro",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "overrides the public vdd behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > vss"
+              },
+              {
+                "default": 0,
+                "name": "vss",
+                "override_behavior": "overrides the public vss behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vdd"
+              },
+              {
+                "default": 0.75,
+                "name": "vref",
+                "override_behavior": "overrides the public vref behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vref is finite and preserves the public operating range"
+              },
+              {
+                "default": 0.08,
+                "name": "dropout",
+                "override_behavior": "overrides the public dropout behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "dropout is finite and preserves the public operating range"
+              },
+              {
+                "default": 0.65,
+                "name": "demand_limit",
+                "override_behavior": "overrides the public demand_limit behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "demand_limit is finite and preserves the public operating range"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "overrides the public vth behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vth is finite and preserves the public operating range"
+              },
+              {
+                "default": 2e-10,
+                "name": "tr",
+                "override_behavior": "overrides the public tr behavior parameter consistently for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "load_demand",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "limit_metric",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "regulation_ok",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "current_limited_regulator_macro.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "378",
+  "identity": {
+    "category": "bias_reference_power_management",
+    "difficulty": "D3",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Current-limited Regulator Macro"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain transient behavior.",
+    "Use portable Spectre-compatible Verilog-A and voltage contributions for public outputs.",
+    "Do not use branch-current oracles, hidden pass/fail ports, checker side channels, or testbench code in the DUT bundle."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_DISABLE_CLEAR",
+      "observable_contract": "Reset or disabled operation drives vout, limit_metric, and regulation_ok low.",
+      "required_signals": [
+        "time",
+        "vin",
+        "load_demand",
+        "enable",
+        "rst",
+        "vout",
+        "limit_metric",
+        "regulation_ok"
+      ]
+    },
+    {
+      "id": "P_NORMAL_REGULATION",
+      "observable_contract": "With adequate headroom and sub-limit demand, vout equals vref and regulation_ok is asserted.",
+      "required_signals": [
+        "time",
+        "vin",
+        "load_demand",
+        "enable",
+        "rst",
+        "vout",
+        "regulation_ok"
+      ]
+    },
+    {
+      "id": "P_DROPOUT_CLAMP",
+      "observable_contract": "When input headroom is insufficient, vout is clamped to max(vss, vin minus dropout).",
+      "required_signals": [
+        "time",
+        "vin",
+        "load_demand",
+        "enable",
+        "rst",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_CURRENT_LIMITING",
+      "observable_contract": "Demand above demand_limit produces limit_metric equal to the overload and reduces vout by that overload subject to rails and dropout.",
+      "required_signals": [
+        "time",
+        "vin",
+        "load_demand",
+        "enable",
+        "rst",
+        "vout",
+        "limit_metric"
+      ]
+    },
+    {
+      "id": "P_REGULATION_FLAG",
+      "observable_contract": "regulation_ok is high only for enabled, non-reset, non-limited operation with enough input headroom.",
+      "required_signals": [
+        "time",
+        "vin",
+        "load_demand",
+        "enable",
+        "rst",
+        "regulation_ok"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1378",
+    "dut": "v4-378",
+    "testbench": "v4-878"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "load_demand",
+            "port_ref": "load_demand",
+            "position": 1
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 4
+          },
+          {
+            "net": "limit_metric",
+            "port_ref": "limit_metric",
+            "position": 5
+          },
+          {
+            "net": "regulation_ok",
+            "port_ref": "regulation_ok",
+            "position": 6
+          }
+        ],
+        "module_ref": "current_limited_regulator_macro",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "load_demand",
+      "enable",
+      "rst",
+      "vout",
+      "limit_metric",
+      "regulation_ok"
+    ]
+  }
+}

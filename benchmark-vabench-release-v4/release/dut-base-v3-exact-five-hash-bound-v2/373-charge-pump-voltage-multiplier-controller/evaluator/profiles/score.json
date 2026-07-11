@@ -1,0 +1,36 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=380n maxstep=100p"
+    ],
+    "body_lines": [
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=8n width=3n rise=100p fall=100p delay=1n",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 310n 0 310.2n 0.9 320n 0.9 320.2n 0]",
+      "Ven (enable 0) vsource type=pwl wave=[0 0 4n 0 4.2n 0.9 225n 0.9 225.2n 0 245n 0 245.2n 0.9 380n 0.9]",
+      "Vtarget (target 0) vsource type=pwl wave=[0 1.05 175n 1.05 175.2n 0.62 275n 0.62 275.2n 0.16 380n 0.16]",
+      "XDUT (clk rst enable target vout phase_a phase_b pump_en regulation_error ready) voltage_multiplier_top pump_step=0.04 leak_step=0.005 ready_tol=0.025"
+    ]
+  },
+  "deterministic_seed": 17,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "1f16a3b2015e824c2d2abc925a6f837eaeaf3165f508ccda85e3be458ec533d1",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "380n"
+  },
+  "profile_name": "score",
+  "property_ids": [
+    "P_RESET_DISABLE_CLEAR",
+    "P_NONOVERLAP_PHASES",
+    "P_PUMP_REGULATION",
+    "P_ERROR_REPORTING",
+    "P_READY_QUALIFICATION"
+  ],
+  "public_visible": false,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {}
+}

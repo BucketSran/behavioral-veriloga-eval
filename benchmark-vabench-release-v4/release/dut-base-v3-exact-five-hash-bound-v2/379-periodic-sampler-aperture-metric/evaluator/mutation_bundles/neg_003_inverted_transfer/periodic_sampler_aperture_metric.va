@@ -1,0 +1,48 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module periodic_sampler_aperture_metric(vin, clk, rst, sample_en, vhold, aperture_metric, valid);
+    input vin, clk, rst, sample_en;
+    output vhold, aperture_metric, valid;
+    electrical vin, clk, rst, sample_en, vhold, aperture_metric, valid;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real aperture_gain = 0.5;
+    parameter real tr = 120p from (0:inf);
+
+    real hold_value;
+    real metric_value;
+    integer valid_state;
+    real delta;
+
+    analog begin
+        @(initial_step) begin
+            hold_value = vss;
+            metric_value = vss;
+            valid_state = 0;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth) begin
+                hold_value = vss;
+                metric_value = vss;
+                valid_state = 0;
+            end else if (V(sample_en) > vth) begin
+                delta = V(vin) - hold_value;
+                if (delta < 0.0)
+                    delta = -delta;
+                metric_value = aperture_gain * delta;
+                if (metric_value > vdd)
+                    metric_value = vdd;
+                hold_value = V(vin);
+                valid_state = 1;
+            end
+        end
+
+        V(vhold) <+ -(transition(hold_value, 0, tr, tr));
+        V(aperture_metric) <+ -(transition(metric_value, 0, tr, tr));
+        V(valid) <+ -(transition(valid_state ? vdd : vss, 0, tr, tr));
+    end
+endmodule

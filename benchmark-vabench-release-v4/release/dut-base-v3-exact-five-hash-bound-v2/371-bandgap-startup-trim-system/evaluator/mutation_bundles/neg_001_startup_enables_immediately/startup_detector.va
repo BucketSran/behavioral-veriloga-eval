@@ -1,0 +1,30 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module startup_detector(vdd_sense, clk, rst, startup_en);
+    input vdd_sense, clk, rst;
+    output startup_en;
+    electrical vdd_sense, clk, rst, startup_en;
+
+    parameter real vhi = 0.9;
+    parameter real vlo = 0.0;
+    parameter real vpor = 0.72;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    integer por_count;
+
+    analog begin
+        @(initial_step)
+            por_count = 0;
+
+        @(cross(V(clk) - vth, +1)) begin
+            if ((V(rst) > vth) || (V(vdd_sense) < vpor))
+                por_count = 0;
+            else
+                por_count = 2;
+        end
+
+        V(startup_en) <+ transition((por_count >= 2) ? vhi : vlo, 0, tr, tr);
+    end
+endmodule

@@ -1,0 +1,132 @@
+{
+  "family_id": "371",
+  "gold_bundle_sha256": "f8b7e87bc7f0a9623f88da2ce84bba23fd45eb3c0b69d6948f695c94eb64cc5a",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "startup_detector.va": "53ba500bab403b2837712d270f5a0e605ead959748451b9d01560d87fd79f6a2"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_POR_STARTUP"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_startup_enables_immediately/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "startup_detector.va"
+      ],
+      "fault_class": "startup_delay_bypassed",
+      "id": "neg_001_startup_enables_immediately",
+      "trigger_condition": "first valid rising clock edge after vdd_sense crosses vpor",
+      "violated_property_ids": [
+        "P_POR_STARTUP"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "trim_controller.va": "b11e8667cc5ba08d648de71fae5b91cd0d2be2ebed518f18de35cba5d72cd94f"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_TRIM_SEARCH"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_trim_direction_reversed/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "trim_controller.va"
+      ],
+      "fault_class": "trim_direction_reversed",
+      "id": "neg_002_trim_direction_reversed",
+      "trigger_condition": "reference error requires increasing trim code",
+      "violated_property_ids": [
+        "P_TRIM_SEARCH"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "trim_controller.va": "74fe5dd11ac5037cdbae2ca4df1fd2b5e91db68f5cbc0482c41da14ba0a62bab"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_READY_QUALIFICATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_ready_asserts_too_early/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "trim_controller.va"
+      ],
+      "fault_class": "premature_ready",
+      "id": "neg_003_ready_asserts_too_early",
+      "trigger_condition": "first in-tolerance enabled update before three stable updates",
+      "violated_property_ids": [
+        "P_READY_QUALIFICATION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "ptat_ctat_core.va": "21d013b1f7e6105d80f31bb475914207386a253b3bc7c1f7c4f04d9f5b72d856"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CORE_REFERENCE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_core_reference_wrong/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "ptat_ctat_core.va"
+      ],
+      "fault_class": "core_reference_wrong",
+      "id": "neg_004_core_reference_wrong",
+      "trigger_condition": "temperature proxy sweep should produce the declared PTAT/CTAT reference metric",
+      "violated_property_ids": [
+        "P_CORE_REFERENCE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "trim_controller.va": "4f566706579a0b40d66a48f452a02e01d16cc5e44ae9cc7be25afa8ec5da9ff7"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_BROWNOUT_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_reset_does_not_clear_outputs/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "trim_controller.va"
+      ],
+      "fault_class": "reset_state_not_cleared",
+      "id": "neg_005_reset_does_not_clear_outputs",
+      "trigger_condition": "reset or POR occurs after nonzero trim and ready state",
+      "violated_property_ids": [
+        "P_RESET_BROWNOUT_CLEAR"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

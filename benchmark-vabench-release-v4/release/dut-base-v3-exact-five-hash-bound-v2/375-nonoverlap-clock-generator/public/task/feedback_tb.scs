@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/nonoverlap_clock_generator.va"
+
+Vclk (clk_in 0) vsource type=pulse val0=0 val1=0.9 period=10n width=5n delay=2n rise=80p fall=80p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2.5n 0.9 2.6n 0 82n 0]
+Ven (enable 0) vsource type=pwl wave=[0 0 8n 0 8.2n 0.9 62n 0.9 62.2n 0 70n 0 70.2n 0.9 82n 0.9]
+
+XDUT (clk_in rst enable phi1 phi2 deadtime_metric valid) nonoverlap_clock_generator
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=82n maxstep=100p
+save clk_in rst enable phi1 phi2 deadtime_metric valid

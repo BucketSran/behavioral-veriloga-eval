@@ -1,0 +1,166 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "bandgap_trim_top",
+            "parameters": [
+              {"default": "0.9", "name": "vhi", "override_behavior": "overrides logic high and upper clamp", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "0.0", "name": "vlo", "override_behavior": "overrides logic low and lower clamp", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "0.72", "name": "vpor", "override_behavior": "overrides startup threshold", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "0.6", "name": "vref_nom", "override_behavior": "overrides nominal reference target", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "2e-3", "name": "trim_lsb", "override_behavior": "overrides reference correction per trim-code step", "type": "real", "units": "V", "valid_range": "finite positive"},
+              {"default": "5e-3", "name": "ready_tol", "override_behavior": "overrides ready tolerance around reference target", "type": "real", "units": "V", "valid_range": "finite positive"},
+              {"default": "0.45", "name": "vth", "override_behavior": "overrides clock/reset/trim threshold", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "200p from (0:inf)", "name": "tr", "override_behavior": "overrides output transition smoothing time", "type": "real", "units": "s", "valid_range": "positive"}
+            ],
+            "ports": [
+              {"direction": "inout", "discipline": "electrical", "name": "vdd_sense", "position": 0},
+              {"direction": "inout", "discipline": "electrical", "name": "clk", "position": 1},
+              {"direction": "inout", "discipline": "electrical", "name": "rst", "position": 2},
+              {"direction": "inout", "discipline": "electrical", "name": "trim_req", "position": 3},
+              {"direction": "inout", "discipline": "electrical", "name": "temp_proxy", "position": 4},
+              {"direction": "inout", "discipline": "electrical", "name": "vref", "position": 5},
+              {"direction": "inout", "discipline": "electrical", "name": "trim_3", "position": 6},
+              {"direction": "inout", "discipline": "electrical", "name": "trim_2", "position": 7},
+              {"direction": "inout", "discipline": "electrical", "name": "trim_1", "position": 8},
+              {"direction": "inout", "discipline": "electrical", "name": "trim_0", "position": 9},
+              {"direction": "inout", "discipline": "electrical", "name": "ready", "position": 10},
+              {"direction": "inout", "discipline": "electrical", "name": "error_metric", "position": 11}
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "bandgap_trim_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": ["bandgap_trim_top"],
+            "name": "startup_detector",
+            "parameters": [
+              {"default": "0.9", "name": "vhi", "override_behavior": "overrides logic high output level", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "0.0", "name": "vlo", "override_behavior": "overrides logic low output level", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "0.72", "name": "vpor", "override_behavior": "overrides startup threshold", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "0.45", "name": "vth", "override_behavior": "overrides clock/reset threshold", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "200p from (0:inf)", "name": "tr", "override_behavior": "overrides output transition smoothing time", "type": "real", "units": "s", "valid_range": "positive"}
+            ],
+            "ports": [
+              {"direction": "inout", "discipline": "electrical", "name": "vdd_sense", "position": 0},
+              {"direction": "inout", "discipline": "electrical", "name": "clk", "position": 1},
+              {"direction": "inout", "discipline": "electrical", "name": "rst", "position": 2},
+              {"direction": "inout", "discipline": "electrical", "name": "startup_en", "position": 3}
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "startup_detector.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": ["bandgap_trim_top"],
+            "name": "ptat_ctat_core",
+            "parameters": [
+              {"default": "0.9", "name": "vhi", "override_behavior": "overrides upper reference clamp", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "0.0", "name": "vlo", "override_behavior": "overrides lower reference clamp", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "0.6", "name": "vref_nom", "override_behavior": "overrides nominal reference target", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "0.45", "name": "vth", "override_behavior": "overrides startup enable threshold", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "200p from (0:inf)", "name": "tr", "override_behavior": "overrides output transition smoothing time", "type": "real", "units": "s", "valid_range": "positive"}
+            ],
+            "ports": [
+              {"direction": "inout", "discipline": "electrical", "name": "temp_proxy", "position": 0},
+              {"direction": "inout", "discipline": "electrical", "name": "startup_en", "position": 1},
+              {"direction": "inout", "discipline": "electrical", "name": "core_ref", "position": 2}
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "ptat_ctat_core.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": ["bandgap_trim_top"],
+            "name": "trim_controller",
+            "parameters": [
+              {"default": "0.9", "name": "vhi", "override_behavior": "overrides logic high output level", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "0.0", "name": "vlo", "override_behavior": "overrides logic low output level", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "0.6", "name": "vref_nom", "override_behavior": "overrides nominal reference target", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "2e-3", "name": "trim_lsb", "override_behavior": "overrides reference correction per trim-code step", "type": "real", "units": "V", "valid_range": "finite positive"},
+              {"default": "5e-3", "name": "ready_tol", "override_behavior": "overrides ready tolerance around reference target", "type": "real", "units": "V", "valid_range": "finite positive"},
+              {"default": "0.45", "name": "vth", "override_behavior": "overrides clock/reset/trim threshold", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "200p from (0:inf)", "name": "tr", "override_behavior": "overrides output transition smoothing time", "type": "real", "units": "s", "valid_range": "positive"}
+            ],
+            "ports": [
+              {"direction": "inout", "discipline": "electrical", "name": "clk", "position": 0},
+              {"direction": "inout", "discipline": "electrical", "name": "rst", "position": 1},
+              {"direction": "inout", "discipline": "electrical", "name": "trim_req", "position": 2},
+              {"direction": "inout", "discipline": "electrical", "name": "startup_en", "position": 3},
+              {"direction": "inout", "discipline": "electrical", "name": "core_ref", "position": 4},
+              {"direction": "inout", "discipline": "electrical", "name": "trim_3", "position": 5},
+              {"direction": "inout", "discipline": "electrical", "name": "trim_2", "position": 6},
+              {"direction": "inout", "discipline": "electrical", "name": "trim_1", "position": 7},
+              {"direction": "inout", "discipline": "electrical", "name": "trim_0", "position": 8},
+              {"direction": "inout", "discipline": "electrical", "name": "trim_corr", "position": 9},
+              {"direction": "inout", "discipline": "electrical", "name": "ready", "position": 10},
+              {"direction": "inout", "discipline": "electrical", "name": "error_metric", "position": 11}
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "trim_controller.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "family_id": "371",
+  "identity": {
+    "category": "bias_reference_power_management",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Bandgap Startup and Trim System"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Use voltage contributions for public electrical outputs.",
+    "Do not instantiate transistor-level devices or add testbench, checker, pass/fail, or debug-only ports."
+  ],
+  "properties": [
+    {"id": "P_RESET_BROWNOUT_CLEAR", "observable_contract": "On reset or brownout below POR, clear trim code, ready, error metric, and drive vref low.", "required_signals": ["time", "vdd_sense", "clk", "rst", "trim_req", "temp_proxy", "vref", "trim_3", "trim_2", "trim_1", "trim_0", "ready", "error_metric"]},
+    {"id": "P_POR_STARTUP", "observable_contract": "Enable the reference only after vdd_sense remains above vpor for two consecutive rising clock edges.", "required_signals": ["time", "vdd_sense", "clk", "rst", "trim_req", "temp_proxy", "vref", "trim_3", "trim_2", "trim_1", "trim_0", "ready", "error_metric"]},
+    {"id": "P_CORE_REFERENCE", "observable_contract": "Generate a behavioral PTAT/CTAT reference metric from temp_proxy around vref_nom.", "required_signals": ["time", "vdd_sense", "clk", "rst", "trim_req", "temp_proxy", "vref", "trim_3", "trim_2", "trim_1", "trim_0", "ready", "error_metric"]},
+    {"id": "P_TRIM_SEARCH", "observable_contract": "When trim_req is high, update the 4-bit trim code once per rising clock edge to reduce reference error.", "required_signals": ["time", "vdd_sense", "clk", "rst", "trim_req", "temp_proxy", "vref", "trim_3", "trim_2", "trim_1", "trim_0", "ready", "error_metric"]},
+    {"id": "P_READY_QUALIFICATION", "observable_contract": "Assert ready only after three consecutive enabled updates with error magnitude within ready_tol.", "required_signals": ["time", "vdd_sense", "clk", "rst", "trim_req", "temp_proxy", "vref", "trim_3", "trim_2", "trim_1", "trim_0", "ready", "error_metric"]}
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {"bugfix": "v4-1371", "dut": "v4-371", "testbench": "v4-871"},
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {"net": "vdd_sense", "port_ref": "vdd_sense", "position": 0},
+          {"net": "clk", "port_ref": "clk", "position": 1},
+          {"net": "rst", "port_ref": "rst", "position": 2},
+          {"net": "trim_req", "port_ref": "trim_req", "position": 3},
+          {"net": "temp_proxy", "port_ref": "temp_proxy", "position": 4},
+          {"net": "vref", "port_ref": "vref", "position": 5},
+          {"net": "trim_3", "port_ref": "trim_3", "position": 6},
+          {"net": "trim_2", "port_ref": "trim_2", "position": 7},
+          {"net": "trim_1", "port_ref": "trim_1", "position": 8},
+          {"net": "trim_0", "port_ref": "trim_0", "position": 9},
+          {"net": "ready", "port_ref": "ready", "position": 10},
+          {"net": "error_metric", "port_ref": "error_metric", "position": 11}
+        ],
+        "module_ref": "bandgap_trim_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {"required_signals": ["time", "vdd_sense", "clk", "rst", "trim_req", "temp_proxy", "vref", "trim_3", "trim_2", "trim_1", "trim_0", "ready", "error_metric"]}
+}

@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/pwm_ramp_modulator.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=6n width=3n delay=1n rise=60p fall=60p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 112n 0]
+Ven (enable 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.9 90n 0.9 90.1n 0 96n 0 96.1n 0.9 112n 0.9]
+Vctrl (vctrl 0) vsource type=pwl wave=[0 0.2 18n 0.2 22n 0.55 42n 0.55 46n 0.82 72n 0.82 76n 0.35 112n 0.35]
+
+XDUT (clk rst enable vctrl ramp_out pwm_out cycle_start duty_metric) pwm_ramp_modulator
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=112n maxstep=120p
+save clk rst enable vctrl ramp_out pwm_out cycle_start duty_metric

@@ -1,0 +1,100 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "phase_generator.va",
+      "pump_stage_model.va",
+      "regulation_comparator.va",
+      "voltage_multiplier_top.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=380n maxstep=200p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "rst",
+      "enable",
+      "target",
+      "vout",
+      "phase_a",
+      "phase_b",
+      "pump_en",
+      "regulation_error",
+      "ready"
+    ]
+  },
+  "family_id": "373",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "profile_defaults": {
+    "feedback": {
+      "corners": [],
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=300n maxstep=200p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=4n rise=100p fall=100p delay=2n",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 4n 0.9 4.2n 0 245n 0 245.2n 0.9 255n 0.9 255.2n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 175n 0.9 175.2n 0 195n 0 195.2n 0.9 300n 0.9]",
+          "Vtarget (target 0) vsource type=pwl wave=[0 0.8 150n 0.8 150.2n 0.55 220n 0.55 220.2n 0.9 300n 0.9]",
+          "XDUT (clk rst enable target vout phase_a phase_b pump_en regulation_error ready) voltage_multiplier_top"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "300n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "corners": [],
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=380n maxstep=100p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=8n width=3n rise=100p fall=100p delay=1n",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 310n 0 310.2n 0.9 320n 0.9 320.2n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 4n 0 4.2n 0.9 225n 0.9 225.2n 0 245n 0 245.2n 0.9 380n 0.9]",
+          "Vtarget (target 0) vsource type=pwl wave=[0 1.05 175n 1.05 175.2n 0.62 275n 0.62 275.2n 0.16 380n 0.16]",
+          "XDUT (clk rst enable target vout phase_a phase_b pump_en regulation_error ready) voltage_multiplier_top pump_step=0.04 leak_step=0.005 ready_tol=0.025"
+        ]
+      },
+      "deterministic_seed": 17,
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "380n"
+      },
+      "simulatorOptions": {}
+    }
+  },
+  "property_ids": [
+    "P_RESET_DISABLE_CLEAR",
+    "P_NONOVERLAP_PHASES",
+    "P_PUMP_REGULATION",
+    "P_ERROR_REPORTING",
+    "P_READY_QUALIFICATION"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "10f505cc363400730f7a320451da94d344cc9322e054686a56188b110938b574",
+    "family_spec_sha256": "f668fbec994e6e9183974674d8ac1b2e3d639d901f82a6ba59c58404b50f61b3"
+  },
+  "task_id": "v4-373"
+}

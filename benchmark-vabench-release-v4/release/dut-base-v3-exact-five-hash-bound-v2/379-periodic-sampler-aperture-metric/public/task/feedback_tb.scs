@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/periodic_sampler_aperture_metric.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=7n width=3.5n delay=1n rise=60p fall=60p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 78n 0]
+Ven (sample_en 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.9 30n 0.9 30.1n 0 42n 0 42.1n 0.9 78n 0.9]
+Vvin (vin 0) vsource type=pwl wave=[0 0.10 8n 0.15 15n 0.70 24n 0.38 35n 0.82 49n 0.25 62n 0.60 78n 0.42]
+
+XDUT (vin clk rst sample_en vhold aperture_metric valid) periodic_sampler_aperture_metric
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=78n maxstep=100p
+save vin clk rst sample_en vhold aperture_metric valid

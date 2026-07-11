@@ -1,0 +1,32 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module regulation_comparator(vout, target, rst, enable, pump_en, regulation_error);
+    input vout, target, rst, enable;
+    output pump_en, regulation_error;
+    electrical vout, target, rst, enable, pump_en, regulation_error;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real ready_tol = 25e-3;
+    parameter real tr = 200p from (0:inf);
+
+    real error_value;
+    integer pump_state;
+
+    analog begin
+        @(initial_step) pump_state = 0;
+
+        error_value = V(target) - V(vout);
+        if ((V(rst) > vth) || (V(enable) <= vth))
+            pump_state = 0;
+        else if (V(vout) < (V(target) - ready_tol))
+            pump_state = 1;
+        else if (V(vout) > (V(target) + ready_tol))
+            pump_state = 0;
+
+        V(pump_en) <+ transition(pump_state ? vdd : vss, 0, tr, tr);
+        V(regulation_error) <+ error_value;
+    end
+endmodule

@@ -1,0 +1,82 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "crystal_oscillator_startup_monitor.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=92n maxstep=200p"
+    ],
+    "body_lines": [
+      "Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 80n 0.9 80.2n 0 92n 0]",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]",
+      "Vclk_ref (clk_ref 0) vsource type=pwl wave=[0 0 9n 0 10n 0.9 11n 0.9 11.2n 0 18n 0.9 19n 0.9 19.2n 0 26n 0.9 27n 0.9 27.2n 0 34n 0.9 35n 0.9 35.2n 0 42n 0.9 43n 0.9 43.2n 0 50n 0.9 51n 0.9 51.2n 0 58n 0.9 59n 0.9 59.2n 0 66n 0.9 67n 0.9 67.2n 0 74n 0.9 75n 0.9 75.2n 0 82n 0.9 83n 0.9 83.2n 0 92n 0]",
+      "XDUT (enable rst clk_ref osc_out amp_metric valid startup_done) crystal_oscillator_startup_monitor",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "enable",
+      "rst",
+      "clk_ref",
+      "osc_out",
+      "amp_metric",
+      "valid",
+      "startup_done"
+    ]
+  },
+  "family_id": "374",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "85dae85708947112976353e6efae63387f62c9a4ff6a847b82b1d3437eb3ba0c",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "85dae85708947112976353e6efae63387f62c9a4ff6a847b82b1d3437eb3ba0c",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ON_RESET_OR_WHEN_ENABLE_IS",
+    "P_INCREASE_A_BEHAVIORAL_AMPLITUDE_STATE_BY",
+    "P_CLAMP_THE_AMPLITUDE_AT_AMP_TARGET",
+    "P_TOGGLE_OSC_OUT_FROM_CLK_REF",
+    "P_ASSERT_STARTUP_DONE_WHEN_AMP_METRIC",
+    "P_ASSERT_VALID_AFTER_TWO_CONSECUTIVE_SLICED"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "58a746250c8fe208cd2347fd71899d3ae0e4aa9a9a71d7e45ca0cd454cb77983",
+    "family_spec_sha256": "cef84789ae7759a1b5d6cba78b14cecff1a02bf6b2d7018ea9ab32fe18915222"
+  },
+  "task_id": "v4-374"
+}

@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/phase_generator.va"
+ahdl_include "./dut/pump_stage_model.va"
+ahdl_include "./dut/regulation_comparator.va"
+ahdl_include "./dut/voltage_multiplier_top.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=4n rise=100p fall=100p delay=2n
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 4n 0.9 4.2n 0 245n 0 245.2n 0.9 255n 0.9 255.2n 0]
+Ven (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 175n 0.9 175.2n 0 195n 0 195.2n 0.9 300n 0.9]
+Vtarget (target 0) vsource type=pwl wave=[0 0.8 150n 0.8 150.2n 0.55 220n 0.55 220.2n 0.9 300n 0.9]
+XDUT (clk rst enable target vout phase_a phase_b pump_en regulation_error ready) voltage_multiplier_top
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=300n maxstep=200p
+save clk rst enable target vout phase_a phase_b pump_en regulation_error ready

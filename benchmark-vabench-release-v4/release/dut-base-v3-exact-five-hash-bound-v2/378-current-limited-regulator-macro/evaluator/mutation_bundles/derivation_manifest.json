@@ -1,0 +1,65 @@
+{
+  "schema_version": "v4-negative-derivation-diagnostics-v1",
+  "family_id": "378",
+  "mutation_catalog_sha256": "4c805bdc0105913a4675cda285a2b72b8e349c6682f12b7c470d83b46911db9a",
+  "mutation_partition": {
+    "bugfix_seed": [
+      "neg_001_reset_ignored"
+    ],
+    "testbench_private_score": [
+      "neg_003_half_overload",
+      "neg_004_regulation_always_ok",
+      "neg_005_wrong_reference"
+    ],
+    "testbench_public_feedback": [
+      "neg_002_wrong_dropout_sign"
+    ]
+  },
+  "mutation_diagnostics": [
+    {
+      "id": "neg_001_reset_ignored",
+      "fault_class": "missing_reset",
+      "trigger_pattern": "reset is asserted while enable is high",
+      "diagnostic_pattern": "P_RESET_DISABLE_CLEAR mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=missing_reset",
+      "violated_property_ids": [
+        "P_RESET_DISABLE_CLEAR"
+      ]
+    },
+    {
+      "id": "neg_002_wrong_dropout_sign",
+      "fault_class": "wrong_polarity",
+      "trigger_pattern": "vin is below vref plus dropout",
+      "diagnostic_pattern": "P_DROPOUT_CLAMP mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=wrong_polarity",
+      "violated_property_ids": [
+        "P_DROPOUT_CLAMP"
+      ]
+    },
+    {
+      "id": "neg_003_half_overload",
+      "fault_class": "wrong_gain",
+      "trigger_pattern": "load_demand exceeds demand_limit",
+      "diagnostic_pattern": "P_CURRENT_LIMITING mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=wrong_gain",
+      "violated_property_ids": [
+        "P_CURRENT_LIMITING"
+      ]
+    },
+    {
+      "id": "neg_004_regulation_always_ok",
+      "fault_class": "qualification_error",
+      "trigger_pattern": "the regulator is enabled in dropout or overload",
+      "diagnostic_pattern": "P_REGULATION_FLAG mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=qualification_error",
+      "violated_property_ids": [
+        "P_REGULATION_FLAG"
+      ]
+    },
+    {
+      "id": "neg_005_wrong_reference",
+      "fault_class": "wrong_target",
+      "trigger_pattern": "normal enabled operation has adequate headroom",
+      "diagnostic_pattern": "P_NORMAL_REGULATION mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=wrong_target",
+      "violated_property_ids": [
+        "P_NORMAL_REGULATION"
+      ]
+    }
+  ]
+}

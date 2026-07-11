@@ -1,0 +1,41 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=190n maxstep=200p"
+    ],
+    "body_lines": [
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=12n width=5n rise=100p fall=100p delay=2n",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 4n 0.9 4.2n 0 145n 0 145.2n 0.9 155n 0.9 155.2n 0]",
+      "Va (port_a 0) vsource type=pwl wave=[0 0.45 20n 0.45 20.2n 0.72 70n 0.72 70.2n 0.30 120n 0.30 120.2n 0.58 190n 0.58]",
+      "Vb (port_b 0) vsource type=pwl wave=[0 0.45 20n 0.45 20.2n 0.30 70n 0.30 70.2n 0.72 120n 0.72 120.2n 0.42 190n 0.42]",
+      "Vt2 (trim_2 0) vsource type=pwl wave=[0 0 95n 0 95.2n 0.9 190n 0.9]",
+      "Vt1 (trim_1 0) vsource type=pwl wave=[0 0.9 95n 0.9 95.2n 0 190n 0]",
+      "Vt0 (trim_0 0) vsource type=pwl wave=[0 0.9 190n 0.9]",
+      "XDUT (port_a port_b clk rst trim_2 trim_1 trim_0 sum_out diff_out forward_metric reverse_metric balance_ok) bidirectional_hybrid_macro"
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "80c9d292bde6f155985bbb6cfce547682d560af71200e6844d51192ceed93f1a",
+  "parameters": {
+    "maxstep": "200p",
+    "stop_time": "190n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_RESET_CLEAR",
+    "P_SUM_DIFF_MAPPING",
+    "P_TRIM_RESPONSE",
+    "P_DIRECTIONAL_METRICS",
+    "P_BALANCE_QUALIFICATION"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

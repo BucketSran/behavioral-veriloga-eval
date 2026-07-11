@@ -1,0 +1,42 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pump_stage_model(clk, rst, enable, phase_a, phase_b, pump_en, vout);
+    input clk, rst, enable, phase_a, phase_b, pump_en;
+    output vout;
+    electrical clk, rst, enable, phase_a, phase_b, pump_en, vout;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real pump_step = 40e-3;
+    parameter real leak_step = 5e-3;
+    parameter real vout_max = 1.8;
+    parameter real tr = 200p from (0:inf);
+
+    real vout_state;
+
+    analog begin
+        @(initial_step)
+            vout_state = vss;
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) < -1.0)
+                vout_state = vss;
+            else if (V(enable) > vth) begin
+                if ((V(pump_en) > vth) && ((V(phase_a) > vth) || (V(phase_b) > vth)))
+                    vout_state = vout_state + pump_step;
+                else
+                    vout_state = vout_state - leak_step;
+            end else
+                vout_state = vout_state - leak_step;
+
+            if (vout_state < vss)
+                vout_state = vss;
+            if (vout_state > vout_max)
+                vout_state = vout_max;
+        end
+
+        V(vout) <+ transition(vout_state, 0, tr, tr);
+    end
+endmodule

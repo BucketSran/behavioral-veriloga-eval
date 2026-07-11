@@ -1,0 +1,83 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "am_modulator_source_macro.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=92n maxstep=200p"
+    ],
+    "body_lines": [
+      "Vcarrier_in (carrier_in 0) vsource type=pwl wave=[0 0.52 20n 0.52 20.2n 0.36 45n 0.36 45.2n 0.60 70n 0.60 92n 0.60]",
+      "Vmod_in (mod_in 0) vsource type=pwl wave=[0 0.45 22n 0.45 22.2n 0.70 50n 0.70 50.2n 0.25 75n 0.25 92n 0.25]",
+      "Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 82n 0.9 82.2n 0 92n 0]",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]",
+      "XDUT (carrier_in mod_in enable rst vout envelope_dbg valid) am_modulator_source_macro",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "carrier_in",
+      "mod_in",
+      "enable",
+      "rst",
+      "vout",
+      "envelope_dbg",
+      "valid"
+    ]
+  },
+  "family_id": "380",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "bc0a089b2754a4217b66d99aba1d2d7fe103cc72be6301ca42eace65204de6b2",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "bc0a089b2754a4217b66d99aba1d2d7fe103cc72be6301ca42eace65204de6b2",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ON_RESET_OR_WHEN_DISABLED_DRIVE",
+    "P_WHEN_ENABLED_TREAT_CARRIER_IN_AND",
+    "P_DRIVE_AN_AMPLITUDE_MODULATED_OUTPUT_WHOSE",
+    "P_CLAMP_THE_ENVELOPE_MULTIPLIER_SO_THE",
+    "P_ENVELOPE_DBG_MUST_EXPOSE_THE_ACTIVE",
+    "P_ASSERT_VALID_WHILE_ENABLED_AFTER_RESET"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "1ab30ce93b729c6db4f9dfee8aaae1b1309ff578cabebdac2be93e273d302a1a",
+    "family_spec_sha256": "d3df8ed55d2b716d17c828be1d262407b16c97360980e37f6fd55e71f9b701b0"
+  },
+  "task_id": "v4-380"
+}

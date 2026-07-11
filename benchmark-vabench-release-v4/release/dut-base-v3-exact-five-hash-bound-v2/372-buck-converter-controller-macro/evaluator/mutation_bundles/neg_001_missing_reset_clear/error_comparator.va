@@ -1,0 +1,19 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module error_comparator(vfb, soft_ref, duty_up);
+    input vfb, soft_ref;
+    output duty_up;
+    electrical vfb, soft_ref, duty_up;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real tr = 200p from (0:inf);
+
+    analog begin
+        if (V(vfb) < V(soft_ref))
+            V(duty_up) <+ vdd;
+        else
+            V(duty_up) <+ vss;
+    end
+endmodule

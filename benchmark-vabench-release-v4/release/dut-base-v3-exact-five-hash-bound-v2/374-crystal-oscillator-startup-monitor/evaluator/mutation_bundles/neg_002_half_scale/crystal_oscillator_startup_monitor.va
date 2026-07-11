@@ -1,0 +1,28 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module crystal_oscillator_startup_monitor(enable, rst, clk_ref, osc_out, amp_metric, valid, startup_done);
+    inout enable, rst, clk_ref, osc_out, amp_metric, valid, startup_done;
+    electrical enable, rst, clk_ref, osc_out, amp_metric, valid, startup_done;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vcm = 0.45; parameter real vth = 0.45; parameter real amp_step = 40e-3; parameter real amp_target = 0.3; parameter real tr = 200p from (0:inf); parameter real tick = 250p from (0:inf);
+    real prev_clk, amp, osc_v, done_v, valid_v; integer period_count;
+    analog function real min2; input a,b; real a,b; begin min2 = (a < b) ? a : b; end endfunction
+    analog begin
+        @(initial_step) begin prev_clk = 0.0; amp = 0.0; osc_v = 0.0; done_v = 0.0; valid_v = 0.0; period_count = 0; end
+        @(timer(0, tick)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin amp = 0.0; osc_v = 0.0; done_v = 0.0; valid_v = 0.0; period_count = 0; end
+            else if (V(clk_ref) > vth && prev_clk <= vth) begin
+                amp = min2(amp_target, amp + amp_step);
+                osc_v = (amp > 0.0) ? ((osc_v > vth) ? vss : vdd) : vss;
+                done_v = ((amp >= amp_target - 1e-6)) ? vdd : vss;
+                if (done_v > vth) period_count = period_count + 1;
+                valid_v = (period_count >= 2 && done_v > vth) ? vdd : vss;
+            end
+            prev_clk = V(clk_ref);
+        end
+        V(osc_out) <+ 0.5*transition(osc_v, 0, tr, tr);
+        V(amp_metric) <+ 0.5*transition(amp, 0, tr, tr);
+        V(valid) <+ 0.5*transition(valid_v, 0, tr, tr);
+        V(startup_done) <+ 0.5*transition(done_v, 0, tr, tr);
+    end
+endmodule

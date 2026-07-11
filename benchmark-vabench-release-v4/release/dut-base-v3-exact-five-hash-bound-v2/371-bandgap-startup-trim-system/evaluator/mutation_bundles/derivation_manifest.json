@@ -1,0 +1,65 @@
+{
+  "schema_version": "v4-negative-derivation-diagnostics-v1",
+  "family_id": "371",
+  "mutation_catalog_sha256": "830206a4e3767b54f69d0d172ee093c2643e292dfaa9b7ea03158e7abe48de1d",
+  "mutation_partition": {
+    "bugfix_seed": [
+      "neg_002_trim_direction_reversed"
+    ],
+    "testbench_private_score": [
+      "neg_003_ready_asserts_too_early",
+      "neg_004_core_reference_wrong",
+      "neg_005_reset_does_not_clear_outputs"
+    ],
+    "testbench_public_feedback": [
+      "neg_001_startup_enables_immediately"
+    ]
+  },
+  "mutation_diagnostics": [
+    {
+      "id": "neg_001_startup_enables_immediately",
+      "fault_class": "startup_delay_bypassed",
+      "trigger_pattern": "first valid rising clock edge after vdd_sense crosses vpor",
+      "diagnostic_pattern": "P_POR_STARTUP mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=startup_delay_bypassed",
+      "violated_property_ids": [
+        "P_POR_STARTUP"
+      ]
+    },
+    {
+      "id": "neg_002_trim_direction_reversed",
+      "fault_class": "trim_direction_reversed",
+      "trigger_pattern": "reference error requires increasing trim code",
+      "diagnostic_pattern": "P_TRIM_SEARCH mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=trim_direction_reversed",
+      "violated_property_ids": [
+        "P_TRIM_SEARCH"
+      ]
+    },
+    {
+      "id": "neg_003_ready_asserts_too_early",
+      "fault_class": "premature_ready",
+      "trigger_pattern": "first in-tolerance enabled update before three stable updates",
+      "diagnostic_pattern": "P_READY_QUALIFICATION mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=premature_ready",
+      "violated_property_ids": [
+        "P_READY_QUALIFICATION"
+      ]
+    },
+    {
+      "id": "neg_004_core_reference_wrong",
+      "fault_class": "core_reference_wrong",
+      "trigger_pattern": "temperature proxy sweep should produce the declared PTAT/CTAT reference metric",
+      "diagnostic_pattern": "P_CORE_REFERENCE mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=core_reference_wrong",
+      "violated_property_ids": [
+        "P_CORE_REFERENCE"
+      ]
+    },
+    {
+      "id": "neg_005_reset_does_not_clear_outputs",
+      "fault_class": "reset_state_not_cleared",
+      "trigger_pattern": "reset or POR occurs after nonzero trim and ready state",
+      "diagnostic_pattern": "P_RESET_BROWNOUT_CLEAR mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=reset_state_not_cleared",
+      "violated_property_ids": [
+        "P_RESET_BROWNOUT_CLEAR"
+      ]
+    }
+  ]
+}

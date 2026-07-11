@@ -1,0 +1,65 @@
+{
+  "schema_version": "v4-negative-derivation-diagnostics-v1",
+  "family_id": "377",
+  "mutation_catalog_sha256": "2a8aec564b5805f34036172a3c7e5aa4f8e0a3ad010e535328dd23063316d5db",
+  "mutation_partition": {
+    "bugfix_seed": [
+      "neg_001_sum_uses_difference"
+    ],
+    "testbench_private_score": [
+      "neg_003_trim_ignored",
+      "neg_004_swapped_directional_metrics",
+      "neg_005_balance_asserts_early"
+    ],
+    "testbench_public_feedback": [
+      "neg_002_reset_not_cleared"
+    ]
+  },
+  "mutation_diagnostics": [
+    {
+      "id": "neg_001_sum_uses_difference",
+      "fault_class": "wrong_polarity",
+      "trigger_pattern": "port_a and port_b have unequal same-direction deviations",
+      "diagnostic_pattern": "P_SUM_DIFF_MAPPING mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=wrong_polarity",
+      "violated_property_ids": [
+        "P_SUM_DIFF_MAPPING"
+      ]
+    },
+    {
+      "id": "neg_002_reset_not_cleared",
+      "fault_class": "missing_reset",
+      "trigger_pattern": "rst is asserted while the input ports are away from common mode",
+      "diagnostic_pattern": "P_RESET_CLEAR mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=missing_reset",
+      "violated_property_ids": [
+        "P_RESET_CLEAR"
+      ]
+    },
+    {
+      "id": "neg_003_trim_ignored",
+      "fault_class": "missing_calibration",
+      "trigger_pattern": "trim code changes away from mid-code",
+      "diagnostic_pattern": "P_TRIM_RESPONSE mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=missing_calibration",
+      "violated_property_ids": [
+        "P_TRIM_RESPONSE"
+      ]
+    },
+    {
+      "id": "neg_004_swapped_directional_metrics",
+      "fault_class": "output_swap",
+      "trigger_pattern": "forward and reverse directional components differ",
+      "diagnostic_pattern": "P_DIRECTIONAL_METRICS mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=output_swap",
+      "violated_property_ids": [
+        "P_DIRECTIONAL_METRICS"
+      ]
+    },
+    {
+      "id": "neg_005_balance_asserts_early",
+      "fault_class": "qualification_count_error",
+      "trigger_pattern": "the first balanced metric update occurs",
+      "diagnostic_pattern": "P_BALANCE_QUALIFICATION mismatch_count>0 with sample_time, expected, observed, metric_gap, and fault_class=qualification_count_error",
+      "violated_property_ids": [
+        "P_BALANCE_QUALIFICATION"
+      ]
+    }
+  ]
+}

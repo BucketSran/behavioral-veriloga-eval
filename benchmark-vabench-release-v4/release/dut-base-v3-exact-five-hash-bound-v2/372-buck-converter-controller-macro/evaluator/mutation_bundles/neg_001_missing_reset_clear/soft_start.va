@@ -1,0 +1,39 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module soft_start(clk, rst, enable, vref, soft_ref);
+    input clk, rst, enable, vref;
+    output soft_ref;
+    electrical clk, rst, enable, vref, soft_ref;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real soft_step = 25e-3;
+    parameter real tr = 200p from (0:inf);
+
+    real soft_state;
+    real soft_drive;
+
+    analog begin
+        @(initial_step)
+            soft_state = vss;
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(enable) <= vth)
+                soft_state = vss;
+            else if (soft_state < V(vref)) begin
+                soft_state = soft_state + soft_step;
+                if (soft_state > V(vref))
+                    soft_state = V(vref);
+            end else if (soft_state > V(vref)) begin
+                soft_state = soft_state - soft_step;
+                if (soft_state < V(vref))
+                    soft_state = V(vref);
+            end
+        end
+
+        soft_drive = (V(rst) > vth) ? vdd : soft_state;
+        V(soft_ref) <+ transition(soft_drive, 0, tr, tr);
+    end
+endmodule

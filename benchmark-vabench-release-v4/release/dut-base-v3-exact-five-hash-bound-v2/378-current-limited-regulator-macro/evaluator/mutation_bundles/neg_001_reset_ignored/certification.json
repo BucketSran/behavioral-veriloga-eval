@@ -1,0 +1,59 @@
+{
+  "component_fingerprints": {
+    "assembly": {
+      "policy_sha256": "91f4e21b94263e796c846aedef282c79d4abeb7ccc415a0e6f1311f8816b33a4",
+      "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+    },
+    "backend": {
+      "ahdl_like_sha256": "91ce239e5f278a6d5dfcde85ca2d820c5133d8f8a3de26dc6477164e703342f3",
+      "evas_sha256": "2d71c227644956df64209b49d0da6ef55bc6934891020eb26d762e8cb8cc6df2",
+      "spectre_sha256": "ac4c1cf785d5eab74058944d52bf40869e83c94e19202ab72c8e8a250c4dc51b"
+    },
+    "oracle": {
+      "checker_binding_sha256": "c3d1d897afc67903361595dc7fd2bacdbd202b29c46cf4f0f82caa3e23f5e7d3",
+      "checker_implementation_sha256": "159b5d0a65e2875c367411a426df85d80866b5949dc15c508f93fa568fedc9a8",
+      "checker_profile_sha256": "988b6684a6cfba0b1c022502b1101116205f21df7a210dc16a1486affca04983",
+      "diagnostic_policy_sha256": "69b217a349cb0e8a3eab574e7e6d1af03f069fea668b15b37868ef3d2e7deea3",
+      "oracle_runner_sha256": "e70bd46cd3abdfd8ed9658cb13f64bc96e27d364d51ed0fdcd05f8139e63af2b",
+      "property_activation_policy_sha256": "14717234ca16c8ffe671057ce61eb848ffdff781e8b8470f6c167b2af2c66893"
+    },
+    "policy_id": "v4-dependency-scoped-evidence-v2",
+    "schema_version": "v4-evidence-components-v2",
+    "state": "carried_forward",
+    "task_inputs": {
+      "candidate_bundle_sha256": "27071f1d824300e232bc07f24d9a63917d0c42e5d24edf129141419d5e82ec41",
+      "deck_sha256": "60dd40da45bf12a7e2008b739ee1033f5833087c8d41b57b402eecfde4eb2b74",
+      "gold_bundle_sha256": "0aaf3a004d9bb489af4468f69c6bbd4cd66a72a7d5023a1e2e7745a144b54cdc",
+      "harness_spec_sha256": "86a6c1cc89d5f4c2d3d76e92bdee9d90946edb558fcbf88b50fe67c4f39aadde",
+      "mutation_bundle_sha256": "27071f1d824300e232bc07f24d9a63917d0c42e5d24edf129141419d5e82ec41",
+      "profile_sha256": "6fb7de74f36797e9bc9ebf6ea0276573b2d8fb758f13df759d4b94033511e6eb",
+      "property_contract_sha256": "55ce86f264b595d4453ecd9087ce7b147cf0c5ef444b7ad70548fd30c5e287bc",
+      "public_support_bundle_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "trace_contract_sha256": "b028d389d3a3df375e394ee2824f3d8d21b5e389a51f27b89ab3f4b945a0a481"
+    }
+  },
+  "diagnostics": {
+    "expected": "trigger=reset is asserted while enable is high; violated_properties=P_RESET_DISABLE_CLEAR",
+    "observed": "EVAS: P_RESET_DISABLE_CLEAR mismatch_count=13 expected=all_outputs_low observed=vout=0.58,metric=0.17,ok=0 sample_time=1.26e-07 metric_gap=0.58; P_NORMAL_REGULATION mismatch_count=0 expected=contract_satisfied observed=contract_satisfied sample_time=none metric_gap=0; P_DROPOUT_CLAMP mismatch_count=0 expected=contract_satisfied observed=contract_satisfied sample_time=none metric_gap=0; P_CURRENT_LIMITING mismatch_count=0 expected=contract_satisfied observed=contract_satisfied sample_time=none metric_gap=0; P_REGULATION_FLAG mismatch_count=0 expected=contract_satisfied observed=contract_satisfied sample_time=none metric_gap=0; Spectre: P_RESET_DISABLE_CLEAR mismatch_count=5 expected=all_outputs_low observed=vout=0.58,metric=0.17,ok=0 sample_time=1.26404463624e-07 metric_gap=0.58; P_NORMAL_REGULATION mismatch_count=0 expected=contract_satisfied observed=contract_satisfied sample_time=none metric_gap=0; P_DROPOUT_CLAMP mismatch_count=0 expected=contract_satisfied observed=contract_satisfied sample_time=none metric_gap=0; P_CURRENT_LIMITING mismatch_count=0 expected=contract_satisfied observed=contract_satisfied sample_time=none metric_gap=0; P_REGULATION_FLAG mismatch_count=0 expected=contract_satisfied observed=contract_satisfied sample_time=none metric_gap=0",
+    "violated_property_ids": [
+      "P_RESET_DISABLE_CLEAR"
+    ]
+  },
+  "evaluators": {
+    "ahdl_like": "pass",
+    "evas": "compile_pass_behavior_fail",
+    "spectre": "compile_pass_behavior_fail"
+  },
+  "family_id": "378",
+  "inputs": {
+    "checker_profile_sha256": "aa5874c063b910b31f48b61bac26ae4b72cf89efa2985a7f4dd56cb89c51a117",
+    "harness_spec_sha256": "86a6c1cc89d5f4c2d3d76e92bdee9d90946edb558fcbf88b50fe67c4f39aadde",
+    "mutation_bundle_sha256": "27071f1d824300e232bc07f24d9a63917d0c42e5d24edf129141419d5e82ec41",
+    "profile_sha256": "6fb7de74f36797e9bc9ebf6ea0276573b2d8fb758f13df759d4b94033511e6eb"
+  },
+  "mutation_id": "neg_001_reset_ignored",
+  "outcome": "killed_behaviorally",
+  "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33",
+  "schema_version": "v4-negative-certification-v2",
+  "toolchain_lock_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+}

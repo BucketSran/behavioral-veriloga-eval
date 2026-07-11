@@ -1,0 +1,42 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bandgap_trim_top(vdd_sense, clk, rst, trim_req, temp_proxy, vref, trim_3, trim_2, trim_1, trim_0, ready, error_metric);
+    input vdd_sense, clk, rst, trim_req, temp_proxy;
+    output vref, trim_3, trim_2, trim_1, trim_0, ready, error_metric;
+    electrical vdd_sense, clk, rst, trim_req, temp_proxy, vref, trim_3, trim_2, trim_1, trim_0, ready, error_metric;
+
+    parameter real vhi = 0.9;
+    parameter real vlo = 0.0;
+    parameter real vpor = 0.72;
+    parameter real vref_nom = 0.6;
+    parameter real trim_lsb = 2e-3;
+    parameter real ready_tol = 5e-3;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    electrical startup_en, core_ref, trim_corr;
+    real ref_value;
+
+    startup_detector #(.vhi(vhi), .vlo(vlo), .vpor(vpor), .vth(vth), .tr(tr)) u_start (
+        vdd_sense, clk, rst, startup_en
+    );
+    ptat_ctat_core #(.vhi(vhi), .vlo(vlo), .vref_nom(vref_nom), .vth(vth), .tr(tr)) u_core (
+        temp_proxy, startup_en, core_ref
+    );
+    trim_controller #(.vhi(vhi), .vlo(vlo), .vref_nom(vref_nom), .trim_lsb(trim_lsb), .ready_tol(ready_tol), .vth(vth), .tr(tr)) u_trim (
+        clk, rst, trim_req, startup_en, core_ref, trim_3, trim_2, trim_1, trim_0, trim_corr, ready, error_metric
+    );
+
+    analog begin
+        ref_value = V(core_ref) + V(trim_corr);
+        if (ref_value < vlo)
+            ref_value = vlo;
+        if (ref_value > vhi)
+            ref_value = vhi;
+        if ((V(rst) > vth) || (V(vdd_sense) < vpor))
+            ref_value = vlo;
+
+        V(vref) <+ ref_value;
+    end
+endmodule

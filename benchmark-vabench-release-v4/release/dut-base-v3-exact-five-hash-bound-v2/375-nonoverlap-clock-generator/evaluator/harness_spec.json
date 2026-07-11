@@ -1,0 +1,99 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "nonoverlap_clock_generator.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=82n maxstep=100p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk_in",
+      "rst",
+      "enable",
+      "phi1",
+      "phi2",
+      "deadtime_metric",
+      "valid"
+    ]
+  },
+  "family_id": "375",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "2c4d9abfe9631128ec1e577d6d0b0392a1a6b3fb0727ba49aa14a793043f6b12",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "348a8eec12f2a7358aae06b25c2393eb3da8efb628e240d41934414b358aa777",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (clk_in 0) vsource type=pulse val0=0 val1=0.9 period=10n width=5n delay=2n rise=80p fall=80p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2.5n 0.9 2.6n 0 82n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 8n 0 8.2n 0.9 62n 0.9 62.2n 0 70n 0 70.2n 0.9 82n 0.9]",
+          "",
+          "XDUT (clk_in rst enable phi1 phi2 deadtime_metric valid) nonoverlap_clock_generator",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=76n maxstep=100p"
+        ],
+        "body_lines": [
+          "Vclk (clk_in 0) vsource type=pulse val0=0 val1=0.9 period=8n width=4n delay=1.5n rise=60p fall=60p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.8n 0.9 1.9n 0 76n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 6n 0 6.1n 0.9 44n 0.9 44.1n 0 53n 0 53.1n 0.9 76n 0.9]",
+          "",
+          "XDUT (clk_in rst enable phi1 phi2 deadtime_metric valid) nonoverlap_clock_generator",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RESET_OR_A_LOW_ENABLE_CLEARS",
+    "P_A_RISING_CLK_IN_REQUEST_EVENTUALLY",
+    "P_DURING_EACH_HANDOFF_BOTH_PHI1_AND",
+    "P_PHI1_AND_PHI2_MUST_NEVER_BE",
+    "P_DEADTIME_METRIC_IS_HIGH_ONLY_WHILE",
+    "P_VALID_BECOMES_HIGH_AFTER_THE_FIRST"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "24704523a90c10afc599d5f0982bfe405d87eb44208b665c4f6f50f85d7a41ad",
+    "family_spec_sha256": "81e0b531a07b110d1db9fe0d729baf22401efa8208262c78896a5a203c730131"
+  },
+  "task_id": "v4-375"
+}

@@ -1,0 +1,37 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=320n maxstep=100p"
+    ],
+    "body_lines": [
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=8n width=3n rise=100p fall=100p delay=1n",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 250n 0 250.2n 0.9 262n 0.9 262.2n 0]",
+      "Ven (enable 0) vsource type=pwl wave=[0 0 4n 0 4.2n 0.9 205n 0.9 205.2n 0 222n 0 222.2n 0.9 320n 0.9]",
+      "Vrefsrc (vref 0) vsource dc=0.62",
+      "Vfb (vfb 0) vsource type=pwl wave=[0 0.18 72n 0.18 72.2n 0.62 128n 0.62 128.2n 0.76 176n 0.76 176.2n 0.57 240n 0.57 240.2n 0.62 320n 0.62]",
+      "XDUT (vfb vref clk rst enable pwm duty_metric soft_ref pgood) buck_ctrl_top soft_step=0.025 pgood_tol=0.025"
+    ]
+  },
+  "deterministic_seed": 17,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "cc477c8d177fee17f1d71a8ecf790ab0ac072eb43b86ecd06fe81e7b0f634c3f",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "320n"
+  },
+  "profile_name": "score",
+  "property_ids": [
+    "P_RESET_DISABLE_CLEAR",
+    "P_SOFT_START_TRACKING",
+    "P_DUTY_DIRECTION_BOUNDS",
+    "P_PWM_ENCODING",
+    "P_POWER_GOOD_QUALIFICATION"
+  ],
+  "public_visible": false,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {}
+}

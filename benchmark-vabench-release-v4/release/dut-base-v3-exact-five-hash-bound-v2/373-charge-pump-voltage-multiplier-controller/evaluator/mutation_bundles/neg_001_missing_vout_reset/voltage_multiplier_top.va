@@ -1,0 +1,55 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module voltage_multiplier_top(clk, rst, enable, target, vout, phase_a, phase_b, pump_en, regulation_error, ready);
+    input clk, rst, enable, target;
+    output vout, phase_a, phase_b, pump_en, regulation_error, ready;
+    electrical clk, rst, enable, target, vout, phase_a, phase_b, pump_en, regulation_error, ready;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real pump_step = 40e-3;
+    parameter real leak_step = 5e-3;
+    parameter real ready_tol = 25e-3;
+    parameter real vout_max = 1.8;
+    parameter real tr = 200p from (0:inf);
+
+    electrical phase_tick;
+    integer ready_count;
+    real ready_value;
+
+    phase_generator #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr)) u_phase (
+        clk, rst, enable, phase_a, phase_b, phase_tick
+    );
+    regulation_comparator #(.vdd(vdd), .vss(vss), .vth(vth), .ready_tol(ready_tol), .tr(tr)) u_reg (
+        vout, target, rst, enable, pump_en, regulation_error
+    );
+    pump_stage_model #(.vdd(vdd), .vss(vss), .vth(vth), .pump_step(pump_step), .leak_step(leak_step), .vout_max(vout_max), .tr(tr)) u_pump (
+        clk, rst, enable, phase_a, phase_b, pump_en, vout
+    );
+
+    analog begin
+        @(initial_step) begin
+            ready_count = 0;
+            ready_value = vss;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if ((V(rst) > vth) || (V(enable) <= vth)) begin
+                ready_count = 0;
+                ready_value = vss;
+            end else if ((V(regulation_error) <= ready_tol) && (V(regulation_error) >= -ready_tol)) begin
+                if (ready_count < 3)
+                    ready_count = ready_count + 1;
+                if (ready_count >= 3)
+                    ready_value = vdd;
+            end else begin
+                ready_count = 0;
+                ready_value = vss;
+            end
+        end
+
+        V(ready) <+ transition(ready_value, 0, tr, tr);
+    end
+endmodule

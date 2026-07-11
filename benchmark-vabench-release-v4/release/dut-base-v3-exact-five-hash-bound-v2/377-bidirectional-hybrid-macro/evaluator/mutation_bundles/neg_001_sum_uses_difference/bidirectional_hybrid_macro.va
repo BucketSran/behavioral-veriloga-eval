@@ -1,0 +1,120 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bidirectional_hybrid_macro(port_a, port_b, clk, rst, trim_2, trim_1, trim_0, sum_out, diff_out, forward_metric, reverse_metric, balance_ok);
+    input port_a, port_b, clk, rst, trim_2, trim_1, trim_0;
+    output sum_out, diff_out, forward_metric, reverse_metric, balance_ok;
+    electrical port_a, port_b, clk, rst, trim_2, trim_1, trim_0;
+    electrical sum_out, diff_out, forward_metric, reverse_metric, balance_ok;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real trim_lsb = 10e-3;
+    parameter real balance_tol = 20e-3;
+    parameter real tr = 200p from (0:inf);
+
+    integer balance_count;
+    integer trim_code;
+    real a_dev;
+    real b_dev;
+    real trim_corr;
+    real sum_value;
+    real diff_value;
+    real forward_value;
+    real reverse_value;
+    real ok_value;
+    real mismatch;
+    real sum_drive;
+    real diff_drive;
+    real forward_drive;
+    real reverse_drive;
+    real ok_drive;
+
+    analog function real rabs;
+        input x;
+        real x;
+        begin
+            rabs = (x < 0.0) ? -x : x;
+        end
+    endfunction
+
+    analog function real clip;
+        input x;
+        real x;
+        begin
+            if (x < vss)
+                clip = vss;
+            else if (x > vdd)
+                clip = vdd;
+            else
+                clip = x;
+        end
+    endfunction
+
+    analog begin
+        @(initial_step) begin
+            balance_count = 0;
+            forward_value = vss;
+            reverse_value = vss;
+            ok_value = vss;
+        end
+
+        trim_code = ((V(trim_2) > vth) ? 4 : 0)
+                  + ((V(trim_1) > vth) ? 2 : 0)
+                  + ((V(trim_0) > vth) ? 1 : 0);
+        trim_corr = (trim_code - 3.0) * trim_lsb;
+        a_dev = V(port_a) - vcm;
+        b_dev = V(port_b) - vcm;
+        sum_value = clip(vcm + 0.5 * (a_dev - b_dev) - trim_corr);
+        diff_value = clip(vcm + 0.5 * (a_dev - b_dev) + trim_corr);
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth) begin
+                forward_value = vss;
+                reverse_value = vss;
+                balance_count = 0;
+                ok_value = vss;
+            end else begin
+                forward_value = vcm + 0.5 * ((sum_value - vcm) + (diff_value - vcm));
+                reverse_value = vcm + 0.5 * ((sum_value - vcm) - (diff_value - vcm));
+                forward_value = clip(forward_value);
+                reverse_value = clip(reverse_value);
+                mismatch = rabs((forward_value - vcm) - (reverse_value - vcm));
+                if (mismatch <= balance_tol)
+                    balance_count = balance_count + 1;
+                else
+                    balance_count = 0;
+                ok_value = (balance_count >= 2) ? vdd : vss;
+            end
+        end
+
+        @(cross(V(rst) - vth, +1)) begin
+            forward_value = vss;
+            reverse_value = vss;
+            balance_count = 0;
+            ok_value = vss;
+        end
+
+        if (V(rst) > vth) begin
+            sum_drive = vcm;
+            diff_drive = vcm;
+            forward_drive = vss;
+            reverse_drive = vss;
+            ok_drive = vss;
+        end else begin
+            sum_drive = sum_value;
+            diff_drive = diff_value;
+            forward_drive = forward_value;
+            reverse_drive = reverse_value;
+            ok_drive = ok_value;
+        end
+
+        V(sum_out) <+ sum_drive;
+        V(diff_out) <+ diff_drive;
+        V(forward_metric) <+ forward_drive;
+        V(reverse_metric) <+ reverse_drive;
+        V(balance_ok) <+ ok_drive;
+    end
+endmodule

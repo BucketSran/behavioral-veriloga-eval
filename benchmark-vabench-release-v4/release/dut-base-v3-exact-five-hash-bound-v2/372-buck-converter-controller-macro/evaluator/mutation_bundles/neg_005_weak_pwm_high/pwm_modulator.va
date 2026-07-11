@@ -1,0 +1,49 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pwm_modulator(clk, rst, enable, duty_up, pwm, duty_metric);
+    input clk, rst, enable, duty_up;
+    output pwm, duty_metric;
+    electrical clk, rst, enable, duty_up, pwm, duty_metric;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real duty_min = 0.05;
+    parameter real duty_max = 0.95;
+    parameter real tr = 200p from (0:inf);
+
+    real duty_state;
+    real pwm_state;
+    integer carrier_count;
+
+    analog begin
+        @(initial_step) begin
+            duty_state = 0.0;
+            pwm_state = vss;
+            carrier_count = 0;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if ((V(rst) > vth) || (V(enable) <= vth)) begin
+                duty_state = 0.0;
+                pwm_state = vss;
+                carrier_count = 0;
+            end else begin
+                if (V(duty_up) > vth)
+                    duty_state = duty_state + 0.05;
+                else
+                    duty_state = duty_state - 0.05;
+                if (duty_state < duty_min)
+                    duty_state = duty_min;
+                if (duty_state > duty_max)
+                    duty_state = duty_max;
+                carrier_count = (carrier_count + 1) % 20;
+                pwm_state = 0.30;
+            end
+        end
+
+        V(duty_metric) <+ transition(duty_state, 0, tr, tr);
+        V(pwm) <+ transition(pwm_state, 0, tr, tr);
+    end
+endmodule

@@ -1,0 +1,29 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module ptat_ctat_core(temp_proxy, startup_en, core_ref);
+    input temp_proxy, startup_en;
+    output core_ref;
+    electrical temp_proxy, startup_en, core_ref;
+
+    parameter real vhi = 0.9;
+    parameter real vlo = 0.0;
+    parameter real vref_nom = 0.6;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    real ref_value;
+
+    analog begin
+        ref_value = vref_nom + 24e-3 - 40e-3 * (V(temp_proxy) - vref_nom);
+        if (ref_value < vlo)
+            ref_value = vlo;
+        if (ref_value > vhi)
+            ref_value = vhi;
+
+        if (V(startup_en) > vth)
+            V(core_ref) <+ ref_value;
+        else
+            V(core_ref) <+ vlo;
+    end
+endmodule

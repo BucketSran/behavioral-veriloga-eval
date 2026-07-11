@@ -1,0 +1,51 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module current_limited_regulator_macro(vin, load_demand, enable, rst, vout, limit_metric, regulation_ok);
+    input vin, load_demand, enable, rst;
+    output vout, limit_metric, regulation_ok;
+    electrical vin, load_demand, enable, rst, vout, limit_metric, regulation_ok;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vref = 0.75;
+    parameter real dropout = 0.08;
+    parameter real demand_limit = 0.65;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    real target;
+    real overload;
+    real headroom_target;
+    real ok_value;
+
+    analog begin
+        overload = V(load_demand) - demand_limit;
+        if (overload < 0.0)
+            overload = 0.0;
+
+        headroom_target = V(vin) - dropout;
+        target = vref - overload;
+        if (target > headroom_target)
+            target = headroom_target;
+        if (target < vss)
+            target = vss;
+        if (target > vdd)
+            target = vdd;
+
+        ok_value = vdd;
+
+        if ((V(rst) > vth) || (V(enable) <= vth)) begin
+            target = vss;
+            overload = 0.0;
+            ok_value = vss;
+        end
+
+        V(vout) <+ target;
+        V(limit_metric) <+ overload;
+        if (ok_value > 0.5 * (vdd + vss))
+            V(regulation_ok) <+ vdd;
+        else
+            V(regulation_ok) <+ vss;
+    end
+endmodule

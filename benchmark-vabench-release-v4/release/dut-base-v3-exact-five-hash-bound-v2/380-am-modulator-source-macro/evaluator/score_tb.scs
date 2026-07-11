@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/am_modulator_source_macro.va"
+
+Vcarrier_in (carrier_in 0) vsource type=pwl wave=[0 0.52 20n 0.52 20.2n 0.36 45n 0.36 45.2n 0.60 70n 0.60 92n 0.60]
+Vmod_in (mod_in 0) vsource type=pwl wave=[0 0.45 22n 0.45 22.2n 0.70 50n 0.70 50.2n 0.25 75n 0.25 92n 0.25]
+Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 82n 0.9 82.2n 0 92n 0]
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]
+XDUT (carrier_in mod_in enable rst vout envelope_dbg valid) am_modulator_source_macro
+
+
+tran tran stop=92n maxstep=200p
+save carrier_in mod_in enable rst vout envelope_dbg valid

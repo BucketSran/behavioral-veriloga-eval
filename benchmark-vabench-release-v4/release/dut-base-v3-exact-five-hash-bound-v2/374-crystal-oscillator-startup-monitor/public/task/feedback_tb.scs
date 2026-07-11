@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/crystal_oscillator_startup_monitor.va"
+
+Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 80n 0.9 80.2n 0 92n 0]
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]
+Vclk_ref (clk_ref 0) vsource type=pwl wave=[0 0 9n 0 10n 0.9 11n 0.9 11.2n 0 18n 0.9 19n 0.9 19.2n 0 26n 0.9 27n 0.9 27.2n 0 34n 0.9 35n 0.9 35.2n 0 42n 0.9 43n 0.9 43.2n 0 50n 0.9 51n 0.9 51.2n 0 58n 0.9 59n 0.9 59.2n 0 66n 0.9 67n 0.9 67.2n 0 74n 0.9 75n 0.9 75.2n 0 82n 0.9 83n 0.9 83.2n 0 92n 0]
+XDUT (enable rst clk_ref osc_out amp_metric valid startup_done) crystal_oscillator_startup_monitor
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=92n maxstep=200p
+save enable rst clk_ref osc_out amp_metric valid startup_done

@@ -1,0 +1,101 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "pwm_ramp_modulator.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=112n maxstep=120p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "rst",
+      "enable",
+      "vctrl",
+      "ramp_out",
+      "pwm_out",
+      "cycle_start",
+      "duty_metric"
+    ]
+  },
+  "family_id": "376",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "f30d926a420e90c20da61714cce90996a49102b5cc6502162a4b6ff2d128fe73",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "cfff7a2b476ef5c608f53fab84d7793736b7f160400e62a5870fd84cb4820b49",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=6n width=3n delay=1n rise=60p fall=60p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 112n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.9 90n 0.9 90.1n 0 96n 0 96.1n 0.9 112n 0.9]",
+          "Vctrl (vctrl 0) vsource type=pwl wave=[0 0.2 18n 0.2 22n 0.55 42n 0.55 46n 0.82 72n 0.82 76n 0.35 112n 0.35]",
+          "",
+          "XDUT (clk rst enable vctrl ramp_out pwm_out cycle_start duty_metric) pwm_ramp_modulator",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=104n maxstep=100p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=5n width=2.5n delay=1.2n rise=50p fall=50p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.6n 0.9 1.7n 0 104n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 4.5n 0 4.6n 0.9 76n 0.9 76.1n 0 84n 0 84.1n 0.9 104n 0.9]",
+          "Vctrl (vctrl 0) vsource type=pwl wave=[0 0.68 14n 0.68 20n 0.28 38n 0.28 43n 0.77 62n 0.77 68n 0.48 104n 0.48]",
+          "",
+          "XDUT (clk rst enable vctrl ramp_out pwm_out cycle_start duty_metric) pwm_ramp_modulator",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RESET_OR_A_LOW_ENABLE_CLEARS",
+    "P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+    "P_CYCLE_START_PULSES_HIGH_FOR_THE",
+    "P_PWM_OUT_IS_HIGH_WHEN_VCTRL",
+    "P_DUTY_METRIC_TRACKS_THE_CLIPPED_DUTY"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "88cf7528af4f2135a58b3b309b737a2e23c68dc22be613f5aea761656a8e6029",
+    "family_spec_sha256": "cc1bdce2ad6c21361744a1948d501e3c445ba7dc7da9344f7ceb90ec4e55c2ec"
+  },
+  "task_id": "v4-376"
+}

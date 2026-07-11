@@ -1,0 +1,94 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "current_limited_regulator_macro.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=230n maxstep=200p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "load_demand",
+      "enable",
+      "rst",
+      "vout",
+      "limit_metric",
+      "regulation_ok"
+    ]
+  },
+  "family_id": "378",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "profile_defaults": {
+    "feedback": {
+      "corners": [],
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=180n maxstep=200p"
+        ],
+        "body_lines": [
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 5n 0.9 5.2n 0 125n 0 125.2n 0.9 138n 0.9 138.2n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 6n 0 6.2n 0.9 105n 0.9 105.2n 0 118n 0 118.2n 0.9 180n 0.9]",
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.95 45n 0.95 45.2n 0.70 85n 0.70 85.2n 0.95 180n 0.95]",
+          "Vload (load_demand 0) vsource type=pwl wave=[0 0.30 75n 0.30 75.2n 0.82 145n 0.82 145.2n 0.50 180n 0.50]",
+          "XDUT (vin load_demand enable rst vout limit_metric regulation_ok) current_limited_regulator_macro"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "180n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "corners": [],
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=230n maxstep=100p"
+        ],
+        "body_lines": [
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 4n 0.9 4.2n 0 175n 0 175.2n 0.9 188n 0.9 188.2n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 145n 0.9 145.2n 0 160n 0 160.2n 0.9 230n 0.9]",
+          "Vvin (vin 0) vsource type=pwl wave=[0 1.05 50n 1.05 50.2n 0.76 95n 0.76 95.2n 0.62 135n 0.62 135.2n 1.00 230n 1.00]",
+          "Vload (load_demand 0) vsource type=pwl wave=[0 0.22 80n 0.22 80.2n 0.72 120n 0.72 120.2n 0.91 205n 0.91 205.2n 0.40 230n 0.40]",
+          "XDUT (vin load_demand enable rst vout limit_metric regulation_ok) current_limited_regulator_macro vref=0.75 dropout=0.08 demand_limit=0.65"
+        ]
+      },
+      "deterministic_seed": 17,
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "230n"
+      },
+      "simulatorOptions": {}
+    }
+  },
+  "property_ids": [
+    "P_RESET_DISABLE_CLEAR",
+    "P_NORMAL_REGULATION",
+    "P_DROPOUT_CLAMP",
+    "P_CURRENT_LIMITING",
+    "P_REGULATION_FLAG"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "aa5874c063b910b31f48b61bac26ae4b72cf89efa2985a7f4dd56cb89c51a117",
+    "family_spec_sha256": "d02e5ca23859dda912ba33b1ecf66de89d35118a48c86b592339ac4903cc3120"
+  },
+  "task_id": "v4-378"
+}

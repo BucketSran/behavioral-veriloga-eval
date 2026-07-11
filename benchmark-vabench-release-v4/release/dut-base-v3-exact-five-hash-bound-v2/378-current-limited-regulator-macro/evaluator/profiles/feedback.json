@@ -1,0 +1,38 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=180n maxstep=200p"
+    ],
+    "body_lines": [
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 5n 0.9 5.2n 0 125n 0 125.2n 0.9 138n 0.9 138.2n 0]",
+      "Ven (enable 0) vsource type=pwl wave=[0 0 6n 0 6.2n 0.9 105n 0.9 105.2n 0 118n 0 118.2n 0.9 180n 0.9]",
+      "Vvin (vin 0) vsource type=pwl wave=[0 0.95 45n 0.95 45.2n 0.70 85n 0.70 85.2n 0.95 180n 0.95]",
+      "Vload (load_demand 0) vsource type=pwl wave=[0 0.30 75n 0.30 75.2n 0.82 145n 0.82 145.2n 0.50 180n 0.50]",
+      "XDUT (vin load_demand enable rst vout limit_metric regulation_ok) current_limited_regulator_macro"
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "86a6c1cc89d5f4c2d3d76e92bdee9d90946edb558fcbf88b50fe67c4f39aadde",
+  "parameters": {
+    "maxstep": "200p",
+    "stop_time": "180n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_RESET_DISABLE_CLEAR",
+    "P_NORMAL_REGULATION",
+    "P_DROPOUT_CLAMP",
+    "P_CURRENT_LIMITING",
+    "P_REGULATION_FLAG"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}
