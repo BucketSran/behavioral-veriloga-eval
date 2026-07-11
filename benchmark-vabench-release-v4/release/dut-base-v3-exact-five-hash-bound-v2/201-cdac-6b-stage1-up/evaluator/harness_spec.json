@@ -1,0 +1,88 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "cdac_6b_stage1_up.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=3.4n maxstep=10p"
+    ],
+    "body_lines": [
+      "Vvin (vin 0) vsource dc=0.2",
+      "Vclks (clks 0) vsource type=pulse val0=0 val1=1 delay=0.1n period=10n width=0.7n rise=20p fall=20p",
+      "Vd5 (dctrl5 0) vsource type=pulse val0=0 val1=1 delay=1.2n period=20n width=8n rise=20p fall=20p",
+      "Vd4 (dctrl4 0) vsource type=pulse val0=0 val1=1 delay=1.8n period=20n width=8n rise=20p fall=20p",
+      "Vd3 (dctrl3 0) vsource type=pulse val0=0 val1=1 delay=2.4n period=20n width=8n rise=20p fall=20p",
+      "Vd2 (dctrl2 0) vsource type=pulse val0=0 val1=1 delay=3.0n period=20n width=8n rise=20p fall=20p",
+      "Vd1 (dctrl1 0) vsource dc=0",
+      "Vd0 (dctrl0 0) vsource dc=0",
+      "XDUT (vin clks dctrl0 dctrl1 dctrl2 dctrl3 dctrl4 dctrl5 vres) cdac_6b_stage1_up"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "clks",
+      "dctrl0",
+      "dctrl1",
+      "dctrl2",
+      "dctrl3",
+      "dctrl4",
+      "dctrl5",
+      "vres"
+    ]
+  },
+  "family_id": "201",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "b9fef8fa2298c269a309fd79b7d4d6dbb9579c70575cca4ce113cb9834574157",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "2c2f40d7546ad3dddf151b268828e3f324c1b91247115728b4e4aa0326f0db56",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=3.8n maxstep=10p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_AT_INITIALIZATION_AND_ON_EACH_FALLING"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "26f1c76099515f2749d6de0b38c27abbec32d79c1286f19279029006b06536f1",
+    "family_spec_sha256": "58c37bb55f400a9e020ad0a921bc6206c7eba160c403a28f108f428ae3d5f601"
+  },
+  "task_id": "v4-201"
+}

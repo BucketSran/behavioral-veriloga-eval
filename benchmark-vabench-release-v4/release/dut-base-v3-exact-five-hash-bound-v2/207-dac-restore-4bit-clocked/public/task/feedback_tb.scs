@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/dac_restore_4bit_clocked.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=0.35n period=1n width=0.35n rise=20p fall=20p
+Vd0 (d0 0) vsource type=pwl wave=[0 0 1.0n 0 1.05n 0.9 2.0n 0.9 2.05n 0 3.0n 0 3.05n 0.9 4.0n 0.9]
+Vd1 (d1 0) vsource type=pwl wave=[0 0 2.0n 0 2.05n 0.9 4.0n 0.9]
+Vd2 (d2 0) vsource type=pwl wave=[0 0 1.0n 0 1.05n 0.9 2.0n 0.9 2.05n 0 3.0n 0 3.05n 0.9 4.0n 0.9]
+Vd3 (d3 0) vsource type=pwl wave=[0 0 2.0n 0 2.05n 0.9 4.0n 0.9]
+XDUT (d3 d2 d1 d0 clk vout) dac_restore_4bit_clocked
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=2.8n maxstep=5p
+save clk d3 d2 d1 d0 vout

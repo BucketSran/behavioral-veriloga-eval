@@ -1,0 +1,21 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/cdac_8b_monodown.va"
+
+Vvin (vin 0) vsource dc=0.8
+Vclks (clks 0) vsource type=pulse val0=0 val1=1 delay=0.1n period=10n width=0.7n rise=20p fall=20p
+Vd7 (dctrl7 0) vsource type=pulse val0=0 val1=1 delay=1.2n period=20n width=8n rise=20p fall=20p
+Vd6 (dctrl6 0) vsource type=pulse val0=0 val1=1 delay=1.8n period=20n width=8n rise=20p fall=20p
+Vd5 (dctrl5 0) vsource type=pulse val0=0 val1=1 delay=2.4n period=20n width=8n rise=20p fall=20p
+Vd4 (dctrl4 0) vsource type=pulse val0=0 val1=1 delay=3.0n period=20n width=8n rise=20p fall=20p
+Vd3 (dctrl3 0) vsource type=pulse val0=0 val1=1 delay=3.6n period=20n width=8n rise=20p fall=20p
+Vd2 (dctrl2 0) vsource type=pulse val0=0 val1=1 delay=4.2n period=20n width=8n rise=20p fall=20p
+Vd1 (dctrl1 0) vsource type=pulse val0=0 val1=1 delay=4.8n period=20n width=8n rise=20p fall=20p
+Vd0 (dctrl0 0) vsource type=pulse val0=0 val1=1 delay=5.4n period=20n width=8n rise=20p fall=20p
+XDUT (vin clks dctrl0 dctrl1 dctrl2 dctrl3 dctrl4 dctrl5 dctrl6 dctrl7 vres) cdac_8b_monodown
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=5.9n maxstep=10p
+save vin clks dctrl0 dctrl1 dctrl2 dctrl3 dctrl4 dctrl5 dctrl6 dctrl7 vres

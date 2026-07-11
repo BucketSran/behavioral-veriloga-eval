@@ -1,0 +1,81 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "adc_zoom_timing_sequencer.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=11.5n maxstep=20p"
+    ],
+    "body_lines": [
+      "XDUT (rst s sar res intg clk_sar zoom clk_zoom rst_zoom) adc_zoom_timing_sequencer",
+      "Iground_ref (rst 0) isource dc=0"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "rst",
+      "s",
+      "sar",
+      "res",
+      "intg",
+      "clk_sar",
+      "zoom",
+      "clk_zoom",
+      "rst_zoom"
+    ]
+  },
+  "family_id": "202",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "1443c1c9b140150e45a0bf7943f92e3cd930a2d83daf719b7ef5d1135b5e830b",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "18d174d6b575a1bf1db8cb7b9bc656c0da61fc4ee0ac669a2df61aa557924132",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=13n maxstep=20p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_GENERATE_A_REPEATING_32_NS_COMPACT"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "f3f85a22e4a208302282c15fec20a79e846707c409bf5985ccfd44519bcbb35d",
+    "family_spec_sha256": "3091409e1058e7b28b7ffd90b77e69536ea3faae06e6876f7826bb15ae084b7f"
+  },
+  "task_id": "v4-202"
+}

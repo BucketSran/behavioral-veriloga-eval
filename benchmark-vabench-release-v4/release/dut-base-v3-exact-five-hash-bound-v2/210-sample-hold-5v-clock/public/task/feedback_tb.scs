@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/sample_hold_5v_clock.va"
+
+Vclk (vclk 0) vsource type=pulse val0=0 val1=5 delay=0.35n period=1n width=0.35n rise=20p fall=20p
+Vvin (vin 0) vsource type=pwl wave=[0 0.10 1.0n 0.10 1.05n 0.65 2.0n 0.65 2.05n -0.20 3.0n -0.20 3.05n 0.35 4.0n 0.35]
+XDUT (vin vout vclk) sample_hold_5v_clock
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=3.8n maxstep=5p
+save vin vclk vout

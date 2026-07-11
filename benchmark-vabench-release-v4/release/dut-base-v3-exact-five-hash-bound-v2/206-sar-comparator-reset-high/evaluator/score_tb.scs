@@ -1,0 +1,12 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/sar_comparator_reset_high.va"
+
+Vclk (cmpck 0) vsource type=pulse val0=0 val1=0.9 delay=0.35n period=1n width=0.45n rise=20p fall=20p
+Vinp (vinp 0) vsource type=pwl wave=[0 0.65 1n 0.65 1.05n 0.20 2n 0.20 2.05n 0.70 3.2n 0.70]
+Vinn (vinn 0) vsource dc=0.45
+XDUT (cmpck vinn vinp dcmpn dcmpp) sar_comparator_reset_high
+
+tran tran stop=3.0n maxstep=5p
+save cmpck vinn vinp dcmpn dcmpp

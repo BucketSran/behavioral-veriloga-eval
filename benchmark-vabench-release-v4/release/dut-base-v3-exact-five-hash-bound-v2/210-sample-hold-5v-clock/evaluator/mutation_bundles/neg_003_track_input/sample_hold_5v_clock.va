@@ -1,0 +1,13 @@
+`include "disciplines.vams"
+module sample_hold_5v_clock(vin, vout, vclk);
+input vin, vclk;
+output vout;
+electrical vin, vout, vclk;
+parameter real vtrans_clk = 2.5;
+real held;
+analog begin
+    @(initial_step) held = 0.0;
+    @(cross(V(vclk) - vtrans_clk, +1)) held = V(vin);
+    V(vout) <+ V(vin);
+end
+endmodule

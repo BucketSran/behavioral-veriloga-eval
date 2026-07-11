@@ -1,0 +1,21 @@
+`include "disciplines.vams"
+module sar_comparator_reset_high(cmpck, vinn, vinp, dcmpn, dcmpp);
+input cmpck, vinn, vinp;
+output dcmpn, dcmpp;
+electrical cmpck, vinn, vinp, dcmpn, dcmpp;
+parameter real vdd = 0.9;
+parameter real td_cmp = 20p;
+real xoutp, xoutn;
+analog begin
+    @(cross(V(cmpck) - vdd / 2.0, +1)) begin
+        xoutp = V(vinp) > V(vinn);
+        xoutn = V(vinp) < V(vinn);
+    end
+    @(initial_step or cross(V(cmpck) - vdd / 2.0, -1)) begin
+        xoutp = 1;
+        xoutn = 1;
+    end
+    V(dcmpp) <+ transition(xoutp * vdd * 0.5, td_cmp, 10p, 10p);
+    V(dcmpn) <+ transition(xoutn * vdd * 0.5, td_cmp, 10p, 10p);
+end
+endmodule

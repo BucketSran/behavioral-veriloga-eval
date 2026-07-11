@@ -1,0 +1,82 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "offset_halving_search.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=6.2n maxstep=10p"
+    ],
+    "body_lines": [
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=0.2n period=1n width=0.5n rise=20p fall=20p"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "dcmpp",
+      "vinp",
+      "vinn"
+    ]
+  },
+  "family_id": "205",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "826f7ddb8d2a68184ef3d569d20f78eca44a0b9cd13dbc2c844acc79c8af33b1",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "dd383cf001aa5b895d78403bf32000191baa296f6f8afd475be0a5770bcede7d",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vcmp (dcmpp 0) vsource type=pwl wave=[0 0.9 1.2n 0.9 1.25n 0 2.2n 0 2.25n 0 3.2n 0 3.25n 0.9 4.2n 0.9 4.25n 0 5.2n 0 5.25n 0.9 6.5n 0.9]",
+          "XDUT (clk dcmpp vinp vinn) offset_halving_search"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vcmp (dcmpp 0) vsource type=pwl wave=[0 0 1.2n 0 1.25n 0.9 2.2n 0.9 2.25n 0.9 3.2n 0.9 3.25n 0 4.2n 0 4.25n 0.9 5.2n 0.9 5.25n 0 6.5n 0]",
+          "XDUT (clk dcmpp vinp vinn) offset_halving_search"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INITIALIZE_THE_DIFFERENTIAL_TRIM_RESIDUE_TO"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "fd8e894eee062c55ec3b48a4340d1b976583a163969c0c9c122668b50cf8a6c6",
+    "family_spec_sha256": "1b185feb9e582636429eb662263552a4eb9271b4a410f68c3222cbdfcb691a75"
+  },
+  "task_id": "v4-205"
+}

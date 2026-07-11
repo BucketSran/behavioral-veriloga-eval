@@ -1,0 +1,207 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "dac_restore_6bit_1p8",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d1",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d2",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d3",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d4",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d5",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d6",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "dac_restore_6bit_1p8.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "209",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "DAC Restore 6bit 1p8"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_EACH_RISING_CROSSING_OF_CLK",
+      "observable_contract": "On each rising crossing of `clk` through `vth`, sample `d1..d6` and decode an unsigned 6-bit code with weights `32, 16, 8, 4, 2, 1`. Hold the decoded output until the next rising clock event. Map the sampled code to a bipolar 1.8 V mid-rise level:",
+      "required_signals": [
+        "time",
+        "clk",
+        "d1",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "d6",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_TEXT_VOUT_CODE_0_5_3",
+      "observable_contract": "```text vout = (code + 0.5) * 3.6 / 64 - 1.8 ```",
+      "required_signals": [
+        "time",
+        "clk",
+        "d1",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "d6",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_THE_ALL_ZERO_CODE_THEREFORE_PRODUCES",
+      "observable_contract": "The all-zero code therefore produces the lowest half-LSB-centered negative level, and the all-one code produces the highest half-LSB-centered positive level.",
+      "required_signals": [
+        "time",
+        "clk",
+        "d1",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "d6",
+        "vout"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1209",
+    "dut": "v4-209",
+    "testbench": "v4-709"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "d1",
+            "port_ref": "d1",
+            "position": 0
+          },
+          {
+            "net": "d2",
+            "port_ref": "d2",
+            "position": 1
+          },
+          {
+            "net": "d3",
+            "port_ref": "d3",
+            "position": 2
+          },
+          {
+            "net": "d4",
+            "port_ref": "d4",
+            "position": 3
+          },
+          {
+            "net": "d5",
+            "port_ref": "d5",
+            "position": 4
+          },
+          {
+            "net": "d6",
+            "port_ref": "d6",
+            "position": 5
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 6
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 7
+          }
+        ],
+        "module_ref": "dac_restore_6bit_1p8",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "d1",
+      "d2",
+      "d3",
+      "d4",
+      "d5",
+      "d6",
+      "vout"
+    ]
+  }
+}
