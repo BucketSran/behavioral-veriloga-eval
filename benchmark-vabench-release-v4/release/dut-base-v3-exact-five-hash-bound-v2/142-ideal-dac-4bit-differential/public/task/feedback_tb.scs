@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/ideal_dac_4bit_differential.va"
+
+Vclk (clk 0) vsource type=pwl wave=[0 1 1n 1 1.1n 0 3n 0 3.1n 1 11n 1 11.1n 0 13n 0 13.1n 1 21n 1 21.1n 0 23n 0 23.1n 1 31n 1 31.1n 0 33n 0 33.1n 1 38n 1]
+Vdig (digital 0) vsource type=pwl wave=[0 0 7n 0 7.1n 5 17n 5 17.1n 8 27n 8 27.1n 15 38n 15]
+Vcm (vcm 0) vsource dc=0.5
+
+XDUT (clk digital vcm vop von) ideal_dac_4bit_differential
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=36n maxstep=20p
+save clk digital vcm von vop

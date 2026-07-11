@@ -1,0 +1,18 @@
+`include "disciplines.vams"
+
+module flash_thermometer_centered_sum(b0, b1, b2, b3, b4, b5, b6, b7, dout);
+input b0, b1, b2, b3, b4, b5, b6, b7;
+output dout;
+electrical b0, b1, b2, b3, b4, b5, b6, b7, dout;
+
+parameter real vth = 0.45;
+parameter real gain = 0.1125;
+real ones;
+
+analog begin
+    ones = (V(b0) > vth) + (V(b1) > vth) + (V(b2) > vth) + (V(b3) > vth)
+         + (V(b4) > vth) + (V(b5) > vth) + (V(b6) > vth) + (V(b7) > vth);
+    V(dout) <+ gain * (ones - 4.0) + 0.1;
+end
+
+endmodule

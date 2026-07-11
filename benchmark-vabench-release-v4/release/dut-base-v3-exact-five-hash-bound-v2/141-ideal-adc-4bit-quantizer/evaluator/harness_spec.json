@@ -1,0 +1,90 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "ideal_adc_4bit_quantizer.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=46n maxstep=20p"
+    ],
+    "body_lines": [
+      "Vclk (vclk 0) vsource type=pwl wave=[0 0 1n 0 1.1n 1 3n 1 3.1n 0 11n 0 11.1n 1 13n 1 13.1n 0 21n 0 21.1n 1 23n 1 23.1n 0 31n 0 31.1n 1 33n 1 33.1n 0 41n 0 41.1n 1 43n 1 43.1n 0 48n 0]"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "digital",
+      "vclk",
+      "vin",
+      "vip"
+    ]
+  },
+  "family_id": "141",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "2065afa510b46a41b466accbc215e4cd65658497be3927899534d5328baf9937",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "16cffd54aa909673c349e120647efc30d119540e71555ccd526987f901519495",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vip (vip 0) vsource type=pwl wave=[0 -0.9 7n -0.9 7.1n -0.2 17n -0.2 17.1n 0.02 27n 0.02 27.1n 0.48 37n 0.48 37.1n 0.92 48n 0.92]",
+          "Vin (vin 0) vsource dc=0",
+          "",
+          "XDUT (vclk vip vin digital) ideal_adc_4bit_quantizer",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vip (vip 0) vsource type=pwl wave=[0 -0.70 7n -0.70 7.1n -0.08 17n -0.08 17.1n 0.38 27n 0.38 27.1n 0.72 37n 0.72 37.1n 1.10 48n 1.10]",
+          "Vin (vin 0) vsource type=pwl wave=[0 0.20 7n 0.20 7.1n 0.15 17n 0.15 17.1n 0.10 27n 0.10 27.1n -0.05 37n -0.05 37.1n 0.00 48n 0.00]",
+          "",
+          "XDUT (vclk vip vin digital) ideal_adc_4bit_quantizer",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_CLOCKED_DIFFERENTIAL_SAMPLE",
+    "P_SYMMETRIC_INPUT_RANGE",
+    "P_CODE_SCALE_AND_LSB"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "d14b41b77eaf1dcd9a63fea3dc6fb797c4cb47e4668167659909ef5690363e82",
+    "family_spec_sha256": "727ba99822760baa7ffabb7bc0379b10bf7958a9024c405b11924d29fbc1b008"
+  },
+  "task_id": "v4-141"
+}

@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/four_channel_edge_sampler.va"
+
+Vclk (clk 0) vsource type=pwl wave=[0 0 2n 0 2.1n 1.2 3n 1.2 3.1n 0 12n 0 12.1n 1.2 13n 1.2 13.1n 0 22n 0 22.1n 1.2 23n 1.2 23.1n 0 32n 0 32.1n 1.2 33n 1.2 33.1n 0 38n 0]
+V0 (vin0 0) vsource type=pwl wave=[0 0.1 8n 0.1 8.1n 0.2 18n 0.2 18.1n 0.3 28n 0.3 28.1n 0.4 38n 0.4]
+V1 (vin1 0) vsource type=pwl wave=[0 0.2 8n 0.2 8.1n 0.4 18n 0.4 18.1n 0.6 28n 0.6 28.1n 0.8 38n 0.8]
+V2 (vin2 0) vsource type=pwl wave=[0 0.3 8n 0.3 8.1n 0.6 18n 0.6 18.1n 0.9 28n 0.9 28.1n 0.1 38n 0.1]
+V3 (vin3 0) vsource type=pwl wave=[0 0.4 8n 0.4 8.1n 0.8 18n 0.8 18.1n 0.2 28n 0.2 28.1n 0.6 38n 0.6]
+
+XDUT (clk vin0 vin1 vin2 vin3 vout0 vout1 vout2 vout3) four_channel_edge_sampler
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=36n maxstep=20p
+save clk vin0 vin1 vin2 vin3 vout0 vout1 vout2 vout3

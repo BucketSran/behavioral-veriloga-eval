@@ -1,0 +1,132 @@
+{
+  "family_id": "150",
+  "gold_bundle_sha256": "2144084faf3624ff5278a5e8ad47697931013d1cf4576e5033dcc0066e9cae53",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "cyclic_decoder_12bit.va": "2463c6f3609f100c84245bd763477e21ecc261163e3fdac65295e110d8bf8f9f"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RISING_EDGE_12BIT_DECODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "cyclic_decoder_12bit.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_RISING_EDGE_12BIT_DECODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "cyclic_decoder_12bit.va": "25b8b455fee2414d91ae0f81cd0f6a74de153d3de8318d0aff6b8a1d25ec35c6"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CENTERED_OUTPUT_SCALE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_half_output_scale/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "cyclic_decoder_12bit.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_002_half_output_scale",
+      "trigger_condition": "Compresses the decoded output by half.",
+      "violated_property_ids": [
+        "P_CENTERED_OUTPUT_SCALE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "cyclic_decoder_12bit.va": "9274ccc111508a4e44cbbf1aaf68411212543b4ed3023d92e95bb1af2c928a52"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BIT_WEIGHT_ORDER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_reversed_bit_weights/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "cyclic_decoder_12bit.va"
+      ],
+      "fault_class": "reversed_bit_weights",
+      "id": "neg_003_reversed_bit_weights",
+      "trigger_condition": "Reverses LSB/MSB bit weights.",
+      "violated_property_ids": [
+        "P_BIT_WEIGHT_ORDER"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "cyclic_decoder_12bit.va": "fa6907347ea993ba59b6d7618acb0b731a4c15942ee8a329871a8d4d1cbf1fc5"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CENTERED_OUTPUT_SCALE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_missing_midscale_offset/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "cyclic_decoder_12bit.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_004_missing_midscale_offset",
+      "trigger_condition": "Omits the -0.5 midscale offset.",
+      "violated_property_ids": [
+        "P_CENTERED_OUTPUT_SCALE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "cyclic_decoder_12bit.va": "e8caac60379ead72dde62e7cbe28ee0b0a5ba53a37316f43ead9018bc15f4200"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CENTERED_OUTPUT_SCALE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "cyclic_decoder_12bit.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Cyclic Decoder 12bit: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_CENTERED_OUTPUT_SCALE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

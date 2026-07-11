@@ -1,0 +1,5 @@
+`include "disciplines.vams"
+module ideal_dac_4bit_differential(clk, digital, vcm, vop, von);
+input clk,digital,vcm; output vop,von; electrical clk,digital,vcm,vop,von; parameter real trise=20p from [0:inf); parameter real tfall=20p from [0:inf); parameter real tdel=0 from [0:inf); parameter real vref=1.0 from (0:inf); parameter real vtrans_clk=0.5 from (0:inf); parameter integer levels=16 from (0:inf); real lsb,half_lsb,vod; integer code;
+analog begin @(initial_step) begin lsb=2.0*vref/levels; half_lsb=lsb/2.0; vod=-vref+half_lsb; end @(cross(V(clk)-vtrans_clk,-1)) begin code=V(digital); if(code<0) code=0; if(code>levels-1) code=levels-1; vod=code*lsb-vref+half_lsb; end V(vop)<+V(vcm)-transition(vod/2.0,tdel,trise,tfall); V(von)<+V(vcm)+transition(vod/2.0,tdel,trise,tfall); end
+endmodule

@@ -1,0 +1,108 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "flash_thermometer_centered_sum.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=36n maxstep=20p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "b0",
+      "b1",
+      "b2",
+      "b3",
+      "b4",
+      "b5",
+      "b6",
+      "b7",
+      "dout"
+    ]
+  },
+  "family_id": "146",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "70a696f7133e34ad5dab6d9874606a52063224739e1d1a1f9473560523d436af",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "c6a11ba1869fd3e58de7ab683c205eda3b181d6de0e26030f1642a2676223aa4",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vb0 (b0 0) vsource type=pwl wave=[0 0 10n 0 10.1n 0.9 40n 0.9]",
+          "Vb1 (b1 0) vsource type=pwl wave=[0 0 10n 0 10.1n 0.9 40n 0.9]",
+          "Vb2 (b2 0) vsource type=pwl wave=[0 0 10n 0 10.1n 0.9 40n 0.9]",
+          "Vb3 (b3 0) vsource type=pwl wave=[0 0 20n 0 20.1n 0.9 40n 0.9]",
+          "Vb4 (b4 0) vsource type=pwl wave=[0 0 20n 0 20.1n 0.9 40n 0.9]",
+          "Vb5 (b5 0) vsource type=pwl wave=[0 0 30n 0 30.1n 0.9 40n 0.9]",
+          "Vb6 (b6 0) vsource type=pwl wave=[0 0 30n 0 30.1n 0.9 40n 0.9]",
+          "Vb7 (b7 0) vsource type=pwl wave=[0 0 30n 0 30.1n 0.9 40n 0.9]",
+          "",
+          "XDUT (b0 b1 b2 b3 b4 b5 b6 b7 dout) flash_thermometer_centered_sum",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=44n maxstep=20p"
+        ],
+        "body_lines": [
+          "Vb0 (b0 0) vsource type=pwl wave=[0 0 8n 0 8.1n 0.9 46n 0.9]",
+          "Vb1 (b1 0) vsource type=pwl wave=[0 0 8n 0 8.1n 0.9 46n 0.9]",
+          "Vb2 (b2 0) vsource type=pwl wave=[0 0 18n 0 18.1n 0.9 46n 0.9]",
+          "Vb3 (b3 0) vsource type=pwl wave=[0 0 18n 0 18.1n 0.9 26n 0.9 26.1n 0 46n 0]",
+          "Vb4 (b4 0) vsource type=pwl wave=[0 0 18n 0 18.1n 0.9 46n 0.9]",
+          "Vb5 (b5 0) vsource type=pwl wave=[0 0 18n 0 18.1n 0.9 46n 0.9]",
+          "Vb6 (b6 0) vsource type=pwl wave=[0 0 30n 0 30.1n 0.9 46n 0.9]",
+          "Vb7 (b7 0) vsource type=pwl wave=[0 0 30n 0 30.1n 0.9 46n 0.9]",
+          "",
+          "XDUT (b0 b1 b2 b3 b4 b5 b6 b7 dout) flash_thermometer_centered_sum",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_THERMOMETER_THRESHOLD_COUNT",
+    "P_CENTERED_SUM",
+    "P_OUTPUT_GAIN"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "49de9858d9ba4e5da36595e55fab8c50b3fd9c1fcf331f8274856d388a62b815",
+    "family_spec_sha256": "760c4352437eab416022b040ff623fcdfdd40a41cf08b90acc88361255389683"
+  },
+  "task_id": "v4-146"
+}

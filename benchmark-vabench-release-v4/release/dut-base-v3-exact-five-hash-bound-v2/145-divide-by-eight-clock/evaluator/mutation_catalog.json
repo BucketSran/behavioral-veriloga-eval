@@ -1,0 +1,132 @@
+{
+  "family_id": "145",
+  "gold_bundle_sha256": "cd61469a31b7c1f6c93e3c08af80247c721f12990091c6395f1351dfb30cf408",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "divide_by_eight_clock.va": "70c55982b47ec79c2b3a1069ac82947be7cc1f51334ad3975295e36361dd78bb"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_DUTY_AND_LEVEL"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "divide_by_eight_clock.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_OUTPUT_DUTY_AND_LEVEL"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "divide_by_eight_clock.va": "e6fc5b8b613b024ee292c529bf6dbc20df55b32c8734539737bda517be8053f0"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ENABLE_QUALIFIED_DIVIDE_BY_EIGHT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_divide_by_four/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "divide_by_eight_clock.va"
+      ],
+      "fault_class": "state_reset_or_enable_error",
+      "id": "neg_002_divide_by_four",
+      "trigger_condition": "Uses divide-by-four timing while still exposing reset and enable ports.",
+      "violated_property_ids": [
+        "P_ENABLE_QUALIFIED_DIVIDE_BY_EIGHT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "divide_by_eight_clock.va": "325867bdd4336cd77bb584ae6b18737d235055c471d0695530a238f004910605"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_DUTY_AND_LEVEL"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_duty/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "divide_by_eight_clock.va"
+      ],
+      "fault_class": "state_reset_or_enable_error",
+      "id": "neg_003_wrong_duty",
+      "trigger_condition": "Uses the correct reset and enable behavior but the wrong high/low duty split.",
+      "violated_property_ids": [
+        "P_OUTPUT_DUTY_AND_LEVEL"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "divide_by_eight_clock.va": "5f5325e8d684e283e6655447a3d04431aa4afff24a65eb35011ac463785347be"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ENABLE_QUALIFIED_DIVIDE_BY_EIGHT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_ignore_enable/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "divide_by_eight_clock.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_004_ignore_enable",
+      "trigger_condition": "Ignores the enable input and advances on disabled input-clock edges.",
+      "violated_property_ids": [
+        "P_ENABLE_QUALIFIED_DIVIDE_BY_EIGHT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "divide_by_eight_clock.va": "d6b81ec31167e881f5f59d1dbbf20ad4051b199441e4045f205fedd5c1d4490f"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_FORCES_INITIAL_HIGH"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_ignore_reset/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "divide_by_eight_clock.va"
+      ],
+      "fault_class": "state_reset_or_enable_error",
+      "id": "neg_005_ignore_reset",
+      "trigger_condition": "Ignores the active-high reset after startup and does not reload the high phase.",
+      "violated_property_ids": [
+        "P_RESET_FORCES_INITIAL_HIGH"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

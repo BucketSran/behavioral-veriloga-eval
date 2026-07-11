@@ -1,0 +1,5 @@
+`include "disciplines.vams"
+module clocked_four_input_mux(dsel0,dsel1,din0,din1,din2,din3,clks,dout);
+input dsel0,dsel1,din0,din1,din2,din3,clks; output dout; electrical dsel0,dsel1,din0,din1,din2,din3,clks,dout; parameter real vth=0.45; parameter real tr=20p; real dreg;
+analog begin @(initial_step) dreg=0; @(cross(V(clks)-vth,-1)) begin if(V(dsel0)<vth) begin if(V(dsel1)<vth) dreg=V(din0); else dreg=V(din1); end else begin if(V(dsel1)<vth) dreg=V(din2); else dreg=V(din3); end end V(dout)<+transition(dreg,1p,tr,tr); end
+endmodule

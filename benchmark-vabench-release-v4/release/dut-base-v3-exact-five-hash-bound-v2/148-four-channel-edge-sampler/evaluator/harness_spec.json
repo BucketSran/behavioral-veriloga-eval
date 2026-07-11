@@ -1,0 +1,102 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "four_channel_edge_sampler.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=36n maxstep=20p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "vin0",
+      "vin1",
+      "vin2",
+      "vin3",
+      "vout0",
+      "vout1",
+      "vout2",
+      "vout3"
+    ]
+  },
+  "family_id": "148",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "71132ed960d13eba809f653913e561b27d58e4665a7d992000a9644421df0db1",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "689a6633d1fdea1787c14600f9d0d650041327bfff9d601f72af911122d43909",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pwl wave=[0 0 2n 0 2.1n 1.2 3n 1.2 3.1n 0 12n 0 12.1n 1.2 13n 1.2 13.1n 0 22n 0 22.1n 1.2 23n 1.2 23.1n 0 32n 0 32.1n 1.2 33n 1.2 33.1n 0 38n 0]",
+          "V0 (vin0 0) vsource type=pwl wave=[0 0.1 8n 0.1 8.1n 0.2 18n 0.2 18.1n 0.3 28n 0.3 28.1n 0.4 38n 0.4]",
+          "V1 (vin1 0) vsource type=pwl wave=[0 0.2 8n 0.2 8.1n 0.4 18n 0.4 18.1n 0.6 28n 0.6 28.1n 0.8 38n 0.8]",
+          "V2 (vin2 0) vsource type=pwl wave=[0 0.3 8n 0.3 8.1n 0.6 18n 0.6 18.1n 0.9 28n 0.9 28.1n 0.1 38n 0.1]",
+          "V3 (vin3 0) vsource type=pwl wave=[0 0.4 8n 0.4 8.1n 0.8 18n 0.8 18.1n 0.2 28n 0.2 28.1n 0.6 38n 0.6]",
+          "",
+          "XDUT (clk vin0 vin1 vin2 vin3 vout0 vout1 vout2 vout3) four_channel_edge_sampler",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=40n maxstep=20p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pwl wave=[0 0 4n 0 4.1n 1.2 5n 1.2 5.1n 0 14n 0 14.1n 1.2 15n 1.2 15.1n 0 24n 0 24.1n 1.2 25n 1.2 25.1n 0 34n 0 34.1n 1.2 35n 1.2 35.1n 0 42n 0]",
+          "V0 (vin0 0) vsource type=pwl wave=[0 0.6 10n 0.6 10.1n 0.1 20n 0.1 20.1n 0.5 30n 0.5 30.1n 0.2 42n 0.2]",
+          "V1 (vin1 0) vsource type=pwl wave=[0 0.1 10n 0.1 10.1n 0.7 20n 0.7 20.1n 0.2 30n 0.2 30.1n 0.9 42n 0.9]",
+          "V2 (vin2 0) vsource type=pwl wave=[0 0.8 10n 0.8 10.1n 0.3 20n 0.3 20.1n 0.6 30n 0.6 30.1n 0.4 42n 0.4]",
+          "V3 (vin3 0) vsource type=pwl wave=[0 0.3 10n 0.3 10.1n 0.9 20n 0.9 20.1n 0.4 30n 0.4 30.1n 0.7 42n 0.7]",
+          "",
+          "XDUT (clk vin0 vin1 vin2 vin3 vout0 vout1 vout2 vout3) four_channel_edge_sampler",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_CONFIGURED_EDGE_SIMULTANEOUS_SAMPLE",
+    "P_CHANNEL_MAPPING",
+    "P_OUTPUT_GAIN_AND_HOLD"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "4c356099cd5673f3ce23fe0d33139efd1f9890ad548f0c56521cb303637c72d5",
+    "family_spec_sha256": "795d53c7937130d21e6352a7fd6424c79c91d1e4792640d43898e072f23ab446"
+  },
+  "task_id": "v4-148"
+}

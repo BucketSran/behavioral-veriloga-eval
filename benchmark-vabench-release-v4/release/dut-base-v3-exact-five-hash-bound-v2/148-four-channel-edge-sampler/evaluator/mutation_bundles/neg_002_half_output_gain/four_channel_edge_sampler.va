@@ -1,0 +1,5 @@
+`include "disciplines.vams"
+module four_channel_edge_sampler(clk,vin0,vin1,vin2,vin3,vout0,vout1,vout2,vout3);
+input clk,vin0,vin1,vin2,vin3; output vout0,vout1,vout2,vout3; electrical clk,vin0,vin1,vin2,vin3,vout0,vout1,vout2,vout3; parameter integer direction=1; parameter real vdd=1.2; parameter real tr=50p; parameter real tf=50p; parameter real td=0; real s0,s1,s2,s3;
+analog begin @(initial_step) begin s0=0;s1=0;s2=0;s3=0; end @(cross(V(clk)-vdd/2.0,direction)) begin s0=V(vin0); s1=V(vin1); s2=V(vin2); s3=V(vin3); end V(vout0)<+transition(0.5*s0,td,tr,tf); V(vout1)<+transition(0.5*s1,td,tr,tf); V(vout2)<+transition(0.5*s2,td,tr,tf); V(vout3)<+transition(0.5*s3,td,tr,tf); end
+endmodule
