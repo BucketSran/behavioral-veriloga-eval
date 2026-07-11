@@ -9,11 +9,15 @@ if str(PREP) not in sys.path:
     sys.path.insert(0, str(PREP))
 
 from materialize_tri_form_release import (  # noqa: E402
+    COMPONENT_METADATA,
     MODES,
+    REFERENCE_TOKENIZER,
+    reference_token_count,
     render_bugfix_instruction,
     render_testbench_instruction,
     select_bugfix_seed,
 )
+from export_tri_form_runtime import install_public  # noqa: E402
 
 
 def sample_spec() -> dict:
@@ -63,3 +67,31 @@ def test_seed_policy_prefers_temporal_semantic_fault_over_force_zero() -> None:
     selected = select_bugfix_seed(row)
     assert selected["mutation_id"] == "neg_002_wrong_edge"
     assert not selected["triviality_markers"]
+
+
+def test_prompt_components_have_pinned_reference_tokenizer_metadata() -> None:
+    assert REFERENCE_TOKENIZER["id"] == "vabench_utf8_lexeme"
+    assert set(COMPONENT_METADATA) == {
+        "neutral_wrapper.md",
+        "dut_modeling.md",
+        "testbench_verification.md",
+        "bugfix_diagnosis.md",
+        "feedback_core.md",
+        "feedback_dut.md",
+        "feedback_testbench.md",
+        "feedback_bugfix.md",
+    }
+    assert reference_token_count("one two; three") == 4
+
+
+def test_agentic_bugfix_export_seeds_editable_submission(tmp_path: Path) -> None:
+    task = tmp_path / "task"
+    (task / "buggy_bundle").mkdir(parents=True)
+    (task / "buggy_bundle" / "a.va").write_text("module a; endmodule\n", encoding="utf-8")
+    (task / "instruction.md").write_text("Repair the bundle.\n", encoding="utf-8")
+    (task / "public_contract.json").write_text("{}\n", encoding="utf-8")
+    public = tmp_path / "public"
+    (public / "submission").mkdir(parents=True)
+    install_public(task, public, "bugfix", "G2")
+    assert (public / "submission" / "a.va").read_bytes() == (task / "buggy_bundle" / "a.va").read_bytes()
+    assert (public / "task" / "buggy_bundle" / "a.va").is_file()

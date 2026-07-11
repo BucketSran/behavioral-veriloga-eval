@@ -39,6 +39,22 @@ FEEDBACK_ADAPTERS = {
     "testbench": "feedback_testbench.md",
     "bugfix": "feedback_bugfix.md",
 }
+NEUTRAL_WRAPPER = "neutral_wrapper.md"
+REFERENCE_TOKENIZER = {
+    "id": "vabench_utf8_lexeme",
+    "version": "1.0.0",
+    "algorithm": "Unicode word runs and individual non-whitespace punctuation marks",
+}
+COMPONENT_METADATA = {
+    "neutral_wrapper.md": {"stable_id": "wrapper.neutral", "kind": "wrapper", "applicable_forms": ["dut", "testbench", "bugfix"]},
+    "dut_modeling.md": {"stable_id": "skill.form.dut", "kind": "form_skill", "applicable_forms": ["dut"]},
+    "testbench_verification.md": {"stable_id": "skill.form.testbench", "kind": "form_skill", "applicable_forms": ["testbench"]},
+    "bugfix_diagnosis.md": {"stable_id": "skill.form.bugfix", "kind": "form_skill", "applicable_forms": ["bugfix"]},
+    "feedback_core.md": {"stable_id": "skill.feedback.core", "kind": "feedback_skill", "applicable_forms": ["dut", "testbench", "bugfix"]},
+    "feedback_dut.md": {"stable_id": "skill.feedback.dut", "kind": "feedback_skill", "applicable_forms": ["dut"]},
+    "feedback_testbench.md": {"stable_id": "skill.feedback.testbench", "kind": "feedback_skill", "applicable_forms": ["testbench"]},
+    "feedback_bugfix.md": {"stable_id": "skill.feedback.bugfix", "kind": "feedback_skill", "applicable_forms": ["bugfix"]},
+}
 TRIVIAL_FAULT_CLASSES = {
     "zero_stub_output",
     "holds_clock_output_low",
@@ -78,6 +94,21 @@ def file_sha(path: Path) -> str:
 def canonical_sha(value: Any) -> str:
     payload = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
     return sha_bytes(payload.encode("utf-8"))
+
+
+def reference_token_count(text: str) -> int:
+    return len(re.findall(r"\w+|[^\w\s]", text, flags=re.UNICODE))
+
+
+def component_fingerprint(component_id: str, path: Path) -> dict[str, Any]:
+    text = path.read_text(encoding="utf-8")
+    tokenizer_id = f"{REFERENCE_TOKENIZER['id']}@{REFERENCE_TOKENIZER['version']}"
+    return {
+        "id": component_id,
+        "sha256": file_sha(path),
+        "bytes": path.stat().st_size,
+        "token_counts": {tokenizer_id: reference_token_count(text)},
+    }
 
 
 def tree_sha(path: Path) -> str:
@@ -570,16 +601,25 @@ def install_prompt_assets(output: Path) -> dict[str, dict[str, Any]]:
     target.mkdir(parents=True)
     records: dict[str, dict[str, Any]] = {}
     for source in sorted(PROMPT_ASSETS.glob("*.md")):
+        if source.name not in COMPONENT_METADATA:
+            raise SystemExit(f"prompt component lacks metadata: {source.name}")
         destination = target / source.name
         shutil.copy2(source, destination)
+        metadata = COMPONENT_METADATA[source.name]
+        fingerprint = component_fingerprint(source.name, destination)
         records[source.name] = {
             "path": rel(destination, output),
-            "sha256": file_sha(destination),
-            "bytes": destination.stat().st_size,
-            "version": "1.0.0",
+            **fingerprint,
+            "stable_id": metadata["stable_id"],
+            "kind": metadata["kind"],
+            "semantic_version": "1.0.0",
+            "applicable_forms": metadata["applicable_forms"],
+            "license": {"status": "repository_license_pending", "spdx": None},
+            "provenance": {"type": "project_authored", "source": "V4_TRI_FORM_BENCHMARK_REQUIREMENTS.md"},
         }
     write_json(output / "prompt_modes" / "skills" / "manifest.json", {
         "schema_version": "v4-skill-manifest-v1",
+        "reference_tokenizer": REFERENCE_TOKENIZER,
         "skills": records,
     })
     write_json(output / "prompt_modes" / "modes.json", {
@@ -609,7 +649,14 @@ def write_prompt_records(output: Path, task_rows: list[dict[str, Any]], skills: 
             instruction_sha = file_sha(task_dir / "instruction.md")
             input_hashes = {rel(item, task_dir): file_sha(item) for item in iter_public_inputs(task_dir, task["form"])}
             for mode, policy in MODES.items():
-                components = ["canonical_instruction_and_public_inputs", "neutral_wrapper_v1"]
+                public_components = [
+                    component_fingerprint(
+                        "instruction" if item.name == "instruction.md" else f"public_input:{rel(item, task_dir)}",
+                        item,
+                    )
+                    for item in iter_public_inputs(task_dir, task["form"])
+                ]
+                components = [item["id"] for item in public_components] + [NEUTRAL_WRAPPER]
                 skill_ids: list[str] = []
                 if policy["form_skill"]:
                     skill_ids.append(FORM_SKILLS[task["form"]])
@@ -617,6 +664,15 @@ def write_prompt_records(output: Path, task_rows: list[dict[str, Any]], skills: 
                 if policy["feedback_skill"]:
                     skill_ids.extend(["feedback_core.md", FEEDBACK_ADAPTERS[task["form"]]])
                     components.extend(["feedback_core.md", FEEDBACK_ADAPTERS[task["form"]]])
+                static_components = public_components + [
+                    {
+                        "id": name,
+                        "sha256": skills[name]["sha256"],
+                        "bytes": skills[name]["bytes"],
+                        "token_counts": skills[name]["token_counts"],
+                    }
+                    for name in [NEUTRAL_WRAPPER, *skill_ids]
+                ]
                 record = {
                     "schema_version": "v4-prompt-record-v1",
                     "task_id": task["task_id"],
@@ -628,6 +684,8 @@ def write_prompt_records(output: Path, task_rows: list[dict[str, Any]], skills: 
                     "canonical_instruction_sha256": instruction_sha,
                     "public_input_hashes": input_hashes,
                     "component_order": components,
+                    "static_components": static_components,
+                    "reference_tokenizer": REFERENCE_TOKENIZER,
                     "skill_hashes": {name: skills[name]["sha256"] for name in skill_ids},
                     "response_protocol": "v4-exact-artifact-blocks-v1" if policy["process"] == "direct_one_shot" else "v4-workspace-finalizer-v1",
                 }

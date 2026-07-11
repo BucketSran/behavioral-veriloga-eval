@@ -15,6 +15,16 @@ PACKAGE_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_RELEASE = PACKAGE_ROOT / "release" / "tri-form-v4-1200-draft"
 FORMS = ("dut", "testbench", "bugfix")
 MODES = ("G0", "G1", "G2", "G3", "G4", "G5")
+FORM_SKILLS = {
+    "dut": "dut_modeling.md",
+    "testbench": "testbench_verification.md",
+    "bugfix": "bugfix_diagnosis.md",
+}
+FEEDBACK_ADAPTERS = {
+    "dut": "feedback_dut.md",
+    "testbench": "feedback_testbench.md",
+    "bugfix": "feedback_bugfix.md",
+}
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -148,6 +158,22 @@ def audit_prompt_records(release: Path, tasks: list[dict[str, Any]], problems: l
         problems.append("prompt record file missing")
         return 0
     seen: dict[str, set[str]] = defaultdict(set)
+    task_forms = {str(row["task_id"]): str(row["form"]) for row in tasks}
+    skill_manifest = read_json(release / "prompt_modes" / "skills" / "manifest.json")
+    skill_records = skill_manifest.get("skills") or {}
+    tokenizer = skill_manifest.get("reference_tokenizer") or {}
+    tokenizer_key = f"{tokenizer.get('id')}@{tokenizer.get('version')}"
+    required_assets = {
+        "neutral_wrapper.md", *FORM_SKILLS.values(), "feedback_core.md", *FEEDBACK_ADAPTERS.values()
+    }
+    if set(skill_records) != required_assets:
+        problems.append("skill manifest component set mismatch")
+    for name, component in skill_records.items():
+        for field in ("stable_id", "semantic_version", "applicable_forms", "sha256", "bytes", "license", "provenance", "token_counts"):
+            if field not in component:
+                problems.append(f"skill manifest {name}: missing {field}")
+        if tokenizer_key not in (component.get("token_counts") or {}):
+            problems.append(f"skill manifest {name}: missing reference-tokenizer count")
     count = 0
     for line_no, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         try:
@@ -162,13 +188,32 @@ def audit_prompt_records(release: Path, tasks: list[dict[str, Any]], problems: l
         expected_cli = mode in {"G2", "G3", "G4", "G5"}
         if row.get("feedback_cli_available") is not expected_cli:
             problems.append(f"{task_id}/{mode}: feedback availability mismatch")
-        skills = set((row.get("skill_hashes") or {}).keys())
-        if mode in {"G0", "G2"} and skills:
-            problems.append(f"{task_id}/{mode}: unexpected skill components")
-        if mode == "G1" and len(skills) != 1:
-            problems.append(f"{task_id}/{mode}: expected exactly one form skill")
-        if mode == "G5" and len(skills) != 3:
-            problems.append(f"{task_id}/{mode}: expected form plus feedback skills")
+        form = task_forms.get(task_id, "")
+        expected_skills: list[str] = []
+        if mode in {"G1", "G3", "G5"}:
+            expected_skills.append(FORM_SKILLS.get(form, ""))
+        if mode in {"G4", "G5"}:
+            expected_skills.extend(["feedback_core.md", FEEDBACK_ADAPTERS.get(form, "")])
+        skills = row.get("skill_hashes") or {}
+        if set(skills) != set(expected_skills):
+            problems.append(f"{task_id}/{mode}: exact skill composition mismatch")
+        for name in expected_skills:
+            if skills.get(name) != (skill_records.get(name) or {}).get("sha256"):
+                problems.append(f"{task_id}/{mode}: skill hash mismatch for {name}")
+        component_order = row.get("component_order") or []
+        expected_suffix = ["neutral_wrapper.md", *expected_skills]
+        if component_order[-len(expected_suffix):] != expected_suffix:
+            problems.append(f"{task_id}/{mode}: component order mismatch")
+        static_components = row.get("static_components") or []
+        if [item.get("id") for item in static_components] != component_order:
+            problems.append(f"{task_id}/{mode}: static component fingerprint order mismatch")
+        for item in static_components:
+            if not isinstance(item.get("bytes"), int) or item.get("bytes") < 0:
+                problems.append(f"{task_id}/{mode}: invalid component byte count")
+            if len(str(item.get("sha256") or "")) != 64:
+                problems.append(f"{task_id}/{mode}: invalid component hash")
+            if tokenizer_key not in (item.get("token_counts") or {}):
+                problems.append(f"{task_id}/{mode}: missing component token count")
     expected_ids = {str(row["task_id"]) for row in tasks}
     if set(seen) != expected_ids:
         problems.append("prompt record task coverage mismatch")

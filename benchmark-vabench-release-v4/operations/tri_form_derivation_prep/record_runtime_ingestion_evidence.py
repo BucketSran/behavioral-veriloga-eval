@@ -23,6 +23,10 @@ def tree_sha(path: Path) -> str:
     return digest.hexdigest()
 
 
+def file_sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run", type=Path, action="append", required=True)
@@ -33,6 +37,12 @@ def main() -> int:
         run = raw.expanduser().resolve()
         attempt = read_json(run / "evidence" / "attempt_record.json")
         access = read_json(run / "MODEL_ACCESS_POLICY.json")
+        audit_path = run / "evidence" / "runtime_export_audit.json"
+        if not audit_path.is_file():
+            raise SystemExit(f"missing runtime export audit: {audit_path}")
+        audit = read_json(audit_path)
+        if audit.get("status") != "pass":
+            raise SystemExit(f"runtime export audit did not pass: {audit_path}")
         rows.append({
             "task_id": attempt["task_id"],
             "family_id": attempt["family_id"],
@@ -44,12 +54,13 @@ def main() -> int:
             "model_mounts": access["mounts"],
             "evaluator_mounted": access["evaluator_mounted"],
             "network": access["network"],
-            "audit_status": "pass",
+            "audit_status": audit["status"],
+            "audit_report_sha256": file_sha(audit_path),
         })
     rows.sort(key=lambda row: (row["form"], row["mode"]))
     payload = {
         "schema_version": "v4-runtime-ingestion-evidence-v1",
-        "status": "pass",
+        "status": "pass" if rows and all(row["audit_status"] == "pass" for row in rows) else "fail",
         "scope": "one direct DUT, one agentic Testbench, and one fully-skilled agentic Bugfix export",
         "runner": "operations/tri_form_derivation_prep/export_tri_form_runtime.py",
         "access_auditor": "operations/tri_form_derivation_prep/audit_runtime_export.py",

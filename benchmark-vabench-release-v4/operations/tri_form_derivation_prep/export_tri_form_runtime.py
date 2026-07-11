@@ -81,27 +81,27 @@ def serialize_public_artifacts(task_dir: Path, form: str) -> str:
     return "\n".join(lines)
 
 
-def render_direct_prompt(release: Path, task_dir: Path, record: dict[str, Any], mode_record: dict[str, Any]) -> str:
+def render_prompt(release: Path, task_dir: Path, record: dict[str, Any], mode_record: dict[str, Any], *, inline_artifacts: bool) -> str:
     parts = [
         (task_dir / "instruction.md").read_text(encoding="utf-8"),
         "<<<VABENCH_PUBLIC_CONTRACT>>>",
         (task_dir / "public_contract.json").read_text(encoding="utf-8"),
         "<<<END_VABENCH_PUBLIC_CONTRACT>>>",
     ]
-    artifacts = serialize_public_artifacts(task_dir, str(record["form"]))
+    artifacts = serialize_public_artifacts(task_dir, str(record["form"])) if inline_artifacts else ""
     if artifacts:
         parts.append(artifacts)
+    parts.extend([
+        '<<<VABENCH_COMPONENT id="neutral_wrapper.md">>>',
+        (release / "prompt_modes" / "skills" / "neutral_wrapper.md").read_text(encoding="utf-8"),
+        "<<<END_VABENCH_COMPONENT>>>",
+    ])
     for skill in (mode_record.get("skill_hashes") or {}):
         parts.extend([
             f'<<<VABENCH_SKILL id="{skill}">>>',
             (release / "prompt_modes" / "skills" / skill).read_text(encoding="utf-8"),
             "<<<END_VABENCH_SKILL>>>",
         ])
-    parts.append(
-        "Return every declared candidate artifact exactly once using "
-        "<<<VABENCH_ARTIFACT path=\"...\">>> and "
-        "<<<END_VABENCH_ARTIFACT>>> markers, with no text outside the blocks."
-    )
     return "\n\n".join(parts)
 
 
@@ -114,6 +114,8 @@ def install_public(task_dir: Path, public_root: Path, form: str, mode: str) -> N
         copy_tree(task_dir / "supplied_dut", target / "supplied_dut")
     elif form == "bugfix":
         copy_tree(task_dir / "buggy_bundle", target / "buggy_bundle")
+        if mode in AGENTIC:
+            copy_tree(task_dir / "buggy_bundle", public_root / "submission")
     if mode in AGENTIC:
         write_json(public_root / "tool_manifest.json", {
             "schema_version": "v4-public-tool-manifest-v1",
@@ -165,12 +167,18 @@ def main() -> int:
     record, task_dir = task_record(release, args.task)
     mode_record = prompt_record(release, args.task, args.mode)
     public_root = output / "public"
+    (public_root / "submission").mkdir(parents=True)
     install_public(task_dir, public_root, str(record["form"]), args.mode)
-    (public_root / "submission").mkdir()
     install_evaluator(task_dir, output / "evaluator", record)
-    if args.mode not in AGENTIC:
-        prompt = render_direct_prompt(release, task_dir, record, mode_record)
-        (output / "direct_prompt.txt").write_text(prompt, encoding="utf-8")
+    prompt = render_prompt(
+        release,
+        task_dir,
+        record,
+        mode_record,
+        inline_artifacts=args.mode not in AGENTIC,
+    )
+    prompt_name = "agent_prompt.txt" if args.mode in AGENTIC else "direct_prompt.txt"
+    (output / prompt_name).write_text(prompt, encoding="utf-8")
     model_mounts = [] if args.mode not in AGENTIC else ["public/task:ro", "public/submission:rw"]
     write_json(output / "MODEL_ACCESS_POLICY.json", {
         "schema_version": "v4-model-access-policy-v1",
@@ -188,6 +196,8 @@ def main() -> int:
         "state": "prepared",
         "working_token_budget": args.working_token_budget,
         "public_bundle_sha256": tree_sha(public_root / "task"),
+        "initial_submission_sha256": tree_sha(public_root / "submission"),
+        "submission_seeded_from_buggy_bundle": bool(record["form"] == "bugfix" and args.mode in AGENTIC),
         "evaluator_bundle_sha256": tree_sha(output / "evaluator"),
         "prompt_record_sha256": hashlib.sha256(json.dumps(mode_record, sort_keys=True).encode("utf-8")).hexdigest(),
         "final_candidate_sha256": None,
