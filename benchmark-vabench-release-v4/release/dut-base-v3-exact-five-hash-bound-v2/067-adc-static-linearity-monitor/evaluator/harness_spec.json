@@ -1,0 +1,99 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "adc_static_linearity_monitor.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=12.5n maxstep=10p"
+    ],
+    "body_lines": [
+      "Vsample (vsample 0) vsource type=pwl wave=[0 0 1.55n 0 1.57n 0.9 1.85n 0.9 1.87n 0 3.55n 0 3.57n 0.9 3.85n 0.9 3.87n 0 5.55n 0 5.57n 0.9 5.85n 0.9 5.87n 0 7.55n 0 7.57n 0.9 7.85n 0.9 7.87n 0 9.55n 0 9.57n 0.9 9.85n 0.9 9.87n 0 11.55n 0 11.57n 0.9 11.85n 0.9 11.87n 0]"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vsample",
+      "vin",
+      "d2",
+      "d1",
+      "d0",
+      "maxerr"
+    ]
+  },
+  "family_id": "067",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "3b4ff148233a277c951b984514ee45f4d82bec6b6c5a7a803a70f6bb19077b52",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "95081002a711b5ba9a74bc51ade4342988d4d61d222729521c2f5a3d0ebbee50",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0n 0.04 1n 0.04 1.02n 0.18 3n 0.18 3.02n 0.44 5n 0.44 5.02n 0.56 7n 0.56 7.02n 0.79 9n 0.79 9.02n 0.94]",
+          "Vd2 (d2 0) vsource type=pwl wave=[0n 0 5n 0 5.02n 0.9]",
+          "Vd1 (d1 0) vsource type=pwl wave=[0n 0 3n 0 3.02n 0.9 5n 0.9 5.02n 0 9n 0 9.02n 0.9]",
+          "Vd0 (d0 0) vsource type=pwl wave=[0n 0 1n 0 1.02n 0.9 3n 0.9 3.02n 0 9n 0 9.02n 0.9]",
+          "",
+          "XDUT (vsample vin d2 d1 d0 maxerr) adc_static_linearity_monitor",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0n 0.06 1n 0.06 1.02n 0.2 3n 0.2 3.02n 0.39 5n 0.39 5.02n 0.55 7n 0.55 7.02n 0.79 9n 0.79 9.02n 0.93]",
+          "Vd2 (d2 0) vsource type=pwl wave=[0n 0 5n 0 5.02n 0.9]",
+          "Vd1 (d1 0) vsource type=pwl wave=[0n 0 3n 0 3.02n 0.9 5n 0.9 5.02n 0 9n 0 9.02n 0.9]",
+          "Vd0 (d0 0) vsource type=pwl wave=[0n 0 1n 0 1.02n 0.9 3n 0.9 3.02n 0 9n 0 9.02n 0.9]",
+          "",
+          "XDUT (vsample vin d2 d1 d0 maxerr) adc_static_linearity_monitor",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_STROBE_UPDATE",
+    "P_IDEAL_CODE",
+    "P_OBSERVED_CODE",
+    "P_ABSOLUTE_ERROR",
+    "P_MAX_RETENTION",
+    "P_METRIC_SCALE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "d724c1f914917cd4fc3e985be6f13a941c64a8bb49d7f6ec203d829978d80723",
+    "family_spec_sha256": "d64c2848083e828a00735584905ebd7e28f5d5dbb1a4940bacedd17268d45749"
+  },
+  "task_id": "v4-067"
+}

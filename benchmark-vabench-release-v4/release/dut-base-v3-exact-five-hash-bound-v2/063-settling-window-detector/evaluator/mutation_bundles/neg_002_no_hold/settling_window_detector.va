@@ -1,0 +1,30 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module settling_window_detector(vin, target, tol, settled, t_code0, t_code1, t_code2, t_code3, t_code4, t_code5, t_code6, t_code7);
+    input vin, target, tol;
+    output settled, t_code0, t_code1, t_code2, t_code3, t_code4, t_code5, t_code6, t_code7;
+    electrical vin, target, tol, settled, t_code0, t_code1, t_code2, t_code3, t_code4, t_code5, t_code6, t_code7;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real tr = 20p;
+
+    real entry_t; integer in_window; integer code; real settled_level;
+    analog begin
+        @(initial_step) begin entry_t=0; in_window=0; code=0; settled_level=0; end
+        if (abs(V(vin)-V(target)) <= V(tol)) begin
+            if (!in_window) begin entry_t=$abstime; in_window=1; settled_level=0; code=(($abstime/1n)+0.5); end
+            settled_level=vdd;
+        end else begin in_window=0; settled_level=0; end
+        V(settled) <+ settled_level;
+        V(t_code0) <+ transition((((code) >> 0) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(t_code1) <+ transition((((code) >> 1) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(t_code2) <+ transition((((code) >> 2) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(t_code3) <+ transition((((code) >> 3) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(t_code4) <+ transition((((code) >> 4) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(t_code5) <+ transition((((code) >> 5) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(t_code6) <+ transition((((code) >> 6) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(t_code7) <+ transition((((code) >> 7) & 1) ? vdd : 0.0, 0, tr, tr);
+    end
+endmodule

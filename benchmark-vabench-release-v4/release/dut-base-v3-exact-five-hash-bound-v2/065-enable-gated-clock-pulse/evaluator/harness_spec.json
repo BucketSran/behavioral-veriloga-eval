@@ -1,0 +1,74 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "enable_gated_clock_pulse.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=150n maxstep=100p"
+    ],
+    "body_lines": [
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n delay=1n rise=50p fall=50p width=5n",
+      "Ven (en 0) vsource type=pwl wave=[0 0 22n 0 22.1n 0.9 75n 0.9 75.1n 0 105n 0 105.1n 0.9 150n 0.9]",
+      "XDUT (clk en pulse) enable_gated_clock_pulse"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "en",
+      "pulse"
+    ]
+  },
+  "family_id": "065",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "f85bac0a13805d84b944b5106ace02212664c08960158c7ba49b3bf8fd155401",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "f85bac0a13805d84b944b5106ace02212664c08960158c7ba49b3bf8fd155401",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ENABLED_HIGH",
+    "P_DISABLED_LOW",
+    "P_ENABLE_GATING",
+    "P_OUTPUT_LEVELS"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "f93b45aee37c02725d43bf0b60edb14d396c883bcc40b50bc05826219f19ce27",
+    "family_spec_sha256": "f38b3ae98309b96112db628e720f5088788729de00317bfde5a65d6da891c36e"
+  },
+  "task_id": "v4-065"
+}

@@ -1,0 +1,182 @@
+{
+  "family_id": "070",
+  "gold_bundle_sha256": "70315c8d38555a07a72c8c64b8b5ac4ff1820689336a048a8786f6ee46e023c8",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "deterministic_jittered_clock.va": "d0be2a1d2e72ce32b18a4a77bd95f111d0b8fe242ce886563f30d77f1501e8c1"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_NOMINAL_CLOCK"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deterministic_jittered_clock.va"
+      ],
+      "fault_class": "holds_clock_output_low",
+      "id": "neg_001_zero",
+      "trigger_condition": "the source must generate clk_out edges instead of holding the output low",
+      "violated_property_ids": [
+        "P_NOMINAL_CLOCK"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "deterministic_jittered_clock.va": "7df4874591ef14ef7ced773afa07e1a9bc3d4037b0251622a76c785226711020"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_EDGE_MODULATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_no_jitter/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deterministic_jittered_clock.va"
+      ],
+      "fault_class": "ignores_jitter_enable",
+      "id": "neg_002_no_jitter",
+      "trigger_condition": "jitter_en high must enable seed-dependent edge modulation instead of a constant period",
+      "violated_property_ids": [
+        "P_EDGE_MODULATION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "deterministic_jittered_clock.va": "3faaf25f12303cdf62092c3ae3eb1dae3c2b3654f72cd5c4532c013283d143d7"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_NOMINAL_CLOCK"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_too_slow/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deterministic_jittered_clock.va"
+      ],
+      "fault_class": "wrong_nominal_half_period",
+      "id": "neg_003_too_slow",
+      "trigger_condition": "the nominal half-period must remain 10 ns in both disabled and jittered modes",
+      "violated_property_ids": [
+        "P_NOMINAL_CLOCK"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "deterministic_jittered_clock.va": "934381947649938c8b0afbd165aac57d98a5c6a35d59c6456443f04d954c96a4"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_TIMING_BOUNDS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_unbounded/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deterministic_jittered_clock.va"
+      ],
+      "fault_class": "unbounded_jitter_modulation",
+      "id": "neg_004_unbounded",
+      "trigger_condition": "jitter-enabled half-periods must stay within the public modulation range",
+      "violated_property_ids": [
+        "P_TIMING_BOUNDS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "deterministic_jittered_clock.va": "21c4fb213237f7de3dd3cc9dd2536651fa467951a6672a3e97a97091bc03449e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SEED_DECODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_ignore_seed/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deterministic_jittered_clock.va"
+      ],
+      "fault_class": "ignores_seed_inputs",
+      "id": "neg_005_ignore_seed",
+      "trigger_condition": "seed7:seed0 must be decoded through vth and affect the next computed half-period",
+      "violated_property_ids": [
+        "P_SEED_DECODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "deterministic_jittered_clock.va": "80be4e807d17b5d9a0c6033a10a0742292d22605eff3003f9651d8326bbf2076"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_REPEATABILITY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_006_nonrepeating_sequence/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deterministic_jittered_clock.va"
+      ],
+      "fault_class": "phase_sequence_does_not_repeat",
+      "id": "neg_006_nonrepeating_sequence",
+      "trigger_condition": "with constant seed and enable history, the five-edge modulation sequence must repeat without a phase shift",
+      "violated_property_ids": [
+        "P_REPEATABILITY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "deterministic_jittered_clock.va": "98415e218fbf36c0bc0f04c9a9a66c1122ea19d83f47b7893f66486e0e9b049a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_LEVELS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_007_weak_high/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deterministic_jittered_clock.va"
+      ],
+      "fault_class": "weak_logic_high_level",
+      "id": "neg_007_weak_high",
+      "trigger_condition": "clk_out high phases must reach the public vdd-coded output level",
+      "violated_property_ids": [
+        "P_OUTPUT_LEVELS"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

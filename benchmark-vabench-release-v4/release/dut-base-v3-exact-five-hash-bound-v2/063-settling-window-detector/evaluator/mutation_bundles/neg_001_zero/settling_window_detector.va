@@ -1,0 +1,24 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module settling_window_detector(vin, target, tol, settled, t_code0, t_code1, t_code2, t_code3, t_code4, t_code5, t_code6, t_code7);
+    input vin, target, tol;
+    output settled, t_code0, t_code1, t_code2, t_code3, t_code4, t_code5, t_code6, t_code7;
+    electrical vin, target, tol, settled, t_code0, t_code1, t_code2, t_code3, t_code4, t_code5, t_code6, t_code7;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real tr = 20p;
+
+    analog begin
+        V(settled) <+ transition(0.0, 0, tr, tr);
+        V(t_code0) <+ transition(0.0, 0, tr, tr);
+        V(t_code1) <+ transition(0.0, 0, tr, tr);
+        V(t_code2) <+ transition(0.0, 0, tr, tr);
+        V(t_code3) <+ transition(0.0, 0, tr, tr);
+        V(t_code4) <+ transition(0.0, 0, tr, tr);
+        V(t_code5) <+ transition(0.0, 0, tr, tr);
+        V(t_code6) <+ transition(0.0, 0, tr, tr);
+        V(t_code7) <+ transition(0.0, 0, tr, tr);
+    end
+endmodule

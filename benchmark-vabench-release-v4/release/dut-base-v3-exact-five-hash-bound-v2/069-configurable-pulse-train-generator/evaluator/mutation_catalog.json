@@ -1,0 +1,182 @@
+{
+  "family_id": "069",
+  "gold_bundle_sha256": "82977b4ae60b7c1e038dae6d6637943a20bab53b0a61f77d827eb87a602a542d",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "configurable_pulse_train.va": "3846dad433762950ec62ce92b6cd0bc394c978795cb2e5f11b3b50246185e610"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_IDLE_CAPTURE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "configurable_pulse_train.va"
+      ],
+      "fault_class": "no_pulse_train",
+      "id": "neg_001_zero",
+      "trigger_condition": "an accepted start command must produce the requested pulse train",
+      "violated_property_ids": [
+        "P_IDLE_CAPTURE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "configurable_pulse_train.va": "bf4a24f96f5a56af681824b045ff8200fe610cf8153563f5b9d93415b9d9a56a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_WIDTH_AND_PERIOD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_ignore_width/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "configurable_pulse_train.va"
+      ],
+      "fault_class": "one_cycle_pulses_only",
+      "id": "neg_002_ignore_width",
+      "trigger_condition": "each pulse must remain high for the captured width in clock samples",
+      "violated_property_ids": [
+        "P_WIDTH_AND_PERIOD"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "configurable_pulse_train.va": "1298a4ad500c87935f8b4a3add94c554123eb314c3863a27e0135601efca3cf0"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_WIDTH_AND_PERIOD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_period/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "configurable_pulse_train.va"
+      ],
+      "fault_class": "uses_period_plus_one",
+      "id": "neg_003_wrong_period",
+      "trigger_condition": "pulse starts must be separated by the captured period in clock samples",
+      "violated_property_ids": [
+        "P_WIDTH_AND_PERIOD"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "configurable_pulse_train.va": "7b67122d49a89712d07e2706d989656e5348e95e14da9de8624eae4ae939b756"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COMPLETION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_no_done/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "configurable_pulse_train.va"
+      ],
+      "fault_class": "never_asserts_done",
+      "id": "neg_004_no_done",
+      "trigger_condition": "after the final pulse completes, done must assert while pulse is low",
+      "violated_property_ids": [
+        "P_COMPLETION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "configurable_pulse_train.va": "ec62b4bdf20de1143391e472e8eb6fc231a7775b0f64187cc0ea73824a4b15f2"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PULSE_COUNT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_extra_pulse/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "configurable_pulse_train.va"
+      ],
+      "fault_class": "emits_one_extra_pulse",
+      "id": "neg_005_extra_pulse",
+      "trigger_condition": "each accepted command must emit exactly the captured count number of pulses",
+      "violated_property_ids": [
+        "P_PULSE_COUNT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "configurable_pulse_train.va": "93f467eda682c5b5808f51c68d704ec900cd527f3782e3074aecd622d1a320b1"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ZERO_CODE_MINIMUM"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_006_zero_code_width_not_minimum/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "configurable_pulse_train.va"
+      ],
+      "fault_class": "zero_width_code_produces_no_minimum_pulse",
+      "id": "neg_006_zero_code_width_not_minimum",
+      "trigger_condition": "zero-coded period, width, and count must each clamp to one clock sample",
+      "violated_property_ids": [
+        "P_ZERO_CODE_MINIMUM"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "configurable_pulse_train.va": "74f1f10b5e78697f6e1a427c5b4f99963efc5eeeefd2e82f4a27a63a3be343f2"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_LEVELS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_007_output_levels_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "configurable_pulse_train.va"
+      ],
+      "fault_class": "pulse_and_done_high_levels_are_too_low",
+      "id": "neg_007_output_levels_low",
+      "trigger_condition": "logical pulse and done highs must reach the declared output rail",
+      "violated_property_ids": [
+        "P_OUTPUT_LEVELS"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

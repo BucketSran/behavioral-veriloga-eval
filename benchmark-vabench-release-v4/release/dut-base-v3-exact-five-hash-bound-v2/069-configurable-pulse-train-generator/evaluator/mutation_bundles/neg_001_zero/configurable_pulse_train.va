@@ -1,0 +1,17 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module configurable_pulse_train(clk, start, period0, period1, period2, period3, width0, width1, width2, width3, count0, count1, count2, count3, pulse, done);
+    input clk, start, period0, period1, period2, period3, width0, width1, width2, width3, count0, count1, count2, count3;
+    output pulse, done;
+    electrical clk, start, period0, period1, period2, period3, width0, width1, width2, width3, count0, count1, count2, count3, pulse, done;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real tr = 20p;
+
+    analog begin
+        V(pulse) <+ transition(0.0, 0, tr, tr);
+        V(done) <+ transition(0.0, 0, tr, tr);
+    end
+endmodule

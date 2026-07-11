@@ -1,0 +1,99 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "edge_delay_line_deglitch.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=62n maxstep=50p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "rst",
+      "enable",
+      "vout",
+      "edge_valid",
+      "rejected"
+    ]
+  },
+  "family_id": "064",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "fc02ff9877140020724c327d9d92cf3e83ab2421e3b310191b93f562ccbd2527",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "a4edd5df49af1a00115f5e4ae26b478306d00bc2261a4328606cd18ed3450ac4",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0 0 5n 0 5.05n 0.9 15n 0.9 15.05n 0 24n 0 24.05n 0.9 24.45n 0.9 24.50n 0 34n 0 34.05n 0.9 47n 0.9 47.05n 0 62n 0]",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1n 0.9 1.1n 0 62n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 2n 0 2.1n 0.9 52n 0.9 52.1n 0 56n 0 56.1n 0.9 62n 0.9]",
+          "",
+          "XDUT (vin rst enable vout edge_valid rejected) edge_delay_line_deglitch",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=58n maxstep=50p"
+        ],
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0 0 4n 0 4.05n 0.9 13n 0.9 13.05n 0 21n 0 21.05n 0.9 21.35n 0.9 21.40n 0 31n 0 31.05n 0.9 43n 0.9 43.05n 0 58n 0]",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 0.8n 0.9 0.9n 0 58n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 1.8n 0 1.9n 0.9 48n 0.9 48.1n 0 52n 0 52.1n 0.9 58n 0.9]",
+          "",
+          "XDUT (vin rst enable vout edge_valid rejected) edge_delay_line_deglitch tick=250p delay_ticks=5 min_width_ticks=3",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RESET_DISABLE_CLEAR",
+    "P_STABLE_EDGE_QUALIFICATION",
+    "P_DELAYED_EDGE_EMISSION",
+    "P_NARROW_GLITCH_REJECTION",
+    "P_VALID_EMISSION_PULSE",
+    "P_BIDIRECTIONAL_LEVELS",
+    "P_PARAMETER_OVERRIDE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "1ab5f0742ac8dfdeb9dccb987424dbbdc3a573dc5bad96098f909b0c114f8d0d",
+    "family_spec_sha256": "f296ae77c677de246ec352800e67c1923271bf29dc78198dc0135a148f4e2eba"
+  },
+  "task_id": "v4-064"
+}

@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/ready_valid_latency_counter_12b.va"
+
+V_clk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n delay=1n rise=50p fall=50p width=5n
+V_valid_i (valid_i 0) vsource type=pwl wave=[0 0 10n 0 10.1n 0.9 45n 0.9 45.1n 0 80n 0 80.1n 0.9 125n 0.9 125.1n 0 160n 0]
+V_ready_i (ready_i 0) vsource type=pwl wave=[0 0 35n 0 35.1n 0.9 45n 0.9 45.1n 0 115n 0 115.1n 0.9 125n 0.9 125.1n 0 160n 0]
+
+XDUT (clk valid_i ready_i done lat0 lat1 lat2 lat3 lat4 lat5 lat6 lat7 lat8 lat9 lat10 lat11) ready_valid_latency_counter_12b
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=160n maxstep=100p
+save clk valid_i ready_i done lat0 lat1 lat2 lat3 lat4 lat5 lat6 lat7 lat8 lat9 lat10 lat11

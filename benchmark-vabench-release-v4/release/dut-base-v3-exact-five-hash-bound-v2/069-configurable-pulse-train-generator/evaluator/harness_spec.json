@@ -1,0 +1,101 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "configurable_pulse_train.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=300n maxstep=100p"
+    ],
+    "body_lines": [
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n delay=1n rise=50p fall=50p width=5n",
+      "Vstart (start 0) vsource type=pwl wave=[0 0 12n 0 12.1n 0.9 22n 0.9 22.1n 0 200n 0 200.1n 0.9 210n 0.9 210.1n 0 300n 0]",
+      "Vperiod0 (period0 0) vsource type=pwl wave=[0 0.9 189n 0.9 190n 0 300n 0]",
+      "Vperiod1 (period1 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0]",
+      "Vperiod2 (period2 0) vsource type=pwl wave=[0 0.9 189n 0.9 190n 0 300n 0]",
+      "Vperiod3 (period3 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0]",
+      "Vwidth0 (width0 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0]",
+      "Vwidth1 (width1 0) vsource type=pwl wave=[0 0.9 189n 0.9 190n 0 300n 0]",
+      "Vwidth2 (width2 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0]",
+      "Vwidth3 (width3 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0]",
+      "Vcount0 (count0 0) vsource type=pwl wave=[0 0.9 189n 0.9 190n 0 300n 0]",
+      "Vcount1 (count1 0) vsource type=pwl wave=[0 0.9 189n 0.9 190n 0 300n 0]",
+      "Vcount2 (count2 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0]",
+      "Vcount3 (count3 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0]",
+      "XDUT (clk start period0 period1 period2 period3 width0 width1 width2 width3 count0 count1 count2 count3 pulse done) configurable_pulse_train"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "start",
+      "period0",
+      "period1",
+      "period2",
+      "period3",
+      "width0",
+      "width1",
+      "width2",
+      "width3",
+      "count0",
+      "count1",
+      "count2",
+      "count3",
+      "pulse",
+      "done"
+    ]
+  },
+  "family_id": "069",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "76b11ea9802bda9fef338e3ba7ebef983333a2dd0e2a4034d184508a3eac252e",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "76b11ea9802bda9fef338e3ba7ebef983333a2dd0e2a4034d184508a3eac252e",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_IDLE_CAPTURE",
+    "P_ZERO_CODE_MINIMUM",
+    "P_PULSE_COUNT",
+    "P_WIDTH_AND_PERIOD",
+    "P_COMPLETION",
+    "P_OUTPUT_LEVELS"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "63dc88e004f170b50e2b87cc7a1674d7aefa6266911ce040dfaa21ff09687f85",
+    "family_spec_sha256": "e329d16ec84f9acaa1839c363fcbf0f0061c35d3de69925880cff58b84df68cb"
+  },
+  "task_id": "v4-069"
+}

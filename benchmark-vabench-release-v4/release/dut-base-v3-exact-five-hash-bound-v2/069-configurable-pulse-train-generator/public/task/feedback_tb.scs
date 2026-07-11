@@ -1,0 +1,25 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/configurable_pulse_train.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n delay=1n rise=50p fall=50p width=5n
+Vstart (start 0) vsource type=pwl wave=[0 0 12n 0 12.1n 0.9 22n 0.9 22.1n 0 200n 0 200.1n 0.9 210n 0.9 210.1n 0 300n 0]
+Vperiod0 (period0 0) vsource type=pwl wave=[0 0.9 189n 0.9 190n 0 300n 0]
+Vperiod1 (period1 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0]
+Vperiod2 (period2 0) vsource type=pwl wave=[0 0.9 189n 0.9 190n 0 300n 0]
+Vperiod3 (period3 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0]
+Vwidth0 (width0 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0]
+Vwidth1 (width1 0) vsource type=pwl wave=[0 0.9 189n 0.9 190n 0 300n 0]
+Vwidth2 (width2 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0]
+Vwidth3 (width3 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0]
+Vcount0 (count0 0) vsource type=pwl wave=[0 0.9 189n 0.9 190n 0 300n 0]
+Vcount1 (count1 0) vsource type=pwl wave=[0 0.9 189n 0.9 190n 0 300n 0]
+Vcount2 (count2 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0]
+Vcount3 (count3 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0]
+XDUT (clk start period0 period1 period2 period3 width0 width1 width2 width3 count0 count1 count2 count3 pulse done) configurable_pulse_train
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=300n maxstep=100p
+save clk start period0 period1 period2 period3 width0 width1 width2 width3 count0 count1 count2 count3 pulse done

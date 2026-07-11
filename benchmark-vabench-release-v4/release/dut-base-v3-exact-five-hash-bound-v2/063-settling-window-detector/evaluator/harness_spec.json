@@ -1,0 +1,95 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "settling_window_detector.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=150n maxstep=100p"
+    ],
+    "body_lines": [
+      "Vtarget (target 0) vsource dc=0.5",
+      "Vtol (tol 0) vsource dc=0.05"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "target",
+      "tol",
+      "settled",
+      "t_code0",
+      "t_code1",
+      "t_code2",
+      "t_code3",
+      "t_code4",
+      "t_code5",
+      "t_code6",
+      "t_code7"
+    ]
+  },
+  "family_id": "063",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "6a2a3c46d736b201805078122ac7bb865219ccbe429863bd2f4f6ee340821807",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "603cb7f2da614fec8c299f3c3a1f5ad9538897ff04b0b45dfc093eb323f1ca1c",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.1 20n 0.1 20.1n 0.58 43n 0.58 43.1n 0.62 55n 0.62 55.1n 0.51 105n 0.51 105.1n 0.7 115n 0.7 115.1n 0.49 150n 0.49]",
+          "XDUT (vin target tol settled t_code0 t_code1 t_code2 t_code3 t_code4 t_code5 t_code6 t_code7) settling_window_detector"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.1 20n 0.1 20.1n 0.40 43n 0.40 43.1n 0.40 55n 0.40 55.1n 0.51 105n 0.51 105.1n 0.7 115n 0.7 115.1n 0.49 150n 0.49]",
+          "XDUT (vin target tol settled t_code0 t_code1 t_code2 t_code3 t_code4 t_code5 t_code6 t_code7) settling_window_detector"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_WINDOW_DEFINITION",
+    "P_ENTRY_AND_HOLD",
+    "P_EXIT_RESETS_QUALIFICATION",
+    "P_ENTRY_TIME_CODE",
+    "P_BIT_ORDER_AND_LEVELS"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "11f032aa367bab6b73b50344eb2ebaf613b506bb795ca99058b72d7d7b0ccb20",
+    "family_spec_sha256": "53f746f228722228727bd0f717df19e2c3d00e4bb08e9a1871b4fb69a14c7be8"
+  },
+  "task_id": "v4-063"
+}

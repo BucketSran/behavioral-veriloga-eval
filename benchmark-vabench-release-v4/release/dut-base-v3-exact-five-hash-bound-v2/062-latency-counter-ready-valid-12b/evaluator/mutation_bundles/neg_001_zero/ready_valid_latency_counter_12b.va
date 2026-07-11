@@ -1,0 +1,28 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module ready_valid_latency_counter_12b(clk, valid_i, ready_i, done, lat0, lat1, lat2, lat3, lat4, lat5, lat6, lat7, lat8, lat9, lat10, lat11);
+    input clk, valid_i, ready_i;
+    output done, lat0, lat1, lat2, lat3, lat4, lat5, lat6, lat7, lat8, lat9, lat10, lat11;
+    electrical clk, valid_i, ready_i, done, lat0, lat1, lat2, lat3, lat4, lat5, lat6, lat7, lat8, lat9, lat10, lat11;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real tr = 20p;
+
+    analog begin
+        V(done) <+ transition(0.0, 0, tr, tr);
+        V(lat0) <+ transition(0.0, 0, tr, tr);
+        V(lat1) <+ transition(0.0, 0, tr, tr);
+        V(lat2) <+ transition(0.0, 0, tr, tr);
+        V(lat3) <+ transition(0.0, 0, tr, tr);
+        V(lat4) <+ transition(0.0, 0, tr, tr);
+        V(lat5) <+ transition(0.0, 0, tr, tr);
+        V(lat6) <+ transition(0.0, 0, tr, tr);
+        V(lat7) <+ transition(0.0, 0, tr, tr);
+        V(lat8) <+ transition(0.0, 0, tr, tr);
+        V(lat9) <+ transition(0.0, 0, tr, tr);
+        V(lat10) <+ transition(0.0, 0, tr, tr);
+        V(lat11) <+ transition(0.0, 0, tr, tr);
+    end
+endmodule

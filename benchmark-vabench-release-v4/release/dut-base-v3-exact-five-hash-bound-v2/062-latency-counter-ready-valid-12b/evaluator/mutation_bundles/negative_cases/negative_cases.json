@@ -1,0 +1,48 @@
+{
+  "cases": [
+    {
+      "expected_failure": [
+        "output_dynamic_bipolar",
+        "latency_counts_cycles"
+      ],
+      "id": "neg_static_output_no_clock_response",
+      "mutation": "Hold the output at a legal DC value while ignoring clocked input changes."
+    },
+    {
+      "expected_failure": [
+        "reset_exercised",
+        "latency_counts_cycles",
+        "done_asserts_on_ready"
+      ],
+      "id": "neg_reset_ignored_or_wrong_polarity",
+      "mutation": "Implement the core transfer function but ignore reset, or treat the active level backwards."
+    },
+    {
+      "expected_failure": [
+        "output_dynamic_bipolar",
+        "bounded_output"
+      ],
+      "id": "neg_unbounded_or_rail_violating_output",
+      "mutation": "Drive the observable output outside the allowed analog range during valid operation."
+    },
+    {
+      "expected_failure": [
+        "metric_dynamic_bounded"
+      ],
+      "id": "neg_metric_constant_or_missing",
+      "mutation": "Compile and produce an output, but leave the metric signal constant or absent."
+    },
+    {
+      "expected_failure": [
+        "latency_counts_cycles",
+        "done_asserts_on_ready",
+        "counter_resets_for_next_transaction"
+      ],
+      "id": "neg_functional_off_by_one_or_code_order_error",
+      "mutation": "Exercise the interface but shift the encoded count, bus lane, timing bin, polarity, or sequence index by one."
+    }
+  ],
+  "note": "These are negative specifications for the promotion gate. The current staging DUT uses a compact smoke interface; concrete failing source files should be added when the task-specific functional interface is materialized.",
+  "status": "planned_near_miss_negatives",
+  "v3_status": "support_staging_needs_task_specific_negative_recertification"
+}

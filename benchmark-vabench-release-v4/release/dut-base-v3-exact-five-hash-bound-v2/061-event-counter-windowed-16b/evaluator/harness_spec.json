@@ -1,0 +1,106 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "event_counter_windowed_16b.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=8n maxstep=100p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "gate",
+      "event",
+      "done",
+      "count0",
+      "count1",
+      "count2",
+      "count3",
+      "count4",
+      "count5",
+      "count6",
+      "count7",
+      "count8",
+      "count9",
+      "count10",
+      "count11",
+      "count12",
+      "count13",
+      "count14",
+      "count15"
+    ]
+  },
+  "family_id": "061",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "c9d2707bf257eb3b8273948afba9c18752c007d14b7afc6f8889fdd9f165cd6c",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "27a66ce63525d5515a27d9631e9f45df31d18f76f5b5d0a479cf9fb0d8b8a228",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "V_gate (gate 0) vsource type=pulse val0=0 val1=0.9 period=4n delay=200p rise=50p fall=50p width=1.5n",
+          "V_event (event 0) vsource type=pulse val0=0 val1=0.9 period=2n delay=400p rise=50p fall=50p width=700p",
+          "",
+          "XDUT (gate event done count0 count1 count2 count3 count4 count5 count6 count7 count8 count9 count10 count11 count12 count13 count14 count15) event_counter_windowed_16b",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=160n maxstep=100p"
+        ],
+        "body_lines": [
+          "Vgate (gate 0) vsource type=pwl wave=[0 0 10n 0 10.1n 0.9 60n 0.9 60.1n 0 90n 0 90.1n 0.9 135n 0.9 135.1n 0 160n 0]",
+          "Vevent (event 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.9 6n 0 15n 0 15.1n 0.9 16n 0 25n 0 25.1n 0.9 26n 0 45n 0 45.1n 0.9 46n 0 62n 0 62.1n 0.9 63n 0 80n 0 80.1n 0.9 81n 0 95n 0 95.1n 0.9 96n 0 105n 0 105.1n 0.9 106n 0 125n 0 125.1n 0.9 126n 0 150n 0]",
+          "XDUT (gate event done count0 count1 count2 count3 count4 count5 count6 count7 count8 count9 count10 count11 count12 count13 count14 count15) event_counter_windowed_16b"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_WINDOW_OPEN",
+    "P_IN_WINDOW_COUNT",
+    "P_OUT_OF_WINDOW_IGNORE",
+    "P_WINDOW_CLOSE_HOLD",
+    "P_BIT_ORDER_AND_LEVELS"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "04faceec87474372b93788da928a8463cf447661efe80e98e270434ab519668d",
+    "family_spec_sha256": "17f2547d7798873eaf27bb5f8a00954823173f85d655160fa85d7166de522417"
+  },
+  "task_id": "v4-061"
+}

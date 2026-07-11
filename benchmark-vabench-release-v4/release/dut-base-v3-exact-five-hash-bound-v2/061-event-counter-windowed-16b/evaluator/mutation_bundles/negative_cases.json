@@ -1,0 +1,85 @@
+{
+  "cases": [
+    {
+      "artifact": "neg_001_zero/event_counter_windowed_16b.va",
+      "expected_status": "FAIL_SIM_CORRECTNESS",
+      "id": "neg_001_zero",
+      "mutation": "Never reports a completed counted window: count remains zero and done remains low."
+    },
+    {
+      "artifact": "neg_002_count_all/event_counter_windowed_16b.va",
+      "expected_status": "FAIL_SIM_CORRECTNESS",
+      "id": "neg_002_count_all",
+      "mutation": "Counts event crossings even after the gate window closes."
+    },
+    {
+      "artifact": "neg_003_no_clear/event_counter_windowed_16b.va",
+      "expected_status": "FAIL_SIM_CORRECTNESS",
+      "id": "neg_003_no_clear",
+      "mutation": "Does not clear the held count at the next rising gate crossing."
+    },
+    {
+      "artifact": "neg_004_no_done/event_counter_windowed_16b.va",
+      "expected_status": "FAIL_SIM_CORRECTNESS",
+      "id": "neg_004_no_done",
+      "mutation": "Closes the gate window without asserting done."
+    },
+    {
+      "artifact": "neg_005_off_by_one/event_counter_windowed_16b.va",
+      "expected_status": "FAIL_SIM_CORRECTNESS",
+      "id": "neg_005_off_by_one",
+      "mutation": "Starts each new window at one, producing an off-by-one in-window count."
+    },
+    {
+      "artifact": "neg_006_swapped_count0_count1/event_counter_windowed_16b.va",
+      "expected_status": "FAIL_SIM_CORRECTNESS",
+      "id": "neg_006_swapped_count0_count1",
+      "mutation": "Swaps count0 and count2 significance while preserving the counter state."
+    }
+  ],
+  "negative_cases": [
+    {
+      "files": [
+        "neg_001_zero/event_counter_windowed_16b.va"
+      ],
+      "id": "neg_001_zero",
+      "why_wrong": "Never reports a completed counted window: count remains zero and done remains low."
+    },
+    {
+      "files": [
+        "neg_002_count_all/event_counter_windowed_16b.va"
+      ],
+      "id": "neg_002_count_all",
+      "why_wrong": "Counts event crossings even after the gate window closes."
+    },
+    {
+      "files": [
+        "neg_003_no_clear/event_counter_windowed_16b.va"
+      ],
+      "id": "neg_003_no_clear",
+      "why_wrong": "Does not clear the held count at the next rising gate crossing."
+    },
+    {
+      "files": [
+        "neg_004_no_done/event_counter_windowed_16b.va"
+      ],
+      "id": "neg_004_no_done",
+      "why_wrong": "Closes the gate window without asserting done."
+    },
+    {
+      "files": [
+        "neg_005_off_by_one/event_counter_windowed_16b.va"
+      ],
+      "id": "neg_005_off_by_one",
+      "why_wrong": "Starts each new window at one, producing an off-by-one in-window count."
+    },
+    {
+      "files": [
+        "neg_006_swapped_count0_count1/event_counter_windowed_16b.va"
+      ],
+      "id": "neg_006_swapped_count0_count1",
+      "why_wrong": "Swaps count0 and count2 significance while preserving the counter state."
+    }
+  ],
+  "status": "concrete_near_miss_negatives"
+}

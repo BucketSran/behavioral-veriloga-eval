@@ -1,0 +1,99 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "deterministic_jittered_clock.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=220n maxstep=50p"
+    ],
+    "body_lines": [
+      "Vseed0 (seed0 0) vsource type=pwl wave=[0 0.9 9.5n 0.9 10n 0.9]",
+      "Vseed1 (seed1 0) vsource type=pwl wave=[0 0.9 9.5n 0.9 10n 0.9]",
+      "Vseed2 (seed2 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0]",
+      "Vseed3 (seed3 0) vsource type=pwl wave=[0 0.9 9.5n 0.9 10n 0.9]",
+      "Vseed4 (seed4 0) vsource type=pwl wave=[0 0.9 9.5n 0.9 10n 0.9]",
+      "Vseed5 (seed5 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0]",
+      "Vseed6 (seed6 0) vsource type=pwl wave=[0 0.9 9.5n 0.9 10n 0.9]",
+      "Vseed7 (seed7 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0]",
+      "XDUT (jitter_en seed0 seed1 seed2 seed3 seed4 seed5 seed6 seed7 clk_out) deterministic_jittered_clock"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "jitter_en",
+      "seed0",
+      "seed1",
+      "seed2",
+      "seed3",
+      "seed4",
+      "seed5",
+      "seed6",
+      "seed7",
+      "clk_out"
+    ]
+  },
+  "family_id": "070",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "1a869d7182ca43162a7e60c25af76a4ba85336db9036f11c4e3a3d376d30130a",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "1a869d7182ca43162a7e60c25af76a4ba85336db9036f11c4e3a3d376d30130a",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vjitter_en (jitter_en 0) vsource type=pwl wave=[0 0.9 220n 0.9]"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vjitter_en (jitter_en 0) vsource type=pwl wave=[0 0.9 120n 0.9 120.1n 0 220n 0]"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_NOMINAL_CLOCK",
+    "P_SEED_DECODE",
+    "P_EDGE_MODULATION",
+    "P_REPEATABILITY",
+    "P_TIMING_BOUNDS",
+    "P_OUTPUT_LEVELS"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "b5264fb32396eaf8a6f796b7bcb887057cb81acf47ca4c521b57fc443eb8a97b",
+    "family_spec_sha256": "2715ac259ec5ad41dd4af756e1a8ceae575fcf37854940011583c8774d235fc4"
+  },
+  "task_id": "v4-070"
+}

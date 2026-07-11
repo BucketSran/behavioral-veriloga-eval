@@ -1,0 +1,20 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/deterministic_jittered_clock.va"
+
+Vseed0 (seed0 0) vsource type=pwl wave=[0 0.9 9.5n 0.9 10n 0.9]
+Vseed1 (seed1 0) vsource type=pwl wave=[0 0.9 9.5n 0.9 10n 0.9]
+Vseed2 (seed2 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0]
+Vseed3 (seed3 0) vsource type=pwl wave=[0 0.9 9.5n 0.9 10n 0.9]
+Vseed4 (seed4 0) vsource type=pwl wave=[0 0.9 9.5n 0.9 10n 0.9]
+Vseed5 (seed5 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0]
+Vseed6 (seed6 0) vsource type=pwl wave=[0 0.9 9.5n 0.9 10n 0.9]
+Vseed7 (seed7 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0]
+XDUT (jitter_en seed0 seed1 seed2 seed3 seed4 seed5 seed6 seed7 clk_out) deterministic_jittered_clock
+Vjitter_en (jitter_en 0) vsource type=pwl wave=[0 0.9 220n 0.9]
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=220n maxstep=50p
+save jitter_en seed0 seed1 seed2 seed3 seed4 seed5 seed6 seed7 clk_out

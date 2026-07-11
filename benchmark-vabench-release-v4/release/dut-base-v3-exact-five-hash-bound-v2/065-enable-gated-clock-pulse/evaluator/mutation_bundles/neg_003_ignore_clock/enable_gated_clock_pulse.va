@@ -1,0 +1,16 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module enable_gated_clock_pulse(clk, en, pulse);
+    input clk, en;
+    output pulse;
+    electrical clk, en, pulse;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real tr = 20p;
+
+    analog begin
+        V(pulse) <+ slew((V(en)>vth) ? vdd : 0.0, 0.9 / (tr), -0.9 / (tr));
+    end
+endmodule
