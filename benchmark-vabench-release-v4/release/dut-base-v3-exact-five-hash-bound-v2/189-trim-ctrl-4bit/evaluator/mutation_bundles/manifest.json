@@ -1,0 +1,132 @@
+{
+  "family_id": "189",
+  "gold_bundle_sha256": "ea19645de9b4ca5b25807b169c1cd9f6f40fc5adfbe970d3e4fbf54a3a59d010",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "trim_ctrl_4bit.va": "fcf46a1975543f211bd1424c7eb84e59205a95519c7b5d7b131e4a0b25ca7fc4"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_TRIM_OUTPUT_LEVELS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "trim_ctrl_4bit.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_TRIM_OUTPUT_LEVELS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "trim_ctrl_4bit.va": "fb660a02b758801b52d76b1264e8c31a57a0d457d8ed891cd9f8face9282eb07"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ANALOG_INPUT_ROUNDING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_floor_without_round/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "trim_ctrl_4bit.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_002_floor_without_round",
+      "trigger_condition": "Inverts output bit dout1 of the rounded trim code.",
+      "violated_property_ids": [
+        "P_ANALOG_INPUT_ROUNDING"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "trim_ctrl_4bit.va": "1b263984e1791cc22444079a45f215ddc6dfb6c6534ea01c3a160d831e2266ce"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LOW_FOUR_BIT_MAPPING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_invert_msb/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "trim_ctrl_4bit.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_003_invert_msb",
+      "trigger_condition": "Inverts the MSB output bit.",
+      "violated_property_ids": [
+        "P_LOW_FOUR_BIT_MAPPING"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "trim_ctrl_4bit.va": "862a1624391afddc077a97435672c75d0b4507269899744a62a22391609c32b1"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_TRIM_OUTPUT_LEVELS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_half_output_level/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "trim_ctrl_4bit.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_004_half_output_level",
+      "trigger_condition": "Drives dout0 high at half logic level.",
+      "violated_property_ids": [
+        "P_TRIM_OUTPUT_LEVELS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "trim_ctrl_4bit.va": "09c1c75bd5027f9ffacd76853c611280c942f902979eb94e593992545cfa747b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CONTINUOUS_CODE_UPDATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "trim_ctrl_4bit.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Trim Ctrl 4bit: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_CONTINUOUS_CODE_UPDATE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

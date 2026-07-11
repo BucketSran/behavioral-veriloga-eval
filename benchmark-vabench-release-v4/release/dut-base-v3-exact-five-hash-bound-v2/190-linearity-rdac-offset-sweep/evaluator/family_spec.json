@@ -1,0 +1,334 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "linearity_rdac_offset_sweep",
+            "parameters": [
+              {
+                "default": "0.6",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.0",
+                "name": "vppd",
+                "override_behavior": "overrides vppd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.0",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "17.0",
+                "name": "nlvl",
+                "override_behavior": "overrides nlvl",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "4",
+                "name": "iter_num",
+                "override_behavior": "overrides iter_num",
+                "type": "integer",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ck",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vinp",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vinn",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vrefp",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vrefn",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dc0",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dc1",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dc2",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dc3",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dc4",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dc5",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dc6",
+                "position": 12
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "linearity_rdac_offset_sweep.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "190",
+  "identity": {
+    "category": "calibration",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Linearity RDAC Offset Sweep"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_CLOCKED_SWEEP_DIRECTION",
+      "observable_contract": "Rising `ck` crossings implement the RDAC sweep using `d < 0.5*vdd` as the low comparator direction.",
+      "required_signals": [
+        "time",
+        "ck",
+        "d",
+        "dc0",
+        "dc1",
+        "dc2",
+        "dc3",
+        "dc4",
+        "dc5",
+        "dc6",
+        "vinn",
+        "vinp",
+        "vrefn",
+        "vrefp"
+      ]
+    },
+    {
+      "id": "P_SWEEP_INITIAL_STATE",
+      "observable_contract": "Initialize `vref`, `vin`, search step, and stored comparator direction to the declared sweep state.",
+      "required_signals": [
+        "time",
+        "ck",
+        "d",
+        "dc0",
+        "dc1",
+        "dc2",
+        "dc3",
+        "dc4",
+        "dc5",
+        "dc6",
+        "vinn",
+        "vinp",
+        "vrefn",
+        "vrefp"
+      ]
+    },
+    {
+      "id": "P_ITERATIVE_SEARCH_UPDATES",
+      "observable_contract": "For each RDAC code, run exactly `iter_num` search-update clocks and halve the step before moving on direction changes.",
+      "required_signals": [
+        "time",
+        "ck",
+        "d",
+        "dc0",
+        "dc1",
+        "dc2",
+        "dc3",
+        "dc4",
+        "dc5",
+        "dc6",
+        "vinn",
+        "vinp",
+        "vrefn",
+        "vrefp"
+      ]
+    },
+    {
+      "id": "P_CODE_UPDATE_AND_RECENTER",
+      "observable_contract": "The clock after each search window updates the 7-bit code, recenters the search, and advances the sweep without an extra search step.",
+      "required_signals": [
+        "time",
+        "ck",
+        "d",
+        "dc0",
+        "dc1",
+        "dc2",
+        "dc3",
+        "dc4",
+        "dc5",
+        "dc6",
+        "vinn",
+        "vinp",
+        "vrefn",
+        "vrefp"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1190",
+    "dut": "v4-190",
+    "testbench": "v4-690"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "ck",
+            "port_ref": "ck",
+            "position": 0
+          },
+          {
+            "net": "d",
+            "port_ref": "d",
+            "position": 1
+          },
+          {
+            "net": "vinp",
+            "port_ref": "vinp",
+            "position": 2
+          },
+          {
+            "net": "vinn",
+            "port_ref": "vinn",
+            "position": 3
+          },
+          {
+            "net": "vrefp",
+            "port_ref": "vrefp",
+            "position": 4
+          },
+          {
+            "net": "vrefn",
+            "port_ref": "vrefn",
+            "position": 5
+          },
+          {
+            "net": "dc0",
+            "port_ref": "dc0",
+            "position": 6
+          },
+          {
+            "net": "dc1",
+            "port_ref": "dc1",
+            "position": 7
+          },
+          {
+            "net": "dc2",
+            "port_ref": "dc2",
+            "position": 8
+          },
+          {
+            "net": "dc3",
+            "port_ref": "dc3",
+            "position": 9
+          },
+          {
+            "net": "dc4",
+            "port_ref": "dc4",
+            "position": 10
+          },
+          {
+            "net": "dc5",
+            "port_ref": "dc5",
+            "position": 11
+          },
+          {
+            "net": "dc6",
+            "port_ref": "dc6",
+            "position": 12
+          }
+        ],
+        "module_ref": "linearity_rdac_offset_sweep",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "ck",
+      "d",
+      "dc0",
+      "dc1",
+      "dc2",
+      "dc3",
+      "dc4",
+      "dc5",
+      "dc6",
+      "vinn",
+      "vinp",
+      "vrefn",
+      "vrefp"
+    ]
+  }
+}

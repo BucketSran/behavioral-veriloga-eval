@@ -1,0 +1,45 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one public behavior contract.
+`include "disciplines.vams"
+module offset_rdac_search_flow(ck, d, vinp, vinn, vrefp, vrefn, dc0, dc1, dc2, dc3, dc4, dc5, dc6);
+input ck, d;
+output vinp, vinn, vrefp, vrefn, dc0, dc1, dc2, dc3, dc4, dc5, dc6;
+electrical ck, d, vinp, vinn, vrefp, vrefn, dc0, dc1, dc2, dc3, dc4, dc5, dc6;
+real vin, vref, step, lsb;
+integer sign, state, iter, flag_calib;
+integer code[0:6];
+analog begin
+    @(initial_step) begin
+        lsb = 1.0 / (17.0 - 1.0); vref = -17.0 / 2.0 * lsb; vin = vref; step = 40m;
+        sign = 1; state = 1; iter = 6; flag_calib = 0;
+        code[6] = 1; code[5] = 0; code[4] = 0; code[3] = 0; code[2] = 0; code[1] = 0; code[0] = 0;
+    end
+    @(cross(V(ck) - 0.5, +1)) begin
+        if (flag_calib == 0) begin
+            sign = V(d) < 0.5;
+            if (iter > 0) begin
+                if (sign == 1) code[iter - 1] = 1;
+                else begin code[iter] = 0; code[iter - 1] = 1; end
+                iter = iter - 1;
+            end else begin
+                flag_calib = 1; iter = 0; step = 40m;
+            end
+        end else begin
+            if (iter == 8) begin
+                iter = 6; step = 40m; flag_calib = 0;
+            end else begin
+                sign = V(d) < 0.5;
+                if ((state != sign) && (step > 0)) step = step / 2.0;
+                state = sign; vin = vin + (2 * state - 1) * step; iter = iter + 1;
+                if (iter == 8) begin
+                    vref = vref + lsb; vin = vref;
+                    code[6] = 1; code[5] = 0; code[4] = 0; code[3] = 0; code[2] = 0; code[1] = 0; code[0] = 0;
+                end
+            end
+        end
+    end
+    V(vinp) <+ (0.42 * (0.6 + 0.5 * vin)); V(vinn) <+ (0.42 * (0.6 - 0.5 * vin));
+    V(vrefp) <+ (0.42 * (0.6 + 0.5 * vref)); V(vrefn) <+ (0.42 * (0.6 - 0.5 * vref));
+    V(dc0) <+ (0.42 * (code[0])); V(dc1) <+ (0.42 * (code[1])); V(dc2) <+ (0.42 * (code[2])); V(dc3) <+ (0.42 * (code[3])); V(dc4) <+ (0.42 * (code[4])); V(dc5) <+ (0.42 * (code[5])); V(dc6) <+ (0.42 * (code[6]));
+end
+endmodule

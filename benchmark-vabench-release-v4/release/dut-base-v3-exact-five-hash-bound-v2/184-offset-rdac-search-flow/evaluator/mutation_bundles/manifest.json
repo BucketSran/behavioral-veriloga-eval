@@ -1,0 +1,134 @@
+{
+  "family_id": "184",
+  "gold_bundle_sha256": "d1b478df43005064ed599036bcd4ce5573b02c8c189b4c4ce4324b3898f81467",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "offset_rdac_search_flow.va": "3b7ba84714657d43892defe3daa1dec0dddac55a57d62cafd94a1a08549332bf"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_REFERENCE_AND_CODE_INITIALIZATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "offset_rdac_search_flow.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_REFERENCE_AND_CODE_INITIALIZATION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "offset_rdac_search_flow.va": "d5919b651655c99be9dcb40e8991d6127e15a075ccfd1d54b65b257842825d16"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OFFSET_SEARCH_BISECTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_no_bisection_halving/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "offset_rdac_search_flow.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_002_no_bisection_halving",
+      "trigger_condition": "Uses full differential search amplitude instead of half-scale around common mode.",
+      "violated_property_ids": [
+        "P_OFFSET_SEARCH_BISECTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "offset_rdac_search_flow.va": "0684e7da80aa8fb45e48cb8fabbdf27bffd1f9e5f869413144a7d1be834c6013"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OFFSET_SEARCH_BISECTION",
+          "P_RDAC_REFINEMENT_SEQUENCE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_inverted_search_sign/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "offset_rdac_search_flow.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_003_inverted_search_sign",
+      "trigger_condition": "Uses the opposite comparator polarity for both RDAC and offset search decisions.",
+      "violated_property_ids": [
+        "P_OFFSET_SEARCH_BISECTION",
+        "P_RDAC_REFINEMENT_SEQUENCE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "offset_rdac_search_flow.va": "97afafb9a08e7783a00490a48ac07fb9049e24eee3250fde49980ae11bcb8b7e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_TWO_PHASE_CLOCKED_FLOW"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_no_reference_advance/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "offset_rdac_search_flow.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_004_no_reference_advance",
+      "trigger_condition": "Collapses the differential reference outputs to common mode.",
+      "violated_property_ids": [
+        "P_TWO_PHASE_CLOCKED_FLOW"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "offset_rdac_search_flow.va": "88cfe5080d4b07c35f64042f43c0fd77522e6210c5a7d3c225dac87586c8a1cc"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_REFERENCE_AND_CODE_INITIALIZATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "offset_rdac_search_flow.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Offset RDAC Search Flow: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_REFERENCE_AND_CODE_INITIALIZATION"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

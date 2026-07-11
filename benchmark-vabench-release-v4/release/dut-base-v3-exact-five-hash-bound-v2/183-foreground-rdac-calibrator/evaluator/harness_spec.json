@@ -1,0 +1,94 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "foreground_rdac_calibrator.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=12n maxstep=20p"
+    ],
+    "body_lines": [
+      "Vck (ck 0) vsource type=pwl wave=[0 0 1n 0 1.05n 1 1.45n 1 1.50n 0 3n 0 3.05n 1 3.45n 1 3.50n 0 5n 0 5.05n 1 5.45n 1 5.50n 0 7n 0 7.05n 1 7.45n 1 7.50n 0 9n 0 9.05n 1 9.45n 1 9.50n 0 11n 0 11.05n 1 11.45n 1 11.50n 0 13n 0 13.05n 1 13.45n 1 13.50n 0]",
+      "Vd (d 0) vsource type=pwl wave=[0 0 2.8n 0 2.9n 1 4.8n 1 4.9n 0 6.8n 0 6.9n 1 8.8n 1 8.9n 0 10.8n 0 10.9n 1]",
+      "Vvrefp (vrefp 0) vsource dc=0.78",
+      "Vvrefn (vrefn 0) vsource dc=0.22",
+      "XDUT (ck d vrefp vrefn dc0 dc1 dc2 dc3 dc4 dc5 dc6 cvinp cvinn en enb) foreground_rdac_calibrator"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "ck",
+      "cvinn",
+      "cvinp",
+      "d",
+      "dc0",
+      "dc1",
+      "dc2",
+      "dc3",
+      "dc4",
+      "dc5",
+      "dc6",
+      "en",
+      "enb",
+      "vrefn",
+      "vrefp"
+    ]
+  },
+  "family_id": "183",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "0b52c7b624eb47712b5539c997a0b063ea466c9c501744da6ad65556adf15c3d",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "e0d4bc2c9ba6c46be5b9ed01965ec6a990b38f84e325b45b46927a945a9f5ca9",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=15n maxstep=20p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INITIAL_MSB_TRIAL_CODE",
+    "P_CLOCKED_RDAC_DECISION_SEQUENCE",
+    "P_DECISION_POLARITY",
+    "P_CALIBRATION_COMPLETION",
+    "P_RDAC_OUTPUT_LEVELS"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "7c487d5370e791a9c117d2cae1caabce4310646b1b008be9c0bb4038ee1d57b0",
+    "family_spec_sha256": "ee168792c0a08fb56b729917e7ada5d9d3272c01185f41efc9e2278fdba35082"
+  },
+  "task_id": "v4-183"
+}

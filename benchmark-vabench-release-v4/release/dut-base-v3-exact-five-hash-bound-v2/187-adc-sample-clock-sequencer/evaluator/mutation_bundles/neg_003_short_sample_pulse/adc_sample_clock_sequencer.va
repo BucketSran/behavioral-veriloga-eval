@@ -1,0 +1,49 @@
+`include "disciplines.vams"
+module adc_sample_clock_sequencer(rst, s, ss, nc_az, nc, conv);
+output rst, s, ss, nc_az, nc, conv;
+electrical rst, s, ss, nc_az, nc, conv;
+real rst_v, s_v, ss_v, nc_az_v, nc_v, conv_v;
+analog begin
+    @(initial_step) begin
+        rst_v = 0; s_v = 0; ss_v = 0; nc_az_v = 0; nc_v = 0; conv_v = 0;
+    end
+    @(timer(0, 18n)) rst_v = 0.9;
+    @(timer(0.25n, 18n)) rst_v = 0.0;
+    @(timer(0.6n, 18n)) s_v = 0.9;
+    @(timer(1.0n, 18n)) s_v = 0.0;
+    @(timer(6.6n, 18n)) s_v = 0.9;
+    @(timer(7.0n, 18n)) s_v = 0.0;
+    @(timer(12.6n, 18n)) s_v = 0.9;
+    @(timer(13.0n, 18n)) s_v = 0.0;
+    @(timer(0.6n, 18n)) ss_v = 0.9;
+    @(timer(1.2n, 18n)) ss_v = 0.0;
+    @(timer(6.6n, 18n)) ss_v = 0.9;
+    @(timer(7.2n, 18n)) ss_v = 0.0;
+    @(timer(12.6n, 18n)) ss_v = 0.9;
+    @(timer(13.2n, 18n)) ss_v = 0.0;
+    @(timer(1.35n, 18n)) nc_az_v = 0.9;
+    @(timer(1.55n, 18n)) nc_az_v = 0.0;
+    @(timer(7.35n, 18n)) nc_az_v = 0.9;
+    @(timer(7.55n, 18n)) nc_az_v = 0.0;
+    @(timer(13.35n, 18n)) nc_az_v = 0.9;
+    @(timer(13.55n, 18n)) nc_az_v = 0.0;
+    @(timer(1.7n, 18n)) nc_v = 0.9;
+    @(timer(2.05n, 18n)) nc_v = 0.0;
+    @(timer(7.7n, 18n)) nc_v = 0.9;
+    @(timer(8.05n, 18n)) nc_v = 0.0;
+    @(timer(13.7n, 18n)) nc_v = 0.9;
+    @(timer(14.05n, 18n)) nc_v = 0.0;
+    @(timer(2.4n, 18n)) conv_v = 0.9;
+    @(timer(5.4n, 18n)) conv_v = 0.0;
+    @(timer(8.4n, 18n)) conv_v = 0.9;
+    @(timer(11.4n, 18n)) conv_v = 0.0;
+    @(timer(14.4n, 18n)) conv_v = 0.9;
+    @(timer(17.4n, 18n)) conv_v = 0.0;
+    V(rst) <+ transition(rst_v, 0, 20p, 20p);
+    V(s) <+ transition(0.5 * s_v, 0, 20p, 20p);
+    V(ss) <+ transition(ss_v, 0, 20p, 20p);
+    V(nc_az) <+ transition(nc_az_v, 0, 20p, 20p);
+    V(nc) <+ transition(nc_v, 0, 20p, 20p);
+    V(conv) <+ transition(conv_v, 0, 20p, 20p);
+end
+endmodule

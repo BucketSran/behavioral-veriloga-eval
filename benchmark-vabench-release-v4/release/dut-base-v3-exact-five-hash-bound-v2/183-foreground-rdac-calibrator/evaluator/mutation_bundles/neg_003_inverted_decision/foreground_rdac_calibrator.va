@@ -1,0 +1,28 @@
+`include "disciplines.vams"
+module foreground_rdac_calibrator(ck, d, vrefp, vrefn, dc0, dc1, dc2, dc3, dc4, dc5, dc6, cvinp, cvinn, en, enb);
+input ck, d, vrefp, vrefn;
+output dc0, dc1, dc2, dc3, dc4, dc5, dc6, cvinp, cvinn, en, enb;
+electrical ck, d, vrefp, vrefn, dc0, dc1, dc2, dc3, dc4, dc5, dc6, cvinp, cvinn, en, enb;
+parameter real vdd = 1.0;
+integer iter, flag_calib;
+integer code[0:6];
+genvar i;
+analog begin
+    @(initial_step) begin
+        iter = 6; flag_calib = 1;
+        code[6] = 1; for (i = 0; i < 6; i = i + 1) code[i] = 0;
+    end
+    @(cross(V(ck) - 0.5 * vdd, +1)) begin
+        if (iter > 0) begin
+            if (V(d) < 0.5 * vdd) begin code[iter] = 0; code[iter - 1] = 1; end
+            else code[iter - 1] = 1;
+            iter = iter - 1;
+        end else begin
+            flag_calib = 0;
+        end
+    end
+    V(cvinp) <+ V(vrefp); V(cvinn) <+ V(vrefn);
+    V(en) <+ transition(flag_calib, 0, 20p, 20p); V(enb) <+ transition(1 - flag_calib, 0, 20p, 20p);
+    V(dc0) <+ code[0]; V(dc1) <+ code[1]; V(dc2) <+ code[2]; V(dc3) <+ code[3]; V(dc4) <+ code[4]; V(dc5) <+ code[5]; V(dc6) <+ code[6];
+end
+endmodule

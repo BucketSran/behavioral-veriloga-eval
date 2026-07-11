@@ -1,0 +1,104 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "sarfend_logic_4b.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=5n maxstep=10p"
+    ],
+    "body_lines": [
+      "Vclks (clks 0) vsource type=pwl wave=[0 0 1n 0 1.05n 1 1.45n 1 1.50n 0 8n 0 8.05n 1 8.45n 1 8.50n 0]",
+      "Vdcomp (dcomp 0) vsource type=pwl wave=[0 0 2.0n 0 2.05n 1 2.45n 1 2.50n 0 4.0n 0 4.05n 0 4.45n 0 4.50n 0 6.0n 0 6.05n 1 6.45n 1 6.50n 0]",
+      "Vdcompb (dcompb 0) vsource type=pwl wave=[0 0 2.0n 0 2.05n 0 2.45n 0 2.50n 0 4.0n 0 4.05n 1 4.45n 1 4.50n 0 6.0n 0 6.05n 0 6.45n 0 6.50n 0]",
+      "Vtest (test 0) vsource dc=0",
+      "Vdtest0 (dtest0 0) vsource dc=0",
+      "Vdtest1 (dtest1 0) vsource dc=1",
+      "Vdtest2 (dtest2 0) vsource dc=0",
+      "Vdtest3 (dtest3 0) vsource dc=1",
+      "XDUT (clks dcomp dcompb test dtest0 dtest1 dtest2 dtest3 clkc dp1 dp2 dp3 dp4 dm1 dm2 dm3 dm4 dout0 dout1 dout2 dout3) sarfend_logic_4b"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clkc",
+      "clks",
+      "dcomp",
+      "dcompb",
+      "dm1",
+      "dm2",
+      "dm3",
+      "dm4",
+      "dout0",
+      "dout1",
+      "dout2",
+      "dout3",
+      "dp1",
+      "dp2",
+      "dp3",
+      "dp4",
+      "dtest0",
+      "dtest1",
+      "dtest2",
+      "dtest3",
+      "test"
+    ]
+  },
+  "family_id": "186",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "f6dd61dacc35ecd490f5674f13bb206c65d8ccdb0186b7a6a8bf3c2227fd54cf",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "0a38e213eb03bb4ab6756cc29206fb0b0e5f8e779a988fe28d6de04b4f30bb5b",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=10n maxstep=10p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_CONVERSION_RESET_AND_PREVIOUS_WORD",
+    "P_SAMPLE_AND_COMPARATOR_DECISIONS",
+    "P_TEST_OVERRIDE_BEHAVIOR",
+    "P_DOUT_BIT_MAPPING",
+    "P_LOGIC_OUTPUT_LEVELS"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "1eec4614d18c1618ea8ea7ea9e457da6d0612c8a0c89f91fe87dc62512cc2342",
+    "family_spec_sha256": "2721ae0be70cd5951c21f4cd2ad903ccea04cb0dcfa27de7656f4243bf57276e"
+  },
+  "task_id": "v4-186"
+}

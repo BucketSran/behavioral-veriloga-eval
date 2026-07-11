@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/offset_rdac_search_flow.va"
+
+Vck (ck 0) vsource type=pulse val0=0 val1=1 delay=1n period=1n width=0.4n rise=20p fall=20p
+Vd (d 0) vsource type=pwl wave=[0 0 2.8n 0 2.9n 1 4.8n 1 4.9n 0 6.8n 0 6.9n 1 8.8n 1 8.9n 0 10.8n 0 10.9n 1 12.8n 1 12.9n 0 14.8n 0 14.9n 1 16.8n 1 16.9n 0]
+XDUT (ck d vinp vinn vrefp vrefn dc0 dc1 dc2 dc3 dc4 dc5 dc6) offset_rdac_search_flow
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=10n maxstep=20p
+save ck d dc0 dc1 dc2 dc3 dc4 dc5 dc6 vinn vinp vrefn vrefp

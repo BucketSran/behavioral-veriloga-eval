@@ -1,0 +1,89 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "offset_rdac_search_flow.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=10n maxstep=20p"
+    ],
+    "body_lines": [
+      "Vck (ck 0) vsource type=pulse val0=0 val1=1 delay=1n period=1n width=0.4n rise=20p fall=20p",
+      "Vd (d 0) vsource type=pwl wave=[0 0 2.8n 0 2.9n 1 4.8n 1 4.9n 0 6.8n 0 6.9n 1 8.8n 1 8.9n 0 10.8n 0 10.9n 1 12.8n 1 12.9n 0 14.8n 0 14.9n 1 16.8n 1 16.9n 0]",
+      "XDUT (ck d vinp vinn vrefp vrefn dc0 dc1 dc2 dc3 dc4 dc5 dc6) offset_rdac_search_flow"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "ck",
+      "d",
+      "dc0",
+      "dc1",
+      "dc2",
+      "dc3",
+      "dc4",
+      "dc5",
+      "dc6",
+      "vinn",
+      "vinp",
+      "vrefn",
+      "vrefp"
+    ]
+  },
+  "family_id": "184",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "7135e31cc5558542f965fc72a5017d8550c757729a399acd6a41c83f262926ae",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "f2a0857a2122190b6504914f8d65f0c4165959a5bab9b16839a6d6eb23b2555d",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=18n maxstep=20p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_TWO_PHASE_CLOCKED_FLOW",
+    "P_REFERENCE_AND_CODE_INITIALIZATION",
+    "P_RDAC_REFINEMENT_SEQUENCE",
+    "P_OFFSET_SEARCH_BISECTION"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "e7b954cd6e435183bc7247d9d313b67cbd9f748055dce4574744bd48e25bc6c4",
+    "family_spec_sha256": "03ee1f041a7dc9e6df6a957e5ed30e34f054883cdab2ab3be90eadd1fa3a7544"
+  },
+  "task_id": "v4-184"
+}

@@ -1,0 +1,132 @@
+{
+  "family_id": "182",
+  "gold_bundle_sha256": "47f8a993e79741a36d2f29bd2281cc9e32611b1afda5fc98026f7c8866f453a3",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "clocked_mux4_sampler.va": "6ce188bb80e97d3d938b7914a91797dd6b42d6b71cf3782d30840239f4276890"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SELECT_DECODE_AND_OUTPUT_TIMING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "clocked_mux4_sampler.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_SELECT_DECODE_AND_OUTPUT_TIMING"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "clocked_mux4_sampler.va": "237b478977a0546dcc4faf5e2f9250821516adb23ebaf26452d9ad9f0b24fb67"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FALLING_CLOCK_UPDATE_SAMPLE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_rising_edge_sample/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "clocked_mux4_sampler.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_002_rising_edge_sample",
+      "trigger_condition": "Samples on rising clks instead of falling clks.",
+      "violated_property_ids": [
+        "P_FALLING_CLOCK_UPDATE_SAMPLE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "clocked_mux4_sampler.va": "4269ca300ffd284e30072e85e659e9f2db72f156177aaf76cc207187685e8275"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_UPDATE_LOW_HOLDS_STATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_ignore_update/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "clocked_mux4_sampler.va"
+      ],
+      "fault_class": "timing_or_state_update_fault",
+      "id": "neg_003_ignore_update",
+      "trigger_condition": "Ignores the update qualifier and applies select changes on every falling clock.",
+      "violated_property_ids": [
+        "P_UPDATE_LOW_HOLDS_STATE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "clocked_mux4_sampler.va": "b82a160088505a17d7069170be90a5e29ee887fb4e5240de70a0d6ed7418ca45"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_SELECTS_DIN0"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_ignore_reset/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "clocked_mux4_sampler.va"
+      ],
+      "fault_class": "state_reset_or_enable_error",
+      "id": "neg_004_ignore_reset",
+      "trigger_condition": "Ignores the active-high reset default to din0.",
+      "violated_property_ids": [
+        "P_RESET_SELECTS_DIN0"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "clocked_mux4_sampler.va": "752eb290db92c3d23ba1dadbab760e6ecf72ce95a7370a8c555b346b58982f6e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SELECT_DECODE_AND_OUTPUT_TIMING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_swap_select_lsb/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "clocked_mux4_sampler.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_005_swap_select_lsb",
+      "trigger_condition": "Swaps the least-significant select-bit mapping for din1/din2.",
+      "violated_property_ids": [
+        "P_SELECT_DECODE_AND_OUTPUT_TIMING"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

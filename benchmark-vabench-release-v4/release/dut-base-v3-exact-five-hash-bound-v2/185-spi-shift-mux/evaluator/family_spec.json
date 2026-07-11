@@ -1,0 +1,313 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "spi_shift_mux",
+            "parameters": [],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "scki",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sdi",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out0",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out1",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out2",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out3",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out4",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out5",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out6",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out7",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sdo",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "scko",
+                "position": 12
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "spi_shift_mux.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "185",
+  "identity": {
+    "category": "logic",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "SPI Shift Mux"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_LOADS_DEFAULT_WORD",
+      "observable_contract": "Initialization and active-high `rst` load the 8-bit word `10110010` with `out7` as the leftmost bit and `out0` as the rightmost bit.",
+      "required_signals": [
+        "time",
+        "out0",
+        "out1",
+        "out2",
+        "out3",
+        "out4",
+        "out5",
+        "out6",
+        "out7",
+        "rst",
+        "scki",
+        "scko",
+        "sdi",
+        "sdo"
+      ]
+    },
+    {
+      "id": "P_SHIFT_ON_SCKI_TRANSITIONS",
+      "observable_contract": "While reset is inactive, every `scki` transition shifts the register exactly once.",
+      "required_signals": [
+        "time",
+        "out0",
+        "out1",
+        "out2",
+        "out3",
+        "out4",
+        "out5",
+        "out6",
+        "out7",
+        "rst",
+        "scki",
+        "scko",
+        "sdi",
+        "sdo"
+      ]
+    },
+    {
+      "id": "P_SHIFT_DIRECTION_AND_SDI_INSERTION",
+      "observable_contract": "The shift moves bits toward higher output indexes and inserts `sdi` into the declared end of the register.",
+      "required_signals": [
+        "time",
+        "out0",
+        "out1",
+        "out2",
+        "out3",
+        "out4",
+        "out5",
+        "out6",
+        "out7",
+        "rst",
+        "scki",
+        "scko",
+        "sdi",
+        "sdo"
+      ]
+    },
+    {
+      "id": "P_SDO_EXPOSES_SHIFTED_OUT_BIT",
+      "observable_contract": "`sdo` exposes the shifted-out `out7` bit rather than another register bit.",
+      "required_signals": [
+        "time",
+        "out0",
+        "out1",
+        "out2",
+        "out3",
+        "out4",
+        "out5",
+        "out6",
+        "out7",
+        "rst",
+        "scki",
+        "scko",
+        "sdi",
+        "sdo"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_RAIL_LEVELS",
+      "observable_contract": "The parallel outputs and `sdo` are voltage-coded at valid low/high levels.",
+      "required_signals": [
+        "time",
+        "out0",
+        "out1",
+        "out2",
+        "out3",
+        "out4",
+        "out5",
+        "out6",
+        "out7",
+        "rst",
+        "scki",
+        "scko",
+        "sdi",
+        "sdo"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1185",
+    "dut": "v4-185",
+    "testbench": "v4-685"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "scki",
+            "port_ref": "scki",
+            "position": 0
+          },
+          {
+            "net": "sdi",
+            "port_ref": "sdi",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "out0",
+            "port_ref": "out0",
+            "position": 3
+          },
+          {
+            "net": "out1",
+            "port_ref": "out1",
+            "position": 4
+          },
+          {
+            "net": "out2",
+            "port_ref": "out2",
+            "position": 5
+          },
+          {
+            "net": "out3",
+            "port_ref": "out3",
+            "position": 6
+          },
+          {
+            "net": "out4",
+            "port_ref": "out4",
+            "position": 7
+          },
+          {
+            "net": "out5",
+            "port_ref": "out5",
+            "position": 8
+          },
+          {
+            "net": "out6",
+            "port_ref": "out6",
+            "position": 9
+          },
+          {
+            "net": "out7",
+            "port_ref": "out7",
+            "position": 10
+          },
+          {
+            "net": "sdo",
+            "port_ref": "sdo",
+            "position": 11
+          },
+          {
+            "net": "scko",
+            "port_ref": "scko",
+            "position": 12
+          }
+        ],
+        "module_ref": "spi_shift_mux",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "out0",
+      "out1",
+      "out2",
+      "out3",
+      "out4",
+      "out5",
+      "out6",
+      "out7",
+      "rst",
+      "scki",
+      "scko",
+      "sdi",
+      "sdo"
+    ]
+  }
+}

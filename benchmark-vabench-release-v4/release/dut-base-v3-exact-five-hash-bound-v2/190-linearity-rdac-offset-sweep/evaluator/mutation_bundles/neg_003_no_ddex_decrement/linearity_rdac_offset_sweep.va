@@ -1,0 +1,62 @@
+`include "disciplines.vams"
+module linearity_rdac_offset_sweep(ck, d, vinp, vinn, vrefp, vrefn, dc0, dc1, dc2, dc3, dc4, dc5, dc6);
+input ck, d;
+output vinp, vinn, vrefp, vrefn, dc0, dc1, dc2, dc3, dc4, dc5, dc6;
+electrical ck, d, vinp, vinn, vrefp, vrefn, dc0, dc1, dc2, dc3, dc4, dc5, dc6;
+parameter real vcm = 0.6;
+parameter real vppd = 1.0;
+parameter real vdd = 1.0;
+parameter real nlvl = 17.0;
+parameter integer iter_num = 4;
+real vin, vref, step, lsb;
+integer sign, state, iter, flag_calib, ddex;
+integer d0, d1, d2, d3, d4, d5, d6;
+analog begin
+    @(initial_step) begin
+        lsb = vppd / (nlvl - 1.0);
+        vref = (1.0 - nlvl / 2.0) * lsb;
+        vin = vref;
+        step = 40m;
+        sign = 1; state = 1; iter = 0; flag_calib = 0; ddex = 127;
+        d0 = 1; d1 = 1; d2 = 1; d3 = 1; d4 = 1; d5 = 1; d6 = 1;
+    end
+    @(cross(V(ck) - 0.5 * vdd, +1)) begin
+        if (flag_calib == 0) begin
+            sign = V(d) < 0.5 * vdd;
+            if ((state != sign) && (step > 0)) step = step / 2.0;
+            state = sign;
+            vin = vin + (2 * state - 1) * step;
+            iter = iter + 1;
+            if (iter == iter_num) flag_calib = 1;
+        end else begin
+            if (ddex != 0) ddex = ddex;
+            else begin
+                ddex = 127;
+                vref = vref + lsb;
+            end
+            d0 = (ddex >> 0) & 1;
+            d1 = (ddex >> 1) & 1;
+            d2 = (ddex >> 2) & 1;
+            d3 = (ddex >> 3) & 1;
+            d4 = (ddex >> 4) & 1;
+            d5 = (ddex >> 5) & 1;
+            d6 = (ddex >> 6) & 1;
+            flag_calib = 0;
+            iter = 0;
+            step = 40m;
+            vin = vref;
+        end
+    end
+    V(vinp) <+ vcm + 0.5 * vin;
+    V(vinn) <+ vcm - 0.5 * vin;
+    V(vrefp) <+ vcm + 0.5 * vref;
+    V(vrefn) <+ vcm - 0.5 * vref;
+    V(dc0) <+ transition(d0 ? vdd : 0.0, 0, 10p, 10p);
+    V(dc1) <+ transition(d1 ? vdd : 0.0, 0, 10p, 10p);
+    V(dc2) <+ transition(d2 ? vdd : 0.0, 0, 10p, 10p);
+    V(dc3) <+ transition(d3 ? vdd : 0.0, 0, 10p, 10p);
+    V(dc4) <+ transition(d4 ? vdd : 0.0, 0, 10p, 10p);
+    V(dc5) <+ transition(d5 ? vdd : 0.0, 0, 10p, 10p);
+    V(dc6) <+ transition(d6 ? vdd : 0.0, 0, 10p, 10p);
+end
+endmodule

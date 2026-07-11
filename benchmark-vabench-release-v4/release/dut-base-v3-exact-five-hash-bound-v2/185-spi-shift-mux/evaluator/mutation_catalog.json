@@ -1,0 +1,132 @@
+{
+  "family_id": "185",
+  "gold_bundle_sha256": "8fc263f85e3fa51e1816e750e1a3b801ee28436e912e5177f6e3e18638902abe",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "spi_shift_mux.va": "3cd53013aa28783748aacb3bd670ad15bf7d59f5dbe9e891b9c24cd32a896893"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_RAIL_LEVELS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "spi_shift_mux.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_OUTPUT_RAIL_LEVELS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "spi_shift_mux.va": "679b11386af2c82f6050745343250671a6bc4eb641490b6957c369b5024d6b17"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SHIFT_ON_SCKI_TRANSITIONS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_shift_on_rising_only/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "spi_shift_mux.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_002_shift_on_rising_only",
+      "trigger_condition": "Shifts only on rising SCKI edges instead of every SCKI transition.",
+      "violated_property_ids": [
+        "P_SHIFT_ON_SCKI_TRANSITIONS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "spi_shift_mux.va": "b15c96bc8bb381754f72ffa00f1699521d05c3076818c1e73996afd23052b555"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SHIFT_DIRECTION_AND_SDI_INSERTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_reverse_shift_direction/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "spi_shift_mux.va"
+      ],
+      "fault_class": "reverse_shift_direction",
+      "id": "neg_003_reverse_shift_direction",
+      "trigger_condition": "Shifts toward lower indexes and loads SDI into bit 7.",
+      "violated_property_ids": [
+        "P_SHIFT_DIRECTION_AND_SDI_INSERTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "spi_shift_mux.va": "5b00d3a62983da231a3408a0b922002efdad97bfcfce6f026c4c843d42055f0c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SDO_EXPOSES_SHIFTED_OUT_BIT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_wrong_sdo_bit/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "spi_shift_mux.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_004_wrong_sdo_bit",
+      "trigger_condition": "Drives SDO from bit 0 instead of the shifted-out bit 7.",
+      "violated_property_ids": [
+        "P_SDO_EXPOSES_SHIFTED_OUT_BIT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "spi_shift_mux.va": "5832576b66306c0ab829669f0ad3e0d4d8566dcff16acfac1b9b941cc64dc849"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_LOADS_DEFAULT_WORD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_ignore_reset_reload/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "spi_shift_mux.va"
+      ],
+      "fault_class": "state_reset_or_enable_error",
+      "id": "neg_005_ignore_reset_reload",
+      "trigger_condition": "Ignores the active-high reset reload and therefore keeps the pre-reset shifted state.",
+      "violated_property_ids": [
+        "P_RESET_LOADS_DEFAULT_WORD"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

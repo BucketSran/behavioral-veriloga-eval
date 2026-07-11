@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/sarfend_logic_4b.va"
+
+Vclks (clks 0) vsource type=pwl wave=[0 0 1n 0 1.05n 1 1.45n 1 1.50n 0 8n 0 8.05n 1 8.45n 1 8.50n 0]
+Vdcomp (dcomp 0) vsource type=pwl wave=[0 0 2.0n 0 2.05n 1 2.45n 1 2.50n 0 4.0n 0 4.05n 0 4.45n 0 4.50n 0 6.0n 0 6.05n 1 6.45n 1 6.50n 0]
+Vdcompb (dcompb 0) vsource type=pwl wave=[0 0 2.0n 0 2.05n 0 2.45n 0 2.50n 0 4.0n 0 4.05n 1 4.45n 1 4.50n 0 6.0n 0 6.05n 0 6.45n 0 6.50n 0]
+Vtest (test 0) vsource dc=0
+Vdtest0 (dtest0 0) vsource dc=0
+Vdtest1 (dtest1 0) vsource dc=1
+Vdtest2 (dtest2 0) vsource dc=0
+Vdtest3 (dtest3 0) vsource dc=1
+XDUT (clks dcomp dcompb test dtest0 dtest1 dtest2 dtest3 clkc dp1 dp2 dp3 dp4 dm1 dm2 dm3 dm4 dout0 dout1 dout2 dout3) sarfend_logic_4b
+
+tran tran stop=10n maxstep=10p
+save clkc clks dcomp dcompb dm1 dm2 dm3 dm4 dout0 dout1 dout2 dout3 dp1 dp2 dp3 dp4 dtest0 dtest1 dtest2 dtest3 test

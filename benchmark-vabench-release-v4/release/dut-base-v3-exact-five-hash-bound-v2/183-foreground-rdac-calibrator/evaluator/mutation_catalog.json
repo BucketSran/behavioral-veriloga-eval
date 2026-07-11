@@ -1,0 +1,134 @@
+{
+  "family_id": "183",
+  "gold_bundle_sha256": "eea0ed133c8578b5dbd34eded2977a62c83ccbc86e754198ac11b7c514cbf0fe",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "foreground_rdac_calibrator.va": "459a14876a36c4a96bdf7078031a2d0c19b8f157ffeb60acee24f496e947a1c8"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RDAC_OUTPUT_LEVELS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "foreground_rdac_calibrator.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_RDAC_OUTPUT_LEVELS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "foreground_rdac_calibrator.va": "c2ae3e51ac6baa1611b41135142fed9bc4774ce68dad9f8c4f8f915c98e6a8d3"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INITIAL_MSB_TRIAL_CODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_wrong_initial_code/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "foreground_rdac_calibrator.va"
+      ],
+      "fault_class": "state_reset_or_enable_error",
+      "id": "neg_002_wrong_initial_code",
+      "trigger_condition": "Initializes the MSB calibration code low instead of high.",
+      "violated_property_ids": [
+        "P_INITIAL_MSB_TRIAL_CODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "foreground_rdac_calibrator.va": "0c629a46f1920e1d544753ab5da49ca131c0477820ea8d05edb2329e38a30e18"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CLOCKED_RDAC_DECISION_SEQUENCE",
+          "P_DECISION_POLARITY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_inverted_decision/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "foreground_rdac_calibrator.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_003_inverted_decision",
+      "trigger_condition": "Clears the current code bit for low d decisions instead of high d decisions.",
+      "violated_property_ids": [
+        "P_CLOCKED_RDAC_DECISION_SEQUENCE",
+        "P_DECISION_POLARITY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "foreground_rdac_calibrator.va": "d1ebcd0eab7251e5b5dfb0a1d53035e669ba997697492f4e502222ad39e3160c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CALIBRATION_COMPLETION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_enable_never_finishes/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "foreground_rdac_calibrator.va"
+      ],
+      "fault_class": "state_reset_or_enable_error",
+      "id": "neg_004_enable_never_finishes",
+      "trigger_condition": "Leaves calibration enable high after all RDAC bits are visited.",
+      "violated_property_ids": [
+        "P_CALIBRATION_COMPLETION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "foreground_rdac_calibrator.va": "f473fc57310b930b07a6199d53695dddad2b257c20387079bbbec0d2324c70db"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RDAC_OUTPUT_LEVELS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "foreground_rdac_calibrator.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Foreground RDAC Calibrator: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_RDAC_OUTPUT_LEVELS"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

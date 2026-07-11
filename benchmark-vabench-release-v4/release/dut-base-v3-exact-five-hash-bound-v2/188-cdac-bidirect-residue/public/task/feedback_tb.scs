@@ -1,0 +1,20 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/cdac_bidirect_residue.va"
+
+Vvin (vin 0) vsource dc=0.30
+Vclks (clks 0) vsource type=pwl wave=[0 1 0.8n 1 0.85n 0 8n 0]
+Vd7 (dctrl7 0) vsource type=pwl wave=[0 1 1.8n 1 1.85n 0 8n 0]
+Vd6 (dctrl6 0) vsource type=pwl wave=[0 0 2.8n 0 2.85n 1 8n 1]
+Vd5 (dctrl5 0) vsource type=pwl wave=[0 0 3.8n 0 3.85n 1 8n 1]
+Vd4 (dctrl4 0) vsource type=pwl wave=[0 0 4.8n 0 4.85n 1 8n 1]
+Vd3 (dctrl3 0) vsource dc=0
+Vd2 (dctrl2 0) vsource dc=0
+Vd1 (dctrl1 0) vsource dc=0
+XDUT (vin clks dctrl1 dctrl2 dctrl3 dctrl4 dctrl5 dctrl6 dctrl7 vres) cdac_bidirect_residue
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=6n maxstep=10p
+save clks dctrl1 dctrl2 dctrl3 dctrl4 dctrl5 dctrl6 dctrl7 vin vres

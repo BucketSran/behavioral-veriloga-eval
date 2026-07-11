@@ -1,0 +1,20 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one public behavior contract.
+`include "disciplines.vams"
+module cdac_bidirect_residue(vin, clks, dctrl1, dctrl2, dctrl3, dctrl4, dctrl5, dctrl6, dctrl7, vres);
+input vin, clks, dctrl1, dctrl2, dctrl3, dctrl4, dctrl5, dctrl6, dctrl7;
+output vres;
+electrical vin, clks, dctrl1, dctrl2, dctrl3, dctrl4, dctrl5, dctrl6, dctrl7, vres;
+real r;
+analog begin
+    @(initial_step or cross(V(clks) - 0.5, -1)) r = V(vin);
+    @(cross(V(dctrl7) - 0.5, -1)) r = r + 0.5;
+    @(cross(V(dctrl6) - 0.5, +1)) r = r - 0.25;
+    @(cross(V(dctrl5) - 0.5, +1)) r = r - 0.125;
+    @(cross(V(dctrl4) - 0.5, +1)) r = r - 0.0625;
+    @(cross(V(dctrl3) - 0.5, +1)) r = r - 0.03125;
+    @(cross(V(dctrl2) - 0.5, +1)) r = r - 0.015625;
+    @(cross(V(dctrl1) - 0.5, +1)) r = r - 0.0078125;
+    V(vres) <+ (0.42 * (transition(r, 0, 20p, 20p)));
+end
+endmodule

@@ -1,0 +1,12 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/trim_ctrl_4bit.va"
+
+Vain (ain 0) vsource type=pwl wave=[0 0 1n 0 1.05n 3 2n 3 2.05n 6 3n 6 3.05n 11 4n 11 4.05n 14 5n 14]
+XDUT (ain dout0 dout1 dout2 dout3) trim_ctrl_4bit
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=3.6n maxstep=10p
+save ain dout0 dout1 dout2 dout3
