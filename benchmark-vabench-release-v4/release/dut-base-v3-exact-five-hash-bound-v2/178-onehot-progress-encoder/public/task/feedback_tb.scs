@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/onehot_progress_encoder.va"
+
+Vck (ck 0) vsource type=pulse val0=0 val1=1 delay=1n period=1n width=0.4n rise=20p fall=20p
+
+XDUT (ck d0 d1 d2 d3 d4 d5 d6 d7 d8 d9 d10 d11 d12 d13 d14 d15 sum) onehot_progress_encoder
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=17n maxstep=20p
+save ck d0 d1 d2 d3 d4 d5 d6 d7 d8 d9 d10 d11 d12 d13 d14 d15 sum

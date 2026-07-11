@@ -1,0 +1,42 @@
+// vaBench generated partial-pass negative: inverted output polarity
+// Preserves the SAR update state machine but drives the DAC residue with wrong sign.
+`include "disciplines.vams"
+
+module iterative_isar_dac(dcmp, rst, clk, vdac);
+input dcmp, rst, clk;
+output vdac;
+electrical dcmp, rst, clk, vdac;
+
+parameter real vth = 0.5;
+parameter real tr = 100p;
+parameter real range = 0.1;
+parameter real lsb = 10u;
+parameter real radix = 2;
+real vdac_level;
+real vdelta;
+
+analog begin
+    @(initial_step) begin
+        vdac_level = 0;
+        vdelta = range;
+    end
+
+    @(cross(V(rst) - vth, +1)) begin
+        vdac_level = 0;
+        vdelta = range;
+    end
+
+    @(cross(V(clk) - vth, +1)) begin
+        if (vdelta > lsb) begin
+            if (V(dcmp) > vth)
+                vdac_level = vdac_level - vdelta;
+            else
+                vdac_level = vdac_level + vdelta;
+            vdelta = vdelta / radix;
+        end
+    end
+
+    V(vdac) <+ transition(-vdac_level, 0, tr, tr);
+end
+
+endmodule

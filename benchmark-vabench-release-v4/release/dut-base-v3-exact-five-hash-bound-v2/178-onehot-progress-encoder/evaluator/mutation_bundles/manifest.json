@@ -1,0 +1,136 @@
+{
+  "family_id": "178",
+  "gold_bundle_sha256": "9c2e5caf72eefcd55bff3227e44e80553a101b737136c4d478fc250ae8380a1c",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "onehot_progress_encoder.va": "34a347091c5257f29aeb752605672c4f39d37e9303ceb864f1f7cd946fa1a116"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PROGRESS_INITIAL_STATE",
+          "P_SEQUENTIAL_ONEHOT_ASSERTION",
+          "P_SUM_COUNT_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "onehot_progress_encoder.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_PROGRESS_INITIAL_STATE",
+        "P_SEQUENTIAL_ONEHOT_ASSERTION",
+        "P_SUM_COUNT_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "onehot_progress_encoder.va": "b4f26e880cf36137fa59c4f84a98d6e8402c56fc2e6abfb3a993a2089c450f26"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SEQUENTIAL_ONEHOT_ASSERTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_start_at_one/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "onehot_progress_encoder.va"
+      ],
+      "fault_class": "timing_or_state_update_fault",
+      "id": "neg_002_start_at_one",
+      "trigger_condition": "Starts progress at index 1, skipping d0 on the first clock.",
+      "violated_property_ids": [
+        "P_SEQUENTIAL_ONEHOT_ASSERTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "onehot_progress_encoder.va": "f03cff5a4462ef2e8718e4874dd7d496a20e5845b5819ece7d678de92380fd5c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SUM_COUNT_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_sum/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "onehot_progress_encoder.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_003_wrong_sum",
+      "trigger_condition": "Reports one less than the active progress count.",
+      "violated_property_ids": [
+        "P_SUM_COUNT_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "onehot_progress_encoder.va": "14d9f6d880820c11610304c499b56879e2bb9a5f4e4e97606b7f90e76da1b8be"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ACCUMULATING_PROGRESS_BITS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_clear_previous_bits/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "onehot_progress_encoder.va"
+      ],
+      "fault_class": "clear_previous_bits",
+      "id": "neg_004_clear_previous_bits",
+      "trigger_condition": "Clears the previous one-hot/progress bits before setting the next bit.",
+      "violated_property_ids": [
+        "P_ACCUMULATING_PROGRESS_BITS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "onehot_progress_encoder.va": "1a74da7a70b163ca1c1ba74ac1fdf754eb14433516a1120c1a4dd508613c3a4d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SUM_COUNT_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "onehot_progress_encoder.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Onehot Progress Encoder: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_SUM_COUNT_OUTPUT"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

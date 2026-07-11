@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/iterative_isar_dac.va"
+
+Vrst (rst 0) vsource type=pwl wave=[0 0 0.5n 0 0.55n 1.0 1.00n 1.0 1.05n 0]
+Vclk (clk 0) vsource type=pwl wave=[0 0 2n 0 2.05n 1.0 2.50n 1.0 2.55n 0 4n 0 4.05n 1.0 4.50n 1.0 4.55n 0 6n 0 6.05n 1.0 6.50n 1.0 6.55n 0 8n 0 8.05n 1.0 8.50n 1.0 8.55n 0 10n 0 10.05n 1.0 10.50n 1.0 10.55n 0]
+Vdcmp (dcmp 0) vsource type=pwl wave=[0 1.0 3.75n 1.0 3.8n 0 7.75n 0 7.8n 1.0 9.75n 1.0 9.8n 0]
+
+XDUT (dcmp rst clk vdac) iterative_isar_dac
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=12n maxstep=20p
+save dcmp rst clk vdac

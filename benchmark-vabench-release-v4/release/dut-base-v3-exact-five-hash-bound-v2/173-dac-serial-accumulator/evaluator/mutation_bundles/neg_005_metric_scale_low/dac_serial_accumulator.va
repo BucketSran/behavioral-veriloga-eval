@@ -1,0 +1,37 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one public behavior contract.
+`include "disciplines.vams"
+
+module dac_serial_accumulator(clk_sample, clk_sarready, data, out);
+input clk_sample, clk_sarready, data;
+output out;
+electrical clk_sample, clk_sarready, data, out;
+
+parameter real vdd = 1.1;
+parameter real vcm = 0.55;
+parameter integer bit_count = 4;
+real state;
+integer counter;
+
+analog begin
+    @(initial_step) begin
+        state = 0;
+        counter = 1;
+    end
+
+    @(cross(V(clk_sample) - vcm, -1)) begin
+        state = 0;
+        counter = 1;
+    end
+
+    @(cross(V(clk_sarready) - vcm, -1)) begin
+        if (counter <= bit_count) begin
+            state = state + 1.0 / pow(2.0, counter) * ((V(data) > vcm) ? 1.0 : 0.0);
+            counter = counter + 1;
+        end
+    end
+
+    V(out) <+ (0.42 * (transition(state * 2.0 * vdd - vdd, 1p, 20p, 20p)));
+end
+
+endmodule

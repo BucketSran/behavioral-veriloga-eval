@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/dac_serial_accumulator.va"
+
+Vclk_sample (clk_sample 0) vsource type=pwl wave=[0 0 1n 0 1.05n 1.1 1.50n 1.1 1.55n 0 13n 0 13.05n 1.1 13.50n 1.1 13.55n 0]
+Vclk_sarready (clk_sarready 0) vsource type=pwl wave=[0 0 3n 0 3.05n 1.1 3.50n 1.1 3.55n 0 5n 0 5.05n 1.1 5.50n 1.1 5.55n 0 7n 0 7.05n 1.1 7.50n 1.1 7.55n 0 9n 0 9.05n 1.1 9.50n 1.1 9.55n 0 15n 0 15.05n 1.1 15.50n 1.1 15.55n 0 17n 0 17.05n 1.1 17.50n 1.1 17.55n 0 19n 0 19.05n 1.1 19.50n 1.1 19.55n 0 21n 0 21.05n 1.1 21.50n 1.1 21.55n 0]
+Vdata (data 0) vsource type=pwl wave=[0 1.1 4.75n 1.1 4.8n 0 6.75n 0 6.8n 1.1 14.75n 1.1 14.8n 0 16.75n 0 16.8n 1.1 18.75n 1.1 18.8n 0 20.75n 0 20.8n 1.1]
+
+XDUT (clk_sample clk_sarready data out) dac_serial_accumulator
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=16n maxstep=20p
+save clk_sample clk_sarready data out

@@ -1,0 +1,94 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "pipe_2lane_edge_align.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=40n maxstep=20p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "din1",
+      "din2",
+      "clk_align",
+      "dout"
+    ]
+  },
+  "family_id": "172",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "97d303c2c8392587d32372b09fccf5fd086c6719e104116f072e248ff1384a80",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "aaa737223976965688cadb60f10bd41240509a6552fc0a329e6261d8e61c2001",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk_align (clk_align 0) vsource type=pwl wave=[0 0 1n 0 1.05n 0.9 1.50n 0.9 1.55n 0 11n 0 11.05n 0.9 11.50n 0.9 11.55n 0 21n 0 21.05n 0.9 21.50n 0.9 21.55n 0 31n 0 31.05n 0.9 31.50n 0.9 31.55n 0]",
+          "Vdin1 (din1 0) vsource type=pwl wave=[0 0.1 7.95n 0.1 8n 0.4 17.95n 0.4 18n 0.7 27.95n 0.7 28n 0.2]",
+          "Vdin2 (din2 0) vsource type=pwl wave=[0 0.8 7.95n 0.8 8n 0.3 17.95n 0.3 18n 0.5 27.95n 0.5 28n 0.9]",
+          "",
+          "XDUT (din1 din2 clk_align dout) pipe_2lane_edge_align",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=28n maxstep=20p"
+        ],
+        "body_lines": [
+          "Vclk_align (clk_align 0) vsource type=pwl wave=[0 0 2n 0 2.05n 0.9 2.80n 0.9 2.85n 0 9n 0 9.05n 0.9 10.20n 0.9 10.25n 0 16n 0 16.05n 0.9 17.40n 0.9 17.45n 0 24n 0 24.05n 0.9 25.50n 0.9 25.55n 0]",
+          "Vdin1 (din1 0) vsource type=pwl wave=[0 0.25 5n 0.25 5.05n 0.65 13n 0.65 13.05n -0.10 21n -0.10 21.05n 0.45]",
+          "Vdin2 (din2 0) vsource type=pwl wave=[0 -0.30 6n -0.30 6.05n 0.15 14n 0.15 14.05n 0.85 22n 0.85 22.05n -0.05]",
+          "",
+          "XDUT (din1 din2 clk_align dout) pipe_2lane_edge_align",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INITIAL_LANE1_STATE",
+    "P_RISING_EDGE_LANE1",
+    "P_FALLING_EDGE_LANE2",
+    "P_SELECTED_LEVEL_HOLD"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "6537365cc188b62da5f2805acd0db85ef27faeee046c5e9201613e87b5db42d1",
+    "family_spec_sha256": "57a91f3fd7462ed95ec0b93d7a2fa517518d26882b8db959927fb032fc741698"
+  },
+  "task_id": "v4-172"
+}

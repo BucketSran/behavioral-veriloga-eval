@@ -1,0 +1,94 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "iterative_isar_dac.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=12n maxstep=20p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "dcmp",
+      "rst",
+      "clk",
+      "vdac"
+    ]
+  },
+  "family_id": "174",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "4ca913f7f9bda670105f61ce62720a895d0e263e7afaf30f172c4c70c1dfb321",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "7015b4f1d6d506fd053e13276a4e1ecbc73a9877c2f84797b4b605c71405c1c3",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vrst (rst 0) vsource type=pwl wave=[0 0 0.5n 0 0.55n 1.0 1.00n 1.0 1.05n 0]",
+          "Vclk (clk 0) vsource type=pwl wave=[0 0 2n 0 2.05n 1.0 2.50n 1.0 2.55n 0 4n 0 4.05n 1.0 4.50n 1.0 4.55n 0 6n 0 6.05n 1.0 6.50n 1.0 6.55n 0 8n 0 8.05n 1.0 8.50n 1.0 8.55n 0 10n 0 10.05n 1.0 10.50n 1.0 10.55n 0]",
+          "Vdcmp (dcmp 0) vsource type=pwl wave=[0 1.0 3.75n 1.0 3.8n 0 7.75n 0 7.8n 1.0 9.75n 1.0 9.8n 0]",
+          "",
+          "XDUT (dcmp rst clk vdac) iterative_isar_dac",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=14n maxstep=20p"
+        ],
+        "body_lines": [
+          "Vrst (rst 0) vsource type=pwl wave=[0 0 0.40n 0 0.45n 1.0 0.80n 1.0 0.85n 0 8.80n 0 8.85n 1.0 9.20n 1.0 9.25n 0]",
+          "Vclk (clk 0) vsource type=pwl wave=[0 0 1.2n 0 1.25n 1.0 1.55n 1.0 1.60n 0 2.6n 0 2.65n 1.0 2.95n 1.0 3.00n 0 4.0n 0 4.05n 1.0 4.35n 1.0 4.40n 0 5.4n 0 5.45n 1.0 5.75n 1.0 5.80n 0 6.8n 0 6.85n 1.0 7.15n 1.0 7.20n 0 10.0n 0 10.05n 1.0 10.35n 1.0 10.40n 0 11.4n 0 11.45n 1.0 11.75n 1.0 11.80n 0 12.8n 0 12.85n 1.0 13.15n 1.0 13.20n 0]",
+          "Vdcmp (dcmp 0) vsource type=pwl wave=[0 0 2.2n 0 2.25n 1.0 3.6n 1.0 3.65n 0 6.3n 0 6.35n 1.0 10.8n 1.0 10.85n 0 12.2n 0 12.25n 1.0]",
+          "",
+          "XDUT (dcmp rst clk vdac) iterative_isar_dac range=0.2 lsb=0.00625 radix=2",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RESET_INITIAL_SEARCH_STATE",
+    "P_COMPARATOR_POLARITY_UPDATE",
+    "P_RADIX_STEP_REDUCTION",
+    "P_HELD_DAC_OUTPUT"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "6f3dea52b21f0cd0607b23bdec566474e2566dc77d929e85d1f2f36dc61f818b",
+    "family_spec_sha256": "c822b9fcce80ebccfed937d4e0eda5a12bccac903076d1afa434ad0288482942"
+  },
+  "task_id": "v4-174"
+}

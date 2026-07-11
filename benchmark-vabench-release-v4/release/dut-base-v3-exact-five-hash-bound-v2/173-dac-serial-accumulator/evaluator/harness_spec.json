@@ -1,0 +1,83 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "dac_serial_accumulator.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=16n maxstep=20p"
+    ],
+    "body_lines": [
+      "Vclk_sample (clk_sample 0) vsource type=pwl wave=[0 0 1n 0 1.05n 1.1 1.50n 1.1 1.55n 0 13n 0 13.05n 1.1 13.50n 1.1 13.55n 0]",
+      "Vclk_sarready (clk_sarready 0) vsource type=pwl wave=[0 0 3n 0 3.05n 1.1 3.50n 1.1 3.55n 0 5n 0 5.05n 1.1 5.50n 1.1 5.55n 0 7n 0 7.05n 1.1 7.50n 1.1 7.55n 0 9n 0 9.05n 1.1 9.50n 1.1 9.55n 0 15n 0 15.05n 1.1 15.50n 1.1 15.55n 0 17n 0 17.05n 1.1 17.50n 1.1 17.55n 0 19n 0 19.05n 1.1 19.50n 1.1 19.55n 0 21n 0 21.05n 1.1 21.50n 1.1 21.55n 0]",
+      "Vdata (data 0) vsource type=pwl wave=[0 1.1 4.75n 1.1 4.8n 0 6.75n 0 6.8n 1.1 14.75n 1.1 14.8n 0 16.75n 0 16.8n 1.1 18.75n 1.1 18.8n 0 20.75n 0 20.8n 1.1]",
+      "",
+      "XDUT (clk_sample clk_sarready data out) dac_serial_accumulator",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk_sample",
+      "clk_sarready",
+      "data",
+      "out"
+    ]
+  },
+  "family_id": "173",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "ad4d5e72911cfb8299b615781d85b8dcea365f761a4a4ab0a750404c65234cc6",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "ade9bb5e311dc8e88942fdf0064dcd6059b239bbbd918406b507a4f98613b066",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=24n maxstep=20p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_SAMPLE_CLOCK_RESET",
+    "P_SARREADY_SERIAL_ACCUMULATION",
+    "P_BINARY_WEIGHT_ORDER",
+    "P_BIPOLAR_OUTPUT_MAPPING"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "355f24520f1b945346a6a4236a0c2a6d845f9e68da424260c7cb2aa141d01f3b",
+    "family_spec_sha256": "0441566a39e148bbb29d333c780efd726223ddd2df1f71ef66fad938df9d34b4"
+  },
+  "task_id": "v4-173"
+}

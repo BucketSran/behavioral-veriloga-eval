@@ -1,0 +1,83 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "tdc_ideal_edge_delta.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=8n maxstep=5p"
+    ],
+    "body_lines": [
+      "Vsamp (samp 0) vsource type=pwl wave=[0 0 0.5n 0 0.55n 0.9 0.8n 0.9 0.85n 0 5n 0 5.05n 0.9 5.30n 0.9 5.35n 0 10n 0 10.05n 0.9 10.30n 0.9 10.35n 0]",
+      "Vinp (inp 0) vsource type=pwl wave=[0 0 2.00n 0 2.02n 0.9 4.0n 0.9 4.05n 0 6.06n 0 6.08n 0.9 8.5n 0.9 8.55n 0 11.02n 0 11.04n 0.9]",
+      "Vinn (inn 0) vsource type=pwl wave=[0 0 2.03n 0 2.05n 0.9 4.0n 0.9 4.05n 0 6.00n 0 6.02n 0.9 8.5n 0.9 8.55n 0 11.00n 0 11.02n 0.9]",
+      "",
+      "XDUT (inp inn samp vout) tdc_ideal_edge_delta",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "inp",
+      "inn",
+      "samp",
+      "vout"
+    ]
+  },
+  "family_id": "179",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "23965f23094f11f45a9576ba256766b6e70b9d7af043c078e0f2c29e67b3d26f",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "1b79b563b5287edc10491456f70ffadf0cfa12cdf7bce74ceae66a6b8394884a",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=13n maxstep=5p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_SAMPLE_REARMS_MEASUREMENT",
+    "P_INPUT_EDGE_PAIR_CAPTURE",
+    "P_SIGNED_DELTA_POLARITY",
+    "P_FULL_RANGE_SCALE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "20f94f82b0516564bd63e7130bccfbb60ec5987e1406fe76ae450c06a2381c97",
+    "family_spec_sha256": "4a489ba23af77f83eb11e6e79b58466807bb58fc2f606343eb6ff4b1b222490a"
+  },
+  "task_id": "v4-179"
+}

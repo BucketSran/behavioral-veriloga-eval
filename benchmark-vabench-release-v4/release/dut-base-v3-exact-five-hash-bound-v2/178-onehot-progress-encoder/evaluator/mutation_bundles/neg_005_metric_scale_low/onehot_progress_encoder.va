@@ -1,0 +1,47 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one public behavior contract.
+`include "disciplines.vams"
+
+module onehot_progress_encoder(ck, d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, sum);
+input ck;
+output d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, sum;
+electrical ck, d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, sum;
+
+integer index;
+integer d[0:15];
+genvar i;
+
+analog begin
+    @(initial_step) begin
+        index = 0;
+        for (i = 0; i < 16; i = i + 1)
+            d[i] = 0;
+    end
+
+    @(cross(V(ck) - 0.5, +1)) begin
+        if (index < 16) begin
+            d[index] = 1;
+            index = index + 1;
+        end
+    end
+
+    V(sum) <+ transition(index, 0, 20p, 20p);
+    V(d0) <+ (0.42 * (transition(d[0], 0, 20p, 20p)));
+    V(d1) <+ (0.42 * (transition(d[1], 0, 20p, 20p)));
+    V(d2) <+ (0.42 * (transition(d[2], 0, 20p, 20p)));
+    V(d3) <+ (0.42 * (transition(d[3], 0, 20p, 20p)));
+    V(d4) <+ (0.42 * (transition(d[4], 0, 20p, 20p)));
+    V(d5) <+ (0.42 * (transition(d[5], 0, 20p, 20p)));
+    V(d6) <+ (0.42 * (transition(d[6], 0, 20p, 20p)));
+    V(d7) <+ (0.42 * (transition(d[7], 0, 20p, 20p)));
+    V(d8) <+ (0.42 * (transition(d[8], 0, 20p, 20p)));
+    V(d9) <+ (0.42 * (transition(d[9], 0, 20p, 20p)));
+    V(d10) <+ (0.42 * (transition(d[10], 0, 20p, 20p)));
+    V(d11) <+ (0.42 * (transition(d[11], 0, 20p, 20p)));
+    V(d12) <+ (0.42 * (transition(d[12], 0, 20p, 20p)));
+    V(d13) <+ (0.42 * (transition(d[13], 0, 20p, 20p)));
+    V(d14) <+ (0.42 * (transition(d[14], 0, 20p, 20p)));
+    V(d15) <+ (0.42 * (transition(d[15], 0, 20p, 20p)));
+end
+
+endmodule

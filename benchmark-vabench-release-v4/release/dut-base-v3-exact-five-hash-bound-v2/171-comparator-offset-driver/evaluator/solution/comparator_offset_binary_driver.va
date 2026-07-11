@@ -1,0 +1,30 @@
+`include "disciplines.vams"
+
+module comparator_offset_binary_driver(clk, dcmpp, vinp, vinn);
+input clk, dcmpp;
+output vinp, vinn;
+electrical clk, dcmpp, vinp, vinn;
+
+parameter real vdd = 0.9;
+real vin;
+real step_size;
+integer sign;
+
+analog begin
+    @(initial_step) begin
+        vin = 0;
+        step_size = 0.1;
+        sign = 1;
+    end
+
+    @(cross(V(clk) - 0.5 * vdd, -1)) begin
+        sign = V(dcmpp) > 0.5 * vdd;
+        vin = vin - (2 * sign - 1) * step_size;
+        step_size = step_size / 2.0;
+    end
+
+    V(vinp) <+ 0.5 * vdd + 0.5 * vin;
+    V(vinn) <+ 0.5 * vdd - 0.5 * vin;
+end
+
+endmodule

@@ -1,0 +1,101 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "track_hold_aperture.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=80n maxstep=80p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "track",
+      "rst",
+      "enable",
+      "vhold",
+      "aperture_metric",
+      "droop_metric",
+      "valid"
+    ]
+  },
+  "family_id": "180",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "0e0a078d1f097fa316eccf571ba89ab7da196cb8af3b181a1bf58407ccc8dfad",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "7410433c250f3fa4bf8d52b45fd92e3351d46f850e594e11e05e47fb7e08ed29",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.12 4n 0.12 10n 0.74 18n 0.22 26n 0.82 34n 0.18 48n 0.70 64n 0.35 80n 0.62]",
+          "Vtrack (track 0) vsource type=pwl wave=[0 0 2n 0 2.1n 0.9 12n 0.9 12.1n 0 20n 0 20.1n 0.9 30n 0.9 30.1n 0 42n 0 42.1n 0.9 54n 0.9 54.1n 0 66n 0 66.1n 0.9 80n 0.9]",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 0.8n 0.9 0.9n 0 80n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 1.5n 0 1.6n 0.9 68n 0.9 68.1n 0 72n 0 72.1n 0.9 80n 0.9]",
+          "",
+          "XDUT (vin track rst enable vhold aperture_metric droop_metric valid) track_hold_aperture",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=84n maxstep=80p"
+        ],
+        "body_lines": [
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.18 5n 0.18 11n 0.78 19n 0.26 27n 0.86 36n 0.16 50n 0.73 67n 0.31 84n 0.65]",
+          "Vtrack (track 0) vsource type=pwl wave=[0 0 2n 0 2.1n 0.9 13n 0.9 13.1n 0 22n 0 22.1n 0.9 32n 0.9 32.1n 0 45n 0 45.1n 0.9 58n 0.9 58.1n 0 70n 0 70.1n 0.9 84n 0.9]",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 0.8n 0.9 0.9n 0 84n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 1.5n 0 1.6n 0.9 72n 0.9 72.1n 0 76n 0 76.1n 0.9 84n 0.9]",
+          "",
+          "XDUT (vin track rst enable vhold aperture_metric droop_metric valid) track_hold_aperture droop_per_tick=0.018 aperture_gain=0.55",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RESET_DISABLE_CLEAR",
+    "P_TRACK_MODE_FOLLOWS_INPUT",
+    "P_FALLING_TRACK_SAMPLE_APERTURE",
+    "P_HOLD_MODE_DROOP",
+    "P_DROOP_METRIC_ACCUMULATION"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "690bf03cda3660b17f0c97610bd3fe36d8614b7dab22489d97371e77ef66b498",
+    "family_spec_sha256": "5bb14a6be7cbe6aa3207e8b0c24092a10b2f3ee2b8175ea74ce27a5757471a23"
+  },
+  "task_id": "v4-180"
+}

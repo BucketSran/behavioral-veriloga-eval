@@ -1,0 +1,121 @@
+{
+  "agent_visible_files": [
+    "instruction.md",
+    "public_contract.json",
+    "feedback_tb.scs"
+  ],
+  "canonical_dut_id": "180",
+  "category": "sampling_memory",
+  "counted_in_score": true,
+  "feedback_oracle": {
+    "command": "vabench-feedback --task . --submission ../submission",
+    "public_tb": "feedback_tb.scs",
+    "public_tb_exposed": true
+  },
+  "form": "dut",
+  "gate2_status": "gate2_ready",
+  "interface": {
+    "module": "track_hold_aperture",
+    "ports": [
+      "vin",
+      "track",
+      "rst",
+      "enable",
+      "vhold",
+      "aperture_metric",
+      "droop_metric",
+      "valid"
+    ],
+    "top_module": "track_hold_aperture"
+  },
+  "language": "verilog-a",
+  "level": "L1",
+  "observable_signals": [
+    "vin",
+    "track",
+    "rst",
+    "enable",
+    "vhold",
+    "aperture_metric",
+    "droop_metric",
+    "valid"
+  ],
+  "oracle_policy": {
+    "checker_private": true,
+    "feedback_oracle_materialized": true,
+    "no_model_visible_starter": true,
+    "proposal_only": false,
+    "score_tb_private": true,
+    "single_public_contract": true,
+    "testbench_and_checker_split_required": true
+  },
+  "parameters": [
+    {
+      "description": "logic-high and metric full-scale level",
+      "name": "vdd = 0.9 V"
+    },
+    {
+      "description": "logic-low and minimum held output level",
+      "name": "vss = 0.0 V"
+    },
+    {
+      "description": "logic threshold",
+      "name": "vth = 0.45 V"
+    },
+    {
+      "description": "internal update period",
+      "name": "tick = 1 ns"
+    },
+    {
+      "description": "hold-mode droop per update tick",
+      "name": "droop_per_tick = 15 mV"
+    },
+    {
+      "description": "gain from sample step magnitude to aperture metric",
+      "name": "aperture_gain = 0.6"
+    },
+    {
+      "description": "output transition smoothing time",
+      "name": "tr = 100 ps"
+    }
+  ],
+  "provenance": {
+    "gold_policy": "clean_room_required_no_restricted_code_copy",
+    "source_ids": [
+      "cadence_course_vloga_samplehold"
+    ],
+    "source_strength": "restricted_course_index_strong_for_function"
+  },
+  "public_modules": [
+    "track_hold_aperture"
+  ],
+  "public_observables": [
+    "vin",
+    "track",
+    "rst",
+    "enable",
+    "vhold",
+    "aperture_metric",
+    "droop_metric",
+    "valid"
+  ],
+  "schema_version": "v4-public-contract-v1",
+  "status": "gate2_ready",
+  "target_artifacts": [
+    "track_hold_aperture.va"
+  ],
+  "task_id": "v4_180_track_hold_with_droop_and_aperture",
+  "task_slug": "977-track-hold-with-droop-and-aperture",
+  "title": "Track/Hold with Droop and Aperture Metric",
+  "top_module": "track_hold_aperture",
+  "validation_status": {
+    "evas_feedback_score_gold": "pass",
+    "gate2": "dut_base_sealed",
+    "next_gate": "canonical_suite_unification_pending",
+    "semantic_negative_certification": "pass",
+    "spectre_score_gold": "clean_pass",
+    "tri_form_gate2": "pending",
+    "tri_form_gate3": "pending",
+    "untriaged_warning_count": 0
+  }
+}

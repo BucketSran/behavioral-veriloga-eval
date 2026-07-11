@@ -1,0 +1,95 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "onehot_progress_encoder.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=17n maxstep=20p"
+    ],
+    "body_lines": [
+      "Vck (ck 0) vsource type=pulse val0=0 val1=1 delay=1n period=1n width=0.4n rise=20p fall=20p",
+      "",
+      "XDUT (ck d0 d1 d2 d3 d4 d5 d6 d7 d8 d9 d10 d11 d12 d13 d14 d15 sum) onehot_progress_encoder",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "ck",
+      "d0",
+      "d1",
+      "d2",
+      "d3",
+      "d4",
+      "d5",
+      "d6",
+      "d7",
+      "d8",
+      "d9",
+      "d10",
+      "d11",
+      "d12",
+      "d13",
+      "d14",
+      "d15",
+      "sum"
+    ]
+  },
+  "family_id": "178",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "0eba16ff9c3ebca3f67c55329cf3aa94cf7bb130a9ef2c97f70bc5ab7e955f38",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "f69a0005a9c35636366f1e292d861c29ae73584984c5cc43de5a2178d763ddfb",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=18n maxstep=20p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_PROGRESS_INITIAL_STATE",
+    "P_SEQUENTIAL_ONEHOT_ASSERTION",
+    "P_ACCUMULATING_PROGRESS_BITS",
+    "P_SUM_COUNT_OUTPUT"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "0e894ee9bc908644900f33ec521e3019ba318614547d45cfda43d24e01f39021",
+    "family_spec_sha256": "c57b742d9992a441851d56586747d7510dd350236300531a3664d9db215b0ac0"
+  },
+  "task_id": "v4-178"
+}

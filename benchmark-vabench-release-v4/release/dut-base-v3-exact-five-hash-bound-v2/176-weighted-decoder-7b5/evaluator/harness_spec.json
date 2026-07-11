@@ -1,0 +1,111 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "weighted_decoder_7b5.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=40n maxstep=20p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "d0",
+      "d1",
+      "d2",
+      "d3",
+      "d4",
+      "d5",
+      "d6",
+      "d7",
+      "d8",
+      "aout7b",
+      "aout7b5",
+      "aout8b"
+    ]
+  },
+  "family_id": "176",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "a69692f02613bc75afe39c6ed80cb55602216bd2cadecd1dcb700c075e3e8b6f",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "11aa51b5b82180c09046f0bb7c149887306b440a4d9f72baa68e601f11f0b101",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vd0 (d0 0) vsource type=pwl wave=[0 0 9.95n 0 10n 0.9 19.95n 0.9 20n 0 29.95n 0 30n 0.9]",
+          "Vd1 (d1 0) vsource type=pwl wave=[0 0 9.95n 0 10n 0.9]",
+          "Vd2 (d2 0) vsource type=pwl wave=[0 0 19.95n 0 20n 0.9]",
+          "Vd3 (d3 0) vsource type=pwl wave=[0 0 9.95n 0 10n 0.9 19.95n 0.9 20n 0 29.95n 0 30n 0.9]",
+          "Vd4 (d4 0) vsource type=pwl wave=[0 0 19.95n 0 20n 0.9]",
+          "Vd5 (d5 0) vsource type=pwl wave=[0 0 9.95n 0 10n 0.9 19.95n 0.9 20n 0 29.95n 0 30n 0.9]",
+          "Vd6 (d6 0) vsource type=pwl wave=[0 0 19.95n 0 20n 0.9]",
+          "Vd7 (d7 0) vsource type=pwl wave=[0 0 9.95n 0 10n 0.9 19.95n 0.9 20n 0 29.95n 0 30n 0.9]",
+          "Vd8 (d8 0) vsource type=pwl wave=[0 0 19.95n 0 20n 0.9 29.95n 0.9 30n 0.9]",
+          "",
+          "XDUT (d0 d1 d2 d3 d4 d5 d6 d7 d8 aout7b aout7b5 aout8b) weighted_decoder_7b5",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vd0 (d0 0) vsource type=pwl wave=[0 0 7.95n 0 8n 0.9 15.95n 0.9 16n 0 23.95n 0 24n 0.9 31.95n 0.9 32n 0 40n 0]",
+          "Vd1 (d1 0) vsource type=pwl wave=[0 0 15.95n 0 16n 0.9 31.95n 0.9 32n 0 40n 0]",
+          "Vd2 (d2 0) vsource type=pwl wave=[0 0 7.95n 0 8n 0.9 15.95n 0.9 16n 0 23.95n 0 24n 0.9 40n 0.9]",
+          "Vd3 (d3 0) vsource type=pwl wave=[0 0 15.95n 0 16n 0.9 40n 0.9]",
+          "Vd4 (d4 0) vsource type=pwl wave=[0 0 7.95n 0 8n 0.9 15.95n 0.9 16n 0 31.95n 0 32n 0.9 40n 0.9]",
+          "Vd5 (d5 0) vsource type=pwl wave=[0 0 15.95n 0 16n 0.9 23.95n 0.9 24n 0 31.95n 0 32n 0.9 40n 0.9]",
+          "Vd6 (d6 0) vsource type=pwl wave=[0 0 7.95n 0 8n 0.9 15.95n 0.9 16n 0 31.95n 0 32n 0.9 40n 0.9]",
+          "Vd7 (d7 0) vsource type=pwl wave=[0 0 15.95n 0 16n 0.9 23.95n 0.9 24n 0 31.95n 0 32n 0.9 40n 0.9]",
+          "Vd8 (d8 0) vsource type=pwl wave=[0 0 7.95n 0 8n 0.9 15.95n 0.9 16n 0 23.95n 0 24n 0.9 31.95n 0.9 32n 0 40n 0]",
+          "",
+          "XDUT (d0 d1 d2 d3 d4 d5 d6 d7 d8 aout7b aout7b5 aout8b) weighted_decoder_7b5",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_SHARED_272_DENOMINATOR",
+    "P_SEVEN_BIT_OUTPUT",
+    "P_SEVEN_HALF_BIT_OUTPUT",
+    "P_EIGHT_BIT_OUTPUT"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "24947f359e77b0873f079c81e5b77cdc260432eeb998e0841a1076535033c9d3",
+    "family_spec_sha256": "9f12dffffcd5a8760bbfab45382bb15165792d0381a8f735d4fbf45bd6237d68"
+  },
+  "task_id": "v4-176"
+}

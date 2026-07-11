@@ -1,0 +1,134 @@
+{
+  "family_id": "171",
+  "gold_bundle_sha256": "c31ed79b1e1ddf169980665679c5b134d96ffd51cc2c504777b38ceebfa64e77",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "comparator_offset_binary_driver.va": "fc6138c7181b7cb237a5cbaab91b90d45ee17a06b612dd228f26386d9e70f052"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COMMON_MODE_HALF_SCALE_DRIVE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "comparator_offset_binary_driver.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_COMMON_MODE_HALF_SCALE_DRIVE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "comparator_offset_binary_driver.va": "d343fafcaebc01bb8dba54d5988d5dfd70477e8770a2c3193f579829ebfd31b4"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FALLING_CLOCK_DECISION_SAMPLE",
+          "P_HALVING_SEARCH_STEP"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_no_step_halving/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "comparator_offset_binary_driver.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_002_no_step_halving",
+      "trigger_condition": "Keeps the same offset-search step size after every clock edge.",
+      "violated_property_ids": [
+        "P_FALLING_CLOCK_DECISION_SAMPLE",
+        "P_HALVING_SEARCH_STEP"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "comparator_offset_binary_driver.va": "9a6d79ead5a8b38268d84bc14aab06b5510daad6f04f300312e1dd0bc6f3a5db"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DECISION_POLARITY_UPDATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_inverted_update/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "comparator_offset_binary_driver.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_003_inverted_update",
+      "trigger_condition": "Moves vin in the opposite direction for each comparator decision.",
+      "violated_property_ids": [
+        "P_DECISION_POLARITY_UPDATE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "comparator_offset_binary_driver.va": "6c4f134e60cd90f0324bffd3ed622db26e98bbe297a91beef81b50f1517ca31f"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COMMON_MODE_HALF_SCALE_DRIVE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_full_diff_scale/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "comparator_offset_binary_driver.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_004_full_diff_scale",
+      "trigger_condition": "Uses full vin on each differential output instead of half-scale around common mode.",
+      "violated_property_ids": [
+        "P_COMMON_MODE_HALF_SCALE_DRIVE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "comparator_offset_binary_driver.va": "12d16cfaa06bfeffd81067ae1925a07618f15f3831e029d4964d3a6ad16da8e7"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COMMON_MODE_HALF_SCALE_DRIVE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "comparator_offset_binary_driver.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Comparator Offset Driver: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_COMMON_MODE_HALF_SCALE_DRIVE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

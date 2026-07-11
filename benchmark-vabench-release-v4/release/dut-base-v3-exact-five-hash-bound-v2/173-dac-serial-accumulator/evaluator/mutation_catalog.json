@@ -1,0 +1,134 @@
+{
+  "family_id": "173",
+  "gold_bundle_sha256": "ab48de8b898b48dcc2109fa8819bc2867d9c84afc1427ece3d9239ac13942928",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "dac_serial_accumulator.va": "2873402ad2e766175e2e8835fc691b590c2a18ac775328c70668b82e77079db5"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BIPOLAR_OUTPUT_MAPPING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "dac_serial_accumulator.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_BIPOLAR_OUTPUT_MAPPING"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "dac_serial_accumulator.va": "5f9d1c905bd38c34a29c9bb52d314bf01d81992b18965d33121755071c4e56f5"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SAMPLE_CLOCK_RESET"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_no_sample_reset/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "dac_serial_accumulator.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_002_no_sample_reset",
+      "trigger_condition": "Does not clear the serial accumulator on the sample clock boundary.",
+      "violated_property_ids": [
+        "P_SAMPLE_CLOCK_RESET"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "dac_serial_accumulator.va": "bcfd7fb17b5c396270eacd5cc65e45a7927ba93d35eebc8cd1d2eb67ed2f9a7c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BINARY_WEIGHT_ORDER",
+          "P_SARREADY_SERIAL_ACCUMULATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_reversed_bit_weights/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "dac_serial_accumulator.va"
+      ],
+      "fault_class": "reversed_bit_weights",
+      "id": "neg_003_reversed_bit_weights",
+      "trigger_condition": "Uses the reverse serial bit weighting order during accumulation.",
+      "violated_property_ids": [
+        "P_BINARY_WEIGHT_ORDER",
+        "P_SARREADY_SERIAL_ACCUMULATION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "dac_serial_accumulator.va": "39c6227be61449a7ceebf07a60e5c447bc2cd0fb00b34b61942a06a7455f6f93"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BIPOLAR_OUTPUT_MAPPING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_unipolar_output/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "dac_serial_accumulator.va"
+      ],
+      "fault_class": "unipolar_output",
+      "id": "neg_004_unipolar_output",
+      "trigger_condition": "Emits unipolar accumulated state instead of the required bipolar output mapping.",
+      "violated_property_ids": [
+        "P_BIPOLAR_OUTPUT_MAPPING"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "dac_serial_accumulator.va": "9635ed97ee9748fcf19058495f64edbe71d73ebad9c3906cc602b280f7328b50"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BIPOLAR_OUTPUT_MAPPING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "dac_serial_accumulator.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "DAC Serial Accumulator: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_BIPOLAR_OUTPUT_MAPPING"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

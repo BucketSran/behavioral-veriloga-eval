@@ -1,0 +1,42 @@
+`include "disciplines.vams"
+
+module weighted_decoder_7b5(d0, d1, d2, d3, d4, d5, d6, d7, d8, aout7b, aout7b5, aout8b);
+input d0, d1, d2, d3, d4, d5, d6, d7, d8;
+output aout7b, aout7b5, aout8b;
+electrical d0, d1, d2, d3, d4, d5, d6, d7, d8, aout7b, aout7b5, aout8b;
+
+parameter real vth = 0.5;
+real din0, din1, din2, din3, din4, din5, din6, din7, din8;
+real d_lsb;
+real y7;
+real y75;
+real y8;
+
+analog begin
+    din0 = (V(d0) > vth) ? 1 : -1;
+    din1 = (V(d1) > vth) ? 1 : -1;
+    din2 = (V(d2) > vth) ? 1 : -1;
+    din3 = (V(d3) > vth) ? 1 : -1;
+    din4 = (V(d4) > vth) ? 1 : -1;
+    din5 = (V(d5) > vth) ? 1 : -1;
+    din6 = (V(d6) > vth) ? 1 : -1;
+    din7 = (V(d7) > vth) ? 1 : -1;
+    din8 = (V(d8) > vth) ? 1 : -1;
+
+    if ((V(d1) > vth) && (V(d0) > vth))
+        d_lsb = 1;
+    else if ((V(d1) < vth) && (V(d0) < vth))
+        d_lsb = -1;
+    else
+        d_lsb = 0;
+
+    y7 = (din1 + 2 * din2 + 4 * din3 + 8 * din4 + 8 * din5 + 16 * din6 + 32 * din7 + 64 * din8) / 272.0;
+    y8 = (0.5 * din0 + din1 + 2 * din2 + 4 * din3 + 8 * din4 + 8 * din5 + 16 * din6 + 32 * din7 + 64 * din8) / 272.0;
+    y75 = (d_lsb + 2 * din2 + 4 * din3 + 8 * din4 + 8 * din5 + 16 * din6 + 32 * din7 + 64 * din8) / 272.0;
+
+    V(aout7b) <+ y7;
+    V(aout7b5) <+ y75;
+    V(aout8b) <+ y8;
+end
+
+endmodule

@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/tdc_ideal_edge_delta.va"
+
+Vsamp (samp 0) vsource type=pwl wave=[0 0 0.5n 0 0.55n 0.9 0.8n 0.9 0.85n 0 5n 0 5.05n 0.9 5.30n 0.9 5.35n 0 10n 0 10.05n 0.9 10.30n 0.9 10.35n 0]
+Vinp (inp 0) vsource type=pwl wave=[0 0 2.00n 0 2.02n 0.9 4.0n 0.9 4.05n 0 6.06n 0 6.08n 0.9 8.5n 0.9 8.55n 0 11.02n 0 11.04n 0.9]
+Vinn (inn 0) vsource type=pwl wave=[0 0 2.03n 0 2.05n 0.9 4.0n 0.9 4.05n 0 6.00n 0 6.02n 0.9 8.5n 0.9 8.55n 0 11.00n 0 11.02n 0.9]
+
+XDUT (inp inn samp vout) tdc_ideal_edge_delta
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=8n maxstep=5p
+save inp inn samp vout

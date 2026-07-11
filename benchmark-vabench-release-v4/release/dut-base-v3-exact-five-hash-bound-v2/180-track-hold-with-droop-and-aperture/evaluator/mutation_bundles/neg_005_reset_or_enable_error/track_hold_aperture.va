@@ -1,0 +1,69 @@
+`include "constants.vams"
+`include "disciplines.vams"
+module track_hold_aperture(vin, track, rst, enable, vhold, aperture_metric, droop_metric, valid);
+input vin, track, rst, enable;
+output vhold, aperture_metric, droop_metric, valid;
+electrical vin, track, rst, enable, vhold, aperture_metric, droop_metric, valid;
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vth = 0.45;
+parameter real tick = 1n from (0:inf);
+parameter real droop_per_tick = 0.015 from [0:inf);
+parameter real aperture_gain = 0.6 from [0:inf);
+parameter real tr = 100p from (0:inf);
+real hold_value;
+real aperture_value;
+real droop_value;
+real valid_value;
+real old_hold;
+analog begin
+@(initial_step) begin
+hold_value = vss;
+aperture_value = vss;
+droop_value = vss;
+valid_value = vss;
+end
+@(timer(0, tick)) begin
+if (V(rst) > vth) begin
+hold_value = vss;
+aperture_value = vss;
+droop_value = vss;
+valid_value = vss;
+end else if (V(track) > vth) begin
+hold_value = V(vin);
+droop_value = vss;
+valid_value = vss;
+end else if (valid_value > vth) begin
+hold_value = hold_value - droop_per_tick;
+if (hold_value < vss) hold_value = vss;
+droop_value = droop_value + droop_per_tick;
+if (droop_value > vdd) droop_value = vdd;
+end
+end
+@(cross(V(track) - vth, -1)) begin
+if (V(rst) > vth || V(enable) <= vth) begin
+hold_value = vss;
+aperture_value = vss;
+droop_value = vss;
+valid_value = vss;
+end else begin
+old_hold = hold_value;
+hold_value = V(vin);
+aperture_value = aperture_gain * abs(V(vin) - old_hold);
+if (aperture_value > vdd) aperture_value = vdd;
+droop_value = vss;
+valid_value = vdd;
+end
+end
+@(cross(V(rst) - vth, +1)) begin
+hold_value = vss;
+aperture_value = vss;
+droop_value = vss;
+valid_value = vss;
+end
+V(vhold) <+ transition(hold_value, 0, tr, tr);
+V(aperture_metric) <+ transition(aperture_value, 0, tr, tr);
+V(droop_metric) <+ transition(droop_value, 0, tr, tr);
+V(valid) <+ transition(valid_value, 0, tr, tr);
+end
+endmodule

@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/comparator_offset_binary_driver.va"
+
+Vclk (clk 0) vsource type=pwl wave=[0 0 1n 0 1.05n 0.9 1.50n 0.9 1.55n 0 11n 0 11.05n 0.9 11.50n 0.9 11.55n 0 21n 0 21.05n 0.9 21.50n 0.9 21.55n 0 31n 0 31.05n 0.9 31.50n 0.9 31.55n 0]
+Vdcmpp (dcmpp 0) vsource type=pwl wave=[0 0.9 7.95n 0.9 8n 0 17.95n 0 18n 0.9]
+
+XDUT (clk dcmpp vinp vinn) comparator_offset_binary_driver
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=40n maxstep=20p
+save clk dcmpp vinp vinn

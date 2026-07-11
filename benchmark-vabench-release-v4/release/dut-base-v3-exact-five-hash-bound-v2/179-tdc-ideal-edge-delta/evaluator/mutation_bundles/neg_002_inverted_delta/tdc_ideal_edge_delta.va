@@ -1,0 +1,43 @@
+`include "disciplines.vams"
+
+module tdc_ideal_edge_delta(inp, inn, samp, vout);
+input inp, inn, samp;
+output vout;
+electrical inp, inn, samp, vout;
+
+parameter real vth = 0.45;
+parameter real fullrange = 100p;
+integer trigp;
+integer trign;
+real tdcval;
+real timep;
+real timen;
+
+analog begin
+    @(initial_step) begin
+        tdcval = 0;
+        trigp = 0;
+        trign = 0;
+        timep = 0;
+        timen = 0;
+    end
+    @(cross(V(samp) - vth, +1)) begin
+        trigp = 0;
+        trign = 0;
+    end
+    @(cross(V(inp) - vth, +1)) begin
+        timep = $abstime;
+        trigp = 1;
+        if (trigp && trign)
+            tdcval = (timen - timep) / fullrange;
+    end
+    @(cross(V(inn) - vth, +1)) begin
+        timen = $abstime;
+        trign = 1;
+        if (trigp && trign)
+            tdcval = (timep - timen) / fullrange;
+    end
+    V(vout) <+ transition(tdcval, 0, 10p, 10p);
+end
+
+endmodule

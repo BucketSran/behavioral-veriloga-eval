@@ -1,0 +1,134 @@
+{
+  "family_id": "175",
+  "gold_bundle_sha256": "8ffb2cd927bad8f9d06fecdfdacb1120ff212c8fe123cb3221576329ba929c81",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "offset_bisection_driver.va": "f27a8a1147abbce3090b4802efa8ceefa19824942bb9644f6bdfb70072952c76"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_VCM_CENTERED_DIFFERENTIAL_DRIVE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "offset_bisection_driver.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_VCM_CENTERED_DIFFERENTIAL_DRIVE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "offset_bisection_driver.va": "b72eff26e1ae496bd02da4909f76fba1e2663d5721b266c53969d8d6c3dca930"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BISECTION_INITIAL_STATE",
+          "P_SIGN_CHANGE_STEP_HALVING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_no_step_halving/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "offset_bisection_driver.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_002_no_step_halving",
+      "trigger_condition": "Keeps the bisection step fixed after sign changes.",
+      "violated_property_ids": [
+        "P_BISECTION_INITIAL_STATE",
+        "P_SIGN_CHANGE_STEP_HALVING"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "offset_bisection_driver.va": "21c99fb901ec2ff52caf1a80b5833035bcfab9d8a2298517854ad6a62030265b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FALLING_CLOCK_DECISION_UPDATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_inverted_sign_sense/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "offset_bisection_driver.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_003_inverted_sign_sense",
+      "trigger_condition": "Uses the opposite comparator polarity for offset updates.",
+      "violated_property_ids": [
+        "P_FALLING_CLOCK_DECISION_UPDATE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "offset_bisection_driver.va": "a61b2aad13edf7148e7b97c2371b983717206f3751b8a8ef6a5da578a9809b02"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_VCM_CENTERED_DIFFERENTIAL_DRIVE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_full_diff_scale/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "offset_bisection_driver.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_004_full_diff_scale",
+      "trigger_condition": "Drives the differential pair with full vin instead of half-scale around vcm.",
+      "violated_property_ids": [
+        "P_VCM_CENTERED_DIFFERENTIAL_DRIVE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "offset_bisection_driver.va": "50ee3b2bba0bf89a104c528a46d235394f6f421dbef9af4c7222760d101feda9"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_VCM_CENTERED_DIFFERENTIAL_DRIVE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "offset_bisection_driver.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Offset Bisection Driver: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_VCM_CENTERED_DIFFERENTIAL_DRIVE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

@@ -1,0 +1,136 @@
+{
+  "family_id": "172",
+  "gold_bundle_sha256": "65e2a837c2af07eff49484e173e2a3f8e4aa490ae978298a2871e96b1b57eb7a",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "pipe_2lane_edge_align.va": "45dc91516de1053000c4a97c39e098a1b6839d96cea06dcc9d4aadf2de0a9e5a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INITIAL_LANE1_STATE",
+          "P_SELECTED_LEVEL_HOLD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pipe_2lane_edge_align.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_INITIAL_LANE1_STATE",
+        "P_SELECTED_LEVEL_HOLD"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pipe_2lane_edge_align.va": "49b7effe58a521217ff11f3fbc1cb680b96bcd2a4ebb5545788a7023d6c11300"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FALLING_EDGE_LANE2",
+          "P_RISING_EDGE_LANE1"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_swap_edges/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pipe_2lane_edge_align.va"
+      ],
+      "fault_class": "edge_lane_selection_swapped",
+      "id": "neg_002_swap_edges",
+      "trigger_condition": "Routes din2 on rising edges and din1 on falling edges.",
+      "violated_property_ids": [
+        "P_FALLING_EDGE_LANE2",
+        "P_RISING_EDGE_LANE1"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pipe_2lane_edge_align.va": "00fe77e7c7f9cae7130ace1ecfbf10b67f96b1dba6864d0eadfaa3f9fa2aaa54"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FALLING_EDGE_LANE2"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_always_first_lane/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pipe_2lane_edge_align.va"
+      ],
+      "fault_class": "lane_selection_stuck",
+      "id": "neg_003_always_first_lane",
+      "trigger_condition": "Never selects din2 on the falling alignment edge.",
+      "violated_property_ids": [
+        "P_FALLING_EDGE_LANE2"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pipe_2lane_edge_align.va": "f9a7d68e755add941a33e9b185f0a51338d9b05594b6371c50fcb0ced8327174"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SELECTED_LEVEL_HOLD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_half_output_level/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pipe_2lane_edge_align.va"
+      ],
+      "fault_class": "output_rail_amplitude_error",
+      "id": "neg_004_half_output_level",
+      "trigger_condition": "Preserves edge selection but drives the selected lane at half amplitude.",
+      "violated_property_ids": [
+        "P_SELECTED_LEVEL_HOLD"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pipe_2lane_edge_align.va": "7139659c017e5906dfa846a45eb0d5b1e2cd6b6a79c23e413e742a845ca20a47"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SELECTED_LEVEL_HOLD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pipe_2lane_edge_align.va"
+      ],
+      "fault_class": "observable_scale_error",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Pipe 2lane Edge Align: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_SELECTED_LEVEL_HOLD"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

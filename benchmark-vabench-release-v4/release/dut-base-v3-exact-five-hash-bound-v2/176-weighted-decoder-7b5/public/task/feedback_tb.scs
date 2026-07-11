@@ -1,0 +1,22 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/weighted_decoder_7b5.va"
+
+Vd0 (d0 0) vsource type=pwl wave=[0 0 9.95n 0 10n 0.9 19.95n 0.9 20n 0 29.95n 0 30n 0.9]
+Vd1 (d1 0) vsource type=pwl wave=[0 0 9.95n 0 10n 0.9]
+Vd2 (d2 0) vsource type=pwl wave=[0 0 19.95n 0 20n 0.9]
+Vd3 (d3 0) vsource type=pwl wave=[0 0 9.95n 0 10n 0.9 19.95n 0.9 20n 0 29.95n 0 30n 0.9]
+Vd4 (d4 0) vsource type=pwl wave=[0 0 19.95n 0 20n 0.9]
+Vd5 (d5 0) vsource type=pwl wave=[0 0 9.95n 0 10n 0.9 19.95n 0.9 20n 0 29.95n 0 30n 0.9]
+Vd6 (d6 0) vsource type=pwl wave=[0 0 19.95n 0 20n 0.9]
+Vd7 (d7 0) vsource type=pwl wave=[0 0 9.95n 0 10n 0.9 19.95n 0.9 20n 0 29.95n 0 30n 0.9]
+Vd8 (d8 0) vsource type=pwl wave=[0 0 19.95n 0 20n 0.9 29.95n 0.9 30n 0.9]
+
+XDUT (d0 d1 d2 d3 d4 d5 d6 d7 d8 aout7b aout7b5 aout8b) weighted_decoder_7b5
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=40n maxstep=20p
+save d0 d1 d2 d3 d4 d5 d6 d7 d8 aout7b aout7b5 aout8b

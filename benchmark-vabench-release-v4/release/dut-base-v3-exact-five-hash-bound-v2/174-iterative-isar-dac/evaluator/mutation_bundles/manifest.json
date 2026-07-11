@@ -1,0 +1,134 @@
+{
+  "family_id": "174",
+  "gold_bundle_sha256": "1ede645328492a8166f62e48bfc21b5ac728e9ab385d39a615d2bb960d3af431",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "iterative_isar_dac.va": "e4626f99df1a3e3aaf5f7b0c055cc990873964dc6a7c69473119d682f9b781b5"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_HELD_DAC_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "iterative_isar_dac.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_HELD_DAC_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "iterative_isar_dac.va": "96c95a037efff7d473b29ef0705d7d3e2c0afe5dbc8b0765455e32eb9353ecef"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COMPARATOR_POLARITY_UPDATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_inverted_comparator_polarity/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "iterative_isar_dac.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_002_inverted_comparator_polarity",
+      "trigger_condition": "Updates vdac in the opposite direction for dcmp decisions.",
+      "violated_property_ids": [
+        "P_COMPARATOR_POLARITY_UPDATE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "iterative_isar_dac.va": "2666972c8ce29b2b46cb5f0196c5f70e88e2f424e94fc449e95459738e325364"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RADIX_STEP_REDUCTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_no_delta_halving/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "iterative_isar_dac.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_003_no_delta_halving",
+      "trigger_condition": "Keeps the DAC search step fixed instead of dividing by radix each cycle.",
+      "violated_property_ids": [
+        "P_RADIX_STEP_REDUCTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "iterative_isar_dac.va": "b16c54eea1d66cfdf17a9b7a8bac79c36e3e4c2255b70bd5935657c0bb820870"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RADIX_STEP_REDUCTION",
+          "P_RESET_INITIAL_SEARCH_STATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_no_reset_to_range/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "iterative_isar_dac.va"
+      ],
+      "fault_class": "state_reset_or_enable_error",
+      "id": "neg_004_no_reset_to_range",
+      "trigger_condition": "Shrinks the search step twice as fast as the specified radix update.",
+      "violated_property_ids": [
+        "P_RADIX_STEP_REDUCTION",
+        "P_RESET_INITIAL_SEARCH_STATE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "iterative_isar_dac.va": "183fd5380c6293b71bcbd2c4fb633e45d4ffe79f0767cd507e303b1ff5fbfdf9"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COMPARATOR_POLARITY_UPDATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "iterative_isar_dac.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Iterative ISAR DAC: preserves the iterative search state machine but drives the DAC output with inverted polarity.",
+      "violated_property_ids": [
+        "P_COMPARATOR_POLARITY_UPDATE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

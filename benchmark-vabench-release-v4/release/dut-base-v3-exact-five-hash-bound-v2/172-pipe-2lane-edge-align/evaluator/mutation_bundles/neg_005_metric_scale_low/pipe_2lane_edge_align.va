@@ -1,0 +1,29 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one public behavior contract.
+`include "disciplines.vams"
+
+module pipe_2lane_edge_align(din1, din2, clk_align, dout);
+input din1, din2, clk_align;
+output dout;
+electrical din1, din2, clk_align, dout;
+
+parameter real vth = 0.45;
+real out_level;
+
+analog begin
+    @(initial_step) begin
+        out_level = V(din1);
+    end
+
+    @(cross(V(clk_align) - vth, +1)) begin
+        out_level = V(din1);
+    end
+
+    @(cross(V(clk_align) - vth, -1)) begin
+        out_level = V(din2);
+    end
+
+    V(dout) <+ (0.42 * (transition(out_level, 0, 20p, 20p)));
+end
+
+endmodule
