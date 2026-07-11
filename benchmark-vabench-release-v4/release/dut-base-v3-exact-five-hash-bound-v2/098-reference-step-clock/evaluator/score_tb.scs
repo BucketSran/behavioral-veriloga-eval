@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/ref_step_clk.va"
+
+// Hidden testbench for the standalone reference-step clock generator.
+
+VDD_SRC (VDD 0) vsource type=dc dc=0.9
+VSS_SRC (VSS 0) vsource type=dc dc=0
+
+XREF (VDD VSS CLK) ref_step_clk \
+    period_pre=18n period_post=22n t_switch=1.3u tedge=80p
+
+
+tran tran stop=2.4u maxstep=250p errpreset=conservative
+save VDD VSS CLK

@@ -1,0 +1,72 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sample_hold_droop_ref(vdd, vss, clk, vin, vout, valid, coarse);
+    inout vdd, vss;
+    input clk, vin;
+    output vout, valid, coarse;
+    electrical vdd, vss, clk, vin, vout, valid, coarse;
+
+    parameter real vth = 0.45;
+    parameter real trf = 40p;
+    parameter real tau = 90n;
+    parameter real dt  = 0.5n;
+    parameter real taperture = 200p;
+    parameter real valid_width = 2n;
+
+    real hold_val;
+    real out_val;
+    real coarse_val;
+    real valid_val;
+    real sample_time;
+    real valid_until;
+    real alpha;
+    real vdd_now;
+    integer armed;
+
+    analog begin
+        @(initial_step) begin
+            hold_val = 0.0;
+            out_val = 0.0;
+            coarse_val = 0.0;
+            valid_val = 0.0;
+            sample_time = -1.0;
+            valid_until = -1.0;
+            alpha = exp(-dt / tau);
+            armed = 0;
+        end
+
+        @(cross(V(clk, vss) - vth, -1)) begin
+            sample_time = $abstime + taperture;
+            armed = 1;
+        end
+
+        @(timer(sample_time)) begin
+            if (armed) begin
+                vdd_now = V(vdd, vss);
+                hold_val = V(vin, vss);
+                if (hold_val < 0.0) hold_val = 0.0;
+                if (hold_val > vdd_now) hold_val = vdd_now;
+                out_val = hold_val;
+                coarse_val = (hold_val > vth) ? vdd_now : 0.0;
+                valid_until = $abstime + valid_width;
+                valid_val = vdd_now;
+                armed = 0;
+            end
+        end
+
+        @(timer(0, dt)) begin
+            vdd_now = V(vdd, vss);
+            if (V(clk, vss) < vth) begin
+                out_val = out_val * alpha;
+                if (out_val < 0.0) out_val = 0.0;
+            end
+            if ($abstime > valid_until)
+                valid_val = 0.0;
+        end
+
+        V(vout, vss) <+ (0.42 * (transition(out_val, 0, trf, trf)));
+        V(valid, vss) <+ (0.42 * (transition(valid_val, 0, trf, trf)));
+        V(coarse, vss) <+ transition(coarse_val, 0, trf, trf);
+    end
+endmodule

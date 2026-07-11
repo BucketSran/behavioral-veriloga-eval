@@ -1,0 +1,28 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module gain_estimator(VDD, VSS, vinp, vinn, voutp, voutn, gain_out, valid);
+    inout VDD, VSS;
+    input vinp, vinn, voutp, voutn;
+    output gain_out, valid;
+    electrical VDD, VSS, vinp, vinn, voutp, voutn, gain_out, valid;
+
+    parameter real sample_period = 1n from (0:inf);
+    parameter real start_time = 20n;
+    parameter real gain_scale = 10.0 from (0:inf);
+    parameter real min_input_span = 0.02 from (0:inf);
+    parameter real tedge = 200p from (0:inf);
+
+    real in_min, in_max;
+    real out_min, out_max;
+    real in_span, out_span;
+    real gain_q;
+    integer valid_q;
+    real vin_diff, vout_diff;
+
+analog begin
+    V(gain_out) <+ transition(0.0);
+    V(valid) <+ transition(0.0);
+end
+
+endmodule

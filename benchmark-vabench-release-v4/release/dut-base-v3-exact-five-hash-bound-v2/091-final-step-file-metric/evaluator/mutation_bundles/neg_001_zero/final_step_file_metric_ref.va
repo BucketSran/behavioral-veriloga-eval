@@ -1,0 +1,20 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module final_step_file_metric_ref (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical ref,
+    output electrical metric_out
+);
+parameter real vth = 0.45;
+parameter real tedge = 200p;
+integer count_q;
+integer fd;
+real metric_q;
+
+analog begin
+    V(metric_out) <+ transition(0.0);
+end
+
+endmodule

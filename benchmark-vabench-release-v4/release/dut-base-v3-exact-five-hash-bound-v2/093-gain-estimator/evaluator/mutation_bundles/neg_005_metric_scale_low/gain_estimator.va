@@ -1,0 +1,56 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "constants.vams"
+`include "disciplines.vams"
+
+module gain_estimator(VDD, VSS, vinp, vinn, voutp, voutn, gain_out, valid);
+    inout VDD, VSS;
+    input vinp, vinn, voutp, voutn;
+    output gain_out, valid;
+    electrical VDD, VSS, vinp, vinn, voutp, voutn, gain_out, valid;
+
+    parameter real sample_period = 1n from (0:inf);
+    parameter real start_time = 20n;
+    parameter real gain_scale = 10.0 from (0:inf);
+    parameter real min_input_span = 0.02 from (0:inf);
+    parameter real tedge = 200p from (0:inf);
+
+    real in_min, in_max;
+    real out_min, out_max;
+    real in_span, out_span;
+    real gain_q;
+    integer valid_q;
+    real vin_diff, vout_diff;
+
+    analog begin
+        @(initial_step) begin
+            in_min = 1.0e9;
+            in_max = -1.0e9;
+            out_min = 1.0e9;
+            out_max = -1.0e9;
+            gain_q = 0.0;
+            valid_q = 0;
+        end
+
+        @(timer(0, sample_period)) begin
+            if ($abstime >= start_time) begin
+                vin_diff = V(vinp, vinn);
+                vout_diff = V(voutp, voutn);
+                if (vin_diff < in_min) in_min = vin_diff;
+                if (vin_diff > in_max) in_max = vin_diff;
+                if (vout_diff < out_min) out_min = vout_diff;
+                if (vout_diff > out_max) out_max = vout_diff;
+
+                in_span = in_max - in_min;
+                out_span = out_max - out_min;
+                if (in_span > min_input_span) begin
+                    gain_q = out_span / in_span;
+                    valid_q = 1;
+                end
+            end
+        end
+
+        V(gain_out, VSS) <+ (0.42 * (V(VDD, VSS) * transition(gain_q / gain_scale, 0, tedge, tedge)));
+        V(valid, VSS) <+ (0.42 * (V(VDD, VSS) * transition((valid_q) ? 1.0 : 0.0, 0, tedge, tedge)));
+    end
+endmodule

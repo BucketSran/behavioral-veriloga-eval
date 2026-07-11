@@ -1,0 +1,338 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "pipeline_adc_chain_4b",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vrefp",
+                "override_behavior": "sets positive conversion reference",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vrefp > vrefn"
+              },
+              {
+                "default": 0.0,
+                "name": "vrefn",
+                "override_behavior": "sets negative conversion reference",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vrefn < vrefp"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets voltage-coded clock and bit decision threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real within the intended clock logic range"
+              },
+              {
+                "default": 1e-10,
+                "name": "tedge",
+                "override_behavior": "sets residue and bit-output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tedge > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VDD",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VSS",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "VIN",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "CLK",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "RES1",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "RES2",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "S1B1",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "S1B0",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "S2B1",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "S2B0",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "DOUT3",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "DOUT2",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "DOUT1",
+                "position": 12
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "DOUT0",
+                "position": 13
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "pipeline_adc_chain_4b.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "096",
+  "identity": {
+    "category": "data_converter_models",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Pipeline ADC Chain 4b"
+  },
+  "modeling_constraints": [
+    "Use deterministic rising-edge sampled two-stage quarter-scale conversion.",
+    "Use rail-referenced smoothed voltage outputs for residues and bits.",
+    "Do not hard-code validation points or use current contributions, transistor-level devices, AC/noise analysis, ddt, idt, or validation side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_CLOCKED_SAMPLE_HOLD",
+      "observable_contract": "On each rising CLK crossing, the converter samples VIN and updates all stage residues and bits; outputs hold between conversions.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "res1",
+        "res2",
+        "s1b1",
+        "s1b0",
+        "s2b1",
+        "s2b0",
+        "dout3",
+        "dout2",
+        "dout1",
+        "dout0"
+      ]
+    },
+    {
+      "id": "P_STAGE1_DECISION",
+      "observable_contract": "Stage 1 clips VIN to vrefn through vrefp, selects the correct quarter-scale bin, and exposes the two-bit coarse decision on S1B1/S1B0.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "s1b1",
+        "s1b0"
+      ]
+    },
+    {
+      "id": "P_STAGE1_RESIDUE",
+      "observable_contract": "RES1 is four times the clipped sampled-input error from the selected stage-1 bin center, clipped to the conversion range.",
+      "required_signals": [
+        "time",
+        "vin",
+        "s1b1",
+        "s1b0",
+        "res1"
+      ]
+    },
+    {
+      "id": "P_STAGE2_DECISION",
+      "observable_contract": "Stage 2 applies the same quarter-scale two-bit decision to RES1 and exposes it on S2B1/S2B0.",
+      "required_signals": [
+        "time",
+        "res1",
+        "s2b1",
+        "s2b0"
+      ]
+    },
+    {
+      "id": "P_STAGE2_RESIDUE",
+      "observable_contract": "RES2 is four times the stage-2 input error from its selected bin center, clipped to the conversion range.",
+      "required_signals": [
+        "time",
+        "res1",
+        "s2b1",
+        "s2b0",
+        "res2"
+      ]
+    },
+    {
+      "id": "P_FINAL_CODE_CONCATENATION",
+      "observable_contract": "DOUT3/DOUT2 equal the stage-1 bits and DOUT1/DOUT0 equal the stage-2 bits, using VDD for high and VSS for low.",
+      "required_signals": [
+        "time",
+        "vdd",
+        "vss",
+        "s1b1",
+        "s1b0",
+        "s2b1",
+        "s2b0",
+        "dout3",
+        "dout2",
+        "dout1",
+        "dout0"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1096",
+    "dut": "v4-096",
+    "testbench": "v4-596"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vdd",
+            "port_ref": "VDD",
+            "position": 0
+          },
+          {
+            "net": "vss",
+            "port_ref": "VSS",
+            "position": 1
+          },
+          {
+            "net": "vin",
+            "port_ref": "VIN",
+            "position": 2
+          },
+          {
+            "net": "clk",
+            "port_ref": "CLK",
+            "position": 3
+          },
+          {
+            "net": "res1",
+            "port_ref": "RES1",
+            "position": 4
+          },
+          {
+            "net": "res2",
+            "port_ref": "RES2",
+            "position": 5
+          },
+          {
+            "net": "s1b1",
+            "port_ref": "S1B1",
+            "position": 6
+          },
+          {
+            "net": "s1b0",
+            "port_ref": "S1B0",
+            "position": 7
+          },
+          {
+            "net": "s2b1",
+            "port_ref": "S2B1",
+            "position": 8
+          },
+          {
+            "net": "s2b0",
+            "port_ref": "S2B0",
+            "position": 9
+          },
+          {
+            "net": "dout3",
+            "port_ref": "DOUT3",
+            "position": 10
+          },
+          {
+            "net": "dout2",
+            "port_ref": "DOUT2",
+            "position": 11
+          },
+          {
+            "net": "dout1",
+            "port_ref": "DOUT1",
+            "position": 12
+          },
+          {
+            "net": "dout0",
+            "port_ref": "DOUT0",
+            "position": 13
+          }
+        ],
+        "module_ref": "pipeline_adc_chain_4b",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vdd",
+      "vss",
+      "vin",
+      "clk",
+      "res1",
+      "res2",
+      "s1b1",
+      "s1b0",
+      "s2b1",
+      "s2b0",
+      "dout3",
+      "dout2",
+      "dout1",
+      "dout0"
+    ]
+  }
+}

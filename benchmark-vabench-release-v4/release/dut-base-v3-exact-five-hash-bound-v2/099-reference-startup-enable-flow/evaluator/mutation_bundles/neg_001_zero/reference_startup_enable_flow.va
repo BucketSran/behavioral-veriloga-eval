@@ -1,0 +1,23 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module reference_startup_enable_flow(clk, rst, vdd_in, en, out, metric, supply_ok, enable_mon, state_mon, startup_mon);
+input clk, rst, vdd_in, en;
+output out, metric, supply_ok, enable_mon, state_mon, startup_mon;
+electrical clk, rst, vdd_in, en, out, metric, supply_ok, enable_mon, state_mon, startup_mon;
+parameter real tr = 100p;
+parameter real vth = 0.45;
+real refv, metricv, supply_ok_v, enable_v, state_v, startup_v;
+integer settle_count;
+integer state;
+
+analog begin
+    V(out) <+ transition(0.0);
+    V(metric) <+ transition(0.0);
+    V(supply_ok) <+ transition(0.0);
+    V(enable_mon) <+ transition(0.0);
+    V(state_mon) <+ transition(0.0);
+    V(startup_mon) <+ transition(0.0);
+end
+
+endmodule

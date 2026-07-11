@@ -1,0 +1,20 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module ldo_load_step_recovery_flow(clk, rst, vin, out, metric, load_mon, ctrl_mon);
+input clk, rst, vin;
+output out, metric, load_mon, ctrl_mon;
+electrical clk, rst, vin, out, metric, load_mon, ctrl_mon;
+parameter real tr = 100p;
+parameter real vth = 0.45;
+real regv, targetv, loadv, last_load, ctrlv, errv, metricv;
+integer recover_count;
+
+analog begin
+    V(out) <+ transition(0.0);
+    V(metric) <+ transition(0.0);
+    V(load_mon) <+ transition(0.0);
+    V(ctrl_mon) <+ transition(0.0);
+end
+
+endmodule

@@ -1,0 +1,107 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "pipeline_adc_chain_4b.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=170n maxstep=200p"
+    ],
+    "body_lines": [
+      "// pipeline_adc_chain_4b gold testbench",
+      "// Drives one representative sample in every final 4-bit code bin. The",
+      "// alternating lower/upper-half points exercise both pipeline residue levels.",
+      "",
+      "Vvdd (vdd 0) vsource dc=0.9",
+      "Vvss (vss 0) vsource dc=0.0",
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=4n rise=100p fall=100p delay=5n"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vdd",
+      "vss",
+      "vin",
+      "clk",
+      "res1",
+      "res2",
+      "s1b1",
+      "s1b0",
+      "s2b1",
+      "s2b0",
+      "dout3",
+      "dout2",
+      "dout1",
+      "dout0"
+    ]
+  },
+  "family_id": "096",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "0c32790746884abbc097f20cbee42400ea4f966fbbbffb91d117e4b2ded39e46",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "6e0a0612cef1d20ba7885ea82360151a66421692e92f657479ae1f5100d14299",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vvin (vin 0) vsource type=pwl wave=[0n 0.0140625 9.8n 0.0140625 10n 0.0984375 19.8n 0.0984375 20n 0.1265625 29.8n 0.1265625 30n 0.2109375 39.8n 0.2109375 40n 0.2390625 49.8n 0.2390625 50n 0.3234375 59.8n 0.3234375 60n 0.3515625 69.8n 0.3515625 70n 0.4359375 79.8n 0.4359375 80n 0.4640625 89.8n 0.4640625 90n 0.5484375 99.8n 0.5484375 100n 0.5765625 109.8n 0.5765625 110n 0.6609375 119.8n 0.6609375 120n 0.6890625 129.8n 0.6890625 130n 0.7734375 139.8n 0.7734375 140n 0.8015625 149.8n 0.8015625 150n 0.8859375 169n 0.8859375]",
+          "",
+          "IDUT (vdd vss vin clk res1 res2 s1b1 s1b0 s2b1 s2b0 dout3 dout2 dout1 dout0) pipeline_adc_chain_4b vrefp=0.9 vrefn=0.0 vth=0.45 tedge=100p",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vvin (vin 0) vsource type=pwl wave=[0n 0.005625 9.8n 0.005625 10n 0.106875 19.8n 0.106875 20n 0.118125 29.8n 0.118125 30n 0.219375 39.8n 0.219375 40n 0.230625 49.8n 0.230625 50n 0.331875 59.8n 0.331875 60n 0.343125 69.8n 0.343125 70n 0.444375 79.8n 0.444375 80n 0.455625 89.8n 0.455625 90n 0.556875 99.8n 0.556875 100n 0.568125 109.8n 0.568125 110n 0.669375 119.8n 0.669375 120n 0.680625 129.8n 0.680625 130n 0.781875 139.8n 0.781875 140n 0.793125 149.8n 0.793125 150n 0.894375 169n 0.894375]",
+          "",
+          "IDUT (vdd vss vin clk res1 res2 s1b1 s1b0 s2b1 s2b0 dout3 dout2 dout1 dout0) pipeline_adc_chain_4b vrefp=0.9 vrefn=0.0 vth=0.45 tedge=100p",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_CLOCKED_SAMPLE_HOLD",
+    "P_STAGE1_DECISION",
+    "P_STAGE1_RESIDUE",
+    "P_STAGE2_DECISION",
+    "P_STAGE2_RESIDUE",
+    "P_FINAL_CODE_CONCATENATION"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "07ee4204e178744ff6f141be0b9151b99d63c339c441b30ccb998fe2fe258ee8",
+    "family_spec_sha256": "389caacd46c55320d339182ef0788d8a35ba6eefdb1e393952146924485d1f48"
+  },
+  "task_id": "v4-096"
+}

@@ -1,0 +1,50 @@
+{
+  "access": "private_checker_backend",
+  "checker_source_public": false,
+  "checker_task_id": "v4_091_final_step_file_metric",
+  "contract": {
+    "public_contract": "public_contract.json",
+    "source_task_id": "v3_100_final_step_file_metric",
+    "task_id": "v4_091_final_step_file_metric"
+  },
+  "schema_version": "v4-checker-profile-v1",
+  "score_and_feedback_share_checker": true,
+  "shared_by": [
+    "test_feedback/public_tb.scs",
+    "evaluator/score_tb.scs"
+  ],
+  "side_effect_contract": {
+    "base": "simulator_output_dir",
+    "exclusive_suffix": ".out",
+    "files": [
+      {
+        "count_group": "count",
+        "metric_divisor": 4.0,
+        "metric_group": "metric",
+        "metric_tolerance": 0.0005,
+        "path": "candidate.out",
+        "record_pattern": "count=(?P<count>[0-9]+) metric=(?P<metric>[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+))",
+        "signal": "ref",
+        "threshold": 0.45,
+        "validator": "rising_edge_count_metric"
+      }
+    ]
+  },
+  "trace_contract": {
+    "extra_trace_signals": [],
+    "property_ids": [
+      "P_ZERO_INITIAL_STATE",
+      "P_RISING_EDGE_COUNT",
+      "P_NORMALIZED_METRIC",
+      "P_EVENT_UPDATED_OUTPUT",
+      "P_FINAL_TEXT_RECORD"
+    ],
+    "public_observables": [
+      "vdd",
+      "vss",
+      "ref",
+      "metric_out"
+    ],
+    "source": "family_spec.trace_contract.required_signals"
+  }
+}

@@ -1,0 +1,33 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sample_hold_droop_ref(vdd, vss, clk, vin, vout, valid, coarse);
+    inout vdd, vss;
+    input clk, vin;
+    output vout, valid, coarse;
+    electrical vdd, vss, clk, vin, vout, valid, coarse;
+
+    parameter real vth = 0.45;
+    parameter real trf = 40p;
+    parameter real tau = 90n;
+    parameter real dt  = 0.5n;
+    parameter real taperture = 200p;
+    parameter real valid_width = 2n;
+
+    real hold_val;
+    real out_val;
+    real coarse_val;
+    real valid_val;
+    real sample_time;
+    real valid_until;
+    real alpha;
+    real vdd_now;
+    integer armed;
+
+analog begin
+    V(vout) <+ transition(0.0);
+    V(valid) <+ transition(0.0);
+    V(coarse) <+ transition(0.0);
+end
+
+endmodule

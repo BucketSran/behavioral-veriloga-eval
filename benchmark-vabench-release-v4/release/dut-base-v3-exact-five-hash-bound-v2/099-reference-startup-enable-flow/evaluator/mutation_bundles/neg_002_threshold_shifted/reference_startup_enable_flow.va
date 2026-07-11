@@ -1,0 +1,56 @@
+// vaBench generated partial-pass negative: threshold_shifted
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "constants.vams"
+`include "disciplines.vams"
+
+module reference_startup_enable_flow(clk, rst, vdd_in, en, out, metric, supply_ok, enable_mon, state_mon, startup_mon);
+input clk, rst, vdd_in, en;
+output out, metric, supply_ok, enable_mon, state_mon, startup_mon;
+electrical clk, rst, vdd_in, en, out, metric, supply_ok, enable_mon, state_mon, startup_mon;
+parameter real tr = 100p;
+parameter real vth = 0.57;
+real refv, metricv, supply_ok_v, enable_v, state_v, startup_v;
+integer settle_count;
+integer state;
+analog begin
+    @(initial_step) begin
+        refv = 0.0;
+        metricv = 0.0;
+        settle_count = 0;
+        state = 0;
+        supply_ok_v = 0.0;
+        enable_v = 0.0;
+        state_v = 0.0;
+        startup_v = 0.0;
+    end
+    @(cross(V(clk) - vth, +1)) begin
+        supply_ok_v = (V(vdd_in) > 0.32) ? 0.9 : 0.0;
+        enable_v = (V(en) > vth) ? 0.9 : 0.0;
+        if (V(rst) > vth || supply_ok_v < 0.45) begin
+            refv = 0.0;
+            metricv = 0.0;
+            settle_count = 0;
+            state = 0;
+        end else if (enable_v < 0.45) begin
+            refv = 0.05;
+            metricv = 0.1;
+            settle_count = 0;
+            state = 1;
+        end else begin
+            refv = refv + 0.32 * (0.55 - refv);
+            settle_count = settle_count + 1;
+            metricv = (settle_count >= 5 && refv > 0.48) ? 0.9 : 0.25;
+            state = (settle_count >= 5 && refv > 0.48) ? 3 : 2;
+        end
+        if (settle_count > 8) settle_count = 8;
+        state_v = state / 3.0 * 0.9;
+        startup_v = settle_count / 8.0 * 0.9;
+    end
+    V(out) <+ (0.42 * (transition(refv, 0, tr, tr)));
+    V(metric) <+ (0.42 * (transition(metricv, 0, tr, tr)));
+    V(supply_ok) <+ transition(supply_ok_v, 0, tr, tr);
+    V(enable_mon) <+ (0.42 * (transition(enable_v, 0, tr, tr)));
+    V(state_mon) <+ transition(state_v, 0, tr, tr);
+    V(startup_mon) <+ transition(startup_v, 0, tr, tr);
+end
+endmodule

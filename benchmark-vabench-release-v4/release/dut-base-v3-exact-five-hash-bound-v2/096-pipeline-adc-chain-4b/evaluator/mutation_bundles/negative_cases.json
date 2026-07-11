@@ -1,0 +1,65 @@
+{
+  "cases": [
+    {
+      "id": "neg_001_zero",
+      "intent": "zero/stub output implementation copied from starter must not satisfy hidden behavior checker",
+      "mutation": "zero_stub_output",
+      "target": "pipeline_adc_chain_4b.va",
+      "violated_property_ids": [
+        "P_CLOCKED_SAMPLE_HOLD",
+        "P_STAGE1_DECISION"
+      ]
+    },
+    {
+      "files": [
+        "neg_002_threshold_shifted/pipeline_adc_chain_4b.va"
+      ],
+      "id": "neg_002_threshold_shifted",
+      "mutation": "threshold_boundary_error",
+      "violated_property_ids": [
+        "P_CLOCKED_SAMPLE_HOLD",
+        "P_STAGE1_DECISION",
+        "P_STAGE2_DECISION"
+      ],
+      "why_wrong": "Pipeline ADC Chain 4b: shifts the decision threshold, preserving nominal behavior while failing boundary checks."
+    },
+    {
+      "files": [
+        "neg_003_event_edge_wrong/pipeline_adc_chain_4b.va"
+      ],
+      "id": "neg_003_event_edge_wrong",
+      "mutation": "event_edge_polarity_error",
+      "violated_property_ids": [
+        "P_CLOCKED_SAMPLE_HOLD",
+        "P_STAGE1_RESIDUE"
+      ],
+      "why_wrong": "Pipeline ADC Chain 4b: uses the opposite event edge, preserving interface behavior while failing timing windows."
+    },
+    {
+      "files": [
+        "neg_004_reset_polarity_wrong/pipeline_adc_chain_4b.va"
+      ],
+      "id": "neg_004_reset_polarity_wrong",
+      "mutation": "reset_semantics_error",
+      "violated_property_ids": [
+        "P_CLOCKED_SAMPLE_HOLD",
+        "P_STAGE1_DECISION"
+      ],
+      "why_wrong": "Pipeline ADC Chain 4b: uses the wrong reset polarity, preserving steady-state behavior while failing recovery checks."
+    },
+    {
+      "files": [
+        "neg_005_metric_scale_low/pipeline_adc_chain_4b.va"
+      ],
+      "id": "neg_005_metric_scale_low",
+      "mutation": "metric_scaling_error",
+      "violated_property_ids": [
+        "P_CLOCKED_SAMPLE_HOLD",
+        "P_STAGE2_RESIDUE",
+        "P_FINAL_CODE_CONCATENATION"
+      ],
+      "why_wrong": "Pipeline ADC Chain 4b: scales the metric output, preserving the main path while failing measurement checks."
+    }
+  ],
+  "status": "concrete_semantic_negatives_static_formalized_runtime_pending"
+}

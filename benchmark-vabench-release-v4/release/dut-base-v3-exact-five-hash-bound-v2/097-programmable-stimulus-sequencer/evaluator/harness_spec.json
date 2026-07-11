@@ -1,0 +1,100 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "programmable_stimulus_sequencer.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=90n maxstep=0.5n"
+    ],
+    "body_lines": [
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=2n width=1n rise=50p fall=50p"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "rst",
+      "mode",
+      "gate",
+      "out",
+      "metric"
+    ]
+  },
+  "family_id": "097",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "79bec235695c315a6792201603cb90b7be56de548b02dff995d37d7221eb2d65",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "e445ccba89a2a2393e36d6ee5755cfc969776c1ab5f6b53c4eee835ec3c71860",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 90n 0]",
+          "Vmode (mode 0) vsource type=pwl wave=[0 0 25.9n 0 26n 0.45 61.9n 0.45 62n 0.9 90n 0.9]",
+          "Vgate (gate 0) vsource type=pwl wave=[0 0 65.9n 0 66n 0.9 75.9n 0.9 76n 0 79.9n 0 80n 0.9 88n 0.9 88.1n 0 90n 0]",
+          "",
+          "XDUT (clk rst mode gate out metric) programmable_stimulus_sequencer",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=95n maxstep=0.5n"
+        ],
+        "body_lines": [
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 95n 0]",
+          "Vmode (mode 0) vsource type=pwl wave=[0 0 25.9n 0 26n 0.45 61.9n 0.45 62n 0.9 95n 0.9]",
+          "Vgate (gate 0) vsource type=pwl wave=[0 0 65.9n 0 66n 0.9 75.9n 0.9 76n 0 79.9n 0 80n 0.9 88n 0.9 88.1n 0 95n 0]",
+          "",
+          "XDUT (clk rst mode gate out metric) programmable_stimulus_sequencer",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RESET_IDLE",
+    "P_RAMP_MODE",
+    "P_CHIRP_MODE",
+    "P_BURST_GATE",
+    "P_BURST_IDLE",
+    "P_CONTROL_DRIVEN_SELECTION"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "43a8d8e92989029fe8864d6aca3dce6e071c339a5d682a3f81e949c9da8b167c",
+    "family_spec_sha256": "2e592752afa20eb01640e0d6ee203ea98c79ca48b216a406dd9cfece42b51d8e"
+  },
+  "task_id": "v4-097"
+}

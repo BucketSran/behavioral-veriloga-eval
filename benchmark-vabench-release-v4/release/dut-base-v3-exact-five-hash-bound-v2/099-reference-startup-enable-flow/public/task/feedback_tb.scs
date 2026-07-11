@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/reference_startup_enable_flow.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=2n width=1n rise=50p fall=50p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 80n 0]
+Vvdd_in (vdd_in 0) vsource type=pwl wave=[0 0.15 9.9n 0.15 10n 0.70 53.9n 0.70 54n 0.20 62.9n 0.20 63n 0.70 80n 0.70]
+Ven (en 0) vsource type=pwl wave=[0 0 23.9n 0 24n 0.9 80n 0.9]
+
+XDUT (clk rst vdd_in en out metric supply_ok enable_mon state_mon startup_mon) reference_startup_enable_flow
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=80n maxstep=0.5n
+save clk rst vdd_in en out metric supply_ok enable_mon state_mon startup_mon

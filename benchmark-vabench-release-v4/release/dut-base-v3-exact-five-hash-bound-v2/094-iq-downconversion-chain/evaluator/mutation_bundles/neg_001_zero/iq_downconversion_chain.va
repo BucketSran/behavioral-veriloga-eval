@@ -1,0 +1,23 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module iq_downconversion_chain(clk, rst, vin, out, metric, lo_i, lo_q, mix_i, mix_q, phase_mon);
+input clk, rst, vin;
+output out, metric, lo_i, lo_q, mix_i, mix_q, phase_mon;
+electrical clk, rst, vin, out, metric, lo_i, lo_q, mix_i, mix_q, phase_mon;
+parameter real tr = 80p;
+parameter real vth = 0.45;
+real basev, iv, qv, icoef, qcoef, lo_i_v, lo_q_v, mix_i_v, mix_q_v, phase_v;
+integer phase;
+
+analog begin
+    V(out) <+ transition(0.0);
+    V(metric) <+ transition(0.0);
+    V(lo_i) <+ transition(0.0);
+    V(lo_q) <+ transition(0.0);
+    V(mix_i) <+ transition(0.0);
+    V(mix_q) <+ transition(0.0);
+    V(phase_mon) <+ transition(0.0);
+end
+
+endmodule

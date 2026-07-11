@@ -1,0 +1,127 @@
+// Two-stage 2-bit/stage pipeline ADC residue chain, behavioral model.
+// Stage 1 makes a 2-bit coarse decision, amplifies the residue by 4, and
+// stage 2 quantizes that residue into the lower 2 output bits.
+
+`include "constants.vams"
+`include "disciplines.vams"
+`default_transition 100p
+
+module pipeline_adc_chain_4b(VDD, VSS, VIN, CLK, RES1, RES2, S1B1, S1B0, S2B1, S2B0, DOUT3, DOUT2, DOUT1, DOUT0);
+
+inout VDD, VSS;
+input VIN, CLK;
+output RES1, RES2;
+output S1B1, S1B0, S2B1, S2B0;
+output DOUT3, DOUT2, DOUT1, DOUT0;
+
+electrical VDD, VSS;
+electrical VIN, CLK;
+electrical RES1, RES2;
+electrical S1B1, S1B0, S2B1, S2B0;
+electrical DOUT3, DOUT2, DOUT1, DOUT0;
+
+parameter real vrefp = 0.9;
+parameter real vrefn = 0.0;
+parameter real vth = 0.45;
+parameter real tedge = 100p;
+
+integer s1_code;
+integer s2_code;
+integer final_code;
+real vin_s;
+real span;
+real center1;
+real center2;
+real res1_level;
+real res2_level;
+real s1b1_level;
+real s1b0_level;
+real s2b1_level;
+real s2b0_level;
+real d3_level;
+real d2_level;
+real d1_level;
+real d0_level;
+
+analog begin
+    @(initial_step) begin
+        s1_code = 0;
+        s2_code = 0;
+        final_code = 0;
+        vin_s = vrefn;
+        res1_level = (vrefp + vrefn) / 2.0;
+        res2_level = (vrefp + vrefn) / 2.0;
+        s1b1_level = V(VSS);
+        s1b0_level = V(VSS);
+        s2b1_level = V(VSS);
+        s2b0_level = V(VSS);
+        d3_level = V(VSS);
+        d2_level = V(VSS);
+        d1_level = V(VSS);
+        d0_level = V(VSS);
+    end
+
+    @(cross(V(CLK) - vth, +1)) begin
+        span = vrefp - vrefn;
+        vin_s = V(VIN);
+        if (vin_s < vrefn) vin_s = vrefn;
+        if (vin_s > vrefp) vin_s = vrefp;
+
+        if (vin_s < vrefn + span * 0.25) begin
+            s1_code = 0;
+        end else if (vin_s < vrefn + span * 0.50) begin
+            s1_code = 1;
+        end else if (vin_s < vrefn + span * 0.75) begin
+            s1_code = 2;
+        end else begin
+            s1_code = 3;
+        end
+
+        center1 = vrefn + (s1_code + 0.5) * span / 4.0;
+        res1_level = (vrefp + vrefn) / 2.0 + 4.0 * (vin_s - center1);
+        if (res1_level < vrefn) res1_level = vrefn;
+        if (res1_level > vrefp) res1_level = vrefp;
+
+        if (res1_level < vrefn + span * 0.25) begin
+            s2_code = 0;
+        end else if (res1_level < vrefn + span * 0.50) begin
+            s2_code = 1;
+        end else if (res1_level < vrefn + span * 0.75) begin
+            s2_code = 2;
+        end else begin
+            s2_code = 3;
+        end
+
+        center2 = vrefn + (s2_code + 0.5) * span / 4.0;
+        res2_level = (vrefp + vrefn) / 2.0 + 4.0 * (res1_level - center2);
+        if (res2_level < vrefn) res2_level = vrefn;
+        if (res2_level > vrefp) res2_level = vrefp;
+
+        final_code = 4 * s1_code + s2_code;
+
+        s1b1_level = (s1_code >= 2) ? V(VDD) : V(VSS);
+        s1b0_level = ((s1_code == 1) || (s1_code == 3)) ? V(VDD) : V(VSS);
+        s2b1_level = (s2_code >= 2) ? V(VDD) : V(VSS);
+        s2b0_level = ((s2_code == 1) || (s2_code == 3)) ? V(VDD) : V(VSS);
+
+        d3_level = (final_code >= 8) ? V(VDD) : V(VSS);
+        d2_level = ((final_code >= 4 && final_code < 8) || (final_code >= 12)) ? V(VDD) : V(VSS);
+        d1_level = ((final_code == 2) || (final_code == 3) || (final_code == 6) || (final_code == 7) ||
+                    (final_code == 10) || (final_code == 11) || (final_code == 14) || (final_code == 15)) ? V(VDD) : V(VSS);
+        d0_level = ((final_code == 1) || (final_code == 3) || (final_code == 5) || (final_code == 7) ||
+                    (final_code == 9) || (final_code == 11) || (final_code == 13) || (final_code == 15)) ? V(VDD) : V(VSS);
+    end
+
+    V(RES1, VSS) <+ transition(res1_level, 0, tedge, tedge);
+    V(RES2, VSS) <+ transition(res2_level, 0, tedge, tedge);
+    V(S1B1, VSS) <+ transition(s1b1_level, 0, tedge, tedge);
+    V(S1B0, VSS) <+ transition(s1b0_level, 0, tedge, tedge);
+    V(S2B1, VSS) <+ transition(s2b1_level, 0, tedge, tedge);
+    V(S2B0, VSS) <+ transition(s2b0_level, 0, tedge, tedge);
+    V(DOUT3, VSS) <+ transition(d3_level, 0, tedge, tedge);
+    V(DOUT2, VSS) <+ transition(d2_level, 0, tedge, tedge);
+    V(DOUT1, VSS) <+ transition(d1_level, 0, tedge, tedge);
+    V(DOUT0, VSS) <+ transition(d0_level, 0, tedge, tedge);
+end
+
+endmodule

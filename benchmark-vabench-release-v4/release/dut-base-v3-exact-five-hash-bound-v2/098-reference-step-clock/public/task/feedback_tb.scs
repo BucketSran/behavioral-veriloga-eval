@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/ref_step_clk.va"
+
+// Visible smoke testbench for the standalone reference-step clock generator.
+
+VDD_SRC (VDD 0) vsource type=dc dc=0.9
+VSS_SRC (VSS 0) vsource type=dc dc=0
+
+XREF (VDD VSS CLK) ref_step_clk \
+    period_pre=20n period_post=19.5n t_switch=2u tedge=100p
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=3u maxstep=250p errpreset=conservative
+save VDD VSS CLK

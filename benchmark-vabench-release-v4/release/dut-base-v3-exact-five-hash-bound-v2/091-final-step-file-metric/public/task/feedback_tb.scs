@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/final_step_file_metric_ref.va"
+
+Vvdd (vdd 0) vsource dc=0.9 type=dc
+Vvss (vss 0) vsource dc=0.0 type=dc
+Vref (ref 0) vsource type=pulse val0=0 val1=0.9 delay=10n period=20n width=2n rise=50p fall=50p
+
+IDUT (vdd vss ref metric_out) final_step_file_metric_ref
+
+simulatorOptions options reltol=1e-4 vabstol=1e-6 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=80n maxstep=20p errpreset=conservative
+save vdd vss ref metric_out
