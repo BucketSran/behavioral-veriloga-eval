@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/absolute_value_behavior.va"
+
+Vin (sigin 0) vsource type=pwl wave=[0 -0.4 10n -0.4 10.1n 0.3 20n 0.3 20.1n -0.1 35n -0.1]
+
+XDUT (sigin sigout) absolute_value_behavior
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=30n maxstep=25p
+save sigin sigout

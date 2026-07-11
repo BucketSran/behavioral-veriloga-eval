@@ -1,0 +1,134 @@
+{
+  "family_id": "127",
+  "gold_bundle_sha256": "fafd18db21e95470b9bc0b28d0c9984ca5c40ee41de907d88085f63a89d855ae",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "offset_gain_amplifier.va": "2443489081a34b8e5759ad80cd23226dc6100557a000cf3b3478ba49ed3cfe63"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DIRECT_MEMORYLESS_OUTPUT",
+          "P_FIXED_GAIN_THREE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "offset_gain_amplifier.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_DIRECT_MEMORYLESS_OUTPUT",
+        "P_FIXED_GAIN_THREE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "offset_gain_amplifier.va": "8fc40e3574313374896e7c9cea9392c5bab509c0f890f6684266f1b88e3f5042"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INPUT_OFFSET_SUBTRACTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_missing_offset/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "offset_gain_amplifier.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_002_missing_offset",
+      "trigger_condition": "Uses gain without subtracting the input offset.",
+      "violated_property_ids": [
+        "P_INPUT_OFFSET_SUBTRACTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "offset_gain_amplifier.va": "e39c5a9d151e523868117aceb9141486117984fcefa7054ba161f3eeb1a95f1d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FIXED_GAIN_THREE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_gain/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "offset_gain_amplifier.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_003_wrong_gain",
+      "trigger_condition": "Uses the wrong gain factor.",
+      "violated_property_ids": [
+        "P_FIXED_GAIN_THREE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "offset_gain_amplifier.va": "6a36eb4a37d470e289e710fcf97a04d75bec89288a62fba3c3d0b7b55c6f9b59"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INPUT_OFFSET_SUBTRACTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_adds_offset/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "offset_gain_amplifier.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_004_adds_offset",
+      "trigger_condition": "Adds the offset instead of subtracting it.",
+      "violated_property_ids": [
+        "P_INPUT_OFFSET_SUBTRACTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "offset_gain_amplifier.va": "23679c4bff4035de1a12d80fae9435e02548cf02c0df20806ea71196afbb9e61"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FIXED_GAIN_THREE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "offset_gain_amplifier.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Scales the amplified output too low while preserving the module/interface shape.",
+      "violated_property_ids": [
+        "P_FIXED_GAIN_THREE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

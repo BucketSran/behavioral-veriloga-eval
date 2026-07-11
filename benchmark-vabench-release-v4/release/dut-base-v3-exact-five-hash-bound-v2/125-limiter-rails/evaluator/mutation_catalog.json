@@ -1,0 +1,134 @@
+{
+  "family_id": "125",
+  "gold_bundle_sha256": "41c737c008461c429b446a04828373a2fc8a72b06a16ad3fd2b043f264e8a42f",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "limiter_rails.va": "745d3e2a44ae1e15979a6760b0772614bd2d9a463d481fa228041123956a271b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PASS_WITHIN_LIMITS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "limiter_rails.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_PASS_WITHIN_LIMITS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "limiter_rails.va": "25a9504806161a4471085d8b7064870085615773df9ff37f6ebc9c68d6d2ec89"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RAIL_DERIVED_LIMITS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_ignores_rail_offsets/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "limiter_rails.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_002_ignores_rail_offsets",
+      "trigger_condition": "Clamps directly to vdd and vss rather than using vmax/vmin offsets.",
+      "violated_property_ids": [
+        "P_RAIL_DERIVED_LIMITS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "limiter_rails.va": "05fef4ac7a2cb574e3aa1ef6d67ee573f4a39e9c33659903d471b9b8c4111f91"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RAIL_DERIVED_LIMITS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_swapped_offsets/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "limiter_rails.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_003_swapped_offsets",
+      "trigger_condition": "Uses vmin for the upper headroom and vmax for the lower headroom.",
+      "violated_property_ids": [
+        "P_RAIL_DERIVED_LIMITS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "limiter_rails.va": "74e0c8efc507332f409e7840db9632d91ea9d87309d96f03ae616fe53ec87aa1"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LIMIT_BELOW_LOWER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_no_lower_limit/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "limiter_rails.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_004_no_lower_limit",
+      "trigger_condition": "Omits the lower limiting branch.",
+      "violated_property_ids": [
+        "P_LIMIT_BELOW_LOWER"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "limiter_rails.va": "5380c1d488ab89760eeb134b1947d127c1cebc0540c10778101de61ff99d3f5c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LIMIT_ABOVE_UPPER",
+          "P_LIMIT_BELOW_LOWER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "limiter_rails.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Scales the upper-clamped output too low while preserving the module/interface shape.",
+      "violated_property_ids": [
+        "P_LIMIT_ABOVE_UPPER",
+        "P_LIMIT_BELOW_LOWER"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

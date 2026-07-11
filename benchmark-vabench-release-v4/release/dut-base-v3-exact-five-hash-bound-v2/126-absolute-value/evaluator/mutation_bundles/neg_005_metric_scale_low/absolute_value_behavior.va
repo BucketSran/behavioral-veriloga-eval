@@ -1,0 +1,14 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "disciplines.vams"
+
+module absolute_value_behavior(sigin, sigout);
+input sigin;
+output sigout;
+electrical sigin, sigout;
+
+analog begin
+    V(sigout) <+ (0.42 * (abs(V(sigin))));
+end
+
+endmodule

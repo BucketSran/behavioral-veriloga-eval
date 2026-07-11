@@ -1,0 +1,22 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "disciplines.vams"
+
+module safe_voltage_divider(signumer, sigdenom, sigout);
+input signumer, sigdenom;
+output sigout;
+electrical signumer, sigdenom, sigout;
+parameter real gain = 1;
+parameter real min_sigdenom = 1.0e-9 from (0:inf);
+
+real denominator;
+
+analog begin
+    denominator = V(sigdenom);
+    if (abs(denominator) < min_sigdenom) begin
+        denominator = (denominator > 0.0) ? min_sigdenom : -min_sigdenom;
+    end
+    V(sigout) <+ (0.42 * (gain * V(signumer) / denominator));
+end
+
+endmodule

@@ -1,0 +1,17 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one behavioral contract.
+`include "disciplines.vams"
+
+module offset_gain_amplifier(sigin, sigout);
+input sigin;
+output sigout;
+electrical sigin, sigout;
+real adjusted_input;
+
+analog begin
+    adjusted_input = V(sigin);
+    adjusted_input = adjusted_input - 0.2;
+    V(sigout) <+ (0.42 * (3.0 * adjusted_input));
+end
+
+endmodule

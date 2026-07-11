@@ -1,0 +1,97 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "limiter_rails.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=40n maxstep=25p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vdd",
+      "vin",
+      "vmax",
+      "vmin",
+      "vout",
+      "vss"
+    ]
+  },
+  "family_id": "125",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "6820a97732bf0510e2dbeb81765f270ced942c4d0f9b2fa283d3b53941733169",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "01c32275ee2577fdd225f43c7ab309f81d3e821dceb51cb239b0ee53d73170ae",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vdd (vdd 0) vsource dc=0.9",
+          "Vss (vss 0) vsource dc=0",
+          "Vmax (vmax 0) vsource dc=0.2",
+          "Vmin (vmin 0) vsource dc=0.1",
+          "Vin (vin 0) vsource type=pwl wave=[0 -0.2 10n -0.2 10.1n 0.4 20n 0.4 20.1n 0.9 30n 0.9 30.1n 0.05 45n 0.05]",
+          "",
+          "XDUT (vdd vss vin vmax vmin vout) limiter_rails",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vdd (vdd 0) vsource dc=1.0",
+          "Vss (vss 0) vsource dc=-0.1",
+          "Vmax (vmax 0) vsource dc=0.25",
+          "Vmin (vmin 0) vsource dc=0.15",
+          "Vin (vin 0) vsource type=pwl wave=[0 -0.2 8n -0.2 8.1n 0.35 18n 0.35 18.1n 0.95 28n 0.95 28.1n 0.05 38n 0.05 38.1n 0.75 45n 0.75]",
+          "",
+          "XDUT (vdd vss vin vmax vmin vout) limiter_rails",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RAIL_DERIVED_LIMITS",
+    "P_PASS_WITHIN_LIMITS",
+    "P_LIMIT_ABOVE_UPPER",
+    "P_LIMIT_BELOW_LOWER"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "368934118ed5b8958d61b587736bf2fe6a02740892e6fafa03477e66ef1fe94b",
+    "family_spec_sha256": "860d9c0671d3048a4b0fdad739a97b9a992582d9a51ea4bd83d88d0f887ae7a7"
+  },
+  "task_id": "v4-125"
+}

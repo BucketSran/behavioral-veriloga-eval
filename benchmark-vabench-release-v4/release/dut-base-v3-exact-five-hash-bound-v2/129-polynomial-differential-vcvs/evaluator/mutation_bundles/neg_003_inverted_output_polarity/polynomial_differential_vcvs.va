@@ -1,0 +1,7 @@
+`include "disciplines.vams"
+module polynomial_differential_vcvs(inp, inn, outp, outn);
+input inp, inn; output outp, outn; electrical inp, inn, outp, outn;
+parameter real vcmo=1.1; parameter real a1=1; parameter real a2=0; parameter real a3=0; parameter real a5=0; parameter real a7=0; parameter real vsat=10000000;
+real vid, vid2, vid3, vid5, vid7, vod, limited_vod;
+analog begin vid=V(inp,inn); vid2=vid*vid; vid3=vid2*vid; vid5=vid3*vid2; vid7=vid5*vid2; vod=(a1*vid+a2*vid2+a3*vid3+a5*vid5+a7*vid7)/2; limited_vod=(vod>vsat)?vsat:((vod<-vsat)?-vsat:vod); V(outp)<+vcmo-limited_vod; V(outn)<+vcmo+limited_vod; end
+endmodule

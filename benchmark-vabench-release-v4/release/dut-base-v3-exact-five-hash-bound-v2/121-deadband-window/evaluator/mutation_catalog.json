@@ -1,0 +1,140 @@
+{
+  "family_id": "121",
+  "gold_bundle_sha256": "79af625a2616c48f5c6c002433b75f135471df0819e4124047ab6ee4f30bd88d",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "deadband_window.va": "785917b3c9f51dc484c8923e27ee64043df2218a22dedf8aed6fc6cc6e672518"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LOWER_RESIDUE",
+          "P_UPPER_RESIDUE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deadband_window.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_LOWER_RESIDUE",
+        "P_UPPER_RESIDUE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "deadband_window.va": "721dac096ad1910bdc7764278ba97b22280e2e4e35687267e9552d967e199334"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ZERO_INSIDE_DEADBAND"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_passes_inside_deadband/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deadband_window.va"
+      ],
+      "fault_class": "deadband_omission",
+      "id": "neg_002_passes_inside_deadband",
+      "trigger_condition": "Passes input inside the deadband instead of zeroing it.",
+      "violated_property_ids": [
+        "P_ZERO_INSIDE_DEADBAND"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "deadband_window.va": "0dd1a7340d639a4be6a561372ac75f39bd8ed0f2b8f512784dcd16da82f7c852"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LOWER_RESIDUE",
+          "P_UPPER_RESIDUE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_offsets/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deadband_window.va"
+      ],
+      "fault_class": "deadband_boundary_offset_error",
+      "id": "neg_003_wrong_offsets",
+      "trigger_condition": "Uses the wrong deadband edge offset outside the window.",
+      "violated_property_ids": [
+        "P_LOWER_RESIDUE",
+        "P_UPPER_RESIDUE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "deadband_window.va": "594acfbd33dc2e74a1e1189e8d89354bf328eb4c08a9b9af71a19faac962a24e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LOWER_RESIDUE",
+          "P_UPPER_RESIDUE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_clips_outside_deadband/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deadband_window.va"
+      ],
+      "fault_class": "residue_transfer_clipped",
+      "id": "neg_004_clips_outside_deadband",
+      "trigger_condition": "Clips outside the window instead of subtracting the edge.",
+      "violated_property_ids": [
+        "P_LOWER_RESIDUE",
+        "P_UPPER_RESIDUE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "deadband_window.va": "3d723b65202032cac6f345fec73a0be23671e65c19101e62044c4c5ac7027bf9"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LOWER_RESIDUE",
+          "P_UPPER_RESIDUE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deadband_window.va"
+      ],
+      "fault_class": "output_scale_error",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Deadband Window: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_LOWER_RESIDUE",
+        "P_UPPER_RESIDUE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

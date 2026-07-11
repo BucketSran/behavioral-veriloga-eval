@@ -1,0 +1,27 @@
+`include "disciplines.vams"
+
+module hard_voltage_clamp_behavior (vin, vout, vgnd);
+
+input vin, vgnd;
+output vout;
+electrical vin, vout, vgnd;
+
+parameter real vclamp_upper = 1;
+parameter real vclamp_lower = 0;
+
+real vin_val;
+real target;
+
+analog begin
+    vin_val = V(vin, vgnd);
+    if (vin_val > vclamp_upper) begin
+        target = vclamp_upper;
+    end else if (vin_val < vclamp_lower) begin
+        target = vclamp_lower;
+    end else begin
+        target = vin_val;
+    end
+    V(vout, vgnd) <+ target;
+end
+
+endmodule

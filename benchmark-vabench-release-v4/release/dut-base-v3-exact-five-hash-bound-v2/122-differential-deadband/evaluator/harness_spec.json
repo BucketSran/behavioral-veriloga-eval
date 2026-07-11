@@ -1,0 +1,87 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "differential_deadband.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=40n maxstep=25p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "sigin_n",
+      "sigin_p",
+      "sigout"
+    ]
+  },
+  "family_id": "122",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "df30c3b0ccdcbea5634128d29a09ba07d27c5946f07dc77e738296319ec5027d",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "da0fcc18972f05b31baa5a8ba00ebe4c2bd375e891999bca22457a619ecfaa79",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vp (sigin_p 0) vsource type=pwl wave=[0 0.2 10n 0.2 10.1n 0.45 20n 0.45 20.1n 0.7 30n 0.7 30.1n 0.53 45n 0.53]",
+          "Vn (sigin_n 0) vsource type=pwl wave=[0 0.7 10n 0.7 10.1n 0.45 20n 0.45 20.1n 0.2 30n 0.2 30.1n 0.47 45n 0.47]",
+          "",
+          "XDUT (sigin_p sigin_n sigout) differential_deadband dead_low=-0.2 dead_high=0.2 gain=1 leak=0.05",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vp (sigin_p 0) vsource type=pwl wave=[0 0.70 8n 0.70 8.1n 0.30 18n 0.30 18.1n 0.53 28n 0.53 28.1n 0.60 38n 0.60 38.1n 0.42 45n 0.42]",
+          "Vn (sigin_n 0) vsource type=pwl wave=[0 0.35 8n 0.35 8.1n 0.65 18n 0.65 18.1n 0.48 28n 0.48 28.1n 0.40 38n 0.40 38.1n 0.58 45n 0.58]",
+          "",
+          "XDUT (sigin_p sigin_n sigout) differential_deadband dead_low=-0.2 dead_high=0.2 gain=1 leak=0.05",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_DIFFERENTIAL_INPUT",
+    "P_LEAK_INSIDE_DEADBAND",
+    "P_GAINED_RESIDUE_OUTSIDE_DEADBAND"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "72f8fd32dfe8a31bd9be43878eadcd2723c0248dc446cd99d0fdf4926d8889c6",
+    "family_spec_sha256": "c7c2b92c390de08afa2b3b6e45613cee02a9e2eb74c6d7dc5c2cf21c85769c30"
+  },
+  "task_id": "v4-122"
+}

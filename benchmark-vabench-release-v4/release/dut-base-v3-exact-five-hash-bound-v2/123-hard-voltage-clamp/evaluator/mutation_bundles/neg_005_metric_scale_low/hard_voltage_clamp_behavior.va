@@ -1,0 +1,24 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "disciplines.vams"
+
+module hard_voltage_clamp_behavior (vin, vout, vgnd);
+
+input vin, vgnd;
+output vout;
+electrical vin, vout, vgnd;
+
+parameter real vclamp_upper = 1;
+parameter real vclamp_lower = 0;
+
+analog begin
+    if (V(vin, vgnd) > vclamp_upper) begin
+        V(vout, vgnd) <+ (0.42 * (vclamp_upper));
+    end else if (V(vin, vgnd) < vclamp_lower) begin
+        V(vout, vgnd) <+ vclamp_lower;
+    end else begin
+        V(vout, vgnd) <+ V(vin, vgnd);
+    end
+end
+
+endmodule

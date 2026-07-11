@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/differential_gain_driver.va"
+
+Vp (sigin_p 0) vsource type=pwl wave=[0 0.35 10n 0.35 10.1n 0.45 20n 0.45 20.1n 0.60 35n 0.60]
+Vn (sigin_n 0) vsource dc=0.45
+Vref (sigref 0) vsource dc=0.45
+
+XDUT (sigin_p sigin_n sigout_p sigout_n sigref) differential_gain_driver gain=2
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=30n maxstep=25p
+save sigin_n sigin_p sigout_n sigout_p sigref

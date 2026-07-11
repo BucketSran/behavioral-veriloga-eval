@@ -1,0 +1,89 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "polynomial_differential_vcvs.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=40n maxstep=25p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "inn",
+      "inp",
+      "outn",
+      "outp"
+    ]
+  },
+  "family_id": "129",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "7425da08e4ce2d5e1cf185a433ad9b4f4b0cf8a0ef54a295a4c0e7a5d9f501cb",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "4c1142d1be9e10280e8e8ae35bcb694061c1d281d3e2b03ae27181a471bbcafd",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vp (inp 0) vsource type=pwl wave=[0 0.35 10n 0.35 10.1n 0.45 20n 0.45 20.1n 0.55 30n 0.55 30.1n 0.70 45n 0.70]",
+          "Vn (inn 0) vsource dc=0.45",
+          "",
+          "XDUT (inp inn outp outn) polynomial_differential_vcvs vcmo=0.5 a1=2 a2=0 a3=1 a5=0 a7=0 vsat=0.3",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vp (inp 0) vsource type=pwl wave=[0 0.20 10n 0.20 10.1n 0.35 20n 0.35 20.1n 0.50 30n 0.50 30.1n 0.80 45n 0.80]",
+          "Vn (inn 0) vsource dc=0.40",
+          "",
+          "XDUT (inp inn outp outn) polynomial_differential_vcvs vcmo=0.5 a1=2 a2=0 a3=1 a5=0 a7=0 vsat=0.3",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_POLYNOMIAL_DIFFERENTIAL_INPUT",
+    "P_HALF_SWING_SPLIT",
+    "P_SYMMETRIC_SATURATION",
+    "P_OUTPUT_COMMON_MODE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "6a65a110e355b1f15892eb47c5c6e4f65d4f057911b5f6dbae56d6927e3a473a",
+    "family_spec_sha256": "f523df9a45d546a55e9757417fc4234f60568d5b2cb9dd6e58e9a782cce4702c"
+  },
+  "task_id": "v4-129"
+}

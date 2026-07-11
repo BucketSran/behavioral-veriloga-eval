@@ -1,0 +1,91 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "differential_gain_driver.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=30n maxstep=25p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "sigin_n",
+      "sigin_p",
+      "sigout_n",
+      "sigout_p",
+      "sigref"
+    ]
+  },
+  "family_id": "130",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "5d053f7c82181c3c345b2745117c7c97b65c7271c5916cdafbf0190eff038ed8",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "57a5c17ef580c97df3b755771f04f7e4212848595fb9d393efb61d15ba1d94b5",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vp (sigin_p 0) vsource type=pwl wave=[0 0.35 10n 0.35 10.1n 0.45 20n 0.45 20.1n 0.60 35n 0.60]",
+          "Vn (sigin_n 0) vsource dc=0.45",
+          "Vref (sigref 0) vsource dc=0.45",
+          "",
+          "XDUT (sigin_p sigin_n sigout_p sigout_n sigref) differential_gain_driver gain=2",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vp (sigin_p 0) vsource type=pwl wave=[0 0.20 8n 0.20 8.1n 0.40 18n 0.40 18.1n 0.70 28n 0.70 28.1n 0.30 35n 0.30]",
+          "Vn (sigin_n 0) vsource dc=0.40",
+          "Vref (sigref 0) vsource dc=0.50",
+          "",
+          "XDUT (sigin_p sigin_n sigout_p sigout_n sigref) differential_gain_driver gain=2",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_DIFFERENTIAL_INPUT_GAIN",
+    "P_BALANCED_HALF_SPLIT",
+    "P_OUTPUT_POLARITY"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "cbb49bca6f08c346c06bb91a3968e3a595c646e20761fe75935f81ca14b22ff9",
+    "family_spec_sha256": "331ced7489af5ae20cf6e57f7f73cab8ccf0532e09aa39382615b17e9cda3788"
+  },
+  "task_id": "v4-130"
+}
