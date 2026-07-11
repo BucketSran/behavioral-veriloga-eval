@@ -1,0 +1,103 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "prbs7_ref.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=120n maxstep=50p"
+    ],
+    "body_lines": [
+      "Vclk   (clk 0)    vsource type=pulse val0=0 val1=0.9 period=1n delay=0.1n rise=20p fall=20p width=0.5n"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "rst_n",
+      "en",
+      "serial_out",
+      "state_0",
+      "state_1",
+      "state_2",
+      "state_3",
+      "state_4",
+      "state_5",
+      "state_6"
+    ]
+  },
+  "family_id": "078",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "3fd9c328e6671d667f212f4121ff80b3a74be59c87cc82b26d7dbed40abb77dd",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "32f409334d769e902d6d23b0590adf64b99b9c12b5a40047b0db04f2726679b3",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vrst_n (rst_n 0)  vsource type=pulse val0=0 val1=0.9 period=300n delay=2n rise=20p fall=20p width=298n",
+          "Ven    (en 0)     vsource dc=0.9",
+          "",
+          "XDUT (clk rst_n en serial_out state_0 state_1 state_2 state_3 state_4 state_5 state_6) prbs7_ref",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=150n maxstep=50p"
+        ],
+        "body_lines": [
+          "Vrst_n (rst_n 0)  vsource type=pulse val0=0 val1=0.9 period=400n delay=2n rise=20p fall=20p width=398n",
+          "Ven    (en 0)     vsource type=pwl wave=[0 0.9 39.8n 0.9 40.0n 0 50.0n 0 50.2n 0.9 150n 0.9]",
+          "",
+          "XDUT (clk rst_n en serial_out state_0 state_1 state_2 state_3 state_4 state_5 state_6) prbs7_ref",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RESET_SEED",
+    "P_ENABLE_GATING",
+    "P_FEEDBACK_POLYNOMIAL",
+    "P_SHIFT_SEQUENCE",
+    "P_SERIAL_OUTPUT",
+    "P_OUTPUT_LEVELS"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "f6845a0d1c478463bec5485b564bc1a8ba05dff141a161c5ed2d00f55f5b1fe9",
+    "family_spec_sha256": "89a9f61a1c08879a2527f15e99d61e6423285fc6f847173a7f3c888630a2532d"
+  },
+  "task_id": "v4-078"
+}

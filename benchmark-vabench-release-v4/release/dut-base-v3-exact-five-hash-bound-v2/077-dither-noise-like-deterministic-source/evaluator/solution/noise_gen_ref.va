@@ -1,0 +1,42 @@
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+// Sample-and-hold noise-like perturbation source.
+
+module noise_gen (
+    input electrical  vin_i,
+    output electrical vout_o
+);
+
+    parameter real sigma = 0.01;   // Dither scale (V)
+    parameter real dt    = 0.5n;   // Sampling interval (s)
+
+    real noise, vout, sample;
+    integer sample_idx;
+
+    analog begin
+        @(initial_step) begin
+            noise = 0.0;
+            vout  = 0.0;
+            sample_idx = 0;
+        end
+
+        @(timer(0, dt)) begin
+            sample_idx = sample_idx + 1;
+            if ((sample_idx % 8) == 1) sample = -1.0;
+            else if ((sample_idx % 8) == 2) sample = -0.5;
+            else if ((sample_idx % 8) == 3) sample = 0.0;
+            else if ((sample_idx % 8) == 4) sample = 0.5;
+            else if ((sample_idx % 8) == 5) sample = 1.0;
+            else if ((sample_idx % 8) == 6) sample = 0.5;
+            else if ((sample_idx % 8) == 7) sample = 0.0;
+            else sample = -0.5;
+            noise = sigma * sample;
+            vout  = V(vin_i) + noise;
+        end
+
+        V(vout_o) <+ transition(vout, 0, dt/10, dt/10);
+    end
+
+endmodule

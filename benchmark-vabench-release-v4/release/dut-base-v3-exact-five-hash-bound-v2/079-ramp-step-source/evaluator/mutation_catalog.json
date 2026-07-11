@@ -1,0 +1,136 @@
+{
+  "family_id": "079",
+  "gold_bundle_sha256": "8a12a6134d0a1ecbcd234a1d711dc472189213f52b115cc2e3d4e5ead8af9968",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "bound_step_period_guard_ref.va": "89571489238ab3759cfc4e54e737b3155f8faac6fbae8c068ee55e185c42479b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PHASE_RAMP"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "bound_step_period_guard_ref.va"
+      ],
+      "fault_class": "zero_output_stub",
+      "id": "neg_001_zero",
+      "trigger_condition": "stimulus exercises Zero output stub. against the public observable contract",
+      "violated_property_ids": [
+        "P_PHASE_RAMP"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "bound_step_period_guard_ref.va": "1d5aedb71c9a572f09918ed63a9d03f9c370d2be0237a402b7a250b23f21b1d0"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PERIODICITY",
+          "P_PHASE_WRAP"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_no_wrap/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "bound_step_period_guard_ref.va"
+      ],
+      "fault_class": "one_shot_phase_ramp_and_guard_without_periodic_wrap",
+      "id": "neg_002_no_wrap",
+      "trigger_condition": "Generates only the first ramp/guard interval and then clamps instead of wrapping every period.",
+      "violated_property_ids": [
+        "P_PERIODICITY",
+        "P_PHASE_WRAP"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "bound_step_period_guard_ref.va": "9582255622ecffa5b244cea80b8122a98b8286fe6381e426c7a59517aca2396f"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_GUARD_WINDOW"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_guard_always_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "bound_step_period_guard_ref.va"
+      ],
+      "fault_class": "keeps_the_phase_ramp_but_never_asserts_the_guard_pulse",
+      "id": "neg_003_guard_always_low",
+      "trigger_condition": "stimulus exercises Keeps the phase ramp but never asserts the guard pulse. against the public observable contract",
+      "violated_property_ids": [
+        "P_GUARD_WINDOW"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "bound_step_period_guard_ref.va": "e435eec9890263790e61b6bc64100c47b1030d95665318a6d4e94969a512648b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_GUARD_LOW",
+          "P_GUARD_WINDOW"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_wrong_guard_width/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "bound_step_period_guard_ref.va"
+      ],
+      "fault_class": "guard_pulse_width_too_wide_for_public_pulse_window",
+      "id": "neg_004_wrong_guard_width",
+      "trigger_condition": "Uses a half-period guard pulse instead of the declared pulse_w window.",
+      "violated_property_ids": [
+        "P_GUARD_LOW",
+        "P_GUARD_WINDOW"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "bound_step_period_guard_ref.va": "3595318c7559fd9778d95b157a83097b84cd348d0a1186b72b79013b814c0993"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RAIL_TRACKING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "bound_step_period_guard_ref.va"
+      ],
+      "fault_class": "mirrored_phase_ramp_with_periodic_guard_preserved",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Preserves periodic guard pulses but reports a descending phase ramp, breaking rail-relative phase tracking.",
+      "violated_property_ids": [
+        "P_RAIL_TRACKING"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

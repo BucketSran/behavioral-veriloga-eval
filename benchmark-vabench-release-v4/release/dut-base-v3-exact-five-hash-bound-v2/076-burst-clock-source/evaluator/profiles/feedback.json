@@ -1,0 +1,40 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "body_lines": [
+      "// clk_burst_gen gold smoke testbench",
+      "// 100ns input clock period, div=8, RST_N deasserts at 235ns, run 3000ns.",
+      "// Check: CLK_OUT hi_frac in (0.05, 0.4), rising_edges \u2265 4.",
+      "",
+      "VCLK   (CLK   0) vsource type=pulse val0=0 val1=0.9 period=100n width=50n rise=1n fall=1n",
+      "VRST_N (RST_N 0) vsource type=pwl wave=[0 0  234n 0  236n 0.9  3000n 0.9]",
+      "",
+      "IDUT (CLK RST_N CLK_OUT) clk_burst_gen div=8 vdd=0.9 vth=0.45",
+      ""
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "696dcee5f7ade7552f0f946f1785dd9513fc77f34984b420e55aad7578a736b8",
+  "parameters": {
+    "maxstep": "200p",
+    "stop_time": "100n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_ACTIVE_LOW_RESET",
+    "P_FRAME_START",
+    "P_TWO_CYCLE_BURST",
+    "P_QUIET_REMAINDER",
+    "P_FRAME_REPEAT",
+    "P_OUTPUT_LEVELS"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

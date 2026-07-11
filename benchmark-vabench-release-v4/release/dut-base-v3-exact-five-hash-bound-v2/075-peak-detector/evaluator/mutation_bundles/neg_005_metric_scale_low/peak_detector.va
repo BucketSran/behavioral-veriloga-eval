@@ -1,0 +1,12 @@
+// vaBench negative: tracks the latest sample instead of retaining the maximum.
+`include "constants.vams"
+`include "disciplines.vams"
+module peak_detector(vin, rst, vout);
+    input vin,rst; output vout; electrical vin,rst,vout;
+    parameter real vth=0.45; parameter real tr=500p; real peak;
+    analog begin
+        @(initial_step) peak=0.0;
+        @(timer(0,500p)) begin if (V(rst)>vth) peak=0.0; else peak=V(vin); end
+        V(vout) <+ transition(peak,0,tr,tr);
+    end
+endmodule

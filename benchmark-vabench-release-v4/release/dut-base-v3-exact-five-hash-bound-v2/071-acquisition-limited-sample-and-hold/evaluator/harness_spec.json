@@ -1,0 +1,95 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "acquisition_limited_sample_hold.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=70n maxstep=250p"
+    ],
+    "body_lines": [
+      "Vsample (sample 0) vsource type=pulse val0=0 val1=0.9 period=20n width=5n delay=5n rise=100p fall=100p",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 90n 0]"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "sample",
+      "rst",
+      "vin",
+      "vout",
+      "metric"
+    ]
+  },
+  "family_id": "071",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "dac7e911653eddc2fc5d018d2917f2ace3cb47ae0da4f4f08afcedffdde5eaca",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "ef286ac57061d1dd21e032ac1a8754528d8aab6edb16f229faba561e480add79",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.25 7n 0.25 14n 0.80 28n 0.80 34n 0.20 49n 0.20 54n 0.70 70n 0.70 75n 0.35 90n 0.35]",
+          "",
+          "XDUT (sample rst vin vout metric) acquisition_limited_sample_hold",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=90n maxstep=250p"
+        ],
+        "body_lines": [
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.30 7n 0.30 14n 0.76 28n 0.76 34n 0.18 49n 0.18 54n 0.68 70n 0.68 75n 0.42 90n 0.42]",
+          "",
+          "XDUT (sample rst vin vout metric) acquisition_limited_sample_hold",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RESET",
+    "P_ACQUISITION_ENABLE",
+    "P_FINITE_ACQUISITION",
+    "P_ACQUISITION_CONVERGENCE",
+    "P_HOLD"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "1e01a41993bac5a3c7da360d42c650bf0fe627115cf36243ba1ca10cd8362c71",
+    "family_spec_sha256": "f20158c2fa17a2f224375fe7a04b2fc65de2200330874fac447375c7d21acf52"
+  },
+  "task_id": "v4-071"
+}

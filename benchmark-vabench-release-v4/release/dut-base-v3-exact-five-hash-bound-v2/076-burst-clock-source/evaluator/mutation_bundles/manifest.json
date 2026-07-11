@@ -1,0 +1,184 @@
+{
+  "family_id": "076",
+  "gold_bundle_sha256": "25c3fbd6222de7fb8b46708af07615dd38444460558c853ab60ecc4403d88b12",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "clk_burst_gen.va": "bbeda1f17ec07c8fb427138a4f8c348080341e076a87729254a4de8056b246ce"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_TWO_CYCLE_BURST"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "clk_burst_gen.va"
+      ],
+      "fault_class": "zero_output_stub_misses_required_burst_high_phases",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives CLK_OUT low for all cycles, missing the required two passed high phases.",
+      "violated_property_ids": [
+        "P_TWO_CYCLE_BURST"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "clk_burst_gen.va": "e0fd4c9690760e1dd3602a0dabb39aa8d62c1c0f99520a74c3b0f4d07dd1358f"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_QUIET_REMAINDER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_pass_all_cycles/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "clk_burst_gen.va"
+      ],
+      "fault_class": "passes_all_non_reset_clock_cycles_without_quiet_remainder",
+      "id": "neg_002_pass_all_cycles",
+      "trigger_condition": "Preserves active-low reset but passes every non-reset CLK high phase instead of suppressing frame cycles 2..7.",
+      "violated_property_ids": [
+        "P_QUIET_REMAINDER"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "clk_burst_gen.va": "1d93d6b24e5cbe9e3c5f85447022ec9cdea466738a1b207bb622e0909d0e9029"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_TWO_CYCLE_BURST"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_one_cycle_burst/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "clk_burst_gen.va"
+      ],
+      "fault_class": "passes_only_the_first_clock_in_each_frame_instead_of_the_first_two",
+      "id": "neg_003_one_cycle_burst",
+      "trigger_condition": "stimulus exercises Passes only the first clock in each frame instead of the first two. against the public observable contract",
+      "violated_property_ids": [
+        "P_TWO_CYCLE_BURST"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "clk_burst_gen.va": "d79518e3208428ab172f83b19be8f5f875491298c5c91f67f04081c3ba023274"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FRAME_REPEAT",
+          "P_QUIET_REMAINDER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_wrong_div4/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "clk_burst_gen.va"
+      ],
+      "fault_class": "uses_a_four_cycle_repeat_frame_instead_of_the_public_div_8_frame",
+      "id": "neg_004_wrong_div4",
+      "trigger_condition": "stimulus exercises Uses a four-cycle repeat frame instead of the public div=8 frame. against the public observable contract",
+      "violated_property_ids": [
+        "P_FRAME_REPEAT",
+        "P_QUIET_REMAINDER"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "clk_burst_gen.va": "f8a70d3fa5add8c070d5c45f40ccf125ebc1e433ecf5ce732c15d24bee74b489"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_LEVELS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "clk_burst_gen.va"
+      ],
+      "fault_class": "clk_out_level_scaled_below_logic_high_threshold",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Preserves burst timing but scales CLK_OUT high level below the public logic-high threshold.",
+      "violated_property_ids": [
+        "P_OUTPUT_LEVELS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "clk_burst_gen.va": "e42988e3dffdbbee333a03632eb876cd299ca53d3c0cb477be32b530773a2aef"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ACTIVE_LOW_RESET"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_006_reset_ignored/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "clk_burst_gen.va"
+      ],
+      "fault_class": "active_low_reset_is_ignored",
+      "id": "neg_006_reset_ignored",
+      "trigger_condition": "CLK_OUT must remain low while RST_N is below threshold",
+      "violated_property_ids": [
+        "P_ACTIVE_LOW_RESET"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "clk_burst_gen.va": "3818d8e0479b771b56b32153d160f0c1f099de44b3a337d679853f4bf3349c33"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FRAME_START"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_007_frame_start_offset/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "clk_burst_gen.va"
+      ],
+      "fault_class": "frame_restarts_after_the_two_pulse_window",
+      "id": "neg_007_frame_start_offset",
+      "trigger_condition": "the first two clock cycles after reset must form the burst",
+      "violated_property_ids": [
+        "P_FRAME_START"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

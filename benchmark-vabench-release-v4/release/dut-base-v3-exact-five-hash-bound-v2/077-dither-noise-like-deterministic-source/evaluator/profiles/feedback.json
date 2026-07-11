@@ -1,0 +1,38 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "body_lines": [
+      "// noise_gen gold smoke testbench",
+      "// DC input at 1.0V; noise_gen adds deterministic sampled dither (sigma=0.1V, dt=0.5ns).",
+      "// Runs 500ns. Check: std(noise) > 0.01V, max|noise| > 0.05V.",
+      "",
+      "Vvin (vin_i 0) vsource type=dc dc=1.0",
+      "",
+      "IDUT (vin_i vout_o) noise_gen sigma=0.1 dt=0.5n",
+      ""
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "1fc397e9acfe7e92d282e2b56e19c9adc59a1b49692cf5a7d1cd87e59ae769a3",
+  "parameters": {
+    "maxstep": "200p",
+    "stop_time": "100n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_PERIODIC_UPDATE",
+    "P_SAMPLE_HOLD",
+    "P_ADDITIVE_OUTPUT",
+    "P_DETERMINISTIC_SEQUENCE",
+    "P_ZERO_MEAN_DITHER"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

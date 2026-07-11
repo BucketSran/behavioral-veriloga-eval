@@ -1,0 +1,13 @@
+// vaBench generated partial-pass negative: threshold_shifted
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "constants.vams"
+`include "disciplines.vams"
+module peak_detector(vin, rst, vout);
+    input vin,rst; output vout; electrical vin,rst,vout;
+    parameter real vth=0.57; parameter real tr=500p; real peak;
+    analog begin
+        @(initial_step) peak=0.0;
+        @(timer(0,500p)) begin if (V(rst)>vth) peak=0.0; else if (V(vin)>0.60 && V(vin)>peak) peak=V(vin); end
+        V(vout) <+ transition(peak,0,tr,tr);
+    end
+endmodule

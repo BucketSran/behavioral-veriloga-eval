@@ -1,0 +1,32 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bias_voltage_generator_with_enable_trim(clk, rst, vin, out, metric);
+input clk, rst, vin;
+output out, metric;
+electrical clk, rst, vin, out, metric;
+parameter real tr = 100p;
+parameter real vth = 0.45;
+real ctrlv, targetv, biasv, metricv;
+analog begin
+    @(initial_step) begin
+        biasv = 0.0;
+        metricv = 0.0;
+    end
+    @(cross(V(clk) - vth, +1)) begin
+        ctrlv = V(vin);
+        if (V(rst) > vth || ctrlv < 0.25) begin
+            biasv = 0.0;
+            metricv = 0.0;
+        end else begin
+            targetv = 0.28 + 0.55 * ((ctrlv - 0.25) / 0.65);
+            if (targetv > 0.82) targetv = 0.82;
+            if (targetv < 0.28) targetv = 0.28;
+            biasv = biasv + 0.45 * (targetv - biasv);
+            metricv = 0.9;
+        end
+    end
+    V(out) <+ transition(biasv, 0, tr, tr);
+    V(metric) <+ transition(metricv, 0, tr, tr);
+end
+endmodule

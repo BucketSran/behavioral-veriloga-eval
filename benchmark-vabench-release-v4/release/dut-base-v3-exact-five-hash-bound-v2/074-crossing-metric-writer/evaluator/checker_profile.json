@@ -1,0 +1,43 @@
+{
+  "access": "private_checker_backend",
+  "checker_source_public": false,
+  "checker_task_id": "v4_074_crossing_metric_writer",
+  "contract": {
+    "public_contract": "public_contract.json",
+    "source_task_id": "v4-074",
+    "task_id": "v4_074_crossing_metric_writer"
+  },
+  "schema_version": "v4-checker-profile-v1",
+  "score_and_feedback_share_checker": true,
+  "shared_by": [
+    "test_feedback/public_tb.scs",
+    "evaluator/score_tb.scs"
+  ],
+  "side_effect_contract": {
+    "base": "simulator_output_dir",
+    "exclusive_suffix": ".out",
+    "files": [
+      {
+        "path": "metric.out",
+        "record_pattern": "cross (?P<time>[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?)\\n",
+        "signal": "vin",
+        "threshold": 0.45,
+        "time_group": "time",
+        "tolerance_s": 5e-11,
+        "validator": "first_rising_crossing_time"
+      }
+    ]
+  },
+  "trace_contract": {
+    "public_observables": [
+      "time",
+      "vin",
+      "done"
+    ],
+    "required_signals": [
+      "time",
+      "vin",
+      "done"
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+[
+  {
+    "id": "neg_001_zero",
+    "intent": "zero output/state stub",
+    "target": "prbs7_ref.va"
+  },
+  {
+    "id": "neg_002_wrong_taps",
+    "intent": "Uses state_6 xor state_4 instead of the public state_6 xor state_5 feedback relation while preserving enable gating.",
+    "target": "prbs7_ref.va"
+  },
+  {
+    "id": "neg_003_ignore_enable",
+    "intent": "Advances the LFSR on every non-reset clock edge instead of holding state while en is low.",
+    "target": "prbs7_ref.va"
+  },
+  {
+    "id": "neg_004_wrong_serial_bit",
+    "intent": "Drives serial_out from state_0 instead of the public state_6 bit.",
+    "target": "prbs7_ref.va"
+  },
+  {
+    "files": [
+      "neg_005_metric_scale_low/prbs7_ref.va"
+    ],
+    "id": "neg_005_metric_scale_low",
+    "why_wrong": "Preserves the exposed LFSR state recurrence but scales serial_out below the public logic threshold."
+  },
+  {
+    "files": [
+      "neg_006_shift_sequence_wrong/prbs7_ref.va"
+    ],
+    "id": "neg_006_shift_sequence_wrong",
+    "why_wrong": "Loads state_2 from state_0 instead of shifting state_1 into state_2."
+  }
+]

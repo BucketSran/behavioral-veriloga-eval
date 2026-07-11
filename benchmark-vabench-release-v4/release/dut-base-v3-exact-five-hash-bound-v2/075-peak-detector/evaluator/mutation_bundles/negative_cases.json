@@ -1,0 +1,49 @@
+[
+  {
+    "id": "neg_001_zero",
+    "intent": "zero/stub output implementation copied from starter must not satisfy hidden behavior checker",
+    "target": "peak_detector.va"
+  },
+  {
+    "files": [
+      "neg_002_threshold_shifted/peak_detector.va"
+    ],
+    "id": "neg_002_threshold_shifted",
+    "why_wrong": "Requires vin to exceed 0.60 V before updating the held peak, missing a valid 0.55 V public peak while retaining reset behavior."
+  },
+  {
+    "files": [
+      "neg_003_event_edge_wrong/peak_detector.va"
+    ],
+    "id": "neg_003_event_edge_wrong",
+    "why_wrong": "Scales the peak output low while leaving sampling and reset structure intact."
+  },
+  {
+    "files": [
+      "neg_004_reset_polarity_wrong/peak_detector.va"
+    ],
+    "id": "neg_004_reset_polarity_wrong",
+    "why_wrong": "Clears the held peak when reset is low instead of when reset is high."
+  },
+  {
+    "files": [
+      "neg_005_metric_scale_low/peak_detector.va"
+    ],
+    "id": "neg_005_metric_scale_low",
+    "why_wrong": "Uses a 5 ns output transition instead of the declared tr, so reset/peak settling misses the checker window."
+  },
+  {
+    "files": [
+      "neg_006_monotonic_notch/peak_detector.va"
+    ],
+    "id": "neg_006_monotonic_notch",
+    "why_wrong": "Introduces a transient downward notch while the held peak must remain monotonic."
+  },
+  {
+    "files": [
+      "neg_007_no_transition_smoothing/peak_detector.va"
+    ],
+    "id": "neg_007_no_transition_smoothing",
+    "why_wrong": "Uses an effectively instantaneous output transition instead of the required smoothed transition."
+  }
+]
