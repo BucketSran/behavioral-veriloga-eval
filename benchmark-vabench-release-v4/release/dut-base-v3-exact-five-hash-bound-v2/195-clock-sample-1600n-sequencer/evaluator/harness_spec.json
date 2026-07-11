@@ -1,0 +1,80 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "clock_sample_1600n_sequencer.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=12n maxstep=20p"
+    ],
+    "body_lines": [
+      "XDUT (rst s nc res conv) clock_sample_1600n_sequencer",
+      "Iground_ref (rst 0) isource dc=0"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "conv",
+      "nc",
+      "res",
+      "rst",
+      "s"
+    ]
+  },
+  "family_id": "195",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "0f68a77cc30b1aba3c638e4ae5990bd41bcf9e3d583e78f7712adef332d522f9",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "f3eab412c5b0a8fa038ce41f7c532d550d0296cc8bfcedc61125b96f81f26247",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=18n maxstep=20p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_PERIODIC_16NS_FRAME",
+    "P_RESET_AND_SAMPLE_WINDOWS",
+    "P_NONOVERLAP_AND_RESIDUE_WINDOWS",
+    "P_CONVERSION_OUTPUT_TIMING"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "1d3ada0854ddb4b76daa63c23e36464dd020596f0f383fb059a0707930fab115",
+    "family_spec_sha256": "359da5fac124d0879ff84034919283b75973d5ab10d1698ec71b6b8a7ddb62b9"
+  },
+  "task_id": "v4-195"
+}

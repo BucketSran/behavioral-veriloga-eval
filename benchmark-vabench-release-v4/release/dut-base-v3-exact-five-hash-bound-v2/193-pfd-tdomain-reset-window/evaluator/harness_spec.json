@@ -1,0 +1,84 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "pfd_tdomain_reset_window.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=2.8n maxstep=5p"
+    ],
+    "body_lines": [
+      "Vdd (vdd 0) vsource dc=1",
+      "Vgnd (gnd 0) vsource dc=0",
+      "Vin1 (in1 0) vsource type=pwl wave=[0 0 0.9n 0 0.92n 1 1.2n 1 1.22n 0 3.0n 0 3.02n 1 3.3n 1 3.32n 0 5n 0]",
+      "Vin2 (in2 0) vsource type=pwl wave=[0 0 1.45n 0 1.47n 1 1.75n 1 1.77n 0 2.55n 0 2.57n 1 2.85n 1 2.87n 0 5n 0]",
+      "XDUT (in1 in2 up dn vdd gnd) pfd_tdomain_reset_window"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "dn",
+      "in1",
+      "in2",
+      "up",
+      "vdd",
+      "gnd"
+    ]
+  },
+  "family_id": "193",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "e9989e3ba5f9fb4d68b48f708c9a71c267b993b8333433c671574925d2745769",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "e0299f1dbe8158f356a5a54d61bed127a7e1329b40dee8ce8b70b236e5dc1726",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=4.5n maxstep=5p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_LEADING_EDGE_DIRECTION",
+    "P_RESET_OVERLAP_WINDOW",
+    "P_CLEAR_AFTER_RESET_WINDOW",
+    "P_PFD_OUTPUT_LEVELS"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "b331609520350b7bf465e0c6e5ec50598c720455fed2f810af137d67de68bc36",
+    "family_spec_sha256": "f3e45096b05673f83790b51f9e39064c4e866da48d28e883e36ab611f793438b"
+  },
+  "task_id": "v4-193"
+}

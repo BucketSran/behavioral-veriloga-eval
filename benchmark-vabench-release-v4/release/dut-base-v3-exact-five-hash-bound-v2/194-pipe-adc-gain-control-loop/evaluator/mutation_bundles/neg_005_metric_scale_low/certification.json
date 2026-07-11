@@ -1,0 +1,60 @@
+{
+  "component_fingerprints": {
+    "assembly": {
+      "policy_sha256": "91f4e21b94263e796c846aedef282c79d4abeb7ccc415a0e6f1311f8816b33a4",
+      "release_snapshot_sha256": "08fc2affa39bbc41c6603edfb923c773838e5c5bdbe630ac3ace53988714398b"
+    },
+    "backend": {
+      "ahdl_like_sha256": "91ce239e5f278a6d5dfcde85ca2d820c5133d8f8a3de26dc6477164e703342f3",
+      "evas_sha256": "03d62b0ed9b8bab38c068a8fc49e6d16d3ea7cbd7c7a0144feaf924f112a7a63",
+      "spectre_sha256": "ac4c1cf785d5eab74058944d52bf40869e83c94e19202ab72c8e8a250c4dc51b"
+    },
+    "oracle": {
+      "checker_binding_sha256": "86fec0fe96209a7ef1afe30de5b836494c03dc76b73c9ff248a609f0528a1c82",
+      "checker_implementation_sha256": "652c120c634e2d107bf51608cd17caff8134a24ab6f014df7c8b25a09e2b9958",
+      "checker_profile_sha256": "62fc7a83c6a7615e380c8e80de49f3c0844ae2878e2220df5705991bdc92aebd",
+      "diagnostic_policy_sha256": "69b217a349cb0e8a3eab574e7e6d1af03f069fea668b15b37868ef3d2e7deea3",
+      "oracle_runner_sha256": "daf6eeded735edd148687b998344d32a4943e8824bac2828f28e9107a7950567",
+      "property_activation_policy_sha256": "74222363f199b3313a3865c203bcbbae14bbee97fffe0e383925b57e914f652d"
+    },
+    "policy_id": "v4-dependency-scoped-evidence-v2",
+    "schema_version": "v4-evidence-components-v2",
+    "state": "carried_forward",
+    "task_inputs": {
+      "candidate_bundle_sha256": "09e8a9a322448be849bf7b8d7038dd0a78b011436abe90add407291865b84df2",
+      "deck_sha256": "2a6194cd7103d603de24c37629abc181e805a5a31ae4e2eedcf8bac63e6d6267",
+      "gold_bundle_sha256": "7d3ad11351f5fa762e1f542203039f7f04aa820a87e7f50eab97969f2042f61d",
+      "harness_spec_sha256": "80478c7b2d43360be1db72a751b91bf8db0e17bc2f1e4e31a06831f8291f8d71",
+      "mutation_bundle_sha256": "09e8a9a322448be849bf7b8d7038dd0a78b011436abe90add407291865b84df2",
+      "profile_sha256": "e767d6c22b630124bcb60e1771d8f0a6dfd954453af207f2fe2240784839c610",
+      "property_contract_sha256": "14afaa0c4b9b27175783c1018448d744eff2954714372aa67eb8410a9eb41d13",
+      "public_support_bundle_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "trace_contract_sha256": "a305b86e9f70e05724631f632022f7950b9b7b25b45c0128047ac4a86daf0a4f"
+    }
+  },
+  "diagnostics": {
+    "expected": "trigger=Pipe ADC Gain Control Loop: scales the metric output, preserving the main path while failing measurement checks.; violated_properties=P_GAIN_CONTROL_INITIAL_STATE,P_ALTERNATING_TEST_DAC_PHASES",
+    "observed": "EVAS: dout10@0.290ns observed=0.378 expected=0.900 code=20 phase=1 dout11@0.290ns observed=0.378 expected=0.900 code=20 phase=1 dout12@0.290ns observed=0.378 expected=0.900 code=20 phase=1 gainctrl1@0.290ns observed=0.378 expected=0.900 code=20 phase=1 gainctrl3@0.290ns observed=0.378 expected=0.900 code=20 phase=1 gainctrl4@0.290ns observed=0.378 expected=0.900 code=20 phase=1 gainctrl6@0.290ns observed=0.378 expected=0.900 code=20 phase=1 dop@0.290ns observed=0.403 expected=0.960 code=20 phase=1; Spectre: dout10@0.290ns observed=0.378 expected=0.900 code=20 phase=1 dout11@0.290ns observed=0.378 expected=0.900 code=20 phase=1 dout12@0.290ns observed=0.378 expected=0.900 code=20 phase=1 gainctrl1@0.290ns observed=0.378 expected=0.900 code=20 phase=1 gainctrl3@0.290ns observed=0.378 expected=0.900 code=20 phase=1 gainctrl4@0.290ns observed=0.378 expected=0.900 code=20 phase=1 gainctrl6@0.290ns observed=0.378 expected=0.900 code=20 phase=1 dop@0.290ns observed=0.403 expected=0.960 code=20 phase=1",
+    "violated_property_ids": [
+      "P_ALTERNATING_TEST_DAC_PHASES",
+      "P_GAIN_CONTROL_INITIAL_STATE"
+    ]
+  },
+  "evaluators": {
+    "ahdl_like": "pass",
+    "evas": "compile_pass_behavior_fail",
+    "spectre": "compile_pass_behavior_fail"
+  },
+  "family_id": "194",
+  "inputs": {
+    "checker_profile_sha256": "bda3dac4ffc52154d5e6172be1195881f1c98ddf227d865ac1d130f0282d21aa",
+    "harness_spec_sha256": "80478c7b2d43360be1db72a751b91bf8db0e17bc2f1e4e31a06831f8291f8d71",
+    "mutation_bundle_sha256": "09e8a9a322448be849bf7b8d7038dd0a78b011436abe90add407291865b84df2",
+    "profile_sha256": "e767d6c22b630124bcb60e1771d8f0a6dfd954453af207f2fe2240784839c610"
+  },
+  "mutation_id": "neg_005_metric_scale_low",
+  "outcome": "killed_behaviorally",
+  "release_snapshot_sha256": "08fc2affa39bbc41c6603edfb923c773838e5c5bdbe630ac3ace53988714398b",
+  "schema_version": "v4-negative-certification-v2",
+  "toolchain_lock_sha256": "08fc2affa39bbc41c6603edfb923c773838e5c5bdbe630ac3ace53988714398b"
+}

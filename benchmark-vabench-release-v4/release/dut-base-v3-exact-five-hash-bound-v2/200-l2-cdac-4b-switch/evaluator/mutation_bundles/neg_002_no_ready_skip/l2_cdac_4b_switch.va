@@ -1,0 +1,21 @@
+`include "disciplines.vams"
+module l2_cdac_4b_switch(din1, din2, din3, din4, rdy, aout);
+input din1, din2, din3, din4, rdy;
+output aout;
+electrical din1, din2, din3, din4, rdy, aout;
+parameter real vdd = 1.1;
+parameter real vth = 0.55;
+real aout_v;
+integer cnt;
+analog begin
+    @(initial_step) begin cnt = 0; aout_v = 0; end
+    @(cross(V(rdy) - vth, +1)) begin
+        if (cnt == 0) cnt = 1;
+        aout_v = ((V(din4) > vth ? 4.0 : 0.0)
+                     + (V(din3) > vth ? 2.0 : 0.0)
+                     + (V(din2) > vth ? 1.0 : 0.0)
+                     + (V(din1) > vth ? 0.5 : 0.0)) / 8.5 * 2.0 * vdd - vdd;
+    end
+    V(aout) <+ transition(aout_v, 0, 10p, 10p);
+end
+endmodule

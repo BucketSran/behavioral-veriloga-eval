@@ -1,0 +1,105 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "pipe_adc_gain_control_loop.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=2.8n maxstep=10p"
+    ],
+    "body_lines": [
+      "Vclk (clks 0) vsource type=pulse val0=0 val1=0.9 delay=0.2n period=1n width=0.45n rise=20p fall=20p",
+      "Vb0 (din20 0) vsource type=pwl wave=[0 0 1.1n 0 1.12n 0 2.1n 0 2.12n 0 3.1n 0 3.12n 0 5n 0]",
+      "Vb1 (din21 0) vsource type=pwl wave=[0 0 1.1n 0 1.12n 0.9 2.1n 0.9 2.12n 0 3.1n 0 3.12n 0.9 5n 0.9]",
+      "Vb2 (din22 0) vsource type=pwl wave=[0 0.9 1.1n 0.9 1.12n 0.9 2.1n 0.9 2.12n 0 3.1n 0 3.12n 0 5n 0]",
+      "Vb3 (din23 0) vsource type=pwl wave=[0 0 1.1n 0 1.12n 0 2.1n 0 2.12n 0.9 3.1n 0.9 3.12n 0.9 5n 0.9]",
+      "Vb4 (din24 0) vsource type=pwl wave=[0 0.9 1.1n 0.9 1.12n 0 2.1n 0 2.12n 0 3.1n 0 3.12n 0.9 5n 0.9]",
+      "Vb5 (din25 0) vsource type=pwl wave=[0 0 1.1n 0 1.12n 0.9 2.1n 0.9 2.12n 0.9 3.1n 0.9 3.12n 0 5n 0]",
+      "Vb6 (din26 0) vsource type=pwl wave=[0 0 1.1n 0 1.12n 0.9 2.1n 0.9 2.12n 0 3.1n 0 3.12n 0.9 5n 0.9]",
+      "XDUT (din20 din21 din22 din23 din24 din25 din26 clks dout10 dout11 dout12 dout13 gainctrl0 gainctrl1 gainctrl2 gainctrl3 gainctrl4 gainctrl5 gainctrl6 ddiff dop dom gctrlcode) pipe_adc_gain_control_loop"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clks",
+      "ddiff",
+      "din20",
+      "din21",
+      "din22",
+      "din23",
+      "din24",
+      "din25",
+      "din26",
+      "dom",
+      "dop",
+      "dout10",
+      "dout11",
+      "dout12",
+      "dout13",
+      "gainctrl0",
+      "gainctrl1",
+      "gainctrl2",
+      "gainctrl3",
+      "gainctrl4",
+      "gainctrl5",
+      "gainctrl6",
+      "gctrlcode"
+    ]
+  },
+  "family_id": "194",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "9b12a692491738c40e52b27aeaedb977da743320eec06e860e8173185f1124ba",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "0debec26dc76dbe2e79894dad428b85b19f95ead23d13fc5d76c079a20b950dd",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=4.8n maxstep=10p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_GAIN_CONTROL_INITIAL_STATE",
+    "P_ALTERNATING_TEST_DAC_PHASES",
+    "P_TARGET_DIFFERENCE_GAIN_UPDATE",
+    "P_GAIN_OUTPUT_LEVELS"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "bda3dac4ffc52154d5e6172be1195881f1c98ddf227d865ac1d130f0282d21aa",
+    "family_spec_sha256": "cf5e224b7936a4a374271c7ff1b89bf61a4b35d1e6f3ebdfae4a3d6cf8ab016c"
+  },
+  "task_id": "v4-194"
+}

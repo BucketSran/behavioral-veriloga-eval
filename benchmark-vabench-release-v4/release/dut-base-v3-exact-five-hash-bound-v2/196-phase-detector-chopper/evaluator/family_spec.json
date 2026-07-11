@@ -1,0 +1,132 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "phase_detector_chopper",
+            "parameters": [
+              {
+                "default": "1.25",
+                "name": "gain",
+                "override_behavior": "overrides gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vlocal_osc",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin_rf",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vif",
+                "position": 2
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "phase_detector_chopper.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "196",
+  "identity": {
+    "category": "signal_processing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Phase Detector Chopper"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_POSITIVE_LO_GAIN_PATH",
+      "observable_contract": "When `vlocal_osc` is positive, drive `vif = gain * vin_rf`.",
+      "required_signals": [
+        "time",
+        "vif",
+        "vin_rf",
+        "vlocal_osc"
+      ]
+    },
+    {
+      "id": "P_NEGATIVE_LO_CHOP_PATH",
+      "observable_contract": "When `vlocal_osc` is not positive, drive `vif = -gain * vin_rf`.",
+      "required_signals": [
+        "time",
+        "vif",
+        "vin_rf",
+        "vlocal_osc"
+      ]
+    },
+    {
+      "id": "P_CONTINUOUS_TRACKING",
+      "observable_contract": "`vif` tracks `vin_rf` and `vlocal_osc` continuously without clocked state or hidden latching.",
+      "required_signals": [
+        "time",
+        "vif",
+        "vin_rf",
+        "vlocal_osc"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1196",
+    "dut": "v4-196",
+    "testbench": "v4-696"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vlocal_osc",
+            "port_ref": "vlocal_osc",
+            "position": 0
+          },
+          {
+            "net": "vin_rf",
+            "port_ref": "vin_rf",
+            "position": 1
+          },
+          {
+            "net": "vif",
+            "port_ref": "vif",
+            "position": 2
+          }
+        ],
+        "module_ref": "phase_detector_chopper",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vif",
+      "vin_rf",
+      "vlocal_osc"
+    ]
+  }
+}

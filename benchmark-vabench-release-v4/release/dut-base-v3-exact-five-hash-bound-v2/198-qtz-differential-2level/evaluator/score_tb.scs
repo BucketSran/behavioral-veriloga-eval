@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/qtz_differential_2level.va"
+
+Vrefp (vrefp 0) vsource dc=0.55
+Vrefn (vrefn 0) vsource dc=-0.25
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=0.2n period=1n width=0.45n rise=20p fall=20p
+Vp (vinp 0) vsource type=pwl wave=[0 -0.20 1n -0.20 1.05n 0.00 2n 0.00 2.05n 0.42 3n 0.42 3.05n 0.08 4n 0.08]
+Vn (vinn 0) vsource dc=0.05
+XDUT (vinp vinn vrefp vrefn clk dout) qtz_differential_2level
+
+tran tran stop=3.8n maxstep=10p
+save clk dout vinn vinp vrefn vrefp

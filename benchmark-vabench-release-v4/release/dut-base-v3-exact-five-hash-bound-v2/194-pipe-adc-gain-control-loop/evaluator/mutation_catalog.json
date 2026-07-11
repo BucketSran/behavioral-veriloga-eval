@@ -1,0 +1,134 @@
+{
+  "family_id": "194",
+  "gold_bundle_sha256": "7d3ad11351f5fa762e1f542203039f7f04aa820a87e7f50eab97969f2042f61d",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "pipe_adc_gain_control_loop.va": "b6e6c7dbe669c2c01e0df43703be00e978ac0166943dfc85db611bb7c461135c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_GAIN_OUTPUT_LEVELS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pipe_adc_gain_control_loop.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_GAIN_OUTPUT_LEVELS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pipe_adc_gain_control_loop.va": "064fa0eed24404a1fc8c1469c4fb35d6cd6e5bb37cf8d33d073f49b53f4ddd2c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_TARGET_DIFFERENCE_GAIN_UPDATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_wrong_target_diff/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pipe_adc_gain_control_loop.va"
+      ],
+      "fault_class": "adaptation_target_error",
+      "id": "neg_002_wrong_target_diff",
+      "trigger_condition": "Uses target difference 32 instead of 64 for gain correction.",
+      "violated_property_ids": [
+        "P_TARGET_DIFFERENCE_GAIN_UPDATE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pipe_adc_gain_control_loop.va": "bc786beb8c2ff6ae65eb74db5f5a02850065aecb799de823c1d729ef53c8058b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_TARGET_DIFFERENCE_GAIN_UPDATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_no_gain_update/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pipe_adc_gain_control_loop.va"
+      ],
+      "fault_class": "adaptation_update_disabled",
+      "id": "neg_003_no_gain_update",
+      "trigger_condition": "Leaves gainctrlcode unchanged during closed-loop correction.",
+      "violated_property_ids": [
+        "P_TARGET_DIFFERENCE_GAIN_UPDATE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pipe_adc_gain_control_loop.va": "9fdb61c6fc63a65ec22292ebff4b61dcc06bd6eb7448ef2067fbef6819e94e58"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_GAIN_OUTPUT_LEVELS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_half_gain_outputs/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pipe_adc_gain_control_loop.va"
+      ],
+      "fault_class": "gain_code_rail_error",
+      "id": "neg_004_half_gain_outputs",
+      "trigger_condition": "Drives gainctrl6 at half logic level.",
+      "violated_property_ids": [
+        "P_GAIN_OUTPUT_LEVELS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pipe_adc_gain_control_loop.va": "f5038677fe7b930ddc98ca018b9b72acaf42a0e4e6f9996e239b4ebea195ce90"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ALTERNATING_TEST_DAC_PHASES",
+          "P_GAIN_CONTROL_INITIAL_STATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pipe_adc_gain_control_loop.va"
+      ],
+      "fault_class": "scalar_monitor_scale_error",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Pipe ADC Gain Control Loop: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_ALTERNATING_TEST_DAC_PHASES",
+        "P_GAIN_CONTROL_INITIAL_STATE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

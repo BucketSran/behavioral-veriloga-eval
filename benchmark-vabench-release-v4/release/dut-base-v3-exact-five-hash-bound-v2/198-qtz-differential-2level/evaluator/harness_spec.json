@@ -1,0 +1,93 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "qtz_differential_2level.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=3.8n maxstep=10p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "dout",
+      "vinn",
+      "vinp",
+      "vrefn",
+      "vrefp"
+    ]
+  },
+  "family_id": "198",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "2713012b93ddcc7412467e5e0758ebd4f00feebb707868fb289c89b2549ce8fc",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "e5bf366c4a830249684e9db29291b358eae46f4ddb78cc84340ae1211f966240",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vrefp (vrefp 0) vsource dc=0.4",
+          "Vrefn (vrefn 0) vsource dc=-0.4",
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=0.2n period=1n width=0.45n rise=20p fall=20p",
+          "Vp (vinp 0) vsource type=pwl wave=[0 -0.25 1n -0.25 1.05n -0.05 2n -0.05 2.05n 0.18 3n 0.18 3.05n 0.30 4n 0.30]",
+          "Vn (vinn 0) vsource dc=0",
+          "XDUT (vinp vinn vrefp vrefn clk dout) qtz_differential_2level"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vrefp (vrefp 0) vsource dc=0.55",
+          "Vrefn (vrefn 0) vsource dc=-0.25",
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=0.2n period=1n width=0.45n rise=20p fall=20p",
+          "Vp (vinp 0) vsource type=pwl wave=[0 -0.20 1n -0.20 1.05n 0.00 2n 0.00 2.05n 0.42 3n 0.42 3.05n 0.08 4n 0.08]",
+          "Vn (vinn 0) vsource dc=0.05",
+          "XDUT (vinp vinn vrefp vrefn clk dout) qtz_differential_2level"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INITIAL_SIGNED_CODE",
+    "P_DIFFERENTIAL_MIDPOINT_DECISION",
+    "P_BIPOLAR_TWO_LEVEL_OUTPUT",
+    "P_CLOCKED_OUTPUT_HOLD"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "e66d0a40b806bc254469176e8037dbdc28fac5dd41d632109fb86ef92e7742a9",
+    "family_spec_sha256": "d291eae157a9fd2a77166727658290ec5a36a4933bf46ad0c4293d850eded32f"
+  },
+  "task_id": "v4-198"
+}

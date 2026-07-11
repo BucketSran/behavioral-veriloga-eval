@@ -1,0 +1,132 @@
+{
+  "family_id": "198",
+  "gold_bundle_sha256": "4da57b471bb19917011fca258f5a409defbeaf203c2e57493e7b532d82b03407",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "qtz_differential_2level.va": "a95c5b075616731b5496d4f5352a66e493c810c890d1935b20e84a1180b3d1e2"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INITIAL_SIGNED_CODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "qtz_differential_2level.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_INITIAL_SIGNED_CODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "qtz_differential_2level.va": "42e8458cf6d1bd08501c9215aac226dca7b8699702946d7dcb4dc788e6556cc2"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DIFFERENTIAL_MIDPOINT_DECISION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_invert_decision/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "qtz_differential_2level.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_002_invert_decision",
+      "trigger_condition": "Inverts the two-level quantizer decision.",
+      "violated_property_ids": [
+        "P_DIFFERENTIAL_MIDPOINT_DECISION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "qtz_differential_2level.va": "65789087730fc5fe7d53ccc889eedbfd9bfd506473de0ccc34b5f1f06fd8c8e8"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DIFFERENTIAL_MIDPOINT_DECISION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_threshold/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "qtz_differential_2level.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_003_wrong_threshold",
+      "trigger_condition": "Compares against the full differential reference instead of the midpoint threshold.",
+      "violated_property_ids": [
+        "P_DIFFERENTIAL_MIDPOINT_DECISION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "qtz_differential_2level.va": "e91dbc32008678f3c354ce8b281b5fa409bedb3472a0cc6213336c3c43dea437"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BIPOLAR_TWO_LEVEL_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_unipolar_output/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "qtz_differential_2level.va"
+      ],
+      "fault_class": "unipolar_output",
+      "id": "neg_004_unipolar_output",
+      "trigger_condition": "Outputs 0/1 instead of -0.5/+0.5 quantizer levels.",
+      "violated_property_ids": [
+        "P_BIPOLAR_TWO_LEVEL_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "qtz_differential_2level.va": "585d365d3f27051e168bc1d85e0d68cf202f31ad878e135a261ba3e496a604e4"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CLOCKED_OUTPUT_HOLD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "qtz_differential_2level.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "QTZ Differential 2level: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_CLOCKED_OUTPUT_HOLD"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

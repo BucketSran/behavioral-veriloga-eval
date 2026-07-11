@@ -1,0 +1,132 @@
+{
+  "family_id": "192",
+  "gold_bundle_sha256": "621f5fa67a5d7a6883127fa18b43ee358a4a80451ccfabbadf0b28adf3a88fe6",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "sar_logic_4b_self_timed.va": "88f39d586acbd2b7d975fd81c7032394de6baaec7b82b4d8ad59ce389b883b4b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_INITIALIZES_SELF_TIMED_STATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "sar_logic_4b_self_timed.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_RESET_INITIALIZES_SELF_TIMED_STATE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "sar_logic_4b_self_timed.va": "07227045aaaaba07e11461fba4d421da877281cf1a61a244a37a7b716966f468"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COMPARATOR_PULSE_DECISION_POLARITY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_invert_decision/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "sar_logic_4b_self_timed.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_002_invert_decision",
+      "trigger_condition": "Stores comparator decisions with inverted dcmpp/dcmpn polarity.",
+      "violated_property_ids": [
+        "P_COMPARATOR_PULSE_DECISION_POLARITY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "sar_logic_4b_self_timed.va": "87508755b6ccfa4af9cbc4d9eebbb31319930b36c1820400eeee19cfa79c6fbc"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_STEP_ADVANCE_ON_COMPARATOR_FALL"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_no_step_decrement/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "sar_logic_4b_self_timed.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_003_no_step_decrement",
+      "trigger_condition": "Does not advance the SAR step when comparator outputs fall.",
+      "violated_property_ids": [
+        "P_STEP_ADVANCE_ON_COMPARATOR_FALL"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "sar_logic_4b_self_timed.va": "e00ddb442a1bf37f4a7724f5f1bdcdcae68afb903d5753dcc10fa58504ffc3eb"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CMPCK_TIMING_AND_LEVEL"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_half_cmpck/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "sar_logic_4b_self_timed.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_004_half_cmpck",
+      "trigger_condition": "Drives cmpck at half supply amplitude.",
+      "violated_property_ids": [
+        "P_CMPCK_TIMING_AND_LEVEL"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "sar_logic_4b_self_timed.va": "a559b837f37d7a5627553c3f3e800d466462129c1982e5ba7823ef68da7bd46e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_INITIALIZES_SELF_TIMED_STATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "sar_logic_4b_self_timed.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "SAR Logic 4b Self Timed: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_RESET_INITIALIZES_SELF_TIMED_STATE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

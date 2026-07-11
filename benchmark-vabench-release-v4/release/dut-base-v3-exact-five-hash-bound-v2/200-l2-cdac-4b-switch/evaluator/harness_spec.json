@@ -1,0 +1,85 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "l2_cdac_4b_switch.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=2.8n maxstep=10p"
+    ],
+    "body_lines": [
+      "Vrdy (rdy 0) vsource type=pulse val0=0 val1=1.1 delay=0.2n period=1n width=0.4n rise=20p fall=20p",
+      "Vd1 (din1 0) vsource type=pwl wave=[0 0 2n 0 2.05n 0 3n 0 3.05n 1.1 4n 1.1]",
+      "Vd2 (din2 0) vsource type=pwl wave=[0 0 2n 0 2.05n 1.1 3n 1.1 3.05n 1.1 4n 1.1]",
+      "Vd3 (din3 0) vsource type=pwl wave=[0 0 2n 0 2.05n 0 3n 0 3.05n 1.1 4n 1.1]",
+      "Vd4 (din4 0) vsource type=pwl wave=[0 0 2n 0 2.05n 1.1 3n 1.1 3.05n 1.1 4n 1.1]",
+      "XDUT (din1 din2 din3 din4 rdy aout) l2_cdac_4b_switch"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "aout",
+      "din1",
+      "din2",
+      "din3",
+      "din4",
+      "rdy"
+    ]
+  },
+  "family_id": "200",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "e81eb26310ae06e550a11958290006f89a6395373dc82938e3cb2f26d0703c7e",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "8f2a78c6ceb38a25c474846d73ef9e909956ea0c65a4a089047aa76aaa4f2f56",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=3.8n maxstep=10p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_FIRST_READY_EDGE_ARMS_ONLY",
+    "P_READY_SAMPLES_FOUR_BITS",
+    "P_SWITCHED_WEIGHT_DENOMINATOR",
+    "P_BIPOLAR_CDAC_OUTPUT"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "a0fe3259bc617808680475bddd37201e8a436847c4808038d60930a851041b43",
+    "family_spec_sha256": "edabb7f416acf7ccb448edd0b448fc706c5c933db7365cf7bae9e9f915aceefa"
+  },
+  "task_id": "v4-200"
+}

@@ -1,0 +1,19 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/pipe_adc_gain_control_loop.va"
+
+Vclk (clks 0) vsource type=pulse val0=0 val1=0.9 delay=0.2n period=1n width=0.45n rise=20p fall=20p
+Vb0 (din20 0) vsource type=pwl wave=[0 0 1.1n 0 1.12n 0 2.1n 0 2.12n 0 3.1n 0 3.12n 0 5n 0]
+Vb1 (din21 0) vsource type=pwl wave=[0 0 1.1n 0 1.12n 0.9 2.1n 0.9 2.12n 0 3.1n 0 3.12n 0.9 5n 0.9]
+Vb2 (din22 0) vsource type=pwl wave=[0 0.9 1.1n 0.9 1.12n 0.9 2.1n 0.9 2.12n 0 3.1n 0 3.12n 0 5n 0]
+Vb3 (din23 0) vsource type=pwl wave=[0 0 1.1n 0 1.12n 0 2.1n 0 2.12n 0.9 3.1n 0.9 3.12n 0.9 5n 0.9]
+Vb4 (din24 0) vsource type=pwl wave=[0 0.9 1.1n 0.9 1.12n 0 2.1n 0 2.12n 0 3.1n 0 3.12n 0.9 5n 0.9]
+Vb5 (din25 0) vsource type=pwl wave=[0 0 1.1n 0 1.12n 0.9 2.1n 0.9 2.12n 0.9 3.1n 0.9 3.12n 0 5n 0]
+Vb6 (din26 0) vsource type=pwl wave=[0 0 1.1n 0 1.12n 0.9 2.1n 0.9 2.12n 0 3.1n 0 3.12n 0.9 5n 0.9]
+XDUT (din20 din21 din22 din23 din24 din25 din26 clks dout10 dout11 dout12 dout13 gainctrl0 gainctrl1 gainctrl2 gainctrl3 gainctrl4 gainctrl5 gainctrl6 ddiff dop dom gctrlcode) pipe_adc_gain_control_loop
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=2.8n maxstep=10p
+save clks ddiff din20 din21 din22 din23 din24 din25 din26 dom dop dout10 dout11 dout12 dout13 gainctrl0 gainctrl1 gainctrl2 gainctrl3 gainctrl4 gainctrl5 gainctrl6 gctrlcode

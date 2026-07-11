@@ -1,0 +1,198 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "l2_cdac_4b_switch",
+            "parameters": [
+              {
+                "default": "1.1",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.55",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din1",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din2",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din3",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din4",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rdy",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "aout",
+                "position": 5
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "l2_cdac_4b_switch.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "200",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "L2 CDAC 4b Switch"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_FIRST_READY_EDGE_ARMS_ONLY",
+      "observable_contract": "The first rising `rdy` edge arms the DAC and leaves the initialized output at zero.",
+      "required_signals": [
+        "time",
+        "aout",
+        "din1",
+        "din2",
+        "din3",
+        "din4",
+        "rdy"
+      ]
+    },
+    {
+      "id": "P_READY_SAMPLES_FOUR_BITS",
+      "observable_contract": "Each later rising `rdy` edge samples `din1..din4` against `vth` with the declared switched weights.",
+      "required_signals": [
+        "time",
+        "aout",
+        "din1",
+        "din2",
+        "din3",
+        "din4",
+        "rdy"
+      ]
+    },
+    {
+      "id": "P_SWITCHED_WEIGHT_DENOMINATOR",
+      "observable_contract": "Compute `switched_weight` and normalize by `8.5` before output scaling.",
+      "required_signals": [
+        "time",
+        "aout",
+        "din1",
+        "din2",
+        "din3",
+        "din4",
+        "rdy"
+      ]
+    },
+    {
+      "id": "P_BIPOLAR_CDAC_OUTPUT",
+      "observable_contract": "Map the sampled ratio to `(switched_weight / 8.5) * 2.0 * vdd - vdd` and hold it between ready edges.",
+      "required_signals": [
+        "time",
+        "aout",
+        "din1",
+        "din2",
+        "din3",
+        "din4",
+        "rdy"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1200",
+    "dut": "v4-200",
+    "testbench": "v4-700"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "din1",
+            "port_ref": "din1",
+            "position": 0
+          },
+          {
+            "net": "din2",
+            "port_ref": "din2",
+            "position": 1
+          },
+          {
+            "net": "din3",
+            "port_ref": "din3",
+            "position": 2
+          },
+          {
+            "net": "din4",
+            "port_ref": "din4",
+            "position": 3
+          },
+          {
+            "net": "rdy",
+            "port_ref": "rdy",
+            "position": 4
+          },
+          {
+            "net": "aout",
+            "port_ref": "aout",
+            "position": 5
+          }
+        ],
+        "module_ref": "l2_cdac_4b_switch",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "aout",
+      "din1",
+      "din2",
+      "din3",
+      "din4",
+      "rdy"
+    ]
+  }
+}

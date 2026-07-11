@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/single_adc_7b_weighted.va"
+
+Vb0 (din0 0) vsource type=pwl wave=[0 0 1n 0 1.05n 0.9 2n 0.9 2.05n 0 3n 0 3.05n 0.9 4n 0.9]
+Vb1 (din1 0) vsource type=pwl wave=[0 0 1n 0 1.05n 0 2n 0 2.05n 0.9 3n 0.9 3.05n 0.9 4n 0.9]
+Vb2 (din2 0) vsource type=pwl wave=[0 0 1n 0 1.05n 0.9 2n 0.9 2.05n 0 3n 0 3.05n 0.9 4n 0.9]
+Vb3 (din3 0) vsource type=pwl wave=[0 0 1n 0 1.05n 0 2n 0 2.05n 0.9 3n 0.9 3.05n 0.9 4n 0.9]
+Vb4 (din4 0) vsource type=pwl wave=[0 0 1n 0 1.05n 0.9 2n 0.9 2.05n 0 3n 0 3.05n 0.9 4n 0.9]
+Vb5 (din5 0) vsource type=pwl wave=[0 0 1n 0 1.05n 0 2n 0 2.05n 0.9 3n 0.9 3.05n 0.9 4n 0.9]
+Vb6 (din6 0) vsource type=pwl wave=[0 0 1n 0 1.05n 0.9 2n 0.9 2.05n 0 3n 0 3.05n 0.9 4n 0.9]
+XDUT (din0 din1 din2 din3 din4 din5 din6 dout) single_adc_7b_weighted
+
+tran tran stop=3.8n maxstep=10p
+save din0 din1 din2 din3 din4 din5 din6 dout

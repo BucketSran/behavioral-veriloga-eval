@@ -1,0 +1,10 @@
+`include "disciplines.vams"
+module phase_detector_chopper(vlocal_osc, vin_rf, vif);
+input vlocal_osc, vin_rf;
+output vif;
+electrical vlocal_osc, vin_rf, vif;
+parameter real gain = 1.0;
+analog begin
+    V(vif) <+ gain * ((V(vlocal_osc) > 0.0) ? V(vin_rf) : -V(vin_rf));
+end
+endmodule

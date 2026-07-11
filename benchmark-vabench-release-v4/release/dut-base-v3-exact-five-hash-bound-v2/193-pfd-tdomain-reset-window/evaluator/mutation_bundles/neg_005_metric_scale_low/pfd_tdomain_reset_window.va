@@ -1,0 +1,44 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one public behavior contract.
+`include "disciplines.vams"
+module pfd_tdomain_reset_window(in1, in2, up, dn, vdd, gnd);
+input in1, in2, vdd, gnd;
+output up, dn;
+electrical in1, in2, up, dn, vdd, gnd;
+parameter real ttol = 5f;
+parameter real td = 0;
+parameter real tt = 10p;
+parameter real ton = 120p;
+integer state, hide_state;
+real toff, vh, vl, vth;
+analog begin
+    vh = V(vdd);
+    vl = V(gnd);
+    vth = (vh + vl) / 2.0;
+    @(initial_step) begin
+        state = 0;
+        hide_state = 0;
+        toff = 0;
+    end
+    @(cross(V(in1) - vth, +1, ttol)) begin
+        if (state == -1) begin
+            hide_state = 1;
+            toff = $abstime + ton;
+        end else state = 1;
+    end
+    @(cross(V(in2) - vth, +1, ttol)) begin
+        if (state == 1) begin
+            hide_state = 1;
+            toff = $abstime + ton;
+        end else state = -1;
+    end
+    @(timer(toff)) begin
+        if (hide_state == 1) begin
+            state = 0;
+            hide_state = 0;
+        end
+    end
+    V(up) <+ (0.42 * (transition((state == 1 || hide_state == 1) ? vh : vl, td, tt, tt)));
+    V(dn) <+ (0.42 * (transition((state == -1 || hide_state == 1) ? vh : vl, td, tt, tt)));
+end
+endmodule

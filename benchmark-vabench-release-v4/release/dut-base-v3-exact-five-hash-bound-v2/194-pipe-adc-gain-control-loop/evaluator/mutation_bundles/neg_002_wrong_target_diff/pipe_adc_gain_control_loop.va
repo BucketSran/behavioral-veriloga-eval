@@ -1,0 +1,64 @@
+`include "disciplines.vams"
+module pipe_adc_gain_control_loop(din20, din21, din22, din23, din24, din25, din26, clks, dout10, dout11, dout12, dout13, gainctrl0, gainctrl1, gainctrl2, gainctrl3, gainctrl4, gainctrl5, gainctrl6, ddiff, dop, dom, gctrlcode);
+input din20, din21, din22, din23, din24, din25, din26, clks;
+output dout10, dout11, dout12, dout13, gainctrl0, gainctrl1, gainctrl2, gainctrl3, gainctrl4, gainctrl5, gainctrl6, ddiff, dop, dom, gctrlcode;
+electrical din20, din21, din22, din23, din24, din25, din26, clks, dout10, dout11, dout12, dout13, gainctrl0, gainctrl1, gainctrl2, gainctrl3, gainctrl4, gainctrl5, gainctrl6, ddiff, dop, dom, gctrlcode;
+parameter real vlo = 0.0;
+parameter real vhi = 0.9;
+parameter real vth = 0.45;
+parameter integer gaincodeinit = 90;
+integer dac10, dac11, dac12, dac13;
+integer dout2, doutp, doutm, gainctrlcode, status, ddifcode, stepcode;
+analog begin
+    @(initial_step) begin
+        gainctrlcode = gaincodeinit;
+        dac13 = 1; dac12 = 0; dac11 = 0; dac10 = 0;
+        doutp = 96; doutm = 32; status = 0; ddifcode = 0;
+    end
+    @(cross(V(clks) - vth, +1)) begin
+        dout2 = ((V(din20) > vth) ? 1 : 0)
+              + ((V(din21) > vth) ? 2 : 0)
+              + ((V(din22) > vth) ? 4 : 0)
+              + ((V(din23) > vth) ? 8 : 0)
+              + ((V(din24) > vth) ? 16 : 0)
+              + ((V(din25) > vth) ? 32 : 0)
+              + ((V(din26) > vth) ? 32 : 0);
+        if (status == 1) begin
+            doutp = dout2;
+            stepcode = abs(doutp - doutm - 32);
+            ddifcode = doutp - doutm;
+            if (doutp - doutm > 32) begin
+                gainctrlcode = gainctrlcode - stepcode;
+                if (gainctrlcode < 0) gainctrlcode = 0;
+            end
+            if (doutp - doutm < 32) begin
+                gainctrlcode = gainctrlcode + stepcode;
+                if (gainctrlcode > 127) gainctrlcode = 127;
+            end
+        end
+        if (status == 0) doutm = dout2;
+        if (status == 0) begin
+            status = 1;
+            dac13 = 0; dac12 = 1; dac11 = 1; dac10 = 1;
+        end else begin
+            status = 0;
+            dac13 = 1; dac12 = 0; dac11 = 0; dac10 = 0;
+        end
+    end
+    V(dout10) <+ transition(dac10 ? vhi : vlo, 0, 10p, 10p);
+    V(dout11) <+ transition(dac11 ? vhi : vlo, 0, 10p, 10p);
+    V(dout12) <+ transition(dac12 ? vhi : vlo, 0, 10p, 10p);
+    V(dout13) <+ transition(dac13 ? vhi : vlo, 0, 10p, 10p);
+    V(gainctrl0) <+ transition(((gainctrlcode >> 0) & 1) ? vhi : vlo, 0, 10p, 10p);
+    V(gainctrl1) <+ transition(((gainctrlcode >> 1) & 1) ? vhi : vlo, 0, 10p, 10p);
+    V(gainctrl2) <+ transition(((gainctrlcode >> 2) & 1) ? vhi : vlo, 0, 10p, 10p);
+    V(gainctrl3) <+ transition(((gainctrlcode >> 3) & 1) ? vhi : vlo, 0, 10p, 10p);
+    V(gainctrl4) <+ transition(((gainctrlcode >> 4) & 1) ? vhi : vlo, 0, 10p, 10p);
+    V(gainctrl5) <+ transition(((gainctrlcode >> 5) & 1) ? vhi : vlo, 0, 10p, 10p);
+    V(gainctrl6) <+ transition(((gainctrlcode >> 6) & 1) ? vhi : vlo, 0, 10p, 10p);
+    V(ddiff) <+ transition(ddifcode / 100.0, 0, 10p, 10p);
+    V(dop) <+ transition(doutp / 100.0, 0, 10p, 10p);
+    V(dom) <+ transition(doutm / 100.0, 0, 10p, 10p);
+    V(gctrlcode) <+ transition(gainctrlcode / 100.0, 0, 10p, 10p);
+end
+endmodule

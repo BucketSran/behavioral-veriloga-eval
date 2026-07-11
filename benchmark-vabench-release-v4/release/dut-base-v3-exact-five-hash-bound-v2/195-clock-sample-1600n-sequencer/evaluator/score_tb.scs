@@ -1,0 +1,10 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/clock_sample_1600n_sequencer.va"
+
+XDUT (rst s nc res conv) clock_sample_1600n_sequencer
+Iground_ref (rst 0) isource dc=0
+
+tran tran stop=18n maxstep=20p
+save conv nc res rst s

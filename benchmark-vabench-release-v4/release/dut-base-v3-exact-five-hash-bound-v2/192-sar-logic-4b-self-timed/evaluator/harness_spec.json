@@ -1,0 +1,107 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "sar_logic_4b_self_timed.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=5n maxstep=10p"
+    ],
+    "body_lines": [
+      "Vdd (vdd 0) vsource dc=1",
+      "Vgnd (gnd 0) vsource dc=0",
+      "Vrst (rst 0) vsource type=pulse val0=0 val1=1 delay=0.05n period=20n width=0.25n rise=20p fall=20p"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clkc",
+      "cmpck",
+      "dbotn1",
+      "dbotn2",
+      "dbotn3",
+      "dbotp1",
+      "dbotp2",
+      "dbotp3",
+      "dcmpn",
+      "dcmpp",
+      "dout1",
+      "dout2",
+      "dout3",
+      "dout4",
+      "rst",
+      "vdd",
+      "gnd"
+    ]
+  },
+  "family_id": "192",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "5aa8e5ca8f9fd217a2079e41fb9e30c6b0dfe497f3f1d15e8f0a45c763cbaf4d",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "325331658b72c2bb63f647ca8467029a9e04befed452de3fce6191f94c81e07f",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclkc (clkc 0) vsource type=pulse val0=0 val1=1 delay=0.8n period=20n width=0.25n rise=20p fall=20p",
+          "Vp (dcmpp 0) vsource type=pwl wave=[0 0 1.25n 0 1.27n 1 1.55n 1 1.57n 0 2.65n 0 2.67n 1 2.95n 1 2.97n 0 6n 0]",
+          "Vn (dcmpn 0) vsource type=pwl wave=[0 0 1.95n 0 1.97n 1 2.25n 1 2.27n 0 3.35n 0 3.37n 1 3.65n 1 3.67n 0 6n 0]",
+          "XDUT (vdd gnd clkc rst dcmpp dcmpn cmpck dout1 dout2 dout3 dout4 dbotp1 dbotp2 dbotp3 dbotn1 dbotn2 dbotn3) sar_logic_4b_self_timed"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=4.8n maxstep=10p"
+        ],
+        "body_lines": [
+          "Vclkc (clkc 0) vsource type=pulse val0=0 val1=1 delay=0.7n period=20n width=0.25n rise=20p fall=20p",
+          "Vp (dcmpp 0) vsource type=pwl wave=[0 0 1.15n 0 1.17n 1 1.42n 1 1.44n 0 2.45n 0 2.47n 1 2.72n 1 2.74n 0 6n 0]",
+          "Vn (dcmpn 0) vsource type=pwl wave=[0 0 1.75n 0 1.77n 1 2.02n 1 2.04n 0 3.05n 0 3.07n 1 3.32n 1 3.34n 0 6n 0]",
+          "XDUT (vdd gnd clkc rst dcmpp dcmpn cmpck dout1 dout2 dout3 dout4 dbotp1 dbotp2 dbotp3 dbotn1 dbotn2 dbotn3) sar_logic_4b_self_timed"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RESET_INITIALIZES_SELF_TIMED_STATE",
+    "P_COMPARATOR_PULSE_DECISION_POLARITY",
+    "P_STEP_ADVANCE_ON_COMPARATOR_FALL",
+    "P_CMPCK_TIMING_AND_LEVEL"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "559c2bb088aee12dd9687c4f859748de36dcab584b7681a6ced2de74f8f245fc",
+    "family_spec_sha256": "5f936d8d2426b956bf10102b56dcd2e9732cf5cf7c75cc00275a90964a70e5f4"
+  },
+  "task_id": "v4-192"
+}

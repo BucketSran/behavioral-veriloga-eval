@@ -1,0 +1,20 @@
+`include "disciplines.vams"
+module qtz_differential_2level(vinp, vinn, vrefp, vrefn, clk, dout);
+input vinp, vinn, vrefp, vrefn, clk;
+output dout;
+electrical vinp, vinn, vrefp, vrefn, clk, dout;
+parameter real vth = 0.45;
+parameter real ttol = 5p;
+real code;
+real vindif, vrefdif;
+analog begin
+    @(initial_step) code = -0.5;
+    @(cross(V(clk) - vth, +1, ttol)) begin
+        vindif = V(vinp) - V(vinn);
+        vrefdif = V(vrefp) - V(vrefn);
+        code = -0.5;
+        if (vindif > V(vrefn) + vrefdif) code = 0.5;
+    end
+    V(dout) <+ transition(code, 0, 10p, 10p);
+end
+endmodule

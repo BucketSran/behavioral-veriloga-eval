@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/sar_das_logic_6b.va"
+
+Vsam (clk_sampling 0) vsource type=pulse val0=0 val1=1.1 delay=0.1n period=20n width=0.9n rise=20p fall=20p
+Vsar (clk_sar 0) vsource type=pulse val0=0 val1=1.1 delay=1.4n period=1.2n width=0.45n rise=20p fall=20p
+Vcomp (vcomp 0) vsource type=pwl wave=[0 1.1 2.0n 1.1 2.02n 0 3.2n 0 3.22n 1.1 4.4n 1.1 4.42n 0 6.8n 0 6.82n 1.1 10n 1.1]
+XDUT (clk_sampling clk_sar vcomp d1 d2 d3 d4 d5 d6 db1 db2 db3 db4 db5 db6 co cob) sar_das_logic_6b
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=9n maxstep=20p
+save clk_sampling clk_sar co cob d1 d2 d3 d4 d5 d6 db1 db2 db3 db4 db5 db6 vcomp

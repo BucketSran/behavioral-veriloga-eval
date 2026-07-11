@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/sar_logic_4b_self_timed.va"
+
+Vdd (vdd 0) vsource dc=1
+Vgnd (gnd 0) vsource dc=0
+Vrst (rst 0) vsource type=pulse val0=0 val1=1 delay=0.05n period=20n width=0.25n rise=20p fall=20p
+Vclkc (clkc 0) vsource type=pulse val0=0 val1=1 delay=0.7n period=20n width=0.25n rise=20p fall=20p
+Vp (dcmpp 0) vsource type=pwl wave=[0 0 1.15n 0 1.17n 1 1.42n 1 1.44n 0 2.45n 0 2.47n 1 2.72n 1 2.74n 0 6n 0]
+Vn (dcmpn 0) vsource type=pwl wave=[0 0 1.75n 0 1.77n 1 2.02n 1 2.04n 0 3.05n 0 3.07n 1 3.32n 1 3.34n 0 6n 0]
+XDUT (vdd gnd clkc rst dcmpp dcmpn cmpck dout1 dout2 dout3 dout4 dbotp1 dbotp2 dbotp3 dbotn1 dbotn2 dbotn3) sar_logic_4b_self_timed
+
+tran tran stop=4.8n maxstep=10p
+save clkc cmpck dbotn1 dbotn2 dbotn3 dbotp1 dbotp2 dbotp3 dcmpn dcmpp dout1 dout2 dout3 dout4 rst vdd gnd

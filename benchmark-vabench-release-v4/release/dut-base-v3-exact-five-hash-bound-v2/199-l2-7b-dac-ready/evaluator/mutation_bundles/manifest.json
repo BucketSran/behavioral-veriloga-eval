@@ -1,0 +1,132 @@
+{
+  "family_id": "199",
+  "gold_bundle_sha256": "f176de749ee9d56a49eb3804077d654548eb1fd12546e58927afda1086a571b2",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "l2_7b_dac_ready.va": "191d299f07cf2cbc7a24d9832f761feb2a963b3198af962bdce34cfa62a0afad"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DAC_OUTPUT_LEVEL_AND_HOLD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "l2_7b_dac_ready.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_DAC_OUTPUT_LEVEL_AND_HOLD"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "l2_7b_dac_ready.va": "5f1da1918b7db6a5374f0e04fa20d8cd593d4c4b026539f66fccdcde41cc2aa5"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FIRST_READY_EDGE_ARMS_ONLY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_no_ready_skip/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "l2_7b_dac_ready.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_002_no_ready_skip",
+      "trigger_condition": "Updates aout on the first ready edge instead of skipping it.",
+      "violated_property_ids": [
+        "P_FIRST_READY_EDGE_ARMS_ONLY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "l2_7b_dac_ready.va": "58aed887832b79a1d6724b4870a9568740698dfa7a44c88ede6e83e79f372803"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BIPOLAR_WEIGHTED_DAC_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_denominator/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "l2_7b_dac_ready.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_003_wrong_denominator",
+      "trigger_condition": "Drives the ready-sampled DAC output at half amplitude.",
+      "violated_property_ids": [
+        "P_BIPOLAR_WEIGHTED_DAC_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "l2_7b_dac_ready.va": "6b5d448b75bdba54e7a5e23ec50e96e48c043eaf15180bfaa6ebf14832b16169"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BIPOLAR_WEIGHTED_DAC_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_unipolar_output/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "l2_7b_dac_ready.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_004_unipolar_output",
+      "trigger_condition": "Omits the bipolar minus-vdd output offset.",
+      "violated_property_ids": [
+        "P_BIPOLAR_WEIGHTED_DAC_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "l2_7b_dac_ready.va": "d174a2250e1b79a59357cc971b1a982d28fc8ae44aa1c81094063da7572c48af"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_READY_SAMPLES_SEVEN_BITS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "l2_7b_dac_ready.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "L2 7b DAC Ready: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_READY_SAMPLES_SEVEN_BITS"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

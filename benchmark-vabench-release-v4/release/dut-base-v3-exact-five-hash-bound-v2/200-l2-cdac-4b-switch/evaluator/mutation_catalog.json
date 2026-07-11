@@ -1,0 +1,132 @@
+{
+  "family_id": "200",
+  "gold_bundle_sha256": "c035c771c8ee8709babdcb8329f78ac1c06f258b3f1a06f9b1553645fdff47cf",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "l2_cdac_4b_switch.va": "bef847bf6b3ea79dcd142964f30f81f50acca182ffde60ccb80dd53c5fa50406"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BIPOLAR_CDAC_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "l2_cdac_4b_switch.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_BIPOLAR_CDAC_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "l2_cdac_4b_switch.va": "5814449928c0ca2b985e97e78e1c38523869ef2051766ca490142d721b2f59d7"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FIRST_READY_EDGE_ARMS_ONLY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_no_ready_skip/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "l2_cdac_4b_switch.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_002_no_ready_skip",
+      "trigger_condition": "Updates aout on the first ready edge instead of skipping it.",
+      "violated_property_ids": [
+        "P_FIRST_READY_EDGE_ARMS_ONLY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "l2_cdac_4b_switch.va": "9e89a948090bfbf921fd9564b428f8d65c3b06951c8faf030c83148116c2142c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SWITCHED_WEIGHT_DENOMINATOR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_denominator/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "l2_cdac_4b_switch.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_003_wrong_denominator",
+      "trigger_condition": "Normalizes the 4-bit CDAC code by 8 instead of 8.5.",
+      "violated_property_ids": [
+        "P_SWITCHED_WEIGHT_DENOMINATOR"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "l2_cdac_4b_switch.va": "cfb96ec909693135cf647e1383fd95272462cc7179588e7a33299640dd13aa30"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BIPOLAR_CDAC_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_unipolar_output/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "l2_cdac_4b_switch.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_004_unipolar_output",
+      "trigger_condition": "Omits the bipolar minus-vdd output offset.",
+      "violated_property_ids": [
+        "P_BIPOLAR_CDAC_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "l2_cdac_4b_switch.va": "48b34ffedacc04e2cdaa888c6094d0a956c8ad61345302cfa8f4e0017b55eecf"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_READY_SAMPLES_FOUR_BITS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "l2_cdac_4b_switch.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "L2 CDAC 4b Switch: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_READY_SAMPLES_FOUR_BITS"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

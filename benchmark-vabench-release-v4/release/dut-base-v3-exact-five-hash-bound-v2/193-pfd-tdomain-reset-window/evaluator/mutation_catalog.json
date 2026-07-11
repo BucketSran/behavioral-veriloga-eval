@@ -1,0 +1,132 @@
+{
+  "family_id": "193",
+  "gold_bundle_sha256": "ad0a9c5f9727ce920f85e42a82e317d1a1c75274eda101f3bfbc8f6e4338a945",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "pfd_tdomain_reset_window.va": "240c7faa4131d030745a1935d0872b497cda53648dd32982b1a80f8b2d7e3dbd"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PFD_OUTPUT_LEVELS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pfd_tdomain_reset_window.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_PFD_OUTPUT_LEVELS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pfd_tdomain_reset_window.va": "eb042eb4549f217e6b2e6c9532bbafbcb7df5ed3bc7303b09012a8372cf4b582"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_OVERLAP_WINDOW"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_short_reset_window/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pfd_tdomain_reset_window.va"
+      ],
+      "fault_class": "state_reset_or_enable_error",
+      "id": "neg_002_short_reset_window",
+      "trigger_condition": "Clears hide_state on timer expiry but leaves directional state latched, so overlap reset does not fully clear outputs.",
+      "violated_property_ids": [
+        "P_RESET_OVERLAP_WINDOW"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pfd_tdomain_reset_window.va": "55df63038ef390d2510d1c83276b9f395f28d8cd5c0f102ae4fd943fdd2d6ae0"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CLEAR_AFTER_RESET_WINDOW"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_no_hide_state/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pfd_tdomain_reset_window.va"
+      ],
+      "fault_class": "state_reset_or_enable_error",
+      "id": "neg_003_no_hide_state",
+      "trigger_condition": "Does not assert both outputs during the reset/hide window.",
+      "violated_property_ids": [
+        "P_CLEAR_AFTER_RESET_WINDOW"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pfd_tdomain_reset_window.va": "ea545ffbe9af1001c0e3c9628ba0c6af75f1808f9e90e05f5ee950f46ea00f4d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LEADING_EDGE_DIRECTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_invert_up_down_outputs/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pfd_tdomain_reset_window.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_004_invert_up_down_outputs",
+      "trigger_condition": "Swaps up and dn output state meanings.",
+      "violated_property_ids": [
+        "P_LEADING_EDGE_DIRECTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pfd_tdomain_reset_window.va": "350a08127b38db881cae65f3acd7eeaa19380940b092ced3bb1b69e9fecb7f46"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_OVERLAP_WINDOW"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pfd_tdomain_reset_window.va"
+      ],
+      "fault_class": "state_reset_or_enable_error",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "PFD Tdomain Reset Window: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_RESET_OVERLAP_WINDOW"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

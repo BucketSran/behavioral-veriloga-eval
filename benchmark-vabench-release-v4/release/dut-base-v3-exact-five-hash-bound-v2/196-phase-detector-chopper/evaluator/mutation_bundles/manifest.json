@@ -1,0 +1,136 @@
+{
+  "family_id": "196",
+  "gold_bundle_sha256": "737e85010ddbf52a6de7af79e864c03dc61d59b65e7341e66ce3860f9dcd1a17",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "phase_detector_chopper.va": "af8764097cce1da536aeea6d303b5ad725fa0dd1653164c4c532fdcb0ffc91e1"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_NEGATIVE_LO_CHOP_PATH",
+          "P_POSITIVE_LO_GAIN_PATH"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "phase_detector_chopper.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_NEGATIVE_LO_CHOP_PATH",
+        "P_POSITIVE_LO_GAIN_PATH"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "phase_detector_chopper.va": "2c0593e80a09b080da49c8dec77e62c601dedb3c4dc2f767c28be767795774fe"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_NEGATIVE_LO_CHOP_PATH"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_no_chop_inversion/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "phase_detector_chopper.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_002_no_chop_inversion",
+      "trigger_condition": "Passes vin_rf without sign inversion when the local oscillator is low.",
+      "violated_property_ids": [
+        "P_NEGATIVE_LO_CHOP_PATH"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "phase_detector_chopper.va": "c8578b98064eae1827d3784398c3e03b0271005f9e83360caa5b550e0fc27e05"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_POSITIVE_LO_GAIN_PATH"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_gain/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "phase_detector_chopper.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_003_wrong_gain",
+      "trigger_condition": "Uses unity gain instead of the specified 1.25 conversion gain.",
+      "violated_property_ids": [
+        "P_POSITIVE_LO_GAIN_PATH"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "phase_detector_chopper.va": "2acfb2ce59f903ba18fc51e9eddd53341f816f7704b959522f10da0039fea209"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_NEGATIVE_LO_CHOP_PATH",
+          "P_POSITIVE_LO_GAIN_PATH"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_inverted_lo_polarity/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "phase_detector_chopper.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_004_inverted_lo_polarity",
+      "trigger_condition": "Uses the opposite local-oscillator polarity for chopping.",
+      "violated_property_ids": [
+        "P_NEGATIVE_LO_CHOP_PATH",
+        "P_POSITIVE_LO_GAIN_PATH"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "phase_detector_chopper.va": "84b12cbce868390de7159a0eb71d0ebb29b45ea76f246b097880772b40e69c9a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CONTINUOUS_TRACKING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "phase_detector_chopper.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Phase Detector Chopper: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_CONTINUOUS_TRACKING"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}
