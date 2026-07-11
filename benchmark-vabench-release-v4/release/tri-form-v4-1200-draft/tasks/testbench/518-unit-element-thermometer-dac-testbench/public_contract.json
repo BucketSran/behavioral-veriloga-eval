@@ -1,0 +1,433 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "thermometer_dac_15seg",
+            "parameters": [
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets the active threshold applied independently to every segment input",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real"
+              },
+              {
+                "default": 5e-10,
+                "name": "tr",
+                "override_behavior": "sets output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seg0",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seg1",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seg2",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seg3",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seg4",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seg5",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seg6",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seg7",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seg8",
+                "position": 8
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seg9",
+                "position": 9
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seg10",
+                "position": 10
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seg11",
+                "position": 11
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seg12",
+                "position": 12
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seg13",
+                "position": 13
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seg14",
+                "position": 14
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vref",
+                "position": 15
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vss",
+                "position": 16
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "aout",
+                "position": 17
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "thermometer_dac_15seg.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "018",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D1",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Unit Element Thermometer DAC"
+  },
+  "modeling_constraints": [
+    "Use all fifteen public segment inputs as identical unit elements.",
+    "Use deterministic smoothed voltage-domain output behavior.",
+    "Do not use current contributions, ddt(), idt(), validation hooks, or simulator-specific side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ZERO_SCALE",
+      "observable_contract": "With no active segment inputs, aout equals the vss endpoint after transition settling.",
+      "required_signals": [
+        "time",
+        "seg0",
+        "seg1",
+        "seg2",
+        "seg3",
+        "seg4",
+        "seg5",
+        "seg6",
+        "seg7",
+        "seg8",
+        "seg9",
+        "seg10",
+        "seg11",
+        "seg12",
+        "seg13",
+        "seg14",
+        "vss",
+        "aout"
+      ]
+    },
+    {
+      "id": "P_FULL_SCALE",
+      "observable_contract": "With all fifteen segment inputs active, aout equals the vref endpoint after transition settling.",
+      "required_signals": [
+        "time",
+        "seg0",
+        "seg1",
+        "seg2",
+        "seg3",
+        "seg4",
+        "seg5",
+        "seg6",
+        "seg7",
+        "seg8",
+        "seg9",
+        "seg10",
+        "seg11",
+        "seg12",
+        "seg13",
+        "seg14",
+        "vref",
+        "aout"
+      ]
+    },
+    {
+      "id": "P_UNIT_ELEMENT_WEIGHT",
+      "observable_contract": "Each input above vth contributes exactly one fifteenth of the vref-minus-vss span, including seg14.",
+      "required_signals": [
+        "time",
+        "seg0",
+        "seg1",
+        "seg2",
+        "seg3",
+        "seg4",
+        "seg5",
+        "seg6",
+        "seg7",
+        "seg8",
+        "seg9",
+        "seg10",
+        "seg11",
+        "seg12",
+        "seg13",
+        "seg14",
+        "vref",
+        "vss",
+        "aout"
+      ]
+    },
+    {
+      "id": "P_PERMUTATION_INVARIANCE",
+      "observable_contract": "Any two segment patterns with the same active count produce the same settled aout.",
+      "required_signals": [
+        "time",
+        "seg0",
+        "seg1",
+        "seg2",
+        "seg3",
+        "seg4",
+        "seg5",
+        "seg6",
+        "seg7",
+        "seg8",
+        "seg9",
+        "seg10",
+        "seg11",
+        "seg12",
+        "seg13",
+        "seg14",
+        "aout"
+      ]
+    },
+    {
+      "id": "P_COUNT_MONOTONICITY",
+      "observable_contract": "Increasing the active segment count cannot reduce the settled DAC output for vref above vss.",
+      "required_signals": [
+        "time",
+        "seg0",
+        "seg1",
+        "seg2",
+        "seg3",
+        "seg4",
+        "seg5",
+        "seg6",
+        "seg7",
+        "seg8",
+        "seg9",
+        "seg10",
+        "seg11",
+        "seg12",
+        "seg13",
+        "seg14",
+        "vref",
+        "vss",
+        "aout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/thermometer_dac_15seg.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-518",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "seg0",
+            "port_ref": "seg0",
+            "position": 0
+          },
+          {
+            "net": "seg1",
+            "port_ref": "seg1",
+            "position": 1
+          },
+          {
+            "net": "seg2",
+            "port_ref": "seg2",
+            "position": 2
+          },
+          {
+            "net": "seg3",
+            "port_ref": "seg3",
+            "position": 3
+          },
+          {
+            "net": "seg4",
+            "port_ref": "seg4",
+            "position": 4
+          },
+          {
+            "net": "seg5",
+            "port_ref": "seg5",
+            "position": 5
+          },
+          {
+            "net": "seg6",
+            "port_ref": "seg6",
+            "position": 6
+          },
+          {
+            "net": "seg7",
+            "port_ref": "seg7",
+            "position": 7
+          },
+          {
+            "net": "seg8",
+            "port_ref": "seg8",
+            "position": 8
+          },
+          {
+            "net": "seg9",
+            "port_ref": "seg9",
+            "position": 9
+          },
+          {
+            "net": "seg10",
+            "port_ref": "seg10",
+            "position": 10
+          },
+          {
+            "net": "seg11",
+            "port_ref": "seg11",
+            "position": 11
+          },
+          {
+            "net": "seg12",
+            "port_ref": "seg12",
+            "position": 12
+          },
+          {
+            "net": "seg13",
+            "port_ref": "seg13",
+            "position": 13
+          },
+          {
+            "net": "seg14",
+            "port_ref": "seg14",
+            "position": 14
+          },
+          {
+            "net": "vref",
+            "port_ref": "vref",
+            "position": 15
+          },
+          {
+            "net": "vss",
+            "port_ref": "vss",
+            "position": 16
+          },
+          {
+            "net": "aout",
+            "port_ref": "aout",
+            "position": 17
+          }
+        ],
+        "module_ref": "thermometer_dac_15seg",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "seg0",
+      "seg1",
+      "seg2",
+      "seg3",
+      "seg4",
+      "seg5",
+      "seg6",
+      "seg7",
+      "seg8",
+      "seg9",
+      "seg10",
+      "seg11",
+      "seg12",
+      "seg13",
+      "seg14",
+      "vref",
+      "vss",
+      "aout"
+    ]
+  }
+}

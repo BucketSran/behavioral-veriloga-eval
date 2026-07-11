@@ -1,0 +1,309 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "clk_divider_ref",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets output high levels",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > 0"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets clock, reset, and code thresholds",
+                "type": "real",
+                "units": "V",
+                "valid_range": "0 < vth < vdd"
+              },
+              {
+                "default": 1e-11,
+                "name": "trf",
+                "override_behavior": "sets output rise and fall smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "trf > 0"
+              },
+              {
+                "default": 0.0,
+                "name": "td",
+                "override_behavior": "sets output transition delay",
+                "type": "real",
+                "units": "s",
+                "valid_range": "td >= 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk_in",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst_n",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "div_code_0",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "div_code_1",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "div_code_2",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "div_code_3",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "div_code_4",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "div_code_5",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "div_code_6",
+                "position": 8
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "div_code_7",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "clk_out",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lock",
+                "position": 11
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "clk_divider_ref.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "012",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "pll_clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Clock Divider"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavior.",
+    "Use voltage contributions and finite smoothing only.",
+    "Do not use current contributions, continuous operators, transistor devices, validation hooks, or simulator-specific side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET",
+      "observable_contract": "Active-low reset clears divider phase and drives clk_out and lock low.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst_n",
+        "clk_out",
+        "lock"
+      ]
+    },
+    {
+      "id": "P_RATIO_DECODE",
+      "observable_contract": "The LSB-first 8-bit code selects the divide ratio, with code zero mapped to ratio one.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "div_code_0",
+        "div_code_1",
+        "div_code_2",
+        "div_code_3",
+        "div_code_4",
+        "div_code_5",
+        "div_code_6",
+        "div_code_7",
+        "clk_out"
+      ]
+    },
+    {
+      "id": "P_DIVIDED_PERIOD",
+      "observable_contract": "For ratios above one, successive clk_out rising edges span the decoded number of clk_in rising edges.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "clk_out"
+      ]
+    },
+    {
+      "id": "P_ODD_RATIO_DUTY",
+      "observable_contract": "Odd ratios retain both phases with floor/ceil segment lengths differing by at most one input cycle.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "clk_out"
+      ]
+    },
+    {
+      "id": "P_LOCK_REACQUIRE",
+      "observable_contract": "lock asserts after one complete output period and clears/reacquires when the ratio changes.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst_n",
+        "div_code_0",
+        "div_code_1",
+        "div_code_2",
+        "div_code_3",
+        "div_code_4",
+        "div_code_5",
+        "div_code_6",
+        "div_code_7",
+        "clk_out",
+        "lock"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "clk_divider_ref.va"
+  ],
+  "task_id": "v4-012",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk_in",
+            "port_ref": "clk_in",
+            "position": 0
+          },
+          {
+            "net": "rst_n",
+            "port_ref": "rst_n",
+            "position": 1
+          },
+          {
+            "net": "div_code_0",
+            "port_ref": "div_code_0",
+            "position": 2
+          },
+          {
+            "net": "div_code_1",
+            "port_ref": "div_code_1",
+            "position": 3
+          },
+          {
+            "net": "div_code_2",
+            "port_ref": "div_code_2",
+            "position": 4
+          },
+          {
+            "net": "div_code_3",
+            "port_ref": "div_code_3",
+            "position": 5
+          },
+          {
+            "net": "div_code_4",
+            "port_ref": "div_code_4",
+            "position": 6
+          },
+          {
+            "net": "div_code_5",
+            "port_ref": "div_code_5",
+            "position": 7
+          },
+          {
+            "net": "div_code_6",
+            "port_ref": "div_code_6",
+            "position": 8
+          },
+          {
+            "net": "div_code_7",
+            "port_ref": "div_code_7",
+            "position": 9
+          },
+          {
+            "net": "clk_out",
+            "port_ref": "clk_out",
+            "position": 10
+          },
+          {
+            "net": "lock",
+            "port_ref": "lock",
+            "position": 11
+          }
+        ],
+        "module_ref": "clk_divider_ref",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk_in",
+      "rst_n",
+      "div_code_0",
+      "div_code_1",
+      "div_code_2",
+      "div_code_3",
+      "div_code_4",
+      "div_code_5",
+      "div_code_6",
+      "div_code_7",
+      "clk_out",
+      "lock"
+    ]
+  }
+}

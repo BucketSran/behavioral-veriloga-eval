@@ -1,0 +1,218 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "pfd_updn",
+            "parameters": [
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets REF and DIV rising-edge threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vth > 0"
+              },
+              {
+                "default": 2e-11,
+                "name": "tedge",
+                "override_behavior": "sets UP and DN edge smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tedge > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VDD",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VSS",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "REF",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "DIV",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "UP",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "DN",
+                "position": 5
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "pfd_updn.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "011",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "pll_clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "PFD Up DN Logic"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain rising-edge behavior for REF and DIV.",
+    "Implement mutual-clear behavior internally; do not add an external reset port.",
+    "Drive UP and DN with voltage contributions and finite smoothing referenced to local VDD/VSS.",
+    "Do not use transistor-level devices, current contributions, ddt(), idt(), validation hooks, or simulator-specific side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_REF_SETS_UP",
+      "observable_contract": "A rising REF edge asserts UP, and falling REF edges do not set either output.",
+      "required_signals": [
+        "time",
+        "ref",
+        "up"
+      ]
+    },
+    {
+      "id": "P_DIV_SETS_DN",
+      "observable_contract": "A rising DIV edge asserts DN, and falling DIV edges do not set either output.",
+      "required_signals": [
+        "time",
+        "div",
+        "dn"
+      ]
+    },
+    {
+      "id": "P_RESET_RACE_CLEAR",
+      "observable_contract": "If a rising edge arrives while the opposite output state is already high, both UP and DN clear immediately for REF-leading and DIV-leading orderings.",
+      "required_signals": [
+        "time",
+        "ref",
+        "div",
+        "up",
+        "dn"
+      ]
+    },
+    {
+      "id": "P_NO_PERSISTENT_OVERLAP",
+      "observable_contract": "UP and DN are not intentionally held high together beyond finite transition smoothing overlap.",
+      "required_signals": [
+        "time",
+        "up",
+        "dn"
+      ]
+    },
+    {
+      "id": "P_RAIL_REFERENCE",
+      "observable_contract": "UP and DN high levels track the local VDD rail and low levels track the local VSS rail.",
+      "required_signals": [
+        "time",
+        "vdd",
+        "vss",
+        "up",
+        "dn"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/pfd_updn.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-511",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vdd",
+            "port_ref": "VDD",
+            "position": 0
+          },
+          {
+            "net": "vss",
+            "port_ref": "VSS",
+            "position": 1
+          },
+          {
+            "net": "ref",
+            "port_ref": "REF",
+            "position": 2
+          },
+          {
+            "net": "div",
+            "port_ref": "DIV",
+            "position": 3
+          },
+          {
+            "net": "up",
+            "port_ref": "UP",
+            "position": 4
+          },
+          {
+            "net": "dn",
+            "port_ref": "DN",
+            "position": 5
+          }
+        ],
+        "module_ref": "pfd_updn",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vdd",
+      "vss",
+      "ref",
+      "div",
+      "up",
+      "dn"
+    ]
+  }
+}

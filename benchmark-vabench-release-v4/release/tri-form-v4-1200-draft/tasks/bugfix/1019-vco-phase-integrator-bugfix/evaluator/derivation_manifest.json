@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-019",
+    "canonical_task_slug": "019-vco-phase-integrator",
+    "family_spec_sha256": "00a387a882e873655a5247a5cc5c4a91755c03ea5ee82f20c58bb7d4aec40fc4",
+    "mutation_catalog_sha256": "b81dda62b828b9ac3ff71eeda6a3d930a99c91b61f576552ef761f257e702cc2",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "019",
+  "negative_assignment": {
+    "bugfix_seed": "neg_006_control_direction_inverted",
+    "testbench_suite": [
+      "neg_001_missing_phase_increment",
+      "neg_004_missing_phase_wrap",
+      "neg_002_phase_increment_too_small",
+      "neg_006_control_direction_inverted",
+      "neg_005_wrap_does_not_toggle_clock"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "7dcf0fdcb9587ba1e114ed49025a308b25808ebf8a00147d754b18d5cb770329",
+    "changed_artifacts": [
+      "vco_phase_integrator.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_006_control_direction_inverted",
+    "rationale": "Select fault class control_direction_inversion under trigger 'vctrl steps from the low to the high public stimulus region' because it exercises P_CONTROLLED_EDGE_RATE, P_WRAPPED_PHASE_RANGE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 18,
+    "source_preferred_seed": "neg_001_missing_phase_increment",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

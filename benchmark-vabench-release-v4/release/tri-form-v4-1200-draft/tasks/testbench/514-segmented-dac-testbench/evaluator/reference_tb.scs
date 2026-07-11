@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/segmented_dac.va"
+
+Vref (vref 0) vsource dc=0.9
+Vss (vss 0) vsource dc=0
+Vb0 (b0 0) vsource type=pwl wave=[0 0 29.5n 0 30n 0.9 59.5n 0.9 60n 0 89.5n 0 90n 0.9 119.5n 0.9 120n 0]
+Vb1 (b1 0) vsource type=pwl wave=[0 0 29.5n 0 30n 0 59.5n 0 60n 0.9 89.5n 0.9 90n 0.9 119.5n 0.9 120n 0]
+Vt0 (t0 0) vsource type=pwl wave=[0 0 29.5n 0 30n 0 59.5n 0 60n 0 89.5n 0 90n 0.9 119.5n 0.9 120n 0.9]
+Vt1 (t1 0) vsource type=pwl wave=[0 0 89.5n 0 90n 0 119.5n 0 120n 0.9]
+Vt2 (t2 0) vsource type=pwl wave=[0 0 119.5n 0 120n 0.9]
+
+XDUT (b0 b1 t0 t1 t2 vref vss aout) segmented_dac
+
+
+tran tran stop=150n maxstep=500p
+save b0 b1 t0 t1 t2 vref vss aout

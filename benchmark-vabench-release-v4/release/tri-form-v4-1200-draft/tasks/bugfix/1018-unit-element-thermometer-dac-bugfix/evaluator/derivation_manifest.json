@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-018",
+    "canonical_task_slug": "018-unit-element-thermometer-dac",
+    "family_spec_sha256": "d10b15af580b2a2efb69ad70f16e51bca3f2a3c2d8e6f75b7425dd337377a631",
+    "mutation_catalog_sha256": "ec187fbf9ca644fef9f740e5ca920d4f01e2d8945e913a8aab0ded66014399da",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "018",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_boundary",
+    "testbench_suite": [
+      "neg_001_boundary",
+      "neg_003_polarity_direction",
+      "neg_004_state_reset",
+      "neg_005_metric_writeout",
+      "neg_002_timing_window"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "ee661d90b5cf0b8f9f24cb910d5638847ede79742ae33b0d8d0f994eca5041c7",
+    "changed_artifacts": [
+      "thermometer_dac_15seg.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_boundary",
+    "rationale": "Select fault class boundary_semantic_error under trigger 'a public endpoint, threshold, saturation, or settling boundary is exercised' because it exercises P_FULL_SCALE, P_UNIT_ELEMENT_WEIGHT as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 28,
+    "source_preferred_seed": "neg_001_boundary",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

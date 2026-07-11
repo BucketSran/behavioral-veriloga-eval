@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-016",
+    "canonical_task_slug": "016-slew-rate-limiter",
+    "family_spec_sha256": "7205a7092111d215f0ca592aecee6d312ea1cd4e7b300c733e9748c685154f79",
+    "mutation_catalog_sha256": "b08f7439620c2fafdb6c1d46f6516cafaf6c77081059975050d90e86a246cf19",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "016",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_inverted_slew_direction",
+    "testbench_suite": [
+      "neg_002_passthrough_update",
+      "neg_001_stuck_zero",
+      "neg_006_wrong_initial_state",
+      "neg_007_wrong_update_period",
+      "neg_003_inverted_slew_direction"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "ee63abe4b5876deba1f6b64e199063c8c2611a2f49915740b1e071c93c32a393",
+    "changed_artifacts": [
+      "slew_rate_limiter.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_inverted_slew_direction",
+    "rationale": "Select fault class response_direction_inversion under trigger 'vin is separated from the current output by more than step' because it exercises P_BIDIRECTIONAL_STEP_LIMIT, P_EVENTUAL_TRACKING as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 22,
+    "source_preferred_seed": "neg_002_passthrough_update",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

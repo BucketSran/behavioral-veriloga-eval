@@ -1,0 +1,152 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "vco_phase_integrator",
+            "parameters": [
+              {
+                "default": 2e-10,
+                "name": "tr",
+                "override_behavior": "sets phase and clock transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vctrl",
+                "position": 0
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "vco_phase_integrator.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/vco_phase_integrator.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "019",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "pll_clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "VCO Phase Integrator"
+  },
+  "modeling_constraints": [
+    "Use deterministic 1 ns timer-updated state and wrapped normalized phase.",
+    "Use smoothed voltage contributions only.",
+    "Do not use current contributions, ddt(), idt(), topology assumptions, validation hooks, or extra observability ports."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_PERIODIC_PHASE_UPDATE",
+      "observable_contract": "Phase state updates on the public 1 ns periodic schedule by 0.03 plus 0.09 times vctrl.",
+      "required_signals": [
+        "time",
+        "vctrl",
+        "phase"
+      ]
+    },
+    {
+      "id": "P_WRAPPED_PHASE_RANGE",
+      "observable_contract": "The observable phase remains in the normalized range from 0 inclusive to 1 exclusive.",
+      "required_signals": [
+        "time",
+        "phase"
+      ]
+    },
+    {
+      "id": "P_WRAP_TOGGLES_CLOCK",
+      "observable_contract": "Each phase wrap by one cycle toggles the voltage-coded clock between 0 V and 0.9 V.",
+      "required_signals": [
+        "time",
+        "phase",
+        "clk"
+      ]
+    },
+    {
+      "id": "P_CONTROLLED_EDGE_RATE",
+      "observable_contract": "A sustained higher vctrl produces more clock toggles over the same observation interval than a sustained lower vctrl.",
+      "required_signals": [
+        "time",
+        "vctrl",
+        "clk"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "vco_phase_integrator.va"
+  ],
+  "task_id": "v4-1019",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vctrl",
+            "port_ref": "vctrl",
+            "position": 0
+          },
+          {
+            "net": "phase",
+            "port_ref": "phase",
+            "position": 1
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 2
+          }
+        ],
+        "module_ref": "vco_phase_integrator",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vctrl",
+      "phase",
+      "clk"
+    ]
+  }
+}

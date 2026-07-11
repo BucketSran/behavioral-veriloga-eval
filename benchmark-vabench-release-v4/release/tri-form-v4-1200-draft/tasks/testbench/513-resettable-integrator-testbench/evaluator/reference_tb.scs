@@ -1,0 +1,12 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "resettable_integrator.va"
+
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 25n 0.9 26n 0 220n 0 221n 0.9 250n 0.9 251n 0 320n 0]
+Vin (vin 0) vsource dc=0.002
+
+XDUT (vin rst vout) resettable_integrator
+
+tran tran stop=320n maxstep=500p
+save vin rst vout

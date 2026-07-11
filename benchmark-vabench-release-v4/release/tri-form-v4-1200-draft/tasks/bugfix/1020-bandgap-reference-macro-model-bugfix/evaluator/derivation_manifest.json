@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-020",
+    "canonical_task_slug": "020-bandgap-reference-macro-model",
+    "family_spec_sha256": "f9897f139adddb8e616941f9533ed98fb5376d73abbfbff0683caae39796e65f",
+    "mutation_catalog_sha256": "62aa3801711c266d5bb7addd5740f41c8c1d3fde6d46839c5b6ee113ca520b90",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "020",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_boundary",
+    "testbench_suite": [
+      "neg_001_boundary",
+      "neg_003_polarity_direction",
+      "neg_004_state_reset",
+      "neg_005_metric_writeout",
+      "neg_002_timing_window"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "1fe7226f2f4c675d0993f1cff83d8ff0603907a3c399593279a0af648c9a3b6b",
+    "changed_artifacts": [
+      "bandgap_reference_macro_model.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_boundary",
+    "rationale": "Select fault class boundary_semantic_error under trigger 'a public endpoint, threshold, saturation, or settling boundary is exercised' because it exercises P_RESET_AND_BROWNOUT as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 25,
+    "source_preferred_seed": "neg_001_boundary",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

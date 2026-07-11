@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-011",
+    "canonical_task_slug": "011-pfd-up-dn-logic",
+    "family_spec_sha256": "e8f6e89675c1ee3b70fafbac899267440606007c4b1a88a55305894ebcdb65ff",
+    "mutation_catalog_sha256": "7ea4178db61a47220f013683b1e92a08ad179889e5e7aa4acdea02796ad37aeb",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "011",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_swapped_outputs",
+    "testbench_suite": [
+      "neg_001_swapped_outputs",
+      "neg_005_div_lead_clear_leaves_up",
+      "neg_006_fixed_nominal_rails",
+      "neg_002_missing_ref_lead_clear",
+      "neg_003_div_falling_edge"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "cc351a238b9f62d838b0dcb3edae175ac69b2298fa6b0c357c03bf106a57acd9",
+    "changed_artifacts": [
+      "pfd_updn.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_swapped_outputs",
+    "rationale": "Select fault class output_polarity_swap under trigger 'a REF-leading or DIV-leading cycle expects the corresponding UP or DN pulse before mutual clear.' because it exercises P_DIV_SETS_DN, P_REF_SETS_UP as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 20,
+    "source_preferred_seed": "neg_001_swapped_outputs",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}
