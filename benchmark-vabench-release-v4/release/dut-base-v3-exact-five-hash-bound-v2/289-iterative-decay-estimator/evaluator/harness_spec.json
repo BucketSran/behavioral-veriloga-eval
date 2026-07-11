@@ -1,0 +1,119 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "iterative_decay_estimator.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=16n maxstep=10p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "ctrl0",
+      "ctrl1",
+      "en",
+      "flag",
+      "in0",
+      "in1",
+      "in2",
+      "in3",
+      "metric",
+      "out",
+      "rst",
+      "vdd",
+      "vss"
+    ]
+  },
+  "family_id": "289",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "e6141c7c42d3c2262badadb9ba94948b303993d6ee58ba837c4f61b37104e616",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "3e1f70d7e4add0edb0bdb0009d016b17489f81825a078d047cf6a1fa3647688f",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=210p period=1n width=420p rise=25p fall=25p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.2n 0.9 1.25n 0 9.0n 0 9.05n 0.9 10.0n 0.9 10.05n 0 16n 0]",
+          "Vvss (vss 0) vsource type=pwl wave=[0 0.03 4n 0.03 4.05n -0.06 8n -0.06 8.05n 0.02 16n 0.02]",
+          "Vvdd (vdd 0) vsource type=pwl wave=[0 0.92 5n 0.92 5.05n 1.12 10n 1.12 10.05n 0.86 16n 0.86]",
+          "Vin0 (in0 0) vsource type=pwl wave=[0 0.18 2n 0.18 2.05n 0.74 4n 0.74 4.05n 0.36 6n 0.36 6.05n 0.90 8n 0.90 8.05n 0.24 10n 0.24 10.05n 0.68 16n 0.68]",
+          "Vin1 (in1 0) vsource type=pwl wave=[0 0.70 2n 0.70 2.05n 0.28 4n 0.28 4.05n 0.82 6n 0.82 6.05n 0.30 8n 0.30 8.05n 0.76 10n 0.76 10.05n 0.16 16n 0.16]",
+          "Vin2 (in2 0) vsource type=pwl wave=[0 0.42 3n 0.42 3.05n 0.86 6n 0.86 6.05n 0.20 9n 0.20 9.05n 0.58 16n 0.58]",
+          "Vin3 (in3 0) vsource type=pwl wave=[0 0.12 3n 0.12 3.05n 0.64 6n 0.64 6.05n 0.88 9n 0.88 9.05n 0.32 16n 0.32]",
+          "Vctrl0 (ctrl0 0) vsource type=pwl wave=[0 0.0 3n 0.0 3.05n 0.9 6n 0.9 6.05n 0.0 9n 0.0 9.05n 0.9 16n 0.9]",
+          "Vctrl1 (ctrl1 0) vsource type=pwl wave=[0 0.0 4.5n 0.0 4.55n 0.9 8n 0.9 8.05n 0.0 12n 0.0 12.05n 0.9 16n 0.9]",
+          "Ven (en 0) vsource type=pwl wave=[0 0.9 6.8n 0.9 6.85n 0 7.8n 0 7.85n 0.9 16n 0.9]",
+          "",
+          "XDUT (clk rst in0 in1 in2 in3 ctrl0 ctrl1 vdd vss en out flag metric) iterative_decay_estimator",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=330p period=1.15n width=420p rise=25p fall=25p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.2n 0.9 1.25n 0 9.0n 0 9.05n 0.9 10.0n 0.9 10.05n 0 16n 0]",
+          "Vvss (vss 0) vsource type=pwl wave=[0 -0.04 4n -0.04 4.05n 0.07 8n 0.07 8.05n -0.02 16n -0.02]",
+          "Vvdd (vdd 0) vsource type=pwl wave=[0 0.94 5n 0.94 5.05n 1.18 10n 1.18 10.05n 0.88 16n 0.88]",
+          "Vin0 (in0 0) vsource type=pwl wave=[0 0.18 2n 0.18 2.05n 0.74 4n 0.74 4.05n 0.36 6n 0.36 6.05n 0.90 8n 0.90 8.05n 0.24 10n 0.24 10.05n 0.68 16n 0.68]",
+          "Vin1 (in1 0) vsource type=pwl wave=[0 0.70 2n 0.70 2.05n 0.28 4n 0.28 4.05n 0.82 6n 0.82 6.05n 0.30 8n 0.30 8.05n 0.76 10n 0.76 10.05n 0.16 16n 0.16]",
+          "Vin2 (in2 0) vsource type=pwl wave=[0 0.42 3n 0.42 3.05n 0.86 6n 0.86 6.05n 0.20 9n 0.20 9.05n 0.58 16n 0.58]",
+          "Vin3 (in3 0) vsource type=pwl wave=[0 0.12 3n 0.12 3.05n 0.64 6n 0.64 6.05n 0.88 9n 0.88 9.05n 0.32 16n 0.32]",
+          "Vctrl0 (ctrl0 0) vsource type=pwl wave=[0 0.0 3n 0.0 3.05n 0.9 6n 0.9 6.05n 0.0 9n 0.0 9.05n 0.9 16n 0.9]",
+          "Vctrl1 (ctrl1 0) vsource type=pwl wave=[0 0.0 4.5n 0.0 4.55n 0.9 8n 0.9 8.05n 0.0 12n 0.0 12.05n 0.9 16n 0.9]",
+          "Ven (en 0) vsource type=pwl wave=[0 0.9 6.8n 0.9 6.85n 0 7.8n 0 7.85n 0.9 16n 0.9]",
+          "",
+          "XDUT (clk rst in0 in1 in2 in3 ctrl0 ctrl1 vdd vss en out flag metric) iterative_decay_estimator",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_MEASURE_ANALOG_INPUTS_RELATIVE_TO_THE",
+    "P_INITIALIZE_THE_DECAY_STATE_AND_ALL",
+    "P_BUILD_A_VOLTAGE_DOMAIN_ANALOG_MIXED",
+    "P_VTH_0_45_V_LOGIC_THRESHOLD",
+    "P_VHI_0_9_V_HIGH_LEVEL",
+    "P_SPAN_MIN_0_62_V_SPAN"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "0d255a7ca36237cf3845a2574a391a715ad3a0f0b3ca6aa656ee0d7f31d6de6d",
+    "family_spec_sha256": "fe69e82f542bc8cb511c58c88e5fce52817a64ed6b0e36a7e3dff54bd9e0e844"
+  },
+  "task_id": "v4-289"
+}

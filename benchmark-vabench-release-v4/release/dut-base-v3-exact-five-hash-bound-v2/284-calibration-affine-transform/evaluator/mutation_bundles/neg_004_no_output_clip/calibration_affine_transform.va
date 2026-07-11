@@ -1,0 +1,65 @@
+`include "disciplines.vams"
+
+module calibration_affine_transform(clk, rst, raw, gain_ctrl, offset_ctrl, en, out, resid_metric);
+input clk, rst, raw, gain_ctrl, offset_ctrl, en;
+output out, resid_metric;
+electrical clk, rst, raw, gain_ctrl, offset_ctrl, en, out, resid_metric;
+
+parameter real vth = 0.45;
+parameter real vhi = 0.9;
+parameter real center = 0.45;
+parameter real gain_base = 0.50;
+parameter real gain_span = 1.00;
+parameter real resid_fullscale = 0.45;
+parameter real tr = 60p;
+
+real gain_v;
+real offset_v;
+real transformed_v;
+real out_v;
+real resid_v;
+
+analog function real clip01;
+    input x;
+    real x;
+    begin
+        if (x < 0.0) clip01 = 0.0;
+        else if (x > 1.0) clip01 = 1.0;
+        else clip01 = x;
+    end
+endfunction
+
+analog function real clamp_range;
+    input x;
+    input lo;
+    input hi;
+    real x, lo, hi;
+    begin
+        if (x < lo) clamp_range = lo;
+        else if (x > hi) clamp_range = hi;
+        else clamp_range = x;
+    end
+endfunction
+analog begin
+    @(initial_step) begin
+        out_v = 0.0;
+        resid_v = 0.0;
+    end
+
+    @(cross(V(clk) - vth, +1)) begin
+        if ((V(rst) > vth) || !(V(en) > vth)) begin
+            out_v = 0.0;
+            resid_v = 0.0;
+        end else begin
+            gain_v = gain_base + gain_span * clip01(V(gain_ctrl) / vhi);
+            offset_v = V(offset_ctrl) - center;
+            transformed_v = center + gain_v * (V(raw) - center) + offset_v;
+            out_v = transformed_v;
+            resid_v = vhi * clip01(abs(transformed_v - V(raw)) / resid_fullscale);
+        end
+    end
+
+    V(out) <+ transition(out_v, 0.0, tr, tr);
+    V(resid_metric) <+ transition(resid_v, 0.0, tr, tr);
+end
+endmodule
