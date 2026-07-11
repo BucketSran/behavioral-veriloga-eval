@@ -1,0 +1,134 @@
+{
+  "family_id": "216",
+  "gold_bundle_sha256": "f1a997ebe68ab2dbf6228c5e94f43b3a11e58cd0c3e0227a28b6d39b1955e5e3",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "sar_13bit_serial_decoder.va": "14914e75ecfc62211bb3252a2ea2c9c45913177a39fa110e53b46924c4c78007"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CONSUME_ONE_MSB_FIRST_BIT_ON"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "sar_13bit_serial_decoder.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_CONSUME_ONE_MSB_FIRST_BIT_ON"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "sar_13bit_serial_decoder.va": "47cbb86e0fa99a9737277ba1cb9dba04242ff000b28cc20c2768307f04ee3728"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ADD_THE_CORRESPONDING_BINARY_WEIGHT_WHEN"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_counts_low_decisions/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "sar_13bit_serial_decoder.va"
+      ],
+      "fault_class": "counts_low_decisions",
+      "id": "neg_002_counts_low_decisions",
+      "trigger_condition": "Accumulates bit weights when DIN is low instead of high.",
+      "violated_property_ids": [
+        "P_ADD_THE_CORRESPONDING_BINARY_WEIGHT_WHEN"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "sar_13bit_serial_decoder.va": "d600185cdad49cd88a6a4860000c6ae500ec8d8f301f541143a247011ebedbca"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_AFTER_PUBLISHING_RESET_THE_ACCUMULATOR_HIGH",
+          "P_INCREMENT_DNUM_FOR_EACH_HIGH_DECISION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_initial_counter/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "sar_13bit_serial_decoder.va"
+      ],
+      "fault_class": "state_reset_or_enable_error",
+      "id": "neg_003_wrong_initial_counter",
+      "trigger_condition": "Starts accumulation at bit 11 instead of bit 12.",
+      "violated_property_ids": [
+        "P_AFTER_PUBLISHING_RESET_THE_ACCUMULATOR_HIGH",
+        "P_INCREMENT_DNUM_FOR_EACH_HIGH_DECISION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "sar_13bit_serial_decoder.va": "209608faf9575b596dbcab5d436367052884c02f2e2466e0cecfb5c296457d5b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ON_EACH_RISING_CLKS_CROSSING_PUBLISH"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_unipolar_result/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "sar_13bit_serial_decoder.va"
+      ],
+      "fault_class": "unipolar_result",
+      "id": "neg_004_unipolar_result",
+      "trigger_condition": "Publishes a unipolar normalized result rather than subtracting 0.5.",
+      "violated_property_ids": [
+        "P_ON_EACH_RISING_CLKS_CROSSING_PUBLISH"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "sar_13bit_serial_decoder.va": "83a90fac04627f0e484729524ab3a9292ea2eeeba5ba38fc6fccffab1710af1c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_MAP_AN_ALL_LOW_FRAME_TO"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "sar_13bit_serial_decoder.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "SAR 13bit Serial Decoder: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_MAP_AN_ALL_LOW_FRAME_TO"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

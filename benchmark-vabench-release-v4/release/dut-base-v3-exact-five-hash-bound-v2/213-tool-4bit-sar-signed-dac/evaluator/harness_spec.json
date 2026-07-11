@@ -1,0 +1,93 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "tool_4bit_sar_signed_dac.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=3.8n maxstep=5p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "sh",
+      "d0",
+      "d1",
+      "d2",
+      "d3",
+      "aout"
+    ]
+  },
+  "family_id": "213",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "9111ad60cdd149646b5c58b5c1bc17b9c344b68a7869d68910da243fcdc6823d",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "5df3542e75fd1349ad69940f29a32f9ec44d3f82f5ec4249948e184344c60da2",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vsh (sh 0) vsource type=pulse val0=0 val1=1.8 delay=0.35n period=1n width=0.35n rise=20p fall=20p",
+          "Vd0 (d0 0) vsource type=pwl wave=[0 0 1.0n 0 1.05n 0 2.0n 0 2.05n 1.8 3.0n 1.8 3.05n 1.8 4.0n 1.8]",
+          "Vd1 (d1 0) vsource type=pwl wave=[0 0 1.0n 0 1.05n 1.8 2.0n 1.8 2.05n 0 3.0n 0 3.05n 1.8 4.0n 1.8]",
+          "Vd2 (d2 0) vsource type=pwl wave=[0 0 2.0n 0 2.05n 1.8 4.0n 1.8]",
+          "Vd3 (d3 0) vsource type=pwl wave=[0 0 1.0n 0 1.05n 1.8 2.0n 1.8 2.05n 0 3.0n 0 3.05n 1.8 4.0n 1.8]",
+          "XDUT (d0 d1 d2 d3 sh aout) tool_4bit_sar_signed_dac"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=4.4n maxstep=5p"
+        ],
+        "body_lines": [
+          "Vsh (sh 0) vsource type=pulse val0=0 val1=1.8 delay=0.50n period=0.90n width=0.25n rise=20p fall=20p",
+          "Vd0 (d0 0) vsource type=pwl wave=[0 0 1.10n 0 1.15n 1.8 2.00n 1.8 2.05n 0 2.90n 0 2.95n 1.8 4.50n 1.8]",
+          "Vd1 (d1 0) vsource type=pwl wave=[0 1.8 1.10n 1.8 1.15n 1.8 2.00n 1.8 2.05n 0 4.50n 0]",
+          "Vd2 (d2 0) vsource type=pwl wave=[0 0 2.00n 0 2.05n 1.8 3.80n 1.8 3.85n 0 4.50n 0]",
+          "Vd3 (d3 0) vsource type=pwl wave=[0 1.8 1.10n 1.8 1.15n 0 2.00n 0 2.05n 1.8 2.90n 1.8 2.95n 0 3.80n 0 3.85n 1.8 4.50n 1.8]",
+          "XDUT (d0 d1 d2 d3 sh aout) tool_4bit_sar_signed_dac"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ON_EACH_RISING_CROSSING_OF_SH"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "c76b24cdeb9b1f6ded6d0a1ec781a185915d422eb643f44433566d3bd28295ad",
+    "family_spec_sha256": "5e9573ccd93d1c21c8ab2e3f055359c810d46cc1129892917c43b08ec75ac941"
+  },
+  "task_id": "v4-213"
+}

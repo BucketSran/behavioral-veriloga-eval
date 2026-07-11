@@ -1,0 +1,93 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "sar_13bit_serial_decoder.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=15.5n maxstep=10p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "din",
+      "clks",
+      "ready",
+      "dout",
+      "dnum"
+    ]
+  },
+  "family_id": "216",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "9615f090e6a5e0237013344a77c36795213a393e6d9f58c6b9ab98b64c7a7496",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "ed2c656c665c9ff40ee8edf5adaf1fd10f10aefa0df25a745e3baf8583d81c2a",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclks (clks 0) vsource type=pwl wave=[0 0 0.2n 0 0.22n 1.1 0.45n 1.1 0.47n 0 14.5n 0 14.52n 1.1 14.8n 1.1 14.82n 0 16n 0]",
+          "Vready (ready 0) vsource type=pulse val0=0 val1=1.1 delay=1.0n period=1n width=0.25n rise=20p fall=20p",
+          "Vdin (din 0) vsource type=pwl wave=[0 1.1 1.4n 1.1 1.45n 0 2.4n 0 2.45n 1.1 4.4n 1.1 4.45n 0 6.4n 0 6.45n 1.1 7.4n 1.1 7.45n 0 8.4n 0 8.45n 1.1 9.4n 1.1 9.45n 0 10.4n 0 10.45n 1.1 12.4n 1.1 12.45n 0 16n 0]",
+          "XDUT (din clks ready dout dnum) sar_13bit_serial_decoder"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=17n maxstep=10p"
+        ],
+        "body_lines": [
+          "Vclks (clks 0) vsource type=pwl wave=[0 0 0.25n 0 0.27n 1.1 0.55n 1.1 0.57n 0 15.7n 0 15.72n 1.1 16.0n 1.1 16.02n 0 18n 0]",
+          "Vready (ready 0) vsource type=pulse val0=0 val1=1.1 delay=1.20n period=1.05n width=0.28n rise=20p fall=20p",
+          "Vdin (din 0) vsource type=pwl wave=[0 0 1.0n 0 1.05n 1.1 2.10n 1.1 2.15n 0 3.15n 0 3.20n 0 4.20n 0 4.25n 1.1 5.25n 1.1 5.30n 1.1 6.30n 1.1 6.35n 0 7.35n 0 7.40n 1.1 8.40n 1.1 8.45n 0 9.45n 0 9.50n 0 10.50n 0 10.55n 1.1 11.55n 1.1 11.60n 0 12.60n 0 12.65n 1.1 14.70n 1.1 14.75n 0 18n 0]",
+          "XDUT (din clks ready dout dnum) sar_13bit_serial_decoder"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_CONSUME_ONE_MSB_FIRST_BIT_ON",
+    "P_ADD_THE_CORRESPONDING_BINARY_WEIGHT_WHEN",
+    "P_INCREMENT_DNUM_FOR_EACH_HIGH_DECISION",
+    "P_ON_EACH_RISING_CLKS_CROSSING_PUBLISH",
+    "P_MAP_AN_ALL_LOW_FRAME_TO",
+    "P_AFTER_PUBLISHING_RESET_THE_ACCUMULATOR_HIGH"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "f8ec7f821109e9b0e0ccc830317c4245c8c4a527a0692ec1ae5210f61e567164",
+    "family_spec_sha256": "b2cc0614235afc6b0dea7fd9169768dc2bcb5f2330677f0659d9535759f8207c"
+  },
+  "task_id": "v4-216"
+}

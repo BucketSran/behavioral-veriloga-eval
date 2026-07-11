@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/sar_13bit_serial_decoder.va"
+
+Vclks (clks 0) vsource type=pwl wave=[0 0 0.2n 0 0.22n 1.1 0.45n 1.1 0.47n 0 14.5n 0 14.52n 1.1 14.8n 1.1 14.82n 0 16n 0]
+Vready (ready 0) vsource type=pulse val0=0 val1=1.1 delay=1.0n period=1n width=0.25n rise=20p fall=20p
+Vdin (din 0) vsource type=pwl wave=[0 1.1 1.4n 1.1 1.45n 0 2.4n 0 2.45n 1.1 4.4n 1.1 4.45n 0 6.4n 0 6.45n 1.1 7.4n 1.1 7.45n 0 8.4n 0 8.45n 1.1 9.4n 1.1 9.45n 0 10.4n 0 10.45n 1.1 12.4n 1.1 12.45n 0 16n 0]
+XDUT (din clks ready dout dnum) sar_13bit_serial_decoder
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=15.5n maxstep=10p
+save din clks ready dout dnum

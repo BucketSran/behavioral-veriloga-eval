@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/tool_4bit_sar_signed_dac.va"
+
+Vsh (sh 0) vsource type=pulse val0=0 val1=1.8 delay=0.35n period=1n width=0.35n rise=20p fall=20p
+Vd0 (d0 0) vsource type=pwl wave=[0 0 1.0n 0 1.05n 0 2.0n 0 2.05n 1.8 3.0n 1.8 3.05n 1.8 4.0n 1.8]
+Vd1 (d1 0) vsource type=pwl wave=[0 0 1.0n 0 1.05n 1.8 2.0n 1.8 2.05n 0 3.0n 0 3.05n 1.8 4.0n 1.8]
+Vd2 (d2 0) vsource type=pwl wave=[0 0 2.0n 0 2.05n 1.8 4.0n 1.8]
+Vd3 (d3 0) vsource type=pwl wave=[0 0 1.0n 0 1.05n 1.8 2.0n 1.8 2.05n 0 3.0n 0 3.05n 1.8 4.0n 1.8]
+XDUT (d0 d1 d2 d3 sh aout) tool_4bit_sar_signed_dac
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=3.8n maxstep=5p
+save sh d0 d1 d2 d3 aout

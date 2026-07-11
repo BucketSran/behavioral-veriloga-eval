@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/lt_readout_sar4.va"
+
+Vgnd (gnd 0) vsource dc=0
+Vd0 (d0 0) vsource type=pwl wave=[0 0 1.0n 0 1.05n 1.8 2.0n 1.8 2.05n 0 3.0n 0 3.05n 1.8 4.0n 1.8]
+Vd1 (d1 0) vsource type=pwl wave=[0 0 2.0n 0 2.05n 1.8 4.0n 1.8]
+Vd2 (d2 0) vsource type=pwl wave=[0 0 1.0n 0 1.05n 1.8 2.0n 1.8 2.05n 0 3.0n 0 3.05n 1.8 4.0n 1.8]
+Vd3 (d3 0) vsource type=pwl wave=[0 0 2.0n 0 2.05n 1.8 4.0n 1.8]
+XDUT (d0 d1 d2 d3 vout gnd) lt_readout_sar4
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=3.8n maxstep=5p
+save d0 d1 d2 d3 vout gnd

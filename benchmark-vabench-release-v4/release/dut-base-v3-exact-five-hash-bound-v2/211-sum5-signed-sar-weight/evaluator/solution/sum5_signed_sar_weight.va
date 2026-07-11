@@ -1,0 +1,16 @@
+`include "disciplines.vams"
+module sum5_signed_sar_weight(d1, d2, d3, d4, d5, out);
+input d1, d2, d3, d4, d5;
+output out;
+electrical d1, d2, d3, d4, d5, out;
+parameter real vth = 0.55;
+real vout;
+analog begin
+    vout = (V(d5) > vth ? 1.0 : -1.0) / 2.0
+         + (V(d4) > vth ? 1.0 : -1.0) / 4.0
+         + (V(d3) > vth ? 1.0 : -1.0) / 8.0
+         + (V(d2) > vth ? 1.0 : -1.0) / 16.0
+         + (V(d1) > vth ? 1.0 : -1.0) / 32.0;
+    V(out) <+ transition((vout * 2.0 - 1.0) * 1.1, 0, 1p, 1p);
+end
+endmodule
