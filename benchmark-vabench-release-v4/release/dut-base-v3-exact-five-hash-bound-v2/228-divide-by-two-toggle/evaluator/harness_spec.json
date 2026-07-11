@@ -1,0 +1,84 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "divide_by_two_toggle.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=4.0n maxstep=5p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "out"
+    ]
+  },
+  "family_id": "228",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "818447a8d2f65aea3cdeac743e0d2c926f9f011221e1500ef2e0fe4edb2c5df0",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "4a87c506963c7752a2a0ff35425f8e22075a7514fa3d0fef8fe77c29884007d4",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pwl wave=[0 0 0.35n 0 0.37n 0.9 0.55n 0.9 0.57n 0 1.15n 0 1.17n 0.9 1.35n 0.9 1.37n 0 1.95n 0 1.97n 0.9 2.15n 0.9 2.17n 0 2.75n 0 2.77n 0.9 2.95n 0.9 2.97n 0 3.55n 0 3.57n 0.9 3.75n 0.9 3.77n 0 4.2n 0]",
+          "XDUT (clk out) divide_by_two_toggle"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=4.9n maxstep=5p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pwl wave=[0 0 0.22n 0 0.24n 0.9 0.47n 0.9 0.49n 0 0.95n 0 0.97n 0.9 1.20n 0.9 1.22n 0 1.70n 0 1.72n 0.9 1.95n 0.9 1.97n 0 2.62n 0 2.64n 0.9 2.87n 0.9 2.89n 0 3.34n 0 3.36n 0.9 3.59n 0.9 3.61n 0 4.18n 0 4.20n 0.9 4.43n 0.9 4.45n 0 5.0n 0]",
+          "XDUT (clk out) divide_by_two_toggle"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INITIALIZE_THE_INTERNAL_DIVIDER_STATE_LOW",
+    "P_TOGGLE_THE_STATE_ON_EVERY_RISING",
+    "P_DRIVE_OUT_LOW_WHEN_THE_STATE",
+    "P_THE_FIRST_VALID_RISING_EDGE_DRIVES"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "20b1f98859db9e37cbfaa64abb47435d19a5b757e441d3cffecd1f9ac797075d",
+    "family_spec_sha256": "b8e0920c85d1b99d5cee8abe1fed07692674e7b67ce898fb368d02729aa11cc1"
+  },
+  "task_id": "v4-228"
+}

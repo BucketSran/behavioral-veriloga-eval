@@ -1,0 +1,146 @@
+{
+  "family_id": "224",
+  "gold_bundle_sha256": "ffed2be8c96b599ce14ac876da7eafaf6280d5ae73aa6f8a552b3fb7b8ef3829",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "coarse_qtz_3bit_residue.va": "05f4643077e619398e616a3cd06409fda5455eaf771486175f46a5049f6d9b90"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_D0_D1_AND_D2_AS",
+          "P_DRIVE_VRES_AS_THE_CLIPPED_INPUT",
+          "P_QUANTIZE_THE_CLIPPED_VALUE_INTO_EIGHT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "coarse_qtz_3bit_residue.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_DRIVE_D0_D1_AND_D2_AS",
+        "P_DRIVE_VRES_AS_THE_CLIPPED_INPUT",
+        "P_QUANTIZE_THE_CLIPPED_VALUE_INTO_EIGHT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "coarse_qtz_3bit_residue.va": "ebd08ef7d2780bbd63e97fe5727dab9995d083a02a3029e8f5b4745eae49648c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_D0_D1_AND_D2_AS",
+          "P_DRIVE_VRES_AS_THE_CLIPPED_INPUT",
+          "P_QUANTIZE_THE_CLIPPED_VALUE_INTO_EIGHT",
+          "P_USE_UNIFORMLY_SPACED_QUANTIZATION_LEVELS_START"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_floor_quantizer/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "coarse_qtz_3bit_residue.va"
+      ],
+      "fault_class": "floor_quantizer",
+      "id": "neg_002_floor_quantizer",
+      "trigger_condition": "Uses floor quantization instead of rounding to nearest.",
+      "violated_property_ids": [
+        "P_DRIVE_D0_D1_AND_D2_AS",
+        "P_DRIVE_VRES_AS_THE_CLIPPED_INPUT",
+        "P_QUANTIZE_THE_CLIPPED_VALUE_INTO_EIGHT",
+        "P_USE_UNIFORMLY_SPACED_QUANTIZATION_LEVELS_START"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "coarse_qtz_3bit_residue.va": "e51676af925e79165d2c29e69e3552a6e4822db4ce521f4614cba3d11b3777ef"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CLIP_VIN_TO_THE_RANGE_FROM",
+          "P_DRIVE_VRES_AS_THE_CLIPPED_INPUT",
+          "P_SATURATE_THE_CODE_AT_THE_ENDPOINTS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_no_input_clip/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "coarse_qtz_3bit_residue.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_003_no_input_clip",
+      "trigger_condition": "Does not clip VIN before quantization and residue computation.",
+      "violated_property_ids": [
+        "P_CLIP_VIN_TO_THE_RANGE_FROM",
+        "P_DRIVE_VRES_AS_THE_CLIPPED_INPUT",
+        "P_SATURATE_THE_CODE_AT_THE_ENDPOINTS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "coarse_qtz_3bit_residue.va": "1cad5beb4bb3b634ef2b456603d08a9b3279fd30c734ccef2e7c98bb3995c3c4"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_VRES_AS_THE_CLIPPED_INPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_residue_sign_inverted/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "coarse_qtz_3bit_residue.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_004_residue_sign_inverted",
+      "trigger_condition": "Reports quantized-minus-input residue instead of input-minus-quantized residue.",
+      "violated_property_ids": [
+        "P_DRIVE_VRES_AS_THE_CLIPPED_INPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "coarse_qtz_3bit_residue.va": "25c7f79f8a828b46748c5b1a92c2caed9966b0682f482af4af034773c9fb7b07"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_D0_D1_AND_D2_AS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "coarse_qtz_3bit_residue.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Coarse QTZ 3bit Residue: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_DRIVE_D0_D1_AND_D2_AS"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

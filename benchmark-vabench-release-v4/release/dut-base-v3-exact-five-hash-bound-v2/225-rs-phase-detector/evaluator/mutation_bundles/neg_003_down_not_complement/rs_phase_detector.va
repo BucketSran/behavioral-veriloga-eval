@@ -1,0 +1,18 @@
+`include "disciplines.vams"
+module rs_phase_detector(ref, fb, up, down);
+input ref, fb;
+output up, down;
+electrical ref, fb, up, down;
+parameter real vdd = 1.2;
+parameter real tdel = 10p;
+parameter real tr = 10p;
+parameter real tf = 10p;
+integer out_state;
+analog begin
+    @(initial_step) out_state = 0;
+    @(cross(V(ref) - vdd / 2.0, +1)) out_state = 1;
+    @(cross(V(fb) - vdd / 2.0, +1)) out_state = 0;
+    V(up) <+ transition((out_state == 0) ? 0.0 : vdd, tdel, tr, tf);
+    V(down) <+ transition((out_state == 0) ? 0.0 : vdd, tdel, tr, tf);
+end
+endmodule

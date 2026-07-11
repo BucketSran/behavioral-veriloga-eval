@@ -1,0 +1,138 @@
+{
+  "family_id": "226",
+  "gold_bundle_sha256": "b64bbee4fd48b2e2eb97081366a7744281470b992719f0df5bb7a6304c2c4883",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "level_shifter_offset.va": "b4d0df48f82b8ecbd15172009a4eae1ee0b5193826de0a86f06d5267d8274c75"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_SIGOUT_TO_V_SIGIN_PLUS_SIGSHIFT",
+          "P_PRESERVE_UNITY_GAIN_WHILE_ADDING_OFFSET"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "level_shifter_offset.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Keeps the output at its trivial zero behavior and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_DRIVE_SIGOUT_TO_V_SIGIN_PLUS_SIGSHIFT",
+        "P_PRESERVE_UNITY_GAIN_WHILE_ADDING_OFFSET"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "level_shifter_offset.va": "c539a8fe424c6e0ec9dc5687ec2fb7d0651ab654eff903032b6a236ee1798ed3"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_SIGOUT_TO_V_SIGIN_PLUS_SIGSHIFT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_wrong_offset/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "level_shifter_offset.va"
+      ],
+      "fault_class": "offset_magnitude_error",
+      "id": "neg_002_wrong_offset",
+      "trigger_condition": "Adds 200 mV instead of the required 350 mV offset.",
+      "violated_property_ids": [
+        "P_DRIVE_SIGOUT_TO_V_SIGIN_PLUS_SIGSHIFT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "level_shifter_offset.va": "0ead1d7c02ce8aa77df7415c26ff6faa93f2ae0652cec8e437fa68ffd8f05218"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_SIGOUT_TO_V_SIGIN_PLUS_SIGSHIFT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_subtract_offset/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "level_shifter_offset.va"
+      ],
+      "fault_class": "offset_polarity_error",
+      "id": "neg_003_subtract_offset",
+      "trigger_condition": "Subtracts the level shift instead of adding it.",
+      "violated_property_ids": [
+        "P_DRIVE_SIGOUT_TO_V_SIGIN_PLUS_SIGSHIFT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "level_shifter_offset.va": "8644919bbb26032f2220d25719596b708480abbb31a0cddac102a4fd912b997e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_SIGOUT_TO_V_SIGIN_PLUS_SIGSHIFT",
+          "P_PRESERVE_UNITY_GAIN_WHILE_ADDING_OFFSET"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_gain_plus_offset/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "level_shifter_offset.va"
+      ],
+      "fault_class": "input_gain_error",
+      "id": "neg_004_gain_plus_offset",
+      "trigger_condition": "Adds an erroneous gain of 2 before the offset.",
+      "violated_property_ids": [
+        "P_DRIVE_SIGOUT_TO_V_SIGIN_PLUS_SIGSHIFT",
+        "P_PRESERVE_UNITY_GAIN_WHILE_ADDING_OFFSET"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "level_shifter_offset.va": "4208865c01ab94c7a4a16c87679bc5eb06ba16544924e28e6dd07065b1ed0763"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_SIGOUT_TO_V_SIGIN_PLUS_SIGSHIFT",
+          "P_PRESERVE_UNITY_GAIN_WHILE_ADDING_OFFSET"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "level_shifter_offset.va"
+      ],
+      "fault_class": "output_scale_error",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Level Shifter Offset: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_DRIVE_SIGOUT_TO_V_SIGIN_PLUS_SIGSHIFT",
+        "P_PRESERVE_UNITY_GAIN_WHILE_ADDING_OFFSET"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

@@ -1,0 +1,12 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/accum3_pulse.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=0.35n rise=20p fall=20p width=0.2n period=1n
+XDUT (clk out) accum3_pulse
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=9.4n maxstep=5p
+save clk out

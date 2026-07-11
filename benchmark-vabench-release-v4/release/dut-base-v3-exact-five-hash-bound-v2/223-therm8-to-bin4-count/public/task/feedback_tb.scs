@@ -1,0 +1,19 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/therm8_to_bin4_count.va"
+
+Vth0 (th0 0) vsource type=pwl wave=[0 0 0.9n 0 0.95n 0.9 3.8n 0.9]
+Vth1 (th1 0) vsource type=pwl wave=[0 0 0.9n 0 0.95n 0.9 3.8n 0.9]
+Vth2 (th2 0) vsource type=pwl wave=[0 0 0.9n 0 0.95n 0.9 3.8n 0.9]
+Vth3 (th3 0) vsource type=pwl wave=[0 0 1.8n 0 1.85n 0.9 3.8n 0.9]
+Vth4 (th4 0) vsource type=pwl wave=[0 0 1.8n 0 1.85n 0.9 3.8n 0.9]
+Vth5 (th5 0) vsource type=pwl wave=[0 0 2.7n 0 2.75n 0.9 3.8n 0.9]
+Vth6 (th6 0) vsource type=pwl wave=[0 0 2.7n 0 2.75n 0.9 3.8n 0.9]
+Vth7 (th7 0) vsource type=pwl wave=[0 0 2.7n 0 2.75n 0.9 3.8n 0.9]
+XDUT (th0 th1 th2 th3 th4 th5 th6 th7 b0 b1 b2 b3) therm8_to_bin4_count
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=3.5n maxstep=5p
+save th0 th1 th2 th3 th4 th5 th6 th7 b0 b1 b2 b3

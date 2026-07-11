@@ -1,0 +1,144 @@
+{
+  "family_id": "223",
+  "gold_bundle_sha256": "7345dd7054aceaac2095180a279b079d85fde52bbe649e6ad3a00cafd0e8be0d",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "therm8_to_bin4_count.va": "b8072b949c2bb44cabc6c429604fb9d19d2136bf4161983ec6e1d73d9b4bc327"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COUNT_HOW_MANY_OF_TH0_TH7",
+          "P_DRIVE_B0_B3_AS_VOLTAGE_CODED",
+          "P_ENCODE_THE_COUNT_AS_A_4"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "therm8_to_bin4_count.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_COUNT_HOW_MANY_OF_TH0_TH7",
+        "P_DRIVE_B0_B3_AS_VOLTAGE_CODED",
+        "P_ENCODE_THE_COUNT_AS_A_4"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "therm8_to_bin4_count.va": "2b939b3217c4231d56c71a77cc6b48487a8c8c99efc6a770ec174cbabe04e2c9"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COUNT_HOW_MANY_OF_TH0_TH7",
+          "P_ENCODE_THE_COUNT_AS_A_4",
+          "P_SUPPORT_ANY_INPUT_PATTERN_BY_COUNTING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_count_lower_half_only/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "therm8_to_bin4_count.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_002_count_lower_half_only",
+      "trigger_condition": "Counts only TH0..TH3 and ignores the upper thermometer inputs.",
+      "violated_property_ids": [
+        "P_COUNT_HOW_MANY_OF_TH0_TH7",
+        "P_ENCODE_THE_COUNT_AS_A_4",
+        "P_SUPPORT_ANY_INPUT_PATTERN_BY_COUNTING"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "therm8_to_bin4_count.va": "891de2f2e445d75771f1693069905f86032550af6fbf6e1a5c0305965d0bda68"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COUNT_HOW_MANY_OF_TH0_TH7",
+          "P_ENCODE_THE_COUNT_AS_A_4"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_threshold_too_high/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "therm8_to_bin4_count.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_003_threshold_too_high",
+      "trigger_condition": "Uses a threshold above the stimulus high level, so asserted thermometer inputs are missed.",
+      "violated_property_ids": [
+        "P_COUNT_HOW_MANY_OF_TH0_TH7",
+        "P_ENCODE_THE_COUNT_AS_A_4"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "therm8_to_bin4_count.va": "86b705a04efc705d324e48bc6d054c676a51b6ce18818d424f3bceaf307dd1a7"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_B0_B3_AS_VOLTAGE_CODED",
+          "P_ENCODE_THE_COUNT_AS_A_4"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_reversed_bit_order/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "therm8_to_bin4_count.va"
+      ],
+      "fault_class": "reversed_bit_order",
+      "id": "neg_004_reversed_bit_order",
+      "trigger_condition": "Outputs the popcount bits in reversed order.",
+      "violated_property_ids": [
+        "P_DRIVE_B0_B3_AS_VOLTAGE_CODED",
+        "P_ENCODE_THE_COUNT_AS_A_4"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "therm8_to_bin4_count.va": "d1c38a944e27d20118da0316a0d775f71e04007a59eae8dcf5e465821e1e4e5c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_B0_B3_AS_VOLTAGE_CODED"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "therm8_to_bin4_count.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Therm8 To Bin4 Count: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_DRIVE_B0_B3_AS_VOLTAGE_CODED"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

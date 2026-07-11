@@ -1,0 +1,84 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "accum3_pulse.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=9.4n maxstep=5p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "out"
+    ]
+  },
+  "family_id": "229",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "52dbf89c17fbf8ac326459d82691e295cb39c530ebe7ce786839fea10e5b65e4",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "7b19c268ff3845ee2db93484626c00d77c39123c7f32fe2bd9584852b7b20f23",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=0.35n rise=20p fall=20p width=0.2n period=1n",
+          "XDUT (clk out) accum3_pulse"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=6.7n maxstep=5p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=0.25n rise=20p fall=20p width=0.18n period=0.70n",
+          "XDUT (clk out) accum3_pulse"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INITIALIZE_THE_INTERNAL_3_BIT_COUNT",
+    "P_INCREMENT_THE_COUNT_MODULO_8_ON",
+    "P_DRIVE_OUT_HIGH_ONLY_WHEN_THE",
+    "P_DRIVE_OUT_LOW_FOR_ALL_OTHER"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "65b70251c97ecf0c74a2c60397a7af72848bdeff16f4b99927d9dbaca578e5e6",
+    "family_spec_sha256": "0b29b2d49c5e3d523e54e65874aa0dfc13e461d6ea3f832b40132dfdcc837718"
+  },
+  "task_id": "v4-229"
+}

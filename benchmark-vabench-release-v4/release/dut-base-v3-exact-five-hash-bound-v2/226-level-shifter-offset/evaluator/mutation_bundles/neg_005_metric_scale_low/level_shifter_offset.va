@@ -1,0 +1,12 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "disciplines.vams"
+module level_shifter_offset(sigin, sigout);
+input sigin;
+output sigout;
+electrical sigin, sigout;
+parameter real sigshift = 0.35;
+analog begin
+    V(sigout) <+ (0.42 * (V(sigin) + sigshift));
+end
+endmodule

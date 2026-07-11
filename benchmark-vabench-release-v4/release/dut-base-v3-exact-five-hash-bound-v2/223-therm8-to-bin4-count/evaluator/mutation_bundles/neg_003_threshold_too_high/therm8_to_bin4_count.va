@@ -1,0 +1,23 @@
+`include "disciplines.vams"
+module therm8_to_bin4_count(th0, th1, th2, th3, th4, th5, th6, th7, b0, b1, b2, b3);
+input th0, th1, th2, th3, th4, th5, th6, th7;
+output b0, b1, b2, b3;
+electrical th0, th1, th2, th3, th4, th5, th6, th7, b0, b1, b2, b3;
+parameter real vth = 1.2;
+integer count;
+analog begin
+    count = 0;
+    if (V(th0) > vth) count = count + 1;
+    if (V(th1) > vth) count = count + 1;
+    if (V(th2) > vth) count = count + 1;
+    if (V(th3) > vth) count = count + 1;
+    if (V(th4) > vth) count = count + 1;
+    if (V(th5) > vth) count = count + 1;
+    if (V(th6) > vth) count = count + 1;
+    if (V(th7) > vth) count = count + 1;
+    V(b0) <+ ((count & 1) ? 0.9 : 0.0);
+    V(b1) <+ (((count >> 1) & 1) ? 0.9 : 0.0);
+    V(b2) <+ (((count >> 2) & 1) ? 0.9 : 0.0);
+    V(b3) <+ (((count >> 3) & 1) ? 0.9 : 0.0);
+end
+endmodule

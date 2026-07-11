@@ -1,0 +1,18 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "disciplines.vams"
+module accum3_pulse(clk, out);
+input clk;
+output out;
+electrical clk, out;
+parameter real vth = 0.45;
+parameter real vdd = 0.9;
+parameter real tdel = 10p;
+parameter real tr = 10p;
+integer cnt;
+analog begin
+    @(initial_step) cnt = 7;
+    @(cross(V(clk) - vth, +1)) cnt = (cnt + 1) % 8;
+    V(out) <+ (0.42 * (transition((cnt < 1) ? vdd : 0.0, tdel, tr, tr)));
+end
+endmodule

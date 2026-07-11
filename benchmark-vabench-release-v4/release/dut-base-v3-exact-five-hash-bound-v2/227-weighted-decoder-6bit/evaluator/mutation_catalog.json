@@ -1,0 +1,144 @@
+{
+  "family_id": "227",
+  "gold_bundle_sha256": "edacfbe8befb91cbaf95e4a90ef65f18012e42f53e036b96c10e493f9d421228",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "weighted_decoder_6bit.va": "c29026b55d0093c25c6f06cdde68aaa9020b2b89914f2c1e6b9a70afe7afdd6e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INTERPRET_VD1_VD6_AS_AN_UNSIGNED",
+          "P_MAP_ALL_ONES_INPUT_TO_VREF",
+          "P_MAP_ALL_ZERO_INPUT_TO_0",
+          "P_SCALE_THE_DECODED_CODE_BY_VREF"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "weighted_decoder_6bit.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Keeps the output at its trivial zero behavior and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_INTERPRET_VD1_VD6_AS_AN_UNSIGNED",
+        "P_MAP_ALL_ONES_INPUT_TO_VREF",
+        "P_MAP_ALL_ZERO_INPUT_TO_0",
+        "P_SCALE_THE_DECODED_CODE_BY_VREF"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "weighted_decoder_6bit.va": "f060e33ab40fa69e897002ef1a18f6a13f79dcf886280d53c1b86cebb9d51103"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_MAP_ALL_ONES_INPUT_TO_VREF",
+          "P_SCALE_THE_DECODED_CODE_BY_VREF"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_wrong_denominator/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "weighted_decoder_6bit.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_002_wrong_denominator",
+      "trigger_condition": "Uses the old MSB-normalized scale instead of the all-ones full-scale code.",
+      "violated_property_ids": [
+        "P_MAP_ALL_ONES_INPUT_TO_VREF",
+        "P_SCALE_THE_DECODED_CODE_BY_VREF"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "weighted_decoder_6bit.va": "31da25329b2221352aaf18a7febdde968daa4de407c834b41ff4052a11e917d6"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_MAP_ALL_ONES_INPUT_TO_VREF",
+          "P_SCALE_THE_DECODED_CODE_BY_VREF"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_half_scale/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "weighted_decoder_6bit.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_003_half_scale",
+      "trigger_condition": "Scales the decoded weighted output to half of the full-scale response.",
+      "violated_property_ids": [
+        "P_MAP_ALL_ONES_INPUT_TO_VREF",
+        "P_SCALE_THE_DECODED_CODE_BY_VREF"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "weighted_decoder_6bit.va": "5b39399577059eaeec08c1c173adb86f6505a59b2885c88ff7513896936ca4a7"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INTERPRET_VD1_VD6_AS_AN_UNSIGNED",
+          "P_TREAT_EACH_INPUT_AS_LOGIC_1"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_threshold_too_high/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "weighted_decoder_6bit.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_004_threshold_too_high",
+      "trigger_condition": "Uses a threshold above the input high level.",
+      "violated_property_ids": [
+        "P_INTERPRET_VD1_VD6_AS_AN_UNSIGNED",
+        "P_TREAT_EACH_INPUT_AS_LOGIC_1"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "weighted_decoder_6bit.va": "a9fcfedbba56b7071f6f88e1263184a70ea6a349231edf4b906a2985c2a1d536"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SCALE_THE_DECODED_CODE_BY_VREF"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "weighted_decoder_6bit.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Weighted Decoder 6bit: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_SCALE_THE_DECODED_CODE_BY_VREF"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

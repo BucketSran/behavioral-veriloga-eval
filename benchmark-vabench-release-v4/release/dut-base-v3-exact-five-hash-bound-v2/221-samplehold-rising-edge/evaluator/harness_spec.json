@@ -1,0 +1,111 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "samplehold_rising_edge.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=3.2n maxstep=5p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "control",
+      "vin",
+      "vout"
+    ]
+  },
+  "family_id": "221",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "111dcd7fa043e6c75855afa6d2a975971dd86d94c0881ff48e203bfab70db3e1",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "47119fb26eb79342d2b1e68a37136e30c7411d258b6148b6ea28eddffaadbfe3",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vcontrol (control 0) vsource type=pwl wave=[0 0 0.45n 0 0.47n 5 0.75n 5 0.77n 0 1.95n 0 1.97n 5 2.25n 5 2.27n 0 3.5n 0]",
+          "Vin (vin 0) vsource type=pwl wave=[0 1.0 1.2n 1.0 1.25n 3.0 2.7n 3.0 2.75n 4.2 3.5n 4.2]",
+          "XDUT (control vin vout) samplehold_rising_edge"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=3.8n maxstep=5p"
+        ],
+        "body_lines": [
+          "Vcontrol (control 0) vsource type=pwl wave=[ \\",
+          "  0 0 \\",
+          "  0.42n 0 \\",
+          "  0.44n 5 \\",
+          "  0.74n 5 \\",
+          "  0.76n 0 \\",
+          "  1.80n 0 \\",
+          "  1.82n 5 \\",
+          "  2.12n 5 \\",
+          "  2.14n 0 \\",
+          "  2.95n 0 \\",
+          "  2.97n 5 \\",
+          "  3.25n 5 \\",
+          "  3.27n 0 \\",
+          "  3.8n 0 \\",
+          "]",
+          "Vin (vin 0) vsource type=pwl wave=[ \\",
+          "  0 0.8 \\",
+          "  1.05n 0.8 \\",
+          "  1.10n 2.6 \\",
+          "  2.45n 2.6 \\",
+          "  2.50n 4.4 \\",
+          "  3.8n 4.4 \\",
+          "]",
+          "",
+          "XDUT (control vin vout) samplehold_rising_edge",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_SAMPLE_VIN_ON_EACH_RISING_CONTROL",
+    "P_HOLD_THE_SAMPLED_VOLTAGE_ON_VOUT",
+    "P_DO_NOT_CONTINUOUSLY_TRACK_VIN_BETWEEN",
+    "P_DRIVE_VOUT_WITH_SMOOTH_VOLTAGE_DOMAIN"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "3043a030522ccc409ba15e70acfcea85e3b462f768583ef10e5b5831c0645565",
+    "family_spec_sha256": "8660b9f985608938587abf577f379090040340531320f5a96e64f7a4d260e61d"
+  },
+  "task_id": "v4-221"
+}

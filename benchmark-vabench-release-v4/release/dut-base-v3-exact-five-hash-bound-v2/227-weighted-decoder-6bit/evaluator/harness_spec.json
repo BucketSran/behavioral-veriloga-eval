@@ -1,0 +1,100 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "weighted_decoder_6bit.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=3.0n maxstep=5p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vd1",
+      "vd2",
+      "vd3",
+      "vd4",
+      "vd5",
+      "vd6",
+      "vout"
+    ]
+  },
+  "family_id": "227",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "25d0c953d1e3fda764ba2ecc1912a626920d5eb7da8ec7307eb208340cefade1",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "4ee46fda9632d3a9880670ff38c936cd3766ee6622a32dbf395c7c87ee6bffde",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vd1 (vd1 0) vsource type=pwl wave=[0 0 0.8n 0 0.85n 0.9 1.6n 0.9 1.65n 0 2.4n 0 2.45n 0.9 3.2n 0.9]",
+          "Vd2 (vd2 0) vsource type=pwl wave=[0 0 0.8n 0 0.85n 0 1.6n 0 1.65n 0.9 2.4n 0.9 2.45n 0.9 3.2n 0.9]",
+          "Vd3 (vd3 0) vsource type=pwl wave=[0 0 0.8n 0 0.85n 0 1.6n 0 1.65n 0 2.4n 0 2.45n 0.9 3.2n 0.9]",
+          "Vd4 (vd4 0) vsource type=pwl wave=[0 0 0.8n 0 0.85n 0 1.6n 0 1.65n 0 2.4n 0 2.45n 0.9 3.2n 0.9]",
+          "Vd5 (vd5 0) vsource type=pwl wave=[0 0 0.8n 0 0.85n 0 1.6n 0 1.65n 0.9 2.4n 0.9 2.45n 0.9 3.2n 0.9]",
+          "Vd6 (vd6 0) vsource type=pwl wave=[0 0 0.8n 0 0.85n 0.9 1.6n 0.9 1.65n 0 2.4n 0 2.45n 0.9 3.2n 0.9]",
+          "XDUT (vd1 vd2 vd3 vd4 vd5 vd6 vout) weighted_decoder_6bit"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=3.4n maxstep=5p"
+        ],
+        "body_lines": [
+          "Vd1 (vd1 0) vsource type=pwl wave=[0 0 0.7n 0 0.75n 0.9 1.4n 0.9 1.45n 0 2.1n 0 2.15n 0.9 2.8n 0.9 2.85n 0 3.6n 0]",
+          "Vd2 (vd2 0) vsource type=pwl wave=[0 0.9 0.7n 0.9 0.75n 0 1.4n 0 1.45n 0 2.1n 0 2.15n 0.9 2.8n 0.9 2.85n 0.9 3.6n 0.9]",
+          "Vd3 (vd3 0) vsource type=pwl wave=[0 0 0.7n 0 0.75n 0.9 1.4n 0.9 1.45n 0.9 2.1n 0.9 2.15n 0 2.8n 0 2.85n 0.9 3.6n 0.9]",
+          "Vd4 (vd4 0) vsource type=pwl wave=[0 0.9 0.7n 0.9 0.75n 0 1.4n 0 1.45n 0.9 2.1n 0.9 2.15n 0.9 2.8n 0.9 2.85n 0 3.6n 0]",
+          "Vd5 (vd5 0) vsource type=pwl wave=[0 0 0.7n 0 0.75n 0 1.4n 0 1.45n 0.9 2.1n 0.9 2.15n 0 2.8n 0 2.85n 0.9 3.6n 0.9]",
+          "Vd6 (vd6 0) vsource type=pwl wave=[0 0.9 0.7n 0.9 0.75n 0 1.4n 0 1.45n 0 2.1n 0 2.15n 0.9 2.8n 0.9 2.85n 0 3.6n 0]",
+          "XDUT (vd1 vd2 vd3 vd4 vd5 vd6 vout) weighted_decoder_6bit"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_TREAT_EACH_INPUT_AS_LOGIC_1",
+    "P_INTERPRET_VD1_VD6_AS_AN_UNSIGNED",
+    "P_SCALE_THE_DECODED_CODE_BY_VREF",
+    "P_MAP_ALL_ZERO_INPUT_TO_0",
+    "P_MAP_ALL_ONES_INPUT_TO_VREF"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "5e08e0ce7585a2708eb236dee9c8319ae8a401a3debe2346b6f16372dfbeb887",
+    "family_spec_sha256": "b7587b595525895325c66bab77330e636d39ba322bf3388567ed16b4f2c2264f"
+  },
+  "task_id": "v4-227"
+}
