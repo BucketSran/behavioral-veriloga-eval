@@ -1,0 +1,93 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "edge_interval_tdc_8b.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=160n maxstep=100p"
+    ],
+    "body_lines": [
+      "Vstart (start 0) vsource type=pwl wave=[0 0 10n 0 10.1n 0.9 11n 0 50n 0 50.1n 0.9 51n 0 100n 0 100.1n 0.9 101n 0 160n 0]"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "start",
+      "stop",
+      "valid",
+      "code0",
+      "code1",
+      "code2",
+      "code3",
+      "code4",
+      "code5",
+      "code6",
+      "code7"
+    ]
+  },
+  "family_id": "059",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "ca132e6da44ba5889b9830d7d858e08a5684989b1d77f4d40a2307b898650eaf",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "c76028b74d0e971e5115cc96ba40deca1b4a9c8683d6984c4b7339bc6ab15de7",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vstop (stop 0) vsource type=pwl wave=[0 0 18n 0 18.1n 0.9 19n 0 73n 0 73.1n 0.9 74n 0 139n 0 139.1n 0.9 140n 0 160n 0]",
+          "XDUT (start stop valid code0 code1 code2 code3 code4 code5 code6 code7) edge_interval_tdc_8b"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vstop (stop 0) vsource type=pwl wave=[0 0 18.2n 0 18.3n 0.9 19n 0 73.2n 0 73.3n 0.9 74n 0 139.2n 0 139.3n 0.9 140n 0 160n 0]",
+          "XDUT (start stop valid code0 code1 code2 code3 code4 code5 code6 code7) edge_interval_tdc_8b"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_START_ARMS",
+    "P_NEXT_STOP_COMPLETES",
+    "P_INTERVAL_QUANTIZATION",
+    "P_CODE_SATURATION",
+    "P_VALID_AND_BIT_ORDER"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "90b729192dbb0dc46411e1274591666f540094aabdf789a5c7e4b2561cad4bb3",
+    "family_spec_sha256": "2d5c95eeda51006ceddd5782973e52082f2ddb50acb9a6c48c27c64bbac91b10"
+  },
+  "task_id": "v4-059"
+}

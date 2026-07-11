@@ -1,0 +1,132 @@
+{
+  "family_id": "057",
+  "gold_bundle_sha256": "b68df2457636605fccf0c25ca3e5f6b34a99861db05248d85ced891541d0119f",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "config_shift_reg_64b.va": "b5ab12dea2b3eef1bbb6de53a55d7522dfc7ae3330f39f9c5b3311d8f2eb05c1"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ACTIVE_LOW_RESET"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_wrong_shift/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "config_shift_reg_64b.va"
+      ],
+      "fault_class": "active_low_reset_ignored",
+      "id": "neg_001_wrong_shift",
+      "trigger_condition": "a rising clock crossing with rst_n low must clear every q bit",
+      "violated_property_ids": [
+        "P_ACTIVE_LOW_RESET"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "config_shift_reg_64b.va": "32b69c19a0e767549b9ac84ad1b832d87122a13b18066d8eb062ea03cec9cf1f"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SERIAL_SHIFT_DIRECTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_wrong_shift/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "config_shift_reg_64b.va"
+      ],
+      "fault_class": "reversed_shift_direction",
+      "id": "neg_002_wrong_shift",
+      "trigger_condition": "serial_in must enter q0 and propagate toward q63",
+      "violated_property_ids": [
+        "P_SERIAL_SHIFT_DIRECTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "config_shift_reg_64b.va": "60bc903b164f7c890e06ef6a43433aed51e6bfcf521eb9ab2edd480f565173e3"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ONE_SHIFT_PER_EDGE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_shift/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "config_shift_reg_64b.va"
+      ],
+      "fault_class": "double_shift_per_edge",
+      "id": "neg_003_wrong_shift",
+      "trigger_condition": "each rising clock crossing must advance the serial pattern by exactly one stage",
+      "violated_property_ids": [
+        "P_ONE_SHIFT_PER_EDGE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "config_shift_reg_64b.va": "d5cc22105d4df85b3a58f42eaa146fbb8a79902ff8bfeb8eb04e729811ea694c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_HOLD_BETWEEN_EDGES"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_wrong_shift/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "config_shift_reg_64b.va"
+      ],
+      "fault_class": "transparent_serial_update_between_edges",
+      "id": "neg_004_wrong_shift",
+      "trigger_condition": "q must hold its captured state when serial_in changes between rising clock crossings",
+      "violated_property_ids": [
+        "P_HOLD_BETWEEN_EDGES"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "config_shift_reg_64b.va": "960170313738bdd209f7a86d72d1187d6da5dd090da1047491a0d41820b4dc44"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_LEVELS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_wrong_shift/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "config_shift_reg_64b.va"
+      ],
+      "fault_class": "weak_logic_high_level",
+      "id": "neg_005_wrong_shift",
+      "trigger_condition": "every asserted q bit must reach the public vdd-coded high rail",
+      "violated_property_ids": [
+        "P_OUTPUT_LEVELS"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

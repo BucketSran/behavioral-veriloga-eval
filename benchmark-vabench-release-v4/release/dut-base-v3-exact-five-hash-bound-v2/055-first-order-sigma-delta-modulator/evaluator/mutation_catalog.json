@@ -1,0 +1,132 @@
+{
+  "family_id": "055",
+  "gold_bundle_sha256": "21d8a864bc61f3bf2d88bf5157b4ccfa5d233ab9f399c8e0e673237af73621c1",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "first_order_sigma_delta_modulator.va": "6d9e34522d8946da6de0bcf5beb1c4eb0788083241eed93d6b7eca40fc92f04d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RISING_EDGE_UPDATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_force_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "first_order_sigma_delta_modulator.va"
+      ],
+      "fault_class": "force_zero",
+      "id": "neg_001_force_zero",
+      "trigger_condition": "First Order Sigma Delta Modulator: never emits high bits, so it compiles but fails density and edge-by-edge behavior.",
+      "violated_property_ids": [
+        "P_RISING_EDGE_UPDATE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "first_order_sigma_delta_modulator.va": "45d6cb342d72570c925b5836fa3a8468eeb51d8759684820c0a00254449de3bd"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FIRST_ORDER_FEEDBACK"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_no_feedback/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "first_order_sigma_delta_modulator.va"
+      ],
+      "fault_class": "no_feedback",
+      "id": "neg_002_no_feedback",
+      "trigger_condition": "First Order Sigma Delta Modulator: accumulates the input without subtracting feedback, passing clock syntax while saturating the loop.",
+      "violated_property_ids": [
+        "P_FIRST_ORDER_FEEDBACK"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "first_order_sigma_delta_modulator.va": "b62bfa97e26fb1091dca87edcb54c04a078ef65606fc2f87a2d28a04859981d6"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BINARY_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_inverted_decision/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "first_order_sigma_delta_modulator.va"
+      ],
+      "fault_class": "inverted_decision",
+      "id": "neg_003_inverted_decision",
+      "trigger_condition": "First Order Sigma Delta Modulator: uses the opposite comparator polarity, producing a plausible stream with inverted loop decisions.",
+      "violated_property_ids": [
+        "P_BINARY_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "first_order_sigma_delta_modulator.va": "b0f04f32350ff1dac05a955b69d06143016081a60289f762865dc10a4d883d53"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INPUT_DENSITY_ORDER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_falling_edge_update/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "first_order_sigma_delta_modulator.va"
+      ],
+      "fault_class": "falling_edge_update",
+      "id": "neg_004_falling_edge_update",
+      "trigger_condition": "First Order Sigma Delta Modulator: updates on falling clock crossings, so simple toggling works but rising-edge state checks fail.",
+      "violated_property_ids": [
+        "P_INPUT_DENSITY_ORDER"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "first_order_sigma_delta_modulator.va": "69d74baf321070e5fc37d7753e7db84708d464ae0395ee96373d04d15ba635f3"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FEEDBACK_STABILITY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_half_feedback/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "first_order_sigma_delta_modulator.va"
+      ],
+      "fault_class": "half_feedback",
+      "id": "neg_005_half_feedback",
+      "trigger_condition": "First Order Sigma Delta Modulator: subtracts only half of the previous feedback bit, leaving density plausible but breaking the certified loop state.",
+      "violated_property_ids": [
+        "P_FEEDBACK_STABILITY"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

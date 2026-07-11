@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/first_order_sigma_delta_modulator.va"
+
+Vin (vin 0) vsource type=pwl wave=[0 0.25 20n 0.25 20.02n 0.75 48n 0.75]
+Vclk (vclk 0) vsource type=pulse val0=0 val1=0.9 delay=0.25n period=1n width=0.35n rise=20p fall=20p
+
+XDUT (vin vclk bitout) first_order_sigma_delta_modulator
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=48n maxstep=20p
+save vin vclk bitout

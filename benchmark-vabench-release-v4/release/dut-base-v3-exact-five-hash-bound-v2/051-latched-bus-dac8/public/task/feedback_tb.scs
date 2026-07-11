@@ -1,0 +1,22 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/latched_bus_dac8.va"
+
+Vclk (vclk 0) vsource type=pulse val0=0 val1=0.9 delay=0.25n period=3n width=0.8n rise=20p fall=20p
+Vb7 (b7 0) vsource type=pwl wave=[0n 0 4.3n 0 4.32n 0.9 7.5n 0.9 7.52n 0 10.2n 0 10.22n 0.9]
+Vb6 (b6 0) vsource type=pwl wave=[0n 0 1n 0 1.02n 0.9 7.5n 0.9 7.52n 0]
+Vb5 (b5 0) vsource type=pwl wave=[0n 0 7.5n 0 7.52n 0.9]
+Vb4 (b4 0) vsource type=pwl wave=[0n 0 1n 0 1.02n 0.9 4.3n 0.9 4.32n 0 7.5n 0 7.52n 0.9 10.2n 0.9 10.22n 0]
+Vb3 (b3 0) vsource type=pwl wave=[0n 0 1n 0 1.02n 0.9 4.3n 0.9 4.32n 0 7.5n 0 7.52n 0.9 10.2n 0.9 10.22n 0]
+Vb2 (b2 0) vsource type=pwl wave=[0n 0 7.5n 0 7.52n 0.9]
+Vb1 (b1 0) vsource type=pwl wave=[0n 0 1n 0 1.02n 0.9 7.5n 0.9 7.52n 0 10.2n 0 10.22n 0.9]
+Vb0 (b0 0) vsource type=pwl wave=[0n 0 4.3n 0 4.32n 0.9 7.5n 0.9 7.52n 0 10.2n 0 10.22n 0.9]
+
+XDUT (vclk b7 b6 b5 b4 b3 b2 b1 b0 vout) latched_bus_dac8
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=15n maxstep=20p
+save vclk b7 b6 b5 b4 b3 b2 b1 b0 vout

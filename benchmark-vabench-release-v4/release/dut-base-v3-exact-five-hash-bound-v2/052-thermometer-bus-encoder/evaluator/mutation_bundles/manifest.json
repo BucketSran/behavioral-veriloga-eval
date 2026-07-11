@@ -1,0 +1,134 @@
+{
+  "family_id": "052",
+  "gold_bundle_sha256": "53e64ddea03cc8687d2918eff7aaeb096ddec2217e89bf8cbc67f25e2474323e",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "thermometer_bus_encoder.va": "6250c6287ae3a622599be202960743ecce759c6fde56612096bb25986f783fed"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INPUT_CLIPPING",
+          "P_PREFIX_CODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_force_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "thermometer_bus_encoder.va"
+      ],
+      "fault_class": "force_zero",
+      "id": "neg_001_force_zero",
+      "trigger_condition": "Thermometer Bus Encoder: leaves every thermometer output low, so it compiles but fails all nonzero input levels.",
+      "violated_property_ids": [
+        "P_INPUT_CLIPPING",
+        "P_PREFIX_CODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "thermometer_bus_encoder.va": "3d39cf747a54b0e65d2a8d6d83e247ff59d4765c382d25c842c23738cf057d3c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_UNIFORM_SEGMENTS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_off_by_one/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "thermometer_bus_encoder.va"
+      ],
+      "fault_class": "off_by_one",
+      "id": "neg_002_off_by_one",
+      "trigger_condition": "Thermometer Bus Encoder: turns on one extra segment for nonzero inputs, passing prefix shape while failing exact segment counts.",
+      "violated_property_ids": [
+        "P_UNIFORM_SEGMENTS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "thermometer_bus_encoder.va": "2033d6adce2c703d8e4d71ea9b76a5a4395cb60cedc3a36db6c55e4063ef5df2"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PREFIX_CODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_binary_code_outputs/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "thermometer_bus_encoder.va"
+      ],
+      "fault_class": "binary_code_outputs",
+      "id": "neg_003_binary_code_outputs",
+      "trigger_condition": "Thermometer Bus Encoder: emits binary-style bit values instead of a prefix thermometer word, so sparse smoke can look active but bus semantics fail.",
+      "violated_property_ids": [
+        "P_PREFIX_CODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "thermometer_bus_encoder.va": "258592d1a4480d89a86e0ffe58eb98d2f66e69fd7d09011756a3003a49b556fa"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ORDERED_ACTIVATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_reversed_thermometer_order/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "thermometer_bus_encoder.va"
+      ],
+      "fault_class": "reversed_thermometer_order",
+      "id": "neg_004_reversed_thermometer_order",
+      "trigger_condition": "Thermometer Bus Encoder: builds the active prefix from t15 downward, preserving segment count while violating bus order.",
+      "violated_property_ids": [
+        "P_ORDERED_ACTIVATION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "thermometer_bus_encoder.va": "007b00a59fbbf71e7a8a96d3337d93b3c665b0de1350a725476643614cfdb902"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_LEVELS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_round_to_nearest/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "thermometer_bus_encoder.va"
+      ],
+      "fault_class": "weak_high_output_level",
+      "id": "neg_005_round_to_nearest",
+      "trigger_condition": "Thermometer Bus Encoder: drives asserted thermometer segments below the public logic-high threshold.",
+      "violated_property_ids": [
+        "P_OUTPUT_LEVELS"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

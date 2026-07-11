@@ -1,0 +1,40 @@
+`include "disciplines.vams"
+
+module correlated_double_sampler(phi_reset, phi_signal, vin, vout, valid);
+input phi_reset, phi_signal, vin;
+output vout, valid;
+electrical phi_reset, phi_signal, vin, vout, valid;
+
+parameter real vth = 0.45;
+parameter real vcm = 0.45;
+parameter real gain = 1.0;
+parameter real vlo = 0.0;
+parameter real vhi = 0.9;
+parameter real tr = 100p from [0:inf);
+
+real reset_level;
+real out_q;
+real valid_q;
+real corrected;
+
+analog begin
+    @(initial_step) begin
+        reset_level = vcm;
+        out_q = vcm;
+        valid_q = 0.0;
+    end
+    @(cross(V(phi_reset) - vth, +1)) begin
+        reset_level = V(vin);
+        out_q = vcm;
+    end
+    @(cross(V(phi_signal) - vth, +1)) begin
+        corrected = vcm + gain * (V(vin) - reset_level);
+        if (corrected < vlo) out_q = vlo;
+        else if (corrected > vhi) out_q = vhi;
+        else out_q = corrected;
+        valid_q = vhi;
+    end
+    V(vout) <+ transition(out_q, 0, tr, tr);
+    V(valid) <+ transition(valid_q, 0, tr, tr);
+end
+endmodule

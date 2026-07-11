@@ -1,0 +1,39 @@
+{
+  "negative_cases": [
+    {
+      "id": "neg_001_force_zero",
+      "why_wrong": "First Order Sigma Delta Modulator: never emits high bits, so it compiles but fails density and edge-by-edge behavior.",
+      "files": [
+        "neg_001_force_zero/first_order_sigma_delta_modulator.va"
+      ]
+    },
+    {
+      "id": "neg_002_no_feedback",
+      "why_wrong": "First Order Sigma Delta Modulator: accumulates the input without subtracting feedback, passing clock syntax while saturating the loop.",
+      "files": [
+        "neg_002_no_feedback/first_order_sigma_delta_modulator.va"
+      ]
+    },
+    {
+      "id": "neg_003_inverted_decision",
+      "why_wrong": "First Order Sigma Delta Modulator: uses the opposite comparator polarity, producing a plausible stream with inverted loop decisions.",
+      "files": [
+        "neg_003_inverted_decision/first_order_sigma_delta_modulator.va"
+      ]
+    },
+    {
+      "id": "neg_004_falling_edge_update",
+      "why_wrong": "First Order Sigma Delta Modulator: updates on falling clock crossings, so simple toggling works but rising-edge state checks fail.",
+      "files": [
+        "neg_004_falling_edge_update/first_order_sigma_delta_modulator.va"
+      ]
+    },
+    {
+      "id": "neg_005_half_feedback",
+      "why_wrong": "First Order Sigma Delta Modulator: subtracts only half of the previous feedback bit, leaving density plausible but breaking the certified loop state.",
+      "files": [
+        "neg_005_half_feedback/first_order_sigma_delta_modulator.va"
+      ]
+    }
+  ]
+}

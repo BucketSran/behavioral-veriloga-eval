@@ -1,0 +1,33 @@
+`include "disciplines.vams"
+
+module latched_bus_dac8(vclk, b7, b6, b5, b4, b3, b2, b1, b0, vout);
+input vclk, b7, b6, b5, b4, b3, b2, b1, b0;
+output vout;
+electrical vclk, b7, b6, b5, b4, b3, b2, b1, b0, vout;
+
+parameter real vth = 0.45;
+parameter real vref = 1.0;
+parameter real tr = 20p;
+
+integer code;
+real target;
+
+analog begin
+    @(initial_step) begin
+        code = 0;
+        target = 0.0;
+    end
+
+    code = ((V(b7) > vth) ? 128 : 0)
+             + ((V(b6) > vth) ? 64 : 0)
+             + ((V(b5) > vth) ? 32 : 0)
+             + ((V(b4) > vth) ? 16 : 0)
+             + ((V(b3) > vth) ? 8 : 0)
+             + ((V(b2) > vth) ? 4 : 0)
+             + ((V(b1) > vth) ? 2 : 0)
+             + ((V(b0) > vth) ? 1 : 0);
+        target = vref * code / 255.0;
+
+    V(vout) <+ target;
+end
+endmodule

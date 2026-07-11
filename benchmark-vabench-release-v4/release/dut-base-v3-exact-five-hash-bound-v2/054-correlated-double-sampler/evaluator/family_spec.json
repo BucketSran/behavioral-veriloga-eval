@@ -1,0 +1,222 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "054",
+  "task_ids": {
+    "dut": "v4-054",
+    "testbench": "v4-554",
+    "bugfix": "v4-1054"
+  },
+  "identity": {
+    "title": "Correlated Double Sampler",
+    "category": "data_converter",
+    "level": "L1",
+    "difficulty": "D2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"
+  },
+  "artifact_contract": {
+    "mode": "single_file",
+    "files": [
+      {
+        "path": "correlated_double_sampler.va",
+        "modules": [
+          {
+            "name": "correlated_double_sampler",
+            "role": "entry",
+            "depends_on": [],
+            "ports": [
+              {
+                "name": "phi_reset",
+                "direction": "input",
+                "discipline": "electrical",
+                "position": 0
+              },
+              {
+                "name": "phi_signal",
+                "direction": "input",
+                "discipline": "electrical",
+                "position": 1
+              },
+              {
+                "name": "vin",
+                "direction": "input",
+                "discipline": "electrical",
+                "position": 2
+              },
+              {
+                "name": "vout",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 3
+              },
+              {
+                "name": "valid",
+                "direction": "output",
+                "discipline": "electrical",
+                "position": 4
+              }
+            ],
+            "parameters": [
+              {
+                "name": "vth",
+                "type": "real",
+                "default": 0.45,
+                "units": "V",
+                "valid_range": "vth > 0",
+                "override_behavior": "sets the rising-edge threshold for both sampling clocks"
+              },
+              {
+                "name": "vcm",
+                "type": "real",
+                "default": 0.45,
+                "units": "V",
+                "valid_range": "vlo <= vcm <= vhi",
+                "override_behavior": "sets the initial, reset-phase, and common-mode output level"
+              },
+              {
+                "name": "gain",
+                "type": "real",
+                "default": 1,
+                "units": null,
+                "valid_range": "any finite real",
+                "override_behavior": "scales the sampled signal-minus-reset difference"
+              },
+              {
+                "name": "vlo",
+                "type": "real",
+                "default": 0,
+                "units": "V",
+                "valid_range": "vlo < vhi",
+                "override_behavior": "sets the lower output clamp"
+              },
+              {
+                "name": "vhi",
+                "type": "real",
+                "default": 0.9,
+                "units": "V",
+                "valid_range": "vhi > vlo",
+                "override_behavior": "sets the upper output clamp and valid high level"
+              },
+              {
+                "name": "tr",
+                "type": "real",
+                "default": 1e-10,
+                "units": "s",
+                "valid_range": "tr > 0",
+                "override_behavior": "sets vout and valid transition smoothing"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "source_path_template": "./dut/{artifact_path}",
+    "instances": [
+      {
+        "name": "XDUT",
+        "module_ref": "correlated_double_sampler",
+        "connections": [
+          {
+            "port_ref": "phi_reset",
+            "net": "phi_reset",
+            "position": 0
+          },
+          {
+            "port_ref": "phi_signal",
+            "net": "phi_signal",
+            "position": 1
+          },
+          {
+            "port_ref": "vin",
+            "net": "vin",
+            "position": 2
+          },
+          {
+            "port_ref": "vout",
+            "net": "vout",
+            "position": 3
+          },
+          {
+            "port_ref": "valid",
+            "net": "valid",
+            "position": 4
+          }
+        ]
+      }
+    ]
+  },
+  "properties": [
+    {
+      "id": "P_RESET_SAMPLE",
+      "observable_contract": "A rising phi_reset crossing captures vin as the reset level, returns vout to vcm, and clears valid.",
+      "required_signals": [
+        "time",
+        "phi_reset",
+        "vin",
+        "vout",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_SIGNAL_CORRECTION",
+      "observable_contract": "A rising phi_signal crossing publishes vcm plus gain times the current signal sample minus the most recently captured reset sample.",
+      "required_signals": [
+        "time",
+        "phi_reset",
+        "phi_signal",
+        "vin",
+        "vout",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_CLAMP",
+      "observable_contract": "The corrected output is limited to the inclusive vlo-to-vhi range.",
+      "required_signals": [
+        "time",
+        "phi_signal",
+        "vin",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_VALID_SEQUENCE",
+      "observable_contract": "valid is low before a completed signal sample and after every reset sample, then rises to vhi when a signal sample is published.",
+      "required_signals": [
+        "time",
+        "phi_reset",
+        "phi_signal",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_HOLD_BETWEEN_EVENTS",
+      "observable_contract": "vout and valid hold their last event-updated states between reset and signal sampling crossings.",
+      "required_signals": [
+        "time",
+        "phi_reset",
+        "phi_signal",
+        "vin",
+        "vout",
+        "valid"
+      ]
+    }
+  ],
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "phi_reset",
+      "phi_signal",
+      "vin",
+      "vout",
+      "valid"
+    ]
+  },
+  "modeling_constraints": [
+    "Use deterministic event-driven sample-and-hold state.",
+    "Keep sampling events separate from smooth unconditional output contributions.",
+    "Do not continuously track vin, reverse the subtraction order, or add undeclared artifacts, validation hooks, current contributions, ddt(), or idt()."
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "family_id": "054",
+  "gold_bundle_sha256": "2e88275a6351bcaa34f79d89cd794260a4f75ce3b24d7a7e67ae5483c193114a",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "correlated_double_sampler.va": "d4acbe4654df47c3fd9de30d94d71536c7ac5998a190b8acbcd291076542698b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_SAMPLE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_force_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "correlated_double_sampler.va"
+      ],
+      "fault_class": "force_zero",
+      "id": "neg_001_force_zero",
+      "trigger_condition": "Correlated Double Sampler: forces both outputs low instead of producing sampled correction and valid indication.",
+      "violated_property_ids": [
+        "P_RESET_SAMPLE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "correlated_double_sampler.va": "5307d2c4c091f8f865b66385ac27ec7a3c21c70adf05631dee6d9363e4025d06"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SIGNAL_CORRECTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_track_input_directly/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "correlated_double_sampler.va"
+      ],
+      "fault_class": "track_input_directly",
+      "id": "neg_002_track_input_directly",
+      "trigger_condition": "Correlated Double Sampler: continuously tracks vin and never forms the signal-minus-reset held correction.",
+      "violated_property_ids": [
+        "P_SIGNAL_CORRECTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "correlated_double_sampler.va": "660d91eb17cce8a98fd13b63eb8b442759587c4a4654ec8a78f2f7e75e0a6f20"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_CLAMP"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_difference_sign/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "correlated_double_sampler.va"
+      ],
+      "fault_class": "wrong_difference_sign",
+      "id": "neg_003_wrong_difference_sign",
+      "trigger_condition": "Correlated Double Sampler: subtracts signal from reset, reversing the correlated-double-sampling correction.",
+      "violated_property_ids": [
+        "P_OUTPUT_CLAMP"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "correlated_double_sampler.va": "93e56cbeb0dedf6590a4ed05a091e7d6a076d089cab6db1fa40a534aa13e9df7"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_VALID_SEQUENCE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_signal_only_no_reset_sample/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "correlated_double_sampler.va"
+      ],
+      "fault_class": "signal_only_no_reset_sample",
+      "id": "neg_004_signal_only_no_reset_sample",
+      "trigger_condition": "Correlated Double Sampler: ignores the reset-phase sample and compares the signal only to the common-mode value.",
+      "violated_property_ids": [
+        "P_VALID_SEQUENCE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "correlated_double_sampler.va": "132023b02ae87f3d453899f5a095334458cf7be968ac332bdf8c6c4df1d5b83e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_HOLD_BETWEEN_EVENTS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_valid_never_clears/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "correlated_double_sampler.va"
+      ],
+      "fault_class": "valid_never_clears",
+      "id": "neg_005_valid_never_clears",
+      "trigger_condition": "Correlated Double Sampler: leaves valid asserted during reset-phase reacquisition.",
+      "violated_property_ids": [
+        "P_HOLD_BETWEEN_EVENTS"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

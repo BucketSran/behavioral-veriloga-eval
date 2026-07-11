@@ -1,0 +1,39 @@
+{
+  "negative_cases": [
+    {
+      "id": "neg_001_force_zero",
+      "why_wrong": "Correlated Double Sampler: forces both outputs low instead of producing sampled correction and valid indication.",
+      "files": [
+        "neg_001_force_zero/correlated_double_sampler.va"
+      ]
+    },
+    {
+      "id": "neg_002_track_input_directly",
+      "why_wrong": "Correlated Double Sampler: continuously tracks vin and never forms the signal-minus-reset held correction.",
+      "files": [
+        "neg_002_track_input_directly/correlated_double_sampler.va"
+      ]
+    },
+    {
+      "id": "neg_003_wrong_difference_sign",
+      "why_wrong": "Correlated Double Sampler: subtracts signal from reset, reversing the correlated-double-sampling correction.",
+      "files": [
+        "neg_003_wrong_difference_sign/correlated_double_sampler.va"
+      ]
+    },
+    {
+      "id": "neg_004_signal_only_no_reset_sample",
+      "why_wrong": "Correlated Double Sampler: ignores the reset-phase sample and compares the signal only to the common-mode value.",
+      "files": [
+        "neg_004_signal_only_no_reset_sample/correlated_double_sampler.va"
+      ]
+    },
+    {
+      "id": "neg_005_valid_never_clears",
+      "why_wrong": "Correlated Double Sampler: leaves valid asserted during reset-phase reacquisition.",
+      "files": [
+        "neg_005_valid_never_clears/correlated_double_sampler.va"
+      ]
+    }
+  ]
+}

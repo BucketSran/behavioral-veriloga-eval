@@ -1,0 +1,90 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "duty_cycle_meter_8b.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=150n maxstep=100p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk_in",
+      "valid",
+      "duty0",
+      "duty1",
+      "duty2",
+      "duty3",
+      "duty4",
+      "duty5",
+      "duty6",
+      "duty7"
+    ]
+  },
+  "family_id": "060",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "3f207c23852d04c133f7a86591adee32e6de78de05b582020a9f2b861245936c",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "8b44df7824d462324b1f322b2dfe38d52520d6401ee846e1735c6a3175f49614",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk_in (clk_in 0) vsource type=pwl wave=[0 0 10n 0 10.1n 0.9 16n 0 30n 0 30.1n 0.9 40n 0 55n 0 55.1n 0.9 72n 0 90n 0 90.1n 0.9 100n 0 120n 0 120.1n 0.9 126n 0 150n 0]",
+          "XDUT (clk_in valid duty0 duty1 duty2 duty3 duty4 duty5 duty6 duty7) duty_cycle_meter_8b"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk_in (clk_in 0) vsource type=pwl wave=[0 0 10n 0 10.1n 0.9 16n 0 30n 0 30.1n 0.9 39n 0 55n 0 55.1n 0.9 72n 0 90n 0 90.1n 0.9 100n 0 120n 0 120.1n 0.9 126n 0 150n 0]",
+          "XDUT (clk_in valid duty0 duty1 duty2 duty3 duty4 duty5 duty6 duty7) duty_cycle_meter_8b"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_COMPLETE_CYCLE_MEASUREMENT",
+    "P_HIGH_FRACTION_CODE",
+    "P_CODE_SATURATION",
+    "P_VALID_HOLD",
+    "P_BIT_ORDER_AND_LEVELS"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "2479371dc7deeebb312af363a518e4feacdd71f179d3ee5deac2e66ef36c5f0d",
+    "family_spec_sha256": "2b627ad1391d0cf9fa84a4dd8cb3ff3b3c92fc3cb10662f7697ccb093eec5628"
+  },
+  "task_id": "v4-060"
+}

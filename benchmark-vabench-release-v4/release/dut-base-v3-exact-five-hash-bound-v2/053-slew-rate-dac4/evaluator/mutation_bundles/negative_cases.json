@@ -1,0 +1,39 @@
+{
+  "negative_cases": [
+    {
+      "id": "neg_001_force_zero",
+      "why_wrong": "Slew Rate DAC4: forces the output to zero, so it compiles and idles plausibly but fails every nonzero code check.",
+      "files": [
+        "neg_001_force_zero/slew_rate_dac4.va"
+      ]
+    },
+    {
+      "id": "neg_002_direct_transition",
+      "why_wrong": "Slew Rate DAC4: decodes the binary input correctly but jumps directly to the target instead of enforcing the slew-rate limit.",
+      "files": [
+        "neg_002_direct_transition/slew_rate_dac4.va"
+      ]
+    },
+    {
+      "id": "neg_003_wrong_denominator",
+      "why_wrong": "Slew Rate DAC4: uses code divided by 16, passing monotonic smoke checks while missing the full-scale endpoint calibration.",
+      "files": [
+        "neg_003_wrong_denominator/slew_rate_dac4.va"
+      ]
+    },
+    {
+      "id": "neg_004_reversed_bit_order",
+      "why_wrong": "Slew Rate DAC4: treats d0 as the MSB and d3 as the LSB, so symmetric code smoke tests can pass but bit-order coverage fails.",
+      "files": [
+        "neg_004_reversed_bit_order/slew_rate_dac4.va"
+      ]
+    },
+    {
+      "id": "neg_005_half_slew_rate",
+      "why_wrong": "Slew Rate DAC4: reaches the right endpoints eventually but slews at half the required rate, failing ramp-shape timing checks.",
+      "files": [
+        "neg_005_half_slew_rate/slew_rate_dac4.va"
+      ]
+    }
+  ]
+}

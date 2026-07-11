@@ -1,0 +1,17 @@
+`include "disciplines.vams"
+module slew_rate_dac4(d3, d2, d1, d0, vout);
+input d3, d2, d1, d0;
+output vout;
+electrical d3, d2, d1, d0, vout;
+parameter real vth = 0.45;
+parameter real vref = 1.0;
+parameter real slewrate = 1e8;
+integer code;
+real target;
+analog begin
+    code = ((V(d3) > vth) ? 8 : 0) + ((V(d2) > vth) ? 4 : 0)
+         + ((V(d1) > vth) ? 2 : 0) + ((V(d0) > vth) ? 1 : 0);
+    target = vref * code / 15.0;
+    V(vout) <+ slew(target, 0.5 * slewrate);
+end
+endmodule

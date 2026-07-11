@@ -1,0 +1,28 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module edge_interval_tdc_8b(start, stop, valid, code0, code1, code2, code3, code4, code5, code6, code7);
+    input start, stop;
+    output valid, code0, code1, code2, code3, code4, code5, code6, code7;
+    electrical start, stop, valid, code0, code1, code2, code3, code4, code5, code6, code7;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real tr = 20p;
+
+    real start_t; integer waiting; integer code; real valid_level;
+    analog begin
+        @(initial_step) begin start_t = 0; waiting = 0; code = 0; valid_level = 0; end
+        @(cross(V(start)-vth,+1)) begin start_t = $abstime; waiting = 1; valid_level = 0; end
+        @(cross(V(stop)-vth,+1)) begin if (waiting) begin code = ((($abstime-start_t)/2n)+0.5); if (code < 0) code = 0; if (code > 255) code = 255; valid_level = vdd; waiting = 0; end end
+        V(valid) <+ transition(valid_level, 0, tr, tr);
+        V(code0) <+ transition((((code) >> 0) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(code1) <+ transition((((code) >> 1) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(code2) <+ transition((((code) >> 2) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(code3) <+ transition((((code) >> 3) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(code4) <+ transition((((code) >> 4) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(code5) <+ transition((((code) >> 5) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(code6) <+ transition((((code) >> 6) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(code7) <+ transition((((code) >> 7) & 1) ? vdd : 0.0, 0, tr, tr);
+    end
+endmodule

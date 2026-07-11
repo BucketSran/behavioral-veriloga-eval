@@ -1,0 +1,39 @@
+{
+  "negative_cases": [
+    {
+      "id": "neg_001_force_zero",
+      "why_wrong": "Latched Bus DAC8: forces the output to zero instead of decoding the latched bus.",
+      "files": [
+        "neg_001_force_zero/latched_bus_dac8.va"
+      ]
+    },
+    {
+      "id": "neg_002_transparent_bus",
+      "why_wrong": "Latched Bus DAC8: updates from the input bus continuously, so it fails hold-between-clock-edge behavior.",
+      "files": [
+        "neg_002_transparent_bus/latched_bus_dac8.va"
+      ]
+    },
+    {
+      "id": "neg_003_falling_edge_update",
+      "why_wrong": "Latched Bus DAC8: samples on falling clock edges instead of rising update edges.",
+      "files": [
+        "neg_003_falling_edge_update/latched_bus_dac8.va"
+      ]
+    },
+    {
+      "id": "neg_004_reversed_bit_order",
+      "why_wrong": "Latched Bus DAC8: treats b0 as the MSB and b7 as the LSB.",
+      "files": [
+        "neg_004_reversed_bit_order/latched_bus_dac8.va"
+      ]
+    },
+    {
+      "id": "neg_005_wrong_denominator",
+      "why_wrong": "Latched Bus DAC8: uses a 7-bit full-scale span for an 8-bit code, so the decoded output gain and endpoint mapping are wrong.",
+      "files": [
+        "neg_005_wrong_denominator/latched_bus_dac8.va"
+      ]
+    }
+  ]
+}

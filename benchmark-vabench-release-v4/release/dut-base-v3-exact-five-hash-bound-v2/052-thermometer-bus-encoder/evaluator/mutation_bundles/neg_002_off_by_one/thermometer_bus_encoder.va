@@ -1,0 +1,20 @@
+`include "disciplines.vams"
+module thermometer_bus_encoder(vin, t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15);
+input vin;
+output t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15;
+electrical vin, t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15;
+parameter real vref=1.0, vh=0.9, tr=20p;
+integer code; real clipped;
+analog begin
+    clipped=V(vin); if(clipped<0) clipped=0; if(clipped>vref) clipped=vref;
+    code=$floor(16.0*clipped/vref)+1; if(code>16) code=16;
+    V(t0)<+transition((code>0)?vh:0,0,tr,tr); V(t1)<+transition((code>1)?vh:0,0,tr,tr);
+    V(t2)<+transition((code>2)?vh:0,0,tr,tr); V(t3)<+transition((code>3)?vh:0,0,tr,tr);
+    V(t4)<+transition((code>4)?vh:0,0,tr,tr); V(t5)<+transition((code>5)?vh:0,0,tr,tr);
+    V(t6)<+transition((code>6)?vh:0,0,tr,tr); V(t7)<+transition((code>7)?vh:0,0,tr,tr);
+    V(t8)<+transition((code>8)?vh:0,0,tr,tr); V(t9)<+transition((code>9)?vh:0,0,tr,tr);
+    V(t10)<+transition((code>10)?vh:0,0,tr,tr); V(t11)<+transition((code>11)?vh:0,0,tr,tr);
+    V(t12)<+transition((code>12)?vh:0,0,tr,tr); V(t13)<+transition((code>13)?vh:0,0,tr,tr);
+    V(t14)<+transition((code>14)?vh:0,0,tr,tr); V(t15)<+transition((code>15)?vh:0,0,tr,tr);
+end
+endmodule
