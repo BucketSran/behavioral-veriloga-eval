@@ -1,0 +1,206 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "power_on_reset_detector",
+            "parameters": [
+              {
+                "default": 1e-10,
+                "name": "tr",
+                "override_behavior": "sets output and metric transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets clk and rst logic threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "0 < vth < 0.9"
+              },
+              {
+                "default": 0.62,
+                "name": "vtrip",
+                "override_behavior": "sets the monitored-supply power-good threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "0 < vtrip < 0.9"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "metric",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "power_on_reset_detector.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "036",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "bias_reference_power_management",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Power-On Reset Detector"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain reset-sequencing behavior.",
+    "Do not use current contributions, transistor-level devices, AC/noise analysis, or KCL/KVL regulation loops.",
+    "Do not encode a particular validation stimulus, stop time, or sample window."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_ASSERTED_UNSAFE",
+      "observable_contract": "Out is active-high reset and remains asserted while rst is high or vin is below vtrip.",
+      "required_signals": [
+        "time",
+        "rst",
+        "vin",
+        "out"
+      ]
+    },
+    {
+      "id": "P_DELAYED_RELEASE",
+      "observable_contract": "After rst releases and vin is power-good, out stays asserted for four rising clk updates before deasserting.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "vin",
+        "out"
+      ]
+    },
+    {
+      "id": "P_RELEASE_STATUS",
+      "observable_contract": "Metric uses an intermediate status level during the release delay, is high after delayed reset release completes, and is cleared when reset is reasserted or supply is not power-good.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "vin",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_FAULT_REASSERTION",
+      "observable_contract": "A new reset assertion or a brownout below vtrip immediately reasserts out and clears the accumulated release delay, independent of the next clk edge.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "vin",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_VOLTAGE_CODED_LEVELS",
+      "observable_contract": "Out and metric use bounded voltage-coded low and high levels with finite transition smoothing.",
+      "required_signals": [
+        "time",
+        "out",
+        "metric"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "power_on_reset_detector.va"
+  ],
+  "task_id": "v4-036",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 2
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 3
+          },
+          {
+            "net": "metric",
+            "port_ref": "metric",
+            "position": 4
+          }
+        ],
+        "module_ref": "power_on_reset_detector",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric"
+    ]
+  }
+}

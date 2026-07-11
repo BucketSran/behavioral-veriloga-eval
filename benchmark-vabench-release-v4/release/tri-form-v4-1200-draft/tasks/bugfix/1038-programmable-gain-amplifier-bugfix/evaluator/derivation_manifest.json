@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-038",
+    "canonical_task_slug": "038-programmable-gain-amplifier",
+    "family_spec_sha256": "92867b2063aa3caab38f38af3085ab6fb3a594a755a3d36237a274338399ce0c",
+    "mutation_catalog_sha256": "62ac1f400c3882f7916c05d3fbaba9600452e53dd41b41dec46e2bf10518f1b2",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "038",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_inverted_gain_select",
+    "testbench_suite": [
+      "neg_002_inverted_gain_select",
+      "neg_005_clip_metric_stuck_low",
+      "neg_007_output_clamp_bypass",
+      "neg_006_reset_ignored",
+      "neg_003_fixed_unity_gain"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "3c6b51fbfa89b62c05dbfaf2923b94ebc95330b1f6139d3e7b059a3cfdb18788",
+    "changed_artifacts": [
+      "programmable_gain_amplifier.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_inverted_gain_select",
+    "rationale": "Select fault class gain_select_polarity_error under trigger 'gain_sel changes state before an active rising clock edge' because it exercises P_COMMON_MODE_GAIN, P_SAMPLED_GAIN_SELECT as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 33,
+    "source_preferred_seed": "neg_002_inverted_gain_select",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

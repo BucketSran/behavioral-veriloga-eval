@@ -1,0 +1,213 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "loop_filter_abstraction",
+            "parameters": [
+              {
+                "default": 1e-10,
+                "name": "tr",
+                "override_behavior": "sets rise and fall smoothing for out and metric",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              },
+              {
+                "default": 0.05,
+                "name": "deadband",
+                "override_behavior": "sets the sampled error magnitude below which proportional and integral state hold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "deadband >= 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "metric",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "loop_filter_abstraction.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/loop_filter_abstraction.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "034",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "pll_clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Loop Filter Abstraction"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain event-driven state updates and voltage contributions only.",
+    "Do not use current contributions, ddt(), idt(), transistor-level devices, or validation-only observables.",
+    "Do not encode a particular stimulus schedule, stop time, or checker sample window."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_RESET_STATE",
+      "observable_contract": "Active reset restores the proportional state to 0.45 V, the step to 0.20 V, the integral residual and accepted-update count to zero, and metric to 0 V.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_DEADBAND_HOLD",
+      "observable_contract": "At a rising clk crossing, an error vin - 0.45 V whose magnitude does not exceed deadband produces no proportional, integral, step, or count update.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "vin",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_SIGNED_UPDATE",
+      "observable_contract": "Each accepted positive error increases the proportional state by the current step and each accepted negative error decreases it, while the integral residual accumulates 0.04 times the sampled error.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "out"
+      ]
+    },
+    {
+      "id": "P_STEP_HALVING",
+      "observable_contract": "The proportional step halves after every accepted update, producing successively smaller proportional corrections for equal-sign errors.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "out"
+      ]
+    },
+    {
+      "id": "P_LOCK_COUNT_METRIC",
+      "observable_contract": "Metric remains low for fewer than four accepted updates and is 0.9 V once the accepted-update count reaches four; reset clears it.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "vin",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_PROPORTIONAL_CLAMP",
+      "observable_contract": "The proportional state is clamped to 0.05 V through 0.85 V before the accumulated integral residual is added to form out.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "out"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "loop_filter_abstraction.va"
+  ],
+  "task_id": "v4-1034",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 2
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 3
+          },
+          {
+            "net": "metric",
+            "port_ref": "metric",
+            "position": 4
+          }
+        ],
+        "module_ref": "loop_filter_abstraction",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric"
+    ]
+  }
+}

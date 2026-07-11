@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-040",
+    "canonical_task_slug": "040-ptat-ctat-reference-generator",
+    "family_spec_sha256": "50d74d4b3ff7d95fd09f56b97b8cd354d42bb3d1872b84c78471de10e8ca91d2",
+    "mutation_catalog_sha256": "eeee18293059edd997c4ca5926d5211c10106c1727e9dae9cfc03de778eb5262",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "040",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_boundary",
+    "testbench_suite": [
+      "neg_001_boundary",
+      "neg_003_polarity_direction",
+      "neg_004_state_reset",
+      "neg_005_metric_writeout",
+      "neg_002_timing_window"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "645cd307d07f463ac4fdfcc984913e8d2355b72e906e74c23a4a994531f9396f",
+    "changed_artifacts": [
+      "ptat_ctat_reference_generator.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_boundary",
+    "rationale": "Select fault class boundary_semantic_error under trigger 'a public endpoint, threshold, saturation, or settling boundary is exercised' because it exercises P_RESET_REFERENCE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 25,
+    "source_preferred_seed": "neg_001_boundary",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

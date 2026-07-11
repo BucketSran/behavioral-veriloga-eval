@@ -1,0 +1,350 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "cmp_delay",
+            "parameters": [
+              {
+                "default": 0.0,
+                "name": "voffset",
+                "override_behavior": "subtracts an input-referred offset from VINP minus VINN",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real"
+              },
+              {
+                "default": 4.34e-12,
+                "name": "tau",
+                "override_behavior": "sets the logarithmic regeneration-delay sensitivity",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tau > 0"
+              },
+              {
+                "default": 2.05e-11,
+                "name": "td_0",
+                "override_behavior": "sets the base clock-to-decision delay",
+                "type": "real",
+                "units": "s",
+                "valid_range": "td_0 >= 0"
+              },
+              {
+                "default": 2e-11,
+                "name": "td_min",
+                "override_behavior": "sets the minimum scheduled decision delay",
+                "type": "real",
+                "units": "s",
+                "valid_range": "0 <= td_min <= td_max"
+              },
+              {
+                "default": 2e-10,
+                "name": "td_max",
+                "override_behavior": "sets the maximum scheduled decision delay",
+                "type": "real",
+                "units": "s",
+                "valid_range": "td_max >= td_min"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "CLK",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "VINN",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "VINP",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "DCMPN",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "DCMPP",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "LP",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "LM",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VSS",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VDD",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "cmp_delay.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "edge_interval_timer",
+            "parameters": [
+              {
+                "default": 0.4,
+                "name": "VTH",
+                "override_behavior": "sets the rising-edge threshold for both timer inputs",
+                "type": "real",
+                "units": "V",
+                "valid_range": "VTH > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "CLK_1",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "CLK_2",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "OUT_PS",
+                "position": 2
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "edge_interval_timer.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "family_id": "039",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "comparator_decision",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A system bundle",
+    "title": "Propagation Delay Comparator"
+  },
+  "modeling_constraints": [
+    "Keep both requested source files and both public module interfaces in one DUT bundle.",
+    "Use voltage contributions and event-driven state; place driven contributions outside event blocks.",
+    "Do not use current contributions, ddt(), idt(), hard-coded sample points, or simulator-specific side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_CLOCKED_DECISION",
+      "observable_contract": "At each rising CLK crossing through half the VDD-to-VSS rail span, the comparator latches the sign of VINP minus VINN minus voffset into complementary DCMPP/DCMPN decisions, with LP mirroring DCMPP and LM mirroring DCMPN.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vinn",
+        "vinp",
+        "gnd",
+        "vdd",
+        "out_n",
+        "out_p",
+        "lp_int",
+        "lm_int"
+      ]
+    },
+    {
+      "id": "P_FALLING_RESET",
+      "observable_contract": "Each falling CLK crossing resets both comparator decision outputs low.",
+      "required_signals": [
+        "time",
+        "clk",
+        "out_n",
+        "out_p"
+      ]
+    },
+    {
+      "id": "P_DELAY_MAGNITUDE_TREND",
+      "observable_contract": "For otherwise equal conditions, a smaller absolute effective differential input produces a longer clock-to-decision delay.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vinn",
+        "vinp",
+        "out_p",
+        "out_n"
+      ]
+    },
+    {
+      "id": "P_DELAY_CLAMP",
+      "observable_contract": "The scheduled comparator decision delay follows the public log-linear regeneration relation and remains within td_min through td_max.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vinn",
+        "vinp",
+        "vdd",
+        "out_p",
+        "out_n"
+      ]
+    },
+    {
+      "id": "P_EDGE_INTERVAL_MEASUREMENT",
+      "observable_contract": "After a rising CLK_1 crossing arms the timer, the next rising CLK_2 crossing updates OUT_PS to the elapsed interval expressed in picoseconds and holds that completed measurement.",
+      "required_signals": [
+        "time",
+        "clk",
+        "out_p",
+        "delay_ps"
+      ]
+    },
+    {
+      "id": "P_BUNDLE_BINDING",
+      "observable_contract": "The timing helper observes the comparator clock as CLK_1 and the positive comparator decision as CLK_2, exposing their measured interval on delay_ps.",
+      "required_signals": [
+        "time",
+        "clk",
+        "out_p",
+        "delay_ps"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "cmp_delay.va",
+    "edge_interval_timer.va"
+  ],
+  "task_id": "v4-039",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "CLK",
+            "port_ref": "CLK",
+            "position": 0
+          },
+          {
+            "net": "VINN",
+            "port_ref": "VINN",
+            "position": 1
+          },
+          {
+            "net": "VINP",
+            "port_ref": "VINP",
+            "position": 2
+          },
+          {
+            "net": "DCMPN",
+            "port_ref": "DCMPN",
+            "position": 3
+          },
+          {
+            "net": "DCMPP",
+            "port_ref": "DCMPP",
+            "position": 4
+          },
+          {
+            "net": "LP",
+            "port_ref": "LP",
+            "position": 5
+          },
+          {
+            "net": "LM",
+            "port_ref": "LM",
+            "position": 6
+          },
+          {
+            "net": "VSS",
+            "port_ref": "VSS",
+            "position": 7
+          },
+          {
+            "net": "VDD",
+            "port_ref": "VDD",
+            "position": 8
+          }
+        ],
+        "module_ref": "cmp_delay",
+        "name": "XCMP"
+      },
+      {
+        "connections": [
+          {
+            "net": "CLK",
+            "port_ref": "CLK_1",
+            "position": 0
+          },
+          {
+            "net": "DCMPP",
+            "port_ref": "CLK_2",
+            "position": 1
+          },
+          {
+            "net": "delay_ps",
+            "port_ref": "OUT_PS",
+            "position": 2
+          }
+        ],
+        "module_ref": "edge_interval_timer",
+        "name": "XTIMER"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "vinn",
+      "vinp",
+      "out_n",
+      "out_p",
+      "lp_int",
+      "lm_int",
+      "gnd",
+      "vdd",
+      "delay_ps"
+    ]
+  }
+}

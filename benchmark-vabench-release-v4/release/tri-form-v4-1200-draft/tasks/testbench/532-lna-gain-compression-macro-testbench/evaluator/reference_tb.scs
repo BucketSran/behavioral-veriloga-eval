@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/lna_gain_compression_macro.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=2n width=1n rise=50p fall=50p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 68.1n 0 68.2n 0.9 70n 0.9 70.1n 0 80n 0]
+Vvin (vin 0) vsource type=pwl wave=[0 0.45 7.9n 0.45 8n 0.52 23.9n 0.52 24n 0.78 47.9n 0.78 48n 0.26 65.9n 0.26 66n 0.60 80n 0.60]
+
+XDUT (clk rst vin out metric) lna_gain_compression_macro
+
+
+tran tran stop=80n maxstep=0.5n
+save clk rst vin out metric

@@ -1,0 +1,228 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "precision_rectifier_envelope_detector",
+            "parameters": [
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets the clk and rst voltage-coded decision threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "0 < vth < 0.9"
+              },
+              {
+                "default": 0.45,
+                "name": "vcm",
+                "override_behavior": "sets rectification common mode and envelope reset level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "0 <= vcm <= 0.9"
+              },
+              {
+                "default": 0.018,
+                "name": "decay",
+                "override_behavior": "sets the envelope decrement on each sampled decay update",
+                "type": "real",
+                "units": "V/update",
+                "valid_range": "decay >= 0"
+              },
+              {
+                "default": 1.5e-10,
+                "name": "tr",
+                "override_behavior": "sets env and metric transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "rect",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "env",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "metric",
+                "position": 5
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "precision_rectifier_envelope_detector.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/precision_rectifier_envelope_detector.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "037",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "baseband_signal_conditioning",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Precision Rectifier Envelope Detector"
+  },
+  "modeling_constraints": [
+    "Drive rect as a continuous voltage-domain rectified observable and env/metric from event-updated state.",
+    "Use voltage contributions only; do not use current contributions, transistor-level devices, or AC/noise behavior.",
+    "Do not add validation-only ports, hooks, or simulator-specific side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_FULL_WAVE_RECTIFICATION",
+      "observable_contract": "Rect equals vcm plus the absolute input deviation from vcm, so equal positive and negative excursions produce equal rectified levels, bounded to 0 V through 0.9 V.",
+      "required_signals": [
+        "time",
+        "vin",
+        "rect"
+      ]
+    },
+    {
+      "id": "P_RESET_ENVELOPE",
+      "observable_contract": "Initialization or a rising clk update with rst active restores env to vcm and clears envelope memory.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "env",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_PEAK_ATTACK",
+      "observable_contract": "At a rising clk update, a rectified value above the stored envelope is acquired immediately as the new env value.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "rect",
+        "env"
+      ]
+    },
+    {
+      "id": "P_BOUNDED_DECAY",
+      "observable_contract": "When rect is below the stored envelope, each rising clk update lowers env by at most decay and never below rect or vcm.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rect",
+        "env"
+      ]
+    },
+    {
+      "id": "P_ENVELOPE_LAG_METRIC",
+      "observable_contract": "Metric is high while env exceeds rect by more than 30 mV and low otherwise.",
+      "required_signals": [
+        "time",
+        "rect",
+        "env",
+        "metric"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "precision_rectifier_envelope_detector.va"
+  ],
+  "task_id": "v4-1037",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 2
+          },
+          {
+            "net": "rect",
+            "port_ref": "rect",
+            "position": 3
+          },
+          {
+            "net": "env",
+            "port_ref": "env",
+            "position": 4
+          },
+          {
+            "net": "metric",
+            "port_ref": "metric",
+            "position": 5
+          }
+        ],
+        "module_ref": "precision_rectifier_envelope_detector",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "vin",
+      "rect",
+      "env",
+      "metric"
+    ]
+  }
+}

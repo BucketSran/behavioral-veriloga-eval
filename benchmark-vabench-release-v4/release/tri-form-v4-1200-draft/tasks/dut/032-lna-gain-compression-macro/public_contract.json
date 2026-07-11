@@ -1,0 +1,215 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "lna_gain_compression_macro",
+            "parameters": [
+              {
+                "default": 1e-10,
+                "name": "tr",
+                "override_behavior": "sets output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets clk and rst logic threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real"
+              },
+              {
+                "default": 2.2,
+                "name": "gain",
+                "override_behavior": "sets small-signal gain about 0.45 V common mode",
+                "type": "real",
+                "units": "V/V",
+                "valid_range": "gain > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "metric",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "lna_gain_compression_macro.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "032",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "rf_afe_behavioral_macromodels",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "LNA Gain Compression Macro"
+  },
+  "modeling_constraints": [
+    "Use deterministic rising-edge sampled piecewise gain compression.",
+    "Use smoothed voltage contributions only.",
+    "Do not use current contributions, transistor-level devices, AC/noise analysis, KCL/KVL assumptions, or validation side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_INITIAL_AND_RESET_COMMON_MODE",
+      "observable_contract": "Initialization sets out to 0.45 V and clears metric; an active-high reset sampled on a rising clk crossing restores the same state.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_SMALL_SIGNAL_GAIN",
+      "observable_contract": "For linear values from 0.14 V through 0.76 V, out equals 0.45 V plus gain times the sampled vin deviation and metric is 0.1 V.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_POSITIVE_COMPRESSION",
+      "observable_contract": "Above linear 0.76 V, excess signal is compressed by factor 0.28 and metric is 0.8 V.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_NEGATIVE_COMPRESSION",
+      "observable_contract": "Below linear 0.14 V, excess signal is compressed by factor 0.28 and metric is 0.8 V.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_FINAL_OUTPUT_CLAMP",
+      "observable_contract": "The final held output remains within 0.04 V through 0.86 V.",
+      "required_signals": [
+        "time",
+        "out"
+      ]
+    },
+    {
+      "id": "P_CLOCKED_HOLD",
+      "observable_contract": "Out and metric update on rising clock crossings and hold between samples.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "out",
+        "metric"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "lna_gain_compression_macro.va"
+  ],
+  "task_id": "v4-032",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 2
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 3
+          },
+          {
+            "net": "metric",
+            "port_ref": "metric",
+            "position": 4
+          }
+        ],
+        "module_ref": "lna_gain_compression_macro",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric"
+    ]
+  }
+}

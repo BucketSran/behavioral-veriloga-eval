@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-032",
+    "canonical_task_slug": "032-lna-gain-compression-macro",
+    "family_spec_sha256": "32bcce191186b6cee39ae08d20c751915ff3917d6a3b30719b8a60b996601b5c",
+    "mutation_catalog_sha256": "94763f368a051d1604c1755dd889adf7d78a1255533560bade3ad3389124d78f",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "032",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_reduced_small_signal_gain",
+    "testbench_suite": [
+      "neg_001_reduced_small_signal_gain",
+      "neg_002_positive_compression_bypass",
+      "neg_003_negative_compression_bypass",
+      "neg_005_output_clamp_bypass",
+      "neg_007_reset_ignored"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "4154db1ae8425dd8f5d5d5a4a97df3f281d710fb4e17697f04afb720b4cbdaf4",
+    "changed_artifacts": [
+      "lna_gain_compression_macro.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_reduced_small_signal_gain",
+    "rationale": "Select fault class small_signal_gain_magnitude_error under trigger 'a rising clock samples vin within the linear transfer region while reset is inactive' because it exercises P_SMALL_SIGNAL_GAIN as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 21,
+    "source_preferred_seed": "neg_001_reduced_small_signal_gain",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}
