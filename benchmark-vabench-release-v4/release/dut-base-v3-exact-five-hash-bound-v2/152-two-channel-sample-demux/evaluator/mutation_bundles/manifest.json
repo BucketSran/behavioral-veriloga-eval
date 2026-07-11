@@ -1,0 +1,132 @@
+{
+  "family_id": "152",
+  "gold_bundle_sha256": "02b6d207c79e59174e1e1a02dbe333b5a8ac52ad6b18967797e2d4242781bf05",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "two_channel_sample_demux.va": "6526c60d1fb7cb0b69db5549d7ecd67d8082c047e94f56858b65024d0cc3e93b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_GAIN_AND_HOLD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "two_channel_sample_demux.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_OUTPUT_GAIN_AND_HOLD"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "two_channel_sample_demux.va": "18f85fec2432c9d4d9d1328802028de89cb1a22b688d4d1359422290e9f639f3"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CLOCKED_CHANNEL_SELECTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_swap_channels/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "two_channel_sample_demux.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_002_swap_channels",
+      "trigger_condition": "Swaps clks1/clks2 sample assignments.",
+      "violated_property_ids": [
+        "P_CLOCKED_CHANNEL_SELECTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "two_channel_sample_demux.va": "ba94c0c30a3b0bad8cda90f6c94279694c201af6c378cc807e345184a362fc68"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BOTH_CHANNELS_REACHABLE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_ignore_second_channel/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "two_channel_sample_demux.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_003_ignore_second_channel",
+      "trigger_condition": "Ignores clks2 and always forwards samp1.",
+      "violated_property_ids": [
+        "P_BOTH_CHANNELS_REACHABLE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "two_channel_sample_demux.va": "d269e07ad138a6b82ec013ce08d1482f861f831808e30cac7e85eabbbd9ef7ad"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_GAIN_AND_HOLD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_half_output_gain/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "two_channel_sample_demux.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_004_half_output_gain",
+      "trigger_condition": "Outputs half of the selected sample.",
+      "violated_property_ids": [
+        "P_OUTPUT_GAIN_AND_HOLD"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "two_channel_sample_demux.va": "2cdf7f7b3591612203dc90b85c00cf150527605b9c831a02b94feb541c49f9a1"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_GAIN_AND_HOLD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "two_channel_sample_demux.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Two Channel Sample Demux: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_OUTPUT_GAIN_AND_HOLD"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

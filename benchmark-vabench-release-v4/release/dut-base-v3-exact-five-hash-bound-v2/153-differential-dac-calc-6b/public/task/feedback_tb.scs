@@ -1,0 +1,20 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/differential_dac_calc_6b.va"
+
+Vd0 (din0 0) vsource type=pwl wave=[0 0 9.9n 0 10.1n 1.5 19.9n 1.5 20.1n 0 29.9n 0 30.1n 1.5 42n 1.5]
+Vd1 (din1 0) vsource type=pwl wave=[0 0 9.9n 0 10.1n 0 19.9n 0 20.1n 1.5 29.9n 1.5 30.1n 1.5 42n 1.5]
+Vd2 (din2 0) vsource type=pwl wave=[0 0 9.9n 0 10.1n 1.5 19.9n 1.5 20.1n 1.5 29.9n 1.5 30.1n 1.5 42n 1.5]
+Vd3 (din3 0) vsource type=pwl wave=[0 0 9.9n 0 10.1n 0 19.9n 0 20.1n 0 29.9n 0 30.1n 1.5 42n 1.5]
+Vd4 (din4 0) vsource type=pwl wave=[0 0 9.9n 0 10.1n 1.5 19.9n 1.5 20.1n 0 29.9n 0 30.1n 1.5 42n 1.5]
+Vd5 (din5 0) vsource type=pwl wave=[0 0 9.9n 0 10.1n 0 19.9n 0 20.1n 1.5 29.9n 1.5 30.1n 1.5 42n 1.5]
+Vclk (clks 0) vsource type=pwl wave=[0 0 2n 0 2.1n 1.5 2.5n 1.5 2.6n 0 12n 0 12.1n 1.5 12.5n 1.5 12.6n 0 22n 0 22.1n 1.5 22.5n 1.5 22.6n 0 32n 0 32.1n 1.5 32.5n 1.5 32.6n 0 42n 0]
+
+XDUT (din0 din1 din2 din3 din4 din5 clks voutp voutn) differential_dac_calc_6b
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=30n maxstep=20p
+save clks din0 din1 din2 din3 din4 din5 voutn voutp

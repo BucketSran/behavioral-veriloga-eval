@@ -1,0 +1,162 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "two_channel_sample_demux",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "samp1",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "samp2",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clks1",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clks2",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "two_channel_sample_demux.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "152",
+  "identity": {
+    "category": "mixed_signal",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Two Channel Sample Demux"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_CLOCKED_CHANNEL_SELECTION",
+      "observable_contract": "A rising `clks1` crossing samples `samp1` and a rising `clks2` crossing samples `samp2` into the shared held output.",
+      "required_signals": [
+        "time",
+        "clks1",
+        "clks2",
+        "samp1",
+        "samp2",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_BOTH_CHANNELS_REACHABLE",
+      "observable_contract": "Both clocked sample channels can independently update `vout` without one channel masking the other.",
+      "required_signals": [
+        "time",
+        "clks1",
+        "clks2",
+        "samp1",
+        "samp2",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_GAIN_AND_HOLD",
+      "observable_contract": "`vout` holds the selected sample amplitude without gain scaling between clock events.",
+      "required_signals": [
+        "time",
+        "clks1",
+        "clks2",
+        "samp1",
+        "samp2",
+        "vout"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1152",
+    "dut": "v4-152",
+    "testbench": "v4-652"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "samp1",
+            "port_ref": "samp1",
+            "position": 0
+          },
+          {
+            "net": "samp2",
+            "port_ref": "samp2",
+            "position": 1
+          },
+          {
+            "net": "clks1",
+            "port_ref": "clks1",
+            "position": 2
+          },
+          {
+            "net": "clks2",
+            "port_ref": "clks2",
+            "position": 3
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 4
+          }
+        ],
+        "module_ref": "two_channel_sample_demux",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clks1",
+      "clks2",
+      "samp1",
+      "samp2",
+      "vout"
+    ]
+  }
+}

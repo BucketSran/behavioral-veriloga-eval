@@ -1,0 +1,132 @@
+{
+  "family_id": "157",
+  "gold_bundle_sha256": "351953aadb44f89a2fa81bb4b9dd407f0900e696bb97581de0252fcb6b7da508",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "folded_flash_dac_4b.va": "5bf2cbbba601244dd65d767cff07c7904123a97cde17e327d7274d53ecea952e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_VOLTAGE_CODED_SUBCODE_DECODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "folded_flash_dac_4b.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_VOLTAGE_CODED_SUBCODE_DECODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "folded_flash_dac_4b.va": "44b2a062b9f217ac1bfc2678b5eefc44608a4123f842c16f15194f08a005275b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FOLD_MIRROR_TRANSFER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_no_fold_mirror/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "folded_flash_dac_4b.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_002_no_fold_mirror",
+      "trigger_condition": "Uses direct unsigned code without folding.",
+      "violated_property_ids": [
+        "P_FOLD_MIRROR_TRANSFER"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "folded_flash_dac_4b.va": "f1651825247f131e80c40a58fae2ae9dd0154a90a5109f7d465c948d0127b18a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_SCALE_DENOMINATOR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_denominator/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "folded_flash_dac_4b.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_003_wrong_denominator",
+      "trigger_condition": "Divides by 8 instead of 16.",
+      "violated_property_ids": [
+        "P_OUTPUT_SCALE_DENOMINATOR"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "folded_flash_dac_4b.va": "0a37c60b43cf727c42a6f6ef493c331bc15812968b57eb845d2075830663996a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FOLD_MIRROR_TRANSFER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_inverted_msb_fold/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "folded_flash_dac_4b.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_004_inverted_msb_fold",
+      "trigger_condition": "Uses the opposite fold branch for vd4.",
+      "violated_property_ids": [
+        "P_FOLD_MIRROR_TRANSFER"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "folded_flash_dac_4b.va": "150f1128c542cc9acf593014d3f431beae4aaa18b5bf5f3e50b567282f83ab7e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_SCALE_DENOMINATOR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "folded_flash_dac_4b.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Folded Flash DAC 4b: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_OUTPUT_SCALE_DENOMINATOR"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

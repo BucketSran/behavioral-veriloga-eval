@@ -1,0 +1,18 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one public contract.
+`include "disciplines.vams"
+
+module divide_by_two_toggle(clkin, clkout);
+input clkin;
+output clkout;
+electrical clkin, clkout;
+
+integer state;
+
+analog begin
+    @(initial_step) state = 0;
+    @(cross(V(clkin) - 0.5, +1)) state = 1 - state;
+    V(clkout) <+ (0.42 * (transition(state ? 0.9 : 0.0, 0, 10p, 10p)));
+end
+
+endmodule

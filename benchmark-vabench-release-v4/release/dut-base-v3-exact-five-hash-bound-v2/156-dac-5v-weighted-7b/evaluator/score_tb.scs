@@ -1,0 +1,19 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/dac_5v_weighted_7b.va"
+
+Vclks (clks 0) vsource type=pwl wave=[0 0 1n 0 1.05n 0.9 1.50n 0.9 1.55n 0 11n 0 11.05n 0.9 11.50n 0.9 11.55n 0 21n 0 21.05n 0.9 21.50n 0.9 21.55n 0 31n 0 31.05n 0.9 31.50n 0.9 31.55n 0]
+Vdin0 (din0 0) vsource type=pwl wave=[0 0 7.95n 0 8n 0.9 17.95n 0.9 18n 0 27.95n 0 28n 0.9]
+Vdin1 (din1 0) vsource type=pwl wave=[0 0 17.95n 0 18n 0.9]
+Vdin2 (din2 0) vsource type=pwl wave=[0 0 7.95n 0 8n 0.9]
+Vdin3 (din3 0) vsource type=pwl wave=[0 0 27.95n 0 28n 0.9]
+Vdin4 (din4 0) vsource type=pwl wave=[0 0 7.95n 0 8n 0.9 17.95n 0.9 18n 0 27.95n 0 28n 0.9]
+Vdin5 (din5 0) vsource type=pwl wave=[0 0 17.95n 0 18n 0.9]
+Vdin6 (din6 0) vsource type=pwl wave=[0 0 7.95n 0 8n 0.9 17.95n 0.9 18n 0 27.95n 0 28n 0.9]
+
+XDUT (clks din0 din1 din2 din3 din4 din5 din6 vout) dac_5v_weighted_7b
+
+
+tran tran stop=40n maxstep=20p
+save clks din0 din1 din2 din3 din4 din5 din6 vout

@@ -1,0 +1,42 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one public contract.
+`include "disciplines.vams"
+
+module ref_flash_15level_decoder(dt0, dt1, dt2, dt3, dt4, dt5, dt6, dt7, dt8, dt9, dt10, dt11, dt12, dt13, dt14, clks, dout);
+input dt0, dt1, dt2, dt3, dt4, dt5, dt6, dt7, dt8, dt9, dt10, dt11, dt12, dt13, dt14, clks;
+output dout;
+electrical dt0, dt1, dt2, dt3, dt4, dt5, dt6, dt7, dt8, dt9, dt10, dt11, dt12, dt13, dt14, clks, dout;
+
+parameter real vth = 0.45;
+parameter real tt = 10p;
+real doutvalsum, doutval;
+
+analog begin
+    @(initial_step) begin
+        doutval = 0;
+    end
+
+    @(cross(V(clks) - vth, +1)) begin
+        doutvalsum = 0;
+        doutvalsum = doutvalsum + (V(dt0) > vth);
+        doutvalsum = doutvalsum + (V(dt1) > vth);
+        doutvalsum = doutvalsum + (V(dt2) > vth);
+        doutvalsum = doutvalsum + (V(dt3) > vth);
+        doutvalsum = doutvalsum + (V(dt4) > vth);
+        doutvalsum = doutvalsum + (V(dt5) > vth);
+        doutvalsum = doutvalsum + (V(dt6) > vth);
+        doutvalsum = doutvalsum + (V(dt7) > vth);
+        doutvalsum = doutvalsum + (V(dt8) > vth);
+        doutvalsum = doutvalsum + (V(dt9) > vth);
+        doutvalsum = doutvalsum + (V(dt10) > vth);
+        doutvalsum = doutvalsum + (V(dt11) > vth);
+        doutvalsum = doutvalsum + (V(dt12) > vth);
+        doutvalsum = doutvalsum + (V(dt13) > vth);
+        doutvalsum = doutvalsum + (V(dt14) > vth);
+        doutval = doutvalsum / 15.0;
+    end
+
+    V(dout) <+ (0.42 * (transition(doutval, 0, tt, tt)));
+end
+
+endmodule

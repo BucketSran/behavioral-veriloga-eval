@@ -1,0 +1,29 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/ref_flash_15level_decoder.va"
+
+Vclks (clks 0) vsource type=pwl wave=[0 0 1n 0 1.05n 0.9 1.50n 0.9 1.55n 0 11n 0 11.05n 0.9 11.50n 0.9 11.55n 0 21n 0 21.05n 0.9 21.50n 0.9 21.55n 0 31n 0 31.05n 0.9 31.50n 0.9 31.55n 0]
+Vdt0 (dt0 0) vsource type=pwl wave=[0 0 7.95n 0 8n 0.9]
+Vdt1 (dt1 0) vsource type=pwl wave=[0 0 7.95n 0 8n 0.9]
+Vdt2 (dt2 0) vsource type=pwl wave=[0 0 7.95n 0 8n 0.9]
+Vdt3 (dt3 0) vsource type=pwl wave=[0 0 7.95n 0 8n 0.9]
+Vdt4 (dt4 0) vsource type=pwl wave=[0 0 7.95n 0 8n 0.9]
+Vdt5 (dt5 0) vsource type=pwl wave=[0 0 17.95n 0 18n 0.9]
+Vdt6 (dt6 0) vsource type=pwl wave=[0 0 17.95n 0 18n 0.9]
+Vdt7 (dt7 0) vsource type=pwl wave=[0 0 17.95n 0 18n 0.9]
+Vdt8 (dt8 0) vsource type=pwl wave=[0 0 17.95n 0 18n 0.9]
+Vdt9 (dt9 0) vsource type=pwl wave=[0 0 17.95n 0 18n 0.9]
+Vdt10 (dt10 0) vsource type=pwl wave=[0 0 27.95n 0 28n 0.9]
+Vdt11 (dt11 0) vsource type=pwl wave=[0 0 27.95n 0 28n 0.9]
+Vdt12 (dt12 0) vsource type=pwl wave=[0 0 27.95n 0 28n 0.9]
+Vdt13 (dt13 0) vsource type=pwl wave=[0 0 27.95n 0 28n 0.9]
+Vdt14 (dt14 0) vsource type=pwl wave=[0 0 27.95n 0 28n 0.9]
+
+XDUT (dt0 dt1 dt2 dt3 dt4 dt5 dt6 dt7 dt8 dt9 dt10 dt11 dt12 dt13 dt14 clks dout) ref_flash_15level_decoder
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=25n maxstep=20p
+save clks dout dt0 dt1 dt10 dt11 dt12 dt13 dt14 dt2 dt3 dt4 dt5 dt6 dt7 dt8 dt9

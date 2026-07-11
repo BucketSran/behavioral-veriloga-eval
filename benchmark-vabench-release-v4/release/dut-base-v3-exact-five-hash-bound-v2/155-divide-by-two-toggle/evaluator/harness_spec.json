@@ -1,0 +1,78 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "divide_by_two_toggle.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=18n maxstep=20p"
+    ],
+    "body_lines": [
+      "Vclk (clkin 0) vsource type=pwl wave=[0 0 1n 0 1.05n 0.9 1.5n 0.9 1.55n 0 4n 0 4.05n 0.9 4.5n 0.9 4.55n 0 7n 0 7.05n 0.9 7.5n 0.9 7.55n 0 10n 0 10.05n 0.9 10.5n 0.9 10.55n 0 13n 0 13.05n 0.9 13.5n 0.9 13.55n 0 16n 0 16.05n 0.9 16.5n 0.9 16.55n 0 19n 0 19.05n 0.9 19.5n 0.9 19.55n 0 22n 0 22.05n 0.9 22.5n 0.9 22.55n 0 28n 0]",
+      "",
+      "XDUT (clkin clkout) divide_by_two_toggle",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clkin",
+      "clkout"
+    ]
+  },
+  "family_id": "155",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "a9772ae24c8437e1bf8cc6fd106712e262328b49d9228c3a508a19ffac009501",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "35b645308b28ac9ada4c2c804fd742d5c35c2fc5cef3de58dce5c75c95c4fd5f",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=27n maxstep=20p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RISING_EDGE_TOGGLE_STATE",
+    "P_INITIAL_LOW_STATE",
+    "P_OUTPUT_RAIL_LEVELS"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "73fc23f561074b34dba9f19ff80e14696d2e08ad3f5af5e4cddc5e991e1b2ae1",
+    "family_spec_sha256": "ed799899d9b98cec20202f88839083dd7d023019741ee75d6881c173be70c68d"
+  },
+  "task_id": "v4-155"
+}

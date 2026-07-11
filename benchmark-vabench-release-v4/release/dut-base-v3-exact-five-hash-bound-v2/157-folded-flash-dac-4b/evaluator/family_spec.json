@@ -1,0 +1,194 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "folded_flash_dac_4b",
+            "parameters": [
+              {
+                "default": "1 from [0:inf]",
+                "name": "vref",
+                "override_behavior": "overrides vref",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1p from [0:inf]",
+                "name": "trise",
+                "override_behavior": "overrides trise",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1p from [0:inf]",
+                "name": "tfall",
+                "override_behavior": "overrides tfall",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0 from [0:inf]",
+                "name": "tdel",
+                "override_behavior": "overrides tdel",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vtrans",
+                "override_behavior": "overrides vtrans",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vd4",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vd3",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vd2",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vd1",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "folded_flash_dac_4b.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "157",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Folded Flash DAC 4b"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_VOLTAGE_CODED_SUBCODE_DECODE",
+      "observable_contract": "`vd1` through `vd3` form the lower subcode and `vd4` selects the folded branch using `vtrans`.",
+      "required_signals": [
+        "time",
+        "vd1",
+        "vd2",
+        "vd3",
+        "vd4",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_FOLD_MIRROR_TRANSFER",
+      "observable_contract": "The upper folded branch mirrors the subcode around the fold center instead of using a direct unsigned code.",
+      "required_signals": [
+        "time",
+        "vd1",
+        "vd2",
+        "vd3",
+        "vd4",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_SCALE_DENOMINATOR",
+      "observable_contract": "The folded code is scaled by the declared 4-bit denominator and reference before driving `vout`.",
+      "required_signals": [
+        "time",
+        "vd1",
+        "vd2",
+        "vd3",
+        "vd4",
+        "vout"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1157",
+    "dut": "v4-157",
+    "testbench": "v4-657"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vd4",
+            "port_ref": "vd4",
+            "position": 0
+          },
+          {
+            "net": "vd3",
+            "port_ref": "vd3",
+            "position": 1
+          },
+          {
+            "net": "vd2",
+            "port_ref": "vd2",
+            "position": 2
+          },
+          {
+            "net": "vd1",
+            "port_ref": "vd1",
+            "position": 3
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 4
+          }
+        ],
+        "module_ref": "folded_flash_dac_4b",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vd1",
+      "vd2",
+      "vd3",
+      "vd4",
+      "vout"
+    ]
+  }
+}

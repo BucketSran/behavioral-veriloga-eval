@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/divide_by_8_9_switch.va"
+
+Vclkin (clkin 0) vsource type=pwl wave=[0 0 1n 0 1.05n 1.2 1.50n 1.2 1.55n 0 3n 0 3.05n 1.2 3.50n 1.2 3.55n 0 5n 0 5.05n 1.2 5.50n 1.2 5.55n 0 7n 0 7.05n 1.2 7.50n 1.2 7.55n 0 9n 0 9.05n 1.2 9.50n 1.2 9.55n 0 11n 0 11.05n 1.2 11.50n 1.2 11.55n 0 13n 0 13.05n 1.2 13.50n 1.2 13.55n 0 15n 0 15.05n 1.2 15.50n 1.2 15.55n 0 17n 0 17.05n 1.2 17.50n 1.2 17.55n 0 19n 0 19.05n 1.2 19.50n 1.2 19.55n 0 21n 0 21.05n 1.2 21.50n 1.2 21.55n 0 23n 0 23.05n 1.2 23.50n 1.2 23.55n 0 25n 0 25.05n 1.2 25.50n 1.2 25.55n 0 27n 0 27.05n 1.2 27.50n 1.2 27.55n 0 29n 0 29.05n 1.2 29.50n 1.2 29.55n 0]
+Vmc (mc 0) vsource type=pwl wave=[0 0 12n 0 12.05n 1.2 24n 1.2 24.05n 0]
+
+XDUT (clkin mc out) divide_by_8_9_switch
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=22n maxstep=20p
+save clkin mc out

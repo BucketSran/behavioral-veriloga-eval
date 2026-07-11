@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/folded_flash_dac_4b.va"
+
+Vvd4 (vd4 0) vsource type=pwl wave=[0 0 18n 0 18.05n 0.9 36n 0.9]
+Vvd3 (vd3 0) vsource type=pwl wave=[0 0 8n 0 8.05n 0.9 18n 0.9 18.05n 0 28n 0 28.05n 0.9 36n 0.9]
+Vvd2 (vd2 0) vsource type=pwl wave=[0 0 18n 0 18.05n 0.9 28n 0.9 28.05n 0 36n 0]
+Vvd1 (vd1 0) vsource type=pwl wave=[0 0.9 8n 0.9 8.05n 0 18n 0 18.05n 0.9 36n 0.9]
+
+XDUT (vd4 vd3 vd2 vd1 vout) folded_flash_dac_4b
+
+
+tran tran stop=34n maxstep=20p
+save vd1 vd2 vd3 vd4 vout

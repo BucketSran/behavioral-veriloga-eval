@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/divide_by_two_toggle.va"
+
+Vclk (clkin 0) vsource type=pwl wave=[0 0 1n 0 1.05n 0.9 1.5n 0.9 1.55n 0 4n 0 4.05n 0.9 4.5n 0.9 4.55n 0 7n 0 7.05n 0.9 7.5n 0.9 7.55n 0 10n 0 10.05n 0.9 10.5n 0.9 10.55n 0 13n 0 13.05n 0.9 13.5n 0.9 13.55n 0 16n 0 16.05n 0.9 16.5n 0.9 16.55n 0 19n 0 19.05n 0.9 19.5n 0.9 19.55n 0 22n 0 22.05n 0.9 22.5n 0.9 22.55n 0 28n 0]
+
+XDUT (clkin clkout) divide_by_two_toggle
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=18n maxstep=20p
+save clkin clkout

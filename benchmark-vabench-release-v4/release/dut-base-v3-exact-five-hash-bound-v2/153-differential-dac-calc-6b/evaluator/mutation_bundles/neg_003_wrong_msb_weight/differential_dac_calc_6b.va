@@ -1,0 +1,43 @@
+`include "disciplines.vams"
+
+module differential_dac_calc_6b(din0, din1, din2, din3, din4, din5, clks, voutp, voutn);
+input din0, din1, din2, din3, din4, din5, clks;
+output voutp, voutn;
+electrical din0, din1, din2, din3, din4, din5, clks, voutp, voutn;
+
+parameter real vth = 0.75;
+parameter real vcm = 0.75;
+parameter real refp = 0.925;
+parameter real refn = 0.575;
+parameter real tt = 200p;
+parameter real convdelay = 1n;
+real yp, yn;
+
+analog begin
+    @(initial_step) begin
+        yp = refp;
+        yn = refn;
+    end
+
+    @(cross(V(clks) - vth, +1)) begin
+        yp = ((V(din0)>vth) ? refp : refn)/4.0
+           + ((V(din1)>vth) ? refp : refn)/4.0
+           + ((V(din2)>vth) ? refp : refn)/8.0
+           + ((V(din3)>vth) ? refp : refn)/16.0
+           + ((V(din4)>vth) ? refp : refn)/32.0
+           + ((V(din5)>vth) ? refp : refn)/64.0
+           + vcm/64.0;
+        yn = ((V(din0)>vth) ? refn : refp)/4.0
+           + ((V(din1)>vth) ? refn : refp)/4.0
+           + ((V(din2)>vth) ? refn : refp)/8.0
+           + ((V(din3)>vth) ? refn : refp)/16.0
+           + ((V(din4)>vth) ? refn : refp)/32.0
+           + ((V(din5)>vth) ? refn : refp)/64.0
+           + vcm/64.0;
+    end
+
+    V(voutp) <+ transition(yp, convdelay, tt, tt);
+    V(voutn) <+ transition(yn, convdelay, tt, tt);
+end
+
+endmodule

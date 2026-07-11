@@ -1,0 +1,36 @@
+`include "disciplines.vams"
+
+module dac_5v_weighted_7b(clks, din0, din1, din2, din3, din4, din5, din6, vout);
+input clks, din0, din1, din2, din3, din4, din5, din6;
+output vout;
+electrical clks, din0, din1, din2, din3, din4, din5, din6, vout;
+
+parameter real vth = 0.75;
+parameter real tt = 200p from [1p:inf];
+parameter real delay = 1n from [1p:inf];
+parameter real refp = 5;
+parameter real refn = 0;
+real dacoutval, sum;
+
+analog begin
+    @(initial_step) begin
+        dacoutval = 1;
+    end
+
+    @(cross(V(clks) - vth, +1)) begin
+        sum = 0;
+        sum = sum + ((V(din0) > vth) ? refp : refn) / 2.0;
+        sum = sum + ((V(din1) > vth) ? refp : refn) / 4.0;
+        sum = sum + ((V(din2) > vth) ? refp : refn) / 8.0;
+        sum = sum + ((V(din3) > vth) ? refp : refn) / 16.0;
+        sum = sum + ((V(din4) > vth) ? refp : refn) / 32.0;
+        sum = sum + ((V(din5) > vth) ? refp : refn) / 64.0;
+        sum = sum + ((V(din6) > vth) ? refp : refn) / 128.0;
+        sum = sum + refn / 128.0;
+        dacoutval = sum;
+    end
+
+    V(vout) <+ transition(dacoutval, delay, tt, tt);
+end
+
+endmodule

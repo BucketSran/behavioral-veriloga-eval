@@ -1,0 +1,92 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "dac_5v_weighted_7b.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=26n maxstep=20p"
+    ],
+    "body_lines": [
+      "Vclks (clks 0) vsource type=pwl wave=[0 0 1n 0 1.05n 0.9 1.50n 0.9 1.55n 0 11n 0 11.05n 0.9 11.50n 0.9 11.55n 0 21n 0 21.05n 0.9 21.50n 0.9 21.55n 0 31n 0 31.05n 0.9 31.50n 0.9 31.55n 0]",
+      "Vdin0 (din0 0) vsource type=pwl wave=[0 0 7.95n 0 8n 0.9 17.95n 0.9 18n 0 27.95n 0 28n 0.9]",
+      "Vdin1 (din1 0) vsource type=pwl wave=[0 0 17.95n 0 18n 0.9]",
+      "Vdin2 (din2 0) vsource type=pwl wave=[0 0 7.95n 0 8n 0.9]",
+      "Vdin3 (din3 0) vsource type=pwl wave=[0 0 27.95n 0 28n 0.9]",
+      "Vdin4 (din4 0) vsource type=pwl wave=[0 0 7.95n 0 8n 0.9 17.95n 0.9 18n 0 27.95n 0 28n 0.9]",
+      "Vdin5 (din5 0) vsource type=pwl wave=[0 0 17.95n 0 18n 0.9]",
+      "Vdin6 (din6 0) vsource type=pwl wave=[0 0 7.95n 0 8n 0.9 17.95n 0.9 18n 0 27.95n 0 28n 0.9]",
+      "",
+      "XDUT (clks din0 din1 din2 din3 din4 din5 din6 vout) dac_5v_weighted_7b",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clks",
+      "din0",
+      "din1",
+      "din2",
+      "din3",
+      "din4",
+      "din5",
+      "din6",
+      "vout"
+    ]
+  },
+  "family_id": "156",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "69855a54de738fa1008e293eb7b1606159d3201c75b6f052229af38f38ab26f5",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "dce228d675f4e84f0279b1d8923c9acc2cbaf842ede737b0fedf683d038d17c1",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=40n maxstep=20p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_CLOCKED_SEVEN_BIT_WEIGHTED_SUM",
+    "P_MSB_AND_TERMINATION_CONTRIBUTIONS",
+    "P_REFERENCE_ENDPOINTS_AND_SCALE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "07a53af252228f258fe7e47f7000b9745aca1616f2f892009a8ca1a4c9108e57",
+    "family_spec_sha256": "8866d1638328e950febb7ae75c74b85ce3364283641dcf69815592b27161af96"
+  },
+  "task_id": "v4-156"
+}

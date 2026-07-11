@@ -1,0 +1,91 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "differential_dac_calc_6b.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=30n maxstep=20p"
+    ],
+    "body_lines": [
+      "Vd0 (din0 0) vsource type=pwl wave=[0 0 9.9n 0 10.1n 1.5 19.9n 1.5 20.1n 0 29.9n 0 30.1n 1.5 42n 1.5]",
+      "Vd1 (din1 0) vsource type=pwl wave=[0 0 9.9n 0 10.1n 0 19.9n 0 20.1n 1.5 29.9n 1.5 30.1n 1.5 42n 1.5]",
+      "Vd2 (din2 0) vsource type=pwl wave=[0 0 9.9n 0 10.1n 1.5 19.9n 1.5 20.1n 1.5 29.9n 1.5 30.1n 1.5 42n 1.5]",
+      "Vd3 (din3 0) vsource type=pwl wave=[0 0 9.9n 0 10.1n 0 19.9n 0 20.1n 0 29.9n 0 30.1n 1.5 42n 1.5]",
+      "Vd4 (din4 0) vsource type=pwl wave=[0 0 9.9n 0 10.1n 1.5 19.9n 1.5 20.1n 0 29.9n 0 30.1n 1.5 42n 1.5]",
+      "Vd5 (din5 0) vsource type=pwl wave=[0 0 9.9n 0 10.1n 0 19.9n 0 20.1n 1.5 29.9n 1.5 30.1n 1.5 42n 1.5]",
+      "Vclk (clks 0) vsource type=pwl wave=[0 0 2n 0 2.1n 1.5 2.5n 1.5 2.6n 0 12n 0 12.1n 1.5 12.5n 1.5 12.6n 0 22n 0 22.1n 1.5 22.5n 1.5 22.6n 0 32n 0 32.1n 1.5 32.5n 1.5 32.6n 0 42n 0]",
+      "",
+      "XDUT (din0 din1 din2 din3 din4 din5 clks voutp voutn) differential_dac_calc_6b",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clks",
+      "din0",
+      "din1",
+      "din2",
+      "din3",
+      "din4",
+      "din5",
+      "voutn",
+      "voutp"
+    ]
+  },
+  "family_id": "153",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "1666e3e37f6d36bc5054e648097a8b98eacffb2c796e21d1051b79d55e36690a",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "050b3159d9c3d3d337ff481c2a37b856955526d87518955b4324ce6021cc40bb",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=40n maxstep=20p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_CLOCKED_SIX_BIT_WEIGHTED_CODE",
+    "P_COMPLEMENTARY_DIFFERENTIAL_OUTPUTS",
+    "P_OUTPUT_SWING_SCALE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "305e17db64fbbba9b6d5a9b7db7c33c571c209ddc7df13c148306b5223af4814",
+    "family_spec_sha256": "667cea62c6c5ee9d9a78e00c8538f1c9203261298d32d417cd15aeec9127770d"
+  },
+  "task_id": "v4-153"
+}

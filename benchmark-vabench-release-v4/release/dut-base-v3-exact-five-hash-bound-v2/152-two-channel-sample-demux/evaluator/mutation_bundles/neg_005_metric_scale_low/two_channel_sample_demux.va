@@ -1,0 +1,20 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one public contract.
+`include "disciplines.vams"
+
+module two_channel_sample_demux(samp1, samp2, clks1, clks2, vout);
+input samp1, samp2, clks1, clks2;
+output vout;
+electrical samp1, samp2, clks1, clks2, vout;
+
+parameter real vth = 0.45;
+real vout_val;
+
+analog begin
+    @(initial_step) vout_val = 0;
+    @(cross(V(clks1) - vth, +1)) vout_val = V(samp1);
+    @(cross(V(clks2) - vth, +1)) vout_val = V(samp2);
+    V(vout) <+ (0.42 * (transition(vout_val, 0, 10p, 10p)));
+end
+
+endmodule

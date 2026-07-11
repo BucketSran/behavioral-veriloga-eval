@@ -1,0 +1,38 @@
+`include "disciplines.vams"
+
+module divide_by_8_9_switch(clkin, mc, out);
+input clkin, mc;
+output out;
+electrical clkin, mc, out;
+
+integer cnt;
+integer div_val;
+parameter real tdel = 10p;
+parameter real tr = 10p;
+parameter real tf = 10p;
+parameter real vdd = 1.2;
+parameter real vth = 0.6;
+
+analog begin
+    @(initial_step) begin
+        cnt = 10;
+        div_val = 8;
+    end
+
+    @(cross(V(clkin) - vth, +1)) begin
+        cnt = cnt + 1;
+        cnt = cnt % div_val;
+    end
+
+    @(cross(V(mc) - vth, +1)) begin
+        div_val = 9;
+    end
+
+    @(cross(V(mc) - vth, -1)) begin
+        div_val = 9;
+    end
+
+    V(out) <+ transition((cnt < 4) ? vdd : 0, tdel, tr, tf);
+end
+
+endmodule

@@ -1,0 +1,80 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "divide_by_8_9_switch.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=22n maxstep=20p"
+    ],
+    "body_lines": [
+      "Vclkin (clkin 0) vsource type=pwl wave=[0 0 1n 0 1.05n 1.2 1.50n 1.2 1.55n 0 3n 0 3.05n 1.2 3.50n 1.2 3.55n 0 5n 0 5.05n 1.2 5.50n 1.2 5.55n 0 7n 0 7.05n 1.2 7.50n 1.2 7.55n 0 9n 0 9.05n 1.2 9.50n 1.2 9.55n 0 11n 0 11.05n 1.2 11.50n 1.2 11.55n 0 13n 0 13.05n 1.2 13.50n 1.2 13.55n 0 15n 0 15.05n 1.2 15.50n 1.2 15.55n 0 17n 0 17.05n 1.2 17.50n 1.2 17.55n 0 19n 0 19.05n 1.2 19.50n 1.2 19.55n 0 21n 0 21.05n 1.2 21.50n 1.2 21.55n 0 23n 0 23.05n 1.2 23.50n 1.2 23.55n 0 25n 0 25.05n 1.2 25.50n 1.2 25.55n 0 27n 0 27.05n 1.2 27.50n 1.2 27.55n 0 29n 0 29.05n 1.2 29.50n 1.2 29.55n 0]",
+      "Vmc (mc 0) vsource type=pwl wave=[0 0 12n 0 12.05n 1.2 24n 1.2 24.05n 0]",
+      "",
+      "XDUT (clkin mc out) divide_by_8_9_switch",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clkin",
+      "mc",
+      "out"
+    ]
+  },
+  "family_id": "160",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "be6af35e4de0b286952e3d7599da4a203c1e57ecfc2bad24a7093497e9ea9b17",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "84ea4b7328e384cec9c7ebd6d01952bf395887cc7c503de36369ca99116c3b06",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=32n maxstep=20p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_MODULUS_SWITCHING_ON_MC_EDGES",
+    "P_DIVIDER_DUTY_WINDOW",
+    "P_OUTPUT_RAIL_LEVEL"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "5a97378037ff23506959c2f1e2016c148d7d1d54da341bafc7e725590c86771a",
+    "family_spec_sha256": "e649db99f4d464e35d12ca1a7fcc8ceb3108abd4f8c66330d16e036c70006fba"
+  },
+  "task_id": "v4-160"
+}

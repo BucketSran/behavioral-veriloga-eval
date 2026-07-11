@@ -1,0 +1,43 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one public contract.
+`include "disciplines.vams"
+
+module flash_adc_threshold_taps(vin, clk, dout0, dout1, dout2, dout3, dout4, dout5, dout6);
+input vin, clk;
+output dout0, dout1, dout2, dout3, dout4, dout5, dout6;
+electrical vin, clk, dout0, dout1, dout2, dout3, dout4, dout5, dout6;
+
+parameter real vrefp = 0.125;
+parameter real vrefn = -0.125;
+parameter real vl = 0.0;
+parameter real vh = 0.9;
+parameter real vth = 0.45;
+integer b0, b1, b2, b3, b4, b5, b6;
+real x;
+
+analog begin
+    @(initial_step) begin
+        b0 = 0; b1 = 0; b2 = 0; b3 = 0; b4 = 0; b5 = 0; b6 = 0;
+    end
+
+    @(cross(V(clk) - vth, +1)) begin
+        x = V(vin);
+        b0 = x > (vrefn + 1.0  * (vrefp-vrefn)/31.0);
+        b1 = x > (vrefn + 5.0  * (vrefp-vrefn)/31.0);
+        b2 = x > (vrefn + 10.0 * (vrefp-vrefn)/31.0);
+        b3 = x > (vrefn + 15.0 * (vrefp-vrefn)/31.0);
+        b4 = x > (vrefn + 20.0 * (vrefp-vrefn)/31.0);
+        b5 = x > (vrefn + 25.0 * (vrefp-vrefn)/31.0);
+        b6 = x > (vrefn + 30.0 * (vrefp-vrefn)/31.0);
+    end
+
+    V(dout0) <+ (0.42 * (transition(b0 ? vh : vl, 0, 10p, 10p)));
+    V(dout1) <+ (0.42 * (transition(b1 ? vh : vl, 0, 10p, 10p)));
+    V(dout2) <+ (0.42 * (transition(b2 ? vh : vl, 0, 10p, 10p)));
+    V(dout3) <+ (0.42 * (transition(b3 ? vh : vl, 0, 10p, 10p)));
+    V(dout4) <+ (0.42 * (transition(b4 ? vh : vl, 0, 10p, 10p)));
+    V(dout5) <+ (0.42 * (transition(b5 ? vh : vl, 0, 10p, 10p)));
+    V(dout6) <+ (0.42 * (transition(b6 ? vh : vl, 0, 10p, 10p)));
+end
+
+endmodule

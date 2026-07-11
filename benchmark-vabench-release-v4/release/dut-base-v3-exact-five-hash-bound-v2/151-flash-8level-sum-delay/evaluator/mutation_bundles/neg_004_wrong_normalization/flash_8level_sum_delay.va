@@ -1,0 +1,35 @@
+`include "disciplines.vams"
+
+module flash_8level_sum_delay(vip, vim, clks, reset, refp, refn, doutsum, doutsumdelay);
+input vip, vim, clks, reset, refp, refn;
+output doutsum, doutsumdelay;
+electrical vip, vim, clks, reset, refp, refn, doutsum, doutsumdelay;
+
+parameter real vth = 0.45;
+parameter real ref_scaling = 0.5;
+parameter real tt = 10p;
+real r0, r1, r2, r3, vin;
+real sum_now, sum_prev;
+
+analog begin
+    @(initial_step) begin
+        sum_now = 0;
+        sum_prev = 0;
+    end
+
+    @(cross(V(clks) - vth, +1)) begin
+        r0 = (V(refp) - V(refn)) * 1.0 / 8.0 * ref_scaling;
+        r1 = (V(refp) - V(refn)) * 3.0 / 8.0 * ref_scaling;
+        r2 = (V(refp) - V(refn)) * 5.0 / 8.0 * ref_scaling;
+        r3 = (V(refp) - V(refn)) * 7.0 / 8.0 * ref_scaling;
+        vin = V(vip) - V(vim);
+        sum_prev = sum_now;
+        sum_now = ((vin > -r3) + (vin > -r2) + (vin > -r1) + (vin > -r0)
+                 + (vin > r0) + (vin > r1) + (vin > r2) + (vin > r3)) / 4.0;
+    end
+
+    V(doutsum) <+ transition(sum_now, 0, tt, tt);
+    V(doutsumdelay) <+ transition(sum_prev, 0, tt, tt);
+end
+
+endmodule
