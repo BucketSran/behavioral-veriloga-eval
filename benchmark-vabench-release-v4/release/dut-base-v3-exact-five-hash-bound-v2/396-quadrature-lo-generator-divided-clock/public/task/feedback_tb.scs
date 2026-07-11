@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/quadrature_lo_generator_divided_clock.va"
+
+Vclk (clk_in 0) vsource type=pulse val0=0 val1=0.9 period=4n width=2n delay=1n rise=40p fall=40p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 88n 0]
+Ven (enable 0) vsource type=pwl wave=[0 0 3n 0 3.1n 0.9 68n 0.9 68.1n 0 74n 0 74.1n 0.9 88n 0.9]
+XDUT (clk_in rst enable lo_i lo_q div_metric quad_ok) quadrature_lo_generator_divided_clock
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=88n maxstep=80p
+save clk_in rst enable lo_i lo_q div_metric quad_ok

@@ -1,0 +1,19 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/serializer_mux_timing_macro.va"
+
+Vclk (clk 0) vsource type=pwl wave=[0 0 9n 0 10n 0.9 12n 0.9 12.2n 0 20n 0.9 22n 0.9 22.2n 0 30n 0.9 32n 0.9 32.2n 0 40n 0.9 42n 0.9 42.2n 0 50n 0.9 52n 0.9 52.2n 0 60n 0.9 62n 0.9 62.2n 0 70n 0.9 72n 0.9 72.2n 0 80n 0.9 82n 0.9 82.2n 0 92n 0]
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]
+Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 82n 0.9 82.2n 0 92n 0]
+Vd0 (d0 0) vsource type=pwl wave=[0 0.9 92n 0.9]
+Vd1 (d1 0) vsource type=pwl wave=[0 0 92n 0]
+Vd2 (d2 0) vsource type=pwl wave=[0 0.9 92n 0.9]
+Vd3 (d3 0) vsource type=pwl wave=[0 0 92n 0]
+XDUT (clk rst enable d0 d1 d2 d3 serial_out slot_1 slot_0 valid) serializer_mux_timing_macro
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=92n maxstep=200p
+save clk rst enable d0 d1 d2 d3 serial_out slot_1 slot_0 valid

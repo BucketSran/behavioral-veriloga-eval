@@ -1,0 +1,253 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "clock_data_valid_qualifier",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets the logic-high output level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > vss"
+              },
+              {
+                "default": 0.0,
+                "name": "vss",
+                "override_behavior": "sets the logic-low output level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vdd"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets the digital-voltage crossing threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vth < vdd"
+              },
+              {
+                "default": 3,
+                "name": "max_age_cycles",
+                "override_behavior": "sets the inclusive qualification age limit",
+                "type": "integer",
+                "units": "cycles",
+                "valid_range": "max_age_cycles >= 1"
+              },
+              {
+                "default": 2e-10,
+                "name": "tr",
+                "override_behavior": "sets transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "data",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid_out",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "edge_age_metric",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "qualified",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "clock_data_valid_qualifier.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "395",
+  "identity": {
+    "category": "serdes_io",
+    "difficulty": "D3",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Clock-and-data Valid Qualifier"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not use current contributions, transistor-level devices, validation logic, or simulator side channels.",
+    "Do not hard-code evaluator stimulus timing, stop times, sample windows, or checker tolerances."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_DISABLE_CLEAR",
+      "observable_contract": "Reset or disable clears valid, qualification, and the public age metric.",
+      "required_signals": [
+        "time",
+        "clk",
+        "data",
+        "rst",
+        "enable",
+        "valid_out",
+        "edge_age_metric",
+        "qualified"
+      ]
+    },
+    {
+      "id": "P_DATA_EDGE_RESTART",
+      "observable_contract": "Either polarity data edge restarts the age count at zero while enabled.",
+      "required_signals": [
+        "time",
+        "clk",
+        "data",
+        "rst",
+        "enable",
+        "valid_out",
+        "edge_age_metric",
+        "qualified"
+      ]
+    },
+    {
+      "id": "P_CLOCKED_AGE",
+      "observable_contract": "Each later rising clk edge increments age before qualification.",
+      "required_signals": [
+        "time",
+        "clk",
+        "data",
+        "rst",
+        "enable",
+        "valid_out",
+        "edge_age_metric",
+        "qualified"
+      ]
+    },
+    {
+      "id": "P_INCLUSIVE_WINDOW",
+      "observable_contract": "Ages one through max_age_cycles are qualified and older ages are not.",
+      "required_signals": [
+        "time",
+        "clk",
+        "data",
+        "rst",
+        "enable",
+        "valid_out",
+        "edge_age_metric",
+        "qualified"
+      ]
+    },
+    {
+      "id": "P_REGISTERED_METRIC",
+      "observable_contract": "valid_out is the registered qualified state and the metric reports saturated normalized age.",
+      "required_signals": [
+        "time",
+        "clk",
+        "data",
+        "rst",
+        "enable",
+        "valid_out",
+        "edge_age_metric",
+        "qualified"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1395",
+    "dut": "v4-395",
+    "testbench": "v4-895"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "data",
+            "port_ref": "data",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 3
+          },
+          {
+            "net": "valid_out",
+            "port_ref": "valid_out",
+            "position": 4
+          },
+          {
+            "net": "edge_age_metric",
+            "port_ref": "edge_age_metric",
+            "position": 5
+          },
+          {
+            "net": "qualified",
+            "port_ref": "qualified",
+            "position": 6
+          }
+        ],
+        "module_ref": "clock_data_valid_qualifier",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "data",
+      "rst",
+      "enable",
+      "valid_out",
+      "edge_age_metric",
+      "qualified"
+    ]
+  }
+}

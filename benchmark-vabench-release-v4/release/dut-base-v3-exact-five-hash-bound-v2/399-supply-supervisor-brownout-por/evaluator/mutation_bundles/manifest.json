@@ -1,0 +1,134 @@
+{
+  "family_id": "399",
+  "gold_bundle_sha256": "4f8719ae5e717536790b1b29f361dc619899b515938e8f32ef9d8e63632961d0",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "supply_supervisor_brownout_por.va": "357f02098a436a12f5072df49a7761d1a176263f0720d886a6b9037611de8672"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_STATE_METRICS",
+          "P_UVLO_HYSTERESIS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_no_uvlo_hysteresis/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "supply_supervisor_brownout_por.va"
+      ],
+      "fault_class": "wrong_threshold",
+      "id": "neg_001_no_uvlo_hysteresis",
+      "trigger_condition": "supply lies between falling and rising thresholds",
+      "violated_property_ids": [
+        "P_STATE_METRICS",
+        "P_UVLO_HYSTERESIS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "supply_supervisor_brownout_por.va": "5257fcebc7a1ee87b5a3a0f171b951a6449971a7b1001c853ff098b603b8daa7"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RELEASE_DELAY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_release_one_cycle_early/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "supply_supervisor_brownout_por.va"
+      ],
+      "fault_class": "off_by_one_delay",
+      "id": "neg_002_release_one_cycle_early",
+      "trigger_condition": "release count is one less than release_cycles",
+      "violated_property_ids": [
+        "P_RELEASE_DELAY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "supply_supervisor_brownout_por.va": "78a664e7f5e8b5e7d20c5f7db6fafdda8ac7c264346ae4e57a74aa777d71c796"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_UVLO_HYSTERESIS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_brownout_polarity_inverted/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "supply_supervisor_brownout_por.va"
+      ],
+      "fault_class": "wrong_status_polarity",
+      "id": "neg_003_brownout_polarity_inverted",
+      "trigger_condition": "an enabled brownout interval is active",
+      "violated_property_ids": [
+        "P_UVLO_HYSTERESIS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "supply_supervisor_brownout_por.va": "8b568831baa344dd67b619d0618640de9a5ae5b7a5cd04d23c7695a828253bba"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DIP_RESTART"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_supply_dip_keeps_counter/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "supply_supervisor_brownout_por.va"
+      ],
+      "fault_class": "missing_fault_reset",
+      "id": "neg_004_supply_dip_keeps_counter",
+      "trigger_condition": "supply crosses below uvlo_fall after partial or full release",
+      "violated_property_ids": [
+        "P_DIP_RESTART"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "supply_supervisor_brownout_por.va": "553a425b5a32af72aa20ef8d98439620a1676495f6d36b90174951f0f0a62c4d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_DISABLE_SAFE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_reset_disable_outputs_not_safe/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "supply_supervisor_brownout_por.va"
+      ],
+      "fault_class": "unsafe_reset_disable_outputs",
+      "id": "neg_005_reset_disable_outputs_not_safe",
+      "trigger_condition": "reset is asserted or enable is deasserted",
+      "violated_property_ids": [
+        "P_RESET_DISABLE_SAFE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

@@ -1,0 +1,84 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "lc_vco_behavioral_source.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=900n maxstep=500p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vctrl",
+      "enable",
+      "rst",
+      "osc_p",
+      "osc_n",
+      "freq_metric",
+      "amp_metric",
+      "valid"
+    ]
+  },
+  "family_id": "391",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "profile_defaults": {
+    "feedback": {
+      "corners": [],
+      "deck_overrides": {
+        "body_lines": [
+          "Ven (enable 0) vsource type=pwl wave=[0 0 8n 0 8.1n 0.9 760n 0.9 760.1n 0 800n 0 800.1n 0.9 900n 0.9]",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 900n 0]",
+          "Vctrl (vctrl 0) vsource type=pwl wave=[0 0.18 360n 0.18 360.1n 0.72 900n 0.72]",
+          "XDUT (vctrl enable rst osc_p osc_n freq_metric amp_metric valid) lc_vco_behavioral_source"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {},
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "corners": [],
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=1050n maxstep=350p"
+        ],
+        "body_lines": [
+          "Ven (enable 0) vsource type=pwl wave=[0 0 10n 0 10.1n 0.9 820n 0.9 820.1n 0 870n 0 870.1n 0.9 1050n 0.9]",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 4n 0.9 4.1n 0 1050n 0]",
+          "Vctrl (vctrl 0) vsource type=pwl wave=[0 -0.1 250n -0.1 250.1n 0.45 600n 0.45 600.1n 1.0 1050n 1.0]",
+          "XDUT (vctrl enable rst osc_p osc_n freq_metric amp_metric valid) lc_vco_behavioral_source"
+        ]
+      },
+      "deterministic_seed": 1,
+      "parameters": {},
+      "simulatorOptions": {}
+    }
+  },
+  "property_ids": [
+    "P_RESET_DISABLE_CENTER",
+    "P_CONTROL_FREQUENCY_MAP",
+    "P_COMPLEMENTARY_AMPLITUDE",
+    "P_METRIC_REPORTING",
+    "P_VALID_AFTER_TWO_CYCLES"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "cf790e01ccae72f567b5b3c82db8f8f7e2b17b8f3b3079450971905bc452e728",
+    "family_spec_sha256": "c01da4797396a4b4d9fb3def35c213db32a2d95a5cc7fc1696603673f1c4e34e"
+  },
+  "task_id": "v4-391"
+}

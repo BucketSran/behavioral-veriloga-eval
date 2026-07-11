@@ -1,0 +1,321 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "serializer_mux_timing_macro",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "250p from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "d0",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "d1",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "d2",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "d3",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "serial_out",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "slot_1",
+                "position": 8
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "slot_0",
+                "position": 9
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 10
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "serializer_mux_timing_macro.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "392",
+  "identity": {
+    "category": "serdes_io",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Serializer MUX Timing Macro"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Implement a serializer timing DUT rather than a generic bus splitter.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+      "observable_contract": "On reset or when disabled, clear `serial_out`, slot outputs, and `valid`.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "d0",
+        "d1",
+        "d2",
+        "d3",
+        "serial_out",
+        "slot_1",
+        "slot_0",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_WHEN_ENABLED_STEP_THROUGH_INPUTS_D0",
+      "observable_contract": "When enabled, step through inputs `d0`, `d1`, `d2`, and `d3` on successive rising `clk` edges.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "d0",
+        "d1",
+        "d2",
+        "d3",
+        "serial_out",
+        "slot_1",
+        "slot_0",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_DRIVE_SERIAL_OUT_AS_THE_VOLTAGE",
+      "observable_contract": "Drive `serial_out` as the voltage-coded value of the active input slot.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "d0",
+        "d1",
+        "d2",
+        "d3",
+        "serial_out",
+        "slot_1",
+        "slot_0",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_SLOT_1_SLOT_0_MUST_EXPOSE",
+      "observable_contract": "`slot_1..slot_0` must expose the active slot index.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "d0",
+        "d1",
+        "d2",
+        "d3",
+        "serial_out",
+        "slot_1",
+        "slot_0",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ASSERT_VALID_AFTER_THE_FIRST_COMPLETE",
+      "observable_contract": "Assert `valid` after the first complete four-slot frame.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "d0",
+        "d1",
+        "d2",
+        "d3",
+        "serial_out",
+        "slot_1",
+        "slot_0",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1392",
+    "dut": "v4-392",
+    "testbench": "v4-892"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 2
+          },
+          {
+            "net": "d0",
+            "port_ref": "d0",
+            "position": 3
+          },
+          {
+            "net": "d1",
+            "port_ref": "d1",
+            "position": 4
+          },
+          {
+            "net": "d2",
+            "port_ref": "d2",
+            "position": 5
+          },
+          {
+            "net": "d3",
+            "port_ref": "d3",
+            "position": 6
+          },
+          {
+            "net": "serial_out",
+            "port_ref": "serial_out",
+            "position": 7
+          },
+          {
+            "net": "slot_1",
+            "port_ref": "slot_1",
+            "position": 8
+          },
+          {
+            "net": "slot_0",
+            "port_ref": "slot_0",
+            "position": 9
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 10
+          }
+        ],
+        "module_ref": "serializer_mux_timing_macro",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "enable",
+      "d0",
+      "d1",
+      "d2",
+      "d3",
+      "serial_out",
+      "slot_1",
+      "slot_0",
+      "valid"
+    ]
+  }
+}

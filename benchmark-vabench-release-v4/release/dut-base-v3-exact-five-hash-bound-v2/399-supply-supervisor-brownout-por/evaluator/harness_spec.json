@@ -1,0 +1,87 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "supply_supervisor_brownout_por.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=118n maxstep=80p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vdd_sense",
+      "clk",
+      "rst",
+      "enable",
+      "por_n",
+      "pgood",
+      "brownout",
+      "delay_metric",
+      "state_metric"
+    ]
+  },
+  "family_id": "399",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "profile_defaults": {
+    "feedback": {
+      "corners": [],
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=8n width=4n delay=1n rise=50p fall=50p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 118n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 96n 0.9 96.1n 0 104n 0 104.1n 0.9 118n 0.9]",
+          "Vsup (vdd_sense 0) vsource type=pwl wave=[0 0.50 10n 0.50 10.1n 0.76 55n 0.76 55.1n 0.68 68n 0.68 68.1n 0.60 78n 0.60 78.1n 0.80 118n 0.80]",
+          "XDUT (vdd_sense clk rst enable por_n pgood brownout delay_metric state_metric) supply_supervisor_brownout_por"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {},
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "corners": [],
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=132n maxstep=70p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=7n width=3.5n delay=1.5n rise=60p fall=60p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2.5n 0.9 2.6n 0 132n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 3.5n 0 3.6n 0.9 108n 0.9 108.1n 0 116n 0 116.1n 0.9 132n 0.9]",
+          "Vsup (vdd_sense 0) vsource type=pwl wave=[0 0.58 9n 0.58 9.1n 0.74 51n 0.74 51.1n 0.66 65n 0.66 65.1n 0.62 76n 0.62 76.1n 0.86 132n 0.86]",
+          "XDUT (vdd_sense clk rst enable por_n pgood brownout delay_metric state_metric) supply_supervisor_brownout_por release_cycles=4"
+        ]
+      },
+      "deterministic_seed": 1,
+      "parameters": {},
+      "simulatorOptions": {}
+    }
+  },
+  "property_ids": [
+    "P_RESET_DISABLE_SAFE",
+    "P_UVLO_HYSTERESIS",
+    "P_RELEASE_DELAY",
+    "P_DIP_RESTART",
+    "P_STATE_METRICS"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "af35cc12a8a7fd1a0ee0a68a66e38432a8136e87c5c0f2bcd7fa71d3fdb18dce",
+    "family_spec_sha256": "d65f258848c9d7758b1e34d45211310469156130dcccdcaf0b39c55663d49e60"
+  },
+  "task_id": "v4-399"
+}

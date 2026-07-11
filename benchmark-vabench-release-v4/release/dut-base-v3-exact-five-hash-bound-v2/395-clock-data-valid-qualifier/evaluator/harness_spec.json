@@ -1,0 +1,85 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "clock_data_valid_qualifier.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=110n maxstep=100p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "data",
+      "rst",
+      "enable",
+      "valid_out",
+      "edge_age_metric",
+      "qualified"
+    ]
+  },
+  "family_id": "395",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "profile_defaults": {
+    "feedback": {
+      "corners": [],
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=5n delay=2n rise=50p fall=50p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 110n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 82n 0.9 82.1n 0 90n 0 90.1n 0.9 110n 0.9]",
+          "Vdata (data 0) vsource type=pwl wave=[0 0 8n 0 8.1n 0.9 43n 0.9 43.1n 0 68n 0 68.1n 0.9 110n 0.9]",
+          "XDUT (clk data rst enable valid_out edge_age_metric qualified) clock_data_valid_qualifier"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {},
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "corners": [],
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=120n maxstep=80p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=8n width=4n delay=1n rise=60p fall=60p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 120n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 3n 0 3.1n 0.9 94n 0.9 94.1n 0 102n 0 102.1n 0.9 120n 0.9]",
+          "Vdata (data 0) vsource type=pwl wave=[0 0 6n 0 6.1n 0.9 31n 0.9 31.1n 0 67n 0 67.1n 0.9 85n 0.9 85.1n 0 120n 0]",
+          "XDUT (clk data rst enable valid_out edge_age_metric qualified) clock_data_valid_qualifier max_age_cycles=3"
+        ]
+      },
+      "deterministic_seed": 1,
+      "parameters": {},
+      "simulatorOptions": {}
+    }
+  },
+  "property_ids": [
+    "P_RESET_DISABLE_CLEAR",
+    "P_DATA_EDGE_RESTART",
+    "P_CLOCKED_AGE",
+    "P_INCLUSIVE_WINDOW",
+    "P_REGISTERED_METRIC"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "6f803e003f53ba99f9b5f6a839a0ba8bf2260e9fa31850013b98b182cddb4740",
+    "family_spec_sha256": "8737f59f56dc48b07045fc27e3c84ddb6e415ac2408e47a9ee9d46964c67b07c"
+  },
+  "task_id": "v4-395"
+}

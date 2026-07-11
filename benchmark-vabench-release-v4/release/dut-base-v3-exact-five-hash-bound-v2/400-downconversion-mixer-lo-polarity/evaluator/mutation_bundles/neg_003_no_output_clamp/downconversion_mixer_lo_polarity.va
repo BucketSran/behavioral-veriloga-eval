@@ -1,0 +1,103 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module downconversion_mixer_lo_polarity(rf_in, lo_i, lo_q, rst, enable, i_out, q_out, lo_i_metric, lo_q_metric, polarity_ok);
+    input rf_in, lo_i, lo_q, rst, enable;
+    output i_out, q_out, lo_i_metric, lo_q_metric, polarity_ok;
+    electrical rf_in, lo_i, lo_q, rst, enable;
+    electrical i_out, q_out, lo_i_metric, lo_q_metric, polarity_ok;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real conversion_gain = 0.5;
+    parameter real tr = 200p from (0:inf);
+
+    integer lo_i_toggled;
+    integer lo_q_toggled;
+    integer lo_i_state;
+    integer lo_q_state;
+    real rf_deviation;
+    real lo_i_sign;
+    real lo_q_sign;
+    real i_value;
+    real q_value;
+    real i_metric_value;
+    real q_metric_value;
+    real polarity_value;
+
+    analog function real clip;
+        input value;
+        real value;
+        begin
+            if (value < vss)
+                clip = vss;
+            else if (value > vdd)
+                clip = vdd;
+            else
+                clip = value;
+        end
+    endfunction
+
+    analog begin
+        @(initial_step) begin
+            lo_i_toggled = 0;
+            lo_q_toggled = 0;
+            lo_i_state = (V(lo_i) > vth) ? 1 : -1;
+            lo_q_state = (V(lo_q) > vth) ? 1 : -1;
+        end
+
+        @(cross(V(lo_i) - vth, +1) or cross(V(lo_i) - vth, -1)) begin
+            if ((V(rst) <= vth) && (V(enable) > vth)) begin
+                lo_i_toggled = 1;
+                lo_i_state = (V(lo_i) > vth) ? 1 : -1;
+            end
+        end
+
+        @(cross(V(lo_q) - vth, +1) or cross(V(lo_q) - vth, -1)) begin
+            if ((V(rst) <= vth) && (V(enable) > vth)) begin
+                lo_q_toggled = 1;
+                lo_q_state = (V(lo_q) > vth) ? 1 : -1;
+            end
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            lo_i_toggled = 0;
+            lo_q_toggled = 0;
+            lo_i_state = -1;
+            lo_q_state = -1;
+        end
+
+        @(cross(V(enable) - vth, +1) or cross(V(rst) - vth, -1)) begin
+            if ((V(rst) <= vth) && (V(enable) > vth)) begin
+                lo_i_state = (V(lo_i) > vth) ? 1 : -1;
+                lo_q_state = (V(lo_q) > vth) ? 1 : -1;
+            end
+        end
+
+        lo_i_sign = transition((lo_i_state > 0) ? 1.0 : -1.0, 0, tr, tr);
+        lo_q_sign = transition((lo_q_state > 0) ? 1.0 : -1.0, 0, tr, tr);
+        rf_deviation = V(rf_in) - vcm;
+
+        if ((V(rst) > vth) || (V(enable) <= vth)) begin
+            i_value = vcm;
+            q_value = vcm;
+            i_metric_value = vss;
+            q_metric_value = vss;
+            polarity_value = vss;
+        end else begin
+            i_value = vcm + conversion_gain * rf_deviation * lo_i_sign;
+            q_value = vcm + conversion_gain * rf_deviation * lo_q_sign;
+            i_metric_value = (lo_i_sign > 0.0) ? vdd : vss;
+            q_metric_value = (lo_q_sign > 0.0) ? vdd : vss;
+            polarity_value = (lo_i_toggled && lo_q_toggled) ? vdd : vss;
+        end
+
+        V(i_out) <+ i_value;
+        V(q_out) <+ q_value;
+        V(lo_i_metric) <+ transition(i_metric_value, 0, tr, tr);
+        V(lo_q_metric) <+ transition(q_metric_value, 0, tr, tr);
+        V(polarity_ok) <+ transition(polarity_value, 0, tr, tr);
+    end
+endmodule

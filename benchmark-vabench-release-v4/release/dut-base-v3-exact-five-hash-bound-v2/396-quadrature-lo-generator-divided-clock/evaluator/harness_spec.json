@@ -1,0 +1,83 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "quadrature_lo_generator_divided_clock.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=88n maxstep=80p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk_in",
+      "rst",
+      "enable",
+      "lo_i",
+      "lo_q",
+      "div_metric",
+      "quad_ok"
+    ]
+  },
+  "family_id": "396",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "profile_defaults": {
+    "feedback": {
+      "corners": [],
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (clk_in 0) vsource type=pulse val0=0 val1=0.9 period=4n width=2n delay=1n rise=40p fall=40p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 88n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 3n 0 3.1n 0.9 68n 0.9 68.1n 0 74n 0 74.1n 0.9 88n 0.9]",
+          "XDUT (clk_in rst enable lo_i lo_q div_metric quad_ok) quadrature_lo_generator_divided_clock"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {},
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "corners": [],
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=108n maxstep=70p"
+        ],
+        "body_lines": [
+          "Vclk (clk_in 0) vsource type=pulse val0=0 val1=0.9 period=5n width=2.5n delay=1.5n rise=50p fall=50p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2.5n 0.9 2.6n 0 108n 0]",
+          "Ven (enable 0) vsource type=pwl wave=[0 0 3.2n 0 3.3n 0.9 82n 0.9 82.1n 0 90n 0 90.1n 0.9 108n 0.9]",
+          "XDUT (clk_in rst enable lo_i lo_q div_metric quad_ok) quadrature_lo_generator_divided_clock"
+        ]
+      },
+      "deterministic_seed": 1,
+      "parameters": {},
+      "simulatorOptions": {}
+    }
+  },
+  "property_ids": [
+    "P_RESET_DISABLE_CLEAR",
+    "P_QUADRATURE_SEQUENCE",
+    "P_DIVIDE_BY_FOUR",
+    "P_STATE_METRIC",
+    "P_QUAD_OK_DELAY"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "ef967013cb6435808c22377ef62bbf8302e2871b3e500c2524dfe857fde79391",
+    "family_spec_sha256": "0e462f2083bb57adfb947a51c8b0f3acedd3eaa413390fcb14452f2630886c5e"
+  },
+  "task_id": "v4-396"
+}

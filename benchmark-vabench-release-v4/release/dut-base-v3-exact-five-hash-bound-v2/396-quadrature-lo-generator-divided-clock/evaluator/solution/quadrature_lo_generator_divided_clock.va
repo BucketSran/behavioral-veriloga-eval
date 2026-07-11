@@ -1,0 +1,85 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module quadrature_lo_generator_divided_clock(clk_in, rst, enable, lo_i, lo_q, div_metric, quad_ok);
+    input clk_in, rst, enable;
+    output lo_i, lo_q, div_metric, quad_ok;
+    electrical clk_in, rst, enable;
+    electrical lo_i, lo_q, div_metric, quad_ok;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    integer phase_state;
+    integer output_state;
+    integer enabled_edge_count;
+    integer lo_i_state;
+    integer lo_q_state;
+    integer quad_ok_state;
+    real lo_i_output;
+    real lo_q_output;
+    real metric_output;
+    real quad_ok_output;
+
+    analog begin
+        @(initial_step) begin
+            phase_state = 0;
+            output_state = 0;
+            enabled_edge_count = 0;
+            lo_i_state = 0;
+            lo_q_state = 0;
+            quad_ok_state = 0;
+        end
+
+        @(cross(V(clk_in) - vth, +1) or cross(V(rst) - vth, +1) or
+          cross(V(enable) - vth, -1)) begin
+            if ((V(rst) > vth) || (V(enable) <= vth)) begin
+                phase_state = 0;
+                output_state = 0;
+                enabled_edge_count = 0;
+                lo_i_state = 0;
+                lo_q_state = 0;
+                quad_ok_state = 0;
+            end else begin
+                output_state = phase_state;
+                if (phase_state == 0) begin
+                    lo_i_state = 1;
+                    lo_q_state = 0;
+                end else if (phase_state == 1) begin
+                    lo_i_state = 1;
+                    lo_q_state = 1;
+                end else if (phase_state == 2) begin
+                    lo_i_state = 0;
+                    lo_q_state = 1;
+                end else begin
+                    lo_i_state = 0;
+                    lo_q_state = 0;
+                end
+
+                enabled_edge_count = enabled_edge_count + 1;
+                if (enabled_edge_count >= 8)
+                    quad_ok_state = 1;
+                phase_state = (phase_state + 1) % 4;
+            end
+        end
+
+        if ((V(rst) > vth) || (V(enable) <= vth)) begin
+            lo_i_output = vss;
+            lo_q_output = vss;
+            metric_output = vss;
+            quad_ok_output = vss;
+        end else begin
+            lo_i_output = lo_i_state ? vdd : vss;
+            lo_q_output = lo_q_state ? vdd : vss;
+            metric_output = vss + (vdd - vss) * output_state / 3.0;
+            quad_ok_output = quad_ok_state ? vdd : vss;
+        end
+
+        V(lo_i) <+ transition(lo_i_output, 0, tr, tr);
+        V(lo_q) <+ transition(lo_q_output, 0, tr, tr);
+        V(div_metric) <+ transition(metric_output, 0, tr, tr);
+        V(quad_ok) <+ transition(quad_ok_output, 0, tr, tr);
+    end
+endmodule

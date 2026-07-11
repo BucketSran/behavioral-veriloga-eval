@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/lc_vco_behavioral_source.va"
+
+Ven (enable 0) vsource type=pwl wave=[0 0 8n 0 8.1n 0.9 760n 0.9 760.1n 0 800n 0 800.1n 0.9 900n 0.9]
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 900n 0]
+Vctrl (vctrl 0) vsource type=pwl wave=[0 0.18 360n 0.18 360.1n 0.72 900n 0.72]
+XDUT (vctrl enable rst osc_p osc_n freq_metric amp_metric valid) lc_vco_behavioral_source
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=900n maxstep=500p
+save vctrl enable rst osc_p osc_n freq_metric amp_metric valid

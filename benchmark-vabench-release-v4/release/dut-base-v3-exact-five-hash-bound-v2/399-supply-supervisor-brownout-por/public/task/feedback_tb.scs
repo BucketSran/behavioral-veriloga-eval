@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/supply_supervisor_brownout_por.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=8n width=4n delay=1n rise=50p fall=50p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 118n 0]
+Ven (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 96n 0.9 96.1n 0 104n 0 104.1n 0.9 118n 0.9]
+Vsup (vdd_sense 0) vsource type=pwl wave=[0 0.50 10n 0.50 10.1n 0.76 55n 0.76 55.1n 0.68 68n 0.68 68.1n 0.60 78n 0.60 78.1n 0.80 118n 0.80]
+XDUT (vdd_sense clk rst enable por_n pgood brownout delay_metric state_metric) supply_supervisor_brownout_por
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=118n maxstep=80p
+save vdd_sense clk rst enable por_n pgood brownout delay_metric state_metric

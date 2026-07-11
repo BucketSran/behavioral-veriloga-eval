@@ -1,0 +1,103 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "serializer_mux_timing_macro.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=92n maxstep=200p"
+    ],
+    "body_lines": [
+      "Vclk (clk 0) vsource type=pwl wave=[0 0 9n 0 10n 0.9 12n 0.9 12.2n 0 20n 0.9 22n 0.9 22.2n 0 30n 0.9 32n 0.9 32.2n 0 40n 0.9 42n 0.9 42.2n 0 50n 0.9 52n 0.9 52.2n 0 60n 0.9 62n 0.9 62.2n 0 70n 0.9 72n 0.9 72.2n 0 80n 0.9 82n 0.9 82.2n 0 92n 0]",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]",
+      "Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 82n 0.9 82.2n 0 92n 0]"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "rst",
+      "enable",
+      "d0",
+      "d1",
+      "d2",
+      "d3",
+      "serial_out",
+      "slot_1",
+      "slot_0",
+      "valid"
+    ]
+  },
+  "family_id": "392",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "84d3635beefc801671d9c7fad5a81506c5245ac0c85bb66680ad06fbb29b3c1f",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "4aaf296ef2a348f9ac566ebaf94e6680edf11f8c42312f35ebe4bf30f6359a90",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vd0 (d0 0) vsource type=pwl wave=[0 0.9 92n 0.9]",
+          "Vd1 (d1 0) vsource type=pwl wave=[0 0 92n 0]",
+          "Vd2 (d2 0) vsource type=pwl wave=[0 0.9 92n 0.9]",
+          "Vd3 (d3 0) vsource type=pwl wave=[0 0 92n 0]",
+          "XDUT (clk rst enable d0 d1 d2 d3 serial_out slot_1 slot_0 valid) serializer_mux_timing_macro",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vd0 (d0 0) vsource type=pwl wave=[0 0 92n 0]",
+          "Vd1 (d1 0) vsource type=pwl wave=[0 0.9 92n 0.9]",
+          "Vd2 (d2 0) vsource type=pwl wave=[0 0 92n 0]",
+          "Vd3 (d3 0) vsource type=pwl wave=[0 0.9 92n 0.9]",
+          "XDUT (clk rst enable d0 d1 d2 d3 serial_out slot_1 slot_0 valid) serializer_mux_timing_macro",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+    "P_WHEN_ENABLED_STEP_THROUGH_INPUTS_D0",
+    "P_DRIVE_SERIAL_OUT_AS_THE_VOLTAGE",
+    "P_SLOT_1_SLOT_0_MUST_EXPOSE",
+    "P_ASSERT_VALID_AFTER_THE_FIRST_COMPLETE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "ac72c0192c2a1e6ae71a9f6529cb45f88ad5c8dfc4a41f5bb84ce27fe12b4952",
+    "family_spec_sha256": "32cb12634b0662240d54e467117ab266dfbfb73498c0ac30b6de93fa1c6cc649"
+  },
+  "task_id": "v4-392"
+}

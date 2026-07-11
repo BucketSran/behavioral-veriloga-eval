@@ -1,0 +1,86 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pam4_slicer_gray_decoder(vin, clk, rst, enable, bit_msb, bit_lsb, level_metric, valid);
+    input vin, clk, rst, enable;
+    output bit_msb, bit_lsb, level_metric, valid;
+    electrical vin, clk, rst, enable;
+    electrical bit_msb, bit_lsb, level_metric, valid;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real t0 = 0.225;
+    parameter real t1 = 0.45;
+    parameter real t2 = 0.675;
+    parameter real tr = 200p from (0:inf);
+
+    integer level_code;
+    integer msb_code;
+    integer lsb_code;
+    integer valid_code;
+    real msb_output;
+    real lsb_output;
+    real level_output;
+    real valid_output;
+
+    analog begin
+        @(initial_step) begin
+            level_code = 0;
+            msb_code = 0;
+            lsb_code = 0;
+            valid_code = 0;
+        end
+
+        @(cross(V(clk) - vth, +1) or cross(V(rst) - vth, +1) or
+          cross(V(enable) - vth, -1)) begin
+            if ((V(rst) > vth) || (V(enable) <= vth)) begin
+                level_code = 0;
+                msb_code = 0;
+                lsb_code = 0;
+                valid_code = 0;
+            end else begin
+                if (V(vin) < t0)
+                    level_code = 0;
+                else if (V(vin) < t1)
+                    level_code = 1;
+                else if (V(vin) < t2)
+                    level_code = 2;
+                else
+                    level_code = 3;
+
+                if (level_code == 0) begin
+                    msb_code = 0;
+                    lsb_code = 0;
+                end else if (level_code == 1) begin
+                    msb_code = 0;
+                    lsb_code = 1;
+                end else if (level_code == 2) begin
+                    msb_code = 1;
+                    lsb_code = 0;
+                end else begin
+                    msb_code = 1;
+                    lsb_code = 0;
+                end
+                valid_code = 1;
+            end
+        end
+
+        if ((V(rst) > vth) || (V(enable) <= vth)) begin
+            msb_output = vss;
+            lsb_output = vss;
+            level_output = vss;
+            valid_output = vss;
+        end else begin
+            msb_output = msb_code ? vdd : vss;
+            lsb_output = lsb_code ? vdd : vss;
+            level_output = vss + (vdd - vss) * level_code / 3.0;
+            valid_output = valid_code ? vdd : vss;
+        end
+
+        V(bit_msb) <+ transition(msb_output, 0, tr, tr);
+        V(bit_lsb) <+ transition(lsb_output, 0, tr, tr);
+        V(level_metric) <+ transition(level_output, 0, tr, tr);
+        V(valid) <+ transition(valid_output, 0, tr, tr);
+    end
+endmodule

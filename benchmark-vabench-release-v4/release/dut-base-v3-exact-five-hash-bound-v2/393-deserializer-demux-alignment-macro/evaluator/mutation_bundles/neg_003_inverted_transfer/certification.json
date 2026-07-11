@@ -1,0 +1,61 @@
+{
+  "component_fingerprints": {
+    "assembly": {
+      "policy_sha256": "91f4e21b94263e796c846aedef282c79d4abeb7ccc415a0e6f1311f8816b33a4",
+      "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+    },
+    "backend": {
+      "ahdl_like_sha256": "91ce239e5f278a6d5dfcde85ca2d820c5133d8f8a3de26dc6477164e703342f3",
+      "evas_sha256": "2d71c227644956df64209b49d0da6ef55bc6934891020eb26d762e8cb8cc6df2",
+      "spectre_sha256": "ac4c1cf785d5eab74058944d52bf40869e83c94e19202ab72c8e8a250c4dc51b"
+    },
+    "oracle": {
+      "checker_binding_sha256": "9d77fca13c9d9754bdc810b3a0e66b6014309645e0e3e28b0880308f1b7ddb21",
+      "checker_implementation_sha256": "fb66f6f05816a85ecd5e12082b3c9b8de52f84313b380d0057f660f73c9232dd",
+      "checker_profile_sha256": "94031c9d9ad28b9e25a66697b6a5fd240c404cd3a58ee970288f79f1e312655c",
+      "diagnostic_policy_sha256": "69b217a349cb0e8a3eab574e7e6d1af03f069fea668b15b37868ef3d2e7deea3",
+      "oracle_runner_sha256": "e70bd46cd3abdfd8ed9658cb13f64bc96e27d364d51ed0fdcd05f8139e63af2b",
+      "property_activation_policy_sha256": "54a6a9b74593ffc8fbb99a8799bf2f4402bbf11c03c5536178346cc5cf8eb5be"
+    },
+    "policy_id": "v4-dependency-scoped-evidence-v2",
+    "schema_version": "v4-evidence-components-v2",
+    "state": "carried_forward",
+    "task_inputs": {
+      "candidate_bundle_sha256": "b659c81c9eeeb3d3a37654c5023d9fe09148258a417411bd96066097e7ede7e3",
+      "deck_sha256": "a5f2a64cd203fe7c86ea46e222b1e6e8d98a6ab64ccd3c7b0c347c6e421c1a4a",
+      "gold_bundle_sha256": "8f1a50fb574c04236cdd1b36371effb48aac78f295aa24f15c06d43edee6892e",
+      "harness_spec_sha256": "7d4cf95e4ef02b54367921138f7d389b11a2297ac6adfc3fe685097912fb5718",
+      "mutation_bundle_sha256": "b659c81c9eeeb3d3a37654c5023d9fe09148258a417411bd96066097e7ede7e3",
+      "profile_sha256": "6e2ad12c98e42102f269b4df402279c493c2b1fde2e6ddfeca546dd8e01a319c",
+      "property_contract_sha256": "a2b6f5b4f6e2fd57b5897b055dd4374de5c0e858374bce25914826c7720fa691",
+      "public_support_bundle_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "trace_contract_sha256": "70c30e645b14ede40354ae87e23b54abf4d1da83bfc900b4b2715ec029add9fe"
+    }
+  },
+  "diagnostics": {
+    "expected": "trigger=semantic invert mutation from gold; violated_properties=P_ON_EACH_RISING_CLK_EDGE_WHILE,P_ASSERT_WORD_VALID_AFTER_ALL_FOUR,P_PHASE_METRIC_MUST_EXPOSE_THE_ACTIVE",
+    "observed": "EVAS: v4_952 checked=8 reset_clear=True disabled_clear=True align_seen=True valid_seen=True one_seen=True zero_seen=True out_errors=8 metric_errors=5 valid_errors=2 clear_errors=0; P_ASSERT_WORD_VALID_AFTER_ALL_FOUR mismatch_count=2; P_A_RISING_ALIGN_PULSE_RESETS_THE mismatch_count=0; P_ON_EACH_RISING_CLK_EDGE_WHILE mismatch_count=8; P_ON_RESET_OR_WHEN_DISABLED_CLEAR mismatch_count=0; P_PHASE_METRIC_MUST_EXPOSE_THE_ACTIVE mismatch_count=5; Spectre: v4_952 checked=8 reset_clear=True disabled_clear=True align_seen=True valid_seen=True one_seen=True zero_seen=True out_errors=8 metric_errors=5 valid_errors=2 clear_errors=0; P_ASSERT_WORD_VALID_AFTER_ALL_FOUR mismatch_count=2; P_A_RISING_ALIGN_PULSE_RESETS_THE mismatch_count=0; P_ON_EACH_RISING_CLK_EDGE_WHILE mismatch_count=8; P_ON_RESET_OR_WHEN_DISABLED_CLEAR mismatch_count=0; P_PHASE_METRIC_MUST_EXPOSE_THE_ACTIVE mismatch_count=5",
+    "violated_property_ids": [
+      "P_ASSERT_WORD_VALID_AFTER_ALL_FOUR",
+      "P_ON_EACH_RISING_CLK_EDGE_WHILE",
+      "P_PHASE_METRIC_MUST_EXPOSE_THE_ACTIVE"
+    ]
+  },
+  "evaluators": {
+    "ahdl_like": "pass",
+    "evas": "compile_pass_behavior_fail",
+    "spectre": "compile_pass_behavior_fail"
+  },
+  "family_id": "393",
+  "inputs": {
+    "checker_profile_sha256": "55c07987f63d493f152a7b9e30a4db021520e965951f16f76f62dd4da6f8356f",
+    "harness_spec_sha256": "7d4cf95e4ef02b54367921138f7d389b11a2297ac6adfc3fe685097912fb5718",
+    "mutation_bundle_sha256": "b659c81c9eeeb3d3a37654c5023d9fe09148258a417411bd96066097e7ede7e3",
+    "profile_sha256": "6e2ad12c98e42102f269b4df402279c493c2b1fde2e6ddfeca546dd8e01a319c"
+  },
+  "mutation_id": "neg_003_inverted_transfer",
+  "outcome": "killed_behaviorally",
+  "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33",
+  "schema_version": "v4-negative-certification-v2",
+  "toolchain_lock_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+}

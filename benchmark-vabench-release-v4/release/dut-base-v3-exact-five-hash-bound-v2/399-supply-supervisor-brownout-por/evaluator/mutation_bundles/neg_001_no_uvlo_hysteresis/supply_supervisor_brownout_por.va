@@ -1,0 +1,99 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module supply_supervisor_brownout_por(vdd_sense, clk, rst, enable, por_n, pgood, brownout, delay_metric, state_metric);
+    input vdd_sense, clk, rst, enable;
+    output por_n, pgood, brownout, delay_metric, state_metric;
+    electrical vdd_sense, clk, rst, enable;
+    electrical por_n, pgood, brownout, delay_metric, state_metric;
+
+    parameter real voh = 0.9;
+    parameter real vol = 0.0;
+    parameter real vth = 0.45;
+    parameter real uvlo_rise = 0.72;
+    parameter real uvlo_fall = 0.64;
+    parameter integer release_cycles = 4 from [1:inf);
+    parameter real tr = 100p from (0:inf);
+
+    integer brownout_state;
+    integer release_count;
+    integer released_state;
+    integer supervisor_state;
+    real por_output;
+    real pgood_output;
+    real brownout_output;
+    real delay_output;
+    real state_output;
+
+    analog begin
+        @(initial_step) begin
+            brownout_state = 1;
+            release_count = 0;
+            released_state = 0;
+            supervisor_state = 0;
+        end
+
+        @(cross(V(vdd_sense) - uvlo_rise, -1) or
+          cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            brownout_state = 1;
+            release_count = 0;
+            released_state = 0;
+            supervisor_state = (V(rst) > vth || V(enable) <= vth) ? 0 : 1;
+        end
+
+        @(cross(V(vdd_sense) - uvlo_rise, +1)) begin
+            if ((V(rst) <= vth) && (V(enable) > vth)) begin
+                brownout_state = 0;
+                release_count = 0;
+                released_state = 0;
+                supervisor_state = 2;
+            end
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if ((V(rst) > vth) || (V(enable) <= vth) ||
+                (V(vdd_sense) < uvlo_fall)) begin
+                brownout_state = 1;
+                release_count = 0;
+                released_state = 0;
+                supervisor_state = (V(rst) > vth || V(enable) <= vth) ? 0 : 1;
+            end else if (!brownout_state) begin
+                if (V(vdd_sense) >= uvlo_rise) begin
+                    if (release_count < release_cycles)
+                        release_count = release_count + 1;
+                    if (release_count >= release_cycles) begin
+                        released_state = 1;
+                        supervisor_state = 3;
+                    end else begin
+                        released_state = 0;
+                        supervisor_state = 2;
+                    end
+                end else begin
+                    release_count = release_count;
+                    released_state = released_state;
+                    supervisor_state = released_state ? 3 : 2;
+                end
+            end
+        end
+
+        if ((V(rst) > vth) || (V(enable) <= vth)) begin
+            por_output = vol;
+            pgood_output = vol;
+            brownout_output = voh;
+            delay_output = vol;
+            state_output = vol;
+        end else begin
+            por_output = released_state ? voh : vol;
+            pgood_output = released_state ? voh : vol;
+            brownout_output = brownout_state ? voh : vol;
+            delay_output = vol + (voh - vol) * release_count / release_cycles;
+            state_output = vol + (voh - vol) * supervisor_state / 3.0;
+        end
+
+        V(por_n) <+ transition(por_output, 0, tr, tr);
+        V(pgood) <+ transition(pgood_output, 0, tr, tr);
+        V(brownout) <+ transition(brownout_output, 0, tr, tr);
+        V(delay_metric) <+ transition(delay_output, 0, tr, tr);
+        V(state_metric) <+ transition(state_output, 0, tr, tr);
+    end
+endmodule

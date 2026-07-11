@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/clock_data_valid_qualifier.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=5n delay=2n rise=50p fall=50p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 110n 0]
+Ven (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 82n 0.9 82.1n 0 90n 0 90.1n 0.9 110n 0.9]
+Vdata (data 0) vsource type=pwl wave=[0 0 8n 0 8.1n 0.9 43n 0.9 43.1n 0 68n 0 68.1n 0.9 110n 0.9]
+XDUT (clk data rst enable valid_out edge_age_metric qualified) clock_data_valid_qualifier
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=110n maxstep=100p
+save clk data rst enable valid_out edge_age_metric qualified

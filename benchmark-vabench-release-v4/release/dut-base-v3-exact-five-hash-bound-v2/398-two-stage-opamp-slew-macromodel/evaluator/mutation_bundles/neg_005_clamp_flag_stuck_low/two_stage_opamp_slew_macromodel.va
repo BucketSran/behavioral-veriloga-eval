@@ -1,0 +1,35 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module two_stage_opamp_slew_macromodel(vinp, vinn, clk, rst, enable, load_step, vout, stage1_metric, slew_metric, clamp_flag, settled);
+    inout vinp, vinn, clk, rst, enable, load_step, vout, stage1_metric, slew_metric, clamp_flag, settled;
+    electrical vinp, vinn, clk, rst, enable, load_step, vout, stage1_metric, slew_metric, clamp_flag, settled;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vcm = 0.45; parameter real vth = 0.45;
+    parameter real stage1_gain = 20.0; parameter real stage2_gain = 5.0; parameter real slew_step = 80e-3; parameter real settle_tol = 10e-3; parameter real tr = 200p from (0:inf); parameter real tick = 250p from (0:inf);
+    integer settle_count, clamped; real prev_clk, diff, stage1_v, target_raw, target, move, vout_v, slew_v, clamp_v, settled_v;
+    analog function real absval; input x; real x; begin absval = (x < 0.0) ? -x : x; end endfunction
+    analog function real clip; input x; real x; begin if (x < vss) clip = vss; else if (x > vdd) clip = vdd; else clip = x; end endfunction
+    analog begin
+        @(initial_step) begin prev_clk = 0.0; settle_count = 0; vout_v = vcm; stage1_v = vcm; slew_v = 0.0; clamp_v = 0.0; settled_v = 0.0; end
+        @(timer(0, tick)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin settle_count = 0; vout_v = vcm; stage1_v = vcm; slew_v = 0.0; clamp_v = 0.0; settled_v = 0.0; end
+            else if (V(clk) > vth && prev_clk <= vth) begin
+                diff = V(vinp) - V(vinn);
+                stage1_v = clip(vcm + stage1_gain * diff);
+                target_raw = vcm + stage2_gain * (stage1_v - vcm) + (V(load_step) - vcm) * 0.5;
+                target = clip(target_raw); clamped = (target != target_raw);
+                move = target - vout_v;
+                if (move > slew_step) move = slew_step; if (move < -slew_step) move = -slew_step;
+                vout_v = clip(vout_v + move); slew_v = absval(move); clamp_v = vss;
+                if (absval(target - vout_v) < settle_tol) settle_count = settle_count + 1; else settle_count = 0;
+                settled_v = (settle_count >= 2) ? vdd : vss;
+            end
+            prev_clk = V(clk);
+        end
+        V(vout) <+ transition(vout_v, 0, tr, tr);
+        V(stage1_metric) <+ transition(stage1_v, 0, tr, tr);
+        V(slew_metric) <+ transition(slew_v, 0, tr, tr);
+        V(clamp_flag) <+ transition(clamp_v, 0, tr, tr);
+        V(settled) <+ transition(settled_v, 0, tr, tr);
+    end
+endmodule

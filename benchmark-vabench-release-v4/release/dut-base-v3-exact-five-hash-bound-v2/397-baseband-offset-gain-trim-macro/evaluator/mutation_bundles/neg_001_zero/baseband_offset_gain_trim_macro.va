@@ -1,0 +1,65 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module baseband_offset_gain_trim_macro(vin, clk, rst, enable, gain_2, gain_1, gain_0, offset_2, offset_1, offset_0, vout, residual_metric, valid);
+    input vin, clk, rst, enable, gain_2, gain_1, gain_0, offset_2, offset_1, offset_0;
+    output vout, residual_metric, valid;
+    electrical vin, clk, rst, enable, gain_2, gain_1, gain_0, offset_2, offset_1, offset_0, vout, residual_metric, valid;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real gain_base = 0.7;
+    parameter real gain_step = 0.1;
+    parameter real offset_lsb = 0.025;
+    parameter real tr = 150p from (0:inf);
+
+    integer gain_code;
+    integer offset_code;
+    integer valid_state;
+    real gain_value;
+    real offset_value;
+    real out_value;
+    real metric_value;
+
+    analog begin
+        @(initial_step) begin
+            valid_state = 0;
+            out_value = vcm;
+            metric_value = vss;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                valid_state = 0;
+                out_value = vcm;
+                metric_value = vss;
+            end else begin
+                gain_code = 0;
+                offset_code = 0;
+                if (V(gain_0) > vth) gain_code = gain_code + 1;
+                if (V(gain_1) > vth) gain_code = gain_code + 2;
+                if (V(gain_2) > vth) gain_code = gain_code + 4;
+                if (V(offset_0) > vth) offset_code = offset_code + 1;
+                if (V(offset_1) > vth) offset_code = offset_code + 2;
+                if (V(offset_2) > vth) offset_code = offset_code + 4;
+                gain_value = gain_base + gain_step * gain_code;
+                offset_value = offset_lsb * (offset_code - 3);
+                out_value = vcm + gain_value * (V(vin) - vcm) + offset_value;
+                if (out_value > vdd)
+                    out_value = vdd;
+                if (out_value < vss)
+                    out_value = vss;
+                metric_value = out_value - vcm;
+                if (metric_value < 0.0)
+                    metric_value = -metric_value;
+                valid_state = 1;
+            end
+        end
+
+        V(vout) <+ 0.0;
+        V(residual_metric) <+ 0.0;
+        V(valid) <+ 0.0;
+    end
+endmodule
