@@ -1,0 +1,12 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/decision_router_logic.va"
+
+Vvin1 (vin1 0) vsource type=pwl wave=[0 0 2.35n 0 2.40n 0.9 4.0n 0.9]
+Vvin2 (vin2 0) vsource type=pwl wave=[0 0 1.55n 0 1.60n 0.9 3.15n 0.9 3.20n 0 4.0n 0]
+Vvalid (valid 0) vsource type=pwl wave=[0 0 0.75n 0 0.80n 0.9 4.0n 0.9]
+XDUT (vin1 vin2 valid x y z dm dl) decision_router_logic
+
+tran tran stop=3.8n maxstep=5p
+save vin1 vin2 valid x y z dm dl

@@ -1,0 +1,21 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "disciplines.vams"
+module decision_router_logic(vin1, vin2, valid, x, y, z, dm, dl);
+input vin1, vin2, valid;
+output x, y, z, dm, dl;
+electrical vin1, vin2, valid, x, y, z, dm, dl;
+parameter real vth = 0.45;
+parameter real vh = 0.9;
+integer a, b, ok;
+analog begin
+    a = V(vin1) > vth;
+    b = V(vin2) > vth;
+    ok = V(valid) > vth;
+    V(dm) <+ (0.42 * (a ? vh : 0.0));
+    V(dl) <+ (0.42 * (((!a && b) ? vh : 0.0)));
+    V(x) <+ (0.42 * (((!a && !b && ok) ? vh : 0.0)));
+    V(y) <+ (0.42 * (((a && b && ok) ? vh : 0.0)));
+    V(z) <+ (0.42 * (((!a && b && ok) ? vh : 0.0)));
+end
+endmodule

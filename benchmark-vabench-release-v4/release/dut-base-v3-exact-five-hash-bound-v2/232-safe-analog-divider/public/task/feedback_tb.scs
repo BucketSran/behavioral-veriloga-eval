@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/safe_analog_divider.va"
+
+Vnum (signumer 0) vsource type=pwl wave=[0 0.6 3.8n 0.6]
+Vden (sigdenom 0) vsource type=pwl wave=[0 2.0 0.8n 2.0 0.85n 0.05 1.6n 0.05 1.65n -0.05 2.4n -0.05 2.45n -1.0 3.2n -1.0]
+XDUT (signumer sigdenom sigout) safe_analog_divider
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=3.0n maxstep=5p
+save signumer sigdenom sigout

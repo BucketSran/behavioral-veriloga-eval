@@ -1,0 +1,134 @@
+{
+  "family_id": "240",
+  "gold_bundle_sha256": "79509e4c911fb132a79f665a91725a519d2713cd558e35e5eda1f2b0878dcdfe",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "limiting_diffamp.va": "72af0335a6b16b617bcb7f4c9e0ebb15480ff5e8659b3ff98779c824dad505a0"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SMALL_SIGNAL_GAIN",
+          "P_SMOOTH_SYMMETRIC_LIMITING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "limiting_diffamp.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Keeps the output at its trivial zero behavior and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_SMALL_SIGNAL_GAIN",
+        "P_SMOOTH_SYMMETRIC_LIMITING"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "limiting_diffamp.va": "9cb1e86a01991eb5d6b864593717058a7d8e926f5237612fd188c32abc436f46"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SMOOTH_SYMMETRIC_LIMITING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_hard_clamp/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "limiting_diffamp.va"
+      ],
+      "fault_class": "hard_clamp",
+      "id": "neg_002_hard_clamp",
+      "trigger_condition": "Uses a hard clamp instead of the required smooth tanh limiting.",
+      "violated_property_ids": [
+        "P_SMOOTH_SYMMETRIC_LIMITING"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "limiting_diffamp.va": "4d197e87a9bd6d5e575fbcac3fbe266db2321c396fd2060b613c7d613e32a229"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SMALL_SIGNAL_GAIN"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_gain/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "limiting_diffamp.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_003_wrong_gain",
+      "trigger_condition": "Uses an incorrect small-signal gain.",
+      "violated_property_ids": [
+        "P_SMALL_SIGNAL_GAIN"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "limiting_diffamp.va": "b45c465c02d15cc4e18c92802f9becb0864ff47f2435796ee936074d983c3491"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ODD_DIFFERENTIAL_POLARITY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_inverted_polarity/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "limiting_diffamp.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_004_inverted_polarity",
+      "trigger_condition": "Uses reversed input polarity.",
+      "violated_property_ids": [
+        "P_ODD_DIFFERENTIAL_POLARITY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "limiting_diffamp.va": "c562dbf98d5560d780c12ce8db5eb8c9d8aadc9f6c044abce839cdb682bfe1db"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SMALL_SIGNAL_GAIN"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "limiting_diffamp.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Scales the smooth limiting amplifier transfer by the wrong output gain.",
+      "violated_property_ids": [
+        "P_SMALL_SIGNAL_GAIN"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

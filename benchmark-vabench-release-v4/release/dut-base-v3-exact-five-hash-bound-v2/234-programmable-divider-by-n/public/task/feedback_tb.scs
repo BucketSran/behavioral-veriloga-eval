@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/programmable_divider_by_n.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=0.35n rise=20p fall=20p width=0.2n period=0.8n
+Vdiv (divctrl 0) vsource dc=3
+XDUT (clk divctrl out) programmable_divider_by_n
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=5.4n maxstep=5p
+save clk divctrl out

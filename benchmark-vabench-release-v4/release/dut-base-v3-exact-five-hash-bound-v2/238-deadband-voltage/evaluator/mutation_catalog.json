@@ -1,0 +1,134 @@
+{
+  "family_id": "238",
+  "gold_bundle_sha256": "634f7acd20dee24202700dcf7a8ce77d46838266bb15b82d1353cd9f48d7c0da",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "deadband_voltage.va": "d5628267de8085fb8d71ced345e04ed5795db7af5b874c0bdd7bbdac090582ba"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SIGNED_RESIDUE_OUTSIDE_WINDOW"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deadband_voltage.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Keeps the output at its trivial zero behavior and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_SIGNED_RESIDUE_OUTSIDE_WINDOW"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "deadband_voltage.va": "3110e31fad6ae0c57d44fb4ef3be794c76a4d18219c8d4f835b274603829e208"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DEADBAND_ZERO_REGION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_no_deadband/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deadband_voltage.va"
+      ],
+      "fault_class": "deadband_omission",
+      "id": "neg_002_no_deadband",
+      "trigger_condition": "Passes the input through and ignores the deadband.",
+      "violated_property_ids": [
+        "P_DEADBAND_ZERO_REGION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "deadband_voltage.va": "2869b3ff8a62b80347139227bf6d55fb62891fb9a8c6ecba35fb3d7a5e862a51"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DEADBAND_EDGE_CONTINUITY",
+          "P_DEADBAND_ZERO_REGION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_thresholds/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deadband_voltage.va"
+      ],
+      "fault_class": "deadband_threshold_error",
+      "id": "neg_003_wrong_thresholds",
+      "trigger_condition": "Uses too-wide deadband thresholds.",
+      "violated_property_ids": [
+        "P_DEADBAND_EDGE_CONTINUITY",
+        "P_DEADBAND_ZERO_REGION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "deadband_voltage.va": "09a2183c9a3d7da1428aeaffa8469bf1fecca8d94c3da1bfed4237d10a517663"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SIGNED_RESIDUE_OUTSIDE_WINDOW"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_rectifies_below_deadband/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deadband_voltage.va"
+      ],
+      "fault_class": "lower_residue_polarity_error",
+      "id": "neg_004_rectifies_below_deadband",
+      "trigger_condition": "Uses the wrong sign for the lower-side residue.",
+      "violated_property_ids": [
+        "P_SIGNED_RESIDUE_OUTSIDE_WINDOW"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "deadband_voltage.va": "1fd63c08cc79ce39af3c5fdb487d12728dab4a27ed7ca255e0fa74d62faebbe2"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SIGNED_RESIDUE_OUTSIDE_WINDOW"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deadband_voltage.va"
+      ],
+      "fault_class": "output_scale_error",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Deadband Voltage: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_SIGNED_RESIDUE_OUTSIDE_WINDOW"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

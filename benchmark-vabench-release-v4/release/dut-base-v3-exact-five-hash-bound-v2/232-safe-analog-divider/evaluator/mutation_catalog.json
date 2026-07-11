@@ -1,0 +1,140 @@
+{
+  "family_id": "232",
+  "gold_bundle_sha256": "410b764e9f400d73e3ef185028d5bb4aaba8373e0ec44eb854d6838933b7e2fd",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "safe_analog_divider.va": "b60a630a5603b0460ce25d4b1da23fda7038dc4532b0faf344cfda43fc5651bf"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_SIGOUT_TO_GAIN_V_SIGNUMER",
+          "P_USE_V_SIGDENOM_DIRECTLY_WHEN_ITS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "safe_analog_divider.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Keeps the output at its trivial zero behavior and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_DRIVE_SIGOUT_TO_GAIN_V_SIGNUMER",
+        "P_USE_V_SIGDENOM_DIRECTLY_WHEN_ITS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "safe_analog_divider.va": "b564b1c50afc721ce6f2cef1eb81f56014958fbe70bcad21e4e4fa516cfe5ef8"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_WHEN_V_SIGDENOM_IS_EXACTLY_ZERO",
+          "P_WHEN_V_SIGDENOM_IS_NEGATIVE_BUT",
+          "P_WHEN_V_SIGDENOM_IS_POSITIVE_BUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_no_denominator_guard/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "safe_analog_divider.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_002_no_denominator_guard",
+      "trigger_condition": "Divides by the raw denominator without the small-signal clamp.",
+      "violated_property_ids": [
+        "P_WHEN_V_SIGDENOM_IS_EXACTLY_ZERO",
+        "P_WHEN_V_SIGDENOM_IS_NEGATIVE_BUT",
+        "P_WHEN_V_SIGDENOM_IS_POSITIVE_BUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "safe_analog_divider.va": "4d909e554cda4c5bbff70d9e5f40a6bf925670287c019e7144ecb6cb3a6c536a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_WHEN_V_SIGDENOM_IS_NEGATIVE_BUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_positive_guard_only/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "safe_analog_divider.va"
+      ],
+      "fault_class": "positive_guard_only",
+      "id": "neg_003_positive_guard_only",
+      "trigger_condition": "Clamps both small positive and small negative denominators to +0.2 V.",
+      "violated_property_ids": [
+        "P_WHEN_V_SIGDENOM_IS_NEGATIVE_BUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "safe_analog_divider.va": "33d50ec002a5778e02d93586b5d26b8f67c95f9ae2cdf9afc208aad745d781c9"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_SIGOUT_TO_GAIN_V_SIGNUMER",
+          "P_USE_V_SIGDENOM_DIRECTLY_WHEN_ITS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_half_gain/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "safe_analog_divider.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_004_half_gain",
+      "trigger_condition": "Uses half the required divider gain.",
+      "violated_property_ids": [
+        "P_DRIVE_SIGOUT_TO_GAIN_V_SIGNUMER",
+        "P_USE_V_SIGDENOM_DIRECTLY_WHEN_ITS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "safe_analog_divider.va": "32dea9ed14bca678c7f4df47bd9e61476151f8749030671cfcdb4a356ba043da"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_SIGOUT_TO_GAIN_V_SIGNUMER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "safe_analog_divider.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Safe Analog Divider: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_DRIVE_SIGOUT_TO_GAIN_V_SIGNUMER"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

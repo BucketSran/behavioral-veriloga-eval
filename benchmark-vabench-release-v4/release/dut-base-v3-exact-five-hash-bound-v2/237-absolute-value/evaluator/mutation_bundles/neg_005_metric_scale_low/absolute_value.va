@@ -1,0 +1,10 @@
+`include "disciplines.vams"
+module absolute_value(sigin, sigout);
+input sigin;
+output sigout;
+electrical sigin, sigout;
+parameter real smooth = 0.05 from (0:inf);
+analog begin
+    V(sigout) <+ 0.42 * V(sigin) * tanh(V(sigin) / smooth);
+end
+endmodule

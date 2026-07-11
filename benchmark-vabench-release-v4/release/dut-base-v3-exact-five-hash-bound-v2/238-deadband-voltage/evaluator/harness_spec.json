@@ -1,0 +1,80 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "deadband_voltage.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=3.0n maxstep=5p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "sigin",
+      "sigout"
+    ]
+  },
+  "family_id": "238",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "b5414b44d21d39da28e6804587237b7984ac5cab83cab2232df113221753d0b3",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "0dc61f6306ef81e347c2b41e98f40c83b76781b0a04cf3ee107c084c86eca4b2",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (sigin 0) vsource type=pwl wave=[0 -0.7 0.8n -0.7 0.85n -0.1 1.6n -0.1 1.65n 0.15 2.4n 0.15 2.45n 0.8 3.2n 0.8]",
+          "XDUT (sigin sigout) deadband_voltage"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (sigin 0) vsource type=pwl wave=[0 -0.9 0.6n -0.9 0.65n -0.25 1.2n -0.25 1.25n 0.0 1.8n 0.0 1.85n 0.25 2.4n 0.25 2.45n 0.6 3.2n 0.6]",
+          "XDUT (sigin sigout) deadband_voltage"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_DEADBAND_ZERO_REGION",
+    "P_SIGNED_RESIDUE_OUTSIDE_WINDOW",
+    "P_DEADBAND_EDGE_CONTINUITY"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "117b75210a7bc49eab4824a38d0be5ad0e307f3950e540c292f1f25925ae40a4",
+    "family_spec_sha256": "2cb188906ecbc367639ba574f05aecc15da0c6fe0adc6bd4c194dc182231272a"
+  },
+  "task_id": "v4-238"
+}

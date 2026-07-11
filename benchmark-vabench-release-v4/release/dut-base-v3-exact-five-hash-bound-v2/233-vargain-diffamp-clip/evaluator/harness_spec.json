@@ -1,0 +1,95 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "vargain_diffamp_clip.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=3.0n maxstep=5p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "sigin_p",
+      "sigin_n",
+      "sigctrl_p",
+      "sigctrl_n",
+      "sigout"
+    ]
+  },
+  "family_id": "233",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "2e8ed2a6f7e87c96b0e0c048d981c5c6fd723cdfb0a445a62a1dafcdb2676755",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "a54d39dbec767c0e612f955168fce42df898acc3342b39a5ae3214cbece93e4c",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin_p (sigin_p 0) vsource type=pwl wave=[0 0.3 0.8n 0.3 0.85n 0.6 1.6n 0.6 1.65n -0.6 2.4n -0.6 2.45n 0.5 3.2n 0.5]",
+          "Vin_n (sigin_n 0) vsource dc=0",
+          "Vctrl_p (sigctrl_p 0) vsource type=pwl wave=[0 0.5 0.8n 0.5 0.85n 1.0 1.6n 1.0 1.65n 1.0 2.4n 1.0 2.45n 0.0 3.2n 0.0]",
+          "Vctrl_n (sigctrl_n 0) vsource type=pwl wave=[0 0 2.4n 0 2.45n 0.5 3.2n 0.5]",
+          "XDUT (sigin_p sigin_n sigctrl_p sigctrl_n sigout) vargain_diffamp_clip"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=3.1n maxstep=5p"
+        ],
+        "body_lines": [
+          "Vin_p (sigin_p 0) vsource type=pwl wave=[0 0.1 0.75n 0.1 0.80n 0.8 1.55n 0.8 1.60n -0.4 2.35n -0.4 2.40n 0.5 3.3n 0.5]",
+          "Vin_n (sigin_n 0) vsource type=pwl wave=[0 -0.1 1.55n -0.1 1.60n 0.2 3.3n 0.2]",
+          "Vctrl_p (sigctrl_p 0) vsource type=pwl wave=[0 0.4 0.75n 0.4 0.80n 0.9 1.55n 0.9 1.60n 1.2 2.35n 1.2 2.40n 0.1 3.3n 0.1]",
+          "Vctrl_n (sigctrl_n 0) vsource type=pwl wave=[0 0.0 2.35n 0.0 2.40n 0.7 3.3n 0.7]",
+          "XDUT (sigin_p sigin_n sigctrl_p sigctrl_n sigout) vargain_diffamp_clip"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_COMPUTE_THE_DIFFERENTIAL_SIGNAL_AS_V",
+    "P_COMPUTE_THE_DIFFERENTIAL_CONTROL_AS_V",
+    "P_SUBTRACT_SIGIN_OFFSET_FROM_THE_DIFFERENTIAL",
+    "P_MULTIPLY_THE_OFFSET_CORRECTED_SIGNAL_BY",
+    "P_CLAMP_THE_RESULT_TO_THE_PUBLIC",
+    "P_DRIVE_SIGOUT_WITH_THE_CLIPPED_TARGET"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "8aaadb863e7caec33702a214b599769b3a88917e61037111fe77e23e6966ea58",
+    "family_spec_sha256": "947bd0b1fdaec3993c8c8144533822ec3505089428d7d76cdac87a119915b5e5"
+  },
+  "task_id": "v4-233"
+}

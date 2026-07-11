@@ -1,0 +1,86 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "deadband_diffamp.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=3.0n maxstep=5p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "sigin_p",
+      "sigin_n",
+      "sigout"
+    ]
+  },
+  "family_id": "239",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "be845edae9886ead46b862526dc326fe1872b889467951529ca6d0c9fa67a60d",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "f990b91ebe76c26d3cf1b7531065cbef00cb85011aa1d34a4747c4cde75a8c9a",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin_p (sigin_p 0) vsource type=pwl wave=[0 -0.4 0.8n -0.4 0.85n -0.05 1.6n -0.05 1.65n 0.05 2.4n 0.05 2.45n 0.5 3.2n 0.5]",
+          "Vin_n (sigin_n 0) vsource dc=0",
+          "XDUT (sigin_p sigin_n sigout) deadband_diffamp"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=3.3n maxstep=5p"
+        ],
+        "body_lines": [
+          "Vin_p (sigin_p 0) vsource type=pwl wave=[0 -0.25 0.7n -0.25 0.75n 0.10 1.4n 0.10 1.45n 0.34 2.1n 0.34 2.15n -0.15 2.8n -0.15 2.85n 0.18 3.5n 0.18]",
+          "Vin_n (sigin_n 0) vsource dc=0.05",
+          "XDUT (sigin_p sigin_n sigout) deadband_diffamp"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_DIFFERENTIAL_POLARITY",
+    "P_DEADBAND_LEAK_OUTPUT",
+    "P_ASYMMETRIC_RESIDUE_GAINS"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "e5a6e13f8b694d900d8d95fdc9689c4dd5e36ce7a8b182f13dab5a0363fc9fd2",
+    "family_spec_sha256": "c5f6f01b1af7c36ad41346f07eb246d5a3884f08550b1c2df7558dcfcad59df5"
+  },
+  "task_id": "v4-239"
+}

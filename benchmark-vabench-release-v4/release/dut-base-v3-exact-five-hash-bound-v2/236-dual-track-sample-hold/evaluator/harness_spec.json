@@ -1,0 +1,108 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "dual_track_sample_hold.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=110n maxstep=100p"
+    ],
+    "body_lines": [
+      "Vvdd (vdd 0) vsource dc=0.9",
+      "Vvss (vss 0) vsource dc=0.0"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "clk",
+      "vout",
+      "phase",
+      "vdd",
+      "vss"
+    ]
+  },
+  "family_id": "236",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "9fcb2b3ebb0139698641ffc2708bb77fdd21f1e5720d7a5ca2cb0c5d2ca42961",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "ea4c25ba7a20dab40a40177f9b88c59cc9e792fb50a26380f856d5da88c4f966",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=10n rise=50p fall=50p width=8n period=20n",
+          "Vin  (vin 0) vsource type=pwl wave=[ \\",
+          "  0 0.10 6n 0.72 13n 0.20 \\",
+          "  24n 0.20 26n 0.35 33n 0.78 \\",
+          "  44n 0.78 46n 0.18 53n 0.62 \\",
+          "  64n 0.62 66n 0.80 73n 0.28 \\",
+          "  84n 0.28 86n 0.55 110n 0.55 \\",
+          "]",
+          "",
+          "XDUT (vdd vss clk vin vout phase) dual_track_sample_hold",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=125n maxstep=100p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=12n rise=60p fall=60p width=7n period=22n",
+          "Vin  (vin 0) vsource type=pwl wave=[ \\",
+          "  0 0.16 7n 0.64 15n 0.24 \\",
+          "  27n 0.24 30n 0.48 37n 0.76 \\",
+          "  49n 0.76 52n 0.22 59n 0.68 \\",
+          "  71n 0.68 74n 0.82 81n 0.30 \\",
+          "  93n 0.30 96n 0.44 125n 0.44 \\",
+          "]",
+          "",
+          "XDUT (vdd vss clk vin vout phase) dual_track_sample_hold",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_COMPLEMENTARY_TRACK_HOLD_SEQUENCE",
+    "P_FINITE_TRACKING_AND_HOLD",
+    "P_PHASE_MONITOR_POLARITY"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "2447ba71ad148774c8a6404e8a3237ffd85d208517c77c0b5fcfe74154f28463",
+    "family_spec_sha256": "22d42b9dfc56a3bad2612bb6be98190f07cfcb5e4c049160f180a53c455d42b4"
+  },
+  "task_id": "v4-236"
+}

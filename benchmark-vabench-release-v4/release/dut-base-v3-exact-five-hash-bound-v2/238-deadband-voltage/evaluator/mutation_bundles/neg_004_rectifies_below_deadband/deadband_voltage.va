@@ -1,0 +1,5 @@
+`include "disciplines.vams"
+module deadband_voltage(sigin, sigout);
+input sigin; output sigout; electrical sigin, sigout; parameter real sigin_dead_low=-0.25; parameter real sigin_dead_high=0.25;
+analog begin if (V(sigin)<sigin_dead_low) V(sigout)<+sigin_dead_low-V(sigin); else if (V(sigin)>sigin_dead_high) V(sigout)<+V(sigin)-sigin_dead_high; else V(sigout)<+0.0; end
+endmodule

@@ -1,0 +1,21 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/dual_track_sample_hold.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0.0
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=12n rise=60p fall=60p width=7n period=22n
+Vin  (vin 0) vsource type=pwl wave=[ \
+  0 0.16 7n 0.64 15n 0.24 \
+  27n 0.24 30n 0.48 37n 0.76 \
+  49n 0.76 52n 0.22 59n 0.68 \
+  71n 0.68 74n 0.82 81n 0.30 \
+  93n 0.30 96n 0.44 125n 0.44 \
+]
+
+XDUT (vdd vss clk vin vout phase) dual_track_sample_hold
+
+
+tran tran stop=125n maxstep=100p
+save vin clk vout phase vdd vss

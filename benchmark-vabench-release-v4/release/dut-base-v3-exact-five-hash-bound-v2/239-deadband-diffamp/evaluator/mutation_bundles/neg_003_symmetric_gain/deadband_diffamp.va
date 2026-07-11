@@ -1,0 +1,5 @@
+`include "disciplines.vams"
+module deadband_diffamp(sigin_p, sigin_n, sigout);
+input sigin_p, sigin_n; output sigout; electrical sigin_p, sigin_n, sigout; parameter real sigin_dead_low=-0.1; parameter real sigin_dead_high=0.1; parameter real sigout_leak=0.02; parameter real gain=2.0; real diff;
+analog begin diff=V(sigin_p,sigin_n); if (diff<sigin_dead_low) V(sigout)<+gain*(diff-sigin_dead_low)+sigout_leak; else if (diff>sigin_dead_high) V(sigout)<+gain*(diff-sigin_dead_high)+sigout_leak; else V(sigout)<+sigout_leak; end
+endmodule

@@ -1,0 +1,47 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dual_track_sample_hold(vdd, vss, clk, vin, vout, phase);
+    inout vdd, vss;
+    input clk, vin;
+    output vout, phase;
+    electrical vdd, vss, clk, vin, vout, phase;
+
+    parameter real vth = 0.45;
+    parameter real tick = 0.5n from (0:inf);
+    parameter real alpha_in = 0.45 from (0:1];
+    parameter real alpha_out = 0.55 from (0:1];
+    parameter real tedge = 50p from (0:inf);
+    parameter real vinit = 0.0;
+
+    real stage_in;
+    real stage_out;
+    real out_tracks;
+    real vspan;
+
+    analog begin
+        @(initial_step) begin
+            stage_in = vinit;
+            stage_out = vinit;
+            out_tracks = (V(clk, vss) > vth) ? 1.0 : 0.0;
+            vspan = V(vdd, vss);
+        end
+
+        @(cross(V(clk, vss) - vth, +1)) out_tracks = 1.0;
+        @(cross(V(clk, vss) - vth, -1)) out_tracks = 0.0;
+
+        @(timer(0, tick)) begin
+            vspan = V(vdd, vss);
+            if (out_tracks < 0.5)
+                stage_in = stage_in + alpha_in * (V(vin, vss) - stage_in);
+            stage_out = stage_out + alpha_out * (stage_in - stage_out);
+            if (stage_in < 0.0) stage_in = 0.0;
+            if (stage_in > vspan) stage_in = vspan;
+            if (stage_out < 0.0) stage_out = 0.0;
+            if (stage_out > vspan) stage_out = vspan;
+        end
+
+        V(vout, vss) <+ transition(stage_out, 0, tedge, tedge);
+        V(phase, vss) <+ transition((out_tracks > 0.5) ? vspan : 0.0, 0, tedge, tedge);
+    end
+endmodule

@@ -1,0 +1,134 @@
+{
+  "family_id": "239",
+  "gold_bundle_sha256": "812cd46cd4f67441be886b1c85e9a642750273e742e9912f8bfe549f3849fca1",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "deadband_diffamp.va": "a9f44aa466e335cda53e167765cb4f259435e11aefb6e25b1190f3bf2bcf6e55"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ASYMMETRIC_RESIDUE_GAINS",
+          "P_DEADBAND_LEAK_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deadband_diffamp.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Keeps the output at its trivial zero behavior and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_ASYMMETRIC_RESIDUE_GAINS",
+        "P_DEADBAND_LEAK_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "deadband_diffamp.va": "ac340dabb3327271b830e2aafc3b5b6344cda0ef2659d414a795883907192756"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DEADBAND_LEAK_OUTPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_no_leak/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deadband_diffamp.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_002_no_leak",
+      "trigger_condition": "Drops the required leakage offset inside and outside the deadband.",
+      "violated_property_ids": [
+        "P_DEADBAND_LEAK_OUTPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "deadband_diffamp.va": "67e82b737edc46217437a13c7d2bb93470414b53d9330ed235be80c5c98a5e53"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ASYMMETRIC_RESIDUE_GAINS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_symmetric_gain/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deadband_diffamp.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_003_symmetric_gain",
+      "trigger_condition": "Uses the low-side gain for both polarities.",
+      "violated_property_ids": [
+        "P_ASYMMETRIC_RESIDUE_GAINS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "deadband_diffamp.va": "c496d46a15c261a3e421446410e9a61da9df7d8c857abb484cfb70f6030cda24"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DIFFERENTIAL_POLARITY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_inverted_diff/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deadband_diffamp.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_004_inverted_diff",
+      "trigger_condition": "Computes the differential input with reversed polarity.",
+      "violated_property_ids": [
+        "P_DIFFERENTIAL_POLARITY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "deadband_diffamp.va": "104105a6c5f0af071a6646856a34bfd944fea318d34f230a3ccbf0568208ce45"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ASYMMETRIC_RESIDUE_GAINS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "deadband_diffamp.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Deadband Diffamp: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_ASYMMETRIC_RESIDUE_GAINS"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

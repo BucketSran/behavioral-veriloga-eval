@@ -1,0 +1,152 @@
+{
+  "family_id": "231",
+  "gold_bundle_sha256": "334476504d6b510a96575e3a0c7263a415274447364117752e5aa556d3c23c10",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "decision_router_logic.va": "9e4e3e5e064da3d53eb2b9cb081eb5bc17513a335610862a822fd32f6d4d4415"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_DL_HIGH_WHEN_VIN1_IS",
+          "P_DRIVE_DM_HIGH_WHEN_VIN1_IS",
+          "P_DRIVE_X_HIGH_WHEN_VALID_IS",
+          "P_DRIVE_Y_HIGH_WHEN_VALID_IS",
+          "P_DRIVE_Z_HIGH_WHEN_VALID_IS",
+          "P_INTERPRET_VIN1_VIN2_AND_VALID_RELATIVE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "decision_router_logic.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Keeps the output at its trivial zero behavior and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_DRIVE_DL_HIGH_WHEN_VIN1_IS",
+        "P_DRIVE_DM_HIGH_WHEN_VIN1_IS",
+        "P_DRIVE_X_HIGH_WHEN_VALID_IS",
+        "P_DRIVE_Y_HIGH_WHEN_VALID_IS",
+        "P_DRIVE_Z_HIGH_WHEN_VALID_IS",
+        "P_INTERPRET_VIN1_VIN2_AND_VALID_RELATIVE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "decision_router_logic.va": "1c080a86d72d0cce1e6c4f3dd7b19495f78c7edaa4d4ee86df243c8144b7f0f8"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_X_HIGH_WHEN_VALID_IS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_ignore_valid_for_x/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "decision_router_logic.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_002_ignore_valid_for_x",
+      "trigger_condition": "Asserts X for input 00 even when VALID is low.",
+      "violated_property_ids": [
+        "P_DRIVE_X_HIGH_WHEN_VALID_IS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "decision_router_logic.va": "d2e30790d0a9507e3cbbc5293485cbb5492bfa689dbf21444f2c1f3359701f32"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_DL_HIGH_WHEN_VIN1_IS",
+          "P_DRIVE_DM_HIGH_WHEN_VIN1_IS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_swap_dm_dl/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "decision_router_logic.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_003_swap_dm_dl",
+      "trigger_condition": "Swaps the DM and DL output equations.",
+      "violated_property_ids": [
+        "P_DRIVE_DL_HIGH_WHEN_VIN1_IS",
+        "P_DRIVE_DM_HIGH_WHEN_VIN1_IS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "decision_router_logic.va": "cc39c5a1288ad0ba26664da81552d4a2e1c0bfe5eaab78e82c5b6b68c48f4f42"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_Y_HIGH_WHEN_VALID_IS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_y_for_a_only/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "decision_router_logic.va"
+      ],
+      "fault_class": "y_for_a_only",
+      "id": "neg_004_y_for_a_only",
+      "trigger_condition": "Asserts Y for A regardless of B instead of only A&B&VALID.",
+      "violated_property_ids": [
+        "P_DRIVE_Y_HIGH_WHEN_VALID_IS"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "decision_router_logic.va": "22a6bd320e36eff0acbe3b694fdd20d94b252ae7c1540f457b198ca33969e1bd"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_DL_HIGH_WHEN_VIN1_IS",
+          "P_DRIVE_DM_HIGH_WHEN_VIN1_IS",
+          "P_DRIVE_X_HIGH_WHEN_VALID_IS",
+          "P_DRIVE_Y_HIGH_WHEN_VALID_IS",
+          "P_DRIVE_Z_HIGH_WHEN_VALID_IS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "decision_router_logic.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Decision Router Logic: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_DRIVE_DL_HIGH_WHEN_VIN1_IS",
+        "P_DRIVE_DM_HIGH_WHEN_VIN1_IS",
+        "P_DRIVE_X_HIGH_WHEN_VALID_IS",
+        "P_DRIVE_Y_HIGH_WHEN_VALID_IS",
+        "P_DRIVE_Z_HIGH_WHEN_VALID_IS"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}
