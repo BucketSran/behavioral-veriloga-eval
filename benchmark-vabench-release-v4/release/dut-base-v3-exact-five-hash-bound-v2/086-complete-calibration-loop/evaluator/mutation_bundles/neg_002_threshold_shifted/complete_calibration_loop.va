@@ -1,0 +1,57 @@
+// vaBench generated partial-pass negative: threshold_shifted
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "constants.vams"
+`include "disciplines.vams"
+
+module complete_calibration_loop(clk, rst, vin, out, metric, trim_mon, residual_mon);
+input clk, rst, vin;
+output out, metric, trim_mon, residual_mon;
+electrical clk, rst, vin, out, metric, trim_mon, residual_mon;
+parameter real tr = 100p;
+parameter real vth = 0.57;
+parameter real target = 0.45;
+parameter real loop_gain = 0.40;
+parameter real plant_alpha = 0.35;
+parameter real vmin = 0.05;
+parameter real vmax = 0.85;
+real trimv, plantv, rawerrv, residualv, residual_mon_v, desiredv, abserr, metricv;
+analog begin
+    @(initial_step) begin
+        trimv = target;
+        plantv = target;
+        residual_mon_v = target;
+        metricv = 0.9;
+    end
+    @(cross(V(clk) - vth, +1)) begin
+        if (V(rst) > vth) begin
+            trimv = target;
+            plantv = target;
+            residual_mon_v = target;
+            metricv = 0.9;
+        end else begin
+            rawerrv = V(vin) - target;
+            residualv = rawerrv + (trimv - target);
+            trimv = trimv - loop_gain * residualv;
+            if (trimv > vmax) trimv = vmax;
+            if (trimv < vmin) trimv = vmin;
+            residualv = rawerrv + (trimv - target);
+            residual_mon_v = target + residualv;
+            if (residual_mon_v > vmax) residual_mon_v = vmax;
+            if (residual_mon_v < vmin) residual_mon_v = vmin;
+            desiredv = target + residualv;
+            plantv = plantv + plant_alpha * (desiredv - plantv);
+            if (plantv > vmax) plantv = vmax;
+            if (plantv < vmin) plantv = vmin;
+            abserr = plantv - target;
+            if (abserr < 0.0) abserr = -abserr;
+            metricv = 0.9 - 1.5 * abserr;
+            if (metricv > 0.9) metricv = 0.9;
+            if (metricv < 0.0) metricv = 0.0;
+        end
+    end
+    V(out) <+ (0.42 * (transition(plantv, 0, tr, tr)));
+    V(metric) <+ (0.42 * (transition(metricv, 0, tr, tr)));
+    V(trim_mon) <+ (0.42 * (transition(trimv, 0, tr, tr)));
+    V(residual_mon) <+ transition(residual_mon_v, 0, tr, tr);
+end
+endmodule

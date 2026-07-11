@@ -1,0 +1,99 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "agc_receiver_leveling_loop.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=60n maxstep=0.5n"
+    ],
+    "body_lines": [
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=2n width=1n rise=50p fall=50p"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric",
+      "gain_mon",
+      "rssi_mon"
+    ]
+  },
+  "family_id": "082",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "0c0d4235faa9c7a1a94aaabfc9154dfb7fdce73504c6aa4edba842bb45bcf428",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "4b0ca49270580efd8ae41ed36737c5db5a4e71f4e6eaa72d2d2d56ee46f4ddac",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.6n 0.9 1.7n 0 60n 0]",
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.45 7.5n 0.535 22n 0.535 22.1n 0.77 36n 0.77 36.1n 0.54 60n 0.54]",
+          "",
+          "XDUT (clk rst vin out metric gain_mon rssi_mon) agc_receiver_leveling_loop",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=80n maxstep=0.5n"
+        ],
+        "body_lines": [
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.6n 0.9 1.7n 0 80n 0]",
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.45 7.5n 0.535 22n 0.535 22.1n 0.77 56n 0.77 56.1n 0.54 80n 0.54]",
+          "",
+          "XDUT (clk rst vin out metric gain_mon rssi_mon) agc_receiver_leveling_loop",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RESET_STATE",
+    "P_CLOCKED_GAIN_LOOP",
+    "P_OUTPUT_ENVELOPE",
+    "P_GAIN_DIRECTION_AND_BOUNDS",
+    "P_DEADBAND_HOLD",
+    "P_SETTLING_METRIC"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "ad5b44f72fa033021864c09cbfcdc2447de42d66d75cc2985f42388997b633a9",
+    "family_spec_sha256": "12544d5b82d942b9bf059eb5c834b989f3d1e23c13631b83a3ba98e3f9213df1"
+  },
+  "task_id": "v4-082"
+}

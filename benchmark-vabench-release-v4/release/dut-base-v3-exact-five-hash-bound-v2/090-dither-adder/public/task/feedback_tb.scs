@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/dither_adder.va"
+
+parameters vdd=0.9 dither=0.024
+
+Vresp (vres_p 0) vsource type=pwl wave=[0 0.55 20n 0.55 20.1n 0.61 45n 0.61 45.1n 0.49 80n 0.49]
+Vresn (vres_n 0) vsource type=pwl wave=[0 0.35 20n 0.35 20.1n 0.29 45n 0.29 45.1n 0.41 80n 0.41]
+Vdpn  (dpn    0) vsource type=pwl wave=[0 0    18n 0    18.1n 0.9  42n 0.9  42.1n 0  80n 0]
+
+XDUT (vres_p vres_n dpn vout_p vout_n) dither_adder vdd=vdd vth=0.45 DITHER_AMP=dither
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=80n maxstep=100p
+save vres_p vres_n dpn vout_p vout_n

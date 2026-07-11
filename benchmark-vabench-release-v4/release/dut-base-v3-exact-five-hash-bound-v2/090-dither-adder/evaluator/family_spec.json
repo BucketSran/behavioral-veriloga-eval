@@ -1,0 +1,202 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "dither_adder",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "preserves the public compatibility supply-domain parameter",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > 0"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets the DPN polarity threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real"
+              },
+              {
+                "default": 0.014063,
+                "name": "DITHER_AMP",
+                "override_behavior": "sets the magnitude of the injected differential dither",
+                "type": "real",
+                "units": "V differential",
+                "valid_range": "DITHER_AMP >= 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "VRES_P",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "VRES_N",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "DPN",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "VOUT_P",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "VOUT_N",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "dither_adder.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "090",
+  "identity": {
+    "category": "measurement_instrumentation_flows",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Dither Adder"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain differential dither injection.",
+    "Preserve common mode and smooth polarity-updated dither targets.",
+    "Do not use transistor-level devices, AC/noise analysis, waveform artifacts, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_POSITIVE_DITHER",
+      "observable_contract": "When DPN is above vth, the output differential exceeds the input differential by DITHER_AMP.",
+      "required_signals": [
+        "time",
+        "vres_p",
+        "vres_n",
+        "dpn",
+        "vout_p",
+        "vout_n"
+      ]
+    },
+    {
+      "id": "P_NEGATIVE_DITHER",
+      "observable_contract": "When DPN is at or below vth, the output differential is lower than the input differential by DITHER_AMP.",
+      "required_signals": [
+        "time",
+        "vres_p",
+        "vres_n",
+        "dpn",
+        "vout_p",
+        "vout_n"
+      ]
+    },
+    {
+      "id": "P_SYMMETRIC_SPLIT",
+      "observable_contract": "Half of the selected differential dither is added to VOUT_P and half is subtracted from VOUT_N.",
+      "required_signals": [
+        "time",
+        "vres_p",
+        "vres_n",
+        "dpn",
+        "vout_p",
+        "vout_n"
+      ]
+    },
+    {
+      "id": "P_COMMON_MODE_PRESERVATION",
+      "observable_contract": "The output pair preserves the input common mode and does not introduce a vdd/2 offset.",
+      "required_signals": [
+        "time",
+        "vres_p",
+        "vres_n",
+        "vout_p",
+        "vout_n"
+      ]
+    },
+    {
+      "id": "P_PARAMETER_OVERRIDE",
+      "observable_contract": "Legal DITHER_AMP and vth overrides change only dither magnitude and polarity decision as declared.",
+      "required_signals": [
+        "time",
+        "dpn",
+        "vres_p",
+        "vres_n",
+        "vout_p",
+        "vout_n"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1090",
+    "dut": "v4-090",
+    "testbench": "v4-590"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vres_p",
+            "port_ref": "VRES_P",
+            "position": 0
+          },
+          {
+            "net": "vres_n",
+            "port_ref": "VRES_N",
+            "position": 1
+          },
+          {
+            "net": "dpn",
+            "port_ref": "DPN",
+            "position": 2
+          },
+          {
+            "net": "vout_p",
+            "port_ref": "VOUT_P",
+            "position": 3
+          },
+          {
+            "net": "vout_n",
+            "port_ref": "VOUT_N",
+            "position": 4
+          }
+        ],
+        "module_ref": "dither_adder",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vres_p",
+      "vres_n",
+      "dpn",
+      "vout_p",
+      "vout_n"
+    ]
+  }
+}

@@ -1,0 +1,55 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cppll_timer_ref (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical ref_clk,
+    output electrical fb_clk,
+    output electrical dco_clk,
+    output electrical vctrl_mon,
+    output electrical lock
+);
+    parameter integer div_ratio = 8 from [1:inf);
+    parameter real f_center = 800.0e6 from (0:inf);
+    parameter real kvco_hz_per_v = 350.0e6 from (0:inf);
+    parameter real f_min = 300.0e6 from (0:inf);
+    parameter real f_max = 1.6e9 from (0:inf);
+    parameter real kp = 8.0e6 from [0:inf);
+    parameter real ki = 1.2e5 from [0:inf);
+    parameter real integ_min = -0.45;
+    parameter real integ_max = 0.45;
+    parameter real vctrl_init = 0.45;
+    parameter real tedge = 20p from (0:inf);
+    parameter real lock_tol = 0.4e-9 from (0:inf);
+    parameter integer lock_count_target = 6 from [1:inf);
+
+    real vh;
+    real vl;
+    real vcm;
+    real vth;
+    real t_ref_prev;
+    real t_ref_last;
+    real t_fb_last;
+    real ref_period;
+    real phase_err;
+    real integ;
+    real vctrl;
+    real dco_freq;
+    real dco_half_period;
+    real t_next_toggle;
+
+    integer dco_state;
+    integer fb_state;
+    integer div_cnt;
+    integer lock_state;
+    integer lock_streak;
+
+analog begin
+    V(fb_clk) <+ transition(0.0);
+    V(dco_clk) <+ transition(0.0);
+    V(vctrl_mon) <+ transition(0.0);
+    V(lock) <+ transition(0.0);
+end
+
+endmodule

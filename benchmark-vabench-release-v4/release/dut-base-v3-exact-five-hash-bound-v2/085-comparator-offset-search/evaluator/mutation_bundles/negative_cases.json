@@ -1,0 +1,65 @@
+{
+  "cases": [
+    {
+      "id": "neg_001_zero",
+      "intent": "zero/stub output implementation copied from starter must not satisfy the public behavior contract",
+      "mutation": "zero_stub_output",
+      "target": "comparator_offset_search_ref.va",
+      "violated_property_ids": [
+        "P_INITIAL_MEASUREMENT_STATE",
+        "P_DECISION_THRESHOLD",
+        "P_RAIL_REFERENCED_LOGIC"
+      ]
+    },
+    {
+      "files": [
+        "neg_002_threshold_shifted/comparator_offset_search_ref.va"
+      ],
+      "id": "neg_002_threshold_shifted",
+      "mutation": "threshold_boundary_error",
+      "violated_property_ids": [
+        "P_INITIAL_MEASUREMENT_STATE",
+        "P_DECISION_THRESHOLD",
+        "P_FIRST_POSITIVE_CAPTURE"
+      ],
+      "why_wrong": "Comparator Offset Search: shifts the decision threshold, preserving interface shape while reporting the wrong trip point."
+    },
+    {
+      "files": [
+        "neg_003_event_edge_wrong/comparator_offset_search_ref.va"
+      ],
+      "id": "neg_003_event_edge_wrong",
+      "mutation": "event_edge_polarity_error",
+      "violated_property_ids": [
+        "P_FIRST_POSITIVE_CAPTURE",
+        "P_CAPTURE_HOLD"
+      ],
+      "why_wrong": "Comparator Offset Search: uses the opposite event edge for the measurement latch, so the rising-ramp offset search is missed."
+    },
+    {
+      "files": [
+        "neg_004_valid_not_latched/comparator_offset_search_ref.va"
+      ],
+      "id": "neg_004_valid_not_latched",
+      "mutation": "behavioral_contract_near_miss",
+      "violated_property_ids": [
+        "P_INITIAL_MEASUREMENT_STATE",
+        "P_DECISION_THRESHOLD"
+      ],
+      "why_wrong": "Comparator Offset Search: captures the trip point but never asserts the valid measurement output."
+    },
+    {
+      "files": [
+        "neg_005_metric_scale_low/comparator_offset_search_ref.va"
+      ],
+      "id": "neg_005_metric_scale_low",
+      "mutation": "metric_scaling_error",
+      "violated_property_ids": [
+        "P_INITIAL_MEASUREMENT_STATE",
+        "P_DECISION_THRESHOLD"
+      ],
+      "why_wrong": "Comparator Offset Search: drives the decision and valid outputs but scales the reported offset metric too low."
+    }
+  ],
+  "status": "concrete_semantic_negatives_static_formalized_runtime_pending"
+}

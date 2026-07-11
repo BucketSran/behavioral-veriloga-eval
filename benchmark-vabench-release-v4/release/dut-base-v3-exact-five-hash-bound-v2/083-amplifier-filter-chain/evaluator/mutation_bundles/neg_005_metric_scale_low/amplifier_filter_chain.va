@@ -1,0 +1,50 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one required behavior contract.
+`include "constants.vams"
+`include "disciplines.vams"
+
+module amplifier_filter_chain(clk, rst, vin, out, metric, preamp_mon, filt1_mon, filt2_mon, settle_metric);
+input clk, rst, vin;
+output out, metric, preamp_mon, filt1_mon, filt2_mon, settle_metric;
+electrical clk, rst, vin, out, metric, preamp_mon, filt1_mon, filt2_mon, settle_metric;
+parameter real tr = 100p;
+parameter real gain = 1.8;
+parameter real alpha = 0.30;
+real s1, s2, y, target, metricv, settlev, err;
+analog begin
+    @(initial_step) begin
+        s1 = 0.45;
+        s2 = 0.45;
+        y = 0.45;
+        target = 0.45;
+        metricv = 0.45;
+        settlev = 0.0;
+    end
+    @(cross(V(clk) - 0.45, +1)) begin
+        if (V(rst) > 0.45) begin
+            s1 = 0.45;
+            s2 = 0.45;
+            y = 0.45;
+            target = 0.45;
+            metricv = 0.45;
+            settlev = 0.0;
+        end else begin
+            target = gain * (V(vin) - 0.45) + 0.45;
+            if (target > 0.9) target = 0.9; if (target < 0.0) target = 0.0;
+            metricv = target;
+            s1 = s1 + alpha * (target - s1);
+            s2 = s2 + alpha * (s1 - s2);
+            y = s2;
+            err = y - target;
+            if (err < 0.0) err = -err;
+            settlev = (err < 0.16) ? 0.9 : 0.1;
+        end
+    end
+    V(out) <+ (0.42 * (transition(y, 0, tr, tr)));
+    V(metric) <+ (0.42 * (transition(metricv, 0, tr, tr)));
+    V(preamp_mon) <+ (0.42 * (transition(target, 0, tr, tr)));
+    V(filt1_mon) <+ (0.42 * (transition(s1, 0, tr, tr)));
+    V(filt2_mon) <+ (0.42 * (transition(s2, 0, tr, tr)));
+    V(settle_metric) <+ transition(settlev, 0, tr, tr);
+end
+endmodule

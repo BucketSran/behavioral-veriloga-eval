@@ -1,0 +1,101 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "amplifier_filter_chain.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=60n maxstep=0.5n"
+    ],
+    "body_lines": [
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=2n width=1n rise=50p fall=50p"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric",
+      "preamp_mon",
+      "filt1_mon",
+      "filt2_mon",
+      "settle_metric"
+    ]
+  },
+  "family_id": "083",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "574b3504d422122a8f2cf5a8c369fe9774cd0614cf7ea43b72292fe5e678ea07",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "15fb0c3d64514eb8f23795c7e427b9a71b40e224075e0e7279159b8760ac85b1",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 60n 0]",
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.45 8n 0.45 12n 0.9 28n 0.9 31n 0.45 37n 0.45 42n 0.1 58n 0.1 60n 0.45]",
+          "",
+          "XDUT (clk rst vin out metric preamp_mon filt1_mon filt2_mon settle_metric) amplifier_filter_chain",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=80n maxstep=0.5n"
+        ],
+        "body_lines": [
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 80n 0]",
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.45 8n 0.45 12n 0.9 28n 0.9 31n 0.45 37n 0.45 42n 0.1 58n 0.1 61n 0.45 67n 0.45 72n 0.85 80n 0.85]",
+          "",
+          "XDUT (clk rst vin out metric preamp_mon filt1_mon filt2_mon settle_metric) amplifier_filter_chain",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RESET_COMMON_MODE",
+    "P_BOUNDED_PREAMP",
+    "P_FIRST_FILTER_STAGE",
+    "P_SECOND_FILTER_STAGE",
+    "P_CASCADE_LAG",
+    "P_SETTLE_STATUS"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "b9a4c3658e26cc7fd12a1d2ec33b37017d35679b6e8dc2d5aa1e6e8023f9cde9",
+    "family_spec_sha256": "fd70e77c9b67228ff0168cb5c86badc26d284af6c7d4dc692330c48320f21339"
+  },
+  "task_id": "v4-083"
+}

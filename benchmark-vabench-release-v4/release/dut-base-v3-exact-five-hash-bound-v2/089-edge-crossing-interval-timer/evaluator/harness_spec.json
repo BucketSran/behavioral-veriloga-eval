@@ -1,0 +1,105 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "cross_interval_163p333_ref.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=12n maxstep=5p errpreset=conservative"
+    ],
+    "body_lines": [
+      "Vvdd (vdd 0) vsource dc=1.0 type=dc",
+      "Vvss (vss 0) vsource dc=0.0 type=dc",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vdd",
+      "vss",
+      "a",
+      "b",
+      "delay_out",
+      "seen_out"
+    ]
+  },
+  "family_id": "089",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "a858326af4f78d37e69657cea7dcf6b628c574013e093ea0931e00ae73ee6acf",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "61ec78e5224d9aa8e409ba078e5aaf12fbf2f4a571769de2f8d37821acd3bb31",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "// The two ramps cross 0.45 V at 10.000000 ns and 10.163333 ns.",
+          "Va (a 0) vsource type=pwl wave=[0 0 9.95n 0 10.05n 0.9 12n 0.9]",
+          "Vb (b 0) vsource type=pwl wave=[0 0 10.113333n 0 10.213333n 0.9 12n 0.9]",
+          "",
+          "IDUT (vdd vss a b delay_out seen_out) cross_interval_163p333_ref",
+          "",
+          "simulatorOptions options reltol=1e-5 vabstol=1e-8 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=11n maxstep=5p errpreset=conservative"
+        ],
+        "body_lines": [
+          "// The two ramps cross 0.45 V at 7.000000 ns and 7.260000 ns.",
+          "Va (a 0) vsource type=pwl wave=[0 0 6.95n 0 7.05n 0.9 11n 0.9]",
+          "Vb (b 0) vsource type=pwl wave=[0 0 7.210n 0 7.310n 0.9 11n 0.9]",
+          "",
+          "IDUT (vdd vss a b delay_out seen_out) cross_interval_163p333_ref",
+          "",
+          "simulatorOptions options reltol=1e-5 vabstol=1e-8 iabstol=1e-12 temp=27 tnom=27 gmin=1e-12",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_A_EDGE_ARMS",
+    "P_FIRST_B_EDGE_CAPTURES",
+    "P_DELAY_NORMALIZATION",
+    "P_COMPLETION_MARKER",
+    "P_SINGLE_CAPTURE_PER_ARM"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "fa9d81befef65d1e6a78d4c9b85d3f14345092513efe0dc9170251de6b579951",
+    "family_spec_sha256": "ac93075f3ff12a8d4194270c6a73aefd5834984c37fb1b90d65ad4e2fdb6ffef"
+  },
+  "task_id": "v4-089"
+}

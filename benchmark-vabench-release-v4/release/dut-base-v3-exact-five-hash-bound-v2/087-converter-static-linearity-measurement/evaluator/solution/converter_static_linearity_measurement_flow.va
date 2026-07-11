@@ -1,0 +1,94 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module converter_static_linearity_measurement_flow(clk, rst, vin, code, recon, dnl, inl);
+    input clk, rst, vin;
+    output code, recon, dnl, inl;
+    electrical clk, rst, vin, code, recon, dnl, inl;
+
+    parameter real vth = 0.45;
+    parameter real vfs = 0.9;
+    parameter real tr = 120p from (0:inf);
+
+    integer code_state;
+    integer prev_valid;
+    integer prev_code;
+    real recon_v;
+    real prev_recon;
+    real ideal_recon;
+    real ideal_step;
+    real step_err;
+    real dnl_v;
+    real inl_v;
+
+    analog begin
+        @(initial_step) begin
+            code_state = 0;
+            prev_valid = 0;
+            prev_code = 0;
+            recon_v = 0.0;
+            prev_recon = 0.0;
+            dnl_v = 0.45;
+            inl_v = 0.45;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth) begin
+                code_state = 0;
+                prev_valid = 0;
+                prev_code = 0;
+                prev_recon = 0.0;
+                recon_v = 0.0;
+                dnl_v = 0.45;
+                inl_v = 0.45;
+            end else begin
+                code_state = floor((V(vin) / vfs) * 15.0 + 0.5);
+                if (code_state < 0) code_state = 0;
+                if (code_state > 15) code_state = 15;
+
+                case (code_state)
+                    0:  recon_v = vfs * (0.000 / 0.900);
+                    1:  recon_v = vfs * (0.055 / 0.900);
+                    2:  recon_v = vfs * (0.118 / 0.900);
+                    3:  recon_v = vfs * (0.182 / 0.900);
+                    4:  recon_v = vfs * (0.245 / 0.900);
+                    5:  recon_v = vfs * (0.303 / 0.900);
+                    6:  recon_v = vfs * (0.366 / 0.900);
+                    7:  recon_v = vfs * (0.428 / 0.900);
+                    8:  recon_v = vfs * (0.491 / 0.900);
+                    9:  recon_v = vfs * (0.553 / 0.900);
+                    10: recon_v = vfs * (0.612 / 0.900);
+                    11: recon_v = vfs * (0.674 / 0.900);
+                    12: recon_v = vfs * (0.735 / 0.900);
+                    13: recon_v = vfs * (0.798 / 0.900);
+                    14: recon_v = vfs * (0.855 / 0.900);
+                    default: recon_v = vfs;
+                endcase
+
+                ideal_recon = (vfs / 15.0) * code_state;
+                inl_v = 0.45 + 3.0 * (recon_v - ideal_recon);
+                if (inl_v < 0.05) inl_v = 0.05;
+                if (inl_v > 0.85) inl_v = 0.85;
+
+                if (prev_valid > 0 && code_state > prev_code) begin
+                    ideal_step = (vfs / 15.0) * (code_state - prev_code);
+                    step_err = (recon_v - prev_recon) - ideal_step;
+                    dnl_v = 0.45 + 4.0 * step_err;
+                    if (dnl_v < 0.05) dnl_v = 0.05;
+                    if (dnl_v > 0.85) dnl_v = 0.85;
+                end else begin
+                    dnl_v = 0.45;
+                end
+
+                prev_code = code_state;
+                prev_recon = recon_v;
+                prev_valid = 1;
+            end
+        end
+
+        V(code) <+ transition((vfs / 15.0) * code_state, 0, tr, tr);
+        V(recon) <+ transition(recon_v, 0, tr, tr);
+        V(dnl) <+ transition(dnl_v, 0, tr, tr);
+        V(inl) <+ transition(inl_v, 0, tr, tr);
+    end
+endmodule

@@ -1,0 +1,29 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cross_interval_163p333_ref (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical a,
+    input  electrical b,
+    output electrical delay_out,
+    output electrical seen_out
+);
+
+parameter real vth = 0.45;
+parameter real scale_ps = 200.0;
+parameter real tedge = 20p from (0:inf);
+
+real t_a;
+real t_b;
+real delay_ps;
+integer seen_a;
+integer seen_b;
+integer done;
+
+analog begin
+    V(delay_out) <+ transition(0.0);
+    V(seen_out) <+ transition(0.0);
+end
+
+endmodule

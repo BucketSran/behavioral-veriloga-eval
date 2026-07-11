@@ -1,0 +1,24 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module complete_calibration_loop(clk, rst, vin, out, metric, trim_mon, residual_mon);
+input clk, rst, vin;
+output out, metric, trim_mon, residual_mon;
+electrical clk, rst, vin, out, metric, trim_mon, residual_mon;
+parameter real tr = 100p;
+parameter real vth = 0.45;
+parameter real target = 0.45;
+parameter real loop_gain = 0.40;
+parameter real plant_alpha = 0.35;
+parameter real vmin = 0.05;
+parameter real vmax = 0.85;
+real trimv, plantv, rawerrv, residualv, residual_mon_v, desiredv, abserr, metricv;
+
+analog begin
+    V(out) <+ transition(0.0);
+    V(metric) <+ transition(0.0);
+    V(trim_mon) <+ transition(0.0);
+    V(residual_mon) <+ transition(0.0);
+end
+
+endmodule

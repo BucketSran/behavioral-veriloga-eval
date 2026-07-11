@@ -1,0 +1,64 @@
+{
+  "cases": [
+    {
+      "id": "neg_001_zero",
+      "intent": "zero/stub output implementation copied from starter must not satisfy hidden behavior checker",
+      "mutation": "zero_stub_output",
+      "target": "complete_calibration_loop.va",
+      "violated_property_ids": [
+        "P_RESET_TO_TARGET",
+        "P_CLOCKED_LOOP_UPDATE"
+      ]
+    },
+    {
+      "files": [
+        "neg_002_threshold_shifted/complete_calibration_loop.va"
+      ],
+      "id": "neg_002_threshold_shifted",
+      "mutation": "threshold_boundary_error",
+      "violated_property_ids": [
+        "P_CLOCKED_LOOP_UPDATE"
+      ],
+      "why_wrong": "Complete Calibration Loop: shifts the decision threshold, preserving nominal behavior while failing boundary checks."
+    },
+    {
+      "files": [
+        "neg_003_event_edge_wrong/complete_calibration_loop.va"
+      ],
+      "id": "neg_003_event_edge_wrong",
+      "mutation": "event_edge_polarity_error",
+      "violated_property_ids": [
+        "P_CLOCKED_LOOP_UPDATE",
+        "P_RESIDUAL_OBSERVATION"
+      ],
+      "why_wrong": "Complete Calibration Loop: uses the opposite event edge, preserving interface behavior while failing timing windows."
+    },
+    {
+      "files": [
+        "neg_004_reset_polarity_wrong/complete_calibration_loop.va"
+      ],
+      "id": "neg_004_reset_polarity_wrong",
+      "mutation": "reset_semantics_error",
+      "violated_property_ids": [
+        "P_RESET_TO_TARGET",
+        "P_CLOCKED_LOOP_UPDATE",
+        "P_NEGATIVE_FEEDBACK_DIRECTION",
+        "P_PLANT_CONVERGENCE"
+      ],
+      "why_wrong": "Complete Calibration Loop: uses the wrong reset polarity, preserving steady-state behavior while failing recovery checks."
+    },
+    {
+      "files": [
+        "neg_005_metric_scale_low/complete_calibration_loop.va"
+      ],
+      "id": "neg_005_metric_scale_low",
+      "mutation": "metric_scaling_error",
+      "violated_property_ids": [
+        "P_RESET_TO_TARGET",
+        "P_BOUNDS_AND_METRIC"
+      ],
+      "why_wrong": "Complete Calibration Loop: scales the metric output, preserving the main path while failing measurement checks."
+    }
+  ],
+  "status": "concrete_semantic_negatives_static_formalized_runtime_pending"
+}

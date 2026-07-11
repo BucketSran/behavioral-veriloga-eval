@@ -1,0 +1,64 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module adpll_ratio_hop_ref (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    input  electrical ref_clk,
+    input  electrical ratio_ctrl,
+    output electrical fb_clk,
+    output electrical vout,
+    output electrical vctrl_mon,
+    output electrical lock
+);
+    parameter real f_center = 240.0e6 from (0:inf);
+    parameter real freq_step_hz = 5.0e6 from (0:inf);
+    parameter real f_min = 120.0e6 from (0:inf);
+    parameter real f_max = 420.0e6 from (0:inf);
+    parameter integer code_min = 0 from [0:inf);
+    parameter integer code_max = 63 from [1:inf);
+    parameter integer code_center = 32 from [0:inf);
+    parameter integer code_init = 24 from [0:inf);
+    parameter integer ratio_min = 2 from [1:inf);
+    parameter integer ratio_max = 16 from [2:inf);
+    parameter real tedge = 200p from (0:inf);
+    parameter real lock_tol = 2.0n from (0:inf);
+    parameter integer lock_count_target = 5 from [1:inf);
+
+    real vh;
+    real vl;
+    real vth;
+    real ratio_sample;
+    real t_ref_prev;
+    real t_ref_last;
+    real t_fb_prev;
+    real t_fb_last;
+    real ref_period;
+    real fb_period;
+    real period_err;
+    real period_mag;
+    real phase_err;
+    real phase_mag;
+    real phase_limit;
+    real dco_freq;
+    real dco_half_period;
+    real t_next_toggle;
+    real code_norm;
+
+    integer ctrl_code;
+    integer ratio_cur;
+    integer ratio_prev;
+    integer dco_state;
+    integer fb_state;
+    integer div_cnt;
+    integer lock_state;
+    integer lock_streak;
+
+analog begin
+    V(fb_clk) <+ transition(0.0);
+    V(vout) <+ transition(0.0);
+    V(vctrl_mon) <+ transition(0.0);
+    V(lock) <+ transition(0.0);
+end
+
+endmodule

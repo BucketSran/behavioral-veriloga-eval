@@ -1,0 +1,39 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=120n maxstep=100p"
+    ],
+    "body_lines": [
+      "parameters vdd=0.9 dither=0.032",
+      "",
+      "Vresp (vres_p 0) vsource type=pwl wave=[0 0.56 15n 0.56 15.1n 0.62 35n 0.62 35.1n 0.50 55n 0.50 55.1n 0.68 80n 0.68 80.1n 0.54 120n 0.54]",
+      "Vresn (vres_n 0) vsource type=pwl wave=[0 0.34 15n 0.34 15.1n 0.28 35n 0.28 35.1n 0.40 55n 0.40 55.1n 0.22 80n 0.22 80.1n 0.36 120n 0.36]",
+      "Vdpn  (dpn    0) vsource type=pwl wave=[0 0    12n 0    12.1n 0.9  32n 0.9  32.1n 0    52n 0    52.1n 0.9  75n 0.9  75.1n 0  120n 0]",
+      "",
+      "XDUT (vres_p vres_n dpn vout_p vout_n) dither_adder vdd=vdd vth=0.45 DITHER_AMP=dither",
+      ""
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "23cb65a370abe4ae187ce92ccf142a6c4618c54eec4c1d9f7138e4045f002361",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "100n"
+  },
+  "profile_name": "score",
+  "property_ids": [
+    "P_POSITIVE_DITHER",
+    "P_NEGATIVE_DITHER",
+    "P_SYMMETRIC_SPLIT",
+    "P_COMMON_MODE_PRESERVATION",
+    "P_PARAMETER_OVERRIDE"
+  ],
+  "public_visible": false,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {}
+}

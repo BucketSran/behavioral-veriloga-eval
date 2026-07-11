@@ -1,0 +1,25 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module comparator_offset_search_ref(vdd, vss, inp, inn, outp, trip_v, offset_est, valid);
+    inout vdd, vss;
+    input inp, inn;
+    output outp, trip_v, offset_est, valid;
+    electrical vdd, vss, inp, inn, outp, trip_v, offset_est, valid;
+
+    parameter real vos = 5m;
+    parameter real trf = 20p;
+
+    integer decision;
+    integer measurement_valid;
+    real measured_trip_v;
+    real measured_offset;
+
+analog begin
+    V(outp) <+ transition(0.0);
+    V(trip_v) <+ transition(0.0);
+    V(offset_est) <+ transition(0.0);
+    V(valid) <+ transition(0.0);
+end
+
+endmodule

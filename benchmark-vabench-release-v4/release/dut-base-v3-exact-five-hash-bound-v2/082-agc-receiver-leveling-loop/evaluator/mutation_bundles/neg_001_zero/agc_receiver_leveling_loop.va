@@ -1,0 +1,21 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module agc_receiver_leveling_loop(clk, rst, vin, out, metric, gain_mon, rssi_mon);
+input clk, rst, vin;
+output out, metric, gain_mon, rssi_mon;
+electrical clk, rst, vin, out, metric, gain_mon, rssi_mon;
+parameter real tr = 100p;
+parameter real vth = 0.45;
+parameter real target_amp = 0.18;
+parameter real deadband = 0.025;
+real gainv, gain_mon_v, rawv, yv, ampv, rssi_mon_v, errv, metricv;
+
+analog begin
+    V(out) <+ transition(0.0);
+    V(metric) <+ transition(0.0);
+    V(gain_mon) <+ transition(0.0);
+    V(rssi_mon) <+ transition(0.0);
+end
+
+endmodule

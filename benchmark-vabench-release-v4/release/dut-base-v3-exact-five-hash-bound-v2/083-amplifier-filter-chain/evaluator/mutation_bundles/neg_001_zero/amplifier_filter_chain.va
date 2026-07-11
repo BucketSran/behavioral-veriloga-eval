@@ -1,0 +1,22 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module amplifier_filter_chain(clk, rst, vin, out, metric, preamp_mon, filt1_mon, filt2_mon, settle_metric);
+input clk, rst, vin;
+output out, metric, preamp_mon, filt1_mon, filt2_mon, settle_metric;
+electrical clk, rst, vin, out, metric, preamp_mon, filt1_mon, filt2_mon, settle_metric;
+parameter real tr = 100p;
+parameter real gain = 1.8;
+parameter real alpha = 0.30;
+real s1, s2, y, target, metricv, settlev, err;
+
+analog begin
+    V(out) <+ transition(0.0);
+    V(metric) <+ transition(0.0);
+    V(preamp_mon) <+ transition(0.0);
+    V(filt1_mon) <+ transition(0.0);
+    V(filt2_mon) <+ transition(0.0);
+    V(settle_metric) <+ transition(0.0);
+end
+
+endmodule
