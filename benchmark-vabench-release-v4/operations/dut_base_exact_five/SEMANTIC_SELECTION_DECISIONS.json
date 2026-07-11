@@ -1,0 +1,698 @@
+{
+  "changed_family_count": 15,
+  "families": [
+    {
+      "active_mutation_ids": [
+        "neg_001_swap_outputs",
+        "neg_003_never_clears_on_clock",
+        "neg_004_both_outputs_on_direction",
+        "neg_006_weak_high_level",
+        "neg_005_retimed_ignored"
+      ],
+      "decision": "approved_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_002_ignore_falling_data_edges"
+      ],
+      "exclusion_reasons": {
+        "neg_002_ignore_falling_data_edges": "Archive edge_polarity_omission as provenance-only: its observable coverage overlaps P_DIRECTION, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "001",
+      "selection_reason": "Retain the Bugfix seed and five complementary observable faults spanning direction_swap, missing_clock_clear, missing_retimed_direction, nonexclusive_outputs, weak_logic_high; exclusions add less property or trigger diversity."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_ignore_calibration",
+        "neg_002_reversed_polarity",
+        "neg_005_common_mode_error",
+        "neg_006_asynchronous_code_update",
+        "neg_003_bit_weight_swap"
+      ],
+      "decision": "approved_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_004_calibration_scale_16"
+      ],
+      "exclusion_reasons": {
+        "neg_004_calibration_scale_16": "Archive calibration_gain_error as provenance-only: its observable coverage overlaps P_CALIBRATION_WEIGHT, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "002",
+      "selection_reason": "Retain the Bugfix seed and five complementary observable faults spanning asynchronous_update, bit_weight_permutation, calibration_omission, common_mode_offset, differential_polarity_swap; exclusions add less property or trigger diversity."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_004_middle_code_wrong",
+        "neg_001_threshold_too_wide",
+        "neg_006_live_vin_on_phi2",
+        "neg_007_missing_residue_clamp",
+        "neg_003_residue_feedback_sign_swapped"
+      ],
+      "decision": "changed_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_002_upper_decision_msb_stuck_low",
+        "neg_005_residue_gain_low"
+      ],
+      "exclusion_reasons": {
+        "neg_002_upper_decision_msb_stuck_low": "Archive upper_code_msb_stuck_low as provenance-only: its observable coverage overlaps P_SUBADC_REGIONS, while the selected five retain broader fault-class and trigger diversity.",
+        "neg_005_residue_gain_low": "Archive residue_gain_error as provenance-only: its observable coverage overlaps P_RESIDUE_MAPPING, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "003",
+      "selection_reason": "Retain residue-feedback sign coverage; two sub-ADC code-region faults were less diverse than a direct MDAC residue-mapping fault."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_002_inverted_error_direction",
+        "neg_005_missing_lower_clamp",
+        "neg_004_wrong_reset_level",
+        "neg_006_asynchronous_error_update",
+        "neg_001_stuck_midscale"
+      ],
+      "decision": "approved_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_003_wrong_step_size"
+      ],
+      "exclusion_reasons": {
+        "neg_003_wrong_step_size": "Archive step_magnitude_error as provenance-only: its observable coverage overlaps P_CLOCKED_STEP, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "004",
+      "selection_reason": "Retain the Bugfix seed and five complementary observable faults spanning asynchronous_update, missing_lower_clamp, reset_level_error, step_direction_inversion, stuck_control; exclusions add less property or trigger diversity."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_002_immediate_set_on_rise",
+        "neg_004_reset_does_not_cancel_timer",
+        "neg_007_missing_fall_clear",
+        "neg_001_no_final_sig_recheck",
+        "neg_005_never_qualifies_high"
+      ],
+      "decision": "approved_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_003_arms_while_reset_low",
+        "neg_006_spurious_timer_glitch"
+      ],
+      "exclusion_reasons": {
+        "neg_003_arms_while_reset_low": "Archive reset_gating_omission as provenance-only: its observable coverage overlaps P_ACTIVE_LOW_RESET, while the selected five retain broader fault-class and trigger diversity.",
+        "neg_006_spurious_timer_glitch": "Archive unauthorized_timer_event as provenance-only: its observable coverage overlaps P_EVENT_HOLD, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "005",
+      "selection_reason": "Retain the Bugfix seed and five complementary observable faults spanning fall_clear_omission, missing_qualification_commit, qualification_delay_bypass, qualification_recheck_omission, reset_timer_cancel_omission; exclusions add less property or trigger diversity."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_003_monotonic_output_order",
+        "neg_005_out0_stuck_high",
+        "neg_006_weak_high_level",
+        "neg_007_wrong_reset_state",
+        "neg_001_stuck_initial_state"
+      ],
+      "decision": "approved_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_002_skip_every_other_state",
+        "neg_004_forces_state_three"
+      ],
+      "exclusion_reasons": {
+        "neg_002_skip_every_other_state": "Archive state_stride_error as provenance-only: its observable coverage overlaps P_PERMUTATION, while the selected five retain broader fault-class and trigger diversity.",
+        "neg_004_forces_state_three": "Archive forced_state as provenance-only: its observable coverage overlaps P_PERMUTATION, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "006",
+      "selection_reason": "Retain the Bugfix seed and five complementary observable faults spanning one_hot_stuck_output, permutation_mapping_error, reset_state_error, state_advance_omission, weak_logic_high; exclusions add less property or trigger diversity."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_too_slow_alpha",
+        "neg_003_inverted_input",
+        "neg_002_passthrough_timer",
+        "neg_006_wrong_initial_state",
+        "neg_007_wrong_update_period"
+      ],
+      "decision": "changed_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_004_output_clamped",
+        "neg_005_stuck_zero"
+      ],
+      "exclusion_reasons": {
+        "neg_004_output_clamped": "Archive unadvertised_output_clamp as provenance-only: its observable coverage overlaps P_LOW_PASS_RESPONSE, while the selected five retain broader fault-class and trigger diversity.",
+        "neg_005_stuck_zero": "Archive missing_periodic_update as provenance-only: its observable coverage overlaps P_LOW_PASS_RESPONSE, P_PERIODIC_UPDATE, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "007",
+      "selection_reason": "Retain the independent periodic-update cadence fault; archive the stuck-zero response proxy because low-pass liveness is already exercised by richer response faults."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_002_inverted_direction",
+        "neg_005_missing_deadband_hold",
+        "neg_004_wrong_reset_level",
+        "neg_006_missing_control_clamp",
+        "neg_001_stuck_midscale"
+      ],
+      "decision": "approved_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_003_wrong_step_size"
+      ],
+      "exclusion_reasons": {
+        "neg_003_wrong_step_size": "Archive step_magnitude_error as provenance-only: its observable coverage overlaps P_ERROR_DIRECTION, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "008",
+      "selection_reason": "Retain the Bugfix seed and five complementary observable faults spanning deadband_hold_omission, missing_control_clamp, reset_level_error, step_direction_inversion, stuck_control; exclusions add less property or trigger diversity."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_zero_offset",
+        "neg_006_fixed_clock_midpoint",
+        "neg_003_falling_edge",
+        "neg_002_large_offset",
+        "neg_004_async_response"
+      ],
+      "decision": "approved_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_005_weak_high"
+      ],
+      "exclusion_reasons": {
+        "neg_005_weak_high": "Archive weak_high_rail as provenance-only: its observable coverage overlaps P_RAIL_REFERENCE, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "010",
+      "selection_reason": "Retain the Bugfix seed and five complementary observable faults spanning asynchronous_decision, falling_edge_sampling, fixed_clock_midpoint, offset_threshold_excessive, offset_threshold_zero; exclusions add less property or trigger diversity."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_swapped_outputs",
+        "neg_005_div_lead_clear_leaves_up",
+        "neg_006_fixed_nominal_rails",
+        "neg_002_missing_ref_lead_clear",
+        "neg_003_div_falling_edge"
+      ],
+      "decision": "approved_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_004_dn_channel_missing"
+      ],
+      "exclusion_reasons": {
+        "neg_004_dn_channel_missing": "Archive dn_channel_missing as provenance-only: its observable coverage overlaps P_DIV_SETS_DN, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "011",
+      "selection_reason": "Retain the Bugfix seed and five complementary observable faults spanning div_falling_edge_trigger, div_lead_mutual_clear_incomplete, local_rail_reference_omission, output_polarity_swap, ref_lead_mutual_clear_omission; exclusions add less property or trigger diversity."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_ratio_decode_bit_drop",
+        "neg_005_output_stuck_high_after_start",
+        "neg_004_lock_never_asserts",
+        "neg_006_reset_ignored",
+        "neg_002_off_by_one_divide_ratio"
+      ],
+      "decision": "approved_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_003_ratio_bit_order_reversed"
+      ],
+      "exclusion_reasons": {
+        "neg_003_ratio_bit_order_reversed": "Archive ratio_bit_order_reversed as provenance-only: its observable coverage overlaps P_RATIO_DECODE, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "012",
+      "selection_reason": "Retain the Bugfix seed and five complementary observable faults spanning lock_assertion_omission, off_by_one_divide_ratio, output_stuck_high_after_start, ratio_decode_bit_drop, reset_ignored_after_activity; exclusions add less property or trigger diversity."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_gain_low",
+        "neg_003_integral_sign_reversed",
+        "neg_004_reset_ignored",
+        "neg_002_timer_too_slow",
+        "neg_006_nonzero_output_baseline"
+      ],
+      "decision": "approved_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_005_output_half_scale"
+      ],
+      "exclusion_reasons": {
+        "neg_005_output_half_scale": "Archive output_scale_error as provenance-only: its observable coverage overlaps P_TIMER_INTEGRATION, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "013",
+      "selection_reason": "Retain the Bugfix seed and five complementary observable faults spanning active_high_reset_omission, integration_gain_error, integration_polarity_error, nonzero_output_baseline, timer_cadence_error; exclusions add less property or trigger diversity."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_002_passthrough_update",
+        "neg_001_stuck_zero",
+        "neg_006_wrong_initial_state",
+        "neg_007_wrong_update_period",
+        "neg_003_inverted_slew_direction"
+      ],
+      "decision": "approved_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_004_step_too_small",
+        "neg_005_missing_fall_branch"
+      ],
+      "exclusion_reasons": {
+        "neg_004_step_too_small": "Archive slew_rate_magnitude_error as provenance-only: its observable coverage overlaps P_EVENTUAL_TRACKING, while the selected five retain broader fault-class and trigger diversity.",
+        "neg_005_missing_fall_branch": "Archive falling_slew_omission as provenance-only: its observable coverage overlaps P_BIDIRECTIONAL_STEP_LIMIT, P_EVENTUAL_TRACKING, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "016",
+      "selection_reason": "Retain the Bugfix seed and five complementary observable faults spanning initial_state_error, response_direction_inversion, step_limit_bypass, stuck_output, update_period_error; exclusions add less property or trigger diversity."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_missing_phase_increment",
+        "neg_004_missing_phase_wrap",
+        "neg_002_phase_increment_too_small",
+        "neg_006_control_direction_inverted",
+        "neg_005_wrap_does_not_toggle_clock"
+      ],
+      "decision": "changed_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_003_wrong_timer_period"
+      ],
+      "exclusion_reasons": {
+        "neg_003_wrong_timer_period": "Archive timer_period_error as provenance-only: its observable coverage overlaps P_PERIODIC_PHASE_UPDATE, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "019",
+      "selection_reason": "Retain VCO control-direction monotonicity; archive timer-period error because periodic phase update already has several direct representatives."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_linear_gain_error",
+        "neg_002_positive_limit_slope",
+        "neg_003_negative_limit_slope",
+        "neg_006_asynchronous_tracking",
+        "neg_007_output_clamp_missing"
+      ],
+      "decision": "changed_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_004_reset_ignored",
+        "neg_005_metric_stuck_low"
+      ],
+      "exclusion_reasons": {
+        "neg_004_reset_ignored": "Archive active_high_reset_polarity_inverted as provenance-only: its observable coverage overlaps the active suite's broader trigger coverage, while the selected five retain broader fault-class and trigger diversity.",
+        "neg_005_metric_stuck_low": "Archive limiting_metric_missing as provenance-only: its observable coverage overlaps P_NEGATIVE_LIMITING, P_POSITIVE_LIMITING, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "031",
+      "selection_reason": "A limiting amplifier must cover both positive and negative limiting slopes; metric/reset proxies cannot replace the primary transfer curve."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_reduced_small_signal_gain",
+        "neg_002_positive_compression_bypass",
+        "neg_003_negative_compression_bypass",
+        "neg_005_output_clamp_bypass",
+        "neg_007_reset_ignored"
+      ],
+      "decision": "changed_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_004_compression_metric_stuck_low",
+        "neg_006_asynchronous_input_tracking"
+      ],
+      "exclusion_reasons": {
+        "neg_004_compression_metric_stuck_low": "Archive compression_metric_omission as provenance-only: its observable coverage overlaps P_NEGATIVE_COMPRESSION, P_POSITIVE_COMPRESSION, while the selected five retain broader fault-class and trigger diversity.",
+        "neg_006_asynchronous_input_tracking": "Archive asynchronous_input_tracking as provenance-only: its observable coverage overlaps the active suite's broader trigger coverage, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "032",
+      "selection_reason": "LNA compression requires both positive and negative main-output compression paths; archive the auxiliary metric and asynchronous proxy."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_003_inverted_drive",
+        "neg_006_output_clamp_bypass",
+        "neg_004_reset_ignored",
+        "neg_007_asynchronous_tracking",
+        "neg_002_compression_bypass"
+      ],
+      "decision": "approved_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_001_wrong_gain",
+        "neg_005_metric_stuck_linear"
+      ],
+      "exclusion_reasons": {
+        "neg_001_wrong_gain": "Archive linear_gain_error as provenance-only: its observable coverage overlaps P_LINEAR_REGION, while the selected five retain broader fault-class and trigger diversity.",
+        "neg_005_metric_stuck_linear": "Archive compression_metric_omission as provenance-only: its observable coverage overlaps P_LINEAR_REGION, P_SYMMETRIC_COMPRESSION, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "035",
+      "selection_reason": "Retain the Bugfix seed and five complementary observable faults spanning clocked_hold_omission, compression_transfer_omission, drive_polarity_error, output_clamp_omission, reset_override_omission; exclusions add less property or trigger diversity."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_002_inverted_gain_select",
+        "neg_005_clip_metric_stuck_low",
+        "neg_007_output_clamp_bypass",
+        "neg_006_reset_ignored",
+        "neg_003_fixed_unity_gain"
+      ],
+      "decision": "approved_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_001_zero_gain",
+        "neg_004_fixed_high_gain"
+      ],
+      "exclusion_reasons": {
+        "neg_001_zero_gain": "Archive sampled_gain_zero as provenance-only: its observable coverage overlaps P_COMMON_MODE_GAIN, P_SAMPLED_GAIN_SELECT, while the selected five retain broader fault-class and trigger diversity.",
+        "neg_004_fixed_high_gain": "Archive gain_state_stuck_high as provenance-only: its observable coverage overlaps P_COMMON_MODE_GAIN, P_SAMPLED_GAIN_SELECT, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "038",
+      "selection_reason": "Retain the Bugfix seed and five complementary observable faults spanning clip_metric_omission, gain_select_polarity_error, gain_state_stuck_unity, output_clamp_omission, reset_override_omission; exclusions add less property or trigger diversity."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_off_by_one_count",
+        "neg_002_reversed_thermometer_bus",
+        "neg_003_enable_ignored",
+        "neg_005_reversed_bit_order",
+        "neg_006_weak_high_level"
+      ],
+      "decision": "changed_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_004_missing_top_cell"
+      ],
+      "exclusion_reasons": {
+        "neg_004_missing_top_cell": "Archive missing_top_cell as provenance-only: its observable coverage overlaps P_ENDPOINT_CODES, P_PREFIX_THERMOMETER, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "048",
+      "selection_reason": "Retain thermometer-bus orientation; missing-top-cell duplicates endpoint/count semantics already covered by off-by-one count."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_zero",
+        "neg_003_no_clear",
+        "neg_004_no_done",
+        "neg_006_swapped_count0_count1",
+        "neg_002_count_all"
+      ],
+      "decision": "approved_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_005_off_by_one"
+      ],
+      "exclusion_reasons": {
+        "neg_005_off_by_one": "Archive starts_count_at_one as provenance-only: its observable coverage overlaps P_WINDOW_OPEN, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "061",
+      "selection_reason": "Retain the Bugfix seed and five complementary observable faults spanning counts_events_outside_gate, does_not_assert_done, does_not_clear_at_new_gate, never_counts_in_window, swapped_count0_count2_significance; exclusions add less property or trigger diversity."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_zero",
+        "neg_003_wide_tol",
+        "neg_004_no_reset",
+        "neg_005_wrong_code",
+        "neg_006_reversed_code_bits"
+      ],
+      "decision": "approved_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_002_no_hold"
+      ],
+      "exclusion_reasons": {
+        "neg_002_no_hold": "Archive asserts_immediately_in_window as provenance-only: its observable coverage overlaps P_ENTRY_AND_HOLD, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "063",
+      "selection_reason": "Retain the Bugfix seed and five complementary observable faults spanning does_not_clear_outside_window, never_settles, reports_settle_time_instead_of_entry_time, reversed_time_code_bit_order, uses_double_tolerance; exclusions add less property or trigger diversity."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_force_zero",
+        "neg_002_instantaneous_error_only",
+        "neg_003_reversed_observed_bits",
+        "neg_004_rounds_ideal_code",
+        "neg_006_signed_error_only"
+      ],
+      "decision": "changed_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_005_wrong_code_span",
+        "neg_007_half_scale_metric"
+      ],
+      "exclusion_reasons": {
+        "neg_005_wrong_code_span": "Archive uses_seven_bins_for_ideal_code as provenance-only: its observable coverage overlaps P_IDEAL_CODE, while the selected five retain broader fault-class and trigger diversity.",
+        "neg_007_half_scale_metric": "Archive max_error_metric_scaled_by_one_half as provenance-only: its observable coverage overlaps the active suite's broader trigger coverage, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "067",
+      "selection_reason": "Retain maximum-error state across samples; archive half-scale metric because output scaling is less central than retention semantics."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_zero",
+        "neg_003_wrong_period",
+        "neg_004_no_done",
+        "neg_005_extra_pulse",
+        "neg_006_zero_code_width_not_minimum"
+      ],
+      "decision": "approved_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_002_ignore_width",
+        "neg_007_output_levels_low"
+      ],
+      "exclusion_reasons": {
+        "neg_002_ignore_width": "Archive one_cycle_pulses_only as provenance-only: its observable coverage overlaps P_WIDTH_AND_PERIOD, while the selected five retain broader fault-class and trigger diversity.",
+        "neg_007_output_levels_low": "Archive pulse_and_done_high_levels_are_too_low as provenance-only: its observable coverage overlaps the active suite's broader trigger coverage, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "069",
+      "selection_reason": "Retain the Bugfix seed and five complementary observable faults spanning emits_one_extra_pulse, never_asserts_done, no_pulse_train, uses_period_plus_one, zero_width_code_produces_no_minimum_pulse; exclusions add less property or trigger diversity."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_zero",
+        "neg_002_no_jitter",
+        "neg_004_unbounded",
+        "neg_005_ignore_seed",
+        "neg_006_nonrepeating_sequence"
+      ],
+      "decision": "changed_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_003_too_slow",
+        "neg_007_weak_high"
+      ],
+      "exclusion_reasons": {
+        "neg_003_too_slow": "Archive wrong_nominal_half_period as provenance-only: its observable coverage overlaps P_NOMINAL_CLOCK, while the selected five retain broader fault-class and trigger diversity.",
+        "neg_007_weak_high": "Archive weak_logic_high_level as provenance-only: its observable coverage overlaps the active suite's broader trigger coverage, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "070",
+      "selection_reason": "Retain actual jitter modulation; archive weak-high output and slow-period variants because bounds, seed, and repeatability already cover timing quality."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_zero",
+        "neg_003_event_edge_wrong",
+        "neg_004_reset_polarity_wrong",
+        "neg_005_metric_scale_low",
+        "neg_006_nonmonotonic_upper_trim"
+      ],
+      "decision": "approved_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_002_threshold_shifted"
+      ],
+      "exclusion_reasons": {
+        "neg_002_threshold_shifted": "Archive input_enable_threshold_too_high_rejects_valid_low_trim as provenance-only: its observable coverage overlaps P_TRIM_TARGET, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "073",
+      "selection_reason": "Retain the Bugfix seed and five complementary observable faults spanning metric_output_scaled_low_while_bias_path_is_correct, reset_polarity_inverted_holds_bias_disabled_when_active, trim_update_gain_too_low_under_settles_bias, upper_trim_target_falls_below_lower_trim_target, zero_stub_output_implementation_copied_from_starter_must_not_satisfy_hidden_beha; exclusions add less property or trigger diversity."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_zero",
+        "neg_002_threshold_shifted",
+        "neg_004_reset_polarity_wrong",
+        "neg_005_metric_scale_low",
+        "neg_006_monotonic_notch"
+      ],
+      "decision": "changed_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_003_event_edge_wrong",
+        "neg_007_no_transition_smoothing"
+      ],
+      "exclusion_reasons": {
+        "neg_003_event_edge_wrong": "Archive peak_output_scaled_low_preserves_timing_but_loses_peak_amplitude as provenance-only: its observable coverage overlaps P_MAX_RETENTION, while the selected five retain broader fault-class and trigger diversity.",
+        "neg_007_no_transition_smoothing": "Archive peak_output_transition_is_effectively_instantaneous as provenance-only: its observable coverage overlaps the active suite's broader trigger coverage, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "075",
+      "selection_reason": "Retain sampled threshold and peak-retention behavior; archive low-amplitude and smoothing proxies that are less central to peak detection."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_zero",
+        "neg_004_wrong_div4",
+        "neg_005_metric_scale_low",
+        "neg_006_reset_ignored",
+        "neg_007_frame_start_offset"
+      ],
+      "decision": "approved_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_002_pass_all_cycles",
+        "neg_003_one_cycle_burst"
+      ],
+      "exclusion_reasons": {
+        "neg_002_pass_all_cycles": "Archive passes_all_non_reset_clock_cycles_without_quiet_remainder as provenance-only: its observable coverage overlaps P_QUIET_REMAINDER, while the selected five retain broader fault-class and trigger diversity.",
+        "neg_003_one_cycle_burst": "Archive passes_only_the_first_clock_in_each_frame_instead_of_the_first_two as provenance-only: its observable coverage overlaps P_TWO_CYCLE_BURST, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "076",
+      "selection_reason": "Retain the Bugfix seed and five complementary observable faults spanning active_low_reset_is_ignored, clk_out_level_scaled_below_logic_high_threshold, frame_restarts_after_the_two_pulse_window, uses_a_four_cycle_repeat_frame_instead_of_the_public_div_8_frame, zero_output_stub_misses_required_burst_high_phases; exclusions add less property or trigger diversity."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_zero",
+        "neg_005_metric_scale_low",
+        "neg_003_ignore_enable",
+        "neg_006_shift_sequence_wrong",
+        "neg_002_wrong_taps"
+      ],
+      "decision": "approved_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_004_wrong_serial_bit"
+      ],
+      "exclusion_reasons": {
+        "neg_004_wrong_serial_bit": "Archive serial_out_driven_from_state0_instead_of_state6 as provenance-only: its observable coverage overlaps P_SERIAL_OUTPUT, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "078",
+      "selection_reason": "Retain the Bugfix seed and five complementary observable faults spanning advances_lfsr_while_enable_is_low, serial_output_level_scaled_below_logic_threshold, state2_loads_state0_instead_of_state1, wrong_feedback_tap_relation_for_public_prbs7_polynomial, zero_output_state_stub; exclusions add less property or trigger diversity."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_zero",
+        "neg_002_short_pulse",
+        "neg_003_falling_edge_trigger",
+        "neg_004_stuck_high_after_first",
+        "neg_006_no_output_delay"
+      ],
+      "decision": "changed_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_005_metric_scale_low"
+      ],
+      "exclusion_reasons": {
+        "neg_005_metric_scale_low": "Archive fault_005_metric_scale_low as provenance-only: its observable coverage overlaps the active suite's broader trigger coverage, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "105",
+      "selection_reason": "One-shot pulse width is core behavior and outranks the generic low-metric proxy."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_zero",
+        "neg_002_rising_only",
+        "neg_003_short_pulse",
+        "neg_004_no_delay",
+        "neg_006_no_output_delay"
+      ],
+      "decision": "changed_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_005_metric_scale_low"
+      ],
+      "exclusion_reasons": {
+        "neg_005_metric_scale_low": "Archive fault_005_metric_scale_low as provenance-only: its observable coverage overlaps the active suite's broader trigger coverage, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "108",
+      "selection_reason": "Bidirectional crossing detection is core behavior and outranks the generic low-metric proxy."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_002_no_falling_reset",
+        "neg_001_zero",
+        "neg_005_metric_scale_low",
+        "neg_006_equal_input_bias",
+        "neg_004_swapped_outputs"
+      ],
+      "decision": "approved_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_003_inverted_compare"
+      ],
+      "exclusion_reasons": {
+        "neg_003_inverted_compare": "Archive polarity_or_direction_error as provenance-only: its observable coverage overlaps the active suite's broader trigger coverage, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "218",
+      "selection_reason": "Retain the Bugfix seed and five complementary observable faults spanning polarity_or_direction_error, threshold_boundary_error, timing_or_state_update_fault, zero_stub_output; exclusions add less property or trigger diversity."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_stage1_threshold_shift",
+        "neg_002_residue_gain_low",
+        "neg_003_stage2_threshold_shift",
+        "neg_004_coarse_alignment_weight",
+        "neg_005_valid_stuck_low"
+      ],
+      "decision": "changed_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_006_reset_state_not_cleared"
+      ],
+      "exclusion_reasons": {
+        "neg_006_reset_state_not_cleared": "Archive pipeline_reset_state_retention as provenance-only: its observable coverage overlaps the active suite's broader trigger coverage, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "343",
+      "selection_reason": "Pipeline ADC dataflow must include residue gain; reset clear is secondary to stage thresholds, alignment, valid latency, and residue transfer."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_count_by_two",
+        "neg_003_valid_stuck_low",
+        "neg_004_early_overflow",
+        "neg_006_reset_clear_ignored",
+        "neg_007_restart_clear_ignored"
+      ],
+      "decision": "approved_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_002_stop_off_by_one",
+        "neg_005_encoder_lsb_swapped"
+      ],
+      "exclusion_reasons": {
+        "neg_002_stop_off_by_one": "Archive latch_off_by_one as provenance-only: its observable coverage overlaps P_TDC_INTERVAL_COUNT, while the selected five retain broader fault-class and trigger diversity.",
+        "neg_005_encoder_lsb_swapped": "Archive encoder_bit_mapping as provenance-only: its observable coverage overlaps P_TDC_INTERVAL_COUNT, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "346",
+      "selection_reason": "Retain the Bugfix seed and five complementary observable faults spanning counter_step_error, overflow_threshold_error, reset_clear_ignored, restart_clear_ignored, valid_latch_missing_completion; exclusions add less property or trigger diversity."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_002_envelope_dbg_stuck",
+        "neg_001_no_modulation",
+        "neg_005_carrier_inverted",
+        "neg_004_missing_clear",
+        "neg_006_output_not_clamped"
+      ],
+      "decision": "changed_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_003_valid_stuck_low"
+      ],
+      "exclusion_reasons": {
+        "neg_003_valid_stuck_low": "Archive valid_stuck_low as provenance-only: its observable coverage overlaps the active suite's broader trigger coverage, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "380",
+      "selection_reason": "Carrier polarity belongs to the AM transfer equation; the auxiliary valid flag is less central than the carrier path."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_002_gain_metric_wrong",
+        "neg_001_no_compression",
+        "neg_003_phase_metric_stuck",
+        "neg_004_flag_stuck_low",
+        "neg_006_output_not_clamped"
+      ],
+      "decision": "changed_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_005_missing_clear"
+      ],
+      "exclusion_reasons": {
+        "neg_005_missing_clear": "Archive missing_clear as provenance-only: its observable coverage overlaps the active suite's broader trigger coverage, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "386",
+      "selection_reason": "AM/PM phase observability is named core behavior; reset/disable clear is secondary to gain, phase, compression, flag, and clamp behavior."
+    },
+    {
+      "active_mutation_ids": [
+        "neg_001_stage1_wrong",
+        "neg_002_no_slew_limit",
+        "neg_003_settled_stuck_high",
+        "neg_005_clamp_flag_stuck_low",
+        "neg_006_asynchronous_update"
+      ],
+      "decision": "changed_after_semantic_review",
+      "excluded_mutation_ids": [
+        "neg_004_missing_clear"
+      ],
+      "exclusion_reasons": {
+        "neg_004_missing_clear": "Archive missing_clear as provenance-only: its observable coverage overlaps the active suite's broader trigger coverage, while the selected five retain broader fault-class and trigger diversity."
+      },
+      "family_id": "398",
+      "selection_reason": "A slew macromodel must test slew limiting; generic clear behavior is secondary to stage metric, slew, settling, clamp, and clocked update."
+    }
+  ],
+  "family_count": 36,
+  "policy": "Manual semantic review selects by observable fault, property, and trigger diversity; mutation ID order is not a selection criterion.",
+  "schema_version": "v4-exact-five-semantic-decisions-v1",
+  "supplemental_exact_five_reviews": [
+    {
+      "family_id": "092",
+      "finding": "The gain-transfer labels repeat, but unity-gain tests a fixed transfer error while ignores-gain-parameter tests parameter override behavior across gain settings; both are observably distinct.",
+      "status": "approved_distinct_trigger_semantics"
+    },
+    {
+      "family_id": "098",
+      "finding": "The spectral-error labels repeat, but no-frequency-step removes the pre/post period transition while late-switch preserves both periods at the wrong transition time; both are observably distinct.",
+      "status": "approved_distinct_trigger_semantics"
+    }
+  ]
+}
