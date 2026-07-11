@@ -1,0 +1,33 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module multiphase_clock_generator_4ph(vss, clk0, clk90, clk180, clk270);
+    input vss;
+    output clk0, clk90, clk180, clk270;
+    electrical vss, clk0, clk90, clk180, clk270;
+
+    parameter real vdd = 0.9;
+    parameter real tr = 20p;
+
+    real level0; real level90; real level180; real level270;
+    analog begin
+        @(initial_step) begin
+            level0 = vdd;
+            level90 = 0.0;
+            level180 = 0.0;
+            level270 = vdd;
+        end
+        @(timer(10n, 10n)) begin
+            level0 = (level0 > 0.5 * vdd) ? 0.0 : vdd;
+            level180 = (level180 > 0.5 * vdd) ? 0.0 : vdd;
+        end
+        @(timer(5n, 10n)) begin
+            level90 = (level90 > 0.5 * vdd) ? 0.0 : vdd;
+            level270 = (level270 > 0.5 * vdd) ? 0.0 : vdd;
+        end
+        V(clk0, vss) <+ transition(level0, 0, tr, tr);
+        V(clk90, vss) <+ transition(level90, 0, tr, tr);
+        V(clk180, vss) <+ transition(level180, 0, tr, tr);
+        V(clk270, vss) <+ transition(level270, 0, tr, tr);
+    end
+endmodule

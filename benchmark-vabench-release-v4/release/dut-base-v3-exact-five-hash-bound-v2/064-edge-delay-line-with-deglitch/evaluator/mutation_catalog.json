@@ -1,0 +1,136 @@
+{
+  "family_id": "064",
+  "gold_bundle_sha256": "ef0ab296759848a3eb4b1255eceb45763af5c61390ff727fd4a20a9f832873d3",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "edge_delay_line_deglitch.va": "5686d5fdca606d9949ae17c7ec8abf559e0fc6be446eadcd324998803a894720"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DELAYED_EDGE_EMISSION",
+          "P_PARAMETER_OVERRIDE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "edge_delay_line_deglitch.va"
+      ],
+      "fault_class": "configured_delay_omitted",
+      "id": "neg_001",
+      "trigger_condition": "a stable qualified input edge is accepted while delay_ticks is nonzero",
+      "violated_property_ids": [
+        "P_DELAYED_EDGE_EMISSION",
+        "P_PARAMETER_OVERRIDE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "edge_delay_line_deglitch.va": "c4bfdd8a5b85232a3e07054be07f7866244fe720069d833a8ce05d01fca6345d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_STABLE_EDGE_QUALIFICATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "edge_delay_line_deglitch.va"
+      ],
+      "fault_class": "stable_edge_qualification_omitted",
+      "id": "neg_002",
+      "trigger_condition": "an input pulse is shorter than min_width_ticks but long enough to create threshold crossings",
+      "violated_property_ids": [
+        "P_STABLE_EDGE_QUALIFICATION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "edge_delay_line_deglitch.va": "2471139e6f634895d53ebb6f29773ce38bd84bafa941a7e9c87b2e808366e983"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_NARROW_GLITCH_REJECTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "edge_delay_line_deglitch.va"
+      ],
+      "fault_class": "glitch_cancellation_omitted",
+      "id": "neg_003",
+      "trigger_condition": "vin returns to its prior state before qualification and delay expire",
+      "violated_property_ids": [
+        "P_NARROW_GLITCH_REJECTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "edge_delay_line_deglitch.va": "a17a6ae89c26d301c293677844fa6ace7520a418780ce4157b224700a41b085e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_VALID_EMISSION_PULSE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "edge_delay_line_deglitch.va"
+      ],
+      "fault_class": "valid_emission_pulse_omitted",
+      "id": "neg_004",
+      "trigger_condition": "a stable qualified edge is emitted at vout",
+      "violated_property_ids": [
+        "P_VALID_EMISSION_PULSE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "edge_delay_line_deglitch.va": "2fd15e26b53bd9418b154e5cddef1cc6a90bc3e148db91c85a924dfce0700fcb"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BIDIRECTIONAL_LEVELS",
+          "P_RESET_DISABLE_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "edge_delay_line_deglitch.va"
+      ],
+      "fault_class": "reset_disable_clear_and_high_level_error",
+      "id": "neg_005",
+      "trigger_condition": "reset or disable is asserted after vout has gone high, and a later qualified edge exercises the high output level",
+      "violated_property_ids": [
+        "P_BIDIRECTIONAL_LEVELS",
+        "P_RESET_DISABLE_CLEAR"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

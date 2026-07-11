@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/event_counter_windowed_16b.va"
+
+V_gate (gate 0) vsource type=pulse val0=0 val1=0.9 period=4n delay=200p rise=50p fall=50p width=1.5n
+V_event (event 0) vsource type=pulse val0=0 val1=0.9 period=2n delay=400p rise=50p fall=50p width=700p
+
+XDUT (gate event done count0 count1 count2 count3 count4 count5 count6 count7 count8 count9 count10 count11 count12 count13 count14 count15) event_counter_windowed_16b
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=8n maxstep=100p
+save gate event done count0 count1 count2 count3 count4 count5 count6 count7 count8 count9 count10 count11 count12 count13 count14 count15

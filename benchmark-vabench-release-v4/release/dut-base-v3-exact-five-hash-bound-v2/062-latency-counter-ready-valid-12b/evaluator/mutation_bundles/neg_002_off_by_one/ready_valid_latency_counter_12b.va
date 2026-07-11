@@ -1,0 +1,35 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module ready_valid_latency_counter_12b(clk, valid_i, ready_i, done, lat0, lat1, lat2, lat3, lat4, lat5, lat6, lat7, lat8, lat9, lat10, lat11);
+    input clk, valid_i, ready_i;
+    output done, lat0, lat1, lat2, lat3, lat4, lat5, lat6, lat7, lat8, lat9, lat10, lat11;
+    electrical clk, valid_i, ready_i, done, lat0, lat1, lat2, lat3, lat4, lat5, lat6, lat7, lat8, lat9, lat10, lat11;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real tr = 20p;
+
+    integer active; integer cnt; integer lat_code; real done_level;
+    analog begin
+        @(initial_step) begin active=0; cnt=0; lat_code=0; done_level=0; end
+        @(cross(V(clk)-vth,+1)) begin
+            if (!active && V(valid_i)>vth) begin active=1; cnt=1; done_level=0; end
+            else if (active && V(ready_i)<=vth) begin cnt=cnt+1; end
+            if (active && V(ready_i)>vth) begin lat_code=cnt; active=0; done_level=vdd; end
+        end
+        V(done) <+ transition(done_level, 0, tr, tr);
+        V(lat0) <+ transition((((lat_code) >> 0) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(lat1) <+ transition((((lat_code) >> 1) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(lat2) <+ transition((((lat_code) >> 2) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(lat3) <+ transition((((lat_code) >> 3) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(lat4) <+ transition((((lat_code) >> 4) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(lat5) <+ transition((((lat_code) >> 5) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(lat6) <+ transition((((lat_code) >> 6) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(lat7) <+ transition((((lat_code) >> 7) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(lat8) <+ transition((((lat_code) >> 8) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(lat9) <+ transition((((lat_code) >> 9) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(lat10) <+ transition((((lat_code) >> 10) & 1) ? vdd : 0.0, 0, tr, tr);
+        V(lat11) <+ transition((((lat_code) >> 11) & 1) ? vdd : 0.0, 0, tr, tr);
+    end
+endmodule

@@ -1,0 +1,12 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/settling_window_detector.va"
+
+Vtarget (target 0) vsource dc=0.5
+Vtol (tol 0) vsource dc=0.05
+Vvin (vin 0) vsource type=pwl wave=[0 0.1 20n 0.1 20.1n 0.40 43n 0.40 43.1n 0.40 55n 0.40 55.1n 0.51 105n 0.51 105.1n 0.7 115n 0.7 115.1n 0.49 150n 0.49]
+XDUT (vin target tol settled t_code0 t_code1 t_code2 t_code3 t_code4 t_code5 t_code6 t_code7) settling_window_detector
+
+tran tran stop=150n maxstep=100p
+save vin target tol settled t_code0 t_code1 t_code2 t_code3 t_code4 t_code5 t_code6 t_code7

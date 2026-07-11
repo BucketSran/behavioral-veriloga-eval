@@ -1,0 +1,16 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module deterministic_jittered_clock(jitter_en, seed0, seed1, seed2, seed3, seed4, seed5, seed6, seed7, clk_out);
+    input jitter_en, seed0, seed1, seed2, seed3, seed4, seed5, seed6, seed7;
+    output clk_out;
+    electrical jitter_en, seed0, seed1, seed2, seed3, seed4, seed5, seed6, seed7, clk_out;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real tr = 20p;
+
+    analog begin
+        V(clk_out) <+ transition(0.0, 0, tr, tr);
+    end
+endmodule

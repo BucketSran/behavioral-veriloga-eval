@@ -1,0 +1,16 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module configurable_polarity_edge_detector(sig, rise_en, pulse);
+    input sig, rise_en;
+    output pulse;
+    electrical sig, rise_en, pulse;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real tr = 20p;
+
+    analog begin
+        V(pulse) <+ transition(0.0, 0, tr, tr);
+    end
+endmodule

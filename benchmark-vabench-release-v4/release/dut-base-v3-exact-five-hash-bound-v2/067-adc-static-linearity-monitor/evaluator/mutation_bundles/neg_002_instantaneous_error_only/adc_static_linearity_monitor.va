@@ -1,0 +1,43 @@
+`include "disciplines.vams"
+
+module adc_static_linearity_monitor(vsample, vin, d2, d1, d0, maxerr);
+input vsample, vin, d2, d1, d0;
+output maxerr;
+electrical vsample, vin, d2, d1, d0, maxerr;
+
+parameter real vref = 1.0;
+parameter real vth = 0.45;
+parameter real lsb_out = 1.0;
+parameter real tr = 20p;
+
+real clipped;
+integer ideal_code;
+integer observed_code;
+real err;
+real max_error;
+
+analog begin
+    @(initial_step) begin
+        max_error = 0.0;
+    end
+
+    @(cross(V(vsample) - vth, +1)) begin
+        clipped = V(vin);
+        if (clipped < 0.0) clipped = 0.0;
+        if (clipped > vref) clipped = vref;
+
+        ideal_code = $floor(8.0 * clipped / vref);
+        if (ideal_code < 0) ideal_code = 0;
+        if (ideal_code > 7) ideal_code = 7;
+
+        observed_code = ((V(d2) > vth) ? 4 : 0)
+                      + ((V(d1) > vth) ? 2 : 0)
+                      + ((V(d0) > vth) ? 1 : 0);
+        err = observed_code - ideal_code;
+        if (err < 0.0) err = -err;
+        max_error = err;
+    end
+
+    V(maxerr) <+ transition(max_error * lsb_out, 0, tr, tr);
+end
+endmodule

@@ -1,0 +1,182 @@
+{
+  "family_id": "067",
+  "gold_bundle_sha256": "6493170031a03d93be2165cb5ef17ea590f0ae308b52f5f3ad0ec197f7c2220f",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "adc_static_linearity_monitor.va": "27f4e0e3dbd04fcaa85441a742c9124f89f27816e11cfc7f5565ada4362aa38a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_STROBE_UPDATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_force_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "adc_static_linearity_monitor.va"
+      ],
+      "fault_class": "never_reports_nonzero_code_error",
+      "id": "neg_001_force_zero",
+      "trigger_condition": "a sampled nonzero code error must update the retained maxerr metric",
+      "violated_property_ids": [
+        "P_STROBE_UPDATE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "adc_static_linearity_monitor.va": "8256d4c377c304e151ecaf4d79836b7f66e917fd7418dff7becb64b8cf06d6ce"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_MAX_RETENTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_instantaneous_error_only/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "adc_static_linearity_monitor.va"
+      ],
+      "fault_class": "forgets_retained_max_error",
+      "id": "neg_002_instantaneous_error_only",
+      "trigger_condition": "maxerr must retain the maximum sampled absolute code error after later smaller errors",
+      "violated_property_ids": [
+        "P_MAX_RETENTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "adc_static_linearity_monitor.va": "e0b5a9c87e21dd9b2d1caadc80f237d7ad434f834152bc110872ab887eef1cc9"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OBSERVED_CODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_reversed_observed_bits/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "adc_static_linearity_monitor.va"
+      ],
+      "fault_class": "reversed_observed_bit_order",
+      "id": "neg_003_reversed_observed_bits",
+      "trigger_condition": "d2 through d0 must decode as an unsigned word with d2 as MSB and d0 as LSB",
+      "violated_property_ids": [
+        "P_OBSERVED_CODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "adc_static_linearity_monitor.va": "b448b125bb05e38c2e4aa9a67075aeb0c0ade6434892155928cf63fdb3309047"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_IDEAL_CODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_rounds_ideal_code/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "adc_static_linearity_monitor.va"
+      ],
+      "fault_class": "rounds_ideal_code_instead_of_floor",
+      "id": "neg_004_rounds_ideal_code",
+      "trigger_condition": "vin must map to the ideal three-bit bin-floor code at each strobe",
+      "violated_property_ids": [
+        "P_IDEAL_CODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "adc_static_linearity_monitor.va": "043b908611097c13021600cdfc60bb50b01e9505867cc750ff920b18df7c7f43"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_IDEAL_CODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_wrong_code_span/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "adc_static_linearity_monitor.va"
+      ],
+      "fault_class": "uses_seven_bins_for_ideal_code",
+      "id": "neg_005_wrong_code_span",
+      "trigger_condition": "vin must be quantized over the full eight-code ideal span before error calculation",
+      "violated_property_ids": [
+        "P_IDEAL_CODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "adc_static_linearity_monitor.va": "08f6988f2e99fa37f6a462c1570141d6d5f4556fd117f8baf5c752e358872e06"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ABSOLUTE_ERROR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_006_signed_error_only/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "adc_static_linearity_monitor.va"
+      ],
+      "fault_class": "retains_signed_error_instead_of_absolute_error",
+      "id": "neg_006_signed_error_only",
+      "trigger_condition": "negative observed-minus-ideal code errors must contribute their absolute magnitude",
+      "violated_property_ids": [
+        "P_ABSOLUTE_ERROR"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "adc_static_linearity_monitor.va": "9967e3782c273376b2ff0611b620f31db1e622d2753f674c5dcfd5dfc49f8af5"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_METRIC_SCALE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_007_half_scale_metric/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "adc_static_linearity_monitor.va"
+      ],
+      "fault_class": "max_error_metric_scaled_by_one_half",
+      "id": "neg_007_half_scale_metric",
+      "trigger_condition": "maxerr voltage must equal the retained code error times lsb_out",
+      "violated_property_ids": [
+        "P_METRIC_SCALE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

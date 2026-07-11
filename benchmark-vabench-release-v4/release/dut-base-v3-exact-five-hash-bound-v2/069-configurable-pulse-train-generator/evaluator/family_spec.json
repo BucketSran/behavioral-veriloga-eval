@@ -1,0 +1,372 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "configurable_pulse_train",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets pulse and done high levels",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > 0"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets the threshold for clk, start, and every control-word bit",
+                "type": "real",
+                "units": "V",
+                "valid_range": "0 < vth < vdd"
+              },
+              {
+                "default": 2e-11,
+                "name": "tr",
+                "override_behavior": "sets rise and fall smoothing for pulse and done",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "start",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "period0",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "period1",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "period2",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "period3",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "width0",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "width1",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "width2",
+                "position": 8
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "width3",
+                "position": 9
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "count0",
+                "position": 10
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "count1",
+                "position": 11
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "count2",
+                "position": 12
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "count3",
+                "position": 13
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "pulse",
+                "position": 14
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "done",
+                "position": 15
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "configurable_pulse_train.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "069",
+  "identity": {
+    "category": "testbench_utility_modules",
+    "difficulty": "D1",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain clocked transient behavioral Verilog-A for finite AMS control-pulse sequencing",
+    "title": "Configurable Pulse Train Generator"
+  },
+  "modeling_constraints": [
+    "AMS role: finite pulse-train sequencer for calibration, startup, and sampled-data control timing.",
+    "Use deterministic rising-edge clocked state for command capture and pulse sequencing.",
+    "Decode each four-bit control word as unsigned with bit 3 as the MSB and bit 0 as the LSB.",
+    "Do not add undeclared reset, debug, or validation-only ports or behavior."
+  ],
+  "properties": [
+    {
+      "id": "P_IDLE_CAPTURE",
+      "observable_contract": "A sampled high start while idle captures unsigned period3:period0, width3:width0, and count3:count0 on a rising clk crossing.",
+      "required_signals": [
+        "time",
+        "clk",
+        "start",
+        "period0",
+        "period1",
+        "period2",
+        "period3",
+        "width0",
+        "width1",
+        "width2",
+        "width3",
+        "count0",
+        "count1",
+        "count2",
+        "count3",
+        "pulse",
+        "done"
+      ]
+    },
+    {
+      "id": "P_ZERO_CODE_MINIMUM",
+      "observable_contract": "A zero-coded period, width, or count is interpreted as one clock sample rather than zero.",
+      "required_signals": [
+        "time",
+        "clk",
+        "period0",
+        "period1",
+        "period2",
+        "period3",
+        "width0",
+        "width1",
+        "width2",
+        "width3",
+        "count0",
+        "count1",
+        "count2",
+        "count3",
+        "pulse",
+        "done"
+      ]
+    },
+    {
+      "id": "P_PULSE_COUNT",
+      "observable_contract": "Each accepted command emits exactly the captured count number of pulses.",
+      "required_signals": [
+        "time",
+        "clk",
+        "start",
+        "count0",
+        "count1",
+        "count2",
+        "count3",
+        "pulse",
+        "done"
+      ]
+    },
+    {
+      "id": "P_WIDTH_AND_PERIOD",
+      "observable_contract": "Each pulse remains high for the captured width in clock samples and pulse starts are separated by the captured period in clock samples.",
+      "required_signals": [
+        "time",
+        "clk",
+        "period0",
+        "period1",
+        "period2",
+        "period3",
+        "width0",
+        "width1",
+        "width2",
+        "width3",
+        "pulse"
+      ]
+    },
+    {
+      "id": "P_COMPLETION",
+      "observable_contract": "After the final pulse completes, pulse is low and done is asserted.",
+      "required_signals": [
+        "time",
+        "clk",
+        "pulse",
+        "done"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_LEVELS",
+      "observable_contract": "pulse and done use 0 V and vdd levels with finite transition smoothing set by tr.",
+      "required_signals": [
+        "time",
+        "pulse",
+        "done"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1069",
+    "dut": "v4-069",
+    "testbench": "v4-569"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "start",
+            "port_ref": "start",
+            "position": 1
+          },
+          {
+            "net": "period0",
+            "port_ref": "period0",
+            "position": 2
+          },
+          {
+            "net": "period1",
+            "port_ref": "period1",
+            "position": 3
+          },
+          {
+            "net": "period2",
+            "port_ref": "period2",
+            "position": 4
+          },
+          {
+            "net": "period3",
+            "port_ref": "period3",
+            "position": 5
+          },
+          {
+            "net": "width0",
+            "port_ref": "width0",
+            "position": 6
+          },
+          {
+            "net": "width1",
+            "port_ref": "width1",
+            "position": 7
+          },
+          {
+            "net": "width2",
+            "port_ref": "width2",
+            "position": 8
+          },
+          {
+            "net": "width3",
+            "port_ref": "width3",
+            "position": 9
+          },
+          {
+            "net": "count0",
+            "port_ref": "count0",
+            "position": 10
+          },
+          {
+            "net": "count1",
+            "port_ref": "count1",
+            "position": 11
+          },
+          {
+            "net": "count2",
+            "port_ref": "count2",
+            "position": 12
+          },
+          {
+            "net": "count3",
+            "port_ref": "count3",
+            "position": 13
+          },
+          {
+            "net": "pulse",
+            "port_ref": "pulse",
+            "position": 14
+          },
+          {
+            "net": "done",
+            "port_ref": "done",
+            "position": 15
+          }
+        ],
+        "module_ref": "configurable_pulse_train",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "start",
+      "period0",
+      "period1",
+      "period2",
+      "period3",
+      "width0",
+      "width1",
+      "width2",
+      "width3",
+      "count0",
+      "count1",
+      "count2",
+      "count3",
+      "pulse",
+      "done"
+    ]
+  }
+}

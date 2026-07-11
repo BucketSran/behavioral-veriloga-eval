@@ -1,0 +1,8 @@
+simulator lang=spectre
+global 0
+ahdl_include "enable_gated_clock_pulse.va"
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n delay=1n rise=50p fall=50p width=5n
+Ven (en 0) vsource type=pwl wave=[0 0 22n 0 22.1n 0.9 75n 0.9 75.1n 0 105n 0 105.1n 0.9 150n 0.9]
+XDUT (clk en pulse) enable_gated_clock_pulse
+tran tran stop=150n maxstep=100p
+save clk en pulse

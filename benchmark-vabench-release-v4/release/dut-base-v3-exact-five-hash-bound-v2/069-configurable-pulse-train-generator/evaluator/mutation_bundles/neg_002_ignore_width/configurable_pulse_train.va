@@ -1,0 +1,24 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module configurable_pulse_train(clk, start, period0, period1, period2, period3, width0, width1, width2, width3, count0, count1, count2, count3, pulse, done);
+    input clk, start, period0, period1, period2, period3, width0, width1, width2, width3, count0, count1, count2, count3;
+    output pulse, done;
+    electrical clk, start, period0, period1, period2, period3, width0, width1, width2, width3, count0, count1, count2, count3, pulse, done;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real tr = 20p;
+
+    integer running; integer per; integer wid; integer total; integer tick; integer emitted; real pulse_level; real done_level;
+    analog begin
+        @(initial_step) begin running=0; per=1; wid=1; total=0; tick=0; emitted=0; pulse_level=0; done_level=0; end
+        @(cross(V(clk)-vth,+1)) begin
+            if (!running && V(start)>vth) begin per=(V(period0)>vth?1:0)+(V(period1)>vth?2:0)+(V(period2)>vth?4:0)+(V(period3)>vth?8:0); wid=(V(width0)>vth?1:0)+(V(width1)>vth?2:0)+(V(width2)>vth?4:0)+(V(width3)>vth?8:0); total=(V(count0)>vth?1:0)+(V(count1)>vth?2:0)+(V(count2)>vth?4:0)+(V(count3)>vth?8:0); if (per<1) per=1; if (wid<1) wid=1; if (total<1) total=1; tick=0; emitted=0; running=1; done_level=0; end
+            pulse_level = (running && emitted < total && (tick % per) < 1) ? vdd : 0.0;
+            if (running) begin if ((tick % per) == per-1) emitted=emitted+1; tick=tick+1; if (emitted>=total && (tick % per)==0) begin running=0; done_level=vdd; pulse_level=0; end end
+        end
+        V(pulse) <+ transition(pulse_level, 0, tr, tr);
+        V(done) <+ transition(done_level, 0, tr, tr);
+    end
+endmodule

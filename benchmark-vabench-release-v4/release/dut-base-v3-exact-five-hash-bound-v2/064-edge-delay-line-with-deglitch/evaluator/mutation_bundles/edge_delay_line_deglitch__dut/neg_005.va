@@ -1,0 +1,76 @@
+`include "constants.vams"
+`include "disciplines.vams"
+module edge_delay_line_deglitch(vin, rst, enable, vout, edge_valid, rejected);
+input vin, rst, enable;
+output vout, edge_valid, rejected;
+electrical vin, rst, enable, vout, edge_valid, rejected;
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vth = 0.45;
+parameter real tick = 250p from (0:inf);
+parameter integer delay_ticks = 4 from [0:200];
+parameter integer min_width_ticks = 3 from [1:200];
+parameter real tr = 100p from (0:inf);
+integer out_state;
+integer candidate_state;
+integer pending;
+integer qualify_left;
+integer delay_left;
+real out_value;
+real valid_value;
+real rejected_value;
+integer current_state;
+analog begin
+@(initial_step) begin
+out_state = 0;
+candidate_state = 0;
+pending = 0;
+qualify_left = 0;
+delay_left = 0;
+out_value = vss;
+valid_value = vss;
+rejected_value = vss;
+end
+@(cross(V(vin) - vth, +1) or cross(V(vin) - vth, -1)) begin
+if (V(rst) > vth || V(enable) <= vth) begin
+pending = 0;
+out_state = 0;
+out_value = vss;
+valid_value = vss;
+rejected_value = vss;
+end else begin
+candidate_state = (V(vin) > vth) ? 1 : 0;
+pending = 1;
+qualify_left = min_width_ticks;
+delay_left = delay_ticks;
+end
+end
+@(timer(0, tick)) begin
+valid_value = vss;
+rejected_value = vss;
+if (V(rst) > vth || V(enable) <= vth) begin
+pending = 0;
+out_state = 0;
+out_value = vdd;
+end else if (pending != 0) begin
+current_state = (V(vin) > vth) ? 1 : 0;
+if (current_state != candidate_state) begin
+pending = 0;
+rejected_value = vdd;
+end else if (qualify_left > 0) begin
+qualify_left = qualify_left - 1;
+end else if (delay_left > 0) begin
+delay_left = delay_left - 1;
+end else begin
+pending = 0;
+out_state = candidate_state;
+out_value = out_state ? vdd : vss;
+valid_value = vdd;
+end
+end
+end
+V(vout) <+ transition(out_value, 0, tr, tr);
+V(edge_valid) <+ transition(valid_value, 0, tr, tr);
+V(rejected) <+ transition(rejected_value, 0, tr, tr);
+end
+endmodule

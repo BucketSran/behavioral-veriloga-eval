@@ -1,0 +1,25 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module deterministic_jittered_clock(jitter_en, seed0, seed1, seed2, seed3, seed4, seed5, seed6, seed7, clk_out);
+    input jitter_en, seed0, seed1, seed2, seed3, seed4, seed5, seed6, seed7;
+    output clk_out;
+    electrical jitter_en, seed0, seed1, seed2, seed3, seed4, seed5, seed6, seed7, clk_out;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real tr = 20p;
+
+    integer level; integer edge_idx; integer seed_val; real next_t; real half_period;
+    analog begin
+        seed_val = 0;
+        @(initial_step) begin level=0; edge_idx=0; next_t=2n; half_period=10n; end
+        @(timer(next_t)) begin
+            level = !level;
+            edge_idx = edge_idx + 1;
+            if (V(jitter_en)>vth) half_period = 10n + (((seed_val + edge_idx*3) % 5) - 2) * 0.8n; else half_period = 10n;
+            next_t = $abstime + half_period;
+        end
+        V(clk_out) <+ transition(level ? vdd : 0.0, 0, tr, tr);
+    end
+endmodule

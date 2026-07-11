@@ -1,0 +1,157 @@
+{
+  "family_id": "061",
+  "gold_bundle_sha256": "dd1f66424d41f2447ffea2236a6396e8dc0c5765ae07904d72d298ab52cfe99a",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "event_counter_windowed_16b.va": "c5c39d5872ccd12696a96b8ce46ffc2391c45d71980f3d472eb5f07d8e88653c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_IN_WINDOW_COUNT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "event_counter_windowed_16b.va"
+      ],
+      "fault_class": "never_counts_in_window",
+      "id": "neg_001_zero",
+      "trigger_condition": "rising event crossings inside an open gate window must increment the held count",
+      "violated_property_ids": [
+        "P_IN_WINDOW_COUNT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "event_counter_windowed_16b.va": "2d82ed592540e983e876fd2f4c8c201508cbcf0ab3bbd92aecf03a69907a1d4a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUT_OF_WINDOW_IGNORE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_count_all/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "event_counter_windowed_16b.va"
+      ],
+      "fault_class": "counts_events_outside_gate",
+      "id": "neg_002_count_all",
+      "trigger_condition": "events outside the active gate window must not change the held result",
+      "violated_property_ids": [
+        "P_OUT_OF_WINDOW_IGNORE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "event_counter_windowed_16b.va": "07b7e44cf952bff98e127940b6725d8ff13bb72d0d156bf0e53aee921e3ece47"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_WINDOW_OPEN"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_no_clear/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "event_counter_windowed_16b.va"
+      ],
+      "fault_class": "does_not_clear_at_new_gate",
+      "id": "neg_003_no_clear",
+      "trigger_condition": "a rising gate crossing must clear the count before the new measurement window",
+      "violated_property_ids": [
+        "P_WINDOW_OPEN"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "event_counter_windowed_16b.va": "be6338dcf4898d27c4da072b60a914ab5745d2cb030f01cd52b7625342096ab0"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_WINDOW_CLOSE_HOLD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_no_done/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "event_counter_windowed_16b.va"
+      ],
+      "fault_class": "does_not_assert_done",
+      "id": "neg_004_no_done",
+      "trigger_condition": "a falling gate crossing must close the window and assert done",
+      "violated_property_ids": [
+        "P_WINDOW_CLOSE_HOLD"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "event_counter_windowed_16b.va": "38c96e54bcaa98935b7f8175bc740857bbfe68c1776fbada7f5d293f99e2dca5"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_WINDOW_OPEN"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_off_by_one/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "event_counter_windowed_16b.va"
+      ],
+      "fault_class": "starts_count_at_one",
+      "id": "neg_005_off_by_one",
+      "trigger_condition": "a rising gate crossing must initialize the count to zero",
+      "violated_property_ids": [
+        "P_WINDOW_OPEN"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "event_counter_windowed_16b.va": "31b9a51224703679302edf261bac5c9c028d6b0ce2b388a7be16af8d04132ce0"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BIT_ORDER_AND_LEVELS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_006_swapped_count0_count1/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "event_counter_windowed_16b.va"
+      ],
+      "fault_class": "swapped_count0_count2_significance",
+      "id": "neg_006_swapped_count0_count1",
+      "trigger_condition": "count0 must be the least-significant count bit and count2 the four-count bit",
+      "violated_property_ids": [
+        "P_BIT_ORDER_AND_LEVELS"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

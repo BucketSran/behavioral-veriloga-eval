@@ -1,0 +1,11 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/multiphase_clock_generator_4ph.va"
+
+XDUT (0 clk0 clk90 clk180 clk270) multiphase_clock_generator_4ph
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=100n maxstep=50p
+save clk0 clk90 clk180 clk270

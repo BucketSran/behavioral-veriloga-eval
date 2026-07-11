@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "adc_static_linearity_monitor.va"
+
+Vsample (vsample 0) vsource type=pwl wave=[0 0 1.55n 0 1.57n 0.9 1.85n 0.9 1.87n 0 3.55n 0 3.57n 0.9 3.85n 0.9 3.87n 0 5.55n 0 5.57n 0.9 5.85n 0.9 5.87n 0 7.55n 0 7.57n 0.9 7.85n 0.9 7.87n 0 9.55n 0 9.57n 0.9 9.85n 0.9 9.87n 0 11.55n 0 11.57n 0.9 11.85n 0.9 11.87n 0]
+Vin (vin 0) vsource type=pwl wave=[0n 0.06 1n 0.06 1.02n 0.2 3n 0.2 3.02n 0.39 5n 0.39 5.02n 0.55 7n 0.55 7.02n 0.79 9n 0.79 9.02n 0.93]
+Vd2 (d2 0) vsource type=pwl wave=[0n 0 5n 0 5.02n 0.9]
+Vd1 (d1 0) vsource type=pwl wave=[0n 0 3n 0 3.02n 0.9 5n 0.9 5.02n 0 9n 0 9.02n 0.9]
+Vd0 (d0 0) vsource type=pwl wave=[0n 0 1n 0 1.02n 0.9 3n 0.9 3.02n 0 9n 0 9.02n 0.9]
+
+XDUT (vsample vin d2 d1 d0 maxerr) adc_static_linearity_monitor
+
+tran tran stop=12.5n maxstep=10p
+save vsample vin d2 d1 d0 maxerr

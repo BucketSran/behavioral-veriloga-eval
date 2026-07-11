@@ -1,0 +1,98 @@
+{
+  "cases": [
+    {
+      "artifact": "neg_001_zero/configurable_pulse_train.va",
+      "expected_status": "FAIL_SIM_CORRECTNESS",
+      "id": "neg_001_zero",
+      "mutation": "Never emits the accepted pulse train."
+    },
+    {
+      "artifact": "neg_002_ignore_width/configurable_pulse_train.va",
+      "expected_status": "FAIL_SIM_CORRECTNESS",
+      "id": "neg_002_ignore_width",
+      "mutation": "Emits one-cycle pulses instead of honoring the captured width."
+    },
+    {
+      "artifact": "neg_003_wrong_period/configurable_pulse_train.va",
+      "expected_status": "FAIL_SIM_CORRECTNESS",
+      "id": "neg_003_wrong_period",
+      "mutation": "Separates pulse starts using period plus one."
+    },
+    {
+      "artifact": "neg_004_no_done/configurable_pulse_train.va",
+      "expected_status": "FAIL_SIM_CORRECTNESS",
+      "id": "neg_004_no_done",
+      "mutation": "Completes the pulse sequence without asserting done."
+    },
+    {
+      "artifact": "neg_005_extra_pulse/configurable_pulse_train.va",
+      "expected_status": "FAIL_SIM_CORRECTNESS",
+      "id": "neg_005_extra_pulse",
+      "mutation": "Emits one extra pulse beyond the captured count."
+    },
+    {
+      "artifact": "neg_006_zero_code_width_not_minimum/configurable_pulse_train.va",
+      "expected_status": "FAIL_SIM_CORRECTNESS",
+      "id": "neg_006_zero_code_width_not_minimum",
+      "mutation": "Treats an all-zero width command as a zero-length pulse instead of the required minimum one-cycle pulse."
+    },
+    {
+      "artifact": "neg_007_output_levels_low/configurable_pulse_train.va",
+      "expected_status": "FAIL_SIM_CORRECTNESS",
+      "id": "neg_007_output_levels_low",
+      "mutation": "Drives pulse and done below the required asserted rail level."
+    }
+  ],
+  "negative_cases": [
+    {
+      "files": [
+        "neg_001_zero/configurable_pulse_train.va"
+      ],
+      "id": "neg_001_zero",
+      "why_wrong": "Never emits the accepted pulse train."
+    },
+    {
+      "files": [
+        "neg_002_ignore_width/configurable_pulse_train.va"
+      ],
+      "id": "neg_002_ignore_width",
+      "why_wrong": "Emits one-cycle pulses instead of honoring the captured width."
+    },
+    {
+      "files": [
+        "neg_003_wrong_period/configurable_pulse_train.va"
+      ],
+      "id": "neg_003_wrong_period",
+      "why_wrong": "Separates pulse starts using period plus one."
+    },
+    {
+      "files": [
+        "neg_004_no_done/configurable_pulse_train.va"
+      ],
+      "id": "neg_004_no_done",
+      "why_wrong": "Completes the pulse sequence without asserting done."
+    },
+    {
+      "files": [
+        "neg_005_extra_pulse/configurable_pulse_train.va"
+      ],
+      "id": "neg_005_extra_pulse",
+      "why_wrong": "Emits one extra pulse beyond the captured count."
+    },
+    {
+      "files": [
+        "neg_006_zero_code_width_not_minimum/configurable_pulse_train.va"
+      ],
+      "id": "neg_006_zero_code_width_not_minimum",
+      "why_wrong": "Treats an all-zero width command as a zero-length pulse instead of the required minimum one-cycle pulse."
+    },
+    {
+      "files": [
+        "neg_007_output_levels_low/configurable_pulse_train.va"
+      ],
+      "id": "neg_007_output_levels_low",
+      "why_wrong": "Drives pulse and done below the required asserted rail level."
+    }
+  ],
+  "status": "concrete_near_miss_negatives"
+}
