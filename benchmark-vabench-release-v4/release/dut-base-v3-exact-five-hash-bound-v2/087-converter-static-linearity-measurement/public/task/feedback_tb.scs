@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/converter_static_linearity_measurement_flow.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=4n width=2n delay=1n rise=100p fall=100p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 96n 0]
+Vvin (vin 0) vsource type=pwl wave=[0 0.0 4n 0.0 88n 0.9 96n 0.9]
+
+XDUT (clk rst vin code recon dnl inl) converter_static_linearity_measurement_flow
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=96n maxstep=250p
+save clk rst vin code recon dnl inl

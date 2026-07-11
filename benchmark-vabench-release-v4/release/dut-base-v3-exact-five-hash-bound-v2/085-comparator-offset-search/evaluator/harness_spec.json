@@ -1,0 +1,108 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "comparator_offset_search_ref.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=100n maxstep=50p errpreset=conservative"
+    ],
+    "body_lines": [
+      "Vvdd (vdd 0) vsource dc=0.9",
+      "Vvss (vss 0) vsource dc=0.0"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vdd",
+      "vss",
+      "inp",
+      "inn",
+      "outp",
+      "trip_v",
+      "offset_est",
+      "valid"
+    ]
+  },
+  "family_id": "085",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "023821efb4fc20ea2dbf759929023a76150979e5aa3efd4386a991fdc63f428f",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "8783c1b836d95080ddb8547d815cf9dda1d2ca0043e7efcf9a7f33af703686de",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vinn (inn 0) vsource dc=0.5",
+          "Vinp (inp 0) vsource type=pwl wave=[ \\",
+          "    0    0.490 \\",
+          "    80n 0.520 \\",
+          "    100n 0.520 \\",
+          "]",
+          "",
+          "XDUT (vdd vss inp inn outp trip_v offset_est valid) comparator_offset_search_ref",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=130n maxstep=50p errpreset=conservative"
+        ],
+        "body_lines": [
+          "Vinn (inn 0) vsource dc=0.47",
+          "Vinp (inp 0) vsource type=pwl wave=[ \\",
+          "    0    0.462 \\",
+          "    110n 0.490 \\",
+          "    130n 0.490 \\",
+          "]",
+          "",
+          "XDUT (vdd vss inp inn outp trip_v offset_est valid) comparator_offset_search_ref",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INITIAL_MEASUREMENT_STATE",
+    "P_DECISION_THRESHOLD",
+    "P_FIRST_POSITIVE_CAPTURE",
+    "P_CAPTURE_HOLD",
+    "P_RAIL_REFERENCED_LOGIC"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "82164ed2db232b1859930cf1a9c402428b0690511bc017b3397e4c81e9d06a00",
+    "family_spec_sha256": "ede63ae44e66dae3e0cfc02e0a037b84780383d5e31356cad74db521a7f68782"
+  },
+  "task_id": "v4-085"
+}

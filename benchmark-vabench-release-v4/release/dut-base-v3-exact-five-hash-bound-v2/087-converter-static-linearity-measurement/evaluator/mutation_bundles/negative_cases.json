@@ -1,0 +1,64 @@
+{
+  "cases": [
+    {
+      "id": "neg_001_zero",
+      "intent": "zero/stub output implementation copied from starter must not satisfy hidden behavior checker",
+      "mutation": "zero_stub_output",
+      "target": "converter_static_linearity_measurement_flow.va",
+      "violated_property_ids": [
+        "P_RESET_STATE",
+        "P_FOUR_BIT_QUANTIZATION",
+        "P_PUBLIC_RECONSTRUCTION_TABLE"
+      ]
+    },
+    {
+      "files": [
+        "neg_002_threshold_shifted/converter_static_linearity_measurement_flow.va"
+      ],
+      "id": "neg_002_threshold_shifted",
+      "mutation": "threshold_boundary_error",
+      "violated_property_ids": [
+        "P_DNL_INCREASING_STEP",
+        "P_DNL_NO_STEP_BASELINE"
+      ],
+      "why_wrong": "Converter Static Linearity Measurement: shifts the decision threshold, preserving nominal behavior while failing boundary checks."
+    },
+    {
+      "files": [
+        "neg_003_event_edge_wrong/converter_static_linearity_measurement_flow.va"
+      ],
+      "id": "neg_003_event_edge_wrong",
+      "mutation": "event_edge_polarity_error",
+      "violated_property_ids": [
+        "P_FOUR_BIT_QUANTIZATION"
+      ],
+      "why_wrong": "Converter Static Linearity Measurement: uses the opposite event edge, preserving interface behavior while failing timing windows."
+    },
+    {
+      "files": [
+        "neg_004_reset_polarity_wrong/converter_static_linearity_measurement_flow.va"
+      ],
+      "id": "neg_004_reset_polarity_wrong",
+      "mutation": "reset_semantics_error",
+      "violated_property_ids": [
+        "P_RESET_STATE",
+        "P_FOUR_BIT_QUANTIZATION"
+      ],
+      "why_wrong": "Converter Static Linearity Measurement: uses the wrong reset polarity, preserving steady-state behavior while failing recovery checks."
+    },
+    {
+      "files": [
+        "neg_005_metric_scale_low/converter_static_linearity_measurement_flow.va"
+      ],
+      "id": "neg_005_metric_scale_low",
+      "mutation": "metric_scaling_error",
+      "violated_property_ids": [
+        "P_INL_METRIC",
+        "P_DNL_INCREASING_STEP",
+        "P_DNL_NO_STEP_BASELINE"
+      ],
+      "why_wrong": "Converter Static Linearity Measurement: scales the metric output, preserving the main path while failing measurement checks."
+    }
+  ],
+  "status": "concrete_semantic_negatives_static_formalized_runtime_pending"
+}

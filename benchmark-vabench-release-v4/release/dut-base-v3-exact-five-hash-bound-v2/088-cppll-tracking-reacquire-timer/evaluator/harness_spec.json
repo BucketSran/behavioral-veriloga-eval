@@ -1,0 +1,105 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "cppll_timer_ref.va",
+      "ref_step_clk.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=6u maxstep=5n errpreset=conservative"
+    ],
+    "body_lines": [
+      "// Gold smoke testbench for CPPLL relock after a reference-frequency step.",
+      "",
+      "vdd_SRC (vdd 0) vsource type=dc dc=0.9",
+      "vss_SRC (vss 0) vsource type=dc dc=0",
+      "",
+      "XREF (vdd vss ref_clk) ref_step_clk \\"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vdd",
+      "vss",
+      "ref_clk",
+      "fb_clk",
+      "dco_clk",
+      "vctrl_mon",
+      "lock"
+    ]
+  },
+  "family_id": "088",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "6e1af2ec44d189bec75349e84d839d9ad518113e17282fecba154b88d42c3d6f",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "bd002043b280b3ee88d55bf3ac2e7d6169a48572b432d1b688077db601d4981d",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "    period_pre=20.4n period_post=19.8n t_switch=2u tedge=100p",
+          "",
+          "XDUT (vdd vss ref_clk fb_clk dco_clk vctrl_mon lock) cppll_timer_ref \\",
+          "    div_ratio=8 f_center=784.313725e6 kvco_hz_per_v=220e6 f_min=500e6 f_max=1.2e9 \\",
+          "    kp=2.5e6 ki=8.0e4 vctrl_init=0.45 tedge=1n lock_tol=1.2n lock_count_target=4",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "    period_pre=20n period_post=19.5n t_switch=2u tedge=100p",
+          "",
+          "XDUT (vdd vss ref_clk fb_clk dco_clk vctrl_mon lock) cppll_timer_ref \\",
+          "    div_ratio=8 f_center=800e6 kvco_hz_per_v=220e6 f_min=500e6 f_max=1.2e9 \\",
+          "    kp=2.5e6 ki=8.0e4 vctrl_init=0.45 tedge=1n lock_tol=1.2n lock_count_target=4",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_REFERENCE_PERIOD_STEP",
+    "P_DCO_FREQUENCY_CONTROL",
+    "P_FEEDBACK_DIVISION",
+    "P_BOUNDED_TRACKING_CONTROL",
+    "P_INITIAL_LOCK_ACQUISITION",
+    "P_DISTURBANCE_UNLOCK",
+    "P_LATE_REACQUISITION"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "ccd25449de9e73722dd26cd3afda95f102696f2a15ceed818ac8500623a1c936",
+    "family_spec_sha256": "c358e54a720bd19d11e9e44684637d8d7ca3c9bf4f42579917f2ccb01a323fa5"
+  },
+  "task_id": "v4-088"
+}

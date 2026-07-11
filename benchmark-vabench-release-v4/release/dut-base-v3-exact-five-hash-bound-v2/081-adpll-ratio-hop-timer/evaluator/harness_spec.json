@@ -1,0 +1,107 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "adpll_ratio_hop_ref.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=5u maxstep=5n"
+    ],
+    "body_lines": [
+      "Vvdd (vdd 0) vsource dc=0.9",
+      "Vvss (vss 0) vsource dc=0.0",
+      "",
+      "Vref (ref_clk 0) vsource type=pulse val0=0 val1=0.9 period=20n width=10n rise=100p fall=100p"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vdd",
+      "vss",
+      "ref_clk",
+      "ratio_ctrl",
+      "fb_clk",
+      "vout",
+      "vctrl_mon",
+      "lock"
+    ]
+  },
+  "family_id": "081",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "5075b9446851504d946963486e506852b52de946e8880d520ea4e54fcc745cb2",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "2e93cdc0e6b5f881b282d343cb35b2806f3fa6f5a290927330ceae3513642b8c",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vratio (ratio_ctrl 0) vsource type=pwl wave=[0 4 1.999u 4 2.001u 6 5u 6]",
+          "",
+          "IDUT (vdd vss ref_clk ratio_ctrl fb_clk vout vctrl_mon lock) adpll_ratio_hop_ref \\",
+          "    f_center=240e6 freq_step_hz=5e6 f_min=120e6 f_max=420e6 \\",
+          "    code_min=0 code_max=63 code_center=32 code_init=24 \\",
+          "    ratio_min=2 ratio_max=16 tedge=200p lock_tol=2n lock_count_target=5",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=7u maxstep=5n"
+        ],
+        "body_lines": [
+          "Vratio (ratio_ctrl 0) vsource type=pwl wave=[0 3 2.399u 3 2.401u 7 7u 7]",
+          "",
+          "IDUT (vdd vss ref_clk ratio_ctrl fb_clk vout vctrl_mon lock) adpll_ratio_hop_ref \\",
+          "    f_center=240e6 freq_step_hz=5e6 f_min=120e6 f_max=420e6 \\",
+          "    code_min=0 code_max=63 code_center=32 code_init=24 \\",
+          "    ratio_min=2 ratio_max=16 tedge=200p lock_tol=2n lock_count_target=5",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RATIO_REQUEST_CLAMP",
+    "P_DCO_FREQUENCY_BOUNDS",
+    "P_FEEDBACK_DERIVED_FROM_DCO",
+    "P_BOUNDED_CONTROL_MONITOR",
+    "P_PRE_HOP_LOCK",
+    "P_RATIO_HOP_REACQUISITION"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "c47ba58602b06f5e29b62ef6fd17d36891720113a24327c94eff94233c595c2b",
+    "family_spec_sha256": "7e4de541f7a253044781f037d3752e923f080422f612c3ed5dfe94eed01591cd"
+  },
+  "task_id": "v4-081"
+}

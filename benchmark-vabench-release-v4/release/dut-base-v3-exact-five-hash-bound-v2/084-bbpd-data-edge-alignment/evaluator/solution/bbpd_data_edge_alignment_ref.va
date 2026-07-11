@@ -1,0 +1,75 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bbpd_data_edge_alignment_ref(vdd, vss, clk, data, up, dn, retimed_data);
+    inout vdd, vss;
+    input clk, data;
+    output up, dn, retimed_data;
+    electrical vdd, vss, clk, data, up, dn, retimed_data;
+
+    parameter real vth = 0.45;
+    parameter real trf = 30p;
+    parameter real clk_period = 20n;
+    parameter real clk_delay = 10n;
+    parameter real deadzone = 0.8n;
+    parameter real pulse_w = 1.0n;
+    parameter real poll_dt = 50p;
+
+    real up_val, dn_val, retimed_val;
+    real t_last_clk;
+    real t_up_clear, t_dn_clear;
+    real dist_prev, dist_next;
+
+    analog begin
+        @(initial_step) begin
+            up_val = 0.0;
+            dn_val = 0.0;
+            retimed_val = 0.0;
+            t_last_clk = clk_delay - clk_period;
+            t_up_clear = -1.0;
+            t_dn_clear = -1.0;
+        end
+
+        @(cross(V(clk, vss) - vth, +1)) begin
+            t_last_clk = $abstime;
+            retimed_val = (V(data, vss) > vth) ? V(vdd, vss) : 0.0;
+        end
+
+        @(cross(V(data, vss) - vth, +1) or cross(V(data, vss) - vth, -1)) begin
+            dist_prev = $abstime - t_last_clk;
+            dist_next = clk_period - dist_prev;
+
+            if ((dist_next < dist_prev) && (dist_next > deadzone)) begin
+                up_val = V(vdd, vss);
+                dn_val = 0.0;
+                t_up_clear = $abstime + pulse_w;
+                t_dn_clear = -1.0;
+            end else if ((dist_prev < dist_next) && (dist_prev > deadzone)) begin
+                dn_val = V(vdd, vss);
+                up_val = 0.0;
+                t_dn_clear = $abstime + pulse_w;
+                t_up_clear = -1.0;
+            end else begin
+                up_val = 0.0;
+                dn_val = 0.0;
+                t_up_clear = -1.0;
+                t_dn_clear = -1.0;
+            end
+        end
+
+        @(timer(0, poll_dt)) begin
+            if ((t_up_clear > 0.0) && ($abstime >= t_up_clear)) begin
+                up_val = 0.0;
+                t_up_clear = -1.0;
+            end
+            if ((t_dn_clear > 0.0) && ($abstime >= t_dn_clear)) begin
+                dn_val = 0.0;
+                t_dn_clear = -1.0;
+            end
+        end
+
+        V(up, vss) <+ transition(up_val, 0, trf, trf);
+        V(dn, vss) <+ transition(dn_val, 0, trf, trf);
+        V(retimed_data, vss) <+ transition(retimed_val, 0, trf, trf);
+    end
+endmodule

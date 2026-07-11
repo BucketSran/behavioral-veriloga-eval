@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/agc_receiver_leveling_loop.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=2n width=1n rise=50p fall=50p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.6n 0.9 1.7n 0 80n 0]
+Vvin (vin 0) vsource type=pwl wave=[0 0.45 7.5n 0.535 22n 0.535 22.1n 0.77 56n 0.77 56.1n 0.54 80n 0.54]
+
+XDUT (clk rst vin out metric gain_mon rssi_mon) agc_receiver_leveling_loop
+
+
+tran tran stop=80n maxstep=0.5n
+save clk rst vin out metric gain_mon rssi_mon

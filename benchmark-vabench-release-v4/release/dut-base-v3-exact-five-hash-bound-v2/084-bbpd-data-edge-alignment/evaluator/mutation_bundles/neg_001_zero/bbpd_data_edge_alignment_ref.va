@@ -1,0 +1,29 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bbpd_data_edge_alignment_ref(vdd, vss, clk, data, up, dn, retimed_data);
+    inout vdd, vss;
+    input clk, data;
+    output up, dn, retimed_data;
+    electrical vdd, vss, clk, data, up, dn, retimed_data;
+
+    parameter real vth = 0.45;
+    parameter real trf = 30p;
+    parameter real clk_period = 20n;
+    parameter real clk_delay = 10n;
+    parameter real deadzone = 0.8n;
+    parameter real pulse_w = 1.0n;
+    parameter real poll_dt = 50p;
+
+    real up_val, dn_val, retimed_val;
+    real t_last_clk;
+    real t_up_clear, t_dn_clear;
+    real dist_prev, dist_next;
+
+analog begin
+    V(up) <+ transition(0.0);
+    V(dn) <+ transition(0.0);
+    V(retimed_data) <+ transition(0.0);
+end
+
+endmodule

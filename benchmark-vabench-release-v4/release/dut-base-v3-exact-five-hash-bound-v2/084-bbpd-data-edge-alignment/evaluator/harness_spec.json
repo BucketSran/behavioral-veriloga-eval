@@ -1,0 +1,114 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "bbpd_data_edge_alignment_ref.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=170n maxstep=0.1n"
+    ],
+    "body_lines": [
+      "Vvdd (vdd 0) vsource dc=0.9",
+      "Vvss (vss 0) vsource dc=0.0",
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=10n rise=50p fall=50p width=9n period=20n",
+      "Vdata (data 0) vsource type=pwl wave=[ \\",
+      "  0 0.0 \\",
+      "  7.95n 0.0   8.00n 0.9 \\",
+      "  27.95n 0.9  28.00n 0.0 \\"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vdd",
+      "vss",
+      "clk",
+      "data",
+      "up",
+      "dn",
+      "retimed_data"
+    ]
+  },
+  "family_id": "084",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "38fa3ac9fc1ceb30dc6ea80f431f8dcddd20f75944b8ea7be6e2ce9db9182624",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "260cf4354ad4acf72a7254b5e888ebd3aba6a5db5678aa88ec5d70af4836a548",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "  47.95n 0.0  48.00n 0.9 \\",
+          "  67.95n 0.9  68.00n 0.0 \\",
+          "  91.95n 0.0  92.00n 0.9 \\",
+          "  111.95n 0.9 112.00n 0.0 \\",
+          "  131.95n 0.0 132.00n 0.9 \\",
+          "  151.95n 0.9 152.00n 0.0 \\",
+          "  170n 0.0 \\",
+          "]",
+          "",
+          "XDUT (vdd vss clk data up dn retimed_data) bbpd_data_edge_alignment_ref",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "  49.45n 0.0  49.50n 0.9 \\",
+          "  71.95n 0.9  72.00n 0.0 \\",
+          "  87.95n 0.0  88.00n 0.9 \\",
+          "  110.35n 0.9 110.40n 0.0 \\",
+          "  131.95n 0.0 132.00n 0.9 \\",
+          "  147.95n 0.9 148.00n 0.0 \\",
+          "  170n 0.0 \\",
+          "]",
+          "",
+          "XDUT (vdd vss clk data up dn retimed_data) bbpd_data_edge_alignment_ref",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_CLOCKED_RETIMING",
+    "P_EARLY_TRANSITION_UP",
+    "P_LATE_TRANSITION_DN",
+    "P_DEADZONE_SUPPRESSION",
+    "P_BOTH_DATA_POLARITIES",
+    "P_MUTUAL_EXCLUSION"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "6137724d9441c622e399d1335540abf7afbc65034d95a31f0fec1c9c37b336ff",
+    "family_spec_sha256": "6d95b8ad0f42d4bffd2da5cd9be35fa51b46237f6aa08a5f55364a9296ee25a5"
+  },
+  "task_id": "v4-084"
+}

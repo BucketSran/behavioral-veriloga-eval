@@ -1,0 +1,31 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module converter_static_linearity_measurement_flow(clk, rst, vin, code, recon, dnl, inl);
+    input clk, rst, vin;
+    output code, recon, dnl, inl;
+    electrical clk, rst, vin, code, recon, dnl, inl;
+
+    parameter real vth = 0.45;
+    parameter real vfs = 0.9;
+    parameter real tr = 120p from (0:inf);
+
+    integer code_state;
+    integer prev_valid;
+    integer prev_code;
+    real recon_v;
+    real prev_recon;
+    real ideal_recon;
+    real ideal_step;
+    real step_err;
+    real dnl_v;
+    real inl_v;
+
+analog begin
+    V(code) <+ transition(0.0);
+    V(recon) <+ transition(0.0);
+    V(dnl) <+ transition(0.0);
+    V(inl) <+ transition(0.0);
+end
+
+endmodule
