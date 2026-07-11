@@ -1,0 +1,212 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "bbpd_ref",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets the voltage-coded output high level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > 0"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets the data, clock, and retimed-data decision threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "0 < vth < vdd"
+              },
+              {
+                "default": 1e-11,
+                "name": "trf",
+                "override_behavior": "sets output rise and fall smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "trf > 0"
+              },
+              {
+                "default": 0.0,
+                "name": "td",
+                "override_behavior": "sets output transition delay",
+                "type": "real",
+                "units": "s",
+                "valid_range": "td >= 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "data",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "retimed_data",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "up",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "down",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "bbpd_ref.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "001",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "pll_clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Bang-Bang Phase Detector"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavior.",
+    "Keep event-triggered state updates separate from unconditional output contributions.",
+    "Do not add undeclared artifacts, ports, debug outputs, or validation state."
+  ],
+  "properties": [
+    {
+      "id": "P_DIRECTION",
+      "observable_contract": "Each data transition selects UP for clock-high/retimed-low, DOWN for clock-low/retimed-high, and neither otherwise.",
+      "required_signals": [
+        "time",
+        "data",
+        "clk",
+        "retimed_data",
+        "up",
+        "down"
+      ]
+    },
+    {
+      "id": "P_MUTUAL_EXCLUSION",
+      "observable_contract": "UP and DOWN are never asserted simultaneously.",
+      "required_signals": [
+        "time",
+        "up",
+        "down"
+      ]
+    },
+    {
+      "id": "P_PULSE_CLEAR",
+      "observable_contract": "An asserted correction output returns low after the next clock transition.",
+      "required_signals": [
+        "time",
+        "clk",
+        "up",
+        "down"
+      ]
+    },
+    {
+      "id": "P_RAIL_LEVELS",
+      "observable_contract": "Asserted outputs approach vdd and inactive outputs approach 0 V with finite smoothing.",
+      "required_signals": [
+        "time",
+        "up",
+        "down"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/bbpd_ref.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-501",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "data",
+            "port_ref": "data",
+            "position": 0
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 1
+          },
+          {
+            "net": "retimed_data",
+            "port_ref": "retimed_data",
+            "position": 2
+          },
+          {
+            "net": "up",
+            "port_ref": "up",
+            "position": 3
+          },
+          {
+            "net": "down",
+            "port_ref": "down",
+            "position": 4
+          }
+        ],
+        "module_ref": "bbpd_ref",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "data",
+      "clk",
+      "retimed_data",
+      "up",
+      "down"
+    ]
+  }
+}

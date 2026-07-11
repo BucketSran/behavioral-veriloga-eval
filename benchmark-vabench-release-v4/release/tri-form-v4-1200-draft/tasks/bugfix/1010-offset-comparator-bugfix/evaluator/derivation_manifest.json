@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-010",
+    "canonical_task_slug": "010-offset-comparator",
+    "family_spec_sha256": "bf5d9aa96c735ca948c1ecf437acc0659979f4a78a49a0270bf4b89828b62d1d",
+    "mutation_catalog_sha256": "607c89e938fa32d961562b21d63c6cfb63e0ac0095df33e62d36bb6c523817b0",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "010",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_async_response",
+    "testbench_suite": [
+      "neg_001_zero_offset",
+      "neg_006_fixed_clock_midpoint",
+      "neg_003_falling_edge",
+      "neg_002_large_offset",
+      "neg_004_async_response"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "2b9b019b0781fe51ce0cc04020059c03c2f9111b01040bf1263aa40edd8e6869",
+    "changed_artifacts": [
+      "cmp_offset_ref.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_async_response",
+    "rationale": "Select fault class asynchronous_decision under trigger 'VINP changes between rising CLK edges' because it exercises P_LATCH_HOLD as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 24,
+    "source_preferred_seed": "neg_001_zero_offset",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

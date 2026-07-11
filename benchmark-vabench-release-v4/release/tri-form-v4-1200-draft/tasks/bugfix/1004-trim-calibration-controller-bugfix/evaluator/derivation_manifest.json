@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-004",
+    "canonical_task_slug": "004-trim-calibration-controller",
+    "family_spec_sha256": "fd38ec40548d730a456db488979ec6ebf6430566eff455370934297d435fd1c4",
+    "mutation_catalog_sha256": "2cdfc559faf971b969a2f8f2f3be5282a8b316d95fd942061948b61aa26328d0",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "004",
+  "negative_assignment": {
+    "bugfix_seed": "neg_006_asynchronous_error_update",
+    "testbench_suite": [
+      "neg_002_inverted_error_direction",
+      "neg_005_missing_lower_clamp",
+      "neg_004_wrong_reset_level",
+      "neg_006_asynchronous_error_update",
+      "neg_001_stuck_midscale"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "9684f09cb45670f3b6c7787141a0a73b6910d557df46d8cbf01d5f0cda275dc9",
+    "changed_artifacts": [
+      "cdac_calibration.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_006_asynchronous_error_update",
+    "rationale": "Select fault class asynchronous_update under trigger 'error changes between rising clock edges' because it exercises P_CLOCKED_HOLD as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 24,
+    "source_preferred_seed": "neg_002_inverted_error_direction",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

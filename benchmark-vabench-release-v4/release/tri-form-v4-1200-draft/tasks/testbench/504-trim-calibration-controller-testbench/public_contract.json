@@ -1,0 +1,182 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "cdac_calibration",
+            "parameters": [
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets clk, rst, and err decision threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vth > 0"
+              },
+              {
+                "default": 5e-10,
+                "name": "tr",
+                "override_behavior": "sets trim transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "err",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "trim",
+                "position": 3
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "cdac_calibration.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "004",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "calibration_control",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Trim Calibration Controller"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavior.",
+    "Drive trim with a finite smoothed voltage contribution.",
+    "Do not hard-code evaluator stimulus or sample times."
+  ],
+  "properties": [
+    {
+      "id": "P_INITIAL_AND_RESET",
+      "observable_contract": "trim initializes to 0.45 V and returns to 0.45 V on a rising clk edge while rst is high.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "trim"
+      ]
+    },
+    {
+      "id": "P_CLOCKED_STEP",
+      "observable_contract": "Each rising clk edge outside reset adds 0.06 V for high err and subtracts 0.06 V for low err.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "err",
+        "trim"
+      ]
+    },
+    {
+      "id": "P_TRIM_CLAMP",
+      "observable_contract": "trim is clamped to the inclusive 0.05 V to 0.85 V range.",
+      "required_signals": [
+        "time",
+        "trim"
+      ]
+    },
+    {
+      "id": "P_CLOCKED_HOLD",
+      "observable_contract": "trim holds its state between rising clk updates.",
+      "required_signals": [
+        "time",
+        "clk",
+        "trim"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/cdac_calibration.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-504",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "err",
+            "port_ref": "err",
+            "position": 2
+          },
+          {
+            "net": "trim",
+            "port_ref": "trim",
+            "position": 3
+          }
+        ],
+        "module_ref": "cdac_calibration",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "err",
+      "trim"
+    ]
+  }
+}

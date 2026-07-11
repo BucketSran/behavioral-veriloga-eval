@@ -1,0 +1,203 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "lock_detector",
+            "parameters": [
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets input logic thresholds",
+                "type": "real",
+                "units": "V",
+                "valid_range": "0 < vth < vdd"
+              },
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets lock high level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > 0"
+              },
+              {
+                "default": 2e-09,
+                "name": "tol",
+                "override_behavior": "sets maximum ref-to-feedback edge separation",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tol >= 0"
+              },
+              {
+                "default": 3,
+                "name": "need",
+                "override_behavior": "sets consecutive aligned reference events required for lock",
+                "type": "integer",
+                "units": null,
+                "valid_range": "need >= 1"
+              },
+              {
+                "default": 5e-10,
+                "name": "tr",
+                "override_behavior": "sets lock transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ref_clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "fb_clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst_n",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lock",
+                "position": 3
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "lock_detector.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/lock_detector.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "009",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "pll_clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Lock Detector"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain edge timing.",
+    "Use voltage contributions with finite smoothing only.",
+    "Do not hard-code evaluator stimulus, stop times, or sample windows."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_ALIGNMENT_STREAK",
+      "observable_contract": "lock asserts only after need consecutive reference edges whose most recent feedback edge is within tol.",
+      "required_signals": [
+        "time",
+        "ref_clk",
+        "fb_clk",
+        "rst_n",
+        "lock"
+      ]
+    },
+    {
+      "id": "P_PREMATURE_LOCK",
+      "observable_contract": "lock remains low before the need-th consecutive aligned reference event.",
+      "required_signals": [
+        "time",
+        "ref_clk",
+        "fb_clk",
+        "lock"
+      ]
+    },
+    {
+      "id": "P_MISS_BREAKS_STREAK",
+      "observable_contract": "A reference event outside tol breaks the streak and clears lock.",
+      "required_signals": [
+        "time",
+        "ref_clk",
+        "fb_clk",
+        "lock"
+      ]
+    },
+    {
+      "id": "P_RESET_REACQUIRE",
+      "observable_contract": "Active-low reset clears stored edge history, streak, and lock and requires a fresh post-reset acquisition.",
+      "required_signals": [
+        "time",
+        "ref_clk",
+        "fb_clk",
+        "rst_n",
+        "lock"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "lock_detector.va"
+  ],
+  "task_id": "v4-1009",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "ref_clk",
+            "port_ref": "ref_clk",
+            "position": 0
+          },
+          {
+            "net": "fb_clk",
+            "port_ref": "fb_clk",
+            "position": 1
+          },
+          {
+            "net": "rst_n",
+            "port_ref": "rst_n",
+            "position": 2
+          },
+          {
+            "net": "lock",
+            "port_ref": "lock",
+            "position": 3
+          }
+        ],
+        "module_ref": "lock_detector",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "ref_clk",
+      "fb_clk",
+      "rst_n",
+      "lock"
+    ]
+  }
+}

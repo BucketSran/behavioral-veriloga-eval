@@ -1,0 +1,148 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "first_order_lowpass",
+            "parameters": [
+              {
+                "default": 0.025,
+                "name": "alpha",
+                "override_behavior": "sets the fraction of input error applied on each update",
+                "type": "real",
+                "units": null,
+                "valid_range": "0 < alpha <= 1"
+              },
+              {
+                "default": 2e-10,
+                "name": "tr",
+                "override_behavior": "sets output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 1
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "first_order_lowpass.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/first_order_lowpass.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "007",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "baseband_signal_conditioning",
+    "difficulty": "D1",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "First Order Lowpass"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavior with a 500 ps periodic update.",
+    "Use voltage contributions only.",
+    "Do not use current contributions, ddt(), idt(), undeclared artifacts, debug outputs, or validation state."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_INITIAL_STATE",
+      "observable_contract": "vout begins at 0 V before the first periodic update.",
+      "required_signals": [
+        "time",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_PERIODIC_UPDATE",
+      "observable_contract": "The internal output updates only on the public 500 ps periodic schedule using y := y + alpha*(vin-y).",
+      "required_signals": [
+        "time",
+        "vin",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_STEP_MONOTONICITY",
+      "observable_contract": "For a positive input step, vout is monotone and bounded by the input level.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_LOW_PASS_RESPONSE",
+      "observable_contract": "The step response is slower than an instantaneous copy of vin.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "first_order_lowpass.va"
+  ],
+  "task_id": "v4-1007",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 1
+          }
+        ],
+        "module_ref": "first_order_lowpass",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "vout"
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/debounce_latch.va"
+
+Vsig (sig 0) vsource type=pwl wave=[0 0 5n 0 5.05n 0.9 24n 0.9 24.05n 0 31n 0 31.05n 0.9 36n 0.9 36.05n 0 54n 0 54.05n 0.9 68n 0.9 68.05n 0 71n 0 71.05n 0.9 132n 0.9 132.05n 0 140n 0]
+Vrst (rst_n 0) vsource type=pwl wave=[0 0 16n 0 16.05n 0.9 55n 0.9 55.05n 0 65n 0 65.05n 0.9 140n 0.9]
+
+XDUT (sig rst_n out) debounce_latch
+
+
+tran tran stop=140n maxstep=500p
+save sig rst_n out

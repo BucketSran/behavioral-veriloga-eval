@@ -1,0 +1,190 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "gain_trim_controller",
+            "parameters": [
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets clk and rst decision threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vth > 0"
+              },
+              {
+                "default": 5e-10,
+                "name": "tr",
+                "override_behavior": "sets gain_ctrl transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "meas",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "target",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "gain_ctrl",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "gain_trim_controller.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/gain_trim_controller.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "008",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "calibration_control",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Gain Trim Controller"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavior.",
+    "Update state only on rising clk crossings and drive gain_ctrl with finite transition smoothing.",
+    "Do not hard-code evaluator stimulus or sample times."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_INITIAL_AND_RESET",
+      "observable_contract": "gain_ctrl initializes to 0.30 V and returns to 0.30 V on a rising clk edge while rst is high.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "gain_ctrl"
+      ]
+    },
+    {
+      "id": "P_ERROR_DIRECTION",
+      "observable_contract": "On rising clk edges, gain_ctrl increases by 0.05 V below target-0.02 V and decreases by 0.05 V above target+0.02 V.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "meas",
+        "target",
+        "gain_ctrl"
+      ]
+    },
+    {
+      "id": "P_DEADBAND_HOLD",
+      "observable_contract": "gain_ctrl holds when meas is within the inclusive target deadband.",
+      "required_signals": [
+        "time",
+        "clk",
+        "meas",
+        "target",
+        "gain_ctrl"
+      ]
+    },
+    {
+      "id": "P_CONTROL_CLAMP",
+      "observable_contract": "gain_ctrl remains within the inclusive 0.05 V to 0.85 V range.",
+      "required_signals": [
+        "time",
+        "gain_ctrl"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "gain_trim_controller.va"
+  ],
+  "task_id": "v4-1008",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "meas",
+            "port_ref": "meas",
+            "position": 2
+          },
+          {
+            "net": "target",
+            "port_ref": "target",
+            "position": 3
+          },
+          {
+            "net": "gain_ctrl",
+            "port_ref": "gain_ctrl",
+            "position": 4
+          }
+        ],
+        "module_ref": "gain_trim_controller",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "meas",
+      "target",
+      "gain_ctrl"
+    ]
+  }
+}

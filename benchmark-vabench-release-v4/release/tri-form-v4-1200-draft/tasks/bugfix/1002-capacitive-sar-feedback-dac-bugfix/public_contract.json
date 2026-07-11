@@ -1,0 +1,365 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "cdac_cal",
+            "parameters": [
+              {
+                "default": 0.45,
+                "name": "vcm",
+                "override_behavior": "sets output common mode",
+                "type": "real",
+                "units": "V",
+                "valid_range": "V(VSS) <= vcm <= V(VDD)"
+              },
+              {
+                "default": 0.6,
+                "name": "swing",
+                "override_behavior": "sets differential output swing scale",
+                "type": "real",
+                "units": "V",
+                "valid_range": "swing >= 0"
+              },
+              {
+                "default": 2e-11,
+                "name": "tt",
+                "override_behavior": "sets output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tt > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "VDD",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "VSS",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "CLK",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "D9",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "D8",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "D7",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "D6",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "D5",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "D4",
+                "position": 8
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "D3",
+                "position": 9
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "D2",
+                "position": 10
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "D1",
+                "position": 11
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "D0",
+                "position": 12
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "CAL0",
+                "position": 13
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "CAL1",
+                "position": 14
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "VDAC_P",
+                "position": 15
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "VDAC_N",
+                "position": 16
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "cdac_cal.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/cdac_cal.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "002",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Capacitive Weighted SAR Feedback DAC"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavior and smooth output transitions.",
+    "Do not use current contributions, ddt(), idt(), validation logic, or simulator-specific side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_CLOCKED_HOLD",
+      "observable_contract": "The DAC samples code and calibration inputs on rising CLK edges and holds the resulting output between edges.",
+      "required_signals": [
+        "time",
+        "CLK",
+        "D9",
+        "D8",
+        "D7",
+        "D6",
+        "D5",
+        "D4",
+        "D3",
+        "D2",
+        "D1",
+        "D0",
+        "CAL0",
+        "CAL1",
+        "VDAC_P",
+        "VDAC_N"
+      ]
+    },
+    {
+      "id": "P_CODE_MONOTONICITY",
+      "observable_contract": "Increasing effective code increases VDAC_P minus VDAC_N.",
+      "required_signals": [
+        "time",
+        "CLK",
+        "D9",
+        "D8",
+        "D7",
+        "D6",
+        "D5",
+        "D4",
+        "D3",
+        "D2",
+        "D1",
+        "D0",
+        "CAL0",
+        "CAL1",
+        "VDAC_P",
+        "VDAC_N"
+      ]
+    },
+    {
+      "id": "P_CALIBRATION_WEIGHT",
+      "observable_contract": "CAL0 contributes one calibration unit, CAL1 contributes two, and each unit offsets the main code by 32 codes.",
+      "required_signals": [
+        "time",
+        "CLK",
+        "CAL0",
+        "CAL1",
+        "VDAC_P",
+        "VDAC_N"
+      ]
+    },
+    {
+      "id": "P_DIFFERENTIAL_COMMON_MODE",
+      "observable_contract": "VDAC_P and VDAC_N are complementary about vcm.",
+      "required_signals": [
+        "time",
+        "VDAC_P",
+        "VDAC_N"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "cdac_cal.va"
+  ],
+  "task_id": "v4-1002",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "VDD",
+            "port_ref": "VDD",
+            "position": 0
+          },
+          {
+            "net": "VSS",
+            "port_ref": "VSS",
+            "position": 1
+          },
+          {
+            "net": "CLK",
+            "port_ref": "CLK",
+            "position": 2
+          },
+          {
+            "net": "D9",
+            "port_ref": "D9",
+            "position": 3
+          },
+          {
+            "net": "D8",
+            "port_ref": "D8",
+            "position": 4
+          },
+          {
+            "net": "D7",
+            "port_ref": "D7",
+            "position": 5
+          },
+          {
+            "net": "D6",
+            "port_ref": "D6",
+            "position": 6
+          },
+          {
+            "net": "D5",
+            "port_ref": "D5",
+            "position": 7
+          },
+          {
+            "net": "D4",
+            "port_ref": "D4",
+            "position": 8
+          },
+          {
+            "net": "D3",
+            "port_ref": "D3",
+            "position": 9
+          },
+          {
+            "net": "D2",
+            "port_ref": "D2",
+            "position": 10
+          },
+          {
+            "net": "D1",
+            "port_ref": "D1",
+            "position": 11
+          },
+          {
+            "net": "D0",
+            "port_ref": "D0",
+            "position": 12
+          },
+          {
+            "net": "CAL0",
+            "port_ref": "CAL0",
+            "position": 13
+          },
+          {
+            "net": "CAL1",
+            "port_ref": "CAL1",
+            "position": 14
+          },
+          {
+            "net": "VDAC_P",
+            "port_ref": "VDAC_P",
+            "position": 15
+          },
+          {
+            "net": "VDAC_N",
+            "port_ref": "VDAC_N",
+            "position": 16
+          }
+        ],
+        "module_ref": "cdac_cal",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "VDD",
+      "VSS",
+      "CLK",
+      "D9",
+      "D8",
+      "D7",
+      "D6",
+      "D5",
+      "D4",
+      "D3",
+      "D2",
+      "D1",
+      "D0",
+      "CAL0",
+      "CAL1",
+      "VDAC_P",
+      "VDAC_N"
+    ]
+  }
+}

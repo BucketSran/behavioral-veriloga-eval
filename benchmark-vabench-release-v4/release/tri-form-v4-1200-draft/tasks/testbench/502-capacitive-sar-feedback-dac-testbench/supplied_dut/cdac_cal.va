@@ -1,0 +1,54 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cdac_cal(
+    VDD, VSS, CLK,
+    D9, D8, D7, D6, D5, D4, D3, D2, D1, D0,
+    CAL0, CAL1,
+    VDAC_P, VDAC_N
+);
+    inout VDD, VSS;
+    input CLK, D9, D8, D7, D6, D5, D4, D3, D2, D1, D0, CAL0, CAL1;
+    output VDAC_P, VDAC_N;
+    electrical VDD, VSS, CLK, D9, D8, D7, D6, D5, D4, D3, D2, D1, D0, CAL0, CAL1, VDAC_P, VDAC_N;
+
+    parameter real vcm = 0.45;
+    parameter real swing = 0.6;
+    parameter real tt = 20p;
+
+    integer code;
+    integer cal;
+    real vdac_p_level;
+    real vdac_n_level;
+
+    analog begin
+        @(initial_step) begin
+            vdac_p_level = vcm;
+            vdac_n_level = vcm;
+        end
+
+        @(cross(V(CLK, VSS) - 0.45, +1)) begin
+            code = 0;
+            if (V(D9, VSS) > 0.45) code = code + 512;
+            if (V(D8, VSS) > 0.45) code = code + 256;
+            if (V(D7, VSS) > 0.45) code = code + 128;
+            if (V(D6, VSS) > 0.45) code = code + 64;
+            if (V(D5, VSS) > 0.45) code = code + 32;
+            if (V(D4, VSS) > 0.45) code = code + 16;
+            if (V(D3, VSS) > 0.45) code = code + 8;
+            if (V(D2, VSS) > 0.45) code = code + 4;
+            if (V(D1, VSS) > 0.45) code = code + 2;
+            if (V(D0, VSS) > 0.45) code = code + 1;
+
+            cal = 0;
+            if (V(CAL0, VSS) > 0.45) cal = cal + 1;
+            if (V(CAL1, VSS) > 0.45) cal = cal + 2;
+
+            vdac_p_level = vcm + swing * (((code + 32 * cal) / 1023.0) - 0.5) * 0.5;
+            vdac_n_level = vcm - swing * (((code + 32 * cal) / 1023.0) - 0.5) * 0.5;
+        end
+
+        V(VDAC_P, VSS) <+ transition(vdac_p_level, 0, tt, tt);
+        V(VDAC_N, VSS) <+ transition(vdac_n_level, 0, tt, tt);
+    end
+endmodule

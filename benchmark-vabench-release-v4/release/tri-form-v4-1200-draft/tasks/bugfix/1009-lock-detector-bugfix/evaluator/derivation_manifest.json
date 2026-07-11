@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-009",
+    "canonical_task_slug": "009-lock-detector",
+    "family_spec_sha256": "6eb54297af6b6bbdc9cccc98df60e93c238c5c2889be02fdbe5e24c9d153ca74",
+    "mutation_catalog_sha256": "4bffd79b517596033bb0ece74d551dd58977cd3ff1830099397a96ad0078d70b",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "009",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_tolerance_too_wide",
+    "testbench_suite": [
+      "neg_002_tolerance_too_wide",
+      "neg_004_reset_ignored",
+      "neg_001_requires_four_hits",
+      "neg_003_does_not_reset_on_mismatch",
+      "neg_005_counts_feedback_events"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "b18811ff613145c3cb86ebd5188105b20aaed9e0cd1d4352777a491c50b5396b",
+    "changed_artifacts": [
+      "lock_detector.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_tolerance_too_wide",
+    "rationale": "Select fault class alignment_window_error under trigger 'a reference edge is more than tol but less than 6 ns from the most recent feedback edge' because it exercises P_ALIGNMENT_STREAK, P_MISS_BREAKS_STREAK as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 21,
+    "source_preferred_seed": "neg_002_tolerance_too_wide",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,213 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "element_shuffler",
+            "parameters": [
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets clk and rst_n decision threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "0 < vth < vdd"
+              },
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets active output high level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > 0"
+              },
+              {
+                "default": 3e-10,
+                "name": "tr",
+                "override_behavior": "sets output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst_n",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out0",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out1",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out2",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out3",
+                "position": 5
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "element_shuffler.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "006",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "calibration_control",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Element Shuffler"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavior driven by clk and rst_n rather than absolute time.",
+    "Use voltage contributions and finite transition smoothing only.",
+    "Do not use current contributions, transistor devices, ddt(), idt(), AC/noise behavior, validation hooks, or simulator-specific side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_START",
+      "observable_contract": "Active-low reset establishes the state so the first rising clk edge after release selects out2.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst_n",
+        "out0",
+        "out1",
+        "out2",
+        "out3"
+      ]
+    },
+    {
+      "id": "P_PERMUTATION",
+      "observable_contract": "Rising clk edges advance the repeating out2, out0, out3, out1 permutation.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst_n",
+        "out0",
+        "out1",
+        "out2",
+        "out3"
+      ]
+    },
+    {
+      "id": "P_ONE_HOT",
+      "observable_contract": "Exactly one output is high in every stable released-reset state.",
+      "required_signals": [
+        "time",
+        "rst_n",
+        "out0",
+        "out1",
+        "out2",
+        "out3"
+      ]
+    },
+    {
+      "id": "P_RAIL_LEVELS",
+      "observable_contract": "The selected output approaches vdd and all other outputs approach 0 V with finite smoothing.",
+      "required_signals": [
+        "time",
+        "out0",
+        "out1",
+        "out2",
+        "out3"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "element_shuffler.va"
+  ],
+  "task_id": "v4-006",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst_n",
+            "port_ref": "rst_n",
+            "position": 1
+          },
+          {
+            "net": "out0",
+            "port_ref": "out0",
+            "position": 2
+          },
+          {
+            "net": "out1",
+            "port_ref": "out1",
+            "position": 3
+          },
+          {
+            "net": "out2",
+            "port_ref": "out2",
+            "position": 4
+          },
+          {
+            "net": "out3",
+            "port_ref": "out3",
+            "position": 5
+          }
+        ],
+        "module_ref": "element_shuffler",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst_n",
+      "out0",
+      "out1",
+      "out2",
+      "out3"
+    ]
+  }
+}

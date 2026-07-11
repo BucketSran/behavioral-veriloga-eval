@@ -1,0 +1,179 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "debounce_latch",
+            "parameters": [
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets sig and rst_n decision threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "0 < vth < vdd"
+              },
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets output high level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > 0"
+              },
+              {
+                "default": 1.2e-08,
+                "name": "stable",
+                "override_behavior": "sets rising-decision qualification duration",
+                "type": "real",
+                "units": "s",
+                "valid_range": "stable >= 0"
+              },
+              {
+                "default": 5e-10,
+                "name": "tr",
+                "override_behavior": "sets output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sig",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst_n",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 2
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "debounce_latch.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/debounce_latch.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "005",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "comparator_decision",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Debounce Latch"
+  },
+  "modeling_constraints": [
+    "Use voltage contributions only.",
+    "Keep event state updates separate from unconditional finite-smoothing output contribution.",
+    "Do not use current contributions, ddt(), idt(), validation logic, or simulator-specific side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_ACTIVE_LOW_RESET",
+      "observable_contract": "out is low and pending qualification is cancelled whenever rst_n is below vth.",
+      "required_signals": [
+        "time",
+        "rst_n",
+        "out"
+      ]
+    },
+    {
+      "id": "P_RISE_QUALIFICATION",
+      "observable_contract": "A sig rising edge sets out high only after sig and rst_n remain high for stable seconds.",
+      "required_signals": [
+        "time",
+        "sig",
+        "rst_n",
+        "out"
+      ]
+    },
+    {
+      "id": "P_FALL_CLEAR",
+      "observable_contract": "A sig falling edge clears out and cancels pending qualification.",
+      "required_signals": [
+        "time",
+        "sig",
+        "out"
+      ]
+    },
+    {
+      "id": "P_EVENT_HOLD",
+      "observable_contract": "out holds between reset, sig-edge, and qualification-timer events.",
+      "required_signals": [
+        "time",
+        "sig",
+        "rst_n",
+        "out"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "debounce_latch.va"
+  ],
+  "task_id": "v4-1005",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "sig",
+            "port_ref": "sig",
+            "position": 0
+          },
+          {
+            "net": "rst_n",
+            "port_ref": "rst_n",
+            "position": 1
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 2
+          }
+        ],
+        "module_ref": "debounce_latch",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "sig",
+      "rst_n",
+      "out"
+    ]
+  }
+}

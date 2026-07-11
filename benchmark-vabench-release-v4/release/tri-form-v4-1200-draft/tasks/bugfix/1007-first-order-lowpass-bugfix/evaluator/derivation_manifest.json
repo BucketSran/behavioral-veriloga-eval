@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-007",
+    "canonical_task_slug": "007-first-order-lowpass",
+    "family_spec_sha256": "5518438b82d9a11eb203c8701fbe7bdf1a947af714b908a044506d6a89eee800",
+    "mutation_catalog_sha256": "e35bb5f02c4e5a4fbbf811d9a756b23f08e8389669321ccaa127d24b1c68a445",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "007",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_inverted_input",
+    "testbench_suite": [
+      "neg_001_too_slow_alpha",
+      "neg_003_inverted_input",
+      "neg_002_passthrough_timer",
+      "neg_006_wrong_initial_state",
+      "neg_007_wrong_update_period"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "139048702e45435ff0fa7a65816b31ae4b7e97429cb8c3b0d3dfd1b2e2808960",
+    "changed_artifacts": [
+      "first_order_lowpass.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_inverted_input",
+    "rationale": "Select fault class response_direction_inversion under trigger 'VIN steps positive or negative' because it exercises P_LOW_PASS_RESPONSE, P_STEP_MONOTONICITY as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 15,
+    "source_preferred_seed": "neg_001_too_slow_alpha",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}
