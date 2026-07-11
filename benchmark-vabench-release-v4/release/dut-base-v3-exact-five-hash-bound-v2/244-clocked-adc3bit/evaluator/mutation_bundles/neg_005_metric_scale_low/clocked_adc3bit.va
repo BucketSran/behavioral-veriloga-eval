@@ -1,0 +1,22 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "disciplines.vams"
+module clocked_adc3bit(vd2, vd1, vd0, vin, vclk);
+output vd2, vd1, vd0;
+input vin, vclk;
+electrical vd2, vd1, vd0, vin, vclk;
+parameter real vth_clk = 0.45;
+parameter real vh = 0.9;
+integer code;
+analog begin
+    @(initial_step) code = 0;
+    @(cross(V(vclk) - vth_clk, +1)) begin
+        code = $floor(8.0 * V(vin));
+        if (code < 0) code = 0;
+        if (code > 7) code = 7;
+    end
+    V(vd0) <+ (0.42 * (((code & 1) ? vh : 0.0)));
+    V(vd1) <+ (0.42 * ((((code >> 1) & 1) ? vh : 0.0)));
+    V(vd2) <+ (0.42 * ((((code >> 2) & 1) ? vh : 0.0)));
+end
+endmodule

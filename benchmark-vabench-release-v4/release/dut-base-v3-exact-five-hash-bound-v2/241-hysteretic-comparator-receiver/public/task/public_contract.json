@@ -1,0 +1,302 @@
+{
+  "agent_visible_files": [
+    "instruction.md",
+    "public_contract.json",
+    "feedback_tb.scs"
+  ],
+  "canonical_dut_id": "241",
+  "canonical_dut_slug": "241-hysteretic-comparator-receiver",
+  "canonical_instruction": "instruction.md",
+  "category": "comparator",
+  "counted_in_score": true,
+  "difficulty": "D2",
+  "feedback_oracle": {
+    "command": "vabench-feedback --task . --submission ../submission",
+    "feedback_channels": [
+      "ahdl_like_preflight",
+      "evas_simulation",
+      "behavior_property_diagnostics"
+    ],
+    "profile_exposed": false,
+    "public_tb": "feedback_tb.scs",
+    "public_tb_exposed": true,
+    "queryable_by_agentic_modes": true,
+    "raw_scs_exposed": true
+  },
+  "form": "dut",
+  "gate2_status": "gate2_ready",
+  "language": "verilog-a",
+  "leakage_policy": {
+    "candidate_instruction_contains_gold_or_checker_internals": false,
+    "checker_private": true,
+    "gold_solution_private": true,
+    "private_constants_exposed": false,
+    "private_score_deck_exposed": false
+  },
+  "level": "L1",
+  "observable_contract": [
+    {
+      "contract": "Define `upper_th = offset + vhys/2` and `lower_th = offset - vhys/2`. On initialization, set the output state high if `V(inp,inm)` is at or above the upper threshold; otherwise set it low. After initialization, switch high only on a rising crossing of `upper_th`, switch low only on a falling crossing of `lower_th`, and hold the previous state inside the hysteresis band. Drive `out` to the selected rail with delay `td` and transition time `tr`.",
+      "property_id": "P_DEFINE_UPPER_TH_OFFSET_VHYS_2",
+      "required_signals": [
+        "time",
+        "inm",
+        "inp",
+        "out"
+      ]
+    },
+    {
+      "contract": "`vout_high = 0.9 V`: high output rail.",
+      "property_id": "P_VOUT_HIGH_0_9_V_HIGH",
+      "required_signals": [
+        "time",
+        "inm",
+        "inp",
+        "out"
+      ]
+    },
+    {
+      "contract": "`vout_low = 0.0 V`: low output rail.",
+      "property_id": "P_VOUT_LOW_0_0_V_LOW",
+      "required_signals": [
+        "time",
+        "inm",
+        "inp",
+        "out"
+      ]
+    },
+    {
+      "contract": "`offset = 0.0 V`: input-referred switching offset.",
+      "property_id": "P_OFFSET_0_0_V_INPUT_REFERRED",
+      "required_signals": [
+        "time",
+        "inm",
+        "inp",
+        "out"
+      ]
+    },
+    {
+      "contract": "`vhys = 40 mV from [0:inf)`: total hysteresis width.",
+      "property_id": "P_VHYS_40_MV_FROM_0_INF",
+      "required_signals": [
+        "time",
+        "inm",
+        "inp",
+        "out"
+      ]
+    },
+    {
+      "contract": "`td = 400 ps from [0:inf)`: propagation delay from a qualifying threshold crossing to the output state change.",
+      "property_id": "P_TD_400_PS_FROM_0_INF",
+      "required_signals": [
+        "time",
+        "inm",
+        "inp",
+        "out"
+      ]
+    }
+  ],
+  "oracle_policy": {
+    "checker_private": true,
+    "feedback_and_score_share_checker_family": true,
+    "feedback_oracle_materialized": true,
+    "no_model_visible_raw_scs": false,
+    "no_model_visible_starter": true,
+    "proposal_only": false,
+    "public_feedback_tb_exposed": true,
+    "score_tb_private": true,
+    "single_public_contract": true,
+    "testbench_and_checker_split_required": true
+  },
+  "output_artifacts": {
+    "boundary": "Solver owns only the candidate DUT artifact bundle. Public feedback decks and public support files, if any, are read-only inputs.",
+    "candidate_owned": [
+      "hysteretic_comparator_receiver.va"
+    ],
+    "must_not_submit": [
+      "testbench files",
+      "checker code",
+      "simulator output files"
+    ]
+  },
+  "public_interface": [
+    {
+      "file": "hysteretic_comparator_receiver.va",
+      "modules": [
+        {
+          "depends_on": [],
+          "name": "hysteretic_comparator_receiver",
+          "parameters": [
+            {
+              "default": "0.9",
+              "name": "vout_high",
+              "override_behavior": "overrides vout_high",
+              "type": "real",
+              "units": "",
+              "valid_range": "finite"
+            },
+            {
+              "default": "0.0",
+              "name": "vout_low",
+              "override_behavior": "overrides vout_low",
+              "type": "real",
+              "units": "",
+              "valid_range": "finite"
+            },
+            {
+              "default": "0.0",
+              "name": "offset",
+              "override_behavior": "overrides offset",
+              "type": "real",
+              "units": "",
+              "valid_range": "finite"
+            },
+            {
+              "default": "40e-3 from [0:inf)",
+              "name": "vhys",
+              "override_behavior": "overrides vhys",
+              "type": "real",
+              "units": "",
+              "valid_range": "finite"
+            },
+            {
+              "default": "400p from [0:inf)",
+              "name": "td",
+              "override_behavior": "overrides td",
+              "type": "real",
+              "units": "",
+              "valid_range": "finite"
+            },
+            {
+              "default": "80p from [0:inf)",
+              "name": "tr",
+              "override_behavior": "overrides tr",
+              "type": "real",
+              "units": "",
+              "valid_range": "finite"
+            }
+          ],
+          "ports": [
+            {
+              "direction": "input",
+              "discipline": "electrical",
+              "name": "inp",
+              "position": 0
+            },
+            {
+              "direction": "input",
+              "discipline": "electrical",
+              "name": "inm",
+              "position": 1
+            },
+            {
+              "direction": "output",
+              "discipline": "electrical",
+              "name": "out",
+              "position": 2
+            }
+          ],
+          "role": "entry"
+        }
+      ]
+    }
+  ],
+  "public_observables": [
+    "inm",
+    "inp",
+    "out"
+  ],
+  "public_parameters": [
+    {
+      "default": "0.9",
+      "module": "hysteretic_comparator_receiver",
+      "name": "vout_high",
+      "override_behavior": "overrides vout_high",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "0.0",
+      "module": "hysteretic_comparator_receiver",
+      "name": "vout_low",
+      "override_behavior": "overrides vout_low",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "0.0",
+      "module": "hysteretic_comparator_receiver",
+      "name": "offset",
+      "override_behavior": "overrides offset",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "40e-3 from [0:inf)",
+      "module": "hysteretic_comparator_receiver",
+      "name": "vhys",
+      "override_behavior": "overrides vhys",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "400p from [0:inf)",
+      "module": "hysteretic_comparator_receiver",
+      "name": "td",
+      "override_behavior": "overrides td",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "80p from [0:inf)",
+      "module": "hysteretic_comparator_receiver",
+      "name": "tr",
+      "override_behavior": "overrides tr",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    }
+  ],
+  "schema_version": "v4-public-contract-v1",
+  "score_oracle": {
+    "checker_profile_exposed": false,
+    "private_score_tb_exposed": false,
+    "profile_exposed": false,
+    "queryable_by_agentic_modes": false,
+    "raw_scs_exposed": false
+  },
+  "status": "gate2_ready",
+  "target_artifacts": [
+    "hysteretic_comparator_receiver.va"
+  ],
+  "task_id": "v4_241_hysteretic_comparator_receiver",
+  "task_slug": "292-hysteretic-comparator-receiver",
+  "title": "Hysteretic Comparator Receiver",
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "inm",
+      "inp",
+      "out"
+    ],
+    "saved_by_private_score_deck": true,
+    "saved_by_public_feedback_deck": true,
+    "time_signal": "time"
+  },
+  "track": "ams_function_dut",
+  "validation_status": {
+    "evas_feedback_score_gold": "pass",
+    "gate2": "dut_base_sealed",
+    "next_gate": "canonical_suite_unification_pending",
+    "semantic_negative_certification": "pass",
+    "spectre_score_gold": "clean_pass",
+    "tri_form_gate2": "pending",
+    "tri_form_gate3": "pending",
+    "untriaged_warning_count": 0
+  }
+}

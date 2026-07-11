@@ -1,0 +1,178 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "voltage_match_window",
+            "parameters": [
+              {
+                "default": "0.05 from [0:inf)",
+                "name": "match_tol",
+                "override_behavior": "overrides match_tol",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vh",
+                "override_behavior": "overrides vh",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "20p from [0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin1",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin2",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 2
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "voltage_match_window.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "247",
+  "identity": {
+    "category": "calibration_control",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Voltage Match Window"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_COMPARE_THE_ANALOG_VOLTAGE_DIFFERENCE_DIRECTLY",
+      "observable_contract": "Compare the analog voltage difference directly. Drive `vout` near `vh` when `abs(V(vin1) - V(vin2)) <= match_tol`; otherwise drive it near `0 V`. The decision should be deterministic and memoryless, with a smoothed voltage transition on the output.",
+      "required_signals": [
+        "time",
+        "vin1",
+        "vin2",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_MATCH_TOL_0_05_V_FROM",
+      "observable_contract": "`match_tol = 0.05 V from [0:inf)`: maximum allowed absolute input difference for a match.",
+      "required_signals": [
+        "time",
+        "vin1",
+        "vin2",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_VH_0_9_V_MATCH_OUTPUT",
+      "observable_contract": "`vh = 0.9 V`: match output level.",
+      "required_signals": [
+        "time",
+        "vin1",
+        "vin2",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_TR_20_PS_FROM_0_INF",
+      "observable_contract": "`tr = 20 ps from [0:inf)`: output transition smoothing time.",
+      "required_signals": [
+        "time",
+        "vin1",
+        "vin2",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_MATCH_TOL_0_05_V_FROM_2",
+      "observable_contract": "- `match_tol = 0.05 V from [0:inf)`: maximum allowed absolute input difference for a match. - `vh = 0.9 V`: match output level. - `tr = 20 ps from [0:inf)`: output transition smoothing time.",
+      "required_signals": [
+        "time",
+        "vin1",
+        "vin2",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_USE_DETERMINISTIC_VOLTAGE_DOMAIN_VERILOG_A",
+      "observable_contract": "Use deterministic voltage-domain Verilog-A and voltage contributions only. Do not emit a testbench, checker logic, out-of-band test hooks, hard-code testbench sample points, use current contributions, transistor-level devices, `ddt()`, `idt()`, or simulator side channels.",
+      "required_signals": [
+        "time",
+        "vin1",
+        "vin2",
+        "vout"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1247",
+    "dut": "v4-247",
+    "testbench": "v4-747"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin1",
+            "port_ref": "vin1",
+            "position": 0
+          },
+          {
+            "net": "vin2",
+            "port_ref": "vin2",
+            "position": 1
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 2
+          }
+        ],
+        "module_ref": "voltage_match_window",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin1",
+      "vin2",
+      "vout"
+    ]
+  }
+}

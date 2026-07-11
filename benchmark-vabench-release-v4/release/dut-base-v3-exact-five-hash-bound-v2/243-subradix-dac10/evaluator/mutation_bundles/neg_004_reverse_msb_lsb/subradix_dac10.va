@@ -1,0 +1,5 @@
+`include "disciplines.vams"
+module subradix_dac10(vd9, vd8, vd7, vd6, vd5, vd4, vd3, vd2, vd1, vd0, vout);
+input vd9,vd8,vd7,vd6,vd5,vd4,vd3,vd2,vd1,vd0; output vout; electrical vd9,vd8,vd7,vd6,vd5,vd4,vd3,vd2,vd1,vd0,vout; parameter real vth=0.45; parameter real vref=1.0;
+analog begin V(vout)<+vref*(((V(vd0)>vth)?198.359290368:0.0)+((V(vd1)>vth)?110.19960576:0.0)+((V(vd2)>vth)?61.2220032:0.0)+((V(vd3)>vth)?34.012224:0.0)+((V(vd4)>vth)?18.89568:0.0)+((V(vd5)>vth)?10.4976:0.0)+((V(vd6)>vth)?5.832:0.0)+((V(vd7)>vth)?3.24:0.0)+((V(vd8)>vth)?1.8:0.0)+((V(vd9)>vth)?1.0:0.0))/1024.0; end
+endmodule

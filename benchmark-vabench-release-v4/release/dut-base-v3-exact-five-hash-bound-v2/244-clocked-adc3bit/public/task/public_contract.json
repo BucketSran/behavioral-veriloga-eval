@@ -1,0 +1,262 @@
+{
+  "agent_visible_files": [
+    "instruction.md",
+    "public_contract.json",
+    "feedback_tb.scs"
+  ],
+  "canonical_dut_id": "244",
+  "canonical_dut_slug": "244-clocked-adc3bit",
+  "canonical_instruction": "instruction.md",
+  "category": "data_converter",
+  "counted_in_score": true,
+  "difficulty": "D2",
+  "feedback_oracle": {
+    "command": "vabench-feedback --task . --submission ../submission",
+    "feedback_channels": [
+      "ahdl_like_preflight",
+      "evas_simulation",
+      "behavior_property_diagnostics"
+    ],
+    "profile_exposed": false,
+    "public_tb": "feedback_tb.scs",
+    "public_tb_exposed": true,
+    "queryable_by_agentic_modes": true,
+    "raw_scs_exposed": true
+  },
+  "form": "dut",
+  "gate2_status": "gate2_ready",
+  "language": "verilog-a",
+  "leakage_policy": {
+    "candidate_instruction_contains_gold_or_checker_internals": false,
+    "checker_private": true,
+    "gold_solution_private": true,
+    "private_constants_exposed": false,
+    "private_score_deck_exposed": false
+  },
+  "level": "L1",
+  "observable_contract": [
+    {
+      "contract": "On each rising crossing of `vclk` through `vth_clk`, sample `vin` and quantize the `0 V` to `1 V` range into eight uniform lower-inclusive bins. Values below `0 V` clip to code `0`; values at or above `1 V` clip to code `7`. Drive `vd2`, `vd1`, and `vd0` as the binary representation of the held sampled code using `vh` for logic one and `0 V` for logic zero.",
+      "property_id": "P_ON_EACH_RISING_CROSSING_OF_VCLK",
+      "required_signals": [
+        "time",
+        "vclk",
+        "vd0",
+        "vd1",
+        "vd2",
+        "vin"
+      ]
+    },
+    {
+      "contract": "`vth_clk = 0.45 V`: rising-edge threshold for `vclk`.",
+      "property_id": "P_VTH_CLK_0_45_V_RISING",
+      "required_signals": [
+        "time",
+        "vclk",
+        "vd0",
+        "vd1",
+        "vd2",
+        "vin"
+      ]
+    },
+    {
+      "contract": "`vh = 0.9 V`: logic-high output level.",
+      "property_id": "P_VH_0_9_V_LOGIC_HIGH",
+      "required_signals": [
+        "time",
+        "vclk",
+        "vd0",
+        "vd1",
+        "vd2",
+        "vin"
+      ]
+    },
+    {
+      "contract": "- `vth_clk = 0.45 V`: rising-edge threshold for `vclk`. - `vh = 0.9 V`: logic-high output level.",
+      "property_id": "P_VTH_CLK_0_45_V_RISING_2",
+      "required_signals": [
+        "time",
+        "vclk",
+        "vd0",
+        "vd1",
+        "vd2",
+        "vin"
+      ]
+    },
+    {
+      "contract": "The output low level is `0 V`; the public input conversion range is `0 V` to `1 V`.",
+      "property_id": "P_THE_OUTPUT_LOW_LEVEL_IS_0",
+      "required_signals": [
+        "time",
+        "vclk",
+        "vd0",
+        "vd1",
+        "vd2",
+        "vin"
+      ]
+    },
+    {
+      "contract": "Use deterministic voltage-domain Verilog-A and voltage contributions only. Do not emit a testbench, checker logic, out-of-band test hooks, file I/O, random behavior, current contributions, transistor-level devices, `ddt()`, `idt()`, or simulator side channels.",
+      "property_id": "P_USE_DETERMINISTIC_VOLTAGE_DOMAIN_VERILOG_A",
+      "required_signals": [
+        "time",
+        "vclk",
+        "vd0",
+        "vd1",
+        "vd2",
+        "vin"
+      ]
+    }
+  ],
+  "oracle_policy": {
+    "checker_private": true,
+    "feedback_and_score_share_checker_family": true,
+    "feedback_oracle_materialized": true,
+    "no_model_visible_raw_scs": false,
+    "no_model_visible_starter": true,
+    "proposal_only": false,
+    "public_feedback_tb_exposed": true,
+    "score_tb_private": true,
+    "single_public_contract": true,
+    "testbench_and_checker_split_required": true
+  },
+  "output_artifacts": {
+    "boundary": "Solver owns only the candidate DUT artifact bundle. Public feedback decks and public support files, if any, are read-only inputs.",
+    "candidate_owned": [
+      "clocked_adc3bit.va"
+    ],
+    "must_not_submit": [
+      "testbench files",
+      "checker code",
+      "simulator output files"
+    ]
+  },
+  "public_interface": [
+    {
+      "file": "clocked_adc3bit.va",
+      "modules": [
+        {
+          "depends_on": [],
+          "name": "clocked_adc3bit",
+          "parameters": [
+            {
+              "default": "0.45",
+              "name": "vth_clk",
+              "override_behavior": "overrides vth_clk",
+              "type": "real",
+              "units": "",
+              "valid_range": "finite"
+            },
+            {
+              "default": "0.9",
+              "name": "vh",
+              "override_behavior": "overrides vh",
+              "type": "real",
+              "units": "",
+              "valid_range": "finite"
+            }
+          ],
+          "ports": [
+            {
+              "direction": "output",
+              "discipline": "electrical",
+              "name": "vd2",
+              "position": 0
+            },
+            {
+              "direction": "output",
+              "discipline": "electrical",
+              "name": "vd1",
+              "position": 1
+            },
+            {
+              "direction": "output",
+              "discipline": "electrical",
+              "name": "vd0",
+              "position": 2
+            },
+            {
+              "direction": "input",
+              "discipline": "electrical",
+              "name": "vin",
+              "position": 3
+            },
+            {
+              "direction": "input",
+              "discipline": "electrical",
+              "name": "vclk",
+              "position": 4
+            }
+          ],
+          "role": "entry"
+        }
+      ]
+    }
+  ],
+  "public_observables": [
+    "vclk",
+    "vd0",
+    "vd1",
+    "vd2",
+    "vin"
+  ],
+  "public_parameters": [
+    {
+      "default": "0.45",
+      "module": "clocked_adc3bit",
+      "name": "vth_clk",
+      "override_behavior": "overrides vth_clk",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    },
+    {
+      "default": "0.9",
+      "module": "clocked_adc3bit",
+      "name": "vh",
+      "override_behavior": "overrides vh",
+      "type": "real",
+      "units": "",
+      "valid_range": "finite"
+    }
+  ],
+  "schema_version": "v4-public-contract-v1",
+  "score_oracle": {
+    "checker_profile_exposed": false,
+    "private_score_tb_exposed": false,
+    "profile_exposed": false,
+    "queryable_by_agentic_modes": false,
+    "raw_scs_exposed": false
+  },
+  "status": "gate2_ready",
+  "target_artifacts": [
+    "clocked_adc3bit.va"
+  ],
+  "task_id": "v4_244_clocked_adc3bit",
+  "task_slug": "295-clocked-adc3bit",
+  "title": "Clocked ADC3bit",
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vclk",
+      "vd0",
+      "vd1",
+      "vd2",
+      "vin"
+    ],
+    "saved_by_private_score_deck": true,
+    "saved_by_public_feedback_deck": true,
+    "time_signal": "time"
+  },
+  "track": "ams_function_dut",
+  "validation_status": {
+    "evas_feedback_score_gold": "pass",
+    "gate2": "dut_base_sealed",
+    "next_gate": "canonical_suite_unification_pending",
+    "semantic_negative_certification": "pass",
+    "spectre_score_gold": "clean_pass",
+    "tri_form_gate2": "pending",
+    "tri_form_gate3": "pending",
+    "untriaged_warning_count": 0
+  }
+}
