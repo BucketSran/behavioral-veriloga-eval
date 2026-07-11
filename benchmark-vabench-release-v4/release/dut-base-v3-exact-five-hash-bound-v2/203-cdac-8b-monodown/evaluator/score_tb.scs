@@ -1,0 +1,19 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/cdac_8b_monodown.va"
+
+Vvin (vin 0) vsource type=pwl wave=[0 0.36 5.90n 0.36 6.00n -0.12]
+Vclks (clks 0) vsource type=pwl wave=[0 1.0 0.65n 1.0 0.70n 0 1.00n 0 1.05n 1.0 6.40n 1.0 6.45n 0 6.75n 0 6.80n 1.0]
+Vd7 (dctrl7 0) vsource type=pwl wave=[0 0 2.00n 0 2.02n 1.0 5.00n 1.0 5.02n 0]
+Vd6 (dctrl6 0) vsource type=pwl wave=[0 0 3.20n 0 3.22n 1.0 5.00n 1.0 5.02n 0]
+Vd5 (dctrl5 0) vsource type=pwl wave=[0 0 7.20n 0 7.22n 1.0]
+Vd4 (dctrl4 0) vsource type=pwl wave=[0 0 1.40n 0 1.42n 1.0 5.00n 1.0 5.02n 0]
+Vd3 (dctrl3 0) vsource type=pwl wave=[0 0 7.80n 0 7.82n 1.0]
+Vd2 (dctrl2 0) vsource type=pwl wave=[0 0 8.40n 0 8.42n 1.0]
+Vd1 (dctrl1 0) vsource type=pwl wave=[0 0 2.60n 0 2.62n 1.0 5.00n 1.0 5.02n 0]
+Vd0 (dctrl0 0) vsource type=pwl wave=[0 0 8.90n 0 8.92n 1.0]
+XDUT (vin clks dctrl0 dctrl1 dctrl2 dctrl3 dctrl4 dctrl5 dctrl6 dctrl7 vres) cdac_8b_monodown
+
+tran tran stop=9.5n maxstep=10p
+save vin clks dctrl0 dctrl1 dctrl2 dctrl3 dctrl4 dctrl5 dctrl6 dctrl7 vres

@@ -1,0 +1,15 @@
+`include "disciplines.vams"
+module dac_restore_6bit_1p8(d1, d2, d3, d4, d5, d6, clk, vout);
+input d1, d2, d3, d4, d5, d6, clk;
+output vout;
+electrical d1, d2, d3, d4, d5, d6, clk, vout;
+parameter real vth = 0.9;
+real out_v;
+analog begin
+    @(cross(V(clk) - vth, +1)) begin
+        out_v = 0.0 + (V(d2) > vth ? 16.0 : 0.0) + (V(d3) > vth ? 8.0 : 0.0) + (V(d4) > vth ? 4.0 : 0.0) + (V(d5) > vth ? 2.0 : 0.0) + (V(d6) > vth ? 1.0 : 0.0);
+        out_v = (out_v + 0.5) * 3.6 / 64.0 - 1.8;
+    end
+    V(vout) <+ transition(out_v, 0, 10p, 10p);
+end
+endmodule

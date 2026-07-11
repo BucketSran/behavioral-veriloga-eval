@@ -1,0 +1,19 @@
+`include "disciplines.vams"
+module dac_restore_7bit_clocked(d6, d5, d4, d3, d2, d1, d0, clk, rst, vout);
+input d6, d5, d4, d3, d2, d1, d0, clk, rst;
+output vout;
+electrical d6, d5, d4, d3, d2, d1, d0, clk, rst, vout;
+parameter real vth = 0.45;
+real out_v;
+analog begin
+    @(initial_step) out_v = 0.0;
+    @(cross(V(rst) - vth, +1)) out_v = 0.0;
+    @(cross(V(clk) - vth, +1)) begin
+        if (V(rst) <= vth) begin
+            out_v = 0.0 + (V(d5) > vth ? 32.0 : 0.0) + (V(d4) > vth ? 16.0 : 0.0) + (V(d3) > vth ? 8.0 : 0.0) + (V(d2) > vth ? 4.0 : 0.0) + (V(d1) > vth ? 2.0 : 0.0) + (V(d0) > vth ? 1.0 : 0.0);
+            out_v = (out_v + 0.5) * 1.8 / 128.0 - 0.9;
+        end
+    end
+    V(vout) <+ transition(out_v, 0, 10p, 10p);
+end
+endmodule

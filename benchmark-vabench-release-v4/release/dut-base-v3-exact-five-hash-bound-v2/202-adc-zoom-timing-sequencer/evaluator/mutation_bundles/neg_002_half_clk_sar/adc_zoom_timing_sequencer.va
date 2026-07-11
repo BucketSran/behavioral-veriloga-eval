@@ -1,0 +1,44 @@
+`include "disciplines.vams"
+module adc_zoom_timing_sequencer(rst, s, sar, res, intg, clk_sar, zoom, clk_zoom, rst_zoom);
+output rst, s, sar, res, intg, clk_sar, zoom, clk_zoom, rst_zoom;
+electrical rst, s, sar, res, intg, clk_sar, zoom, clk_zoom, rst_zoom;
+real rst_v, s_v, sar_v, res_v, int_v, clk_sar_v, zoom_v, clk_zoom_v, rst_zoom_v;
+analog begin
+    @(initial_step) begin
+        rst_v=0; s_v=0; sar_v=0; res_v=0; int_v=0; clk_sar_v=0; zoom_v=0; clk_zoom_v=0; rst_zoom_v=0;
+    end
+    @(timer(0.5n, 32n)) rst_v = 1.1;
+    @(timer(0.8n, 32n)) rst_v = 0.0;
+    @(timer(1.5n, 32n)) s_v = 1.1;
+    @(timer(2.5n, 32n)) s_v = 0.0;
+    @(timer(3.0n, 32n)) sar_v = 1.1;
+    @(timer(5.4n, 32n)) sar_v = 0.0;
+    @(timer(3.0n, 32n)) clk_sar_v = 1.1;
+    @(timer(3.25n, 32n)) clk_sar_v = 0.0;
+    @(timer(3.6n, 32n)) clk_sar_v = 1.1;
+    @(timer(3.85n, 32n)) clk_sar_v = 0.0;
+    @(timer(4.2n, 32n)) clk_sar_v = 1.1;
+    @(timer(4.45n, 32n)) clk_sar_v = 0.0;
+    @(timer(6.0n, 32n)) res_v = 1.1;
+    @(timer(6.6n, 32n)) res_v = 0.0;
+    @(timer(8.0n, 32n)) int_v = 1.1;
+    @(timer(8.7n, 32n)) int_v = 0.0;
+    @(timer(9.2n, 32n)) zoom_v = 1.1;
+    @(timer(10.8n, 32n)) zoom_v = 0.0;
+    @(timer(9.2n, 32n)) clk_zoom_v = 1.1;
+    @(timer(9.45n, 32n)) clk_zoom_v = 0.0;
+    @(timer(9.8n, 32n)) clk_zoom_v = 1.1;
+    @(timer(10.05n, 32n)) clk_zoom_v = 0.0;
+    @(timer(11.0n, 32n)) rst_zoom_v = 1.1;
+    @(timer(11.5n, 32n)) rst_zoom_v = 0.0;
+    V(rst) <+ transition(rst_v, 0, 20p, 20p);
+    V(s) <+ transition(s_v, 0, 20p, 20p);
+    V(sar) <+ transition(sar_v, 0, 20p, 20p);
+    V(res) <+ transition(res_v, 0, 20p, 20p);
+    V(intg) <+ transition(int_v, 0, 20p, 20p);
+    V(clk_sar) <+ transition(0.5 * clk_sar_v, 0, 20p, 20p);
+    V(zoom) <+ transition(zoom_v, 0, 20p, 20p);
+    V(clk_zoom) <+ transition(clk_zoom_v, 0, 20p, 20p);
+    V(rst_zoom) <+ transition(rst_zoom_v, 0, 20p, 20p);
+end
+endmodule

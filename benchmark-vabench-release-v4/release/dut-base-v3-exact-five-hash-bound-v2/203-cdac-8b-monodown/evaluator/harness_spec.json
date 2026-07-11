@@ -1,0 +1,108 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "cdac_8b_monodown.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=5.9n maxstep=10p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "clks",
+      "dctrl0",
+      "dctrl1",
+      "dctrl2",
+      "dctrl3",
+      "dctrl4",
+      "dctrl5",
+      "dctrl6",
+      "dctrl7",
+      "vres"
+    ]
+  },
+  "family_id": "203",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "544ce05872afa5362a7531833a159a8d140675a47b533809623eb3cd0befee65",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "3e92f4213bf9319e18d17cac1001d1bf6a39cc7e78f24c036782c79980625585",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vvin (vin 0) vsource dc=0.8",
+          "Vclks (clks 0) vsource type=pulse val0=0 val1=1 delay=0.1n period=10n width=0.7n rise=20p fall=20p",
+          "Vd7 (dctrl7 0) vsource type=pulse val0=0 val1=1 delay=1.2n period=20n width=8n rise=20p fall=20p",
+          "Vd6 (dctrl6 0) vsource type=pulse val0=0 val1=1 delay=1.8n period=20n width=8n rise=20p fall=20p",
+          "Vd5 (dctrl5 0) vsource type=pulse val0=0 val1=1 delay=2.4n period=20n width=8n rise=20p fall=20p",
+          "Vd4 (dctrl4 0) vsource type=pulse val0=0 val1=1 delay=3.0n period=20n width=8n rise=20p fall=20p",
+          "Vd3 (dctrl3 0) vsource type=pulse val0=0 val1=1 delay=3.6n period=20n width=8n rise=20p fall=20p",
+          "Vd2 (dctrl2 0) vsource type=pulse val0=0 val1=1 delay=4.2n period=20n width=8n rise=20p fall=20p",
+          "Vd1 (dctrl1 0) vsource type=pulse val0=0 val1=1 delay=4.8n period=20n width=8n rise=20p fall=20p",
+          "Vd0 (dctrl0 0) vsource type=pulse val0=0 val1=1 delay=5.4n period=20n width=8n rise=20p fall=20p",
+          "XDUT (vin clks dctrl0 dctrl1 dctrl2 dctrl3 dctrl4 dctrl5 dctrl6 dctrl7 vres) cdac_8b_monodown"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=9.5n maxstep=10p"
+        ],
+        "body_lines": [
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.36 5.90n 0.36 6.00n -0.12]",
+          "Vclks (clks 0) vsource type=pwl wave=[0 1.0 0.65n 1.0 0.70n 0 1.00n 0 1.05n 1.0 6.40n 1.0 6.45n 0 6.75n 0 6.80n 1.0]",
+          "Vd7 (dctrl7 0) vsource type=pwl wave=[0 0 2.00n 0 2.02n 1.0 5.00n 1.0 5.02n 0]",
+          "Vd6 (dctrl6 0) vsource type=pwl wave=[0 0 3.20n 0 3.22n 1.0 5.00n 1.0 5.02n 0]",
+          "Vd5 (dctrl5 0) vsource type=pwl wave=[0 0 7.20n 0 7.22n 1.0]",
+          "Vd4 (dctrl4 0) vsource type=pwl wave=[0 0 1.40n 0 1.42n 1.0 5.00n 1.0 5.02n 0]",
+          "Vd3 (dctrl3 0) vsource type=pwl wave=[0 0 7.80n 0 7.82n 1.0]",
+          "Vd2 (dctrl2 0) vsource type=pwl wave=[0 0 8.40n 0 8.42n 1.0]",
+          "Vd1 (dctrl1 0) vsource type=pwl wave=[0 0 2.60n 0 2.62n 1.0 5.00n 1.0 5.02n 0]",
+          "Vd0 (dctrl0 0) vsource type=pwl wave=[0 0 8.90n 0 8.92n 1.0]",
+          "XDUT (vin clks dctrl0 dctrl1 dctrl2 dctrl3 dctrl4 dctrl5 dctrl6 dctrl7 vres) cdac_8b_monodown"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_AT_INITIALIZATION_AND_ON_EACH_FALLING"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "1ef6bfb45f42e72fc631cc0840027f3eb20313f028daabb61d0b73b7e4832339",
+    "family_spec_sha256": "2fbf58b0561080bfd3a7b0682a48dd0f6aae9cfe5878d28c751c13660e517417"
+  },
+  "task_id": "v4-203"
+}

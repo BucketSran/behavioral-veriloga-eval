@@ -1,0 +1,81 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "sample_hold_5v_clock.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=3.8n maxstep=5p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "vclk",
+      "vout"
+    ]
+  },
+  "family_id": "210",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "3755487fe719e3d7ab257d7404a82acbb9ae9512e9ad232e44544574fed95c08",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "12b41567b471b43a3b1322a5851ed0d483dd9e198f8937145dbb1462115612fd",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (vclk 0) vsource type=pulse val0=0 val1=5 delay=0.35n period=1n width=0.35n rise=20p fall=20p",
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.10 1.0n 0.10 1.05n 0.65 2.0n 0.65 2.05n -0.20 3.0n -0.20 3.05n 0.35 4.0n 0.35]",
+          "XDUT (vin vout vclk) sample_hold_5v_clock"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (vclk 0) vsource type=pulse val0=0 val1=5 delay=0.25n period=0.8n width=0.28n rise=20p fall=20p",
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.20 0.55n 0.20 0.60n -0.35 1.35n -0.35 1.40n 0.80 2.15n 0.80 2.20n 0.05 2.95n 0.05 3.00n -0.10 4.00n -0.10]",
+          "XDUT (vin vout vclk) sample_hold_5v_clock"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_DETECT_RISING_CROSSINGS_OF_VCLK_THROUGH"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "45a59a0c4d3c05b7718062a7fe017619416f31de50e6bf090f8e3b49c2b286a6",
+    "family_spec_sha256": "484cbcef68817e92c5b2c51c4b18af1e933cf90369068c7677084bf7e90f04df"
+  },
+  "task_id": "v4-210"
+}
