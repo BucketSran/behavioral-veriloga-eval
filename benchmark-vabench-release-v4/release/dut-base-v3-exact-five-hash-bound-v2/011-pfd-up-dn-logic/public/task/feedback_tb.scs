@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/pfd_updn.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0
+Vref (ref 0) vsource type=pwl wave=[0 0 23.9n 0 24n 0.9 29n 0.9 29.1n 0 43.9n 0 44n 0.9 49n 0.9 49.1n 0 63.9n 0 64n 0.9 69n 0.9 69.1n 0 83.9n 0 84n 0.9 89n 0.9 89.1n 0 103.9n 0 104n 0.9 109n 0.9 109.1n 0 164.9n 0 165n 0.9 171n 0.9 171.1n 0 184.9n 0 185n 0.9 191n 0.9 191.1n 0 204.9n 0 205n 0.9 211n 0.9 211.1n 0 224.9n 0 225n 0.9 231n 0.9 231.1n 0 244.9n 0 245n 0.9 251n 0.9 251.1n 0 280n 0]
+Vdiv (div 0) vsource type=pwl wave=[0 0 24.9n 0 25n 0.9 31n 0.9 31.1n 0 44.9n 0 45n 0.9 51n 0.9 51.1n 0 64.9n 0 65n 0.9 71n 0.9 71.1n 0 84.9n 0 85n 0.9 91n 0.9 91.1n 0 104.9n 0 105n 0.9 111n 0.9 111.1n 0 163.9n 0 164n 0.9 169n 0.9 169.1n 0 183.9n 0 184n 0.9 189n 0.9 189.1n 0 203.9n 0 204n 0.9 209n 0.9 209.1n 0 223.9n 0 224n 0.9 229n 0.9 229.1n 0 243.9n 0 244n 0.9 249n 0.9 249.1n 0 280n 0]
+
+XDUT (vdd vss ref div up dn) pfd_updn
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=280n maxstep=100p
+save vdd vss ref div up dn

@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/cmp_strongarm.va"
+
+V_CLK (clk 0) vsource type=pulse val0=0 val1=0.9 period=1n delay=0.42n rise=20p fall=20p width=460p
+V_VINP (vinp 0) vsource type=pwl wave=[0 0.451 0.74n 0.451 0.76n 0.449 1.74n 0.449 1.76n 0.451 3.08n 0.451 3.10n 0.449 4.08n 0.449 4.10n 0.45 5n 0.45]
+V_VINN (vinn 0) vsource type=pwl wave=[0 0.449 0.74n 0.449 0.76n 0.451 1.74n 0.451 1.76n 0.449 3.08n 0.449 3.10n 0.451 4.08n 0.451 4.10n 0.45 5n 0.45]
+V_VSS (vss 0) vsource dc=0
+V_VDD (vdd 0) vsource dc=0.9
+
+XDUT (clk vinn vinp out_n out_p lp lm vss vdd) cmp_strongarm
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=5n maxstep=5p
+save clk vinp vinn out_p out_n lp lm vss vdd

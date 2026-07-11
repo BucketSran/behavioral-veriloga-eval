@@ -1,0 +1,49 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+// Negative: adds one to every nonzero decoded divide ratio.
+module clk_divider_ref (
+    input electrical clk_in, input electrical rst_n,
+    input electrical div_code_0, input electrical div_code_1,
+    input electrical div_code_2, input electrical div_code_3,
+    input electrical div_code_4, input electrical div_code_5,
+    input electrical div_code_6, input electrical div_code_7,
+    output electrical clk_out, output electrical lock
+);
+
+parameter real vdd = 0.9;
+parameter real vth = 0.45;
+parameter real trf = 10p;
+integer ratio, count, out_state, lock_state;
+
+analog begin
+    @(initial_step) begin
+        ratio = 1; count = 0; out_state = 0; lock_state = 0;
+    end
+    @(cross(V(rst_n) - vth, -1)) begin
+        count = 0; out_state = 0; lock_state = 0;
+    end
+    @(cross(V(clk_in) - vth, +1)) begin
+        ratio = (V(div_code_0) > vth ? 1 : 0)
+              + (V(div_code_1) > vth ? 2 : 0)
+              + (V(div_code_2) > vth ? 4 : 0)
+              + (V(div_code_3) > vth ? 8 : 0)
+              + (V(div_code_4) > vth ? 16 : 0)
+              + (V(div_code_5) > vth ? 32 : 0)
+              + (V(div_code_6) > vth ? 64 : 0)
+              + (V(div_code_7) > vth ? 128 : 0);
+        if (ratio < 1) ratio = 1;
+        else ratio = ratio + 1;
+        if (V(rst_n) < vth) begin
+            count = 0; out_state = 0; lock_state = 0;
+        end else begin
+            count = count + 1;
+            if (count >= ratio) begin count = 0; out_state = 1; lock_state = 1; end
+            else if (count >= (ratio >> 1)) out_state = 0;
+        end
+    end
+    V(clk_out) <+ transition(out_state ? vdd : 0.0, 0, trf, trf);
+    V(lock)    <+ transition(lock_state ? vdd : 0.0, 0, trf, trf);
+end
+
+endmodule

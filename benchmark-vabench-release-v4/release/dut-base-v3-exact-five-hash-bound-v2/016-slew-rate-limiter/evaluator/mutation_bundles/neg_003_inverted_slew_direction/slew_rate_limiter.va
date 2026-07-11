@@ -1,0 +1,23 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module slew_rate_limiter(vin, vout);
+    input vin;
+    output vout;
+    electrical vin, vout;
+    parameter real step = 0.015;
+    parameter real tr = 200p;
+    real y;
+
+    analog begin
+        @(initial_step) y = 0.0;
+        @(timer(0, 1n)) begin
+            if (V(vin) > y + step) y = y - step;
+            else if (V(vin) < y - step) y = y + step;
+            else y = V(vin);
+            if (y > 0.9) y = 0.9;
+            if (y < 0.0) y = 0.0;
+        end
+        V(vout) <+ transition(y, 0, tr, tr);
+    end
+endmodule

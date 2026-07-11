@@ -1,0 +1,21 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module vco_phase_integrator(vctrl, phase, clk);
+    input vctrl;
+    output phase, clk;
+    electrical vctrl, phase, clk;
+    parameter real tr = 200p;
+    real ph;
+    integer c;
+
+    analog begin
+        @(initial_step) begin ph = 0.0; c = 0; end
+        @(timer(0, 1n)) begin
+            ph = ph + 0.03 - 0.09 * V(vctrl);
+            if (ph >= 1.0) begin ph = ph - 1.0; c = 1 - c; end
+        end
+        V(phase) <+ transition(ph, 0, tr, tr);
+        V(clk) <+ transition(c ? 0.9 : 0.0, 0, tr, tr);
+    end
+endmodule

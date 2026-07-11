@@ -1,0 +1,26 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module resettable_integrator(vin, rst, vout);
+    input vin, rst;
+    output vout;
+    electrical vin, rst, vout;
+    parameter real vth = 0.45;
+    parameter real gain = 1.0e9;
+    parameter real dt = 1n;
+    parameter real vmax = 0.85;
+    parameter real tr = 500p;
+    real acc;
+    analog begin
+        @(initial_step) acc = 0.0;
+        @(timer(0, dt)) begin
+            if (V(rst) > vth) acc = 0.0;
+            else begin
+                acc = acc + gain * V(vin) * dt;
+                if (acc > vmax) acc = vmax;
+                if (acc < 0.0) acc = 0.0;
+            end
+        end
+        V(vout) <+ transition(acc + 0.10, 0, tr, tr);
+    end
+endmodule

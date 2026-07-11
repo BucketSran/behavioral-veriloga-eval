@@ -1,0 +1,124 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "simple_binary_voltage_dac_4b.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=5n maxstep=100p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "code_0",
+      "code_1",
+      "code_2",
+      "code_3",
+      "vref",
+      "vss"
+    ]
+  },
+  "family_id": "015",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "5554095a50a9b371176ac74c98ff00ef3bf73a0a34b5df0cf54c31e0e4580a2a",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "483c93c49d99c5518cbb6ca0c1c4cd71a4db6b2c7d763f67f4be16bd2dad7894",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=160n maxstep=200p"
+        ],
+        "body_lines": [
+          "V_code_0 (code_0 0) vsource type=pwl wave=[0 0 7.8n 0 8n 0.9 17.8n 0.9 18n 0 27.8n 0 28n 0.9 37.8n 0.9 38n 0 47.8n 0 48n 0.9 57.8n 0.9 58n 0 67.8n 0 68n 0.9 77.8n 0.9 78n 0 87.8n 0 88n 0.9 97.8n 0.9 98n 0 107.8n 0 108n 0.9 117.8n 0.9 118n 0 127.8n 0 128n 0.9 137.8n 0.9 138n 0 147.8n 0 148n 0.9 160n 0.9]",
+          "V_code_1 (code_1 0) vsource type=pwl wave=[0 0 17.8n 0 18n 0.9 37.8n 0.9 38n 0 57.8n 0 58n 0.9 77.8n 0.9 78n 0 97.8n 0 98n 0.9 117.8n 0.9 118n 0 137.8n 0 138n 0.9 160n 0.9]",
+          "V_code_2 (code_2 0) vsource type=pwl wave=[0 0 37.8n 0 38n 0.9 77.8n 0.9 78n 0 117.8n 0 118n 0.9 160n 0.9]",
+          "V_code_3 (code_3 0) vsource type=pwl wave=[0 0 77.8n 0 78n 0.9 160n 0.9]",
+          "V_vref (vref 0) vsource dc=0.9",
+          "V_vss (vss 0) vsource dc=0",
+          "",
+          "XDUT (code_0 code_1 code_2 code_3 vref vss aout) simple_binary_voltage_dac_4b",
+          ""
+        ],
+        "save_signals": [
+          "code_0",
+          "code_1",
+          "code_2",
+          "code_3",
+          "vref",
+          "vss",
+          "aout"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=165n maxstep=500p"
+        ],
+        "body_lines": [
+          "Vref (vref 0) vsource dc=0.9",
+          "Vss (vss 0) vsource dc=0",
+          "// Code samples at 5/15/.../155 ns cover every 4-bit code from 0 through 15.",
+          "Vb0 (code_0 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0.9 19.5n 0.9 20n 0 29.5n 0 30n 0.9 39.5n 0.9 40n 0 49.5n 0 50n 0.9 59.5n 0.9 60n 0 69.5n 0 70n 0.9 79.5n 0.9 80n 0 89.5n 0 90n 0.9 99.5n 0.9 100n 0 109.5n 0 110n 0.9 119.5n 0.9 120n 0 129.5n 0 130n 0.9 139.5n 0.9 140n 0 149.5n 0 150n 0.9 165n 0.9]",
+          "Vb1 (code_1 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0 19.5n 0 20n 0.9 29.5n 0.9 30n 0.9 39.5n 0.9 40n 0 49.5n 0 50n 0 59.5n 0 60n 0.9 69.5n 0.9 70n 0.9 79.5n 0.9 80n 0 89.5n 0 90n 0 99.5n 0 100n 0.9 109.5n 0.9 110n 0.9 119.5n 0.9 120n 0 129.5n 0 130n 0 139.5n 0 140n 0.9 149.5n 0.9 150n 0.9 165n 0.9]",
+          "Vb2 (code_2 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0 19.5n 0 20n 0 29.5n 0 30n 0 39.5n 0 40n 0.9 49.5n 0.9 50n 0.9 59.5n 0.9 60n 0.9 69.5n 0.9 70n 0.9 79.5n 0.9 80n 0 89.5n 0 90n 0 99.5n 0 100n 0 109.5n 0 110n 0 119.5n 0 120n 0.9 129.5n 0.9 130n 0.9 139.5n 0.9 140n 0.9 149.5n 0.9 150n 0.9 165n 0.9]",
+          "Vb3 (code_3 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0 19.5n 0 20n 0 29.5n 0 30n 0 39.5n 0 40n 0 49.5n 0 50n 0 59.5n 0 60n 0 69.5n 0 70n 0 79.5n 0 80n 0.9 89.5n 0.9 90n 0.9 99.5n 0.9 100n 0.9 109.5n 0.9 110n 0.9 119.5n 0.9 120n 0.9 129.5n 0.9 130n 0.9 139.5n 0.9 140n 0.9 149.5n 0.9 150n 0.9 165n 0.9]",
+          "",
+          "XDUT (code_0 code_1 code_2 code_3 vref vss aout) simple_binary_voltage_dac_4b",
+          ""
+        ],
+        "save_signals": [
+          "code_0",
+          "code_1",
+          "code_2",
+          "code_3",
+          "vref",
+          "vss",
+          "aout"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_BINARY_WEIGHTS",
+    "P_ENDPOINTS",
+    "P_LINEAR_MONOTONIC_MAPPING",
+    "P_CONTINUOUS_UPDATE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "5567cc71803112d0d3b6a95e0593827233a4e111da330409f541b0ac8897decb",
+    "family_spec_sha256": "e9e246939f63a42840fc429a0f1eaff407bb5350c935b38ce0e657541cadecaa"
+  },
+  "task_id": "v4-015"
+}

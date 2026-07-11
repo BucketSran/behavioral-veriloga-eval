@@ -1,0 +1,163 @@
+{
+  "family_id": "019",
+  "gold_bundle_sha256": "5eebdc90df01719c04a68182ae0bb2ecbd41067a53db71d16e7f94de3cf59f94",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "vco_phase_integrator.va": "24bbf495608296d517d10de2b261e5b820a175de33496ced7698cc841ec8df58"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PERIODIC_PHASE_UPDATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_missing_phase_increment/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "vco_phase_integrator.va"
+      ],
+      "fault_class": "missing_phase_increment",
+      "id": "neg_001_missing_phase_increment",
+      "trigger_condition": "the first periodic 1 ns update occurs",
+      "violated_property_ids": [
+        "P_PERIODIC_PHASE_UPDATE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "vco_phase_integrator.va": "521037315d8f02beab5b90856237aeb7c81e8d32a74d9fccfcb9d4b631543a7a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CONTROLLED_EDGE_RATE",
+          "P_PERIODIC_PHASE_UPDATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_phase_increment_too_small/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "vco_phase_integrator.va"
+      ],
+      "fault_class": "phase_increment_gain_error",
+      "id": "neg_002_phase_increment_too_small",
+      "trigger_condition": "a nonzero vctrl is sampled by successive periodic updates",
+      "violated_property_ids": [
+        "P_CONTROLLED_EDGE_RATE",
+        "P_PERIODIC_PHASE_UPDATE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "vco_phase_integrator.va": "ac8415bcb443fe6eb60921725432c855a9829206dbedb2d842fa0fdb1a5d5e51"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PERIODIC_PHASE_UPDATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_timer_period/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "vco_phase_integrator.va"
+      ],
+      "fault_class": "timer_period_error",
+      "id": "neg_003_wrong_timer_period",
+      "trigger_condition": "the public 1 ns periodic schedule is observed",
+      "violated_property_ids": [
+        "P_PERIODIC_PHASE_UPDATE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "vco_phase_integrator.va": "174c06b4cd4a0cdcc4a5b69e77c18bb3b744b8b5eb519513bb9f240ce029293b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_WRAPPED_PHASE_RANGE",
+          "P_WRAP_TOGGLES_CLOCK"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_missing_phase_wrap/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "vco_phase_integrator.va"
+      ],
+      "fault_class": "phase_wrap_omission",
+      "id": "neg_004_missing_phase_wrap",
+      "trigger_condition": "the accumulated phase reaches one normalized cycle",
+      "violated_property_ids": [
+        "P_WRAPPED_PHASE_RANGE",
+        "P_WRAP_TOGGLES_CLOCK"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "vco_phase_integrator.va": "dfba6a4f30f2382d75db9b0166d3480e9a935d51f41e501014a2e09bd97f5f55"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_WRAP_TOGGLES_CLOCK"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_wrap_does_not_toggle_clock/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "vco_phase_integrator.va"
+      ],
+      "fault_class": "wrap_clock_toggle_omission",
+      "id": "neg_005_wrap_does_not_toggle_clock",
+      "trigger_condition": "the accumulated phase wraps by one cycle",
+      "violated_property_ids": [
+        "P_WRAP_TOGGLES_CLOCK"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "vco_phase_integrator.va": "e22ae7db01422adbae994a406241bdbb130b1d9e0d30ab25b6b3568bf1821dbd"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CONTROLLED_EDGE_RATE",
+          "P_WRAPPED_PHASE_RANGE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_006_control_direction_inverted/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "vco_phase_integrator.va"
+      ],
+      "fault_class": "control_direction_inversion",
+      "id": "neg_006_control_direction_inverted",
+      "trigger_condition": "vctrl steps from the low to the high public stimulus region",
+      "violated_property_ids": [
+        "P_CONTROLLED_EDGE_RATE",
+        "P_WRAPPED_PHASE_RANGE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

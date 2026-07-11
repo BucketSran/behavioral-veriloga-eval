@@ -1,0 +1,31 @@
+{
+  "schema_version": "v4-family-spec-v1", "family_id": "014",
+  "task_ids": {"dut": "v4-014", "testbench": "v4-514", "bugfix": "v4-1014"},
+  "identity": {"title": "Segmented DAC", "category": "data_converter", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "segmented_dac.va", "modules": [{
+    "name": "segmented_dac", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "b0", "direction": "input", "discipline": "electrical", "position": 0}, {"name": "b1", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "t0", "direction": "input", "discipline": "electrical", "position": 2}, {"name": "t1", "direction": "input", "discipline": "electrical", "position": 3},
+      {"name": "t2", "direction": "input", "discipline": "electrical", "position": 4}, {"name": "vref", "direction": "input", "discipline": "electrical", "position": 5},
+      {"name": "vss", "direction": "input", "discipline": "electrical", "position": 6}, {"name": "aout", "direction": "output", "discipline": "electrical", "position": 7}
+    ],
+    "parameters": [
+      {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "vth > 0", "override_behavior": "sets binary and thermometer control threshold"},
+      {"name": "tr", "type": "real", "default": 5e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets output transition smoothing"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "segmented_dac", "connections": [
+    {"port_ref": "b0", "net": "b0", "position": 0}, {"port_ref": "b1", "net": "b1", "position": 1}, {"port_ref": "t0", "net": "t0", "position": 2},
+    {"port_ref": "t1", "net": "t1", "position": 3}, {"port_ref": "t2", "net": "t2", "position": 4}, {"port_ref": "vref", "net": "vref", "position": 5},
+    {"port_ref": "vss", "net": "vss", "position": 6}, {"port_ref": "aout", "net": "aout", "position": 7}
+  ]}]},
+  "properties": [
+    {"id": "P_SEGMENT_WEIGHTS", "observable_contract": "b0 and b1 contribute one and two LSB steps while each active thermometer control contributes four LSB steps.", "required_signals": ["time", "b0", "b1", "t0", "t1", "t2", "aout"]},
+    {"id": "P_CODE_MONOTONICITY", "observable_contract": "Increasing the summed segmented code does not decrease aout.", "required_signals": ["time", "b0", "b1", "t0", "t1", "t2", "aout"]},
+    {"id": "P_ENDPOINTS", "observable_contract": "The zero code maps to vss and the all-active 15-step code maps to vref.", "required_signals": ["time", "b0", "b1", "t0", "t1", "t2", "vref", "vss", "aout"]},
+    {"id": "P_RAIL_RELATIVE_MAPPING", "observable_contract": "Intermediate codes linearly span the vss-to-vref range.", "required_signals": ["time", "b0", "b1", "t0", "t1", "t2", "vref", "vss", "aout"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "b0", "b1", "t0", "t1", "t2", "vref", "vss", "aout"]},
+  "modeling_constraints": ["Use deterministic continuous code-to-voltage behavior with finite transition smoothing.", "Use voltage contributions only.", "Do not use current contributions, ddt(), idt(), validation logic, or simulator-specific side channels."]
+}

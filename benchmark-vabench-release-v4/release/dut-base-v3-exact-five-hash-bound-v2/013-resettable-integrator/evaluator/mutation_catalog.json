@@ -1,0 +1,161 @@
+{
+  "family_id": "013",
+  "gold_bundle_sha256": "1dfe919f68ed6dc51be59fa6319496bf840c0a2b8d931c1e606fc79751f906a0",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "resettable_integrator.va": "8ff7252ac08da9e94c64225cac6cb9f3246541fa10df1e4bd189c5b2e5a3add3"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_TIMER_INTEGRATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_gain_low/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "resettable_integrator.va"
+      ],
+      "fault_class": "integration_gain_error",
+      "id": "neg_001_gain_low",
+      "trigger_condition": "a positive VIN is integrated through multiple timer events",
+      "violated_property_ids": [
+        "P_TIMER_INTEGRATION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "resettable_integrator.va": "996d06323dc55fad6e9bb485a0b397323f43f85579e4170878cc61939ed8854c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_EVENT_HOLD",
+          "P_TIMER_INTEGRATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_timer_too_slow/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "resettable_integrator.va"
+      ],
+      "fault_class": "timer_cadence_error",
+      "id": "neg_002_timer_too_slow",
+      "trigger_condition": "VIN remains positive across successive dt periods",
+      "violated_property_ids": [
+        "P_EVENT_HOLD",
+        "P_TIMER_INTEGRATION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "resettable_integrator.va": "d26bd35fe3906cd30cdde8da640de1aa469305876470c062b0040f89fb5817c3"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ACCUMULATOR_CLAMP",
+          "P_TIMER_INTEGRATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_integral_sign_reversed/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "resettable_integrator.va"
+      ],
+      "fault_class": "integration_polarity_error",
+      "id": "neg_003_integral_sign_reversed",
+      "trigger_condition": "a positive VIN is integrated while reset is low",
+      "violated_property_ids": [
+        "P_ACCUMULATOR_CLAMP",
+        "P_TIMER_INTEGRATION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "resettable_integrator.va": "8c6342c0bb155554921f13eb57d41af586f8b4bf553d62a81d05fd30828d92ce"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ACTIVE_HIGH_RESET"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_reset_ignored/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "resettable_integrator.va"
+      ],
+      "fault_class": "active_high_reset_omission",
+      "id": "neg_004_reset_ignored",
+      "trigger_condition": "rst is driven above the reset threshold after integration",
+      "violated_property_ids": [
+        "P_ACTIVE_HIGH_RESET"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "resettable_integrator.va": "ed75197a40863735c5767e504aed06a140ae27117f52da2223febc073bcb9c2d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_TIMER_INTEGRATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_output_half_scale/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "resettable_integrator.va"
+      ],
+      "fault_class": "output_scale_error",
+      "id": "neg_005_output_half_scale",
+      "trigger_condition": "the accumulated state is observed after a positive integration interval",
+      "violated_property_ids": [
+        "P_TIMER_INTEGRATION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "resettable_integrator.va": "55faf2d5d92c60a4eb15a37ad6ef5fd90fddb55089dc85cb05d94d02df96fb0b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INITIAL_ZERO"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_006_nonzero_output_baseline/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "resettable_integrator.va"
+      ],
+      "fault_class": "nonzero_output_baseline",
+      "id": "neg_006_nonzero_output_baseline",
+      "trigger_condition": "the output is observed while reset holds the accumulator at zero",
+      "violated_property_ids": [
+        "P_INITIAL_ZERO"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

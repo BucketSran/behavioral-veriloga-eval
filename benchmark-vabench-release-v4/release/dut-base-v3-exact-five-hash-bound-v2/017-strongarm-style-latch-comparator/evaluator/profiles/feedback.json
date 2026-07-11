@@ -1,0 +1,52 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=5n maxstep=5p"
+    ],
+    "body_lines": [
+      "V_CLK (clk 0) vsource type=pulse val0=0 val1=0.9 period=1n delay=0.42n rise=20p fall=20p width=460p",
+      "V_VINP (vinp 0) vsource type=pwl wave=[0 0.451 0.74n 0.451 0.76n 0.449 1.74n 0.449 1.76n 0.451 3.08n 0.451 3.10n 0.449 4.08n 0.449 4.10n 0.45 5n 0.45]",
+      "V_VINN (vinn 0) vsource type=pwl wave=[0 0.449 0.74n 0.449 0.76n 0.451 1.74n 0.451 1.76n 0.449 3.08n 0.449 3.10n 0.451 4.08n 0.451 4.10n 0.45 5n 0.45]",
+      "V_VSS (vss 0) vsource dc=0",
+      "V_VDD (vdd 0) vsource dc=0.9",
+      "",
+      "XDUT (clk vinn vinp out_n out_p lp lm vss vdd) cmp_strongarm",
+      ""
+    ],
+    "save_signals": [
+      "clk",
+      "vinp",
+      "vinn",
+      "out_p",
+      "out_n",
+      "lp",
+      "lm",
+      "vss",
+      "vdd"
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "3ed08017b04728c7f1879d22722001988c2b9eadb3b6332980876f2e2ee19c54",
+  "parameters": {
+    "maxstep": "200p",
+    "stop_time": "100n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_INITIAL_AND_FALLING_RESET",
+    "P_POSITIVE_DECISION",
+    "P_NEGATIVE_DECISION",
+    "P_ZERO_DIFFERENTIAL",
+    "P_LATCH_HOLD"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

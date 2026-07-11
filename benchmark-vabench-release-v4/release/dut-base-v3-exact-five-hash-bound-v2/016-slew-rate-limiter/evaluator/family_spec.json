@@ -1,0 +1,25 @@
+{
+  "schema_version": "v4-family-spec-v1", "family_id": "016",
+  "task_ids": {"dut": "v4-016", "testbench": "v4-516", "bugfix": "v4-1016"},
+  "identity": {"title": "Slew Rate Limiter", "category": "baseband_signal_conditioning", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "slew_rate_limiter.va", "modules": [{
+    "name": "slew_rate_limiter", "role": "entry", "depends_on": [],
+    "ports": [{"name": "vin", "direction": "input", "discipline": "electrical", "position": 0}, {"name": "vout", "direction": "output", "discipline": "electrical", "position": 1}],
+    "parameters": [
+      {"name": "step", "type": "real", "default": 0.015, "units": "V", "valid_range": "step > 0", "override_behavior": "sets maximum state change per update"},
+      {"name": "tr", "type": "real", "default": 2e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets output transition smoothing"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "slew_rate_limiter", "connections": [
+    {"port_ref": "vin", "net": "vin", "position": 0}, {"port_ref": "vout", "net": "vout", "position": 1}
+  ]}]},
+  "properties": [
+    {"id": "P_INITIAL_ZERO", "observable_contract": "vout begins at 0 V.", "required_signals": ["time", "vout"]},
+    {"id": "P_PERIODIC_UPDATE", "observable_contract": "The state changes only on the public 1 ns periodic update schedule.", "required_signals": ["time", "vin", "vout"]},
+    {"id": "P_BIDIRECTIONAL_STEP_LIMIT", "observable_contract": "Each rising or falling update changes the state toward vin by no more than step.", "required_signals": ["time", "vin", "vout"]},
+    {"id": "P_NEAR_TARGET_SETTLE", "observable_contract": "When vin is within one step, vout may settle directly to vin.", "required_signals": ["time", "vin", "vout"]},
+    {"id": "P_EVENTUAL_TRACKING", "observable_contract": "The limited response eventually reaches sustained high and low input levels while remaining non-instantaneous.", "required_signals": ["time", "vin", "vout"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "vin", "vout"]},
+  "modeling_constraints": ["Use deterministic 1 ns timer-updated voltage-domain behavior.", "Use voltage contributions only.", "Do not use current contributions, ddt(), idt(), undeclared state outputs, or validation hooks."]
+}

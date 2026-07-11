@@ -1,0 +1,34 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "020",
+  "task_ids": {"dut": "v4-020", "testbench": "v4-520", "bugfix": "v4-1020"},
+  "identity": {"title": "Bandgap Reference Macro Model", "category": "bias_reference_power_management", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "bandgap_reference_macro_model.va", "modules": [{
+    "name": "bandgap_reference_macro_model", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "clk", "direction": "input", "discipline": "electrical", "position": 0},
+      {"name": "rst", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "vin", "direction": "input", "discipline": "electrical", "position": 2},
+      {"name": "out", "direction": "output", "discipline": "electrical", "position": 3},
+      {"name": "metric", "direction": "output", "discipline": "electrical", "position": 4}
+    ],
+    "parameters": [
+      {"name": "tr", "type": "real", "default": 1e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets output and metric transition smoothing"},
+      {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "finite real", "override_behavior": "sets the voltage-coded clk and rst threshold"},
+      {"name": "vstart", "type": "real", "default": 0.58, "units": "V", "valid_range": "vstart > 0.05", "override_behavior": "sets the supply level required for startup and valid updates"},
+      {"name": "vref", "type": "real", "default": 0.55, "units": "V", "valid_range": "vref >= 0", "override_behavior": "sets the nominal regulated reference target before line correction and clamping"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "bandgap_reference_macro_model", "connections": [
+    {"port_ref": "clk", "net": "clk", "position": 0}, {"port_ref": "rst", "net": "rst", "position": 1}, {"port_ref": "vin", "net": "vin", "position": 2}, {"port_ref": "out", "net": "out", "position": 3}, {"port_ref": "metric", "net": "metric", "position": 4}
+  ]}]},
+  "properties": [
+    {"id": "P_RESET_AND_BROWNOUT", "observable_contract": "Reset or vin below vstart forces out and metric to 0 V.", "required_signals": ["time", "rst", "vin", "out", "metric"]},
+    {"id": "P_CLOCKED_FIRST_ORDER_SETTLING", "observable_contract": "On eligible rising clock crossings, the held reference advances by 0.35 of the remaining error to the clamped line-corrected target.", "required_signals": ["time", "clk", "rst", "vin", "out"]},
+    {"id": "P_TARGET_AND_OUTPUT_CLAMPS", "observable_contract": "The line-corrected target is clamped to 0 through vin minus 0.05 V, and driven out remains within 0 through 0.9 V.", "required_signals": ["time", "vin", "out"]},
+    {"id": "P_VALIDITY_ENCODING", "observable_contract": "Metric is 0 V in reset or brownout, 0.2 V during startup below the 0.48 V validity threshold, and 0.9 V after the held reference exceeds it.", "required_signals": ["time", "rst", "vin", "out", "metric"]},
+    {"id": "P_CLOCKED_HOLD", "observable_contract": "Above startup, the reference state changes only on rising clock crossings and holds between samples.", "required_signals": ["time", "clk", "vin", "out"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "clk", "rst", "vin", "out", "metric"]},
+  "modeling_constraints": ["Use deterministic voltage-domain sampled settling with no KCL or KVL regulation loop.", "Use voltage contributions only.", "Do not use current contributions, transistor-level devices, AC/noise analysis, or validation side channels."]
+}

@@ -1,0 +1,31 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+// Negative: ignores an active-low reset after divider activity has started.
+module clk_divider_ref (
+    input electrical clk_in, input electrical rst_n,
+    input electrical div_code_0, input electrical div_code_1,
+    input electrical div_code_2, input electrical div_code_3,
+    input electrical div_code_4, input electrical div_code_5,
+    input electrical div_code_6, input electrical div_code_7,
+    output electrical clk_out, output electrical lock
+);
+
+parameter real vdd = 0.9;
+parameter real vth = 0.45;
+parameter real trf = 10p;
+integer seen_edge;
+
+analog begin
+    @(initial_step) begin
+        seen_edge = 0;
+    end
+    @(cross(V(clk_in) - vth, +1)) begin
+        if (V(rst_n) > vth)
+            seen_edge = 1;
+    end
+    V(clk_out) <+ transition(seen_edge ? vdd : 0.0, 0, trf, trf);
+    V(lock)    <+ transition(seen_edge ? vdd : 0.0, 0, trf, trf);
+end
+
+endmodule

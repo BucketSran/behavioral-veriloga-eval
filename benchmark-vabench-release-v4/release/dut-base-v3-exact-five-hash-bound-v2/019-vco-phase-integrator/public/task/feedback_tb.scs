@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/vco_phase_integrator.va"
+
+V_vctrl (vctrl 0) vsource type=pwl wave=[0 0.2 60n 0.2 61n 0.7 170n 0.7]
+
+XDUT (vctrl phase clk) vco_phase_integrator
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=170n maxstep=500p
+save vctrl phase clk

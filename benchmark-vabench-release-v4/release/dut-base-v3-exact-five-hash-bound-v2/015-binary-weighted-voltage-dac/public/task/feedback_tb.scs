@@ -1,0 +1,19 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/simple_binary_voltage_dac_4b.va"
+
+V_code_0 (code_0 0) vsource type=pwl wave=[0 0 7.8n 0 8n 0.9 17.8n 0.9 18n 0 27.8n 0 28n 0.9 37.8n 0.9 38n 0 47.8n 0 48n 0.9 57.8n 0.9 58n 0 67.8n 0 68n 0.9 77.8n 0.9 78n 0 87.8n 0 88n 0.9 97.8n 0.9 98n 0 107.8n 0 108n 0.9 117.8n 0.9 118n 0 127.8n 0 128n 0.9 137.8n 0.9 138n 0 147.8n 0 148n 0.9 160n 0.9]
+V_code_1 (code_1 0) vsource type=pwl wave=[0 0 17.8n 0 18n 0.9 37.8n 0.9 38n 0 57.8n 0 58n 0.9 77.8n 0.9 78n 0 97.8n 0 98n 0.9 117.8n 0.9 118n 0 137.8n 0 138n 0.9 160n 0.9]
+V_code_2 (code_2 0) vsource type=pwl wave=[0 0 37.8n 0 38n 0.9 77.8n 0.9 78n 0 117.8n 0 118n 0.9 160n 0.9]
+V_code_3 (code_3 0) vsource type=pwl wave=[0 0 77.8n 0 78n 0.9 160n 0.9]
+V_vref (vref 0) vsource dc=0.9
+V_vss (vss 0) vsource dc=0
+
+XDUT (code_0 code_1 code_2 code_3 vref vss aout) simple_binary_voltage_dac_4b
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=160n maxstep=200p
+save code_0 code_1 code_2 code_3 vref vss aout

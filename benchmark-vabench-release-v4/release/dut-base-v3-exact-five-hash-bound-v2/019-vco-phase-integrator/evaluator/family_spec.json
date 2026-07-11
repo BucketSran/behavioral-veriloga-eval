@@ -1,0 +1,33 @@
+{
+  "schema_version": "v4-family-spec-v1",
+  "family_id": "019",
+  "task_ids": {"dut": "v4-019", "testbench": "v4-519", "bugfix": "v4-1019"},
+  "identity": {"title": "VCO Phase Integrator", "category": "pll_clock_timing", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {
+    "mode": "single_file",
+    "files": [{"path": "vco_phase_integrator.va", "modules": [{
+      "name": "vco_phase_integrator", "role": "entry", "depends_on": [],
+      "ports": [
+        {"name": "vctrl", "direction": "input", "discipline": "electrical", "position": 0},
+        {"name": "phase", "direction": "output", "discipline": "electrical", "position": 1},
+        {"name": "clk", "direction": "output", "discipline": "electrical", "position": 2}
+      ],
+      "parameters": [{"name": "tr", "type": "real", "default": 2e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets phase and clock transition smoothing"}]
+    }]}]
+  },
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "vco_phase_integrator", "connections": [
+    {"port_ref": "vctrl", "net": "vctrl", "position": 0}, {"port_ref": "phase", "net": "phase", "position": 1}, {"port_ref": "clk", "net": "clk", "position": 2}
+  ]}]},
+  "properties": [
+    {"id": "P_PERIODIC_PHASE_UPDATE", "observable_contract": "Phase state updates on the public 1 ns periodic schedule by 0.03 plus 0.09 times vctrl.", "required_signals": ["time", "vctrl", "phase"]},
+    {"id": "P_WRAPPED_PHASE_RANGE", "observable_contract": "The observable phase remains in the normalized range from 0 inclusive to 1 exclusive.", "required_signals": ["time", "phase"]},
+    {"id": "P_WRAP_TOGGLES_CLOCK", "observable_contract": "Each phase wrap by one cycle toggles the voltage-coded clock between 0 V and 0.9 V.", "required_signals": ["time", "phase", "clk"]},
+    {"id": "P_CONTROLLED_EDGE_RATE", "observable_contract": "A sustained higher vctrl produces more clock toggles over the same observation interval than a sustained lower vctrl.", "required_signals": ["time", "vctrl", "clk"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "vctrl", "phase", "clk"]},
+  "modeling_constraints": [
+    "Use deterministic 1 ns timer-updated state and wrapped normalized phase.",
+    "Use smoothed voltage contributions only.",
+    "Do not use current contributions, ddt(), idt(), topology assumptions, validation hooks, or extra observability ports."
+  ]
+}

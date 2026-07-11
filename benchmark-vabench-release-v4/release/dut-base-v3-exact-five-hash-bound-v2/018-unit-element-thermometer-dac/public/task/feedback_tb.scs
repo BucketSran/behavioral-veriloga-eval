@@ -1,0 +1,30 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/thermometer_dac_15seg.va"
+
+V_seg0 (seg0 0) vsource type=pwl wave=[0 0 24.8n 0 25n 0 54.8n 0 55n 0 84.8n 0 85n 0.9 114.8n 0.9 115n 0.9 144.8n 0.9 145n 0.9 175n 0.9]
+V_seg1 (seg1 0) vsource type=pwl wave=[0 0 24.8n 0 25n 0 54.8n 0 55n 0.9 84.8n 0.9 85n 0 114.8n 0 115n 0.9 144.8n 0.9 145n 0.9 175n 0.9]
+V_seg2 (seg2 0) vsource type=pwl wave=[0 0 24.8n 0 25n 0 54.8n 0 55n 0 84.8n 0 85n 0.9 114.8n 0.9 115n 0.9 144.8n 0.9 145n 0.9 175n 0.9]
+V_seg3 (seg3 0) vsource type=pwl wave=[0 0 24.8n 0 25n 0 54.8n 0 55n 0 84.8n 0 85n 0 114.8n 0 115n 0.9 144.8n 0.9 145n 0.9 175n 0.9]
+V_seg4 (seg4 0) vsource type=pwl wave=[0 0 24.8n 0 25n 0 54.8n 0 55n 0 84.8n 0 85n 0.9 114.8n 0.9 115n 0.9 144.8n 0.9 145n 0.9 175n 0.9]
+V_seg5 (seg5 0) vsource type=pwl wave=[0 0 24.8n 0 25n 0 54.8n 0 55n 0 84.8n 0 85n 0 114.8n 0 115n 0 144.8n 0 145n 0.9 175n 0.9]
+V_seg6 (seg6 0) vsource type=pwl wave=[0 0 24.8n 0 25n 0 54.8n 0 55n 0 84.8n 0 85n 0.9 114.8n 0.9 115n 0.9 144.8n 0.9 145n 0.9 175n 0.9]
+V_seg7 (seg7 0) vsource type=pwl wave=[0 0 24.8n 0 25n 0.9 54.8n 0.9 55n 0 84.8n 0 85n 0 114.8n 0 115n 0.9 144.8n 0.9 145n 0.9 175n 0.9]
+V_seg8 (seg8 0) vsource type=pwl wave=[0 0 24.8n 0 25n 0 54.8n 0 55n 0 84.8n 0 85n 0.9 114.8n 0.9 115n 0.9 144.8n 0.9 145n 0.9 175n 0.9]
+V_seg9 (seg9 0) vsource type=pwl wave=[0 0 24.8n 0 25n 0 54.8n 0 55n 0 84.8n 0 85n 0 114.8n 0 115n 0.9 144.8n 0.9 145n 0.9 175n 0.9]
+V_seg10 (seg10 0) vsource type=pwl wave=[0 0 24.8n 0 25n 0 54.8n 0 55n 0 84.8n 0 85n 0.9 114.8n 0.9 115n 0.9 144.8n 0.9 145n 0.9 175n 0.9]
+V_seg11 (seg11 0) vsource type=pwl wave=[0 0 24.8n 0 25n 0 54.8n 0 55n 0 84.8n 0 85n 0 114.8n 0 115n 0.9 144.8n 0.9 145n 0.9 175n 0.9]
+V_seg12 (seg12 0) vsource type=pwl wave=[0 0 24.8n 0 25n 0 54.8n 0 55n 0 84.8n 0 85n 0.9 114.8n 0.9 115n 0.9 144.8n 0.9 145n 0.9 175n 0.9]
+V_seg13 (seg13 0) vsource type=pwl wave=[0 0 24.8n 0 25n 0 54.8n 0 55n 0.9 84.8n 0.9 85n 0 114.8n 0 115n 0.9 144.8n 0.9 145n 0.9 175n 0.9]
+V_seg14 (seg14 0) vsource type=pwl wave=[0 0 24.8n 0 25n 0 54.8n 0 55n 0 84.8n 0 85n 0 114.8n 0 115n 0.9 144.8n 0.9 145n 0.9 175n 0.9]
+V_vref (vref 0) vsource dc=0.9
+V_vss (vss 0) vsource dc=0
+
+XDUT (seg0 seg1 seg2 seg3 seg4 seg5 seg6 seg7 seg8 seg9 seg10 seg11 seg12 seg13 seg14 vref vss aout) thermometer_dac_15seg
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=175n maxstep=200p
+save seg0 seg1 seg2 seg3 seg4 seg5 seg6 seg7 seg8 seg9 seg10 seg11 seg12 seg13 seg14 vref vss aout

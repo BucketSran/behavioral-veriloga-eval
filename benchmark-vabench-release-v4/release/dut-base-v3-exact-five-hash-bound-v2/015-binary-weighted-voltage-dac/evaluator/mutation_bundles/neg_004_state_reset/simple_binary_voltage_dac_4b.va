@@ -1,0 +1,23 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module simple_binary_voltage_dac_4b(code_0, code_1, code_2, code_3, vref, vss, aout);
+    input code_0, code_1, code_2, code_3, vref, vss;
+    output aout;
+    electrical code_0, code_1, code_2, code_3, vref, vss, aout;
+    parameter real vth = 0.45;
+    parameter real tr = 500p;
+    integer code;
+    real y;
+    analog begin
+        code = (V(code_0)>vth?1:0) + (V(code_1)>vth?2:0) + (V(code_2)>vth?4:0) + (V(code_3)>vth?8:0);
+        y = V(vss) + 0.03 + (V(vref)-V(vss))*code/15.0;
+        V(aout, vss) <+ slew(y - V(vss), 0.9 / (tr), -0.9 / (tr));
+    end
+endmodule
+
+// vaBench partial-pass negative 4 for binary_weighted_voltage_dac:dut
+// Intended to preserve interface/smoke behavior while failing full checks.
+// Mutation note: state_reset_near_miss. This stateless DAC has no reset, so
+// this near-miss uses a persistent zero-code offset as the analogous initial
+// condition error.

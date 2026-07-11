@@ -1,0 +1,17 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module simple_binary_voltage_dac_4b(code_0, code_1, code_2, code_3, vref, vss, aout);
+    input code_0, code_1, code_2, code_3, vref, vss;
+    output aout;
+    electrical code_0, code_1, code_2, code_3, vref, vss, aout;
+    parameter real vth = 0.45;
+    parameter real tr = 500p;
+    integer code;
+    real y;
+    analog begin
+        code = (V(code_0)>vth?1:0) + (V(code_1)>vth?2:0) + (V(code_2)>vth?4:0) + (V(code_3)>vth?8:0);
+        y = V(vss) + (V(vref)-V(vss))*code/15.0;
+        V(aout, vss) <+ slew(y - V(vss), 0.9 / (tr), -0.9 / (tr));
+    end
+endmodule

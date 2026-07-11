@@ -1,0 +1,95 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "resettable_integrator.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=320n maxstep=500p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "rst",
+      "vout"
+    ]
+  },
+  "family_id": "013",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "6930237e43300498da838c041aecedf7269d9b9cd848682598fda4c5298f7b3d",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "5d43d941cc51842c4275885a3093e4a4ff17bd4892fe127afeb019c2a861b021",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (vin 0) vsource dc=0.003",
+          "Vrst (rst 0) vsource type=pwl wave=[ \\",
+          "    0 0.9 \\",
+          "    20n 0.9 20.2n 0 \\",
+          "    220n 0 220.2n 0.9 \\",
+          "    255n 0.9 255.2n 0 \\",
+          "    320n 0 \\",
+          "]",
+          "",
+          "XDUT (vin rst vout) resettable_integrator",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 25n 0.9 26n 0 220n 0 221n 0.9 250n 0.9 251n 0 320n 0]",
+          "Vin (vin 0) vsource dc=0.002",
+          "",
+          "XDUT (vin rst vout) resettable_integrator",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INITIAL_ZERO",
+    "P_TIMER_INTEGRATION",
+    "P_ACTIVE_HIGH_RESET",
+    "P_ACCUMULATOR_CLAMP",
+    "P_EVENT_HOLD"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "136b8bbf90104fd2eebd066b660fc12f6e793dd8f8f9f2078a1c3728e5141c32",
+    "family_spec_sha256": "aa14c5bf21ca7e3ae3832755f96d422751a6244043d0f9c40247a362c76946cd"
+  },
+  "task_id": "v4-013"
+}

@@ -1,0 +1,128 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "segmented_dac.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=5n maxstep=100p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "b0",
+      "b1",
+      "t0",
+      "t1",
+      "t2",
+      "vref",
+      "vss"
+    ]
+  },
+  "family_id": "014",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "0a661a3002058fb19dd965b75f07ac1dbce9d2a8c170e060c5e38a5ec8b4c055",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "bf4806afb9dfb1ff6d5515e1cd4608c81a744103d68af9b695a5b1bc5e09a741",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=145n maxstep=200p"
+        ],
+        "body_lines": [
+          "V_b0 (b0 0) vsource type=pwl wave=[0 0 23.8n 0 24n 0.9 53.8n 0.9 54n 0 83.8n 0 84n 0.9 113.8n 0.9 114n 0 145n 0]",
+          "V_b1 (b1 0) vsource type=pwl wave=[0 0 53.8n 0 54n 0.9 113.8n 0.9 114n 0 145n 0]",
+          "V_t0 (t0 0) vsource type=pwl wave=[0 0 83.8n 0 84n 0.9 145n 0.9]",
+          "V_t1 (t1 0) vsource type=pwl wave=[0 0 113.8n 0 114n 0.9 145n 0.9]",
+          "V_t2 (t2 0) vsource type=pwl wave=[0 0 113.8n 0 114n 0.9 145n 0.9]",
+          "V_vref (vref 0) vsource dc=0.9",
+          "V_vss (vss 0) vsource dc=0",
+          "",
+          "XDUT (b0 b1 t0 t1 t2 vref vss aout) segmented_dac",
+          ""
+        ],
+        "save_signals": [
+          "b0",
+          "b1",
+          "t0",
+          "t1",
+          "t2",
+          "vref",
+          "vss",
+          "aout"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=150n maxstep=500p"
+        ],
+        "body_lines": [
+          "Vref (vref 0) vsource dc=0.9",
+          "Vss (vss 0) vsource dc=0",
+          "Vb0 (b0 0) vsource type=pwl wave=[0 0 29.5n 0 30n 0.9 59.5n 0.9 60n 0 89.5n 0 90n 0.9 119.5n 0.9 120n 0]",
+          "Vb1 (b1 0) vsource type=pwl wave=[0 0 29.5n 0 30n 0 59.5n 0 60n 0.9 89.5n 0.9 90n 0.9 119.5n 0.9 120n 0]",
+          "Vt0 (t0 0) vsource type=pwl wave=[0 0 29.5n 0 30n 0 59.5n 0 60n 0 89.5n 0 90n 0.9 119.5n 0.9 120n 0.9]",
+          "Vt1 (t1 0) vsource type=pwl wave=[0 0 89.5n 0 90n 0 119.5n 0 120n 0.9]",
+          "Vt2 (t2 0) vsource type=pwl wave=[0 0 119.5n 0 120n 0.9]",
+          "",
+          "XDUT (b0 b1 t0 t1 t2 vref vss aout) segmented_dac",
+          ""
+        ],
+        "save_signals": [
+          "b0",
+          "b1",
+          "t0",
+          "t1",
+          "t2",
+          "vref",
+          "vss",
+          "aout"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_SEGMENT_WEIGHTS",
+    "P_CODE_MONOTONICITY",
+    "P_ENDPOINTS",
+    "P_RAIL_RELATIVE_MAPPING"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "5c8ef3e92823409b5785cc4b1dad36a52d50f71e5892d743433b30ed40b1f907",
+    "family_spec_sha256": "567bf2a92711abf0d00fa6e548abf7067be3eac1fcd8e8ee18e64183957f4f32"
+  },
+  "task_id": "v4-014"
+}

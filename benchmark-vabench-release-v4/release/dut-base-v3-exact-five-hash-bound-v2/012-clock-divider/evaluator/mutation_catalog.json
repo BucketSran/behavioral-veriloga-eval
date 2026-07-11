@@ -1,0 +1,159 @@
+{
+  "family_id": "012",
+  "gold_bundle_sha256": "f749492dbfc253ad45b7ae6901c699a76bd1cac8b5dc8a60d05d73af1ebca5f4",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "clk_divider_ref.va": "ec4ab1c86c0295d33e888b222798eb982f96a40ff0ac25f34a0b367bcb533dcb"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RATIO_DECODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_ratio_decode_bit_drop/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "clk_divider_ref.va"
+      ],
+      "fault_class": "ratio_decode_bit_drop",
+      "id": "neg_001_ratio_decode_bit_drop",
+      "trigger_condition": "div_code_2 is asserted as part of an LSB-first divide-ratio code",
+      "violated_property_ids": [
+        "P_RATIO_DECODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "clk_divider_ref.va": "a960e4aa0c4adc7cdc19d9e9bbc0a2d73226664e5f8bc1a620905a0006c2809a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DIVIDED_PERIOD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_off_by_one_divide_ratio/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "clk_divider_ref.va"
+      ],
+      "fault_class": "off_by_one_divide_ratio",
+      "id": "neg_002_off_by_one_divide_ratio",
+      "trigger_condition": "a nonzero decoded divide ratio is exercised after reset release",
+      "violated_property_ids": [
+        "P_DIVIDED_PERIOD"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "clk_divider_ref.va": "82ebc5d022b09e220d21bbfe7fe42dabe0e65fdaf48d5a7b1f9689fb502b8e3b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RATIO_DECODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_ratio_bit_order_reversed/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "clk_divider_ref.va"
+      ],
+      "fault_class": "ratio_bit_order_reversed",
+      "id": "neg_003_ratio_bit_order_reversed",
+      "trigger_condition": "an asymmetric code distinguishes div_code_0 as the LSB from div_code_7 as the MSB",
+      "violated_property_ids": [
+        "P_RATIO_DECODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "clk_divider_ref.va": "80521ef5ff6f61465a6f7ea41d7117e64790b3d220242330da074d826699572d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LOCK_REACQUIRE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_lock_never_asserts/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "clk_divider_ref.va"
+      ],
+      "fault_class": "lock_assertion_omission",
+      "id": "neg_004_lock_never_asserts",
+      "trigger_condition": "the first complete divided output period completes after reset release",
+      "violated_property_ids": [
+        "P_LOCK_REACQUIRE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "clk_divider_ref.va": "53051f8d3ec6799e17cb6f4e23018f9c9095d102028f46fe7694d936df0ae358"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DIVIDED_PERIOD",
+          "P_ODD_RATIO_DUTY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_output_stuck_high_after_start/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "clk_divider_ref.va"
+      ],
+      "fault_class": "output_stuck_high_after_start",
+      "id": "neg_005_output_stuck_high_after_start",
+      "trigger_condition": "successive divided-clock output phases are required after startup",
+      "violated_property_ids": [
+        "P_DIVIDED_PERIOD",
+        "P_ODD_RATIO_DUTY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "clk_divider_ref.va": "07c733705a911bce71670de3619ae13162c6f1a7533b1269e654cfbd98fef369"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_006_reset_ignored/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "clk_divider_ref.va"
+      ],
+      "fault_class": "reset_ignored_after_activity",
+      "id": "neg_006_reset_ignored",
+      "trigger_condition": "an active-low reset is asserted after at least one divider output transition",
+      "violated_property_ids": [
+        "P_RESET"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

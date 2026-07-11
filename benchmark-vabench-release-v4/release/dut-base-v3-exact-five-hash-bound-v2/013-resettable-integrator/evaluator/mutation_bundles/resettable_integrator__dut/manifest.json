@@ -1,0 +1,199 @@
+{
+  "certification_note": "EVAS v3 negative recertification is recorded in the task AUDIT.md.",
+  "certification_status": "simulator_certified_behavior_rejected",
+  "gate2_status": "gate2_semantic_validated_candidate",
+  "negative_count": 5,
+  "negatives": [
+    {
+      "expected": "FAIL_FULL_CHECKER",
+      "full_failures": [
+        "pre_reset_output_integrates_up",
+        "post_reset_integration_restarts"
+      ],
+      "id": "neg_001",
+      "kind": "gain_near_miss",
+      "note": "Uses the correct interface, timer, reset, clamp, and transition form, but integrates with gain 0.8e9 instead of 1.0e9.",
+      "partial_pass_requirement": "Must pass interface/smoke or a nominal shallow case and fail at least one full correctness/parity check.",
+      "sha256": "cb935d66d74d0f9f965274e0041fc697ab789d5e23b088e1af910eec43233e2e",
+      "shallow_passes": [
+        "artifact_exists",
+        "interface_or_testbench_shape_preserved",
+        "nominal_or_smoke_path_intended_to_pass"
+      ],
+      "shallow_static_failures": [],
+      "shallow_static_passes": [
+        "non_empty_candidate",
+        "differs_from_reference",
+        "veriloga_module_signature_present",
+        "veriloga_interface_preserved",
+        "analog_block_or_keyword_present"
+      ],
+      "source": "negative_variants/resettable_integrator__dut/neg_001.va",
+      "source_kind": "hidden_behavior_negative",
+      "target_artifacts": [
+        "resettable_integrator.va"
+      ],
+      "validation_evidence": {
+        "full_checker_lane": "evas_behavior_rejected",
+        "publication_status": "gate2_semantic_validated_candidate",
+        "score_oracle_result": "SCORE_BEHAVIOR_FAIL",
+        "simulator_shallow_lane": "evas_compile_and_sim_pass",
+        "static_shallow_shape": "pass",
+        "v3_status": "needs_v3_recertification_before_formal_release"
+      }
+    },
+    {
+      "expected": "FAIL_FULL_CHECKER",
+      "full_failures": [
+        "pre_reset_output_integrates_up",
+        "post_reset_integration_restarts"
+      ],
+      "id": "neg_002",
+      "kind": "timer_cadence_near_miss",
+      "note": "Uses a timer-driven integrator but updates every 2*dt while accumulating only one dt per event, so the waveform slope is too slow.",
+      "partial_pass_requirement": "Must pass interface/smoke or a nominal shallow case and fail at least one full correctness/parity check.",
+      "sha256": "996d06323dc55fad6e9bb485a0b397323f43f85579e4170878cc61939ed8854c",
+      "shallow_passes": [
+        "artifact_exists",
+        "interface_or_testbench_shape_preserved",
+        "nominal_or_smoke_path_intended_to_pass"
+      ],
+      "shallow_static_failures": [],
+      "shallow_static_passes": [
+        "non_empty_candidate",
+        "differs_from_reference",
+        "veriloga_module_signature_present",
+        "veriloga_interface_preserved",
+        "analog_block_or_keyword_present"
+      ],
+      "source": "negative_variants/resettable_integrator__dut/neg_002.va",
+      "source_kind": "hidden_behavior_negative",
+      "target_artifacts": [
+        "resettable_integrator.va"
+      ],
+      "validation_evidence": {
+        "full_checker_lane": "evas_behavior_rejected",
+        "publication_status": "gate2_semantic_validated_candidate",
+        "score_oracle_result": "SCORE_BEHAVIOR_FAIL",
+        "simulator_shallow_lane": "evas_compile_and_sim_pass",
+        "static_shallow_shape": "pass",
+        "v3_status": "needs_v3_recertification_before_formal_release"
+      }
+    },
+    {
+      "expected": "FAIL_FULL_CHECKER",
+      "full_failures": [
+        "polarity_direction_near_miss"
+      ],
+      "id": "neg_003",
+      "kind": "polarity_direction_near_miss",
+      "note": "Passes positive or nominal path but fails sign, feedback direction, I/Q polarity, or trim direction.",
+      "partial_pass_requirement": "Must pass interface/smoke or a nominal shallow case and fail at least one full correctness/parity check.",
+      "sha256": "d26bd35fe3906cd30cdde8da640de1aa469305876470c062b0040f89fb5817c3",
+      "shallow_passes": [
+        "artifact_exists",
+        "interface_or_testbench_shape_preserved",
+        "nominal_or_smoke_path_intended_to_pass"
+      ],
+      "shallow_static_failures": [],
+      "shallow_static_passes": [
+        "non_empty_candidate",
+        "differs_from_reference",
+        "veriloga_module_signature_present",
+        "veriloga_interface_preserved",
+        "analog_block_or_keyword_present"
+      ],
+      "source": "negative_variants/resettable_integrator__dut/neg_003.va",
+      "source_kind": "hidden_behavior_negative",
+      "target_artifacts": [
+        "resettable_integrator.va"
+      ],
+      "validation_evidence": {
+        "full_checker_lane": "evas_behavior_rejected",
+        "publication_status": "gate2_semantic_validated_candidate",
+        "score_oracle_result": "SCORE_BEHAVIOR_FAIL",
+        "simulator_shallow_lane": "evas_compile_and_sim_pass",
+        "static_shallow_shape": "pass",
+        "v3_status": "needs_v3_recertification_before_formal_release"
+      }
+    },
+    {
+      "expected": "FAIL_FULL_CHECKER",
+      "full_failures": [
+        "reset_clears_integrator",
+        "post_reset_integration_restarts"
+      ],
+      "id": "neg_004",
+      "kind": "state_reset_near_miss",
+      "note": "Integrates with the correct gain and clamp but ignores the active-high reset input, so reset windows do not clear the state.",
+      "partial_pass_requirement": "Must pass interface/smoke or a nominal shallow case and fail at least one full correctness/parity check.",
+      "sha256": "8c6342c0bb155554921f13eb57d41af586f8b4bf553d62a81d05fd30828d92ce",
+      "shallow_passes": [
+        "artifact_exists",
+        "interface_or_testbench_shape_preserved",
+        "nominal_or_smoke_path_intended_to_pass"
+      ],
+      "shallow_static_failures": [],
+      "shallow_static_passes": [
+        "non_empty_candidate",
+        "differs_from_reference",
+        "veriloga_module_signature_present",
+        "veriloga_interface_preserved",
+        "analog_block_or_keyword_present"
+      ],
+      "source": "negative_variants/resettable_integrator__dut/neg_004.va",
+      "source_kind": "hidden_behavior_negative",
+      "target_artifacts": [
+        "resettable_integrator.va"
+      ],
+      "validation_evidence": {
+        "full_checker_lane": "evas_behavior_rejected",
+        "publication_status": "gate2_semantic_validated_candidate",
+        "score_oracle_result": "SCORE_BEHAVIOR_FAIL",
+        "simulator_shallow_lane": "evas_compile_and_sim_pass",
+        "static_shallow_shape": "pass",
+        "v3_status": "needs_v3_recertification_before_formal_release"
+      }
+    },
+    {
+      "expected": "FAIL_FULL_CHECKER",
+      "full_failures": [
+        "pre_reset_output_integrates_up",
+        "post_reset_integration_restarts"
+      ],
+      "id": "neg_005",
+      "kind": "output_scale_near_miss",
+      "note": "Maintains the internal accumulator correctly but drives vout at half scale, which preserves waveform shape while failing amplitude checks.",
+      "partial_pass_requirement": "Must pass interface/smoke or a nominal shallow case and fail at least one full correctness/parity check.",
+      "sha256": "ed75197a40863735c5767e504aed06a140ae27117f52da2223febc073bcb9c2d",
+      "shallow_passes": [
+        "artifact_exists",
+        "interface_or_testbench_shape_preserved",
+        "nominal_or_smoke_path_intended_to_pass"
+      ],
+      "shallow_static_failures": [],
+      "shallow_static_passes": [
+        "non_empty_candidate",
+        "differs_from_reference",
+        "veriloga_module_signature_present",
+        "veriloga_interface_preserved",
+        "analog_block_or_keyword_present"
+      ],
+      "source": "negative_variants/resettable_integrator__dut/neg_005.va",
+      "source_kind": "hidden_behavior_negative",
+      "target_artifacts": [
+        "resettable_integrator.va"
+      ],
+      "validation_evidence": {
+        "full_checker_lane": "evas_behavior_rejected",
+        "publication_status": "gate2_semantic_validated_candidate",
+        "score_oracle_result": "SCORE_BEHAVIOR_FAIL",
+        "simulator_shallow_lane": "evas_compile_and_sim_pass",
+        "static_shallow_shape": "pass",
+        "v3_status": "needs_v3_recertification_before_formal_release"
+      }
+    }
+  ],
+  "policy": "five_partial_pass_near_miss_negatives_per_task",
+  "task_id": "v4_013_resettable_integrator"
+}

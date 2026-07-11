@@ -1,0 +1,45 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "body_lines": [
+      "Vclk  (clk_in 0) vsource type=pulse val0=0 val1=0.9 period=1n delay=100p rise=20p fall=20p width=500p",
+      "Vrst  (rst_n  0) vsource type=pwl wave=[0 0 1n 0 1.02n 0.9 9n 0.9 9.02n 0 10n 0 10.02n 0.9 20n 0.9]",
+      "",
+      "// Public smoke ratio = 3 (00000011).",
+      "// The required behavior is specified in instruction.md.",
+      "Vb0 (div_code_0 0) vsource dc=0.9",
+      "Vb1 (div_code_1 0) vsource dc=0.9",
+      "Vb2 (div_code_2 0) vsource dc=0.0",
+      "Vb3 (div_code_3 0) vsource dc=0.0",
+      "Vb4 (div_code_4 0) vsource dc=0.0",
+      "Vb5 (div_code_5 0) vsource dc=0.0",
+      "Vb6 (div_code_6 0) vsource dc=0.0",
+      "Vb7 (div_code_7 0) vsource dc=0.0",
+      "",
+      "XDUT (clk_in rst_n div_code_0 div_code_1 div_code_2 div_code_3 div_code_4 div_code_5 div_code_6 div_code_7 clk_out lock) clk_divider_ref"
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "efdf89610451e7cfcd7d5e2ee92430696ed6ce44d8da1c3ea22e0de21dd78284",
+  "parameters": {
+    "maxstep": "200p",
+    "stop_time": "100n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_RESET",
+    "P_RATIO_DECODE",
+    "P_DIVIDED_PERIOD",
+    "P_ODD_RATIO_DUTY",
+    "P_LOCK_REACQUIRE"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

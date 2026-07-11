@@ -1,0 +1,188 @@
+{
+  "family_id": "016",
+  "gold_bundle_sha256": "ee1a734de0c5f2ec902291b1dbb29c7f08d91c3adfd443f2de372165f0aeb10b",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "slew_rate_limiter.va": "8d82ce12fe39d28a5d876d31801e542905804f5c7ee0bf04286f050df82324fb"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_EVENTUAL_TRACKING",
+          "P_NEAR_TARGET_SETTLE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_stuck_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "slew_rate_limiter.va"
+      ],
+      "fault_class": "stuck_output",
+      "id": "neg_001_stuck_zero",
+      "trigger_condition": "vin remains above the initial output across periodic updates",
+      "violated_property_ids": [
+        "P_EVENTUAL_TRACKING",
+        "P_NEAR_TARGET_SETTLE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "slew_rate_limiter.va": "7a8448046cd686288663b9b0e7db0649de78d5b4a9eff9efea306a3897d8ee1e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BIDIRECTIONAL_STEP_LIMIT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_passthrough_update/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "slew_rate_limiter.va"
+      ],
+      "fault_class": "step_limit_bypass",
+      "id": "neg_002_passthrough_update",
+      "trigger_condition": "vin steps by more than step between two timer updates",
+      "violated_property_ids": [
+        "P_BIDIRECTIONAL_STEP_LIMIT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "slew_rate_limiter.va": "6dfa82ec6c0ffcab48c7dad242ac81372435392748717c89ff5ce0ea86c1894c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BIDIRECTIONAL_STEP_LIMIT",
+          "P_EVENTUAL_TRACKING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_inverted_slew_direction/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "slew_rate_limiter.va"
+      ],
+      "fault_class": "response_direction_inversion",
+      "id": "neg_003_inverted_slew_direction",
+      "trigger_condition": "vin is separated from the current output by more than step",
+      "violated_property_ids": [
+        "P_BIDIRECTIONAL_STEP_LIMIT",
+        "P_EVENTUAL_TRACKING"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "slew_rate_limiter.va": "20304cdf010a6f36c0d605047d75bba6bee6d96a7d7a40bfb65f665761cbf852"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_EVENTUAL_TRACKING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_step_too_small/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "slew_rate_limiter.va"
+      ],
+      "fault_class": "slew_rate_magnitude_error",
+      "id": "neg_004_step_too_small",
+      "trigger_condition": "a sustained high or low vin level requires the configured step response",
+      "violated_property_ids": [
+        "P_EVENTUAL_TRACKING"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "slew_rate_limiter.va": "055e283e3a5cb70cdbd3a3b22d9c0cf0041ca5cf852d12d71f1348cb227a3f46"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_BIDIRECTIONAL_STEP_LIMIT",
+          "P_EVENTUAL_TRACKING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_missing_fall_branch/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "slew_rate_limiter.va"
+      ],
+      "fault_class": "falling_slew_omission",
+      "id": "neg_005_missing_fall_branch",
+      "trigger_condition": "vin falls below the current output by more than step",
+      "violated_property_ids": [
+        "P_BIDIRECTIONAL_STEP_LIMIT",
+        "P_EVENTUAL_TRACKING"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "slew_rate_limiter.va": "a95c00f633d8f327b6c851068dfe4b4fdc000d217e068224ea12bc332c7edfeb"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INITIAL_ZERO"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_006_wrong_initial_state/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "slew_rate_limiter.va"
+      ],
+      "fault_class": "initial_state_error",
+      "id": "neg_006_wrong_initial_state",
+      "trigger_condition": "the simulation begins before the first 1 ns timer update",
+      "violated_property_ids": [
+        "P_INITIAL_ZERO"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "slew_rate_limiter.va": "66ce92d79422eb38f0961a0ff81d664dc4287fea0da5dd3705e53248dc336bac"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PERIODIC_UPDATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_007_wrong_update_period/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "slew_rate_limiter.va"
+      ],
+      "fault_class": "update_period_error",
+      "id": "neg_007_wrong_update_period",
+      "trigger_condition": "the 1 ns public update schedule advances the output state",
+      "violated_property_ids": [
+        "P_PERIODIC_UPDATE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

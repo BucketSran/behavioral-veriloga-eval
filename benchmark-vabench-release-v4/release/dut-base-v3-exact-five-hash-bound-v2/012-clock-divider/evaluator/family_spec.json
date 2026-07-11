@@ -1,0 +1,39 @@
+{
+  "schema_version": "v4-family-spec-v1", "family_id": "012",
+  "task_ids": {"dut": "v4-012", "testbench": "v4-512", "bugfix": "v4-1012"},
+  "identity": {"title": "Clock Divider", "category": "pll_clock_timing", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "clk_divider_ref.va", "modules": [{
+    "name": "clk_divider_ref", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "clk_in", "direction": "input", "discipline": "electrical", "position": 0}, {"name": "rst_n", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "div_code_0", "direction": "input", "discipline": "electrical", "position": 2}, {"name": "div_code_1", "direction": "input", "discipline": "electrical", "position": 3},
+      {"name": "div_code_2", "direction": "input", "discipline": "electrical", "position": 4}, {"name": "div_code_3", "direction": "input", "discipline": "electrical", "position": 5},
+      {"name": "div_code_4", "direction": "input", "discipline": "electrical", "position": 6}, {"name": "div_code_5", "direction": "input", "discipline": "electrical", "position": 7},
+      {"name": "div_code_6", "direction": "input", "discipline": "electrical", "position": 8}, {"name": "div_code_7", "direction": "input", "discipline": "electrical", "position": 9},
+      {"name": "clk_out", "direction": "output", "discipline": "electrical", "position": 10}, {"name": "lock", "direction": "output", "discipline": "electrical", "position": 11}
+    ],
+    "parameters": [
+      {"name": "vdd", "type": "real", "default": 0.9, "units": "V", "valid_range": "vdd > 0", "override_behavior": "sets output high levels"},
+      {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "0 < vth < vdd", "override_behavior": "sets clock, reset, and code thresholds"},
+      {"name": "trf", "type": "real", "default": 1e-11, "units": "s", "valid_range": "trf > 0", "override_behavior": "sets output rise and fall smoothing"},
+      {"name": "td", "type": "real", "default": 0.0, "units": "s", "valid_range": "td >= 0", "override_behavior": "sets output transition delay"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "clk_divider_ref", "connections": [
+    {"port_ref": "clk_in", "net": "clk_in", "position": 0}, {"port_ref": "rst_n", "net": "rst_n", "position": 1},
+    {"port_ref": "div_code_0", "net": "div_code_0", "position": 2}, {"port_ref": "div_code_1", "net": "div_code_1", "position": 3},
+    {"port_ref": "div_code_2", "net": "div_code_2", "position": 4}, {"port_ref": "div_code_3", "net": "div_code_3", "position": 5},
+    {"port_ref": "div_code_4", "net": "div_code_4", "position": 6}, {"port_ref": "div_code_5", "net": "div_code_5", "position": 7},
+    {"port_ref": "div_code_6", "net": "div_code_6", "position": 8}, {"port_ref": "div_code_7", "net": "div_code_7", "position": 9},
+    {"port_ref": "clk_out", "net": "clk_out", "position": 10}, {"port_ref": "lock", "net": "lock", "position": 11}
+  ]}]},
+  "properties": [
+    {"id": "P_RESET", "observable_contract": "Active-low reset clears divider phase and drives clk_out and lock low.", "required_signals": ["time", "clk_in", "rst_n", "clk_out", "lock"]},
+    {"id": "P_RATIO_DECODE", "observable_contract": "The LSB-first 8-bit code selects the divide ratio, with code zero mapped to ratio one.", "required_signals": ["time", "clk_in", "div_code_0", "div_code_1", "div_code_2", "div_code_3", "div_code_4", "div_code_5", "div_code_6", "div_code_7", "clk_out"]},
+    {"id": "P_DIVIDED_PERIOD", "observable_contract": "For ratios above one, successive clk_out rising edges span the decoded number of clk_in rising edges.", "required_signals": ["time", "clk_in", "clk_out"]},
+    {"id": "P_ODD_RATIO_DUTY", "observable_contract": "Odd ratios retain both phases with floor/ceil segment lengths differing by at most one input cycle.", "required_signals": ["time", "clk_in", "clk_out"]},
+    {"id": "P_LOCK_REACQUIRE", "observable_contract": "lock asserts after one complete output period and clears/reacquires when the ratio changes.", "required_signals": ["time", "clk_in", "rst_n", "div_code_0", "div_code_1", "div_code_2", "div_code_3", "div_code_4", "div_code_5", "div_code_6", "div_code_7", "clk_out", "lock"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "clk_in", "rst_n", "div_code_0", "div_code_1", "div_code_2", "div_code_3", "div_code_4", "div_code_5", "div_code_6", "div_code_7", "clk_out", "lock"]},
+  "modeling_constraints": ["Use deterministic voltage-domain behavior.", "Use voltage contributions and finite smoothing only.", "Do not use current contributions, continuous operators, transistor devices, validation hooks, or simulator-specific side channels."]
+}

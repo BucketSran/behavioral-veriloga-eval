@@ -1,0 +1,31 @@
+{
+  "schema_version": "v4-family-spec-v1", "family_id": "015",
+  "task_ids": {"dut": "v4-015", "testbench": "v4-515", "bugfix": "v4-1015"},
+  "identity": {"title": "Binary Weighted Voltage DAC", "category": "data_converter", "level": "L1", "difficulty": "D1", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "simple_binary_voltage_dac_4b.va", "modules": [{
+    "name": "simple_binary_voltage_dac_4b", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "code_0", "direction": "input", "discipline": "electrical", "position": 0}, {"name": "code_1", "direction": "input", "discipline": "electrical", "position": 1},
+      {"name": "code_2", "direction": "input", "discipline": "electrical", "position": 2}, {"name": "code_3", "direction": "input", "discipline": "electrical", "position": 3},
+      {"name": "vref", "direction": "input", "discipline": "electrical", "position": 4}, {"name": "vss", "direction": "input", "discipline": "electrical", "position": 5},
+      {"name": "aout", "direction": "output", "discipline": "electrical", "position": 6}
+    ],
+    "parameters": [
+      {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "vth > 0", "override_behavior": "sets code-bit decision threshold"},
+      {"name": "tr", "type": "real", "default": 5e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets output transition smoothing"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "simple_binary_voltage_dac_4b", "connections": [
+    {"port_ref": "code_0", "net": "code_0", "position": 0}, {"port_ref": "code_1", "net": "code_1", "position": 1},
+    {"port_ref": "code_2", "net": "code_2", "position": 2}, {"port_ref": "code_3", "net": "code_3", "position": 3},
+    {"port_ref": "vref", "net": "vref", "position": 4}, {"port_ref": "vss", "net": "vss", "position": 5}, {"port_ref": "aout", "net": "aout", "position": 6}
+  ]}]},
+  "properties": [
+    {"id": "P_BINARY_WEIGHTS", "observable_contract": "code_0 through code_3 form an unsigned four-bit word with weights one, two, four, and eight.", "required_signals": ["time", "code_0", "code_1", "code_2", "code_3", "aout"]},
+    {"id": "P_ENDPOINTS", "observable_contract": "Code zero maps to vss and code fifteen maps to vref.", "required_signals": ["time", "code_0", "code_1", "code_2", "code_3", "vref", "vss", "aout"]},
+    {"id": "P_LINEAR_MONOTONIC_MAPPING", "observable_contract": "aout changes linearly and monotonically with the unsigned code between the rail endpoints.", "required_signals": ["time", "code_0", "code_1", "code_2", "code_3", "vref", "vss", "aout"]},
+    {"id": "P_CONTINUOUS_UPDATE", "observable_contract": "aout responds continuously to code-bit changes without a clock event.", "required_signals": ["time", "code_0", "code_1", "code_2", "code_3", "aout"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "code_0", "code_1", "code_2", "code_3", "vref", "vss", "aout"]},
+  "modeling_constraints": ["Use deterministic voltage-domain continuous code mapping with finite transition smoothing.", "Use voltage contributions only.", "Do not use current contributions, ddt(), idt(), validation logic, or simulator-specific side channels."]
+}

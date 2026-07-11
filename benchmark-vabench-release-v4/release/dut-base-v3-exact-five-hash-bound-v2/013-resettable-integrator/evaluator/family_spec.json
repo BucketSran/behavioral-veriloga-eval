@@ -1,0 +1,30 @@
+{
+  "schema_version": "v4-family-spec-v1", "family_id": "013",
+  "task_ids": {"dut": "v4-013", "testbench": "v4-513", "bugfix": "v4-1013"},
+  "identity": {"title": "Resettable Integrator", "category": "baseband_signal_conditioning", "level": "L1", "difficulty": "D2", "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A"},
+  "artifact_contract": {"mode": "single_file", "files": [{"path": "resettable_integrator.va", "modules": [{
+    "name": "resettable_integrator", "role": "entry", "depends_on": [],
+    "ports": [
+      {"name": "vin", "direction": "input", "discipline": "electrical", "position": 0}, {"name": "rst", "direction": "input", "discipline": "electrical", "position": 1}, {"name": "vout", "direction": "output", "discipline": "electrical", "position": 2}
+    ],
+    "parameters": [
+      {"name": "vth", "type": "real", "default": 0.45, "units": "V", "valid_range": "vth > 0", "override_behavior": "sets active-high reset threshold"},
+      {"name": "gain", "type": "real", "default": 1e9, "units": "1/s", "valid_range": "gain >= 0", "override_behavior": "sets accumulation gain per input volt"},
+      {"name": "dt", "type": "real", "default": 1e-9, "units": "s", "valid_range": "dt > 0", "override_behavior": "sets periodic state update interval"},
+      {"name": "vmax", "type": "real", "default": 0.85, "units": "V", "valid_range": "vmax >= 0", "override_behavior": "sets accumulator upper clamp"},
+      {"name": "tr", "type": "real", "default": 5e-10, "units": "s", "valid_range": "tr > 0", "override_behavior": "sets output transition smoothing"}
+    ]
+  }]}]},
+  "testbench_binding": {"dut_source_root": "dut", "source_path_template": "./dut/{artifact_path}", "instances": [{"name": "XDUT", "module_ref": "resettable_integrator", "connections": [
+    {"port_ref": "vin", "net": "vin", "position": 0}, {"port_ref": "rst", "net": "rst", "position": 1}, {"port_ref": "vout", "net": "vout", "position": 2}
+  ]}]},
+  "properties": [
+    {"id": "P_INITIAL_ZERO", "observable_contract": "vout begins at 0 V.", "required_signals": ["time", "vout"]},
+    {"id": "P_TIMER_INTEGRATION", "observable_contract": "While reset is low, each dt timer event adds gain*vin*dt to the accumulator.", "required_signals": ["time", "vin", "rst", "vout"]},
+    {"id": "P_ACTIVE_HIGH_RESET", "observable_contract": "When rst is above vth at a timer event, the accumulator and vout return toward 0 V and later restart from zero.", "required_signals": ["time", "vin", "rst", "vout"]},
+    {"id": "P_ACCUMULATOR_CLAMP", "observable_contract": "vout remains in the closed 0 V to vmax range.", "required_signals": ["time", "vout"]},
+    {"id": "P_EVENT_HOLD", "observable_contract": "The accumulated state changes only on dt timer events.", "required_signals": ["time", "vin", "rst", "vout"]}
+  ],
+  "trace_contract": {"required_signals": ["time", "vin", "rst", "vout"]},
+  "modeling_constraints": ["Use deterministic timer-updated voltage-domain behavior.", "Use voltage contributions only.", "Do not use current contributions, ddt(), idt(), undeclared state outputs, or validation hooks."]
+}

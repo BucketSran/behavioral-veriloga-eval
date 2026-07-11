@@ -1,0 +1,89 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "vco_phase_integrator.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=170n maxstep=500p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vctrl",
+      "phase",
+      "clk"
+    ]
+  },
+  "family_id": "019",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "a58b35002ccd72aa36de38b58a371751bfb68b7b95e41dfd96a59480de729e55",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "e9f90d0d431cbe472077d3f0b5ba4df6ed962d4fe7f3c8fe0a1445d394a0aaa1",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "V_vctrl (vctrl 0) vsource type=pwl wave=[0 0.2 60n 0.2 61n 0.7 170n 0.7]",
+          "",
+          "XDUT (vctrl phase clk) vco_phase_integrator",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=180n maxstep=500p"
+        ],
+        "body_lines": [
+          "Vctrl (vctrl 0) vsource type=pwl wave=[0 0.1 80n 0.1 81n 0.8 180n 0.8]",
+          "",
+          "XDUT (vctrl phase clk) vco_phase_integrator",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_PERIODIC_PHASE_UPDATE",
+    "P_WRAPPED_PHASE_RANGE",
+    "P_WRAP_TOGGLES_CLOCK",
+    "P_CONTROLLED_EDGE_RATE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "92483d538df0b5fc053f81b43df18338737942ad9b3e5260ec399dba90a7d87a",
+    "family_spec_sha256": "00a387a882e873655a5247a5cc5c4a91755c03ea5ee82f20c58bb7d4aec40fc4"
+  },
+  "task_id": "v4-019"
+}

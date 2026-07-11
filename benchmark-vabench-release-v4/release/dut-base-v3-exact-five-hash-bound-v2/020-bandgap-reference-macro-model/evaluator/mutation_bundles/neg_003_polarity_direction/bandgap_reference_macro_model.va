@@ -1,0 +1,18 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bandgap_reference_macro_model(clk, rst, vin, out, metric);
+input clk, rst, vin; output out, metric; electrical clk, rst, vin, out, metric;
+parameter real tr=100p; parameter real vth=0.45; parameter real vstart=0.58; parameter real vref=0.55;
+real refv, metricv, supplyv, targetv;
+analog begin
+    @(initial_step) begin refv=0.0; metricv=0.0; end
+    @(cross(V(clk)-vth,+1)) begin
+        supplyv=V(vin);
+        if (V(rst) > vth) begin refv=0.0; metricv=0.0; end
+        else begin targetv = vref; refv = refv + 0.35 * (targetv - refv); metricv = 0.9; end
+        if (refv>0.9) refv=0.9; if (refv<0.0) refv=0.0;
+    end
+    V(out)<+transition(refv,0,tr,tr); V(metric)<+transition(metricv,0,tr,tr);
+end
+endmodule

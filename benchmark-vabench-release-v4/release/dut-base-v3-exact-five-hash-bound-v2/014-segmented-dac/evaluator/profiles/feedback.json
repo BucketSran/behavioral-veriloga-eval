@@ -1,0 +1,52 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=145n maxstep=200p"
+    ],
+    "body_lines": [
+      "V_b0 (b0 0) vsource type=pwl wave=[0 0 23.8n 0 24n 0.9 53.8n 0.9 54n 0 83.8n 0 84n 0.9 113.8n 0.9 114n 0 145n 0]",
+      "V_b1 (b1 0) vsource type=pwl wave=[0 0 53.8n 0 54n 0.9 113.8n 0.9 114n 0 145n 0]",
+      "V_t0 (t0 0) vsource type=pwl wave=[0 0 83.8n 0 84n 0.9 145n 0.9]",
+      "V_t1 (t1 0) vsource type=pwl wave=[0 0 113.8n 0 114n 0.9 145n 0.9]",
+      "V_t2 (t2 0) vsource type=pwl wave=[0 0 113.8n 0 114n 0.9 145n 0.9]",
+      "V_vref (vref 0) vsource dc=0.9",
+      "V_vss (vss 0) vsource dc=0",
+      "",
+      "XDUT (b0 b1 t0 t1 t2 vref vss aout) segmented_dac",
+      ""
+    ],
+    "save_signals": [
+      "b0",
+      "b1",
+      "t0",
+      "t1",
+      "t2",
+      "vref",
+      "vss",
+      "aout"
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "be768484286f04356d72a9de661b253938e94c96c508420252eca473fd3b1aef",
+  "parameters": {
+    "maxstep": "200p",
+    "stop_time": "100n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_SEGMENT_WEIGHTS",
+    "P_CODE_MONOTONICITY",
+    "P_ENDPOINTS",
+    "P_RAIL_RELATIVE_MAPPING"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

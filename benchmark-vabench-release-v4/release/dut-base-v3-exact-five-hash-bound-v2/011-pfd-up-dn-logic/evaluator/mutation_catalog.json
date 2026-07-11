@@ -1,0 +1,163 @@
+{
+  "family_id": "011",
+  "gold_bundle_sha256": "0ffbb903cc68a97e095e2dae732b08c3fedf0bd9c5b5af000147fd35ee213853",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "pfd_updn.va": "122a29563575291ee6b312bce1e774a46a8049e343b8d4bfd241e2f7fe929510"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DIV_SETS_DN",
+          "P_REF_SETS_UP"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_swapped_outputs/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pfd_updn.va"
+      ],
+      "fault_class": "output_polarity_swap",
+      "id": "neg_001_swapped_outputs",
+      "trigger_condition": "a REF-leading or DIV-leading cycle expects the corresponding UP or DN pulse before mutual clear.",
+      "violated_property_ids": [
+        "P_DIV_SETS_DN",
+        "P_REF_SETS_UP"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pfd_updn.va": "c28d960922e819608a885c0d92917075cfea23de7bcfdd4f4191de16b1af10a6"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_NO_PERSISTENT_OVERLAP",
+          "P_RESET_RACE_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_missing_ref_lead_clear/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pfd_updn.va"
+      ],
+      "fault_class": "ref_lead_mutual_clear_omission",
+      "id": "neg_002_missing_ref_lead_clear",
+      "trigger_condition": "a DIV rising edge arrives after UP has been asserted by a REF-leading cycle.",
+      "violated_property_ids": [
+        "P_NO_PERSISTENT_OVERLAP",
+        "P_RESET_RACE_CLEAR"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pfd_updn.va": "87c166e7c7a4fe82c6c9943fc93583d5e7f0cd7465fffab4193e951eec579534"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DIV_SETS_DN"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_div_falling_edge/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pfd_updn.va"
+      ],
+      "fault_class": "div_falling_edge_trigger",
+      "id": "neg_003_div_falling_edge",
+      "trigger_condition": "dIV falls after a legal rising-edge window while no new DIV rising edge should assert DN.",
+      "violated_property_ids": [
+        "P_DIV_SETS_DN"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pfd_updn.va": "fd35b9d23790973312894d7ecf7c48e35b76256b54c173b240f4d0fd53587194"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DIV_SETS_DN"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_dn_channel_missing/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pfd_updn.va"
+      ],
+      "fault_class": "dn_channel_missing",
+      "id": "neg_004_dn_channel_missing",
+      "trigger_condition": "dIV leads REF and should assert DN before the mutual-clear edge arrives.",
+      "violated_property_ids": [
+        "P_DIV_SETS_DN"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pfd_updn.va": "477b20ee113ab4b9edfd9f41278c3446a8e553ce963e08ef5657cdbe22acefcf"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_NO_PERSISTENT_OVERLAP",
+          "P_RESET_RACE_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_div_lead_clear_leaves_up/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pfd_updn.va"
+      ],
+      "fault_class": "div_lead_mutual_clear_incomplete",
+      "id": "neg_005_div_lead_clear_leaves_up",
+      "trigger_condition": "a REF rising edge arrives after DN has been asserted by a DIV-leading cycle.",
+      "violated_property_ids": [
+        "P_NO_PERSISTENT_OVERLAP",
+        "P_RESET_RACE_CLEAR"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "pfd_updn.va": "b58bf1f914138326ae8e04b69078f7c95111d76d52daf50762f7c82059578821"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RAIL_REFERENCE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_006_fixed_nominal_rails/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "pfd_updn.va"
+      ],
+      "fault_class": "local_rail_reference_omission",
+      "id": "neg_006_fixed_nominal_rails",
+      "trigger_condition": "the local supply rails differ from nominal 0 V and 0.9 V while UP or DN is driven.",
+      "violated_property_ids": [
+        "P_RAIL_REFERENCE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

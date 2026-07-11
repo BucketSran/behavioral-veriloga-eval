@@ -1,0 +1,11 @@
+`include "constants.vams"
+`include "disciplines.vams"
+module segmented_dac(b0,b1,t0,t1,t2,vref,vss,aout);
+    input b0,b1,t0,t1,t2,vref,vss; output aout; electrical b0,b1,t0,t1,t2,vref,vss,aout;
+    parameter real vth=0.45; parameter real tr=500p; integer code; real y;
+    analog begin
+        code = (V(b0)>vth?1:0) + (V(b1)>vth?2:0) + (V(t0)>vth?4:0) + (V(t1)>vth?4:0) + (V(t2)>vth?4:0);
+        y = V(vss) + (V(vref)-V(vss))*code/15.0;
+        V(aout,vss) <+ slew(y - V(vss), 0.9 / (tr), -0.9 / (tr));
+    end
+endmodule

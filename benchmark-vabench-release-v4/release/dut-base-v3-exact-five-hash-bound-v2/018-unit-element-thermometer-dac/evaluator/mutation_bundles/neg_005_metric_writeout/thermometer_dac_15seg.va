@@ -1,0 +1,45 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module thermometer_dac_15seg(
+    seg0, seg1, seg2, seg3, seg4, seg5, seg6, seg7,
+    seg8, seg9, seg10, seg11, seg12, seg13, seg14,
+    vref, vss, aout
+);
+    input seg0, seg1, seg2, seg3, seg4, seg5, seg6, seg7;
+    input seg8, seg9, seg10, seg11, seg12, seg13, seg14;
+    input vref, vss;
+    output aout;
+    electrical seg0, seg1, seg2, seg3, seg4, seg5, seg6, seg7;
+    electrical seg8, seg9, seg10, seg11, seg12, seg13, seg14;
+    electrical vref, vss, aout;
+
+    parameter real vth = 0.45;
+    parameter real tr = 500p;
+    integer active;
+    real y;
+
+    analog begin
+        active = (V(seg0) > vth ? 1 : 0)
+               + (V(seg1) > vth ? 1 : 0)
+               + (V(seg2) > vth ? 1 : 0)
+               + (V(seg3) > vth ? 1 : 0)
+               + (V(seg4) > vth ? 1 : 0)
+               + (V(seg5) > vth ? 1 : 0)
+               + (V(seg6) > vth ? 1 : 0)
+               + (V(seg7) > vth ? 1 : 0)
+               + (V(seg8) > vth ? 1 : 0)
+               + (V(seg9) > vth ? 1 : 0)
+               + (V(seg10) > vth ? 1 : 0)
+               + (V(seg11) > vth ? 1 : 0)
+               + (V(seg12) > vth ? 1 : 0)
+               + (V(seg13) > vth ? 1 : 0)
+               + (V(seg14) > vth ? 1 : 0);
+        y = V(vss) + (V(vref) - V(vss)) * active / 14.0;
+        V(aout, vss) <+ slew(y - V(vss), 0.9 / (tr), -0.9 / (tr));
+    end
+endmodule
+
+// vaBench partial-pass negative 5 for unit_element_thermometer_dac:dut
+// Intended to preserve interface/smoke behavior while failing full checks.
+// Mutation note: metric_writeout_near_miss.
