@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/control_word_encoder_7b.va"
+
+Ianchor (d0_0 0) isource dc=0
+
+XCTRL0 (d0_0 d1_0 d2_0 d3_0 d4_0 d5_0 d6_0) control_word_encoder_7b ctrl=0
+XCTRL19 (d0_19 d1_19 d2_19 d3_19 d4_19 d5_19 d6_19) control_word_encoder_7b ctrl=19
+XCTRL108 (d0_108 d1_108 d2_108 d3_108 d4_108 d5_108 d6_108) control_word_encoder_7b ctrl=108
+XCTRL127 (d0_127 d1_127 d2_127 d3_127 d4_127 d5_127 d6_127) control_word_encoder_7b ctrl=127
+
+
+tran tran stop=20n maxstep=20p
+save d0_0 d1_0 d2_0 d3_0 d4_0 d5_0 d6_0 d0_19 d1_19 d2_19 d3_19 d4_19 d5_19 d6_19 d0_108 d1_108 d2_108 d3_108 d4_108 d5_108 d6_108 d0_127 d1_127 d2_127 d3_127 d4_127 d5_127 d6_127

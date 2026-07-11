@@ -1,0 +1,5 @@
+`include "disciplines.vams"
+module control_word_encoder_7b(d0,d1,d2,d3,d4,d5,d6);
+output d0,d1,d2,d3,d4,d5,d6; electrical d0,d1,d2,d3,d4,d5,d6; parameter integer ctrl=85; parameter real vhi=0.9; parameter real vlo=0.0; parameter real tr=20p;
+analog begin V(d0)<+transition(((ctrl>>0)&1)?vlo:vhi,0,tr,tr); V(d1)<+transition(((ctrl>>1)&1)?vlo:vhi,0,tr,tr); V(d2)<+transition(((ctrl>>2)&1)?vlo:vhi,0,tr,tr); V(d3)<+transition(((ctrl>>3)&1)?vlo:vhi,0,tr,tr); V(d4)<+transition(((ctrl>>4)&1)?vlo:vhi,0,tr,tr); V(d5)<+transition(((ctrl>>5)&1)?vlo:vhi,0,tr,tr); V(d6)<+transition(((ctrl>>6)&1)?vlo:vhi,0,tr,tr); end
+endmodule

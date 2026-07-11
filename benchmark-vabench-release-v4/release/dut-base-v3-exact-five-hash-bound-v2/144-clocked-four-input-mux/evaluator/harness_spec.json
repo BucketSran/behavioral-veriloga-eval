@@ -1,0 +1,105 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "clocked_four_input_mux.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=36n maxstep=20p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clks",
+      "din0",
+      "din1",
+      "din2",
+      "din3",
+      "dout",
+      "dsel0",
+      "dsel1"
+    ]
+  },
+  "family_id": "144",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "e9992f24296dda920005644f032edd6e42ce12b97cd426cbbdbe93ab15e69daf",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "85f1bea70b247839d58413922f41df2f40fcc952d366e5c95f319dac4e50f748",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (clks 0) vsource type=pwl wave=[0 1 2n 1 2.1n 0 4n 0 4.1n 1 12n 1 12.1n 0 14n 0 14.1n 1 22n 1 22.1n 0 24n 0 24.1n 1 32n 1 32.1n 0 34n 0 34.1n 1 38n 1]",
+          "Vs0 (dsel0 0) vsource type=pwl wave=[0 0 7n 0 7.1n 1 17n 1 17.1n 0 27n 0 27.1n 1 38n 1]",
+          "Vs1 (dsel1 0) vsource type=pwl wave=[0 0 17n 0 17.1n 1 38n 1]",
+          "Vd0 (din0 0) vsource dc=0.15",
+          "Vd1 (din1 0) vsource dc=0.35",
+          "Vd2 (din2 0) vsource dc=0.65",
+          "Vd3 (din3 0) vsource dc=0.85",
+          "",
+          "XDUT (dsel0 dsel1 din0 din1 din2 din3 clks dout) clocked_four_input_mux",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=47n maxstep=20p"
+        ],
+        "body_lines": [
+          "Vclk (clks 0) vsource type=pwl wave=[0 1 3n 1 3.1n 0 5n 0 5.1n 1 13n 1 13.1n 0 15n 0 15.1n 1 23n 1 23.1n 0 25n 0 25.1n 1 33n 1 33.1n 0 35n 0 35.1n 1 43n 1 43.1n 0 45n 0 45.1n 1]",
+          "Vs0 (dsel0 0) vsource type=pwl wave=[0 0 8n 0 8.1n 1 18n 1 18.1n 0 28n 0 28.1n 1 50n 1]",
+          "Vs1 (dsel1 0) vsource type=pwl wave=[0 0 18n 0 18.1n 1 38n 1 38.1n 0 50n 0]",
+          "Vd0 (din0 0) vsource dc=0.10",
+          "Vd1 (din1 0) vsource dc=0.40",
+          "Vd2 (din2 0) vsource dc=0.70",
+          "Vd3 (din3 0) vsource dc=0.95",
+          "",
+          "XDUT (dsel0 dsel1 din0 din1 din2 din3 clks dout) clocked_four_input_mux",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_FALLING_EDGE_SAMPLE_HOLD",
+    "P_SELECT_BIT_DECODE",
+    "P_ALL_FOUR_INPUTS_REACHABLE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "b23a5877cf5f4bb0fe167deb7e6e77935a8b1d812626a47cd8ffceb9362dd11c",
+    "family_spec_sha256": "ee52b477d55630806778aff0d3e9d32cbbf56961477d11ce3f94548207c68c6d"
+  },
+  "task_id": "v4-144"
+}

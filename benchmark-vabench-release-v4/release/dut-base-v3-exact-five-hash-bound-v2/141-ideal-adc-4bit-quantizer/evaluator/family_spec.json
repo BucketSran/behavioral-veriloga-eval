@@ -1,0 +1,187 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "ideal_adc_4bit_quantizer",
+            "parameters": [
+              {
+                "default": "20p from [0:inf)",
+                "name": "trise",
+                "override_behavior": "overrides trise",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "20p from [0:inf)",
+                "name": "tfall",
+                "override_behavior": "overrides tfall",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0 from [0:inf)",
+                "name": "tdel",
+                "override_behavior": "overrides tdel",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.5 from (0:inf)",
+                "name": "vtrans_clk",
+                "override_behavior": "overrides vtrans_clk",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.0 from (0:inf)",
+                "name": "vref",
+                "override_behavior": "overrides vref",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "16 from (0:inf)",
+                "name": "levels",
+                "override_behavior": "overrides levels",
+                "type": "integer",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vclk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vip",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "digital",
+                "position": 3
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "ideal_adc_4bit_quantizer.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "141",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Ideal ADC 4bit Quantizer"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_CLOCKED_DIFFERENTIAL_SAMPLE",
+      "observable_contract": "Each rising `vclk` crossing through `vtrans_clk` samples `V(vip)-V(vin)` and holds the resulting analog code on `digital` until the next sample.",
+      "required_signals": [
+        "time",
+        "digital",
+        "vclk",
+        "vin",
+        "vip"
+      ]
+    },
+    {
+      "id": "P_SYMMETRIC_INPUT_RANGE",
+      "observable_contract": "The sampled differential input is quantized over the symmetric span from `-vref` to `+vref`; values outside that span saturate to the endpoint codes.",
+      "required_signals": [
+        "time",
+        "digital",
+        "vclk",
+        "vin",
+        "vip"
+      ]
+    },
+    {
+      "id": "P_CODE_SCALE_AND_LSB",
+      "observable_contract": "`digital` represents the selected code using the declared `levels` spacing so adjacent quantization bins differ by one LSB.",
+      "required_signals": [
+        "time",
+        "digital",
+        "vclk",
+        "vin",
+        "vip"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1141",
+    "dut": "v4-141",
+    "testbench": "v4-641"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vclk",
+            "port_ref": "vclk",
+            "position": 0
+          },
+          {
+            "net": "vip",
+            "port_ref": "vip",
+            "position": 1
+          },
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 2
+          },
+          {
+            "net": "digital",
+            "port_ref": "digital",
+            "position": 3
+          }
+        ],
+        "module_ref": "ideal_adc_4bit_quantizer",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "digital",
+      "vclk",
+      "vin",
+      "vip"
+    ]
+  }
+}

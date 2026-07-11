@@ -1,0 +1,132 @@
+{
+  "family_id": "146",
+  "gold_bundle_sha256": "37ab6026fe7eb11f6a55766730c5ad0f0b7fd52d5a92023e524f355f56bdb627",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "flash_thermometer_centered_sum.va": "f6f39b10739a77c04b346b3e0f48427d6d3a0c213d35d63c693ce8a685e3e121"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_GAIN"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "flash_thermometer_centered_sum.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_OUTPUT_GAIN"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "flash_thermometer_centered_sum.va": "073dcf0756a7e57de418706b94a01b141ef639e4da0d5caace895a872cfcbeda"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CENTERED_SUM"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_uncentered_sum/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "flash_thermometer_centered_sum.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_002_uncentered_sum",
+      "trigger_condition": "Adds a fixed DC offset to the centered thermometer sum.",
+      "violated_property_ids": [
+        "P_CENTERED_SUM"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "flash_thermometer_centered_sum.va": "dc6ec240d32599795b3cdef68217a4a7d75824cdb30b3b56ca4329a9d21346db"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_GAIN"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_gain/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "flash_thermometer_centered_sum.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_003_wrong_gain",
+      "trigger_condition": "Uses the wrong output gain.",
+      "violated_property_ids": [
+        "P_OUTPUT_GAIN"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "flash_thermometer_centered_sum.va": "70b24b99a7193fa16a24b267b32c4853756fa6824dfe46a5a58095cb7456a33b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_THERMOMETER_THRESHOLD_COUNT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_ignores_upper_bits/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "flash_thermometer_centered_sum.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_004_ignores_upper_bits",
+      "trigger_condition": "Counts only the lower four thermometer inputs.",
+      "violated_property_ids": [
+        "P_THERMOMETER_THRESHOLD_COUNT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "flash_thermometer_centered_sum.va": "dbb36ca07066dcac0a38cbf11c947e0890f8840041f7cb5f4bd9ffc222dbdc08"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTPUT_GAIN"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "flash_thermometer_centered_sum.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Flash Thermometer Centered Sum: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_OUTPUT_GAIN"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

@@ -1,0 +1,82 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "divide_by_eight_clock.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=18n maxstep=10p"
+    ],
+    "body_lines": [
+      "Vin (vin 0) vsource type=pwl wave=[0 0 1n 0 1.05n 0.9 1.45n 0.9 1.5n 0 3n 0 3.05n 0.9 3.45n 0.9 3.5n 0 5n 0 5.05n 0.9 5.45n 0.9 5.5n 0 7n 0 7.05n 0.9 7.45n 0.9 7.5n 0 9n 0 9.05n 0.9 9.45n 0.9 9.5n 0 11n 0 11.05n 0.9 11.45n 0.9 11.5n 0 13n 0 13.05n 0.9 13.45n 0.9 13.5n 0 15n 0 15.05n 0.9 15.45n 0.9 15.5n 0 17n 0 17.05n 0.9 17.45n 0.9 17.5n 0 19n 0 19.05n 0.9 19.45n 0.9 19.5n 0 21n 0]",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.25n 0.9 1.30n 0 18.20n 0 18.25n 0.9 18.80n 0.9 18.85n 0]",
+      "Ven (en 0) vsource type=pwl wave=[0 0.9 11.60n 0.9 11.65n 0 15.55n 0 15.60n 0.9 24n 0.9]",
+      "",
+      "XDUT (vin rst en vout) divide_by_eight_clock",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "en",
+      "rst",
+      "vin",
+      "vout"
+    ]
+  },
+  "family_id": "145",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "0d55ab0291698a9c243f3d2a4a76eff15ef447d35fe80ff851a78026ac006034",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "f434a732341e9336a5b91036672fdf4ba16495bc283ec583b2a1d31c748ad217",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=24n maxstep=10p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RESET_FORCES_INITIAL_HIGH",
+    "P_ENABLE_QUALIFIED_DIVIDE_BY_EIGHT",
+    "P_OUTPUT_DUTY_AND_LEVEL"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "1c00aa946502450871ca8a3a155b32f487dd5216664c37526f6435682353b5d5",
+    "family_spec_sha256": "6125e37aaea5ed73ba971fb412b1f84bb78a131c3695c7f34cfffbcee84f3596"
+  },
+  "task_id": "v4-145"
+}

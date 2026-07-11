@@ -1,0 +1,5 @@
+`include "disciplines.vams"
+module two_period_sample_delay(update, ain, aout);
+input update,ain; output aout; electrical update,ain,aout; parameter real vth=0.5; parameter real tr=50p; parameter real init=0.0; real prev_sample,curr_sample,delayed_out;
+analog begin @(initial_step) begin prev_sample=init; curr_sample=init; delayed_out=init; end @(cross(V(update)-vth,+1)) begin delayed_out=prev_sample; curr_sample=V(ain); prev_sample=curr_sample; end V(aout)<+transition(0.5*delayed_out,0,tr,tr); end
+endmodule

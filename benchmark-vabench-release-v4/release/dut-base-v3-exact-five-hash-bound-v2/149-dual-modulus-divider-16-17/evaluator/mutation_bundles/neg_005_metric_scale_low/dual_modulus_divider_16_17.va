@@ -1,0 +1,40 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one public contract.
+`include "disciplines.vams"
+
+module dual_modulus_divider_16_17(fin, mc, fout);
+input fin, mc;
+output fout;
+electrical fin, mc, fout;
+
+integer count;
+real outvalue;
+
+analog begin
+    @(initial_step) begin
+        count = 0;
+        outvalue = 0;
+    end
+
+    @(cross(V(fin) - 0.5, +1)) begin
+        if (count == 15) begin
+            if (V(mc) > 0.5) count = count + 1;
+            else begin
+                count = 0;
+                outvalue = 1;
+            end
+        end else if (count == 16) begin
+            count = 0;
+            outvalue = 1;
+        end else if (count == 8) begin
+            count = count + 1;
+            outvalue = 0;
+        end else begin
+            count = count + 1;
+        end
+    end
+
+    V(fout) <+ (0.42 * (transition(outvalue, 10p, 10p, 10p)));
+end
+
+endmodule

@@ -1,0 +1,19 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/flash_thermometer_centered_sum.va"
+
+Vb0 (b0 0) vsource type=pwl wave=[0 0 8n 0 8.1n 0.9 46n 0.9]
+Vb1 (b1 0) vsource type=pwl wave=[0 0 8n 0 8.1n 0.9 46n 0.9]
+Vb2 (b2 0) vsource type=pwl wave=[0 0 18n 0 18.1n 0.9 46n 0.9]
+Vb3 (b3 0) vsource type=pwl wave=[0 0 18n 0 18.1n 0.9 26n 0.9 26.1n 0 46n 0]
+Vb4 (b4 0) vsource type=pwl wave=[0 0 18n 0 18.1n 0.9 46n 0.9]
+Vb5 (b5 0) vsource type=pwl wave=[0 0 18n 0 18.1n 0.9 46n 0.9]
+Vb6 (b6 0) vsource type=pwl wave=[0 0 30n 0 30.1n 0.9 46n 0.9]
+Vb7 (b7 0) vsource type=pwl wave=[0 0 30n 0 30.1n 0.9 46n 0.9]
+
+XDUT (b0 b1 b2 b3 b4 b5 b6 b7 dout) flash_thermometer_centered_sum
+
+
+tran tran stop=44n maxstep=20p
+save b0 b1 b2 b3 b4 b5 b6 b7 dout

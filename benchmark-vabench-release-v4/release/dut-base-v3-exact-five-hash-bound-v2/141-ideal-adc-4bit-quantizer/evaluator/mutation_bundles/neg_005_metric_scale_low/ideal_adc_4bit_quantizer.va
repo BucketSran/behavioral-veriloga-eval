@@ -1,0 +1,41 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one public contract.
+`include "disciplines.vams"
+
+module ideal_adc_4bit_quantizer(vclk, vip, vin, digital);
+input vip, vin, vclk;
+output digital;
+electrical digital, vip, vin, vclk;
+
+parameter real trise = 20p from [0:inf);
+parameter real tfall = 20p from [0:inf);
+parameter real tdel = 0 from [0:inf);
+parameter real vtrans_clk = 0.5 from (0:inf);
+parameter real vref = 1.0 from (0:inf);
+parameter integer levels = 16 from (0:inf);
+
+real sample, cmp_level, lsb, code;
+integer i;
+
+analog begin
+    @(initial_step) begin
+        lsb = 2.0 * vref / levels;
+        code = 0;
+    end
+
+    @(cross(V(vclk) - vtrans_clk, +1)) begin
+        sample = V(vip) - V(vin);
+        cmp_level = -vref;
+        code = 0;
+        for (i = 0; i <= levels - 2; i = i + 1) begin
+            cmp_level = cmp_level + lsb;
+            if (sample > cmp_level) begin
+                code = code + 1;
+            end
+        end
+    end
+
+    V(digital) <+ (0.42 * (transition(code, tdel, trise, tfall)));
+end
+
+endmodule

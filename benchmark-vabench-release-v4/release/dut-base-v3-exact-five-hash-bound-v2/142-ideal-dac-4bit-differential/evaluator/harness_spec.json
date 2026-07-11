@@ -1,0 +1,91 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "ideal_dac_4bit_differential.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=36n maxstep=20p"
+    ],
+    "body_lines": [
+      "Vclk (clk 0) vsource type=pwl wave=[0 1 1n 1 1.1n 0 3n 0 3.1n 1 11n 1 11.1n 0 13n 0 13.1n 1 21n 1 21.1n 0 23n 0 23.1n 1 31n 1 31.1n 0 33n 0 33.1n 1 38n 1]"
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "digital",
+      "vcm",
+      "von",
+      "vop"
+    ]
+  },
+  "family_id": "142",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "44954f8b57f3378cc1a0bf646e8b50606d40c7ca3bafa4f7288568f90835a049",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "8d9140e144d1442c9b97478b3fc1981643fbbe2723f44b52cc80695e8d327b16",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vdig (digital 0) vsource type=pwl wave=[0 0 7n 0 7.1n 5 17n 5 17.1n 8 27n 8 27.1n 15 38n 15]",
+          "Vcm (vcm 0) vsource dc=0.5",
+          "",
+          "XDUT (clk digital vcm vop von) ideal_dac_4bit_differential",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vdig (digital 0) vsource type=pwl wave=[0 2 7n 2 7.1n 7 17n 7 17.1n 12 27n 12 27.1n 15 38n 15]",
+          "Vcm (vcm 0) vsource dc=0.6",
+          "",
+          "XDUT (clk digital vcm vop von) ideal_dac_4bit_differential",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_FALLING_EDGE_CODE_SAMPLE",
+    "P_MIDRISE_DIFFERENTIAL_SCALE",
+    "P_OUTPUT_POLARITY_AND_COMMON_MODE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "468ea344d4a199a62f53e76f523349e4117812770031be83140faac198523f68",
+    "family_spec_sha256": "007c8d708e9d8a124f34bdbff09d39822945f3183be2532b1a39798d405c0b4d"
+  },
+  "task_id": "v4-142"
+}

@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/control_word_encoder_7b.va"
+
+Ianchor (d0_85 0) isource dc=0
+
+XCTRL85 (d0_85 d1_85 d2_85 d3_85 d4_85 d5_85 d6_85) control_word_encoder_7b ctrl=85
+XCTRL42 (d0_42 d1_42 d2_42 d3_42 d4_42 d5_42 d6_42) control_word_encoder_7b ctrl=42
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=20n maxstep=20p
+save d0_42 d0_85 d1_42 d1_85 d2_42 d2_85 d3_42 d3_85 d4_42 d4_85 d5_42 d5_85 d6_42 d6_85

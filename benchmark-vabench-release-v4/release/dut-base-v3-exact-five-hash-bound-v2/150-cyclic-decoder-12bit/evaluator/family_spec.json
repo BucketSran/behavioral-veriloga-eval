@@ -1,0 +1,297 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "cyclic_decoder_12bit",
+            "parameters": [
+              {
+                "default": "0.55",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d0",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d1",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d2",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d3",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d4",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d5",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d6",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d7",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d8",
+                "position": 8
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d9",
+                "position": 9
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d10",
+                "position": 10
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d11",
+                "position": 11
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clks",
+                "position": 12
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dout",
+                "position": 13
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "cyclic_decoder_12bit.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "150",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Cyclic Decoder 12bit"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RISING_EDGE_12BIT_DECODE",
+      "observable_contract": "Each rising `clks` crossing samples the twelve voltage-coded bits into an unsigned code.",
+      "required_signals": [
+        "time",
+        "clks",
+        "d0",
+        "d1",
+        "d10",
+        "d11",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "d6",
+        "d7",
+        "d8",
+        "d9",
+        "dout"
+      ]
+    },
+    {
+      "id": "P_BIT_WEIGHT_ORDER",
+      "observable_contract": "`d0` is the LSB and `d11` is the MSB in the decoded code.",
+      "required_signals": [
+        "time",
+        "clks",
+        "d0",
+        "d1",
+        "d10",
+        "d11",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "d6",
+        "d7",
+        "d8",
+        "d9",
+        "dout"
+      ]
+    },
+    {
+      "id": "P_CENTERED_OUTPUT_SCALE",
+      "observable_contract": "The decoded value is normalized to the full 12-bit range, shifted by the half-scale midpoint, and held on `dout`.",
+      "required_signals": [
+        "time",
+        "clks",
+        "d0",
+        "d1",
+        "d10",
+        "d11",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "d6",
+        "d7",
+        "d8",
+        "d9",
+        "dout"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1150",
+    "dut": "v4-150",
+    "testbench": "v4-650"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "d0",
+            "port_ref": "d0",
+            "position": 0
+          },
+          {
+            "net": "d1",
+            "port_ref": "d1",
+            "position": 1
+          },
+          {
+            "net": "d2",
+            "port_ref": "d2",
+            "position": 2
+          },
+          {
+            "net": "d3",
+            "port_ref": "d3",
+            "position": 3
+          },
+          {
+            "net": "d4",
+            "port_ref": "d4",
+            "position": 4
+          },
+          {
+            "net": "d5",
+            "port_ref": "d5",
+            "position": 5
+          },
+          {
+            "net": "d6",
+            "port_ref": "d6",
+            "position": 6
+          },
+          {
+            "net": "d7",
+            "port_ref": "d7",
+            "position": 7
+          },
+          {
+            "net": "d8",
+            "port_ref": "d8",
+            "position": 8
+          },
+          {
+            "net": "d9",
+            "port_ref": "d9",
+            "position": 9
+          },
+          {
+            "net": "d10",
+            "port_ref": "d10",
+            "position": 10
+          },
+          {
+            "net": "d11",
+            "port_ref": "d11",
+            "position": 11
+          },
+          {
+            "net": "clks",
+            "port_ref": "clks",
+            "position": 12
+          },
+          {
+            "net": "dout",
+            "port_ref": "dout",
+            "position": 13
+          }
+        ],
+        "module_ref": "cyclic_decoder_12bit",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clks",
+      "d0",
+      "d1",
+      "d10",
+      "d11",
+      "d2",
+      "d3",
+      "d4",
+      "d5",
+      "d6",
+      "d7",
+      "d8",
+      "d9",
+      "dout"
+    ]
+  }
+}

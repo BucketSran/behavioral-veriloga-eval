@@ -1,0 +1,37 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one public contract.
+`include "disciplines.vams"
+
+module cyclic_decoder_12bit(d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, clks, dout);
+input d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, clks;
+output dout;
+electrical d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, clks, dout;
+
+parameter real vth = 0.55;
+real sum;
+
+analog begin
+    @(initial_step) begin
+        sum = 0;
+    end
+
+    @(cross(V(clks) - vth, +1)) begin
+        sum = ((V(d0) > vth) ? 1.0 : 0.0)
+            + ((V(d1) > vth) ? 2.0 : 0.0)
+            + ((V(d2) > vth) ? 4.0 : 0.0)
+            + ((V(d3) > vth) ? 8.0 : 0.0)
+            + ((V(d4) > vth) ? 16.0 : 0.0)
+            + ((V(d5) > vth) ? 32.0 : 0.0)
+            + ((V(d6) > vth) ? 64.0 : 0.0)
+            + ((V(d7) > vth) ? 128.0 : 0.0)
+            + ((V(d8) > vth) ? 256.0 : 0.0)
+            + ((V(d9) > vth) ? 512.0 : 0.0)
+            + ((V(d10) > vth) ? 1024.0 : 0.0)
+            + ((V(d11) > vth) ? 2048.0 : 0.0);
+        sum = sum / 4095.0 - 0.5;
+    end
+
+    V(dout) <+ (0.42 * (transition(sum, 1p, 1p, 1p)));
+end
+
+endmodule
