@@ -1,0 +1,26 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "disciplines.vams"
+module coarse_qtz_3bit_residue(vin, d0, d1, d2, vres);
+input vin;
+output d0, d1, d2, vres;
+electrical vin, d0, d1, d2, vres;
+parameter real vref = 1.0;
+parameter real vdd = 1.0;
+real vclip, lsb, vq;
+integer code;
+analog begin
+    lsb = (2.0 * vref) / 8.0;
+    vclip = V(vin);
+    if (vclip > vref) vclip = vref;
+    if (vclip < -vref) vclip = -vref;
+    code = $floor(((vclip + vref) / lsb) + 0.5);
+    if (code < 0) code = 0;
+    if (code > 7) code = 7;
+    vq = code * lsb - vref;
+    V(vres) <+ vclip - vq;
+    V(d0) <+ (0.42 * (((code & 1) ? vdd : 0.0)));
+    V(d1) <+ (0.42 * ((((code >> 1) & 1) ? vdd : 0.0)));
+    V(d2) <+ (0.42 * ((((code >> 2) & 1) ? vdd : 0.0)));
+end
+endmodule

@@ -1,0 +1,18 @@
+`include "disciplines.vams"
+module weighted_decoder_6bit(vd1, vd2, vd3, vd4, vd5, vd6, vout);
+input vd1, vd2, vd3, vd4, vd5, vd6;
+output vout;
+electrical vd1, vd2, vd3, vd4, vd5, vd6, vout;
+parameter real vth = 0.45;
+parameter real vref = 1.0;
+analog begin
+    V(vout) <+ vref * (
+        ((V(vd1) > vth) ? 32.0 : 0.0) +
+        ((V(vd2) > vth) ? 16.0 : 0.0) +
+        ((V(vd3) > vth) ? 8.0 : 0.0) +
+        ((V(vd4) > vth) ? 4.0 : 0.0) +
+        ((V(vd5) > vth) ? 2.0 : 0.0) +
+        ((V(vd6) > vth) ? 1.0 : 0.0)
+    ) / 63.0;
+end
+endmodule

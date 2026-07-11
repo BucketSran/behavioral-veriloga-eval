@@ -1,0 +1,150 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "divide_by_two_toggle",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "10p",
+                "name": "tdel",
+                "override_behavior": "overrides tdel",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "10p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 1
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "divide_by_two_toggle.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "228",
+  "identity": {
+    "category": "clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Divide By Two Toggle"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_INITIALIZE_THE_INTERNAL_DIVIDER_STATE_LOW",
+      "observable_contract": "Initialize the internal divider state low.",
+      "required_signals": [
+        "time",
+        "clk",
+        "out"
+      ]
+    },
+    {
+      "id": "P_TOGGLE_THE_STATE_ON_EVERY_RISING",
+      "observable_contract": "Toggle the state on every rising `clk` crossing through `vth`.",
+      "required_signals": [
+        "time",
+        "clk",
+        "out"
+      ]
+    },
+    {
+      "id": "P_DRIVE_OUT_LOW_WHEN_THE_STATE",
+      "observable_contract": "Drive `out` low when the state is low and to `vdd` when the state is high.",
+      "required_signals": [
+        "time",
+        "clk",
+        "out"
+      ]
+    },
+    {
+      "id": "P_THE_FIRST_VALID_RISING_EDGE_DRIVES",
+      "observable_contract": "The first valid rising edge drives `out` high.",
+      "required_signals": [
+        "time",
+        "clk",
+        "out"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1228",
+    "dut": "v4-228",
+    "testbench": "v4-728"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 1
+          }
+        ],
+        "module_ref": "divide_by_two_toggle",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "out"
+    ]
+  }
+}

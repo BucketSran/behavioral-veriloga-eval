@@ -1,0 +1,144 @@
+{
+  "family_id": "228",
+  "gold_bundle_sha256": "8bb5293eda1a1332576b9f9c9d233a580d6be7fe64f01488cc199ba69aaf7fe4",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "divide_by_two_toggle.va": "7c72c237bc18e2ffc88ca550371b0e0b8c5b35f83a1ba6eb1e7258c331ed60a1"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_OUT_LOW_WHEN_THE_STATE",
+          "P_THE_FIRST_VALID_RISING_EDGE_DRIVES",
+          "P_TOGGLE_THE_STATE_ON_EVERY_RISING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "divide_by_two_toggle.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Keeps the output at its trivial zero behavior and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_DRIVE_OUT_LOW_WHEN_THE_STATE",
+        "P_THE_FIRST_VALID_RISING_EDGE_DRIVES",
+        "P_TOGGLE_THE_STATE_ON_EVERY_RISING"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "divide_by_two_toggle.va": "8d1eedc9897ae4c9bede106dddde1fcdb3ea767ae33afaee63606ae166bbec66"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_THE_FIRST_VALID_RISING_EDGE_DRIVES",
+          "P_TOGGLE_THE_STATE_ON_EVERY_RISING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_stuck_low_on_clock/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "divide_by_two_toggle.va"
+      ],
+      "fault_class": "timing_or_state_update_fault",
+      "id": "neg_002_stuck_low_on_clock",
+      "trigger_condition": "Forces the divider state low on each clock instead of toggling.",
+      "violated_property_ids": [
+        "P_THE_FIRST_VALID_RISING_EDGE_DRIVES",
+        "P_TOGGLE_THE_STATE_ON_EVERY_RISING"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "divide_by_two_toggle.va": "d655b232e4b22e90f3a79b5a7fe0f6583d8cab1c4038e1c45befe20ca8033977"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_OUT_LOW_WHEN_THE_STATE",
+          "P_INITIALIZE_THE_INTERNAL_DIVIDER_STATE_LOW",
+          "P_THE_FIRST_VALID_RISING_EDGE_DRIVES"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_starts_high/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "divide_by_two_toggle.va"
+      ],
+      "fault_class": "starts_high",
+      "id": "neg_003_starts_high",
+      "trigger_condition": "Starts the divide-by-two state high rather than low.",
+      "violated_property_ids": [
+        "P_DRIVE_OUT_LOW_WHEN_THE_STATE",
+        "P_INITIALIZE_THE_INTERNAL_DIVIDER_STATE_LOW",
+        "P_THE_FIRST_VALID_RISING_EDGE_DRIVES"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "divide_by_two_toggle.va": "8063db3fa7506271ac428ddba6ee42cf635ae6a10ab2cc9877b7f565bdb2e344"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_OUT_LOW_WHEN_THE_STATE",
+          "P_TOGGLE_THE_STATE_ON_EVERY_RISING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_no_toggle/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "divide_by_two_toggle.va"
+      ],
+      "fault_class": "timing_or_state_update_fault",
+      "id": "neg_004_no_toggle",
+      "trigger_condition": "Forces the state high on each clock instead of toggling.",
+      "violated_property_ids": [
+        "P_DRIVE_OUT_LOW_WHEN_THE_STATE",
+        "P_TOGGLE_THE_STATE_ON_EVERY_RISING"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "divide_by_two_toggle.va": "ce84b0a209e01bd34996ad1c8abb82d63ff6ef4807d07c584f18d6e86d2e578a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_OUT_LOW_WHEN_THE_STATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "divide_by_two_toggle.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Divide By Two Toggle: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_DRIVE_OUT_LOW_WHEN_THE_STATE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

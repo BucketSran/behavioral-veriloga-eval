@@ -1,0 +1,148 @@
+{
+  "family_id": "225",
+  "gold_bundle_sha256": "c221937e298eab7ae13803fce6577af29f24a9048b7ed2a2c65042da2c5e10e2",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "rs_phase_detector.va": "bb4f2401fb454ef1744064432e5e3d6f6750e9d7c9423417f697aa4307e27eb9"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_A_RISING_REF_EDGE_SETS_THE",
+          "P_DETECT_RISING_REF_AND_FB_CROSSINGS",
+          "P_INITIALIZE_TO_THE_RESET_STATE_WITH"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "rs_phase_detector.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_A_RISING_REF_EDGE_SETS_THE",
+        "P_DETECT_RISING_REF_AND_FB_CROSSINGS",
+        "P_INITIALIZE_TO_THE_RESET_STATE_WITH"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "rs_phase_detector.va": "510688a7800c18a9a5b31986175225c334f7685b778dc9aa2a5333f7959ecacc"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_A_RISING_FB_EDGE_RESETS_THE",
+          "P_A_RISING_REF_EDGE_SETS_THE",
+          "P_HOLD_THE_MOST_RECENT_LATCH_STATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_swapped_edges/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "rs_phase_detector.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_002_swapped_edges",
+      "trigger_condition": "Swaps REF/FB effects, so REF clears and FB sets the latch.",
+      "violated_property_ids": [
+        "P_A_RISING_FB_EDGE_RESETS_THE",
+        "P_A_RISING_REF_EDGE_SETS_THE",
+        "P_HOLD_THE_MOST_RECENT_LATCH_STATE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "rs_phase_detector.va": "3a31d9c593db3e62eb47354519dc47232ac77ff8076a5b9e18f0fe58ed1e268f"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_A_RISING_FB_EDGE_RESETS_THE",
+          "P_A_RISING_REF_EDGE_SETS_THE",
+          "P_INITIALIZE_TO_THE_RESET_STATE_WITH"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_down_not_complement/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "rs_phase_detector.va"
+      ],
+      "fault_class": "down_not_complement",
+      "id": "neg_003_down_not_complement",
+      "trigger_condition": "Drives DOWN equal to UP instead of the complementary latch state.",
+      "violated_property_ids": [
+        "P_A_RISING_FB_EDGE_RESETS_THE",
+        "P_A_RISING_REF_EDGE_SETS_THE",
+        "P_INITIALIZE_TO_THE_RESET_STATE_WITH"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "rs_phase_detector.va": "7adbb6bfc9d43ad8caa2f4351bbefe4a22dc5dd49c36a18da7b81aca03b941eb"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_A_RISING_FB_EDGE_RESETS_THE",
+          "P_DETECT_RISING_REF_AND_FB_CROSSINGS",
+          "P_HOLD_THE_MOST_RECENT_LATCH_STATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_ignore_fb_reset/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "rs_phase_detector.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_004_ignore_fb_reset",
+      "trigger_condition": "Ignores FB rising edges, so UP stays asserted after REF.",
+      "violated_property_ids": [
+        "P_A_RISING_FB_EDGE_RESETS_THE",
+        "P_DETECT_RISING_REF_AND_FB_CROSSINGS",
+        "P_HOLD_THE_MOST_RECENT_LATCH_STATE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "rs_phase_detector.va": "4e6e791160806ee8f4c8a4bcedb7e22b6590b68265aa996eca3313a22f442615"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_A_RISING_REF_EDGE_SETS_THE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "rs_phase_detector.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "RS Phase Detector: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_A_RISING_REF_EDGE_SETS_THE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

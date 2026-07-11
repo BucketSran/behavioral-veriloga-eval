@@ -1,0 +1,89 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "coarse_qtz_3bit_residue.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=3.5n maxstep=5p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "d0",
+      "d1",
+      "d2",
+      "vres"
+    ]
+  },
+  "family_id": "224",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "c407cbf7ff83dd18fbe3148ed5b45d01a38fa20a24dce9fed51e38026265f836",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "7aa51095db1893c5462b65e04e974a2fb855369da252baf3d1ed6c166392251e",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0 -1.2 0.9n -1.2 0.95n -0.6 1.8n -0.6 1.85n 0.1 2.7n 0.1 2.75n 0.9 3.8n 0.9]",
+          "XDUT (vin d0 d1 d2 vres) coarse_qtz_3bit_residue"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=4.1n maxstep=5p"
+        ],
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0 -1.5 0.8n -1.5 0.85n -0.875 1.6n -0.875 1.65n -0.125 2.4n -0.125 2.45n 0.375 3.2n 0.375 3.25n 1.25 4.3n 1.25]",
+          "XDUT (vin d0 d1 d2 vres) coarse_qtz_3bit_residue"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_CLIP_VIN_TO_THE_RANGE_FROM",
+    "P_QUANTIZE_THE_CLIPPED_VALUE_INTO_EIGHT",
+    "P_SATURATE_THE_CODE_AT_THE_ENDPOINTS",
+    "P_USE_UNIFORMLY_SPACED_QUANTIZATION_LEVELS_START",
+    "P_DRIVE_D0_D1_AND_D2_AS",
+    "P_DRIVE_VRES_AS_THE_CLIPPED_INPUT"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "52455c07e43016270eaaf1b2187bceef9fca0f34471bea4458a8620db713e21f",
+    "family_spec_sha256": "d04cf078028bc9fee86321139737bc38e42e909bac75ef5652efa57b211cdfe4"
+  },
+  "task_id": "v4-224"
+}

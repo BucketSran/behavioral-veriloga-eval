@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/xor_phase_detector.va"
+
+Vref (ref 0) vsource type=pwl wave=[0 0 0.8n 0 0.85n 1.2 1.6n 1.2 1.65n 1.2 2.4n 1.2 2.45n 0 3.2n 0]
+Vfb (fb 0) vsource type=pwl wave=[0 0 0.8n 0 0.85n 0 1.6n 0 1.65n 1.2 2.4n 1.2 2.45n 1.2 3.2n 1.2]
+XDUT (ref fb up down) xor_phase_detector
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=3.0n maxstep=5p
+save ref fb up down

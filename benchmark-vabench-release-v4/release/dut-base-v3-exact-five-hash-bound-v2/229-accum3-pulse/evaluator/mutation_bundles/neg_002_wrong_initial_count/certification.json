@@ -1,0 +1,61 @@
+{
+  "component_fingerprints": {
+    "assembly": {
+      "policy_sha256": "91f4e21b94263e796c846aedef282c79d4abeb7ccc415a0e6f1311f8816b33a4",
+      "release_snapshot_sha256": "ec25ff4e82bd73ef23394b05e71b73298f84f12139028d337e881ddcfddcd8f4"
+    },
+    "backend": {
+      "ahdl_like_sha256": "91ce239e5f278a6d5dfcde85ca2d820c5133d8f8a3de26dc6477164e703342f3",
+      "evas_sha256": "e48df10fee21fa1613eb87e8febd0226895e2482f2e91355645d2e93e71e04d7",
+      "spectre_sha256": "ac4c1cf785d5eab74058944d52bf40869e83c94e19202ab72c8e8a250c4dc51b"
+    },
+    "oracle": {
+      "checker_binding_sha256": "2ec6e30fbe635b4ef51f1ea705d4a5133d4762c771bbf1011705a5180579954a",
+      "checker_implementation_sha256": "d5f18f4a9002439b4a1e11cbe12ea9e89845537bbc9375718228e1e67cc4fd7f",
+      "checker_profile_sha256": "854a28cd5ab8d7488e442a75cd8a40ecaffbc0637c217f65c09e08c5184f6ef9",
+      "diagnostic_policy_sha256": "69b217a349cb0e8a3eab574e7e6d1af03f069fea668b15b37868ef3d2e7deea3",
+      "oracle_runner_sha256": "daf6eeded735edd148687b998344d32a4943e8824bac2828f28e9107a7950567",
+      "property_activation_policy_sha256": "c61a104fe3667272d374091076b8852431bc6ea86fc573435b9170a9ee6e0b49"
+    },
+    "policy_id": "v4-dependency-scoped-evidence-v2",
+    "schema_version": "v4-evidence-components-v2",
+    "state": "carried_forward",
+    "task_inputs": {
+      "candidate_bundle_sha256": "1ff8af2966185390e8ddc75cc73d4b765e6d5e495ded76374a69d6d253fd3c1f",
+      "deck_sha256": "31016574883f28ecc761356a3dafffbd85a70f0d08ff331465fd1d27583ab986",
+      "gold_bundle_sha256": "881ecd69bd81bc341528e3bf3bbc8712fea64f0a46066525abdf7f74fe8ac7ad",
+      "harness_spec_sha256": "3336ec457ddccd6907c715ce0d2ac6e6e54d8ad1e9e0ef4fadac6752144b7274",
+      "mutation_bundle_sha256": "1ff8af2966185390e8ddc75cc73d4b765e6d5e495ded76374a69d6d253fd3c1f",
+      "profile_sha256": "e65613c6a3d93f18d7bb79aed8d3bf5b6d49b23b656c65a7da2c1099a4e6ce27",
+      "property_contract_sha256": "c98d6d75890563f642ceeb9b0432640d26e192c7deaa65b9e1d646725391e45a",
+      "public_support_bundle_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "trace_contract_sha256": "f309ee78a7fad7e52400672b860de57e4e3e6f4fbe9adc3830079a2b04f8e30f"
+    }
+  },
+  "diagnostics": {
+    "expected": "trigger=Starts the modulo accumulator at zero instead of seven.; violated_properties=P_INITIALIZE_THE_INTERNAL_3_BIT_COUNT,P_INCREMENT_THE_COUNT_MODULO_8_ON,P_DRIVE_OUT_HIGH_ONLY_WHEN_THE",
+    "observed": "EVAS: t=0.050ns out=0.900 expected=0.000 t=0.055ns out=0.900 expected=0.000 t=0.060ns out=0.900 expected=0.000 t=0.065ns out=0.900 expected=0.000 t=0.070ns out=0.900 expected=0.000 t=0.075ns out=0.900 expected=0.000; Spectre: t=0.066ns out=0.900 expected=0.000 t=0.141ns out=0.900 expected=0.000 t=0.245ns out=0.900 expected=0.000 t=0.465ns out=0.000 expected=0.900 t=0.672ns out=0.000 expected=0.900 t=0.757ns out=0.000 expected=0.900",
+    "violated_property_ids": [
+      "P_DRIVE_OUT_HIGH_ONLY_WHEN_THE",
+      "P_INCREMENT_THE_COUNT_MODULO_8_ON",
+      "P_INITIALIZE_THE_INTERNAL_3_BIT_COUNT"
+    ]
+  },
+  "evaluators": {
+    "ahdl_like": "pass",
+    "evas": "compile_pass_behavior_fail",
+    "spectre": "compile_pass_behavior_fail"
+  },
+  "family_id": "229",
+  "inputs": {
+    "checker_profile_sha256": "65b70251c97ecf0c74a2c60397a7af72848bdeff16f4b99927d9dbaca578e5e6",
+    "harness_spec_sha256": "3336ec457ddccd6907c715ce0d2ac6e6e54d8ad1e9e0ef4fadac6752144b7274",
+    "mutation_bundle_sha256": "1ff8af2966185390e8ddc75cc73d4b765e6d5e495ded76374a69d6d253fd3c1f",
+    "profile_sha256": "e65613c6a3d93f18d7bb79aed8d3bf5b6d49b23b656c65a7da2c1099a4e6ce27"
+  },
+  "mutation_id": "neg_002_wrong_initial_count",
+  "outcome": "killed_behaviorally",
+  "release_snapshot_sha256": "ec25ff4e82bd73ef23394b05e71b73298f84f12139028d337e881ddcfddcd8f4",
+  "schema_version": "v4-negative-certification-v2",
+  "toolchain_lock_sha256": "ec25ff4e82bd73ef23394b05e71b73298f84f12139028d337e881ddcfddcd8f4"
+}

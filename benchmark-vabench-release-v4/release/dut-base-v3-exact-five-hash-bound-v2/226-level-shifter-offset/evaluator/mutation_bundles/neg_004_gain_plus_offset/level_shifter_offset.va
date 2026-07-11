@@ -1,0 +1,10 @@
+`include "disciplines.vams"
+module level_shifter_offset(sigin, sigout);
+input sigin;
+output sigout;
+electrical sigin, sigout;
+parameter real sigshift = 0.35;
+analog begin
+    V(sigout) <+ 2.0 * V(sigin) + sigshift;
+end
+endmodule

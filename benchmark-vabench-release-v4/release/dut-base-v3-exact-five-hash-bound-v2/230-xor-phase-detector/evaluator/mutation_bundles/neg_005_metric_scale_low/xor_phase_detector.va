@@ -1,0 +1,17 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "disciplines.vams"
+module xor_phase_detector(ref, fb, up, down);
+input ref, fb;
+output up, down;
+electrical ref, fb, up, down;
+parameter real vdd = 1.2;
+integer ref_high, fb_high, mismatch;
+analog begin
+    ref_high = (V(ref) > vdd / 2.0) ? 1 : 0;
+    fb_high = (V(fb) > vdd / 2.0) ? 1 : 0;
+    mismatch = (ref_high != fb_high) ? 1 : 0;
+    V(up) <+ (0.42 * (mismatch ? vdd : 0.0));
+    V(down) <+ (0.42 * (mismatch ? 0.0 : vdd));
+end
+endmodule

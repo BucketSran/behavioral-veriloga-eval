@@ -1,0 +1,62 @@
+{
+  "component_fingerprints": {
+    "assembly": {
+      "policy_sha256": "91f4e21b94263e796c846aedef282c79d4abeb7ccc415a0e6f1311f8816b33a4",
+      "release_snapshot_sha256": "ec25ff4e82bd73ef23394b05e71b73298f84f12139028d337e881ddcfddcd8f4"
+    },
+    "backend": {
+      "ahdl_like_sha256": "91ce239e5f278a6d5dfcde85ca2d820c5133d8f8a3de26dc6477164e703342f3",
+      "evas_sha256": "e48df10fee21fa1613eb87e8febd0226895e2482f2e91355645d2e93e71e04d7",
+      "spectre_sha256": "ac4c1cf785d5eab74058944d52bf40869e83c94e19202ab72c8e8a250c4dc51b"
+    },
+    "oracle": {
+      "checker_binding_sha256": "d0755d60f8abe20c6b60d20346d799e66351e07009baa16159034db0dfa01d03",
+      "checker_implementation_sha256": "ef251d6d4e18e0dae70e3141a4f66521accca10f2e727654403967fbe18988ce",
+      "checker_profile_sha256": "07b6aa5725dec258db93f722b7884f57a3e6829222bf169cd8752c5dd4b7b579",
+      "diagnostic_policy_sha256": "69b217a349cb0e8a3eab574e7e6d1af03f069fea668b15b37868ef3d2e7deea3",
+      "oracle_runner_sha256": "daf6eeded735edd148687b998344d32a4943e8824bac2828f28e9107a7950567",
+      "property_activation_policy_sha256": "fe4d7a20f35b631da432cffc8aa45d31e9a1da3d73ef54a81fe2dc4802e19d81"
+    },
+    "policy_id": "v4-dependency-scoped-evidence-v2",
+    "schema_version": "v4-evidence-components-v2",
+    "state": "carried_forward",
+    "task_inputs": {
+      "candidate_bundle_sha256": "607ec39eb3b41018651de1d832e697ce83397547afb1355cadbf370bb2ae476f",
+      "deck_sha256": "b4db19f2ce14161072e1b0c65c96ae8e202b0d842ffcdd8c8d1059073bc9c4c1",
+      "gold_bundle_sha256": "d346c72450ab058949e1dc46889405db5744c8f5431d7fcd899b529ac019259d",
+      "harness_spec_sha256": "db2a631b46eb43b83e185f178700705255c0388ec278f798084058dfeae3960a",
+      "mutation_bundle_sha256": "607ec39eb3b41018651de1d832e697ce83397547afb1355cadbf370bb2ae476f",
+      "profile_sha256": "2b89d29cbda8969546f7cd6e64764b7844af6296b084f28431e151ed65167455",
+      "property_contract_sha256": "a5f64459fab12ed507c9ff2884cd1b00ec826d76411be345be5d35b9ff7126a0",
+      "public_support_bundle_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "trace_contract_sha256": "7fb1f3499c0d2ecb8112df86719980621c83d8e3fc51cf451e13e67a563a74cb"
+    }
+  },
+  "diagnostics": {
+    "expected": "trigger=Drives zero output and therefore fails the stable waveform contract.; violated_properties=P_CONVERT_V_AIN_TO_THE_NEAREST,P_DRIVE_DOUT0_DOUT4_FROM_THE_CLAMPED,P_DRIVE_HIGH_BITS_NEAR_VH_AND,P_UPDATE_DETERMINISTICALLY_AS_THE_ANALOG_INPUT",
+    "observed": "EVAS: dout0@1.050ns=0.000 expected=0.900 dout1@1.050ns=0.000 expected=0.900 dout0@1.075ns=0.000 expected=0.900 dout1@1.075ns=0.000 expected=0.900 dout0@1.100ns=0.000 expected=0.900 dout1@1.100ns=0.000 expected=0.900; Spectre: dout0@1.051ns=0.000 expected=0.900 dout1@1.051ns=0.000 expected=0.900 dout0@1.121ns=0.000 expected=0.900 dout1@1.121ns=0.000 expected=0.900 dout0@1.191ns=0.000 expected=0.900 dout1@1.191ns=0.000 expected=0.900",
+    "violated_property_ids": [
+      "P_CONVERT_V_AIN_TO_THE_NEAREST",
+      "P_DRIVE_DOUT0_DOUT4_FROM_THE_CLAMPED",
+      "P_DRIVE_HIGH_BITS_NEAR_VH_AND",
+      "P_UPDATE_DETERMINISTICALLY_AS_THE_ANALOG_INPUT"
+    ]
+  },
+  "evaluators": {
+    "ahdl_like": "pass",
+    "evas": "compile_pass_behavior_fail",
+    "spectre": "compile_pass_behavior_fail"
+  },
+  "family_id": "222",
+  "inputs": {
+    "checker_profile_sha256": "3c7fa9832dd278465c83501756eed495ba621ecd0863ee475ab60917e8f60f6e",
+    "harness_spec_sha256": "db2a631b46eb43b83e185f178700705255c0388ec278f798084058dfeae3960a",
+    "mutation_bundle_sha256": "607ec39eb3b41018651de1d832e697ce83397547afb1355cadbf370bb2ae476f",
+    "profile_sha256": "2b89d29cbda8969546f7cd6e64764b7844af6296b084f28431e151ed65167455"
+  },
+  "mutation_id": "neg_001_zero",
+  "outcome": "killed_behaviorally",
+  "release_snapshot_sha256": "ec25ff4e82bd73ef23394b05e71b73298f84f12139028d337e881ddcfddcd8f4",
+  "schema_version": "v4-negative-certification-v2",
+  "toolchain_lock_sha256": "ec25ff4e82bd73ef23394b05e71b73298f84f12139028d337e881ddcfddcd8f4"
+}

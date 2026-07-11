@@ -1,0 +1,10 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/coarse_qtz_3bit_residue.va"
+
+Vin (vin 0) vsource type=pwl wave=[0 -1.5 0.8n -1.5 0.85n -0.875 1.6n -0.875 1.65n -0.125 2.4n -0.125 2.45n 0.375 3.2n 0.375 3.25n 1.25 4.3n 1.25]
+XDUT (vin d0 d1 d2 vres) coarse_qtz_3bit_residue
+
+tran tran stop=4.1n maxstep=5p
+save vin d0 d1 d2 vres

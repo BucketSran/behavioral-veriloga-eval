@@ -1,0 +1,146 @@
+{
+  "family_id": "222",
+  "gold_bundle_sha256": "d346c72450ab058949e1dc46889405db5744c8f5431d7fcd899b529ac019259d",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "trim_ctrl_5bit.va": "d7f4cb0510e802c659e3dabe143824fd1e8ec9290989aaf7cb7235402f16d391"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CONVERT_V_AIN_TO_THE_NEAREST",
+          "P_DRIVE_DOUT0_DOUT4_FROM_THE_CLAMPED",
+          "P_DRIVE_HIGH_BITS_NEAR_VH_AND",
+          "P_UPDATE_DETERMINISTICALLY_AS_THE_ANALOG_INPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "trim_ctrl_5bit.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_CONVERT_V_AIN_TO_THE_NEAREST",
+        "P_DRIVE_DOUT0_DOUT4_FROM_THE_CLAMPED",
+        "P_DRIVE_HIGH_BITS_NEAR_VH_AND",
+        "P_UPDATE_DETERMINISTICALLY_AS_THE_ANALOG_INPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "trim_ctrl_5bit.va": "cda01723fbcd62a029ac49127a1d07393c72ad4352b9dfd250a3d3a15fb401bd"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CLAMP_THE_CODE_TO_THE_VALID",
+          "P_CONVERT_V_AIN_TO_THE_NEAREST",
+          "P_DRIVE_DOUT0_DOUT4_FROM_THE_CLAMPED",
+          "P_UPDATE_DETERMINISTICALLY_AS_THE_ANALOG_INPUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_code_offset_plus_one/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "trim_ctrl_5bit.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_002_code_offset_plus_one",
+      "trigger_condition": "Adds an erroneous +1 offset after rounding the trim code.",
+      "violated_property_ids": [
+        "P_CLAMP_THE_CODE_TO_THE_VALID",
+        "P_CONVERT_V_AIN_TO_THE_NEAREST",
+        "P_DRIVE_DOUT0_DOUT4_FROM_THE_CLAMPED",
+        "P_UPDATE_DETERMINISTICALLY_AS_THE_ANALOG_INPUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "trim_ctrl_5bit.va": "a738a17ebe2c371b139740db77d022fb299de26b6a8d69c20bbfd1961a9fac1b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_CLAMP_THE_CODE_TO_THE_VALID",
+          "P_DRIVE_DOUT0_DOUT4_FROM_THE_CLAMPED"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_clamp_to_15/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "trim_ctrl_5bit.va"
+      ],
+      "fault_class": "clamp_to_15",
+      "id": "neg_003_clamp_to_15",
+      "trigger_condition": "Incorrectly clamps the maximum trim code to 15 rather than 31.",
+      "violated_property_ids": [
+        "P_CLAMP_THE_CODE_TO_THE_VALID",
+        "P_DRIVE_DOUT0_DOUT4_FROM_THE_CLAMPED"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "trim_ctrl_5bit.va": "0d4f7727228a9d43ee01c6da6f690afa346aae79e7e329e78992e8448f54a690"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_DOUT0_DOUT4_FROM_THE_CLAMPED"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_reversed_bit_order/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "trim_ctrl_5bit.va"
+      ],
+      "fault_class": "reversed_bit_order",
+      "id": "neg_004_reversed_bit_order",
+      "trigger_condition": "Drives DOUT0..DOUT4 in reversed bit order.",
+      "violated_property_ids": [
+        "P_DRIVE_DOUT0_DOUT4_FROM_THE_CLAMPED"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "trim_ctrl_5bit.va": "f7a508ba58d1c5cd1e733f96c558de0c215e06fde2b15d1dc681d1de044b444f"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_HIGH_BITS_NEAR_VH_AND"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "trim_ctrl_5bit.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Trim Ctrl 5bit: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_DRIVE_HIGH_BITS_NEAR_VH_AND"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

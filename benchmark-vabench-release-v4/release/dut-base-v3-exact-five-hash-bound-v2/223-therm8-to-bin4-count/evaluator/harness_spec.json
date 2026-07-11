@@ -1,0 +1,108 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "therm8_to_bin4_count.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=3.5n maxstep=5p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "th0",
+      "th1",
+      "th2",
+      "th3",
+      "th4",
+      "th5",
+      "th6",
+      "th7",
+      "b0",
+      "b1",
+      "b2",
+      "b3"
+    ]
+  },
+  "family_id": "223",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "77a9d4530c08d8f7a7d511f1899db9fa30a924e68e2237ed3017b906e6231208",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "8bb16e6ae9a5713dbecdcfccf8da5a2d9f3dbb3d91e0e4ccc3f5cf62b87ec0c2",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vth0 (th0 0) vsource type=pwl wave=[0 0 0.9n 0 0.95n 0.9 3.8n 0.9]",
+          "Vth1 (th1 0) vsource type=pwl wave=[0 0 0.9n 0 0.95n 0.9 3.8n 0.9]",
+          "Vth2 (th2 0) vsource type=pwl wave=[0 0 0.9n 0 0.95n 0.9 3.8n 0.9]",
+          "Vth3 (th3 0) vsource type=pwl wave=[0 0 1.8n 0 1.85n 0.9 3.8n 0.9]",
+          "Vth4 (th4 0) vsource type=pwl wave=[0 0 1.8n 0 1.85n 0.9 3.8n 0.9]",
+          "Vth5 (th5 0) vsource type=pwl wave=[0 0 2.7n 0 2.75n 0.9 3.8n 0.9]",
+          "Vth6 (th6 0) vsource type=pwl wave=[0 0 2.7n 0 2.75n 0.9 3.8n 0.9]",
+          "Vth7 (th7 0) vsource type=pwl wave=[0 0 2.7n 0 2.75n 0.9 3.8n 0.9]",
+          "XDUT (th0 th1 th2 th3 th4 th5 th6 th7 b0 b1 b2 b3) therm8_to_bin4_count"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=3.2n maxstep=5p"
+        ],
+        "body_lines": [
+          "Vth0 (th0 0) vsource type=pwl wave=[0 0.9 3.4n 0.9]",
+          "Vth1 (th1 0) vsource type=pwl wave=[0 0 1.6n 0 1.65n 0.9 3.4n 0.9]",
+          "Vth2 (th2 0) vsource type=pwl wave=[0 0 0.8n 0 0.85n 0.9 3.4n 0.9]",
+          "Vth3 (th3 0) vsource type=pwl wave=[0 0 1.6n 0 1.65n 0.9 3.4n 0.9]",
+          "Vth4 (th4 0) vsource type=pwl wave=[0 0 1.6n 0 1.65n 0.9 3.4n 0.9]",
+          "Vth5 (th5 0) vsource type=pwl wave=[0 0 0.8n 0 0.85n 0.9 3.4n 0.9]",
+          "Vth6 (th6 0) vsource type=pwl wave=[0 0 1.6n 0 1.65n 0.9 3.4n 0.9]",
+          "Vth7 (th7 0) vsource type=pwl wave=[0 0 0.8n 0 0.85n 0.9 3.4n 0.9]",
+          "XDUT (th0 th1 th2 th3 th4 th5 th6 th7 b0 b1 b2 b3) therm8_to_bin4_count"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_COUNT_HOW_MANY_OF_TH0_TH7",
+    "P_ENCODE_THE_COUNT_AS_A_4",
+    "P_DRIVE_B0_B3_AS_VOLTAGE_CODED",
+    "P_SUPPORT_ANY_INPUT_PATTERN_BY_COUNTING"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "40024843d850d122c539aa71a38337951d5056023a12bfd5f724d39fa7c2d632",
+    "family_spec_sha256": "492ad18136b552d6f700fccae07ea0d6d97a3a7bdc20fc6e4e17ed98f61a10ff"
+  },
+  "task_id": "v4-223"
+}

@@ -1,0 +1,144 @@
+{
+  "family_id": "221",
+  "gold_bundle_sha256": "2436063e1bafdede644190b4a16264b9dc7cd242a0782d9876c688dbb40cd762",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "samplehold_rising_edge.va": "8369e7bd71964335adf62b160905609c3f644b3fda1ef6c4b6af12f1f2130c1d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_VOUT_WITH_SMOOTH_VOLTAGE_DOMAIN",
+          "P_HOLD_THE_SAMPLED_VOLTAGE_ON_VOUT",
+          "P_SAMPLE_VIN_ON_EACH_RISING_CONTROL"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "samplehold_rising_edge.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_DRIVE_VOUT_WITH_SMOOTH_VOLTAGE_DOMAIN",
+        "P_HOLD_THE_SAMPLED_VOLTAGE_ON_VOUT",
+        "P_SAMPLE_VIN_ON_EACH_RISING_CONTROL"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "samplehold_rising_edge.va": "e62dd4c4dfd1df731be105605d33d86492c496eff38c598edd920575ba275e12"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_HOLD_THE_SAMPLED_VOLTAGE_ON_VOUT",
+          "P_SAMPLE_VIN_ON_EACH_RISING_CONTROL"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_half_scale_capture/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "samplehold_rising_edge.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_002_half_scale_capture",
+      "trigger_condition": "Captures half of VIN on rising control edges instead of the full held voltage.",
+      "violated_property_ids": [
+        "P_HOLD_THE_SAMPLED_VOLTAGE_ON_VOUT",
+        "P_SAMPLE_VIN_ON_EACH_RISING_CONTROL"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "samplehold_rising_edge.va": "ec059eb67d9661975466b1f47542abfc2a322659467f24a1f3dd2933b14846a0"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DO_NOT_CONTINUOUSLY_TRACK_VIN_BETWEEN",
+          "P_HOLD_THE_SAMPLED_VOLTAGE_ON_VOUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_track_input/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "samplehold_rising_edge.va"
+      ],
+      "fault_class": "track_input",
+      "id": "neg_003_track_input",
+      "trigger_condition": "Tracks VIN continuously instead of holding sampled values.",
+      "violated_property_ids": [
+        "P_DO_NOT_CONTINUOUSLY_TRACK_VIN_BETWEEN",
+        "P_HOLD_THE_SAMPLED_VOLTAGE_ON_VOUT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "samplehold_rising_edge.va": "2a9dfc558667d3668a1b7618e6cf13020ca8bd429a60dfee3857902999741c0a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_HOLD_THE_SAMPLED_VOLTAGE_ON_VOUT",
+          "P_SAMPLE_VIN_ON_EACH_RISING_CONTROL"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_wrong_threshold/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "samplehold_rising_edge.va"
+      ],
+      "fault_class": "threshold_or_boundary_fault",
+      "id": "neg_004_wrong_threshold",
+      "trigger_condition": "Uses a threshold above the control high level and never captures after initialization.",
+      "violated_property_ids": [
+        "P_HOLD_THE_SAMPLED_VOLTAGE_ON_VOUT",
+        "P_SAMPLE_VIN_ON_EACH_RISING_CONTROL"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "samplehold_rising_edge.va": "1b8f183543220784f10a6100d64a38cd4a4ef4e61aff8bfe77c5fe3d9c9608f4"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_VOUT_WITH_SMOOTH_VOLTAGE_DOMAIN",
+          "P_HOLD_THE_SAMPLED_VOLTAGE_ON_VOUT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "samplehold_rising_edge.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Samplehold Rising Edge: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_DRIVE_VOUT_WITH_SMOOTH_VOLTAGE_DOMAIN",
+        "P_HOLD_THE_SAMPLED_VOLTAGE_ON_VOUT"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}
