@@ -1,0 +1,132 @@
+{
+  "family_id": "300",
+  "gold_bundle_sha256": "e9bce411ea9405a564cc6eefff106e4c602dc4307c3b981e39397c38d964093b",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "differential_vco_clip_idtmod.va": "df7c70154d9d9f04c535860d365652eff3097855ef477f0415876a23fb23e67e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FREQ_Q_CLIP_FNOM_DFDV_V"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_drive_outputs_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "differential_vco_clip_idtmod.va"
+      ],
+      "fault_class": "differential_output_amplitude_zero",
+      "id": "neg_001_drive_outputs_zero",
+      "trigger_condition": "Differential VCO With Clip And Idtmod: keeps the sin() terms but multiplies them by zero so both differential arms are flat at the common mode.",
+      "violated_property_ids": [
+        "P_FREQ_Q_CLIP_FNOM_DFDV_V"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "differential_vco_clip_idtmod.va": "fa3fb53c9a250695c9f524db86f1a33e56f072085d5b079ad7928e3e2b93570c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PHASE_Q_IDTMOD_FREQ_Q_0"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_drive_metric_zero/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "differential_vco_clip_idtmod.va"
+      ],
+      "fault_class": "phase_metric_missing",
+      "id": "neg_002_drive_metric_zero",
+      "trigger_condition": "Differential VCO With Clip And Idtmod: keeps the differential sine but drives the wrapped-phase metric to zero so the metric trace fails.",
+      "violated_property_ids": [
+        "P_PHASE_Q_IDTMOD_FREQ_Q_0"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "differential_vco_clip_idtmod.va": "fde7f1f4371c470befe3c2899eedc170fb14161fd5e6161ab8035011927157e1"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTP_VCM_VAC_SIN_M_TWO"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_phase_modulus/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "differential_vco_clip_idtmod.va"
+      ],
+      "fault_class": "phase_modulus_error",
+      "id": "neg_003_wrong_phase_modulus",
+      "trigger_condition": "Differential VCO With Clip And Idtmod: uses a 0.5 idtmod modulus so the phase wraps twice per cycle and the sine and metric diverge from the modulo-1 reference.",
+      "violated_property_ids": [
+        "P_OUTP_VCM_VAC_SIN_M_TWO"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "differential_vco_clip_idtmod.va": "269dfddab098ce4a06f003bd773c26e9ab7b148fda710ff77aef5719a742ac44"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_OUTM_VCM_VAC_SIN_M_TWO"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_gain_sign_flipped/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "differential_vco_clip_idtmod.va"
+      ],
+      "fault_class": "vco_tuning_polarity_error",
+      "id": "neg_004_gain_sign_flipped",
+      "trigger_condition": "Differential VCO With Clip And Idtmod: flips the dFdV sign so the frequency moves the wrong way with the differential control and the reintegrated phase diverges.",
+      "violated_property_ids": [
+        "P_OUTM_VCM_VAC_SIN_M_TWO"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "differential_vco_clip_idtmod.va": "92b21dded5ca218791b298fba4d898b628db5f4a0129e73a1d89d627a22863eb"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_METRIC_0_9_PHASE_Q_VOLTAGE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_single_ended_output/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "differential_vco_clip_idtmod.va"
+      ],
+      "fault_class": "differential_symmetry_error",
+      "id": "neg_005_single_ended_output",
+      "trigger_condition": "Differential VCO With Clip And Idtmod: drives both arms with the same polarity so outp and outm no longer bracket the common mode symmetrically.",
+      "violated_property_ids": [
+        "P_METRIC_0_9_PHASE_Q_VOLTAGE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

@@ -1,0 +1,55 @@
+`include "disciplines.vams"
+
+module reference_settling_window_monitor(clk, rst, ref, target, valid, err_metric, settle_mon);
+input clk, rst, ref, target;
+output valid, err_metric, settle_mon;
+electrical clk, rst, ref, target, valid, err_metric, settle_mon;
+
+parameter real vth = 0.45;
+parameter real vhi = 0.9;
+parameter real tol = 0.035;
+parameter real err_scale = 0.20;
+parameter integer settle_cycles = 3;
+parameter real tr = 80p;
+
+integer settle_count;
+real err_v;
+real valid_v;
+real metric_v;
+real settle_v;
+
+analog begin
+    @(initial_step) begin
+        settle_count = 0;
+        err_v = 0.0;
+        valid_v = 0.0;
+        metric_v = 0.0;
+        settle_v = 0.0;
+    end
+
+    @(cross(V(clk) - vth, +1)) begin
+        err_v = V(ref) - V(target);
+        if (err_v < 0.0) err_v = -err_v;
+        metric_v = err_v / err_scale;
+        if (metric_v > 1.0) metric_v = 1.0;
+        if (metric_v < 0.0) metric_v = 0.0;
+        metric_v = metric_v * vhi;
+
+        if (V(rst) > vth) begin
+            settle_count = settle_cycles;
+        end else if (err_v <= tol) begin
+            if (settle_count < settle_cycles) settle_count = settle_count + 1;
+        end else begin
+            settle_count = 0;
+        end
+
+        valid_v = (settle_count >= settle_cycles) ? vhi : 0.0;
+        settle_v = vhi * settle_count / settle_cycles;
+        if (settle_v > vhi) settle_v = vhi;
+    end
+
+    V(valid) <+ transition(valid_v, 0.0, tr, tr);
+    V(err_metric) <+ transition(metric_v, 0.0, tr, tr);
+    V(settle_mon) <+ transition(settle_v, 0.0, tr, tr);
+end
+endmodule

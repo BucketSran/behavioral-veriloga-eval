@@ -1,0 +1,93 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "dynamic_supply_level_driver.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=12n maxstep=10p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "din",
+      "out",
+      "vdd",
+      "vss"
+    ]
+  },
+  "family_id": "296",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "db2edf486628a3a86da7a06d7723b0e8e7e4a1d5800cee79186af29a5ac7f5a4",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "1750d39d6fe552dbd5ab7f430d025f4811b2b45d827bdde07cc15838615eba03",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vvdd (vdd 0) vsource type=pwl wave=[0 0.9 4n 0.9 4.05n 0.50 6n 0.50 6.05n 0.70 10n 0.70 10.05n 1.05]",
+          "Vvss (vss 0) vsource type=pwl wave=[0 0 6n 0 6.05n 0.10 10n 0.10 10.05n 0]",
+          "Vdin (din 0) vsource type=pwl wave=[0 0.10 2n 0.10 2.05n 0.85 5n 0.85 5.05n 0.20 7n 0.20 7.05n 0.42 9n 0.42 9.05n 0.25 11n 0.25 11.05n 0.80]",
+          "",
+          "XDUT (din vdd vss out) dynamic_supply_level_driver",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vvdd (vdd 0) vsource type=pwl wave=[0 1.0 3n 1.0 3.05n 0.48 5n 0.48 5.05n 0.85 9n 0.85 9.05n 0.62]",
+          "Vvss (vss 0) vsource type=pwl wave=[0 0.05 5n 0.05 5.05n 0.18 9n 0.18 9.05n -0.03]",
+          "Vdin (din 0) vsource type=pwl wave=[0 0.35 1n 0.35 1.05n 0.74 4n 0.74 4.05n 0.20 6n 0.20 6.05n 0.70 8n 0.70 8.05n 0.45 10n 0.45 10.05n 0.34]",
+          "",
+          "XDUT (din vdd vss out) dynamic_supply_level_driver",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_MODEL_A_DYNAMIC_SUPPLY_ELECTRICAL_LEVEL",
+    "P_BUILD_A_DYNAMIC_SUPPLY_VOLTAGE_DOMAIN",
+    "P_VSUP_MIN_0_55_V_MINIMUM",
+    "P_VTH_FRAC_0_5_INPUT_THRESHOLD",
+    "P_VLO_FRAC_0_0_VHI_FRAC",
+    "P_TR_40P_OUTPUT_TRANSITION_SMOOTHING_TIME"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "b65a9753a98fd9fa7f37623f83740f57f308ddee74c95708ecc3232cf47c9f62",
+    "family_spec_sha256": "d6b7e73f98d914fd52ebc658449dd0fc1d31eb7dc7cddc0e16cb7b0ae8b75090"
+  },
+  "task_id": "v4-296"
+}

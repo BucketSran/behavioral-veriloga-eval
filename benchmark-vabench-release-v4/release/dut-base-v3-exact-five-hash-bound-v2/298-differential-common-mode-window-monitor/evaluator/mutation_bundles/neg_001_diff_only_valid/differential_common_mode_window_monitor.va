@@ -1,0 +1,43 @@
+`include "disciplines.vams"
+
+module differential_common_mode_window_monitor(vip, vin, vcm_ref, en, diff_ok, cm_ok, valid, diff_metric, cm_metric);
+input vip, vin, vcm_ref, en;
+output diff_ok, cm_ok, valid, diff_metric, cm_metric;
+electrical vip, vin, vcm_ref, en, diff_ok, cm_ok, valid, diff_metric, cm_metric;
+
+parameter real vth = 0.45;
+parameter real vhi = 0.9;
+parameter real diff_max = 0.30;
+parameter real diff_fullscale = 0.45;
+parameter real cm_tol = 0.080;
+parameter real cm_fullscale = 0.160;
+parameter real tr = 50p;
+
+real vdiff;
+real vcm;
+real diff_abs;
+real cm_err;
+real diff_ok_v;
+real cm_ok_v;
+real diff_metric_v;
+real cm_metric_v;
+
+analog begin
+    vdiff = V(vip) - V(vin);
+    vcm = 0.5 * (V(vip) + V(vin));
+    diff_abs = abs(vdiff);
+    cm_err = abs(vcm - V(vcm_ref));
+    diff_ok_v = ((V(en) > vth) && (diff_abs <= diff_max)) ? vhi : 0.0;
+    cm_ok_v = ((V(en) > vth) && (cm_err <= cm_tol)) ? vhi : 0.0;
+    diff_metric_v = vhi * diff_abs / diff_fullscale;
+    if (diff_metric_v > vhi) diff_metric_v = vhi;
+    cm_metric_v = vhi * cm_err / cm_fullscale;
+    if (cm_metric_v > vhi) cm_metric_v = vhi;
+
+    V(diff_ok) <+ diff_ok_v;
+    V(cm_ok) <+ cm_ok_v;
+    V(valid) <+ diff_ok_v;
+    V(diff_metric) <+ diff_metric_v;
+    V(cm_metric) <+ cm_metric_v;
+end
+endmodule

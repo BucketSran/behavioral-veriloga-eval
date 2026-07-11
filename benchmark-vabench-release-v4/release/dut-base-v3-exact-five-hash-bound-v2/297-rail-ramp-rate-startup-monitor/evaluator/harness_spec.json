@@ -1,0 +1,106 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "rail_ramp_rate_startup_monitor.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=18n maxstep=10p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "en",
+      "rail_ok",
+      "ramp_ok",
+      "slew_metric",
+      "startup_ready",
+      "vdd",
+      "vss"
+    ]
+  },
+  "family_id": "297",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "93254b9693a12e6043c653f172655b500361d3587b0e6dc438e2193a42de2833",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "4ef3db4eb6394f6c978e9d891fa2bfff2d2f5e360d12e6493c5ea96b41fab32e",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=100p period=1n width=420p rise=20p fall=20p",
+          "Vvss (vss 0) vsource type=pwl wave=[0 0 10n 0 10.05n 0.04 18n 0.04]",
+          "Vvdd (vdd 0) vsource type=pwl wave=[0 0.20 0.9n 0.20 0.95n 0.31 1.9n 0.31 1.95n 0.45 2.9n 0.45 2.95n 0.59 3.9n 0.59 3.95n 0.73 4.9n 0.73 4.95n 0.86 5.9n 0.86 5.95n 0.90 6.9n 0.90 6.95n 0.91 9.9n 0.91 9.95n 1.13 10.9n 1.13 10.95n 0.95 11.9n 0.95 11.95n 0.96 14.9n 0.96 14.95n 0.80 18n 0.80]",
+          "Ven (en 0) vsource type=pwl wave=[0 0.9 12n 0.9 12.05n 0.0 13.8n 0.0 13.85n 0.9 18n 0.9]",
+          "",
+          "XDUT (clk vdd vss en rail_ok ramp_ok startup_ready slew_metric) rail_ramp_rate_startup_monitor",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=20n maxstep=10p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=180p period=1.2n width=520p rise=25p fall=25p",
+          "Vvss (vss 0) vsource type=pwl wave=[0 0.03 9n 0.03 9.06n -0.02 20n -0.02]",
+          "Vvdd (vdd 0) vsource type=pwl wave=[0 0.26 1.05n 0.26 1.10n 0.38 2.25n 0.38 2.30n 0.53 3.45n 0.53 3.50n 0.68 4.65n 0.68 4.70n 0.82 5.85n 0.82 5.90n 0.92 7.05n 0.92 7.10n 0.93 10.65n 0.93 10.70n 1.11 11.85n 1.11 11.90n 0.88 13.05n 0.88 13.10n 0.89 20n 0.89]",
+          "Ven (en 0) vsource type=pwl wave=[0 0.9 14n 0.9 14.06n 0.0 15.6n 0.0 15.66n 0.9 20n 0.9]",
+          "",
+          "XDUT (clk vdd vss en rail_ok ramp_ok startup_ready slew_metric) rail_ramp_rate_startup_monitor",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_RAIL_OK_ENFORCES_ENABLE_AND_SUPPLY_WINDOW",
+    "P_RAMP_OK_QUALIFIES_STARTUP_AND_SETTLING_SLEW",
+    "P_STARTUP_READY_REQUIRES_CONSECUTIVE_SETTLED_SAMPLES",
+    "P_SLEW_METRIC_REPORTS_BOUNDED_DELTA",
+    "P_ON_EACH_RISING_CROSSING_OF_CLK",
+    "P_BUILD_A_VOLTAGE_DOMAIN_STARTUP_MONITOR",
+    "P_VTH_0_45_V_LOGIC_THRESHOLD",
+    "P_VHI_0_9_V_HIGH_LEVEL",
+    "P_VDD_MIN_0_72_V_VDD",
+    "P_VREADY_0_86_V_SAMPLED_RAIL"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "895e9aa64c62895da5fb559c8b224b321cb702e68946dd8d39400a7ccb296e72",
+    "family_spec_sha256": "292130ad04bc4ce59b643070005c279f7435183da759b9fcfd84388ca947bef1"
+  },
+  "task_id": "v4-297"
+}

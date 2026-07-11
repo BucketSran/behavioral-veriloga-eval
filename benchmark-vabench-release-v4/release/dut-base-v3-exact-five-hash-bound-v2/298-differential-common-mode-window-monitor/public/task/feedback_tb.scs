@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/differential_common_mode_window_monitor.va"
+
+Vref (vcm_ref 0) vsource type=pwl wave=[0 0.45 8n 0.45 8.05n 0.52 16n 0.52]
+Ven (en 0) vsource type=pwl wave=[0 0.9 12n 0.9 12.05n 0.0 14n 0.0 14.05n 0.9 16n 0.9]
+Vvip (vip 0) vsource type=pwl wave=[0 0.50 2n 0.50 2.05n 0.65 4n 0.65 4.05n 0.62 6n 0.62 6.05n 0.42 8n 0.42 8.05n 0.56 10n 0.56 10.05n 0.70 12n 0.70 12.05n 0.55 14n 0.55 14.05n 0.44 16n 0.44]
+Vvin (vin 0) vsource type=pwl wave=[0 0.40 2n 0.40 2.05n 0.25 4n 0.25 4.05n 0.52 6n 0.52 6.05n 0.22 8n 0.22 8.05n 0.48 10n 0.48 10.05n 0.36 12n 0.36 12.05n 0.45 14n 0.45 14.05n 0.60 16n 0.60]
+
+XDUT (vip vin vcm_ref en diff_ok cm_ok valid diff_metric cm_metric) differential_common_mode_window_monitor
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=16n maxstep=10p
+save cm_metric cm_ok diff_metric diff_ok en valid vcm_ref vin vip

@@ -1,0 +1,274 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "reference_settling_window_monitor",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vhi",
+                "override_behavior": "overrides vhi",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.035",
+                "name": "tol",
+                "override_behavior": "overrides tol",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.20",
+                "name": "err_scale",
+                "override_behavior": "overrides err_scale",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "3",
+                "name": "settle_cycles",
+                "override_behavior": "overrides settle_cycles",
+                "type": "integer",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "80p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ref",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "target",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "err_metric",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "settle_mon",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "reference_settling_window_monitor.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "293",
+  "identity": {
+    "category": "bias_reference_power_management",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Reference Settling Window Monitor"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_EACH_RISING_CROSSING_OF_CLK",
+      "observable_contract": "On each rising crossing of `clk`, measure the absolute difference between `ref` and `target`. Drive `err_metric` as the clipped error magnitude scaled by `err_scale`. While reset is high, clear the settling counter and keep `valid` low. Otherwise, increment the counter on each in-window sample, clear it on any out-of-window sample, and assert `valid` only after `settle_cycles` consecutive in-window samples. Drive `settle_mon` as bounded progress from 0 to `vhi`. Smooth all outputs with `transition()`.",
+      "required_signals": [
+        "time",
+        "clk",
+        "err_metric",
+        "ref",
+        "rst",
+        "settle_mon",
+        "target",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_BUILD_A_MEASUREMENT_STYLE_BIAS_REFERENCE",
+      "observable_contract": "Build a measurement-style bias/reference monitor. The module samples a reference voltage against a target, reports the bounded error magnitude, and asserts validity only after consecutive in-window samples.",
+      "required_signals": [
+        "time",
+        "clk",
+        "err_metric",
+        "ref",
+        "rst",
+        "settle_mon",
+        "target",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_VTH_0_45_V_LOGIC_THRESHOLD",
+      "observable_contract": "`vth = 0.45 V`: logic threshold for `clk` and `rst`.",
+      "required_signals": [
+        "time",
+        "clk",
+        "err_metric",
+        "ref",
+        "rst",
+        "settle_mon",
+        "target",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_VHI_0_9_V_HIGH_LEVEL",
+      "observable_contract": "`vhi = 0.9 V`: high level for voltage-coded outputs.",
+      "required_signals": [
+        "time",
+        "clk",
+        "err_metric",
+        "ref",
+        "rst",
+        "settle_mon",
+        "target",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_TOL_0_035_V_ALLOWED_ABSOLUTE",
+      "observable_contract": "`tol = 0.035 V`: allowed absolute error around `target`.",
+      "required_signals": [
+        "time",
+        "clk",
+        "err_metric",
+        "ref",
+        "rst",
+        "settle_mon",
+        "target",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ERR_SCALE_0_20_V_ERROR",
+      "observable_contract": "`err_scale = 0.20 V`: error that maps to full-scale `err_metric`.",
+      "required_signals": [
+        "time",
+        "clk",
+        "err_metric",
+        "ref",
+        "rst",
+        "settle_mon",
+        "target",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1293",
+    "dut": "v4-293",
+    "testbench": "v4-793"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "ref",
+            "port_ref": "ref",
+            "position": 2
+          },
+          {
+            "net": "target",
+            "port_ref": "target",
+            "position": 3
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 4
+          },
+          {
+            "net": "err_metric",
+            "port_ref": "err_metric",
+            "position": 5
+          },
+          {
+            "net": "settle_mon",
+            "port_ref": "settle_mon",
+            "position": 6
+          }
+        ],
+        "module_ref": "reference_settling_window_monitor",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "err_metric",
+      "ref",
+      "rst",
+      "settle_mon",
+      "target",
+      "valid"
+    ]
+  }
+}

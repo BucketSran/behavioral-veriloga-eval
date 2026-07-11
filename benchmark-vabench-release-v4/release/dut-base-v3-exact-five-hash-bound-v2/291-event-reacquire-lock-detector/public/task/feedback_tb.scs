@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/event_reacquire_lock_detector.va"
+
+Vref (ref_clk 0) vsource type=pwl wave=[0 0 0.97n 0 1n 0.9 1.45n 0.9 1.48n 0 2.97n 0 3n 0.9 3.45n 0.9 3.48n 0 4.97n 0 5n 0.9 5.45n 0.9 5.48n 0 6.97n 0 7n 0.9 7.45n 0.9 7.48n 0 8.97n 0 9n 0.9 9.45n 0.9 9.48n 0 10.97n 0 11n 0.9 11.45n 0.9 11.48n 0 12.97n 0 13n 0.9 13.45n 0.9 13.48n 0 14.97n 0 15n 0.9 15.45n 0.9 15.48n 0 16.97n 0 17n 0.9 17.45n 0.9 17.48n 0 18.97n 0 19n 0.9 19.45n 0.9 19.48n 0 21n 0]
+Vfb (fb_clk 0) vsource type=pwl wave=[0 0 1.67n 0 1.7n 0.9 2.1n 0.9 2.13n 0 3.05n 0 3.08n 0.9 3.48n 0.9 3.51n 0 5.06n 0 5.09n 0.9 5.49n 0.9 5.52n 0 7.04n 0 7.07n 0.9 7.47n 0.9 7.5n 0 9.05n 0 9.08n 0.9 9.48n 0.9 9.51n 0 13.04n 0 13.07n 0.9 13.47n 0.9 13.5n 0 15.05n 0 15.08n 0.9 15.48n 0.9 15.51n 0 17.06n 0 17.09n 0.9 17.49n 0.9 17.52n 0 19.67n 0 19.7n 0.9 20.1n 0.9 20.13n 0 21n 0]
+Vrst (rst 0) vsource type=pwl wave=[0 0 10.4n 0 10.45n 0.9 11.55n 0.9 11.6n 0 21n 0]
+
+XDUT (ref_clk fb_clk rst lock phase_metric state_mon) event_reacquire_lock_detector
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=21n maxstep=10p
+save fb_clk lock phase_metric ref_clk rst state_mon

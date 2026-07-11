@@ -1,0 +1,54 @@
+`include "disciplines.vams"
+
+module power_enable_turnon_delay_gate(clk, vdd, vss, vbias, en, pd, pwr_ok, drive_en, delay_mon);
+input clk, vdd, vss, vbias, en, pd;
+output pwr_ok, drive_en, delay_mon;
+electrical clk, vdd, vss, vbias, en, pd, pwr_ok, drive_en, delay_mon;
+
+parameter real vth = 0.45;
+parameter real vhi = 0.9;
+parameter real vdd_min = 0.75;
+parameter real vdd_max = 1.05;
+parameter real vbias_min = 0.25;
+parameter real vbias_max = 0.75;
+parameter integer delay_cycles = 3;
+parameter real tr = 60p;
+
+integer valid_count;
+real pwr_ok_v;
+real drive_en_v;
+real delay_mon_v;
+real supply_v;
+real bias_v;
+real sampled_valid;
+
+analog begin
+    @(initial_step) begin
+        valid_count = 0;
+        pwr_ok_v = 0.0;
+        drive_en_v = 0.0;
+        delay_mon_v = 0.0;
+    end
+
+    @(cross(V(clk) - vth, +1)) begin
+        supply_v = V(vdd, vss);
+        bias_v = V(vbias, vss);
+        sampled_valid = ((supply_v >= vdd_min) && (supply_v <= vdd_max) &&
+                         (bias_v >= vbias_min) && (bias_v <= vbias_max) &&
+                         (V(en) > vth) && (V(pd) <= vth)) ? 1.0 : 0.0;
+        if (sampled_valid > 0.5) begin
+            if (valid_count < delay_cycles) valid_count = valid_count + 1;
+        end else begin
+            valid_count = 0;
+        end
+        pwr_ok_v = (sampled_valid > 0.5) ? vhi : 0.0;
+        drive_en_v = (valid_count >= delay_cycles) ? vhi : 0.0;
+        delay_mon_v = vhi * valid_count / delay_cycles;
+        if (delay_mon_v > vhi) delay_mon_v = vhi;
+    end
+
+    V(pwr_ok) <+ transition(pwr_ok_v, 0.0, tr, tr);
+    V(drive_en) <+ transition(drive_en_v, 0.0, tr, tr);
+    V(delay_mon) <+ transition(delay_mon_v, 0.0, tr, tr);
+end
+endmodule

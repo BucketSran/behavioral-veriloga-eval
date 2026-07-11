@@ -1,0 +1,16 @@
+`include "disciplines.vams"
+
+module supply_bias_validity_gate(vdd, vss, vbias, en, pd, ok, gated);
+input vdd, vss, vbias, en, pd;
+output ok, gated;
+electrical vdd, vss, vbias, en, pd, ok, gated;
+parameter real vth = 0.45;
+parameter real vhi = 0.9;
+parameter real tr = 50p;
+real gated_v;
+analog begin
+    gated_v = ((V(en) > vth) && (V(pd) <= vth)) ? vhi : 0.0;
+    V(ok) <+ transition(vhi, 0.0, tr, tr);
+    V(gated) <+ gated_v;
+end
+endmodule

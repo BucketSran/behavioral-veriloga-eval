@@ -1,0 +1,11 @@
+`include "disciplines.vams"
+
+module power_mode_supply_current_metric(vdd, vss, en, pd, mode, load, isup_metric);
+input vdd, vss, en, pd, mode, load;
+output isup_metric;
+electrical vdd, vss, en, pd, mode, load, isup_metric;
+parameter real tr = 80p;
+analog begin
+    V(isup_metric) <+ transition(0.10, 0.0, tr, tr);
+end
+endmodule

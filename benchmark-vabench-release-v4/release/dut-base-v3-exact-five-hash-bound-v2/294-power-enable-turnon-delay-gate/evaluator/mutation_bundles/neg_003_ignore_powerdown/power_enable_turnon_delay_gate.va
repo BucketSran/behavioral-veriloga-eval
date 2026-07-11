@@ -1,0 +1,34 @@
+`include "disciplines.vams"
+
+module power_enable_turnon_delay_gate(clk, vdd, vss, vbias, en, pd, pwr_ok, drive_en, delay_mon);
+input clk, vdd, vss, vbias, en, pd;
+output pwr_ok, drive_en, delay_mon;
+electrical clk, vdd, vss, vbias, en, pd, pwr_ok, drive_en, delay_mon;
+parameter real vth = 0.45;
+parameter real vhi = 0.9;
+parameter real vdd_min = 0.75;
+parameter real vdd_max = 1.05;
+parameter real vbias_min = 0.25;
+parameter real vbias_max = 0.75;
+parameter real tr = 60p;
+integer count;
+real ok_v;
+real drive_v;
+analog begin
+    @(initial_step) begin count = 0; ok_v = 0.0; drive_v = 0.0; end
+    @(cross(V(clk) - vth, +1)) begin
+        ok_v = ((V(vdd, vss) >= vdd_min) && (V(vdd, vss) <= vdd_max) &&
+                (V(vbias, vss) >= vbias_min) && (V(vbias, vss) <= vbias_max) &&
+                (V(en) > vth)) ? vhi : 0.0;
+        if (ok_v > 0.45) begin
+            if (count < 3) count = count + 1;
+        end else begin
+            count = 0;
+        end
+        drive_v = (count >= 3) ? vhi : 0.0;
+    end
+    V(pwr_ok) <+ transition(ok_v, 0.0, tr, tr);
+    V(drive_en) <+ transition(drive_v, 0.0, tr, tr);
+    V(delay_mon) <+ transition(vhi * count / 3.0, 0.0, tr, tr);
+end
+endmodule

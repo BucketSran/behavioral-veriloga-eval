@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/reference_settling_window_monitor.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=100p period=1n width=400p rise=20p fall=20p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 1n 0.9 1.05n 0.0 12n 0.0 12.05n 0.9 13n 0.9 13.05n 0.0 18n 0.0]
+Vtarget (target 0) vsource type=pwl wave=[0 0.55 8n 0.55 8.05n 0.65 18n 0.65]
+Vref (ref 0) vsource type=pwl wave=[0 0.20 2n 0.20 2.05n 0.50 3n 0.50 3.05n 0.535 8n 0.535 8.05n 0.58 9.5n 0.58 9.55n 0.66 12n 0.66 12.05n 0.62 14n 0.62 14.05n 0.65 18n 0.65]
+
+XDUT (clk rst ref target valid err_metric settle_mon) reference_settling_window_monitor
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=18n maxstep=10p
+save clk err_metric ref rst settle_mon target valid

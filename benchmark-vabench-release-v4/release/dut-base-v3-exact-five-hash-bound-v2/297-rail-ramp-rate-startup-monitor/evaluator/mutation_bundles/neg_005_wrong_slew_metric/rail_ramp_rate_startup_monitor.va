@@ -1,0 +1,65 @@
+`include "disciplines.vams"
+
+module rail_ramp_rate_startup_monitor(clk, vdd, vss, en, rail_ok, ramp_ok, startup_ready, slew_metric);
+input clk, vdd, vss, en;
+output rail_ok, ramp_ok, startup_ready, slew_metric;
+electrical clk, vdd, vss, en, rail_ok, ramp_ok, startup_ready, slew_metric;
+
+parameter real vth = 0.45;
+parameter real vhi = 0.9;
+parameter real vdd_min = 0.72;
+parameter real vdd_max = 1.08;
+parameter real vready = 0.86;
+parameter real dv_min = 0.025;
+parameter real dv_max = 0.20;
+parameter real dv_settle_max = 0.030;
+parameter integer ready_cycles = 3;
+parameter real tr = 60p;
+
+integer settled_count;
+real previous_supply;
+real rail_ok_v;
+real ramp_ok_v;
+real ready_v;
+real metric_v;
+real supply_v;
+real delta_v;
+real delta_abs;
+
+analog begin
+    @(initial_step) begin
+        settled_count = 0;
+        previous_supply = V(vdd, vss);
+        rail_ok_v = 0.0;
+        ramp_ok_v = 0.0;
+        ready_v = 0.0;
+        metric_v = 0.0;
+    end
+
+    @(cross(V(clk) - vth, +1)) begin
+        supply_v = V(vdd, vss);
+        delta_v = supply_v - previous_supply;
+        delta_abs = abs(delta_v);
+        rail_ok_v = ((V(en) > vth) && (supply_v >= vdd_min) && (supply_v <= vdd_max)) ? vhi : 0.0;
+        if (supply_v < vready) begin
+            ramp_ok_v = ((delta_v >= dv_min) && (delta_v <= dv_max)) ? vhi : 0.0;
+        end else begin
+            ramp_ok_v = (delta_abs <= dv_settle_max) ? vhi : 0.0;
+        end
+        if ((rail_ok_v > 0.45) && (ramp_ok_v > 0.45) && (supply_v >= vready)) begin
+            if (settled_count < ready_cycles) settled_count = settled_count + 1;
+        end else begin
+            settled_count = 0;
+        end
+        ready_v = (settled_count >= ready_cycles) ? vhi : 0.0;
+        metric_v = vhi * supply_v / vready;
+        if (metric_v > vhi) metric_v = vhi;
+        previous_supply = supply_v;
+    end
+
+    V(rail_ok) <+ transition(rail_ok_v, 0.0, tr, tr);
+    V(ramp_ok) <+ transition(ramp_ok_v, 0.0, tr, tr);
+    V(startup_ready) <+ transition(ready_v, 0.0, tr, tr);
+    V(slew_metric) <+ transition(metric_v, 0.0, tr, tr);
+end
+endmodule

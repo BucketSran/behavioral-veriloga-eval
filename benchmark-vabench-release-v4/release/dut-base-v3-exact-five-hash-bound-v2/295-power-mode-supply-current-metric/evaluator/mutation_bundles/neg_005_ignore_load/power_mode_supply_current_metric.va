@@ -1,0 +1,28 @@
+`include "disciplines.vams"
+
+module power_mode_supply_current_metric(vdd, vss, en, pd, mode, load, isup_metric);
+input vdd, vss, en, pd, mode, load;
+output isup_metric;
+electrical vdd, vss, en, pd, mode, load, isup_metric;
+parameter real vth = 0.45;
+parameter real vnom = 0.9;
+parameter real iq0 = 0.08;
+parameter real iq1 = 0.14;
+parameter real ipd = 0.01;
+parameter real tr = 80p;
+real supply_scale;
+real base_metric;
+real metric_v;
+analog begin
+    supply_scale = V(vdd, vss) / vnom;
+    if (supply_scale < 0.0) supply_scale = 0.0;
+    if (supply_scale > 1.5) supply_scale = 1.5;
+    if ((V(en) <= vth) || (V(pd) > vth)) begin
+        metric_v = ipd * supply_scale;
+    end else begin
+        base_metric = (V(mode) > vth) ? iq1 : iq0;
+        metric_v = base_metric * supply_scale;
+    end
+    V(isup_metric) <+ metric_v;
+end
+endmodule

@@ -1,0 +1,94 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "sine_vco_idtmod_bound_step.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=1.5u maxstep=8n"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "out",
+      "metric"
+    ]
+  },
+  "family_id": "299",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "810a5256682166da897552c6ca3215447bafeff3c933a2cb95bbdaa0d0a36a95",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "11d4c9c1f64dba10cd8c3a0c08b487f6e5043183425f3ee8b3b0b0c2105b2f4c",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "// Visible smoke testbench for sine_vco_idtmod_bound_step.",
+          "// Constant vin = 0.2 V => freq_q = 20.0e6 + 40.0e6*0.2 = 28 MHz.",
+          "",
+          "Vvin (vin 0) vsource dc=0.2 type=dc",
+          "",
+          "XDUT (vin out metric) sine_vco_idtmod_bound_step",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "// Hidden testbench for sine_vco_idtmod_bound_step.",
+          "// Constant vin = 0.4 V => freq_q = 20.0e6 + 40.0e6*0.4 = 36 MHz (~14 ns/cycle).",
+          "// maxstep=8n alone would under-resolve; $bound_step(1/(40*36e6))~0.69n enforces 40 pts/cycle.",
+          "",
+          "Vvin (vin 0) vsource dc=0.4 type=dc",
+          "",
+          "XDUT (vin out metric) sine_vco_idtmod_bound_step",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_FREQ_Q_CENTER_FREQ_VCO_GAIN",
+    "P_PHASE_Q_IDTMOD_FREQ_Q_0",
+    "P_OUT_VCO_AMP_SIN_M_TWO",
+    "P_METRIC_VCO_AMP_PHASE_Q_VOLTAGE",
+    "P_CALL_BOUND_STEP_1_0_VCO"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "1d48e8745b1e856a52686942427274317bb30879d1803bbb78081ba4f55142f4",
+    "family_spec_sha256": "01a7ce64347fb4eded3b5d85a92f31d288af51081f54910bfecd4ec8fb0171ef"
+  },
+  "task_id": "v4-299"
+}

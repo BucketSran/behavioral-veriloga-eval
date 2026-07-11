@@ -1,0 +1,89 @@
+`include "disciplines.vams"
+
+module event_reacquire_lock_detector(ref_clk, fb_clk, rst, lock, phase_metric, state_mon);
+input ref_clk, fb_clk, rst;
+output lock, phase_metric, state_mon;
+electrical ref_clk, fb_clk, rst, lock, phase_metric, state_mon;
+
+parameter real vth = 0.45;
+parameter real vhi = 0.9;
+parameter real lock_window = 180p;
+parameter real metric_fullscale = 600p;
+parameter integer lock_count = 3;
+parameter real tr = 60p;
+
+integer good_count;
+real last_ref_t;
+real phase_err_t;
+real lock_v;
+real phase_metric_v;
+real state_mon_v;
+
+analog function real clip01;
+    input x;
+    real x;
+    begin
+        if (x < 0.0) clip01 = 0.0;
+        else if (x > 1.0) clip01 = 1.0;
+        else clip01 = x;
+    end
+endfunction
+
+analog function real clamp_range;
+    input x;
+    input lo;
+    input hi;
+    real x, lo, hi;
+    begin
+        if (x < lo) clamp_range = lo;
+        else if (x > hi) clamp_range = hi;
+        else clamp_range = x;
+    end
+endfunction
+
+analog begin
+    @(initial_step) begin
+        good_count = 0;
+        last_ref_t = -1.0;
+        phase_err_t = 0.0;
+        lock_v = 0.0;
+        phase_metric_v = 0.0;
+        state_mon_v = 0.0;
+    end
+
+    @(cross(V(rst) - vth, +1)) begin
+        good_count = good_count;
+    end
+
+    @(cross(V(ref_clk) - vth, +1)) begin
+        last_ref_t = $abstime;
+    end
+
+    @(cross(V(fb_clk) - vth, +1)) begin
+        if (0) begin
+            good_count = 0;
+            lock_v = 0.0;
+            phase_metric_v = 0.0;
+            state_mon_v = 0.0;
+        end else begin
+            if (last_ref_t >= 0.0) begin
+                phase_err_t = abs($abstime - last_ref_t);
+            end else begin
+                phase_err_t = metric_fullscale;
+            end
+            if ((last_ref_t >= 0.0) && (phase_err_t <= lock_window)) begin
+                if (good_count < lock_count) good_count = good_count + 1;
+            end else begin
+                good_count = 0;
+            end
+            lock_v = (good_count >= lock_count) ? vhi : 0.0;
+            phase_metric_v = vhi * clip01(phase_err_t / metric_fullscale);
+            state_mon_v = vhi * clip01((1.0 * good_count) / lock_count);
+        end
+    end
+
+    V(lock) <+ transition(lock_v, 0.0, tr, tr);
+    V(phase_metric) <+ transition(phase_metric_v, 0.0, tr, tr);
+    V(state_mon) <+ transition(state_mon_v, 0.0, tr, tr);
+end
+endmodule

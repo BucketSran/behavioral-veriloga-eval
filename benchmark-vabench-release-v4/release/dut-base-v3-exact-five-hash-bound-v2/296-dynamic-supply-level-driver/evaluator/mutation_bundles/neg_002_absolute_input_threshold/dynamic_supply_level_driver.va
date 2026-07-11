@@ -1,0 +1,24 @@
+`include "disciplines.vams"
+
+module dynamic_supply_level_driver(din, vdd, vss, out);
+input din, vdd, vss;
+output out;
+electrical din, vdd, vss, out;
+parameter real vsup_min = 0.55;
+parameter real tr = 40p;
+real supply_v;
+real vss_v;
+real out_frac;
+real target_v;
+analog begin
+    supply_v = V(vdd, vss);
+    vss_v = V(vss);
+    if (supply_v < vsup_min) begin
+        out_frac = 0.0;
+    end else begin
+        out_frac = (V(din) > 0.45) ? 1.0 : 0.0;
+    end
+    target_v = vss_v + supply_v * transition(out_frac, 0.0, tr, tr);
+    V(out) <+ target_v;
+end
+endmodule

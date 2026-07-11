@@ -1,0 +1,19 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/power_enable_turnon_delay_gate.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=100p period=1n width=400p rise=20p fall=20p
+Vvdd (vdd 0) vsource type=pwl wave=[0 0.90 5n 0.90 5.05n 0.62 7n 0.62 7.05n 0.90 16n 0.90]
+Vvss (vss 0) vsource dc=0
+Vbias (vbias 0) vsource type=pwl wave=[0 0.45 9n 0.45 9.05n 0.90 10.5n 0.90 10.55n 0.45 16n 0.45]
+Ven (en 0) vsource type=pwl wave=[0 0.9 12n 0.9 12.05n 0.0 13n 0.0 13.05n 0.9]
+Vpd (pd 0) vsource type=pwl wave=[0 0 14n 0 14.05n 0.9 15n 0.9 15.05n 0]
+
+XDUT (clk vdd vss vbias en pd pwr_ok drive_en delay_mon) power_enable_turnon_delay_gate
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=16n maxstep=10p
+save clk delay_mon drive_en en pd pwr_ok vbias vdd vss
