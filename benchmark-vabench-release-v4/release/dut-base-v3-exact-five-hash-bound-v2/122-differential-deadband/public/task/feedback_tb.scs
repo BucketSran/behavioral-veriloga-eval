@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/differential_deadband.va"
+
+Vp (sigin_p 0) vsource type=pwl wave=[0 0.2 10n 0.2 10.1n 0.45 20n 0.45 20.1n 0.7 30n 0.7 30.1n 0.53 45n 0.53]
+Vn (sigin_n 0) vsource type=pwl wave=[0 0.7 10n 0.7 10.1n 0.45 20n 0.45 20.1n 0.2 30n 0.2 30.1n 0.47 45n 0.47]
+
+XDUT (sigin_p sigin_n sigout) differential_deadband dead_low=-0.2 dead_high=0.2 gain=1 leak=0.05
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=40n maxstep=25p
+save sigin_n sigin_p sigout

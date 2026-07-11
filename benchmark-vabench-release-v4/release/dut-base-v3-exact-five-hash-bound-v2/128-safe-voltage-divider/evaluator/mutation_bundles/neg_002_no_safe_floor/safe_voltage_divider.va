@@ -1,0 +1,6 @@
+`include "disciplines.vams"
+module safe_voltage_divider(signumer, sigdenom, sigout);
+input signumer, sigdenom; output sigout; electrical signumer, sigdenom, sigout;
+parameter real gain=1; parameter real min_sigdenom=1.0e-9 from (0:inf);
+analog begin V(sigout) <+ gain*V(signumer)/V(sigdenom); end
+endmodule

@@ -1,0 +1,136 @@
+{
+  "family_id": "123",
+  "gold_bundle_sha256": "7c5b970da66d62211876a621958246e93e2f1ccab4b0f0a3ba6af61d661d9a10",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "hard_voltage_clamp_behavior.va": "bc8501b38ed5214c9fda1e19ff587ef18d1521133bb263d50a65f2df8710b1e2"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_GROUND_REFERENCED_INPUT",
+          "P_PASSBAND_TRANSFER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "hard_voltage_clamp_behavior.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_GROUND_REFERENCED_INPUT",
+        "P_PASSBAND_TRANSFER"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "hard_voltage_clamp_behavior.va": "315d6c99cdd3011e803bc19e8b36d6bf1482bab3dffe18857ca0b75303687f76"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LOWER_CLAMP"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_no_lower_clamp/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "hard_voltage_clamp_behavior.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_002_no_lower_clamp",
+      "trigger_condition": "Passes values below the lower clamp through.",
+      "violated_property_ids": [
+        "P_LOWER_CLAMP"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "hard_voltage_clamp_behavior.va": "f71bc094bc4e92e42c0de771f950fba5ee2d828f644e32f1c44c06f8711c9af7"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_UPPER_CLAMP"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_no_upper_clamp/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "hard_voltage_clamp_behavior.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_003_no_upper_clamp",
+      "trigger_condition": "Passes values above the upper clamp through.",
+      "violated_property_ids": [
+        "P_UPPER_CLAMP"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "hard_voltage_clamp_behavior.va": "3272ed84d7ae8c69b1fbf86a0d4f987722b2ea02890e56435d042b1934aea7c8"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LOWER_CLAMP",
+          "P_UPPER_CLAMP"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_swapped_clamp_rails/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "hard_voltage_clamp_behavior.va"
+      ],
+      "fault_class": "polarity_or_direction_error",
+      "id": "neg_004_swapped_clamp_rails",
+      "trigger_condition": "Uses the opposite rail for each clamp condition.",
+      "violated_property_ids": [
+        "P_LOWER_CLAMP",
+        "P_UPPER_CLAMP"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "hard_voltage_clamp_behavior.va": "d3935e8615490cc6b9bf8dee8cc823eff66e705da67868d4bb9ef476c6b7669b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PASSBAND_TRANSFER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "hard_voltage_clamp_behavior.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Hard Voltage Clamp: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_PASSBAND_TRANSFER"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

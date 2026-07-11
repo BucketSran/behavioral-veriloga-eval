@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/deadband_window.va"
+
+Vin (sigin 0) vsource type=pwl wave=[0 -0.5 10n -0.5 10.1n 0 20n 0 20.1n 0.5 30n 0.5 30.1n 0.1 45n 0.1]
+
+XDUT (sigin sigout) deadband_window dead_low=-0.2 dead_high=0.2
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=40n maxstep=25p
+save sigin sigout

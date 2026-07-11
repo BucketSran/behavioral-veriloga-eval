@@ -1,0 +1,27 @@
+`include "disciplines.vams"
+
+module limiter_rails (vdd, vss, vin, vmax, vmin, vout);
+
+input vdd, vss, vin, vmax, vmin;
+output vout;
+electrical vdd, vss, vin, vmax, vmin, vout;
+
+real upper_limit;
+real lower_limit;
+real limited_vout;
+
+analog begin
+    upper_limit = V(vdd) - V(vmax);
+    lower_limit = V(vss) + V(vmin);
+    limited_vout = V(vin);
+
+    if (limited_vout > upper_limit) begin
+        limited_vout = upper_limit;
+    end else if (limited_vout < lower_limit) begin
+        limited_vout = lower_limit;
+    end
+
+    V(vout) <+ limited_vout;
+end
+
+endmodule

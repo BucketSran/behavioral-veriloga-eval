@@ -1,0 +1,85 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "hard_voltage_clamp_behavior.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=40n maxstep=25p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "vout"
+    ]
+  },
+  "family_id": "123",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "5f5aea514cabde7d881df7df39275e461322201a7463c7c5dd10273d7c21d4fb",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "f1ad2f2c25a0ac60b77345c96dae46af60c7247b67902947d5ca89ed4dc27990",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0 -0.5 10n -0.5 10.1n 0.3 20n 0.3 20.1n 0.9 30n 0.9 30.1n 0.1 45n 0.1]",
+          "",
+          "XDUT (vin vout 0) hard_voltage_clamp_behavior vclamp_upper=0.6 vclamp_lower=-0.2",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (vin 0) vsource type=pwl wave=[0 0.8 8n 0.8 8.1n -0.4 18n -0.4 18.1n 0 28n 0 28.1n 0.6 38n 0.6 38.1n -0.2 45n -0.2]",
+          "",
+          "XDUT (vin vout 0) hard_voltage_clamp_behavior vclamp_upper=0.6 vclamp_lower=-0.2",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_GROUND_REFERENCED_INPUT",
+    "P_PASSBAND_TRANSFER",
+    "P_LOWER_CLAMP",
+    "P_UPPER_CLAMP"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "75de03e8e6f9bc9b6bc37b2fccc35a72e308866e60409db82224d2c6c6c23415",
+    "family_spec_sha256": "bb1c4acdf18840d8d2b423293755c4fcd84b0e4ae2bf82fcb3026bdb1e21f240"
+  },
+  "task_id": "v4-123"
+}

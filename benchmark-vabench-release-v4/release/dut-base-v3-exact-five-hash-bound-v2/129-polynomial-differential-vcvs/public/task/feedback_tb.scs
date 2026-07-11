@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/polynomial_differential_vcvs.va"
+
+Vp (inp 0) vsource type=pwl wave=[0 0.35 10n 0.35 10.1n 0.45 20n 0.45 20.1n 0.55 30n 0.55 30.1n 0.70 45n 0.70]
+Vn (inn 0) vsource dc=0.45
+
+XDUT (inp inn outp outn) polynomial_differential_vcvs vcmo=0.5 a1=2 a2=0 a3=1 a5=0 a7=0 vsat=0.3
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=40n maxstep=25p
+save inn inp outn outp

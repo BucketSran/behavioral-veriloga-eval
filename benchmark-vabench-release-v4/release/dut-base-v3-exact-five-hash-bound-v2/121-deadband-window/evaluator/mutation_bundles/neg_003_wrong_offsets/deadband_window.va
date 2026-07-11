@@ -1,0 +1,10 @@
+`include "disciplines.vams"
+module deadband_window (sigin, sigout);
+input sigin; output sigout; electrical sigin, sigout;
+parameter real dead_high=0.1; parameter real dead_low=-0.1;
+analog begin
+    if (V(sigin) < dead_low) V(sigout) <+ V(sigin) - dead_high;
+    else if (V(sigin) > dead_high) V(sigout) <+ V(sigin) - dead_low;
+    else V(sigout) <+ 0;
+end
+endmodule

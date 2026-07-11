@@ -1,0 +1,138 @@
+{
+  "family_id": "126",
+  "gold_bundle_sha256": "3cfd403f80eab17411a2f9d73643646d7b6c9e90d36ec936e1f86f313fc63b09",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "absolute_value_behavior.va": "d6cfe88210e2bc13341e8f15fdddeb10045ad8b24802ba71e4aacc07d919b83a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_POSITIVE_INPUT_PASSTHROUGH"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "absolute_value_behavior.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_POSITIVE_INPUT_PASSTHROUGH"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "absolute_value_behavior.va": "84cdee331531b2b7dddbc633c5787a195b245d515c6a7993a7ea2f7cb9dc6917"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_NEGATIVE_INPUT_REFLECTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_identity/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "absolute_value_behavior.va"
+      ],
+      "fault_class": "identity",
+      "id": "neg_002_identity",
+      "trigger_condition": "Passes the signed input instead of the absolute value.",
+      "violated_property_ids": [
+        "P_NEGATIVE_INPUT_REFLECTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "absolute_value_behavior.va": "97dc0e0b9dd44b32ed8432427efdede152f6b26f8646f580d3c52d1aad45498c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_NEGATIVE_INPUT_REFLECTION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_negative_abs/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "absolute_value_behavior.va"
+      ],
+      "fault_class": "negative_abs",
+      "id": "neg_003_negative_abs",
+      "trigger_condition": "Drives the negative absolute value.",
+      "violated_property_ids": [
+        "P_NEGATIVE_INPUT_REFLECTION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "absolute_value_behavior.va": "86f35c454af8b95e8d4fd679f3712279a3c11127f53ec19fb21501f42de7f573"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_MEMORYLESS_ABSOLUTE_VALUE",
+          "P_NEGATIVE_INPUT_REFLECTION",
+          "P_POSITIVE_INPUT_PASSTHROUGH"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_half_abs/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "absolute_value_behavior.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_004_half_abs",
+      "trigger_condition": "Uses half of the absolute value.",
+      "violated_property_ids": [
+        "P_MEMORYLESS_ABSOLUTE_VALUE",
+        "P_NEGATIVE_INPUT_REFLECTION",
+        "P_POSITIVE_INPUT_PASSTHROUGH"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "absolute_value_behavior.va": "31b823c587d141e80562cc313ac61c41e055e3cde573afc43a42bb2b04600c5e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_NEGATIVE_INPUT_REFLECTION",
+          "P_POSITIVE_INPUT_PASSTHROUGH"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "absolute_value_behavior.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Absolute Value: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_NEGATIVE_INPUT_REFLECTION",
+        "P_POSITIVE_INPUT_PASSTHROUGH"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

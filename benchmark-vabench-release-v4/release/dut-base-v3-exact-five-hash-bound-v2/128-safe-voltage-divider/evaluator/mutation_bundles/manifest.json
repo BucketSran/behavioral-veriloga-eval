@@ -1,0 +1,132 @@
+{
+  "family_id": "128",
+  "gold_bundle_sha256": "6d2abbe4addf0be085a19c609d271f39f9d183792a3a8b6a1ae3477c70d74d96",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "safe_voltage_divider.va": "3c2095a58e0a8dd6deca3b185bc7aefb4c8dace9b00844b88e9d8c445af00c0b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_GAINED_DIVISION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "safe_voltage_divider.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Drives zero output and therefore fails the stable waveform contract.",
+      "violated_property_ids": [
+        "P_GAINED_DIVISION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "safe_voltage_divider.va": "175cb4f86bcb80c8f704c2eaf82d5e65ccb46f3f8b830d0dc97b94cea8fd345a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DENOMINATOR_MAGNITUDE_FLOOR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_no_safe_floor/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "safe_voltage_divider.va"
+      ],
+      "fault_class": "omission_or_incomplete_behavior",
+      "id": "neg_002_no_safe_floor",
+      "trigger_condition": "Divides by the raw denominator without applying the safety floor.",
+      "violated_property_ids": [
+        "P_DENOMINATOR_MAGNITUDE_FLOOR"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "safe_voltage_divider.va": "d2cd396fb243f617b87825a4a8ba959639ad4689645250313fc0344f700a328d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DENOMINATOR_SIGN_PRESERVED"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_loses_denominator_sign/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "safe_voltage_divider.va"
+      ],
+      "fault_class": "loses_denominator_sign",
+      "id": "neg_003_loses_denominator_sign",
+      "trigger_condition": "Uses a positive floor for both small positive and small negative denominators.",
+      "violated_property_ids": [
+        "P_DENOMINATOR_SIGN_PRESERVED"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "safe_voltage_divider.va": "b34ae40fb5abeaee11881a18235c7ed2bc0be9c9f94a26a937ff591f24313d02"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_GAINED_DIVISION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_missing_gain/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "safe_voltage_divider.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_004_missing_gain",
+      "trigger_condition": "Omits the gain factor.",
+      "violated_property_ids": [
+        "P_GAINED_DIVISION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "safe_voltage_divider.va": "d352020b9a3d309a3427e5472ed38dd138469e54e3a3ad4aecc439b5dc5ad2e0"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_GAINED_DIVISION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_metric_scale_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "safe_voltage_divider.va"
+      ],
+      "fault_class": "metric_or_observable_fault",
+      "id": "neg_005_metric_scale_low",
+      "trigger_condition": "Safe Voltage Divider: scales the metric output, preserving the main path while failing measurement checks.",
+      "violated_property_ids": [
+        "P_GAINED_DIVISION"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

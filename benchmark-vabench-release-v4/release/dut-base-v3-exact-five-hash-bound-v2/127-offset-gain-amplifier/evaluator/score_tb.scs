@@ -1,0 +1,12 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/offset_gain_amplifier.va"
+
+Vin (sigin 0) vsource type=pwl wave=[0 -0.2 8n -0.2 8.1n 0.2 18n 0.2 18.1n 0.6 28n 0.6 28.1n 0.35 35n 0.35]
+
+XDUT (sigin sigout) offset_gain_amplifier
+
+
+tran tran stop=30n maxstep=25p
+save sigin sigout

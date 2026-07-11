@@ -1,0 +1,16 @@
+// vaBench generated partial-pass negative: metric_scale_low
+// Preserves module/interface shape while intentionally violating one public contract.
+`include "disciplines.vams"
+
+module differential_gain_driver(sigin_p, sigin_n, sigout_p, sigout_n, sigref);
+input sigin_p, sigin_n, sigref;
+output sigout_p, sigout_n;
+electrical sigin_p, sigin_n, sigout_p, sigout_n, sigref;
+parameter real gain = 1;
+
+analog begin
+    V(sigout_p, sigref) <+ (0.42 * (V(sigin_p, sigin_n) * gain / 2));
+    V(sigout_n, sigref) <+ (0.42 * (-V(sigin_p, sigin_n) * gain / 2));
+end
+
+endmodule

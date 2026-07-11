@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/limiter_rails.va"
+
+Vdd (vdd 0) vsource dc=0.9
+Vss (vss 0) vsource dc=0
+Vmax (vmax 0) vsource dc=0.2
+Vmin (vmin 0) vsource dc=0.1
+Vin (vin 0) vsource type=pwl wave=[0 -0.2 10n -0.2 10.1n 0.4 20n 0.4 20.1n 0.9 30n 0.9 30.1n 0.05 45n 0.05]
+
+XDUT (vdd vss vin vmax vmin vout) limiter_rails
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=40n maxstep=25p
+save vdd vin vmax vmin vout vss

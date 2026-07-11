@@ -1,0 +1,12 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/hard_voltage_clamp_behavior.va"
+
+Vin (vin 0) vsource type=pwl wave=[0 0.8 8n 0.8 8.1n -0.4 18n -0.4 18.1n 0 28n 0 28.1n 0.6 38n 0.6 38.1n -0.2 45n -0.2]
+
+XDUT (vin vout 0) hard_voltage_clamp_behavior vclamp_upper=0.6 vclamp_lower=-0.2
+
+
+tran tran stop=40n maxstep=25p
+save vin vout

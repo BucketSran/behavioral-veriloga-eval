@@ -1,0 +1,84 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "offset_gain_amplifier.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=30n maxstep=25p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "sigin",
+      "sigout"
+    ]
+  },
+  "family_id": "127",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "22e8ee28d4b5dd44235ca2c2cc49f40e892956286b68d6c8a050b74d41891400",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "1cf98d132af5e1ad97c619bc8f39eb14e4fa0ef7d2390ee832e271f43b338d26",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (sigin 0) vsource type=pwl wave=[0 0.1 10n 0.1 10.1n 0.5 20n 0.5 20.1n -0.1 35n -0.1]",
+          "",
+          "XDUT (sigin sigout) offset_gain_amplifier",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vin (sigin 0) vsource type=pwl wave=[0 -0.2 8n -0.2 8.1n 0.2 18n 0.2 18.1n 0.6 28n 0.6 28.1n 0.35 35n 0.35]",
+          "",
+          "XDUT (sigin sigout) offset_gain_amplifier",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_INPUT_OFFSET_SUBTRACTION",
+    "P_FIXED_GAIN_THREE",
+    "P_DIRECT_MEMORYLESS_OUTPUT"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "1c84ab2941a73988bc562227890508b564abdd44bb90a23b2ac4a2bb024fc42a",
+    "family_spec_sha256": "eee986a7d0b55578bb70b0bfd6d88d6300239495a1b91fa45ad599f4e2b6572c"
+  },
+  "task_id": "v4-127"
+}

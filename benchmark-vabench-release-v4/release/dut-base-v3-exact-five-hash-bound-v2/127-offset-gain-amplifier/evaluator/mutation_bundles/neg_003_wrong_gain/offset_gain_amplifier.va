@@ -1,0 +1,5 @@
+`include "disciplines.vams"
+module offset_gain_amplifier(sigin, sigout);
+input sigin; output sigout; electrical sigin, sigout; real adjusted_input;
+analog begin adjusted_input=V(sigin)-0.2; V(sigout)<+2.0*adjusted_input; end
+endmodule

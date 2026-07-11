@@ -1,0 +1,8 @@
+`include "disciplines.vams"
+module smooth_comparator_tanh (sigin, sigref, sigout);
+input sigin, sigref; output sigout; electrical sigin, sigref, sigout;
+parameter real high=1; parameter real low=-1; parameter real offset=0; parameter real comp_slope=1000;
+analog begin
+    V(sigout) <+ 0.25*(high-low)*tanh(comp_slope*(V(sigin,sigref)-offset)) + 0.5*(high+low);
+end
+endmodule
