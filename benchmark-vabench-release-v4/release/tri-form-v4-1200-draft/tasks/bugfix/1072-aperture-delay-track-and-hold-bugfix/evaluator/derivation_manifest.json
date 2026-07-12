@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-072",
+    "canonical_task_slug": "072-aperture-delay-track-and-hold",
+    "family_spec_sha256": "c98697dbe527499fbf0b007b4e68fe9f3beada52d09ac3abc4c3fbc0f620f44d",
+    "mutation_catalog_sha256": "e49594dc583e2d208a4462a6d845864b1492259da509441a327694da8c87fc38",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "072",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_inverted_sample",
+    "testbench_suite": [
+      "neg_001_zero",
+      "neg_004_inverted_sample",
+      "neg_003_half_gain_sample",
+      "neg_005_metric_scale_low",
+      "neg_002_edge_sample_delayed_output"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "be50568d681d660d32be44b81b1d58e3201bc01217f5aea402d8c7af80bcfc98",
+    "changed_artifacts": [
+      "sample_hold_aperture_ref.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_inverted_sample",
+    "rationale": "Select fault class delayed_sampling_with_inverted_rail_relative_value_must_not_satisfy_held_value_c under trigger 'stimulus exercises delayed sampling with inverted rail-relative value must not satisfy held-value checks against the public observable contract' because it exercises P_HOLD, P_RAIL_OBSERVABILITY as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 24,
+    "source_preferred_seed": "neg_001_zero",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-073",
+    "canonical_task_slug": "073-bias-voltage-generator-with-enable-trim",
+    "family_spec_sha256": "90d54d0c495e7076dff22333fa2a40d2d0e526d484c2652c4922b89f1f37239a",
+    "mutation_catalog_sha256": "35c338707656f1f8f4f4fe27767e30fa8b0535a06c585c3fcaa81c81ac22103a",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "073",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_event_edge_wrong",
+    "testbench_suite": [
+      "neg_001_zero",
+      "neg_003_event_edge_wrong",
+      "neg_004_reset_polarity_wrong",
+      "neg_005_metric_scale_low",
+      "neg_006_nonmonotonic_upper_trim"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "b85761716ec5809fa0587cc57848bf5f89dcd1f420cd46bf5f395fd3b1660879",
+    "changed_artifacts": [
+      "bias_voltage_generator_with_enable_trim.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_event_edge_wrong",
+    "rationale": "Select fault class trim_update_gain_too_low_under_settles_bias under trigger 'Uses the correct clock/reset contract but an under-relaxed trim update coefficient, so the bias does not reach the low-trim target window.' because it exercises P_SETTLING, P_TRIM_TARGET as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 27,
+    "source_preferred_seed": "neg_001_zero",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

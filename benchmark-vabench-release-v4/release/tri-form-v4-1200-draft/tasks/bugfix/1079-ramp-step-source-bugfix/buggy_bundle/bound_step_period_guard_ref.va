@@ -1,0 +1,29 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bound_step_period_guard_ref (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    output electrical guard_out,
+    output electrical phase_out
+);
+
+parameter real period = 8n from (0:inf);
+parameter real pulse_w = 1.5n from (0:inf);
+parameter real points_per_period = 16.0 from (0:inf);
+parameter real tedge = 40p from (0:inf);
+
+real vh;
+real vl;
+real cycle_start;
+real next_cycle;
+real phase;
+real guard_target;
+real phase_norm;
+
+
+    analog begin
+        V(guard_out) <+ transition(0.0);
+        V(phase_out) <+ transition(0.0);
+    end
+endmodule

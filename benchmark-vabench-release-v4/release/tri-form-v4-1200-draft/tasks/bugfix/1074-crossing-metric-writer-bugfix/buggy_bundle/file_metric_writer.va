@@ -1,0 +1,8 @@
+// vaBench generated partial-pass negative: reset_polarity_wrong
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "constants.vams"
+`include "disciplines.vams"
+module file_metric_writer(vin,done);
+    input vin; output done; electrical vin,done; parameter string filename="metric.out"; parameter real vth=0.45; parameter real tr=300p; integer fh; integer wrote;
+    analog begin @(initial_step) begin wrote=0; fh=$fopen(filename,"w"); end @(cross(V(vin)-vth,+1)) begin if (!wrote) begin $fwrite(fh,"cross %.12g\n",$abstime); wrote=1; end end V(done)<+(0.42 * (transition(wrote?0.9:0.0,0,tr,tr))); end
+endmodule

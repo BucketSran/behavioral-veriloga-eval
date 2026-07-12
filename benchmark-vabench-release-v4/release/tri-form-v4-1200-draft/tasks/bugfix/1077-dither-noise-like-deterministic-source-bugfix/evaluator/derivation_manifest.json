@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-077",
+    "canonical_task_slug": "077-dither-noise-like-deterministic-source",
+    "family_spec_sha256": "d9424817d87ea5af6eb71dc5fb735c7ca572c06b6ddb737a16da79bb3518b18f",
+    "mutation_catalog_sha256": "dd2f0aca151b249dffbf81a6d7ddad1b48c92f683331aa632c32ba3b8a10be1d",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "077",
+  "negative_assignment": {
+    "bugfix_seed": "neg_005_metric_scale_low",
+    "testbench_suite": [
+      "neg_001_zero",
+      "neg_003_too_large_noise",
+      "neg_004_biased_noise",
+      "neg_005_metric_scale_low",
+      "neg_002_passthrough"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "3103d11c8e126c526474db9326300541d22b4dfbf9386b7ff3d2d2462fc21ef8",
+    "changed_artifacts": [
+      "noise_gen_ref.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_005_metric_scale_low",
+    "rationale": "Select fault class scales_the_generated_output_amplitude_preserving_the_sample_timing_while_violati under trigger 'stimulus exercises Scales the generated output amplitude, preserving the sample timing while violating the dither-source amplitude contract. against the public observable contract' because it exercises P_ZERO_MEAN_DITHER as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 19,
+    "source_preferred_seed": "neg_001_zero",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

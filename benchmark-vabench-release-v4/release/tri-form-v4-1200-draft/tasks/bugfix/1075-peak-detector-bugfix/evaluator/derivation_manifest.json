@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-075",
+    "canonical_task_slug": "075-peak-detector",
+    "family_spec_sha256": "23194842a80ba3a3fdfb829b78156803d77ec92c803ddd011c0afeee1124fa5d",
+    "mutation_catalog_sha256": "39074e09ca272a0bc7a176ec3cbb82cb9aad861164fd9d07ed1ba64bef788f2d",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "075",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_threshold_shifted",
+    "testbench_suite": [
+      "neg_001_zero",
+      "neg_002_threshold_shifted",
+      "neg_004_reset_polarity_wrong",
+      "neg_005_metric_scale_low",
+      "neg_006_monotonic_notch"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "a6e5d70d1e5820922bfb0ad008ecf6322e71c1107a175f8850755cbabb4717fd",
+    "changed_artifacts": [
+      "peak_detector.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_threshold_shifted",
+    "rationale": "Select fault class peak_accept_threshold_too_high_misses_valid_public_peak under trigger 'Requires vin to exceed 0.60 V before updating the held peak, missing a valid 0.55 V public peak while retaining reset behavior.' because it exercises P_SAMPLED_MEASUREMENT as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 21,
+    "source_preferred_seed": "neg_001_zero",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

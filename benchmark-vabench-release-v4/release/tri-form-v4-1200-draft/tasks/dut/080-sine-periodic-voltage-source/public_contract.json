@@ -1,0 +1,180 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "multitone",
+            "parameters": [
+              {
+                "default": 1000000.0,
+                "name": "f1",
+                "override_behavior": "sets the first sine-tone frequency",
+                "type": "real",
+                "units": "Hz",
+                "valid_range": "f1 > 0"
+              },
+              {
+                "default": 2000000.0,
+                "name": "f2",
+                "override_behavior": "sets the second sine-tone frequency",
+                "type": "real",
+                "units": "Hz",
+                "valid_range": "f2 > 0"
+              },
+              {
+                "default": 3000000.0,
+                "name": "f3",
+                "override_behavior": "sets the third sine-tone frequency",
+                "type": "real",
+                "units": "Hz",
+                "valid_range": "f3 > 0"
+              },
+              {
+                "default": 0.2,
+                "name": "a1",
+                "override_behavior": "sets the signed amplitude of the first sine tone",
+                "type": "real",
+                "units": "V",
+                "valid_range": "any finite voltage amplitude"
+              },
+              {
+                "default": 0.1,
+                "name": "a2",
+                "override_behavior": "sets the signed amplitude of the second sine tone",
+                "type": "real",
+                "units": "V",
+                "valid_range": "any finite voltage amplitude"
+              },
+              {
+                "default": 0.05,
+                "name": "a3",
+                "override_behavior": "sets the signed amplitude of the third sine tone",
+                "type": "real",
+                "units": "V",
+                "valid_range": "any finite voltage amplitude"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "VSS",
+                "position": 0
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "OUT",
+                "position": 1
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "multitone.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "080",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "stimulus_source_generators",
+    "difficulty": "D1",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain deterministic transient behavioral Verilog-A for three-tone periodic voltage stimulus",
+    "title": "Sine Periodic Voltage Source"
+  },
+  "modeling_constraints": [
+    "Use deterministic continuous voltage contribution from the declared three-tone sum.",
+    "Drive OUT relative to the declared VSS reference port.",
+    "Provide timestep guidance based on the highest declared frequency without altering the waveform contract.",
+    "Do not add DC offsets, phase parameters, undeclared ports, or validation-only waveform branches."
+  ],
+  "properties": [
+    {
+      "id": "P_FIRST_TONE",
+      "observable_contract": "The output includes a zero-phase sine component with frequency f1 and signed amplitude a1.",
+      "required_signals": [
+        "time",
+        "OUT"
+      ]
+    },
+    {
+      "id": "P_SECOND_TONE",
+      "observable_contract": "The output includes a zero-phase sine component with frequency f2 and signed amplitude a2.",
+      "required_signals": [
+        "time",
+        "OUT"
+      ]
+    },
+    {
+      "id": "P_THIRD_TONE",
+      "observable_contract": "The output includes a zero-phase sine component with frequency f3 and signed amplitude a3.",
+      "required_signals": [
+        "time",
+        "OUT"
+      ]
+    },
+    {
+      "id": "P_LINEAR_SUPERPOSITION",
+      "observable_contract": "At every transient time t, OUT equals a1*sin(2*pi*f1*t) plus a2*sin(2*pi*f2*t) plus a3*sin(2*pi*f3*t).",
+      "required_signals": [
+        "time",
+        "OUT"
+      ]
+    },
+    {
+      "id": "P_ZERO_INITIAL_PHASE",
+      "observable_contract": "With no added offset and zero initial phase for all tones, OUT is 0 V at t = 0.",
+      "required_signals": [
+        "time",
+        "OUT"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "multitone.va"
+  ],
+  "task_id": "v4-080",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "0",
+            "port_ref": "VSS",
+            "position": 0
+          },
+          {
+            "net": "OUT",
+            "port_ref": "OUT",
+            "position": 1
+          }
+        ],
+        "module_ref": "multitone",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "OUT"
+    ]
+  }
+}

@@ -1,0 +1,324 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "prbs7_ref",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets serial_out and state-bit high levels",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > 0"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets the clock, reset, and enable decision threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "0 < vth < vdd"
+              },
+              {
+                "default": 1e-11,
+                "name": "trf",
+                "override_behavior": "sets rise and fall smoothing for every output",
+                "type": "real",
+                "units": "s",
+                "valid_range": "trf > 0"
+              },
+              {
+                "default": 0.0,
+                "name": "td",
+                "override_behavior": "sets transition delay for every output",
+                "type": "real",
+                "units": "s",
+                "valid_range": "td >= 0"
+              },
+              {
+                "default": 127,
+                "name": "seed",
+                "override_behavior": "sets the seven-bit reset state; seed 0 is remapped to 7'b0000001 to avoid the LFSR lock-up state",
+                "type": "integer",
+                "units": null,
+                "valid_range": "integer 0 through 127 inclusive; values outside this range are invalid public overrides"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst_n",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "en",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "serial_out",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "state_0",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "state_1",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "state_2",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "state_3",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "state_4",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "state_5",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "state_6",
+                "position": 10
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "prbs7_ref.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "078",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "stimulus_source_generators",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A for resettable PRBS-7 stimulus generation",
+    "title": "LFSR PRBS Generator"
+  },
+  "modeling_constraints": [
+    "Use deterministic rising-edge state updates with active-low reset semantics.",
+    "Preserve the public bit ordering and expose every state bit continuously.",
+    "Do not add undeclared taps, seed ports, files, or validation-only states."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_SEED",
+      "observable_contract": "When rst_n is below vth, the exposed seven-bit state is loaded from seed[6:0]; legal seed overrides are integers 0 through 127 inclusive, and seed 0 is remapped to 7'b0000001 to avoid the LFSR lock-up state.",
+      "required_signals": [
+        "time",
+        "rst_n",
+        "state_0",
+        "state_1",
+        "state_2",
+        "state_3",
+        "state_4",
+        "state_5",
+        "state_6"
+      ]
+    },
+    {
+      "id": "P_ENABLE_GATING",
+      "observable_contract": "On rising clk crossings, the state advances only when rst_n and en are both above vth; otherwise it holds or resets as applicable.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst_n",
+        "en",
+        "state_0",
+        "state_1",
+        "state_2",
+        "state_3",
+        "state_4",
+        "state_5",
+        "state_6"
+      ]
+    },
+    {
+      "id": "P_FEEDBACK_POLYNOMIAL",
+      "observable_contract": "Each enabled update sets next state_0 to previous state_6 XOR previous state_5, implementing x^7 + x^6 + 1.",
+      "required_signals": [
+        "time",
+        "clk",
+        "en",
+        "state_0",
+        "state_5",
+        "state_6"
+      ]
+    },
+    {
+      "id": "P_SHIFT_SEQUENCE",
+      "observable_contract": "Each enabled update sets next state_i to previous state_(i-1) for i from 1 through 6.",
+      "required_signals": [
+        "time",
+        "clk",
+        "en",
+        "state_0",
+        "state_1",
+        "state_2",
+        "state_3",
+        "state_4",
+        "state_5",
+        "state_6"
+      ]
+    },
+    {
+      "id": "P_SERIAL_OUTPUT",
+      "observable_contract": "serial_out always represents the current state_6 bit.",
+      "required_signals": [
+        "time",
+        "serial_out",
+        "state_6"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_LEVELS",
+      "observable_contract": "serial_out and every state output use 0 V and vdd levels with delay td and transition smoothing trf.",
+      "required_signals": [
+        "time",
+        "serial_out",
+        "state_0",
+        "state_1",
+        "state_2",
+        "state_3",
+        "state_4",
+        "state_5",
+        "state_6"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "prbs7_ref.va"
+  ],
+  "task_id": "v4-078",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst_n",
+            "port_ref": "rst_n",
+            "position": 1
+          },
+          {
+            "net": "en",
+            "port_ref": "en",
+            "position": 2
+          },
+          {
+            "net": "serial_out",
+            "port_ref": "serial_out",
+            "position": 3
+          },
+          {
+            "net": "state_0",
+            "port_ref": "state_0",
+            "position": 4
+          },
+          {
+            "net": "state_1",
+            "port_ref": "state_1",
+            "position": 5
+          },
+          {
+            "net": "state_2",
+            "port_ref": "state_2",
+            "position": 6
+          },
+          {
+            "net": "state_3",
+            "port_ref": "state_3",
+            "position": 7
+          },
+          {
+            "net": "state_4",
+            "port_ref": "state_4",
+            "position": 8
+          },
+          {
+            "net": "state_5",
+            "port_ref": "state_5",
+            "position": 9
+          },
+          {
+            "net": "state_6",
+            "port_ref": "state_6",
+            "position": 10
+          }
+        ],
+        "module_ref": "prbs7_ref",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst_n",
+      "en",
+      "serial_out",
+      "state_0",
+      "state_1",
+      "state_2",
+      "state_3",
+      "state_4",
+      "state_5",
+      "state_6"
+    ]
+  }
+}

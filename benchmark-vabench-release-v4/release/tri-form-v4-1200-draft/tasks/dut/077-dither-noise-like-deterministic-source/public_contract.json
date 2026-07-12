@@ -1,0 +1,153 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "noise_gen",
+            "parameters": [
+              {
+                "default": 0.01,
+                "name": "sigma",
+                "override_behavior": "scales the held deterministic perturbation added to vin_i",
+                "type": "real",
+                "units": "V",
+                "valid_range": "sigma >= 0"
+              },
+              {
+                "default": 5e-10,
+                "name": "dt",
+                "override_behavior": "sets the periodic interval between perturbation-sample updates",
+                "type": "real",
+                "units": "s",
+                "valid_range": "dt > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin_i",
+                "position": 0
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout_o",
+                "position": 1
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "noise_gen_ref.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "077",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "stimulus_source_generators",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain deterministic timer-sampled transient behavioral Verilog-A for bounded dither stimulus",
+    "title": "Dither Noise Like Deterministic Source"
+  },
+  "modeling_constraints": [
+    "Use deterministic periodic sample-and-hold updates rather than physical noise analysis or random simulator state.",
+    "Apply sigma only as a perturbation scale and preserve the continuously observed vin_i contribution.",
+    "Do not add undeclared seed inputs, files, ports, or validation-only sequence branches."
+  ],
+  "properties": [
+    {
+      "id": "P_PERIODIC_UPDATE",
+      "observable_contract": "The deterministic perturbation sample updates once every dt seconds.",
+      "required_signals": [
+        "time",
+        "vin_i",
+        "vout_o"
+      ]
+    },
+    {
+      "id": "P_SAMPLE_HOLD",
+      "observable_contract": "Between update events, the perturbation vout_o minus vin_i remains piecewise constant.",
+      "required_signals": [
+        "time",
+        "vin_i",
+        "vout_o"
+      ]
+    },
+    {
+      "id": "P_ADDITIVE_OUTPUT",
+      "observable_contract": "At all times after the first update, vout_o equals vin_i plus sigma times the currently held normalized perturbation sample.",
+      "required_signals": [
+        "time",
+        "vin_i",
+        "vout_o"
+      ]
+    },
+    {
+      "id": "P_DETERMINISTIC_SEQUENCE",
+      "observable_contract": "The normalized perturbation sample repeats the public eight-sample sequence [-1.0, -0.5, 0.0, 0.5, 1.0, 0.5, 0.0, -0.5], advancing by one entry at each dt update.",
+      "required_signals": [
+        "time",
+        "vin_i",
+        "vout_o"
+      ]
+    },
+    {
+      "id": "P_ZERO_MEAN_DITHER",
+      "observable_contract": "Every complete eight-sample sequence period is exactly zero mean, and every perturbation is bounded within [-sigma, +sigma].",
+      "required_signals": [
+        "time",
+        "vin_i",
+        "vout_o"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "noise_gen_ref.va"
+  ],
+  "task_id": "v4-077",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin_i",
+            "port_ref": "vin_i",
+            "position": 0
+          },
+          {
+            "net": "vout_o",
+            "port_ref": "vout_o",
+            "position": 1
+          }
+        ],
+        "module_ref": "noise_gen",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin_i",
+      "vout_o"
+    ]
+  }
+}
