@@ -1,0 +1,187 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "gain_amp_fixed",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets twice the output common-mode level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > 0"
+              },
+              {
+                "default": 8.64,
+                "name": "ACTUAL_GAIN",
+                "override_behavior": "sets positive differential voltage gain",
+                "type": "real",
+                "units": "V/V",
+                "valid_range": "ACTUAL_GAIN > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "VIN_P",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "VIN_N",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "VOUT_P",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "VOUT_N",
+                "position": 3
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "gain_amp_fixed.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "092",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "measurement_instrumentation_flows",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain transient behavioral Verilog-A",
+    "title": "Fixed Gain Amplifier"
+  },
+  "modeling_constraints": [
+    "Use deterministic pure voltage-domain differential amplification.",
+    "Preserve the public positive polarity and vdd/2 common-mode relation.",
+    "Do not use transistor-level devices, AC/noise analysis, waveform artifacts, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_DIFFERENTIAL_GAIN",
+      "observable_contract": "The output differential equals ACTUAL_GAIN times the input differential.",
+      "required_signals": [
+        "time",
+        "vin_p",
+        "vin_n",
+        "vout_p",
+        "vout_n"
+      ]
+    },
+    {
+      "id": "P_POSITIVE_POLARITY",
+      "observable_contract": "A positive input differential produces a positive output differential and a negative input differential produces a negative output differential.",
+      "required_signals": [
+        "time",
+        "vin_p",
+        "vin_n",
+        "vout_p",
+        "vout_n"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_COMMON_MODE",
+      "observable_contract": "The output pair remains centered at vdd/2 independently of input common mode.",
+      "required_signals": [
+        "time",
+        "vin_p",
+        "vin_n",
+        "vout_p",
+        "vout_n"
+      ]
+    },
+    {
+      "id": "P_SYMMETRIC_OUTPUT_PAIR",
+      "observable_contract": "Half the amplified differential is added to VOUT_P and half is subtracted from VOUT_N.",
+      "required_signals": [
+        "time",
+        "vin_p",
+        "vin_n",
+        "vout_p",
+        "vout_n"
+      ]
+    },
+    {
+      "id": "P_PARAMETER_OVERRIDES",
+      "observable_contract": "Legal ACTUAL_GAIN and vdd overrides alter differential gain and output common mode according to their declared meanings.",
+      "required_signals": [
+        "time",
+        "vin_p",
+        "vin_n",
+        "vout_p",
+        "vout_n"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "gain_amp_fixed.va"
+  ],
+  "task_id": "v4-092",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin_p",
+            "port_ref": "VIN_P",
+            "position": 0
+          },
+          {
+            "net": "vin_n",
+            "port_ref": "VIN_N",
+            "position": 1
+          },
+          {
+            "net": "vout_p",
+            "port_ref": "VOUT_P",
+            "position": 2
+          },
+          {
+            "net": "vout_n",
+            "port_ref": "VOUT_N",
+            "position": 3
+          }
+        ],
+        "module_ref": "gain_amp_fixed",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin_p",
+      "vin_n",
+      "vout_p",
+      "vout_n"
+    ]
+  }
+}

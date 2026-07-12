@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/programmable_stimulus_sequencer.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=2n width=1n rise=50p fall=50p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 95n 0]
+Vmode (mode 0) vsource type=pwl wave=[0 0 25.9n 0 26n 0.45 61.9n 0.45 62n 0.9 95n 0.9]
+Vgate (gate 0) vsource type=pwl wave=[0 0 65.9n 0 66n 0.9 75.9n 0.9 76n 0 79.9n 0 80n 0.9 88n 0.9 88.1n 0 95n 0]
+
+XDUT (clk rst mode gate out metric) programmable_stimulus_sequencer
+
+
+tran tran stop=95n maxstep=0.5n
+save clk rst mode gate out metric

@@ -1,0 +1,63 @@
+// vaBench generated partial-pass negative: event_edge_wrong
+// Preserves module/interface shape while intentionally violating one hidden behavior contract.
+`include "constants.vams"
+`include "disciplines.vams"
+
+module ldo_load_step_recovery_flow(clk, rst, vin, out, metric, load_mon, ctrl_mon);
+input clk, rst, vin;
+output out, metric, load_mon, ctrl_mon;
+electrical clk, rst, vin, out, metric, load_mon, ctrl_mon;
+parameter real tr = 100p;
+parameter real vth = 0.45;
+real regv, targetv, loadv, last_load, ctrlv, errv, metricv;
+integer recover_count;
+analog begin
+    @(initial_step) begin
+        regv = 0.60;
+        targetv = 0.60;
+        loadv = 0.10;
+        last_load = 0.10;
+        ctrlv = 0.50;
+        metricv = 0.9;
+        recover_count = 0;
+    end
+    @(cross(V(clk) - vth, -1)) begin
+        if (V(rst) > vth) begin
+            regv = 0.60;
+            targetv = 0.60;
+            loadv = 0.10;
+            last_load = 0.10;
+            ctrlv = 0.50;
+            metricv = 0.9;
+            recover_count = 0;
+        end else begin
+            loadv = V(vin);
+            if (loadv < 0.0) loadv = 0.0;
+            if (loadv > 0.9) loadv = 0.9;
+            targetv = 0.61 - 0.025 * loadv;
+            ctrlv = 0.45 + 0.40 * loadv + 0.50 * (targetv - regv);
+            if (ctrlv > 0.85) ctrlv = 0.85;
+            if (ctrlv < 0.05) ctrlv = 0.05;
+            if (loadv > last_load + 0.20) begin
+                regv = regv - 0.13;
+                recover_count = 0;
+            end else if (loadv + 0.20 < last_load) begin
+                regv = regv + 0.05;
+                recover_count = 0;
+            end
+            regv = regv + 0.30 * (targetv - regv);
+            recover_count = recover_count + 1;
+            errv = regv - targetv;
+            if (errv < 0.0) errv = -errv;
+            metricv = (recover_count >= 5 && errv < 0.045) ? 0.9 : 0.25;
+            last_load = loadv;
+            if (regv > 0.75) regv = 0.75;
+            if (regv < 0.20) regv = 0.20;
+        end
+    end
+    V(out) <+ (0.42 * (transition(regv, 0, tr, tr)));
+    V(metric) <+ (0.42 * (transition(metricv, 0, tr, tr)));
+    V(load_mon) <+ (0.42 * (transition(loadv, 0, tr, tr)));
+    V(ctrl_mon) <+ (0.42 * (transition(ctrlv, 0, tr, tr)));
+end
+endmodule

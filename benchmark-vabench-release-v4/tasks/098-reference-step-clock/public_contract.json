@@ -1,0 +1,188 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "ref_step_clk",
+            "parameters": [
+              {
+                "default": 2e-08,
+                "name": "period_pre",
+                "override_behavior": "sets the full clock period before t_switch",
+                "type": "real",
+                "units": "s",
+                "valid_range": "period_pre > 0"
+              },
+              {
+                "default": 1.95e-08,
+                "name": "period_post",
+                "override_behavior": "sets the full clock period for cycles scheduled after t_switch",
+                "type": "real",
+                "units": "s",
+                "valid_range": "period_post > 0"
+              },
+              {
+                "default": 2e-06,
+                "name": "t_switch",
+                "override_behavior": "sets the cadence-change boundary",
+                "type": "real",
+                "units": "s",
+                "valid_range": "t_switch >= 0"
+              },
+              {
+                "default": 1e-10,
+                "name": "tedge",
+                "override_behavior": "sets CLK rise and fall smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tedge > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VDD",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VSS",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "CLK",
+                "position": 2
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "ref_step_clk.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "098",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "pll_clock_timing_systems",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Reference Step Clock"
+  },
+  "modeling_constraints": [
+    "Generate a deterministic supply-referenced square wave with a parameterized frequency step.",
+    "Use event-driven state and smoothed voltage contributions only.",
+    "Do not hard-code validation stop times or sample windows, and do not use current contributions, transistor-level devices, validation hooks, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_SUPPLY_REFERENCED_RAILS",
+      "observable_contract": "CLK low and high levels track VSS and VDD respectively.",
+      "required_signals": [
+        "time",
+        "VDD",
+        "VSS",
+        "CLK"
+      ]
+    },
+    {
+      "id": "P_PRE_SWITCH_PERIOD",
+      "observable_contract": "Clock cycles before t_switch have full period period_pre.",
+      "required_signals": [
+        "time",
+        "CLK"
+      ]
+    },
+    {
+      "id": "P_POST_SWITCH_PERIOD",
+      "observable_contract": "Clock cycles scheduled after t_switch have full period period_post.",
+      "required_signals": [
+        "time",
+        "CLK"
+      ]
+    },
+    {
+      "id": "P_CADENCE_STEP",
+      "observable_contract": "The waveform changes cadence near t_switch without stopping, duplicating, or losing clock transitions.",
+      "required_signals": [
+        "time",
+        "CLK"
+      ]
+    },
+    {
+      "id": "P_HALF_DUTY_CYCLE",
+      "observable_contract": "CLK duty cycle remains close to 50 percent on both sides of the cadence step.",
+      "required_signals": [
+        "time",
+        "CLK"
+      ]
+    },
+    {
+      "id": "P_PARAMETERIZED_TIMING",
+      "observable_contract": "Nearby legal overrides of period_pre, period_post, t_switch, and tedge produce the corresponding periods, switch boundary, and edge smoothing.",
+      "required_signals": [
+        "time",
+        "VDD",
+        "VSS",
+        "CLK"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "ref_step_clk.va"
+  ],
+  "task_id": "v4-098",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vdd",
+            "port_ref": "VDD",
+            "position": 0
+          },
+          {
+            "net": "vss",
+            "port_ref": "VSS",
+            "position": 1
+          },
+          {
+            "net": "clk",
+            "port_ref": "CLK",
+            "position": 2
+          }
+        ],
+        "module_ref": "ref_step_clk",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "VDD",
+      "VSS",
+      "CLK"
+    ]
+  }
+}

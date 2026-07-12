@@ -1,0 +1,265 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "sample_hold_droop_ref",
+            "parameters": [
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets the clock crossing and coarse-decision threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real"
+              },
+              {
+                "default": 4e-11,
+                "name": "trf",
+                "override_behavior": "sets output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "trf >= 0"
+              },
+              {
+                "default": 9e-08,
+                "name": "tau",
+                "override_behavior": "sets the held-value droop time constant",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tau > 0"
+              },
+              {
+                "default": 5e-10,
+                "name": "dt",
+                "override_behavior": "sets the interval between bounded droop updates",
+                "type": "real",
+                "units": "s",
+                "valid_range": "dt > 0"
+              },
+              {
+                "default": 2e-10,
+                "name": "taperture",
+                "override_behavior": "sets sampling delay after a rising clk crossing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "taperture >= 0"
+              },
+              {
+                "default": 2e-09,
+                "name": "valid_width",
+                "override_behavior": "sets the duration of the valid pulse after sampling",
+                "type": "real",
+                "units": "s",
+                "valid_range": "valid_width > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vdd",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vss",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "coarse",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "sample_hold_droop_ref.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/sample_hold_droop_ref.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "100",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "sampling_analog_memory",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Sample Hold Droop Front End"
+  },
+  "modeling_constraints": [
+    "Use event-driven delayed sampling, bounded timer-driven droop, and voltage-coded status outputs.",
+    "Use smoothed voltage contributions only.",
+    "Do not use current contributions, ddt(), idt(), validation hooks, testbench-specific timing constants, or simulator-specific side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_APERTURE_CAPTURE",
+      "observable_contract": "Each rising clk crossing schedules capture of vin after taperture rather than sampling at an unrelated time.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_SUPPLY_CLAMPED_SAMPLE",
+      "observable_contract": "At aperture capture, the held output updates to the sampled vin clamped between the instantaneous vss and vdd rails.",
+      "required_signals": [
+        "time",
+        "vdd",
+        "vss",
+        "clk",
+        "vin",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_COARSE_DECISION",
+      "observable_contract": "At each capture, coarse is high when the sampled value exceeds vth and low otherwise, then holds until the next capture.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "coarse"
+      ]
+    },
+    {
+      "id": "P_VALID_PULSE",
+      "observable_contract": "Valid asserts at the aperture sample and deasserts after valid_width.",
+      "required_signals": [
+        "time",
+        "clk",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_LOW_PHASE_DROOP",
+      "observable_contract": "While clk is low, vout applies bounded droop updates governed by tau and dt instead of remaining ideal or changing discontinuously.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_NO_TRACK_THROUGH",
+      "observable_contract": "Between aperture captures, vout does not transparently track changes on vin; only the specified droop behavior is permitted.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "vout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "sample_hold_droop_ref.va"
+  ],
+  "task_id": "v4-1100",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vdd",
+            "port_ref": "vdd",
+            "position": 0
+          },
+          {
+            "net": "vss",
+            "port_ref": "vss",
+            "position": 1
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 2
+          },
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 3
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 4
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 5
+          },
+          {
+            "net": "coarse",
+            "port_ref": "coarse",
+            "position": 6
+          }
+        ],
+        "module_ref": "sample_hold_droop_ref",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vdd",
+      "vss",
+      "clk",
+      "vin",
+      "vout",
+      "valid",
+      "coarse"
+    ]
+  }
+}
