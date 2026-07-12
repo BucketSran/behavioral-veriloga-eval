@@ -1,0 +1,28 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module segmented_dac_dem_top(clk, rst, code_5, code_4, code_3, code_2, code_1, code_0,
+                             vout, sel_7, sel_6, sel_5, sel_4, sel_3, sel_2, sel_1, sel_0,
+                             ptr_2, ptr_1, ptr_0);
+input clk, rst, code_5, code_4, code_3, code_2, code_1, code_0;
+output vout, sel_7, sel_6, sel_5, sel_4, sel_3, sel_2, sel_1, sel_0, ptr_2, ptr_1, ptr_0;
+electrical clk, rst, code_5, code_4, code_3, code_2, code_1, code_0;
+electrical vout, sel_7, sel_6, sel_5, sel_4, sel_3, sel_2, sel_1, sel_0, ptr_2, ptr_1, ptr_0;
+electrical req_2, req_1, req_0, fine_2, fine_1, fine_0;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vref = 0.9;
+parameter real vth = 0.45;
+parameter real tr = 200p;
+
+thermometer_decoder #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr))
+    XTHERM(code_5, code_4, code_3, req_2, req_1, req_0);
+binary_decoder #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr))
+    XBIN(code_2, code_1, code_0, fine_2, fine_1, fine_0);
+dwa_rotator #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr))
+    XDWA(clk, rst, req_2, req_1, req_0, sel_7, sel_6, sel_5, sel_4, sel_3, sel_2, sel_1, sel_0,
+         ptr_2, ptr_1, ptr_0);
+dac_driver #(.vss(vss), .vref(vref), .vth(vth), .tr(tr))
+    XDAC(clk, rst, req_2, req_1, req_0, fine_2, fine_1, fine_0, vout);
+endmodule

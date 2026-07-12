@@ -1,0 +1,26 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sd_comparator(state_metric, rst, bit_out);
+    input state_metric, rst;
+    output bit_out;
+    electrical state_metric, rst, bit_out;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    real bit_v;
+
+    analog begin
+        if (V(rst) > vth) begin
+            bit_v = vss;
+        end else begin
+            bit_v = (V(state_metric) < vcm) ? vdd : vss;
+        end
+
+        V(bit_out) <+ transition(bit_v, 0, tr, tr);
+    end
+endmodule

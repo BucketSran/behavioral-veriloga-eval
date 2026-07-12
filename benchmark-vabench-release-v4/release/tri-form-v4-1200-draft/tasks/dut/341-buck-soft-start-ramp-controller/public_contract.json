@@ -1,0 +1,278 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "buck_soft_start_ramp_controller",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "40e-3 from (0:inf)",
+                "name": "ramp_step",
+                "override_behavior": "overrides ramp_step",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "5e-3 from [0:inf)",
+                "name": "ramp_tol",
+                "override_behavior": "overrides ramp_tol",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "target_ref",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "soft_ref",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "ramp_metric",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "done",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "buck_soft_start_ramp_controller.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "341",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "power_control",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Buck Soft-start Ramp Controller"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Use only voltage-domain behavioral state and voltage contributions on public electrical outputs.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+      "observable_contract": "On reset or when disabled, clear `soft_ref`, ramp metric, and `done`.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "target_ref",
+        "soft_ref",
+        "ramp_metric",
+        "done"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+      "observable_contract": "On each enabled rising `clk` edge, increase `soft_ref` toward `target_ref` by at most `ramp_step`.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "target_ref",
+        "soft_ref",
+        "ramp_metric",
+        "done"
+      ]
+    },
+    {
+      "id": "P_NEVER_ALLOW_SOFT_REF_TO_EXCEED",
+      "observable_contract": "Never allow `soft_ref` to exceed `target_ref` or the public rails.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "target_ref",
+        "soft_ref",
+        "ramp_metric",
+        "done"
+      ]
+    },
+    {
+      "id": "P_EXPOSE_THE_REMAINING_RAMP_DISTANCE_ON",
+      "observable_contract": "Expose the remaining ramp distance on `ramp_metric`.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "target_ref",
+        "soft_ref",
+        "ramp_metric",
+        "done"
+      ]
+    },
+    {
+      "id": "P_ASSERT_DONE_ONLY_AFTER_SOFT_REF",
+      "observable_contract": "Assert `done` only after `soft_ref` reaches the target within `ramp_tol`.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "target_ref",
+        "soft_ref",
+        "ramp_metric",
+        "done"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "buck_soft_start_ramp_controller.va"
+  ],
+  "task_id": "v4-341",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 2
+          },
+          {
+            "net": "target_ref",
+            "port_ref": "target_ref",
+            "position": 3
+          },
+          {
+            "net": "soft_ref",
+            "port_ref": "soft_ref",
+            "position": 4
+          },
+          {
+            "net": "ramp_metric",
+            "port_ref": "ramp_metric",
+            "position": 5
+          },
+          {
+            "net": "done",
+            "port_ref": "done",
+            "position": 6
+          }
+        ],
+        "module_ref": "buck_soft_start_ramp_controller",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "enable",
+      "target_ref",
+      "soft_ref",
+      "ramp_metric",
+      "done"
+    ]
+  }
+}

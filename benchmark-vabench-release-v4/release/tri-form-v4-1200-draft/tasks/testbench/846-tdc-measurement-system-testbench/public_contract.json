@@ -1,0 +1,811 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "edge_detector",
+              "interval_counter",
+              "binary_encoder",
+              "valid_latch"
+            ],
+            "name": "tdc_measurement_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200p",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "start",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "stop",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_7",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_6",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_5",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_4",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_3",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_2",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_1",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_0",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 12
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "overflow",
+                "position": 13
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "tdc_measurement_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "edge_detector",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200p",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "start",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "stop",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clear_i",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "start_evt",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "stop_evt",
+                "position": 5
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "edge_detector.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "interval_counter",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200p",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "start_evt",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "stop_evt",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count_7",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count_6",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count_5",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count_4",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count_3",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count_2",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count_1",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count_0",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid_i",
+                "position": 12
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "overflow_i",
+                "position": 13
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "clear_o",
+                "position": 14
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "interval_counter.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "binary_encoder",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200p",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "count_7",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "count_6",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "count_5",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "count_4",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "count_3",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "count_2",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "count_1",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "count_0",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_7",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_6",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_5",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_4",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_3",
+                "position": 12
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_2",
+                "position": 13
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_1",
+                "position": 14
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_0",
+                "position": 15
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "binary_encoder.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "valid_latch",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200p",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "start_evt",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "valid_i",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "overflow_i",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "overflow",
+                "position": 5
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "valid_latch.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "346",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "measurement_systems",
+    "difficulty": "D4",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "TDC Event Measurement System"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain transient behavioral Verilog-A.",
+    "Preserve the declared multi-module architecture and exact public artifact interfaces.",
+    "Do not use current contributions, unsupported continuous operators, validation logic, hard-coded evaluator timing, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_TDC_RESET_CLEAR",
+      "observable_contract": "Reset clears count code, valid, and overflow.",
+      "required_signals": [
+        "time",
+        "rst",
+        "code_7",
+        "code_6",
+        "code_5",
+        "code_4",
+        "code_3",
+        "code_2",
+        "code_1",
+        "code_0",
+        "valid",
+        "overflow"
+      ]
+    },
+    {
+      "id": "P_TDC_RESTART_CLEAR",
+      "observable_contract": "Each rising start edge begins a new interval and clears valid and overflow.",
+      "required_signals": [
+        "time",
+        "start",
+        "rst",
+        "valid",
+        "overflow"
+      ]
+    },
+    {
+      "id": "P_TDC_INTERVAL_COUNT",
+      "observable_contract": "The first stop after start latches the number of intervening rising clock edges.",
+      "required_signals": [
+        "time",
+        "start",
+        "stop",
+        "clk",
+        "code_7",
+        "code_6",
+        "code_5",
+        "code_4",
+        "code_3",
+        "code_2",
+        "code_1",
+        "code_0"
+      ]
+    },
+    {
+      "id": "P_TDC_VALID_LATCH",
+      "observable_contract": "A completed interval asserts valid and preserves its code until restart or reset.",
+      "required_signals": [
+        "time",
+        "start",
+        "stop",
+        "clk",
+        "valid",
+        "code_7",
+        "code_0"
+      ]
+    },
+    {
+      "id": "P_TDC_OVERFLOW",
+      "observable_contract": "The 256th armed clock saturates code at 255, asserts overflow and valid, and disarms.",
+      "required_signals": [
+        "time",
+        "start",
+        "stop",
+        "clk",
+        "code_7",
+        "code_6",
+        "code_5",
+        "code_4",
+        "code_3",
+        "code_2",
+        "code_1",
+        "code_0",
+        "valid",
+        "overflow"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/tdc_measurement_top.va",
+    "supplied_dut/edge_detector.va",
+    "supplied_dut/interval_counter.va",
+    "supplied_dut/binary_encoder.va",
+    "supplied_dut/valid_latch.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-846",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "start",
+            "port_ref": "start",
+            "position": 0
+          },
+          {
+            "net": "stop",
+            "port_ref": "stop",
+            "position": 1
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "code_7",
+            "port_ref": "code_7",
+            "position": 4
+          },
+          {
+            "net": "code_6",
+            "port_ref": "code_6",
+            "position": 5
+          },
+          {
+            "net": "code_5",
+            "port_ref": "code_5",
+            "position": 6
+          },
+          {
+            "net": "code_4",
+            "port_ref": "code_4",
+            "position": 7
+          },
+          {
+            "net": "code_3",
+            "port_ref": "code_3",
+            "position": 8
+          },
+          {
+            "net": "code_2",
+            "port_ref": "code_2",
+            "position": 9
+          },
+          {
+            "net": "code_1",
+            "port_ref": "code_1",
+            "position": 10
+          },
+          {
+            "net": "code_0",
+            "port_ref": "code_0",
+            "position": 11
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 12
+          },
+          {
+            "net": "overflow",
+            "port_ref": "overflow",
+            "position": 13
+          }
+        ],
+        "module_ref": "tdc_measurement_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "start",
+      "stop",
+      "clk",
+      "rst",
+      "code_7",
+      "code_6",
+      "code_5",
+      "code_4",
+      "code_3",
+      "code_2",
+      "code_1",
+      "code_0",
+      "valid",
+      "overflow"
+    ]
+  }
+}

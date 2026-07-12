@@ -1,0 +1,41 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-344",
+    "canonical_task_slug": "344-segmented-dac-dem-system",
+    "family_spec_sha256": "d3d9a8a6771967e8ec6d4fa7ea04d7a2d66641760ab1372f8b37835dc2195b06",
+    "mutation_catalog_sha256": "2281001a0532c02678838b765909ecdce0f7319fa7e2e4f81431707e681cd2af",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "344",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_dac_divisor_64",
+    "testbench_suite": [
+      "neg_001_dac_divisor_64",
+      "neg_002_pointer_frozen",
+      "neg_005_vout_stuck_low",
+      "neg_003_mask_short_by_one",
+      "neg_004_fine_lsb_stuck_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "d1d09086b6b72ec20a8a8dce9382a4214ffa5c97f4045dd490253b732828bcd9",
+    "changed_artifacts": [
+      "binary_decoder.va",
+      "dac_driver.va",
+      "dwa_rotator.va",
+      "segmented_dac_dem_top.va",
+      "thermometer_decoder.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_dac_divisor_64",
+    "rationale": "Select fault class dac_gain_error under trigger 'any nonzero code is sampled' because it exercises P_DEM_DAC_TRANSFER as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 13,
+    "source_preferred_seed": "neg_001_dac_divisor_64",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

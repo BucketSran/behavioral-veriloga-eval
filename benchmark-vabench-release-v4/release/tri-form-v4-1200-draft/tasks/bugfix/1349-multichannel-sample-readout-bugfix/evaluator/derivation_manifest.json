@@ -1,0 +1,40 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-349",
+    "canonical_task_slug": "349-multichannel-sample-readout",
+    "family_spec_sha256": "6953452553b858267d8c95197d7d18a614698ea4d2ff55b207cf980a38b72132",
+    "mutation_catalog_sha256": "04b9918c4779b362a680270198264988d1faa005ee1043a22da7b49243729128",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "349",
+  "negative_assignment": {
+    "bugfix_seed": "neg_005_reset_does_not_clear_out",
+    "testbench_suite": [
+      "neg_001_only_channel0_captured",
+      "neg_003_valid_stuck_low",
+      "neg_005_reset_does_not_clear_out",
+      "neg_002_pointer_skips_channels",
+      "neg_004_selector1_reads_hold2"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "8e817bde4d6b0e8c1a55c2848836955aa9038913f1227a7eea94795acb38143f",
+    "changed_artifacts": [
+      "mux_controller.va",
+      "output_driver.va",
+      "sample_hold_bank.va",
+      "sample_mux_readout_top.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_005_reset_does_not_clear_out",
+    "rationale": "Select fault class missing_reset under trigger 'reset is asserted after a nonzero read' because it exercises P_READOUT_RESET_CLEAR as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 15,
+    "source_preferred_seed": "neg_001_only_channel0_captured",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

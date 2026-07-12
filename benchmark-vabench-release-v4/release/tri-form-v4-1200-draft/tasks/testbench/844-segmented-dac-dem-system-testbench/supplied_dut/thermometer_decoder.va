@@ -1,0 +1,29 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module thermometer_decoder(code_5, code_4, code_3, req_2, req_1, req_0);
+input code_5, code_4, code_3;
+output req_2, req_1, req_0;
+electrical code_5, code_4, code_3, req_2, req_1, req_0;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vth = 0.45;
+parameter real tr = 200p;
+
+integer req;
+real r2, r1, r0;
+
+analog begin
+    req = 0;
+    if (V(code_3) > vth) req = req + 1;
+    if (V(code_4) > vth) req = req + 2;
+    if (V(code_5) > vth) req = req + 4;
+    r2 = (req >= 4) ? vdd : vss;
+    r1 = ((req == 2) || (req == 3) || (req == 6) || (req == 7)) ? vdd : vss;
+    r0 = ((req == 1) || (req == 3) || (req == 5) || (req == 7)) ? vdd : vss;
+    V(req_2) <+ transition(r2, 0, tr, tr);
+    V(req_1) <+ transition(r1, 0, tr, tr);
+    V(req_0) <+ transition(r0, 0, tr, tr);
+end
+endmodule

@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-341",
+    "canonical_task_slug": "341-buck-soft-start-ramp-controller",
+    "family_spec_sha256": "812b7ac824fe8845bd81da0cf18dfbdb0f25a90a495885d21ae20ca354ba125b",
+    "mutation_catalog_sha256": "c8eef159424cfd086da4633c1757311fc285c9d25b3846be0db13268fb5ac4e0",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "341",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_double_ramp_step",
+    "testbench_suite": [
+      "neg_002_double_ramp_step",
+      "neg_003_target_drop_not_clamped",
+      "neg_004_ramp_metric_reports_progress",
+      "neg_005_done_asserted_before_target",
+      "neg_001_disable_retains_soft_ref"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "1316252584d4bca7a0d7d84f69ef9da6f556272a6557fa3b81da0d28ff7a3a2b",
+    "changed_artifacts": [
+      "buck_soft_start_ramp_controller.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_double_ramp_step",
+    "rationale": "Select fault class soft_reference_advances_by_double_ramp_step under trigger 'an enabled rising clock edge occurs while target_ref is more than ramp_tol above soft_ref' because it exercises P_ON_EACH_ENABLED_RISING_CLK_EDGE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 18,
+    "source_preferred_seed": "neg_002_double_ramp_step",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

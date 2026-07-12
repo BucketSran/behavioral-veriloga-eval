@@ -1,0 +1,41 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-342",
+    "canonical_task_slug": "342-sar-adc-system-4b",
+    "family_spec_sha256": "6daef18c68b2077ee47e1262b1192430cdfb89058c4f459c840014df247a6072",
+    "mutation_catalog_sha256": "dd56d20e72bf33ff28f8d5c75de332d47b4c60fe5478f55744c43c23c7a0c13a",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "342",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_comparator_polarity",
+    "testbench_suite": [
+      "neg_001_sample_stuck_zero",
+      "neg_004_wrong_first_trial",
+      "neg_005_done_stuck_low",
+      "neg_003_comparator_polarity",
+      "neg_002_cdac_divisor_15"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "6944e4735ae2c46af3547eee1b5fdb583d2bad7bdafe54bfe5054189c0819f9e",
+    "changed_artifacts": [
+      "binary_weighted_cdac.va",
+      "sample_hold.va",
+      "sar_adc_top.va",
+      "sar_comparator.va",
+      "sar_controller.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_comparator_polarity",
+    "rationale": "Select fault class comparator_polarity under trigger 'held sample and DAC trial differ' because it exercises P_SAR_FINAL_CODE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 13,
+    "source_preferred_seed": "neg_001_sample_stuck_zero",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

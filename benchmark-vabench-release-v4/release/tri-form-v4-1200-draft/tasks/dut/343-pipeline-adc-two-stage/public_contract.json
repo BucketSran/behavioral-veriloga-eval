@@ -1,0 +1,687 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "stage1_quantizer",
+              "residue_amp",
+              "stage2_quantizer",
+              "code_aligner"
+            ],
+            "name": "pipeline_adc_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.9",
+                "name": "vref",
+                "override_behavior": "overrides vref for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200p",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "valid_i",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_3",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_2",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_1",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_0",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid_o",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "residue_dbg",
+                "position": 9
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "pipeline_adc_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "stage1_quantizer",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.9",
+                "name": "vref",
+                "override_behavior": "overrides vref for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200p",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "valid_i",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "bit_1",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "bit_0",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid_o",
+                "position": 6
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "stage1_quantizer.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "residue_amp",
+            "parameters": [
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.9",
+                "name": "vref",
+                "override_behavior": "overrides vref for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200p",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "s1_1",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "s1_0",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "residue_o",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "residue_dbg",
+                "position": 5
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "residue_amp.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "stage2_quantizer",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.9",
+                "name": "vref",
+                "override_behavior": "overrides vref for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200p",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "residue_i",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "valid_i",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "bit_1",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "bit_0",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid_o",
+                "position": 6
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "stage2_quantizer.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "code_aligner",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200p",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "s1_1",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "s1_0",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "s1_valid",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "s2_1",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "s2_0",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "s2_valid",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_3",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_2",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_1",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code_0",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid_o",
+                "position": 12
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "code_aligner.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "family_id": "343",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "data_converter_systems",
+    "difficulty": "D4",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Two-stage Pipeline ADC Mini Chain"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain transient behavioral Verilog-A.",
+    "Preserve the declared multi-module architecture and exact public artifact interfaces.",
+    "Do not use current contributions, unsupported continuous operators, validation logic, hard-coded evaluator timing, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_PIPE_RESET_CLEAR",
+      "observable_contract": "Reset clears both stages, output code, valid_o, and residue_dbg.",
+      "required_signals": [
+        "time",
+        "rst",
+        "code_3",
+        "code_2",
+        "code_1",
+        "code_0",
+        "valid_o",
+        "residue_dbg"
+      ]
+    },
+    {
+      "id": "P_PIPE_RESIDUE",
+      "observable_contract": "A valid input sample produces the four-times normalized residue for its coarse quarter range.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "valid_i",
+        "residue_dbg"
+      ]
+    },
+    {
+      "id": "P_PIPE_ALIGNED_CODE",
+      "observable_contract": "The delayed coarse and fine decisions align into the clamped 4-bit conversion code.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "valid_i",
+        "code_3",
+        "code_2",
+        "code_1",
+        "code_0",
+        "valid_o"
+      ]
+    },
+    {
+      "id": "P_PIPE_VALID_LATENCY",
+      "observable_contract": "valid_o accompanies each completed pipeline result and no reset result is marked valid.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "valid_i",
+        "valid_o"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "pipeline_adc_top.va",
+    "stage1_quantizer.va",
+    "residue_amp.va",
+    "stage2_quantizer.va",
+    "code_aligner.va"
+  ],
+  "task_id": "v4-343",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "valid_i",
+            "port_ref": "valid_i",
+            "position": 3
+          },
+          {
+            "net": "code_3",
+            "port_ref": "code_3",
+            "position": 4
+          },
+          {
+            "net": "code_2",
+            "port_ref": "code_2",
+            "position": 5
+          },
+          {
+            "net": "code_1",
+            "port_ref": "code_1",
+            "position": 6
+          },
+          {
+            "net": "code_0",
+            "port_ref": "code_0",
+            "position": 7
+          },
+          {
+            "net": "valid_o",
+            "port_ref": "valid_o",
+            "position": 8
+          },
+          {
+            "net": "residue_dbg",
+            "port_ref": "residue_dbg",
+            "position": 9
+          }
+        ],
+        "module_ref": "pipeline_adc_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "clk",
+      "rst",
+      "valid_i",
+      "code_3",
+      "code_2",
+      "code_1",
+      "code_0",
+      "valid_o",
+      "residue_dbg"
+    ]
+  }
+}

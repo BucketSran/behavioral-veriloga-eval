@@ -1,0 +1,41 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-348",
+    "canonical_task_slug": "348-vga-gain-calibration-loop",
+    "family_spec_sha256": "661d3b16bd2234a7b00e85d30b57df124c9e308dd14b56908509635257207959",
+    "mutation_catalog_sha256": "32bddc961e65705acdd8a2c782f8b00f2eba89bc9f8f483f7042e02171af2979",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "348",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_gain_direction_reversed",
+    "testbench_suite": [
+      "neg_001_gain_direction_reversed",
+      "neg_003_gain_lsb_double",
+      "neg_004_lock_one_cycle",
+      "neg_005_peak_not_absolute",
+      "neg_002_reset_gain_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "7a400b3231ced23037fde81f71e472eddf0852c08ca892339c6cf5fefdce96ec",
+    "changed_artifacts": [
+      "gain_controller.va",
+      "lock_detector.va",
+      "peak_detector.va",
+      "vga_cal_loop_top.va",
+      "vga_model.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_gain_direction_reversed",
+    "rationale": "Select fault class gain_control_polarity under trigger 'peak lies below target' because it exercises P_VGA_GAIN_DIRECTION as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 20,
+    "source_preferred_seed": "neg_001_gain_direction_reversed",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

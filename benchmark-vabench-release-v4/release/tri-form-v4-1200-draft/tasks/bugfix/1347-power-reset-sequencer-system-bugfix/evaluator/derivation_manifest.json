@@ -1,0 +1,41 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-347",
+    "canonical_task_slug": "347-power-reset-sequencer-system",
+    "family_spec_sha256": "53f53541156402704f92c484744f4c56a086e8ca283c13cb3b633f0a85f4a920",
+    "mutation_catalog_sha256": "6d034ec7d715f3de27958ed20c2f2b4ea91da07f7a73c8613e52e65260694c46",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "347",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_enables_same_cycle",
+    "testbench_suite": [
+      "neg_001_por_one_edge",
+      "neg_003_enables_same_cycle",
+      "neg_004_ready_without_extra_edge",
+      "neg_005_brownout_output_ungated",
+      "neg_002_enable_request_ignored"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "287561366e0eea13a7eb8ba1766fd5c2c7b3b1fffb35176d495b346013174f0a",
+    "changed_artifacts": [
+      "enable_sequencer.va",
+      "por_detector.va",
+      "power_reset_seq_top.va",
+      "ready_flag.va",
+      "reset_synchronizer.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_enables_same_cycle",
+    "rationale": "Select fault class sequence_timing_error under trigger 'core reset is released' because it exercises P_PWR_SEQUENCE_ORDER as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 22,
+    "source_preferred_seed": "neg_001_por_one_edge",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,20 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sar_comparator(sample_i, dac_i, cmp_o);
+input sample_i, dac_i;
+output cmp_o;
+electrical sample_i, dac_i, cmp_o;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vth = 0.45;
+parameter real tr = 200p;
+
+real cmp_level;
+
+analog begin
+    cmp_level = (V(sample_i) < V(dac_i)) ? vdd : vss;
+    V(cmp_o) <+ transition(cmp_level, 0, tr, tr);
+end
+endmodule

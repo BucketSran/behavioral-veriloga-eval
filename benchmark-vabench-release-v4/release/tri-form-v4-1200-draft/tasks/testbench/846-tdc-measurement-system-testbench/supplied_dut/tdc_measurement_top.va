@@ -1,0 +1,27 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module tdc_measurement_top(start, stop, clk, rst, code_7, code_6, code_5, code_4,
+                           code_3, code_2, code_1, code_0, valid, overflow);
+input start, stop, clk, rst;
+output code_7, code_6, code_5, code_4, code_3, code_2, code_1, code_0, valid, overflow;
+electrical start, stop, clk, rst, code_7, code_6, code_5, code_4, code_3, code_2, code_1, code_0, valid, overflow;
+electrical start_evt, stop_evt, valid_i, overflow_i, clear_evt;
+electrical count_7, count_6, count_5, count_4, count_3, count_2, count_1, count_0;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vth = 0.45;
+parameter real tr = 200p;
+
+edge_detector #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr))
+    XEDGE(start, stop, rst, clear_evt, start_evt, stop_evt);
+interval_counter #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr))
+    XCOUNT(clk, rst, start_evt, stop_evt, count_7, count_6, count_5, count_4,
+           count_3, count_2, count_1, count_0, valid_i, overflow_i, clear_evt);
+binary_encoder #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr))
+    XENC(count_7, count_6, count_5, count_4, count_3, count_2, count_1, count_0,
+         code_7, code_6, code_5, code_4, code_3, code_2, code_1, code_0);
+valid_latch #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr))
+    XLATCH(rst, start_evt, valid_i, overflow_i, valid, overflow);
+endmodule

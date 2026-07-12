@@ -1,0 +1,21 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sigma_delta_top(vin, clk, rst, bit_out, avg_3, avg_2, avg_1, avg_0, state_metric);
+    input vin, clk, rst;
+    output bit_out, avg_3, avg_2, avg_1, avg_0, state_metric;
+    electrical vin, clk, rst, bit_out, avg_3, avg_2, avg_1, avg_0, state_metric;
+    electrical feedback;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real state_limit = 1.8;
+    parameter real tr = 200p from (0:inf);
+
+    feedback_dac #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr)) u_feedback(bit_out, rst, feedback);
+    integrator_state #(.vcm(vcm), .vth(vth), .state_limit(state_limit), .tr(tr)) u_integrator(vin, feedback, clk, rst, state_metric);
+    sd_comparator #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr)) u_comparator(state_metric, rst, bit_out);
+    decimator_lite #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr)) u_decimator(bit_out, clk, rst, avg_3, avg_2, avg_1, avg_0);
+endmodule

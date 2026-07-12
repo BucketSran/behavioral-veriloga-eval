@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/pipeline_adc_top.va"
+ahdl_include "./dut/stage1_quantizer.va"
+ahdl_include "./dut/residue_amp.va"
+ahdl_include "./dut/stage2_quantizer.va"
+ahdl_include "./dut/code_aligner.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=4n delay=5n rise=100p fall=100p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 195n 0]
+Vvin (vin 0) vsource type=pwl wave=[0 -0.08 13n -0.08 13.1n -0.08 43n -0.08 43.1n 0.225 73n 0.225 73.1n 0.449 103n 0.449 103.1n 0.676 133n 0.676 133.1n 0.899 163n 0.899 163.1n 1.02 195n 1.02]
+Vvalid_i (valid_i 0) vsource type=pwl wave=[0 0 13.5n 0 13.6n 0.9 16.5n 0.9 16.6n 0 43.5n 0 43.6n 0.9 46.5n 0.9 46.6n 0 73.5n 0 73.6n 0.9 76.5n 0.9 76.6n 0 103.5n 0 103.6n 0.9 106.5n 0.9 106.6n 0 133.5n 0 133.6n 0.9 136.5n 0.9 136.6n 0 163.5n 0 163.6n 0.9 166.5n 0.9 166.6n 0 195n 0]
+XDUT (vin clk rst valid_i code_3 code_2 code_1 code_0 valid_o residue_dbg) pipeline_adc_top
+
+tran tran stop=195n maxstep=100p
+save vin clk rst valid_i code_3 code_2 code_1 code_0 valid_o residue_dbg

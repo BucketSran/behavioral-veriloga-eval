@@ -1,0 +1,35 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module residue_amp(vin, rst, s1_1, s1_0, residue_o, residue_dbg);
+input vin, rst, s1_1, s1_0;
+output residue_o, residue_dbg;
+electrical vin, rst, s1_1, s1_0, residue_o, residue_dbg;
+
+parameter real vss = 0.0;
+parameter real vref = 0.9;
+parameter real vth = 0.45;
+parameter real tr = 200p;
+
+integer coarse;
+real x, span, residue;
+
+analog begin
+    if (V(rst) > vth) begin
+        residue = vss;
+    end else begin
+        coarse = 0;
+        if (V(s1_0) > vth) coarse = coarse + 1;
+        if (V(s1_1) > vth) coarse = coarse + 2;
+        x = V(vin);
+        if (x < vss) x = vss;
+        if (x > vref) x = vref;
+        span = vref - vss;
+        residue = vss + 4.0 * (x - (vss + span * coarse / 4.0));
+        if (residue < vss) residue = vss;
+        if (residue > vref) residue = vref;
+    end
+    V(residue_o) <+ transition(residue, 0, tr, tr);
+    V(residue_dbg) <+ transition(residue, 0, tr, tr);
+end
+endmodule

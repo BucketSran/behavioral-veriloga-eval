@@ -1,0 +1,41 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-346",
+    "canonical_task_slug": "346-tdc-measurement-system",
+    "family_spec_sha256": "3ab9da12ea64b107edcdbdf1f675c0d4b4cf07729bf37c8964e4ac0c7c5cc42b",
+    "mutation_catalog_sha256": "c70b29c78048b9cac038b3d8d2c1c9e20a5a3c7761c461de90fa6ff9a1a20832",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "346",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_count_by_two",
+    "testbench_suite": [
+      "neg_001_count_by_two",
+      "neg_003_valid_stuck_low",
+      "neg_004_early_overflow",
+      "neg_006_reset_clear_ignored",
+      "neg_007_restart_clear_ignored"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "3d8d6b518deae7c6aac01aa68219efb5b5f7c01f1207079b4ac6030687f735fc",
+    "changed_artifacts": [
+      "binary_encoder.va",
+      "edge_detector.va",
+      "interval_counter.va",
+      "tdc_measurement_top.va",
+      "valid_latch.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_count_by_two",
+    "rationale": "Select fault class counter_step_error under trigger 'an armed interval spans clock edges' because it exercises P_TDC_INTERVAL_COUNT as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_001_count_by_two",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

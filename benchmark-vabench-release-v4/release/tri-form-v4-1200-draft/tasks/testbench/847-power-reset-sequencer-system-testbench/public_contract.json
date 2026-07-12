@@ -1,0 +1,576 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "por_detector",
+              "reset_synchronizer",
+              "enable_sequencer",
+              "ready_flag"
+            ],
+            "name": "power_reset_seq_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vhi",
+                "override_behavior": "overrides vhi for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.0",
+                "name": "vlo",
+                "override_behavior": "overrides vlo for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.72",
+                "name": "vpor",
+                "override_behavior": "overrides vpor for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200e-12",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vdd_sense",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst_n_ext",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable_req",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "por_n",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "rst_n_core",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "en_ana",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "en_dig",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "ready",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "power_reset_seq_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "por_detector",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vhi",
+                "override_behavior": "overrides vhi for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.0",
+                "name": "vlo",
+                "override_behavior": "overrides vlo for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.72",
+                "name": "vpor",
+                "override_behavior": "overrides vpor for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200e-12",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vdd_sense",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst_n_ext",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "por_n",
+                "position": 3
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "por_detector.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "reset_synchronizer",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vhi",
+                "override_behavior": "overrides vhi for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.0",
+                "name": "vlo",
+                "override_behavior": "overrides vlo for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200e-12",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "por_n",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable_req",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "rst_n_core",
+                "position": 3
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "reset_synchronizer.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "enable_sequencer",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vhi",
+                "override_behavior": "overrides vhi for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.0",
+                "name": "vlo",
+                "override_behavior": "overrides vlo for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200e-12",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst_n_core",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "en_ana",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "en_dig",
+                "position": 3
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "enable_sequencer.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "ready_flag",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vhi",
+                "override_behavior": "overrides vhi for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.0",
+                "name": "vlo",
+                "override_behavior": "overrides vlo for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200e-12",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "en_ana",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "en_dig",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "ready",
+                "position": 3
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "ready_flag.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "347",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "reset_power_control_systems",
+    "difficulty": "D4",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Power and Reset Sequencer"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain transient behavioral Verilog-A.",
+    "Preserve the declared multi-module architecture and exact public artifact interfaces.",
+    "Do not use current contributions, unsupported continuous operators, validation logic, hard-coded evaluator timing, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_PWR_ASYNC_CLEAR",
+      "observable_contract": "External reset or a brownout clears por_n, core reset release, enables, and ready without waiting for sequence completion.",
+      "required_signals": [
+        "time",
+        "vdd_sense",
+        "rst_n_ext",
+        "por_n",
+        "rst_n_core",
+        "en_ana",
+        "en_dig",
+        "ready"
+      ]
+    },
+    {
+      "id": "P_PWR_POR_DEBOUNCE",
+      "observable_contract": "por_n asserts only after two consecutive good-power rising clock edges.",
+      "required_signals": [
+        "time",
+        "vdd_sense",
+        "clk",
+        "rst_n_ext",
+        "por_n"
+      ]
+    },
+    {
+      "id": "P_PWR_SEQUENCE_ORDER",
+      "observable_contract": "With power good and enable requested, rst_n_core, en_ana, and en_dig release on successive rising clock edges.",
+      "required_signals": [
+        "time",
+        "vdd_sense",
+        "clk",
+        "rst_n_ext",
+        "enable_req",
+        "por_n",
+        "rst_n_core",
+        "en_ana",
+        "en_dig"
+      ]
+    },
+    {
+      "id": "P_PWR_READY_DELAY",
+      "observable_contract": "ready asserts one rising clock after both enables are high.",
+      "required_signals": [
+        "time",
+        "clk",
+        "en_ana",
+        "en_dig",
+        "ready"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/power_reset_seq_top.va",
+    "supplied_dut/por_detector.va",
+    "supplied_dut/reset_synchronizer.va",
+    "supplied_dut/enable_sequencer.va",
+    "supplied_dut/ready_flag.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-847",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vdd_sense",
+            "port_ref": "vdd_sense",
+            "position": 0
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 1
+          },
+          {
+            "net": "rst_n_ext",
+            "port_ref": "rst_n_ext",
+            "position": 2
+          },
+          {
+            "net": "enable_req",
+            "port_ref": "enable_req",
+            "position": 3
+          },
+          {
+            "net": "por_n",
+            "port_ref": "por_n",
+            "position": 4
+          },
+          {
+            "net": "rst_n_core",
+            "port_ref": "rst_n_core",
+            "position": 5
+          },
+          {
+            "net": "en_ana",
+            "port_ref": "en_ana",
+            "position": 6
+          },
+          {
+            "net": "en_dig",
+            "port_ref": "en_dig",
+            "position": 7
+          },
+          {
+            "net": "ready",
+            "port_ref": "ready",
+            "position": 8
+          }
+        ],
+        "module_ref": "power_reset_seq_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vdd_sense",
+      "clk",
+      "rst_n_ext",
+      "enable_req",
+      "por_n",
+      "rst_n_core",
+      "en_ana",
+      "en_dig",
+      "ready"
+    ]
+  }
+}

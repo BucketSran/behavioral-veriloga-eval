@@ -1,0 +1,593 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "integrator_state",
+              "sd_comparator",
+              "feedback_dac",
+              "decimator_lite"
+            ],
+            "name": "sigma_delta_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module sigma_delta_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module sigma_delta_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm for module sigma_delta_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module sigma_delta_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.8",
+                "name": "state_limit",
+                "override_behavior": "overrides state_limit for module sigma_delta_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr for module sigma_delta_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "bit_out",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "avg_3",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "avg_2",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "avg_1",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "avg_0",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "state_metric",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "sigma_delta_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "integrator_state",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm for module integrator_state",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module integrator_state",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.8",
+                "name": "state_limit",
+                "override_behavior": "overrides state_limit for module integrator_state",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr for module integrator_state",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "feedback",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "state_metric",
+                "position": 4
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "integrator_state.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "sd_comparator",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module sd_comparator",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module sd_comparator",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm for module sd_comparator",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module sd_comparator",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr for module sd_comparator",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "state_metric",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "bit_out",
+                "position": 2
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "sd_comparator.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "feedback_dac",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module feedback_dac",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module feedback_dac",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module feedback_dac",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr for module feedback_dac",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "bit_in",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "feedback",
+                "position": 2
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "feedback_dac.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "decimator_lite",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module decimator_lite",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module decimator_lite",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module decimator_lite",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr for module decimator_lite",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "bit_in",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "avg_3",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "avg_2",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "avg_1",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "avg_0",
+                "position": 6
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "decimator_lite.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "family_id": "350",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "data_converter_systems",
+    "difficulty": "D4",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Sigma-delta Modulator Mini Loop"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Preserve the declared module graph, port order, parameter override behavior, and public trace observability.",
+    "Do not hard-code evaluator stimulus, stop times, sample windows, checker tolerances, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_CLEAR",
+      "observable_contract": "Reset clears the loop state, output bit, and decimator result.",
+      "required_signals": [
+        "time",
+        "rst",
+        "bit_out",
+        "avg_3",
+        "avg_2",
+        "avg_1",
+        "avg_0",
+        "state_metric"
+      ]
+    },
+    {
+      "id": "P_FEEDBACK_STATE_UPDATE",
+      "observable_contract": "Each rising clock edge updates the bounded integrator from VIN and the previous feedback bit.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "bit_out",
+        "state_metric"
+      ]
+    },
+    {
+      "id": "P_COMPARATOR_DECISION",
+      "observable_contract": "The output bit reflects the updated state relative to VCM.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "bit_out",
+        "state_metric"
+      ]
+    },
+    {
+      "id": "P_DECIMATOR_WINDOW",
+      "observable_contract": "The four-bit result reports the saturated high-bit count for each complete 16-sample window.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "bit_out",
+        "avg_3",
+        "avg_2",
+        "avg_1",
+        "avg_0"
+      ]
+    },
+    {
+      "id": "P_STATE_BOUNDED",
+      "observable_contract": "The public state metric remains within the configured state limit.",
+      "required_signals": [
+        "time",
+        "rst",
+        "state_metric"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "sigma_delta_top.va",
+    "integrator_state.va",
+    "sd_comparator.va",
+    "feedback_dac.va",
+    "decimator_lite.va"
+  ],
+  "task_id": "v4-350",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "bit_out",
+            "port_ref": "bit_out",
+            "position": 3
+          },
+          {
+            "net": "avg_3",
+            "port_ref": "avg_3",
+            "position": 4
+          },
+          {
+            "net": "avg_2",
+            "port_ref": "avg_2",
+            "position": 5
+          },
+          {
+            "net": "avg_1",
+            "port_ref": "avg_1",
+            "position": 6
+          },
+          {
+            "net": "avg_0",
+            "port_ref": "avg_0",
+            "position": 7
+          },
+          {
+            "net": "state_metric",
+            "port_ref": "state_metric",
+            "position": 8
+          }
+        ],
+        "module_ref": "sigma_delta_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "clk",
+      "rst",
+      "bit_out",
+      "avg_3",
+      "avg_2",
+      "avg_1",
+      "avg_0",
+      "state_metric"
+    ]
+  }
+}

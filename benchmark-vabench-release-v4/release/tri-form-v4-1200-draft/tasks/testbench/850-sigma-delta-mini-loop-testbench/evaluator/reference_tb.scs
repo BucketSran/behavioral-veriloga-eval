@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/sigma_delta_top.va"
+ahdl_include "./dut/integrator_state.va"
+ahdl_include "./dut/sd_comparator.va"
+ahdl_include "./dut/feedback_dac.va"
+ahdl_include "./dut/decimator_lite.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=3n width=1.5n delay=3.5n rise=50p fall=50p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 160n 0]
+Vvin (vin 0) vsource type=pwl wave=[0 0.67 45n 0.67 45.1n 0.28 96n 0.28 96.1n 0.52 160n 0.52]
+
+XDUT (vin clk rst bit_out avg_3 avg_2 avg_1 avg_0 state_metric) sigma_delta_top
+
+tran tran stop=160n maxstep=100p
+save vin clk rst bit_out avg_3 avg_2 avg_1 avg_0 state_metric

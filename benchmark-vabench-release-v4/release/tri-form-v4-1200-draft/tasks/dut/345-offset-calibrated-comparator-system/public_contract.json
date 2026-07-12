@@ -1,0 +1,599 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "comparator_core",
+              "offset_dac",
+              "calibration_fsm"
+            ],
+            "name": "calibrated_comparator_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "5e-3",
+                "name": "offset_lsb",
+                "override_behavior": "overrides offset_lsb for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200p",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vinp",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vinn",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "cal_en",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "cal_ref",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "decision",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "ready",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "offset_3",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "offset_2",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "offset_1",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "offset_0",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "threshold_dbg",
+                "position": 12
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "calibrated_comparator_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "comparator_core",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200p",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vinp",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vinn",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "threshold_i",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "decision",
+                "position": 4
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "comparator_core.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "offset_dac",
+            "parameters": [
+              {
+                "default": "5e-3",
+                "name": "offset_lsb",
+                "override_behavior": "overrides offset_lsb for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200p",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "offset_3",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "offset_2",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "offset_1",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "offset_0",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "threshold_dbg",
+                "position": 5
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "offset_dac.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "calibration_fsm",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200p",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "cal_en",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "cal_ref",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "ready",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "offset_3",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "offset_2",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "offset_1",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "offset_0",
+                "position": 8
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "calibration_fsm.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "family_id": "345",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "comparator_decision_systems",
+    "difficulty": "D4",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Offset-calibrated Comparator System"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain transient behavioral Verilog-A.",
+    "Preserve the declared multi-module architecture and exact public artifact interfaces.",
+    "Do not use current contributions, unsupported continuous operators, validation logic, hard-coded evaluator timing, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_CAL_RESET_CLEAR",
+      "observable_contract": "Reset clears offset code, decision, ready, and threshold_dbg.",
+      "required_signals": [
+        "time",
+        "rst",
+        "offset_3",
+        "offset_2",
+        "offset_1",
+        "offset_0",
+        "decision",
+        "ready",
+        "threshold_dbg"
+      ]
+    },
+    {
+      "id": "P_CAL_CODE_UPDATE",
+      "observable_contract": "Each enabled rising clock updates and clamps the offset code in the direction selected by cal_ref.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "cal_en",
+        "cal_ref",
+        "offset_3",
+        "offset_2",
+        "offset_1",
+        "offset_0"
+      ]
+    },
+    {
+      "id": "P_CAL_OFFSET_DAC",
+      "observable_contract": "threshold_dbg equals signed code minus eight times offset_lsb outside reset.",
+      "required_signals": [
+        "time",
+        "rst",
+        "offset_3",
+        "offset_2",
+        "offset_1",
+        "offset_0",
+        "threshold_dbg"
+      ]
+    },
+    {
+      "id": "P_CAL_READY_QUALIFICATION",
+      "observable_contract": "ready asserts after four updates in one calibration window and the code holds while cal_en is low.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "cal_en",
+        "ready",
+        "offset_3",
+        "offset_2",
+        "offset_1",
+        "offset_0"
+      ]
+    },
+    {
+      "id": "P_CAL_COMPARATOR_DECISION",
+      "observable_contract": "decision reflects the sign of vinp minus vinn plus threshold_dbg and is low in reset.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "rst",
+        "threshold_dbg",
+        "decision"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "calibrated_comparator_top.va",
+    "comparator_core.va",
+    "offset_dac.va",
+    "calibration_fsm.va"
+  ],
+  "task_id": "v4-345",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vinp",
+            "port_ref": "vinp",
+            "position": 0
+          },
+          {
+            "net": "vinn",
+            "port_ref": "vinn",
+            "position": 1
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "cal_en",
+            "port_ref": "cal_en",
+            "position": 4
+          },
+          {
+            "net": "cal_ref",
+            "port_ref": "cal_ref",
+            "position": 5
+          },
+          {
+            "net": "decision",
+            "port_ref": "decision",
+            "position": 6
+          },
+          {
+            "net": "ready",
+            "port_ref": "ready",
+            "position": 7
+          },
+          {
+            "net": "offset_3",
+            "port_ref": "offset_3",
+            "position": 8
+          },
+          {
+            "net": "offset_2",
+            "port_ref": "offset_2",
+            "position": 9
+          },
+          {
+            "net": "offset_1",
+            "port_ref": "offset_1",
+            "position": 10
+          },
+          {
+            "net": "offset_0",
+            "port_ref": "offset_0",
+            "position": 11
+          },
+          {
+            "net": "threshold_dbg",
+            "port_ref": "threshold_dbg",
+            "position": 12
+          }
+        ],
+        "module_ref": "calibrated_comparator_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vinp",
+      "vinn",
+      "clk",
+      "rst",
+      "cal_en",
+      "cal_ref",
+      "decision",
+      "ready",
+      "offset_3",
+      "offset_2",
+      "offset_1",
+      "offset_0",
+      "threshold_dbg"
+    ]
+  }
+}
