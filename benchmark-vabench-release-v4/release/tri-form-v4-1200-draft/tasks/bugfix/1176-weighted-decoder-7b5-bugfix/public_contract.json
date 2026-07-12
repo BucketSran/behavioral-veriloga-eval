@@ -1,0 +1,291 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "weighted_decoder_7b5",
+            "parameters": [
+              {
+                "default": "0.5",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d0",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d1",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d2",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d3",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d4",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d5",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d6",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d7",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d8",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "aout7b",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "aout7b5",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "aout8b",
+                "position": 11
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "weighted_decoder_7b5.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/weighted_decoder_7b5.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "176",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Weighted Decoder 7b5"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_SHARED_272_DENOMINATOR",
+      "observable_contract": "All decoded outputs use the shared normalization denominator of 272.0, including the fixed reference basis.",
+      "required_signals": [
+        "time",
+        "d0",
+        "d1",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "d6",
+        "d7",
+        "d8",
+        "aout7b",
+        "aout7b5",
+        "aout8b"
+      ]
+    },
+    {
+      "id": "P_SEVEN_BIT_OUTPUT",
+      "observable_contract": "`aout7b` reports the 7-bit decoded analog output with the specified redundant SAR weights.",
+      "required_signals": [
+        "time",
+        "d0",
+        "d1",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "d6",
+        "aout7b"
+      ]
+    },
+    {
+      "id": "P_SEVEN_HALF_BIT_OUTPUT",
+      "observable_contract": "`aout7b5` preserves the half-bit redundant contribution and correct polarity.",
+      "required_signals": [
+        "time",
+        "d0",
+        "d1",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "d6",
+        "d7",
+        "aout7b5"
+      ]
+    },
+    {
+      "id": "P_EIGHT_BIT_OUTPUT",
+      "observable_contract": "`aout8b` reports the full 8-bit weighted output with the correct amplitude.",
+      "required_signals": [
+        "time",
+        "d0",
+        "d1",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "d6",
+        "d7",
+        "d8",
+        "aout8b"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "weighted_decoder_7b5.va"
+  ],
+  "task_id": "v4-1176",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "d0",
+            "port_ref": "d0",
+            "position": 0
+          },
+          {
+            "net": "d1",
+            "port_ref": "d1",
+            "position": 1
+          },
+          {
+            "net": "d2",
+            "port_ref": "d2",
+            "position": 2
+          },
+          {
+            "net": "d3",
+            "port_ref": "d3",
+            "position": 3
+          },
+          {
+            "net": "d4",
+            "port_ref": "d4",
+            "position": 4
+          },
+          {
+            "net": "d5",
+            "port_ref": "d5",
+            "position": 5
+          },
+          {
+            "net": "d6",
+            "port_ref": "d6",
+            "position": 6
+          },
+          {
+            "net": "d7",
+            "port_ref": "d7",
+            "position": 7
+          },
+          {
+            "net": "d8",
+            "port_ref": "d8",
+            "position": 8
+          },
+          {
+            "net": "aout7b",
+            "port_ref": "aout7b",
+            "position": 9
+          },
+          {
+            "net": "aout7b5",
+            "port_ref": "aout7b5",
+            "position": 10
+          },
+          {
+            "net": "aout8b",
+            "port_ref": "aout8b",
+            "position": 11
+          }
+        ],
+        "module_ref": "weighted_decoder_7b5",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "d0",
+      "d1",
+      "d2",
+      "d3",
+      "d4",
+      "d5",
+      "d6",
+      "d7",
+      "d8",
+      "aout7b",
+      "aout7b5",
+      "aout8b"
+    ]
+  }
+}

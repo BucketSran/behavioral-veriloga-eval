@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-176",
+    "canonical_task_slug": "176-weighted-decoder-7b5",
+    "family_spec_sha256": "9f12dffffcd5a8760bbfab45382bb15165792d0381a8f735d4fbf45bd6237d68",
+    "mutation_catalog_sha256": "ce3a4d6ff2a85ca607ef5885ef6ea8680435f65fb8c7442106bbd2a84fa1948d",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "176",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_wrong_lsb_vote",
+    "testbench_suite": [
+      "neg_002_wrong_denominator",
+      "neg_001_zero",
+      "neg_003_omit_half_bit",
+      "neg_004_wrong_lsb_vote",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "ebe5e87ede6ec8944d6f417d5f13ce9e9e434e2395915a18fb0f71d225253fb2",
+    "changed_artifacts": [
+      "weighted_decoder_7b5.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_wrong_lsb_vote",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Inverts the 7.5-bit weighted output polarity.' because it exercises P_SEVEN_HALF_BIT_OUTPUT as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 20,
+    "source_preferred_seed": "neg_002_wrong_denominator",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

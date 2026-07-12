@@ -1,0 +1,364 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "onehot_progress_encoder",
+            "parameters": [],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ck",
+                "position": 0
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "d0",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "d1",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "d2",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "d3",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "d4",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "d5",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "d6",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "d7",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "d8",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "d9",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "d10",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "d11",
+                "position": 12
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "d12",
+                "position": 13
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "d13",
+                "position": 14
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "d14",
+                "position": 15
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "d15",
+                "position": 16
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sum",
+                "position": 17
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "onehot_progress_encoder.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "178",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "logic",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Onehot Progress Encoder"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_PROGRESS_INITIAL_STATE",
+      "observable_contract": "All progress outputs and the count initialize to zero.",
+      "required_signals": [
+        "time",
+        "ck",
+        "d0",
+        "d1",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "d6",
+        "d7",
+        "d8",
+        "d9",
+        "d10",
+        "d11",
+        "d12",
+        "d13",
+        "d14",
+        "d15",
+        "sum"
+      ]
+    },
+    {
+      "id": "P_SEQUENTIAL_ONEHOT_ASSERTION",
+      "observable_contract": "Each rising `ck` crossing asserts the next progress bit in order from `d0` through `d15` without skipping the first bit.",
+      "required_signals": [
+        "time",
+        "ck",
+        "d0",
+        "d1",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "d6",
+        "d7",
+        "d8",
+        "d9",
+        "d10",
+        "d11",
+        "d12",
+        "d13",
+        "d14",
+        "d15"
+      ]
+    },
+    {
+      "id": "P_ACCUMULATING_PROGRESS_BITS",
+      "observable_contract": "Previously asserted progress bits remain high until all sixteen bits have been asserted.",
+      "required_signals": [
+        "time",
+        "ck",
+        "d0",
+        "d1",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "d6",
+        "d7",
+        "d8",
+        "d9",
+        "d10",
+        "d11",
+        "d12",
+        "d13",
+        "d14",
+        "d15"
+      ]
+    },
+    {
+      "id": "P_SUM_COUNT_OUTPUT",
+      "observable_contract": "`sum` reports the current count value corresponding to the number of asserted progress bits.",
+      "required_signals": [
+        "time",
+        "ck",
+        "sum"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "onehot_progress_encoder.va"
+  ],
+  "task_id": "v4-178",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "ck",
+            "port_ref": "ck",
+            "position": 0
+          },
+          {
+            "net": "d0",
+            "port_ref": "d0",
+            "position": 1
+          },
+          {
+            "net": "d1",
+            "port_ref": "d1",
+            "position": 2
+          },
+          {
+            "net": "d2",
+            "port_ref": "d2",
+            "position": 3
+          },
+          {
+            "net": "d3",
+            "port_ref": "d3",
+            "position": 4
+          },
+          {
+            "net": "d4",
+            "port_ref": "d4",
+            "position": 5
+          },
+          {
+            "net": "d5",
+            "port_ref": "d5",
+            "position": 6
+          },
+          {
+            "net": "d6",
+            "port_ref": "d6",
+            "position": 7
+          },
+          {
+            "net": "d7",
+            "port_ref": "d7",
+            "position": 8
+          },
+          {
+            "net": "d8",
+            "port_ref": "d8",
+            "position": 9
+          },
+          {
+            "net": "d9",
+            "port_ref": "d9",
+            "position": 10
+          },
+          {
+            "net": "d10",
+            "port_ref": "d10",
+            "position": 11
+          },
+          {
+            "net": "d11",
+            "port_ref": "d11",
+            "position": 12
+          },
+          {
+            "net": "d12",
+            "port_ref": "d12",
+            "position": 13
+          },
+          {
+            "net": "d13",
+            "port_ref": "d13",
+            "position": 14
+          },
+          {
+            "net": "d14",
+            "port_ref": "d14",
+            "position": 15
+          },
+          {
+            "net": "d15",
+            "port_ref": "d15",
+            "position": 16
+          },
+          {
+            "net": "sum",
+            "port_ref": "sum",
+            "position": 17
+          }
+        ],
+        "module_ref": "onehot_progress_encoder",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "ck",
+      "d0",
+      "d1",
+      "d2",
+      "d3",
+      "d4",
+      "d5",
+      "d6",
+      "d7",
+      "d8",
+      "d9",
+      "d10",
+      "d11",
+      "d12",
+      "d13",
+      "d14",
+      "d15",
+      "sum"
+    ]
+  }
+}

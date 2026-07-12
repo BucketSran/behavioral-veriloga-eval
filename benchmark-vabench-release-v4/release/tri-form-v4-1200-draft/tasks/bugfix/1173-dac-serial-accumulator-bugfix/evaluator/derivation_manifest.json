@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-173",
+    "canonical_task_slug": "173-dac-serial-accumulator",
+    "family_spec_sha256": "0441566a39e148bbb29d333c780efd726223ddd2df1f71ef66fad938df9d34b4",
+    "mutation_catalog_sha256": "cad27cf5e44efd8863c02188c9222f52ed630f03a5d131d1cc2571c336bd79eb",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "173",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_no_sample_reset",
+    "testbench_suite": [
+      "neg_002_no_sample_reset",
+      "neg_003_reversed_bit_weights",
+      "neg_004_unipolar_output",
+      "neg_005_metric_scale_low",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "6de8b745404ad27c5681adb8b19d487c7da4dfaa6daa41c64b954b9a6611aec9",
+    "changed_artifacts": [
+      "dac_serial_accumulator.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_no_sample_reset",
+    "rationale": "Select fault class threshold_or_boundary_fault under trigger 'Does not clear the serial accumulator on the sample clock boundary.' because it exercises P_SAMPLE_CLOCK_RESET as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 23,
+    "source_preferred_seed": "neg_002_no_sample_reset",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

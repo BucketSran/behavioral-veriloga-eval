@@ -1,0 +1,491 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "sync_8b_dffs_v2",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "20p",
+                "name": "tt",
+                "override_behavior": "overrides tt",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ck1",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ck2",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ck3",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ck4",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ck5",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ck6",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ck7",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ck8",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ck9",
+                "position": 8
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dl0",
+                "position": 9
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dl1",
+                "position": 10
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dl2",
+                "position": 11
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dl3",
+                "position": 12
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dl4",
+                "position": 13
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dl5",
+                "position": 14
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dl6",
+                "position": 15
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dl7",
+                "position": 16
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dl8",
+                "position": 17
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do0",
+                "position": 18
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do1",
+                "position": 19
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do2",
+                "position": 20
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do3",
+                "position": 21
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do4",
+                "position": 22
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do5",
+                "position": 23
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do6",
+                "position": 24
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do7",
+                "position": 25
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do8",
+                "position": 26
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "sync_8b_dffs_v2.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "177",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Sync 8b DFFs V2"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_PHASED_CAPTURE_ORDER",
+      "observable_contract": "Each phase clock captures its corresponding `dl` input and shifts previously captured upper-phase data down the chain in the specified order.",
+      "required_signals": [
+        "time",
+        "ck1",
+        "ck2",
+        "ck3",
+        "ck4",
+        "ck5",
+        "ck6",
+        "ck7",
+        "ck8",
+        "ck9",
+        "dl0",
+        "dl1",
+        "dl2",
+        "dl3",
+        "dl4",
+        "dl5",
+        "dl6",
+        "dl7",
+        "dl8",
+        "do0",
+        "do1",
+        "do2",
+        "do3",
+        "do4",
+        "do5",
+        "do6",
+        "do7",
+        "do8"
+      ]
+    },
+    {
+      "id": "P_INTERMEDIATE_OUTPUT_CAPTURE",
+      "observable_contract": "Intermediate outputs, including `do4`, reflect their synchronized pipeline state rather than a stuck or skipped stage.",
+      "required_signals": [
+        "time",
+        "ck4",
+        "ck5",
+        "dl4",
+        "do4"
+      ]
+    },
+    {
+      "id": "P_FINAL_OUTPUT_CAPTURE",
+      "observable_contract": "The most delayed output `do8` reflects the final synchronized stage with correct polarity.",
+      "required_signals": [
+        "time",
+        "ck8",
+        "ck9",
+        "dl8",
+        "do8"
+      ]
+    },
+    {
+      "id": "P_FULL_LEVEL_OUTPUTS",
+      "observable_contract": "All `do` outputs drive full voltage-coded levels for their captured state.",
+      "required_signals": [
+        "time",
+        "do0",
+        "do1",
+        "do2",
+        "do3",
+        "do4",
+        "do5",
+        "do6",
+        "do7",
+        "do8"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/sync_8b_dffs_v2.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-677",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "ck1",
+            "port_ref": "ck1",
+            "position": 0
+          },
+          {
+            "net": "ck2",
+            "port_ref": "ck2",
+            "position": 1
+          },
+          {
+            "net": "ck3",
+            "port_ref": "ck3",
+            "position": 2
+          },
+          {
+            "net": "ck4",
+            "port_ref": "ck4",
+            "position": 3
+          },
+          {
+            "net": "ck5",
+            "port_ref": "ck5",
+            "position": 4
+          },
+          {
+            "net": "ck6",
+            "port_ref": "ck6",
+            "position": 5
+          },
+          {
+            "net": "ck7",
+            "port_ref": "ck7",
+            "position": 6
+          },
+          {
+            "net": "ck8",
+            "port_ref": "ck8",
+            "position": 7
+          },
+          {
+            "net": "ck9",
+            "port_ref": "ck9",
+            "position": 8
+          },
+          {
+            "net": "dl0",
+            "port_ref": "dl0",
+            "position": 9
+          },
+          {
+            "net": "dl1",
+            "port_ref": "dl1",
+            "position": 10
+          },
+          {
+            "net": "dl2",
+            "port_ref": "dl2",
+            "position": 11
+          },
+          {
+            "net": "dl3",
+            "port_ref": "dl3",
+            "position": 12
+          },
+          {
+            "net": "dl4",
+            "port_ref": "dl4",
+            "position": 13
+          },
+          {
+            "net": "dl5",
+            "port_ref": "dl5",
+            "position": 14
+          },
+          {
+            "net": "dl6",
+            "port_ref": "dl6",
+            "position": 15
+          },
+          {
+            "net": "dl7",
+            "port_ref": "dl7",
+            "position": 16
+          },
+          {
+            "net": "dl8",
+            "port_ref": "dl8",
+            "position": 17
+          },
+          {
+            "net": "do0",
+            "port_ref": "do0",
+            "position": 18
+          },
+          {
+            "net": "do1",
+            "port_ref": "do1",
+            "position": 19
+          },
+          {
+            "net": "do2",
+            "port_ref": "do2",
+            "position": 20
+          },
+          {
+            "net": "do3",
+            "port_ref": "do3",
+            "position": 21
+          },
+          {
+            "net": "do4",
+            "port_ref": "do4",
+            "position": 22
+          },
+          {
+            "net": "do5",
+            "port_ref": "do5",
+            "position": 23
+          },
+          {
+            "net": "do6",
+            "port_ref": "do6",
+            "position": 24
+          },
+          {
+            "net": "do7",
+            "port_ref": "do7",
+            "position": 25
+          },
+          {
+            "net": "do8",
+            "port_ref": "do8",
+            "position": 26
+          }
+        ],
+        "module_ref": "sync_8b_dffs_v2",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "ck1",
+      "ck2",
+      "ck3",
+      "ck4",
+      "ck5",
+      "ck6",
+      "ck7",
+      "ck8",
+      "ck9",
+      "dl0",
+      "dl1",
+      "dl2",
+      "dl3",
+      "dl4",
+      "dl5",
+      "dl6",
+      "dl7",
+      "dl8",
+      "do0",
+      "do1",
+      "do2",
+      "do3",
+      "do4",
+      "do5",
+      "do6",
+      "do7",
+      "do8"
+    ]
+  }
+}

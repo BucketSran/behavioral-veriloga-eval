@@ -1,0 +1,35 @@
+`include "disciplines.vams"
+
+module offset_bisection_driver(clk, vout, vcm, vinp, vinn);
+input clk, vout, vcm;
+output vinp, vinn;
+electrical clk, vout, vcm, vinp, vinn;
+
+parameter real vth = 0.45;
+parameter real step_initial = 10m;
+real vin;
+real step;
+integer state;
+integer sign;
+
+analog begin
+    @(initial_step) begin
+        vin = 0;
+        step = step_initial;
+        state = 1;
+        sign = 1;
+    end
+
+    @(cross(V(clk) - vth, -1)) begin
+        sign = V(vout) > vth;
+        if ((state != sign) && (step > 0))
+            step = step / 2.0;
+        state = sign;
+        vin = vin + (2 * state - 1) * step;
+    end
+
+    V(vinp) <+ V(vcm) + 0.5 * vin;
+    V(vinn) <+ V(vcm) - 0.5 * vin;
+end
+
+endmodule

@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-178",
+    "canonical_task_slug": "178-onehot-progress-encoder",
+    "family_spec_sha256": "c57b742d9992a441851d56586747d7510dd350236300531a3664d9db215b0ac0",
+    "mutation_catalog_sha256": "8a1a2c441455b26a3af4b886bfadf3070766bd7de57f2d27059ab2f5ee02a1cf",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "178",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_start_at_one",
+    "testbench_suite": [
+      "neg_003_wrong_sum",
+      "neg_001_zero",
+      "neg_004_clear_previous_bits",
+      "neg_002_start_at_one",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "55af52aaf0dc7f38fff3e9e2abf93cfb5547304cfaf11bd22a922f6bce8b091a",
+    "changed_artifacts": [
+      "onehot_progress_encoder.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_start_at_one",
+    "rationale": "Select fault class timing_or_state_update_fault under trigger 'Starts progress at index 1, skipping d0 on the first clock.' because it exercises P_SEQUENTIAL_ONEHOT_ASSERTION as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 21,
+    "source_preferred_seed": "neg_003_wrong_sum",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

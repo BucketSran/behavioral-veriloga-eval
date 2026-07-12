@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-179",
+    "canonical_task_slug": "179-tdc-ideal-edge-delta",
+    "family_spec_sha256": "4a489ba23af77f83eb11e6e79b58466807bb58fc2f606343eb6ff4b1b222490a",
+    "mutation_catalog_sha256": "14e6cd02f65bbdad59f3a2b73fe27cd45697507f26deadd35d08cd446976dafe",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "179",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_no_sample_reset",
+    "testbench_suite": [
+      "neg_003_wrong_fullrange",
+      "neg_001_zero",
+      "neg_004_no_sample_reset",
+      "neg_005_metric_scale_low",
+      "neg_002_inverted_delta"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "62c853cc7375d87bea5025b66f389f8d21a26d06705872424c6e8933576d30da",
+    "changed_artifacts": [
+      "tdc_ideal_edge_delta.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_no_sample_reset",
+    "rationale": "Select fault class state_reset_or_enable_error under trigger 'Drives the measured TDC delta at half scale.' because it exercises P_FULL_RANGE_SCALE, P_SAMPLE_REARMS_MEASUREMENT as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 24,
+    "source_preferred_seed": "neg_003_wrong_fullrange",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

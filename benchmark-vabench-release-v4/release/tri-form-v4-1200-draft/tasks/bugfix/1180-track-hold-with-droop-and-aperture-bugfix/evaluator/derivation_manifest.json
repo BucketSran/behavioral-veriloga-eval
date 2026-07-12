@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-180",
+    "canonical_task_slug": "180-track-hold-with-droop-and-aperture",
+    "family_spec_sha256": "5bb14a6be7cbe6aa3207e8b0c24092a10b2f3ee2b8175ea74ce27a5757471a23",
+    "mutation_catalog_sha256": "d85c2f01be24ec5ccb2a508ea7a98ab22fe82b4bd7e015d5ddc9e7ad37115ede",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "180",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_valid_state_error",
+    "testbench_suite": [
+      "neg_002_droop_error",
+      "neg_004_valid_state_error",
+      "neg_005_reset_or_enable_error",
+      "neg_003_aperture_metric_error",
+      "neg_001_sample_edge_error"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "bda47bfbda11f2054b386cf2e9400b31c0699d1a21329460e9fc8d980e9509fa",
+    "changed_artifacts": [
+      "track_hold_aperture.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_valid_state_error",
+    "rationale": "Select fault class valid_state_error under trigger 'valid_state_error' because it exercises P_FALLING_TRACK_SAMPLE_APERTURE, P_TRACK_MODE_FOLLOWS_INPUT as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 12,
+    "source_preferred_seed": "neg_002_droop_error",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

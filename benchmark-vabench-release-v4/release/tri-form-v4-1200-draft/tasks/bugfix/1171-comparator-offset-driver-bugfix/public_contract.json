@@ -1,0 +1,170 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "comparator_offset_binary_driver",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dcmpp",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vinp",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vinn",
+                "position": 3
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "comparator_offset_binary_driver.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/comparator_offset_binary_driver.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "171",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "comparator",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Comparator Offset Driver"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_FALLING_CLOCK_DECISION_SAMPLE",
+      "observable_contract": "On each falling `clk` threshold crossing, sample `dcmpp` to choose the next binary-search direction.",
+      "required_signals": [
+        "time",
+        "clk",
+        "dcmpp",
+        "vinp",
+        "vinn"
+      ]
+    },
+    {
+      "id": "P_DECISION_POLARITY_UPDATE",
+      "observable_contract": "A high decision moves the differential input negative and a low decision moves it positive.",
+      "required_signals": [
+        "time",
+        "clk",
+        "dcmpp",
+        "vinp",
+        "vinn"
+      ]
+    },
+    {
+      "id": "P_HALVING_SEARCH_STEP",
+      "observable_contract": "The differential search step halves after each sampled decision.",
+      "required_signals": [
+        "time",
+        "clk",
+        "dcmpp",
+        "vinp",
+        "vinn"
+      ]
+    },
+    {
+      "id": "P_COMMON_MODE_HALF_SCALE_DRIVE",
+      "observable_contract": "`vinp` and `vinn` are driven symmetrically around the common-mode level with half differential amplitude on each side.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "comparator_offset_binary_driver.va"
+  ],
+  "task_id": "v4-1171",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "dcmpp",
+            "port_ref": "dcmpp",
+            "position": 1
+          },
+          {
+            "net": "vinp",
+            "port_ref": "vinp",
+            "position": 2
+          },
+          {
+            "net": "vinn",
+            "port_ref": "vinn",
+            "position": 3
+          }
+        ],
+        "module_ref": "comparator_offset_binary_driver",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "dcmpp",
+      "vinp",
+      "vinn"
+    ]
+  }
+}

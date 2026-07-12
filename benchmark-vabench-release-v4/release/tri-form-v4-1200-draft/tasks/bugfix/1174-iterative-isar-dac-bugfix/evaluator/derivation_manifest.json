@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-174",
+    "canonical_task_slug": "174-iterative-isar-dac",
+    "family_spec_sha256": "c822b9fcce80ebccfed937d4e0eda5a12bccac903076d1afa434ad0288482942",
+    "mutation_catalog_sha256": "e6c1d0bb77b16864db22aa5df852a03c470e2d6d0635f7e4909d84006eb6e237",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "174",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_no_reset_to_range",
+    "testbench_suite": [
+      "neg_002_inverted_comparator_polarity",
+      "neg_004_no_reset_to_range",
+      "neg_001_zero",
+      "neg_003_no_delta_halving",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "9f078416d8839c117b0473a348edb52dd162f13812005892dc20114f2b3d7b59",
+    "changed_artifacts": [
+      "iterative_isar_dac.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_no_reset_to_range",
+    "rationale": "Select fault class state_reset_or_enable_error under trigger 'Shrinks the search step twice as fast as the specified radix update.' because it exercises P_RADIX_STEP_REDUCTION, P_RESET_INITIAL_SEARCH_STATE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 24,
+    "source_preferred_seed": "neg_002_inverted_comparator_polarity",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

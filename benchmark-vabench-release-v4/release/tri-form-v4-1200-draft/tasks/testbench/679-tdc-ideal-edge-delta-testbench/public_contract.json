@@ -1,0 +1,185 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "tdc_ideal_edge_delta",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "100p",
+                "name": "fullrange",
+                "override_behavior": "overrides fullrange",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "inp",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "inn",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "samp",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 3
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "tdc_ideal_edge_delta.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "179",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "measurement",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "TDC Ideal Edge Delta"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_SAMPLE_REARMS_MEASUREMENT",
+      "observable_contract": "At initialization and each rising `samp` crossing, input trigger flags clear while the previous output is retained until a new edge pair is measured.",
+      "required_signals": [
+        "time",
+        "samp",
+        "inp",
+        "inn",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_INPUT_EDGE_PAIR_CAPTURE",
+      "observable_contract": "A measurement completes only after the required `inp` and `inn` rising-edge pair has been observed.",
+      "required_signals": [
+        "time",
+        "inp",
+        "inn",
+        "samp",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_SIGNED_DELTA_POLARITY",
+      "observable_contract": "`vout` represents the `inp` minus `inn` edge-time delta with the specified polarity.",
+      "required_signals": [
+        "time",
+        "inp",
+        "inn",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_FULL_RANGE_SCALE",
+      "observable_contract": "The reported timing delta uses the specified full-range scale rather than a half-range or alternate denominator.",
+      "required_signals": [
+        "time",
+        "inp",
+        "inn",
+        "vout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/tdc_ideal_edge_delta.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-679",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "inp",
+            "port_ref": "inp",
+            "position": 0
+          },
+          {
+            "net": "inn",
+            "port_ref": "inn",
+            "position": 1
+          },
+          {
+            "net": "samp",
+            "port_ref": "samp",
+            "position": 2
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 3
+          }
+        ],
+        "module_ref": "tdc_ideal_edge_delta",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "inp",
+      "inn",
+      "samp",
+      "vout"
+    ]
+  }
+}

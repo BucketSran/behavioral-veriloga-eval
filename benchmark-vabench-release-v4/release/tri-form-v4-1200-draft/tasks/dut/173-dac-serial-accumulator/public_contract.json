@@ -1,0 +1,176 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "dac_serial_accumulator",
+            "parameters": [
+              {
+                "default": "1.1",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.55",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "4",
+                "name": "bit_count",
+                "override_behavior": "overrides bit_count",
+                "type": "integer",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk_sample",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk_sarready",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "data",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 3
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "dac_serial_accumulator.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "173",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "DAC Serial Accumulator"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_SAMPLE_CLOCK_RESET",
+      "observable_contract": "Each falling `clk_sample` crossing resets the accumulator and serial bit counter.",
+      "required_signals": [
+        "time",
+        "clk_sample",
+        "out"
+      ]
+    },
+    {
+      "id": "P_SARREADY_SERIAL_ACCUMULATION",
+      "observable_contract": "Falling `clk_sarready` crossings during the active bit window add the sampled `data` bit to the accumulator.",
+      "required_signals": [
+        "time",
+        "clk_sarready",
+        "data",
+        "out"
+      ]
+    },
+    {
+      "id": "P_BINARY_WEIGHT_ORDER",
+      "observable_contract": "The first accepted serial bit has the largest binary weight and later bits use descending weights.",
+      "required_signals": [
+        "time",
+        "clk_sarready",
+        "data",
+        "out"
+      ]
+    },
+    {
+      "id": "P_BIPOLAR_OUTPUT_MAPPING",
+      "observable_contract": "The accumulated code is mapped to the required bipolar output range rather than an unipolar code.",
+      "required_signals": [
+        "time",
+        "out"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "dac_serial_accumulator.va"
+  ],
+  "task_id": "v4-173",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk_sample",
+            "port_ref": "clk_sample",
+            "position": 0
+          },
+          {
+            "net": "clk_sarready",
+            "port_ref": "clk_sarready",
+            "position": 1
+          },
+          {
+            "net": "data",
+            "port_ref": "data",
+            "position": 2
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 3
+          }
+        ],
+        "module_ref": "dac_serial_accumulator",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk_sample",
+      "clk_sarready",
+      "data",
+      "out"
+    ]
+  }
+}

@@ -1,0 +1,192 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "offset_bisection_driver",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "10m",
+                "name": "step_initial",
+                "override_behavior": "overrides step_initial",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vcm",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vinp",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vinn",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "offset_bisection_driver.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/offset_bisection_driver.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "175",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "comparator",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Offset Bisection Driver"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_BISECTION_INITIAL_STATE",
+      "observable_contract": "The differential residue initializes to zero, the step initializes to `step_initial`, and the previous decision polarity initializes to the low-decision direction.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vout",
+        "vcm",
+        "vinp",
+        "vinn"
+      ]
+    },
+    {
+      "id": "P_FALLING_CLOCK_DECISION_UPDATE",
+      "observable_contract": "On each falling `clk` crossing, sample `vout` and update the residue using the specified comparator polarity.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vout",
+        "vinp",
+        "vinn"
+      ]
+    },
+    {
+      "id": "P_SIGN_CHANGE_STEP_HALVING",
+      "observable_contract": "The bisection step halves when the sampled decision polarity changes.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vout",
+        "vinp",
+        "vinn"
+      ]
+    },
+    {
+      "id": "P_VCM_CENTERED_DIFFERENTIAL_DRIVE",
+      "observable_contract": "`vinp` and `vinn` remain centered around `vcm` with half of the differential residue on each side.",
+      "required_signals": [
+        "time",
+        "vcm",
+        "vinp",
+        "vinn"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "offset_bisection_driver.va"
+  ],
+  "task_id": "v4-1175",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 1
+          },
+          {
+            "net": "vcm",
+            "port_ref": "vcm",
+            "position": 2
+          },
+          {
+            "net": "vinp",
+            "port_ref": "vinp",
+            "position": 3
+          },
+          {
+            "net": "vinn",
+            "port_ref": "vinn",
+            "position": 4
+          }
+        ],
+        "module_ref": "offset_bisection_driver",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "vout",
+      "vcm",
+      "vinp",
+      "vinn"
+    ]
+  }
+}

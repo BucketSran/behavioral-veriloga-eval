@@ -1,0 +1,295 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "track_hold_aperture",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1n from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.015 from [0:inf)",
+                "name": "droop_per_tick",
+                "override_behavior": "overrides droop_per_tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.6 from [0:inf)",
+                "name": "aperture_gain",
+                "override_behavior": "overrides aperture_gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "100p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "track",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vhold",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "aperture_metric",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "droop_metric",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "track_hold_aperture.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "180",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "sampling_memory",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Track/Hold with Droop and Aperture Metric"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_DISABLE_CLEAR",
+      "observable_contract": "Reset or a low `enable` clears `vhold`, `aperture_metric`, `droop_metric`, and `valid`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "track",
+        "rst",
+        "enable",
+        "vhold",
+        "aperture_metric",
+        "droop_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_TRACK_MODE_FOLLOWS_INPUT",
+      "observable_contract": "While `track` is high and the DUT is enabled, the held state follows `vin` at the internal update cadence and `valid` remains low.",
+      "required_signals": [
+        "time",
+        "vin",
+        "track",
+        "rst",
+        "enable",
+        "vhold",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_FALLING_TRACK_SAMPLE_APERTURE",
+      "observable_contract": "A falling `track` edge samples `vin`, asserts `valid`, and reports an aperture metric proportional to the step from the previous tracked value.",
+      "required_signals": [
+        "time",
+        "vin",
+        "track",
+        "enable",
+        "vhold",
+        "aperture_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_HOLD_MODE_DROOP",
+      "observable_contract": "During hold mode, `vhold` droops downward by `droop_per_tick` on each update tick without going below `vss`.",
+      "required_signals": [
+        "time",
+        "track",
+        "enable",
+        "vhold",
+        "droop_metric"
+      ]
+    },
+    {
+      "id": "P_DROOP_METRIC_ACCUMULATION",
+      "observable_contract": "`droop_metric` accumulates total hold-mode droop and clears on a new sample, reset, or disable.",
+      "required_signals": [
+        "time",
+        "track",
+        "rst",
+        "enable",
+        "droop_metric",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/track_hold_aperture.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-680",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "track",
+            "port_ref": "track",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 3
+          },
+          {
+            "net": "vhold",
+            "port_ref": "vhold",
+            "position": 4
+          },
+          {
+            "net": "aperture_metric",
+            "port_ref": "aperture_metric",
+            "position": 5
+          },
+          {
+            "net": "droop_metric",
+            "port_ref": "droop_metric",
+            "position": 6
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 7
+          }
+        ],
+        "module_ref": "track_hold_aperture",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "track",
+      "rst",
+      "enable",
+      "vhold",
+      "aperture_metric",
+      "droop_metric",
+      "valid"
+    ]
+  }
+}
