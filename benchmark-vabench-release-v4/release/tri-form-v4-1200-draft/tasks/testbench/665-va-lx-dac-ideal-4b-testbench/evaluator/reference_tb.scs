@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/va_lx_dac_ideal_4b.va"
+
+Vrdy (rdy 0) vsource type=pwl wave=[0 0 1n 0 1.05n 1.8 1.50n 1.8 1.55n 0 11n 0 11.05n 1.8 11.50n 1.8 11.55n 0 21n 0 21.05n 1.8 21.50n 1.8 21.55n 0 31n 0 31.05n 1.8 31.50n 1.8 31.55n 0]
+Vdin1 (din1 0) vsource type=pwl wave=[0 0 7.95n 0 8n 1.8 17.95n 1.8 18n 0 27.95n 0 28n 1.8]
+Vdin2 (din2 0) vsource type=pwl wave=[0 0 17.95n 0 18n 1.8]
+Vdin3 (din3 0) vsource type=pwl wave=[0 0 7.95n 0 8n 1.8]
+Vdin4 (din4 0) vsource type=pwl wave=[0 0 17.95n 0 18n 1.8]
+
+XDUT (din1 din2 din3 din4 rdy aout) va_lx_dac_ideal_4b
+
+
+tran tran stop=40n maxstep=20p
+save din1 din2 din3 din4 rdy aout

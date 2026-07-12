@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-166",
+    "canonical_task_slug": "166-l2-cdac-4b-residue",
+    "family_spec_sha256": "c29230e402be77dfddfce10aff5e0c932c2a862742c4a8e5d885eeb9f0f7cc5b",
+    "mutation_catalog_sha256": "28490aa9d837dfbac7f92280f308316b9da35dd13a3ebc515d188cb079c831b7",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "166",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_sample_on_rising_clock",
+    "testbench_suite": [
+      "neg_002_wrong_msb_step",
+      "neg_004_sample_on_rising_clock",
+      "neg_005_metric_scale_low",
+      "neg_003_subtract_control_steps",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "5c290408663ca14956ffdda51266edcf9b96b9e12974a1e638c7b72495420d37",
+    "changed_artifacts": [
+      "l2_cdac_4b_residue.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_sample_on_rising_clock",
+    "rationale": "Select fault class timing_or_state_update_fault under trigger 'Omits the dctrl1 one-eighth residue increment.' because it exercises P_CONTROL_STEP_WEIGHTS, P_FALLING_CLOCK_SAMPLE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 22,
+    "source_preferred_seed": "neg_002_wrong_msb_step",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

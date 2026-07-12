@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-165",
+    "canonical_task_slug": "165-va-lx-dac-ideal-4b",
+    "family_spec_sha256": "c005d52faa757bedea50347e8e7399bb2e095a41945e54ee85b8a2a536bea841",
+    "mutation_catalog_sha256": "8ad06ac78f54e329cf483343ca5897e804e1ed470b915d0bc21fd792f034d44a",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "165",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_wrong_msb_weight",
+    "testbench_suite": [
+      "neg_003_wrong_msb_weight",
+      "neg_001_zero",
+      "neg_004_ignore_lsb",
+      "neg_002_missing_vdd_scale",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "f81d8c44657646657cc0cb6247c6d233b834dea974205dbb5f1fcebcdeb4f06b",
+    "changed_artifacts": [
+      "va_lx_dac_ideal_4b.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_wrong_msb_weight",
+    "rationale": "Select fault class metric_or_observable_fault under trigger 'Uses a quarter-scale MSB weight for din4.' because it exercises P_BINARY_BIT_ORDER as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 15,
+    "source_preferred_seed": "neg_003_wrong_msb_weight",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

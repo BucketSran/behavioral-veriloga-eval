@@ -1,0 +1,320 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "dac_restore_10bit_offset",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.8 / 1024.0",
+                "name": "lsb",
+                "override_behavior": "overrides lsb",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "D1",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "D2",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "D3",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "D4",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "D5",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "D6",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "D7",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "D8",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "D9",
+                "position": 8
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "D10",
+                "position": 9
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "D0",
+                "position": 10
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 12
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "dac_restore_10bit_offset.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "161",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "DAC Restore 10bit Offset"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_CLOCKED_CODE_SAMPLING",
+      "observable_contract": "Only rising crossings of `clk` through `vth` update the held DAC output; input-bit changes between clock crossings do not alter `vout`.",
+      "required_signals": [
+        "time",
+        "clk",
+        "D0",
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5",
+        "D6",
+        "D7",
+        "D8",
+        "D9",
+        "D10",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_WEIGHTED_REDUNDANT_CODE",
+      "observable_contract": "`D10` is the largest weight, `D0` is the LSB, and `D6` and `D7` both contribute the redundant 64-LSB weight before scaling.",
+      "required_signals": [
+        "time",
+        "clk",
+        "D0",
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5",
+        "D6",
+        "D7",
+        "D8",
+        "D9",
+        "D10",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_OFFSET_MIDRISE_OUTPUT",
+      "observable_contract": "The asserted weighted code is shifted by the source -32 LSB offset and placed at the mid-rise half-LSB output level using the public `lsb` scale.",
+      "required_signals": [
+        "time",
+        "clk",
+        "D0",
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5",
+        "D6",
+        "D7",
+        "D8",
+        "D9",
+        "D10",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_SMOOTH_HOLD",
+      "observable_contract": "`vout` transitions smoothly to each sampled code value and holds that value until the next qualifying clock edge.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/dac_restore_10bit_offset.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-661",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "d1",
+            "port_ref": "D1",
+            "position": 0
+          },
+          {
+            "net": "d2",
+            "port_ref": "D2",
+            "position": 1
+          },
+          {
+            "net": "d3",
+            "port_ref": "D3",
+            "position": 2
+          },
+          {
+            "net": "d4",
+            "port_ref": "D4",
+            "position": 3
+          },
+          {
+            "net": "d5",
+            "port_ref": "D5",
+            "position": 4
+          },
+          {
+            "net": "d6",
+            "port_ref": "D6",
+            "position": 5
+          },
+          {
+            "net": "d7",
+            "port_ref": "D7",
+            "position": 6
+          },
+          {
+            "net": "d8",
+            "port_ref": "D8",
+            "position": 7
+          },
+          {
+            "net": "d9",
+            "port_ref": "D9",
+            "position": 8
+          },
+          {
+            "net": "d10",
+            "port_ref": "D10",
+            "position": 9
+          },
+          {
+            "net": "d0",
+            "port_ref": "D0",
+            "position": 10
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 11
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 12
+          }
+        ],
+        "module_ref": "dac_restore_10bit_offset",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "D0",
+      "D1",
+      "D2",
+      "D3",
+      "D4",
+      "D5",
+      "D6",
+      "D7",
+      "D8",
+      "D9",
+      "D10",
+      "vout"
+    ]
+  }
+}

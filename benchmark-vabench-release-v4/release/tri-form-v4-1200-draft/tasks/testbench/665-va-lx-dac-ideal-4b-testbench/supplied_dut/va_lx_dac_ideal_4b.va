@@ -1,0 +1,29 @@
+`include "disciplines.vams"
+
+module va_lx_dac_ideal_4b(din1, din2, din3, din4, rdy, aout);
+input din1, din2, din3, din4, rdy;
+output aout;
+electrical din1, din2, din3, din4, rdy, aout;
+
+parameter real vdd = 1.8;
+parameter real vth = 0.9;
+real aout_level;
+
+analog begin
+    @(initial_step) begin
+        aout_level = 0;
+    end
+
+    @(cross(V(rdy) - vth, +1)) begin
+        aout_level = 0;
+        aout_level = aout_level + ((V(din4) > vth) ? 0.5 : 0);
+        aout_level = aout_level + ((V(din3) > vth) ? 0.25 : 0);
+        aout_level = aout_level + ((V(din2) > vth) ? 0.125 : 0);
+        aout_level = aout_level + ((V(din1) > vth) ? 0.0625 : 0);
+        aout_level = aout_level * vdd;
+    end
+
+    V(aout) <+ transition(aout_level, 0, 20p, 20p);
+end
+
+endmodule

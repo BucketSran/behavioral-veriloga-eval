@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-168",
+    "canonical_task_slug": "168-dac-ideal-4b-offset",
+    "family_spec_sha256": "0d334db93fd544b1bdfaa033293c6cf638e3f2f6e5ed9a1114df36864295749f",
+    "mutation_catalog_sha256": "845f4c043e1c2452e4bd2be043b5ea976a167e3f38fba4f24fcca0b86dda7bff",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "168",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_swap_msb_lsb",
+    "testbench_suite": [
+      "neg_002_missing_offset",
+      "neg_004_swap_msb_lsb",
+      "neg_003_wrong_scaling",
+      "neg_005_metric_scale_low",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "cd15eb678e932645220f3d556fcb81adfa330a02a7cea284c446143380b5e8af",
+    "changed_artifacts": [
+      "dac_ideal_4b_offset.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_swap_msb_lsb",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Swaps the din3 MSB and din0 LSB code weights.' because it exercises P_THRESHOLDED_4BIT_CODE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 22,
+    "source_preferred_seed": "neg_002_missing_offset",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

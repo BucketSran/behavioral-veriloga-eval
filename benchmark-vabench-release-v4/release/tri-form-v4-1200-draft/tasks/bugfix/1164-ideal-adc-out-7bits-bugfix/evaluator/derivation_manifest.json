@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-164",
+    "canonical_task_slug": "164-ideal-adc-out-7bits",
+    "family_spec_sha256": "979d1e489337f70ba6fd093330b42bee491bc3415904695416f6b1689531ad0c",
+    "mutation_catalog_sha256": "9b128d1b377460256119ecf9821f7fce5811d63897ad2ab5cc83084a6839ae19",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "164",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_reverse_lsb_msb",
+    "testbench_suite": [
+      "neg_002_omit_msb",
+      "neg_003_reverse_lsb_msb",
+      "neg_004_half_scale",
+      "neg_005_metric_scale_low",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "1ac76ee2c02169fb9232f5047fe2186b9d1ef2434d7731a1df6919e8154debe8",
+    "changed_artifacts": [
+      "ideal_adc_out_7bits_scalar.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_reverse_lsb_msb",
+    "rationale": "Select fault class threshold_or_boundary_fault under trigger 'Adds a fixed offset to every decoded scalar output code.' because it exercises P_SCALED_SCALAR_OUTPUT, P_THRESHOLD_CODE_DETECTION, P_WEIGHTED_GROUP_SUM as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 22,
+    "source_preferred_seed": "neg_002_omit_msb",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

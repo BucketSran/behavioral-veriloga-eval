@@ -1,0 +1,37 @@
+`include "disciplines.vams"
+
+module dac_restore_10bit_offset(D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, D0, clk, vout);
+input D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, D0, clk;
+output vout;
+electrical D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, D0, clk, vout;
+
+parameter real vth = 0.45;
+parameter real lsb = 1.8 / 1024.0;
+real code;
+real vout_level;
+
+analog begin
+    @(initial_step) begin
+        vout_level = 0;
+    end
+
+    @(cross(V(clk) - vth, +1)) begin
+        code = 0;
+        code = code + (V(D10) > vth) * 512;
+        code = code + (V(D9) > vth) * 256;
+        code = code + (V(D8) > vth) * 128;
+        code = code + (V(D7) > vth) * 64;
+        code = code + (V(D6) > vth) * 64;
+        code = code + (V(D5) > vth) * 32;
+        code = code + (V(D4) > vth) * 16;
+        code = code + (V(D3) > vth) * 8;
+        code = code + (V(D2) > vth) * 4;
+        code = code + (V(D1) > vth) * 2;
+        code = code + (V(D0) > vth) * 1;
+        vout_level = (code + 0.5) * lsb - 0.9;
+    end
+
+    V(vout) <+ transition(vout_level, 0, 20p, 20p);
+end
+
+endmodule

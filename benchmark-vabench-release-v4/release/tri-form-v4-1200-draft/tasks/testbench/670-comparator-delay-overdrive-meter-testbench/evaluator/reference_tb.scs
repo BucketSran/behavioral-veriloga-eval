@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/comparator_delay_overdrive_meter.va"
+ahdl_include "./support/support_overdrive_delay_comparator.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0.0
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=0.8n period=5n width=2.1n rise=50p fall=50p
+Vvinp (vinp 0) vsource type=pwl wave=[0 0.456 4.8n 0.456 5n 0.420 9.8n 0.420 10n 0.4515 14.8n 0.4515 15n 0.4375 19.8n 0.4375 20n 0.475]
+Vvinn (vinn 0) vsource type=pwl wave=[0 0.444 4.8n 0.444 5n 0.480 9.8n 0.480 10n 0.4485 14.8n 0.4485 15n 0.4625 19.8n 0.4625 20n 0.425]
+
+XCMP (vdd vss clk vinp vinn outp outn) support_overdrive_delay_comparator td_0=28p tau=6p td_min=30p td_max=160p tr=18p
+XMEAS (vdd vss clk vinp vinn outp outn delay_ps overdrive_mv polarity valid) comparator_delay_overdrive_meter tr=15p
+
+
+tran tran stop=25n maxstep=5p
+save clk vinp vinn outp outn delay_ps overdrive_mv polarity valid

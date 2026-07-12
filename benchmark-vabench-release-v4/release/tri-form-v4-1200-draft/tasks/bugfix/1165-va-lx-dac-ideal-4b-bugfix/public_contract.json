@@ -1,0 +1,199 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "va_lx_dac_ideal_4b",
+            "parameters": [
+              {
+                "default": "1.8",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din1",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din2",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din3",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din4",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rdy",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "aout",
+                "position": 5
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "va_lx_dac_ideal_4b.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/va_lx_dac_ideal_4b.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "165",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "VA Lx DAC Ideal 4b"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_READY_CLOCKED_SAMPLING",
+      "observable_contract": "Only rising crossings of `rdy` through `vth` sample the four input bits; `aout` holds between ready events.",
+      "required_signals": [
+        "time",
+        "rdy",
+        "din1",
+        "din2",
+        "din3",
+        "din4",
+        "aout"
+      ]
+    },
+    {
+      "id": "P_BINARY_BIT_ORDER",
+      "observable_contract": "`din4` is the MSB and `din1` is the LSB of the sampled 4-bit unipolar code.",
+      "required_signals": [
+        "time",
+        "rdy",
+        "din1",
+        "din2",
+        "din3",
+        "din4",
+        "aout"
+      ]
+    },
+    {
+      "id": "P_VDD_SCALED_DAC_OUTPUT",
+      "observable_contract": "The sampled binary fraction is scaled by `vdd` and driven smoothly on `aout`.",
+      "required_signals": [
+        "time",
+        "rdy",
+        "din1",
+        "din2",
+        "din3",
+        "din4",
+        "aout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "va_lx_dac_ideal_4b.va"
+  ],
+  "task_id": "v4-1165",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "din1",
+            "port_ref": "din1",
+            "position": 0
+          },
+          {
+            "net": "din2",
+            "port_ref": "din2",
+            "position": 1
+          },
+          {
+            "net": "din3",
+            "port_ref": "din3",
+            "position": 2
+          },
+          {
+            "net": "din4",
+            "port_ref": "din4",
+            "position": 3
+          },
+          {
+            "net": "rdy",
+            "port_ref": "rdy",
+            "position": 4
+          },
+          {
+            "net": "aout",
+            "port_ref": "aout",
+            "position": 5
+          }
+        ],
+        "module_ref": "va_lx_dac_ideal_4b",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "din1",
+      "din2",
+      "din3",
+      "din4",
+      "rdy",
+      "aout"
+    ]
+  }
+}

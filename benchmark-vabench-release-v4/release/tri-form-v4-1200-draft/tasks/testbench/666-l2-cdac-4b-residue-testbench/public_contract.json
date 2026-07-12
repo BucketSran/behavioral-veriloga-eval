@@ -1,0 +1,209 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "l2_cdac_4b_residue",
+            "parameters": [
+              {
+                "default": "1",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1",
+                "name": "vrefp",
+                "override_behavior": "overrides vrefp",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0",
+                "name": "vrefn",
+                "override_behavior": "overrides vrefn",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clks",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dctrl1",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dctrl2",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dctrl3",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vres",
+                "position": 5
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "l2_cdac_4b_residue.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "166",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "L2 CDAC 4b Residue"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_FALLING_CLOCK_SAMPLE",
+      "observable_contract": "`vin` is sampled into the residue on initial step and on falling `clks` crossings through `vdd/2`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clks",
+        "vres"
+      ]
+    },
+    {
+      "id": "P_CONTROL_STEP_WEIGHTS",
+      "observable_contract": "Rising control crossings add positive capacitive reference steps: `dctrl3` is half scale, `dctrl2` quarter scale, and `dctrl1` eighth scale.",
+      "required_signals": [
+        "time",
+        "dctrl1",
+        "dctrl2",
+        "dctrl3",
+        "vres"
+      ]
+    },
+    {
+      "id": "P_RETAINED_RESIDUE_OUTPUT",
+      "observable_contract": "`vres` retains the accumulated sampled residue between clock/control events.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clks",
+        "dctrl1",
+        "dctrl2",
+        "dctrl3",
+        "vres"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/l2_cdac_4b_residue.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-666",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "clks",
+            "port_ref": "clks",
+            "position": 1
+          },
+          {
+            "net": "dctrl1",
+            "port_ref": "dctrl1",
+            "position": 2
+          },
+          {
+            "net": "dctrl2",
+            "port_ref": "dctrl2",
+            "position": 3
+          },
+          {
+            "net": "dctrl3",
+            "port_ref": "dctrl3",
+            "position": 4
+          },
+          {
+            "net": "vres",
+            "port_ref": "vres",
+            "position": 5
+          }
+        ],
+        "module_ref": "l2_cdac_4b_residue",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "clks",
+      "dctrl1",
+      "dctrl2",
+      "dctrl3",
+      "vres"
+    ]
+  }
+}

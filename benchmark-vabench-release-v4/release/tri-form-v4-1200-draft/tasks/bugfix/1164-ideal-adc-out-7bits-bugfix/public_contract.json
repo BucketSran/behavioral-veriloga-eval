@@ -1,0 +1,221 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "ideal_adc_out_7bits_scalar",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din0",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din1",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din2",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din3",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din4",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din5",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din6",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dout",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "ideal_adc_out_7bits_scalar.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/ideal_adc_out_7bits_scalar.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "164",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Ideal ADC Out 7bits"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_THRESHOLD_CODE_DETECTION",
+      "observable_contract": "Each `din` input is interpreted as asserted only when it is above `vth`.",
+      "required_signals": [
+        "time",
+        "din0",
+        "din1",
+        "din2",
+        "din3",
+        "din4",
+        "din5",
+        "din6",
+        "dout"
+      ]
+    },
+    {
+      "id": "P_WEIGHTED_GROUP_SUM",
+      "observable_contract": "`din6` through `din2` contribute 16, 8, 4, 2, and 1 unit groups, while `din1` and `din0` contribute half-LSB and quarter-LSB trim groups.",
+      "required_signals": [
+        "time",
+        "din0",
+        "din1",
+        "din2",
+        "din3",
+        "din4",
+        "din5",
+        "din6",
+        "dout"
+      ]
+    },
+    {
+      "id": "P_SCALED_SCALAR_OUTPUT",
+      "observable_contract": "`dout` represents the correctly scaled fractional scalar sum without fixed offsets or denominator errors.",
+      "required_signals": [
+        "time",
+        "din0",
+        "din1",
+        "din2",
+        "din3",
+        "din4",
+        "din5",
+        "din6",
+        "dout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "ideal_adc_out_7bits_scalar.va"
+  ],
+  "task_id": "v4-1164",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "din0",
+            "port_ref": "din0",
+            "position": 0
+          },
+          {
+            "net": "din1",
+            "port_ref": "din1",
+            "position": 1
+          },
+          {
+            "net": "din2",
+            "port_ref": "din2",
+            "position": 2
+          },
+          {
+            "net": "din3",
+            "port_ref": "din3",
+            "position": 3
+          },
+          {
+            "net": "din4",
+            "port_ref": "din4",
+            "position": 4
+          },
+          {
+            "net": "din5",
+            "port_ref": "din5",
+            "position": 5
+          },
+          {
+            "net": "din6",
+            "port_ref": "din6",
+            "position": 6
+          },
+          {
+            "net": "dout",
+            "port_ref": "dout",
+            "position": 7
+          }
+        ],
+        "module_ref": "ideal_adc_out_7bits_scalar",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "din0",
+      "din1",
+      "din2",
+      "din3",
+      "din4",
+      "din5",
+      "din6",
+      "dout"
+    ]
+  }
+}

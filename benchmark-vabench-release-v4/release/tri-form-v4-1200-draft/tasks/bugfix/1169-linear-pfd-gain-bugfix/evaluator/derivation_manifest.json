@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-169",
+    "canonical_task_slug": "169-linear-pfd-gain",
+    "family_spec_sha256": "a35a3352fcbedc984d344fe0bcd1903b24aec234ab88c4f4b25bca894be6ea6f",
+    "mutation_catalog_sha256": "69faeafb85f6bb9e75c321de62bb9569ebd682a47d5762d2668b788bfa25b549",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "169",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_inverted_sign",
+    "testbench_suite": [
+      "neg_002_inverted_sign",
+      "neg_001_zero",
+      "neg_003_unit_gain",
+      "neg_004_single_ended",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "186e4fbb8f98f959a17fd43d08693dad10ec29eecf310656d2617bdebb96a3e8",
+    "changed_artifacts": [
+      "linear_pfd_gain.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_inverted_sign",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Computes the gain with in2-in1 polarity.' because it exercises P_DIFFERENTIAL_INPUT_POLARITY as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 22,
+    "source_preferred_seed": "neg_002_inverted_sign",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,187 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "dac_ideal_4b_offset",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.239",
+                "name": "offset",
+                "override_behavior": "overrides offset",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "32.0 * 10.0 / 9.0",
+                "name": "scaling",
+                "override_behavior": "overrides scaling",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din0",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din1",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din2",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din3",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dout",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "dac_ideal_4b_offset.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "168",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "DAC Ideal 4b Offset"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_THRESHOLDED_4BIT_CODE",
+      "observable_contract": "`din3` is the MSB and `din0` is the LSB of a 4-bit unsigned code using threshold `vth`.",
+      "required_signals": [
+        "time",
+        "din0",
+        "din1",
+        "din2",
+        "din3",
+        "dout"
+      ]
+    },
+    {
+      "id": "P_OFFSET_PLUS_SCALED_TRIM",
+      "observable_contract": "The output equals the public `offset` plus the code-scaled trim increment using the public `scaling` factor.",
+      "required_signals": [
+        "time",
+        "din0",
+        "din1",
+        "din2",
+        "din3",
+        "dout"
+      ]
+    },
+    {
+      "id": "P_EVENT_UPDATED_OUTPUT",
+      "observable_contract": "`dout` updates on input threshold crossings or initial step and otherwise holds the smooth voltage output.",
+      "required_signals": [
+        "time",
+        "din0",
+        "din1",
+        "din2",
+        "din3",
+        "dout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "dac_ideal_4b_offset.va"
+  ],
+  "task_id": "v4-168",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "din0",
+            "port_ref": "din0",
+            "position": 0
+          },
+          {
+            "net": "din1",
+            "port_ref": "din1",
+            "position": 1
+          },
+          {
+            "net": "din2",
+            "port_ref": "din2",
+            "position": 2
+          },
+          {
+            "net": "din3",
+            "port_ref": "din3",
+            "position": 3
+          },
+          {
+            "net": "dout",
+            "port_ref": "dout",
+            "position": 4
+          }
+        ],
+        "module_ref": "dac_ideal_4b_offset",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "din0",
+      "din1",
+      "din2",
+      "din3",
+      "dout"
+    ]
+  }
+}

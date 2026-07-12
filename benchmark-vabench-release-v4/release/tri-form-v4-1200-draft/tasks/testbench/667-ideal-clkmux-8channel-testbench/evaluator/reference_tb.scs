@@ -1,0 +1,20 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/ideal_clkmux_8channel.va"
+
+Vclk (clk 0) vsource type=pwl wave=[0 0 1n 0 1.05n 1.0 1.50n 1.0 1.55n 0 3n 0 3.05n 1.0 3.50n 1.0 3.55n 0 5n 0 5.05n 1.0 5.50n 1.0 5.55n 0 7n 0 7.05n 1.0 7.50n 1.0 7.55n 0 9n 0 9.05n 1.0 9.50n 1.0 9.55n 0 11n 0 11.05n 1.0 11.50n 1.0 11.55n 0 13n 0 13.05n 1.0 13.50n 1.0 13.55n 0 15n 0 15.05n 1.0 15.50n 1.0 15.55n 0]
+Vin0 (in0 0) vsource dc=0.1
+Vin1 (in1 0) vsource dc=0.2
+Vin2 (in2 0) vsource dc=0.3
+Vin3 (in3 0) vsource dc=0.4
+Vin4 (in4 0) vsource dc=0.5
+Vin5 (in5 0) vsource dc=0.6
+Vin6 (in6 0) vsource dc=0.7
+Vin7 (in7 0) vsource dc=0.8
+
+XDUT (clk in0 in1 in2 in3 in4 in5 in6 in7 out count_x) ideal_clkmux_8channel
+
+
+tran tran stop=18n maxstep=20p
+save clk out count_x in0 in1 in2 in3 in4 in5 in6 in7
