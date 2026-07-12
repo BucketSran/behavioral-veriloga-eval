@@ -1,0 +1,34 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module reset_sample_latch(vin, clk, rst, sample_reset, reset_node);
+    input vin, clk, rst, sample_reset;
+    output reset_node;
+    electrical vin, clk, rst, sample_reset, reset_node;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    real reset_sample;
+
+    analog function real clip01;
+        input x;
+        real x;
+        begin
+            if (x < vss) clip01 = vss;
+            else if (x > vdd) clip01 = vdd;
+            else clip01 = x;
+        end
+    endfunction
+
+    analog begin
+        @(initial_step) reset_sample = vcm;
+        @(cross(V(clk) - vth, +1)) begin
+            if (0) reset_sample = vcm;
+            else if (V(sample_reset) > vth) reset_sample = V(vin);
+        end
+        V(reset_node) <+ transition(clip01(reset_sample), 0, tr, tr);
+    end
+endmodule

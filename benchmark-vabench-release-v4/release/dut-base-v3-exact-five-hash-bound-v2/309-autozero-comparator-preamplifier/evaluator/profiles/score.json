@@ -1,0 +1,41 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=76n maxstep=80p"
+    ],
+    "body_lines": [
+      "Vvinp (vinp 0) vsource type=pwl wave=[0 0.56 7n 0.56 13n 0.49 23n 0.49 33n 0.40 47n 0.40 58n 0.63 76n 0.61]",
+      "Vvinn (vinn 0) vsource type=pwl wave=[0 0.44 7n 0.44 13n 0.45 23n 0.45 33n 0.54 47n 0.54 58n 0.50 76n 0.46]",
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=5n width=2n delay=2.4n rise=60p fall=60p",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.7n 0.9 1.8n 0 50n 0 50.1n 0.9 53n 0.9 53.1n 0 76n 0]",
+      "Vaz_en (az_en 0) vsource type=pwl wave=[0 0 6n 0 6.1n 0.9 10n 0.9 10.1n 0 29n 0 29.1n 0.9 34n 0.9 34.1n 0 56n 0 56.1n 0.9 60n 0.9 60.1n 0 76n 0]",
+      "Veval_en (eval_en 0) vsource type=pwl wave=[0 0 12n 0 12.1n 0.9 23n 0.9 23.1n 0 36n 0 36.1n 0.9 48n 0.9 48.1n 0 64n 0 64.1n 0.9 72n 0.9 72.1n 0 76n 0]",
+      "",
+      "XDUT (vinp vinn clk rst az_en eval_en decision offset_store ready) autozero_comparator_preamplifier_top",
+      ""
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "1bbaa50e4ab97fda48e39e65fd294804be49fdaefd0369c01a78e897d48aee9f",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "100n"
+  },
+  "profile_name": "score",
+  "property_ids": [
+    "P_ON_RESET_CLEAR_STORED_OFFSET_DECISION",
+    "P_DURING_AN_AUTO_ZERO_CLOCK_UPDATE",
+    "P_DURING_AN_EVALUATION_CLOCK_UPDATE_WITH",
+    "P_DRIVE_DECISION_HIGH_FOR_CORRECTED_NONNEGATIVE",
+    "P_EXPOSE_STORED_OFFSET_ON_OFFSET_STORE",
+    "P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE"
+  ],
+  "public_visible": false,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {}
+}

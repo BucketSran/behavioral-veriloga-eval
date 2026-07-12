@@ -1,0 +1,21 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module correlated_double_sampler_top(vin, clk, rst, sample_reset, sample_signal, vout, offset_dbg, valid);
+    input vin, clk, rst, sample_reset, sample_signal;
+    output vout, offset_dbg, valid;
+    electrical vin, clk, rst, sample_reset, sample_signal, vout, offset_dbg, valid;
+    electrical reset_node;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real cds_gain = 1.0;
+
+    reset_sample_latch #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr))
+        XRST (vin, clk, rst, sample_reset, reset_node);
+    signal_sample_latch #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr), .cds_gain(cds_gain))
+        XSIG (vin, clk, rst, sample_signal, reset_node, vout, offset_dbg, valid);
+endmodule

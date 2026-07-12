@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/switched_cap_integrator_phase_pair_top.va"
+ahdl_include "./dut/sample_phase_cell.va"
+ahdl_include "./dut/integrator_state_cell.va"
+
+Vvin (vin 0) vsource type=pwl wave=[0 0.33 9n 0.33 16n 0.74 28n 0.74 40n 0.22 53n 0.22 76n 0.58]
+Vphi1 (phi1 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.9 7n 0.9 7.1n 0 16n 0 16.1n 0.9 18n 0.9 18.1n 0 29n 0 29.1n 0.9 32n 0.9 32.1n 0 48n 0 48.1n 0.9 50n 0.9 50.1n 0 76n 0]
+Vphi2 (phi2 0) vsource type=pwl wave=[0 0 9n 0 9.1n 0.9 11n 0.9 11.1n 0 20n 0 20.1n 0.9 22n 0.9 22.1n 0 31n 0 31.1n 0.9 33n 0.9 33.1n 0 54n 0 54.1n 0.9 56n 0.9 56.1n 0 76n 0]
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.7n 0.9 1.8n 0 50n 0 50.1n 0.9 53n 0.9 53.1n 0 76n 0]
+Venable (enable 0) vsource type=pwl wave=[0 0 3.5n 0 3.6n 0.9 41n 0.9 41.1n 0 47n 0 47.1n 0.9 76n 0.9]
+
+XDUT (vin phi1 phi2 rst enable vout phase_metric valid) switched_cap_integrator_phase_pair_top
+
+
+tran tran stop=76n maxstep=80p
+save vin phi1 phi2 rst enable vout phase_metric valid

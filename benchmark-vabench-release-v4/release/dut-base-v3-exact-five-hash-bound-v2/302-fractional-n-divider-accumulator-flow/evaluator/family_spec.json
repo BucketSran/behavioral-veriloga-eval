@@ -1,0 +1,346 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "fracn_pll_timer_ref",
+            "parameters": [
+              {
+                "default": "8 from [1:inf)",
+                "name": "div_int",
+                "override_behavior": "overrides div_int",
+                "type": "integer",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "3 from [0:inf)",
+                "name": "frac_word",
+                "override_behavior": "overrides frac_word",
+                "type": "integer",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "8 from [1:inf)",
+                "name": "acc_modulus",
+                "override_behavior": "overrides acc_modulus",
+                "type": "integer",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "800.0e6 from (0:inf)",
+                "name": "f_center",
+                "override_behavior": "overrides f_center",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "350.0e6 from (0:inf)",
+                "name": "kvco_hz_per_v",
+                "override_behavior": "overrides kvco_hz_per_v",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "300.0e6 from (0:inf)",
+                "name": "f_min",
+                "override_behavior": "overrides f_min",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.6e9 from (0:inf)",
+                "name": "f_max",
+                "override_behavior": "overrides f_max",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "8.0e6 from [0:inf)",
+                "name": "kp",
+                "override_behavior": "overrides kp",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.2e5 from [0:inf)",
+                "name": "ki",
+                "override_behavior": "overrides ki",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "-0.45",
+                "name": "integ_min",
+                "override_behavior": "overrides integ_min",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "integ_max",
+                "override_behavior": "overrides integ_max",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vctrl_init",
+                "override_behavior": "overrides vctrl_init",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "20p from (0:inf)",
+                "name": "tedge",
+                "override_behavior": "overrides tedge",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.4e-9 from (0:inf)",
+                "name": "lock_tol",
+                "override_behavior": "overrides lock_tol",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "6 from [1:inf)",
+                "name": "lock_count_target",
+                "override_behavior": "overrides lock_count_target",
+                "type": "integer",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VDD",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VSS",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ref_clk",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "fb_clk",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dco_clk",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vctrl_mon",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lock",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "fracn_pll_timer_ref.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "302",
+  "identity": {
+    "category": "pll_clock_timing_systems",
+    "difficulty": "D3",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Fractional-N Divider Accumulator Flow"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_USE_REF_CLK_AS_THE_REFERENCE",
+      "observable_contract": "Use `ref_clk` as the reference timing input.",
+      "required_signals": [
+        "time",
+        "VDD",
+        "VSS",
+        "ref_clk",
+        "fb_clk",
+        "dco_clk",
+        "vctrl_mon",
+        "lock"
+      ]
+    },
+    {
+      "id": "P_GENERATE_A_BEHAVIORAL_DCO_CLOCK_ON",
+      "observable_contract": "Generate a behavioral DCO clock on `dco_clk`.",
+      "required_signals": [
+        "time",
+        "VDD",
+        "VSS",
+        "ref_clk",
+        "fb_clk",
+        "dco_clk",
+        "vctrl_mon",
+        "lock"
+      ]
+    },
+    {
+      "id": "P_GENERATE_FB_CLK_BY_TOGGLING_IT",
+      "observable_contract": "Generate `fb_clk` by toggling it after a DCO rising-edge count selected by a",
+      "required_signals": [
+        "time",
+        "VDD",
+        "VSS",
+        "ref_clk",
+        "fb_clk",
+        "dco_clk",
+        "vctrl_mon",
+        "lock"
+      ]
+    },
+    {
+      "id": "P_UPDATE_A_BOUNDED_CONTROL_VOLTAGE_MONITOR",
+      "observable_contract": "Update a bounded control-voltage monitor on `vctrl_mon` from the PFD phase",
+      "required_signals": [
+        "time",
+        "VDD",
+        "VSS",
+        "ref_clk",
+        "fb_clk",
+        "dco_clk",
+        "vctrl_mon",
+        "lock"
+      ]
+    },
+    {
+      "id": "P_DRIVE_LOCK_HIGH_AFTER_STABLE_TRACKING",
+      "observable_contract": "Drive `lock` high after stable tracking, low or unstable during the",
+      "required_signals": [
+        "time",
+        "VDD",
+        "VSS",
+        "ref_clk",
+        "fb_clk",
+        "dco_clk",
+        "vctrl_mon",
+        "lock"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "support_contract": {
+    "files": [
+      {
+        "modules": [
+          "ref_step_clk"
+        ],
+        "path": "ref_step_clk.va",
+        "sha256": "b2903c6ad950df0b02ddaf7d078b7a41bf16e6b25e0742445971a7d90c40700b"
+      }
+    ],
+    "mount_root": "support",
+    "source_root": "public_support",
+    "visibility": "public_readonly"
+  },
+  "task_ids": {
+    "bugfix": "v4-1302",
+    "dut": "v4-302",
+    "testbench": "v4-802"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "VDD",
+            "port_ref": "VDD",
+            "position": 0
+          },
+          {
+            "net": "VSS",
+            "port_ref": "VSS",
+            "position": 1
+          },
+          {
+            "net": "ref_clk",
+            "port_ref": "ref_clk",
+            "position": 2
+          },
+          {
+            "net": "fb_clk",
+            "port_ref": "fb_clk",
+            "position": 3
+          },
+          {
+            "net": "dco_clk",
+            "port_ref": "dco_clk",
+            "position": 4
+          },
+          {
+            "net": "vctrl_mon",
+            "port_ref": "vctrl_mon",
+            "position": 5
+          },
+          {
+            "net": "lock",
+            "port_ref": "lock",
+            "position": 6
+          }
+        ],
+        "module_ref": "fracn_pll_timer_ref",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "VDD",
+      "VSS",
+      "ref_clk",
+      "fb_clk",
+      "dco_clk",
+      "vctrl_mon",
+      "lock"
+    ]
+  }
+}

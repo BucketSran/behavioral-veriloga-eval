@@ -1,0 +1,24 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/fracn_pll_timer_ref.va"
+ahdl_include "./support/ref_step_clk.va"
+
+// Visible smoke testbench for fractional-N PLL tracking/reacquire after a reference step.
+
+VDD_SRC (VDD 0) vsource type=dc dc=0.9
+VSS_SRC (VSS 0) vsource type=dc dc=0
+
+XREF (VDD VSS ref_clk) ref_step_clk \
+    period_pre=20.4n period_post=20.0n t_switch=2u tedge=100p
+
+XDUT (VDD VSS ref_clk fb_clk dco_clk vctrl_mon lock) fracn_pll_timer_ref \
+    div_int=8 frac_word=2 acc_modulus=8 f_center=784.313725e6 kvco_hz_per_v=200e6 \
+    f_min=500e6 f_max=1.2e9 kp=2.5e6 ki=8.0e4 vctrl_init=0.45 tedge=1n \
+    lock_tol=3n lock_count_target=3
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=6u maxstep=5n
+save ref_clk fb_clk dco_clk vctrl_mon lock VDD VSS

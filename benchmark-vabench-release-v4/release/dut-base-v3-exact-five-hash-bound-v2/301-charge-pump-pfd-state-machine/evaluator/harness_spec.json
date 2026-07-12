@@ -1,0 +1,113 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "charge_pump_pfd_state_machine.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=1.2u maxstep=1n"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "ref",
+      "fb",
+      "vctrl",
+      "metric"
+    ],
+    "support_include_templates": [
+      "ahdl_include \"{support_source_root}/{support_artifact_path}\""
+    ]
+  },
+  "family_id": "301",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "04b52d2932cba9a011e05a0a259e1a817b982a0de63ccfad7293180b37b545e6",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "9d3c5553c09f9d22c9ee3bb06a4ddc9de5ecb62e2b9155ed2cca0ca25059a452",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "// Visible smoke testbench for charge_pump_pfd_state_machine.",
+          "// ref_fb_clk drives fb leading ref by 30 ns (both 4 MHz squares => period=250n):",
+          "// the detector state goes negative and vctrl ramps down.",
+          "",
+          "VDD (VDD 0) vsource dc=0.9 type=dc",
+          "VSS (VSS 0) vsource dc=0.0 type=dc",
+          "",
+          "XREF (VDD VSS ref fb) ref_fb_clk period=250n phase_lead=-30n tedge=100p",
+          "XDUT (ref fb vctrl metric) charge_pump_pfd_state_machine",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=1.0u maxstep=1n"
+        ],
+        "body_lines": [
+          "// Hidden testbench for charge_pump_pfd_state_machine.",
+          "// ref_fb_clk drives ref leading fb by 20 ns (both 5 MHz squares => period=200n):",
+          "// the detector state goes positive and vctrl ramps up.",
+          "",
+          "VDD (VDD 0) vsource dc=0.9 type=dc",
+          "VSS (VSS 0) vsource dc=0.0 type=dc",
+          "",
+          "XREF (VDD VSS ref fb) ref_fb_clk period=200n phase_lead=20n tedge=100p",
+          "XDUT (ref fb vctrl metric) charge_pump_pfd_state_machine",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_AN_INTEGER_STATE_Q_HELD_IN",
+    "P_ON_EACH_RISING_CROSSING_OF_V",
+    "P_ON_EACH_RISING_CROSSING_OF_V_2",
+    "P_MAINTAIN_A_CONTROL_VOLTAGE_VCTRL_Q",
+    "P_DRIVE_VCTRL_TRANSITION_VCTRL_Q_0",
+    "P_DRIVE_METRIC_AS_A_VOLTAGE_CODED"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "fa36ffdd397c64481eb6430eec3ab2b63f739da378cbdda6444aa63c8cd3b59a",
+    "family_spec_sha256": "4024374ef781f421fa2815335321ff821a20b6a7e9090b9b23687e85f08e0c71"
+  },
+  "support": {
+    "artifact_paths": [
+      "ref_fb_clk.va"
+    ],
+    "source_root": "./support"
+  },
+  "task_id": "v4-301"
+}

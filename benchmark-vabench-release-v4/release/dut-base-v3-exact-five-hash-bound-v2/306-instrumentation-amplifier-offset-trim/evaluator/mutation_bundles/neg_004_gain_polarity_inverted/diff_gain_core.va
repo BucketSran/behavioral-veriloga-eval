@@ -1,0 +1,38 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module diff_gain_core(vinp, vinn, corr, rst, vout, offset_metric);
+    input vinp, vinn, corr, rst;
+    output vout, offset_metric;
+    electrical vinp, vinn, corr, rst, vout, offset_metric;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real diff_gain = 8.0;
+    real vout_target, metric_target;
+
+    analog function real clip01;
+        input x;
+        real x;
+        begin
+            if (x < vss) clip01 = vss;
+            else if (x > vdd) clip01 = vdd;
+            else clip01 = x;
+        end
+    endfunction
+
+    analog begin
+        if (V(rst) > vth) begin
+            vout_target = vcm;
+            metric_target = vss;
+        end else begin
+            vout_target = clip01(vcm + -1.0 * diff_gain * (V(vinp) - V(vinn) - (V(corr) - vcm)));
+            metric_target = V(corr);
+        end
+        V(vout) <+ vout_target;
+        V(offset_metric) <+ metric_target;
+    end
+endmodule

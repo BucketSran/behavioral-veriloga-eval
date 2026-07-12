@@ -1,0 +1,72 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bootstrapped_sampler_charge_metric(vin, clk, rst, enable, vhold, boot_metric, droop_flag);
+    inout vin, clk, rst, enable, vhold, boot_metric, droop_flag;
+    electrical vin, clk, rst, enable, vhold, boot_metric, droop_flag;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real droop_step = 2e-3;
+    parameter real droop_tol = 10e-3;
+    parameter real tick = 1n from (0:inf);
+
+    real held_v, boot_metric_v, droop_flag_v, droop_accum;
+
+    analog function real clip01;
+        input x;
+        real x;
+        begin
+            if (x < vss) clip01 = vss;
+            else if (x > vdd) clip01 = vdd;
+            else clip01 = x;
+        end
+    endfunction
+
+    analog function real absval;
+        input x;
+        real x;
+        begin
+            absval = (x < 0.0) ? -x : x;
+        end
+    endfunction
+
+    analog begin
+        @(initial_step) begin
+            held_v = vcm; boot_metric_v = vss; droop_flag_v = vss; droop_accum = 0.0;
+        end
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                held_v = vcm;
+                boot_metric_v = vss;
+                droop_flag_v = vss;
+                droop_accum = 0.0;
+            end else begin
+
+                held_v = vcm;
+                boot_metric_v = vss;
+                droop_flag_v = vss;
+            end
+        end
+        @(timer(0, tick)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                held_v = vcm;
+                boot_metric_v = vss;
+                droop_flag_v = vss;
+                droop_accum = 0.0;
+            end else begin
+                if (held_v > vcm) held_v = held_v - droop_step;
+                else if (held_v < vcm) held_v = held_v + droop_step;
+                droop_accum = droop_accum + droop_step;
+                boot_metric_v = clip01(2.0 * absval(held_v - vcm));
+                droop_flag_v = ((droop_accum > droop_tol) ? vdd : vss);
+            end
+        end
+        V(vhold) <+ transition(held_v, 0, tr, tr);
+        V(boot_metric) <+ transition(boot_metric_v, 0, tr, tr);
+        V(droop_flag) <+ transition(droop_flag_v, 0, tr, tr);
+    end
+endmodule

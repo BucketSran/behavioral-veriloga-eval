@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/bootstrapped_sampler_charge_metric.va"
+
+Vvin (vin 0) vsource type=pwl wave=[0 0.45 10n 0.45 18n 0.82 32n 0.82 44n 0.12 58n 0.12 70n 0.55 90n 0.55]
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=7n width=3.5n delay=1n rise=60p fall=60p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 90n 0]
+Venable (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 56n 0.9 56.1n 0 64n 0 64.1n 0.9 90n 0.9]
+
+XDUT (vin clk rst enable vhold boot_metric droop_flag) bootstrapped_sampler_charge_metric
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=90n maxstep=80p
+save vin clk rst enable vhold boot_metric droop_flag

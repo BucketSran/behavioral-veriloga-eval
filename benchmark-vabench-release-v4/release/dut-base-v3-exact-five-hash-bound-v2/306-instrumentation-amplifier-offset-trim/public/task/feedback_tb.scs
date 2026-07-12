@@ -1,0 +1,23 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/instrumentation_amp_offset_trim_top.va"
+ahdl_include "./dut/diff_gain_core.va"
+ahdl_include "./dut/offset_trim_controller.va"
+
+Vvinp (vinp 0) vsource type=pwl wave=[0 0.30 10n 0.30 18n 0.66 31n 0.66 42n 0.38 58n 0.38 80n 0.57]
+Vvinn (vinn 0) vsource type=pwl wave=[0 0.36 10n 0.36 18n 0.48 31n 0.48 42n 0.53 58n 0.53 80n 0.45]
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=6n width=2.2n delay=3n rise=60p fall=60p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2.1n 0.9 2.2n 0 52n 0 52.1n 0.9 55n 0.9 55.1n 0 80n 0]
+Vcal_en (cal_en 0) vsource type=pwl wave=[0 0 7n 0 7.1n 0.9 46n 0.9 46.1n 0 55n 0 55.1n 0.9 80n 0.9]
+Vtrim_2 (trim_2 0) vsource type=pwl wave=[0 0 20n 0 20.1n 0.9 44n 0.9 44.1n 0 80n 0]
+Vtrim_1 (trim_1 0) vsource type=pwl wave=[0 0 14n 0 14.1n 0.9 36n 0.9 36.1n 0 62n 0 62.1n 0.9 80n 0.9]
+Vtrim_0 (trim_0 0) vsource type=pwl wave=[0 0 26n 0 26.1n 0.9 52n 0.9 52.1n 0 80n 0]
+
+XDUT (vinp vinn clk rst cal_en trim_2 trim_1 trim_0 vout offset_metric ready) instrumentation_amp_offset_trim_top
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=80n maxstep=80p
+save vinp vinn clk rst cal_en trim_2 trim_1 trim_0 vout offset_metric ready

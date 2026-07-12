@@ -1,0 +1,102 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "differential_pair_gm_limiter.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=84n maxstep=80p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vinp",
+      "vinn",
+      "bias",
+      "enable",
+      "voutp",
+      "voutn",
+      "gm_metric",
+      "limit_flag"
+    ]
+  },
+  "family_id": "303",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "b722574bbee18406c0696b11a4769b1328e4be58a7b21e7b68eb130e97e42154",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "2103cd570d20ad26dcd7981d653dbf48bccc0f5a3cabeecda197417d3a2236c6",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vvinp (vinp 0) vsource type=pwl wave=[0 0.30 8n 0.30 16n 0.70 28n 0.70 38n 0.20 48n 0.20 62n 0.62 84n 0.62]",
+          "Vvinn (vinn 0) vsource type=pwl wave=[0 0.52 8n 0.52 16n 0.40 28n 0.40 38n 0.58 48n 0.58 62n 0.50 84n 0.50]",
+          "Vbias (bias 0) vsource dc=0.45",
+          "Venable (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 57n 0.9 57.1n 0 64n 0 64.1n 0.9 84n 0.9]",
+          "",
+          "XDUT (vinp vinn bias enable voutp voutn gm_metric limit_flag) differential_pair_gm_limiter",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=76n maxstep=80p"
+        ],
+        "body_lines": [
+          "Vvinp (vinp 0) vsource type=pwl wave=[0 0.30 8n 0.30 16n 0.70 28n 0.70 38n 0.20 48n 0.20 62n 0.62 76n 0.62]",
+          "Vvinn (vinn 0) vsource type=pwl wave=[0 0.52 8n 0.52 16n 0.40 28n 0.40 38n 0.58 48n 0.58 62n 0.50 76n 0.50]",
+          "Vbias (bias 0) vsource dc=0.45",
+          "Venable (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 50n 0.9 50.1n 0 57n 0 57.1n 0.9 76n 0.9]",
+          "",
+          "XDUT (vinp vinn bias enable voutp voutn gm_metric limit_flag) differential_pair_gm_limiter",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_WHEN_DISABLED_DRIVE_BOTH_OUTPUTS_TO",
+    "P_WHEN_ENABLED_CONVERT_THE_SAMPLED_DIFFERENTIAL",
+    "P_SCALE_SMALL_SIGNAL_OUTPUT_SEPARATION_BY",
+    "P_DRIVE_GM_METRIC_AS_A_VOLTAGE",
+    "P_ASSERT_LIMIT_FLAG_ONLY_WHEN_COMPRESSION",
+    "P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "6deb4ad22858d9d6f03f2be7c144d6d00bfa5d5397bc99aa8e8b7227b4fc1569",
+    "family_spec_sha256": "e2f379c40a3a85cc21c0a0ec169c193799a178f536acb8da23c7084fcf4eae86"
+  },
+  "task_id": "v4-303"
+}

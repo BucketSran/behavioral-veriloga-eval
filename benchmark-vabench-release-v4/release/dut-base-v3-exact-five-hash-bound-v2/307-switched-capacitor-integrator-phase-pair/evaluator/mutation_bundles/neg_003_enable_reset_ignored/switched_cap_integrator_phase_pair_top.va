@@ -1,0 +1,21 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module switched_cap_integrator_phase_pair_top(vin, phi1, phi2, rst, enable, vout, phase_metric, valid);
+    input vin, phi1, phi2, rst, enable;
+    output vout, phase_metric, valid;
+    electrical vin, phi1, phi2, rst, enable, vout, phase_metric, valid;
+    electrical sample_node, sample_valid;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real k_int = 0.2;
+
+    sample_phase_cell #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr))
+        XSAMPLE (vin, phi1, phi2, rst, enable, sample_node, sample_valid);
+    integrator_state_cell #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr), .k_int(k_int))
+        XINT (phi1, phi2, rst, enable, sample_node, sample_valid, vout, phase_metric, valid);
+endmodule

@@ -1,0 +1,20 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/correlated_double_sampler_top.va"
+ahdl_include "./dut/reset_sample_latch.va"
+ahdl_include "./dut/signal_sample_latch.va"
+
+Vvin (vin 0) vsource type=pwl wave=[0 0.28 8n 0.28 14n 0.68 24n 0.68 32n 0.72 34n 0.72 38n 0.30 48n 0.30 80n 0.61]
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=6n width=2.2n delay=3n rise=60p fall=60p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2.1n 0.9 2.2n 0 50n 0 50.1n 0.9 53.5n 0.9 53.6n 0 80n 0]
+Vsample_reset (sample_reset 0) vsource type=pwl wave=[0 0 8n 0 8.1n 0.9 12n 0.9 12.1n 0 32n 0 32.1n 0.9 36n 0.9 36.1n 0 80n 0]
+Vsample_signal (sample_signal 0) vsource type=pwl wave=[0 0 14n 0 14.1n 0.9 18n 0.9 18.1n 0 38n 0 38.1n 0.9 42n 0.9 42.1n 0 80n 0]
+
+XDUT (vin clk rst sample_reset sample_signal vout offset_dbg valid) correlated_double_sampler_top
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=80n maxstep=80p
+save vin clk rst sample_reset sample_signal vout offset_dbg valid

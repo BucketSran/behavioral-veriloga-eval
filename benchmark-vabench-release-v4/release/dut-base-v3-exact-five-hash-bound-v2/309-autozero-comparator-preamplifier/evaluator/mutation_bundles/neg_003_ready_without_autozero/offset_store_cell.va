@@ -1,0 +1,40 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module offset_store_cell(vinp, vinn, clk, rst, az_en, offset_store, ready);
+    input vinp, vinn, clk, rst, az_en;
+    output offset_store, ready;
+    electrical vinp, vinn, clk, rst, az_en, offset_store, ready;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    real stored_offset, ready_v;
+
+    analog function real clip01;
+        input x;
+        real x;
+        begin
+            if (x < vss) clip01 = vss;
+            else if (x > vdd) clip01 = vdd;
+            else clip01 = x;
+        end
+    endfunction
+
+    analog begin
+        @(initial_step) begin stored_offset = 0.0; ready_v = vss; end
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth) begin
+                stored_offset = 0.0;
+                ready_v = vss;
+            end else if (V(az_en) > vth) begin
+                stored_offset = V(vinp) - V(vinn);
+                ready_v = vdd;
+            end
+        end
+        V(offset_store) <+ transition(clip01(vcm + stored_offset), 0, tr, tr);
+        V(ready) <+ transition((V(rst) > vth) ? vss : vdd, 0, tr, tr);
+    end
+endmodule

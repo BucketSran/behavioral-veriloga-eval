@@ -1,0 +1,43 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=76n maxstep=80p"
+    ],
+    "body_lines": [
+      "Vvinp (vinp 0) vsource type=pwl wave=[0 0.26 9n 0.26 16n 0.70 29n 0.70 39n 0.41 51n 0.41 76n 0.60]",
+      "Vvinn (vinn 0) vsource type=pwl wave=[0 0.34 9n 0.34 16n 0.44 29n 0.44 39n 0.55 51n 0.55 76n 0.47]",
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=5n width=2n delay=2.4n rise=60p fall=60p",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.7n 0.9 1.8n 0 49n 0 49.1n 0.9 52n 0.9 52.1n 0 76n 0]",
+      "Vcal_en (cal_en 0) vsource type=pwl wave=[0 0 6n 0 6.1n 0.9 42n 0.9 42.1n 0 50n 0 50.1n 0.9 76n 0.9]",
+      "Vtrim_2 (trim_2 0) vsource type=pwl wave=[0 0 18n 0 18.1n 0.9 38n 0.9 38.1n 0 76n 0]",
+      "Vtrim_1 (trim_1 0) vsource type=pwl wave=[0 0 12n 0 12.1n 0.9 32n 0.9 32.1n 0 58n 0 58.1n 0.9 76n 0.9]",
+      "Vtrim_0 (trim_0 0) vsource type=pwl wave=[0 0 24n 0 24.1n 0.9 48n 0.9 48.1n 0 76n 0]",
+      "",
+      "XDUT (vinp vinn clk rst cal_en trim_2 trim_1 trim_0 vout offset_metric ready) instrumentation_amp_offset_trim_top",
+      ""
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "b795dc276ee28438ef5bece8c51058e3c574d3f60a3330498c2d9fd05d2d8cc8",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "100n"
+  },
+  "profile_name": "score",
+  "property_ids": [
+    "P_ON_RESET_CLEAR_THE_TRIM_STATE",
+    "P_DECODE_TRIM_2_TRIM_0_AS",
+    "P_WHILE_CAL_EN_IS_HIGH_UPDATE",
+    "P_DRIVE_VOUT_FROM_THE_CORRECTED_DIFFERENTIAL",
+    "P_EXPOSE_THE_ACTIVE_CORRECTION_ON_OFFSET",
+    "P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE"
+  ],
+  "public_visible": false,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {}
+}

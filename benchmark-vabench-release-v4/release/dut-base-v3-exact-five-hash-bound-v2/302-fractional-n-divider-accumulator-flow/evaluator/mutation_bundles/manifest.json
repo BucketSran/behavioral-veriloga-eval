@@ -1,0 +1,132 @@
+{
+  "family_id": "302",
+  "gold_bundle_sha256": "b9433264a78b193bf6f6213b8a91c2a87d004c0b5cc092634b233e8489917eb0",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "fracn_pll_timer_ref.va": "e22a33aae6a82ad3d6c9294e125187fad8e2229f54ade3bb58c1f6434cceeefc"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_USE_REF_CLK_AS_THE_REFERENCE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "fracn_pll_timer_ref.va"
+      ],
+      "fault_class": "zero_stub_output",
+      "id": "neg_001_zero",
+      "trigger_condition": "Fractional-N Divider Accumulator Flow: keeps all outputs at the low rail so there is no DCO, feedback, lock, or control behavior.",
+      "violated_property_ids": [
+        "P_USE_REF_CLK_AS_THE_REFERENCE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "fracn_pll_timer_ref.va": "b72cc0c57808ff541c295f9b7f08cc261f77d3a8f39070cc74c73bd5f9e7bbfa"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_GENERATE_A_BEHAVIORAL_DCO_CLOCK_ON"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_lock_stuck_high/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "fracn_pll_timer_ref.va"
+      ],
+      "fault_class": "lock_qualification_bypass",
+      "id": "neg_002_lock_stuck_high",
+      "trigger_condition": "Fractional-N Divider Accumulator Flow: generates the clocks but drives lock high continuously so the disturbance and reacquire behavior is missing.",
+      "violated_property_ids": [
+        "P_GENERATE_A_BEHAVIORAL_DCO_CLOCK_ON"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "fracn_pll_timer_ref.va": "0069b3e2ac1cdc604328402f8bffb06474df2d2b938bdd2ddce39f04b07aa55f"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_GENERATE_FB_CLK_BY_TOGGLING_IT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_wrong_integer_divider/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "fracn_pll_timer_ref.va"
+      ],
+      "fault_class": "divider_ratio_off_by_one",
+      "id": "neg_003_wrong_integer_divider",
+      "trigger_condition": "Fractional-N Divider Accumulator Flow: uses the wrong base integer divider so the late-window feedback cadence cannot track the reference.",
+      "violated_property_ids": [
+        "P_GENERATE_FB_CLK_BY_TOGGLING_IT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "fracn_pll_timer_ref.va": "fda26f6c11154f7e73857d546c0ed53b116d7b7505bf23ac51ae3585af935a1f"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_UPDATE_A_BOUNDED_CONTROL_VOLTAGE_MONITOR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_no_loop_correction/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "fracn_pll_timer_ref.va"
+      ],
+      "fault_class": "loop_correction_disabled",
+      "id": "neg_004_no_loop_correction",
+      "trigger_condition": "Fractional-N Divider Accumulator Flow: keeps the control voltage fixed instead of correcting after the reference frequency step.",
+      "violated_property_ids": [
+        "P_UPDATE_A_BOUNDED_CONTROL_VOLTAGE_MONITOR"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "fracn_pll_timer_ref.va": "a9a610013f08b1d1b952dc531ea6b8c583c959cd0a9bbe6bfa16f6f33dffc264"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_LOCK_HIGH_AFTER_STABLE_TRACKING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_vctrl_out_of_range/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "fracn_pll_timer_ref.va"
+      ],
+      "fault_class": "monitor_rail_violation",
+      "id": "neg_005_vctrl_out_of_range",
+      "trigger_condition": "Fractional-N Divider Accumulator Flow: reports a control-voltage monitor outside the supply rails while otherwise preserving most clock behavior.",
+      "violated_property_ids": [
+        "P_DRIVE_LOCK_HIGH_AFTER_STABLE_TRACKING"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

@@ -1,0 +1,65 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module capacitive_feedback_amplifier_macro(vin, clk, rst, enable, gain_1, gain_0, vout, sampled_metric, settled);
+    inout vin, clk, rst, enable, gain_1, gain_0, vout, sampled_metric, settled;
+    electrical vin, clk, rst, enable, gain_1, gain_0, vout, sampled_metric, settled;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real gain_step = 0.75;
+    parameter real settle_tol = 10e-3;
+
+    integer code, settle_count;
+    real sample_v, target_v, vout_v, sampled_metric_v, settled_v;
+
+    analog function real clip01;
+        input x;
+        real x;
+        begin
+            if (x < vss) clip01 = vss;
+            else if (x > vdd) clip01 = vdd;
+            else clip01 = x;
+        end
+    endfunction
+
+    analog function real absval;
+        input x;
+        real x;
+        begin
+            absval = (x < 0.0) ? -x : x;
+        end
+    endfunction
+
+    analog begin
+        @(initial_step) begin
+            settle_count = 0; vout_v = vcm; sampled_metric_v = vss; settled_v = vss;
+        end
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                settle_count = 0;
+                vout_v = vcm;
+                sampled_metric_v = vss;
+                settled_v = vss;
+            end else begin
+
+                code = 0;
+                if (V(gain_0) > vth) code = code + 1;
+                if (V(gain_1) > vth) code = code + 2;
+                sample_v = V(vin);
+                target_v = clip01(vcm + 1.0 * (1.0 + gain_step * code) * (sample_v - vcm));
+                if (absval(vout_v - target_v) < settle_tol) settle_count = settle_count + 1;
+                else settle_count = 0;
+                vout_v = target_v;
+                sampled_metric_v = sample_v;
+                settled_v = vss;
+            end
+        end
+        V(vout) <+ transition(vout_v, 0, tr, tr);
+        V(sampled_metric) <+ transition(sampled_metric_v, 0, tr, tr);
+        V(settled) <+ transition(settled_v, 0, tr, tr);
+    end
+endmodule

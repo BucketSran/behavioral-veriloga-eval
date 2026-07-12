@@ -1,0 +1,48 @@
+// Public read-only harness clock source for the charge-pump/PFD task.
+`include "constants.vams"
+`include "disciplines.vams"
+
+module ref_fb_clk (
+    inout  electrical VDD,
+    inout  electrical VSS,
+    output electrical ref,
+    output electrical fb
+);
+    parameter real period = 200n from (0:inf);
+    parameter real phase_lead = 20n;
+    parameter real tedge = 100p from (0:inf);
+
+    real vh;
+    real vl;
+    real half;
+    real t_ref_next;
+    real t_fb_next;
+    integer ref_state;
+    integer fb_state;
+
+    analog begin
+        vh = V(VDD);
+        vl = V(VSS);
+        half = 0.5 * period;
+
+        @(initial_step) begin
+            ref_state = 0;
+            fb_state = 0;
+            t_ref_next = $abstime + half;
+            t_fb_next = $abstime + half + phase_lead;
+        end
+
+        @(timer(t_ref_next)) begin
+            ref_state = 1 - ref_state;
+            t_ref_next = t_ref_next + half;
+        end
+
+        @(timer(t_fb_next)) begin
+            fb_state = 1 - fb_state;
+            t_fb_next = t_fb_next + half;
+        end
+
+        V(ref) <+ vl + (vh - vl) * transition(ref_state ? 1.0 : 0.0, 0.0, tedge, tedge);
+        V(fb)  <+ vl + (vh - vl) * transition(fb_state ? 1.0 : 0.0, 0.0, tedge, tedge);
+    end
+endmodule

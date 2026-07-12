@@ -1,0 +1,42 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=1.0u maxstep=1n"
+    ],
+    "body_lines": [
+      "// Hidden testbench for charge_pump_pfd_state_machine.",
+      "// ref_fb_clk drives ref leading fb by 20 ns (both 5 MHz squares => period=200n):",
+      "// the detector state goes positive and vctrl ramps up.",
+      "",
+      "VDD (VDD 0) vsource dc=0.9 type=dc",
+      "VSS (VSS 0) vsource dc=0.0 type=dc",
+      "",
+      "XREF (VDD VSS ref fb) ref_fb_clk period=200n phase_lead=20n tedge=100p",
+      "XDUT (ref fb vctrl metric) charge_pump_pfd_state_machine",
+      ""
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "dc75f0b9849d5efde4e8f2136a933ff6f4ee31248a3e754f52ece74858e6d695",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "100n"
+  },
+  "profile_name": "score",
+  "property_ids": [
+    "P_AN_INTEGER_STATE_Q_HELD_IN",
+    "P_ON_EACH_RISING_CROSSING_OF_V",
+    "P_ON_EACH_RISING_CROSSING_OF_V_2",
+    "P_MAINTAIN_A_CONTROL_VOLTAGE_VCTRL_Q",
+    "P_DRIVE_VCTRL_TRANSITION_VCTRL_Q_0",
+    "P_DRIVE_METRIC_AS_A_VOLTAGE_CODED"
+  ],
+  "public_visible": false,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {}
+}

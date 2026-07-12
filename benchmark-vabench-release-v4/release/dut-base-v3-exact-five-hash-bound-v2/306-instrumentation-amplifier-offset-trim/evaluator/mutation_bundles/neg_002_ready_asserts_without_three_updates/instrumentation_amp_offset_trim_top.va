@@ -1,0 +1,22 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module instrumentation_amp_offset_trim_top(vinp, vinn, clk, rst, cal_en, trim_2, trim_1, trim_0, vout, offset_metric, ready);
+    input vinp, vinn, clk, rst, cal_en, trim_2, trim_1, trim_0;
+    output vout, offset_metric, ready;
+    electrical vinp, vinn, clk, rst, cal_en, trim_2, trim_1, trim_0, vout, offset_metric, ready;
+    electrical corr;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real diff_gain = 8.0;
+    parameter real trim_lsb = 8e-3;
+
+    offset_trim_controller #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr), .trim_lsb(trim_lsb))
+        XCTL (vinp, vinn, clk, rst, cal_en, trim_2, trim_1, trim_0, corr, ready);
+    diff_gain_core #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr), .diff_gain(diff_gain))
+        XCORE (vinp, vinn, corr, rst, vout, offset_metric);
+endmodule

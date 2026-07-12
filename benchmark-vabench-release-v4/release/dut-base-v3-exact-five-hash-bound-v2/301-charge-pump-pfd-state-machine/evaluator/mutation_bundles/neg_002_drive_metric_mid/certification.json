@@ -1,0 +1,60 @@
+{
+  "component_fingerprints": {
+    "assembly": {
+      "policy_sha256": "91f4e21b94263e796c846aedef282c79d4abeb7ccc415a0e6f1311f8816b33a4",
+      "release_snapshot_sha256": "ec25ff4e82bd73ef23394b05e71b73298f84f12139028d337e881ddcfddcd8f4"
+    },
+    "backend": {
+      "ahdl_like_sha256": "91ce239e5f278a6d5dfcde85ca2d820c5133d8f8a3de26dc6477164e703342f3",
+      "evas_sha256": "e48df10fee21fa1613eb87e8febd0226895e2482f2e91355645d2e93e71e04d7",
+      "spectre_sha256": "ac4c1cf785d5eab74058944d52bf40869e83c94e19202ab72c8e8a250c4dc51b"
+    },
+    "oracle": {
+      "checker_binding_sha256": "7e83a567d689e46920130ad781785154efe74d36170e88ce4b2a8d43d44bf5e2",
+      "checker_implementation_sha256": "437cf7fc3990b4f3140153b5ec61ed8e1e6193333a9c8daf1052b8186a606962",
+      "checker_profile_sha256": "c8aab4a307b86f703311e60a712e5ef5939155f795704a8e603bf3a645852cba",
+      "diagnostic_policy_sha256": "69b217a349cb0e8a3eab574e7e6d1af03f069fea668b15b37868ef3d2e7deea3",
+      "oracle_runner_sha256": "daf6eeded735edd148687b998344d32a4943e8824bac2828f28e9107a7950567",
+      "property_activation_policy_sha256": "a8de22f3eaacf9b83d6ec120319653830cf1d768c4877c5a81cb0758c58bec73"
+    },
+    "policy_id": "v4-dependency-scoped-evidence-v2",
+    "schema_version": "v4-evidence-components-v2",
+    "state": "carried_forward",
+    "task_inputs": {
+      "candidate_bundle_sha256": "aab740efdfb96eb67ad15ed0d750dc938904f3e3774b178d0b0f5f77f26c8d59",
+      "deck_sha256": "9fee40451d2ac93151bf3d6a336400ab632075f865e56323eee1e419d15c6cf7",
+      "gold_bundle_sha256": "1c7dc0a116dc10fc354b0743fe2883fe71f5010905ef5f05a7477678e2797701",
+      "harness_spec_sha256": "dc75f0b9849d5efde4e8f2136a933ff6f4ee31248a3e754f52ece74858e6d695",
+      "mutation_bundle_sha256": "aab740efdfb96eb67ad15ed0d750dc938904f3e3774b178d0b0f5f77f26c8d59",
+      "profile_sha256": "80d2dfd02cb5232017212d5567f017683ea3daf19bbb125b5b708dcacf094550",
+      "property_contract_sha256": "dfb882754e53fcdf7be1f0ae6a8bb919e26e87ea38177d0782dfc21b75f017e1",
+      "public_support_bundle_sha256": "588a81bd84e5ace25f2bbca51c305a55d878282c5a6c9c98d70129f025252516",
+      "trace_contract_sha256": "d1923718c0e0ffb334387006d8066b45d5388a52c1d920f20f6a84ce2feec6b5"
+    }
+  },
+  "diagnostics": {
+    "expected": "trigger=Charge Pump PFD State Machine: keeps the vctrl ramp but reports the detector-state metric stuck at mid so the polarity check fails.; violated_properties=P_ON_EACH_RISING_CROSSING_OF_V,P_DRIVE_METRIC_AS_A_VOLTAGE_CODED",
+    "observed": "EVAS: metric_no_negative_pulses lo_frac=0.000; Spectre: metric_no_negative_pulses lo_frac=0.000",
+    "violated_property_ids": [
+      "P_DRIVE_METRIC_AS_A_VOLTAGE_CODED",
+      "P_ON_EACH_RISING_CROSSING_OF_V"
+    ]
+  },
+  "evaluators": {
+    "ahdl_like": "pass",
+    "evas": "compile_pass_behavior_fail",
+    "spectre": "compile_pass_behavior_fail"
+  },
+  "family_id": "301",
+  "inputs": {
+    "checker_profile_sha256": "fa36ffdd397c64481eb6430eec3ab2b63f739da378cbdda6444aa63c8cd3b59a",
+    "harness_spec_sha256": "dc75f0b9849d5efde4e8f2136a933ff6f4ee31248a3e754f52ece74858e6d695",
+    "mutation_bundle_sha256": "aab740efdfb96eb67ad15ed0d750dc938904f3e3774b178d0b0f5f77f26c8d59",
+    "profile_sha256": "80d2dfd02cb5232017212d5567f017683ea3daf19bbb125b5b708dcacf094550"
+  },
+  "mutation_id": "neg_002_drive_metric_mid",
+  "outcome": "killed_behaviorally",
+  "release_snapshot_sha256": "ec25ff4e82bd73ef23394b05e71b73298f84f12139028d337e881ddcfddcd8f4",
+  "schema_version": "v4-negative-certification-v2",
+  "toolchain_lock_sha256": "ec25ff4e82bd73ef23394b05e71b73298f84f12139028d337e881ddcfddcd8f4"
+}

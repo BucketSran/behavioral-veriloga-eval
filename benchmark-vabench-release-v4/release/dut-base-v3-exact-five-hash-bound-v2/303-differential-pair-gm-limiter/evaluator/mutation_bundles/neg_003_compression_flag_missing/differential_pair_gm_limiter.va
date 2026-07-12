@@ -1,0 +1,64 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module differential_pair_gm_limiter(vinp, vinn, bias, enable, voutp, voutn, gm_metric, limit_flag);
+    inout vinp, vinn, bias, enable, voutp, voutn, gm_metric, limit_flag;
+    electrical vinp, vinn, bias, enable, voutp, voutn, gm_metric, limit_flag;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real gm_gain = 4.0;
+    parameter real diff_limit = 120e-3 from (0:inf);
+    parameter real tick = 500p from (0:inf);
+
+    real diff, limited, sep;
+    real voutp_v, voutn_v, gm_metric_v, limit_flag_v;
+
+    analog function real clip01;
+        input x;
+        real x;
+        begin
+            if (x < vss) clip01 = vss;
+            else if (x > vdd) clip01 = vdd;
+            else clip01 = x;
+        end
+    endfunction
+
+    analog function real absval;
+        input x;
+        real x;
+        begin
+            absval = (x < 0.0) ? -x : x;
+        end
+    endfunction
+
+    analog begin
+        @(initial_step) begin
+            voutp_v = vcm; voutn_v = vcm; gm_metric_v = vss; limit_flag_v = vss;
+        end
+        @(timer(0, tick)) begin
+            if (V(enable) <= vth) begin
+                voutp_v = vcm;
+                voutn_v = vcm;
+                gm_metric_v = vss;
+                limit_flag_v = vss;
+            end else begin
+
+                diff = 1.0 * (V(vinp) - V(vinn));
+                limited = diff / (1.0 + absval(diff) / diff_limit);
+                sep = gm_gain * limited;
+                voutp_v = clip01(vcm + 0.5 * sep);
+                voutn_v = clip01(vcm - 0.5 * sep);
+                gm_metric_v = clip01(vdd * diff_limit / (diff_limit + absval(diff)));
+                limit_flag_v = vss;
+            end
+        end
+        V(voutp) <+ transition(voutp_v, 0, tr, tr);
+        V(voutn) <+ transition(voutn_v, 0, tr, tr);
+        V(gm_metric) <+ transition(gm_metric_v, 0, tr, tr);
+        V(limit_flag) <+ transition(limit_flag_v, 0, tr, tr);
+    end
+endmodule

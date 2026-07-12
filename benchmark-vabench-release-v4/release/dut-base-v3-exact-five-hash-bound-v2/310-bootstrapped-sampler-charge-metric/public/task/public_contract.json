@@ -1,0 +1,68 @@
+{
+  "agent_visible_files": [
+    "instruction.md",
+    "public_contract.json",
+    "feedback_tb.scs"
+  ],
+  "canonical_dut_id": "310",
+  "canonical_instruction": "instruction.md",
+  "category": "sampling_analog_memory",
+  "counted_in_score": true,
+  "feedback_oracle": {
+    "command": "vabench-feedback --task . --submission ../submission",
+    "public_tb": "feedback_tb.scs",
+    "public_tb_exposed": true
+  },
+  "form": "dut",
+  "gate2_status": "gate2_ready",
+  "language": "verilog-a",
+  "level": "L1",
+  "oracle_policy": {
+    "checker_private": true,
+    "feedback_oracle_materialized": true,
+    "no_model_visible_starter": true,
+    "proposal_only": false,
+    "score_tb_private": true,
+    "single_public_contract": true,
+    "testbench_and_checker_split_required": true
+  },
+  "planned_checker_focus": [
+    "sample capture",
+    "hold droop",
+    "bootstrap metric",
+    "droop flag"
+  ],
+  "planned_oracle_type": "deterministic_trace_behavior_with_static_module_contract",
+  "public_modules": [
+    "bootstrapped_sampler_charge_metric"
+  ],
+  "public_observables": [
+    "vin",
+    "clk",
+    "rst",
+    "enable",
+    "vhold",
+    "boot_metric",
+    "droop_flag"
+  ],
+  "schema_version": "v4-proposed-public-contract-v1",
+  "status": "gate2_ready",
+  "target_artifacts": [
+    "bootstrapped_sampler_charge_metric.va"
+  ],
+  "task_id": "v4_310_bootstrapped_sampler_charge_metric",
+  "task_slug": "1008-bootstrapped-sampler-charge-metric",
+  "title": "Bootstrapped Sampler Charge Metric",
+  "top_module": "bootstrapped_sampler_charge_metric",
+  "track": "ams_function_dut",
+  "validation_status": {
+    "evas_feedback_score_gold": "pass",
+    "gate2": "dut_base_sealed",
+    "next_gate": "canonical_suite_unification_pending",
+    "semantic_negative_certification": "pass",
+    "spectre_score_gold": "clean_pass",
+    "tri_form_gate2": "pending",
+    "tri_form_gate3": "pending",
+    "untriaged_warning_count": 0
+  }
+}

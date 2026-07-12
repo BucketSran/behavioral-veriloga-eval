@@ -1,0 +1,54 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module offset_trim_controller(vinp, vinn, clk, rst, cal_en, trim_2, trim_1, trim_0, corr, ready);
+    input vinp, vinn, clk, rst, cal_en, trim_2, trim_1, trim_0;
+    output corr, ready;
+    electrical vinp, vinn, clk, rst, cal_en, trim_2, trim_1, trim_0, corr, ready;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real trim_lsb = 8e-3;
+
+    integer code, signed_code, update_count;
+    real trim_static, trim_adapt, active_corr, error;
+
+    analog function real clip01;
+        input x;
+        real x;
+        begin
+            if (x < vss) clip01 = vss;
+            else if (x > vdd) clip01 = vdd;
+            else clip01 = x;
+        end
+    endfunction
+
+    analog begin
+        @(initial_step) begin
+            update_count = 0;
+            trim_adapt = 0.0;
+            active_corr = 0.0;
+        end
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth) begin
+                update_count = 0;
+                trim_adapt = 0.0;
+                active_corr = 0.0;
+            end else if (V(cal_en) > vth) begin
+                code = (V(trim_0) > vth ? 1 : 0) + (V(trim_1) > vth ? 2 : 0) + (V(trim_2) > vth ? 4 : 0);
+                signed_code = code - 4;
+                trim_static = signed_code * trim_lsb;
+                error = V(vinp) - V(vinn) - trim_static - trim_adapt;
+                if (error > 0.5 * trim_lsb) trim_adapt = trim_adapt + 1.0 * trim_lsb;
+                else if (error < -0.5 * trim_lsb) trim_adapt = trim_adapt - 1.0 * trim_lsb;
+                active_corr = trim_static + trim_adapt;
+                update_count = update_count + 1;
+            end
+        end
+        V(corr) <+ transition(clip01(vcm + active_corr), 0, tr, tr);
+        V(ready) <+ transition((V(rst) > vth) ? vss : vdd, 0, tr, tr);
+    end
+endmodule

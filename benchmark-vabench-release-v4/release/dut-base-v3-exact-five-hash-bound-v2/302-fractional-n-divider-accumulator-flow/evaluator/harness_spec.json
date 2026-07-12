@@ -1,0 +1,118 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "fracn_pll_timer_ref.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=6u maxstep=5n"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "ref_clk",
+      "fb_clk",
+      "dco_clk",
+      "vctrl_mon",
+      "lock",
+      "VDD",
+      "VSS"
+    ],
+    "support_include_templates": [
+      "ahdl_include \"{support_source_root}/{support_artifact_path}\""
+    ]
+  },
+  "family_id": "302",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "7203fa9ec39625de3ce76643489f0c97a850c1af683adad34f1ebd8639f2ad80",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "4d2a15409d8fc953abd61408bda8e6b2f0264a721cb0e06e9bfae3103f1b57a4",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "// Visible smoke testbench for fractional-N PLL tracking/reacquire after a reference step.",
+          "",
+          "VDD_SRC (VDD 0) vsource type=dc dc=0.9",
+          "VSS_SRC (VSS 0) vsource type=dc dc=0",
+          "",
+          "XREF (VDD VSS ref_clk) ref_step_clk \\",
+          "    period_pre=20.4n period_post=20.0n t_switch=2u tedge=100p",
+          "",
+          "XDUT (VDD VSS ref_clk fb_clk dco_clk vctrl_mon lock) fracn_pll_timer_ref \\",
+          "    div_int=8 frac_word=2 acc_modulus=8 f_center=784.313725e6 kvco_hz_per_v=200e6 \\",
+          "    f_min=500e6 f_max=1.2e9 kp=2.5e6 ki=8.0e4 vctrl_init=0.45 tedge=1n \\",
+          "    lock_tol=3n lock_count_target=3",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "body_lines": [
+          "// Hidden testbench for fractional-N PLL tracking/reacquire after a reference step.",
+          "",
+          "VDD_SRC (VDD 0) vsource type=dc dc=0.9",
+          "VSS_SRC (VSS 0) vsource type=dc dc=0",
+          "",
+          "XREF (VDD VSS ref_clk) ref_step_clk \\",
+          "    period_pre=20n period_post=19.5n t_switch=2u tedge=100p",
+          "",
+          "XDUT (VDD VSS ref_clk fb_clk dco_clk vctrl_mon lock) fracn_pll_timer_ref \\",
+          "    div_int=8 frac_word=3 acc_modulus=8 f_center=800e6 kvco_hz_per_v=220e6 \\",
+          "    f_min=500e6 f_max=1.2e9 kp=2.5e6 ki=8.0e4 vctrl_init=0.45 tedge=1n \\",
+          "    lock_tol=3n lock_count_target=3",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_USE_REF_CLK_AS_THE_REFERENCE",
+    "P_GENERATE_A_BEHAVIORAL_DCO_CLOCK_ON",
+    "P_GENERATE_FB_CLK_BY_TOGGLING_IT",
+    "P_UPDATE_A_BOUNDED_CONTROL_VOLTAGE_MONITOR",
+    "P_DRIVE_LOCK_HIGH_AFTER_STABLE_TRACKING"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "53f8aac6e996aebfe9f9e4dfed8f657692b5172e2e4a67865107654168434d77",
+    "family_spec_sha256": "6c69bb15c15c8e4d18a318bd2a201bf54e4a9a85f3627b0801bfb8d1c4ec3763"
+  },
+  "support": {
+    "artifact_paths": [
+      "ref_step_clk.va"
+    ],
+    "source_root": "./support"
+  },
+  "task_id": "v4-302"
+}

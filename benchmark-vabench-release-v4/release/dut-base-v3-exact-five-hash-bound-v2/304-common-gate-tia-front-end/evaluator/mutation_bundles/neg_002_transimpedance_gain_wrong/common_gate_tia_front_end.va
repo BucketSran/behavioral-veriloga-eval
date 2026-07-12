@@ -1,0 +1,62 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module common_gate_tia_front_end(vin_proxy, bias, enable, rst, vout, transimpedance_metric, overload);
+    inout vin_proxy, bias, enable, rst, vout, transimpedance_metric, overload;
+    electrical vin_proxy, bias, enable, rst, vout, transimpedance_metric, overload;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real rz_gain = 3.0;
+    parameter real bias_min = 0.3;
+    parameter real tick = 500p from (0:inf);
+
+    real gain_scale, effective_gain, raw_target;
+    real vout_v, transimpedance_metric_v, overload_v;
+
+    analog function real clip01;
+        input x;
+        real x;
+        begin
+            if (x < vss) clip01 = vss;
+            else if (x > vdd) clip01 = vdd;
+            else clip01 = x;
+        end
+    endfunction
+
+    analog function real absval;
+        input x;
+        real x;
+        begin
+            absval = (x < 0.0) ? -x : x;
+        end
+    endfunction
+
+    analog begin
+        @(initial_step) begin
+            vout_v = vcm; transimpedance_metric_v = vss; overload_v = vss;
+        end
+        @(timer(0, tick)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                vout_v = vcm;
+                transimpedance_metric_v = vss;
+                overload_v = vss;
+            end else begin
+
+                gain_scale = clip01((V(bias) - bias_min) / (vcm - bias_min));
+                if (gain_scale < 0.35) gain_scale = 0.35;
+                effective_gain = 1.0;
+                raw_target = vcm + 1.0 * effective_gain * (V(vin_proxy) - vcm);
+                vout_v = clip01(raw_target);
+                transimpedance_metric_v = clip01(vdd * effective_gain / rz_gain);
+                overload_v = ((raw_target > vdd || raw_target < vss) ? vdd : vss);
+            end
+        end
+        V(vout) <+ transition(vout_v, 0, tr, tr);
+        V(transimpedance_metric) <+ transition(transimpedance_metric_v, 0, tr, tr);
+        V(overload) <+ transition(overload_v, 0, tr, tr);
+    end
+endmodule
