@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-142",
+    "canonical_task_slug": "142-ideal-dac-4bit-differential",
+    "family_spec_sha256": "007c8d708e9d8a124f34bdbff09d39822945f3183be2532b1a39798d405c0b4d",
+    "mutation_catalog_sha256": "48a8d5e6b3e8e929c05309e8d8748f2a5ba9e90af17ec7dc450a59a0a2176096",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "142",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_no_midrise_offset",
+    "testbench_suite": [
+      "neg_002_wrong_lsb_scale",
+      "neg_001_zero",
+      "neg_004_inverted_outputs",
+      "neg_003_no_midrise_offset",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "1ba6e1f088a09c83707f0eebc7f116ffd414778e35375d3ba7f27d457d1bcf3e",
+    "changed_artifacts": [
+      "ideal_dac_4bit_differential.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_no_midrise_offset",
+    "rationale": "Select fault class threshold_or_boundary_fault under trigger 'Uses endpoint DAC levels without half-LSB mid-rise offset.' because it exercises P_MIDRISE_DIFFERENTIAL_SCALE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_002_wrong_lsb_scale",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-143",
+    "canonical_task_slug": "143-two-period-sample-delay",
+    "family_spec_sha256": "2d31ef6045cdd88661274e7fc1d96be951b317ebe01b5b179246844b83ba9017",
+    "mutation_catalog_sha256": "b5517fdc68127bb8adc204b5fd5ec6b57fa036b4dbabbcd13d92cba0de092cd5",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "143",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_half_output_gain",
+    "testbench_suite": [
+      "neg_004_wrong_initial_value",
+      "neg_002_one_period_delay",
+      "neg_001_zero",
+      "neg_003_half_output_gain",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "d76b6ae5b31eb692b7ac892f5623f9e79ddaf803e3c1e4ae74ef564cdd23bdb4",
+    "changed_artifacts": [
+      "two_period_sample_delay.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_half_output_gain",
+    "rationale": "Select fault class timing_or_state_update_fault under trigger 'Applies half gain to the delayed output.' because it exercises P_OUTPUT_GAIN_AND_HOLD as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 27,
+    "source_preferred_seed": "neg_004_wrong_initial_value",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

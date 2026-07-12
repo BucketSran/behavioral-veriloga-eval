@@ -1,0 +1,239 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "flash_thermometer_centered_sum",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.1125",
+                "name": "gain",
+                "override_behavior": "overrides gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b0",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b1",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b2",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b3",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b4",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b5",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b6",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b7",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dout",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "flash_thermometer_centered_sum.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "146",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Flash Thermometer Centered Sum"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_THERMOMETER_THRESHOLD_COUNT",
+      "observable_contract": "Each `b0` through `b7` input above `vth` contributes exactly one count to the thermometer total.",
+      "required_signals": [
+        "time",
+        "b0",
+        "b1",
+        "b2",
+        "b3",
+        "b4",
+        "b5",
+        "b6",
+        "b7",
+        "dout"
+      ]
+    },
+    {
+      "id": "P_CENTERED_SUM",
+      "observable_contract": "The output subtracts the four-count midpoint so the analog sum is centered around zero asserted-input balance.",
+      "required_signals": [
+        "time",
+        "b0",
+        "b1",
+        "b2",
+        "b3",
+        "b4",
+        "b5",
+        "b6",
+        "b7",
+        "dout"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_GAIN",
+      "observable_contract": "The centered count is multiplied by `gain` and driven on `dout` without extra scaling.",
+      "required_signals": [
+        "time",
+        "b0",
+        "b1",
+        "b2",
+        "b3",
+        "b4",
+        "b5",
+        "b6",
+        "b7",
+        "dout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "flash_thermometer_centered_sum.va"
+  ],
+  "task_id": "v4-146",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "b0",
+            "port_ref": "b0",
+            "position": 0
+          },
+          {
+            "net": "b1",
+            "port_ref": "b1",
+            "position": 1
+          },
+          {
+            "net": "b2",
+            "port_ref": "b2",
+            "position": 2
+          },
+          {
+            "net": "b3",
+            "port_ref": "b3",
+            "position": 3
+          },
+          {
+            "net": "b4",
+            "port_ref": "b4",
+            "position": 4
+          },
+          {
+            "net": "b5",
+            "port_ref": "b5",
+            "position": 5
+          },
+          {
+            "net": "b6",
+            "port_ref": "b6",
+            "position": 6
+          },
+          {
+            "net": "b7",
+            "port_ref": "b7",
+            "position": 7
+          },
+          {
+            "net": "dout",
+            "port_ref": "dout",
+            "position": 8
+          }
+        ],
+        "module_ref": "flash_thermometer_centered_sum",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "b0",
+      "b1",
+      "b2",
+      "b3",
+      "b4",
+      "b5",
+      "b6",
+      "b7",
+      "dout"
+    ]
+  }
+}

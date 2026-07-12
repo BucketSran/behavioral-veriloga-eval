@@ -1,0 +1,223 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "ideal_dac_4bit_differential",
+            "parameters": [
+              {
+                "default": "20p from [0:inf)",
+                "name": "trise",
+                "override_behavior": "overrides trise",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "20p from [0:inf)",
+                "name": "tfall",
+                "override_behavior": "overrides tfall",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0 from [0:inf)",
+                "name": "tdel",
+                "override_behavior": "overrides tdel",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.0 from (0:inf)",
+                "name": "vref",
+                "override_behavior": "overrides vref",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.5 from (0:inf)",
+                "name": "vtrans_clk",
+                "override_behavior": "overrides vtrans_clk",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "16 from (0:inf)",
+                "name": "levels",
+                "override_behavior": "overrides levels",
+                "type": "integer",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "digital",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vcm",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vop",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "von",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "ideal_dac_4bit_differential.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "142",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Ideal DAC 4bit Differential"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_FALLING_EDGE_CODE_SAMPLE",
+      "observable_contract": "Each falling `clk` crossing through `vtrans_clk` samples `digital`, clamps it to the valid code range, and holds the converted output until the next sample.",
+      "required_signals": [
+        "time",
+        "clk",
+        "digital",
+        "vcm",
+        "von",
+        "vop"
+      ]
+    },
+    {
+      "id": "P_MIDRISE_DIFFERENTIAL_SCALE",
+      "observable_contract": "The sampled code maps to a mid-rise differential DAC level with the declared `levels` and `vref` scale.",
+      "required_signals": [
+        "time",
+        "clk",
+        "digital",
+        "vcm",
+        "von",
+        "vop"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_POLARITY_AND_COMMON_MODE",
+      "observable_contract": "`vop` and `von` are complementary about `vcm`, with positive differential polarity for larger sampled codes.",
+      "required_signals": [
+        "time",
+        "clk",
+        "digital",
+        "vcm",
+        "von",
+        "vop"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/ideal_dac_4bit_differential.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-642",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "digital",
+            "port_ref": "digital",
+            "position": 1
+          },
+          {
+            "net": "vcm",
+            "port_ref": "vcm",
+            "position": 2
+          },
+          {
+            "net": "vop",
+            "port_ref": "vop",
+            "position": 3
+          },
+          {
+            "net": "von",
+            "port_ref": "von",
+            "position": 4
+          }
+        ],
+        "module_ref": "ideal_dac_4bit_differential",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "digital",
+      "vcm",
+      "von",
+      "vop"
+    ]
+  }
+}

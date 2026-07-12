@@ -1,0 +1,28 @@
+`include "disciplines.vams"
+module divide_by_eight_clock(vin, rst, en, vout);
+input vin, rst, en;
+output vout;
+electrical vin, rst, en, vout;
+parameter integer divisor = 8;
+parameter real tdel = 10p;
+parameter real tr = 20p;
+parameter real tf = 20p;
+parameter real vdd = 0.9;
+parameter real vth = 0.45;
+integer cnt;
+integer out_state;
+analog begin
+    @(initial_step) begin cnt = 0; out_state = 1; end
+    @(cross(V(rst) - vth, +1)) begin cnt = 0; out_state = 1; end
+    @(cross(V(vin) - vth, +1)) begin
+        if (V(rst) > vth) begin
+            cnt = 0; out_state = 1;
+        end else if (V(en) > vth) begin
+            cnt = cnt + 1;
+            if (cnt >= 4) cnt = 0;
+            out_state = cnt < 2;
+        end
+    end
+    V(vout) <+ transition(out_state ? vdd : 0.0, tdel, tr, tf);
+end
+endmodule

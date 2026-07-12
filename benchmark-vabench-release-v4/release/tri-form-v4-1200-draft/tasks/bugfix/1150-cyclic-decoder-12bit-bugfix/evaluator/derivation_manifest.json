@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-150",
+    "canonical_task_slug": "150-cyclic-decoder-12bit",
+    "family_spec_sha256": "a7c905ca57960ec896ad04b83203780e74d0b45f29359aac9b58894b673a04a4",
+    "mutation_catalog_sha256": "c3059ce0644784eabe7dc0d507eab911abd911994ec88e4061012b487da34792",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "150",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_missing_midscale_offset",
+    "testbench_suite": [
+      "neg_004_missing_midscale_offset",
+      "neg_003_reversed_bit_weights",
+      "neg_001_zero",
+      "neg_002_half_output_scale",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "db8de759302af0d53b0c020a19abd08adbe3cb9cb0fd6b46e9e6f4cf24c0f32c",
+    "changed_artifacts": [
+      "cyclic_decoder_12bit.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_missing_midscale_offset",
+    "rationale": "Select fault class threshold_or_boundary_fault under trigger 'Omits the -0.5 midscale offset.' because it exercises P_CENTERED_OUTPUT_SCALE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 15,
+    "source_preferred_seed": "neg_004_missing_midscale_offset",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

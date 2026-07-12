@@ -1,0 +1,137 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "dual_modulus_divider_16_17",
+            "parameters": [],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "fin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "mc",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "fout",
+                "position": 2
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "dual_modulus_divider_16_17.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/dual_modulus_divider_16_17.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "149",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "clocking",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Dual Modulus Divider 16 17"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_MC_SELECTS_MODULUS",
+      "observable_contract": "`mc` selects divide-by-16 when low and divide-by-17 when high for rising `fin` crossings.",
+      "required_signals": [
+        "time",
+        "fin",
+        "fout",
+        "mc"
+      ]
+    },
+    {
+      "id": "P_DIVIDE_COUNT_TIMING",
+      "observable_contract": "The output counter resets only at the terminal count for the selected modulus.",
+      "required_signals": [
+        "time",
+        "fin",
+        "fout",
+        "mc"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_LOW_MARKER_AND_LEVEL",
+      "observable_contract": "`fout` uses the specified low-marker count and declared voltage-coded output levels.",
+      "required_signals": [
+        "time",
+        "fin",
+        "fout",
+        "mc"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "dual_modulus_divider_16_17.va"
+  ],
+  "task_id": "v4-1149",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "fin",
+            "port_ref": "fin",
+            "position": 0
+          },
+          {
+            "net": "mc",
+            "port_ref": "mc",
+            "position": 1
+          },
+          {
+            "net": "fout",
+            "port_ref": "fout",
+            "position": 2
+          }
+        ],
+        "module_ref": "dual_modulus_divider_16_17",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "fin",
+      "fout",
+      "mc"
+    ]
+  }
+}

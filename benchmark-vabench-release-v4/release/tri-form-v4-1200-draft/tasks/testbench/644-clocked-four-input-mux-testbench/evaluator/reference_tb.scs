@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/clocked_four_input_mux.va"
+
+Vclk (clks 0) vsource type=pwl wave=[0 1 3n 1 3.1n 0 5n 0 5.1n 1 13n 1 13.1n 0 15n 0 15.1n 1 23n 1 23.1n 0 25n 0 25.1n 1 33n 1 33.1n 0 35n 0 35.1n 1 43n 1 43.1n 0 45n 0 45.1n 1]
+Vs0 (dsel0 0) vsource type=pwl wave=[0 0 8n 0 8.1n 1 18n 1 18.1n 0 28n 0 28.1n 1 50n 1]
+Vs1 (dsel1 0) vsource type=pwl wave=[0 0 18n 0 18.1n 1 38n 1 38.1n 0 50n 0]
+Vd0 (din0 0) vsource dc=0.10
+Vd1 (din1 0) vsource dc=0.40
+Vd2 (din2 0) vsource dc=0.70
+Vd3 (din3 0) vsource dc=0.95
+
+XDUT (dsel0 dsel1 din0 din1 din2 din3 clks dout) clocked_four_input_mux
+
+
+tran tran stop=47n maxstep=20p
+save clks din0 din1 din2 din3 dout dsel0 dsel1

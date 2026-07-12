@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-146",
+    "canonical_task_slug": "146-flash-thermometer-centered-sum",
+    "family_spec_sha256": "760c4352437eab416022b040ff623fcdfdd40a41cf08b90acc88361255389683",
+    "mutation_catalog_sha256": "2f72278cb9a5dbb0c56427d095d25fa9754ce2de4a0a30a1bb5a049a0fe1d9f6",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "146",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_uncentered_sum",
+    "testbench_suite": [
+      "neg_003_wrong_gain",
+      "neg_002_uncentered_sum",
+      "neg_004_ignores_upper_bits",
+      "neg_001_zero",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "0462b2c06ada8481b65b8c6f877af95b81ebe1303da6c3f9cdc28129ea8a4bb3",
+    "changed_artifacts": [
+      "flash_thermometer_centered_sum.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_uncentered_sum",
+    "rationale": "Select fault class threshold_or_boundary_fault under trigger 'Adds a fixed DC offset to the centered thermometer sum.' because it exercises P_CENTERED_SUM as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_003_wrong_gain",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

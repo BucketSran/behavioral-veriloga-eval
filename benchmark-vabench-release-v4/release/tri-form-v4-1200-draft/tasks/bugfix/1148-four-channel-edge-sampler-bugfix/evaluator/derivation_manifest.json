@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-148",
+    "canonical_task_slug": "148-four-channel-edge-sampler",
+    "family_spec_sha256": "795d53c7937130d21e6352a7fd6424c79c91d1e4792640d43898e072f23ab446",
+    "mutation_catalog_sha256": "0ac4cd0bdda35afcde11c81ac058c7408934633f6cd66eda210557616b3c099d",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "148",
+  "negative_assignment": {
+    "bugfix_seed": "neg_005_metric_scale_low",
+    "testbench_suite": [
+      "neg_002_half_output_gain",
+      "neg_003_swapped_channels",
+      "neg_004_channel3_stuck_initial",
+      "neg_001_zero",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "54a2617663638719dc776f6b3ab028200d466cabd4224e592f11e25d9a7544b6",
+    "changed_artifacts": [
+      "four_channel_edge_sampler.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_005_metric_scale_low",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Four Channel Edge Sampler: scales the metric output, preserving the main path while failing measurement checks.' because it exercises P_OUTPUT_GAIN_AND_HOLD as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 24,
+    "source_preferred_seed": "neg_002_half_output_gain",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

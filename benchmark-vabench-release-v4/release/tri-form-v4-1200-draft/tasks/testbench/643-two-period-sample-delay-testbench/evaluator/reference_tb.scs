@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/two_period_sample_delay.va"
+
+Vupd (update 0) vsource type=pwl wave=[0 0 3n 0 3.1n 1 4n 1 4.1n 0 11n 0 11.1n 1 12n 1 12.1n 0 19n 0 19.1n 1 20n 1 20.1n 0 29n 0 29.1n 1 30n 1 30.1n 0 41n 0 41.1n 1 42n 1 42.1n 0 48n 0]
+Vain (ain 0) vsource type=pwl wave=[0 0.2 7n 0.2 7.1n 0.7 15n 0.7 15.1n 0.3 25n 0.3 25.1n 0.9 37n 0.9 37.1n 0.4 48n 0.4]
+
+XDUT (update ain aout) two_period_sample_delay
+
+
+tran tran stop=46n maxstep=20p
+save ain aout update
