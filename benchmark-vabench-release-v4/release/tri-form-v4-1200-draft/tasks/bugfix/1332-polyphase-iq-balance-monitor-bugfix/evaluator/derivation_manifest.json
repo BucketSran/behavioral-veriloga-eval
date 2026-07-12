@@ -1,0 +1,39 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-332",
+    "canonical_task_slug": "332-polyphase-iq-balance-monitor",
+    "family_spec_sha256": "5c7e620dfed357e42503f8e7b916bb199d403130ae02cf22e2186759aaf08c41",
+    "mutation_catalog_sha256": "d416eb704586f786f2a3a66531782702f415b9a6795119debed1d2bd646a4938",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "332",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_q_channel_sample_held_at_vcm",
+    "testbench_suite": [
+      "neg_002_q_channel_sample_held_at_vcm",
+      "neg_003_normalizer_omits_bounded_scaling",
+      "neg_004_amp_metric_sums_magnitudes",
+      "neg_005_balance_accepts_one_metric",
+      "neg_001_clear_drives_ground_not_vcm"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "8f834da5c288704e506c45c1ba357492eebf63dbd2a96f7ef5e99ef0f079ed8c",
+    "changed_artifacts": [
+      "balance_metric_core.va",
+      "iq_normalizer.va",
+      "polyphase_iq_balance_monitor_top.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_q_channel_sample_held_at_vcm",
+    "rationale": "Select fault class q_channel_sample_held_at_common_mode under trigger 'an enabled rising clock edge samples a Q input away from vcm' because it exercises P_ON_EACH_ENABLED_RISING_CLK_EDGE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 18,
+    "source_preferred_seed": "neg_002_q_channel_sample_held_at_vcm",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

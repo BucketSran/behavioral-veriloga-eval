@@ -1,0 +1,331 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "pa_ampm_memory_tap_macro",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.55",
+                "name": "drive_start",
+                "override_behavior": "overrides drive_start",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.2",
+                "name": "memory_gain",
+                "override_behavior": "overrides memory_gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "250p from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "drive",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "am_metric",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "pm_metric",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "pa_ampm_memory_tap_macro.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "339",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "rf_power_macromodels",
+    "difficulty": "D3",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "PA AM/PM Memory Tap Macro"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_DRIVE",
+      "observable_contract": "On reset or when disabled, drive `vout` to `vcm`, clear metrics, and clear `valid`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "drive",
+        "vout",
+        "am_metric",
+        "pm_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+      "observable_contract": "On each enabled rising `clk` edge, sample input amplitude and drive level.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "drive",
+        "vout",
+        "am_metric",
+        "pm_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_APPLY_AN_AM_GAIN_COMPRESSION_PROXY",
+      "observable_contract": "Apply an AM gain compression proxy as drive increases.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "drive",
+        "vout",
+        "am_metric",
+        "pm_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_APPLY_A_ONE_SAMPLE_MEMORY_TERM",
+      "observable_contract": "Apply a one-sample memory term that changes output polarity metric after large input changes.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "drive",
+        "vout",
+        "am_metric",
+        "pm_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_EXPOSE_AM_AND_PM_PROXIES_SEPARATELY",
+      "observable_contract": "Expose AM and PM proxies separately and assert `valid` after the first update.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "drive",
+        "vout",
+        "am_metric",
+        "pm_metric",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/pa_ampm_memory_tap_macro.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-839",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 3
+          },
+          {
+            "net": "drive",
+            "port_ref": "drive",
+            "position": 4
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 5
+          },
+          {
+            "net": "am_metric",
+            "port_ref": "am_metric",
+            "position": 6
+          },
+          {
+            "net": "pm_metric",
+            "port_ref": "pm_metric",
+            "position": 7
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 8
+          }
+        ],
+        "module_ref": "pa_ampm_memory_tap_macro",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "clk",
+      "rst",
+      "enable",
+      "drive",
+      "vout",
+      "am_metric",
+      "pm_metric",
+      "valid"
+    ]
+  }
+}

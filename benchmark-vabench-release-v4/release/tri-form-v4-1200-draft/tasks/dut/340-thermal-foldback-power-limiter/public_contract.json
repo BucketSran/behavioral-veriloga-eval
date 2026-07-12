@@ -1,0 +1,472 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "thermal_foldback_power_limiter_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.65",
+                "name": "temp_trip",
+                "override_behavior": "overrides temp_trip",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "power_cmd",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "temp_sense",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "limited_cmd",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "foldback_metric",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "thermal_ok",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "thermal_foldback_power_limiter_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "thermal_foldback_power_limiter_top"
+            ],
+            "name": "foldback_controller",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.65",
+                "name": "temp_trip",
+                "override_behavior": "overrides temp_trip",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.85",
+                "name": "temp_full",
+                "override_behavior": "overrides temp_full",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "temp_sense",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "foldback_factor",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "foldback_metric",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "thermal_ok",
+                "position": 6
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "foldback_controller.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "thermal_foldback_power_limiter_top"
+            ],
+            "name": "command_limiter",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "power_cmd",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "foldback_factor",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "limited_cmd",
+                "position": 4
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "command_limiter.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "family_id": "340",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "power_control",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Thermal Foldback Power Limiter"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+      "observable_contract": "On reset or when disabled, clear limited command, foldback metric, and status.",
+      "required_signals": [
+        "time",
+        "power_cmd",
+        "temp_sense",
+        "clk",
+        "rst",
+        "enable",
+        "limited_cmd",
+        "foldback_metric",
+        "thermal_ok"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+      "observable_contract": "On each enabled rising `clk` edge, compare `temp_sense` against the foldback threshold.",
+      "required_signals": [
+        "time",
+        "power_cmd",
+        "temp_sense",
+        "clk",
+        "rst",
+        "enable",
+        "limited_cmd",
+        "foldback_metric",
+        "thermal_ok"
+      ]
+    },
+    {
+      "id": "P_PASS_POWER_CMD_THROUGH_WHILE_TEMPERATURE",
+      "observable_contract": "Pass `power_cmd` through while temperature is below threshold.",
+      "required_signals": [
+        "time",
+        "power_cmd",
+        "temp_sense",
+        "clk",
+        "rst",
+        "enable",
+        "limited_cmd",
+        "foldback_metric",
+        "thermal_ok"
+      ]
+    },
+    {
+      "id": "P_REDUCE_LIMITED_CMD_AS_TEMPERATURE_RISES",
+      "observable_contract": "Reduce `limited_cmd` as temperature rises above threshold and expose the reduction on `foldback_metric`.",
+      "required_signals": [
+        "time",
+        "power_cmd",
+        "temp_sense",
+        "clk",
+        "rst",
+        "enable",
+        "limited_cmd",
+        "foldback_metric",
+        "thermal_ok"
+      ]
+    },
+    {
+      "id": "P_ASSERT_THERMAL_OK_ONLY_WHEN_NO",
+      "observable_contract": "Assert `thermal_ok` only when no foldback reduction is active.",
+      "required_signals": [
+        "time",
+        "power_cmd",
+        "temp_sense",
+        "clk",
+        "rst",
+        "enable",
+        "limited_cmd",
+        "foldback_metric",
+        "thermal_ok"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "thermal_foldback_power_limiter_top.va",
+    "foldback_controller.va",
+    "command_limiter.va"
+  ],
+  "task_id": "v4-340",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "power_cmd",
+            "port_ref": "power_cmd",
+            "position": 0
+          },
+          {
+            "net": "temp_sense",
+            "port_ref": "temp_sense",
+            "position": 1
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 4
+          },
+          {
+            "net": "limited_cmd",
+            "port_ref": "limited_cmd",
+            "position": 5
+          },
+          {
+            "net": "foldback_metric",
+            "port_ref": "foldback_metric",
+            "position": 6
+          },
+          {
+            "net": "thermal_ok",
+            "port_ref": "thermal_ok",
+            "position": 7
+          }
+        ],
+        "module_ref": "thermal_foldback_power_limiter_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "power_cmd",
+      "temp_sense",
+      "clk",
+      "rst",
+      "enable",
+      "limited_cmd",
+      "foldback_metric",
+      "thermal_ok"
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module thermal_foldback_power_limiter_top(power_cmd, temp_sense, clk, rst, enable, limited_cmd, foldback_metric, thermal_ok);
+input power_cmd, temp_sense, clk, rst, enable;
+output limited_cmd, foldback_metric, thermal_ok;
+electrical power_cmd, temp_sense, clk, rst, enable, limited_cmd, foldback_metric, thermal_ok;
+electrical foldback_factor;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vcm = 0.45;
+parameter real vth = 0.45;
+parameter real tr = 200p from (0:inf);
+parameter real temp_trip = 0.65;
+
+foldback_controller #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr), .temp_trip(temp_trip))
+    XFOLD(temp_sense, clk, rst, enable, foldback_factor, foldback_metric, thermal_ok);
+
+command_limiter #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr))
+    XLIMIT(power_cmd, rst, enable, foldback_factor, limited_cmd);
+endmodule

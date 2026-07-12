@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/lna_blocker_compression_detector.va"
+
+Vvin (vin 0) vsource type=pwl wave=[0 0.48 18n 0.48 18.2n 0.56 42n 0.56 42.2n 0.38 70n 0.38 92n 0.38]
+Vblocker (blocker 0) vsource type=pwl wave=[0 0.45 25n 0.45 25.2n 0.72 55n 0.72 55.2n 0.86 78n 0.86 78.2n 0.50 92n 0.50]
+Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 82n 0.9 82.2n 0 92n 0]
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]
+XDUT (vin blocker enable rst vout compression_metric compressed) lna_blocker_compression_detector
+
+
+tran tran stop=92n maxstep=200p
+save vin blocker enable rst vout compression_metric compressed

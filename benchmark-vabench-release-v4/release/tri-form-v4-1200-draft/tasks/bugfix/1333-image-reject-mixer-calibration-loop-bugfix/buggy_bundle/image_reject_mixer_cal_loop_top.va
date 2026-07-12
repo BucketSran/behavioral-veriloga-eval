@@ -1,0 +1,22 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module image_reject_mixer_cal_loop_top(rf_in, lo_i, lo_q, clk, rst, enable, i_out, q_out, image_metric, calibrated);
+input rf_in, lo_i, lo_q, clk, rst, enable;
+output i_out, q_out, image_metric, calibrated;
+electrical rf_in, lo_i, lo_q, clk, rst, enable, i_out, q_out, image_metric, calibrated;
+electrical gain_trim, phase_trim, raw_image_metric;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vcm = 0.45;
+parameter real vth = 0.45;
+parameter real tr = 200p from (0:inf);
+parameter real image_tol = 40e-3;
+
+quadrature_mixer_proxy #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr))
+    XMIX(rf_in, lo_i, lo_q, rst, enable, gain_trim, phase_trim, i_out, q_out, raw_image_metric);
+
+image_cal_controller #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr), .image_tol(image_tol))
+    XCAL(clk, rst, enable, raw_image_metric, gain_trim, phase_trim, image_metric, calibrated);
+endmodule

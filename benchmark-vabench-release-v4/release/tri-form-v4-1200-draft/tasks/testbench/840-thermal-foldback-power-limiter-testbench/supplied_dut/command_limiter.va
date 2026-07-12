@@ -1,0 +1,39 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module command_limiter(power_cmd, rst, enable, foldback_factor, limited_cmd);
+input power_cmd, rst, enable, foldback_factor;
+output limited_cmd;
+electrical power_cmd, rst, enable, foldback_factor, limited_cmd;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vth = 0.45;
+parameter real tr = 200p from (0:inf);
+
+real cmd_norm;
+real factor_norm;
+real limited_v;
+
+analog function real cliprail;
+    input x;
+    real x;
+    begin
+        if (x < vss) cliprail = vss;
+        else if (x > vdd) cliprail = vdd;
+        else cliprail = x;
+    end
+endfunction
+
+analog begin
+    if (V(rst) > vth || V(enable) <= vth) begin
+        limited_v = vss;
+    end else begin
+        cmd_norm = cliprail(V(power_cmd)) / vdd;
+        factor_norm = cliprail(V(foldback_factor)) / vdd;
+        limited_v = cliprail(vdd * cmd_norm * factor_norm);
+    end
+
+    V(limited_cmd) <+ transition(limited_v, 0, tr, tr);
+end
+endmodule

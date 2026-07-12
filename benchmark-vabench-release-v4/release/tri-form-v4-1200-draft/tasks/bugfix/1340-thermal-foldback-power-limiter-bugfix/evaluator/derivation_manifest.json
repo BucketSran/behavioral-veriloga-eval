@@ -1,0 +1,39 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-340",
+    "canonical_task_slug": "340-thermal-foldback-power-limiter",
+    "family_spec_sha256": "ed5517e8a138192fc3939b6c16d0fe8383d24c55122f55b893f690adb5e09292",
+    "mutation_catalog_sha256": "22b8a3fd1eaa9281a4cd2502f83d167fe8533ba72549415d1d1a7f2228be55a6",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "340",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_foldback_state_stuck_after_overtemperature",
+    "testbench_suite": [
+      "neg_002_temperature_subsampled_on_falling_edge",
+      "neg_003_below_trip_command_attenuated",
+      "neg_004_foldback_state_stuck_after_overtemperature",
+      "neg_005_thermal_ok_stuck_high",
+      "neg_001_disable_retains_limited_command"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "b2edfff74de70661c94be1d393fbe4ee4b1d8687db58f500f141d4b8fad05037",
+    "changed_artifacts": [
+      "command_limiter.va",
+      "foldback_controller.va",
+      "thermal_foldback_power_limiter_top.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_foldback_state_stuck_after_overtemperature",
+    "rationale": "Select fault class foldback_reduction_bypassed_and_metric_stuck_after_overtemperature under trigger 'temperature rises above temp_trip and later returns below the threshold while the limiter remains enabled' because it exercises P_REDUCE_LIMITED_CMD_AS_TEMPERATURE_RISES as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 21,
+    "source_preferred_seed": "neg_002_temperature_subsampled_on_falling_edge",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

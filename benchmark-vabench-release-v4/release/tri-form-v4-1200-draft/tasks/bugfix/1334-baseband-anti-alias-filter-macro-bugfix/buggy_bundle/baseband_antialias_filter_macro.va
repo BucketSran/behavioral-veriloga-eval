@@ -1,0 +1,31 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module baseband_antialias_filter_macro(vin, clk, rst, enable, bw_1, bw_0, vout, bandwidth_metric, valid);
+    inout vin, clk, rst, enable, bw_1, bw_0, vout, bandwidth_metric, valid;
+    electrical vin, clk, rst, enable, bw_1, bw_0, vout, bandwidth_metric, valid;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vcm = 0.45; parameter real vth = 0.45; parameter real tr = 200p from (0:inf);
+    parameter real tick = 250p from (0:inf);
+    integer code, mapped_code; real prev_clk, vout_v, metric_v, valid_v, alpha;
+    analog begin
+        @(initial_step) begin prev_clk = 0.0; vout_v = vcm; metric_v = 0.0; valid_v = 0.0; end
+        @(timer(0, tick)) begin
+            if (0) begin
+                vout_v = vcm; metric_v = 0.0; valid_v = 0.0;
+            end else if (V(clk) > vth && prev_clk <= vth) begin
+                code = 0;
+                if (V(bw_0) > vth) code = code + 1;
+                if (V(bw_1) > vth) code = code + 2;
+                mapped_code = code;
+                alpha = (mapped_code + 1) / 4.0;
+                vout_v = vout_v + alpha * (V(vin) - vout_v);
+                metric_v = mapped_code * (vdd / 3.0);
+                valid_v = vdd;
+            end
+            prev_clk = V(clk);
+        end
+        V(vout) <+ transition(vout_v, 0, tr, tr);
+        V(bandwidth_metric) <+ transition(metric_v, 0, tr, tr);
+        V(valid) <+ transition(valid_v, 0, tr, tr);
+    end
+endmodule
