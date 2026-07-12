@@ -1,0 +1,208 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "bound_step_period_guard_ref",
+            "parameters": [
+              {
+                "default": 8e-09,
+                "name": "period",
+                "override_behavior": "sets the repetition interval and phase-ramp wrap time",
+                "type": "real",
+                "units": "s",
+                "valid_range": "period > 0"
+              },
+              {
+                "default": 1.5e-09,
+                "name": "pulse_w",
+                "override_behavior": "sets the guard_out high duration from the start of each period; values at least as large as period leave no low remainder in that period",
+                "type": "real",
+                "units": "s",
+                "valid_range": "pulse_w > 0"
+              },
+              {
+                "default": 16.0,
+                "name": "points_per_period",
+                "override_behavior": "sets transient timestep guidance used to resolve the ramp and guard pulse without changing their ideal timing",
+                "type": "real",
+                "units": null,
+                "valid_range": "points_per_period > 0"
+              },
+              {
+                "default": 4e-11,
+                "name": "tedge",
+                "override_behavior": "sets guard_out transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tedge > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VDD",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VSS",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "guard_out",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_out",
+                "position": 3
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "bound_step_period_guard_ref.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "079",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "stimulus_source_generators",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain deterministic transient behavioral Verilog-A for rail-referenced periodic ramp and guard stimulus",
+    "title": "Ramp Step Source"
+  },
+  "modeling_constraints": [
+    "Use deterministic rail-referenced voltage contributions.",
+    "Timestep guidance may improve resolution but must not redefine the public ramp or guard timing.",
+    "Do not add undeclared synchronization inputs, ports, or validation-only timing cases."
+  ],
+  "properties": [
+    {
+      "id": "P_PHASE_RAMP",
+      "observable_contract": "Within each period, phase_out rises linearly from VSS toward VDD as normalized phase advances from zero toward one.",
+      "required_signals": [
+        "time",
+        "VDD",
+        "VSS",
+        "phase_out"
+      ]
+    },
+    {
+      "id": "P_PHASE_WRAP",
+      "observable_contract": "At each period boundary, phase_out wraps from the end of the ramp back to VSS and begins the next ramp.",
+      "required_signals": [
+        "time",
+        "VDD",
+        "VSS",
+        "phase_out"
+      ]
+    },
+    {
+      "id": "P_GUARD_WINDOW",
+      "observable_contract": "guard_out is at VDD during the first min(pulse_w, period) seconds of each period.",
+      "required_signals": [
+        "time",
+        "VDD",
+        "VSS",
+        "guard_out"
+      ]
+    },
+    {
+      "id": "P_GUARD_LOW",
+      "observable_contract": "If pulse_w is less than period, guard_out remains at VSS after the guard window and before the next period boundary; if pulse_w is greater than or equal to period, guard_out has no low remainder in that period.",
+      "required_signals": [
+        "time",
+        "VDD",
+        "VSS",
+        "guard_out"
+      ]
+    },
+    {
+      "id": "P_RAIL_TRACKING",
+      "observable_contract": "Both outputs derive their low and high endpoints from the observed VSS and VDD rails rather than fixed absolute voltages.",
+      "required_signals": [
+        "time",
+        "VDD",
+        "VSS",
+        "guard_out",
+        "phase_out"
+      ]
+    },
+    {
+      "id": "P_PERIODICITY",
+      "observable_contract": "The ramp-wrap and guard-window pattern repeats every period with guard transitions smoothed by tedge.",
+      "required_signals": [
+        "time",
+        "guard_out",
+        "phase_out"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "bound_step_period_guard_ref.va"
+  ],
+  "task_id": "v4-079",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "VDD",
+            "port_ref": "VDD",
+            "position": 0
+          },
+          {
+            "net": "VSS",
+            "port_ref": "VSS",
+            "position": 1
+          },
+          {
+            "net": "guard_out",
+            "port_ref": "guard_out",
+            "position": 2
+          },
+          {
+            "net": "phase_out",
+            "port_ref": "phase_out",
+            "position": 3
+          }
+        ],
+        "module_ref": "bound_step_period_guard_ref",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "VDD",
+      "VSS",
+      "guard_out",
+      "phase_out"
+    ]
+  }
+}

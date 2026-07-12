@@ -1,0 +1,175 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "peak_detector",
+            "parameters": [
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets the active-high reset threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vth > 0"
+              },
+              {
+                "default": 5e-10,
+                "name": "tr",
+                "override_behavior": "sets vout rise and fall smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 2
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "peak_detector.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "075",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "measurement_instrumentation_flows",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain timer-sampled transient behavioral Verilog-A for resettable peak measurement",
+    "title": "Peak Detector"
+  },
+  "modeling_constraints": [
+    "Use deterministic 500 ps timer sampling and retained voltage-domain state.",
+    "Reset takes precedence over peak accumulation while asserted.",
+    "Do not add undeclared sample controls, files, or validation-only outputs."
+  ],
+  "properties": [
+    {
+      "id": "P_INITIAL_ZERO",
+      "observable_contract": "The retained peak and vout initialize to 0 V.",
+      "required_signals": [
+        "time",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_SAMPLED_MEASUREMENT",
+      "observable_contract": "When reset is inactive, vin is considered for peak updates at periodic 500 ps sample instants.",
+      "required_signals": [
+        "time",
+        "vin",
+        "rst",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_MAX_RETENTION",
+      "observable_contract": "At each sample, a vin value above the retained peak replaces it; lower or equal samples leave vout unchanged.",
+      "required_signals": [
+        "time",
+        "vin",
+        "rst",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_MONOTONIC_HOLD",
+      "observable_contract": "Between resets, the retained peak does not decrease and remains held between sample instants.",
+      "required_signals": [
+        "time",
+        "vin",
+        "rst",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_RESET_CLEAR",
+      "observable_contract": "While rst is above vth, the retained peak is cleared and vout returns to 0 V.",
+      "required_signals": [
+        "time",
+        "rst",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_SMOOTHING",
+      "observable_contract": "Changes of the retained peak appear on vout with finite transition smoothing set by tr.",
+      "required_signals": [
+        "time",
+        "vout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "peak_detector.va"
+  ],
+  "task_id": "v4-075",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 2
+          }
+        ],
+        "module_ref": "peak_detector",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "rst",
+      "vout"
+    ]
+  }
+}

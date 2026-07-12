@@ -1,0 +1,11 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "file_metric_writer.va"
+
+Vin (vin 0) vsource type=pwl wave=[0 0 18n 0 19n 0.9 46n 0.9 47n 0.1 64n 0.1 65n 0.9 110n 0.9]
+
+XDUT (vin done) file_metric_writer filename="metric.out"
+
+tran tran stop=110n maxstep=500p
+save vin done

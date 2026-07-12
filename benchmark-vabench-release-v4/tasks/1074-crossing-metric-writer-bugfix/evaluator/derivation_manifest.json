@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-074",
+    "canonical_task_slug": "074-crossing-metric-writer",
+    "family_spec_sha256": "3531d70bad6263b95ca6795287da9001db0226db1191898ee70bfe2a1782f7b9",
+    "mutation_catalog_sha256": "659f920a08e8384106b298ac91386463e4f50f82352df3c1d77857e85e1b68c1",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "074",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_reset_polarity_wrong",
+    "testbench_suite": [
+      "neg_001_zero",
+      "neg_003_event_edge_wrong",
+      "neg_004_reset_polarity_wrong",
+      "neg_005_metric_scale_low",
+      "neg_002_threshold_shifted"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "a94357ba9fcf4f39f6769091d16c441f517fcd8d74741bce2bf7c78dab8e6bad",
+    "changed_artifacts": [
+      "file_metric_writer.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_reset_polarity_wrong",
+    "rationale": "Select fault class crossing_metric_writer_uses_the_wrong_reset_polarity_preserving_steady_state_beh under trigger 'stimulus exercises Crossing Metric Writer: uses the wrong reset polarity, preserving steady-state behavior while failing recovery checks. against the public observable contract' because it exercises P_DONE_LATCH as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 28,
+    "source_preferred_seed": "neg_001_zero",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,221 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "bias_voltage_generator_with_enable_trim",
+            "parameters": [
+              {
+                "default": 1e-10,
+                "name": "tr",
+                "override_behavior": "sets rise and fall smoothing for out and metric",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets the decision threshold for clk and rst",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vth > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "metric",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "bias_voltage_generator_with_enable_trim.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "073",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "bias_reference_power_management",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain clocked transient behavioral Verilog-A for enabled and trimmed bias-reference settling",
+    "title": "Bias Voltage Generator With Enable Trim"
+  },
+  "modeling_constraints": [
+    "Use deterministic rising-edge voltage-domain state updates.",
+    "Clamp the public target before applying the declared settling step.",
+    "Do not introduce current-domain regulation, undeclared rails, or validation-only state."
+  ],
+  "properties": [
+    {
+      "id": "P_CLOCKED_UPDATE",
+      "observable_contract": "Bias state changes are evaluated on rising clk crossings through vth and hold between clock updates.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "vin",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_DISABLE_RESET",
+      "observable_contract": "At an update, rst above vth or vin below 0.25 V disables the generator, returning out and metric to 0 V.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "vin",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_TRIM_TARGET",
+      "observable_contract": "When enabled, the target is 0.28 V plus 0.55 times (vin minus 0.25 V) divided by 0.65 V, clamped to 0.28 V through 0.82 V.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "out"
+      ]
+    },
+    {
+      "id": "P_SETTLING",
+      "observable_contract": "At each enabled update, out advances by 45 percent of the remaining difference to the current target rather than jumping directly.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "out"
+      ]
+    },
+    {
+      "id": "P_MONOTONIC_TRIM",
+      "observable_contract": "For otherwise equal enabled histories, a higher trim request produces a target and settled out value no lower than a smaller request.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "out"
+      ]
+    },
+    {
+      "id": "P_ENABLE_METRIC",
+      "observable_contract": "metric approaches 0.9 V while enabled and 0 V while disabled, with transition smoothing set by tr.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "vin",
+        "metric"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/bias_voltage_generator_with_enable_trim.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-573",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 2
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 3
+          },
+          {
+            "net": "metric",
+            "port_ref": "metric",
+            "position": 4
+          }
+        ],
+        "module_ref": "bias_voltage_generator_with_enable_trim",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric"
+    ]
+  }
+}
