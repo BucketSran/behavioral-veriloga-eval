@@ -1,0 +1,122 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "absolute_value_behavior",
+            "parameters": [],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigin",
+                "position": 0
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sigout",
+                "position": 1
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "absolute_value_behavior.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/absolute_value_behavior.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "126",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "mixed_signal",
+    "difficulty": "D1",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Absolute Value"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_POSITIVE_INPUT_PASSTHROUGH",
+      "observable_contract": "For nonnegative `V(sigin)`, drive `sigout` to the same nonnegative voltage.",
+      "required_signals": [
+        "time",
+        "sigin",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_NEGATIVE_INPUT_REFLECTION",
+      "observable_contract": "For negative `V(sigin)`, drive `sigout` to `-V(sigin)`.",
+      "required_signals": [
+        "time",
+        "sigin",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_MEMORYLESS_ABSOLUTE_VALUE",
+      "observable_contract": "The output is an instantaneous absolute-value function of `sigin` with no retained state or waveform schedule.",
+      "required_signals": [
+        "time",
+        "sigin",
+        "sigout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "absolute_value_behavior.va"
+  ],
+  "task_id": "v4-1126",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "sigin",
+            "port_ref": "sigin",
+            "position": 0
+          },
+          {
+            "net": "sigout",
+            "port_ref": "sigout",
+            "position": 1
+          }
+        ],
+        "module_ref": "absolute_value_behavior",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "sigin",
+      "sigout"
+    ]
+  }
+}

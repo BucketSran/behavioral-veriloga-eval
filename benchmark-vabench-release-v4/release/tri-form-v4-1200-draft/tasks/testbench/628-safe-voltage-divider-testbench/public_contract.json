@@ -1,0 +1,160 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "safe_voltage_divider",
+            "parameters": [
+              {
+                "default": "1",
+                "name": "gain",
+                "override_behavior": "overrides gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.0e-9 from (0:inf)",
+                "name": "min_sigdenom",
+                "override_behavior": "overrides min_sigdenom",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "signumer",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigdenom",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sigout",
+                "position": 2
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "safe_voltage_divider.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "128",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "mixed_signal",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Safe Voltage Divider"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_GAINED_DIVISION",
+      "observable_contract": "Drive `sigout` to `gain * V(signumer) / guarded_denominator`.",
+      "required_signals": [
+        "time",
+        "signumer",
+        "sigdenom",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_DENOMINATOR_MAGNITUDE_FLOOR",
+      "observable_contract": "When `abs(V(sigdenom)) < min_sigdenom`, use a denominator magnitude of `min_sigdenom`.",
+      "required_signals": [
+        "time",
+        "sigdenom",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_DENOMINATOR_SIGN_PRESERVED",
+      "observable_contract": "Preserve the original denominator sign when applying the minimum denominator guard.",
+      "required_signals": [
+        "time",
+        "signumer",
+        "sigdenom",
+        "sigout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/safe_voltage_divider.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-628",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "signumer",
+            "port_ref": "signumer",
+            "position": 0
+          },
+          {
+            "net": "sigdenom",
+            "port_ref": "sigdenom",
+            "position": 1
+          },
+          {
+            "net": "sigout",
+            "port_ref": "sigout",
+            "position": 2
+          }
+        ],
+        "module_ref": "safe_voltage_divider",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "sigdenom",
+      "signumer",
+      "sigout"
+    ]
+  }
+}

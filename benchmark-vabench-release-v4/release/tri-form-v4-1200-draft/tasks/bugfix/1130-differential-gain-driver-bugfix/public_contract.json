@@ -1,0 +1,176 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "differential_gain_driver",
+            "parameters": [
+              {
+                "default": "1",
+                "name": "gain",
+                "override_behavior": "overrides gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigin_p",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigin_n",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sigout_p",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sigout_n",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigref",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "differential_gain_driver.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/differential_gain_driver.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "130",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "mixed_signal",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Differential Gain Driver"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_DIFFERENTIAL_INPUT_GAIN",
+      "observable_contract": "Read `V(sigin_p, sigin_n)` and multiply it by the overridable `gain` parameter.",
+      "required_signals": [
+        "time",
+        "sigin_p",
+        "sigin_n",
+        "sigout_p",
+        "sigout_n",
+        "sigref"
+      ]
+    },
+    {
+      "id": "P_BALANCED_HALF_SPLIT",
+      "observable_contract": "Drive `sigout_p` and `sigout_n` as equal and opposite half-swings around `sigref`.",
+      "required_signals": [
+        "time",
+        "sigin_p",
+        "sigin_n",
+        "sigout_p",
+        "sigout_n",
+        "sigref"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_POLARITY",
+      "observable_contract": "For a positive input differential, `sigout_p` rises relative to `sigref` and `sigout_n` falls relative to `sigref`.",
+      "required_signals": [
+        "time",
+        "sigin_p",
+        "sigin_n",
+        "sigout_p",
+        "sigout_n",
+        "sigref"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "differential_gain_driver.va"
+  ],
+  "task_id": "v4-1130",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "sigin_p",
+            "port_ref": "sigin_p",
+            "position": 0
+          },
+          {
+            "net": "sigin_n",
+            "port_ref": "sigin_n",
+            "position": 1
+          },
+          {
+            "net": "sigout_p",
+            "port_ref": "sigout_p",
+            "position": 2
+          },
+          {
+            "net": "sigout_n",
+            "port_ref": "sigout_n",
+            "position": 3
+          },
+          {
+            "net": "sigref",
+            "port_ref": "sigref",
+            "position": 4
+          }
+        ],
+        "module_ref": "differential_gain_driver",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "sigin_n",
+      "sigin_p",
+      "sigout_n",
+      "sigout_p",
+      "sigref"
+    ]
+  }
+}

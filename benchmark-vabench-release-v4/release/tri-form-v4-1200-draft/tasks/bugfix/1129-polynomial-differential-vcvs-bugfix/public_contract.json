@@ -1,0 +1,218 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "polynomial_differential_vcvs",
+            "parameters": [
+              {
+                "default": "1.1",
+                "name": "vcmo",
+                "override_behavior": "overrides vcmo",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1",
+                "name": "a1",
+                "override_behavior": "overrides a1",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0",
+                "name": "a2",
+                "override_behavior": "overrides a2",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0",
+                "name": "a3",
+                "override_behavior": "overrides a3",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0",
+                "name": "a5",
+                "override_behavior": "overrides a5",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0",
+                "name": "a7",
+                "override_behavior": "overrides a7",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "10000000",
+                "name": "vsat",
+                "override_behavior": "overrides vsat",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "inp",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "inn",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "outp",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "outn",
+                "position": 3
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "polynomial_differential_vcvs.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/polynomial_differential_vcvs.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "129",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "mixed_signal",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Polynomial Differential VCVS"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_POLYNOMIAL_DIFFERENTIAL_INPUT",
+      "observable_contract": "Compute the polynomial from `vid = V(inp, inn)` using coefficients `a1`, `a2`, `a3`, `a5`, and `a7` through seventh order.",
+      "required_signals": [
+        "time",
+        "inp",
+        "inn",
+        "outp",
+        "outn"
+      ]
+    },
+    {
+      "id": "P_HALF_SWING_SPLIT",
+      "observable_contract": "Divide the polynomial result by two and drive `outp = vcmo + limited_vod`, `outn = vcmo - limited_vod`.",
+      "required_signals": [
+        "time",
+        "inp",
+        "inn",
+        "outp",
+        "outn"
+      ]
+    },
+    {
+      "id": "P_SYMMETRIC_SATURATION",
+      "observable_contract": "Limit the half-swing to the inclusive interval `[-vsat, vsat]` before driving both outputs.",
+      "required_signals": [
+        "time",
+        "inp",
+        "inn",
+        "outp",
+        "outn"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_COMMON_MODE",
+      "observable_contract": "Keep both outputs symmetric around the common-mode parameter `vcmo`.",
+      "required_signals": [
+        "time",
+        "outp",
+        "outn"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "polynomial_differential_vcvs.va"
+  ],
+  "task_id": "v4-1129",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "inp",
+            "port_ref": "inp",
+            "position": 0
+          },
+          {
+            "net": "inn",
+            "port_ref": "inn",
+            "position": 1
+          },
+          {
+            "net": "outp",
+            "port_ref": "outp",
+            "position": 2
+          },
+          {
+            "net": "outn",
+            "port_ref": "outn",
+            "position": 3
+          }
+        ],
+        "module_ref": "polynomial_differential_vcvs",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "inn",
+      "inp",
+      "outn",
+      "outp"
+    ]
+  }
+}

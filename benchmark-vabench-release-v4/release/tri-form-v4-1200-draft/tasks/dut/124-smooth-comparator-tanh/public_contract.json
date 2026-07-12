@@ -1,0 +1,165 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "smooth_comparator_tanh",
+            "parameters": [
+              {
+                "default": "1",
+                "name": "high",
+                "override_behavior": "overrides high",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "-1",
+                "name": "low",
+                "override_behavior": "overrides low",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0",
+                "name": "offset",
+                "override_behavior": "overrides offset",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1000",
+                "name": "comp_slope",
+                "override_behavior": "overrides comp_slope",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigref",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sigout",
+                "position": 2
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "smooth_comparator_tanh.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "124",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "comparator",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Smooth Comparator Tanh"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_TANH_TRANSFER",
+      "observable_contract": "Drive `sigout` as `0.5 * (high - low) * tanh(comp_slope * (V(sigin, sigref) - offset)) + 0.5 * (high + low)`.",
+      "required_signals": [
+        "time",
+        "sigin",
+        "sigref",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_INPUT_POLARITY",
+      "observable_contract": "A larger `V(sigin, sigref)` must move the output toward `high`, not toward `low`.",
+      "required_signals": [
+        "time",
+        "sigin",
+        "sigref",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_SMOOTH_TRANSITION",
+      "observable_contract": "The output must transition smoothly between `low` and `high` according to the tanh slope, not as a hard switch.",
+      "required_signals": [
+        "time",
+        "sigin",
+        "sigref",
+        "sigout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "smooth_comparator_tanh.va"
+  ],
+  "task_id": "v4-124",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "sigin",
+            "port_ref": "sigin",
+            "position": 0
+          },
+          {
+            "net": "sigref",
+            "port_ref": "sigref",
+            "position": 1
+          },
+          {
+            "net": "sigout",
+            "port_ref": "sigout",
+            "position": 2
+          }
+        ],
+        "module_ref": "smooth_comparator_tanh",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "sigin",
+      "sigout",
+      "sigref"
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-126",
+    "canonical_task_slug": "126-absolute-value",
+    "family_spec_sha256": "642472df236718ff8407f37cc4a8208d6b2e1f736d995f985c8bc3d7b89c994d",
+    "mutation_catalog_sha256": "3455db3d0beb6d735060b5fbf888fcdabbdc4c4a973cf3506cdbfdc696041741",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "126",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_half_abs",
+    "testbench_suite": [
+      "neg_002_identity",
+      "neg_004_half_abs",
+      "neg_003_negative_abs",
+      "neg_005_metric_scale_low",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "0d1e1206b6cf109408de18d1df02cd44c3393e780fcef79363b8286cc5e3212c",
+    "changed_artifacts": [
+      "absolute_value_behavior.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_half_abs",
+    "rationale": "Select fault class omission_or_incomplete_behavior under trigger 'Uses half of the absolute value.' because it exercises P_MEMORYLESS_ABSOLUTE_VALUE, P_NEGATIVE_INPUT_REFLECTION, P_POSITIVE_INPUT_PASSTHROUGH as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 15,
+    "source_preferred_seed": "neg_002_identity",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

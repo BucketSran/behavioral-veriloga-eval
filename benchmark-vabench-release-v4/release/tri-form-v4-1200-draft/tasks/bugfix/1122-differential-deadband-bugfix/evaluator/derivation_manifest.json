@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-122",
+    "canonical_task_slug": "122-differential-deadband",
+    "family_spec_sha256": "c7c2b92c390de08afa2b3b6e45613cee02a9e2eb74c6d7dc5c2cf21c85769c30",
+    "mutation_catalog_sha256": "9103af68e31b8730c56a72640775eb7e58a1a64a12add70f806bbddd37354a8e",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "122",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_wrong_offsets",
+    "testbench_suite": [
+      "neg_002_no_leak_inside_deadband",
+      "neg_003_wrong_offsets",
+      "neg_004_single_ended_input",
+      "neg_001_zero",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "c05516c03e6031398a3f59ade59e2324db9c42b96f77dcb3e233992887f5ea16",
+    "changed_artifacts": [
+      "differential_deadband.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_wrong_offsets",
+    "rationale": "Select fault class threshold_or_boundary_fault under trigger 'Subtracts the wrong deadband edge outside the window.' because it exercises P_GAINED_RESIDUE_OUTSIDE_DEADBAND as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 21,
+    "source_preferred_seed": "neg_002_no_leak_inside_deadband",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

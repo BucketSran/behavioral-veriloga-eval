@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-124",
+    "canonical_task_slug": "124-smooth-comparator-tanh",
+    "family_spec_sha256": "9b3eb208e2ccccce428a94e29ff99171ee25cfd174d93fa5636b43737ee8475b",
+    "mutation_catalog_sha256": "a2fe74c4bd3668b8ff5c215a0a104da411375663e36d30ed54ec20b6e8784d4e",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "124",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_inverted_difference",
+    "testbench_suite": [
+      "neg_002_inverted_difference",
+      "neg_003_half_slope",
+      "neg_005_metric_scale_low",
+      "neg_001_zero",
+      "neg_004_half_output_span"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "03c9d6d21874579f1bf6b1a58ef1f5a2aedb333407d3ff22aeaf4ac87d19003f",
+    "changed_artifacts": [
+      "smooth_comparator_tanh.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_inverted_difference",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Uses sigref minus sigin in the tanh comparator.' because it exercises P_INPUT_POLARITY as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 21,
+    "source_preferred_seed": "neg_002_inverted_difference",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

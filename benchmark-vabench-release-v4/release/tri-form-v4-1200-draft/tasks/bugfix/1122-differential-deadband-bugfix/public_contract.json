@@ -1,0 +1,170 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "differential_deadband",
+            "parameters": [
+              {
+                "default": "0.1",
+                "name": "dead_high",
+                "override_behavior": "overrides dead_high",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "-0.1",
+                "name": "dead_low",
+                "override_behavior": "overrides dead_low",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1",
+                "name": "gain",
+                "override_behavior": "overrides gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0",
+                "name": "leak",
+                "override_behavior": "overrides leak",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigin_p",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigin_n",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sigout",
+                "position": 2
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "differential_deadband.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/differential_deadband.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "122",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "mixed_signal",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Differential Deadband"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_DIFFERENTIAL_INPUT",
+      "observable_contract": "Use `V(sigin_p, sigin_n)` as the signed input error; do not collapse the transfer to one input terminal.",
+      "required_signals": [
+        "time",
+        "sigin_p",
+        "sigin_n",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_LEAK_INSIDE_DEADBAND",
+      "observable_contract": "For `dead_low <= V(sigin_p, sigin_n) <= dead_high`, drive `sigout` to the parameter `leak`.",
+      "required_signals": [
+        "time",
+        "sigin_p",
+        "sigin_n",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_GAINED_RESIDUE_OUTSIDE_DEADBAND",
+      "observable_contract": "Below `dead_low`, drive `gain * (diff - dead_low) + leak`; above `dead_high`, drive `gain * (diff - dead_high) + leak`.",
+      "required_signals": [
+        "time",
+        "sigin_p",
+        "sigin_n",
+        "sigout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "differential_deadband.va"
+  ],
+  "task_id": "v4-1122",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "sigin_p",
+            "port_ref": "sigin_p",
+            "position": 0
+          },
+          {
+            "net": "sigin_n",
+            "port_ref": "sigin_n",
+            "position": 1
+          },
+          {
+            "net": "sigout",
+            "port_ref": "sigout",
+            "position": 2
+          }
+        ],
+        "module_ref": "differential_deadband",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "sigin_n",
+      "sigin_p",
+      "sigout"
+    ]
+  }
+}

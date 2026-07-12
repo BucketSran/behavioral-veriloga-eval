@@ -1,0 +1,134 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "deadband_window",
+            "parameters": [
+              {
+                "default": "0.1",
+                "name": "dead_high",
+                "override_behavior": "overrides dead_high",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "-0.1",
+                "name": "dead_low",
+                "override_behavior": "overrides dead_low",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigin",
+                "position": 0
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sigout",
+                "position": 1
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "deadband_window.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "121",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "mixed_signal",
+    "difficulty": "D1",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Deadband Window"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ZERO_INSIDE_DEADBAND",
+      "observable_contract": "For `dead_low <= V(sigin) <= dead_high`, drive `sigout` to 0 V.",
+      "required_signals": [
+        "time",
+        "sigin",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_LOWER_RESIDUE",
+      "observable_contract": "For `V(sigin) < dead_low`, drive `sigout` to `V(sigin) - dead_low`.",
+      "required_signals": [
+        "time",
+        "sigin",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_UPPER_RESIDUE",
+      "observable_contract": "For `V(sigin) > dead_high`, drive `sigout` to `V(sigin) - dead_high`.",
+      "required_signals": [
+        "time",
+        "sigin",
+        "sigout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "deadband_window.va"
+  ],
+  "task_id": "v4-121",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "sigin",
+            "port_ref": "sigin",
+            "position": 0
+          },
+          {
+            "net": "sigout",
+            "port_ref": "sigout",
+            "position": 1
+          }
+        ],
+        "module_ref": "deadband_window",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "sigin",
+      "sigout"
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-125",
+    "canonical_task_slug": "125-limiter-rails",
+    "family_spec_sha256": "860d9c0671d3048a4b0fdad739a97b9a992582d9a51ea4bd83d88d0f887ae7a7",
+    "mutation_catalog_sha256": "cc07d18e7d6c33d4849ab51e340d57e6029c941b0a35a30ff42d59f09aeb378d",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "125",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_ignores_rail_offsets",
+    "testbench_suite": [
+      "neg_002_ignores_rail_offsets",
+      "neg_005_metric_scale_low",
+      "neg_001_zero",
+      "neg_004_no_lower_limit",
+      "neg_003_swapped_offsets"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "c19ea6b8014989f2656ab2b86dd669d7da144d8c933792d58f1b9c66ffb21d88",
+    "changed_artifacts": [
+      "limiter_rails.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_ignores_rail_offsets",
+    "rationale": "Select fault class threshold_or_boundary_fault under trigger 'Clamps directly to vdd and vss rather than using vmax/vmin offsets.' because it exercises P_RAIL_DERIVED_LIMITS as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 21,
+    "source_preferred_seed": "neg_002_ignores_rail_offsets",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

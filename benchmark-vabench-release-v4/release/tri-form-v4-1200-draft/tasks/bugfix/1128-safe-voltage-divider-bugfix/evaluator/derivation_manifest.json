@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-128",
+    "canonical_task_slug": "128-safe-voltage-divider",
+    "family_spec_sha256": "066a40660236e3c63263ab6839f41e2a22eeb4073f614cc736d2eb6e75f5f197",
+    "mutation_catalog_sha256": "eebe31de2d50ed3f5e5db7f2fdc13dae764abefb08922664bc9d6823465c4a68",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "128",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_no_safe_floor",
+    "testbench_suite": [
+      "neg_002_no_safe_floor",
+      "neg_003_loses_denominator_sign",
+      "neg_004_missing_gain",
+      "neg_001_zero",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "d242fa95b205d3b24596c79955b8ec3cda592a4c5fdbcd29bfbc6ab3cfc1d1e5",
+    "changed_artifacts": [
+      "safe_voltage_divider.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_no_safe_floor",
+    "rationale": "Select fault class omission_or_incomplete_behavior under trigger 'Divides by the raw denominator without applying the safety floor.' because it exercises P_DENOMINATOR_MAGNITUDE_FLOOR as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 13,
+    "source_preferred_seed": "neg_002_no_safe_floor",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}
