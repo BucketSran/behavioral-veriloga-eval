@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-296",
+    "canonical_task_slug": "296-dynamic-supply-level-driver",
+    "family_spec_sha256": "d6b7e73f98d914fd52ebc658449dd0fc1d31eb7dc7cddc0e16cb7b0ae8b75090",
+    "mutation_catalog_sha256": "ddf2d971b61c3fba62416f8aaa9394c52661c09a826e1baa5a333382b735f314",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "296",
+  "negative_assignment": {
+    "bugfix_seed": "neg_005_inverted_logic",
+    "testbench_suite": [
+      "neg_002_absolute_input_threshold",
+      "neg_001_fixed_output_rails",
+      "neg_004_drive_when_supply_invalid",
+      "neg_005_inverted_logic",
+      "neg_003_ignore_vss_offset"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "b14763027bb02b3399e7a704288e77ae43bca3b05ecf4ad51c4bbfd6b7ae637c",
+    "changed_artifacts": [
+      "dynamic_supply_level_driver.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_005_inverted_logic",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'stimulus exercises neg_005_inverted_logic' because it exercises P_MODEL_A_DYNAMIC_SUPPLY_ELECTRICAL_LEVEL, P_TR_40P_OUTPUT_TRANSITION_SMOOTHING_TIME as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 17,
+    "source_preferred_seed": "neg_002_absolute_input_threshold",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

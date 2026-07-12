@@ -1,0 +1,257 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "event_reacquire_lock_detector",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vhi",
+                "override_behavior": "overrides vhi",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "180p",
+                "name": "lock_window",
+                "override_behavior": "overrides lock_window",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "600p",
+                "name": "metric_fullscale",
+                "override_behavior": "overrides metric_fullscale",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "3",
+                "name": "lock_count",
+                "override_behavior": "overrides lock_count",
+                "type": "integer",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "60p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ref_clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "fb_clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lock",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_metric",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "state_mon",
+                "position": 5
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "event_reacquire_lock_detector.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/event_reacquire_lock_detector.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "291",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "pll_clock_timing",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Event Reacquire Lock Detector"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_RECORD_REFERENCE_CLOCK_RISING_EDGE_TIME",
+      "observable_contract": "Record reference clock rising-edge time and evaluate feedback clock rising edges against it.",
+      "required_signals": [
+        "time",
+        "fb_clk",
+        "lock",
+        "phase_metric",
+        "ref_clk",
+        "rst",
+        "state_mon"
+      ]
+    },
+    {
+      "id": "P_REQUIRE_CONSECUTIVE_IN_WINDOW_FEEDBACK_EDGE",
+      "observable_contract": "Require consecutive in-window feedback edge errors before lock asserts.",
+      "required_signals": [
+        "time",
+        "fb_clk",
+        "lock",
+        "phase_metric",
+        "ref_clk",
+        "rst",
+        "state_mon"
+      ]
+    },
+    {
+      "id": "P_CLEAR_LOCK_STATE_AND_PROGRESS_WHEN",
+      "observable_contract": "Clear lock state and progress when reset rises or is sampled high.",
+      "required_signals": [
+        "time",
+        "fb_clk",
+        "lock",
+        "phase_metric",
+        "ref_clk",
+        "rst",
+        "state_mon"
+      ]
+    },
+    {
+      "id": "P_EXPOSE_PHASE_METRIC_AND_STATE_MON",
+      "observable_contract": "Expose phase_metric and state_mon as bounded voltage-coded observables.",
+      "required_signals": [
+        "time",
+        "fb_clk",
+        "lock",
+        "phase_metric",
+        "ref_clk",
+        "rst",
+        "state_mon"
+      ]
+    },
+    {
+      "id": "P_USE_EVENT_BODY_STATE_UPDATES_PLUS",
+      "observable_contract": "Use event-body state updates plus local analog helper functions rather than user task/endtask syntax.",
+      "required_signals": [
+        "time",
+        "fb_clk",
+        "lock",
+        "phase_metric",
+        "ref_clk",
+        "rst",
+        "state_mon"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "event_reacquire_lock_detector.va"
+  ],
+  "task_id": "v4-1291",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "ref_clk",
+            "port_ref": "ref_clk",
+            "position": 0
+          },
+          {
+            "net": "fb_clk",
+            "port_ref": "fb_clk",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "lock",
+            "port_ref": "lock",
+            "position": 3
+          },
+          {
+            "net": "phase_metric",
+            "port_ref": "phase_metric",
+            "position": 4
+          },
+          {
+            "net": "state_mon",
+            "port_ref": "state_mon",
+            "position": 5
+          }
+        ],
+        "module_ref": "event_reacquire_lock_detector",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "fb_clk",
+      "lock",
+      "phase_metric",
+      "ref_clk",
+      "rst",
+      "state_mon"
+    ]
+  }
+}

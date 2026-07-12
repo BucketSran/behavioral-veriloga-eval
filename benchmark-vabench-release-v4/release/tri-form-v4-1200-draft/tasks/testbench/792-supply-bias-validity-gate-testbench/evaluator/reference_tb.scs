@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/supply_bias_validity_gate.va"
+
+Vvdd (vdd 0) vsource type=pwl wave=[0 0.95 2n 0.95 2.05n 0.82 5n 0.82 5.05n 1.16 7n 1.16 7.05n 0.95 11n 0.95]
+Vvss (vss 0) vsource type=pwl wave=[0 0.10 4n 0.10 4.05n 0.05 9n 0.05 9.05n 0.10 11n 0.10 11.05n 0.0]
+Vbias (vbias 0) vsource type=pwl wave=[0 0.82 2n 0.82 2.05n 0.32 4n 0.32 4.05n 0.80 6n 0.80 6.05n 0.28 8n 0.28 8.05n 0.90 11n 0.90 11.05n 0.45]
+Ven (en 0) vsource type=pwl wave=[0 0.9 12n 0.9 12.05n 0.0 14n 0.0 14.05n 0.9]
+Vpd (pd 0) vsource type=pwl wave=[0 0 14n 0 14.05n 0.9]
+
+XDUT (vdd vss vbias en pd ok gated) supply_bias_validity_gate
+
+
+tran tran stop=16n maxstep=10p
+save en gated ok pd vbias vdd vss

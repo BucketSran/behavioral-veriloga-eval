@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-294",
+    "canonical_task_slug": "294-power-enable-turnon-delay-gate",
+    "family_spec_sha256": "884aca8734b5ca40c0e58d469f717415ac5b48bc95a370f8d13be730ab5e584c",
+    "mutation_catalog_sha256": "93102457602eba8baef09824cf5af510f77b65bdd4b888062f2e2b3bcda2a972",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "294",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_no_turnon_delay",
+    "testbench_suite": [
+      "neg_002_ignore_bias_validity",
+      "neg_004_no_fault_reset",
+      "neg_005_short_delay",
+      "neg_003_ignore_powerdown",
+      "neg_001_no_turnon_delay"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "1f4b978b7f228f89350615d3be656050790c3154c7994b9d5ef3999cb6b12cb4",
+    "changed_artifacts": [
+      "power_enable_turnon_delay_gate.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_no_turnon_delay",
+    "rationale": "Select fault class timing_or_state_update_fault under trigger 'stimulus exercises neg_001_no_turnon_delay' because it exercises P_BUILD_A_VOLTAGE_DOMAIN_POWER_SEQUENCING, P_ON_EACH_RISING_CROSSING_OF_CLK as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 23,
+    "source_preferred_seed": "neg_002_ignore_bias_validity",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

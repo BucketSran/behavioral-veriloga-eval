@@ -1,0 +1,311 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "power_mode_supply_current_metric",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vhi",
+                "override_behavior": "overrides vhi",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vnom",
+                "override_behavior": "overrides vnom",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.08",
+                "name": "iq0",
+                "override_behavior": "overrides iq0",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.14",
+                "name": "iq1",
+                "override_behavior": "overrides iq1",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.01",
+                "name": "ipd",
+                "override_behavior": "overrides ipd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.20",
+                "name": "load_gain",
+                "override_behavior": "overrides load_gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "80p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vdd",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vss",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "en",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "pd",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "mode",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "load",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "isup_metric",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "power_mode_supply_current_metric.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "295",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "bias_reference_power_management",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Power Mode Supply Current Metric"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_DRIVE_ISUP_METRIC_AS_A_VOLTAGE",
+      "observable_contract": "Drive `isup_metric` as a voltage-coded supply-current estimate. The estimate must scale with the local supply ratio `V(vdd, vss) / vnom` clipped to the range `[0, 1.5]`. Normalize load as `V(load, vss) / vhi` clipped to `[0, 1]`. When the block is disabled or powered down, meaning `V(en) <= vth` or `V(pd) > vth`, drive `isup_metric = ipd * supply_scale`. Otherwise choose the active base metric as `iq1` when `V(mode) > vth` and `iq0` when `V(mode) <= vth`, then drive `isup_metric = (base_metric + load_gain * load_norm) * supply_scale`. The metric is not a real branch current; it is an observable behavioral macro-model output.",
+      "required_signals": [
+        "time",
+        "en",
+        "isup_metric",
+        "load",
+        "mode",
+        "pd",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_BUILD_A_VOLTAGE_DOMAIN_BIAS_REFERENCE",
+      "observable_contract": "Build a voltage-domain bias/reference/power-management macro-model metric. The module exposes an observable supply-current demand estimate as a voltage-coded output across enable, power-down, operating mode, load demand, and local supply conditions.",
+      "required_signals": [
+        "time",
+        "en",
+        "isup_metric",
+        "load",
+        "mode",
+        "pd",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_VTH_0_45_V_LOGIC_THRESHOLD",
+      "observable_contract": "`vth = 0.45 V`: logic threshold for `en`, `pd`, and `mode`.",
+      "required_signals": [
+        "time",
+        "en",
+        "isup_metric",
+        "load",
+        "mode",
+        "pd",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_VHI_0_9_V_FULL_SCALE",
+      "observable_contract": "`vhi = 0.9 V`: full-scale input level for `load`.",
+      "required_signals": [
+        "time",
+        "en",
+        "isup_metric",
+        "load",
+        "mode",
+        "pd",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_VNOM_0_9_V_NOMINAL_SUPPLY",
+      "observable_contract": "`vnom = 0.9 V`: nominal supply used for supply-ratio scaling.",
+      "required_signals": [
+        "time",
+        "en",
+        "isup_metric",
+        "load",
+        "mode",
+        "pd",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_IQ0_0_08_IQ1_0_14",
+      "observable_contract": "`iq0 = 0.08`, `iq1 = 0.14`: active quiescent metric levels for low and high",
+      "required_signals": [
+        "time",
+        "en",
+        "isup_metric",
+        "load",
+        "mode",
+        "pd",
+        "vdd",
+        "vss"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/power_mode_supply_current_metric.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-795",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vdd",
+            "port_ref": "vdd",
+            "position": 0
+          },
+          {
+            "net": "vss",
+            "port_ref": "vss",
+            "position": 1
+          },
+          {
+            "net": "en",
+            "port_ref": "en",
+            "position": 2
+          },
+          {
+            "net": "pd",
+            "port_ref": "pd",
+            "position": 3
+          },
+          {
+            "net": "mode",
+            "port_ref": "mode",
+            "position": 4
+          },
+          {
+            "net": "load",
+            "port_ref": "load",
+            "position": 5
+          },
+          {
+            "net": "isup_metric",
+            "port_ref": "isup_metric",
+            "position": 6
+          }
+        ],
+        "module_ref": "power_mode_supply_current_metric",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "en",
+      "isup_metric",
+      "load",
+      "mode",
+      "pd",
+      "vdd",
+      "vss"
+    ]
+  }
+}

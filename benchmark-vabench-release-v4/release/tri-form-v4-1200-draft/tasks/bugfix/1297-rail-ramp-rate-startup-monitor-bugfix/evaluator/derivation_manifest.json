@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-297",
+    "canonical_task_slug": "297-rail-ramp-rate-startup-monitor",
+    "family_spec_sha256": "292130ad04bc4ce59b643070005c279f7435183da759b9fcfd84388ca947bef1",
+    "mutation_catalog_sha256": "e5ddaf3d53c394ed6a8989cc61e7fb7ac3470a9ec44d36445706aabbf4c04c38",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "297",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_threshold_only_ready",
+    "testbench_suite": [
+      "neg_001_threshold_only_ready",
+      "neg_003_ignore_enable",
+      "neg_005_wrong_slew_metric",
+      "neg_002_no_settle_requirement",
+      "neg_004_ignore_high_rail_fault"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "43784dc4b33431707ae226d567432a9b488fed2a2ac505fa974fe2564cf900b7",
+    "changed_artifacts": [
+      "rail_ramp_rate_startup_monitor.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_threshold_only_ready",
+    "rationale": "Select fault class threshold_or_boundary_fault under trigger 'stimulus exercises neg_001_threshold_only_ready' because it exercises P_ON_EACH_RISING_CROSSING_OF_CLK, P_STARTUP_READY_REQUIRES_CONSECUTIVE_SETTLED_SAMPLES, P_VREADY_0_86_V_SAMPLED_RAIL as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 19,
+    "source_preferred_seed": "neg_001_threshold_only_ready",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/rail_ramp_rate_startup_monitor.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=180p period=1.2n width=520p rise=25p fall=25p
+Vvss (vss 0) vsource type=pwl wave=[0 0.03 9n 0.03 9.06n -0.02 20n -0.02]
+Vvdd (vdd 0) vsource type=pwl wave=[0 0.26 1.05n 0.26 1.10n 0.38 2.25n 0.38 2.30n 0.53 3.45n 0.53 3.50n 0.68 4.65n 0.68 4.70n 0.82 5.85n 0.82 5.90n 0.92 7.05n 0.92 7.10n 0.93 10.65n 0.93 10.70n 1.11 11.85n 1.11 11.90n 0.88 13.05n 0.88 13.10n 0.89 20n 0.89]
+Ven (en 0) vsource type=pwl wave=[0 0.9 14n 0.9 14.06n 0.0 15.6n 0.0 15.66n 0.9 20n 0.9]
+
+XDUT (clk vdd vss en rail_ok ramp_ok startup_ready slew_metric) rail_ramp_rate_startup_monitor
+
+
+tran tran stop=20n maxstep=10p
+save clk en rail_ok ramp_ok slew_metric startup_ready vdd vss

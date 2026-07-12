@@ -1,0 +1,304 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "supply_bias_validity_gate",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vhi",
+                "override_behavior": "overrides vhi",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.75",
+                "name": "vdd_min",
+                "override_behavior": "overrides vdd_min",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.05",
+                "name": "vdd_max",
+                "override_behavior": "overrides vdd_max",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.08",
+                "name": "vss_max",
+                "override_behavior": "overrides vss_max",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.25",
+                "name": "vbias_min",
+                "override_behavior": "overrides vbias_min",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.75",
+                "name": "vbias_max",
+                "override_behavior": "overrides vbias_max",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "50p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vdd",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vss",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vbias",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "en",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "pd",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "ok",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "gated",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "supply_bias_validity_gate.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/supply_bias_validity_gate.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "292",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "bias_reference_power_management",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Supply Bias Validity Gate"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_MODEL_A_REUSABLE_SUPPLY_BIAS_VALIDITY",
+      "observable_contract": "Model a reusable supply/bias validity gate for a behavioral AMS block. Drive `ok` high only when the local supply is inside the supply window, the local ground rail is close enough to the global reference, and the bias input is inside its `vss`-referenced window. Drive `gated` high only when `ok` is high, `en` is high, and `pd` is low. Both outputs must be voltage-coded and smoothed with `transition()`.",
+      "required_signals": [
+        "time",
+        "en",
+        "gated",
+        "ok",
+        "pd",
+        "vbias",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_BUILD_A_VOLTAGE_DOMAIN_BIAS_REFERENCE",
+      "observable_contract": "Build a voltage-domain bias/reference/power-management DUT. The module reports whether local supply, local ground, and local bias conditions are valid, then gates a downstream drive-enable output with public enable and power-down inputs.",
+      "required_signals": [
+        "time",
+        "en",
+        "gated",
+        "ok",
+        "pd",
+        "vbias",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_VTH_0_45_V_LOGIC_THRESHOLD",
+      "observable_contract": "`vth = 0.45 V`: logic threshold for `en` and `pd`.",
+      "required_signals": [
+        "time",
+        "en",
+        "gated",
+        "ok",
+        "pd",
+        "vbias",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_VHI_0_9_V_HIGH_LEVEL",
+      "observable_contract": "`vhi = 0.9 V`: high level for `ok` and `gated`.",
+      "required_signals": [
+        "time",
+        "en",
+        "gated",
+        "ok",
+        "pd",
+        "vbias",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_VDD_MIN_0_75_V_VDD",
+      "observable_contract": "`vdd_min = 0.75 V`, `vdd_max = 1.05 V`: valid supply-voltage window measured",
+      "required_signals": [
+        "time",
+        "en",
+        "gated",
+        "ok",
+        "pd",
+        "vbias",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_VSS_MAX_0_08_V_MAXIMUM",
+      "observable_contract": "`vss_max = 0.08 V`: maximum absolute ground-rail displacement allowed for",
+      "required_signals": [
+        "time",
+        "en",
+        "gated",
+        "ok",
+        "pd",
+        "vbias",
+        "vdd",
+        "vss"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "supply_bias_validity_gate.va"
+  ],
+  "task_id": "v4-1292",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vdd",
+            "port_ref": "vdd",
+            "position": 0
+          },
+          {
+            "net": "vss",
+            "port_ref": "vss",
+            "position": 1
+          },
+          {
+            "net": "vbias",
+            "port_ref": "vbias",
+            "position": 2
+          },
+          {
+            "net": "en",
+            "port_ref": "en",
+            "position": 3
+          },
+          {
+            "net": "pd",
+            "port_ref": "pd",
+            "position": 4
+          },
+          {
+            "net": "ok",
+            "port_ref": "ok",
+            "position": 5
+          },
+          {
+            "net": "gated",
+            "port_ref": "gated",
+            "position": 6
+          }
+        ],
+        "module_ref": "supply_bias_validity_gate",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "en",
+      "gated",
+      "ok",
+      "pd",
+      "vbias",
+      "vdd",
+      "vss"
+    ]
+  }
+}

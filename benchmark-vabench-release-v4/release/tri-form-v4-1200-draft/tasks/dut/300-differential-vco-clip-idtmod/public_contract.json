@@ -1,0 +1,235 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "differential_vco_clip_idtmod",
+            "parameters": [
+              {
+                "default": "20.0e6 from (0:inf)",
+                "name": "Fnom",
+                "override_behavior": "overrides Fnom",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "160.0e6 exclude 0.0",
+                "name": "dFdV",
+                "override_behavior": "overrides dFdV",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "5.0e6 from (0:inf)",
+                "name": "Fmin",
+                "override_behavior": "overrides Fmin",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "80.0e6 from (0:inf)",
+                "name": "Fmax",
+                "override_behavior": "overrides Fmax",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "Vcm",
+                "override_behavior": "overrides Vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.4 from (0:inf)",
+                "name": "Vac",
+                "override_behavior": "overrides Vac",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vinp",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vinm",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "outp",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "outm",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "metric",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "differential_vco_clip_idtmod.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "300",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "pll_clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Differential VCO With Clip And Idtmod"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_FREQ_Q_CLIP_FNOM_DFDV_V",
+      "observable_contract": "`freq_q = `clip(Fnom + dFdV * V(vinp, vinm), Fmin, Fmax)`",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinm",
+        "outp",
+        "outm",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_PHASE_Q_IDTMOD_FREQ_Q_0",
+      "observable_contract": "`phase_q = idtmod(freq_q, 0.0, 1.0)` (modulo-1 phase accumulator)",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinm",
+        "outp",
+        "outm",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_OUTP_VCM_VAC_SIN_M_TWO",
+      "observable_contract": "`outp = Vcm + Vac * sin(M_TWO_PI * phase_q)` (positive differential arm)",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinm",
+        "outp",
+        "outm",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_OUTM_VCM_VAC_SIN_M_TWO",
+      "observable_contract": "`outm = Vcm - Vac * sin(M_TWO_PI * phase_q)` (negative differential arm)",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinm",
+        "outp",
+        "outm",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_METRIC_0_9_PHASE_Q_VOLTAGE",
+      "observable_contract": "`metric = 0.9 * phase_q` (voltage-coded instantaneous wrapped phase, `0 V` to `0.9 V`)",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinm",
+        "outp",
+        "outm",
+        "metric"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "differential_vco_clip_idtmod.va"
+  ],
+  "task_id": "v4-300",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vinp",
+            "port_ref": "vinp",
+            "position": 0
+          },
+          {
+            "net": "vinm",
+            "port_ref": "vinm",
+            "position": 1
+          },
+          {
+            "net": "outp",
+            "port_ref": "outp",
+            "position": 2
+          },
+          {
+            "net": "outm",
+            "port_ref": "outm",
+            "position": 3
+          },
+          {
+            "net": "metric",
+            "port_ref": "metric",
+            "position": 4
+          }
+        ],
+        "module_ref": "differential_vco_clip_idtmod",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vinp",
+      "vinm",
+      "outp",
+      "outm",
+      "metric"
+    ]
+  }
+}

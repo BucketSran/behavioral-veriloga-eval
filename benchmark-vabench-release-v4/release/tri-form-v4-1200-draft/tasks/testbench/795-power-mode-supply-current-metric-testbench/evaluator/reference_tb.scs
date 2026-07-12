@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/power_mode_supply_current_metric.va"
+
+Vvdd (vdd 0) vsource type=pwl wave=[0 1.0 3n 1.0 3.05n 0.63 6n 0.63 6.05n 1.20 11n 1.20 11.05n 0.86]
+Vvss (vss 0) vsource type=pwl wave=[0 0.05 8n 0.05 8.05n 0.0]
+Ven (en 0) vsource type=pwl wave=[0 0.9 12n 0.9 12.05n 0 14n 0 14.05n 0.9]
+Vpd (pd 0) vsource type=pwl wave=[0 0 15n 0 15.05n 0.9]
+Vmode (mode 0) vsource type=pwl wave=[0 0.9 5n 0.9 5.05n 0 10n 0 10.05n 0.9]
+Vload (load 0) vsource type=pwl wave=[0 0.80 4n 0.80 4.05n 0.05 7n 0.05 7.05n 0.90 13n 0.90 13.05n 0.35]
+
+XDUT (vdd vss en pd mode load isup_metric) power_mode_supply_current_metric
+
+
+tran tran stop=17n maxstep=10p
+save en isup_metric load mode pd vdd vss

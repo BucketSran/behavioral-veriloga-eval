@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/dynamic_supply_level_driver.va"
+
+Vvdd (vdd 0) vsource type=pwl wave=[0 1.0 3n 1.0 3.05n 0.48 5n 0.48 5.05n 0.85 9n 0.85 9.05n 0.62]
+Vvss (vss 0) vsource type=pwl wave=[0 0.05 5n 0.05 5.05n 0.18 9n 0.18 9.05n -0.03]
+Vdin (din 0) vsource type=pwl wave=[0 0.35 1n 0.35 1.05n 0.74 4n 0.74 4.05n 0.20 6n 0.20 6.05n 0.70 8n 0.70 8.05n 0.45 10n 0.45 10.05n 0.34]
+
+XDUT (din vdd vss out) dynamic_supply_level_driver
+
+
+tran tran stop=12n maxstep=10p
+save din out vdd vss

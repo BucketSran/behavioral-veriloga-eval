@@ -1,0 +1,340 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "power_enable_turnon_delay_gate",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vhi",
+                "override_behavior": "overrides vhi",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.75",
+                "name": "vdd_min",
+                "override_behavior": "overrides vdd_min",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.05",
+                "name": "vdd_max",
+                "override_behavior": "overrides vdd_max",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.25",
+                "name": "vbias_min",
+                "override_behavior": "overrides vbias_min",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.75",
+                "name": "vbias_max",
+                "override_behavior": "overrides vbias_max",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "3",
+                "name": "delay_cycles",
+                "override_behavior": "overrides delay_cycles",
+                "type": "integer",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "60p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vdd",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vss",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vbias",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "en",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "pd",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "pwr_ok",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "drive_en",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "delay_mon",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "power_enable_turnon_delay_gate.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/power_enable_turnon_delay_gate.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "294",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "bias_reference_power_management",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Power Enable Turn-On Delay Gate"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_ON_EACH_RISING_CROSSING_OF_CLK",
+      "observable_contract": "On each rising crossing of `clk`, evaluate whether supply, bias, enable, and power-down conditions allow operation. Drive `pwr_ok` high whenever the sampled conditions are valid, meaning `vdd_min <= V(vdd, vss) <= vdd_max`, `vbias_min <= V(vbias, vss) <= vbias_max`, `V(en) > vth`, and `V(pd) <= vth`. Maintain an integer consecutive-valid counter. Increment the counter by one on each sampled valid rising-clock update until it reaches `delay_cycles`; reset the counter to zero on any sampled invalid update. After applying that update, assert `drive_en` when the counter is greater than or equal to `delay_cycles`. Drive `delay_mon = min(vhi, vhi * counter / delay_cycles)` as the bounded voltage-coded turn-on progress value from `0 V` to `vhi`. Smooth all outputs with `transition()`.",
+      "required_signals": [
+        "time",
+        "clk",
+        "delay_mon",
+        "drive_en",
+        "en",
+        "pd",
+        "pwr_ok",
+        "vbias",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_BUILD_A_VOLTAGE_DOMAIN_POWER_SEQUENCING",
+      "observable_contract": "Build a voltage-domain power sequencing DUT for a biased analog block. The module samples supply, bias, enable, and power-down conditions, reports sampled power validity, and releases downstream drive only after a consecutive valid turn-on delay.",
+      "required_signals": [
+        "time",
+        "clk",
+        "delay_mon",
+        "drive_en",
+        "en",
+        "pd",
+        "pwr_ok",
+        "vbias",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_VTH_0_45_V_LOGIC_THRESHOLD",
+      "observable_contract": "`vth = 0.45 V`: logic threshold for `clk`, `en`, and `pd`.",
+      "required_signals": [
+        "time",
+        "clk",
+        "delay_mon",
+        "drive_en",
+        "en",
+        "pd",
+        "pwr_ok",
+        "vbias",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_VHI_0_9_V_HIGH_LEVEL",
+      "observable_contract": "`vhi = 0.9 V`: high level for voltage-coded outputs.",
+      "required_signals": [
+        "time",
+        "clk",
+        "delay_mon",
+        "drive_en",
+        "en",
+        "pd",
+        "pwr_ok",
+        "vbias",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_VDD_MIN_0_75_V_VDD",
+      "observable_contract": "`vdd_min = 0.75 V`, `vdd_max = 1.05 V`: valid `V(vdd, vss)` window.",
+      "required_signals": [
+        "time",
+        "clk",
+        "delay_mon",
+        "drive_en",
+        "en",
+        "pd",
+        "pwr_ok",
+        "vbias",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_VBIAS_MIN_0_25_V_VBIAS",
+      "observable_contract": "`vbias_min = 0.25 V`, `vbias_max = 0.75 V`: valid `V(vbias, vss)` window.",
+      "required_signals": [
+        "time",
+        "clk",
+        "delay_mon",
+        "drive_en",
+        "en",
+        "pd",
+        "pwr_ok",
+        "vbias",
+        "vdd",
+        "vss"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "power_enable_turnon_delay_gate.va"
+  ],
+  "task_id": "v4-1294",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "vdd",
+            "port_ref": "vdd",
+            "position": 1
+          },
+          {
+            "net": "vss",
+            "port_ref": "vss",
+            "position": 2
+          },
+          {
+            "net": "vbias",
+            "port_ref": "vbias",
+            "position": 3
+          },
+          {
+            "net": "en",
+            "port_ref": "en",
+            "position": 4
+          },
+          {
+            "net": "pd",
+            "port_ref": "pd",
+            "position": 5
+          },
+          {
+            "net": "pwr_ok",
+            "port_ref": "pwr_ok",
+            "position": 6
+          },
+          {
+            "net": "drive_en",
+            "port_ref": "drive_en",
+            "position": 7
+          },
+          {
+            "net": "delay_mon",
+            "port_ref": "delay_mon",
+            "position": 8
+          }
+        ],
+        "module_ref": "power_enable_turnon_delay_gate",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "delay_mon",
+      "drive_en",
+      "en",
+      "pd",
+      "pwr_ok",
+      "vbias",
+      "vdd",
+      "vss"
+    ]
+  }
+}

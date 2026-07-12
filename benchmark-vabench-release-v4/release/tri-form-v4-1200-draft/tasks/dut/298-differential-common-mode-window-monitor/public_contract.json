@@ -1,0 +1,327 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "differential_common_mode_window_monitor",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vhi",
+                "override_behavior": "overrides vhi",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.30",
+                "name": "diff_max",
+                "override_behavior": "overrides diff_max",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "diff_fullscale",
+                "override_behavior": "overrides diff_fullscale",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.080",
+                "name": "cm_tol",
+                "override_behavior": "overrides cm_tol",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.160",
+                "name": "cm_fullscale",
+                "override_behavior": "overrides cm_fullscale",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "50p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vip",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vcm_ref",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "en",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "diff_ok",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "cm_ok",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "diff_metric",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "cm_metric",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "differential_common_mode_window_monitor.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "298",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "measurement_instrumentation_flows",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Differential Common Mode Window Monitor"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_CONTINUOUSLY_COMPUTE_VDIFF_V_VIP_V",
+      "observable_contract": "Continuously compute `vdiff = V(vip) - V(vin)` and `vcm = 0.5 * (V(vip) + V(vin))`. Drive `diff_ok` high only while `en` is high and `abs(vdiff)` is no larger than `diff_max`. Drive `cm_ok` high only while `en` is high and `abs(vcm - V(vcm_ref))` is no larger than `cm_tol`. Drive `valid` high only when both `diff_ok` and `cm_ok` would be high. Drive `diff_metric` as `vhi * clip(abs(vdiff) / diff_fullscale, 0, 1)` and `cm_metric` as `vhi * clip(abs(vcm - V(vcm_ref)) / cm_fullscale, 0, 1)`. Smooth the voltage-coded Boolean outputs with `transition()`.",
+      "required_signals": [
+        "time",
+        "cm_metric",
+        "cm_ok",
+        "diff_metric",
+        "diff_ok",
+        "en",
+        "valid",
+        "vcm_ref",
+        "vin",
+        "vip"
+      ]
+    },
+    {
+      "id": "P_BUILD_A_VOLTAGE_DOMAIN_INPUT_VALIDITY",
+      "observable_contract": "Build a voltage-domain input-validity monitor for a differential analog front-end. The module checks whether the differential input magnitude remains inside a public linear range, whether the instantaneous common-mode level stays near a reference, and whether the enabled input pair is valid for downstream behavioral processing.",
+      "required_signals": [
+        "time",
+        "cm_metric",
+        "cm_ok",
+        "diff_metric",
+        "diff_ok",
+        "en",
+        "valid",
+        "vcm_ref",
+        "vin",
+        "vip"
+      ]
+    },
+    {
+      "id": "P_VTH_0_45_V_LOGIC_THRESHOLD",
+      "observable_contract": "`vth = 0.45 V`: logic threshold for `en`.",
+      "required_signals": [
+        "time",
+        "cm_metric",
+        "cm_ok",
+        "diff_metric",
+        "diff_ok",
+        "en",
+        "valid",
+        "vcm_ref",
+        "vin",
+        "vip"
+      ]
+    },
+    {
+      "id": "P_VHI_0_9_V_HIGH_LEVEL",
+      "observable_contract": "`vhi = 0.9 V`: high level for voltage-coded outputs.",
+      "required_signals": [
+        "time",
+        "cm_metric",
+        "cm_ok",
+        "diff_metric",
+        "diff_ok",
+        "en",
+        "valid",
+        "vcm_ref",
+        "vin",
+        "vip"
+      ]
+    },
+    {
+      "id": "P_DIFF_MAX_0_30_V_MAXIMUM",
+      "observable_contract": "`diff_max = 0.30 V`: maximum allowed `abs(V(vip) - V(vin))`.",
+      "required_signals": [
+        "time",
+        "cm_metric",
+        "cm_ok",
+        "diff_metric",
+        "diff_ok",
+        "en",
+        "valid",
+        "vcm_ref",
+        "vin",
+        "vip"
+      ]
+    },
+    {
+      "id": "P_DIFF_FULLSCALE_0_45_V_FULL",
+      "observable_contract": "`diff_fullscale = 0.45 V`: full-scale value for `diff_metric`.",
+      "required_signals": [
+        "time",
+        "cm_metric",
+        "cm_ok",
+        "diff_metric",
+        "diff_ok",
+        "en",
+        "valid",
+        "vcm_ref",
+        "vin",
+        "vip"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "differential_common_mode_window_monitor.va"
+  ],
+  "task_id": "v4-298",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vip",
+            "port_ref": "vip",
+            "position": 0
+          },
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 1
+          },
+          {
+            "net": "vcm_ref",
+            "port_ref": "vcm_ref",
+            "position": 2
+          },
+          {
+            "net": "en",
+            "port_ref": "en",
+            "position": 3
+          },
+          {
+            "net": "diff_ok",
+            "port_ref": "diff_ok",
+            "position": 4
+          },
+          {
+            "net": "cm_ok",
+            "port_ref": "cm_ok",
+            "position": 5
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 6
+          },
+          {
+            "net": "diff_metric",
+            "port_ref": "diff_metric",
+            "position": 7
+          },
+          {
+            "net": "cm_metric",
+            "port_ref": "cm_metric",
+            "position": 8
+          }
+        ],
+        "module_ref": "differential_common_mode_window_monitor",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "cm_metric",
+      "cm_ok",
+      "diff_metric",
+      "diff_ok",
+      "en",
+      "valid",
+      "vcm_ref",
+      "vin",
+      "vip"
+    ]
+  }
+}

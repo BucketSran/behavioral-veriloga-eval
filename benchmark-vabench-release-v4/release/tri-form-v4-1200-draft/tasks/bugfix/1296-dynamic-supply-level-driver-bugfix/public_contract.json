@@ -1,0 +1,226 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "dynamic_supply_level_driver",
+            "parameters": [
+              {
+                "default": "0.55",
+                "name": "vsup_min",
+                "override_behavior": "overrides vsup_min",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.5",
+                "name": "vth_frac",
+                "override_behavior": "overrides vth_frac",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vlo_frac",
+                "override_behavior": "overrides vlo_frac",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.0",
+                "name": "vhi_frac",
+                "override_behavior": "overrides vhi_frac",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "40p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vdd",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vss",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 3
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "dynamic_supply_level_driver.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/dynamic_supply_level_driver.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "296",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "bias_reference_power_management",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Dynamic Supply Level Driver"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_MODEL_A_DYNAMIC_SUPPLY_ELECTRICAL_LEVEL",
+      "observable_contract": "Model a dynamic-supply electrical level driver. Compute the input level relative to the local rails, not global ground. When `V(vdd, vss)` is at least `vsup_min`, drive `out` to the local low or high rail-derived level according to whether the normalized input exceeds `vth_frac`. When the supply is below `vsup_min`, drive `out` to the local low level. Smooth the output with `transition()`.",
+      "required_signals": [
+        "time",
+        "din",
+        "out",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_BUILD_A_DYNAMIC_SUPPLY_VOLTAGE_DOMAIN",
+      "observable_contract": "Build a dynamic-supply voltage-domain level driver. The module thresholds its input relative to local supply rails, drives its output relative to those same rails, and falls back to the local low level when the supply is invalid.",
+      "required_signals": [
+        "time",
+        "din",
+        "out",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_VSUP_MIN_0_55_V_MINIMUM",
+      "observable_contract": "`vsup_min = 0.55 V`: minimum `V(vdd, vss)` required for normal operation.",
+      "required_signals": [
+        "time",
+        "din",
+        "out",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_VTH_FRAC_0_5_INPUT_THRESHOLD",
+      "observable_contract": "`vth_frac = 0.5`: input threshold expressed as a fraction of the local supply",
+      "required_signals": [
+        "time",
+        "din",
+        "out",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_VLO_FRAC_0_0_VHI_FRAC",
+      "observable_contract": "`vlo_frac = 0.0`, `vhi_frac = 1.0`: output low and high levels expressed as",
+      "required_signals": [
+        "time",
+        "din",
+        "out",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_TR_40P_OUTPUT_TRANSITION_SMOOTHING_TIME",
+      "observable_contract": "`tr = 40p`: output transition smoothing time.",
+      "required_signals": [
+        "time",
+        "din",
+        "out",
+        "vdd",
+        "vss"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "dynamic_supply_level_driver.va"
+  ],
+  "task_id": "v4-1296",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "din",
+            "port_ref": "din",
+            "position": 0
+          },
+          {
+            "net": "vdd",
+            "port_ref": "vdd",
+            "position": 1
+          },
+          {
+            "net": "vss",
+            "port_ref": "vss",
+            "position": 2
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 3
+          }
+        ],
+        "module_ref": "dynamic_supply_level_driver",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "din",
+      "out",
+      "vdd",
+      "vss"
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-291",
+    "canonical_task_slug": "291-event-reacquire-lock-detector",
+    "family_spec_sha256": "1b5aff7ee8c2131b3d60e548155fc951184edaa5896d721b189111031c962608",
+    "mutation_catalog_sha256": "0b66b37c7667712013d23f75098115611085d494171c0cf3d756e21200d31959",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "291",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_too_wide_phase_window",
+    "testbench_suite": [
+      "neg_002_too_wide_phase_window",
+      "neg_003_no_reset_clear",
+      "neg_005_constant_phase_metric",
+      "neg_001_lock_after_one_hit",
+      "neg_004_ignore_ref_timing"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "110bf8867ef31ea169cacc8d2592f1f24d8f0e994b8b02943619c8fa71f278f9",
+    "changed_artifacts": [
+      "event_reacquire_lock_detector.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_too_wide_phase_window",
+    "rationale": "Select fault class timing_or_state_update_fault under trigger 'stimulus exercises neg_002_too_wide_phase_window' because it exercises P_REQUIRE_CONSECUTIVE_IN_WINDOW_FEEDBACK_EDGE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 18,
+    "source_preferred_seed": "neg_002_too_wide_phase_window",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

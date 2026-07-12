@@ -1,0 +1,43 @@
+`include "disciplines.vams"
+
+module rail_ramp_rate_startup_monitor(clk, vdd, vss, en, rail_ok, ramp_ok, startup_ready, slew_metric);
+input clk, vdd, vss, en;
+output rail_ok, ramp_ok, startup_ready, slew_metric;
+electrical clk, vdd, vss, en, rail_ok, ramp_ok, startup_ready, slew_metric;
+
+parameter real vth = 0.45;
+parameter real vhi = 0.9;
+parameter real vdd_min = 0.72;
+parameter real vdd_max = 1.08;
+parameter real vready = 0.86;
+parameter real dv_min = 0.025;
+parameter real dv_max = 0.20;
+parameter real dv_settle_max = 0.030;
+parameter integer ready_cycles = 3;
+parameter real tr = 60p;
+
+real rail_ok_v;
+real ramp_ok_v;
+real ready_v;
+real supply_v;
+
+analog begin
+    @(initial_step) begin
+        rail_ok_v = 0.0;
+        ramp_ok_v = 0.0;
+        ready_v = 0.0;
+    end
+
+    @(cross(V(clk) - vth, +1)) begin
+        supply_v = V(vdd, vss);
+        rail_ok_v = ((V(en) > vth) && (supply_v >= vdd_min) && (supply_v <= vdd_max)) ? vhi : 0.0;
+        ramp_ok_v = rail_ok_v;
+        ready_v = ((rail_ok_v > 0.45) && (supply_v >= vready)) ? vhi : 0.0;
+    end
+
+    V(rail_ok) <+ transition(rail_ok_v, 0.0, tr, tr);
+    V(ramp_ok) <+ transition(ramp_ok_v, 0.0, tr, tr);
+    V(startup_ready) <+ transition(ready_v, 0.0, tr, tr);
+    V(slew_metric) <+ 0.0;
+end
+endmodule
