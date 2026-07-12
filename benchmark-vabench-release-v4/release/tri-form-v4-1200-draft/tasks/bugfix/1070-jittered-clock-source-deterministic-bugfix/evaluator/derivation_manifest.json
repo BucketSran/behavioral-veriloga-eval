@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-070",
+    "canonical_task_slug": "070-jittered-clock-source-deterministic",
+    "family_spec_sha256": "2715ac259ec5ad41dd4af756e1a8ceae575fcf37854940011583c8774d235fc4",
+    "mutation_catalog_sha256": "4b74e3e27463e53b049fcc5505aaf59a8677b32165dbbe5ae92e6bc846e7cb63",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "070",
+  "negative_assignment": {
+    "bugfix_seed": "neg_006_nonrepeating_sequence",
+    "testbench_suite": [
+      "neg_001_zero",
+      "neg_002_no_jitter",
+      "neg_004_unbounded",
+      "neg_005_ignore_seed",
+      "neg_006_nonrepeating_sequence"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "698af327c4fe57044592032c3b3d922f0819fd82de5ce9f76ac4f6b4d54204fc",
+    "changed_artifacts": [
+      "deterministic_jittered_clock.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_006_nonrepeating_sequence",
+    "rationale": "Select fault class phase_sequence_does_not_repeat under trigger 'with constant seed and enable history, the five-edge modulation sequence must repeat without a phase shift' because it exercises P_REPEATABILITY as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 21,
+    "source_preferred_seed": "neg_001_zero",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

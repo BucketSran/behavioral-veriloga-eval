@@ -1,0 +1,8 @@
+simulator lang=spectre
+global 0
+ahdl_include "configurable_polarity_edge_detector.va"
+Vrise_en (rise_en 0) vsource type=pwl wave=[0 0.9 70n 0.9 70.1n 0 150n 0]
+Vsig (sig 0) vsource type=pwl wave=[0 0 15n 0 15.1n 0.9 35n 0.9 35.1n 0 55n 0 55.1n 0.9 80n 0.9 80.1n 0 105n 0 105.1n 0.9 125n 0.9 125.1n 0 150n 0]
+XDUT (sig rise_en pulse) configurable_polarity_edge_detector
+tran tran stop=150n maxstep=50p
+save sig rise_en pulse

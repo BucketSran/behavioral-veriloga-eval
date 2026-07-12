@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-065",
+    "canonical_task_slug": "065-enable-gated-clock-pulse",
+    "family_spec_sha256": "f38b3ae98309b96112db628e720f5088788729de00317bfde5a65d6da891c36e",
+    "mutation_catalog_sha256": "f4045e7848f9d6d83ac6132394386867ea6c26b34a3f3f7ccf27ae8e58c9943d",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "065",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_zero",
+    "testbench_suite": [
+      "neg_001_zero",
+      "neg_003_ignore_clock",
+      "neg_004_invert_enable",
+      "neg_002_ignore_enable",
+      "neg_005_invert_output"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "1e3b60755bb63cdb18bf8ec7c2ae40b7a000bd2ecac3274fb029f037661dbe21",
+    "changed_artifacts": [
+      "enable_gated_clock_pulse.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_zero",
+    "rationale": "Select fault class no_pulse under trigger 'stimulus exercises no pulse against the public observable contract' because it exercises P_ENABLED_HIGH as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_001_zero",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

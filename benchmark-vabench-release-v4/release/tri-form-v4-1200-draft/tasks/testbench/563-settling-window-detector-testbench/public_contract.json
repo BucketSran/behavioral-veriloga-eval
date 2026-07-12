@@ -1,0 +1,333 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "settling_window_detector",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets the voltage-coded settled and time-code high level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > 0"
+              },
+              {
+                "default": 2e-11,
+                "name": "tr",
+                "override_behavior": "sets output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "target",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "tol",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "settled",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "t_code0",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "t_code1",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "t_code2",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "t_code3",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "t_code4",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "t_code5",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "t_code6",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "t_code7",
+                "position": 11
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "settling_window_detector.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "063",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "testbench_utility_modules",
+    "difficulty": "D1",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Settling Window Detector"
+  },
+  "modeling_constraints": [
+    "Use deterministic continuous window qualification with stored entry-time state.",
+    "Treat the public 20 ns hold interval and 1 ns time-code quantum as circuit-contract values, not stimulus timing.",
+    "Use smooth voltage contributions for all outputs.",
+    "Do not add hidden observables, validation hooks, current contributions, or simulator-specific side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_WINDOW_DEFINITION",
+      "observable_contract": "The input is qualified in-window exactly while the absolute vin-to-target error is no greater than tol.",
+      "required_signals": [
+        "time",
+        "vin",
+        "target",
+        "tol",
+        "settled",
+        "t_code0",
+        "t_code1",
+        "t_code2",
+        "t_code3",
+        "t_code4",
+        "t_code5",
+        "t_code6",
+        "t_code7"
+      ]
+    },
+    {
+      "id": "P_ENTRY_AND_HOLD",
+      "observable_contract": "Entering the window records the entry time, but settled remains low until vin has stayed continuously in-window for at least 20 ns.",
+      "required_signals": [
+        "time",
+        "vin",
+        "target",
+        "tol",
+        "settled",
+        "t_code0",
+        "t_code1",
+        "t_code2",
+        "t_code3",
+        "t_code4",
+        "t_code5",
+        "t_code6",
+        "t_code7"
+      ]
+    },
+    {
+      "id": "P_EXIT_RESETS_QUALIFICATION",
+      "observable_contract": "Leaving the tolerance window before or after qualification clears the entry state, drives settled low, and clears the time code.",
+      "required_signals": [
+        "time",
+        "vin",
+        "target",
+        "tol",
+        "settled",
+        "t_code0",
+        "t_code1",
+        "t_code2",
+        "t_code3",
+        "t_code4",
+        "t_code5",
+        "t_code6",
+        "t_code7"
+      ]
+    },
+    {
+      "id": "P_ENTRY_TIME_CODE",
+      "observable_contract": "After qualification, t_code[7:0] reports the rounded window-entry time in whole nanoseconds, saturated to 0 through 255.",
+      "required_signals": [
+        "time",
+        "vin",
+        "target",
+        "tol",
+        "settled",
+        "t_code0",
+        "t_code1",
+        "t_code2",
+        "t_code3",
+        "t_code4",
+        "t_code5",
+        "t_code6",
+        "t_code7"
+      ]
+    },
+    {
+      "id": "P_BIT_ORDER_AND_LEVELS",
+      "observable_contract": "t_code0 is the least significant bit and t_code7 is the most significant bit; asserted outputs use vdd and inactive outputs use 0 V.",
+      "required_signals": [
+        "time",
+        "settled",
+        "t_code0",
+        "t_code1",
+        "t_code2",
+        "t_code3",
+        "t_code4",
+        "t_code5",
+        "t_code6",
+        "t_code7"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/settling_window_detector.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-563",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "target",
+            "port_ref": "target",
+            "position": 1
+          },
+          {
+            "net": "tol",
+            "port_ref": "tol",
+            "position": 2
+          },
+          {
+            "net": "settled",
+            "port_ref": "settled",
+            "position": 3
+          },
+          {
+            "net": "t_code0",
+            "port_ref": "t_code0",
+            "position": 4
+          },
+          {
+            "net": "t_code1",
+            "port_ref": "t_code1",
+            "position": 5
+          },
+          {
+            "net": "t_code2",
+            "port_ref": "t_code2",
+            "position": 6
+          },
+          {
+            "net": "t_code3",
+            "port_ref": "t_code3",
+            "position": 7
+          },
+          {
+            "net": "t_code4",
+            "port_ref": "t_code4",
+            "position": 8
+          },
+          {
+            "net": "t_code5",
+            "port_ref": "t_code5",
+            "position": 9
+          },
+          {
+            "net": "t_code6",
+            "port_ref": "t_code6",
+            "position": 10
+          },
+          {
+            "net": "t_code7",
+            "port_ref": "t_code7",
+            "position": 11
+          }
+        ],
+        "module_ref": "settling_window_detector",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "target",
+      "tol",
+      "settled",
+      "t_code0",
+      "t_code1",
+      "t_code2",
+      "t_code3",
+      "t_code4",
+      "t_code5",
+      "t_code6",
+      "t_code7"
+    ]
+  }
+}
