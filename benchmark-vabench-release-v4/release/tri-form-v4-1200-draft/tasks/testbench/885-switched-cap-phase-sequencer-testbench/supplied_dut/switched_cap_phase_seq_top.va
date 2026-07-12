@@ -1,0 +1,23 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module switched_cap_phase_seq_top(clk, rst, enable, phi1, phi2, phi3, phi4, sample_cmd, hold_cmd, phase_code_1, phase_code_0, valid);
+    input clk, rst, enable;
+    output phi1, phi2, phi3, phi4, sample_cmd, hold_cmd, phase_code_1, phase_code_0, valid;
+    electrical clk, rst, enable, phi1, phi2, phi3, phi4, sample_cmd, hold_cmd, phase_code_1, phase_code_0, valid;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    nonoverlap_phase_gen #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr)) u_phase (
+        clk, rst, enable, phi1, phi2, phi3, phi4, phase_code_1, phase_code_0
+    );
+    sample_switch_scheduler #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr)) u_sched (
+        phi1, phi2, phi3, phi4, sample_cmd, hold_cmd
+    );
+    hold_flagger #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr)) u_valid (
+        clk, rst, enable, phase_code_1, phase_code_0, valid
+    );
+endmodule

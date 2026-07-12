@@ -1,0 +1,40 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-390",
+    "canonical_task_slug": "390-common-mode-feedback-loop",
+    "family_spec_sha256": "34075cf2d35d66197faae0c8baa4916fb64d967b31d9fdfb6bc6ad523d4d4c84",
+    "mutation_catalog_sha256": "be3d0221117f218e8ae4530207e3544f03e33d3eda9d4c5bbb47a999cb6bd68a",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "390",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_reversed_trim_direction",
+    "testbench_suite": [
+      "neg_001_reversed_trim_direction",
+      "neg_003_lock_after_one_update",
+      "neg_004_cm_error_reports_input",
+      "neg_005_disable_keeps_trim",
+      "neg_002_same_sign_output_correction"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "ddbafa749682e050b5f381c35dab837d0ecf0d010c87d062eff21ff6b2b56f4f",
+    "changed_artifacts": [
+      "cm_sensor.va",
+      "cmfb_loop_top.va",
+      "output_balancer.va",
+      "trim_controller.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_reversed_trim_direction",
+    "rationale": "Select fault class wrong_control_polarity under trigger 'positive common-mode error is applied' because it exercises P_TRIM_DIRECTION as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 18,
+    "source_preferred_seed": "neg_001_reversed_trim_direction",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

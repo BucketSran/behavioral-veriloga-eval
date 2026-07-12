@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-381",
+    "canonical_task_slug": "381-fm-vco-modulation-source",
+    "family_spec_sha256": "f2451f43e5f762418f1748235736da9e22edfd3b6fc5a778dfb1da6eea61e2f6",
+    "mutation_catalog_sha256": "981bdc0c5a8da8db144983274dd5820454c4962eef1f2d17eaa51bd26f91926b",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "381",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_inverted_transfer",
+    "testbench_suite": [
+      "neg_004_threshold_shifted",
+      "neg_001_zero",
+      "neg_002_half_scale",
+      "neg_005_event_edge_wrong",
+      "neg_003_inverted_transfer"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "1708f1bf64f09de33b431a9bf34562ebf1dd72b7904ccf697ee09c9a4f1a3f81",
+    "changed_artifacts": [
+      "fm_vco_modulation_source.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_inverted_transfer",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'semantic invert mutation from gold' because it exercises P_ASSERT_VALID_AFTER_THE_FIRST_COMPLETED, P_OSC_OUT_MUST_TOGGLE_BETWEEN_VSS, P_PHASE_MARKER_MUST_PULSE_OR_TOGGLE, P_WHEN_ENABLED_GENERATE_A_DETERMINISTIC_BEHAVIOR as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 25,
+    "source_preferred_seed": "neg_004_threshold_shifted",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

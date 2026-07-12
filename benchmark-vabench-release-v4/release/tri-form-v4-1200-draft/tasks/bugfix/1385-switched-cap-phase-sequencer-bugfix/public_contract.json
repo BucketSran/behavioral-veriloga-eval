@@ -1,0 +1,595 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "hold_flagger",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "overrides the public vdd behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > vss"
+              },
+              {
+                "default": 0,
+                "name": "vss",
+                "override_behavior": "overrides the public vss behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vdd"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "overrides the public vth behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vth is finite and preserves the public operating range"
+              },
+              {
+                "default": 2e-10,
+                "name": "tr",
+                "override_behavior": "overrides the public tr behavior parameter consistently for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "phase_code_1",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "phase_code_0",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 5
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "hold_flagger.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "nonoverlap_phase_gen",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "overrides the public vdd behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > vss"
+              },
+              {
+                "default": 0,
+                "name": "vss",
+                "override_behavior": "overrides the public vss behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vdd"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "overrides the public vth behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vth is finite and preserves the public operating range"
+              },
+              {
+                "default": 2e-10,
+                "name": "tr",
+                "override_behavior": "overrides the public tr behavior parameter consistently for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phi1",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phi2",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phi3",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phi4",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_code_1",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_code_0",
+                "position": 8
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "nonoverlap_phase_gen.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "sample_switch_scheduler",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "overrides the public vdd behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > vss"
+              },
+              {
+                "default": 0,
+                "name": "vss",
+                "override_behavior": "overrides the public vss behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vdd"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "overrides the public vth behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vth is finite and preserves the public operating range"
+              },
+              {
+                "default": 2e-10,
+                "name": "tr",
+                "override_behavior": "overrides the public tr behavior parameter consistently for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "phi1",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "phi2",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "phi3",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "phi4",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sample_cmd",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "hold_cmd",
+                "position": 5
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "sample_switch_scheduler.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "nonoverlap_phase_gen",
+              "sample_switch_scheduler",
+              "hold_flagger"
+            ],
+            "name": "switched_cap_phase_seq_top",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "overrides the public vdd behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > vss"
+              },
+              {
+                "default": 0,
+                "name": "vss",
+                "override_behavior": "overrides the public vss behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vdd"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "overrides the public vth behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vth is finite and preserves the public operating range"
+              },
+              {
+                "default": 2e-10,
+                "name": "tr",
+                "override_behavior": "overrides the public tr behavior parameter consistently for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phi1",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phi2",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phi3",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phi4",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sample_cmd",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "hold_cmd",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_code_1",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_code_0",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 11
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "switched_cap_phase_seq_top.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/hold_flagger.va",
+    "buggy_bundle/nonoverlap_phase_gen.va",
+    "buggy_bundle/sample_switch_scheduler.va",
+    "buggy_bundle/switched_cap_phase_seq_top.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "385",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "clock_timing_systems",
+    "difficulty": "D4",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Switched-cap Phase Sequencer"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain transient behavior.",
+    "Use portable Spectre-compatible Verilog-A and voltage contributions for public outputs.",
+    "Do not use branch-current oracles, hidden pass/fail ports, checker side channels, or testbench code in the DUT bundle."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_RESET_DISABLE_CLEAR",
+      "observable_contract": "Reset or disabled operation clears all phase outputs, commands, phase code, and valid.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "phi1",
+        "phi2",
+        "phi3",
+        "phi4",
+        "sample_cmd",
+        "hold_cmd",
+        "phase_code_1",
+        "phase_code_0",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ONE_HOT_SEQUENCE",
+      "observable_contract": "Enabled rising clock edges advance cyclically through four one-hot phases with no overlapping high phases.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "phi1",
+        "phi2",
+        "phi3",
+        "phi4"
+      ]
+    },
+    {
+      "id": "P_COMMAND_MAPPING",
+      "observable_contract": "sample_cmd is high exactly for phi1 or phi2, while hold_cmd is high exactly for phi3 or phi4.",
+      "required_signals": [
+        "time",
+        "phi1",
+        "phi2",
+        "phi3",
+        "phi4",
+        "sample_cmd",
+        "hold_cmd"
+      ]
+    },
+    {
+      "id": "P_PHASE_CODE",
+      "observable_contract": "phase_code_1 and phase_code_0 encode the active phase index zero through three.",
+      "required_signals": [
+        "time",
+        "phi1",
+        "phi2",
+        "phi3",
+        "phi4",
+        "phase_code_1",
+        "phase_code_0"
+      ]
+    },
+    {
+      "id": "P_VALID_AFTER_SEQUENCE",
+      "observable_contract": "valid remains low initially and asserts only after a complete enabled four-phase sample/hold sequence.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "phase_code_1",
+        "phase_code_0",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "hold_flagger.va",
+    "nonoverlap_phase_gen.va",
+    "sample_switch_scheduler.va",
+    "switched_cap_phase_seq_top.va"
+  ],
+  "task_id": "v4-1385",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 2
+          },
+          {
+            "net": "phi1",
+            "port_ref": "phi1",
+            "position": 3
+          },
+          {
+            "net": "phi2",
+            "port_ref": "phi2",
+            "position": 4
+          },
+          {
+            "net": "phi3",
+            "port_ref": "phi3",
+            "position": 5
+          },
+          {
+            "net": "phi4",
+            "port_ref": "phi4",
+            "position": 6
+          },
+          {
+            "net": "sample_cmd",
+            "port_ref": "sample_cmd",
+            "position": 7
+          },
+          {
+            "net": "hold_cmd",
+            "port_ref": "hold_cmd",
+            "position": 8
+          },
+          {
+            "net": "phase_code_1",
+            "port_ref": "phase_code_1",
+            "position": 9
+          },
+          {
+            "net": "phase_code_0",
+            "port_ref": "phase_code_0",
+            "position": 10
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 11
+          }
+        ],
+        "module_ref": "switched_cap_phase_seq_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "enable",
+      "phi1",
+      "phi2",
+      "phi3",
+      "phi4",
+      "sample_cmd",
+      "hold_cmd",
+      "phase_code_1",
+      "phase_code_0",
+      "valid"
+    ]
+  }
+}

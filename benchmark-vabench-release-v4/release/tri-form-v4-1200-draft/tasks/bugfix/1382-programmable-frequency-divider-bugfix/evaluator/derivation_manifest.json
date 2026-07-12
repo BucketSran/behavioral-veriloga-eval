@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-382",
+    "canonical_task_slug": "382-programmable-frequency-divider",
+    "family_spec_sha256": "3a29be845c02b9735c93f9bd12a33fdacd5bbb22b16de20136125da9d6bb2298",
+    "mutation_catalog_sha256": "eaf6352469a596f275b05cbc01a936199345ea62485f2b8590d534706d0a9573",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "382",
+  "negative_assignment": {
+    "bugfix_seed": "neg_005_event_edge_wrong",
+    "testbench_suite": [
+      "neg_004_threshold_shifted",
+      "neg_001_zero",
+      "neg_002_half_scale",
+      "neg_005_event_edge_wrong",
+      "neg_003_inverted_transfer"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "05708d276a44db7c8d564093ce150c5a7a288d08c51fba1f496714aa67b680ad",
+    "changed_artifacts": [
+      "programmable_frequency_divider.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_005_event_edge_wrong",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'semantic delay_edge mutation from gold' because it exercises P_VALID_IS_HIGH_AFTER_THE_FIRST as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 25,
+    "source_preferred_seed": "neg_004_threshold_shifted",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

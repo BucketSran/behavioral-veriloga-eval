@@ -1,0 +1,281 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "source_follower_buffer_macro",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.12",
+                "name": "vgs_drop",
+                "override_behavior": "overrides vgs_drop",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.10",
+                "name": "min_headroom",
+                "override_behavior": "overrides min_headroom",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "150p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vbias",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "headroom_metric",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "source_follower_buffer_macro.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "388",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "analog_primitive",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Source-follower Buffer Macro"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_OR_LOW_ENABLE_DRIVES_THE",
+      "observable_contract": "Reset or low `enable` drives the output and metrics low.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vbias",
+        "enable",
+        "rst",
+        "vout",
+        "headroom_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_WHEN_ENABLED_THE_OUTPUT_FOLLOWS_VIN",
+      "observable_contract": "When enabled, the output follows `vin - vgs_drop`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vbias",
+        "enable",
+        "rst",
+        "vout",
+        "headroom_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_CLAMP_THE_OUTPUT_BETWEEN_VSS_AND",
+      "observable_contract": "Clamp the output between `vss` and `vbias - min_headroom`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vbias",
+        "enable",
+        "rst",
+        "vout",
+        "headroom_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_HEADROOM_METRIC_REPORTS_THE_REMAINING_VBIAS",
+      "observable_contract": "`headroom_metric` reports the remaining `vbias - vout` margin clipped to the nominal flag range.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vbias",
+        "enable",
+        "rst",
+        "vout",
+        "headroom_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_VALID_IS_HIGH_ONLY_WHEN_ENABLED",
+      "observable_contract": "`valid` is high only when enabled, not reset, and the bias rail can support at least the minimum headroom.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vbias",
+        "enable",
+        "rst",
+        "vout",
+        "headroom_metric",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/source_follower_buffer_macro.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-888",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "vbias",
+            "port_ref": "vbias",
+            "position": 1
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 4
+          },
+          {
+            "net": "headroom_metric",
+            "port_ref": "headroom_metric",
+            "position": 5
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 6
+          }
+        ],
+        "module_ref": "source_follower_buffer_macro",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "vbias",
+      "enable",
+      "rst",
+      "vout",
+      "headroom_metric",
+      "valid"
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module fixed_frequency_oscillator_source(enable, rst, osc_out, period_metric, valid);
+    inout enable, rst, osc_out, period_metric, valid;
+    electrical enable, rst, osc_out, period_metric, valid;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real period = 20e-9; parameter real vth = 0.45; parameter real tr = 200p from (0:inf); parameter real tick = 500p from (0:inf);
+    real phase, osc_v, metric_v, valid_v; integer cycles;
+    analog function real min2; input a,b; real a,b; begin min2 = (a < b) ? a : b; end endfunction
+    analog begin
+        @(initial_step) begin phase = 0.0; osc_v = 0.0; metric_v = 0.0; valid_v = 0.0; cycles = 0; end
+        @(timer(0, tick)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin osc_v = 0.0; metric_v = 0.0; valid_v = 0.0; end
+            else begin
+                phase = phase + tick / (period / 2.0);
+                if (phase >= 1.0) begin phase = phase - 1.0; osc_v = (osc_v > vth) ? vss : vdd; cycles = cycles + 1; end
+                metric_v = min2(vdd, period / 20e-9 * 0.45);
+                valid_v = (cycles >= 1) ? vdd : vss;
+            end
+        end
+        V(osc_out) <+ transition(osc_v, 0, tr, tr);
+        V(period_metric) <+ transition(metric_v, 0, tr, tr);
+        V(valid) <+ transition(valid_v, 0, tr, tr);
+    end
+endmodule

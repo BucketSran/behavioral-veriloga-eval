@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/lna_gain_compression_macro.va"
+
+Vvin (vin 0) vsource type=pwl wave=[0 0.47 18n 0.47 18.2n 0.58 42n 0.58 42.2n 0.72 64n 0.72 64.2n 0.25 92n 0.25]
+Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 82n 0.9 82.2n 0 92n 0]
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]
+XDUT (vin enable rst vout gain_metric compression_flag) lna_gain_compression_macro
+
+
+tran tran stop=92n maxstep=200p
+save vin enable rst vout gain_metric compression_flag

@@ -1,0 +1,260 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "lna_gain_compression_macro",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "4.0",
+                "name": "small_gain",
+                "override_behavior": "overrides small_gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.18",
+                "name": "input_clip",
+                "override_behavior": "overrides input_clip",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "gain_metric",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "compression_flag",
+                "position": 5
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "lna_gain_compression_macro.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "387",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "rf_afe_behavioral_macromodels",
+    "difficulty": "D3",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "LNA Gain-compression Macro"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_DRIVE",
+      "observable_contract": "On reset or when disabled, drive `vout` to `vcm`, clear `gain_metric`, and clear `compression_flag`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "enable",
+        "rst",
+        "vout",
+        "gain_metric",
+        "compression_flag"
+      ]
+    },
+    {
+      "id": "P_WHEN_ENABLED_PROVIDE_HIGH_GAIN_FOR",
+      "observable_contract": "When enabled, provide high gain for small input deviations around `vcm`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "enable",
+        "rst",
+        "vout",
+        "gain_metric",
+        "compression_flag"
+      ]
+    },
+    {
+      "id": "P_REDUCE_EFFECTIVE_GAIN_MONOTONICALLY_WHEN_THE",
+      "observable_contract": "Reduce effective gain monotonically when the absolute input deviation exceeds `input_clip`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "enable",
+        "rst",
+        "vout",
+        "gain_metric",
+        "compression_flag"
+      ]
+    },
+    {
+      "id": "P_EXPOSE_ACTIVE_GAIN_ON_GAIN_METRIC",
+      "observable_contract": "Expose active gain on `gain_metric` and assert `compression_flag` during compressed operation.",
+      "required_signals": [
+        "time",
+        "vin",
+        "enable",
+        "rst",
+        "vout",
+        "gain_metric",
+        "compression_flag"
+      ]
+    },
+    {
+      "id": "P_CLAMP_VOUT_INSIDE_VSS_VDD",
+      "observable_contract": "Clamp `vout` inside `[vss, vdd]`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "enable",
+        "rst",
+        "vout",
+        "gain_metric",
+        "compression_flag"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "lna_gain_compression_macro.va"
+  ],
+  "task_id": "v4-387",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 3
+          },
+          {
+            "net": "gain_metric",
+            "port_ref": "gain_metric",
+            "position": 4
+          },
+          {
+            "net": "compression_flag",
+            "port_ref": "compression_flag",
+            "position": 5
+          }
+        ],
+        "module_ref": "lna_gain_compression_macro",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "enable",
+      "rst",
+      "vout",
+      "gain_metric",
+      "compression_flag"
+    ]
+  }
+}

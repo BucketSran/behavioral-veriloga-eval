@@ -1,0 +1,240 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "fixed_frequency_oscillator_source",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "20e-9",
+                "name": "period",
+                "override_behavior": "overrides period",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "500p from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "osc_out",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "period_metric",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "fixed_frequency_oscillator_source.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/fixed_frequency_oscillator_source.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "383",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Fixed-frequency Oscillator Source"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_DRIVE",
+      "observable_contract": "On reset or when disabled, drive `osc_out`, `period_metric`, and `valid` low.",
+      "required_signals": [
+        "time",
+        "enable",
+        "rst",
+        "osc_out",
+        "period_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_WHEN_ENABLED_GENERATE_A_PERIODIC_VOLTAGE",
+      "observable_contract": "When enabled, generate a periodic voltage-domain clock that toggles between `vss` and `vdd` with the configured period.",
+      "required_signals": [
+        "time",
+        "enable",
+        "rst",
+        "osc_out",
+        "period_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_PERIOD_METRIC_MUST_EXPOSE_A_STABLE",
+      "observable_contract": "`period_metric` must expose a stable voltage-coded representation of the configured period after the first complete cycle.",
+      "required_signals": [
+        "time",
+        "enable",
+        "rst",
+        "osc_out",
+        "period_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ASSERT_VALID_AFTER_THE_FIRST_COMPLETE",
+      "observable_contract": "Assert `valid` after the first complete oscillator cycle following enable.",
+      "required_signals": [
+        "time",
+        "enable",
+        "rst",
+        "osc_out",
+        "period_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_RESET_OR_DISABLE_MUST_RESTART_THE",
+      "observable_contract": "Reset or disable must restart the oscillator phase deterministically.",
+      "required_signals": [
+        "time",
+        "enable",
+        "rst",
+        "osc_out",
+        "period_metric",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "fixed_frequency_oscillator_source.va"
+  ],
+  "task_id": "v4-1383",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "osc_out",
+            "port_ref": "osc_out",
+            "position": 2
+          },
+          {
+            "net": "period_metric",
+            "port_ref": "period_metric",
+            "position": 3
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 4
+          }
+        ],
+        "module_ref": "fixed_frequency_oscillator_source",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "enable",
+      "rst",
+      "osc_out",
+      "period_metric",
+      "valid"
+    ]
+  }
+}

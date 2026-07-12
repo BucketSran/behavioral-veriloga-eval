@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-387",
+    "canonical_task_slug": "387-lna-gain-compression-macro",
+    "family_spec_sha256": "1c05e7f21942f5296b834b9558b81406e63b5ff37c41bea93aded4b8862b5a6b",
+    "mutation_catalog_sha256": "ae17d3ff3eb58ba65379af399cb0ec1a356a4de3319af6bd386278ad7370666a",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "387",
+  "negative_assignment": {
+    "bugfix_seed": "neg_005_gain_polarity_wrong",
+    "testbench_suite": [
+      "neg_002_gain_metric_wrong",
+      "neg_001_no_compression",
+      "neg_004_missing_clear",
+      "neg_005_gain_polarity_wrong",
+      "neg_003_flag_stuck_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "6856c3754b7af58763fad08a457925b5067856e5a793f41b20b6614abe628021",
+    "changed_artifacts": [
+      "lna_gain_compression_macro.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_005_gain_polarity_wrong",
+    "rationale": "Select fault class gain_polarity_wrong under trigger 'gain_polarity_wrong' because it exercises P_WHEN_ENABLED_PROVIDE_HIGH_GAIN_FOR as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 11,
+    "source_preferred_seed": "neg_002_gain_metric_wrong",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

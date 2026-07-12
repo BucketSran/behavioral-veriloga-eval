@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-386",
+    "canonical_task_slug": "386-pa-gain-compression-ampm-macro",
+    "family_spec_sha256": "b0a0d174e3a7fb97b53f0407fd4d99e5ee4e9e2ff02b0c9aa5622840e2e8b073",
+    "mutation_catalog_sha256": "2fc091775337aa67385e7be17ad21556e08678bda30184e20bac8157f663c08a",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "386",
+  "negative_assignment": {
+    "bugfix_seed": "neg_006_output_not_clamped",
+    "testbench_suite": [
+      "neg_002_gain_metric_wrong",
+      "neg_001_no_compression",
+      "neg_003_phase_metric_stuck",
+      "neg_004_flag_stuck_low",
+      "neg_006_output_not_clamped"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "1cc9a6f3eb44e65fac31424e637f5cff2b90df8e26e0764e4e5bac235f6cb34b",
+    "changed_artifacts": [
+      "pa_gain_compression_ampm_macro.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_006_output_not_clamped",
+    "rationale": "Select fault class output_clamp_removed under trigger 'input and gain demand an output beyond a supply rail' because it exercises P_CLAMP_VOUT_INSIDE_VSS_VDD as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 17,
+    "source_preferred_seed": "neg_002_gain_metric_wrong",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

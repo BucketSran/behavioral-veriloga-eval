@@ -1,0 +1,15 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cm_sensor(vop_in, von_in, cm_error_raw);
+    input vop_in, von_in;
+    output cm_error_raw;
+    electrical vop_in, von_in, cm_error_raw;
+
+    parameter real vcm = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    analog begin
+        V(cm_error_raw) <+ (0.5 * (V(vop_in) + V(von_in)) - vcm);
+    end
+endmodule

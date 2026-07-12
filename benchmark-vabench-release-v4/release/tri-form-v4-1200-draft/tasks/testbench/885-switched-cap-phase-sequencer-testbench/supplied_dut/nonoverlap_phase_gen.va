@@ -1,0 +1,53 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module nonoverlap_phase_gen(clk, rst, enable, phi1, phi2, phi3, phi4, phase_code_1, phase_code_0);
+    input clk, rst, enable;
+    output phi1, phi2, phi3, phi4, phase_code_1, phase_code_0;
+    electrical clk, rst, enable, phi1, phi2, phi3, phi4, phase_code_1, phase_code_0;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    integer phase;
+    real phi1_state;
+    real phi2_state;
+    real phi3_state;
+    real phi4_state;
+    real code0_state;
+    real code1_state;
+
+    analog begin
+        @(initial_step) begin
+            phase = 0;
+            phi1_state = vss;
+            phi2_state = vss;
+            phi3_state = vss;
+            phi4_state = vss;
+            code0_state = vss;
+            code1_state = vss;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if ((V(rst) > vth) || (V(enable) <= vth))
+                phase = 0;
+            else
+                phase = (phase + 1) % 4;
+            phi1_state = ((V(rst) <= vth) && (V(enable) > vth) && (phase == 0)) ? vdd : vss;
+            phi2_state = ((V(rst) <= vth) && (V(enable) > vth) && (phase == 1)) ? vdd : vss;
+            phi3_state = ((V(rst) <= vth) && (V(enable) > vth) && (phase == 2)) ? vdd : vss;
+            phi4_state = ((V(rst) <= vth) && (V(enable) > vth) && (phase == 3)) ? vdd : vss;
+            code0_state = ((V(rst) <= vth) && (V(enable) > vth) && ((phase == 1) || (phase == 3))) ? vdd : vss;
+            code1_state = ((V(rst) <= vth) && (V(enable) > vth) && (phase >= 2)) ? vdd : vss;
+        end
+
+        V(phi1) <+ transition(phi1_state, 0, tr, tr);
+        V(phi2) <+ transition(phi2_state, 0, tr, tr);
+        V(phi3) <+ transition(phi3_state, 0, tr, tr);
+        V(phi4) <+ transition(phi4_state, 0, tr, tr);
+        V(phase_code_0) <+ transition(code0_state, 0, tr, tr);
+        V(phase_code_1) <+ transition(code1_state, 0, tr, tr);
+    end
+endmodule
