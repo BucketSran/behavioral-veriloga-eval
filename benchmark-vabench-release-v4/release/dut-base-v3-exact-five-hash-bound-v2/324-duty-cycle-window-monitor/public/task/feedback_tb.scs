@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/duty_cycle_window_monitor.va"
+
+Vclk_in (clk_in 0) vsource type=pwl wave=[0 0 9n 0 10n 0.9 14n 0.9 14.2n 0 20n 0 20.2n 0.9 27n 0.9 27.2n 0 30n 0 30.2n 0.9 35n 0.9 35.2n 0 40n 0 40.2n 0.9 42.5n 0.9 42.7n 0 50n 0 50.2n 0.9 56n 0.9 56.2n 0 60n 0 60.2n 0.9 64n 0.9 64.2n 0 70n 0 70.2n 0.9 73n 0.9 73.2n 0 92n 0]
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]
+Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 80n 0.9 80.2n 0 92n 0]
+Vduty_min (duty_min 0) vsource dc=0.315
+Vduty_max (duty_max 0) vsource dc=0.585
+XDUT (clk_in rst enable duty_min duty_max duty_metric in_window valid) duty_cycle_window_monitor
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=92n maxstep=200p
+save clk_in rst enable duty_min duty_max duty_metric in_window valid

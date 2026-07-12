@@ -1,0 +1,38 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module fractional_delay_dtc_macro(clk_in, rst, enable, frac_3, frac_2, frac_1, frac_0, clk_out, phase_metric, valid);
+    inout clk_in, rst, enable, frac_3, frac_2, frac_1, frac_0, clk_out, phase_metric, valid;
+    electrical clk_in, rst, enable, frac_3, frac_2, frac_1, frac_0, clk_out, phase_metric, valid;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vcm = 0.45; parameter real vth = 0.45; parameter real tr = 200p from (0:inf);
+    parameter real tick = 200p from (0:inf);
+    integer code, mapped_code, delay_count, pulse_count; real prev_clk, out_v, metric_v, valid_v;
+    analog begin
+        @(initial_step) begin prev_clk = 0.0; delay_count = 0; pulse_count = 0; out_v = 0.0; metric_v = 0.0; valid_v = 0.0; end
+        @(timer(0, tick)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                delay_count = 0; pulse_count = 0; out_v = 0.0; metric_v = 0.0; valid_v = 0.0;
+            end else begin
+                if (V(clk_in) > vth && prev_clk <= vth) begin
+                    code = 0;
+                    if (V(frac_0) > vth) code = code + 1;
+                    if (V(frac_1) > vth) code = code + 2;
+                    if (V(frac_2) > vth) code = code + 4;
+                    if (V(frac_3) > vth) code = code + 8;
+                    mapped_code = code;
+                    delay_count = mapped_code + 1;
+                    metric_v = mapped_code * (vdd / 15.0);
+                end
+                if (delay_count > 0) begin
+                    delay_count = delay_count - 1;
+                    if (delay_count == 0) begin pulse_count = 5; valid_v = vdd; end
+                end
+                if (pulse_count > 0) begin out_v = vdd; pulse_count = pulse_count - 1; end else begin out_v = vss; end
+            end
+            prev_clk = V(clk_in);
+        end
+        V(clk_out) <+ transition(out_v, 0, tr, tr);
+        V(phase_metric) <+ transition(metric_v, 0, tr, tr);
+        V(valid) <+ transition(valid_v, 0, tr, tr);
+    end
+endmodule

@@ -1,0 +1,76 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module edge_margin_sampler(data_in, sample_clk, rst, enable, early, late, margin, valid);
+    input data_in, sample_clk, rst, enable;
+    output early, late, margin, valid;
+    electrical data_in, sample_clk, rst, enable, early, late, margin, valid;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real edge_window = 600p from (0:inf);
+
+    real last_data_edge;
+    real last_sample_edge;
+    real early_v, late_v, margin_v, valid_v;
+
+    analog begin
+        @(initial_step) begin
+            last_data_edge = -1.0;
+            last_sample_edge = -1.0;
+            early_v = vss;
+            late_v = vss;
+            margin_v = vss;
+            valid_v = vss;
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            early_v = vss;
+            late_v = vss;
+            margin_v = vss;
+            valid_v = vss;
+            last_data_edge = -1.0;
+            last_sample_edge = -1.0;
+        end
+
+        @(cross(V(data_in) - vth, +1) or cross(V(data_in) - vth, -1)) begin
+            if (V(rst) <= vth && V(enable) > vth) begin
+                last_data_edge = $abstime;
+                if (last_sample_edge >= 0.0 && ($abstime - last_sample_edge) <= edge_window) begin
+                    early_v = vss;
+                    late_v = vdd;
+                    margin_v = vdd * (($abstime - last_sample_edge) / edge_window);
+                    valid_v = vdd;
+                end
+            end
+        end
+
+        @(cross(V(sample_clk) - vth, +1)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                early_v = vss;
+                late_v = vss;
+                margin_v = vss;
+                valid_v = vss;
+                last_sample_edge = -1.0;
+            end else begin
+                last_sample_edge = $abstime;
+                late_v = vss;
+                valid_v = vdd;
+                if (last_data_edge >= 0.0 && ($abstime - last_data_edge) <= edge_window) begin
+                    early_v = vdd;
+                    margin_v = vdd * (($abstime - last_data_edge) / edge_window);
+                end else begin
+                    early_v = vss;
+                    margin_v = vdd;
+                end
+            end
+        end
+
+        V(early) <+ transition(early_v, 0, tr, tr);
+        V(late) <+ transition(late_v, 0, tr, tr);
+        V(margin) <+ transition(margin_v, 0, tr, tr);
+        V(valid) <+ transition(valid_v, 0, tr, tr);
+    end
+endmodule

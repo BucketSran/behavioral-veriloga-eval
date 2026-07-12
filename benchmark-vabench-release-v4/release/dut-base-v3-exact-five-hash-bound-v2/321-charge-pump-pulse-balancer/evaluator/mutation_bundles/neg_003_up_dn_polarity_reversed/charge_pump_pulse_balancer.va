@@ -1,0 +1,54 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module charge_pump_pulse_balancer(up, dn, clk, rst, enable, vctrl, imbalance_metric, balanced);
+    input up, dn, clk, rst, enable;
+    output vctrl, imbalance_metric, balanced;
+    electrical up, dn, clk, rst, enable, vctrl, imbalance_metric, balanced;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real pump_step = 20e-3 from (0:inf);
+    parameter real balance_tol = 30e-3 from (0:inf);
+
+    real vctrl_q, imbalance_q, metric_q;
+    integer balanced_q;
+
+    analog begin
+        @(initial_step) begin
+            vctrl_q = vcm;
+            imbalance_q = 0.0;
+            metric_q = 0.0;
+            balanced_q = 0;
+        end
+
+        @(cross(V(clk) - vth, +1) or cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                vctrl_q = vcm;
+                imbalance_q = 0.0;
+                metric_q = 0.0;
+                balanced_q = 0;
+            end else begin
+                if (V(up) > vth && V(dn) <= vth) begin
+                    vctrl_q = vctrl_q - pump_step;
+                    imbalance_q = imbalance_q + pump_step;
+                end else if (V(dn) > vth && V(up) <= vth) begin
+                    vctrl_q = vctrl_q + pump_step;
+                    imbalance_q = imbalance_q - pump_step;
+                end
+                if (vctrl_q > vdd) vctrl_q = vdd;
+                if (vctrl_q < vss) vctrl_q = vss;
+                metric_q = (imbalance_q < 0.0) ? -imbalance_q : imbalance_q;
+                balanced_q = (metric_q <= balance_tol);
+            end
+        end
+
+        V(vctrl) <+ transition(vctrl_q, 0.0, tr, tr);
+        V(imbalance_metric) <+ transition(metric_q, 0.0, tr, tr);
+        V(balanced) <+ transition(balanced_q ? vdd : vss, 0.0, tr, tr);
+    end
+endmodule
+

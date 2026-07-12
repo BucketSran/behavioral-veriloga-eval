@@ -1,0 +1,132 @@
+{
+  "family_id": "327",
+  "gold_bundle_sha256": "a17c07f989103768f583ebe5b94449687cf3fd542ba5cf1db4090c974b58c013",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "eye_metric_filter.va": "e28249b7bb21f9072c32a8e30bbc0f0154e7ccfb2ad5870a084dfef380c4e4f1"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ON_RESET_OR_WHEN_DISABLED_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_eye_metric_not_cleared/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "eye_metric_filter.va"
+      ],
+      "fault_class": "eye_metric_clear_forced_high",
+      "id": "neg_001_eye_metric_not_cleared",
+      "trigger_condition": "reset is asserted or enable is low",
+      "violated_property_ids": [
+        "P_ON_RESET_OR_WHEN_DISABLED_CLEAR"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "cdr_eye_monitor_top.va": "6d7e83cc0b1f0ca389b929f47317401fecf0f3dfdb1c99923000d0e821c05a01"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ON_EACH_SAMPLING_CLOCK_EDGE_COMPARE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_sample_valid_missing/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "cdr_eye_monitor_top.va"
+      ],
+      "fault_class": "sample_valid_suppressed",
+      "id": "neg_002_sample_valid_missing",
+      "trigger_condition": "an enabled rising sample_clk edge captures a sample",
+      "violated_property_ids": [
+        "P_ON_EACH_SAMPLING_CLOCK_EDGE_COMPARE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "cdr_eye_monitor_top.va": "5177ef8d0276c9a2b37a4d1ebb61033b960ecc12adfa4f015a947df9bed782d1"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RAISE_EARLY_OR_LATE_ACCORDING_TO"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_early_late_flags_swapped/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "cdr_eye_monitor_top.va"
+      ],
+      "fault_class": "early_late_polarity_swapped",
+      "id": "neg_003_early_late_flags_swapped",
+      "trigger_condition": "a data transition occurs within the public edge window around a sample edge",
+      "violated_property_ids": [
+        "P_RAISE_EARLY_OR_LATE_ACCORDING_TO"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "cdr_eye_monitor_top.va": "9c5b68004c948c029a9531cb9f2577c4673c898601933fd97bff36f3a3cabb42"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_EYE_METRIC_FROM_RECENT_TRANSITION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_eye_metric_not_updated/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "cdr_eye_monitor_top.va"
+      ],
+      "fault_class": "public_eye_metric_update_suppressed",
+      "id": "neg_004_eye_metric_not_updated",
+      "trigger_condition": "an enabled valid sample updates the internal eye metric",
+      "violated_property_ids": [
+        "P_DRIVE_EYE_METRIC_FROM_RECENT_TRANSITION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "eye_metric_filter.va": "1b01094f6bcb8ed38f7bbfba14dd52c9fd77f679686df21e7f2e83e511a5b4cf"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ASSERT_LOCK_HINT_AFTER_FOUR_CONSECUTIVE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_lock_after_one_good_sample/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "eye_metric_filter.va"
+      ],
+      "fault_class": "lock_qualification_too_short",
+      "id": "neg_005_lock_after_one_good_sample",
+      "trigger_condition": "the first valid sample has margin above eye_min",
+      "violated_property_ids": [
+        "P_ASSERT_LOCK_HINT_AFTER_FOUR_CONSECUTIVE"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

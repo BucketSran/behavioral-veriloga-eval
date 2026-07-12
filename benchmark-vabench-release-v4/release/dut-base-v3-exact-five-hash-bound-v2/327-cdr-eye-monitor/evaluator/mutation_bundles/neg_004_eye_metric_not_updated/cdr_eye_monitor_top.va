@@ -1,0 +1,34 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cdr_eye_monitor_top(data_in, sample_clk, rst, enable, early, late, eye_metric, lock_hint, valid);
+    input data_in, sample_clk, rst, enable;
+    output early, late, eye_metric, lock_hint, valid;
+    electrical data_in, sample_clk, rst, enable, early, late, eye_metric, lock_hint, valid;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real eye_min = 0.55;
+    parameter real edge_window = 600p from (0:inf);
+
+    electrical margin_internal, eye_metric_internal;
+
+    edge_margin_sampler #(
+        .vdd(vdd), .vss(vss), .vth(vth), .tr(tr), .edge_window(edge_window)
+    ) sampler (
+        data_in, sample_clk, rst, enable, early, late, margin_internal, valid
+    );
+
+    eye_metric_filter #(
+        .vdd(vdd), .vss(vss), .vth(vth), .tr(tr), .eye_min(eye_min)
+    ) filter (
+        sample_clk, rst, enable, margin_internal, valid, eye_metric_internal, lock_hint
+    );
+
+    analog begin
+        V(eye_metric) <+ transition(vss, 0, tr, tr);
+    end
+endmodule

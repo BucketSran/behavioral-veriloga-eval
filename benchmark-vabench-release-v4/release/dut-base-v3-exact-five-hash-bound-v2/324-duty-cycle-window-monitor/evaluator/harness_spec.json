@@ -1,0 +1,84 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "duty_cycle_window_monitor.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=92n maxstep=200p"
+    ],
+    "body_lines": [
+      "Vclk_in (clk_in 0) vsource type=pwl wave=[0 0 9n 0 10n 0.9 14n 0.9 14.2n 0 20n 0 20.2n 0.9 27n 0.9 27.2n 0 30n 0 30.2n 0.9 35n 0.9 35.2n 0 40n 0 40.2n 0.9 42.5n 0.9 42.7n 0 50n 0 50.2n 0.9 56n 0.9 56.2n 0 60n 0 60.2n 0.9 64n 0.9 64.2n 0 70n 0 70.2n 0.9 73n 0.9 73.2n 0 92n 0]",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]",
+      "Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 80n 0.9 80.2n 0 92n 0]",
+      "Vduty_min (duty_min 0) vsource dc=0.315",
+      "Vduty_max (duty_max 0) vsource dc=0.585",
+      "XDUT (clk_in rst enable duty_min duty_max duty_metric in_window valid) duty_cycle_window_monitor",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk_in",
+      "rst",
+      "enable",
+      "duty_min",
+      "duty_max",
+      "duty_metric",
+      "in_window",
+      "valid"
+    ]
+  },
+  "family_id": "324",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "902fbf21088c133134b54814d5b52aebb7695414023a38477734929c24ded34e",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "902fbf21088c133134b54814d5b52aebb7695414023a38477734929c24ded34e",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+    "P_MEASURE_HIGH_AND_LOW_INTERVALS_OVER",
+    "P_DRIVE_DUTY_METRIC_AS_THE_MEASURED",
+    "P_ASSERT_IN_WINDOW_ONLY_WHEN_THE",
+    "P_ASSERT_VALID_AFTER_A_COMPLETE_HIGH"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "18ebd09b0bfb542b4e125ebcc82fc39ea3d96fd79fe6082acd3a7f0dddd6f950",
+    "family_spec_sha256": "366664ab3a80ec6fc01424acfa5350255ee20255500040180e25e365c8cfc866"
+  },
+  "task_id": "v4-324"
+}

@@ -1,0 +1,132 @@
+{
+  "family_id": "321",
+  "gold_bundle_sha256": "86380431e9fcfd769ecc9ca28b22c7c12954b948bc3db1a6c218309a688fa86b",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "charge_pump_pulse_balancer.va": "8d43caae17f39570b5fe0c2d1063376a5287761916d5ac5bfb0fdce90daf2fc2"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ON_RESET_OR_WHEN_DISABLED_DRIVE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_wrong_clear_level/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "charge_pump_pulse_balancer.va"
+      ],
+      "fault_class": "wrong_clear_level",
+      "id": "neg_001_wrong_clear_level",
+      "trigger_condition": "Reset or disable clears vctrl to vss instead of vcm.",
+      "violated_property_ids": [
+        "P_ON_RESET_OR_WHEN_DISABLED_DRIVE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "charge_pump_pulse_balancer.va": "3db971b55de97cedd2572db33f2984bcad65574995ec4eb0dbfdaefc5402f230"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ON_EACH_RISING_CLK_EDGE_OBSERVE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_falling_edge_update/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "charge_pump_pulse_balancer.va"
+      ],
+      "fault_class": "wrong_clock_edge",
+      "id": "neg_002_falling_edge_update",
+      "trigger_condition": "Updates state on falling clock edges instead of rising edges.",
+      "violated_property_ids": [
+        "P_ON_EACH_RISING_CLK_EDGE_OBSERVE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "charge_pump_pulse_balancer.va": "4a571c8de1e3560425dca6f6894ff2c5fa8558eb36581cc9f19e06dd1cabd484"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INCREASE_VCTRL_FOR_UP_ONLY_DECREASE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_up_dn_polarity_reversed/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "charge_pump_pulse_balancer.va"
+      ],
+      "fault_class": "reversed_up_dn_polarity",
+      "id": "neg_003_up_dn_polarity_reversed",
+      "trigger_condition": "UP-only decreases vctrl and DN-only increases it.",
+      "violated_property_ids": [
+        "P_INCREASE_VCTRL_FOR_UP_ONLY_DECREASE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "charge_pump_pulse_balancer.va": "39a9183b20c2d5ffd21789613059551c754a316d1ccc84c93c2481aad3a2f15d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_IMBALANCE_METRIC_FROM_THE_ACCUMULATED"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_imbalance_metric_half_scale/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "charge_pump_pulse_balancer.va"
+      ],
+      "fault_class": "wrong_metric_scale",
+      "id": "neg_004_imbalance_metric_half_scale",
+      "trigger_condition": "Reports half of the accumulated imbalance magnitude.",
+      "violated_property_ids": [
+        "P_DRIVE_IMBALANCE_METRIC_FROM_THE_ACCUMULATED"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "charge_pump_pulse_balancer.va": "5fd796a9bacfa91eaf2194941db3bc95658b7b718998c488661660eb101ee0b3"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ASSERT_BALANCED_ONLY_WHEN_THE_RECENT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_balance_threshold_too_loose/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "charge_pump_pulse_balancer.va"
+      ],
+      "fault_class": "premature_balance_qualification",
+      "id": "neg_005_balance_threshold_too_loose",
+      "trigger_condition": "Uses an overly loose balance threshold.",
+      "violated_property_ids": [
+        "P_ASSERT_BALANCED_ONLY_WHEN_THE_RECENT"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

@@ -1,0 +1,63 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module tap_update_controller(err_in, clk, rst, enable, tap_pre, tap_post, done);
+    inout err_in, clk, rst, enable, tap_pre, tap_post, done;
+    electrical err_in, clk, rst, enable, tap_pre, tap_post, done;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter integer tap_limit = 3;
+
+    integer pre_code;
+    integer post_code;
+    integer update_count;
+
+    analog function real clamp_rail;
+        input x;
+        real x;
+        begin
+            if (x < vss) clamp_rail = vss;
+            else if (x > vdd) clamp_rail = vdd;
+            else clamp_rail = x;
+        end
+    endfunction
+
+    analog begin
+        @(initial_step) begin
+            pre_code = 0;
+            post_code = 0;
+            update_count = 0;
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            pre_code = 0;
+            post_code = 0;
+            update_count = 0;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                pre_code = 0;
+                post_code = 0;
+                update_count = 0;
+            end else begin
+                if (V(err_in) >= vcm) begin
+                    if (pre_code < tap_limit) pre_code = pre_code + 1;
+                    if (post_code > -tap_limit) post_code = post_code - 1;
+                end else begin
+                    if (pre_code > -tap_limit) pre_code = pre_code - 1;
+                    if (post_code < tap_limit) post_code = post_code + 1;
+                end
+                if (update_count < 6) update_count = update_count + 1;
+            end
+        end
+
+        V(tap_pre) <+ transition((V(rst) > vth || V(enable) <= vth) ? clamp_rail(vcm + 0.24) : clamp_rail(vcm + (pre_code * 0.08)), 0, tr, tr);
+        V(tap_post) <+ transition((V(rst) > vth || V(enable) <= vth) ? vcm : clamp_rail(vcm + (post_code * 0.08)), 0, tr, tr);
+        V(done) <+ transition((V(rst) > vth || V(enable) <= vth) ? vss : ((update_count >= 6) ? vdd : vss), 0, tr, tr);
+    end
+endmodule

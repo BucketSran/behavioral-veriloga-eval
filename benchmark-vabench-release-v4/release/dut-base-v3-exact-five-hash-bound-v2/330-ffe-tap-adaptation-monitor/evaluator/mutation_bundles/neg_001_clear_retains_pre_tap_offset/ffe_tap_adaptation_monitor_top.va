@@ -1,0 +1,42 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module ffe_tap_adaptation_monitor_top(err_in, clk, rst, enable, tap_pre, tap_post, main_out, adapt_metric, done);
+    inout err_in, clk, rst, enable, tap_pre, tap_post, main_out, adapt_metric, done;
+    electrical err_in, clk, rst, enable, tap_pre, tap_post, main_out, adapt_metric, done;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    tap_update_controller #(
+        .vdd(vdd),
+        .vss(vss),
+        .vcm(vcm),
+        .vth(vth),
+        .tr(tr)
+    ) tap_controller (
+        err_in,
+        clk,
+        rst,
+        enable,
+        tap_pre,
+        tap_post,
+        done
+    );
+
+    cursor_metric_core #(
+        .vdd(vdd),
+        .vss(vss),
+        .vcm(vcm),
+        .tr(tr)
+    ) metric_core (
+        err_in,
+        tap_pre,
+        tap_post,
+        main_out,
+        adapt_metric
+    );
+endmodule

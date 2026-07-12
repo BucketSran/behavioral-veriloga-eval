@@ -1,0 +1,59 @@
+{
+  "component_fingerprints": {
+    "assembly": {
+      "policy_sha256": "91f4e21b94263e796c846aedef282c79d4abeb7ccc415a0e6f1311f8816b33a4",
+      "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+    },
+    "backend": {
+      "ahdl_like_sha256": "91ce239e5f278a6d5dfcde85ca2d820c5133d8f8a3de26dc6477164e703342f3",
+      "evas_sha256": "2d71c227644956df64209b49d0da6ef55bc6934891020eb26d762e8cb8cc6df2",
+      "spectre_sha256": "ac4c1cf785d5eab74058944d52bf40869e83c94e19202ab72c8e8a250c4dc51b"
+    },
+    "oracle": {
+      "checker_binding_sha256": "4722ac6a66992194fef2e84d1c2be8bd901f364a71a688873b4756b61ebf15f2",
+      "checker_implementation_sha256": "f0d30bdbae2c7e12aaa4b31d31d449f4e5d24219199e36e53b23a6b392cb9edb",
+      "checker_profile_sha256": "3d465742458860ab47b33a52fd6cbd368d47a72833d7db67fd365c5ac823fdb3",
+      "diagnostic_policy_sha256": "69b217a349cb0e8a3eab574e7e6d1af03f069fea668b15b37868ef3d2e7deea3",
+      "oracle_runner_sha256": "e70bd46cd3abdfd8ed9658cb13f64bc96e27d364d51ed0fdcd05f8139e63af2b",
+      "property_activation_policy_sha256": "77f19fba4ca34650d07835287ddf366c49ee3d36a7fcda47fa3cb67650a578ce"
+    },
+    "policy_id": "v4-dependency-scoped-evidence-v2",
+    "schema_version": "v4-evidence-components-v2",
+    "state": "carried_forward",
+    "task_inputs": {
+      "candidate_bundle_sha256": "ac701bedc4ccd740d32fb7c7c79c5ae3fb7bff2d14e1d7eba8f783cd8200a1ae",
+      "deck_sha256": "7251ddfdf35cfea816bce7969635b694eca23faaf25fd4a701ed7654550aa6ab",
+      "gold_bundle_sha256": "34b21ac22c015ba1f7a34ffea3fd5512a31d6fedbe812b90f211af4f8c843b5d",
+      "harness_spec_sha256": "b11e30de6d23c660f1b4fe15918518b9fdcbb2f28b68dfce2d3a7ea7439a40af",
+      "mutation_bundle_sha256": "1dc343c55386b0b5e85c65783fe49a80741a8ad7ade500ca2acd227b06b52b42",
+      "profile_sha256": "515b6149eb821b59f3d454478bc329de963588068a4d85350fe129fe43942c68",
+      "property_contract_sha256": "316f4e15c430f57b30b7d4758704b521808fb9b798e01ce2c72dd65605491848",
+      "public_support_bundle_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "trace_contract_sha256": "7eb09068c2697866679e89c0ee7b7663210c77edfae8959bf621b918f639078c"
+    }
+  },
+  "diagnostics": {
+    "expected": "trigger=a rising stop edge completes an armed measurement after reference edges have established the period; violated_properties=P_LATCH_THE_COARSE_COUNT_INTO_COARSE",
+    "observed": "EVAS: v4_325 checked=3 ref_edges_last=3 coarse=[2, 3] fine_max=0.752 valid_edges=3 reset_clear=True disabled_clear=True latch_errors=0 fine_errors=3 valid_errors=0 clear_errors=0; P_ON_RESET_OR_WHEN_DISABLED_CLEAR mismatch_count=0; P_A_RISING_START_EDGE_ARMS_A mismatch_count=0; P_COUNT_RISING_REF_CLK_EDGES_UNTIL mismatch_count=0; P_LATCH_THE_COARSE_COUNT_INTO_COARSE mismatch_count=3; P_ASSERT_VALID_ONLY_AFTER_THE_STOP mismatch_count=0; Spectre: v4_325 checked=3 ref_edges_last=3 coarse=[2, 3] fine_max=0.752 valid_edges=3 reset_clear=True disabled_clear=True latch_errors=0 fine_errors=3 valid_errors=0 clear_errors=0; P_ON_RESET_OR_WHEN_DISABLED_CLEAR mismatch_count=0; P_A_RISING_START_EDGE_ARMS_A mismatch_count=0; P_COUNT_RISING_REF_CLK_EDGES_UNTIL mismatch_count=0; P_LATCH_THE_COARSE_COUNT_INTO_COARSE mismatch_count=3; P_ASSERT_VALID_ONLY_AFTER_THE_STOP mismatch_count=0",
+    "violated_property_ids": [
+      "P_LATCH_THE_COARSE_COUNT_INTO_COARSE"
+    ]
+  },
+  "evaluators": {
+    "ahdl_like": "pass",
+    "evas": "compile_pass_behavior_fail",
+    "spectre": "compile_pass_behavior_fail"
+  },
+  "family_id": "325",
+  "inputs": {
+    "checker_profile_sha256": "6f913ade63d70eb7eabfb13ef1f981d8da2082f6989a57fffcf1d2af1d8c193e",
+    "harness_spec_sha256": "b11e30de6d23c660f1b4fe15918518b9fdcbb2f28b68dfce2d3a7ea7439a40af",
+    "mutation_bundle_sha256": "1dc343c55386b0b5e85c65783fe49a80741a8ad7ade500ca2acd227b06b52b42",
+    "profile_sha256": "515b6149eb821b59f3d454478bc329de963588068a4d85350fe129fe43942c68"
+  },
+  "mutation_id": "neg_004_fine_residual_inverted",
+  "outcome": "killed_behaviorally",
+  "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33",
+  "schema_version": "v4-negative-certification-v2",
+  "toolchain_lock_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+}

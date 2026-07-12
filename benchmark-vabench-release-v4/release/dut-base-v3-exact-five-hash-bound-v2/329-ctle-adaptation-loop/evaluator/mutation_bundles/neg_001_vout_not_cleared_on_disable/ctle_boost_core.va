@@ -1,0 +1,35 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module ctle_boost_core(vin, boost_2, boost_1, boost_0, vout);
+    inout vin, boost_2, boost_1, boost_0, vout;
+    electrical vin, boost_2, boost_1, boost_0, vout;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real boost_step = 0.12 from [0:inf);
+
+    integer code;
+    real gain;
+    real out_v;
+
+    analog function real clamp_rail;
+        input x;
+        real x;
+        begin
+            if (x < vss) clamp_rail = vss;
+            else if (x > vdd) clamp_rail = vdd;
+            else clamp_rail = x;
+        end
+    endfunction
+
+    analog begin
+        code = ((V(boost_2) > vth) ? 4 : 0) + ((V(boost_1) > vth) ? 2 : 0) + ((V(boost_0) > vth) ? 1 : 0);
+        gain = 1.0 + boost_step * code;
+        out_v = clamp_rail(vcm + gain * (V(vin) - vcm));
+        V(vout) <+ transition(out_v, 0, tr, tr);
+    end
+endmodule

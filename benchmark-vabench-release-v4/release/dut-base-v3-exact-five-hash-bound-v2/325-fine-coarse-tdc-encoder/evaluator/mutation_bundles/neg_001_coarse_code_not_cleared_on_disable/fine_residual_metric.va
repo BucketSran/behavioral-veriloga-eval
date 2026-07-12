@@ -1,0 +1,63 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module fine_residual_metric(start, stop, ref_clk, rst, enable, fine_metric);
+    input start, stop, ref_clk, rst, enable;
+    output fine_metric;
+    electrical start, stop, ref_clk, rst, enable, fine_metric;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    integer armed_q;
+    real previous_ref_time;
+    real last_ref_time;
+    real ref_period_q;
+    real fine_q;
+    real fraction;
+
+    analog begin
+        @(initial_step) begin
+            armed_q = 0;
+            previous_ref_time = 0.0;
+            last_ref_time = 0.0;
+            ref_period_q = 1.0;
+            fine_q = vss;
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            armed_q = 0;
+            fine_q = vss;
+        end
+
+        @(cross(V(start) - vth, +1)) begin
+            if (V(rst) <= vth && V(enable) > vth) begin
+                armed_q = 1;
+                fine_q = vss;
+            end
+        end
+
+        @(cross(V(ref_clk) - vth, +1)) begin
+            if (armed_q) begin
+                previous_ref_time = last_ref_time;
+                last_ref_time = $abstime;
+                if (previous_ref_time > 0.0)
+                    ref_period_q = last_ref_time - previous_ref_time;
+            end
+        end
+
+        @(cross(V(stop) - vth, +1)) begin
+            if (armed_q && V(rst) <= vth && V(enable) > vth) begin
+                fraction = ($abstime - last_ref_time) / ref_period_q;
+                if (fraction < 0.0) fraction = 0.0;
+                if (fraction > 1.0) fraction = 1.0;
+                fine_q = vss + (vdd - vss) * fraction;
+                armed_q = 0;
+            end
+        end
+
+        V(fine_metric) <+ transition(fine_q, 0.0, tr, tr);
+    end
+endmodule

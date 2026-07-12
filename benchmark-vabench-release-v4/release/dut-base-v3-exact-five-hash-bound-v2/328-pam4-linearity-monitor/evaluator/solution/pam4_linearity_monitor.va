@@ -1,0 +1,30 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pam4_linearity_monitor(symbol_1, symbol_0, clk, rst, enable, level_out, linearity_metric, valid);
+    inout symbol_1, symbol_0, clk, rst, enable, level_out, linearity_metric, valid;
+    electrical symbol_1, symbol_0, clk, rst, enable, level_out, linearity_metric, valid;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vth = 0.45; parameter real tr = 200p from (0:inf);
+    parameter real tick = 250p from (0:inf);
+    integer code, mapped_code; real prev_clk, level_v, metric_v, valid_v;
+    analog begin
+        @(initial_step) begin prev_clk = 0.0; level_v = 0.0; metric_v = 0.0; valid_v = 0.0; end
+        @(timer(0, tick)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                level_v = 0.0; metric_v = 0.0; valid_v = 0.0;
+            end else if (V(clk) > vth && prev_clk <= vth) begin
+                code = 0;
+                if (V(symbol_0) > vth) code = code + 1;
+                if (V(symbol_1) > vth) code = code + 2;
+                mapped_code = code;
+                level_v = mapped_code * (vdd / 3.0);
+                metric_v = vdd;
+                valid_v = vdd;
+            end
+            prev_clk = V(clk);
+        end
+        V(level_out) <+ transition(level_v, 0, tr, tr);
+        V(linearity_metric) <+ transition(metric_v, 0, tr, tr);
+        V(valid) <+ transition(valid_v, 0, tr, tr);
+    end
+endmodule

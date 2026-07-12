@@ -1,0 +1,132 @@
+{
+  "family_id": "325",
+  "gold_bundle_sha256": "34b21ac22c015ba1f7a34ffea3fd5512a31d6fedbe812b90f211af4f8c843b5d",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "coarse_counter.va": "3aef00925f542cb5007ddd0fd687dd2442cb072419189f4456153cb3fb4c93a8"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ON_RESET_OR_WHEN_DISABLED_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_coarse_code_not_cleared_on_disable/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "coarse_counter.va"
+      ],
+      "fault_class": "coarse_code_clear_omitted_on_disable",
+      "id": "neg_001_coarse_code_not_cleared_on_disable",
+      "trigger_condition": "enable falls after a completed measurement has latched a nonzero coarse code",
+      "violated_property_ids": [
+        "P_ON_RESET_OR_WHEN_DISABLED_CLEAR"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "coarse_counter.va": "20dd523c3e918a48175cfa27fb14d7676798cc81248fcc17233a216022e77f3d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_A_RISING_START_EDGE_ARMS_A"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_start_edge_does_not_arm/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "coarse_counter.va"
+      ],
+      "fault_class": "start_arm_missing",
+      "id": "neg_002_start_edge_does_not_arm",
+      "trigger_condition": "an enabled rising start edge begins a new measurement",
+      "violated_property_ids": [
+        "P_A_RISING_START_EDGE_ARMS_A"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "coarse_counter.va": "96f62e04405f4b74592444390b909fe33971cc23586900d8b1a2d086d277e74d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COUNT_RISING_REF_CLK_EDGES_UNTIL"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_ref_clk_edges_double_counted/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "coarse_counter.va"
+      ],
+      "fault_class": "reference_edge_double_count",
+      "id": "neg_003_ref_clk_edges_double_counted",
+      "trigger_condition": "an armed rising ref_clk edge occurs before the first rising stop edge",
+      "violated_property_ids": [
+        "P_COUNT_RISING_REF_CLK_EDGES_UNTIL"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "fine_residual_metric.va": "5040a047e9c2cb585c02df6c7624e266ae34bf4947ef63a234146d6bd2a346e9"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_LATCH_THE_COARSE_COUNT_INTO_COARSE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_fine_residual_inverted/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "fine_residual_metric.va"
+      ],
+      "fault_class": "fine_residual_polarity_inverted",
+      "id": "neg_004_fine_residual_inverted",
+      "trigger_condition": "a rising stop edge completes an armed measurement after reference edges have established the period",
+      "violated_property_ids": [
+        "P_LATCH_THE_COARSE_COUNT_INTO_COARSE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "coarse_counter.va": "2a9eda8e140b0d3f26e824b343e3fe234743f78ed8d03c52a6da1c46b109c370"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ASSERT_VALID_ONLY_AFTER_THE_STOP"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_valid_asserted_at_start/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "coarse_counter.va"
+      ],
+      "fault_class": "valid_asserted_before_stop",
+      "id": "neg_005_valid_asserted_at_start",
+      "trigger_condition": "a start edge arms a measurement before any stop edge",
+      "violated_property_ids": [
+        "P_ASSERT_VALID_ONLY_AFTER_THE_STOP"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

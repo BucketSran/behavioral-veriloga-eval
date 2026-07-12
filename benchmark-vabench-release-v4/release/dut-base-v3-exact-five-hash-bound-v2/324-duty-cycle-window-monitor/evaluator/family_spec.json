@@ -1,0 +1,277 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "duty_cycle_window_monitor",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk_in",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "duty_min",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "duty_max",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "duty_metric",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "in_window",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "duty_cycle_window_monitor.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "324",
+  "identity": {
+    "category": "measurement_systems",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Duty-cycle Window Monitor"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+      "observable_contract": "On reset or when disabled, clear duty metric, window flag, and `valid`.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst",
+        "enable",
+        "duty_min",
+        "duty_max",
+        "duty_metric",
+        "in_window",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_MEASURE_HIGH_AND_LOW_INTERVALS_OVER",
+      "observable_contract": "Measure high and low intervals over complete clock cycles using threshold crossings.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst",
+        "enable",
+        "duty_min",
+        "duty_max",
+        "duty_metric",
+        "in_window",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_DRIVE_DUTY_METRIC_AS_THE_MEASURED",
+      "observable_contract": "Drive `duty_metric` as the measured high-time fraction mapped to the public voltage range.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst",
+        "enable",
+        "duty_min",
+        "duty_max",
+        "duty_metric",
+        "in_window",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ASSERT_IN_WINDOW_ONLY_WHEN_THE",
+      "observable_contract": "Assert `in_window` only when the measured duty lies between `duty_min` and `duty_max`.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst",
+        "enable",
+        "duty_min",
+        "duty_max",
+        "duty_metric",
+        "in_window",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ASSERT_VALID_AFTER_A_COMPLETE_HIGH",
+      "observable_contract": "Assert `valid` after a complete high/low cycle has been observed.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst",
+        "enable",
+        "duty_min",
+        "duty_max",
+        "duty_metric",
+        "in_window",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1324",
+    "dut": "v4-324",
+    "testbench": "v4-824"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk_in",
+            "port_ref": "clk_in",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 2
+          },
+          {
+            "net": "duty_min",
+            "port_ref": "duty_min",
+            "position": 3
+          },
+          {
+            "net": "duty_max",
+            "port_ref": "duty_max",
+            "position": 4
+          },
+          {
+            "net": "duty_metric",
+            "port_ref": "duty_metric",
+            "position": 5
+          },
+          {
+            "net": "in_window",
+            "port_ref": "in_window",
+            "position": 6
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 7
+          }
+        ],
+        "module_ref": "duty_cycle_window_monitor",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk_in",
+      "rst",
+      "enable",
+      "duty_min",
+      "duty_max",
+      "duty_metric",
+      "in_window",
+      "valid"
+    ]
+  }
+}

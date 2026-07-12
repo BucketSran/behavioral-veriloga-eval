@@ -1,0 +1,43 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cursor_metric_core(err_in, tap_pre, tap_post, main_out, adapt_metric);
+    inout err_in, tap_pre, tap_post, main_out, adapt_metric;
+    electrical err_in, tap_pre, tap_post, main_out, adapt_metric;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    real pre_mag;
+    real post_mag;
+    real correction;
+
+    analog function real absval;
+        input x;
+        real x;
+        begin
+            absval = (x < 0.0) ? -x : x;
+        end
+    endfunction
+
+    analog function real clamp_rail;
+        input x;
+        real x;
+        begin
+            if (x < vss) clamp_rail = vss;
+            else if (x > vdd) clamp_rail = vdd;
+            else clamp_rail = x;
+        end
+    endfunction
+
+    analog begin
+        pre_mag = V(tap_pre) - vcm;
+        post_mag = V(tap_post) - vcm;
+        correction = -0.45 * pre_mag - 0.30 * post_mag + 0.20 * (V(err_in) - vcm);
+
+        V(main_out) <+ transition(clamp_rail(vcm + correction), 0, tr, tr);
+        V(adapt_metric) <+ transition(clamp_rail(absval(pre_mag) + absval(post_mag)), 0, tr, tr);
+    end
+endmodule

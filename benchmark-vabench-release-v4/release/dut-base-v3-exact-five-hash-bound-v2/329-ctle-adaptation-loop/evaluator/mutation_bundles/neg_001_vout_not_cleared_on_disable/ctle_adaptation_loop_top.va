@@ -1,0 +1,54 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module ctle_adaptation_loop_top(vin, edge_metric_in, clk, rst, enable, boost_2, boost_1, boost_0, vout, adapt_metric, locked);
+    inout vin, edge_metric_in, clk, rst, enable, boost_2, boost_1, boost_0, vout, adapt_metric, locked;
+    electrical vin, edge_metric_in, clk, rst, enable, boost_2, boost_1, boost_0, vout, adapt_metric, locked;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real edge_target = 0.55;
+    parameter real adapt_tol = 30e-3 from [0:inf);
+
+    electrical boosted_vout;
+
+    boost_adapt_controller #(
+        .vdd(vdd),
+        .vss(vss),
+        .vth(vth),
+        .tr(tr),
+        .edge_target(edge_target),
+        .adapt_tol(adapt_tol)
+    ) controller (
+        edge_metric_in,
+        clk,
+        rst,
+        enable,
+        boost_2,
+        boost_1,
+        boost_0,
+        adapt_metric,
+        locked
+    );
+
+    ctle_boost_core #(
+        .vdd(vdd),
+        .vss(vss),
+        .vcm(vcm),
+        .vth(vth),
+        .tr(tr)
+    ) boost_core (
+        vin,
+        boost_2,
+        boost_1,
+        boost_0,
+        boosted_vout
+    );
+
+    analog begin
+        V(vout) <+ (V(rst) > vth) ? vcm : ((V(enable) <= vth) ? vdd : V(boosted_vout));
+    end
+endmodule

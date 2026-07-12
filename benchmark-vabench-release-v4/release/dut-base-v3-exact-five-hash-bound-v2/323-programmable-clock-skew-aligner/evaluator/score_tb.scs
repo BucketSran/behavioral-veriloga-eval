@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/programmable_clock_skew_aligner.va"
+
+Vclk_in (clk_in 0) vsource type=pwl wave=[0 0 9n 0 10n 0.9 12n 0.9 12.2n 0 20n 0.9 22n 0.9 22.2n 0 30n 0.9 32n 0.9 32.2n 0 40n 0.9 42n 0.9 42.2n 0 50n 0.9 52n 0.9 52.2n 0 60n 0.9 62n 0.9 62.2n 0 70n 0.9 72n 0.9 72.2n 0 80n 0.9 82n 0.9 82.2n 0 92n 0]
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]
+Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 80n 0.9 80.2n 0 92n 0]
+Vskew_0 (skew_0 0) vsource type=pwl wave=[0 0 8n 0 8.2n 0 18n 0 18.2n 0 28n 0 28.2n 0.9 38n 0.9 38.2n 0.9 48n 0.9 48.2n 0.9 58n 0.9 58.2n 0.9 68n 0.9 68.2n 0 92n 0]
+Vskew_1 (skew_1 0) vsource type=pwl wave=[0 0 8n 0 8.2n 0 18n 0 18.2n 0.9 28n 0.9 28.2n 0 38n 0 38.2n 0 48n 0 48.2n 0.9 58n 0.9 58.2n 0.9 68n 0.9 68.2n 0 92n 0]
+Vskew_2 (skew_2 0) vsource type=pwl wave=[0 0 8n 0 8.2n 0 18n 0 18.2n 0 28n 0 28.2n 0.9 38n 0.9 38.2n 0 48n 0 48.2n 0.9 58n 0.9 58.2n 0 68n 0 68.2n 0.9 92n 0.9]
+XDUT (clk_in rst enable skew_2 skew_1 skew_0 clk_out delay_metric valid) programmable_clock_skew_aligner
+
+
+tran tran stop=92n maxstep=200p
+save clk_in rst enable skew_2 skew_1 skew_0 clk_out delay_metric valid

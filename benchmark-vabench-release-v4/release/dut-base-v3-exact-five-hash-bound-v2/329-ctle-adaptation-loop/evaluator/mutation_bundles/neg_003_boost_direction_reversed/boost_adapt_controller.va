@@ -1,0 +1,65 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module boost_adapt_controller(edge_metric_in, clk, rst, enable, boost_2, boost_1, boost_0, adapt_metric, locked);
+    inout edge_metric_in, clk, rst, enable, boost_2, boost_1, boost_0, adapt_metric, locked;
+    electrical edge_metric_in, clk, rst, enable, boost_2, boost_1, boost_0, adapt_metric, locked;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real edge_target = 0.55;
+    parameter real adapt_tol = 30e-3 from [0:inf);
+
+    integer boost_code;
+    integer lock_count;
+    real metric_error;
+
+    analog function real absval;
+        input x;
+        real x;
+        begin
+            absval = (x < 0.0) ? -x : x;
+        end
+    endfunction
+
+    analog begin
+        @(initial_step) begin
+            boost_code = 0;
+            lock_count = 0;
+            metric_error = edge_target;
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            boost_code = 0;
+            lock_count = 0;
+            metric_error = edge_target;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                boost_code = 0;
+                lock_count = 0;
+                metric_error = edge_target;
+            end else begin
+                metric_error = V(edge_metric_in) - edge_target;
+                if (metric_error < -adapt_tol) begin
+                    if (boost_code > 0) boost_code = boost_code - 1;
+                    lock_count = 0;
+                end else if (metric_error > adapt_tol) begin
+                    if (boost_code < 7) boost_code = boost_code + 1;
+                    lock_count = 0;
+                end else begin
+                    if (lock_count < 3) lock_count = lock_count + 1;
+                end
+            end
+        end
+
+        V(boost_2) <+ transition((V(rst) > vth || V(enable) <= vth) ? vss : (((boost_code >= 4) ? vdd : vss)), 0, tr, tr);
+        V(boost_1) <+ transition((V(rst) > vth || V(enable) <= vth) ? vss : ((((boost_code % 4) >= 2) ? vdd : vss)), 0, tr, tr);
+        V(boost_0) <+ transition((V(rst) > vth || V(enable) <= vth) ? vss : (((boost_code % 2) == 1) ? vdd : vss), 0, tr, tr);
+        V(adapt_metric) <+ transition((V(rst) > vth || V(enable) <= vth) ? vss : absval(metric_error), 0, tr, tr);
+        V(locked) <+ transition((V(rst) > vth || V(enable) <= vth) ? vss : ((lock_count >= 3) ? vdd : vss), 0, tr, tr);
+    end
+endmodule

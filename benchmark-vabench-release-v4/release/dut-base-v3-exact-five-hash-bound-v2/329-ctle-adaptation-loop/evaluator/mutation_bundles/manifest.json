@@ -1,0 +1,132 @@
+{
+  "family_id": "329",
+  "gold_bundle_sha256": "7ce3be8a430f1124e47213ea736751bdd7b9270c86ff7ceba6a0286db8426ebb",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "ctle_adaptation_loop_top.va": "c17ffdd4acaa80bcec5ce10495d3564f2b63286e78212732e1a199b7a1424b2e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ON_RESET_OR_WHEN_DISABLED_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_vout_not_cleared_on_disable/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "ctle_adaptation_loop_top.va"
+      ],
+      "fault_class": "output_disable_clear_forced_high",
+      "id": "neg_001_vout_not_cleared_on_disable",
+      "trigger_condition": "enable is low while reset is deasserted",
+      "violated_property_ids": [
+        "P_ON_RESET_OR_WHEN_DISABLED_CLEAR"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "boost_adapt_controller.va": "8ef0ec58b479ca81895d6f4cd294f0bed8fb3bc928274417a2e85cacd81183e4"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ON_EACH_ENABLED_RISING_CLK_EDGE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_edge_metric_sample_delayed_two_cycles/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "boost_adapt_controller.va"
+      ],
+      "fault_class": "edge_metric_sample_delayed_two_cycles",
+      "id": "neg_002_edge_metric_sample_delayed_two_cycles",
+      "trigger_condition": "an enabled rising clk edge compares a two-cycle stale edge metric instead of the current input",
+      "violated_property_ids": [
+        "P_ON_EACH_ENABLED_RISING_CLK_EDGE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "boost_adapt_controller.va": "063d351632123b676a67f386cb293394f2a978754767c263cdb9af99cb47359c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_INCREASE_BOOST_CODE_WHEN_EDGE_METRIC"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_boost_direction_reversed/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "boost_adapt_controller.va"
+      ],
+      "fault_class": "boost_update_direction_reversed",
+      "id": "neg_003_boost_direction_reversed",
+      "trigger_condition": "edge_metric_in is outside the target tolerance on an enabled rising clk edge",
+      "violated_property_ids": [
+        "P_INCREASE_BOOST_CODE_WHEN_EDGE_METRIC"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "ctle_boost_core.va": "e5d94b0abe523fd931853b40d4c461ec3b3ca394caae6a67d76aa6af3fe1da0e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_VOUT_AS_A_BOOSTED_VERSION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_boost_output_polarity_inverted/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "ctle_boost_core.va"
+      ],
+      "fault_class": "boost_output_polarity_inverted",
+      "id": "neg_004_boost_output_polarity_inverted",
+      "trigger_condition": "the active boost path drives the opposite polarity of vin minus vcm",
+      "violated_property_ids": [
+        "P_DRIVE_VOUT_AS_A_BOOSTED_VERSION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "boost_adapt_controller.va": "7e8522799402b3b2cd6c4fb899eb30a5e709dcbeaeb2c724367084e65ba376c3"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ASSERT_LOCKED_AFTER_THREE_CONSECUTIVE_UPDATES"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_lock_after_one_update/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "boost_adapt_controller.va"
+      ],
+      "fault_class": "adaptation_lock_qualification_too_short",
+      "id": "neg_005_lock_after_one_update",
+      "trigger_condition": "the first qualifying CTLE adaptation update completes",
+      "violated_property_ids": [
+        "P_ASSERT_LOCKED_AFTER_THREE_CONSECUTIVE_UPDATES"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

@@ -1,0 +1,132 @@
+{
+  "family_id": "330",
+  "gold_bundle_sha256": "67ed97d2812fe6028a76c67af9d2b57b12cdeb97181ecc0c7fc44ce6bc6463cf",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "tap_update_controller.va": "48eb0e76bda6efb2cec14f2411591aa56eb4850172cfb5b325bb024508aef43c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ON_RESET_OR_WHEN_DISABLED_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_clear_retains_pre_tap_offset/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "tap_update_controller.va"
+      ],
+      "fault_class": "clear_state_retains_pre_tap_offset",
+      "id": "neg_001_clear_retains_pre_tap_offset",
+      "trigger_condition": "reset is asserted or enable is low",
+      "violated_property_ids": [
+        "P_ON_RESET_OR_WHEN_DISABLED_CLEAR"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "tap_update_controller.va": "5a7e62b974cbdd42909453e80465cb1724eb36305ef8cf385a7b8ddbbc99debb"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ON_EACH_ENABLED_RISING_CLK_EDGE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_post_tap_polarity_matches_pre/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "tap_update_controller.va"
+      ],
+      "fault_class": "post_tap_update_polarity_matches_pre_tap",
+      "id": "neg_002_post_tap_polarity_matches_pre",
+      "trigger_condition": "an enabled rising clock edge samples err_in on either side of vcm",
+      "violated_property_ids": [
+        "P_ON_EACH_ENABLED_RISING_CLK_EDGE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "cursor_metric_core.va": "e86078330dba0fd996858b9fe1203d1a7ad6993dec442aa6d5c35593f958d52a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_MAIN_OUT_AS_THE_CURRENT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_main_cursor_polarity_reversed/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "cursor_metric_core.va"
+      ],
+      "fault_class": "main_cursor_correction_polarity_reversed",
+      "id": "neg_003_main_cursor_polarity_reversed",
+      "trigger_condition": "the current tap state and err_in produce a nonzero cursor correction",
+      "violated_property_ids": [
+        "P_DRIVE_MAIN_OUT_AS_THE_CURRENT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "cursor_metric_core.va": "813c7f1c1f628fe83965d966a9aa6cfacd5dc79cd9206d3dfe9b457a0ec22665"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_EXPOSE_AGGREGATE_TAP_MAGNITUDE_ON_ADAPT"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_adapt_metric_omits_post_tap/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "cursor_metric_core.va"
+      ],
+      "fault_class": "adapt_metric_omits_post_tap_magnitude",
+      "id": "neg_004_adapt_metric_omits_post_tap",
+      "trigger_condition": "the post-cursor tap magnitude is nonzero",
+      "violated_property_ids": [
+        "P_EXPOSE_AGGREGATE_TAP_MAGNITUDE_ON_ADAPT"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "tap_update_controller.va": "47c2e511a1f9e2f2fa6f9de2333bec5980d8862955202fdf042c98632001baa6"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ASSERT_DONE_AFTER_SIX_ENABLED_ADAPTATION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_done_after_one_update/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "tap_update_controller.va"
+      ],
+      "fault_class": "adaptation_done_qualification_too_short",
+      "id": "neg_005_done_after_one_update",
+      "trigger_condition": "the first enabled FFE adaptation update completes",
+      "violated_property_ids": [
+        "P_ASSERT_DONE_AFTER_SIX_ENABLED_ADAPTATION"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

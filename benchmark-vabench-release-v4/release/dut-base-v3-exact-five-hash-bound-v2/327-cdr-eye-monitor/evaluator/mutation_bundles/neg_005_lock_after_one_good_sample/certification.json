@@ -1,0 +1,59 @@
+{
+  "component_fingerprints": {
+    "assembly": {
+      "policy_sha256": "91f4e21b94263e796c846aedef282c79d4abeb7ccc415a0e6f1311f8816b33a4",
+      "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+    },
+    "backend": {
+      "ahdl_like_sha256": "91ce239e5f278a6d5dfcde85ca2d820c5133d8f8a3de26dc6477164e703342f3",
+      "evas_sha256": "2d71c227644956df64209b49d0da6ef55bc6934891020eb26d762e8cb8cc6df2",
+      "spectre_sha256": "ac4c1cf785d5eab74058944d52bf40869e83c94e19202ab72c8e8a250c4dc51b"
+    },
+    "oracle": {
+      "checker_binding_sha256": "a86f60fab67ebc3fbfeb757f40919e775c23262470ced1f9e08ef8ded188e3b5",
+      "checker_implementation_sha256": "e8f9d0a8ac1ba74346ad02df64fb40cdb85e11661277e2a261c8e2deca47fb41",
+      "checker_profile_sha256": "86245f150355f71633d37699457151ba528591b45834fd56a619ed1cee526069",
+      "diagnostic_policy_sha256": "69b217a349cb0e8a3eab574e7e6d1af03f069fea668b15b37868ef3d2e7deea3",
+      "oracle_runner_sha256": "e70bd46cd3abdfd8ed9658cb13f64bc96e27d364d51ed0fdcd05f8139e63af2b",
+      "property_activation_policy_sha256": "c98b707438e9e62661fe63796b87ea010da35d4ebaab10127edcc115908fd2ce"
+    },
+    "policy_id": "v4-dependency-scoped-evidence-v2",
+    "schema_version": "v4-evidence-components-v2",
+    "state": "carried_forward",
+    "task_inputs": {
+      "candidate_bundle_sha256": "ffda2b7d5ad1b1afeddb395d6a9cbc42804be8d59605530d0549808a03cc83a8",
+      "deck_sha256": "8f823f48577c8c276532cbdd4da5db3a58f20e7aae58bc1eaf978970b6f4cb7a",
+      "gold_bundle_sha256": "a17c07f989103768f583ebe5b94449687cf3fd542ba5cf1db4090c974b58c013",
+      "harness_spec_sha256": "5917d5f0e5a2374c22bf8e75490988848246707676cf9a9daf49360207af4c13",
+      "mutation_bundle_sha256": "63d847f04f39df8b8d15e650edf4569c7d0d26d48d36acac4d49aa6eecbc1f15",
+      "profile_sha256": "214d404f2e96e0b3334a0fc6c0ce5f92bf1dbcd3c20b9b810d533feefa2ce452",
+      "property_contract_sha256": "0b91796b62aaebfd3eea6026a3c8bf8968cf5c39b830076bfdeb976b3b55e7ea",
+      "public_support_bundle_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "trace_contract_sha256": "ae27cc4d2440637810c0377e4de5f7b6fb18c354d99f186c01db4cf2b6cfb3b6"
+    }
+  },
+  "diagnostics": {
+    "expected": "trigger=the first valid sample has margin above eye_min; violated_properties=P_ASSERT_LOCK_HINT_AFTER_FOUR_CONSECUTIVE",
+    "observed": "EVAS: v4_327 checked=13 early_events=1 late_events=3 early_misses=0 late_misses=0 lock_seen=True open_streak_reached=True eye_max=0.900 early_lock_errors=7 missing_lock_errors=0 mutex_errors=0 range_errors=0 valid_misses=0 reset_clear=True disabled_clear=True clear_errors=0; P_ON_RESET_OR_WHEN_DISABLED_CLEAR mismatch_count=0; P_ON_EACH_SAMPLING_CLOCK_EDGE_COMPARE mismatch_count=0; P_RAISE_EARLY_OR_LATE_ACCORDING_TO mismatch_count=0; P_DRIVE_EYE_METRIC_FROM_RECENT_TRANSITION mismatch_count=0; P_ASSERT_LOCK_HINT_AFTER_FOUR_CONSECUTIVE mismatch_count=7; Spectre: v4_327 checked=13 early_events=1 late_events=3 early_misses=0 late_misses=0 lock_seen=True open_streak_reached=True eye_max=0.900 early_lock_errors=7 missing_lock_errors=0 mutex_errors=0 range_errors=0 valid_misses=0 reset_clear=True disabled_clear=True clear_errors=0; P_ON_RESET_OR_WHEN_DISABLED_CLEAR mismatch_count=0; P_ON_EACH_SAMPLING_CLOCK_EDGE_COMPARE mismatch_count=0; P_RAISE_EARLY_OR_LATE_ACCORDING_TO mismatch_count=0; P_DRIVE_EYE_METRIC_FROM_RECENT_TRANSITION mismatch_count=0; P_ASSERT_LOCK_HINT_AFTER_FOUR_CONSECUTIVE mismatch_count=7",
+    "violated_property_ids": [
+      "P_ASSERT_LOCK_HINT_AFTER_FOUR_CONSECUTIVE"
+    ]
+  },
+  "evaluators": {
+    "ahdl_like": "pass",
+    "evas": "compile_pass_behavior_fail",
+    "spectre": "compile_pass_behavior_fail"
+  },
+  "family_id": "327",
+  "inputs": {
+    "checker_profile_sha256": "990a9bdd849a6bc8de885fcb97993159db4e01fd54376f5ebef62466529425f9",
+    "harness_spec_sha256": "5917d5f0e5a2374c22bf8e75490988848246707676cf9a9daf49360207af4c13",
+    "mutation_bundle_sha256": "63d847f04f39df8b8d15e650edf4569c7d0d26d48d36acac4d49aa6eecbc1f15",
+    "profile_sha256": "214d404f2e96e0b3334a0fc6c0ce5f92bf1dbcd3c20b9b810d533feefa2ce452"
+  },
+  "mutation_id": "neg_005_lock_after_one_good_sample",
+  "outcome": "killed_behaviorally",
+  "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33",
+  "schema_version": "v4-negative-certification-v2",
+  "toolchain_lock_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+}

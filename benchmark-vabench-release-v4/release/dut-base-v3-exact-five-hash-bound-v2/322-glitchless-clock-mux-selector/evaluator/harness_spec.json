@@ -1,0 +1,84 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "glitchless_clock_mux_selector.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=92n maxstep=200p"
+    ],
+    "body_lines": [
+      "Vclk_a (clk_a 0) vsource type=pulse val0=0 val1=0.9 delay=8n period=8n width=2.4n rise=80p fall=80p",
+      "Vclk_b (clk_b 0) vsource type=pulse val0=0 val1=0.9 delay=10n period=8n width=2.4n rise=80p fall=80p",
+      "Vsel (sel 0) vsource type=pwl wave=[0 0 8n 0 8.2n 0 18n 0 18.2n 0 28n 0 28.2n 0.9 38n 0.9 38.2n 0.9 48n 0.9 48.2n 0 58n 0 58.2n 0.9 68n 0.9 68.2n 0 78n 0 78.2n 0.9 92n 0.9]",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]",
+      "Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 80n 0.9 80.2n 0 92n 0]",
+      "XDUT (clk_a clk_b sel rst enable clk_out switch_metric valid) glitchless_clock_mux_selector",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk_a",
+      "clk_b",
+      "sel",
+      "rst",
+      "enable",
+      "clk_out",
+      "switch_metric",
+      "valid"
+    ]
+  },
+  "family_id": "322",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "9119f77658e822af498635a60c3db623af95fdff5d8a90a2ba3eab66ed859aec",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "9119f77658e822af498635a60c3db623af95fdff5d8a90a2ba3eab66ed859aec",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ON_RESET_OR_WHEN_DISABLED_DRIVE",
+    "P_ROUTE_CLK_A_WHEN_SEL_IS",
+    "P_WHEN_SEL_CHANGES_WAIT_UNTIL_BOTH",
+    "P_EXPOSE_A_SWITCH_EVENT_ON_SWITCH",
+    "P_ASSERT_VALID_AFTER_THE_SELECTED_SOURCE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "16fb1699eb4dcc4c527ffb1af9f546730b00eae6ba76198cbf8d913ee618f331",
+    "family_spec_sha256": "bc9d8555ebfb2acec4e0e0b21694eb69894861e101571fdb2733ce50261fa688"
+  },
+  "task_id": "v4-322"
+}

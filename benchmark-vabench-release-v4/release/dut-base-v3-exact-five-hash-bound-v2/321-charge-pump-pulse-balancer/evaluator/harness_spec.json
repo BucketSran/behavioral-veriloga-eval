@@ -1,0 +1,101 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "charge_pump_pulse_balancer.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=80n maxstep=120p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "up",
+      "dn",
+      "clk",
+      "rst",
+      "enable",
+      "vctrl",
+      "imbalance_metric",
+      "balanced"
+    ]
+  },
+  "family_id": "321",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "8b81e2dc5892142e16a9b4e28e294f85bcc6f3c9940b888f630a24ba7fe695b8",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "65bb2c962a69dc27943e9447110085069dd5b146a628c47f8960918146684259",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vup (up 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.9 23n 0.9 23.1n 0 41n 0 41.1n 0.9 56n 0.9 56.1n 0 62n 0 62.1n 0.9 69n 0.9 69.1n 0 80n 0]",
+          "Vdn (dn 0) vsource type=pwl wave=[0 0 23n 0 23.1n 0.9 56n 0.9 56.1n 0 69n 0 69.1n 0.9 76n 0.9 76.1n 0 80n 0]",
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=6n width=3n delay=1n rise=60p fall=60p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2.1n 0.9 2.2n 0 80n 0]",
+          "Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.9 56n 0.9 56.1n 0 62n 0 62.1n 0.9 80n 0.9]",
+          "XDUT (up dn clk rst enable vctrl imbalance_metric balanced) charge_pump_pulse_balancer",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=72n maxstep=100p"
+        ],
+        "body_lines": [
+          "Vup (up 0) vsource type=pwl wave=[0 0 4.5n 0 4.6n 0.9 19n 0.9 19.1n 0 34n 0 34.1n 0.9 44.64n 0.9 44.74n 0 50.64n 0 50.74n 0.9 57n 0.9 57.1n 0 72n 0]",
+          "Vdn (dn 0) vsource type=pwl wave=[0 0 19n 0 19.1n 0.9 44.64n 0.9 44.74n 0 57n 0 57.1n 0.9 63n 0.9 63.1n 0 72n 0]",
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=5n width=2.5n delay=1.2n rise=60p fall=60p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.7n 0.9 1.8n 0 72n 0]",
+          "Venable (enable 0) vsource type=pwl wave=[0 0 4.5n 0 4.6n 0.9 44.64n 0.9 44.74n 0 50.64n 0 50.74n 0.9 72n 0.9]",
+          "XDUT (up dn clk rst enable vctrl imbalance_metric balanced) charge_pump_pulse_balancer",
+          ""
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ON_RESET_OR_WHEN_DISABLED_DRIVE",
+    "P_ON_EACH_RISING_CLK_EDGE_OBSERVE",
+    "P_INCREASE_VCTRL_FOR_UP_ONLY_DECREASE",
+    "P_DRIVE_IMBALANCE_METRIC_FROM_THE_ACCUMULATED",
+    "P_ASSERT_BALANCED_ONLY_WHEN_THE_RECENT"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "abeba0873ad00a99c0de5d77da159aacc61d1d38fc019697d9f1a9247086ebbd",
+    "family_spec_sha256": "9f330b32082ec5615fff82ff27e7dbc983fdd07fb2e648ca1987b8cfae344f1f"
+  },
+  "task_id": "v4-321"
+}

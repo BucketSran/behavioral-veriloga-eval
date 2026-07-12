@@ -1,0 +1,33 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module glitchless_clock_mux_selector(clk_a, clk_b, sel, rst, enable, clk_out, switch_metric, valid);
+    inout clk_a, clk_b, sel, rst, enable, clk_out, switch_metric, valid;
+    electrical clk_a, clk_b, sel, rst, enable, clk_out, switch_metric, valid;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vcm = 0.45; parameter real vth = 0.45; parameter real tr = 200p from (0:inf);
+    parameter real tick = 200p from (0:inf);
+    integer active_sel, pending_sel, metric_count; real out_v, metric_v, valid_v, prev_out;
+    analog begin
+        @(initial_step) begin active_sel = 0; pending_sel = 0; metric_count = 0; out_v = 0.0; metric_v = 0.0; valid_v = 0.0; prev_out = 0.0; end
+        @(timer(0, tick)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                active_sel = 0; pending_sel = 0; metric_count = 0; out_v = 0.0; metric_v = 0.0; valid_v = 0.0; prev_out = 0.0;
+            end else begin
+                pending_sel = 1;
+                if (pending_sel != active_sel && V(clk_a) <= vth && V(clk_b) <= vth) begin
+                    active_sel = pending_sel;
+                    metric_count = 20;
+                    valid_v = vss;
+                end
+                out_v = (active_sel == 1) ? ((V(clk_b) > vth) ? vdd : vss) : ((V(clk_a) > vth) ? vdd : vss);
+                if (out_v > vth && prev_out <= vth) begin valid_v = vdd; end
+                prev_out = out_v;
+                metric_v = (metric_count > 0) ? vdd : vss;
+                if (metric_count > 0) metric_count = metric_count - 1;
+            end
+        end
+        V(clk_out) <+ out_v;
+        V(switch_metric) <+ transition(metric_v, 0, tr, tr);
+        V(valid) <+ transition(valid_v, 0, tr, tr);
+    end
+endmodule

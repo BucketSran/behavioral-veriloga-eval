@@ -1,0 +1,65 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module coarse_counter(
+    start, stop, ref_clk, rst, enable,
+    coarse_3, coarse_2, coarse_1, coarse_0, valid
+);
+    input start, stop, ref_clk, rst, enable;
+    output coarse_3, coarse_2, coarse_1, coarse_0, valid;
+    electrical start, stop, ref_clk, rst, enable;
+    electrical coarse_3, coarse_2, coarse_1, coarse_0, valid;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    integer armed_q;
+    integer count_q;
+    integer code_q;
+    integer valid_q;
+
+    analog begin
+        @(initial_step) begin
+            armed_q = 0;
+            count_q = 0;
+            code_q = 0;
+            valid_q = 0;
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            armed_q = 0;
+            count_q = 0;
+            code_q = 0;
+            valid_q = 0;
+        end
+
+        @(cross(V(start) - vth, +1)) begin
+            if (V(rst) <= vth && V(enable) > vth) begin
+                armed_q = 0;
+                count_q = 0;
+                valid_q = 0;
+            end
+        end
+
+        @(cross(V(ref_clk) - vth, +1)) begin
+            if (armed_q && V(rst) <= vth && V(enable) > vth && count_q < 15)
+                count_q = count_q + 1;
+        end
+
+        @(cross(V(stop) - vth, +1)) begin
+            if (armed_q && V(rst) <= vth && V(enable) > vth) begin
+                code_q = count_q;
+                valid_q = 1;
+                armed_q = 0;
+            end
+        end
+
+        V(coarse_0) <+ transition((code_q & 1) ? vdd : vss, 0.0, tr, tr);
+        V(coarse_1) <+ transition((code_q & 2) ? vdd : vss, 0.0, tr, tr);
+        V(coarse_2) <+ transition((code_q & 4) ? vdd : vss, 0.0, tr, tr);
+        V(coarse_3) <+ transition((code_q & 8) ? vdd : vss, 0.0, tr, tr);
+        V(valid) <+ transition(valid_q ? vdd : vss, 0.0, tr, tr);
+    end
+endmodule
