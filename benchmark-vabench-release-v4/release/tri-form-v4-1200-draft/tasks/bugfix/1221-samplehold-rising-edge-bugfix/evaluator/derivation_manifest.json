@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-221",
+    "canonical_task_slug": "221-samplehold-rising-edge",
+    "family_spec_sha256": "8660b9f985608938587abf577f379090040340531320f5a96e64f7a4d260e61d",
+    "mutation_catalog_sha256": "1cd8ca87e97b671751b037f051a543eeb87866be1d8c32b7ddb65c9bc98f5012",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "221",
+  "negative_assignment": {
+    "bugfix_seed": "neg_005_metric_scale_low",
+    "testbench_suite": [
+      "neg_004_wrong_threshold",
+      "neg_003_track_input",
+      "neg_005_metric_scale_low",
+      "neg_001_zero",
+      "neg_002_half_scale_capture"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "f60fadcfc5ca5ec46060acc98fb74dba5214de2bc6f109f1c5d527c3fca64395",
+    "changed_artifacts": [
+      "samplehold_rising_edge.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_005_metric_scale_low",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Samplehold Rising Edge: scales the metric output, preserving the main path while failing measurement checks.' because it exercises P_DRIVE_VOUT_WITH_SMOOTH_VOLTAGE_DOMAIN, P_HOLD_THE_SAMPLED_VOLTAGE_ON_VOUT as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 32,
+    "source_preferred_seed": "neg_004_wrong_threshold",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

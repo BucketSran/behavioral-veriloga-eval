@@ -1,0 +1,295 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "therm8_to_bin4_count",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "th0",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "th1",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "th2",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "th3",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "th4",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "th5",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "th6",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "th7",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "b0",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "b1",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "b2",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "b3",
+                "position": 11
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "therm8_to_bin4_count.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "223",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "digital_logic",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Therm8 To Bin4 Count"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_COUNT_HOW_MANY_OF_TH0_TH7",
+      "observable_contract": "Count how many of `th0..th7` are above `vth`.",
+      "required_signals": [
+        "time",
+        "b0",
+        "b1",
+        "b2",
+        "b3",
+        "th0",
+        "th1",
+        "th2",
+        "th3",
+        "th4",
+        "th5",
+        "th6",
+        "th7"
+      ]
+    },
+    {
+      "id": "P_ENCODE_THE_COUNT_AS_A_4",
+      "observable_contract": "Encode the count as a 4-bit binary word.",
+      "required_signals": [
+        "time",
+        "b0",
+        "b1",
+        "b2",
+        "b3",
+        "th0",
+        "th1",
+        "th2",
+        "th3",
+        "th4",
+        "th5",
+        "th6",
+        "th7"
+      ]
+    },
+    {
+      "id": "P_DRIVE_B0_B3_AS_VOLTAGE_CODED",
+      "observable_contract": "Drive `b0..b3` as voltage-coded outputs with `b0` as the least significant bit.",
+      "required_signals": [
+        "time",
+        "b0",
+        "b1",
+        "b2",
+        "b3",
+        "th0",
+        "th1",
+        "th2",
+        "th3",
+        "th4",
+        "th5",
+        "th6",
+        "th7"
+      ]
+    },
+    {
+      "id": "P_SUPPORT_ANY_INPUT_PATTERN_BY_COUNTING",
+      "observable_contract": "Support any input pattern by counting high inputs rather than assuming a perfectly monotonic thermometer prefix.",
+      "required_signals": [
+        "time",
+        "b0",
+        "b1",
+        "b2",
+        "b3",
+        "th0",
+        "th1",
+        "th2",
+        "th3",
+        "th4",
+        "th5",
+        "th6",
+        "th7"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "therm8_to_bin4_count.va"
+  ],
+  "task_id": "v4-223",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "th0",
+            "port_ref": "th0",
+            "position": 0
+          },
+          {
+            "net": "th1",
+            "port_ref": "th1",
+            "position": 1
+          },
+          {
+            "net": "th2",
+            "port_ref": "th2",
+            "position": 2
+          },
+          {
+            "net": "th3",
+            "port_ref": "th3",
+            "position": 3
+          },
+          {
+            "net": "th4",
+            "port_ref": "th4",
+            "position": 4
+          },
+          {
+            "net": "th5",
+            "port_ref": "th5",
+            "position": 5
+          },
+          {
+            "net": "th6",
+            "port_ref": "th6",
+            "position": 6
+          },
+          {
+            "net": "th7",
+            "port_ref": "th7",
+            "position": 7
+          },
+          {
+            "net": "b0",
+            "port_ref": "b0",
+            "position": 8
+          },
+          {
+            "net": "b1",
+            "port_ref": "b1",
+            "position": 9
+          },
+          {
+            "net": "b2",
+            "port_ref": "b2",
+            "position": 10
+          },
+          {
+            "net": "b3",
+            "port_ref": "b3",
+            "position": 11
+          }
+        ],
+        "module_ref": "therm8_to_bin4_count",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "b0",
+      "b1",
+      "b2",
+      "b3",
+      "th0",
+      "th1",
+      "th2",
+      "th3",
+      "th4",
+      "th5",
+      "th6",
+      "th7"
+    ]
+  }
+}

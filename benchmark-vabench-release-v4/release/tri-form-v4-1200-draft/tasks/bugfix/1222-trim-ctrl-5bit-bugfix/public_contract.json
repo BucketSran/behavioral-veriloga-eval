@@ -1,0 +1,225 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "trim_ctrl_5bit",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vh",
+                "override_behavior": "overrides vh",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "20p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ain",
+                "position": 0
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dout0",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dout1",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dout2",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dout3",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dout4",
+                "position": 5
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "trim_ctrl_5bit.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/trim_ctrl_5bit.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "222",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "digital_logic",
+    "difficulty": "D1",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Trim Ctrl 5bit"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_CONVERT_V_AIN_TO_THE_NEAREST",
+      "observable_contract": "Convert `V(ain)` to the nearest integer code using half-up rounding.",
+      "required_signals": [
+        "time",
+        "ain",
+        "dout0",
+        "dout1",
+        "dout2",
+        "dout3",
+        "dout4"
+      ]
+    },
+    {
+      "id": "P_CLAMP_THE_CODE_TO_THE_VALID",
+      "observable_contract": "Clamp the code to the valid 5-bit trim range `0..31`.",
+      "required_signals": [
+        "time",
+        "ain",
+        "dout0",
+        "dout1",
+        "dout2",
+        "dout3",
+        "dout4"
+      ]
+    },
+    {
+      "id": "P_DRIVE_DOUT0_DOUT4_FROM_THE_CLAMPED",
+      "observable_contract": "Drive `dout0..dout4` from the clamped binary code, LSB first.",
+      "required_signals": [
+        "time",
+        "ain",
+        "dout0",
+        "dout1",
+        "dout2",
+        "dout3",
+        "dout4"
+      ]
+    },
+    {
+      "id": "P_DRIVE_HIGH_BITS_NEAR_VH_AND",
+      "observable_contract": "Drive high bits near `vh` and low bits near 0 V.",
+      "required_signals": [
+        "time",
+        "ain",
+        "dout0",
+        "dout1",
+        "dout2",
+        "dout3",
+        "dout4"
+      ]
+    },
+    {
+      "id": "P_UPDATE_DETERMINISTICALLY_AS_THE_ANALOG_INPUT",
+      "observable_contract": "Update deterministically as the analog input changes.",
+      "required_signals": [
+        "time",
+        "ain",
+        "dout0",
+        "dout1",
+        "dout2",
+        "dout3",
+        "dout4"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "trim_ctrl_5bit.va"
+  ],
+  "task_id": "v4-1222",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "ain",
+            "port_ref": "ain",
+            "position": 0
+          },
+          {
+            "net": "dout0",
+            "port_ref": "dout0",
+            "position": 1
+          },
+          {
+            "net": "dout1",
+            "port_ref": "dout1",
+            "position": 2
+          },
+          {
+            "net": "dout2",
+            "port_ref": "dout2",
+            "position": 3
+          },
+          {
+            "net": "dout3",
+            "port_ref": "dout3",
+            "position": 4
+          },
+          {
+            "net": "dout4",
+            "port_ref": "dout4",
+            "position": 5
+          }
+        ],
+        "module_ref": "trim_ctrl_5bit",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "ain",
+      "dout0",
+      "dout1",
+      "dout2",
+      "dout3",
+      "dout4"
+    ]
+  }
+}

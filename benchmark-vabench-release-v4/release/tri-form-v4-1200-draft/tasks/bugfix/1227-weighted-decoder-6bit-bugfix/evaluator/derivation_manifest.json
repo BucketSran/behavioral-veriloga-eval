@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-227",
+    "canonical_task_slug": "227-weighted-decoder-6bit",
+    "family_spec_sha256": "b7587b595525895325c66bab77330e636d39ba322bf3388567ed16b4f2c2264f",
+    "mutation_catalog_sha256": "c9c56e3d83cc856f988b2b1e832082031e4c320af1749c807b9dc57461f6d336",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "227",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_threshold_too_high",
+    "testbench_suite": [
+      "neg_002_wrong_denominator",
+      "neg_004_threshold_too_high",
+      "neg_001_zero",
+      "neg_003_half_scale",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "ceaf6fd9e45809bb28420a9dd5a3051f9eeafc4831881fd339661cef48bff733",
+    "changed_artifacts": [
+      "weighted_decoder_6bit.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_threshold_too_high",
+    "rationale": "Select fault class threshold_or_boundary_fault under trigger 'Uses a threshold above the input high level.' because it exercises P_INTERPRET_VD1_VD6_AS_AN_UNSIGNED, P_TREAT_EACH_INPUT_AS_LOGIC_1 as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 19,
+    "source_preferred_seed": "neg_002_wrong_denominator",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

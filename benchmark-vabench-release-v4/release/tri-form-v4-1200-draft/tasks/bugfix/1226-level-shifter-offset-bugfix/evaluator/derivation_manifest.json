@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-226",
+    "canonical_task_slug": "226-level-shifter-offset",
+    "family_spec_sha256": "47624e41abddb35f89a1c1e342272e40aadf385818e915d77bcb82544ccd2348",
+    "mutation_catalog_sha256": "63c839202af614d7cc1bcd75ff52aeb8c536ed124dbc19a9a87d44ed068e6bfc",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "226",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_gain_plus_offset",
+    "testbench_suite": [
+      "neg_002_wrong_offset",
+      "neg_004_gain_plus_offset",
+      "neg_003_subtract_offset",
+      "neg_005_metric_scale_low",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "258a0cc901256384f35bd4dad93af6364c689469f0109cb6fd1477bb1250c351",
+    "changed_artifacts": [
+      "level_shifter_offset.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_gain_plus_offset",
+    "rationale": "Select fault class input_gain_error under trigger 'Adds an erroneous gain of 2 before the offset.' because it exercises P_DRIVE_SIGOUT_TO_V_SIGIN_PLUS_SIGSHIFT, P_PRESERVE_UNITY_GAIN_WHILE_ADDING_OFFSET as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 17,
+    "source_preferred_seed": "neg_002_wrong_offset",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

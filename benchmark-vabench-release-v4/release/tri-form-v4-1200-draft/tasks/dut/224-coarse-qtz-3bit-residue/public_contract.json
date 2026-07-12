@@ -1,0 +1,215 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "coarse_qtz_3bit_residue",
+            "parameters": [
+              {
+                "default": "1.0",
+                "name": "vref",
+                "override_behavior": "overrides vref",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.0",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "d0",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "d1",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "d2",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vres",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "coarse_qtz_3bit_residue.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "224",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Coarse QTZ 3bit Residue"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_CLIP_VIN_TO_THE_RANGE_FROM",
+      "observable_contract": "Clip `vin` to the range from `-vref` to `+vref`.",
+      "required_signals": [
+        "time",
+        "d0",
+        "d1",
+        "d2",
+        "vin",
+        "vres"
+      ]
+    },
+    {
+      "id": "P_QUANTIZE_THE_CLIPPED_VALUE_INTO_EIGHT",
+      "observable_contract": "Quantize the clipped value into eight 3-bit codes using round-to-nearest behavior.",
+      "required_signals": [
+        "time",
+        "d0",
+        "d1",
+        "d2",
+        "vin",
+        "vres"
+      ]
+    },
+    {
+      "id": "P_SATURATE_THE_CODE_AT_THE_ENDPOINTS",
+      "observable_contract": "Saturate the code at the endpoints.",
+      "required_signals": [
+        "time",
+        "d0",
+        "d1",
+        "d2",
+        "vin",
+        "vres"
+      ]
+    },
+    {
+      "id": "P_USE_UNIFORMLY_SPACED_QUANTIZATION_LEVELS_START",
+      "observable_contract": "Use uniformly spaced quantization levels starting at `-vref`, with one LSB equal to one eighth of the full input span.",
+      "required_signals": [
+        "time",
+        "d0",
+        "d1",
+        "d2",
+        "vin",
+        "vres"
+      ]
+    },
+    {
+      "id": "P_DRIVE_D0_D1_AND_D2_AS",
+      "observable_contract": "Drive `d0`, `d1`, and `d2` as LSB-to-MSB voltage-coded bits.",
+      "required_signals": [
+        "time",
+        "d0",
+        "d1",
+        "d2",
+        "vin",
+        "vres"
+      ]
+    },
+    {
+      "id": "P_DRIVE_VRES_AS_THE_CLIPPED_INPUT",
+      "observable_contract": "Drive `vres` as the clipped input minus the selected quantized analog level.",
+      "required_signals": [
+        "time",
+        "d0",
+        "d1",
+        "d2",
+        "vin",
+        "vres"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "coarse_qtz_3bit_residue.va"
+  ],
+  "task_id": "v4-224",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "d0",
+            "port_ref": "d0",
+            "position": 1
+          },
+          {
+            "net": "d1",
+            "port_ref": "d1",
+            "position": 2
+          },
+          {
+            "net": "d2",
+            "port_ref": "d2",
+            "position": 3
+          },
+          {
+            "net": "vres",
+            "port_ref": "vres",
+            "position": 4
+          }
+        ],
+        "module_ref": "coarse_qtz_3bit_residue",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "d0",
+      "d1",
+      "d2",
+      "vin",
+      "vres"
+    ]
+  }
+}

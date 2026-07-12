@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-228",
+    "canonical_task_slug": "228-divide-by-two-toggle",
+    "family_spec_sha256": "b8e0920c85d1b99d5cee8abe1fed07692674e7b67ce898fb368d02729aa11cc1",
+    "mutation_catalog_sha256": "5b7e2e719e30f98bd0ba92699f09e8f95a98b3f9e13b788dce35f1c3fb9c6b99",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "228",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_stuck_low_on_clock",
+    "testbench_suite": [
+      "neg_002_stuck_low_on_clock",
+      "neg_003_starts_high",
+      "neg_005_metric_scale_low",
+      "neg_001_zero",
+      "neg_004_no_toggle"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "b3882436951d707f43e03862618863d265da9c74248509bf0aa4a3785a9440f6",
+    "changed_artifacts": [
+      "divide_by_two_toggle.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_stuck_low_on_clock",
+    "rationale": "Select fault class timing_or_state_update_fault under trigger 'Forces the divider state low on each clock instead of toggling.' because it exercises P_THE_FIRST_VALID_RISING_EDGE_DRIVES, P_TOGGLE_THE_STATE_ON_EVERY_RISING as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 26,
+    "source_preferred_seed": "neg_002_stuck_low_on_clock",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

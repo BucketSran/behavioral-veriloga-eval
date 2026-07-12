@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-225",
+    "canonical_task_slug": "225-rs-phase-detector",
+    "family_spec_sha256": "e387826c73ba69569c09d1a6bc88eb49edb65d5781041be23f64f2ee44c5858e",
+    "mutation_catalog_sha256": "2e2d384a6d5a3ad541fd775ef802e972a5bd8aba12282b533b90c69fce9df793",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "225",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_ignore_fb_reset",
+    "testbench_suite": [
+      "neg_002_swapped_edges",
+      "neg_001_zero",
+      "neg_003_down_not_complement",
+      "neg_005_metric_scale_low",
+      "neg_004_ignore_fb_reset"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "ec7de1acdc71a52f6785c45757bee98bc11d14a9d2f3bf04f876a96012e162da",
+    "changed_artifacts": [
+      "rs_phase_detector.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_ignore_fb_reset",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Ignores FB rising edges, so UP stays asserted after REF.' because it exercises P_A_RISING_FB_EDGE_RESETS_THE, P_DETECT_RISING_REF_AND_FB_CROSSINGS, P_HOLD_THE_MOST_RECENT_LATCH_STATE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 35,
+    "source_preferred_seed": "neg_002_swapped_edges",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

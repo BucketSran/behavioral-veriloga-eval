@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-222",
+    "canonical_task_slug": "222-trim-ctrl-5bit",
+    "family_spec_sha256": "a8389a5f85b6cd6f405441a7ea4234b8517885b6b5c0219c15837a71421024e7",
+    "mutation_catalog_sha256": "aa52eb253c2b16cc4560661b38b5a4e7515fb7a43f62e490d91e37be4ad26995",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "222",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_code_offset_plus_one",
+    "testbench_suite": [
+      "neg_002_code_offset_plus_one",
+      "neg_005_metric_scale_low",
+      "neg_003_clamp_to_15",
+      "neg_004_reversed_bit_order",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "499f2e181bd529062f2ded9854a55f2d07b6de4126a7deeaf7f12ee4f24c6fa5",
+    "changed_artifacts": [
+      "trim_ctrl_5bit.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_code_offset_plus_one",
+    "rationale": "Select fault class threshold_or_boundary_fault under trigger 'Adds an erroneous +1 offset after rounding the trim code.' because it exercises P_CLAMP_THE_CODE_TO_THE_VALID, P_CONVERT_V_AIN_TO_THE_NEAREST, P_DRIVE_DOUT0_DOUT4_FROM_THE_CLAMPED, P_UPDATE_DETERMINISTICALLY_AS_THE_ANALOG_INPUT as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 27,
+    "source_preferred_seed": "neg_002_code_offset_plus_one",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,35 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/samplehold_rising_edge.va"
+
+Vcontrol (control 0) vsource type=pwl wave=[ \
+  0 0 \
+  0.42n 0 \
+  0.44n 5 \
+  0.74n 5 \
+  0.76n 0 \
+  1.80n 0 \
+  1.82n 5 \
+  2.12n 5 \
+  2.14n 0 \
+  2.95n 0 \
+  2.97n 5 \
+  3.25n 5 \
+  3.27n 0 \
+  3.8n 0 \
+]
+Vin (vin 0) vsource type=pwl wave=[ \
+  0 0.8 \
+  1.05n 0.8 \
+  1.10n 2.6 \
+  2.45n 2.6 \
+  2.50n 4.4 \
+  3.8n 4.4 \
+]
+
+XDUT (control vin vout) samplehold_rising_edge
+
+
+tran tran stop=3.8n maxstep=5p
+save control vin vout

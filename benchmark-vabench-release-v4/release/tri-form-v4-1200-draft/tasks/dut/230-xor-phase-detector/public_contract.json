@@ -1,0 +1,167 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "xor_phase_detector",
+            "parameters": [
+              {
+                "default": "1.2",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ref",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "fb",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "up",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "down",
+                "position": 3
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "xor_phase_detector.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "230",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "clock_timing",
+    "difficulty": "D1",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "XOR Phase Detector"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_INTERPRET_REF_AND_FB_LOGIC_LEVELS",
+      "observable_contract": "Interpret `ref` and `fb` logic levels using a threshold of `vdd/2`.",
+      "required_signals": [
+        "time",
+        "down",
+        "fb",
+        "ref",
+        "up"
+      ]
+    },
+    {
+      "id": "P_DRIVE_UP_HIGH_WHEN_THE_INTERPRETED",
+      "observable_contract": "Drive `up` high when the interpreted `ref` and `fb` levels differ.",
+      "required_signals": [
+        "time",
+        "down",
+        "fb",
+        "ref",
+        "up"
+      ]
+    },
+    {
+      "id": "P_DRIVE_DOWN_HIGH_WHEN_THE_INTERPRETED",
+      "observable_contract": "Drive `down` high when the interpreted `ref` and `fb` levels match.",
+      "required_signals": [
+        "time",
+        "down",
+        "fb",
+        "ref",
+        "up"
+      ]
+    },
+    {
+      "id": "P_UPDATE_OUTPUTS_COMBINATIONALLY_FROM_THE_CURREN",
+      "observable_contract": "Update outputs combinationally from the current input voltages.",
+      "required_signals": [
+        "time",
+        "down",
+        "fb",
+        "ref",
+        "up"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "xor_phase_detector.va"
+  ],
+  "task_id": "v4-230",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "ref",
+            "port_ref": "ref",
+            "position": 0
+          },
+          {
+            "net": "fb",
+            "port_ref": "fb",
+            "position": 1
+          },
+          {
+            "net": "up",
+            "port_ref": "up",
+            "position": 2
+          },
+          {
+            "net": "down",
+            "port_ref": "down",
+            "position": 3
+          }
+        ],
+        "module_ref": "xor_phase_detector",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "down",
+      "fb",
+      "ref",
+      "up"
+    ]
+  }
+}

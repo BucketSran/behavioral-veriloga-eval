@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-223",
+    "canonical_task_slug": "223-therm8-to-bin4-count",
+    "family_spec_sha256": "492ad18136b552d6f700fccae07ea0d6d97a3a7bdc20fc6e4e17ed98f61a10ff",
+    "mutation_catalog_sha256": "73213badf9a31ee84263c0b075ee5dc2c73925fe1165ac9a59ae2ea57a088298",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "223",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_threshold_too_high",
+    "testbench_suite": [
+      "neg_003_threshold_too_high",
+      "neg_002_count_lower_half_only",
+      "neg_004_reversed_bit_order",
+      "neg_005_metric_scale_low",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "d154092835ee54eb27dbfed2ac3b348b7fa08fb48a4aba53190bf79504b50186",
+    "changed_artifacts": [
+      "therm8_to_bin4_count.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_threshold_too_high",
+    "rationale": "Select fault class threshold_or_boundary_fault under trigger 'Uses a threshold above the stimulus high level, so asserted thermometer inputs are missed.' because it exercises P_COUNT_HOW_MANY_OF_TH0_TH7, P_ENCODE_THE_COUNT_AS_A_4 as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 21,
+    "source_preferred_seed": "neg_003_threshold_too_high",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

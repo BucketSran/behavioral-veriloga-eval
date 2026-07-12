@@ -1,0 +1,207 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "rs_phase_detector",
+            "parameters": [
+              {
+                "default": "1.2",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "10p",
+                "name": "tdel",
+                "override_behavior": "overrides tdel",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "10p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "10p",
+                "name": "tf",
+                "override_behavior": "overrides tf",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ref",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "fb",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "up",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "down",
+                "position": 3
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "rs_phase_detector.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/rs_phase_detector.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "225",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "RS Phase Detector"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_DETECT_RISING_REF_AND_FB_CROSSINGS",
+      "observable_contract": "Detect rising `ref` and `fb` crossings at `vdd/2`.",
+      "required_signals": [
+        "time",
+        "down",
+        "fb",
+        "ref",
+        "up"
+      ]
+    },
+    {
+      "id": "P_A_RISING_REF_EDGE_SETS_THE",
+      "observable_contract": "A rising `ref` edge sets the latch state so `up` is high and `down` is low.",
+      "required_signals": [
+        "time",
+        "down",
+        "fb",
+        "ref",
+        "up"
+      ]
+    },
+    {
+      "id": "P_A_RISING_FB_EDGE_RESETS_THE",
+      "observable_contract": "A rising `fb` edge resets the latch state so `up` is low and `down` is high.",
+      "required_signals": [
+        "time",
+        "down",
+        "fb",
+        "ref",
+        "up"
+      ]
+    },
+    {
+      "id": "P_HOLD_THE_MOST_RECENT_LATCH_STATE",
+      "observable_contract": "Hold the most recent latch state between qualifying input edges.",
+      "required_signals": [
+        "time",
+        "down",
+        "fb",
+        "ref",
+        "up"
+      ]
+    },
+    {
+      "id": "P_INITIALIZE_TO_THE_RESET_STATE_WITH",
+      "observable_contract": "Initialize to the reset state with `up` low and `down` high.",
+      "required_signals": [
+        "time",
+        "down",
+        "fb",
+        "ref",
+        "up"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "rs_phase_detector.va"
+  ],
+  "task_id": "v4-1225",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "ref",
+            "port_ref": "ref",
+            "position": 0
+          },
+          {
+            "net": "fb",
+            "port_ref": "fb",
+            "position": 1
+          },
+          {
+            "net": "up",
+            "port_ref": "up",
+            "position": 2
+          },
+          {
+            "net": "down",
+            "port_ref": "down",
+            "position": 3
+          }
+        ],
+        "module_ref": "rs_phase_detector",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "down",
+      "fb",
+      "ref",
+      "up"
+    ]
+  }
+}

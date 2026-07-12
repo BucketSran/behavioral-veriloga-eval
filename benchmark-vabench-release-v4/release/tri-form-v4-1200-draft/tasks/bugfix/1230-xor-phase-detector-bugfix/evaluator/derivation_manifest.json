@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-230",
+    "canonical_task_slug": "230-xor-phase-detector",
+    "family_spec_sha256": "34194f5a894d19b1e7de9054073d74de52827b28dd9122a2f6d8e46edb1e5d7b",
+    "mutation_catalog_sha256": "d1610897478b4bfef883bd7b1716075055fd0bcc8b890a6cb6ca0c4994302f29",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "230",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_xnor_up",
+    "testbench_suite": [
+      "neg_002_xnor_up",
+      "neg_004_ignore_fb",
+      "neg_003_down_not_complement",
+      "neg_005_metric_scale_low",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "eee2d653a1154f006d735f7aef0370cf38f7a689a50e58abf6a6bbe86001e70b",
+    "changed_artifacts": [
+      "xor_phase_detector.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_xnor_up",
+    "rationale": "Select fault class xnor_up under trigger 'Drives UP on matches instead of mismatches.' because it exercises P_DRIVE_UP_HIGH_WHEN_THE_INTERPRETED, P_UPDATE_OUTPUTS_COMBINATIONALLY_FROM_THE_CURREN as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 15,
+    "source_preferred_seed": "neg_002_xnor_up",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

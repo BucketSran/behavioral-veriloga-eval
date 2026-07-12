@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-229",
+    "canonical_task_slug": "229-accum3-pulse",
+    "family_spec_sha256": "0b29b2d49c5e3d523e54e65874aa0dfc13e461d6ea3f832b40132dfdcc837718",
+    "mutation_catalog_sha256": "bfc9002afacd714d66f6401982b1f1dcf945fef7849e063ea221f61c8238fa34",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "229",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_wrong_pulse_count",
+    "testbench_suite": [
+      "neg_002_wrong_initial_count",
+      "neg_003_wrong_pulse_count",
+      "neg_005_metric_scale_low",
+      "neg_004_active_high_window",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "80e4f7e4d261f32e290ccf50c85aca820d8670bcfbdb98935b930a06d95dc438",
+    "changed_artifacts": [
+      "accum3_pulse.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_wrong_pulse_count",
+    "rationale": "Select fault class omission_or_incomplete_behavior under trigger 'Asserts OUT at count 1 instead of count 0.' because it exercises P_DRIVE_OUT_HIGH_ONLY_WHEN_THE, P_DRIVE_OUT_LOW_FOR_ALL_OTHER as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 14,
+    "source_preferred_seed": "neg_002_wrong_initial_count",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

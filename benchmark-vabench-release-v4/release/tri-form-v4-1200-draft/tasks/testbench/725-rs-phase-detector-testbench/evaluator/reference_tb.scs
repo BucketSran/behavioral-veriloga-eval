@@ -1,0 +1,11 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/rs_phase_detector.va"
+
+Vref (ref 0) vsource type=pwl wave=[0 0 0.95n 0 0.97n 1.2 1.17n 1.2 1.19n 0 1.55n 0 1.57n 1.2 1.77n 1.2 1.79n 0 3.05n 0 3.07n 1.2 3.27n 1.2 3.29n 0 3.8n 0]
+Vfb (fb 0) vsource type=pwl wave=[0 0 0.35n 0 0.37n 1.2 0.57n 1.2 0.59n 0 2.25n 0 2.27n 1.2 2.47n 1.2 2.49n 0 3.8n 0]
+XDUT (ref fb up down) rs_phase_detector
+
+tran tran stop=3.6n maxstep=5p
+save ref fb up down

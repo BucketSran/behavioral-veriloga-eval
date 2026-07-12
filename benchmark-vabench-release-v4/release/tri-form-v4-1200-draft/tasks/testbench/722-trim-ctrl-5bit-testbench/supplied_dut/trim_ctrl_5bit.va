@@ -1,0 +1,19 @@
+`include "disciplines.vams"
+module trim_ctrl_5bit(ain, dout0, dout1, dout2, dout3, dout4);
+input ain;
+output dout0, dout1, dout2, dout3, dout4;
+electrical ain, dout0, dout1, dout2, dout3, dout4;
+parameter real vh = 0.9;
+parameter real tr = 20p;
+integer code;
+analog begin
+    code = $floor(V(ain) + 0.5);
+    if (code < 0) code = 0;
+    if (code > 31) code = 31;
+    V(dout0) <+ transition((code & 1) ? vh : 0.0, 0, tr, tr);
+    V(dout1) <+ transition(((code >> 1) & 1) ? vh : 0.0, 0, tr, tr);
+    V(dout2) <+ transition(((code >> 2) & 1) ? vh : 0.0, 0, tr, tr);
+    V(dout3) <+ transition(((code >> 3) & 1) ? vh : 0.0, 0, tr, tr);
+    V(dout4) <+ transition(((code >> 4) & 1) ? vh : 0.0, 0, tr, tr);
+end
+endmodule
