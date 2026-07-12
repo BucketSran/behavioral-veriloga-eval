@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-097",
+    "canonical_task_slug": "097-programmable-stimulus-sequencer",
+    "family_spec_sha256": "2e592752afa20eb01640e0d6ee203ea98c79ca48b216a406dd9cfece42b51d8e",
+    "mutation_catalog_sha256": "055e88f4d17cd5db5ea987b5d124850b5a0db0fa36ca6bedd49b7bfb2fb18fcd",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "097",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_ignore_gate",
+    "testbench_suite": [
+      "neg_002_flat_ramp",
+      "neg_001_zero",
+      "neg_005_metric_scale_low",
+      "neg_003_fixed_sine_not_chirp",
+      "neg_004_ignore_gate"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "a041af7aa7df95537176d7cadd29ceba411c703506dc72895f5e526ca8890d30",
+    "changed_artifacts": [
+      "programmable_stimulus_sequencer.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_ignore_gate",
+    "rationale": "Select fault class behavioral_contract_near_miss under trigger 'targeted stimulus exercises the violated observable contract for Programmable Stimulus Sequencer' because it exercises P_BURST_GATE, P_BURST_IDLE, P_CONTROL_DRIVEN_SELECTION, P_RAMP_MODE, P_RESET_IDLE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 28,
+    "source_preferred_seed": "neg_002_flat_ramp",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

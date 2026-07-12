@@ -1,0 +1,191 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "final_step_file_metric_ref",
+            "parameters": [
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets ref rising-crossing threshold relative to VSS",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real within the VSS-to-VDD logic range"
+              },
+              {
+                "default": 2e-10,
+                "name": "tedge",
+                "override_behavior": "sets metric_out transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tedge > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VDD",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VSS",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ref",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "metric_out",
+                "position": 3
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "final_step_file_metric_ref.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "091",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "measurement_instrumentation_flows",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "voltage-domain event-driven transient measurement Verilog-A with a final_step text-metric side effect",
+    "title": "Final Step File Metric"
+  },
+  "modeling_constraints": [
+    "Use deterministic rising-crossing count state and a final_step text-metric write.",
+    "Smooth only the retained metric target rather than a continuously varying branch expression.",
+    "Do not generate waveform or validation artifacts or use current contributions, transistor-level devices, ddt, or idt."
+  ],
+  "properties": [
+    {
+      "id": "P_ZERO_INITIAL_STATE",
+      "observable_contract": "Before any qualifying ref edge, the event count and metric_out are zero.",
+      "required_signals": [
+        "time",
+        "ref",
+        "metric_out"
+      ]
+    },
+    {
+      "id": "P_RISING_EDGE_COUNT",
+      "observable_contract": "Every rising ref crossing through vth increments the retained event count exactly once; falling crossings do not.",
+      "required_signals": [
+        "time",
+        "ref",
+        "metric_out"
+      ]
+    },
+    {
+      "id": "P_NORMALIZED_METRIC",
+      "observable_contract": "Metric_out equals the VDD-to-VSS rail span multiplied by the retained event count divided by four.",
+      "required_signals": [
+        "time",
+        "vdd",
+        "vss",
+        "ref",
+        "metric_out"
+      ]
+    },
+    {
+      "id": "P_EVENT_UPDATED_OUTPUT",
+      "observable_contract": "Metric_out changes only after counted rising events and uses finite transition smoothing of the retained target.",
+      "required_signals": [
+        "time",
+        "ref",
+        "metric_out"
+      ]
+    },
+    {
+      "id": "P_FINAL_TEXT_RECORD",
+      "observable_contract": "At final_step, the module emits one text metric record to candidate.out in the simulator working directory with format count=<integer> metric=<fixed-point to three decimals>.",
+      "required_signals": [
+        "time",
+        "ref",
+        "metric_out"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/final_step_file_metric_ref.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-591",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vdd",
+            "port_ref": "VDD",
+            "position": 0
+          },
+          {
+            "net": "vss",
+            "port_ref": "VSS",
+            "position": 1
+          },
+          {
+            "net": "ref",
+            "port_ref": "ref",
+            "position": 2
+          },
+          {
+            "net": "metric_out",
+            "port_ref": "metric_out",
+            "position": 3
+          }
+        ],
+        "module_ref": "final_step_file_metric_ref",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vdd",
+      "vss",
+      "ref",
+      "metric_out"
+    ]
+  }
+}

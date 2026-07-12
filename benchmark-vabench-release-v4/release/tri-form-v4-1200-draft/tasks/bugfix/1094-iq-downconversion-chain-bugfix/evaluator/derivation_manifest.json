@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-094",
+    "canonical_task_slug": "094-iq-downconversion-chain",
+    "family_spec_sha256": "841e97dcb331a20eb0b027b13bccfe0bbcf1fc41677c868946d4a30e6e9e6231",
+    "mutation_catalog_sha256": "fac84a85eb4ee68f49294f0237a9b78b9568dc6ad832461ad7664eaf7c37f9fb",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "094",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_event_edge_wrong",
+    "testbench_suite": [
+      "neg_002_threshold_shifted",
+      "neg_003_event_edge_wrong",
+      "neg_001_zero",
+      "neg_004_reset_polarity_wrong",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "aa3d4786bfa8cd19f66c8e8b875842fd5ae0b69bfffd12dea701cc6ec931ffa4",
+    "changed_artifacts": [
+      "iq_downconversion_chain.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_event_edge_wrong",
+    "rationale": "Select fault class event_edge_polarity_error under trigger 'event-timing stimulus distinguishes the required active edge for IQ Downconversion Chain' because it exercises P_BASEBAND_UPDATES, P_LO_MONITORS, P_MIXER_MONITORS, P_PHASE_MONITOR, P_QUADRATURE_SEQUENCE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 37,
+    "source_preferred_seed": "neg_002_threshold_shifted",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

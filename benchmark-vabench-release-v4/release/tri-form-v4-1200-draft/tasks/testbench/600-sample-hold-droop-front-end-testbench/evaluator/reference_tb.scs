@@ -1,0 +1,26 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/sample_hold_droop_ref.va"
+
+Vvdd (vdd 0) vsource dc=0.9
+Vvss (vss 0) vsource dc=0.0
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=5n rise=50p fall=50p width=8n period=20n
+Vvin (vin 0) vsource type=pwl wave=[ \
+  0 0.22 \
+  24.95n 0.22 \
+  25.10n 0.74 \
+  64.95n 0.74 \
+  65.10n 0.28 \
+  104.95n 0.28 \
+  105.10n 0.81 \
+  144.95n 0.81 \
+  145.10n 0.36 \
+  170n 0.36 \
+]
+
+XDUT (vdd vss clk vin vout valid coarse) sample_hold_droop_ref vth=0.45 tau=90n dt=0.5n taperture=200p valid_width=2n trf=40p
+
+
+tran tran stop=170n maxstep=0.1n
+save vdd vss clk vin vout valid coarse

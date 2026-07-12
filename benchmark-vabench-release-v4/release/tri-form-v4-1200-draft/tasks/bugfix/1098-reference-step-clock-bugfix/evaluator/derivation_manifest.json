@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-098",
+    "canonical_task_slug": "098-reference-step-clock",
+    "family_spec_sha256": "8f654d61171c2a4a68f399503485b66c1b40c9701bda1790b31e1781624e73fc",
+    "mutation_catalog_sha256": "a630c9a3336fdd5cd5e9b03eaba6044270f456800eb9e4b06c395aa22044dcf8",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "098",
+  "negative_assignment": {
+    "bugfix_seed": "neg_005_bad_duty_cycle",
+    "testbench_suite": [
+      "neg_002_no_frequency_step",
+      "neg_005_bad_duty_cycle",
+      "neg_003_wrong_post_period",
+      "neg_001_zero",
+      "neg_004_late_switch"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "c081ce8ab68515cb0e345bb4a3c3dcc1dea451b0b2f16d0bf83acd08056eb2f4",
+    "changed_artifacts": [
+      "ref_step_clk.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_005_bad_duty_cycle",
+    "rationale": "Select fault class event_edge_polarity_error under trigger 'event-timing stimulus distinguishes the required active edge for Reference Step Clock' because it exercises P_CADENCE_STEP, P_HALF_DUTY_CYCLE, P_POST_SWITCH_PERIOD, P_PRE_SWITCH_PERIOD as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 34,
+    "source_preferred_seed": "neg_002_no_frequency_step",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

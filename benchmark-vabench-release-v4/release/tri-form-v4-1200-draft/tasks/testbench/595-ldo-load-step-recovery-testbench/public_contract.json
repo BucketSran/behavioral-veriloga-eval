@@ -1,0 +1,248 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "ldo_load_step_recovery_flow",
+            "parameters": [
+              {
+                "default": 1e-10,
+                "name": "tr",
+                "override_behavior": "sets output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets clock and reset logic threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "metric",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "load_mon",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "ctrl_mon",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "ldo_load_step_recovery_flow.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "095",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "bias_reference_power_management",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "LDO Load Step Recovery"
+  },
+  "modeling_constraints": [
+    "Use deterministic rising-edge sampled load-step and recovery state.",
+    "Use bounded smoothed voltage contributions only.",
+    "Do not use branch-current contributions, transistor-level devices, AC/noise analysis, KCL/KVL regulation loops, or validation side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_REGULATION_STATE",
+      "observable_contract": "Active-high reset initializes out and target to 0.60 V, load_mon to 0.10 V, ctrl_mon to 0.50 V, metric to 0.9 V, and clears recovery progress.",
+      "required_signals": [
+        "time",
+        "rst",
+        "out",
+        "metric",
+        "load_mon",
+        "ctrl_mon"
+      ]
+    },
+    {
+      "id": "P_BOUNDED_LOAD_AND_TARGET",
+      "observable_contract": "Each non-reset rising clk edge clips vin to 0 V through 0.9 V on load_mon and uses the public load-dependent target 0.61 V minus 0.025 times load.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "vin",
+        "load_mon",
+        "out"
+      ]
+    },
+    {
+      "id": "P_CONTROL_MONITOR",
+      "observable_contract": "Ctrl_mon represents the public load and regulation-error control expression and remains clamped to 0.05 V through 0.85 V.",
+      "required_signals": [
+        "time",
+        "clk",
+        "load_mon",
+        "out",
+        "ctrl_mon"
+      ]
+    },
+    {
+      "id": "P_HEAVY_LOAD_DROOP",
+      "observable_contract": "A sampled load increase greater than 0.20 V causes the public 0.13 V transient droop before first-order recovery and restarts recovery qualification.",
+      "required_signals": [
+        "time",
+        "clk",
+        "load_mon",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_LIGHT_LOAD_KICK",
+      "observable_contract": "A sampled load decrease greater than 0.20 V causes the public 0.05 V light-load recovery kick before first-order recovery and restarts qualification.",
+      "required_signals": [
+        "time",
+        "clk",
+        "load_mon",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_RECOVERY_AND_SETTLING",
+      "observable_contract": "Every non-reset update applies the public 0.30 first-order recovery, clamps out to 0.20 V through 0.75 V, and sets metric high only after at least five updates with target error below 0.045 V.",
+      "required_signals": [
+        "time",
+        "clk",
+        "out",
+        "metric",
+        "load_mon"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/ldo_load_step_recovery_flow.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-595",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 2
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 3
+          },
+          {
+            "net": "metric",
+            "port_ref": "metric",
+            "position": 4
+          },
+          {
+            "net": "load_mon",
+            "port_ref": "load_mon",
+            "position": 5
+          },
+          {
+            "net": "ctrl_mon",
+            "port_ref": "ctrl_mon",
+            "position": 6
+          }
+        ],
+        "module_ref": "ldo_load_step_recovery_flow",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric",
+      "load_mon",
+      "ctrl_mon"
+    ]
+  }
+}

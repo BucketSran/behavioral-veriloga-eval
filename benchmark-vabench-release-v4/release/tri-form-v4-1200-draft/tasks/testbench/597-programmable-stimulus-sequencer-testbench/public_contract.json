@@ -1,0 +1,229 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "programmable_stimulus_sequencer",
+            "parameters": [
+              {
+                "default": 8e-11,
+                "name": "tr",
+                "override_behavior": "sets rise and fall smoothing for out and metric without changing segment selection",
+                "type": "real",
+                "units": "s",
+                "valid_range": "finite real; use tr >= 0 for physical transition smoothing"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "mode",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "gate",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "metric",
+                "position": 5
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "programmable_stimulus_sequencer.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "097",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "stimulus_source_generators",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Programmable Stimulus Sequencer"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-coded ramp, chirp, and gated burst generation.",
+    "Use smoothed voltage contributions only; absolute transient time may shape public stimulus segments.",
+    "Do not use current contributions, ddt(), idt(), transistor-level devices, waveform tables, validation hooks, or simulator-specific side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_IDLE",
+      "observable_contract": "When rst is above the 0.45 V control threshold, out is held near 0.45 V and metric is low.",
+      "required_signals": [
+        "time",
+        "rst",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_RAMP_MODE",
+      "observable_contract": "For mode below 0.30 V outside reset, out produces a monotonic ramp segment from about 0.18 V toward 0.45 V and metric is near 0.20 V.",
+      "required_signals": [
+        "time",
+        "rst",
+        "mode",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_CHIRP_MODE",
+      "observable_contract": "For mode from 0.30 V through below 0.60 V, out is a sine segment centered near 0.45 V whose instantaneous frequency increases over the segment, with metric near 0.50 V.",
+      "required_signals": [
+        "time",
+        "rst",
+        "mode",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_BURST_GATE",
+      "observable_contract": "For mode at or above 0.60 V and gate high, out produces a deterministic PRBS-like burst between the low and high stimulus levels.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "mode",
+        "gate",
+        "out"
+      ]
+    },
+    {
+      "id": "P_BURST_IDLE",
+      "observable_contract": "In burst mode with gate low, out returns near 0.45 V and metric reports the idle rather than active-burst status.",
+      "required_signals": [
+        "time",
+        "rst",
+        "mode",
+        "gate",
+        "out",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_CONTROL_DRIVEN_SELECTION",
+      "observable_contract": "Mode and gate behavior follows the voltage-coded inputs over arbitrary legal control schedules rather than a fixed stimulus timeline.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "mode",
+        "gate",
+        "out",
+        "metric"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/programmable_stimulus_sequencer.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-597",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "mode",
+            "port_ref": "mode",
+            "position": 2
+          },
+          {
+            "net": "gate",
+            "port_ref": "gate",
+            "position": 3
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 4
+          },
+          {
+            "net": "metric",
+            "port_ref": "metric",
+            "position": 5
+          }
+        ],
+        "module_ref": "programmable_stimulus_sequencer",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "mode",
+      "gate",
+      "out",
+      "metric"
+    ]
+  }
+}
