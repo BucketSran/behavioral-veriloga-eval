@@ -1,0 +1,39 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=72n maxstep=100p"
+    ],
+    "body_lines": [
+      "Vi_in (i_in 0) vsource type=pwl wave=[0 0.180 9n 0.180 15n 0.680 28n 0.680 34n 0.440 48n 0.440 72n 0.285]",
+      "Vq_in (q_in 0) vsource type=pwl wave=[0 0.270 9n 0.270 15n 0.680 28n 0.680 34n 0.420 48n 0.420 72n 0.307]",
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=5n width=2.5n delay=1.2n rise=60p fall=60p",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.7n 0.9 1.8n 0 72n 0]",
+      "Venable (enable 0) vsource type=pwl wave=[0 0 4.5n 0 4.6n 0.9 44.64n 0.9 44.74n 0 50.64n 0 50.74n 0.9 72n 0.9]",
+      "",
+      "XDUT (i_in q_in clk rst enable i_out q_out amp_error_metric phase_error_metric balanced) polyphase_iq_balance_monitor_top",
+      ""
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "c424b457fbba5fa130fda9c792b98b9434a31983a5009bb74f842169fb459ced",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "100n"
+  },
+  "profile_name": "score",
+  "property_ids": [
+    "P_ON_RESET_OR_WHEN_DISABLED_DRIVE",
+    "P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+    "P_DRIVE_CORRECTED_I_Q_OUTPUTS_WITH",
+    "P_EXPOSE_AMPLITUDE_AND_PHASE_ERROR_PROXIES",
+    "P_ASSERT_BALANCED_ONLY_WHEN_BOTH_METRICS"
+  ],
+  "public_visible": false,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {}
+}

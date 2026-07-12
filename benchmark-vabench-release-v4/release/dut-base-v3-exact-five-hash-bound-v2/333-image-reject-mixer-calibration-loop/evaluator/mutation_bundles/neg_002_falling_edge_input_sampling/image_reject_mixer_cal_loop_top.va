@@ -1,0 +1,75 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module image_reject_mixer_cal_loop_top(rf_in, lo_i, lo_q, clk, rst, enable, i_out, q_out, image_metric, calibrated);
+input rf_in, lo_i, lo_q, clk, rst, enable;
+output i_out, q_out, image_metric, calibrated;
+electrical rf_in, lo_i, lo_q, clk, rst, enable, i_out, q_out, image_metric, calibrated;
+electrical gain_trim, phase_trim, raw_image_metric;
+electrical sampled_rf, sampled_lo_i, sampled_lo_q;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vcm = 0.45;
+parameter real vth = 0.45;
+parameter real tr = 200p from (0:inf);
+parameter real image_tol = 40e-3;
+
+real sampled_rf_v;
+real sampled_lo_i_v;
+real sampled_lo_q_v;
+real pending_rf_v;
+real pending_lo_i_v;
+real pending_lo_q_v;
+real delayed_rf_v;
+real delayed_lo_i_v;
+real delayed_lo_q_v;
+
+analog begin
+    @(initial_step) begin
+        sampled_rf_v = vcm;
+        sampled_lo_i_v = vcm;
+        sampled_lo_q_v = vcm;
+        pending_rf_v = vcm;
+        pending_lo_i_v = vcm;
+        pending_lo_q_v = vcm;
+        delayed_rf_v = vcm;
+        delayed_lo_i_v = vcm;
+        delayed_lo_q_v = vcm;
+    end
+
+    @(cross(V(clk) - vth, -1) or cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+        if (V(rst) > vth || V(enable) <= vth) begin
+            sampled_rf_v = vcm;
+            sampled_lo_i_v = vcm;
+            sampled_lo_q_v = vcm;
+            pending_rf_v = vcm;
+            pending_lo_i_v = vcm;
+            pending_lo_q_v = vcm;
+            delayed_rf_v = vcm;
+            delayed_lo_i_v = vcm;
+            delayed_lo_q_v = vcm;
+        end else begin
+            sampled_rf_v = delayed_rf_v;
+            sampled_lo_i_v = delayed_lo_i_v;
+            sampled_lo_q_v = delayed_lo_q_v;
+            delayed_rf_v = pending_rf_v;
+            delayed_lo_i_v = pending_lo_i_v;
+            delayed_lo_q_v = pending_lo_q_v;
+            pending_rf_v = V(rf_in);
+            pending_lo_i_v = V(lo_i);
+            pending_lo_q_v = V(lo_q);
+        end
+    end
+
+    V(sampled_rf) <+ transition(sampled_rf_v, 0, tr, tr);
+    V(sampled_lo_i) <+ transition(sampled_lo_i_v, 0, tr, tr);
+    V(sampled_lo_q) <+ transition(sampled_lo_q_v, 0, tr, tr);
+end
+
+quadrature_mixer_proxy #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr))
+    XMIX(sampled_rf, sampled_lo_i, sampled_lo_q, rst, enable, gain_trim, phase_trim, i_out, q_out, raw_image_metric);
+
+image_cal_controller #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr), .image_tol(image_tol))
+    XCAL(clk, rst, enable, raw_image_metric, gain_trim, phase_trim, image_metric, calibrated);
+endmodule

@@ -1,0 +1,294 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "baseband_antialias_filter_macro",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "250p from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "bw_1",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "bw_0",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "bandwidth_metric",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "baseband_antialias_filter_macro.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "334",
+  "identity": {
+    "category": "filter_integrator_macromodels",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Baseband Anti-alias Filter Macro"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_DRIVE",
+      "observable_contract": "On reset or when disabled, drive `vout` to `vcm`, clear metric, and clear `valid`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "bw_1",
+        "bw_0",
+        "vout",
+        "bandwidth_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+      "observable_contract": "On each enabled rising `clk` edge, decode `bw_1..bw_0` as a bandwidth setting.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "bw_1",
+        "bw_0",
+        "vout",
+        "bandwidth_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_UPDATE_VOUT_AS_A_FIRST_ORDER",
+      "observable_contract": "Update `vout` as a first-order discrete-time low-pass response to `vin`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "bw_1",
+        "bw_0",
+        "vout",
+        "bandwidth_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_HIGHER_BANDWIDTH_CODE_MUST_MOVE_VOUT",
+      "observable_contract": "Higher bandwidth code must move `vout` closer to `vin` per update.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "bw_1",
+        "bw_0",
+        "vout",
+        "bandwidth_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_EXPOSE_THE_ACTIVE_BANDWIDTH_CODE_ON",
+      "observable_contract": "Expose the active bandwidth code on `bandwidth_metric` and assert `valid` after the first update.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "bw_1",
+        "bw_0",
+        "vout",
+        "bandwidth_metric",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1334",
+    "dut": "v4-334",
+    "testbench": "v4-834"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 3
+          },
+          {
+            "net": "bw_1",
+            "port_ref": "bw_1",
+            "position": 4
+          },
+          {
+            "net": "bw_0",
+            "port_ref": "bw_0",
+            "position": 5
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 6
+          },
+          {
+            "net": "bandwidth_metric",
+            "port_ref": "bandwidth_metric",
+            "position": 7
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 8
+          }
+        ],
+        "module_ref": "baseband_antialias_filter_macro",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "clk",
+      "rst",
+      "enable",
+      "bw_1",
+      "bw_0",
+      "vout",
+      "bandwidth_metric",
+      "valid"
+    ]
+  }
+}

@@ -1,0 +1,66 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module quadrature_mixer_proxy(rf_in, lo_i, lo_q, rst, enable, gain_trim, phase_trim, i_out, q_out, raw_image_metric);
+input rf_in, lo_i, lo_q, rst, enable, gain_trim, phase_trim;
+output i_out, q_out, raw_image_metric;
+electrical rf_in, lo_i, lo_q, rst, enable, gain_trim, phase_trim, i_out, q_out, raw_image_metric;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vcm = 0.45;
+parameter real vth = 0.45;
+parameter real tr = 200p from (0:inf);
+
+real rf_dev;
+real lo_i_sign;
+real lo_q_sign;
+real gain_corr;
+real phase_corr;
+real i_dev;
+real q_dev;
+real i_v;
+real q_v;
+real image_v;
+
+analog function real absval;
+    input x;
+    real x;
+    begin
+        absval = (x < 0.0) ? -x : x;
+    end
+endfunction
+
+analog function real cliprail;
+    input x;
+    real x;
+    begin
+        if (x < vss) cliprail = vss;
+        else if (x > vdd) cliprail = vdd;
+        else cliprail = x;
+    end
+endfunction
+
+analog begin
+    if (V(rst) > vth || V(enable) <= vth) begin
+        i_v = vcm;
+        q_v = vcm;
+        image_v = vss;
+    end else begin
+        rf_dev = V(rf_in) - vcm;
+        lo_i_sign = (V(lo_i) > vth) ? 1.0 : -1.0;
+        lo_q_sign = (V(lo_q) > vth) ? 1.0 : -1.0;
+        gain_corr = (V(gain_trim) - vcm) * 0.8;
+        phase_corr = (V(phase_trim) - vcm) * 0.6;
+        i_dev = (rf_dev * lo_i_sign >= 0.0) ? (vss - vcm) : (vdd - vcm);
+        q_dev = -rf_dev * lo_q_sign * (1.0 + gain_corr) - phase_corr * rf_dev * lo_i_sign;
+        i_v = cliprail(vcm + i_dev);
+        q_v = cliprail(vcm + q_dev);
+        image_v = cliprail(absval(i_dev + q_dev) * 0.5);
+    end
+
+    V(i_out) <+ i_v;
+    V(q_out) <+ q_v;
+    V(raw_image_metric) <+ image_v;
+end
+endmodule

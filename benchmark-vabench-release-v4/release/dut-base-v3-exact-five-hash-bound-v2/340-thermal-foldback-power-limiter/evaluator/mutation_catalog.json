@@ -1,0 +1,148 @@
+{
+  "family_id": "340",
+  "gold_bundle_sha256": "31a48771b2eb6a6a018e870cc74402c6a44cbd148c1ea48b13f2688c1ae62098",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "command_limiter.va": "20422f2a3eac14905a74a0be1e5cd76ae68ef2f208e34083f78a8bef584faa65",
+        "foldback_controller.va": "369a445cd985909f89fbded573d0c722d4cc9463e800774ce13e5e84611ebe18",
+        "thermal_foldback_power_limiter_top.va": "1fe7b5b816d3b3d84954aa2eb6a44c5cf2fdbe3a96d1d9eef2dd31bef182966b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ON_RESET_OR_WHEN_DISABLED_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_disable_retains_limited_command/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "command_limiter.va",
+        "foldback_controller.va",
+        "thermal_foldback_power_limiter_top.va"
+      ],
+      "fault_class": "disable_clear_retains_limited_command",
+      "id": "neg_001_disable_retains_limited_command",
+      "trigger_condition": "reset is asserted or enable is low while power_cmd remains nonzero",
+      "violated_property_ids": [
+        "P_ON_RESET_OR_WHEN_DISABLED_CLEAR"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "command_limiter.va": "c260a6c11e4b9798d7110215a3a4476b67de5fa1d04b03499ad0d9035a35ab74",
+        "foldback_controller.va": "cc050ad5af4e4e3919fd6c9f3f12b3e6cf53eebf9070e80ea491517c8b5d014c",
+        "thermal_foldback_power_limiter_top.va": "1fe7b5b816d3b3d84954aa2eb6a44c5cf2fdbe3a96d1d9eef2dd31bef182966b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ON_EACH_ENABLED_RISING_CLK_EDGE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_temperature_subsampled_on_falling_edge/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "command_limiter.va",
+        "foldback_controller.va",
+        "thermal_foldback_power_limiter_top.va"
+      ],
+      "fault_class": "temperature_compared_only_every_fourth_falling_edge",
+      "id": "neg_002_temperature_subsampled_on_falling_edge",
+      "trigger_condition": "temp_sense changes before an enabled rising clock edge",
+      "violated_property_ids": [
+        "P_ON_EACH_ENABLED_RISING_CLK_EDGE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "command_limiter.va": "84d9168cb7b6b835ea6ee44806287d6bdfec4403a6ac99e714ca2fb1eb5ac522",
+        "foldback_controller.va": "369a445cd985909f89fbded573d0c722d4cc9463e800774ce13e5e84611ebe18",
+        "thermal_foldback_power_limiter_top.va": "1fe7b5b816d3b3d84954aa2eb6a44c5cf2fdbe3a96d1d9eef2dd31bef182966b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PASS_POWER_CMD_THROUGH_WHILE_TEMPERATURE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_below_trip_command_attenuated/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "command_limiter.va",
+        "foldback_controller.va",
+        "thermal_foldback_power_limiter_top.va"
+      ],
+      "fault_class": "below_trip_command_incorrectly_attenuated",
+      "id": "neg_003_below_trip_command_attenuated",
+      "trigger_condition": "temperature is below temp_trip while the limiter is enabled",
+      "violated_property_ids": [
+        "P_PASS_POWER_CMD_THROUGH_WHILE_TEMPERATURE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "command_limiter.va": "c260a6c11e4b9798d7110215a3a4476b67de5fa1d04b03499ad0d9035a35ab74",
+        "foldback_controller.va": "de5a72923d525e3dcb3b3f5cecd777e31fa1eb1558f50ba161f452d98ea71dc0",
+        "thermal_foldback_power_limiter_top.va": "1fe7b5b816d3b3d84954aa2eb6a44c5cf2fdbe3a96d1d9eef2dd31bef182966b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_REDUCE_LIMITED_CMD_AS_TEMPERATURE_RISES"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_foldback_state_stuck_after_overtemperature/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "command_limiter.va",
+        "foldback_controller.va",
+        "thermal_foldback_power_limiter_top.va"
+      ],
+      "fault_class": "foldback_reduction_bypassed_and_metric_stuck_after_overtemperature",
+      "id": "neg_004_foldback_state_stuck_after_overtemperature",
+      "trigger_condition": "temperature rises above temp_trip and later returns below the threshold while the limiter remains enabled",
+      "violated_property_ids": [
+        "P_REDUCE_LIMITED_CMD_AS_TEMPERATURE_RISES"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "foldback_controller.va": "33e2a707cd960624d18be324ef09d297b87bbb21f5ce782ba4cdf487849672fa"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ASSERT_THERMAL_OK_ONLY_WHEN_NO"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_thermal_ok_stuck_high/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "foldback_controller.va"
+      ],
+      "fault_class": "thermal_ok_ignores_foldback_activity",
+      "id": "neg_005_thermal_ok_stuck_high",
+      "trigger_condition": "temperature exceeds the foldback trip point while the controller is enabled",
+      "violated_property_ids": [
+        "P_ASSERT_THERMAL_OK_ONLY_WHEN_NO"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

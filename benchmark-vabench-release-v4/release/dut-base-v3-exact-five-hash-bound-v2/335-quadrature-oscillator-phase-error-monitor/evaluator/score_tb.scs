@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/quadrature_oscillator_phase_error_monitor.va"
+
+Vclk_i (clk_i 0) vsource type=pwl wave=[0 0 9.9n 0 10n 0.9 12n 0.9 12.2n 0 19.9n 0 20n 0.9 22n 0.9 22.2n 0 29.9n 0 30n 0.9 32n 0.9 32.2n 0 39.9n 0 40n 0.9 42n 0.9 42.2n 0 49.9n 0 50n 0.9 52n 0.9 52.2n 0 59.9n 0 60n 0.9 62n 0.9 62.2n 0 69.9n 0 70n 0.9 72n 0.9 72.2n 0 79.9n 0 80n 0.9 82n 0.9 82.2n 0 92n 0]
+Vclk_q (clk_q 0) vsource type=pwl wave=[0 0 12.4n 0 12.5n 0.9 14.5n 0.9 14.7n 0 22.4n 0 22.5n 0.9 24.5n 0.9 24.7n 0 32.4n 0 32.5n 0.9 34.5n 0.9 34.7n 0 43.7n 0 43.8n 0.9 45.8n 0.9 46n 0 52.4n 0 52.5n 0.9 54.5n 0.9 54.7n 0 62.4n 0 62.5n 0.9 64.5n 0.9 64.7n 0 75.1n 0 75.2n 0.9 77.2n 0.9 77.4n 0 82.4n 0 82.5n 0.9 84.5n 0.9 84.7n 0 92n 0]
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]
+Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 80n 0.9 80.2n 0 92n 0]
+XDUT (clk_i clk_q rst enable phase_error_metric quadrature_ok valid) quadrature_oscillator_phase_error_monitor
+
+
+tran tran stop=92n maxstep=200p
+save clk_i clk_q rst enable phase_error_metric quadrature_ok valid

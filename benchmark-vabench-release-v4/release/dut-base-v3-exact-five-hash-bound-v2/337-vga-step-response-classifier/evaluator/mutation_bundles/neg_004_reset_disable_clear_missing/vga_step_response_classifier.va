@@ -1,0 +1,36 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module vga_step_response_classifier(vin, clk, rst, enable, gain_2, gain_1, gain_0, vout, overshoot_metric, settled);
+    inout vin, clk, rst, enable, gain_2, gain_1, gain_0, vout, overshoot_metric, settled;
+    electrical vin, clk, rst, enable, gain_2, gain_1, gain_0, vout, overshoot_metric, settled;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vcm = 0.45; parameter real vth = 0.45; parameter real tr = 200p from (0:inf);
+    parameter real gain_lsb = 0.5; parameter real settle_tol = 12e-3; parameter real tick = 250p from (0:inf);
+    integer code, mapped_code, prev_code, stable_count; real prev_clk, vout_v, metric_v, settled_v, target;
+    analog function real clip01; input x; real x; begin if (x < vss) clip01 = vss; else if (x > vdd) clip01 = vdd; else clip01 = x; end endfunction
+    analog function real absval; input x; real x; begin absval = (x < 0.0) ? -x : x; end endfunction
+    analog begin
+        @(initial_step) begin prev_clk = 0.0; prev_code = 0; stable_count = 0; vout_v = vcm; metric_v = 0.0; settled_v = 0.0; end
+        @(timer(0, tick)) begin
+            if (0) begin
+                prev_code = 0; stable_count = 0; vout_v = vcm; metric_v = 0.0; settled_v = 0.0;
+            end else if (V(clk) > vth && prev_clk <= vth) begin
+                code = 0;
+                if (V(gain_0) > vth) code = code + 1;
+                if (V(gain_1) > vth) code = code + 2;
+                if (V(gain_2) > vth) code = code + 4;
+                mapped_code = code;
+                target = clip01(vcm + (1.0 + gain_lsb * mapped_code) * (V(vin) - vcm));
+                vout_v = target;
+                metric_v = absval(mapped_code - prev_code) * (vdd / 7.0);
+                if (mapped_code == prev_code) stable_count = stable_count + 1; else stable_count = 0;
+                settled_v = ((stable_count >= 2) ? vdd : vss);
+                prev_code = mapped_code;
+            end
+            prev_clk = V(clk);
+        end
+        V(vout) <+ transition(vout_v, 0, tr, tr);
+        V(overshoot_metric) <+ transition(metric_v, 0, tr, tr);
+        V(settled) <+ transition(settled_v, 0, tr, tr);
+    end
+endmodule

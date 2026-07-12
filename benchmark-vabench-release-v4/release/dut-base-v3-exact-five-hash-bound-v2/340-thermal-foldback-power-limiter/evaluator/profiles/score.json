@@ -1,0 +1,39 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=72n maxstep=100p"
+    ],
+    "body_lines": [
+      "Vpower_cmd (power_cmd 0) vsource type=pwl wave=[0 0.180 9n 0.180 15n 0.740 28n 0.740 34n 0.420 48n 0.420 72n 0.285]",
+      "Vtemp_sense (temp_sense 0) vsource type=pwl wave=[0 0.180 9n 0.180 15n 0.680 28n 0.680 34n 0.440 48n 0.440 72n 0.285]",
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=5n width=2.5n delay=1.2n rise=60p fall=60p",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.7n 0.9 1.8n 0 72n 0]",
+      "Venable (enable 0) vsource type=pwl wave=[0 0 4.5n 0 4.6n 0.9 44.64n 0.9 44.74n 0 50.64n 0 50.74n 0.9 72n 0.9]",
+      "",
+      "XDUT (power_cmd temp_sense clk rst enable limited_cmd foldback_metric thermal_ok) thermal_foldback_power_limiter_top",
+      ""
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "e39ea0d9a4aee75d3f3218e6680916b43e2e7b6788034e918de9218ab57e979c",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "100n"
+  },
+  "profile_name": "score",
+  "property_ids": [
+    "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+    "P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+    "P_PASS_POWER_CMD_THROUGH_WHILE_TEMPERATURE",
+    "P_REDUCE_LIMITED_CMD_AS_TEMPERATURE_RISES",
+    "P_ASSERT_THERMAL_OK_ONLY_WHEN_NO"
+  ],
+  "public_visible": false,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {}
+}

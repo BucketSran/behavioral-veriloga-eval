@@ -1,0 +1,82 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "lna_blocker_compression_detector.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=92n maxstep=200p"
+    ],
+    "body_lines": [
+      "Vvin (vin 0) vsource type=pwl wave=[0 0.48 18n 0.48 18.2n 0.56 42n 0.56 42.2n 0.38 70n 0.38 92n 0.38]",
+      "Vblocker (blocker 0) vsource type=pwl wave=[0 0.45 25n 0.45 25.2n 0.72 55n 0.72 55.2n 0.86 78n 0.86 78.2n 0.50 92n 0.50]",
+      "Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 82n 0.9 82.2n 0 92n 0]",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]",
+      "XDUT (vin blocker enable rst vout compression_metric compressed) lna_blocker_compression_detector",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "blocker",
+      "enable",
+      "rst",
+      "vout",
+      "compression_metric",
+      "compressed"
+    ]
+  },
+  "family_id": "338",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "adb013bc2fe62a50132e085f10d412f4108b3bff3ee88e2307eea5f597f2308f",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "adb013bc2fe62a50132e085f10d412f4108b3bff3ee88e2307eea5f597f2308f",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ON_RESET_OR_WHEN_DISABLED_DRIVE",
+    "P_AMPLIFY_VIN_VCM_WITH_SMALL_SIGNAL",
+    "P_REDUCE_EFFECTIVE_GAIN_AS_BLOCKER_RISES",
+    "P_EXPOSE_GAIN_REDUCTION_ON_COMPRESSION_METRIC",
+    "P_ASSERT_COMPRESSED_ONLY_WHEN_THE_EFFECTIVE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "3ccef44161cf3afbba28e27420ba7e00195a9be8ff6296b015e685d2365cf2c1",
+    "family_spec_sha256": "e20f784230f1de26a917a62c03ff71218988c224bb8c03b2dbdaed30664797ce"
+  },
+  "task_id": "v4-338"
+}

@@ -1,0 +1,547 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "image_reject_mixer_cal_loop_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "40e-3",
+                "name": "image_tol",
+                "override_behavior": "overrides image_tol",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rf_in",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "lo_i",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "lo_q",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "i_out",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "q_out",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "image_metric",
+                "position": 8
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "calibrated",
+                "position": 9
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "image_reject_mixer_cal_loop_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "image_reject_mixer_cal_loop_top"
+            ],
+            "name": "quadrature_mixer_proxy",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rf_in",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "lo_i",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "lo_q",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "gain_trim",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "phase_trim",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "i_out",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "q_out",
+                "position": 8
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "raw_image_metric",
+                "position": 9
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "quadrature_mixer_proxy.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "image_reject_mixer_cal_loop_top"
+            ],
+            "name": "image_cal_controller",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "40e-3",
+                "name": "image_tol",
+                "override_behavior": "overrides image_tol",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "18e-3",
+                "name": "step",
+                "override_behavior": "overrides step",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "raw_image_metric",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "gain_trim",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "phase_trim",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "image_metric",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "calibrated",
+                "position": 7
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "image_cal_controller.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "family_id": "333",
+  "identity": {
+    "category": "rf_mixer_systems",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Image-reject Mixer Calibration Loop"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+      "observable_contract": "On reset or when disabled, clear outputs, image metric, and `calibrated`.",
+      "required_signals": [
+        "time",
+        "rf_in",
+        "lo_i",
+        "lo_q",
+        "clk",
+        "rst",
+        "enable",
+        "i_out",
+        "q_out",
+        "image_metric",
+        "calibrated"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+      "observable_contract": "On each enabled rising `clk` edge, sample RF and quadrature LO inputs as voltage-domain mixer proxies.",
+      "required_signals": [
+        "time",
+        "rf_in",
+        "lo_i",
+        "lo_q",
+        "clk",
+        "rst",
+        "enable",
+        "i_out",
+        "q_out",
+        "image_metric",
+        "calibrated"
+      ]
+    },
+    {
+      "id": "P_GENERATE_I_AND_Q_OUTPUTS_USING",
+      "observable_contract": "Generate I and Q outputs using opposite LO polarities.",
+      "required_signals": [
+        "time",
+        "rf_in",
+        "lo_i",
+        "lo_q",
+        "clk",
+        "rst",
+        "enable",
+        "i_out",
+        "q_out",
+        "image_metric",
+        "calibrated"
+      ]
+    },
+    {
+      "id": "P_UPDATE_A_SIMPLE_GAIN_PHASE_CORRECTION",
+      "observable_contract": "Update a simple gain/phase correction state to reduce the image metric.",
+      "required_signals": [
+        "time",
+        "rf_in",
+        "lo_i",
+        "lo_q",
+        "clk",
+        "rst",
+        "enable",
+        "i_out",
+        "q_out",
+        "image_metric",
+        "calibrated"
+      ]
+    },
+    {
+      "id": "P_ASSERT_CALIBRATED_AFTER_THREE_CONSECUTIVE_UPDA",
+      "observable_contract": "Assert `calibrated` after three consecutive updates with image metric below `image_tol`.",
+      "required_signals": [
+        "time",
+        "rf_in",
+        "lo_i",
+        "lo_q",
+        "clk",
+        "rst",
+        "enable",
+        "i_out",
+        "q_out",
+        "image_metric",
+        "calibrated"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1333",
+    "dut": "v4-333",
+    "testbench": "v4-833"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "rf_in",
+            "port_ref": "rf_in",
+            "position": 0
+          },
+          {
+            "net": "lo_i",
+            "port_ref": "lo_i",
+            "position": 1
+          },
+          {
+            "net": "lo_q",
+            "port_ref": "lo_q",
+            "position": 2
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 3
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 4
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 5
+          },
+          {
+            "net": "i_out",
+            "port_ref": "i_out",
+            "position": 6
+          },
+          {
+            "net": "q_out",
+            "port_ref": "q_out",
+            "position": 7
+          },
+          {
+            "net": "image_metric",
+            "port_ref": "image_metric",
+            "position": 8
+          },
+          {
+            "net": "calibrated",
+            "port_ref": "calibrated",
+            "position": 9
+          }
+        ],
+        "module_ref": "image_reject_mixer_cal_loop_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "rf_in",
+      "lo_i",
+      "lo_q",
+      "clk",
+      "rst",
+      "enable",
+      "i_out",
+      "q_out",
+      "image_metric",
+      "calibrated"
+    ]
+  }
+}

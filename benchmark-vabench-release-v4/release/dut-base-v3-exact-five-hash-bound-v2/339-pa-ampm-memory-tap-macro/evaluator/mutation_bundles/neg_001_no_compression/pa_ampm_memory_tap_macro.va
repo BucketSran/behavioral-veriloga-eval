@@ -1,0 +1,33 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pa_ampm_memory_tap_macro(vin, clk, rst, enable, drive, vout, am_metric, pm_metric, valid);
+    inout vin, clk, rst, enable, drive, vout, am_metric, pm_metric, valid;
+    electrical vin, clk, rst, enable, drive, vout, am_metric, pm_metric, valid;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vcm = 0.45; parameter real vth = 0.45; parameter real tr = 200p from (0:inf);
+    parameter real drive_start = 0.55; parameter real memory_gain = 0.2; parameter real tick = 250p from (0:inf);
+    real prev_clk, prev_amp, amp, drive_excess, gain, out_v, am_v, pm_v, valid_v;
+    analog function real absval; input x; real x; begin absval = (x < 0.0) ? -x : x; end endfunction
+    analog function real clip; input x; real x; begin if (x < vss) clip = vss; else if (x > vdd) clip = vdd; else clip = x; end endfunction
+    analog function real max0; input x; real x; begin max0 = (x > 0.0) ? x : 0.0; end endfunction
+    analog begin
+        @(initial_step) begin prev_clk = 0.0; prev_amp = 0.0; out_v = vcm; am_v = 0.0; pm_v = 0.0; valid_v = 0.0; end
+        @(timer(0, tick)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin prev_amp = 0.0; out_v = vcm; am_v = 0.0; pm_v = 0.0; valid_v = 0.0; end
+            else if (V(clk) > vth && prev_clk <= vth) begin
+                amp = V(vin) - vcm; drive_excess = max0(V(drive) - drive_start);
+                gain = 1.0 / (1.0 + (0.0));
+                out_v = clip(vcm + amp * gain + memory_gain * prev_amp);
+                am_v = vdd * (1.0 - gain);
+                pm_v = clip(vcm + memory_gain * absval(amp - prev_amp));
+                valid_v = vdd;
+                prev_amp = amp;
+            end
+            prev_clk = V(clk);
+        end
+        V(vout) <+ transition(out_v, 0, tr, tr);
+        V(am_metric) <+ transition(am_v, 0, tr, tr);
+        V(pm_metric) <+ transition(pm_v, 0, tr, tr);
+        V(valid) <+ transition(valid_v, 0, tr, tr);
+    end
+endmodule

@@ -1,0 +1,55 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module iq_normalizer(i_sample, q_sample, i_norm, q_norm);
+input i_sample, q_sample;
+output i_norm, q_norm;
+electrical i_sample, q_sample, i_norm, q_norm;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vcm = 0.45;
+parameter real target_dev = 0.22;
+parameter real tr = 200p from (0:inf);
+
+real i_dev;
+real q_dev;
+real abs_i;
+real abs_q;
+real max_dev;
+real scale;
+real i_v;
+real q_v;
+
+analog function real absval;
+    input x;
+    real x;
+    begin
+        absval = (x < 0.0) ? -x : x;
+    end
+endfunction
+
+analog function real cliprail;
+    input x;
+    real x;
+    begin
+        if (x < vss) cliprail = vss;
+        else if (x > vdd) cliprail = vdd;
+        else cliprail = x;
+    end
+endfunction
+
+analog begin
+    i_dev = V(i_sample) - vcm;
+    q_dev = V(q_sample) - vcm;
+    abs_i = absval(i_dev);
+    abs_q = absval(q_dev);
+    max_dev = (abs_i > abs_q) ? abs_i : abs_q;
+    scale = 5.0;
+    i_v = vcm + i_dev * scale;
+    q_v = vcm + q_dev * scale;
+
+    V(i_norm) <+ i_v;
+    V(q_norm) <+ q_v;
+end
+endmodule

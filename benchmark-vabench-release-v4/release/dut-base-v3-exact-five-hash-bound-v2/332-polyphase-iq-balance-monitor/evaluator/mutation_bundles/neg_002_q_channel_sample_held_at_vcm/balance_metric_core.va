@@ -1,0 +1,48 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module balance_metric_core(i_sample, q_sample, amp_error_metric, phase_error_metric);
+input i_sample, q_sample;
+output amp_error_metric, phase_error_metric;
+electrical i_sample, q_sample, amp_error_metric, phase_error_metric;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vcm = 0.45;
+parameter real amp_tol = 45e-3;
+parameter real phase_tol = 60e-3;
+parameter real tr = 200p from (0:inf);
+
+real i_dev;
+real q_dev;
+real amp_err;
+real phase_err;
+
+analog function real absval;
+    input x;
+    real x;
+    begin
+        absval = (x < 0.0) ? -x : x;
+    end
+endfunction
+
+analog function real cliprail;
+    input x;
+    real x;
+    begin
+        if (x < vss) cliprail = vss;
+        else if (x > vdd) cliprail = vdd;
+        else cliprail = x;
+    end
+endfunction
+
+analog begin
+    i_dev = V(i_sample) - vcm;
+    q_dev = V(q_sample) - vcm;
+    amp_err = absval(absval(i_dev) - absval(q_dev));
+    phase_err = absval(i_dev + q_dev);
+
+    V(amp_error_metric) <+ transition(cliprail(amp_err), 0, tr, tr);
+    V(phase_error_metric) <+ transition(cliprail(phase_err), 0, tr, tr);
+end
+endmodule

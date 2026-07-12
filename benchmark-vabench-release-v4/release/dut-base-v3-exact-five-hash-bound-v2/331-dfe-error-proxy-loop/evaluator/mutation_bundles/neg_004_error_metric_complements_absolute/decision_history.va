@@ -1,0 +1,41 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module decision_history(sample_in, decision_clk, rst, enable, hist_1, hist_0);
+    inout sample_in, decision_clk, rst, enable, hist_1, hist_0;
+    electrical sample_in, decision_clk, rst, enable, hist_1, hist_0;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    integer prev_decision;
+    integer prev_prev_decision;
+
+    analog begin
+        @(initial_step) begin
+            prev_decision = 0;
+            prev_prev_decision = 0;
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            prev_decision = 0;
+            prev_prev_decision = 0;
+        end
+
+        @(cross(V(decision_clk) - vth, +1)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                prev_decision = 0;
+                prev_prev_decision = 0;
+            end else begin
+                prev_prev_decision = prev_decision;
+                prev_decision = (V(sample_in) >= vcm) ? 1 : -1;
+            end
+        end
+
+        V(hist_1) <+ transition((V(rst) > vth || V(enable) <= vth) ? vcm : vcm + 0.35 * prev_decision, 0, tr, tr);
+        V(hist_0) <+ transition((V(rst) > vth || V(enable) <= vth) ? vcm : vcm + 0.35 * prev_prev_decision, 0, tr, tr);
+    end
+endmodule

@@ -1,0 +1,59 @@
+{
+  "component_fingerprints": {
+    "assembly": {
+      "policy_sha256": "91f4e21b94263e796c846aedef282c79d4abeb7ccc415a0e6f1311f8816b33a4",
+      "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+    },
+    "backend": {
+      "ahdl_like_sha256": "91ce239e5f278a6d5dfcde85ca2d820c5133d8f8a3de26dc6477164e703342f3",
+      "evas_sha256": "2d71c227644956df64209b49d0da6ef55bc6934891020eb26d762e8cb8cc6df2",
+      "spectre_sha256": "ac4c1cf785d5eab74058944d52bf40869e83c94e19202ab72c8e8a250c4dc51b"
+    },
+    "oracle": {
+      "checker_binding_sha256": "ac7cb1beaecdc8b1e5177af1d0af5ae9d93bd46a14bf04941bc3771d7be58805",
+      "checker_implementation_sha256": "029808328385a703386671ddb2c8c546f9df20676e39bdbaa2e8655c9d009fdf",
+      "checker_profile_sha256": "3d3cd1b73f858a7c1b0ccbe3639d9a4afa24d7f860b311adc82b897cbac06f9d",
+      "diagnostic_policy_sha256": "69b217a349cb0e8a3eab574e7e6d1af03f069fea668b15b37868ef3d2e7deea3",
+      "oracle_runner_sha256": "e70bd46cd3abdfd8ed9658cb13f64bc96e27d364d51ed0fdcd05f8139e63af2b",
+      "property_activation_policy_sha256": "8e9569fb0f756d84b75fbfb7261e62051c26d39e00f5ce8a28fb6138de2b5090"
+    },
+    "policy_id": "v4-dependency-scoped-evidence-v2",
+    "schema_version": "v4-evidence-components-v2",
+    "state": "carried_forward",
+    "task_inputs": {
+      "candidate_bundle_sha256": "4a3a0d874b16386f5987ab1971d485b54b76b98e3a344eda32ca348fbe1cbeb3",
+      "deck_sha256": "a1bcd44310f1e540c7f1e16c15b077d07b4f4f06bb9f54f5d2e9e6e238e25356",
+      "gold_bundle_sha256": "31a48771b2eb6a6a018e870cc74402c6a44cbd148c1ea48b13f2688c1ae62098",
+      "harness_spec_sha256": "e39ea0d9a4aee75d3f3218e6680916b43e2e7b6788034e918de9218ab57e979c",
+      "mutation_bundle_sha256": "4a3a0d874b16386f5987ab1971d485b54b76b98e3a344eda32ca348fbe1cbeb3",
+      "profile_sha256": "1d8ae65b57a62ff9dc364bd429ac9f9753d25c4522502bfc124255071edf5b22",
+      "property_contract_sha256": "8fbde14a0cc876a4e6abee5029272c22b3a91ee503493d81977e370b03ceafd1",
+      "public_support_bundle_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "trace_contract_sha256": "70846a6e1d6ff2d962f55370064663db7b50def2e62c2b225323f78d7fd73d75"
+    }
+  },
+  "diagnostics": {
+    "expected": "trigger=reset is asserted or enable is low while power_cmd remains nonzero; violated_properties=P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+    "observed": "EVAS: v4_340 checked=11 pass_errors=2 fold_errors=1 metric_errors=1 thermal_errors=1 reset_clear=False disabled_clear=False clear_errors=22; P_ASSERT_THERMAL_OK_ONLY_WHEN_NO mismatch_count=1; P_ON_EACH_ENABLED_RISING_CLK_EDGE mismatch_count=3; P_ON_RESET_OR_WHEN_DISABLED_CLEAR mismatch_count=24; P_PASS_POWER_CMD_THROUGH_WHILE_TEMPERATURE mismatch_count=2; P_REDUCE_LIMITED_CMD_AS_TEMPERATURE_RISES mismatch_count=2; Spectre: v4_340 checked=11 pass_errors=2 fold_errors=1 metric_errors=1 thermal_errors=1 reset_clear=False disabled_clear=False clear_errors=16; P_ASSERT_THERMAL_OK_ONLY_WHEN_NO mismatch_count=1; P_ON_EACH_ENABLED_RISING_CLK_EDGE mismatch_count=3; P_ON_RESET_OR_WHEN_DISABLED_CLEAR mismatch_count=18; P_PASS_POWER_CMD_THROUGH_WHILE_TEMPERATURE mismatch_count=2; P_REDUCE_LIMITED_CMD_AS_TEMPERATURE_RISES mismatch_count=2",
+    "violated_property_ids": [
+      "P_ON_RESET_OR_WHEN_DISABLED_CLEAR"
+    ]
+  },
+  "evaluators": {
+    "ahdl_like": "pass",
+    "evas": "compile_pass_behavior_fail",
+    "spectre": "compile_pass_behavior_fail"
+  },
+  "family_id": "340",
+  "inputs": {
+    "checker_profile_sha256": "721374c64c99cd993891024c361c3b58331b6d722048ac03100c148242909807",
+    "harness_spec_sha256": "e39ea0d9a4aee75d3f3218e6680916b43e2e7b6788034e918de9218ab57e979c",
+    "mutation_bundle_sha256": "4a3a0d874b16386f5987ab1971d485b54b76b98e3a344eda32ca348fbe1cbeb3",
+    "profile_sha256": "1d8ae65b57a62ff9dc364bd429ac9f9753d25c4522502bfc124255071edf5b22"
+  },
+  "mutation_id": "neg_001_disable_retains_limited_command",
+  "outcome": "killed_behaviorally",
+  "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33",
+  "schema_version": "v4-negative-certification-v2",
+  "toolchain_lock_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+}

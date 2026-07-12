@@ -1,0 +1,132 @@
+{
+  "family_id": "332",
+  "gold_bundle_sha256": "79a39bec87a121e3231147a420d99804e363feb97c37ddc41b160bcdfa469af0",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "polyphase_iq_balance_monitor_top.va": "f5c9b94764eac3efb926f39eaf3ee4a955e858377532e7d37cb46df76f00eafb"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ON_RESET_OR_WHEN_DISABLED_DRIVE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_clear_drives_ground_not_vcm/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "polyphase_iq_balance_monitor_top.va"
+      ],
+      "fault_class": "clear_level_ground_instead_of_common_mode",
+      "id": "neg_001_clear_drives_ground_not_vcm",
+      "trigger_condition": "reset is asserted or enable is low",
+      "violated_property_ids": [
+        "P_ON_RESET_OR_WHEN_DISABLED_DRIVE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "polyphase_iq_balance_monitor_top.va": "2c5e668b679167f39b87b35da22ee2936a4a7f58979acedb709e9420e13f093f"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ON_EACH_ENABLED_RISING_CLK_EDGE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_q_channel_sample_held_at_vcm/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "polyphase_iq_balance_monitor_top.va"
+      ],
+      "fault_class": "q_channel_sample_held_at_common_mode",
+      "id": "neg_002_q_channel_sample_held_at_vcm",
+      "trigger_condition": "an enabled rising clock edge samples a Q input away from vcm",
+      "violated_property_ids": [
+        "P_ON_EACH_ENABLED_RISING_CLK_EDGE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "iq_normalizer.va": "db87784b390ec298621a1eb28be9801494566f0fce78aa207f7e841912f07d5c"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DRIVE_CORRECTED_I_Q_OUTPUTS_WITH"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_normalizer_omits_bounded_scaling/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "iq_normalizer.va"
+      ],
+      "fault_class": "bounded_normalization_replaced_by_unclamped_gain",
+      "id": "neg_003_normalizer_omits_bounded_scaling",
+      "trigger_condition": "the sampled I or Q deviation requires amplitude limiting",
+      "violated_property_ids": [
+        "P_DRIVE_CORRECTED_I_Q_OUTPUTS_WITH"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "balance_metric_core.va": "70f90d43f5057a57870c524307d7b6aa4d79544b57ad1ca264fb862502b76186"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_EXPOSE_AMPLITUDE_AND_PHASE_ERROR_PROXIES"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_amp_metric_sums_magnitudes/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "balance_metric_core.va"
+      ],
+      "fault_class": "amplitude_error_metric_sums_instead_of_differences",
+      "id": "neg_004_amp_metric_sums_magnitudes",
+      "trigger_condition": "sampled I and Q deviations are both nonzero",
+      "violated_property_ids": [
+        "P_EXPOSE_AMPLITUDE_AND_PHASE_ERROR_PROXIES"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "polyphase_iq_balance_monitor_top.va": "20409fd2c52315166f57c0bb6b74b15a74e6fc7b7acdbf4eee7783574f5ab11b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ASSERT_BALANCED_ONLY_WHEN_BOTH_METRICS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_balance_accepts_one_metric/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "polyphase_iq_balance_monitor_top.va"
+      ],
+      "fault_class": "balance_metric_conjunction_replaced_by_disjunction",
+      "id": "neg_005_balance_accepts_one_metric",
+      "trigger_condition": "only one of amplitude balance or phase balance is within tolerance",
+      "violated_property_ids": [
+        "P_ASSERT_BALANCED_ONLY_WHEN_BOTH_METRICS"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

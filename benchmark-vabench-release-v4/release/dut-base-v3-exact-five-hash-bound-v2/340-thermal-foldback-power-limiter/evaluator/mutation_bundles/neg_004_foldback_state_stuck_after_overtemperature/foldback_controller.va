@@ -1,0 +1,59 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module foldback_controller(temp_sense, clk, rst, enable, foldback_factor, foldback_metric, thermal_ok);
+input temp_sense, clk, rst, enable;
+output foldback_factor, foldback_metric, thermal_ok;
+electrical temp_sense, clk, rst, enable, foldback_factor, foldback_metric, thermal_ok;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vth = 0.45;
+parameter real tr = 200p from (0:inf);
+parameter real temp_trip = 0.65;
+parameter real temp_full = 0.85;
+
+real factor_v;
+real metric_v;
+real ok_v;
+real over_temp;
+integer foldback_seen;
+
+analog function real clip01;
+    input x;
+    real x;
+    begin
+        if (x < 0.0) clip01 = 0.0;
+        else if (x > 1.0) clip01 = 1.0;
+        else clip01 = x;
+    end
+endfunction
+
+analog begin
+    @(initial_step) begin
+        factor_v = vss;
+        metric_v = vss;
+        ok_v = vss;
+        foldback_seen = 0;
+    end
+
+    @(cross(V(clk) - vth, +1) or cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+        if (V(rst) > vth || V(enable) <= vth) begin
+            factor_v = vss;
+            metric_v = vss;
+            ok_v = vss;
+            foldback_seen = 0;
+        end else begin
+            over_temp = clip01((V(temp_sense) - temp_trip) / (temp_full - temp_trip));
+            if (over_temp > 1e-3) foldback_seen = 1;
+            metric_v = foldback_seen ? vdd : vss;
+            factor_v = vdd;
+            ok_v = foldback_seen ? vss : vdd;
+        end
+    end
+
+    V(foldback_factor) <+ transition(factor_v, 0, tr, tr);
+    V(foldback_metric) <+ transition(metric_v, 0, tr, tr);
+    V(thermal_ok) <+ transition(ok_v, 0, tr, tr);
+end
+endmodule

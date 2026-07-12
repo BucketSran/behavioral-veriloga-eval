@@ -1,0 +1,40 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module quadrature_oscillator_phase_error_monitor(clk_i, clk_q, rst, enable, phase_error_metric, quadrature_ok, valid);
+    inout clk_i, clk_q, rst, enable, phase_error_metric, quadrature_ok, valid;
+    electrical clk_i, clk_q, rst, enable, phase_error_metric, quadrature_ok, valid;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vcm = 0.45; parameter real vth = 0.45; parameter real tr = 200p from (0:inf);
+    parameter real phase_tol = 60e-3; parameter real tick = 200p from (0:inf);
+    integer tick_count, last_i_tick, prev_i_tick, last_q_tick, period_ticks, stable_ok;
+    real prev_i, prev_q, phase_proxy, phase_err, metric_v, ok_v, valid_v;
+    analog begin
+        @(initial_step) begin tick_count = 0; last_i_tick = -1; prev_i_tick = -1; last_q_tick = -1; period_ticks = 0; stable_ok = 0; prev_i = 0.0; prev_q = 0.0; phase_err = 0.0; metric_v = 0.0; ok_v = 0.0; valid_v = 0.0; end
+        @(timer(0, tick)) begin
+            tick_count = tick_count + 1;
+            if (V(rst) > vth || V(enable) <= vth) begin
+                last_i_tick = -1; prev_i_tick = -1; last_q_tick = -1; period_ticks = 0; stable_ok = 0; phase_err = 0.0; metric_v = 0.0; ok_v = 0.0; valid_v = 0.0;
+            end else begin
+                if (V(clk_i) > vth && prev_i <= vth) begin
+                    prev_i_tick = last_i_tick;
+                    last_i_tick = tick_count;
+                    if (prev_i_tick >= 0) period_ticks = last_i_tick - prev_i_tick;
+                end
+                if (V(clk_q) > vth && prev_q <= vth && last_i_tick >= 0 && period_ticks > 0) begin
+                    last_q_tick = tick_count;
+                    phase_proxy = (last_q_tick - last_i_tick + 0.0) / period_ticks;
+                    phase_err = (phase_proxy > 0.25) ? (phase_proxy - 0.25) : (0.25 - phase_proxy);
+                    metric_v = (phase_err * 3.6 > vdd) ? vdd : phase_err * 3.6;
+                    if (phase_err <= 0.10) stable_ok = stable_ok + 1; else stable_ok = 0;
+                    ok_v = (1) ? vdd : vss;
+                    valid_v = vdd;
+                end
+            end
+            prev_i = V(clk_i);
+            prev_q = V(clk_q);
+        end
+        V(phase_error_metric) <+ transition(metric_v, 0, tr, tr);
+        V(quadrature_ok) <+ transition(ok_v, 0, tr, tr);
+        V(valid) <+ transition(valid_v, 0, tr, tr);
+    end
+endmodule

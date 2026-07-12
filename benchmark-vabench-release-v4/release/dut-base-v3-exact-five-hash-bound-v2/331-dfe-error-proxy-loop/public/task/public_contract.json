@@ -1,0 +1,73 @@
+{
+  "agent_visible_files": [
+    "instruction.md",
+    "public_contract.json",
+    "feedback_tb.scs"
+  ],
+  "canonical_dut_id": "331",
+  "canonical_instruction": "instruction.md",
+  "category": "serdes_equalization_systems",
+  "counted_in_score": true,
+  "feedback_oracle": {
+    "command": "vabench-feedback --task . --submission ../submission",
+    "public_tb": "feedback_tb.scs",
+    "public_tb_exposed": true
+  },
+  "form": "dut",
+  "gate2_status": "gate2_ready",
+  "language": "verilog-a",
+  "level": "L2",
+  "oracle_policy": {
+    "checker_private": true,
+    "feedback_oracle_materialized": false,
+    "no_model_visible_starter": true,
+    "proposal_only": true,
+    "single_public_contract": true,
+    "testbench_and_checker_split_required": true
+  },
+  "planned_checker_focus": [
+    "decision history",
+    "feedback correction",
+    "residual metric",
+    "convergence"
+  ],
+  "planned_oracle_type": "deterministic_trace_behavior_with_static_module_contract",
+  "public_modules": [
+    "dfe_error_proxy_loop_top",
+    "decision_history",
+    "feedback_correction_core"
+  ],
+  "public_observables": [
+    "sample_in",
+    "decision_clk",
+    "rst",
+    "enable",
+    "tap_1",
+    "tap_0",
+    "corrected_out",
+    "error_metric",
+    "converged"
+  ],
+  "schema_version": "v4-proposed-public-contract-v1",
+  "status": "gate2_ready",
+  "target_artifacts": [
+    "dfe_error_proxy_loop_top.va",
+    "decision_history.va",
+    "feedback_correction_core.va"
+  ],
+  "task_id": "v4_331_dfe_error_proxy_loop",
+  "task_slug": "1029-dfe-error-proxy-loop",
+  "title": "DFE Error-proxy Loop",
+  "top_module": "dfe_error_proxy_loop_top",
+  "track": "multi_module_ams_system_dut",
+  "validation_status": {
+    "evas_feedback_score_gold": "pass",
+    "gate2": "dut_base_sealed",
+    "next_gate": "canonical_suite_unification_pending",
+    "semantic_negative_certification": "pass",
+    "spectre_score_gold": "clean_pass",
+    "tri_form_gate2": "pending",
+    "tri_form_gate3": "pending",
+    "untriaged_warning_count": 0
+  }
+}

@@ -1,0 +1,73 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module image_cal_controller(clk, rst, enable, raw_image_metric, gain_trim, phase_trim, image_metric, calibrated);
+input clk, rst, enable, raw_image_metric;
+output gain_trim, phase_trim, image_metric, calibrated;
+electrical clk, rst, enable, raw_image_metric, gain_trim, phase_trim, image_metric, calibrated;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vcm = 0.45;
+parameter real vth = 0.45;
+parameter real tr = 200p from (0:inf);
+parameter real image_tol = 40e-3;
+parameter real step = 18e-3;
+
+real gain_trim_v;
+real phase_trim_v;
+real image_metric_v;
+real calibrated_v;
+integer below_count;
+integer trim_direction;
+
+analog function real cliptrim;
+    input x;
+    real x;
+    begin
+        if (x < vcm - 0.18) cliptrim = vcm - 0.18;
+        else if (x > vcm + 0.18) cliptrim = vcm + 0.18;
+        else cliptrim = x;
+    end
+endfunction
+
+analog begin
+    @(initial_step) begin
+        gain_trim_v = vcm;
+        phase_trim_v = vcm;
+        image_metric_v = vss;
+        calibrated_v = vss;
+        below_count = 0;
+        trim_direction = 1;
+    end
+
+    @(cross(V(clk) - vth, +1) or cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+        if (V(rst) > vth || V(enable) <= vth) begin
+            gain_trim_v = vcm;
+            phase_trim_v = vcm;
+            image_metric_v = vss;
+            calibrated_v = vss;
+            below_count = 0;
+            trim_direction = 1;
+        end else begin
+            image_metric_v = V(raw_image_metric);
+            if (image_metric_v < image_tol) begin
+                below_count = below_count + 1;
+                gain_trim_v = cliptrim(vcm + 0.5 * (gain_trim_v - vcm));
+                phase_trim_v = cliptrim(vcm + 0.5 * (phase_trim_v - vcm));
+            end else begin
+                below_count = 0;
+                gain_trim_v = cliptrim(gain_trim_v + trim_direction * step);
+                phase_trim_v = cliptrim(phase_trim_v - trim_direction * 0.5 * step);
+                trim_direction = -trim_direction;
+            end
+            calibrated_v = (below_count >= 3) ? vdd : vss;
+        end
+    end
+
+    V(gain_trim) <+ transition(gain_trim_v, 0, tr, tr);
+    V(phase_trim) <+ transition(phase_trim_v, 0, tr, tr);
+    V(image_metric) <+ transition(image_metric_v, 0, tr, tr);
+    V(calibrated) <+ transition(calibrated_v, 0, tr, tr);
+end
+endmodule

@@ -1,0 +1,52 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dfe_error_proxy_loop_top(sample_in, decision_clk, rst, enable, tap_1, tap_0, corrected_out, error_metric, converged);
+    inout sample_in, decision_clk, rst, enable, tap_1, tap_0, corrected_out, error_metric, converged;
+    electrical sample_in, decision_clk, rst, enable, tap_1, tap_0, corrected_out, error_metric, converged;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real residual_tol = 35e-3 from [0:inf);
+
+    electrical hist_1, hist_0;
+
+    decision_history #(
+        .vdd(vdd),
+        .vss(vss),
+        .vcm(vcm),
+        .vth(vth),
+        .tr(tr)
+    ) history (
+        sample_in,
+        decision_clk,
+        rst,
+        enable,
+        hist_1,
+        hist_0
+    );
+
+    feedback_correction_core #(
+        .vdd(vdd),
+        .vss(vss),
+        .vcm(vcm),
+        .vth(vth),
+        .tr(tr),
+        .residual_tol(residual_tol)
+    ) feedback_core (
+        sample_in,
+        decision_clk,
+        rst,
+        enable,
+        hist_1,
+        hist_0,
+        tap_1,
+        tap_0,
+        corrected_out,
+        error_metric,
+        converged
+    );
+endmodule

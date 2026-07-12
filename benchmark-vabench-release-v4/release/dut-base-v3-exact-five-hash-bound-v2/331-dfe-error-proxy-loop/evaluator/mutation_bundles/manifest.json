@@ -1,0 +1,132 @@
+{
+  "family_id": "331",
+  "gold_bundle_sha256": "0050b7b8a09707142c1d3a1c31e2a5938595f349d972d165bd9e88ee5b38c9b3",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "feedback_correction_core.va": "eedb8f6999ace9a217a22adb689741a01261c89c9c2759e3ea3e4a61cdf5bbf0"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ON_RESET_OR_WHEN_DISABLED_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_clear_retains_corrected_offset/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "feedback_correction_core.va"
+      ],
+      "fault_class": "clear_state_retains_corrected_output_offset",
+      "id": "neg_001_clear_retains_corrected_offset",
+      "trigger_condition": "reset is asserted or enable is low",
+      "violated_property_ids": [
+        "P_ON_RESET_OR_WHEN_DISABLED_CLEAR"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "decision_history.va": "54a1fdee05ed8ca3abdcdfc2604be78e67be061ca2b14ae5e14d40fe5f5464f5"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ON_EACH_ENABLED_DECISION_CLOCK_LATCH"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_decision_sign_inverted/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "decision_history.va"
+      ],
+      "fault_class": "latched_decision_sign_inverted",
+      "id": "neg_002_decision_sign_inverted",
+      "trigger_condition": "an enabled decision-clock edge samples sample_in on either side of vcm",
+      "violated_property_ids": [
+        "P_ON_EACH_ENABLED_DECISION_CLOCK_LATCH"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "feedback_correction_core.va": "1d50e361e20a6d1d485d6286e4521978fec3a8d84d7303d0fee1f13b80149168"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_USE_THE_PREVIOUS_DECISION_HISTORY_TO"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_corrected_output_adds_feedback/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "feedback_correction_core.va"
+      ],
+      "fault_class": "corrected_output_adds_instead_of_subtracts_two_tap_feedback",
+      "id": "neg_003_corrected_output_adds_feedback",
+      "trigger_condition": "previous decision history and nonzero tap weights contribute to the correction",
+      "violated_property_ids": [
+        "P_USE_THE_PREVIOUS_DECISION_HISTORY_TO"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "feedback_correction_core.va": "cb8e50f552fce77fd29a459a5d8a629288ae37dfc39e074847b9d5b2faad5a0f"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_EXPOSE_THE_ABSOLUTE_RESIDUAL_ON_ERROR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_error_metric_complements_absolute/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "feedback_correction_core.va"
+      ],
+      "fault_class": "error_metric_complements_instead_of_reports_absolute_residual",
+      "id": "neg_004_error_metric_complements_absolute",
+      "trigger_condition": "an enabled decision produces a finite nonzero residual",
+      "violated_property_ids": [
+        "P_EXPOSE_THE_ABSOLUTE_RESIDUAL_ON_ERROR"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "feedback_correction_core.va": "1fad059f395791bdbf3b263680e41ecf2297a45e08837041a9910388764ee544"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ASSERT_CONVERGED_WHEN_THE_RESIDUAL_REMAINS"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_converged_after_one_sample/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "feedback_correction_core.va"
+      ],
+      "fault_class": "convergence_qualification_too_short",
+      "id": "neg_005_converged_after_one_sample",
+      "trigger_condition": "one residual sample falls inside the convergence window",
+      "violated_property_ids": [
+        "P_ASSERT_CONVERGED_WHEN_THE_RESIDUAL_REMAINS"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

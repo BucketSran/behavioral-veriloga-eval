@@ -1,0 +1,25 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module lna_blocker_compression_detector(vin, blocker, enable, rst, vout, compression_metric, compressed);
+    inout vin, blocker, enable, rst, vout, compression_metric, compressed;
+    electrical vin, blocker, enable, rst, vout, compression_metric, compressed;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vcm = 0.45; parameter real vth = 0.45; parameter real tr = 200p from (0:inf);
+    parameter real small_gain = 6.0; parameter real blocker_start = 0.6; parameter real compression_tol = 0.1;
+    real excess, eff_gain, metric_v, out_v, flag_v;
+    analog function real clip; input x; real x; begin if (x < vss) clip = vss; else if (x > vdd) clip = vdd; else clip = x; end endfunction
+    analog function real max0; input x; real x; begin max0 = (x > 0.0) ? x : 0.0; end endfunction
+    analog begin
+        if (V(rst) > vth || V(enable) <= vth) begin out_v = vcm; metric_v = 0.0; flag_v = 0.0; end
+        else begin
+            excess = max0(V(blocker) - blocker_start);
+            eff_gain = small_gain / (1.0 + (excess / 0.25));
+            out_v = clip(vcm + eff_gain * (V(vin) - vcm));
+            metric_v = 0.0;
+            flag_v = (metric_v > compression_tol) ? vdd : vss;
+        end
+        V(vout) <+ out_v;
+        V(compression_metric) <+ metric_v;
+        V(compressed) <+ flag_v;
+    end
+endmodule

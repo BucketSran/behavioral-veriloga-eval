@@ -1,0 +1,85 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "pa_ampm_memory_tap_macro.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=92n maxstep=200p"
+    ],
+    "body_lines": [
+      "Vvin (vin 0) vsource type=pwl wave=[0 0.45 18n 0.45 18.2n 0.66 38n 0.66 38.2n 0.32 58n 0.32 58.2n 0.60 92n 0.60]",
+      "Vclk (clk 0) vsource type=pwl wave=[0 0 9n 0 10n 0.9 12n 0.9 12.2n 0 20n 0.9 22n 0.9 22.2n 0 30n 0.9 32n 0.9 32.2n 0 40n 0.9 42n 0.9 42.2n 0 50n 0.9 52n 0.9 52.2n 0 60n 0.9 62n 0.9 62.2n 0 70n 0.9 72n 0.9 72.2n 0 80n 0.9 82n 0.9 82.2n 0 92n 0]",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]",
+      "Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 80n 0.9 80.2n 0 92n 0]",
+      "Vdrive (drive 0) vsource type=pwl wave=[0 0.45 25n 0.45 25.2n 0.80 55n 0.80 55.2n 0.58 92n 0.58]",
+      "XDUT (vin clk rst enable drive vout am_metric pm_metric valid) pa_ampm_memory_tap_macro",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "clk",
+      "rst",
+      "enable",
+      "drive",
+      "vout",
+      "am_metric",
+      "pm_metric",
+      "valid"
+    ]
+  },
+  "family_id": "339",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "3d76b0cc02b6aa259a83c97441903acb7b68747db2852df33c828cdd54dc0b5b",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "3d76b0cc02b6aa259a83c97441903acb7b68747db2852df33c828cdd54dc0b5b",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ON_RESET_OR_WHEN_DISABLED_DRIVE",
+    "P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+    "P_APPLY_AN_AM_GAIN_COMPRESSION_PROXY",
+    "P_APPLY_A_ONE_SAMPLE_MEMORY_TERM",
+    "P_EXPOSE_AM_AND_PM_PROXIES_SEPARATELY"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "f3acc25f46253b5ecf93f9ca638aa441022fbe82dc940d50c60cda287c158cef",
+    "family_spec_sha256": "4f6c0e346bf8f69294a4bb09ea64c50c9bbe861413011a817b9c8a3c14aaa06a"
+  },
+  "task_id": "v4-339"
+}

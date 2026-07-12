@@ -1,0 +1,366 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "dfe_error_proxy_loop_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1n from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "sample_in",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "decision_clk",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "tap_1",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "tap_0",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "corrected_out",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "error_metric",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "converged",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "dfe_error_proxy_loop_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "dfe_error_proxy_loop_top"
+            ],
+            "name": "decision_history",
+            "parameters": [
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "a",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "b",
+                "position": 1
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "decision_history.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "dfe_error_proxy_loop_top"
+            ],
+            "name": "feedback_correction_core",
+            "parameters": [
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "a",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "b",
+                "position": 1
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "feedback_correction_core.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "family_id": "331",
+  "identity": {
+    "category": "serdes_equalization_systems",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "DFE Error-proxy Loop"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+      "observable_contract": "On reset or when disabled, clear taps, corrected output, error metric, and `converged`.",
+      "required_signals": [
+        "time",
+        "sample_in",
+        "decision_clk",
+        "rst",
+        "enable",
+        "tap_1",
+        "tap_0",
+        "corrected_out",
+        "error_metric",
+        "converged"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_ENABLED_DECISION_CLOCK_LATCH",
+      "observable_contract": "On each enabled decision clock, latch the sign of `sample_in - vcm` as the current decision.",
+      "required_signals": [
+        "time",
+        "sample_in",
+        "decision_clk",
+        "rst",
+        "enable",
+        "tap_1",
+        "tap_0",
+        "corrected_out",
+        "error_metric",
+        "converged"
+      ]
+    },
+    {
+      "id": "P_USE_THE_PREVIOUS_DECISION_HISTORY_TO",
+      "observable_contract": "Use the previous decision history to subtract a two-tap feedback estimate from the live sample.",
+      "required_signals": [
+        "time",
+        "sample_in",
+        "decision_clk",
+        "rst",
+        "enable",
+        "tap_1",
+        "tap_0",
+        "corrected_out",
+        "error_metric",
+        "converged"
+      ]
+    },
+    {
+      "id": "P_EXPOSE_THE_ABSOLUTE_RESIDUAL_ON_ERROR",
+      "observable_contract": "Expose the absolute residual on `error_metric`.",
+      "required_signals": [
+        "time",
+        "sample_in",
+        "decision_clk",
+        "rst",
+        "enable",
+        "tap_1",
+        "tap_0",
+        "corrected_out",
+        "error_metric",
+        "converged"
+      ]
+    },
+    {
+      "id": "P_ASSERT_CONVERGED_WHEN_THE_RESIDUAL_REMAINS",
+      "observable_contract": "Assert `converged` when the residual remains below `residual_tol` for three decisions.",
+      "required_signals": [
+        "time",
+        "sample_in",
+        "decision_clk",
+        "rst",
+        "enable",
+        "tap_1",
+        "tap_0",
+        "corrected_out",
+        "error_metric",
+        "converged"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1331",
+    "dut": "v4-331",
+    "testbench": "v4-831"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "sample_in",
+            "port_ref": "sample_in",
+            "position": 0
+          },
+          {
+            "net": "decision_clk",
+            "port_ref": "decision_clk",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 3
+          },
+          {
+            "net": "tap_1",
+            "port_ref": "tap_1",
+            "position": 4
+          },
+          {
+            "net": "tap_0",
+            "port_ref": "tap_0",
+            "position": 5
+          },
+          {
+            "net": "corrected_out",
+            "port_ref": "corrected_out",
+            "position": 6
+          },
+          {
+            "net": "error_metric",
+            "port_ref": "error_metric",
+            "position": 7
+          },
+          {
+            "net": "converged",
+            "port_ref": "converged",
+            "position": 8
+          }
+        ],
+        "module_ref": "dfe_error_proxy_loop_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "sample_in",
+      "decision_clk",
+      "rst",
+      "enable",
+      "tap_1",
+      "tap_0",
+      "corrected_out",
+      "error_metric",
+      "converged"
+    ]
+  }
+}

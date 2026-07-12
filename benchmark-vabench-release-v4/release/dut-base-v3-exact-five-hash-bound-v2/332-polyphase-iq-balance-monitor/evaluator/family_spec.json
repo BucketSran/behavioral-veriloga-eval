@@ -1,0 +1,487 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "polyphase_iq_balance_monitor_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "45e-3",
+                "name": "amp_tol",
+                "override_behavior": "overrides amp_tol",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "60e-3",
+                "name": "phase_tol",
+                "override_behavior": "overrides phase_tol",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "i_in",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "q_in",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "i_out",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "q_out",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "amp_error_metric",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "phase_error_metric",
+                "position": 8
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "balanced",
+                "position": 9
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "polyphase_iq_balance_monitor_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "polyphase_iq_balance_monitor_top"
+            ],
+            "name": "iq_normalizer",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.22",
+                "name": "target_dev",
+                "override_behavior": "overrides target_dev",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "i_sample",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "q_sample",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "i_norm",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "q_norm",
+                "position": 3
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "iq_normalizer.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "polyphase_iq_balance_monitor_top"
+            ],
+            "name": "balance_metric_core",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "45e-3",
+                "name": "amp_tol",
+                "override_behavior": "overrides amp_tol",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "60e-3",
+                "name": "phase_tol",
+                "override_behavior": "overrides phase_tol",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "i_sample",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "q_sample",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "amp_error_metric",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "phase_error_metric",
+                "position": 3
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "balance_metric_core.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "family_id": "332",
+  "identity": {
+    "category": "rf_afe_behavioral_macromodels",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Polyphase I/Q Balance Monitor"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_DRIVE",
+      "observable_contract": "On reset or when disabled, drive outputs to `vcm` and clear metrics.",
+      "required_signals": [
+        "time",
+        "i_in",
+        "q_in",
+        "clk",
+        "rst",
+        "enable",
+        "i_out",
+        "q_out",
+        "amp_error_metric",
+        "phase_error_metric",
+        "balanced"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+      "observable_contract": "On each enabled rising `clk` edge, sample I and Q input deviations around `vcm`.",
+      "required_signals": [
+        "time",
+        "i_in",
+        "q_in",
+        "clk",
+        "rst",
+        "enable",
+        "i_out",
+        "q_out",
+        "amp_error_metric",
+        "phase_error_metric",
+        "balanced"
+      ]
+    },
+    {
+      "id": "P_DRIVE_CORRECTED_I_Q_OUTPUTS_WITH",
+      "observable_contract": "Drive corrected I/Q outputs with bounded amplitude normalization.",
+      "required_signals": [
+        "time",
+        "i_in",
+        "q_in",
+        "clk",
+        "rst",
+        "enable",
+        "i_out",
+        "q_out",
+        "amp_error_metric",
+        "phase_error_metric",
+        "balanced"
+      ]
+    },
+    {
+      "id": "P_EXPOSE_AMPLITUDE_AND_PHASE_ERROR_PROXIES",
+      "observable_contract": "Expose amplitude and phase-error proxies as separate voltage-domain metrics.",
+      "required_signals": [
+        "time",
+        "i_in",
+        "q_in",
+        "clk",
+        "rst",
+        "enable",
+        "i_out",
+        "q_out",
+        "amp_error_metric",
+        "phase_error_metric",
+        "balanced"
+      ]
+    },
+    {
+      "id": "P_ASSERT_BALANCED_ONLY_WHEN_BOTH_METRICS",
+      "observable_contract": "Assert `balanced` only when both metrics remain below their thresholds for two updates.",
+      "required_signals": [
+        "time",
+        "i_in",
+        "q_in",
+        "clk",
+        "rst",
+        "enable",
+        "i_out",
+        "q_out",
+        "amp_error_metric",
+        "phase_error_metric",
+        "balanced"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1332",
+    "dut": "v4-332",
+    "testbench": "v4-832"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "i_in",
+            "port_ref": "i_in",
+            "position": 0
+          },
+          {
+            "net": "q_in",
+            "port_ref": "q_in",
+            "position": 1
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 4
+          },
+          {
+            "net": "i_out",
+            "port_ref": "i_out",
+            "position": 5
+          },
+          {
+            "net": "q_out",
+            "port_ref": "q_out",
+            "position": 6
+          },
+          {
+            "net": "amp_error_metric",
+            "port_ref": "amp_error_metric",
+            "position": 7
+          },
+          {
+            "net": "phase_error_metric",
+            "port_ref": "phase_error_metric",
+            "position": 8
+          },
+          {
+            "net": "balanced",
+            "port_ref": "balanced",
+            "position": 9
+          }
+        ],
+        "module_ref": "polyphase_iq_balance_monitor_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "i_in",
+      "q_in",
+      "clk",
+      "rst",
+      "enable",
+      "i_out",
+      "q_out",
+      "amp_error_metric",
+      "phase_error_metric",
+      "balanced"
+    ]
+  }
+}

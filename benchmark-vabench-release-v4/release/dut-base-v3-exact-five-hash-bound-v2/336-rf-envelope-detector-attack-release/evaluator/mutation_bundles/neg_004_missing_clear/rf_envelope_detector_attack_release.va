@@ -1,0 +1,29 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module rf_envelope_detector_attack_release(vin, clk, rst, enable, envelope, attack_metric, valid);
+    inout vin, clk, rst, enable, envelope, attack_metric, valid;
+    electrical vin, clk, rst, enable, envelope, attack_metric, valid;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vcm = 0.45; parameter real vth = 0.45; parameter real tr = 200p from (0:inf);
+    parameter real attack_step = 120e-3; parameter real release_step = 30e-3; parameter real tick = 250p from (0:inf);
+    real prev_clk, env_v, attack_v, valid_v, mag;
+    analog function real absval; input x; real x; begin absval = (x < 0.0) ? -x : x; end endfunction
+    analog function real min2; input a,b; real a,b; begin min2 = (a < b) ? a : b; end endfunction
+    analog function real max2; input a,b; real a,b; begin max2 = (a > b) ? a : b; end endfunction
+    analog begin
+        @(initial_step) begin prev_clk = 0.0; env_v = 0.0; attack_v = 0.0; valid_v = 0.0; end
+        @(timer(0, tick)) begin
+            if (0) begin env_v = 0.0; attack_v = 0.0; valid_v = 0.0; end
+            else if (V(clk) > vth && prev_clk <= vth) begin
+                mag = min2(vdd, absval(V(vin) - vcm) * 2.0);
+                if (mag > env_v) begin env_v = min2(mag, env_v + attack_step); attack_v = vdd; end
+                else begin env_v = max2(mag, env_v - release_step); attack_v = vss; end
+                valid_v = vdd;
+            end
+            prev_clk = V(clk);
+        end
+        V(envelope) <+ transition(env_v, 0, tr, tr);
+        V(attack_metric) <+ transition(attack_v, 0, tr, tr);
+        V(valid) <+ transition(valid_v, 0, tr, tr);
+    end
+endmodule

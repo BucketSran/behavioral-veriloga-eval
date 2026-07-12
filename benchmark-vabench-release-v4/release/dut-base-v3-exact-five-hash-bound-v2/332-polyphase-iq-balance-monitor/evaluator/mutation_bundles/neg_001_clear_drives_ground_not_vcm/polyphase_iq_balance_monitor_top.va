@@ -1,0 +1,78 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module polyphase_iq_balance_monitor_top(i_in, q_in, clk, rst, enable, i_out, q_out, amp_error_metric, phase_error_metric, balanced);
+input i_in, q_in, clk, rst, enable;
+output i_out, q_out, amp_error_metric, phase_error_metric, balanced;
+electrical i_in, q_in, clk, rst, enable, i_out, q_out, amp_error_metric, phase_error_metric, balanced;
+electrical sampled_i, sampled_q;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vcm = 0.45;
+parameter real vth = 0.45;
+parameter real tr = 200p from (0:inf);
+parameter real amp_tol = 45e-3;
+parameter real phase_tol = 60e-3;
+
+real sampled_i_v;
+real sampled_q_v;
+real balanced_v;
+integer below_count;
+
+analog function real absval;
+    input x;
+    real x;
+    begin
+        absval = (x < 0.0) ? -x : x;
+    end
+endfunction
+
+analog function real cliprail;
+    input x;
+    real x;
+    begin
+        if (x < vss) cliprail = vss;
+        else if (x > vdd) cliprail = vdd;
+        else cliprail = x;
+    end
+endfunction
+
+iq_normalizer #(.vdd(vdd), .vss(vss), .vcm(vcm), .tr(tr))
+    XNORM(sampled_i, sampled_q, i_out, q_out);
+
+balance_metric_core #(.vdd(vdd), .vss(vss), .vcm(vcm), .amp_tol(amp_tol), .phase_tol(phase_tol), .tr(tr))
+    XMETRIC(sampled_i, sampled_q, amp_error_metric, phase_error_metric);
+
+analog begin
+    @(initial_step) begin
+        sampled_i_v = vcm;
+        sampled_q_v = vcm;
+        balanced_v = vss;
+        below_count = 0;
+    end
+
+    @(cross(V(clk) - vth, +1) or cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+        if (V(rst) > vth || V(enable) <= vth) begin
+            sampled_i_v = vss;
+            sampled_q_v = vss;
+            balanced_v = vss;
+            below_count = 0;
+        end else begin
+            sampled_i_v = cliprail(V(i_in));
+            sampled_q_v = cliprail(V(q_in));
+            if (absval(absval(sampled_i_v - vcm) - absval(sampled_q_v - vcm)) < amp_tol &&
+                absval((sampled_i_v - vcm) + (sampled_q_v - vcm)) < phase_tol) begin
+                below_count = below_count + 1;
+            end else begin
+                below_count = 0;
+            end
+            balanced_v = (below_count >= 2) ? vdd : vss;
+        end
+    end
+
+    V(sampled_i) <+ transition(sampled_i_v, 0, tr, tr);
+    V(sampled_q) <+ transition(sampled_q_v, 0, tr, tr);
+    V(balanced) <+ transition(balanced_v, 0, tr, tr);
+end
+endmodule

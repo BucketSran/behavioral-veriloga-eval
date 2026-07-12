@@ -1,0 +1,20 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/thermal_foldback_power_limiter_top.va"
+ahdl_include "./dut/foldback_controller.va"
+ahdl_include "./dut/command_limiter.va"
+
+Vpower_cmd (power_cmd 0) vsource type=pwl wave=[0 0.180 9n 0.180 15n 0.740 28n 0.740 34n 0.420 48n 0.420 80n 0.285]
+Vtemp_sense (temp_sense 0) vsource type=pwl wave=[0 0.180 9n 0.180 15n 0.680 28n 0.680 34n 0.440 48n 0.440 80n 0.285]
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=6n width=3n delay=1n rise=60p fall=60p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2.1n 0.9 2.2n 0 80n 0]
+Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.9 56n 0.9 56.1n 0 62n 0 62.1n 0.9 80n 0.9]
+
+XDUT (power_cmd temp_sense clk rst enable limited_cmd foldback_metric thermal_ok) thermal_foldback_power_limiter_top
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=80n maxstep=120p
+save power_cmd temp_sense clk rst enable limited_cmd foldback_metric thermal_ok
