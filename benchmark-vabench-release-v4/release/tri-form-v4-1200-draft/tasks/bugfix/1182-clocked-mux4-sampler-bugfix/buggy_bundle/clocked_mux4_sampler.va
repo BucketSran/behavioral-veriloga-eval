@@ -1,0 +1,29 @@
+`include "disciplines.vams"
+
+module clocked_mux4_sampler(dsel0, dsel1, din0, din1, din2, din3, update, rst, clks, dout);
+input dsel0, dsel1, din0, din1, din2, din3, update, rst, clks;
+output dout;
+electrical dsel0, dsel1, din0, din1, din2, din3, update, rst, clks, dout;
+
+parameter real vth = 0.45;
+real dreg;
+integer sel;
+
+analog begin
+    @(initial_step) begin sel = 0; dreg = V(din0); end
+    @(cross(V(rst) - vth, +1)) begin sel = 0; dreg = V(din0); end
+    @(cross(V(clks) - vth, +1)) begin
+        if (V(rst) > vth) begin
+            sel = 0; dreg = V(din0);
+        end else if (V(update) > vth) begin
+            sel = (V(dsel1) > vth ? 2 : 0) + (V(dsel0) > vth ? 1 : 0);
+            if (sel == 0) dreg = V(din0);
+            else if (sel == 1) dreg = V(din1);
+            else if (sel == 2) dreg = V(din2);
+            else dreg = V(din3);
+        end
+    end
+    V(dout) <+ transition(dreg, 1p, 20p, 20p);
+end
+
+endmodule

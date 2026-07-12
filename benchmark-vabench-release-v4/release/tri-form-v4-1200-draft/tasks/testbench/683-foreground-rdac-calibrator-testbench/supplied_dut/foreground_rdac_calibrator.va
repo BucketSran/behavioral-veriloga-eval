@@ -1,0 +1,50 @@
+`include "disciplines.vams"
+module foreground_rdac_calibrator(ck, d, vrefp, vrefn, dc0, dc1, dc2, dc3, dc4, dc5, dc6, cvinp, cvinn, en, enb);
+input ck, d, vrefp, vrefn;
+output dc0, dc1, dc2, dc3, dc4, dc5, dc6, cvinp, cvinn, en, enb;
+electrical ck, d, vrefp, vrefn, dc0, dc1, dc2, dc3, dc4, dc5, dc6, cvinp, cvinn, en, enb;
+parameter real vdd = 1.0;
+integer iter, flag_calib;
+integer code0, code1, code2, code3, code4, code5, code6;
+analog begin
+    @(initial_step) begin
+        iter = 6; flag_calib = 1;
+        code6 = 1; code5 = 0; code4 = 0; code3 = 0; code2 = 0; code1 = 0; code0 = 0;
+    end
+    @(cross(V(ck) - 0.5 * vdd, +1)) begin
+        if (iter > 0) begin
+            if (iter == 6) begin
+                if (V(d) < 0.5 * vdd) code5 = 1;
+                else begin code6 = 0; code5 = 1; end
+            end else if (iter == 5) begin
+                if (V(d) < 0.5 * vdd) code4 = 1;
+                else begin code5 = 0; code4 = 1; end
+            end else if (iter == 4) begin
+                if (V(d) < 0.5 * vdd) code3 = 1;
+                else begin code4 = 0; code3 = 1; end
+            end else if (iter == 3) begin
+                if (V(d) < 0.5 * vdd) code2 = 1;
+                else begin code3 = 0; code2 = 1; end
+            end else if (iter == 2) begin
+                if (V(d) < 0.5 * vdd) code1 = 1;
+                else begin code2 = 0; code1 = 1; end
+            end else begin
+                if (V(d) < 0.5 * vdd) code0 = 1;
+                else begin code1 = 0; code0 = 1; end
+            end
+            iter = iter - 1;
+        end else begin
+            flag_calib = 0;
+        end
+    end
+    V(cvinp) <+ V(vrefp); V(cvinn) <+ V(vrefn);
+    V(en) <+ transition(flag_calib ? vdd : 0.0, 0, 20p, 20p); V(enb) <+ transition(flag_calib ? 0.0 : vdd, 0, 20p, 20p);
+    V(dc0) <+ transition(code0 ? vdd : 0.0, 0, 20p, 20p);
+    V(dc1) <+ transition(code1 ? vdd : 0.0, 0, 20p, 20p);
+    V(dc2) <+ transition(code2 ? vdd : 0.0, 0, 20p, 20p);
+    V(dc3) <+ transition(code3 ? vdd : 0.0, 0, 20p, 20p);
+    V(dc4) <+ transition(code4 ? vdd : 0.0, 0, 20p, 20p);
+    V(dc5) <+ transition(code5 ? vdd : 0.0, 0, 20p, 20p);
+    V(dc6) <+ transition(code6 ? vdd : 0.0, 0, 20p, 20p);
+end
+endmodule

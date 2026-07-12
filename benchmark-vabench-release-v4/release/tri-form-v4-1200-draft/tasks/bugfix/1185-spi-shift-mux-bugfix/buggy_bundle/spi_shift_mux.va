@@ -1,0 +1,20 @@
+`include "disciplines.vams"
+module spi_shift_mux(scki, sdi, rst, out0, out1, out2, out3, out4, out5, out6, out7, sdo, scko);
+input scki, sdi, rst;
+output out0, out1, out2, out3, out4, out5, out6, out7, sdo, scko;
+electrical scki, sdi, rst, out0, out1, out2, out3, out4, out5, out6, out7, sdo, scko;
+integer b[0:7];
+genvar i;
+analog begin
+    @(initial_step) begin
+        b[7]=1; b[6]=0; b[5]=1; b[4]=1; b[3]=0; b[2]=0; b[1]=1; b[0]=0;
+    end
+    @(cross(V(scki) - 0.45, +1)) begin
+        for (i = 7; i > 0; i = i - 1) b[i] = b[i - 1];
+        b[0] = V(sdi) > 0.45;
+    end
+    V(out0)<+transition(b[0]?0.9:0.0,30p,30p,30p); V(out1)<+transition(b[1]?0.9:0.0,30p,30p,30p); V(out2)<+transition(b[2]?0.9:0.0,30p,30p,30p); V(out3)<+transition(b[3]?0.9:0.0,30p,30p,30p);
+    V(out4)<+transition(b[4]?0.9:0.0,30p,30p,30p); V(out5)<+transition(b[5]?0.9:0.0,30p,30p,30p); V(out6)<+transition(b[6]?0.9:0.0,30p,30p,30p); V(out7)<+transition(b[7]?0.9:0.0,30p,30p,30p);
+    V(sdo)<+transition(b[7]?0.9:0.0,30p,30p,30p); V(scko)<+transition((V(scki)>0.45)?0.9:0.0,30p,30p,30p);
+end
+endmodule

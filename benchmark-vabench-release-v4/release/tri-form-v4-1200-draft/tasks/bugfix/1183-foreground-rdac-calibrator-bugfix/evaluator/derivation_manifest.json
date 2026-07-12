@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-183",
+    "canonical_task_slug": "183-foreground-rdac-calibrator",
+    "family_spec_sha256": "ee168792c0a08fb56b729917e7ada5d9d3272c01185f41efc9e2278fdba35082",
+    "mutation_catalog_sha256": "741e06e4eeff73a5b6976e052f328f86ab93d5c6d861651364038d6162a2b32c",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "183",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_wrong_initial_code",
+    "testbench_suite": [
+      "neg_002_wrong_initial_code",
+      "neg_003_inverted_decision",
+      "neg_001_zero",
+      "neg_005_metric_scale_low",
+      "neg_004_enable_never_finishes"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "a8c6872fa35bc221d3f79e319ee7751383a4e8d87c724372a90203febb8d2734",
+    "changed_artifacts": [
+      "foreground_rdac_calibrator.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_wrong_initial_code",
+    "rationale": "Select fault class state_reset_or_enable_error under trigger 'Initializes the MSB calibration code low instead of high.' because it exercises P_INITIAL_MSB_TRIAL_CODE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 27,
+    "source_preferred_seed": "neg_002_wrong_initial_code",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

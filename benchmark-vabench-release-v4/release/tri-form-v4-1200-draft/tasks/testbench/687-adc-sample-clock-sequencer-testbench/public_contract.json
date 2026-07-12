@@ -1,0 +1,215 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "adc_sample_clock_sequencer",
+            "parameters": [],
+            "ports": [
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 0
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "s",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "ss",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "nc_az",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "nc",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "conv",
+                "position": 5
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "adc_sample_clock_sequencer.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "187",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "ADC Sample Clock Sequencer"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_PERIODIC_18NS_FRAME",
+      "observable_contract": "Generate a repeating 18 ns timing frame.",
+      "required_signals": [
+        "time",
+        "conv",
+        "nc",
+        "nc_az",
+        "rst",
+        "s",
+        "ss"
+      ]
+    },
+    {
+      "id": "P_RESET_SAMPLE_AND_SS_WINDOWS",
+      "observable_contract": "`rst`, `s`, and `ss` are high only in the declared frame windows.",
+      "required_signals": [
+        "time",
+        "conv",
+        "nc",
+        "nc_az",
+        "rst",
+        "s",
+        "ss"
+      ]
+    },
+    {
+      "id": "P_NONOVERLAP_AND_AUTOZERO_WINDOWS",
+      "observable_contract": "`nc` and `nc_az` use the declared non-overlap and autozero windows without swapping outputs.",
+      "required_signals": [
+        "time",
+        "conv",
+        "nc",
+        "nc_az",
+        "rst",
+        "s",
+        "ss"
+      ]
+    },
+    {
+      "id": "P_CONVERSION_WINDOW_TIMING",
+      "observable_contract": "`conv` is asserted in the declared conversion windows with the correct phase.",
+      "required_signals": [
+        "time",
+        "conv",
+        "nc",
+        "nc_az",
+        "rst",
+        "s",
+        "ss"
+      ]
+    },
+    {
+      "id": "P_TIMING_OUTPUT_LEVELS",
+      "observable_contract": "All timing outputs drive valid voltage-coded low/high levels.",
+      "required_signals": [
+        "time",
+        "conv",
+        "nc",
+        "nc_az",
+        "rst",
+        "s",
+        "ss"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/adc_sample_clock_sequencer.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-687",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 0
+          },
+          {
+            "net": "s",
+            "port_ref": "s",
+            "position": 1
+          },
+          {
+            "net": "ss",
+            "port_ref": "ss",
+            "position": 2
+          },
+          {
+            "net": "nc_az",
+            "port_ref": "nc_az",
+            "position": 3
+          },
+          {
+            "net": "nc",
+            "port_ref": "nc",
+            "position": 4
+          },
+          {
+            "net": "conv",
+            "port_ref": "conv",
+            "position": 5
+          }
+        ],
+        "module_ref": "adc_sample_clock_sequencer",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "conv",
+      "nc",
+      "nc_az",
+      "rst",
+      "s",
+      "ss"
+    ]
+  }
+}

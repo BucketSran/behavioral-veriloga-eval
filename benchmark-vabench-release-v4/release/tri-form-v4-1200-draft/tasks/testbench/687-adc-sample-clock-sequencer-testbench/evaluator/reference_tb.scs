@@ -1,0 +1,10 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/adc_sample_clock_sequencer.va"
+
+XDUT (rst s ss nc_az nc conv) adc_sample_clock_sequencer
+Iground_ref (rst 0) isource dc=0
+
+tran tran stop=22n maxstep=20p
+save conv nc nc_az rst s ss

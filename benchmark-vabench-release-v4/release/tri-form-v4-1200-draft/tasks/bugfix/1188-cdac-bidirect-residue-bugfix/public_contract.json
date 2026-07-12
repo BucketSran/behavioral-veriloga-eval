@@ -1,0 +1,259 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "cdac_bidirect_residue",
+            "parameters": [],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clks",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dctrl1",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dctrl2",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dctrl3",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dctrl4",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dctrl5",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dctrl6",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dctrl7",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vres",
+                "position": 9
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "cdac_bidirect_residue.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/cdac_bidirect_residue.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "188",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "CDAC Bidirect Residue"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_SAMPLE_RESIDUE_ON_CLKS_FALL",
+      "observable_contract": "At initialization and on each falling `clks` crossing, sample `vin` into the residue state.",
+      "required_signals": [
+        "time",
+        "clks",
+        "dctrl1",
+        "dctrl2",
+        "dctrl3",
+        "dctrl4",
+        "dctrl5",
+        "dctrl6",
+        "dctrl7",
+        "vin",
+        "vres"
+      ]
+    },
+    {
+      "id": "P_MSB_RESIDUE_STEP_SIGN",
+      "observable_contract": "A falling `dctrl7` event adds the half-scale MSB residue step with the declared sign.",
+      "required_signals": [
+        "time",
+        "clks",
+        "dctrl1",
+        "dctrl2",
+        "dctrl3",
+        "dctrl4",
+        "dctrl5",
+        "dctrl6",
+        "dctrl7",
+        "vin",
+        "vres"
+      ]
+    },
+    {
+      "id": "P_LOWER_BIT_RESIDUE_WEIGHTS",
+      "observable_contract": "Falling `dctrl6..dctrl1` events apply the declared binary-weighted residue steps.",
+      "required_signals": [
+        "time",
+        "clks",
+        "dctrl1",
+        "dctrl2",
+        "dctrl3",
+        "dctrl4",
+        "dctrl5",
+        "dctrl6",
+        "dctrl7",
+        "vin",
+        "vres"
+      ]
+    },
+    {
+      "id": "P_RESIDUE_OUTPUT_GAIN",
+      "observable_contract": "`vres` drives the sampled residue with the declared gain and voltage scale.",
+      "required_signals": [
+        "time",
+        "clks",
+        "dctrl1",
+        "dctrl2",
+        "dctrl3",
+        "dctrl4",
+        "dctrl5",
+        "dctrl6",
+        "dctrl7",
+        "vin",
+        "vres"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "cdac_bidirect_residue.va"
+  ],
+  "task_id": "v4-1188",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "clks",
+            "port_ref": "clks",
+            "position": 1
+          },
+          {
+            "net": "dctrl1",
+            "port_ref": "dctrl1",
+            "position": 2
+          },
+          {
+            "net": "dctrl2",
+            "port_ref": "dctrl2",
+            "position": 3
+          },
+          {
+            "net": "dctrl3",
+            "port_ref": "dctrl3",
+            "position": 4
+          },
+          {
+            "net": "dctrl4",
+            "port_ref": "dctrl4",
+            "position": 5
+          },
+          {
+            "net": "dctrl5",
+            "port_ref": "dctrl5",
+            "position": 6
+          },
+          {
+            "net": "dctrl6",
+            "port_ref": "dctrl6",
+            "position": 7
+          },
+          {
+            "net": "dctrl7",
+            "port_ref": "dctrl7",
+            "position": 8
+          },
+          {
+            "net": "vres",
+            "port_ref": "vres",
+            "position": 9
+          }
+        ],
+        "module_ref": "cdac_bidirect_residue",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clks",
+      "dctrl1",
+      "dctrl2",
+      "dctrl3",
+      "dctrl4",
+      "dctrl5",
+      "dctrl6",
+      "dctrl7",
+      "vin",
+      "vres"
+    ]
+  }
+}

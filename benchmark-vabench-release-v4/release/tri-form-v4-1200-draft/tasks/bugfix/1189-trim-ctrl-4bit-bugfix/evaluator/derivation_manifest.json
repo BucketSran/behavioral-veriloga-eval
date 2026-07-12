@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-189",
+    "canonical_task_slug": "189-trim-ctrl-4bit",
+    "family_spec_sha256": "2e63303eac696ad7ee6351c730518113aaff5defe7b13683684ea7c4c86d6bff",
+    "mutation_catalog_sha256": "5473eadb49abb29f8fc40ddfa6e4f21f1f130b5f6f7c8879a00c3bc74157332a",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "189",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_floor_without_round",
+    "testbench_suite": [
+      "neg_002_floor_without_round",
+      "neg_001_zero",
+      "neg_005_metric_scale_low",
+      "neg_004_half_output_level",
+      "neg_003_invert_msb"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "8a8649def6b2ee00f69f87888c726e8874f2b0a63e39bd81ff2e1d3839846579",
+    "changed_artifacts": [
+      "trim_ctrl_4bit.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_floor_without_round",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Inverts output bit dout1 of the rounded trim code.' because it exercises P_ANALOG_INPUT_ROUNDING as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 21,
+    "source_preferred_seed": "neg_002_floor_without_round",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

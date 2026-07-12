@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-185",
+    "canonical_task_slug": "185-spi-shift-mux",
+    "family_spec_sha256": "d799411e6138ac220107ff2c112de00a41a39c5d94f7a179088855f6bb14f31e",
+    "mutation_catalog_sha256": "8fbfd15ebe08701bdaa797a5b2de452c9c50b33acd530d2d51ed9a1137436053",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "185",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_shift_on_rising_only",
+    "testbench_suite": [
+      "neg_004_wrong_sdo_bit",
+      "neg_002_shift_on_rising_only",
+      "neg_003_reverse_shift_direction",
+      "neg_005_ignore_reset_reload",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "fa014a86a5a1831d98a437f87a31d3b760bf3ba9ead21ae12752e4502d8c9524",
+    "changed_artifacts": [
+      "spi_shift_mux.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_shift_on_rising_only",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Shifts only on rising SCKI edges instead of every SCKI transition.' because it exercises P_SHIFT_ON_SCKI_TRANSITIONS as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 24,
+    "source_preferred_seed": "neg_004_wrong_sdo_bit",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

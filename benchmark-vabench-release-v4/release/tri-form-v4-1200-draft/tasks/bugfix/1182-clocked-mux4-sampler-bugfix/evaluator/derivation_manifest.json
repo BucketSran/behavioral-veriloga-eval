@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-182",
+    "canonical_task_slug": "182-clocked-mux4-sampler",
+    "family_spec_sha256": "53370c36941c8eed1d9b4439104b2990af2feeaa003112e1c3e39cd43ec38ac6",
+    "mutation_catalog_sha256": "a6a3299d3e6d3c4474da3ce416cc4c07325b21beafe3823b05566ec57cd84b34",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "182",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_rising_edge_sample",
+    "testbench_suite": [
+      "neg_002_rising_edge_sample",
+      "neg_003_ignore_update",
+      "neg_004_ignore_reset",
+      "neg_001_zero",
+      "neg_005_swap_select_lsb"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "a37c386e95f2f3eba3c8ba2195403f9d1ec7462e3477dbb22625b3a1e895ef3b",
+    "changed_artifacts": [
+      "clocked_mux4_sampler.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_rising_edge_sample",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Samples on rising clks instead of falling clks.' because it exercises P_FALLING_CLOCK_UPDATE_SAMPLE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 26,
+    "source_preferred_seed": "neg_002_rising_edge_sample",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

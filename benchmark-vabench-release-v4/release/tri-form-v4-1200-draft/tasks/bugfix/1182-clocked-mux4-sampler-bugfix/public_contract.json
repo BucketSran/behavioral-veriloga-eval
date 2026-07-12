@@ -1,0 +1,292 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "clocked_mux4_sampler",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1p",
+                "name": "tdel",
+                "override_behavior": "overrides tdel",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "20p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "20p",
+                "name": "tf",
+                "override_behavior": "overrides tf",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dsel0",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dsel1",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din0",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din1",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din2",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din3",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "update",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clks",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dout",
+                "position": 9
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "clocked_mux4_sampler.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/clocked_mux4_sampler.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "182",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "logic",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Clocked Mux4 Sampler"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_RESET_SELECTS_DIN0",
+      "observable_contract": "While `rst` is high, the selected channel and `dout` are forced to `din0`.",
+      "required_signals": [
+        "time",
+        "clks",
+        "din0",
+        "din1",
+        "din2",
+        "din3",
+        "dout",
+        "dsel0",
+        "dsel1",
+        "rst",
+        "update"
+      ]
+    },
+    {
+      "id": "P_FALLING_CLOCK_UPDATE_SAMPLE",
+      "observable_contract": "On each falling `clks` crossing with reset inactive and `update` high, latch `dsel0/dsel1` and sample the selected input.",
+      "required_signals": [
+        "time",
+        "clks",
+        "din0",
+        "din1",
+        "din2",
+        "din3",
+        "dout",
+        "dsel0",
+        "dsel1",
+        "rst",
+        "update"
+      ]
+    },
+    {
+      "id": "P_UPDATE_LOW_HOLDS_STATE",
+      "observable_contract": "On falling `clks` crossings with `update` low, hold the previous selection and output value.",
+      "required_signals": [
+        "time",
+        "clks",
+        "din0",
+        "din1",
+        "din2",
+        "din3",
+        "dout",
+        "dsel0",
+        "dsel1",
+        "rst",
+        "update"
+      ]
+    },
+    {
+      "id": "P_SELECT_DECODE_AND_OUTPUT_TIMING",
+      "observable_contract": "The held two-bit selection maps to `din0..din3` in binary order and drives `dout` with the declared transition timing.",
+      "required_signals": [
+        "time",
+        "clks",
+        "din0",
+        "din1",
+        "din2",
+        "din3",
+        "dout",
+        "dsel0",
+        "dsel1",
+        "rst",
+        "update"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "clocked_mux4_sampler.va"
+  ],
+  "task_id": "v4-1182",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "dsel0",
+            "port_ref": "dsel0",
+            "position": 0
+          },
+          {
+            "net": "dsel1",
+            "port_ref": "dsel1",
+            "position": 1
+          },
+          {
+            "net": "din0",
+            "port_ref": "din0",
+            "position": 2
+          },
+          {
+            "net": "din1",
+            "port_ref": "din1",
+            "position": 3
+          },
+          {
+            "net": "din2",
+            "port_ref": "din2",
+            "position": 4
+          },
+          {
+            "net": "din3",
+            "port_ref": "din3",
+            "position": 5
+          },
+          {
+            "net": "update",
+            "port_ref": "update",
+            "position": 6
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 7
+          },
+          {
+            "net": "clks",
+            "port_ref": "clks",
+            "position": 8
+          },
+          {
+            "net": "dout",
+            "port_ref": "dout",
+            "position": 9
+          }
+        ],
+        "module_ref": "clocked_mux4_sampler",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clks",
+      "din0",
+      "din1",
+      "din2",
+      "din3",
+      "dout",
+      "dsel0",
+      "dsel1",
+      "rst",
+      "update"
+    ]
+  }
+}

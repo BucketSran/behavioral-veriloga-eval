@@ -1,0 +1,612 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "pipe15_data_align",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "20p",
+                "name": "tt",
+                "override_behavior": "overrides tt",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "samp",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d0",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d1",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d2",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d3",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d4",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d5",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d6",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d7",
+                "position": 8
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d8",
+                "position": 9
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d9",
+                "position": 10
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d10",
+                "position": 11
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d11",
+                "position": 12
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d12",
+                "position": 13
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d13",
+                "position": 14
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d14",
+                "position": 15
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do0",
+                "position": 16
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do1",
+                "position": 17
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do2",
+                "position": 18
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do3",
+                "position": 19
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do4",
+                "position": 20
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do5",
+                "position": 21
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do6",
+                "position": 22
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do7",
+                "position": 23
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do8",
+                "position": 24
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do9",
+                "position": 25
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do10",
+                "position": 26
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do11",
+                "position": 27
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do12",
+                "position": 28
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do13",
+                "position": 29
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "do14",
+                "position": 30
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "pipe15_data_align.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/pipe15_data_align.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "181",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Pipe15 Data Align"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_SAMPLE_ON_RISING_SAMP",
+      "observable_contract": "On each rising `samp` crossing, sample all fifteen input bits `d0..d14` into the alignment pipeline.",
+      "required_signals": [
+        "time",
+        "d0",
+        "d1",
+        "d10",
+        "d11",
+        "d12",
+        "d13",
+        "d14",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "d6",
+        "d7",
+        "d8",
+        "d9",
+        "do0",
+        "do1",
+        "do10",
+        "do11",
+        "do12",
+        "do13",
+        "do14",
+        "do2",
+        "do3",
+        "do4",
+        "do5",
+        "do6",
+        "do7",
+        "do8",
+        "do9",
+        "samp"
+      ]
+    },
+    {
+      "id": "P_ZERO_DELAY_OUTPUT_GROUP",
+      "observable_contract": "Outputs `do0..do2` publish the current sampled values without an added sample delay.",
+      "required_signals": [
+        "time",
+        "d0",
+        "d1",
+        "d10",
+        "d11",
+        "d12",
+        "d13",
+        "d14",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "d6",
+        "d7",
+        "d8",
+        "d9",
+        "do0",
+        "do1",
+        "do10",
+        "do11",
+        "do12",
+        "do13",
+        "do14",
+        "do2",
+        "do3",
+        "do4",
+        "do5",
+        "do6",
+        "do7",
+        "do8",
+        "do9",
+        "samp"
+      ]
+    },
+    {
+      "id": "P_STAGGERED_DELAY_OUTPUT_GROUPS",
+      "observable_contract": "Outputs `do3..do6`, `do7..do10`, and `do11..do14` publish the one-, two-, and three-sample delayed input groups respectively.",
+      "required_signals": [
+        "time",
+        "d0",
+        "d1",
+        "d10",
+        "d11",
+        "d12",
+        "d13",
+        "d14",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "d6",
+        "d7",
+        "d8",
+        "d9",
+        "do0",
+        "do1",
+        "do10",
+        "do11",
+        "do12",
+        "do13",
+        "do14",
+        "do2",
+        "do3",
+        "do4",
+        "do5",
+        "do6",
+        "do7",
+        "do8",
+        "do9",
+        "samp"
+      ]
+    },
+    {
+      "id": "P_VOLTAGE_CODED_OUTPUT_LEVELS",
+      "observable_contract": "Every aligned output is driven as a voltage-coded logic level near 0 V or `vdd` with the declared transition timing.",
+      "required_signals": [
+        "time",
+        "d0",
+        "d1",
+        "d10",
+        "d11",
+        "d12",
+        "d13",
+        "d14",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "d6",
+        "d7",
+        "d8",
+        "d9",
+        "do0",
+        "do1",
+        "do10",
+        "do11",
+        "do12",
+        "do13",
+        "do14",
+        "do2",
+        "do3",
+        "do4",
+        "do5",
+        "do6",
+        "do7",
+        "do8",
+        "do9",
+        "samp"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "pipe15_data_align.va"
+  ],
+  "task_id": "v4-1181",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "samp",
+            "port_ref": "samp",
+            "position": 0
+          },
+          {
+            "net": "d0",
+            "port_ref": "d0",
+            "position": 1
+          },
+          {
+            "net": "d1",
+            "port_ref": "d1",
+            "position": 2
+          },
+          {
+            "net": "d2",
+            "port_ref": "d2",
+            "position": 3
+          },
+          {
+            "net": "d3",
+            "port_ref": "d3",
+            "position": 4
+          },
+          {
+            "net": "d4",
+            "port_ref": "d4",
+            "position": 5
+          },
+          {
+            "net": "d5",
+            "port_ref": "d5",
+            "position": 6
+          },
+          {
+            "net": "d6",
+            "port_ref": "d6",
+            "position": 7
+          },
+          {
+            "net": "d7",
+            "port_ref": "d7",
+            "position": 8
+          },
+          {
+            "net": "d8",
+            "port_ref": "d8",
+            "position": 9
+          },
+          {
+            "net": "d9",
+            "port_ref": "d9",
+            "position": 10
+          },
+          {
+            "net": "d10",
+            "port_ref": "d10",
+            "position": 11
+          },
+          {
+            "net": "d11",
+            "port_ref": "d11",
+            "position": 12
+          },
+          {
+            "net": "d12",
+            "port_ref": "d12",
+            "position": 13
+          },
+          {
+            "net": "d13",
+            "port_ref": "d13",
+            "position": 14
+          },
+          {
+            "net": "d14",
+            "port_ref": "d14",
+            "position": 15
+          },
+          {
+            "net": "do0",
+            "port_ref": "do0",
+            "position": 16
+          },
+          {
+            "net": "do1",
+            "port_ref": "do1",
+            "position": 17
+          },
+          {
+            "net": "do2",
+            "port_ref": "do2",
+            "position": 18
+          },
+          {
+            "net": "do3",
+            "port_ref": "do3",
+            "position": 19
+          },
+          {
+            "net": "do4",
+            "port_ref": "do4",
+            "position": 20
+          },
+          {
+            "net": "do5",
+            "port_ref": "do5",
+            "position": 21
+          },
+          {
+            "net": "do6",
+            "port_ref": "do6",
+            "position": 22
+          },
+          {
+            "net": "do7",
+            "port_ref": "do7",
+            "position": 23
+          },
+          {
+            "net": "do8",
+            "port_ref": "do8",
+            "position": 24
+          },
+          {
+            "net": "do9",
+            "port_ref": "do9",
+            "position": 25
+          },
+          {
+            "net": "do10",
+            "port_ref": "do10",
+            "position": 26
+          },
+          {
+            "net": "do11",
+            "port_ref": "do11",
+            "position": 27
+          },
+          {
+            "net": "do12",
+            "port_ref": "do12",
+            "position": 28
+          },
+          {
+            "net": "do13",
+            "port_ref": "do13",
+            "position": 29
+          },
+          {
+            "net": "do14",
+            "port_ref": "do14",
+            "position": 30
+          }
+        ],
+        "module_ref": "pipe15_data_align",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "d0",
+      "d1",
+      "d10",
+      "d11",
+      "d12",
+      "d13",
+      "d14",
+      "d2",
+      "d3",
+      "d4",
+      "d5",
+      "d6",
+      "d7",
+      "d8",
+      "d9",
+      "do0",
+      "do1",
+      "do10",
+      "do11",
+      "do12",
+      "do13",
+      "do14",
+      "do2",
+      "do3",
+      "do4",
+      "do5",
+      "do6",
+      "do7",
+      "do8",
+      "do9",
+      "samp"
+    ]
+  }
+}

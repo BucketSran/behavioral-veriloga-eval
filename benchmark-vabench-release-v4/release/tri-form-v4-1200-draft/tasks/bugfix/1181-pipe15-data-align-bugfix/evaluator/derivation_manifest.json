@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-181",
+    "canonical_task_slug": "181-pipe15-data-align",
+    "family_spec_sha256": "6e6bc6d9344699301210155b25b80b60b5130b6f37c9645555ccea2b52cd1031",
+    "mutation_catalog_sha256": "47fe24dc234e650738110f2d3f0670abc1f992a7c1d66cb0cc0783c79ac30b08",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "181",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_top_group_three_delay",
+    "testbench_suite": [
+      "neg_002_top_group_three_delay",
+      "neg_005_metric_scale_low",
+      "neg_004_swap_low_outputs",
+      "neg_001_zero",
+      "neg_003_middle_group_one_delay"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "c33aeab1b25ef62ec1010cb52bf7c8ae15c2426a71e616cf38884090b8f20ffa",
+    "changed_artifacts": [
+      "pipe15_data_align.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_top_group_three_delay",
+    "rationale": "Select fault class timing_or_state_update_fault under trigger 'Uses the third delay stage for bits 11-14 instead of the fourth.' because it exercises P_STAGGERED_DELAY_OUTPUT_GROUPS as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 27,
+    "source_preferred_seed": "neg_002_top_group_three_delay",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

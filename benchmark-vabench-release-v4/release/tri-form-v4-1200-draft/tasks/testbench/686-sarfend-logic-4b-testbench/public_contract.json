@@ -1,0 +1,470 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "sarfend_logic_4b",
+            "parameters": [],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clks",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dcomp",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dcompb",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "test",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dtest0",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dtest1",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dtest2",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dtest3",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "clkc",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dp1",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dp2",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dp3",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dp4",
+                "position": 12
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dm1",
+                "position": 13
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dm2",
+                "position": 14
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dm3",
+                "position": 15
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dm4",
+                "position": 16
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dout0",
+                "position": 17
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dout1",
+                "position": 18
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dout2",
+                "position": 19
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dout3",
+                "position": 20
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "sarfend_logic_4b.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "186",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "SARFEND Logic 4b"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_CONVERSION_RESET_AND_PREVIOUS_WORD",
+      "observable_contract": "Each rising `clks` crossing publishes the previous DAC-P word on `dout0..dout3`, resets the conversion pointer, and initializes controls for a new conversion.",
+      "required_signals": [
+        "time",
+        "clkc",
+        "clks",
+        "dcomp",
+        "dcompb",
+        "dm1",
+        "dm2",
+        "dm3",
+        "dm4",
+        "dout0",
+        "dout1",
+        "dout2",
+        "dout3",
+        "dp1",
+        "dp2",
+        "dp3",
+        "dp4",
+        "dtest0",
+        "dtest1",
+        "dtest2",
+        "dtest3",
+        "test"
+      ]
+    },
+    {
+      "id": "P_SAMPLE_AND_COMPARATOR_DECISIONS",
+      "observable_contract": "The conversion captures comparator inputs and updates SAR decisions with the declared `dcomp/dcompb` polarity.",
+      "required_signals": [
+        "time",
+        "clkc",
+        "clks",
+        "dcomp",
+        "dcompb",
+        "dm1",
+        "dm2",
+        "dm3",
+        "dm4",
+        "dout0",
+        "dout1",
+        "dout2",
+        "dout3",
+        "dp1",
+        "dp2",
+        "dp3",
+        "dp4",
+        "dtest0",
+        "dtest1",
+        "dtest2",
+        "dtest3",
+        "test"
+      ]
+    },
+    {
+      "id": "P_TEST_OVERRIDE_BEHAVIOR",
+      "observable_contract": "The public test override controls the DAC/control outputs when asserted and does not corrupt normal conversion state.",
+      "required_signals": [
+        "time",
+        "clkc",
+        "clks",
+        "dcomp",
+        "dcompb",
+        "dm1",
+        "dm2",
+        "dm3",
+        "dm4",
+        "dout0",
+        "dout1",
+        "dout2",
+        "dout3",
+        "dp1",
+        "dp2",
+        "dp3",
+        "dp4",
+        "dtest0",
+        "dtest1",
+        "dtest2",
+        "dtest3",
+        "test"
+      ]
+    },
+    {
+      "id": "P_DOUT_BIT_MAPPING",
+      "observable_contract": "`dout0..dout3` preserve the declared bit order of the previous DAC-P state.",
+      "required_signals": [
+        "time",
+        "clkc",
+        "clks",
+        "dcomp",
+        "dcompb",
+        "dm1",
+        "dm2",
+        "dm3",
+        "dm4",
+        "dout0",
+        "dout1",
+        "dout2",
+        "dout3",
+        "dp1",
+        "dp2",
+        "dp3",
+        "dp4",
+        "dtest0",
+        "dtest1",
+        "dtest2",
+        "dtest3",
+        "test"
+      ]
+    },
+    {
+      "id": "P_LOGIC_OUTPUT_LEVELS",
+      "observable_contract": "Handshake, DAC-control, and data outputs use full voltage-coded low/high levels.",
+      "required_signals": [
+        "time",
+        "clkc",
+        "clks",
+        "dcomp",
+        "dcompb",
+        "dm1",
+        "dm2",
+        "dm3",
+        "dm4",
+        "dout0",
+        "dout1",
+        "dout2",
+        "dout3",
+        "dp1",
+        "dp2",
+        "dp3",
+        "dp4",
+        "dtest0",
+        "dtest1",
+        "dtest2",
+        "dtest3",
+        "test"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/sarfend_logic_4b.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-686",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clks",
+            "port_ref": "clks",
+            "position": 0
+          },
+          {
+            "net": "dcomp",
+            "port_ref": "dcomp",
+            "position": 1
+          },
+          {
+            "net": "dcompb",
+            "port_ref": "dcompb",
+            "position": 2
+          },
+          {
+            "net": "test",
+            "port_ref": "test",
+            "position": 3
+          },
+          {
+            "net": "dtest0",
+            "port_ref": "dtest0",
+            "position": 4
+          },
+          {
+            "net": "dtest1",
+            "port_ref": "dtest1",
+            "position": 5
+          },
+          {
+            "net": "dtest2",
+            "port_ref": "dtest2",
+            "position": 6
+          },
+          {
+            "net": "dtest3",
+            "port_ref": "dtest3",
+            "position": 7
+          },
+          {
+            "net": "clkc",
+            "port_ref": "clkc",
+            "position": 8
+          },
+          {
+            "net": "dp1",
+            "port_ref": "dp1",
+            "position": 9
+          },
+          {
+            "net": "dp2",
+            "port_ref": "dp2",
+            "position": 10
+          },
+          {
+            "net": "dp3",
+            "port_ref": "dp3",
+            "position": 11
+          },
+          {
+            "net": "dp4",
+            "port_ref": "dp4",
+            "position": 12
+          },
+          {
+            "net": "dm1",
+            "port_ref": "dm1",
+            "position": 13
+          },
+          {
+            "net": "dm2",
+            "port_ref": "dm2",
+            "position": 14
+          },
+          {
+            "net": "dm3",
+            "port_ref": "dm3",
+            "position": 15
+          },
+          {
+            "net": "dm4",
+            "port_ref": "dm4",
+            "position": 16
+          },
+          {
+            "net": "dout0",
+            "port_ref": "dout0",
+            "position": 17
+          },
+          {
+            "net": "dout1",
+            "port_ref": "dout1",
+            "position": 18
+          },
+          {
+            "net": "dout2",
+            "port_ref": "dout2",
+            "position": 19
+          },
+          {
+            "net": "dout3",
+            "port_ref": "dout3",
+            "position": 20
+          }
+        ],
+        "module_ref": "sarfend_logic_4b",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clkc",
+      "clks",
+      "dcomp",
+      "dcompb",
+      "dm1",
+      "dm2",
+      "dm3",
+      "dm4",
+      "dout0",
+      "dout1",
+      "dout2",
+      "dout3",
+      "dp1",
+      "dp2",
+      "dp3",
+      "dp4",
+      "dtest0",
+      "dtest1",
+      "dtest2",
+      "dtest3",
+      "test"
+    ]
+  }
+}
