@@ -1,0 +1,239 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "comparator_offset_search_ref",
+            "parameters": [
+              {
+                "default": 0.005,
+                "name": "vos",
+                "override_behavior": "sets the input-referred differential decision threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real"
+              },
+              {
+                "default": 2e-11,
+                "name": "trf",
+                "override_behavior": "sets decision and measurement-output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "trf > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vdd",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vss",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "inp",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "inn",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "outp",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "trip_v",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "offset_est",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "comparator_offset_search_ref.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "085",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "comparator_decision_circuits",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Comparator Offset Search"
+  },
+  "modeling_constraints": [
+    "Use deterministic crossing-event state for comparator decision and one-shot measurement capture.",
+    "Drive voltage contributions outside event blocks with finite transition smoothing.",
+    "Do not use current contributions, transistor-level devices, continuous-time operators, or validation side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_INITIAL_MEASUREMENT_STATE",
+      "observable_contract": "Before the first positive threshold crossing, valid, trip_v, and offset_est remain in the zero-measurement state.",
+      "required_signals": [
+        "time",
+        "inp",
+        "inn",
+        "trip_v",
+        "offset_est",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_DECISION_THRESHOLD",
+      "observable_contract": "Outp is high when V(inp,vss)-V(inn,vss) is above vos and low after that differential falls below vos.",
+      "required_signals": [
+        "time",
+        "vdd",
+        "vss",
+        "inp",
+        "inn",
+        "outp"
+      ]
+    },
+    {
+      "id": "P_FIRST_POSITIVE_CAPTURE",
+      "observable_contract": "The first positive crossing of the vos threshold captures the input trip voltage and measured differential offset and asserts valid.",
+      "required_signals": [
+        "time",
+        "inp",
+        "inn",
+        "trip_v",
+        "offset_est",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_CAPTURE_HOLD",
+      "observable_contract": "After valid asserts, trip_v, offset_est, and valid retain their first-measurement values despite later differential-input changes.",
+      "required_signals": [
+        "time",
+        "inp",
+        "inn",
+        "trip_v",
+        "offset_est",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_RAIL_REFERENCED_LOGIC",
+      "observable_contract": "Outp and valid use the vdd-to-vss logic range with finite transition smoothing.",
+      "required_signals": [
+        "time",
+        "vdd",
+        "vss",
+        "outp",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "comparator_offset_search_ref.va"
+  ],
+  "task_id": "v4-085",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vdd",
+            "port_ref": "vdd",
+            "position": 0
+          },
+          {
+            "net": "vss",
+            "port_ref": "vss",
+            "position": 1
+          },
+          {
+            "net": "inp",
+            "port_ref": "inp",
+            "position": 2
+          },
+          {
+            "net": "inn",
+            "port_ref": "inn",
+            "position": 3
+          },
+          {
+            "net": "outp",
+            "port_ref": "outp",
+            "position": 4
+          },
+          {
+            "net": "trip_v",
+            "port_ref": "trip_v",
+            "position": 5
+          },
+          {
+            "net": "offset_est",
+            "port_ref": "offset_est",
+            "position": 6
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 7
+          }
+        ],
+        "module_ref": "comparator_offset_search_ref",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vdd",
+      "vss",
+      "inp",
+      "inn",
+      "outp",
+      "trip_v",
+      "offset_est",
+      "valid"
+    ]
+  }
+}

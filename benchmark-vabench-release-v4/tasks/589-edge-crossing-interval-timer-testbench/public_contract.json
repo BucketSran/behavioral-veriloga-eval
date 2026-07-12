@@ -1,0 +1,231 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "cross_interval_163p333_ref",
+            "parameters": [
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets rising-edge thresholds for a and b relative to VSS",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real within the VSS-to-VDD logic range"
+              },
+              {
+                "default": 200.0,
+                "name": "scale_ps",
+                "override_behavior": "sets measured-delay normalization for delay_out",
+                "type": "real",
+                "units": "ps",
+                "valid_range": "scale_ps > 0"
+              },
+              {
+                "default": 2e-11,
+                "name": "tedge",
+                "override_behavior": "sets output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tedge > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VDD",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VSS",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "a",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "delay_out",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "seen_out",
+                "position": 5
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "cross_interval_163p333_ref.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "089",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "measurement_instrumentation_flows",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Edge Crossing Interval Timer"
+  },
+  "modeling_constraints": [
+    "Use deterministic crossing events and retained measurement state.",
+    "Use rail-referenced smoothed voltage outputs only.",
+    "Do not hard-code validation intervals or use waveform files, transistor-level devices, AC/noise analysis, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_A_EDGE_ARMS",
+      "observable_contract": "A rising a crossing arms a fresh measurement and clears seen_out until completion.",
+      "required_signals": [
+        "time",
+        "a",
+        "seen_out"
+      ]
+    },
+    {
+      "id": "P_FIRST_B_EDGE_CAPTURES",
+      "observable_contract": "The first rising b crossing after an armed a edge captures their elapsed time; b edges before arming do not complete a measurement.",
+      "required_signals": [
+        "time",
+        "a",
+        "b",
+        "delay_out",
+        "seen_out"
+      ]
+    },
+    {
+      "id": "P_DELAY_NORMALIZATION",
+      "observable_contract": "Delay_out equals the VDD-to-VSS rail span multiplied by measured delay in picoseconds divided by scale_ps.",
+      "required_signals": [
+        "time",
+        "vdd",
+        "vss",
+        "a",
+        "b",
+        "delay_out"
+      ]
+    },
+    {
+      "id": "P_COMPLETION_MARKER",
+      "observable_contract": "Seen_out is rail-high after a valid a-then-b capture and rail-low while a newly armed measurement is incomplete.",
+      "required_signals": [
+        "time",
+        "vdd",
+        "vss",
+        "a",
+        "b",
+        "seen_out"
+      ]
+    },
+    {
+      "id": "P_SINGLE_CAPTURE_PER_ARM",
+      "observable_contract": "Additional b crossings after completion do not change delay_out until the next rising a edge rearms the timer.",
+      "required_signals": [
+        "time",
+        "a",
+        "b",
+        "delay_out",
+        "seen_out"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/cross_interval_163p333_ref.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-589",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vdd",
+            "port_ref": "VDD",
+            "position": 0
+          },
+          {
+            "net": "vss",
+            "port_ref": "VSS",
+            "position": 1
+          },
+          {
+            "net": "a",
+            "port_ref": "a",
+            "position": 2
+          },
+          {
+            "net": "b",
+            "port_ref": "b",
+            "position": 3
+          },
+          {
+            "net": "delay_out",
+            "port_ref": "delay_out",
+            "position": 4
+          },
+          {
+            "net": "seen_out",
+            "port_ref": "seen_out",
+            "position": 5
+          }
+        ],
+        "module_ref": "cross_interval_163p333_ref",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vdd",
+      "vss",
+      "a",
+      "b",
+      "delay_out",
+      "seen_out"
+    ]
+  }
+}

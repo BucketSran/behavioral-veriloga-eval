@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-081",
+    "canonical_task_slug": "081-adpll-ratio-hop-timer",
+    "family_spec_sha256": "7e4de541f7a253044781f037d3752e923f080422f612c3ed5dfe94eed01591cd",
+    "mutation_catalog_sha256": "6a2446dbc439d741a52b86e6cf21e18024e5cb1af52a86a8533f392e8f04f111",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "081",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_event_edge_wrong",
+    "testbench_suite": [
+      "neg_002_threshold_shifted",
+      "neg_003_event_edge_wrong",
+      "neg_005_metric_scale_low",
+      "neg_001_zero",
+      "neg_004_reset_polarity_wrong"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "e9631440d50c6505a954a2e0ba8df2ca480cb36947984f7376ef56a2749fb202",
+    "changed_artifacts": [
+      "adpll_ratio_hop_ref.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_event_edge_wrong",
+    "rationale": "Select fault class event_edge_polarity_error under trigger 'event-timing stimulus distinguishes the required active edge for ADPLL Ratio Hop Timer' because it exercises P_FEEDBACK_DERIVED_FROM_DCO, P_PRE_HOP_LOCK, P_RATIO_HOP_REACQUISITION as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 31,
+    "source_preferred_seed": "neg_002_threshold_shifted",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

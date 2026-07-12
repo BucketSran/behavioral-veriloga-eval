@@ -1,0 +1,281 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "amplifier_filter_chain",
+            "parameters": [
+              {
+                "default": 1e-10,
+                "name": "tr",
+                "override_behavior": "sets output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              },
+              {
+                "default": 1.8,
+                "name": "gain",
+                "override_behavior": "sets pre-filter gain about 0.45 V common mode",
+                "type": "real",
+                "units": "V/V",
+                "valid_range": "gain > 0"
+              },
+              {
+                "default": 0.3,
+                "name": "alpha",
+                "override_behavior": "sets each sampled low-pass update coefficient",
+                "type": "real",
+                "units": null,
+                "valid_range": "0 < alpha <= 1"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "metric",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "preamp_mon",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "filt1_mon",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "filt2_mon",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "settle_metric",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "amplifier_filter_chain.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "083",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "baseband_signal_conditioning",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Amplifier Filter Chain"
+  },
+  "modeling_constraints": [
+    "Use deterministic rising-edge sampled gain and two-stage low-pass state updates.",
+    "Use smoothed voltage contributions only.",
+    "Do not use current contributions, transistor-level devices, AC/noise analysis, continuous-time operators, or validation side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_COMMON_MODE",
+      "observable_contract": "Initialization or active-high reset returns the preamp and both filter stages near 0.45 V and leaves settle_metric low.",
+      "required_signals": [
+        "time",
+        "rst",
+        "out",
+        "metric",
+        "preamp_mon",
+        "filt1_mon",
+        "filt2_mon",
+        "settle_metric"
+      ]
+    },
+    {
+      "id": "P_BOUNDED_PREAMP",
+      "observable_contract": "At each rising clock edge, preamp_mon and metric equal gain times the sampled vin deviation about 0.45 V, clamped to 0 V through 0.9 V.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "metric",
+        "preamp_mon"
+      ]
+    },
+    {
+      "id": "P_FIRST_FILTER_STAGE",
+      "observable_contract": "Filt1_mon applies the sampled first-order alpha update toward the bounded preamp target.",
+      "required_signals": [
+        "time",
+        "clk",
+        "preamp_mon",
+        "filt1_mon"
+      ]
+    },
+    {
+      "id": "P_SECOND_FILTER_STAGE",
+      "observable_contract": "Filt2_mon applies a second sampled alpha update toward the newly updated first-stage value, and out follows filt2_mon.",
+      "required_signals": [
+        "time",
+        "clk",
+        "filt1_mon",
+        "filt2_mon",
+        "out"
+      ]
+    },
+    {
+      "id": "P_CASCADE_LAG",
+      "observable_contract": "After a large input change, the second-stage output visibly lags the bounded preamp target while the two stage monitors preserve cascade order.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "preamp_mon",
+        "filt1_mon",
+        "filt2_mon",
+        "out"
+      ]
+    },
+    {
+      "id": "P_SETTLE_STATUS",
+      "observable_contract": "Settle_metric is 0.9 V when the output-target error is below 0.16 V and 0.1 V while the chain is recovering.",
+      "required_signals": [
+        "time",
+        "preamp_mon",
+        "out",
+        "settle_metric"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/amplifier_filter_chain.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-583",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 2
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 3
+          },
+          {
+            "net": "metric",
+            "port_ref": "metric",
+            "position": 4
+          },
+          {
+            "net": "preamp_mon",
+            "port_ref": "preamp_mon",
+            "position": 5
+          },
+          {
+            "net": "filt1_mon",
+            "port_ref": "filt1_mon",
+            "position": 6
+          },
+          {
+            "net": "filt2_mon",
+            "port_ref": "filt2_mon",
+            "position": 7
+          },
+          {
+            "net": "settle_metric",
+            "port_ref": "settle_metric",
+            "position": 8
+          }
+        ],
+        "module_ref": "amplifier_filter_chain",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric",
+      "preamp_mon",
+      "filt1_mon",
+      "filt2_mon",
+      "settle_metric"
+    ]
+  }
+}

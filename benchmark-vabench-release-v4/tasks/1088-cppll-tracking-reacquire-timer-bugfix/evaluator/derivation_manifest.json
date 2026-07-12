@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-088",
+    "canonical_task_slug": "088-cppll-tracking-reacquire-timer",
+    "family_spec_sha256": "c358e54a720bd19d11e9e44684637d8d7ca3c9bf4f42579917f2ccb01a323fa5",
+    "mutation_catalog_sha256": "8f90b40118cb593999c718dac3b54742b431fd6fbcd0dad2c6acb70f9b13a12d",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "088",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_lock_stuck_high",
+    "testbench_suite": [
+      "neg_002_lock_stuck_high",
+      "neg_003_wrong_feedback_divider",
+      "neg_004_no_loop_correction",
+      "neg_001_zero",
+      "neg_005_vctrl_monitor_out_of_range"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "62b65936f8d93e164e97284791a04f340e27db72a3e3ff4d48e3982385d08592",
+    "changed_artifacts": [
+      "cppll_timer_ref.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_lock_stuck_high",
+    "rationale": "Select fault class lock_qualification_error under trigger 'tracking disturbance stimulus exercises lock qualification and reacquisition' because it exercises P_DISTURBANCE_UNLOCK, P_INITIAL_LOCK_ACQUISITION, P_LATE_REACQUISITION, P_REFERENCE_PERIOD_STEP as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 22,
+    "source_preferred_seed": "neg_002_lock_stuck_high",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

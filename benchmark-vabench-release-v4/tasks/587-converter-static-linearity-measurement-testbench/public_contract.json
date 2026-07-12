@@ -1,0 +1,254 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "converter_static_linearity_measurement_flow",
+            "parameters": [
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets clock and reset logic threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real"
+              },
+              {
+                "default": 0.9,
+                "name": "vfs",
+                "override_behavior": "sets the full-scale input and code-output range",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vfs > 0"
+              },
+              {
+                "default": 1.2e-10,
+                "name": "tr",
+                "override_behavior": "sets metric-output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "code",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "recon",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dnl",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "inl",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "converter_static_linearity_measurement_flow.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "087",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "data_converter_models",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Converter Static Linearity Measurement"
+  },
+  "modeling_constraints": [
+    "Use deterministic rising-edge sampled quantization and retained previous-step state.",
+    "Use only the public reconstruction table and smoothed voltage outputs.",
+    "Do not hard-code validation sweeps or use current contributions, transistor-level devices, continuous-time operators, or validation side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_STATE",
+      "observable_contract": "Active-high reset clears the retained conversion and previous-step state to the public reset values.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "code",
+        "recon",
+        "dnl",
+        "inl"
+      ]
+    },
+    {
+      "id": "P_FOUR_BIT_QUANTIZATION",
+      "observable_contract": "On each non-reset rising clk edge, vin clips to 0 through vfs and quantizes monotonically to one of 16 codes represented as code_index times vfs/15.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "vin",
+        "code"
+      ]
+    },
+    {
+      "id": "P_PUBLIC_RECONSTRUCTION_TABLE",
+      "observable_contract": "For each code 0 through 15, recon equals the corresponding value in the public monotonic non-ideal reconstruction table, with default table voltages scaled by vfs/0.9 for legal vfs overrides.",
+      "required_signals": [
+        "time",
+        "clk",
+        "code",
+        "recon"
+      ]
+    },
+    {
+      "id": "P_INL_METRIC",
+      "observable_contract": "INL encodes reconstruction error from the vfs/15-per-code ideal ramp using the public gain and 0.05 V through 0.85 V clamp.",
+      "required_signals": [
+        "time",
+        "code",
+        "recon",
+        "inl"
+      ]
+    },
+    {
+      "id": "P_DNL_INCREASING_STEP",
+      "observable_contract": "For a valid increasing code step, dnl encodes actual reconstruction-step error relative to vfs/15 per code step with the public scaling and clamp.",
+      "required_signals": [
+        "time",
+        "clk",
+        "code",
+        "recon",
+        "dnl"
+      ]
+    },
+    {
+      "id": "P_DNL_NO_STEP_BASELINE",
+      "observable_contract": "Before a valid increasing step, or when code does not increase, dnl is held at the 0.45 V baseline.",
+      "required_signals": [
+        "time",
+        "clk",
+        "code",
+        "recon",
+        "dnl"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/converter_static_linearity_measurement_flow.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-587",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 2
+          },
+          {
+            "net": "code",
+            "port_ref": "code",
+            "position": 3
+          },
+          {
+            "net": "recon",
+            "port_ref": "recon",
+            "position": 4
+          },
+          {
+            "net": "dnl",
+            "port_ref": "dnl",
+            "position": 5
+          },
+          {
+            "net": "inl",
+            "port_ref": "inl",
+            "position": 6
+          }
+        ],
+        "module_ref": "converter_static_linearity_measurement_flow",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "vin",
+      "code",
+      "recon",
+      "dnl",
+      "inl"
+    ]
+  }
+}

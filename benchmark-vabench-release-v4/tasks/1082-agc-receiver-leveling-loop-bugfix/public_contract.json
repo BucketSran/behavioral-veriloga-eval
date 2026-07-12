@@ -1,0 +1,256 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "agc_receiver_leveling_loop",
+            "parameters": [
+              {
+                "default": 1e-10,
+                "name": "tr",
+                "override_behavior": "sets output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets clk and reset logic threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real"
+              },
+              {
+                "default": 0.18,
+                "name": "target_amp",
+                "override_behavior": "sets desired output-envelope amplitude about common mode",
+                "type": "real",
+                "units": "V",
+                "valid_range": "0 <= target_amp <= 0.43"
+              },
+              {
+                "default": 0.025,
+                "name": "deadband",
+                "override_behavior": "sets the no-adjustment envelope tolerance",
+                "type": "real",
+                "units": "V",
+                "valid_range": "deadband >= 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "metric",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "gain_mon",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "rssi_mon",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "agc_receiver_leveling_loop.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/agc_receiver_leveling_loop.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "082",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "rf_afe_behavioral_macromodels",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "AGC Receiver Leveling Loop"
+  },
+  "modeling_constraints": [
+    "Use deterministic rising-edge event-updated gain-control state.",
+    "Use smoothed voltage contributions only.",
+    "Do not use current contributions, transistor-level, AC/noise, link-level decoding, or validation side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_RESET_STATE",
+      "observable_contract": "Active-high reset restores out to 0.45 V, clears rssi_mon and metric, and represents the initial gain 2.2 on gain_mon.",
+      "required_signals": [
+        "time",
+        "rst",
+        "out",
+        "metric",
+        "gain_mon",
+        "rssi_mon"
+      ]
+    },
+    {
+      "id": "P_CLOCKED_GAIN_LOOP",
+      "observable_contract": "The AGC samples and updates its held output and gain state only on rising clk crossings after reset releases.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "vin",
+        "out",
+        "gain_mon"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_ENVELOPE",
+      "observable_contract": "Out is the current-gain amplification of vin about 0.45 V, clamped to 0.02 V through 0.88 V, and rssi_mon reports the normalized absolute output envelope.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "out",
+        "rssi_mon"
+      ]
+    },
+    {
+      "id": "P_GAIN_DIRECTION_AND_BOUNDS",
+      "observable_contract": "Envelope above target_amp plus deadband lowers gain by 0.18, envelope below target_amp minus deadband raises gain by 0.10, and gain remains in 0.45 through 3.0.",
+      "required_signals": [
+        "time",
+        "clk",
+        "out",
+        "gain_mon",
+        "rssi_mon"
+      ]
+    },
+    {
+      "id": "P_DEADBAND_HOLD",
+      "observable_contract": "When the observed envelope lies within the target deadband, the bounded gain state holds across the update.",
+      "required_signals": [
+        "time",
+        "clk",
+        "out",
+        "gain_mon",
+        "rssi_mon"
+      ]
+    },
+    {
+      "id": "P_SETTLING_METRIC",
+      "observable_contract": "Metric decreases with absolute envelope error from target_amp according to the public scaling and remains clamped to 0 V through 0.9 V.",
+      "required_signals": [
+        "time",
+        "out",
+        "metric",
+        "rssi_mon"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "agc_receiver_leveling_loop.va"
+  ],
+  "task_id": "v4-1082",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 2
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 3
+          },
+          {
+            "net": "metric",
+            "port_ref": "metric",
+            "position": 4
+          },
+          {
+            "net": "gain_mon",
+            "port_ref": "gain_mon",
+            "position": 5
+          },
+          {
+            "net": "rssi_mon",
+            "port_ref": "rssi_mon",
+            "position": 6
+          }
+        ],
+        "module_ref": "agc_receiver_leveling_loop",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric",
+      "gain_mon",
+      "rssi_mon"
+    ]
+  }
+}

@@ -1,0 +1,416 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "cppll_timer_ref",
+            "parameters": [
+              {
+                "default": 8,
+                "name": "div_ratio",
+                "override_behavior": "sets DCO rising-edge division ratio for fb_clk",
+                "type": "integer",
+                "units": "ratio",
+                "valid_range": "div_ratio >= 1"
+              },
+              {
+                "default": 800000000.0,
+                "name": "f_center",
+                "override_behavior": "sets DCO frequency at common-mode control",
+                "type": "real",
+                "units": "Hz",
+                "valid_range": "f_center > 0"
+              },
+              {
+                "default": 350000000.0,
+                "name": "kvco_hz_per_v",
+                "override_behavior": "sets DCO frequency sensitivity to vctrl_mon",
+                "type": "real",
+                "units": "Hz/V",
+                "valid_range": "kvco_hz_per_v > 0"
+              },
+              {
+                "default": 300000000.0,
+                "name": "f_min",
+                "override_behavior": "sets lower DCO frequency clamp",
+                "type": "real",
+                "units": "Hz",
+                "valid_range": "f_min > 0 and f_min <= f_max"
+              },
+              {
+                "default": 1600000000.0,
+                "name": "f_max",
+                "override_behavior": "sets upper DCO frequency clamp",
+                "type": "real",
+                "units": "Hz",
+                "valid_range": "f_max > 0 and f_max >= f_min"
+              },
+              {
+                "default": 8000000.0,
+                "name": "kp",
+                "override_behavior": "sets proportional phase-error correction scale",
+                "type": "real",
+                "units": "loop scale",
+                "valid_range": "kp >= 0"
+              },
+              {
+                "default": 120000.0,
+                "name": "ki",
+                "override_behavior": "sets accumulated phase-error correction scale",
+                "type": "real",
+                "units": "loop scale",
+                "valid_range": "ki >= 0"
+              },
+              {
+                "default": -0.45,
+                "name": "integ_min",
+                "override_behavior": "sets lower integral-state bound",
+                "type": "real",
+                "units": "V-equivalent",
+                "valid_range": "integ_min < integ_max"
+              },
+              {
+                "default": 0.45,
+                "name": "integ_max",
+                "override_behavior": "sets upper integral-state bound",
+                "type": "real",
+                "units": "V-equivalent",
+                "valid_range": "integ_max > integ_min"
+              },
+              {
+                "default": 0.45,
+                "name": "vctrl_init",
+                "override_behavior": "sets initial control-voltage monitor",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real within the intended supply range"
+              },
+              {
+                "default": 2e-11,
+                "name": "tedge",
+                "override_behavior": "sets voltage-coded output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tedge > 0"
+              },
+              {
+                "default": 4e-10,
+                "name": "lock_tol",
+                "override_behavior": "sets phase-error tolerance for lock streaks",
+                "type": "real",
+                "units": "s",
+                "valid_range": "lock_tol > 0"
+              },
+              {
+                "default": 6,
+                "name": "lock_count_target",
+                "override_behavior": "sets consecutive in-tolerance events required for lock",
+                "type": "integer",
+                "units": "events",
+                "valid_range": "lock_count_target >= 1"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VDD",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VSS",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ref_clk",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "fb_clk",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dco_clk",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vctrl_mon",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lock",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "cppll_timer_ref.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "ref_step_clk",
+            "parameters": [
+              {
+                "default": 2e-08,
+                "name": "period_pre",
+                "override_behavior": "sets reference-clock period before t_switch",
+                "type": "real",
+                "units": "s",
+                "valid_range": "period_pre > 0"
+              },
+              {
+                "default": 1.95e-08,
+                "name": "period_post",
+                "override_behavior": "sets reference-clock period after t_switch",
+                "type": "real",
+                "units": "s",
+                "valid_range": "period_post > 0"
+              },
+              {
+                "default": 2e-06,
+                "name": "t_switch",
+                "override_behavior": "sets time of the reference-cadence step",
+                "type": "real",
+                "units": "s",
+                "valid_range": "t_switch >= 0"
+              },
+              {
+                "default": 1e-10,
+                "name": "tedge",
+                "override_behavior": "sets reference-clock transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tedge > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VDD",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VSS",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "CLK",
+                "position": 2
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "ref_step_clk.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "family_id": "088",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "pll_clock_timing_systems",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "CPPLL Tracking Reacquire Timer"
+  },
+  "modeling_constraints": [
+    "Treat the two source files as one atomic system bundle with no direct module-instantiation dependency between them.",
+    "Use deterministic event-driven oscillator, divider, tracking, and reference-step behavior with timestep guidance.",
+    "Do not hard-code validation windows or use transistor-level, AC/noise, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_REFERENCE_PERIOD_STEP",
+      "observable_contract": "The bundled reference-step clock produces the configured period_pre cadence before t_switch and period_post cadence afterwards, with rail-referenced levels.",
+      "required_signals": [
+        "time",
+        "vdd",
+        "vss",
+        "ref_clk"
+      ]
+    },
+    {
+      "id": "P_DCO_FREQUENCY_CONTROL",
+      "observable_contract": "Dco_clk frequency responds to bounded vctrl_mon around f_center with kvco_hz_per_v sensitivity and remains clamped to f_min through f_max.",
+      "required_signals": [
+        "time",
+        "dco_clk",
+        "vctrl_mon"
+      ]
+    },
+    {
+      "id": "P_FEEDBACK_DIVISION",
+      "observable_contract": "Fb_clk is derived from dco_clk rising-edge activity using div_ratio.",
+      "required_signals": [
+        "time",
+        "dco_clk",
+        "fb_clk"
+      ]
+    },
+    {
+      "id": "P_BOUNDED_TRACKING_CONTROL",
+      "observable_contract": "Reference-versus-feedback phase error updates proportional and bounded integral correction while vctrl_mon remains within the supply rails.",
+      "required_signals": [
+        "time",
+        "vdd",
+        "vss",
+        "ref_clk",
+        "fb_clk",
+        "vctrl_mon"
+      ]
+    },
+    {
+      "id": "P_INITIAL_LOCK_ACQUISITION",
+      "observable_contract": "Stable pre-step tracking asserts lock only after lock_count_target consecutive in-tolerance events.",
+      "required_signals": [
+        "time",
+        "ref_clk",
+        "fb_clk",
+        "lock"
+      ]
+    },
+    {
+      "id": "P_DISTURBANCE_UNLOCK",
+      "observable_contract": "The reference-period step removes or destabilizes lock qualification while the loop responds to the changed cadence.",
+      "required_signals": [
+        "time",
+        "ref_clk",
+        "fb_clk",
+        "vctrl_mon",
+        "lock"
+      ]
+    },
+    {
+      "id": "P_LATE_REACQUISITION",
+      "observable_contract": "After the step, fb_clk tracks the new reference cadence and lock reasserts while vctrl_mon remains rail-bounded.",
+      "required_signals": [
+        "time",
+        "vdd",
+        "vss",
+        "ref_clk",
+        "fb_clk",
+        "vctrl_mon",
+        "lock"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "cppll_timer_ref.va",
+    "ref_step_clk.va"
+  ],
+  "task_id": "v4-088",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vdd",
+            "port_ref": "VDD",
+            "position": 0
+          },
+          {
+            "net": "vss",
+            "port_ref": "VSS",
+            "position": 1
+          },
+          {
+            "net": "ref_clk",
+            "port_ref": "CLK",
+            "position": 2
+          }
+        ],
+        "module_ref": "ref_step_clk",
+        "name": "XREF"
+      },
+      {
+        "connections": [
+          {
+            "net": "vdd",
+            "port_ref": "VDD",
+            "position": 0
+          },
+          {
+            "net": "vss",
+            "port_ref": "VSS",
+            "position": 1
+          },
+          {
+            "net": "ref_clk",
+            "port_ref": "ref_clk",
+            "position": 2
+          },
+          {
+            "net": "fb_clk",
+            "port_ref": "fb_clk",
+            "position": 3
+          },
+          {
+            "net": "dco_clk",
+            "port_ref": "dco_clk",
+            "position": 4
+          },
+          {
+            "net": "vctrl_mon",
+            "port_ref": "vctrl_mon",
+            "position": 5
+          },
+          {
+            "net": "lock",
+            "port_ref": "lock",
+            "position": 6
+          }
+        ],
+        "module_ref": "cppll_timer_ref",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vdd",
+      "vss",
+      "ref_clk",
+      "fb_clk",
+      "dco_clk",
+      "vctrl_mon",
+      "lock"
+    ]
+  }
+}

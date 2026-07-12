@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-083",
+    "canonical_task_slug": "083-amplifier-filter-chain",
+    "family_spec_sha256": "fd70e77c9b67228ff0168cb5c86badc26d284af6c7d4dc692330c48320f21339",
+    "mutation_catalog_sha256": "8682011fefa9d7f82f469436e8a796636f2e4979379dce4b79798d95f772141c",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "083",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_event_edge_wrong",
+    "testbench_suite": [
+      "neg_002_threshold_shifted",
+      "neg_005_metric_scale_low",
+      "neg_003_event_edge_wrong",
+      "neg_001_zero",
+      "neg_004_reset_polarity_wrong"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "c6a2abc48cb1784004d322fe33c2f317a1091ae716a5fedc4a8f69b61eb46480",
+    "changed_artifacts": [
+      "amplifier_filter_chain.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_event_edge_wrong",
+    "rationale": "Select fault class event_edge_polarity_error under trigger 'event-timing stimulus distinguishes the required active edge for Amplifier Filter Chain' because it exercises P_BOUNDED_PREAMP, P_FIRST_FILTER_STAGE, P_SECOND_FILTER_STAGE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 31,
+    "source_preferred_seed": "neg_002_threshold_shifted",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

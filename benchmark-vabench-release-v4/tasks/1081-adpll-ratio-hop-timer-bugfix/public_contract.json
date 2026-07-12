@@ -1,0 +1,335 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "adpll_ratio_hop_ref",
+            "parameters": [
+              {
+                "default": 240000000.0,
+                "name": "f_center",
+                "override_behavior": "sets the DCO center frequency near code_center",
+                "type": "real",
+                "units": "Hz",
+                "valid_range": "f_center > 0"
+              },
+              {
+                "default": 5000000.0,
+                "name": "freq_step_hz",
+                "override_behavior": "sets DCO frequency change per control-code step",
+                "type": "real",
+                "units": "Hz/code",
+                "valid_range": "freq_step_hz > 0"
+              },
+              {
+                "default": 120000000.0,
+                "name": "f_min",
+                "override_behavior": "sets the lower generated-frequency clamp",
+                "type": "real",
+                "units": "Hz",
+                "valid_range": "f_min > 0 and f_min <= f_max"
+              },
+              {
+                "default": 420000000.0,
+                "name": "f_max",
+                "override_behavior": "sets the upper generated-frequency clamp",
+                "type": "real",
+                "units": "Hz",
+                "valid_range": "f_max > 0 and f_max >= f_min"
+              },
+              {
+                "default": 0,
+                "name": "code_min",
+                "override_behavior": "sets the minimum loop-control code",
+                "type": "integer",
+                "units": "code",
+                "valid_range": "code_min >= 0 and code_min <= code_max"
+              },
+              {
+                "default": 63,
+                "name": "code_max",
+                "override_behavior": "sets the maximum loop-control code",
+                "type": "integer",
+                "units": "code",
+                "valid_range": "code_max >= 1 and code_max >= code_min"
+              },
+              {
+                "default": 32,
+                "name": "code_center",
+                "override_behavior": "sets the control code corresponding to f_center",
+                "type": "integer",
+                "units": "code",
+                "valid_range": "code_min <= code_center <= code_max"
+              },
+              {
+                "default": 24,
+                "name": "code_init",
+                "override_behavior": "sets the initial bounded loop-control code",
+                "type": "integer",
+                "units": "code",
+                "valid_range": "code_min <= code_init <= code_max"
+              },
+              {
+                "default": 2,
+                "name": "ratio_min",
+                "override_behavior": "sets the minimum accepted feedback divide ratio",
+                "type": "integer",
+                "units": "ratio",
+                "valid_range": "ratio_min >= 1 and ratio_min <= ratio_max"
+              },
+              {
+                "default": 16,
+                "name": "ratio_max",
+                "override_behavior": "sets the maximum accepted feedback divide ratio",
+                "type": "integer",
+                "units": "ratio",
+                "valid_range": "ratio_max >= 2 and ratio_max >= ratio_min"
+              },
+              {
+                "default": 2e-10,
+                "name": "tedge",
+                "override_behavior": "sets voltage-coded output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tedge > 0"
+              },
+              {
+                "default": 2e-09,
+                "name": "lock_tol",
+                "override_behavior": "sets the timing-error tolerance for lock qualification",
+                "type": "real",
+                "units": "s",
+                "valid_range": "lock_tol > 0"
+              },
+              {
+                "default": 5,
+                "name": "lock_count_target",
+                "override_behavior": "sets the required consecutive in-tolerance feedback-event count",
+                "type": "integer",
+                "units": "events",
+                "valid_range": "lock_count_target >= 1"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VDD",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VSS",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ref_clk",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ratio_ctrl",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "fb_clk",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vctrl_mon",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lock",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "adpll_ratio_hop_ref.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/adpll_ratio_hop_ref.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "081",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "pll_clock_timing_systems",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "ADPLL Ratio Hop Timer"
+  },
+  "modeling_constraints": [
+    "Use a deterministic timing loop whose feedback clock is derived from the generated DCO.",
+    "Use rail-referenced voltage-coded outputs and appropriate oscillator timestep guidance.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_RATIO_REQUEST_CLAMP",
+      "observable_contract": "The voltage-coded ratio request rounds V(ratio_ctrl) to the nearest integer with half-step boundaries and then clips the feedback divide ratio to the inclusive ratio_min through ratio_max range, including legal non-default override ranges.",
+      "required_signals": [
+        "time",
+        "ratio_ctrl",
+        "vout",
+        "fb_clk"
+      ]
+    },
+    {
+      "id": "P_DCO_FREQUENCY_BOUNDS",
+      "observable_contract": "The behavioral DCO on vout remains within the configured f_min and f_max limits.",
+      "required_signals": [
+        "time",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_FEEDBACK_DERIVED_FROM_DCO",
+      "observable_contract": "Feedback-clock activity is derived by dividing vout activity by the requested ratio rather than from an independent clock source.",
+      "required_signals": [
+        "time",
+        "ratio_ctrl",
+        "vout",
+        "fb_clk"
+      ]
+    },
+    {
+      "id": "P_BOUNDED_CONTROL_MONITOR",
+      "observable_contract": "Reference-versus-feedback timing error adjusts a bounded control state represented by rail-referenced vctrl_mon.",
+      "required_signals": [
+        "time",
+        "vdd",
+        "vss",
+        "ref_clk",
+        "fb_clk",
+        "vctrl_mon"
+      ]
+    },
+    {
+      "id": "P_PRE_HOP_LOCK",
+      "observable_contract": "Stable pre-hop tracking produces lock only after lock_count_target consecutive feedback events satisfy lock_tol.",
+      "required_signals": [
+        "time",
+        "ref_clk",
+        "fb_clk",
+        "lock"
+      ]
+    },
+    {
+      "id": "P_RATIO_HOP_REACQUISITION",
+      "observable_contract": "A changed ratio request causes loss of lock qualification followed by renewed lock after the loop tracks the new feedback cadence.",
+      "required_signals": [
+        "time",
+        "ratio_ctrl",
+        "ref_clk",
+        "fb_clk",
+        "vctrl_mon",
+        "lock"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "adpll_ratio_hop_ref.va"
+  ],
+  "task_id": "v4-1081",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vdd",
+            "port_ref": "VDD",
+            "position": 0
+          },
+          {
+            "net": "vss",
+            "port_ref": "VSS",
+            "position": 1
+          },
+          {
+            "net": "ref_clk",
+            "port_ref": "ref_clk",
+            "position": 2
+          },
+          {
+            "net": "ratio_ctrl",
+            "port_ref": "ratio_ctrl",
+            "position": 3
+          },
+          {
+            "net": "fb_clk",
+            "port_ref": "fb_clk",
+            "position": 4
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 5
+          },
+          {
+            "net": "vctrl_mon",
+            "port_ref": "vctrl_mon",
+            "position": 6
+          },
+          {
+            "net": "lock",
+            "port_ref": "lock",
+            "position": 7
+          }
+        ],
+        "module_ref": "adpll_ratio_hop_ref",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vdd",
+      "vss",
+      "ref_clk",
+      "ratio_ctrl",
+      "fb_clk",
+      "vout",
+      "vctrl_mon",
+      "lock"
+    ]
+  }
+}
