@@ -1,0 +1,24 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module duty_cycle_meter_8b(clk_in, valid, duty0, duty1, duty2, duty3, duty4, duty5, duty6, duty7);
+    input clk_in;
+    output valid, duty0, duty1, duty2, duty3, duty4, duty5, duty6, duty7;
+    electrical clk_in, valid, duty0, duty1, duty2, duty3, duty4, duty5, duty6, duty7;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real tr = 20p;
+
+    analog begin
+        V(valid) <+ transition(0.0, 0, tr, tr);
+        V(duty0) <+ transition(0.0, 0, tr, tr);
+        V(duty1) <+ transition(0.0, 0, tr, tr);
+        V(duty2) <+ transition(0.0, 0, tr, tr);
+        V(duty3) <+ transition(0.0, 0, tr, tr);
+        V(duty4) <+ transition(0.0, 0, tr, tr);
+        V(duty5) <+ transition(0.0, 0, tr, tr);
+        V(duty6) <+ transition(0.0, 0, tr, tr);
+        V(duty7) <+ transition(0.0, 0, tr, tr);
+    end
+endmodule

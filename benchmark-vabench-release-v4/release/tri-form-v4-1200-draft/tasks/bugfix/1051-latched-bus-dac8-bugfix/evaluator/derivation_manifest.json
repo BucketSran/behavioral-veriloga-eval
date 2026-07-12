@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-051",
+    "canonical_task_slug": "051-latched-bus-dac8",
+    "family_spec_sha256": "8fb0d2cd7b84adda9907600f92291d66852f487a2d20c232312c2531282d8d6e",
+    "mutation_catalog_sha256": "ab672b71d35765307a26c649e83125d831d65331c622a037fcecc43d3fece008",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "051",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_transparent_bus",
+    "testbench_suite": [
+      "neg_001_force_zero",
+      "neg_003_falling_edge_update",
+      "neg_004_reversed_bit_order",
+      "neg_005_wrong_denominator",
+      "neg_002_transparent_bus"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "25bfda0908b7c9a58d803eebb8652077f0276b3e5827d8497ddff006cbe06d4d",
+    "changed_artifacts": [
+      "latched_bus_dac8.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_transparent_bus",
+    "rationale": "Select fault class transparent_bus under trigger 'Latched Bus DAC8: updates from the input bus continuously, so it fails hold-between-clock-edge behavior.' because it exercises P_HOLD_BETWEEN_EDGES as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 21,
+    "source_preferred_seed": "neg_001_force_zero",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

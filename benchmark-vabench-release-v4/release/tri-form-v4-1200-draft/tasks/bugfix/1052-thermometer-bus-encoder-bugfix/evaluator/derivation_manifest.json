@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-052",
+    "canonical_task_slug": "052-thermometer-bus-encoder",
+    "family_spec_sha256": "18add0d9bb52d1b9aba2e435cb1d0a204657718c6a18c6850fdc6070786acf3f",
+    "mutation_catalog_sha256": "2cce54b4d21e8cd68074b38a80e9d0155d2d2f32ab4de89c403f1261c64fb7e5",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "052",
+  "negative_assignment": {
+    "bugfix_seed": "neg_005_round_to_nearest",
+    "testbench_suite": [
+      "neg_001_force_zero",
+      "neg_004_reversed_thermometer_order",
+      "neg_005_round_to_nearest",
+      "neg_002_off_by_one",
+      "neg_003_binary_code_outputs"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "85810c833d40c7ac77cfba22af47b4597e75192266ec3b35933b768e96770fd1",
+    "changed_artifacts": [
+      "thermometer_bus_encoder.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_005_round_to_nearest",
+    "rationale": "Select fault class weak_high_output_level under trigger 'Thermometer Bus Encoder: drives asserted thermometer segments below the public logic-high threshold.' because it exercises P_OUTPUT_LEVELS as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_001_force_zero",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

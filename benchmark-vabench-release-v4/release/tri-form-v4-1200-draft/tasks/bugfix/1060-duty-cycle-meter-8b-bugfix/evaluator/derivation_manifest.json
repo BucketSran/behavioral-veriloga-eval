@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-060",
+    "canonical_task_slug": "060-duty-cycle-meter-8b",
+    "family_spec_sha256": "2b627ad1391d0cf9fa84a4dd8cb3ff3b3c92fc3cb10662f7697ccb093eec5628",
+    "mutation_catalog_sha256": "fda5bb961033e4daae7089565658e4bfb2f8f4629d2c3de2e10eee0b1985365e",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "060",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_zero",
+    "testbench_suite": [
+      "neg_001_zero",
+      "neg_002_period_code",
+      "neg_004_no_valid",
+      "neg_005_constant_half",
+      "neg_003_inverted"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "d7c873581d4ec58e66b698e23c58b16d5d0b0a7f97570091f965f3d580f3776a",
+    "changed_artifacts": [
+      "duty_cycle_meter_8b.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_zero",
+    "rationale": "Select fault class zero under trigger 'never reports duty' because it exercises P_COMPLETE_CYCLE_MEASUREMENT as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 8,
+    "source_preferred_seed": "neg_001_zero",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

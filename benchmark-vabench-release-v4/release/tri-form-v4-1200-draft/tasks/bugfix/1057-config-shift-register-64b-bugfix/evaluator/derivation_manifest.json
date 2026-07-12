@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-057",
+    "canonical_task_slug": "057-config-shift-register-64b",
+    "family_spec_sha256": "928f7ca5f42c6faa062ece119ab4a5c995d42837631a2224b71a7b7a5cccc4d6",
+    "mutation_catalog_sha256": "f94153a940b27d8a19db1e067bc45092401f5cdccedd0f50cf5538fb1cb423ff",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "057",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_wrong_shift",
+    "testbench_suite": [
+      "neg_001_wrong_shift",
+      "neg_003_wrong_shift",
+      "neg_004_wrong_shift",
+      "neg_005_wrong_shift",
+      "neg_002_wrong_shift"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "3e0f4785624e0956aeb3acc080fd1ee73885ec66174c4282d2981404c2422364",
+    "changed_artifacts": [
+      "config_shift_reg_64b.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_wrong_shift",
+    "rationale": "Select fault class transparent_serial_update_between_edges under trigger 'q must hold its captured state when serial_in changes between rising clock crossings' because it exercises P_HOLD_BETWEEN_EDGES as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 26,
+    "source_preferred_seed": "neg_001_wrong_shift",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

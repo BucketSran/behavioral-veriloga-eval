@@ -1,0 +1,20 @@
+`include "disciplines.vams"
+module first_order_sigma_delta_modulator(vin, vclk, bitout);
+input vin, vclk;
+output bitout;
+electrical vin, vclk, bitout;
+parameter real vth_clk = 0.45;
+parameter real vh = 0.9;
+parameter real vref = 1.0;
+parameter real tr = 20p;
+real acc;
+integer bit_state;
+analog begin
+    @(initial_step) begin acc = 0.0; bit_state = 0; end
+    @(cross(V(vclk) - vth_clk, -1)) begin
+        acc = acc + V(vin) / vref - bit_state;
+        bit_state = (acc >= 0.0) ? 1 : 0;
+    end
+    V(bitout) <+ transition(bit_state ? vh : 0.0, 0, tr, tr);
+end
+endmodule

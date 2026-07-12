@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-054",
+    "canonical_task_slug": "054-correlated-double-sampler",
+    "family_spec_sha256": "541c0b453fafa43eee5f79ba73bb4d8acfa326df6ed23d63373eeaa9771d2513",
+    "mutation_catalog_sha256": "3b0e98d4c4f6d2705978a4dfff84371e2aa0fb402eb894bcc22cabadc1a37625",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "054",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_track_input_directly",
+    "testbench_suite": [
+      "neg_001_force_zero",
+      "neg_002_track_input_directly",
+      "neg_004_signal_only_no_reset_sample",
+      "neg_005_valid_never_clears",
+      "neg_003_wrong_difference_sign"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "ba0a0b551e2ec323df9a9d709861c22387404e017246c792ab28a21108559971",
+    "changed_artifacts": [
+      "correlated_double_sampler.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_track_input_directly",
+    "rationale": "Select fault class track_input_directly under trigger 'Correlated Double Sampler: continuously tracks vin and never forms the signal-minus-reset held correction.' because it exercises P_SIGNAL_CORRECTION as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_001_force_zero",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}
