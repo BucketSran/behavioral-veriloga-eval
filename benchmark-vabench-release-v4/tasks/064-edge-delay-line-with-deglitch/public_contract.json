@@ -1,0 +1,274 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "edge_delay_line_deglitch",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets the logic-high target for vout, edge_valid, and rejected",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real greater than vss"
+              },
+              {
+                "default": 0.0,
+                "name": "vss",
+                "override_behavior": "sets the cleared and logic-low target for all public outputs",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real less than vdd"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets the decision threshold for vin, rst, and enable",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vth < vdd"
+              },
+              {
+                "default": 2.5e-10,
+                "name": "tick",
+                "override_behavior": "sets the deterministic qualification and delay scheduling interval",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tick > 0"
+              },
+              {
+                "default": 4,
+                "name": "delay_ticks",
+                "override_behavior": "sets the additional number of scheduling ticks between qualification and output emission",
+                "type": "integer",
+                "units": "ticks",
+                "valid_range": "0 <= delay_ticks <= 200"
+              },
+              {
+                "default": 3,
+                "name": "min_width_ticks",
+                "override_behavior": "sets the number of stable scheduling ticks required to qualify an input edge",
+                "type": "integer",
+                "units": "ticks",
+                "valid_range": "1 <= min_width_ticks <= 200"
+              },
+              {
+                "default": 1e-10,
+                "name": "tr",
+                "override_behavior": "sets rise and fall smoothing for all public voltage outputs",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "edge_valid",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "rejected",
+                "position": 5
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "edge_delay_line_deglitch.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "064",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A for qualified mixed-signal edge delay and glitch rejection",
+    "title": "Edge Delay Line with Deglitch Window"
+  },
+  "modeling_constraints": [
+    "AMS role: qualified edge-delay and deglitch block for mixed-signal clock, timing, and control paths.",
+    "Use deterministic voltage-domain threshold events and periodic scheduling state for qualification and delayed emission.",
+    "Use voltage contributions for vout, edge_valid, and rejected, with transition smoothing controlled by tr.",
+    "Preserve the positional six-port interface and all overrideable public parameters.",
+    "Do not use current contributions, transistor-level devices, random sources, external table files, AC/noise behavior, debug outputs, validation hooks, or simulator-specific side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_DISABLE_CLEAR",
+      "observable_contract": "When rst is above vth or enable is at or below vth, pending edge state is cancelled and vout, edge_valid, and rejected settle to vss no later than the next scheduling tick.",
+      "required_signals": [
+        "time",
+        "rst",
+        "enable",
+        "vout",
+        "edge_valid",
+        "rejected"
+      ]
+    },
+    {
+      "id": "P_STABLE_EDGE_QUALIFICATION",
+      "observable_contract": "A rising or falling vin crossing through vth can qualify only when vin remains in the crossed-to logic state for min_width_ticks scheduling ticks while reset is inactive and the DUT is enabled.",
+      "required_signals": [
+        "time",
+        "vin",
+        "rst",
+        "enable",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_DELAYED_EDGE_EMISSION",
+      "observable_contract": "After an input edge qualifies, vout changes to the corresponding vdd or vss target only after the additional delay_ticks scheduling interval and does not change early.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_NARROW_GLITCH_REJECTION",
+      "observable_contract": "If vin reverses before a pending edge completes qualification, that edge does not update vout and rejected produces a bounded high pulse.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vout",
+        "rejected"
+      ]
+    },
+    {
+      "id": "P_VALID_EMISSION_PULSE",
+      "observable_contract": "Each qualified delayed update of vout produces one bounded high pulse on edge_valid, while rejected remains reserved for cancelled narrow edges.",
+      "required_signals": [
+        "time",
+        "vout",
+        "edge_valid",
+        "rejected"
+      ]
+    },
+    {
+      "id": "P_BIDIRECTIONAL_LEVELS",
+      "observable_contract": "Qualified rising and falling input edges can respectively drive vout toward vdd and vss, and all public outputs use tr-smoothed voltage transitions.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vout",
+        "edge_valid",
+        "rejected"
+      ]
+    },
+    {
+      "id": "P_PARAMETER_OVERRIDE",
+      "observable_contract": "Overriding tick, min_width_ticks, or delay_ticks changes the observable qualification or emission timing without changing module ports, output polarity, or reset/enable behavior.",
+      "required_signals": [
+        "time",
+        "vin",
+        "rst",
+        "enable",
+        "vout",
+        "edge_valid",
+        "rejected"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "edge_delay_line_deglitch.va"
+  ],
+  "task_id": "v4-064",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 2
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 3
+          },
+          {
+            "net": "edge_valid",
+            "port_ref": "edge_valid",
+            "position": 4
+          },
+          {
+            "net": "rejected",
+            "port_ref": "rejected",
+            "position": 5
+          }
+        ],
+        "module_ref": "edge_delay_line_deglitch",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "rst",
+      "enable",
+      "vout",
+      "edge_valid",
+      "rejected"
+    ]
+  }
+}

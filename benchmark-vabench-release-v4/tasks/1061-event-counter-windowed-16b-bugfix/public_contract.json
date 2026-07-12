@@ -1,0 +1,453 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "event_counter_windowed_16b",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets the voltage-coded count and done high level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > 0"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets the gate and event edge threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "0 < vth < vdd"
+              },
+              {
+                "default": 2e-11,
+                "name": "tr",
+                "override_behavior": "sets output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "gate",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "event_in",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "done",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count0",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count1",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count2",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count3",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count4",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count5",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count6",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count7",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count8",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count9",
+                "position": 12
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count10",
+                "position": 13
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count11",
+                "position": 14
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count12",
+                "position": 15
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count13",
+                "position": 16
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count14",
+                "position": 17
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "count15",
+                "position": 18
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "event_counter_windowed_16b.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/event_counter_windowed_16b.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "061",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "testbench_utility_modules",
+    "difficulty": "D1",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Event Counter Windowed 16b"
+  },
+  "modeling_constraints": [
+    "AMS role: windowed event-rate/count measurement block for timing, readout, and calibration instrumentation.",
+    "Use deterministic event state for window activity, count, and done.",
+    "Count rising event crossings only within an explicitly opened gate window.",
+    "Use smooth voltage contributions for all outputs.",
+    "Do not embed stimulus timing, validation hooks, debug outputs, or simulator-specific side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_WINDOW_OPEN",
+      "observable_contract": "A rising gate crossing clears the count, opens a new measurement window, and drives done low.",
+      "required_signals": [
+        "time",
+        "gate",
+        "event",
+        "done",
+        "count0",
+        "count1",
+        "count2",
+        "count3",
+        "count4",
+        "count5",
+        "count6",
+        "count7",
+        "count8",
+        "count9",
+        "count10",
+        "count11",
+        "count12",
+        "count13",
+        "count14",
+        "count15"
+      ]
+    },
+    {
+      "id": "P_IN_WINDOW_COUNT",
+      "observable_contract": "Each rising event crossing increments the count exactly once only while the window is active and gate is high.",
+      "required_signals": [
+        "time",
+        "gate",
+        "event",
+        "count0",
+        "count1",
+        "count2",
+        "count3",
+        "count4",
+        "count5",
+        "count6",
+        "count7",
+        "count8",
+        "count9",
+        "count10",
+        "count11",
+        "count12",
+        "count13",
+        "count14",
+        "count15"
+      ]
+    },
+    {
+      "id": "P_OUT_OF_WINDOW_IGNORE",
+      "observable_contract": "Event crossings before a window opens or after it closes do not change the held result.",
+      "required_signals": [
+        "time",
+        "gate",
+        "event",
+        "count0",
+        "count1",
+        "count2",
+        "count3",
+        "count4",
+        "count5",
+        "count6",
+        "count7",
+        "count8",
+        "count9",
+        "count10",
+        "count11",
+        "count12",
+        "count13",
+        "count14",
+        "count15"
+      ]
+    },
+    {
+      "id": "P_WINDOW_CLOSE_HOLD",
+      "observable_contract": "A falling gate crossing closes the window, preserves the final count, and asserts done.",
+      "required_signals": [
+        "time",
+        "gate",
+        "event",
+        "done",
+        "count0",
+        "count1",
+        "count2",
+        "count3",
+        "count4",
+        "count5",
+        "count6",
+        "count7",
+        "count8",
+        "count9",
+        "count10",
+        "count11",
+        "count12",
+        "count13",
+        "count14",
+        "count15"
+      ]
+    },
+    {
+      "id": "P_BIT_ORDER_AND_LEVELS",
+      "observable_contract": "count0 is the least significant bit and count15 is the most significant bit; asserted outputs use vdd and inactive outputs use 0 V.",
+      "required_signals": [
+        "time",
+        "done",
+        "count0",
+        "count1",
+        "count2",
+        "count3",
+        "count4",
+        "count5",
+        "count6",
+        "count7",
+        "count8",
+        "count9",
+        "count10",
+        "count11",
+        "count12",
+        "count13",
+        "count14",
+        "count15"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "event_counter_windowed_16b.va"
+  ],
+  "task_id": "v4-1061",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "gate",
+            "port_ref": "gate",
+            "position": 0
+          },
+          {
+            "net": "event",
+            "port_ref": "event_in",
+            "position": 1
+          },
+          {
+            "net": "done",
+            "port_ref": "done",
+            "position": 2
+          },
+          {
+            "net": "count0",
+            "port_ref": "count0",
+            "position": 3
+          },
+          {
+            "net": "count1",
+            "port_ref": "count1",
+            "position": 4
+          },
+          {
+            "net": "count2",
+            "port_ref": "count2",
+            "position": 5
+          },
+          {
+            "net": "count3",
+            "port_ref": "count3",
+            "position": 6
+          },
+          {
+            "net": "count4",
+            "port_ref": "count4",
+            "position": 7
+          },
+          {
+            "net": "count5",
+            "port_ref": "count5",
+            "position": 8
+          },
+          {
+            "net": "count6",
+            "port_ref": "count6",
+            "position": 9
+          },
+          {
+            "net": "count7",
+            "port_ref": "count7",
+            "position": 10
+          },
+          {
+            "net": "count8",
+            "port_ref": "count8",
+            "position": 11
+          },
+          {
+            "net": "count9",
+            "port_ref": "count9",
+            "position": 12
+          },
+          {
+            "net": "count10",
+            "port_ref": "count10",
+            "position": 13
+          },
+          {
+            "net": "count11",
+            "port_ref": "count11",
+            "position": 14
+          },
+          {
+            "net": "count12",
+            "port_ref": "count12",
+            "position": 15
+          },
+          {
+            "net": "count13",
+            "port_ref": "count13",
+            "position": 16
+          },
+          {
+            "net": "count14",
+            "port_ref": "count14",
+            "position": 17
+          },
+          {
+            "net": "count15",
+            "port_ref": "count15",
+            "position": 18
+          }
+        ],
+        "module_ref": "event_counter_windowed_16b",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "gate",
+      "event",
+      "done",
+      "count0",
+      "count1",
+      "count2",
+      "count3",
+      "count4",
+      "count5",
+      "count6",
+      "count7",
+      "count8",
+      "count9",
+      "count10",
+      "count11",
+      "count12",
+      "count13",
+      "count14",
+      "count15"
+    ]
+  }
+}

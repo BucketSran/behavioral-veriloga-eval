@@ -1,0 +1,295 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "deterministic_jittered_clock",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets the voltage-coded clk_out high level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > 0"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets the threshold for jitter_en and all seed inputs",
+                "type": "real",
+                "units": "V",
+                "valid_range": "0 < vth < vdd"
+              },
+              {
+                "default": 2e-11,
+                "name": "tr",
+                "override_behavior": "sets clk_out rise and fall smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "jitter_en",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seed0",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seed1",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seed2",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seed3",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seed4",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seed5",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seed6",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "seed7",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "clk_out",
+                "position": 9
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "deterministic_jittered_clock.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/deterministic_jittered_clock.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "070",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "testbench_utility_modules",
+    "difficulty": "D1",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain deterministic timer-driven transient behavioral Verilog-A for repeatable jittered clock stimulus",
+    "title": "Deterministic Jittered Clock Source"
+  },
+  "modeling_constraints": [
+    "AMS role: deterministic jittered clock stimulus source for repeatable timing-margin and aperture-stress checks.",
+    "Use deterministic timer-driven state and no random distribution functions.",
+    "Decode seed inputs only through vth and preserve repeatability for identical input histories.",
+    "Do not add undeclared ports, random state, or validation-only timing cases."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_NOMINAL_CLOCK",
+      "observable_contract": "With jitter_en below vth, clk_out has a constant 10 ns half-period and 20 ns full period.",
+      "required_signals": [
+        "time",
+        "jitter_en",
+        "clk_out"
+      ]
+    },
+    {
+      "id": "P_SEED_DECODE",
+      "observable_contract": "Seed7:seed0 is sampled through vth only at each output transition and interpreted as one unsigned eight-bit seed with seed7 as MSB; seed changes affect the next scheduled half-period, not the already scheduled current edge.",
+      "required_signals": [
+        "time",
+        "jitter_en",
+        "seed0",
+        "seed1",
+        "seed2",
+        "seed3",
+        "seed4",
+        "seed5",
+        "seed6",
+        "seed7",
+        "clk_out"
+      ]
+    },
+    {
+      "id": "P_EDGE_MODULATION",
+      "observable_contract": "For edge index k, the next half-period is 10 ns plus (((seed + 3*k) modulo 5) minus 2) times 0.8 ns.",
+      "required_signals": [
+        "time",
+        "jitter_en",
+        "seed0",
+        "seed1",
+        "seed2",
+        "seed3",
+        "seed4",
+        "seed5",
+        "seed6",
+        "seed7",
+        "clk_out"
+      ]
+    },
+    {
+      "id": "P_REPEATABILITY",
+      "observable_contract": "With constant seed and enable history, the modulo-5 half-period sequence repeats every five output transitions; identical input histories also produce the same edge-time sequence on repeated runs.",
+      "required_signals": [
+        "time",
+        "jitter_en",
+        "seed0",
+        "seed1",
+        "seed2",
+        "seed3",
+        "seed4",
+        "seed5",
+        "seed6",
+        "seed7",
+        "clk_out"
+      ]
+    },
+    {
+      "id": "P_TIMING_BOUNDS",
+      "observable_contract": "Every jitter-enabled half-period remains within the public modulation range from 8.4 ns through 11.6 ns.",
+      "required_signals": [
+        "time",
+        "jitter_en",
+        "clk_out"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_LEVELS",
+      "observable_contract": "clk_out uses 0 V and vdd levels with finite transition smoothing set by tr.",
+      "required_signals": [
+        "time",
+        "clk_out"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "deterministic_jittered_clock.va"
+  ],
+  "task_id": "v4-1070",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "jitter_en",
+            "port_ref": "jitter_en",
+            "position": 0
+          },
+          {
+            "net": "seed0",
+            "port_ref": "seed0",
+            "position": 1
+          },
+          {
+            "net": "seed1",
+            "port_ref": "seed1",
+            "position": 2
+          },
+          {
+            "net": "seed2",
+            "port_ref": "seed2",
+            "position": 3
+          },
+          {
+            "net": "seed3",
+            "port_ref": "seed3",
+            "position": 4
+          },
+          {
+            "net": "seed4",
+            "port_ref": "seed4",
+            "position": 5
+          },
+          {
+            "net": "seed5",
+            "port_ref": "seed5",
+            "position": 6
+          },
+          {
+            "net": "seed6",
+            "port_ref": "seed6",
+            "position": 7
+          },
+          {
+            "net": "seed7",
+            "port_ref": "seed7",
+            "position": 8
+          },
+          {
+            "net": "clk_out",
+            "port_ref": "clk_out",
+            "position": 9
+          }
+        ],
+        "module_ref": "deterministic_jittered_clock",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "jitter_en",
+      "seed0",
+      "seed1",
+      "seed2",
+      "seed3",
+      "seed4",
+      "seed5",
+      "seed6",
+      "seed7",
+      "clk_out"
+    ]
+  }
+}

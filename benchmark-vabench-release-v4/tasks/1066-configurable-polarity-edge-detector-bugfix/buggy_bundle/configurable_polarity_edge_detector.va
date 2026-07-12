@@ -1,0 +1,21 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module configurable_polarity_edge_detector(sig, rise_en, pulse);
+    input sig, rise_en;
+    output pulse;
+    electrical sig, rise_en, pulse;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real tr = 20p;
+
+    integer pulse_state; real clear_t;
+    analog begin
+        @(initial_step) begin pulse_state=0; clear_t=1e9; end
+        @(cross(V(sig)-vth,+1)) begin if (1) begin pulse_state=1; clear_t=$abstime+2n; end end
+        @(cross(V(sig)-vth,-1)) begin if (1) begin pulse_state=1; clear_t=$abstime+2n; end end
+        @(timer(clear_t)) begin pulse_state=0; end
+        V(pulse) <+ transition(pulse_state ? vdd : 0.0, 0, tr, tr);
+    end
+endmodule

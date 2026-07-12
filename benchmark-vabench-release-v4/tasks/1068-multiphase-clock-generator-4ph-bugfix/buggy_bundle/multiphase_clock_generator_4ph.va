@@ -1,0 +1,19 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module multiphase_clock_generator_4ph(vss, clk0, clk90, clk180, clk270);
+    input vss;
+    output clk0, clk90, clk180, clk270;
+    electrical vss, clk0, clk90, clk180, clk270;
+
+    parameter real vdd = 0.9;
+    parameter real vth = 0.45;
+    parameter real tr = 20p;
+
+    analog begin
+        V(clk0, vss) <+ transition(0.0, 0, tr, tr);
+        V(clk90, vss) <+ transition(0.0, 0, tr, tr);
+        V(clk180, vss) <+ transition(0.0, 0, tr, tr);
+        V(clk270, vss) <+ transition(0.0, 0, tr, tr);
+    end
+endmodule

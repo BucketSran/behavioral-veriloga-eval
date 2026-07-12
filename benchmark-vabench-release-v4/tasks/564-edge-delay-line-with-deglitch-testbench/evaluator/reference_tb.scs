@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "edge_delay_line_deglitch.va"
+
+Vin (vin 0) vsource type=pwl wave=[0 0 4n 0 4.05n 0.9 13n 0.9 13.05n 0 21n 0 21.05n 0.9 21.35n 0.9 21.40n 0 31n 0 31.05n 0.9 43n 0.9 43.05n 0 58n 0]
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 0.8n 0.9 0.9n 0 58n 0]
+Ven (enable 0) vsource type=pwl wave=[0 0 1.8n 0 1.9n 0.9 48n 0.9 48.1n 0 52n 0 52.1n 0.9 58n 0.9]
+
+XDUT (vin rst enable vout edge_valid rejected) edge_delay_line_deglitch tick=250p delay_ticks=5 min_width_ticks=3
+
+tran tran stop=58n maxstep=50p
+save vin rst enable vout edge_valid rejected

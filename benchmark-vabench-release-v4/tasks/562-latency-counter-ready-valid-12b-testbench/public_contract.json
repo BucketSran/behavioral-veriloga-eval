@@ -1,0 +1,410 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "ready_valid_latency_counter_12b",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets the voltage-coded latency and done high level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > 0"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets the clock, valid, and ready decision threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "0 < vth < vdd"
+              },
+              {
+                "default": 2e-11,
+                "name": "tr",
+                "override_behavior": "sets output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "valid_i",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ready_i",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "done",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lat0",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lat1",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lat2",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lat3",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lat4",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lat5",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lat6",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lat7",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lat8",
+                "position": 12
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lat9",
+                "position": 13
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lat10",
+                "position": 14
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lat11",
+                "position": 15
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "ready_valid_latency_counter_12b.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "062",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "testbench_utility_modules",
+    "difficulty": "D1",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Ready/Valid Latency Counter 12b"
+  },
+  "modeling_constraints": [
+    "AMS role: ready/valid latency measurement block for converter/readout handshakes.",
+    "Use deterministic rising-edge active/idle and counter state.",
+    "Sample valid_i and ready_i only at rising clock crossings.",
+    "Use smooth voltage contributions for all outputs.",
+    "Do not add an undeclared reset, embed stimulus timing, expose validation state, or use simulator-specific side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_REQUEST_START",
+      "observable_contract": "While idle, a rising clock crossing that samples valid_i high starts a measurement at count zero and clears done.",
+      "required_signals": [
+        "time",
+        "clk",
+        "valid_i",
+        "ready_i",
+        "done",
+        "lat0",
+        "lat1",
+        "lat2",
+        "lat3",
+        "lat4",
+        "lat5",
+        "lat6",
+        "lat7",
+        "lat8",
+        "lat9",
+        "lat10",
+        "lat11"
+      ]
+    },
+    {
+      "id": "P_WAIT_CYCLE_COUNT",
+      "observable_contract": "While active, each rising clock crossing that samples ready_i low increments the pending latency by one cycle.",
+      "required_signals": [
+        "time",
+        "clk",
+        "ready_i",
+        "lat0",
+        "lat1",
+        "lat2",
+        "lat3",
+        "lat4",
+        "lat5",
+        "lat6",
+        "lat7",
+        "lat8",
+        "lat9",
+        "lat10",
+        "lat11"
+      ]
+    },
+    {
+      "id": "P_READY_COMPLETION",
+      "observable_contract": "While active, a rising clock crossing that samples ready_i high latches the current count to lat[11:0], asserts done, and returns the meter to idle.",
+      "required_signals": [
+        "time",
+        "clk",
+        "valid_i",
+        "ready_i",
+        "done",
+        "lat0",
+        "lat1",
+        "lat2",
+        "lat3",
+        "lat4",
+        "lat5",
+        "lat6",
+        "lat7",
+        "lat8",
+        "lat9",
+        "lat10",
+        "lat11"
+      ]
+    },
+    {
+      "id": "P_ZERO_LATENCY",
+      "observable_contract": "If valid_i and ready_i are both high on the starting clock edge, the reported latency is zero.",
+      "required_signals": [
+        "time",
+        "clk",
+        "valid_i",
+        "ready_i",
+        "done",
+        "lat0",
+        "lat1",
+        "lat2",
+        "lat3",
+        "lat4",
+        "lat5",
+        "lat6",
+        "lat7",
+        "lat8",
+        "lat9",
+        "lat10",
+        "lat11"
+      ]
+    },
+    {
+      "id": "P_RESULT_HOLD_AND_ORDER",
+      "observable_contract": "The completed result holds until a later request starts; lat0 is LSB, lat11 is MSB, and asserted outputs use vdd.",
+      "required_signals": [
+        "time",
+        "clk",
+        "valid_i",
+        "done",
+        "lat0",
+        "lat1",
+        "lat2",
+        "lat3",
+        "lat4",
+        "lat5",
+        "lat6",
+        "lat7",
+        "lat8",
+        "lat9",
+        "lat10",
+        "lat11"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/ready_valid_latency_counter_12b.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-562",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "valid_i",
+            "port_ref": "valid_i",
+            "position": 1
+          },
+          {
+            "net": "ready_i",
+            "port_ref": "ready_i",
+            "position": 2
+          },
+          {
+            "net": "done",
+            "port_ref": "done",
+            "position": 3
+          },
+          {
+            "net": "lat0",
+            "port_ref": "lat0",
+            "position": 4
+          },
+          {
+            "net": "lat1",
+            "port_ref": "lat1",
+            "position": 5
+          },
+          {
+            "net": "lat2",
+            "port_ref": "lat2",
+            "position": 6
+          },
+          {
+            "net": "lat3",
+            "port_ref": "lat3",
+            "position": 7
+          },
+          {
+            "net": "lat4",
+            "port_ref": "lat4",
+            "position": 8
+          },
+          {
+            "net": "lat5",
+            "port_ref": "lat5",
+            "position": 9
+          },
+          {
+            "net": "lat6",
+            "port_ref": "lat6",
+            "position": 10
+          },
+          {
+            "net": "lat7",
+            "port_ref": "lat7",
+            "position": 11
+          },
+          {
+            "net": "lat8",
+            "port_ref": "lat8",
+            "position": 12
+          },
+          {
+            "net": "lat9",
+            "port_ref": "lat9",
+            "position": 13
+          },
+          {
+            "net": "lat10",
+            "port_ref": "lat10",
+            "position": 14
+          },
+          {
+            "net": "lat11",
+            "port_ref": "lat11",
+            "position": 15
+          }
+        ],
+        "module_ref": "ready_valid_latency_counter_12b",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "valid_i",
+      "ready_i",
+      "done",
+      "lat0",
+      "lat1",
+      "lat2",
+      "lat3",
+      "lat4",
+      "lat5",
+      "lat6",
+      "lat7",
+      "lat8",
+      "lat9",
+      "lat10",
+      "lat11"
+    ]
+  }
+}
