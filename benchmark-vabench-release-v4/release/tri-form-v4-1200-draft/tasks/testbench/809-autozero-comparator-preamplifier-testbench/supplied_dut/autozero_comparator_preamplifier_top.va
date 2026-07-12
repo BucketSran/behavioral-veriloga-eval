@@ -1,0 +1,19 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module autozero_comparator_preamplifier_top(vinp, vinn, clk, rst, az_en, eval_en, decision, offset_store, ready);
+    input vinp, vinn, clk, rst, az_en, eval_en;
+    output decision, offset_store, ready;
+    electrical vinp, vinn, clk, rst, az_en, eval_en, decision, offset_store, ready;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    offset_store_cell #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr))
+        XSTORE (vinp, vinn, clk, rst, az_en, offset_store, ready);
+    clocked_comparator_core #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr))
+        XCMP (vinp, vinn, clk, rst, eval_en, ready, offset_store, decision);
+endmodule

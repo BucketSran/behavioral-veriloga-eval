@@ -1,0 +1,19 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/charge_pump_pfd_state_machine.va"
+ahdl_include "./support/ref_fb_clk.va"
+
+// Hidden testbench for charge_pump_pfd_state_machine.
+// ref_fb_clk drives ref leading fb by 20 ns (both 5 MHz squares => period=200n):
+// the detector state goes positive and vctrl ramps up.
+
+VDD (VDD 0) vsource dc=0.9 type=dc
+VSS (VSS 0) vsource dc=0.0 type=dc
+
+XREF (VDD VSS ref fb) ref_fb_clk period=200n phase_lead=20n tedge=100p
+XDUT (ref fb vctrl metric) charge_pump_pfd_state_machine
+
+
+tran tran stop=1.0u maxstep=1n
+save ref fb vctrl metric

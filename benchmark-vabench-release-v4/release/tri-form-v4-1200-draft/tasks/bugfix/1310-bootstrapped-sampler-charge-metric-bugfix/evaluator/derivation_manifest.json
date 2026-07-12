@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-310",
+    "canonical_task_slug": "310-bootstrapped-sampler-charge-metric",
+    "family_spec_sha256": "acb324de5f0aeb56637d48711dcf330e13583cad4d6d5cdce4f7bbd0cd0410df",
+    "mutation_catalog_sha256": "06aca106b7aa10a01697be1b9f5723d034c4b4e73556eca6cbe4ae13ee0b9d53",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "310",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_reset_enable_clear_ignored",
+    "testbench_suite": [
+      "neg_002_droop_flag_missing",
+      "neg_001_bootstrap_metric_missing",
+      "neg_004_reset_enable_clear_ignored",
+      "neg_005_held_output_stuck_common_mode",
+      "neg_003_held_sample_polarity_inverted"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "1b5dfb373287284f926b1e9ca4649a87ccc526feee666a2c61c6a7f78313b844",
+    "changed_artifacts": [
+      "bootstrapped_sampler_charge_metric.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_reset_enable_clear_ignored",
+    "rationale": "Select fault class reset_enable_clear_ignored under trigger 'reset_enable_clear_ignored' because it exercises P_BETWEEN_SAMPLES_HOLD_VHOLD_AND_APPLY as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 9,
+    "source_preferred_seed": "neg_002_droop_flag_missing",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

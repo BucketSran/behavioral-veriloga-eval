@@ -1,0 +1,329 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "differential_pair_gm_limiter",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "4.0",
+                "name": "gm_gain",
+                "override_behavior": "overrides gm_gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "120e-3 from (0:inf)",
+                "name": "diff_limit",
+                "override_behavior": "overrides diff_limit",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "500p from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vinp",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vinn",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "bias",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "voutp",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "voutn",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "gm_metric",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "limit_flag",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "differential_pair_gm_limiter.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "303",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "amplifier_macromodels",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Differential-pair gm Limiter"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_WHEN_DISABLED_DRIVE_BOTH_OUTPUTS_TO",
+      "observable_contract": "When disabled, drive both outputs to `vcm`, clear `gm_metric`, and clear `limit_flag`.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "bias",
+        "enable",
+        "voutp",
+        "voutn",
+        "gm_metric",
+        "limit_flag"
+      ]
+    },
+    {
+      "id": "P_WHEN_ENABLED_CONVERT_THE_SAMPLED_DIFFERENTIAL",
+      "observable_contract": "When enabled, convert the sampled differential input into equal-and-opposite output deviations around `vcm`.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "bias",
+        "enable",
+        "voutp",
+        "voutn",
+        "gm_metric",
+        "limit_flag"
+      ]
+    },
+    {
+      "id": "P_SCALE_SMALL_SIGNAL_OUTPUT_SEPARATION_BY",
+      "observable_contract": "Scale small-signal output separation by `gm_gain` and compress large differential inputs smoothly at `diff_limit`.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "bias",
+        "enable",
+        "voutp",
+        "voutn",
+        "gm_metric",
+        "limit_flag"
+      ]
+    },
+    {
+      "id": "P_DRIVE_GM_METRIC_AS_A_VOLTAGE",
+      "observable_contract": "Drive `gm_metric` as a voltage-coded estimate of the active transconductance region.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "bias",
+        "enable",
+        "voutp",
+        "voutn",
+        "gm_metric",
+        "limit_flag"
+      ]
+    },
+    {
+      "id": "P_ASSERT_LIMIT_FLAG_ONLY_WHEN_COMPRESSION",
+      "observable_contract": "Assert `limit_flag` only when compression is active.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "bias",
+        "enable",
+        "voutp",
+        "voutn",
+        "gm_metric",
+        "limit_flag"
+      ]
+    },
+    {
+      "id": "P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE",
+      "observable_contract": "Use only voltage-domain behavioral state and voltage contributions on public electrical outputs.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "bias",
+        "enable",
+        "voutp",
+        "voutn",
+        "gm_metric",
+        "limit_flag"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/differential_pair_gm_limiter.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-803",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vinp",
+            "port_ref": "vinp",
+            "position": 0
+          },
+          {
+            "net": "vinn",
+            "port_ref": "vinn",
+            "position": 1
+          },
+          {
+            "net": "bias",
+            "port_ref": "bias",
+            "position": 2
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 3
+          },
+          {
+            "net": "voutp",
+            "port_ref": "voutp",
+            "position": 4
+          },
+          {
+            "net": "voutn",
+            "port_ref": "voutn",
+            "position": 5
+          },
+          {
+            "net": "gm_metric",
+            "port_ref": "gm_metric",
+            "position": 6
+          },
+          {
+            "net": "limit_flag",
+            "port_ref": "limit_flag",
+            "position": 7
+          }
+        ],
+        "module_ref": "differential_pair_gm_limiter",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vinp",
+      "vinn",
+      "bias",
+      "enable",
+      "voutp",
+      "voutn",
+      "gm_metric",
+      "limit_flag"
+    ]
+  }
+}

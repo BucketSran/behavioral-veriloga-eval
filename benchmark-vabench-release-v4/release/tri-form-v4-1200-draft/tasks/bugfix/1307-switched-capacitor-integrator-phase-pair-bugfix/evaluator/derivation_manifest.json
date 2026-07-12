@@ -1,0 +1,39 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-307",
+    "canonical_task_slug": "307-switched-capacitor-integrator-phase-pair",
+    "family_spec_sha256": "4ab51f60d890c1d178f6047977d8f3b5cf9ea362c48c4b20c1b15b3c9d4d4ac0",
+    "mutation_catalog_sha256": "edda7cc96cb5c14bf2e099d68318b9069aef4ad8f260abeaa2b554f327958564",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "307",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_enable_reset_ignored",
+    "testbench_suite": [
+      "neg_002_overlap_cycle_accepted",
+      "neg_004_valid_stuck_high",
+      "neg_003_enable_reset_ignored",
+      "neg_005_state_not_integrated",
+      "neg_001_integration_sign_inverted"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "d161f339051478d90da2be70185255a4068dfbf189efdc2b18a0ddee9432dc07",
+    "changed_artifacts": [
+      "integrator_state_cell.va",
+      "sample_phase_cell.va",
+      "switched_cap_integrator_phase_pair_top.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_enable_reset_ignored",
+    "rationale": "Select fault class enable_reset_ignored under trigger 'enable_reset_ignored' because it exercises P_ON_THE_FOLLOWING_RISING_PHI2_CROSSING as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 9,
+    "source_preferred_seed": "neg_002_overlap_cycle_accepted",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

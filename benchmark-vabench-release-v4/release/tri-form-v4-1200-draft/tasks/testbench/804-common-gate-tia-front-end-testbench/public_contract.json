@@ -1,0 +1,311 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "common_gate_tia_front_end",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "3.0",
+                "name": "rz_gain",
+                "override_behavior": "overrides rz_gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.3",
+                "name": "bias_min",
+                "override_behavior": "overrides bias_min",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "500p from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vin_proxy",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "bias",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "transimpedance_metric",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "overload",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "common_gate_tia_front_end.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "304",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "rf_afe_behavioral_macromodels",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Common-gate TIA Front-end Macro"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_DRIVE",
+      "observable_contract": "On reset or when disabled, drive `vout` to `vcm` and clear the metrics.",
+      "required_signals": [
+        "time",
+        "vin_proxy",
+        "bias",
+        "enable",
+        "rst",
+        "vout",
+        "transimpedance_metric",
+        "overload"
+      ]
+    },
+    {
+      "id": "P_TREAT_VIN_PROXY_AS_A_VOLTAGE",
+      "observable_contract": "Treat `vin_proxy` as a voltage-domain proxy for input current magnitude.",
+      "required_signals": [
+        "time",
+        "vin_proxy",
+        "bias",
+        "enable",
+        "rst",
+        "vout",
+        "transimpedance_metric",
+        "overload"
+      ]
+    },
+    {
+      "id": "P_GENERATE_AN_OUTPUT_DEVIATION_AROUND_VCM",
+      "observable_contract": "Generate an output deviation around `vcm` proportional to the proxy input and `rz_gain`.",
+      "required_signals": [
+        "time",
+        "vin_proxy",
+        "bias",
+        "enable",
+        "rst",
+        "vout",
+        "transimpedance_metric",
+        "overload"
+      ]
+    },
+    {
+      "id": "P_REDUCE_EFFECTIVE_GAIN_WHEN_BIAS_FALLS",
+      "observable_contract": "Reduce effective gain when `bias` falls below `bias_min` and expose the effective gain on `transimpedance_metric`.",
+      "required_signals": [
+        "time",
+        "vin_proxy",
+        "bias",
+        "enable",
+        "rst",
+        "vout",
+        "transimpedance_metric",
+        "overload"
+      ]
+    },
+    {
+      "id": "P_ASSERT_OVERLOAD_WHEN_THE_UNCLAMPED_OUTPUT",
+      "observable_contract": "Assert `overload` when the unclamped output target would exceed the rails.",
+      "required_signals": [
+        "time",
+        "vin_proxy",
+        "bias",
+        "enable",
+        "rst",
+        "vout",
+        "transimpedance_metric",
+        "overload"
+      ]
+    },
+    {
+      "id": "P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE",
+      "observable_contract": "Use only voltage-domain behavioral state and voltage contributions on public electrical outputs.",
+      "required_signals": [
+        "time",
+        "vin_proxy",
+        "bias",
+        "enable",
+        "rst",
+        "vout",
+        "transimpedance_metric",
+        "overload"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/common_gate_tia_front_end.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-804",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin_proxy",
+            "port_ref": "vin_proxy",
+            "position": 0
+          },
+          {
+            "net": "bias",
+            "port_ref": "bias",
+            "position": 1
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 4
+          },
+          {
+            "net": "transimpedance_metric",
+            "port_ref": "transimpedance_metric",
+            "position": 5
+          },
+          {
+            "net": "overload",
+            "port_ref": "overload",
+            "position": 6
+          }
+        ],
+        "module_ref": "common_gate_tia_front_end",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin_proxy",
+      "bias",
+      "enable",
+      "rst",
+      "vout",
+      "transimpedance_metric",
+      "overload"
+    ]
+  }
+}

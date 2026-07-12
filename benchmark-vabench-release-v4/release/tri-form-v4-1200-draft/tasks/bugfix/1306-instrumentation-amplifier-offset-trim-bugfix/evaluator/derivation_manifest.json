@@ -1,0 +1,39 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-306",
+    "canonical_task_slug": "306-instrumentation-amplifier-offset-trim",
+    "family_spec_sha256": "25c5f8b5b55f63ad861996675ba20160f09dde0ad87bb635225f3e9e54136045",
+    "mutation_catalog_sha256": "5c59d26665deb8fb193e34b03580acf2797c78c3896438b82142427ecd6700c8",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "306",
+  "negative_assignment": {
+    "bugfix_seed": "neg_005_reset_does_not_clear_state",
+    "testbench_suite": [
+      "neg_002_ready_asserts_without_three_updates",
+      "neg_001_trim_direction_inverted",
+      "neg_003_trim_code_ignored",
+      "neg_004_gain_polarity_inverted",
+      "neg_005_reset_does_not_clear_state"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "45a06bf4059e5cd5de051cc4d1c86678761f920ddb7701f4cdda6f2230be3c49",
+    "changed_artifacts": [
+      "diff_gain_core.va",
+      "instrumentation_amp_offset_trim_top.va",
+      "offset_trim_controller.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_005_reset_does_not_clear_state",
+    "rationale": "Select fault class reset_does_not_clear_state under trigger 'reset_does_not_clear_state' because it exercises P_EXPOSE_THE_ACTIVE_CORRECTION_ON_OFFSET as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 14,
+    "source_preferred_seed": "neg_002_ready_asserts_without_three_updates",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

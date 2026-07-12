@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/common_gate_tia_front_end.va"
+
+Vvin_proxy (vin_proxy 0) vsource type=pwl wave=[0 0.42 10n 0.42 18n 0.72 30n 0.72 40n 0.16 52n 0.16 66n 0.62 78n 0.62]
+Vbias (bias 0) vsource type=pwl wave=[0 0.24 14n 0.24 24n 0.68 45n 0.68 58n 0.28 78n 0.62]
+Venable (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 52n 0.9 52.1n 0 58n 0 58.1n 0.9 78n 0.9]
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.7n 0.9 1.8n 0 78n 0]
+
+XDUT (vin_proxy bias enable rst vout transimpedance_metric overload) common_gate_tia_front_end
+
+
+tran tran stop=78n maxstep=80p
+save vin_proxy bias enable rst vout transimpedance_metric overload

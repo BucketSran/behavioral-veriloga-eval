@@ -1,0 +1,46 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module integrator_state_cell(phi1, phi2, rst, enable, sample_node, sample_valid, vout, phase_metric, valid);
+    input phi1, phi2, rst, enable, sample_node, sample_valid;
+    output vout, phase_metric, valid;
+    electrical phi1, phi2, rst, enable, sample_node, sample_valid, vout, phase_metric, valid;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real k_int = 0.2;
+    real state_v, phase_metric_v, valid_v;
+
+    analog function real clip01;
+        input x;
+        real x;
+        begin
+            if (x < vss) clip01 = vss;
+            else if (x > vdd) clip01 = vdd;
+            else clip01 = x;
+        end
+    endfunction
+
+    analog begin
+        @(initial_step) begin state_v = vcm; phase_metric_v = vcm; valid_v = vss; end
+        @(cross(V(phi2) - vth, +1)) begin
+            if ((V(rst) > vth || V(enable) <= vth)) begin
+                state_v = vcm;
+                phase_metric_v = vcm;
+                valid_v = vss;
+            end else if ((V(phi1) <= vth || 0) && V(sample_valid) > vth) begin
+                state_v = clip01(state_v + 1.0 * k_int * (V(sample_node) - vcm));
+                phase_metric_v = V(sample_node);
+                valid_v = vdd;
+            end else begin
+                valid_v = vss;
+            end
+        end
+        V(vout) <+ transition(clip01(state_v), 0, tr, tr);
+        V(phase_metric) <+ transition(clip01(phase_metric_v), 0, tr, tr);
+        V(valid) <+ transition(valid_v, 0, tr, tr);
+    end
+endmodule

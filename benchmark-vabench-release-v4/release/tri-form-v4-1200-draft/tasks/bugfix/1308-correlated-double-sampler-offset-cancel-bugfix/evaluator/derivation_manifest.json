@@ -1,0 +1,39 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-308",
+    "canonical_task_slug": "308-correlated-double-sampler-offset-cancel",
+    "family_spec_sha256": "14a68835afe8051115536ea3645cb80e90b219c4e802a1d56980f89d9bfcaae1",
+    "mutation_catalog_sha256": "db2072f9044436d118d272de8007a9a259959f74f457a365d786de69aac8dc67",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "308",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_reset_does_not_clear",
+    "testbench_suite": [
+      "neg_003_offset_debug_tracks_signal_sample",
+      "neg_005_output_tracks_input_directly",
+      "neg_002_valid_before_complete_pair",
+      "neg_004_reset_does_not_clear",
+      "neg_001_difference_polarity_inverted"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "e86c1e97ac20309473fd89c75d80ddeb460b0941bbc1c791bb8dcb4f330ab5af",
+    "changed_artifacts": [
+      "correlated_double_sampler_top.va",
+      "reset_sample_latch.va",
+      "signal_sample_latch.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_reset_does_not_clear",
+    "rationale": "Select fault class reset_does_not_clear under trigger 'reset_does_not_clear' because it exercises P_DRIVE_VOUT_AS_VCM_PLUS_THE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 9,
+    "source_preferred_seed": "neg_003_offset_debug_tracks_signal_sample",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

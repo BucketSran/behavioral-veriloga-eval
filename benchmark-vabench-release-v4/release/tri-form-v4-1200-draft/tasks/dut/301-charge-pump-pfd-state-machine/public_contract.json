@@ -1,0 +1,261 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "charge_pump_pfd_state_machine",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.0e-9 from (0:inf)",
+                "name": "tstep",
+                "override_behavior": "overrides tstep",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "60.0e6 from [0:inf)",
+                "name": "pump_rate",
+                "override_behavior": "overrides pump_rate",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vctrl_init",
+                "override_behavior": "overrides vctrl_init",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.05",
+                "name": "vctrl_min",
+                "override_behavior": "overrides vctrl_min",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.85",
+                "name": "vctrl_max",
+                "override_behavior": "overrides vctrl_max",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tedge",
+                "override_behavior": "overrides tedge",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.1",
+                "name": "metric_lo",
+                "override_behavior": "overrides metric_lo",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "metric_mid",
+                "override_behavior": "overrides metric_mid",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.8",
+                "name": "metric_hi",
+                "override_behavior": "overrides metric_hi",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ref",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "fb",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vctrl",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "metric",
+                "position": 3
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "charge_pump_pfd_state_machine.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "301",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "pll_clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Charge Pump PFD State Machine"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_AN_INTEGER_STATE_Q_HELD_IN",
+      "observable_contract": "An integer `state_q` held in `[-1, 0, +1]`, initialized to `0`.",
+      "required_signals": [
+        "time",
+        "ref",
+        "fb",
+        "vctrl",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_RISING_CROSSING_OF_V",
+      "observable_contract": "On each rising crossing of `V(ref)` through `vth` (`@(cross(V(ref) - vth, +1))`),",
+      "required_signals": [
+        "time",
+        "ref",
+        "fb",
+        "vctrl",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_RISING_CROSSING_OF_V_2",
+      "observable_contract": "On each rising crossing of `V(fb)` through `vth` (`@(cross(V(fb) - vth, +1))`),",
+      "required_signals": [
+        "time",
+        "ref",
+        "fb",
+        "vctrl",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_MAINTAIN_A_CONTROL_VOLTAGE_VCTRL_Q",
+      "observable_contract": "Maintain a control voltage `vctrl_q`, initialized to `vctrl_init`. On a fixed",
+      "required_signals": [
+        "time",
+        "ref",
+        "fb",
+        "vctrl",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_DRIVE_VCTRL_TRANSITION_VCTRL_Q_0",
+      "observable_contract": "Drive `vctrl = transition(vctrl_q, 0, tedge, tedge)`.",
+      "required_signals": [
+        "time",
+        "ref",
+        "fb",
+        "vctrl",
+        "metric"
+      ]
+    },
+    {
+      "id": "P_DRIVE_METRIC_AS_A_VOLTAGE_CODED",
+      "observable_contract": "Drive `metric` as a voltage-coded copy of the detector state:",
+      "required_signals": [
+        "time",
+        "ref",
+        "fb",
+        "vctrl",
+        "metric"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "charge_pump_pfd_state_machine.va"
+  ],
+  "task_id": "v4-301",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "ref",
+            "port_ref": "ref",
+            "position": 0
+          },
+          {
+            "net": "fb",
+            "port_ref": "fb",
+            "position": 1
+          },
+          {
+            "net": "vctrl",
+            "port_ref": "vctrl",
+            "position": 2
+          },
+          {
+            "net": "metric",
+            "port_ref": "metric",
+            "position": 3
+          }
+        ],
+        "module_ref": "charge_pump_pfd_state_machine",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "ref",
+      "fb",
+      "vctrl",
+      "metric"
+    ]
+  }
+}

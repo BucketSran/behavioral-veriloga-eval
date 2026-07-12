@@ -1,0 +1,23 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module clocked_comparator_core(vinp, vinn, clk, rst, eval_en, ready, offset_store, decision);
+    input vinp, vinn, clk, rst, eval_en, ready, offset_store;
+    output decision;
+    electrical vinp, vinn, clk, rst, eval_en, ready, offset_store, decision;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    real decision_v;
+    analog begin
+        @(initial_step) decision_v = vss;
+        @(cross(V(clk) - vth, +1)) begin
+            if (0) decision_v = vss;
+            else if (V(eval_en) > vth && V(ready) > vth) decision_v = (((V(vinp) - V(vinn) - (V(offset_store) - vcm)) >= 0.0)) ? vdd : vss;
+        end
+        V(decision) <+ transition(decision_v, 0, tr, tr);
+    end
+endmodule

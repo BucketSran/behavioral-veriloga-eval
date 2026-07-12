@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/differential_pair_gm_limiter.va"
+
+Vvinp (vinp 0) vsource type=pwl wave=[0 0.30 8n 0.30 16n 0.70 28n 0.70 38n 0.20 48n 0.20 62n 0.62 76n 0.62]
+Vvinn (vinn 0) vsource type=pwl wave=[0 0.52 8n 0.52 16n 0.40 28n 0.40 38n 0.58 48n 0.58 62n 0.50 76n 0.50]
+Vbias (bias 0) vsource dc=0.45
+Venable (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 50n 0.9 50.1n 0 57n 0 57.1n 0.9 76n 0.9]
+
+XDUT (vinp vinn bias enable voutp voutn gm_metric limit_flag) differential_pair_gm_limiter
+
+
+tran tran stop=76n maxstep=80p
+save vinp vinn bias enable voutp voutn gm_metric limit_flag

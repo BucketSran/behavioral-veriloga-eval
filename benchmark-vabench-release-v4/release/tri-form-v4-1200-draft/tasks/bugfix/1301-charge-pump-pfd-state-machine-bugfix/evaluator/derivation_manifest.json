@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-301",
+    "canonical_task_slug": "301-charge-pump-pfd-state-machine",
+    "family_spec_sha256": "4024374ef781f421fa2815335321ff821a20b6a7e9090b9b23687e85f08e0c71",
+    "mutation_catalog_sha256": "c03ef6f6ec5abe9bdf05e1b955a6e2a170b96a098271b8e598887fc51e9c0e54",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "301",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_drive_vctrl_mid",
+    "testbench_suite": [
+      "neg_002_drive_metric_mid",
+      "neg_003_dead_zone_state",
+      "neg_004_gain_sign_flipped",
+      "neg_005_vctrl_unclamped",
+      "neg_001_drive_vctrl_mid"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "64d6b8b6dffcbc9c95e290461481a74d90d39daaa7a895a0b78f64580e1ccefa",
+    "changed_artifacts": [
+      "charge_pump_pfd_state_machine.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_drive_vctrl_mid",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Charge Pump PFD State Machine: holds vctrl at the initial mid value so it never ramps toward the lead polarity and the late-window rail check fails.' because it exercises P_AN_INTEGER_STATE_Q_HELD_IN as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 32,
+    "source_preferred_seed": "neg_002_drive_metric_mid",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

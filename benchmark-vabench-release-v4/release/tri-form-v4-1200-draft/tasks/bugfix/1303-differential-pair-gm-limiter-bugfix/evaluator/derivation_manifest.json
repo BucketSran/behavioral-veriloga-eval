@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-303",
+    "canonical_task_slug": "303-differential-pair-gm-limiter",
+    "family_spec_sha256": "e2f379c40a3a85cc21c0a0ec169c193799a178f536acb8da23c7084fcf4eae86",
+    "mutation_catalog_sha256": "f4e002cf99598c64ad37c145db99d99e00c0c389842f95cdfe22724ba5b479a0",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "303",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_small_signal_gain_wrong",
+    "testbench_suite": [
+      "neg_002_small_signal_gain_wrong",
+      "neg_003_compression_flag_missing",
+      "neg_004_enable_clear_ignored",
+      "neg_005_outputs_stuck_common_mode",
+      "neg_001_differential_polarity_inverted"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "58c2293beffef36e578ebe2c565916dde46f84ea0a14ccef401fdeee4a029fa6",
+    "changed_artifacts": [
+      "differential_pair_gm_limiter.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_small_signal_gain_wrong",
+    "rationale": "Select fault class small_signal_gain_wrong under trigger 'small_signal_gain_wrong' because it exercises P_WHEN_ENABLED_CONVERT_THE_SAMPLED_DIFFERENTIAL as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 9,
+    "source_preferred_seed": "neg_002_small_signal_gain_wrong",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-302",
+    "canonical_task_slug": "302-fractional-n-divider-accumulator-flow",
+    "family_spec_sha256": "6c69bb15c15c8e4d18a318bd2a201bf54e4a9a85f3627b0801bfb8d1c4ec3763",
+    "mutation_catalog_sha256": "73c9880bb45c574c66582b94d4a091514d5bba3f40c7705270bdce289470d5ab",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "302",
+  "negative_assignment": {
+    "bugfix_seed": "neg_005_vctrl_out_of_range",
+    "testbench_suite": [
+      "neg_003_wrong_integer_divider",
+      "neg_002_lock_stuck_high",
+      "neg_004_no_loop_correction",
+      "neg_005_vctrl_out_of_range",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "eba9b2ec6ea078407f546a10130330d9b3f40f8f97641ec91c066ce913069432",
+    "changed_artifacts": [
+      "fracn_pll_timer_ref.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_005_vctrl_out_of_range",
+    "rationale": "Select fault class monitor_rail_violation under trigger 'Fractional-N Divider Accumulator Flow: reports a control-voltage monitor outside the supply rails while otherwise preserving most clock behavior.' because it exercises P_DRIVE_LOCK_HIGH_AFTER_STABLE_TRACKING as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 14,
+    "source_preferred_seed": "neg_003_wrong_integer_divider",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

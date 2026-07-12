@@ -1,0 +1,601 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "instrumentation_amp_offset_trim_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "8.0",
+                "name": "diff_gain",
+                "override_behavior": "overrides diff_gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "8e-3",
+                "name": "trim_lsb",
+                "override_behavior": "overrides trim_lsb",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vinp",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vinn",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "cal_en",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "trim_2",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "trim_1",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "trim_0",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "offset_metric",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "ready",
+                "position": 10
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "instrumentation_amp_offset_trim_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "instrumentation_amp_offset_trim_top"
+            ],
+            "name": "diff_gain_core",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "8.0",
+                "name": "diff_gain",
+                "override_behavior": "overrides diff_gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vinp",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vinn",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "corr",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "offset_metric",
+                "position": 5
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "diff_gain_core.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "instrumentation_amp_offset_trim_top"
+            ],
+            "name": "offset_trim_controller",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "8e-3",
+                "name": "trim_lsb",
+                "override_behavior": "overrides trim_lsb",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vinp",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vinn",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "cal_en",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "trim_2",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "trim_1",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "trim_0",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "corr",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "ready",
+                "position": 9
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "offset_trim_controller.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "306",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "amplifier_macromodels",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Instrumentation Amplifier Offset-trim System"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_RESET_CLEAR_THE_TRIM_STATE",
+      "observable_contract": "On reset, clear the trim state, drive `vout` to `vcm`, clear `offset_metric`, and clear `ready`.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "cal_en",
+        "trim_2",
+        "trim_1",
+        "trim_0",
+        "vout",
+        "offset_metric",
+        "ready"
+      ]
+    },
+    {
+      "id": "P_DECODE_TRIM_2_TRIM_0_AS",
+      "observable_contract": "Decode `trim_2..trim_0` as a signed offset correction around zero.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "cal_en",
+        "trim_2",
+        "trim_1",
+        "trim_0",
+        "vout",
+        "offset_metric",
+        "ready"
+      ]
+    },
+    {
+      "id": "P_WHILE_CAL_EN_IS_HIGH_UPDATE",
+      "observable_contract": "While `cal_en` is high, update the internal trim accumulator once per rising `clk` edge toward reducing the measured input offset.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "cal_en",
+        "trim_2",
+        "trim_1",
+        "trim_0",
+        "vout",
+        "offset_metric",
+        "ready"
+      ]
+    },
+    {
+      "id": "P_DRIVE_VOUT_FROM_THE_CORRECTED_DIFFERENTIAL",
+      "observable_contract": "Drive `vout` from the corrected differential input and clamp to the output rails.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "cal_en",
+        "trim_2",
+        "trim_1",
+        "trim_0",
+        "vout",
+        "offset_metric",
+        "ready"
+      ]
+    },
+    {
+      "id": "P_EXPOSE_THE_ACTIVE_CORRECTION_ON_OFFSET",
+      "observable_contract": "Expose the active correction on `offset_metric` and assert `ready` after three calibration updates.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "cal_en",
+        "trim_2",
+        "trim_1",
+        "trim_0",
+        "vout",
+        "offset_metric",
+        "ready"
+      ]
+    },
+    {
+      "id": "P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE",
+      "observable_contract": "Use only voltage-domain behavioral state and voltage contributions on public electrical outputs.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "cal_en",
+        "trim_2",
+        "trim_1",
+        "trim_0",
+        "vout",
+        "offset_metric",
+        "ready"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/instrumentation_amp_offset_trim_top.va",
+    "supplied_dut/diff_gain_core.va",
+    "supplied_dut/offset_trim_controller.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-806",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vinp",
+            "port_ref": "vinp",
+            "position": 0
+          },
+          {
+            "net": "vinn",
+            "port_ref": "vinn",
+            "position": 1
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "cal_en",
+            "port_ref": "cal_en",
+            "position": 4
+          },
+          {
+            "net": "trim_2",
+            "port_ref": "trim_2",
+            "position": 5
+          },
+          {
+            "net": "trim_1",
+            "port_ref": "trim_1",
+            "position": 6
+          },
+          {
+            "net": "trim_0",
+            "port_ref": "trim_0",
+            "position": 7
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 8
+          },
+          {
+            "net": "offset_metric",
+            "port_ref": "offset_metric",
+            "position": 9
+          },
+          {
+            "net": "ready",
+            "port_ref": "ready",
+            "position": 10
+          }
+        ],
+        "module_ref": "instrumentation_amp_offset_trim_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vinp",
+      "vinn",
+      "clk",
+      "rst",
+      "cal_en",
+      "trim_2",
+      "trim_1",
+      "trim_0",
+      "vout",
+      "offset_metric",
+      "ready"
+    ]
+  }
+}
