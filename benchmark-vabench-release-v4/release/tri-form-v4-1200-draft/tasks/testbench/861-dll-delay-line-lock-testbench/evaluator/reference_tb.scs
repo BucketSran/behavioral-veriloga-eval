@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/dll_top.va"
+ahdl_include "./dut/phase_detector.va"
+ahdl_include "./dut/delay_line.va"
+ahdl_include "./dut/lock_detector.va"
+
+Vref (ref_clk 0) vsource type=pulse val0=0 val1=0.9 delay=4.14n period=10n width=5n rise=10p fall=10p
+Vin (in_clk 0) vsource type=pulse val0=0 val1=0.9 delay=4n period=10n width=5n rise=10p fall=10p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 1n 0.9 1.1n 0 92n 0]
+Ven (enable 0) vsource type=pwl wave=[0 0 2n 0 2.1n 0.9 72n 0.9 72.1n 0 78n 0 78.1n 0.9 92n 0.9]
+XDUT (ref_clk in_clk rst enable delayed_clk up down delay_4 delay_3 delay_2 delay_1 delay_0 lock) dll_top
+
+tran tran stop=92n maxstep=20p
+save ref_clk in_clk rst enable delayed_clk up down delay_4 delay_3 delay_2 delay_1 delay_0 lock

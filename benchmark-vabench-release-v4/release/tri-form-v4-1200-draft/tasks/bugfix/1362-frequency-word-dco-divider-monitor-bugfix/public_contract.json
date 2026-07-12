@@ -1,0 +1,324 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "frequency_word_dco",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides public vdd behavior for module frequency_word_dco",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides public vss behavior for module frequency_word_dco",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides public vth behavior for module frequency_word_dco",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "80.0e6",
+                "name": "f_min",
+                "override_behavior": "overrides public f_min behavior for module frequency_word_dco",
+                "type": "real",
+                "units": "Hz",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "2.0e6",
+                "name": "f_step",
+                "override_behavior": "overrides public f_step behavior for module frequency_word_dco",
+                "type": "real",
+                "units": "Hz",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "250.0e6",
+                "name": "f_max",
+                "override_behavior": "overrides public f_max behavior for module frequency_word_dco",
+                "type": "real",
+                "units": "Hz",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "4 from [1:inf)",
+                "name": "divide_ratio",
+                "override_behavior": "overrides public divide_ratio behavior for module frequency_word_dco",
+                "type": "integer",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "100p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides public tr behavior for module frequency_word_dco",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "fcw_5",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "fcw_4",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "fcw_3",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "fcw_2",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "fcw_1",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "fcw_0",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dco_clk",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "div_clk",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "freq_metric",
+                "position": 10
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "frequency_word_dco.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/frequency_word_dco.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "362",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "pll_clock_timing_systems",
+    "difficulty": "D3",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Frequency-word DCO with Divider Monitor"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A suitable for transient simulation.",
+    "Use public voltage contributions only and preserve the declared artifact and module interfaces.",
+    "Do not hard-code evaluator stimulus, sample windows, checker tolerances, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_RESET_DISABLE_STOP",
+      "observable_contract": "Reset or disabled operation stops and clears both clocks, the divider counter, and the frequency metric.",
+      "required_signals": [
+        "time",
+        "enable",
+        "rst",
+        "dco_clk",
+        "div_clk",
+        "freq_metric"
+      ]
+    },
+    {
+      "id": "P_FREQUENCY_WORD_MAPPING",
+      "observable_contract": "The six-bit frequency word maps to min(f_max, f_min plus f_step times code), with the public normalized metric matching that target.",
+      "required_signals": [
+        "time",
+        "fcw_5",
+        "fcw_4",
+        "fcw_3",
+        "fcw_2",
+        "fcw_1",
+        "fcw_0",
+        "dco_clk",
+        "freq_metric"
+      ]
+    },
+    {
+      "id": "P_DIVIDER_MONITOR",
+      "observable_contract": "div_clk toggles once per divide_ratio rising DCO edges and its counter restarts after reset or disable.",
+      "required_signals": [
+        "time",
+        "enable",
+        "rst",
+        "dco_clk",
+        "div_clk"
+      ]
+    },
+    {
+      "id": "P_RESTART_MONOTONICITY",
+      "observable_contract": "Enable restarts both clocks low with the first DCO rise one half-period later, and larger frequency words produce nondecreasing edge counts.",
+      "required_signals": [
+        "time",
+        "enable",
+        "rst",
+        "fcw_5",
+        "fcw_4",
+        "fcw_3",
+        "fcw_2",
+        "fcw_1",
+        "fcw_0",
+        "dco_clk",
+        "div_clk"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "frequency_word_dco.va"
+  ],
+  "task_id": "v4-1362",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "fcw_5",
+            "port_ref": "fcw_5",
+            "position": 2
+          },
+          {
+            "net": "fcw_4",
+            "port_ref": "fcw_4",
+            "position": 3
+          },
+          {
+            "net": "fcw_3",
+            "port_ref": "fcw_3",
+            "position": 4
+          },
+          {
+            "net": "fcw_2",
+            "port_ref": "fcw_2",
+            "position": 5
+          },
+          {
+            "net": "fcw_1",
+            "port_ref": "fcw_1",
+            "position": 6
+          },
+          {
+            "net": "fcw_0",
+            "port_ref": "fcw_0",
+            "position": 7
+          },
+          {
+            "net": "dco_clk",
+            "port_ref": "dco_clk",
+            "position": 8
+          },
+          {
+            "net": "div_clk",
+            "port_ref": "div_clk",
+            "position": 9
+          },
+          {
+            "net": "freq_metric",
+            "port_ref": "freq_metric",
+            "position": 10
+          }
+        ],
+        "module_ref": "frequency_word_dco",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "enable",
+      "rst",
+      "fcw_5",
+      "fcw_4",
+      "fcw_3",
+      "fcw_2",
+      "fcw_1",
+      "fcw_0",
+      "dco_clk",
+      "div_clk",
+      "freq_metric"
+    ]
+  }
+}

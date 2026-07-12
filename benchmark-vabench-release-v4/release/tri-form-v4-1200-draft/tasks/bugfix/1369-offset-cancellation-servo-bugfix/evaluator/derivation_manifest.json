@@ -1,0 +1,40 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-369",
+    "canonical_task_slug": "369-offset-cancellation-servo",
+    "family_spec_sha256": "75187efa6b83a65562a3c5d86db3edb5f9be4a7d5c96ca88563a7c1ef5b0ecbe",
+    "mutation_catalog_sha256": "eaa83aaab6d48ece71149f2b0171f90549cfa9a06a5c3abccb1fd1b57274380e",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "369",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_reset_does_not_clear_outputs",
+    "testbench_suite": [
+      "neg_001_trim_direction_reversed",
+      "neg_003_corrected_output_uncorrected",
+      "neg_004_reset_does_not_clear_outputs",
+      "neg_005_error_metric_inverted",
+      "neg_002_done_asserts_too_early"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "ae8123edc10cb2af9d10f54d5199e4daa308739fd7b4817913e610acdf1870a6",
+    "changed_artifacts": [
+      "error_integrator.va",
+      "offset_sampler.va",
+      "offset_servo_top.va",
+      "trim_dac.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_reset_does_not_clear_outputs",
+    "rationale": "Select fault class reset_state_not_cleared under trigger 'reset asserted after nonzero trim or done state' because it exercises P_RESET_DISABLE_CLEAR as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 21,
+    "source_preferred_seed": "neg_001_trim_direction_reversed",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

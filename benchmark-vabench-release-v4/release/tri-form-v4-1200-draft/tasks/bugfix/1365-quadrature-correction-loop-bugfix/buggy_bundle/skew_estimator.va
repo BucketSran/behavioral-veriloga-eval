@@ -1,0 +1,82 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module skew_estimator(i_in, q_in, clk, rst, cal_en, phase_code_3, phase_code_2, phase_code_1, phase_code_0, error_metric, locked);
+    input i_in, q_in, clk, rst, cal_en;
+    output phase_code_3, phase_code_2, phase_code_1, phase_code_0, error_metric, locked;
+    electrical i_in, q_in, clk, rst, cal_en;
+    electrical phase_code_3, phase_code_2, phase_code_1, phase_code_0, error_metric, locked;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real trim_lsb = 10e-3;
+    parameter real error_tol = 15e-3;
+    parameter real tr = 200p from (0:inf);
+
+    integer phase_code;
+    integer signed_phase;
+    integer lock_count;
+    real err_value;
+    real lock_value;
+
+    analog function real rabs;
+        input x;
+        real x;
+        begin
+            rabs = (x < 0.0) ? -x : x;
+        end
+    endfunction
+
+    analog begin
+        @(initial_step) begin
+            phase_code = 0;
+            signed_phase = 0;
+            lock_count = 0;
+            err_value = vss;
+            lock_value = vss;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth) begin
+                phase_code = 0;
+                signed_phase = 0;
+                lock_count = 0;
+                err_value = vss;
+                lock_value = vss;
+            end else if (V(cal_en) > vth) begin
+                err_value = (V(i_in) - vcm) * (V(q_in) - vcm) - signed_phase * trim_lsb;
+                if (err_value > error_tol) begin
+                    if (signed_phase < 7)
+                        signed_phase = signed_phase + 1;
+                    lock_count = 0;
+                end else if (err_value < -error_tol) begin
+                    if (signed_phase > -8)
+                        signed_phase = signed_phase - 1;
+                    lock_count = 0;
+                end else begin
+                    lock_count = lock_count + 1;
+                end
+                phase_code = (signed_phase >= 0) ? signed_phase : (7 - signed_phase);
+                err_value = (V(i_in) - vcm) * (V(q_in) - vcm) - signed_phase * trim_lsb;
+                lock_value = (lock_count >= 3) ? vdd : vss;
+            end
+        end
+
+        @(cross(V(rst) - vth, +1)) begin
+            phase_code = 0;
+            signed_phase = 0;
+            lock_count = 0;
+            err_value = vss;
+            lock_value = vss;
+        end
+
+        V(phase_code_3) <+ transition((phase_code >= 8) ? vdd : vss, 0, tr, tr);
+        V(phase_code_2) <+ transition((((phase_code / 4) - 2 * (phase_code / 8)) >= 1) ? vdd : vss, 0, tr, tr);
+        V(phase_code_1) <+ transition((((phase_code / 2) - 2 * (phase_code / 4)) >= 1) ? vdd : vss, 0, tr, tr);
+        V(phase_code_0) <+ transition((phase_code - 2 * (phase_code / 2)) ? vdd : vss, 0, tr, tr);
+        V(error_metric) <+ transition(err_value, 0, tr, tr);
+        V(locked) <+ transition(lock_value, 0, tr, tr);
+    end
+endmodule

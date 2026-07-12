@@ -1,0 +1,29 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module offset_sampler(vinp, vinn, clk, rst, cal_en, sampled_error);
+    input vinp, vinn, clk, rst, cal_en;
+    output sampled_error;
+    electrical vinp, vinn, clk, rst, cal_en, sampled_error;
+
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    real sample_value;
+
+    analog begin
+        @(initial_step) sample_value = vss;
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth)
+                sample_value = vss;
+            else if (V(cal_en) > vth)
+                sample_value = V(vinp) - V(vinn);
+        end
+
+        @(cross(V(rst) - vth, +1)) sample_value = vss;
+
+        V(sampled_error) <+ transition(sample_value, 0, tr, tr);
+    end
+endmodule

@@ -1,0 +1,332 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "polyphase_quadrature_filter",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.25",
+                "name": "alpha",
+                "override_behavior": "overrides alpha",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "250p from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "i_out",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "q_out",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "amp_metric",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "phase_metric",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "polyphase_quadrature_filter.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/polyphase_quadrature_filter.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "366",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "rf_afe_behavioral_macromodels",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Polyphase Quadrature Filter Macro"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_ENABLE_IS",
+      "observable_contract": "On reset or when `enable` is low, clear path states, metrics, `valid`, and drive outputs to `vcm`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "i_out",
+        "q_out",
+        "amp_metric",
+        "phase_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_RISING_CLK_EDGE_WHILE",
+      "observable_contract": "On each rising `clk` edge while enabled, update an in-phase sampled state from `vin`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "i_out",
+        "q_out",
+        "amp_metric",
+        "phase_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_UPDATE_A_QUADRATURE_SAMPLED_STATE_USING",
+      "observable_contract": "Update a quadrature sampled state using the previous in-phase state so the Q output is phase-shifted relative to I.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "i_out",
+        "q_out",
+        "amp_metric",
+        "phase_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_DRIVE_I_OUT_AND_Q_OUT",
+      "observable_contract": "Drive `i_out` and `q_out` around `vcm` from the two path states.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "i_out",
+        "q_out",
+        "amp_metric",
+        "phase_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_REPORT_A_BOUNDED_PHASE_ORDER_METRIC",
+      "observable_contract": "Report a bounded phase/order metric on `phase_metric` and an amplitude-balance metric on `amp_metric`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "i_out",
+        "q_out",
+        "amp_metric",
+        "phase_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ASSERT_VALID_AFTER_AT_LEAST_FOUR",
+      "observable_contract": "Assert `valid` after at least four enabled sample updates.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "i_out",
+        "q_out",
+        "amp_metric",
+        "phase_metric",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "polyphase_quadrature_filter.va"
+  ],
+  "task_id": "v4-1366",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 3
+          },
+          {
+            "net": "i_out",
+            "port_ref": "i_out",
+            "position": 4
+          },
+          {
+            "net": "q_out",
+            "port_ref": "q_out",
+            "position": 5
+          },
+          {
+            "net": "amp_metric",
+            "port_ref": "amp_metric",
+            "position": 6
+          },
+          {
+            "net": "phase_metric",
+            "port_ref": "phase_metric",
+            "position": 7
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 8
+          }
+        ],
+        "module_ref": "polyphase_quadrature_filter",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "clk",
+      "rst",
+      "enable",
+      "i_out",
+      "q_out",
+      "amp_metric",
+      "phase_metric",
+      "valid"
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-361",
+    "canonical_task_slug": "361-dll-delay-line-lock",
+    "family_spec_sha256": "1971990c49c5f2e1590d0d57655a1d3269b175c6545106a3ac7557e0d9c37d27",
+    "mutation_catalog_sha256": "0996c5989cc0f868b493efb2f364de5961bb07ae9c5d6a9588a000fe5ade8333",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "361",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_phase_direction_swapped",
+    "testbench_suite": [
+      "neg_001_zero_delay_line",
+      "neg_003_lock_after_one",
+      "neg_004_reset_code_zero",
+      "neg_005_delayed_clock_stuck_low",
+      "neg_002_phase_direction_swapped"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "2951d4ca3c2b6a3e6e6293404310fe67b778ddc4bb200db9e4669a22119188f2",
+    "changed_artifacts": [
+      "delay_line.va",
+      "dll_top.va",
+      "lock_detector.va",
+      "phase_detector.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_phase_direction_swapped",
+    "rationale": "Select fault class correction_polarity_error under trigger 'The delayed edge and reference edge are separated beyond the coincidence band.' because it exercises P_PHASE_CORRECTION as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 28,
+    "source_preferred_seed": "neg_001_zero_delay_line",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

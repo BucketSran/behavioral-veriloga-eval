@@ -1,0 +1,699 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "phase_detector",
+              "delay_line",
+              "lock_detector"
+            ],
+            "name": "dll_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides public vdd behavior for module dll_top",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides public vss behavior for module dll_top",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides public vth behavior for module dll_top",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "16",
+                "name": "delay_center",
+                "override_behavior": "overrides public delay_center behavior for module dll_top",
+                "type": "integer",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "5e-12",
+                "name": "unit_delay",
+                "override_behavior": "overrides public unit_delay behavior for module dll_top",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "1",
+                "name": "lock_window",
+                "override_behavior": "overrides public lock_window behavior for module dll_top",
+                "type": "integer",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "100p",
+                "name": "tr",
+                "override_behavior": "overrides public tr behavior for module dll_top",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ref_clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in_clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "delayed_clk",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "up",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "down",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "delay_4",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "delay_3",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "delay_2",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "delay_1",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "delay_0",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lock",
+                "position": 12
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "dll_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "phase_detector",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides public vdd behavior for module phase_detector",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides public vss behavior for module phase_detector",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides public vth behavior for module phase_detector",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "5e-12",
+                "name": "unit_delay",
+                "override_behavior": "overrides public unit_delay behavior for module phase_detector",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "100p",
+                "name": "tr",
+                "override_behavior": "overrides public tr behavior for module phase_detector",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ref_clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "delayed_clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "up",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "down",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "decision_clk",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "edge_error",
+                "position": 7
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "phase_detector.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "delay_line",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides public vdd behavior for module delay_line",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides public vss behavior for module delay_line",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides public vth behavior for module delay_line",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "5e-12",
+                "name": "unit_delay",
+                "override_behavior": "overrides public unit_delay behavior for module delay_line",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "100p",
+                "name": "tr",
+                "override_behavior": "overrides public tr behavior for module delay_line",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in_clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "delay_4",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "delay_3",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "delay_2",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "delay_1",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "delay_0",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "delayed_clk",
+                "position": 8
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "delay_line.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "lock_detector",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides public vdd behavior for module lock_detector",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides public vss behavior for module lock_detector",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides public vth behavior for module lock_detector",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "16",
+                "name": "delay_center",
+                "override_behavior": "overrides public delay_center behavior for module lock_detector",
+                "type": "integer",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "1",
+                "name": "lock_window",
+                "override_behavior": "overrides public lock_window behavior for module lock_detector",
+                "type": "integer",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "100p",
+                "name": "tr",
+                "override_behavior": "overrides public tr behavior for module lock_detector",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "decision_clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "up",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "down",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "edge_error",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "delay_4",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "delay_3",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "delay_2",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "delay_1",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "delay_0",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lock",
+                "position": 11
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "lock_detector.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/dll_top.va",
+    "buggy_bundle/phase_detector.va",
+    "buggy_bundle/delay_line.va",
+    "buggy_bundle/lock_detector.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "361",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "pll_clock_timing_systems",
+    "difficulty": "D4",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "DLL Delay-line Lock"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A suitable for transient simulation.",
+    "Use public voltage contributions only and preserve the declared artifact and module interfaces.",
+    "Do not hard-code evaluator stimulus, sample windows, checker tolerances, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_RESET_DISABLE_CLEAR",
+      "observable_contract": "Reset or disabled operation restores delay_center, clears correction and lock outputs, cancels pending edges, and drives delayed_clk low.",
+      "required_signals": [
+        "time",
+        "rst",
+        "enable",
+        "delayed_clk",
+        "up",
+        "down",
+        "delay_4",
+        "delay_3",
+        "delay_2",
+        "delay_1",
+        "delay_0",
+        "lock"
+      ]
+    },
+    {
+      "id": "P_DELAY_LINE_DERIVATION",
+      "observable_contract": "Each delayed-clock edge derives from the matching input-clock edge using the code selected for that edge; the output is not free-running.",
+      "required_signals": [
+        "time",
+        "in_clk",
+        "delayed_clk",
+        "delay_4",
+        "delay_3",
+        "delay_2",
+        "delay_1",
+        "delay_0"
+      ]
+    },
+    {
+      "id": "P_PHASE_CORRECTION",
+      "observable_contract": "Completed ref/delayed comparisons request the correction direction that moves the delay code toward edge alignment and update the code once within 0 through 31.",
+      "required_signals": [
+        "time",
+        "ref_clk",
+        "delayed_clk",
+        "up",
+        "down",
+        "delay_4",
+        "delay_3",
+        "delay_2",
+        "delay_1",
+        "delay_0"
+      ]
+    },
+    {
+      "id": "P_LOCK_QUALIFICATION",
+      "observable_contract": "Lock asserts only after four consecutive comparisons within lock_window times unit_delay and clears after an out-of-window comparison.",
+      "required_signals": [
+        "time",
+        "ref_clk",
+        "delayed_clk",
+        "up",
+        "down",
+        "lock"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "dll_top.va",
+    "phase_detector.va",
+    "delay_line.va",
+    "lock_detector.va"
+  ],
+  "task_id": "v4-1361",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "ref_clk",
+            "port_ref": "ref_clk",
+            "position": 0
+          },
+          {
+            "net": "in_clk",
+            "port_ref": "in_clk",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 3
+          },
+          {
+            "net": "delayed_clk",
+            "port_ref": "delayed_clk",
+            "position": 4
+          },
+          {
+            "net": "up",
+            "port_ref": "up",
+            "position": 5
+          },
+          {
+            "net": "down",
+            "port_ref": "down",
+            "position": 6
+          },
+          {
+            "net": "delay_4",
+            "port_ref": "delay_4",
+            "position": 7
+          },
+          {
+            "net": "delay_3",
+            "port_ref": "delay_3",
+            "position": 8
+          },
+          {
+            "net": "delay_2",
+            "port_ref": "delay_2",
+            "position": 9
+          },
+          {
+            "net": "delay_1",
+            "port_ref": "delay_1",
+            "position": 10
+          },
+          {
+            "net": "delay_0",
+            "port_ref": "delay_0",
+            "position": 11
+          },
+          {
+            "net": "lock",
+            "port_ref": "lock",
+            "position": 12
+          }
+        ],
+        "module_ref": "dll_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "ref_clk",
+      "in_clk",
+      "rst",
+      "enable",
+      "delayed_clk",
+      "up",
+      "down",
+      "delay_4",
+      "delay_3",
+      "delay_2",
+      "delay_1",
+      "delay_0",
+      "lock"
+    ]
+  }
+}

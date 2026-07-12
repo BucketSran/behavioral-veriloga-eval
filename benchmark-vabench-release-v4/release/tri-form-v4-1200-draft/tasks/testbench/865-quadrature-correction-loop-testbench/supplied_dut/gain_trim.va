@@ -1,0 +1,59 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module gain_trim(i_in, q_in, clk, rst, cal_en, gain_code_3, gain_code_2, gain_code_1, gain_code_0);
+    input i_in, q_in, clk, rst, cal_en;
+    output gain_code_3, gain_code_2, gain_code_1, gain_code_0;
+    electrical i_in, q_in, clk, rst, cal_en;
+    electrical gain_code_3, gain_code_2, gain_code_1, gain_code_0;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real trim_lsb = 10e-3;
+    parameter real error_tol = 15e-3;
+    parameter real tr = 200p from (0:inf);
+
+    integer gain_code;
+    integer signed_gain;
+    real i_abs;
+    real q_abs;
+    real imbalance;
+
+    analog begin
+        @(initial_step) begin
+            signed_gain = 0;
+            gain_code = 0;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth) begin
+                signed_gain = 0;
+                gain_code = 0;
+            end else if (V(cal_en) > vth) begin
+                i_abs = (V(i_in) >= vcm) ? (V(i_in) - vcm) : (vcm - V(i_in));
+                q_abs = (V(q_in) >= vcm) ? (V(q_in) - vcm) : (vcm - V(q_in));
+                imbalance = i_abs - q_abs - signed_gain * trim_lsb;
+                if (imbalance > error_tol) begin
+                    if (signed_gain < 7)
+                        signed_gain = signed_gain + 1;
+                end else if (imbalance < -error_tol) begin
+                    if (signed_gain > -8)
+                        signed_gain = signed_gain - 1;
+                end
+                gain_code = (signed_gain >= 0) ? signed_gain : (7 - signed_gain);
+            end
+        end
+
+        @(cross(V(rst) - vth, +1)) begin
+            signed_gain = 0;
+            gain_code = 0;
+        end
+
+        V(gain_code_3) <+ transition((gain_code >= 8) ? vdd : vss, 0, tr, tr);
+        V(gain_code_2) <+ transition((((gain_code / 4) - 2 * (gain_code / 8)) >= 1) ? vdd : vss, 0, tr, tr);
+        V(gain_code_1) <+ transition((((gain_code / 2) - 2 * (gain_code / 4)) >= 1) ? vdd : vss, 0, tr, tr);
+        V(gain_code_0) <+ transition((gain_code - 2 * (gain_code / 2)) ? vdd : vss, 0, tr, tr);
+    end
+endmodule

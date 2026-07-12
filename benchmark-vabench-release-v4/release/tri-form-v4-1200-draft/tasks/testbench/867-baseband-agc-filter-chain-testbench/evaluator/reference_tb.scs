@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/agc_chain_top.va"
+ahdl_include "./dut/level_meter.va"
+ahdl_include "./dut/gain_controller.va"
+ahdl_include "./dut/vga_stage.va"
+ahdl_include "./dut/filter_stage.va"
+
+Vvin (vin 0) vsource type=pwl wave=[0 0.40 56n 0.40 56.1n 1.75 112n 1.75 112.1n 0.52 185n 0.52]
+Vtarget (target 0) vsource type=pwl wave=[0 0.14 94n 0.14 94.1n 0.07 185n 0.07]
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=5n period=9n width=4.5n rise=50p fall=50p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.8n 0.9 1.9n 0 157n 0 157.1n 0.9 163n 0.9 163.1n 0 185n 0]
+Ven (enable 0) vsource type=pwl wave=[0 0 2.5n 0 2.6n 0.9 92n 0.9 92.1n 0 102n 0 102.1n 0.9 185n 0.9]
+XDUT (vin target clk rst enable vout gain_3 gain_2 gain_1 gain_0 level_metric clip_flag settled) agc_chain_top
+
+tran tran stop=185n maxstep=100p
+save vin target clk rst enable vout gain_3 gain_2 gain_1 gain_0 level_metric clip_flag settled

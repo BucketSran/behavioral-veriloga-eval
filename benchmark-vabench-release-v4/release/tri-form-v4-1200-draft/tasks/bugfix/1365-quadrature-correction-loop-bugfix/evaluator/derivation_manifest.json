@@ -1,0 +1,40 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-365",
+    "canonical_task_slug": "365-quadrature-correction-loop",
+    "family_spec_sha256": "8c84dbb4c16bc89b6e27eb4b845b3f15062ceb24152f3d67a567f8283ccc8b29",
+    "mutation_catalog_sha256": "0170d97687807e2dcb1e7bc983d7c751ff2d9b406bb042d5cac1e0d53634c744",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "365",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_gain_direction_reversed",
+    "testbench_suite": [
+      "neg_001_gain_direction_reversed",
+      "neg_003_corrector_ignores_codes",
+      "neg_004_lock_after_one",
+      "neg_005_reset_outputs_not_cleared",
+      "neg_002_phase_direction_reversed"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "96fb9edbdc4c401f2b163ea6dbc028e945e84b76215ecbededf914802b6847e8",
+    "changed_artifacts": [
+      "corrector.va",
+      "gain_trim.va",
+      "quad_corr_top.va",
+      "skew_estimator.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_gain_direction_reversed",
+    "rationale": "Select fault class gain_trim_polarity_error under trigger 'I and Q amplitudes have a persistent imbalance.' because it exercises P_TRIM_DIRECTION as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 24,
+    "source_preferred_seed": "neg_001_gain_direction_reversed",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-364",
+    "canonical_task_slug": "364-iq-upconversion-mixer-chain",
+    "family_spec_sha256": "d551441562506417127fc437556f348c6d60a70db3e9ac456ccdc7c8b6b4757c",
+    "mutation_catalog_sha256": "3ceaa044c03b83eaad842dceae349809f548b58c8a822d8a7ef4b86d0c966a60",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "364",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_q_sign_swapped",
+    "testbench_suite": [
+      "neg_001_q_sign_swapped",
+      "neg_004_quad_ok_after_i_only",
+      "neg_005_disable_keeps_rf_active",
+      "neg_003_rf_ignores_q",
+      "neg_002_i_path_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "c8d7a88cae3bcbfff82ee08905b0bd9f973ae6eb7ce5d469c9452498ad755f60",
+    "changed_artifacts": [
+      "iq_upconversion_mixer.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_q_sign_swapped",
+    "rationale": "Select fault class mixer_polarity_error under trigger 'q_in differs from vcm while lo_q toggles.' because it exercises P_IQ_SIGNED_MIXING, P_RF_SUM_CLAMP as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 19,
+    "source_preferred_seed": "neg_001_q_sign_swapped",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

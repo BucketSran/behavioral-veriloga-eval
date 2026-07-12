@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-362",
+    "canonical_task_slug": "362-frequency-word-dco-divider-monitor",
+    "family_spec_sha256": "0d68d74300154a21ca427e4402405566fb083f9575fa5bdb0025592e7c31dbfd",
+    "mutation_catalog_sha256": "c5ecb20b5cc51d93eb94fe58af9d0a037ce1f3ebb37cbf24585e537c960a44b3",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "362",
+  "negative_assignment": {
+    "bugfix_seed": "neg_005_disable_outputs_not_stopped",
+    "testbench_suite": [
+      "neg_001_ignore_fcw_msb",
+      "neg_003_divider_off_by_one",
+      "neg_005_disable_outputs_not_stopped",
+      "neg_004_metric_stuck_low",
+      "neg_002_half_frequency_step"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "c2bf5d60f1a43d9398ff45a6a0527549d9ceccda63aa2b7b5b0738a52b4af907",
+    "changed_artifacts": [
+      "frequency_word_dco.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_005_disable_outputs_not_stopped",
+    "rationale": "Select fault class reset_disable_stop_error under trigger 'Reset is asserted or enable is deasserted while clocks and metric must stop low.' because it exercises P_RESET_DISABLE_STOP as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_001_ignore_fcw_msb",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

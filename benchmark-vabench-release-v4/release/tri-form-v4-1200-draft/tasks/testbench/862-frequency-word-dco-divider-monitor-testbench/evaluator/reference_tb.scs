@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/frequency_word_dco.va"
+
+Ven (enable 0) vsource type=pwl wave=[0 0 3n 0 3.1n 0.9 118n 0.9 118.1n 0 131n 0 131.1n 0.9 162n 0.9 162.1n 0 171n 0 171.1n 0.9 190n 0.9]
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.2n 0.9 1.3n 0 164n 0 164.1n 0.9 170n 0.9 170.1n 0 190n 0]
+Vf5 (fcw_5 0) vsource type=pwl wave=[0 0 82n 0 82.1n 0.9 190n 0.9]
+Vf4 (fcw_4 0) vsource type=pwl wave=[0 0 44n 0 44.1n 0.9 82n 0.9 82.1n 0 190n 0]
+Vf3 (fcw_3 0) vsource type=pwl wave=[0 0 82n 0 82.1n 0.9 190n 0.9]
+Vf2 (fcw_2 0) vsource type=pwl wave=[0 0 44n 0 44.1n 0.9 190n 0.9]
+Vf1 (fcw_1 0) vsource type=pwl wave=[0 0 82n 0 82.1n 0.9 190n 0.9]
+Vf0 (fcw_0 0) vsource type=pwl wave=[0 0 44n 0 44.1n 0.9 82n 0.9 82.1n 0 190n 0]
+XDUT (enable rst fcw_5 fcw_4 fcw_3 fcw_2 fcw_1 fcw_0 dco_clk div_clk freq_metric) frequency_word_dco
+
+tran tran stop=190n maxstep=50p
+save enable rst fcw_5 fcw_4 fcw_3 fcw_2 fcw_1 fcw_0 dco_clk div_clk freq_metric

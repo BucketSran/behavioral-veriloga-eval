@@ -1,0 +1,616 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "accumulator",
+              "multi_modulus_divider",
+              "ratio_monitor"
+            ],
+            "name": "fracn_synth_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides public vdd behavior for module fracn_synth_top",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides public vss behavior for module fracn_synth_top",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides public vth behavior for module fracn_synth_top",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "8 from [1:inf)",
+                "name": "n_int",
+                "override_behavior": "overrides public n_int behavior for module fracn_synth_top",
+                "type": "integer",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "16 from [1:inf)",
+                "name": "window_len",
+                "override_behavior": "overrides public window_len behavior for module fracn_synth_top",
+                "type": "integer",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "100p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides public tr behavior for module fracn_synth_top",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ref_clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dco_clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "frac_3",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "frac_2",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "frac_1",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "frac_0",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "div_clk",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "div_sel",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "avg_ratio_metric",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 11
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "fracn_synth_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "accumulator",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides public vdd behavior for module accumulator",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides public vss behavior for module accumulator",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides public vth behavior for module accumulator",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "100p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides public tr behavior for module accumulator",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "decision_tick",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "frac_3",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "frac_2",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "frac_1",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "frac_0",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "carry",
+                "position": 7
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "accumulator.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "multi_modulus_divider",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides public vdd behavior for module multi_modulus_divider",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides public vss behavior for module multi_modulus_divider",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides public vth behavior for module multi_modulus_divider",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "8 from [1:inf)",
+                "name": "n_int",
+                "override_behavior": "overrides public n_int behavior for module multi_modulus_divider",
+                "type": "integer",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "100p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides public tr behavior for module multi_modulus_divider",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dco_clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "carry",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "div_clk",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "div_sel",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "decision_tick",
+                "position": 6
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "multi_modulus_divider.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "ratio_monitor",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides public vdd behavior for module ratio_monitor",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides public vss behavior for module ratio_monitor",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides public vth behavior for module ratio_monitor",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "8 from [1:inf)",
+                "name": "n_int",
+                "override_behavior": "overrides public n_int behavior for module ratio_monitor",
+                "type": "integer",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "16 from [1:inf)",
+                "name": "window_len",
+                "override_behavior": "overrides public window_len behavior for module ratio_monitor",
+                "type": "integer",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "100p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides public tr behavior for module ratio_monitor",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "decision_tick",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "div_sel",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "avg_ratio_metric",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 5
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "ratio_monitor.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "family_id": "363",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "pll_clock_timing_systems",
+    "difficulty": "D4",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Fractional-N Synthesizer Mini Loop"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A suitable for transient simulation.",
+    "Use public voltage contributions only and preserve the declared artifact and module interfaces.",
+    "Do not hard-code evaluator stimulus, sample windows, checker tolerances, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_DISABLE_CLEAR",
+      "observable_contract": "Reset or disabled operation clears accumulator/divider state and all public outputs.",
+      "required_signals": [
+        "time",
+        "rst",
+        "enable",
+        "div_clk",
+        "div_sel",
+        "avg_ratio_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_FRACTIONAL_SELECTION",
+      "observable_contract": "The fraction code drives deterministic n_int versus n_int+1 selection through accumulator carry events.",
+      "required_signals": [
+        "time",
+        "dco_clk",
+        "frac_3",
+        "frac_2",
+        "frac_1",
+        "frac_0",
+        "div_sel"
+      ]
+    },
+    {
+      "id": "P_DCO_DERIVED_DIVIDER",
+      "observable_contract": "div_clk transitions are derived only from counted rising dco_clk edges using the selected modulus.",
+      "required_signals": [
+        "time",
+        "ref_clk",
+        "dco_clk",
+        "div_clk",
+        "div_sel"
+      ]
+    },
+    {
+      "id": "P_RATIO_WINDOW",
+      "observable_contract": "At each full window, avg_ratio_metric reports n_int plus the observed fraction of larger-modulus selections and valid pulses.",
+      "required_signals": [
+        "time",
+        "dco_clk",
+        "div_sel",
+        "avg_ratio_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_FRACTION_MONOTONICITY",
+      "observable_contract": "Larger fraction commands produce nondecreasing average selected divide-ratio metrics over equal windows.",
+      "required_signals": [
+        "time",
+        "frac_3",
+        "frac_2",
+        "frac_1",
+        "frac_0",
+        "avg_ratio_metric",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "fracn_synth_top.va",
+    "accumulator.va",
+    "multi_modulus_divider.va",
+    "ratio_monitor.va"
+  ],
+  "task_id": "v4-363",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "ref_clk",
+            "port_ref": "ref_clk",
+            "position": 0
+          },
+          {
+            "net": "dco_clk",
+            "port_ref": "dco_clk",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 3
+          },
+          {
+            "net": "frac_3",
+            "port_ref": "frac_3",
+            "position": 4
+          },
+          {
+            "net": "frac_2",
+            "port_ref": "frac_2",
+            "position": 5
+          },
+          {
+            "net": "frac_1",
+            "port_ref": "frac_1",
+            "position": 6
+          },
+          {
+            "net": "frac_0",
+            "port_ref": "frac_0",
+            "position": 7
+          },
+          {
+            "net": "div_clk",
+            "port_ref": "div_clk",
+            "position": 8
+          },
+          {
+            "net": "div_sel",
+            "port_ref": "div_sel",
+            "position": 9
+          },
+          {
+            "net": "avg_ratio_metric",
+            "port_ref": "avg_ratio_metric",
+            "position": 10
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 11
+          }
+        ],
+        "module_ref": "fracn_synth_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "ref_clk",
+      "dco_clk",
+      "rst",
+      "enable",
+      "frac_3",
+      "frac_2",
+      "frac_1",
+      "frac_0",
+      "div_clk",
+      "div_sel",
+      "avg_ratio_metric",
+      "valid"
+    ]
+  }
+}

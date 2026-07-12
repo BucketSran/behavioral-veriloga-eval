@@ -1,0 +1,48 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module vga_stage(vin, rst, enable, gain_3, gain_2, gain_1, gain_0, vga_out);
+    input vin, rst, enable, gain_3, gain_2, gain_1, gain_0;
+    output vga_out;
+    electrical vin, rst, enable, gain_3, gain_2, gain_1, gain_0, vga_out;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real gain_min = 0.5;
+    parameter real gain_lsb = 0.1;
+    parameter real tr = 200p from (0:inf);
+
+    integer gain_code;
+    real gain_value;
+    real out_value;
+    real out_drive;
+
+    analog function real clip;
+        input x;
+        real x;
+        begin
+            if (x < vss)
+                clip = vss;
+            else if (x > vdd)
+                clip = vdd;
+            else
+                clip = x;
+        end
+    endfunction
+
+    analog begin
+        gain_code = ((V(gain_3) > vth) ? 8 : 0)
+                  + ((V(gain_2) > vth) ? 4 : 0)
+                  + ((V(gain_1) > vth) ? 2 : 0)
+                  + ((V(gain_0) > vth) ? 1 : 0);
+        gain_value = gain_min + gain_lsb * gain_code;
+        out_value = vcm + gain_value * (V(vin) - vcm);
+        if ((V(rst) > vth) || (V(enable) <= vth))
+            out_drive = vcm;
+        else
+            out_drive = out_value;
+        V(vga_out) <+ out_drive;
+    end
+endmodule

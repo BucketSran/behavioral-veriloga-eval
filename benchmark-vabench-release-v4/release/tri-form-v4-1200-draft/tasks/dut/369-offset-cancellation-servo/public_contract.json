@@ -1,0 +1,691 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "offset_servo_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides logic high output level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides logic low output level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides clock/control threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite"
+              },
+              {
+                "default": "2e-3",
+                "name": "trim_lsb",
+                "override_behavior": "overrides offset correction per trim-code step",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite positive"
+              },
+              {
+                "default": "5e-3",
+                "name": "error_tol",
+                "override_behavior": "overrides residual offset tolerance",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite positive"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides output transition smoothing time",
+                "type": "real",
+                "units": "s",
+                "valid_range": "positive"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vinp",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vinn",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "cal_en",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "corrected_out",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "trim_4",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "trim_3",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "trim_2",
+                "position": 8
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "trim_1",
+                "position": 9
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "trim_0",
+                "position": 10
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "error_metric",
+                "position": 11
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "done",
+                "position": 12
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "offset_servo_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "offset_servo_top"
+            ],
+            "name": "offset_sampler",
+            "parameters": [
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides reset sample level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides clock/control threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides output transition smoothing time",
+                "type": "real",
+                "units": "s",
+                "valid_range": "positive"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vinp",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vinn",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "cal_en",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "sampled_error",
+                "position": 5
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "offset_sampler.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "offset_servo_top"
+            ],
+            "name": "trim_dac",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides logic high output level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides logic low output level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides trim-bit threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite"
+              },
+              {
+                "default": "2e-3",
+                "name": "trim_lsb",
+                "override_behavior": "overrides offset correction per trim-code step",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite positive"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides output transition smoothing time",
+                "type": "real",
+                "units": "s",
+                "valid_range": "positive"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vinp",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vinn",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "trim_4",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "trim_3",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "trim_2",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "trim_1",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "trim_0",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "corrected_out",
+                "position": 8
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "trim_dac.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "offset_servo_top"
+            ],
+            "name": "error_integrator",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides logic high output level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides logic low output level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides clock/control threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite"
+              },
+              {
+                "default": "2e-3",
+                "name": "trim_lsb",
+                "override_behavior": "overrides offset correction per trim-code step",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite positive"
+              },
+              {
+                "default": "5e-3",
+                "name": "error_tol",
+                "override_behavior": "overrides residual offset tolerance",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite positive"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides output transition smoothing time",
+                "type": "real",
+                "units": "s",
+                "valid_range": "positive"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "sampled_error",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "cal_en",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "trim_4",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "trim_3",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "trim_2",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "trim_1",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "trim_0",
+                "position": 8
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "error_metric",
+                "position": 9
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "done",
+                "position": 10
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "error_integrator.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "family_id": "369",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "calibration_control_systems",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Offset-cancellation Servo"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Use voltage contributions for public electrical outputs.",
+    "Do not instantiate transistor-level devices or add testbench, checker, pass/fail, or debug-only ports."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_DISABLE_CLEAR",
+      "observable_contract": "On reset, clear trim code, corrected output, error metric, and done; when calibration is disabled, do not advance trim search state.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "cal_en",
+        "corrected_out",
+        "trim_4",
+        "trim_3",
+        "trim_2",
+        "trim_1",
+        "trim_0",
+        "error_metric",
+        "done"
+      ]
+    },
+    {
+      "id": "P_TRIM_SEARCH_DIRECTION",
+      "observable_contract": "Update the signed 5-bit trim code in the direction that reduces sampled differential error.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "cal_en",
+        "corrected_out",
+        "trim_4",
+        "trim_3",
+        "trim_2",
+        "trim_1",
+        "trim_0",
+        "error_metric",
+        "done"
+      ]
+    },
+    {
+      "id": "P_CORRECTED_RESIDUAL",
+      "observable_contract": "Drive corrected_out as the differential input minus the signed trim correction.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "cal_en",
+        "corrected_out",
+        "trim_4",
+        "trim_3",
+        "trim_2",
+        "trim_1",
+        "trim_0",
+        "error_metric",
+        "done"
+      ]
+    },
+    {
+      "id": "P_ERROR_METRIC",
+      "observable_contract": "Expose the current residual offset on error_metric after each enabled trim update.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "cal_en",
+        "corrected_out",
+        "trim_4",
+        "trim_3",
+        "trim_2",
+        "trim_1",
+        "trim_0",
+        "error_metric",
+        "done"
+      ]
+    },
+    {
+      "id": "P_DONE_QUALIFICATION",
+      "observable_contract": "Assert done only after four consecutive calibration updates with residual magnitude within error_tol.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "cal_en",
+        "corrected_out",
+        "trim_4",
+        "trim_3",
+        "trim_2",
+        "trim_1",
+        "trim_0",
+        "error_metric",
+        "done"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "offset_servo_top.va",
+    "offset_sampler.va",
+    "trim_dac.va",
+    "error_integrator.va"
+  ],
+  "task_id": "v4-369",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vinp",
+            "port_ref": "vinp",
+            "position": 0
+          },
+          {
+            "net": "vinn",
+            "port_ref": "vinn",
+            "position": 1
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "cal_en",
+            "port_ref": "cal_en",
+            "position": 4
+          },
+          {
+            "net": "corrected_out",
+            "port_ref": "corrected_out",
+            "position": 5
+          },
+          {
+            "net": "trim_4",
+            "port_ref": "trim_4",
+            "position": 6
+          },
+          {
+            "net": "trim_3",
+            "port_ref": "trim_3",
+            "position": 7
+          },
+          {
+            "net": "trim_2",
+            "port_ref": "trim_2",
+            "position": 8
+          },
+          {
+            "net": "trim_1",
+            "port_ref": "trim_1",
+            "position": 9
+          },
+          {
+            "net": "trim_0",
+            "port_ref": "trim_0",
+            "position": 10
+          },
+          {
+            "net": "error_metric",
+            "port_ref": "error_metric",
+            "position": 11
+          },
+          {
+            "net": "done",
+            "port_ref": "done",
+            "position": 12
+          }
+        ],
+        "module_ref": "offset_servo_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vinp",
+      "vinn",
+      "clk",
+      "rst",
+      "cal_en",
+      "corrected_out",
+      "trim_4",
+      "trim_3",
+      "trim_2",
+      "trim_1",
+      "trim_0",
+      "error_metric",
+      "done"
+    ]
+  }
+}
