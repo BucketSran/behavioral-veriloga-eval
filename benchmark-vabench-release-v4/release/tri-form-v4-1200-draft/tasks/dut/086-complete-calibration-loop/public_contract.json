@@ -1,0 +1,278 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "complete_calibration_loop",
+            "parameters": [
+              {
+                "default": 1e-10,
+                "name": "tr",
+                "override_behavior": "sets output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets clock and reset logic threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real"
+              },
+              {
+                "default": 0.45,
+                "name": "target",
+                "override_behavior": "sets the calibration common-mode target",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vmin <= target <= vmax"
+              },
+              {
+                "default": 0.4,
+                "name": "loop_gain",
+                "override_behavior": "sets correction applied to residual error per update",
+                "type": "real",
+                "units": null,
+                "valid_range": "loop_gain >= 0"
+              },
+              {
+                "default": 0.35,
+                "name": "plant_alpha",
+                "override_behavior": "sets first-order corrected-plant update factor",
+                "type": "real",
+                "units": null,
+                "valid_range": "0 < plant_alpha <= 1"
+              },
+              {
+                "default": 0.05,
+                "name": "vmin",
+                "override_behavior": "sets lower clamp for bounded analog states",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vmin < vmax"
+              },
+              {
+                "default": 0.85,
+                "name": "vmax",
+                "override_behavior": "sets upper clamp for bounded analog states",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vmax > vmin"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "metric",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "trim_mon",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "residual_mon",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "complete_calibration_loop.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "086",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "calibration_dem_control",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Complete Calibration Loop"
+  },
+  "modeling_constraints": [
+    "Use deterministic rising-edge sampled closed-loop calibration state.",
+    "Use bounded state and smoothed voltage contributions only.",
+    "Do not use current contributions, transistor-level devices, continuous-time operators, AC/noise analysis, or validation side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_TO_TARGET",
+      "observable_contract": "Active-high reset initializes out, trim_mon, residual_mon, and metric to their target-state values.",
+      "required_signals": [
+        "time",
+        "rst",
+        "out",
+        "metric",
+        "trim_mon",
+        "residual_mon"
+      ]
+    },
+    {
+      "id": "P_CLOCKED_LOOP_UPDATE",
+      "observable_contract": "After reset releases, calibration state updates on rising clk crossings and holds between updates.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "vin",
+        "out",
+        "trim_mon",
+        "residual_mon"
+      ]
+    },
+    {
+      "id": "P_RESIDUAL_OBSERVATION",
+      "observable_contract": "Residual_mon exposes clamp(target + raw_error + (trim_mon_next - target), vmin, vmax), where raw_error is V(vin)-target and trim_mon_next is the current edge's bounded negative-feedback trim update.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "trim_mon",
+        "residual_mon"
+      ]
+    },
+    {
+      "id": "P_NEGATIVE_FEEDBACK_DIRECTION",
+      "observable_contract": "The trim correction uses trim_mon_next = clamp(trim_mon - loop_gain * residual_before_update, vmin, vmax), so positive residual decreases trim and negative residual increases trim.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "out",
+        "trim_mon",
+        "residual_mon"
+      ]
+    },
+    {
+      "id": "P_PLANT_CONVERGENCE",
+      "observable_contract": "Out follows out_next = clamp(out + plant_alpha * (residual_mon_next - out), vmin, vmax) on each non-reset update.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vin",
+        "out",
+        "residual_mon"
+      ]
+    },
+    {
+      "id": "P_BOUNDS_AND_METRIC",
+      "observable_contract": "Bounded analog states remain within vmin through vmax, while metric equals clamp(0.9 - 1.5 * abs(out-target), 0.0, 0.9) after each update.",
+      "required_signals": [
+        "time",
+        "out",
+        "metric",
+        "trim_mon",
+        "residual_mon"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "complete_calibration_loop.va"
+  ],
+  "task_id": "v4-086",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 2
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 3
+          },
+          {
+            "net": "metric",
+            "port_ref": "metric",
+            "position": 4
+          },
+          {
+            "net": "trim_mon",
+            "port_ref": "trim_mon",
+            "position": 5
+          },
+          {
+            "net": "residual_mon",
+            "port_ref": "residual_mon",
+            "position": 6
+          }
+        ],
+        "module_ref": "complete_calibration_loop",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "vin",
+      "out",
+      "metric",
+      "trim_mon",
+      "residual_mon"
+    ]
+  }
+}
