@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-203",
+    "canonical_task_slug": "203-cdac-8b-monodown",
+    "family_spec_sha256": "2fbf58b0561080bfd3a7b0682a48dd0f6aae9cfe5878d28c751c13660e517417",
+    "mutation_catalog_sha256": "b73ad2a0f92b865504edca0a5853595f9205cba0bb3feb4004ec2cee9937bd3c",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "203",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_wrong_msb_weight",
+    "testbench_suite": [
+      "neg_002_wrong_msb_weight",
+      "neg_003_wrong_sign",
+      "neg_001_zero",
+      "neg_004_half_output",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "817f0bdc7ba2748989b1f52c58246085e63511570a07f14a7e95cbfe9efb04fe",
+    "changed_artifacts": [
+      "cdac_8b_monodown.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_wrong_msb_weight",
+    "rationale": "Select fault class metric_or_observable_fault under trigger 'Uses a quarter-scale dctrl7 subtraction instead of the required half-scale.' because it exercises P_AT_INITIALIZATION_AND_ON_EACH_FALLING as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_002_wrong_msb_weight",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

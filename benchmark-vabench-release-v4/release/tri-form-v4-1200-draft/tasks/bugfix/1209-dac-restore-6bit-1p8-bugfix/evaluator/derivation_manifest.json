@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-209",
+    "canonical_task_slug": "209-dac-restore-6bit-1p8",
+    "family_spec_sha256": "51786abf1ab2247761061ef124d783500966454b3a226f57bff3fdc739ceb347",
+    "mutation_catalog_sha256": "be2239989a2c49402acc5318af8c06e6111b72727fbe6075ae7ed600359852e7",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "209",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_unipolar_output",
+    "testbench_suite": [
+      "neg_003_wrong_denominator",
+      "neg_004_unipolar_output",
+      "neg_005_metric_scale_low",
+      "neg_001_zero",
+      "neg_002_omit_msb"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "6315318372302b9a11e3345bfbbb1fa97fd28fc14469dec219877da6331341e2",
+    "changed_artifacts": [
+      "dac_restore_6bit_1p8.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_unipolar_output",
+    "rationale": "Select fault class threshold_or_boundary_fault under trigger 'Omits the bipolar -1.8 offset.' because it exercises P_ON_EACH_RISING_CROSSING_OF_CLK as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 13,
+    "source_preferred_seed": "neg_003_wrong_denominator",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

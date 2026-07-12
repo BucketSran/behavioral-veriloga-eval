@@ -1,0 +1,16 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/dac_restore_6bit_1p8.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=1.8 delay=0.25n period=0.8n width=0.30n rise=20p fall=20p
+Vd1 (d1 0) vsource type=pwl wave=[0 0 0.80n 0 0.85n 1.8 1.60n 1.8 1.65n 0 2.40n 0 2.45n 1.8 3.20n 1.8 3.25n 0 4.20n 0]
+Vd2 (d2 0) vsource type=pwl wave=[0 0 0.80n 0 0.85n 1.8 1.60n 1.8 1.65n 0 2.40n 0 2.45n 0 3.20n 0 3.25n 1.8 4.20n 1.8]
+Vd3 (d3 0) vsource type=pwl wave=[0 0 0.80n 0 0.85n 1.8 1.60n 1.8 1.65n 1.8 2.40n 1.8 2.45n 1.8 3.20n 1.8 3.25n 0 4.20n 0]
+Vd4 (d4 0) vsource type=pwl wave=[0 0 0.80n 0 0.85n 1.8 1.60n 1.8 1.65n 1.8 2.40n 1.8 2.45n 1.8 3.20n 1.8 3.25n 0 4.20n 0]
+Vd5 (d5 0) vsource type=pwl wave=[0 0 0.80n 0 0.85n 1.8 1.60n 1.8 1.65n 0 2.40n 0 2.45n 0 3.20n 0 3.25n 1.8 4.20n 1.8]
+Vd6 (d6 0) vsource type=pwl wave=[0 0 0.80n 0 0.85n 1.8 1.60n 1.8 1.65n 0 2.40n 0 2.45n 1.8 3.20n 1.8 3.25n 0 4.20n 0]
+XDUT (d1 d2 d3 d4 d5 d6 clk vout) dac_restore_6bit_1p8
+
+tran tran stop=4.1n maxstep=5p
+save clk d1 d2 d3 d4 d5 d6 vout

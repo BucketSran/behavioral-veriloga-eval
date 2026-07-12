@@ -1,0 +1,202 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "adc_zoom_timing_sequencer",
+            "parameters": [],
+            "ports": [
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 0
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "s",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sar",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "res",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "intg",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "clk_sar",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "zoom",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "clk_zoom",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "rst_zoom",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "adc_zoom_timing_sequencer.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "202",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "ADC Zoom Timing Sequencer"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_GENERATE_A_REPEATING_32_NS_COMPACT",
+      "observable_contract": "Generate a repeating 32 ns compact ADC timing frame with these high windows: `rst` from 0.5 to 0.8 ns; `s` from 1.5 to 2.5 ns; `sar` from 3.0 to 5.4 ns; `clk_sar` from 3.0 to 3.25 ns, 3.6 to 3.85 ns, and 4.2 to 4.45 ns; `res` from 6.0 to 6.6 ns; `intg` from 8.0 to 8.7 ns; `zoom` from 9.2 to 10.8 ns; `clk_zoom` from 9.2 to 9.45 ns and 9.8 to 10.05 ns; and `rst_zoom` from 11.0 to 11.5 ns. All outputs should return low between their public windows and repeat every 32 ns.",
+      "required_signals": [
+        "time",
+        "clk_sar",
+        "clk_zoom",
+        "intg",
+        "res",
+        "rst",
+        "rst_zoom",
+        "s",
+        "sar",
+        "zoom"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/adc_zoom_timing_sequencer.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-702",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 0
+          },
+          {
+            "net": "s",
+            "port_ref": "s",
+            "position": 1
+          },
+          {
+            "net": "sar",
+            "port_ref": "sar",
+            "position": 2
+          },
+          {
+            "net": "res",
+            "port_ref": "res",
+            "position": 3
+          },
+          {
+            "net": "intg",
+            "port_ref": "intg",
+            "position": 4
+          },
+          {
+            "net": "clk_sar",
+            "port_ref": "clk_sar",
+            "position": 5
+          },
+          {
+            "net": "zoom",
+            "port_ref": "zoom",
+            "position": 6
+          },
+          {
+            "net": "clk_zoom",
+            "port_ref": "clk_zoom",
+            "position": 7
+          },
+          {
+            "net": "rst_zoom",
+            "port_ref": "rst_zoom",
+            "position": 8
+          }
+        ],
+        "module_ref": "adc_zoom_timing_sequencer",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk_sar",
+      "clk_zoom",
+      "intg",
+      "res",
+      "rst",
+      "rst_zoom",
+      "s",
+      "sar",
+      "zoom"
+    ]
+  }
+}

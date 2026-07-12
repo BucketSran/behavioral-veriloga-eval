@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-206",
+    "canonical_task_slug": "206-sar-comparator-reset-high",
+    "family_spec_sha256": "f0538df1a4744ec408848abe765eefeb068ded58b10022d640f384943c86fdca",
+    "mutation_catalog_sha256": "25f4220b1aa035e643479fbabdf9a0b5e55e798d514c42e9623bd66b2804711f",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "206",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_no_reset_high",
+    "testbench_suite": [
+      "neg_002_swap_decision_outputs",
+      "neg_003_no_reset_high",
+      "neg_004_half_output",
+      "neg_001_zero",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "e68cbd05648e2fc13cda385cde0f0278db45f76b55f13f5af1c3fb20f2dd277c",
+    "changed_artifacts": [
+      "sar_comparator_reset_high.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_no_reset_high",
+    "rationale": "Select fault class state_reset_or_enable_error under trigger 'Does not reset comparator outputs high on falling cmpck.' because it exercises P_INITIALIZE_BOTH_DECISION_OUTPUTS_HIGH_WHENEVER as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 21,
+    "source_preferred_seed": "neg_002_swap_decision_outputs",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

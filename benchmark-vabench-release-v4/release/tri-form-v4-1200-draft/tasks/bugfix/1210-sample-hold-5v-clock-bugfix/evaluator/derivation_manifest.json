@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-210",
+    "canonical_task_slug": "210-sample-hold-5v-clock",
+    "family_spec_sha256": "484cbcef68817e92c5b2c51c4b18af1e933cf90369068c7677084bf7e90f04df",
+    "mutation_catalog_sha256": "e447f671949d11a55a964e941cab0354bb28b378c931477ecb4a47786861ad97",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "210",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_falling_edge_sample",
+    "testbench_suite": [
+      "neg_002_falling_edge_sample",
+      "neg_003_track_input",
+      "neg_004_half_output",
+      "neg_005_metric_scale_low",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "1699b1a1b6f35ee8ecd05e72e23be057e23f62013f65f244d1979bb1e0f2e8a1",
+    "changed_artifacts": [
+      "sample_hold_5v_clock.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_falling_edge_sample",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Samples vin on falling clock edges instead of rising edges.' because it exercises P_DETECT_RISING_CROSSINGS_OF_VCLK_THROUGH as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 26,
+    "source_preferred_seed": "neg_002_falling_edge_sample",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

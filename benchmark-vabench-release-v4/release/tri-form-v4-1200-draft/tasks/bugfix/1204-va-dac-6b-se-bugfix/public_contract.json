@@ -1,0 +1,229 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "va_dac_6b_se",
+            "parameters": [
+              {
+                "default": "1.0",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.5",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din0",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din1",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din2",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din3",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din4",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din5",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rdy",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "aout",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "va_dac_6b_se.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/va_dac_6b_se.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "204",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "VA DAC 6b SE"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_ON_EACH_RISING_RDY_CROSSING_SAMPLE",
+      "observable_contract": "On each rising `rdy` crossing, sample `din0..din5` with switched weights `0.5, 1, 2, 4, 8, 16` from `din0` through `din5`. Map the sampled weighted code to a bipolar single-ended output scaled by `vdd` using this public normalization:",
+      "required_signals": [
+        "time",
+        "aout",
+        "din0",
+        "din1",
+        "din2",
+        "din3",
+        "din4",
+        "din5",
+        "rdy"
+      ]
+    },
+    {
+      "id": "P_TEXT_WEIGHTED_CODE_16_DIN5_8",
+      "observable_contract": "```text weighted_code = 16*din5 + 8*din4 + 4*din3 + 2*din2 + 1*din1 + 0.5*din0 aout = (weighted_code / 47.5) * 2.0 * vdd - vdd ```",
+      "required_signals": [
+        "time",
+        "aout",
+        "din0",
+        "din1",
+        "din2",
+        "din3",
+        "din4",
+        "din5",
+        "rdy"
+      ]
+    },
+    {
+      "id": "P_EACH_DIN_TERM_IS_1_WHEN",
+      "observable_contract": "Each `din*` term is `1` when the corresponding voltage is above `vth` and `0` otherwise. The denominator `47.5` is the fixed source normalization basis including the non-switching reference contribution.",
+      "required_signals": [
+        "time",
+        "aout",
+        "din0",
+        "din1",
+        "din2",
+        "din3",
+        "din4",
+        "din5",
+        "rdy"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "va_dac_6b_se.va"
+  ],
+  "task_id": "v4-1204",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "din0",
+            "port_ref": "din0",
+            "position": 0
+          },
+          {
+            "net": "din1",
+            "port_ref": "din1",
+            "position": 1
+          },
+          {
+            "net": "din2",
+            "port_ref": "din2",
+            "position": 2
+          },
+          {
+            "net": "din3",
+            "port_ref": "din3",
+            "position": 3
+          },
+          {
+            "net": "din4",
+            "port_ref": "din4",
+            "position": 4
+          },
+          {
+            "net": "din5",
+            "port_ref": "din5",
+            "position": 5
+          },
+          {
+            "net": "rdy",
+            "port_ref": "rdy",
+            "position": 6
+          },
+          {
+            "net": "aout",
+            "port_ref": "aout",
+            "position": 7
+          }
+        ],
+        "module_ref": "va_dac_6b_se",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "aout",
+      "din0",
+      "din1",
+      "din2",
+      "din3",
+      "din4",
+      "din5",
+      "rdy"
+    ]
+  }
+}

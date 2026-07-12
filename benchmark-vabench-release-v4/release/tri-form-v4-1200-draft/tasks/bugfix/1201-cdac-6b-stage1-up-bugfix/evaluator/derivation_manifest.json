@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-201",
+    "canonical_task_slug": "201-cdac-6b-stage1-up",
+    "family_spec_sha256": "58c37bb55f400a9e020ad0a921bc6206c7eba160c403a28f108f428ae3d5f601",
+    "mutation_catalog_sha256": "71ff7032a516ff03d53b57074af03cf0013e5571d2f0419d951098d216030e7d",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "201",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_wrong_msb_weight",
+    "testbench_suite": [
+      "neg_002_wrong_msb_weight",
+      "neg_003_wrong_sign",
+      "neg_001_zero",
+      "neg_004_half_output",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "db4a56ce31a4e2ed574c9ecd512d2a4dfa8ef9cd15fc8bba543765a9d389fcb2",
+    "changed_artifacts": [
+      "cdac_6b_stage1_up.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_wrong_msb_weight",
+    "rationale": "Select fault class metric_or_observable_fault under trigger 'Uses a quarter-scale dctrl5 addition instead of half-scale.' because it exercises P_AT_INITIALIZATION_AND_ON_EACH_FALLING as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_002_wrong_msb_weight",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

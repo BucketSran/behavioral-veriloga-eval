@@ -1,0 +1,10 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/adc_zoom_timing_sequencer.va"
+
+XDUT (rst s sar res intg clk_sar zoom clk_zoom rst_zoom) adc_zoom_timing_sequencer
+Iground_ref (rst 0) isource dc=0
+
+tran tran stop=13n maxstep=20p
+save rst s sar res intg clk_sar zoom clk_zoom rst_zoom

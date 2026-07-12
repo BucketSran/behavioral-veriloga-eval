@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-208",
+    "canonical_task_slug": "208-dac-restore-7bit-clocked",
+    "family_spec_sha256": "3b88f75821ccd44a1369c7a2ffcfacaf93a8de531aa24ba76f86b0a437369139",
+    "mutation_catalog_sha256": "fe1b00b0e59b3a700b8c6f92b327f9e6aee2dba518cb0eadbc841416a214e366",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "208",
+  "negative_assignment": {
+    "bugfix_seed": "neg_005_metric_scale_low",
+    "testbench_suite": [
+      "neg_003_wrong_denominator",
+      "neg_004_unipolar_output",
+      "neg_005_metric_scale_low",
+      "neg_001_zero",
+      "neg_002_omit_msb"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "ddaa8e76a8957648bf14e7b85f0d34bb5fb5c2c9edfeb931c07a702bfa9d71d4",
+    "changed_artifacts": [
+      "dac_restore_7bit_clocked.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_005_metric_scale_low",
+    "rationale": "Select fault class timing_or_state_update_fault under trigger 'DAC Restore 7bit Clocked: scales the metric output, preserving the main path while failing measurement checks.' because it exercises P_WHEN_RST_RISES_ABOVE_THRESHOLD_IMMEDIATELY as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 21,
+    "source_preferred_seed": "neg_003_wrong_denominator",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

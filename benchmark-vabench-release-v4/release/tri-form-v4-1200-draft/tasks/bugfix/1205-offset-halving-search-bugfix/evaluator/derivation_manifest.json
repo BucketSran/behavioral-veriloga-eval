@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-205",
+    "canonical_task_slug": "205-offset-halving-search",
+    "family_spec_sha256": "1b185feb9e582636429eb662263552a4eb9271b4a410f68c3222cbdfcb691a75",
+    "mutation_catalog_sha256": "d6846bc651eb5895e28b90ab09d00bce071d3336d48e412d1c567b503d7aea99",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "205",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_inverted_update",
+    "testbench_suite": [
+      "neg_002_no_step_halving",
+      "neg_001_zero",
+      "neg_004_full_diff_scale",
+      "neg_003_inverted_update",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "ee5faceb32257787133239a7400a7292555ae89b66adf3d65990de7b5a27bcde",
+    "changed_artifacts": [
+      "offset_halving_search.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_inverted_update",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Moves vin in the opposite direction for each comparator decision.' because it exercises P_INITIALIZE_THE_DIFFERENTIAL_TRIM_RESIDUE_TO as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 19,
+    "source_preferred_seed": "neg_002_no_step_halving",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}
