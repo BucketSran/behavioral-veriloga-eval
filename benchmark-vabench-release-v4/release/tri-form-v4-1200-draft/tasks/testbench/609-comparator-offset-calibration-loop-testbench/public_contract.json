@@ -1,0 +1,267 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "comparator_offset_calibration_loop",
+            "parameters": [
+              {
+                "default": 0.064,
+                "name": "step_initial",
+                "override_behavior": "sets the first signed differential search increment",
+                "type": "real",
+                "units": "V",
+                "valid_range": "step_initial > 0"
+              },
+              {
+                "default": 7,
+                "name": "iterations",
+                "override_behavior": "sets the number of falling-clock updates before valid asserts",
+                "type": "integer",
+                "units": "updates",
+                "valid_range": "iterations >= 1"
+              },
+              {
+                "default": 2e-11,
+                "name": "tr",
+                "override_behavior": "sets transition smoothing for generated stimulus, estimate, and valid outputs",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr >= 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vdd",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vss",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dcmpp",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vinp",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vinn",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "offset_est",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "comparator_offset_calibration_loop.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "109",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "comparator",
+    "difficulty": "D3",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Comparator Offset Calibration Loop"
+  },
+  "modeling_constraints": [
+    "Treat the companion comparator as a supplied harness component coupled only through the declared voltage-domain ports.",
+    "Update search state on falling clock events and drive symmetric stimulus and status through smoothed voltage contributions.",
+    "Do not use current contributions, ddt(), idt(), validation hooks, hard-coded waveform sample points, or simulator-specific side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ZERO_INITIAL_ESTIMATE",
+      "observable_contract": "The signed estimate initializes to zero, the search increment initializes to step_initial, and valid begins low.",
+      "required_signals": [
+        "time",
+        "offset_est",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_FALLING_EDGE_UPDATE",
+      "observable_contract": "The calibration state updates only on falling clk crossings through the midpoint of vdd and vss.",
+      "required_signals": [
+        "time",
+        "vdd",
+        "vss",
+        "clk",
+        "dcmpp",
+        "offset_est"
+      ]
+    },
+    {
+      "id": "P_DECISION_DIRECTION",
+      "observable_contract": "At an update, a high dcmpp decreases the estimate by the current step and a low dcmpp increases it by the current step.",
+      "required_signals": [
+        "time",
+        "clk",
+        "dcmpp",
+        "offset_est"
+      ]
+    },
+    {
+      "id": "P_SUCCESSIVE_STEP_HALVING",
+      "observable_contract": "The magnitude of the search increment halves after every update, yielding a successive-approximation trajectory.",
+      "required_signals": [
+        "time",
+        "clk",
+        "dcmpp",
+        "offset_est"
+      ]
+    },
+    {
+      "id": "P_SYMMETRIC_DIFFERENTIAL_STIMULUS",
+      "observable_contract": "Vinp and vinn remain symmetric around mid-supply and vinp minus vinn equals offset_est.",
+      "required_signals": [
+        "time",
+        "vdd",
+        "vss",
+        "vinp",
+        "vinn",
+        "offset_est"
+      ]
+    },
+    {
+      "id": "P_VALID_COMPLETION",
+      "observable_contract": "Valid remains at vss until iterations updates complete, then rises to vdd and the reported estimate resolves the supplied comparator trip point represented by vos_ref within the search resolution.",
+      "required_signals": [
+        "time",
+        "vdd",
+        "vss",
+        "clk",
+        "offset_est",
+        "valid",
+        "vos_ref"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/comparator_offset_calibration_loop.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-609",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vdd",
+            "port_ref": "vdd",
+            "position": 0
+          },
+          {
+            "net": "vss",
+            "port_ref": "vss",
+            "position": 1
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 2
+          },
+          {
+            "net": "dcmpp",
+            "port_ref": "dcmpp",
+            "position": 3
+          },
+          {
+            "net": "vinp",
+            "port_ref": "vinp",
+            "position": 4
+          },
+          {
+            "net": "vinn",
+            "port_ref": "vinn",
+            "position": 5
+          },
+          {
+            "net": "offset_est",
+            "port_ref": "offset_est",
+            "position": 6
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 7
+          }
+        ],
+        "module_ref": "comparator_offset_calibration_loop",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vdd",
+      "vss",
+      "clk",
+      "dcmpp",
+      "vinp",
+      "vinn",
+      "offset_est",
+      "valid",
+      "vos_ref"
+    ]
+  }
+}

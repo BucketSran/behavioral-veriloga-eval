@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-105",
+    "canonical_task_slug": "105-single-shot-pulse",
+    "family_spec_sha256": "c0e105c64eeababe7a964807753465f3fa9fb9154360b5ab5a63dad02ab18c25",
+    "mutation_catalog_sha256": "b03d577db8c847405ed9fe74692daeb1a5b67e80509d7acd9cf9aa38bbb6ef8f",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "105",
+  "negative_assignment": {
+    "bugfix_seed": "neg_006_no_output_delay",
+    "testbench_suite": [
+      "neg_001_zero",
+      "neg_002_short_pulse",
+      "neg_003_falling_edge_trigger",
+      "neg_004_stuck_high_after_first",
+      "neg_006_no_output_delay"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "92428152dd241a56f873472bc1d13a7ec0bfd119c3daa034d45c1d2015e27aaf",
+    "changed_artifacts": [
+      "source_single_shot.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_006_no_output_delay",
+    "rationale": "Select fault class missing_output_delay under trigger 'An input threshold crossing exposes an immediate output edge instead of the declared delayed transition.' because it exercises P_TRANSITION_TIMING as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 25,
+    "source_preferred_seed": "neg_001_zero",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

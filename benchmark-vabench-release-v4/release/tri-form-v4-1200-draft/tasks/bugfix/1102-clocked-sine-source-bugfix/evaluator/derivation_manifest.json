@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-102",
+    "canonical_task_slug": "102-clocked-sine-source",
+    "family_spec_sha256": "9103a83f1afd39d63705510daabbe1cdd1b4487db3528e4fa20a492e30297903",
+    "mutation_catalog_sha256": "1815380cb84619c1091ed18e441b8ba54b8b62d28e0722cde029c9ccf626d545",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "102",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_static_common_mode",
+    "testbench_suite": [
+      "neg_001_zero",
+      "neg_005_metric_scale_low",
+      "neg_003_common_mode_sine",
+      "neg_004_reset_stuck",
+      "neg_002_static_common_mode"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "d5c717c19391fe4cd3e9a11fc36b7e0f23b88f04097cac327617f804d60f2ac8",
+    "changed_artifacts": [
+      "vin_src.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_static_common_mode",
+    "rationale": "Select fault class fault_002_static_common_mode under trigger 'Holds both outputs at common mode, so the composed gain flow sees no input signal.' because it exercises P_RISING_EDGE_SAMPLE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 19,
+    "source_preferred_seed": "neg_001_zero",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,216 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "start_gated_offset_search",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets twice the CLK and VOUT decision threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > 0"
+              },
+              {
+                "default": 0.7,
+                "name": "vcm",
+                "override_behavior": "sets the common mode of VINP and VINN",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real"
+              },
+              {
+                "default": 0.45,
+                "name": "vstart_th",
+                "override_behavior": "sets the START enable and reinitialization threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "CLK",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "VOUT",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "START",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "VINP",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "VINN",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "start_gated_offset_search.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "110",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Start Gated Offset Search"
+  },
+  "modeling_constraints": [
+    "Gate and reinitialize the search from START and update it only on falling CLK events.",
+    "Maintain symmetric voltage-domain outputs around the public vcm parameter.",
+    "Do not use current contributions, ddt(), idt(), validation hooks, hard-coded waveform sample points, or simulator-specific side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_DISABLED_COMMON_MODE",
+      "observable_contract": "While START is below vstart_th, VINP and VINN both equal vcm and the internal search state is reset.",
+      "required_signals": [
+        "time",
+        "start",
+        "vinp",
+        "vinn"
+      ]
+    },
+    {
+      "id": "P_START_REINITIALIZATION",
+      "observable_contract": "Each rising START crossing through vstart_th reinitializes differential value to zero, step to 20 mV, and remembered direction high.",
+      "required_signals": [
+        "time",
+        "start",
+        "vinp",
+        "vinn"
+      ]
+    },
+    {
+      "id": "P_FALLING_CLOCK_UPDATES",
+      "observable_contract": "While START is high, search updates occur only on falling CLK crossings through vdd/2.",
+      "required_signals": [
+        "time",
+        "clk",
+        "start",
+        "vout",
+        "vinp",
+        "vinn"
+      ]
+    },
+    {
+      "id": "P_DECISION_DIRECTED_STEP",
+      "observable_contract": "At each enabled update, VOUT above vdd/2 moves the differential value positive and VOUT at or below vdd/2 moves it negative.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vout",
+        "vinp",
+        "vinn"
+      ]
+    },
+    {
+      "id": "P_REVERSAL_STEP_HALVING",
+      "observable_contract": "When the newly sampled decision direction differs from the remembered direction, the current step is halved before applying the move.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vout",
+        "vinp",
+        "vinn"
+      ]
+    },
+    {
+      "id": "P_COMMON_MODE_AND_DIFFERENTIAL",
+      "observable_contract": "During search, the average of VINP and VINN remains vcm and their difference equals the accumulated differential search value.",
+      "required_signals": [
+        "time",
+        "start",
+        "vinp",
+        "vinn"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "start_gated_offset_search.va"
+  ],
+  "task_id": "v4-110",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "CLK",
+            "position": 0
+          },
+          {
+            "net": "vout",
+            "port_ref": "VOUT",
+            "position": 1
+          },
+          {
+            "net": "start",
+            "port_ref": "START",
+            "position": 2
+          },
+          {
+            "net": "vinp",
+            "port_ref": "VINP",
+            "position": 3
+          },
+          {
+            "net": "vinn",
+            "port_ref": "VINN",
+            "position": 4
+          }
+        ],
+        "module_ref": "start_gated_offset_search",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "vout",
+      "start",
+      "vinp",
+      "vinn"
+    ]
+  }
+}

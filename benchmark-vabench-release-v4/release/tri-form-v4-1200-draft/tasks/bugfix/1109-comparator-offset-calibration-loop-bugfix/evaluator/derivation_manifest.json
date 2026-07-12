@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-109",
+    "canonical_task_slug": "109-comparator-offset-calibration-loop",
+    "family_spec_sha256": "94552f14c076ce3fb4cccea94cc3b09466577ffb72995c8745c2bc0ce10eff48",
+    "mutation_catalog_sha256": "ecfd2e08a0ddb4e931fe7e618b3584b14e333b7d04ac8a453582f6bb1289282d",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "109",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_wrong_direction",
+    "testbench_suite": [
+      "neg_001_zero",
+      "neg_004_no_valid",
+      "neg_003_no_step_halving",
+      "neg_005_metric_scale_low",
+      "neg_002_wrong_direction"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "9bddca29b31d6e50747fddb764ac42cb651e50e4d56ea225dce0e350f20dd234",
+    "changed_artifacts": [
+      "comparator_offset_calibration_loop.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_wrong_direction",
+    "rationale": "Select fault class fault_002_wrong_direction under trigger 'Moves the estimate in the opposite direction from comparator decisions.' because it exercises P_FALLING_EDGE_UPDATE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 15,
+    "source_preferred_seed": "neg_001_zero",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "source_crossing_pulse_detector",
+            "parameters": [
+              {
+                "default": 4e-09,
+                "name": "pulse_width",
+                "override_behavior": "sets output high duration after each qualifying crossing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "pulse_width > 0"
+              },
+              {
+                "default": 0.45,
+                "name": "sigcrossing",
+                "override_behavior": "sets the bidirectional sigin detection threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real"
+              },
+              {
+                "default": 0.9,
+                "name": "vlogic_high",
+                "override_behavior": "sets the asserted output level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real"
+              },
+              {
+                "default": 0.0,
+                "name": "vlogic_low",
+                "override_behavior": "sets the deasserted output level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real"
+              },
+              {
+                "default": 1e-09,
+                "name": "tdel",
+                "override_behavior": "sets output transition delay",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tdel >= 0"
+              },
+              {
+                "default": 2e-11,
+                "name": "trise",
+                "override_behavior": "sets sigout rise smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "trise > 0"
+              },
+              {
+                "default": 2e-11,
+                "name": "tfall",
+                "override_behavior": "sets sigout fall smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tfall > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigin",
+                "position": 0
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sigout",
+                "position": 1
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "source_crossing_pulse_detector.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/source_crossing_pulse_detector.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "108",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "timing_primitive",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Crossing Pulse Detector"
+  },
+  "modeling_constraints": [
+    "Use bidirectional threshold crossing detection and timer-controlled pulse state.",
+    "Drive sigout with a smoothed voltage contribution using the public timing parameters.",
+    "Do not use current contributions, ddt(), idt(), transistor-level devices, AC/noise analysis, validation hooks, or simulator-specific side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_RISING_CROSS_PULSE",
+      "observable_contract": "A rising sigin crossing through sigcrossing initiates a sigout pulse.",
+      "required_signals": [
+        "time",
+        "sigin",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_FALLING_CROSS_PULSE",
+      "observable_contract": "A falling sigin crossing through sigcrossing also initiates a sigout pulse.",
+      "required_signals": [
+        "time",
+        "sigin",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_PULSE_WIDTH",
+      "observable_contract": "After each qualifying crossing, the output target remains at vlogic_high for pulse_width before returning to vlogic_low.",
+      "required_signals": [
+        "time",
+        "sigin",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_LOW_BETWEEN_EVENTS",
+      "observable_contract": "Sigout returns to vlogic_low between sufficiently separated threshold crossings.",
+      "required_signals": [
+        "time",
+        "sigin",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_REPEATABLE_BIDIRECTIONAL_EVENTS",
+      "observable_contract": "Alternating rising and falling crossings each produce corresponding pulses rather than only the first event or one polarity.",
+      "required_signals": [
+        "time",
+        "sigin",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_TRANSITION_TIMING",
+      "observable_contract": "Sigout changes use tdel delay with trise and tfall smoothing.",
+      "required_signals": [
+        "time",
+        "sigin",
+        "sigout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "source_crossing_pulse_detector.va"
+  ],
+  "task_id": "v4-1108",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "sigin",
+            "port_ref": "sigin",
+            "position": 0
+          },
+          {
+            "net": "sigout",
+            "port_ref": "sigout",
+            "position": 1
+          }
+        ],
+        "module_ref": "source_crossing_pulse_detector",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "sigin",
+      "sigout"
+    ]
+  }
+}

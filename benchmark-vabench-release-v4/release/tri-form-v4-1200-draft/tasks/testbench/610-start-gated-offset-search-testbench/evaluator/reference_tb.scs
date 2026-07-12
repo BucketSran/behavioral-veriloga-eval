@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/start_gated_offset_search.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=2.5n period=10n width=5n rise=100p fall=100p
+Vstart (start 0) vsource type=pwl wave=[0 0 9.5n 0 10n 0.9 60n 0.9]
+Vout (vout 0) vsource type=pwl wave=[0 0.9 22n 0.9 22.1n 0.0 42n 0.0 42.1n 0.9 60n 0.9]
+
+XDUT (clk vout start vinp vinn) start_gated_offset_search
+
+
+tran tran stop=55n maxstep=25p
+save clk vout start vinp vinn

@@ -1,0 +1,35 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module source_crossing_pulse_detector(sigin, sigout);
+    input sigin;
+    output sigout;
+    electrical sigin, sigout;
+    parameter real pulse_width = 4n from (0:inf);
+    parameter real sigcrossing = 0.45;
+    parameter real vlogic_high = 0.9;
+    parameter real vlogic_low = 0.0;
+    parameter real tdel = 1n from [0:inf);
+    parameter real trise = 20p from (0:inf);
+    parameter real tfall = 20p from (0:inf);
+    real sigout_val;
+    real tbreak;
+
+    analog begin
+        @(initial_step) begin
+            sigout_val = vlogic_low;
+            tbreak = -1.0;
+        end
+
+        @(cross(V(sigin) - sigcrossing, 0)) begin
+            sigout_val = vlogic_high;
+            tbreak = $abstime + pulse_width;
+        end
+
+        @(timer(tbreak)) begin
+            sigout_val = vlogic_low;
+        end
+
+        V(sigout) <+ transition(sigout_val, 0, trise, tfall);
+    end
+endmodule

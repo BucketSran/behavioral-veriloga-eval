@@ -1,0 +1,207 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "source_single_shot",
+            "parameters": [
+              {
+                "default": 1e-08,
+                "name": "pulse_width",
+                "override_behavior": "sets output high duration after a qualifying rising crossing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "pulse_width > 0"
+              },
+              {
+                "default": 0.9,
+                "name": "vlogic_high",
+                "override_behavior": "sets the asserted output level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real"
+              },
+              {
+                "default": 0.0,
+                "name": "vlogic_low",
+                "override_behavior": "sets the deasserted output level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real"
+              },
+              {
+                "default": 0.45,
+                "name": "vtrans",
+                "override_behavior": "sets the rising vin trigger threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real"
+              },
+              {
+                "default": 1e-09,
+                "name": "tdel",
+                "override_behavior": "sets output transition delay",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tdel >= 0"
+              },
+              {
+                "default": 2e-11,
+                "name": "trise",
+                "override_behavior": "sets vout rise smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "trise > 0"
+              },
+              {
+                "default": 2e-11,
+                "name": "tfall",
+                "override_behavior": "sets vout fall smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tfall > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 1
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "source_single_shot.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/source_single_shot.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "105",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "timing_primitive",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Single Shot Pulse"
+  },
+  "modeling_constraints": [
+    "Use a rising-threshold crossing event and timer-controlled pulse state.",
+    "Drive vout with a smoothed voltage contribution using the public timing parameters.",
+    "Do not use current contributions, ddt(), idt(), transistor-level devices, AC/noise analysis, validation hooks, or simulator-specific side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_RISING_CROSS_TRIGGER",
+      "observable_contract": "Each qualifying rising vin crossing through vtrans initiates an output pulse.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_NO_FALLING_TRIGGER",
+      "observable_contract": "Falling vin crossings do not initiate pulses.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_PULSE_WIDTH",
+      "observable_contract": "After a qualifying trigger, the output target remains high for pulse_width before returning low.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_LEVELS",
+      "observable_contract": "The deasserted and asserted targets are vlogic_low and vlogic_high respectively.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_REPEATABLE_ONE_SHOTS",
+      "observable_contract": "Distinct qualifying rising edges produce corresponding pulses and vout returns low between sufficiently separated events.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_TRANSITION_TIMING",
+      "observable_contract": "Output changes use tdel delay with trise and tfall smoothing without altering the logical pulse duration contract.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "source_single_shot.va"
+  ],
+  "task_id": "v4-1105",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 1
+          }
+        ],
+        "module_ref": "source_single_shot",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "vout"
+    ]
+  }
+}

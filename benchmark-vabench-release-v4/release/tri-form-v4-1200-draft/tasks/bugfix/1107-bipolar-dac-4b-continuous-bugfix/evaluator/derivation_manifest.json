@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-107",
+    "canonical_task_slug": "107-bipolar-dac-4b-continuous",
+    "family_spec_sha256": "743665bdb84b6ce71d50c89689ccb984db5dd53539430ff9342ad2cb274e1254",
+    "mutation_catalog_sha256": "7a97a7e57a23ae03b1ebb732b6e05879f86d83fbe6bc3e0ca2e1071dec1af9b2",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "107",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_reversed_bit_weights",
+    "testbench_suite": [
+      "neg_001_zero",
+      "neg_003_reversed_bit_weights",
+      "neg_004_wrong_fullscale",
+      "neg_005_metric_scale_low",
+      "neg_002_unipolar_output"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "a3e4f5fe242b9602bb71f680754156f4a0169674061a03b177b456404d8fd68e",
+    "changed_artifacts": [
+      "bipolar_dac_4b_continuous.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_reversed_bit_weights",
+    "rationale": "Select fault class fault_003_reversed_bit_weights under trigger 'Reverses the bit weights.' because it exercises P_CONTINUOUS_REEVALUATION, P_POSITIVE_FULL_SCALE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 13,
+    "source_preferred_seed": "neg_001_zero",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

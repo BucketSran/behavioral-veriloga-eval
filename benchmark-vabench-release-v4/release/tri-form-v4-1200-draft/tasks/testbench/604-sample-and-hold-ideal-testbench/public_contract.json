@@ -1,0 +1,182 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "source_sample_hold",
+            "parameters": [
+              {
+                "default": 0.45,
+                "name": "vtrans_clk",
+                "override_behavior": "sets the rising vclk sampling threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real"
+              },
+              {
+                "default": 2e-11,
+                "name": "tr",
+                "override_behavior": "sets vout transition smoothing without changing the sampled value",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr >= 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vclk",
+                "position": 2
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "source_sample_hold.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "104",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D1",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Ideal Sample And Hold"
+  },
+  "modeling_constraints": [
+    "Use rising-edge event-driven capture and persistent held state.",
+    "Use a smoothed voltage contribution for vout.",
+    "Do not use current contributions, transistor-level devices, ddt(), idt(), validation hooks, auxiliary test ports, or testbench-specific timing constants."
+  ],
+  "properties": [
+    {
+      "id": "P_RISING_EDGE_CAPTURE",
+      "observable_contract": "On each rising vclk crossing through vtrans_clk, vout captures the instantaneous vin value.",
+      "required_signals": [
+        "time",
+        "vclk",
+        "vin",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_INTEREDGE_HOLD",
+      "observable_contract": "The captured value holds until the next rising sampling event even when vin changes.",
+      "required_signals": [
+        "time",
+        "vclk",
+        "vin",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_NO_FALLING_EDGE_CAPTURE",
+      "observable_contract": "Falling vclk crossings do not update the held value.",
+      "required_signals": [
+        "time",
+        "vclk",
+        "vin",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_UNITY_SAMPLE_GAIN",
+      "observable_contract": "The held target equals the sampled vin without gain, offset, quantization, or rail remapping.",
+      "required_signals": [
+        "time",
+        "vclk",
+        "vin",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_PARAMETERIZED_THRESHOLD",
+      "observable_contract": "Legal vtrans_clk overrides move the sampling crossing threshold while preserving rising-edge capture and hold behavior.",
+      "required_signals": [
+        "time",
+        "vclk",
+        "vin",
+        "vout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/source_sample_hold.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-604",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 1
+          },
+          {
+            "net": "vclk",
+            "port_ref": "vclk",
+            "position": 2
+          }
+        ],
+        "module_ref": "source_sample_hold",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vclk",
+      "vin",
+      "vout"
+    ]
+  }
+}

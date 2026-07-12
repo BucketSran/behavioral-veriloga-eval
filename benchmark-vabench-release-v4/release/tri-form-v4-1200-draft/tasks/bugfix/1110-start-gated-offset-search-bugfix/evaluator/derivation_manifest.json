@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-110",
+    "canonical_task_slug": "110-start-gated-offset-search",
+    "family_spec_sha256": "3ab9c8f2ecabd8c4083cb4d6d4173bc45e7d5fbe5f517294a49de2e8d72d0d30",
+    "mutation_catalog_sha256": "ea2ef5949e1937237c530e97ddcddfa62f98ed23b9d7bf29726ab1a1ce6c9270",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "110",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_ignores_start_gate",
+    "testbench_suite": [
+      "neg_001_zero",
+      "neg_004_wrong_common_mode",
+      "neg_003_no_step_halving",
+      "neg_005_metric_scale_low",
+      "neg_002_ignores_start_gate"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "7dce75c321a735cde6cc27aae7a196b2a5c0349be409781dd6c8568b34237417",
+    "changed_artifacts": [
+      "start_gated_offset_search.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_ignores_start_gate",
+    "rationale": "Select fault class fault_002_ignores_start_gate under trigger 'Uses an unreachable START threshold, so the gated search never starts.' because it exercises P_START_REINITIALIZATION as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_001_zero",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}
