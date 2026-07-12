@@ -1,0 +1,322 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "resettable_phase_toggle_monitor",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vhi",
+                "override_behavior": "overrides vhi",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.62",
+                "name": "span_min",
+                "override_behavior": "overrides span_min",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.28",
+                "name": "span_max",
+                "override_behavior": "overrides span_max",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "50p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in0",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in1",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in2",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in3",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ctrl0",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ctrl1",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vdd",
+                "position": 8
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vss",
+                "position": 9
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "en",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "flag",
+                "position": 12
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "metric",
+                "position": 13
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "resettable_phase_toggle_monitor.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/resettable_phase_toggle_monitor.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "262",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "pll_clock_timing",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Resettable Phase Toggle Monitor"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_MEASURE_ANALOG_INPUTS_RELATIVE_TO_THE",
+      "observable_contract": "Measure analog inputs relative to the local `vss` rail and normalize by the current local supply span. Let `span = V(vdd, vss)` and treat the row as valid only when `V(en) > vth` and `span_min <= span <= span_max`. If `span` is below `0.05 V`, use `0.05 V` as the normalization span. Define `clip01(y)` as `y` limited to the range `[0, 1]` and `x0..x3 = clip01((V(inN) - V(vss)) / span)`.",
+      "required_signals": [
+        "time",
+        "clk",
+        "ctrl0",
+        "ctrl1",
+        "en",
+        "flag",
+        "in0",
+        "in1",
+        "in2",
+        "in3",
+        "metric",
+        "out",
+        "rst",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_INITIALIZE_ALL_OBSERVABLE_STATE_TO_0",
+      "observable_contract": "Initialize all observable state to `0 V`. On a rising crossing of `clk` or a rising crossing of `rst`, clear `out`, `flag`, and `metric` when `rst` is high or the row is not valid. Otherwise, when `x0 > 0.50`, toggle `out` between `0 V` and `vhi` and set `flag` equal to the new `out` value; when `x0 <= 0.50`, hold the previous `out` and `flag` values. On every valid update, drive `metric = vhi * clip01(abs(x0 - x1))`; hold observable values between update events.",
+      "required_signals": [
+        "time",
+        "clk",
+        "ctrl0",
+        "ctrl1",
+        "en",
+        "flag",
+        "in0",
+        "in1",
+        "in2",
+        "in3",
+        "metric",
+        "out",
+        "rst",
+        "vdd",
+        "vss"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "resettable_phase_toggle_monitor.va"
+  ],
+  "task_id": "v4-1262",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "in0",
+            "port_ref": "in0",
+            "position": 2
+          },
+          {
+            "net": "in1",
+            "port_ref": "in1",
+            "position": 3
+          },
+          {
+            "net": "in2",
+            "port_ref": "in2",
+            "position": 4
+          },
+          {
+            "net": "in3",
+            "port_ref": "in3",
+            "position": 5
+          },
+          {
+            "net": "ctrl0",
+            "port_ref": "ctrl0",
+            "position": 6
+          },
+          {
+            "net": "ctrl1",
+            "port_ref": "ctrl1",
+            "position": 7
+          },
+          {
+            "net": "vdd",
+            "port_ref": "vdd",
+            "position": 8
+          },
+          {
+            "net": "vss",
+            "port_ref": "vss",
+            "position": 9
+          },
+          {
+            "net": "en",
+            "port_ref": "en",
+            "position": 10
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 11
+          },
+          {
+            "net": "flag",
+            "port_ref": "flag",
+            "position": 12
+          },
+          {
+            "net": "metric",
+            "port_ref": "metric",
+            "position": 13
+          }
+        ],
+        "module_ref": "resettable_phase_toggle_monitor",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "ctrl0",
+      "ctrl1",
+      "en",
+      "flag",
+      "in0",
+      "in1",
+      "in2",
+      "in3",
+      "metric",
+      "out",
+      "rst",
+      "vdd",
+      "vss"
+    ]
+  }
+}

@@ -1,0 +1,78 @@
+`include "disciplines.vams"
+
+module sampled_error_update_monitor(clk, rst, sample, target, coef, out, err_metric, progress);
+input clk, rst, sample, target, coef;
+output out, err_metric, progress;
+electrical clk, rst, sample, target, coef, out, err_metric, progress;
+
+parameter real vth = 0.45;
+parameter real vhi = 0.9;
+parameter real err_fullscale = 0.50;
+parameter real err_window = 0.040;
+parameter integer ready_count = 3;
+parameter real tr = 60p;
+
+integer stable_count;
+real out_v;
+real err_metric_v;
+real progress_v;
+real coeff_v;
+real err_v;
+real corrected_v;
+
+analog function real clip01;
+    input x;
+    real x;
+    begin
+        if (x < 0.0) clip01 = 0.0;
+        else if (x > 1.0) clip01 = 1.0;
+        else clip01 = x;
+    end
+endfunction
+
+analog function real clamp_range;
+    input x;
+    input lo;
+    input hi;
+    real x, lo, hi;
+    begin
+        if (x < lo) clamp_range = lo;
+        else if (x > hi) clamp_range = hi;
+        else clamp_range = x;
+    end
+endfunction
+
+analog begin
+    @(initial_step) begin
+        stable_count = 0;
+        out_v = 0.0;
+        err_metric_v = 0.0;
+        progress_v = 0.0;
+    end
+
+    @(cross(V(clk) - vth, +1)) begin
+        if (V(rst) > vth) begin
+            stable_count = 0;
+            out_v = 0.0;
+            err_metric_v = 0.0;
+            progress_v = 0.0;
+        end else begin
+            coeff_v = clip01(V(coef) / vhi);
+            err_v = V(target) - V(sample);
+            corrected_v = V(sample) + coeff_v * err_v;
+            out_v = clamp_range(corrected_v, 0.0, vhi);
+            err_metric_v = vhi * clip01(abs(err_v) / err_fullscale);
+            if (abs(err_v) <= err_window) begin
+                if (stable_count < ready_count) stable_count = stable_count + 1;
+            end else begin
+                stable_count = 0;
+            end
+            progress_v = vhi * clip01((1.0 * stable_count) / ready_count);
+        end
+    end
+
+    V(out) <+ transition(out_v, 0.0, tr, tr);
+    V(err_metric) <+ transition(err_metric_v, 0.0, tr, tr);
+    V(progress) <+ transition(progress_v, 0.0, tr, tr);
+end
+endmodule

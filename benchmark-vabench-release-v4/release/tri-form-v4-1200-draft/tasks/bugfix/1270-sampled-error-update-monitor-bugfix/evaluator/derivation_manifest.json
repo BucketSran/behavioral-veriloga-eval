@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-270",
+    "canonical_task_slug": "270-sampled-error-update-monitor",
+    "family_spec_sha256": "f2e0dde1363f1ea384f1fd5fb05109f072fcf739927e59dd9c32f700881968e1",
+    "mutation_catalog_sha256": "e7534d6dc4606dc10ae90083faf72f9bcf1ca76001042f732806b9b560c842dc",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "270",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_no_reset_clear",
+    "testbench_suite": [
+      "neg_005_wrong_error_metric",
+      "neg_002_ignore_target",
+      "neg_003_no_reset_clear",
+      "neg_004_progress_without_window",
+      "neg_001_ignore_coefficient"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "e89670a15bfb76b7d522b4de6323bffa908ad20d792a96aa176dcbf4bd7bed20",
+    "changed_artifacts": [
+      "sampled_error_update_monitor.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_no_reset_clear",
+    "rationale": "Select fault class state_reset_or_enable_error under trigger 'stimulus exercises neg_003_no_reset_clear' because it exercises P_RESET_CLEARS_STATE_AND_OBSERVABLES as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_005_wrong_error_metric",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

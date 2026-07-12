@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-269",
+    "canonical_task_slug": "269-saturation-recovery-limiter",
+    "family_spec_sha256": "46a32763c11e8c15f03d8dda059967ad5da9553d2cd21acda36e4eadcf003d12",
+    "mutation_catalog_sha256": "da38025dec992562d5d5ba34a871e1c6301884feff71bc5410b7b3089277ec24",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "269",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_ignore_enable",
+    "testbench_suite": [
+      "neg_001_passthrough_no_limit",
+      "neg_005_wrong_recovery_metric",
+      "neg_003_ignore_enable",
+      "neg_004_saturation_flag_high_only",
+      "neg_002_high_only_limit"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "3a2d8a5701110df4f6a1de0dab41ecbb6f3471961114837ac2fb285b879f119d",
+    "changed_artifacts": [
+      "saturation_recovery_limiter.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_ignore_enable",
+    "rationale": "Select fault class state_reset_or_enable_error under trigger 'stimulus exercises neg_003_ignore_enable' because it exercises P_CLEAR_OUTPUT_FLAG_AND_RECOVERY_METRIC as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_001_passthrough_no_limit",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}
