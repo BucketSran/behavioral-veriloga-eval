@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-219",
+    "canonical_task_slug": "219-bin2ther-2b",
+    "family_spec_sha256": "0c26c00c7ac49462668e89d5f21caa27eb95221540b9521aaafcf04dd7398fe4",
+    "mutation_catalog_sha256": "f252e559258e1b4a377286402e580b4af0db04449c562993dc2467583f21491e",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "219",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_threshold_too_high",
+    "testbench_suite": [
+      "neg_004_threshold_too_high",
+      "neg_002_standard_thermometer",
+      "neg_003_lsb_drives_all",
+      "neg_005_metric_scale_low",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "8732e6512f77019ceec8a9a2dc4175cf37585a20bb7cc46203051d426332bc62",
+    "changed_artifacts": [
+      "bin2ther_2b.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_threshold_too_high",
+    "rationale": "Select fault class threshold_or_boundary_fault under trigger 'Uses a threshold above the VDD high level, so asserted input bits are ignored.' because it exercises P_DRIVE_EACH_LOW_OUTPUT_TO_THE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 18,
+    "source_preferred_seed": "neg_004_threshold_too_high",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,21 @@
+`include "disciplines.vams"
+module tool_4bit_sar_signed_dac(d0, d1, d2, d3, sh, aout);
+input d0, d1, d2, d3, sh;
+output aout;
+electrical d0, d1, d2, d3, sh, aout;
+parameter real vth = 0.9;
+parameter real gain = 1.8 / 16.0;
+parameter real tr = 1p;
+real out_v;
+analog begin
+    @(initial_step) out_v = 0.0;
+    @(cross(V(sh) - vth, +1)) begin
+        out_v = (V(d3) > vth ? 8.0 : -8.0)
+              + (V(d2) > vth ? 4.0 : -4.0)
+              + (V(d1) > vth ? 2.0 : -2.0)
+              + (V(d0) > vth ? 1.0 : -1.0);
+        out_v = out_v * gain;
+    end
+    V(aout) <+ transition(out_v, 0, tr, tr);
+end
+endmodule

@@ -1,0 +1,15 @@
+`include "disciplines.vams"
+module bin2ther_2b(vdd, gnd, b1, b0, t0, t1, t2);
+input vdd, gnd, b1, b0;
+output t0, t1, t2;
+electrical vdd, gnd, b1, b0, t0, t1, t2;
+real vh, vl, vtrans;
+analog begin
+    vh = V(vdd);
+    vl = V(gnd);
+    vtrans = 0.5 * (vh + vl);
+    V(t0) <+ transition((V(b1) > vtrans) ? vh : vl, 0, 20p, 20p);
+    V(t1) <+ transition((V(b1) > vtrans) ? vh : vl, 0, 20p, 20p);
+    V(t2) <+ transition((V(b0) > vtrans) ? vh : vl, 0, 20p, 20p);
+end
+endmodule

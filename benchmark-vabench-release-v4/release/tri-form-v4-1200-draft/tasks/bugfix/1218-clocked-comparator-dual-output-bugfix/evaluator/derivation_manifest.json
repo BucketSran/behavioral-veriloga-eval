@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-218",
+    "canonical_task_slug": "218-clocked-comparator-dual-output",
+    "family_spec_sha256": "d10c523bd6e93e0d75df47dc7baf5c130a020023027a5a531fcb99bab206683b",
+    "mutation_catalog_sha256": "24e368419e7fa0a374c82b1248e69d13af162cb11361a4f7595e1789e1591741",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "218",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_no_falling_reset",
+    "testbench_suite": [
+      "neg_002_no_falling_reset",
+      "neg_001_zero",
+      "neg_005_metric_scale_low",
+      "neg_006_equal_input_bias",
+      "neg_004_swapped_outputs"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "e48629808c25a9110a694dda13b77ed8c182c4a3ec33f77ad25513d54237fef7",
+    "changed_artifacts": [
+      "clocked_comparator_dual_output.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_no_falling_reset",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Holds comparator outputs after clock falling edges instead of resetting low.' because it exercises P_WHENEVER_CLK_FALLS_THROUGH_VDD_2 as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 36,
+    "source_preferred_seed": "neg_002_no_falling_reset",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

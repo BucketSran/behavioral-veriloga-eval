@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/lt_readout_sar4.va"
+
+Vgnd (gnd 0) vsource dc=0
+Vd0 (d0 0) vsource type=pwl wave=[0 0 0.80n 0 0.85n 1.8 1.60n 1.8 1.65n 1.8 2.40n 1.8 2.45n 0 3.20n 0 3.25n 1.8 4.20n 1.8]
+Vd1 (d1 0) vsource type=pwl wave=[0 0 0.80n 0 0.85n 1.8 1.60n 1.8 1.65n 0 2.40n 0 2.45n 1.8 3.20n 1.8 3.25n 1.8 4.20n 1.8]
+Vd2 (d2 0) vsource type=pwl wave=[0 0 0.80n 0 0.85n 1.8 1.60n 1.8 1.65n 1.8 2.40n 1.8 2.45n 0 3.20n 0 3.25n 0 4.20n 0]
+Vd3 (d3 0) vsource type=pwl wave=[0 0 0.80n 0 0.85n 1.8 1.60n 1.8 1.65n 0 2.40n 0 2.45n 1.8 3.20n 1.8 3.25n 0 4.20n 0]
+XDUT (d0 d1 d2 d3 vout gnd) lt_readout_sar4
+
+tran tran stop=4.0n maxstep=5p
+save d0 d1 d2 d3 vout gnd

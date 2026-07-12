@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-211",
+    "canonical_task_slug": "211-sum5-signed-sar-weight",
+    "family_spec_sha256": "95b15903798d74a30459eae0063b01ac89eba4d39301a20d1697f2c79e72323d",
+    "mutation_catalog_sha256": "0bc4d9f0062c293036f255d2c81c6b120e0491e36c4360edb9cf7f4093db08f0",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "211",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_half_output",
+    "testbench_suite": [
+      "neg_002_wrong_msb_sign",
+      "neg_003_wrong_output_mapping",
+      "neg_004_half_output",
+      "neg_005_metric_scale_low",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "23c1f365d8197d83b862cddbf5446db85973294cf702849f555d4a698aea3280",
+    "changed_artifacts": [
+      "sum5_signed_sar_weight.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_half_output",
+    "rationale": "Select fault class metric_or_observable_fault under trigger 'Drives the signed weighted output at half amplitude.' because it exercises P_TREAT_EACH_DECISION_INPUT_AS_1 as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 14,
+    "source_preferred_seed": "neg_002_wrong_msb_sign",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

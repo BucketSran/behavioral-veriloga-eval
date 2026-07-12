@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-213",
+    "canonical_task_slug": "213-tool-4bit-sar-signed-dac",
+    "family_spec_sha256": "5e9573ccd93d1c21c8ab2e3f055359c810d46cc1129892917c43b08ec75ac941",
+    "mutation_catalog_sha256": "f39cfd2bf9d42dc31e207fc0fef1fe4ffa74ad5863eec1d67d5755960cbcc2fd",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "213",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_falling_sample",
+    "testbench_suite": [
+      "neg_003_wrong_gain",
+      "neg_002_unipolar_bits",
+      "neg_004_falling_sample",
+      "neg_005_metric_scale_low",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "8a8a5481b143751f5b551ea2a1223b994fdbace26b7fd179b131a9f06484b098",
+    "changed_artifacts": [
+      "tool_4bit_sar_signed_dac.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_falling_sample",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Samples the signed DAC on falling sh edges instead of rising edges.' because it exercises P_ON_EACH_RISING_CROSSING_OF_SH as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 24,
+    "source_preferred_seed": "neg_003_wrong_gain",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

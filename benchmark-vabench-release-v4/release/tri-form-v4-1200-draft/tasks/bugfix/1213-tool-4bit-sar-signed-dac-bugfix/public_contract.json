@@ -1,0 +1,181 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "tool_4bit_sar_signed_dac",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.8 / 16.0",
+                "name": "gain",
+                "override_behavior": "overrides gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d0",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d1",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d2",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d3",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sh",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "aout",
+                "position": 5
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "tool_4bit_sar_signed_dac.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/tool_4bit_sar_signed_dac.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "213",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Tool 4bit SAR Signed DAC"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_ON_EACH_RISING_CROSSING_OF_SH",
+      "observable_contract": "On each rising crossing of `sh` through `vth`, evaluate bits `d3..d0` with weights `8, 4, 2, 1`. A high bit contributes the positive weight and a low bit contributes the negative weight. Drive `aout` to the signed weighted sum multiplied by `gain` and hold it until the next sample trigger.",
+      "required_signals": [
+        "time",
+        "aout",
+        "d0",
+        "d1",
+        "d2",
+        "d3",
+        "sh"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "tool_4bit_sar_signed_dac.va"
+  ],
+  "task_id": "v4-1213",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "d0",
+            "port_ref": "d0",
+            "position": 0
+          },
+          {
+            "net": "d1",
+            "port_ref": "d1",
+            "position": 1
+          },
+          {
+            "net": "d2",
+            "port_ref": "d2",
+            "position": 2
+          },
+          {
+            "net": "d3",
+            "port_ref": "d3",
+            "position": 3
+          },
+          {
+            "net": "sh",
+            "port_ref": "sh",
+            "position": 4
+          },
+          {
+            "net": "aout",
+            "port_ref": "aout",
+            "position": 5
+          }
+        ],
+        "module_ref": "tool_4bit_sar_signed_dac",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "aout",
+      "d0",
+      "d1",
+      "d2",
+      "d3",
+      "sh"
+    ]
+  }
+}

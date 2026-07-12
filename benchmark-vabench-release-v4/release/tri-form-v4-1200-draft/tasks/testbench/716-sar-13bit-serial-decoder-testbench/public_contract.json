@@ -1,0 +1,219 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "sar_13bit_serial_decoder",
+            "parameters": [
+              {
+                "default": "0.55",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clks",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ready",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dout",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dnum",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "sar_13bit_serial_decoder.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "216",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D3",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "SAR 13bit Serial Decoder"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_CONSUME_ONE_MSB_FIRST_BIT_ON",
+      "observable_contract": "Consume one MSB-first bit on each rising `ready` crossing, starting with bit 12 and ending with bit 0.",
+      "required_signals": [
+        "time",
+        "clks",
+        "din",
+        "dnum",
+        "dout",
+        "ready"
+      ]
+    },
+    {
+      "id": "P_ADD_THE_CORRESPONDING_BINARY_WEIGHT_WHEN",
+      "observable_contract": "Add the corresponding binary weight when `din` is high.",
+      "required_signals": [
+        "time",
+        "clks",
+        "din",
+        "dnum",
+        "dout",
+        "ready"
+      ]
+    },
+    {
+      "id": "P_INCREMENT_DNUM_FOR_EACH_HIGH_DECISION",
+      "observable_contract": "Increment `dnum` for each high decision in the current frame.",
+      "required_signals": [
+        "time",
+        "clks",
+        "din",
+        "dnum",
+        "dout",
+        "ready"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_RISING_CLKS_CROSSING_PUBLISH",
+      "observable_contract": "On each rising `clks` crossing, publish the previous frame as a normalized bipolar output.",
+      "required_signals": [
+        "time",
+        "clks",
+        "din",
+        "dnum",
+        "dout",
+        "ready"
+      ]
+    },
+    {
+      "id": "P_MAP_AN_ALL_LOW_FRAME_TO",
+      "observable_contract": "Map an all-low frame to `-0.5` and an all-high frame near `+0.5`.",
+      "required_signals": [
+        "time",
+        "clks",
+        "din",
+        "dnum",
+        "dout",
+        "ready"
+      ]
+    },
+    {
+      "id": "P_AFTER_PUBLISHING_RESET_THE_ACCUMULATOR_HIGH",
+      "observable_contract": "After publishing, reset the accumulator, high-bit count, and bit pointer for the next frame.",
+      "required_signals": [
+        "time",
+        "clks",
+        "din",
+        "dnum",
+        "dout",
+        "ready"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/sar_13bit_serial_decoder.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-716",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "din",
+            "port_ref": "din",
+            "position": 0
+          },
+          {
+            "net": "clks",
+            "port_ref": "clks",
+            "position": 1
+          },
+          {
+            "net": "ready",
+            "port_ref": "ready",
+            "position": 2
+          },
+          {
+            "net": "dout",
+            "port_ref": "dout",
+            "position": 3
+          },
+          {
+            "net": "dnum",
+            "port_ref": "dnum",
+            "position": 4
+          }
+        ],
+        "module_ref": "sar_13bit_serial_decoder",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clks",
+      "din",
+      "dnum",
+      "dout",
+      "ready"
+    ]
+  }
+}

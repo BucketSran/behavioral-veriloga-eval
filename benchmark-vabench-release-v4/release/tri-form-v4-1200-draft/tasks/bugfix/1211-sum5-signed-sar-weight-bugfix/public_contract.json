@@ -1,0 +1,191 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "sum5_signed_sar_weight",
+            "parameters": [
+              {
+                "default": "0.55",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d1",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d2",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d3",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d4",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "d5",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 5
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "sum5_signed_sar_weight.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/sum5_signed_sar_weight.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "211",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "SUM5 Signed SAR Weight"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_TREAT_EACH_DECISION_INPUT_AS_1",
+      "observable_contract": "Treat each decision input as `+1` when its voltage is above `vth` and `-1` otherwise. Combine the signed decisions with SAR weights `d5 = 1/2`, `d4 = 1/4`, `d3 = 1/8`, `d2 = 1/16`, and `d1 = 1/32`. Drive `out` to the scaled signed reconstruction:",
+      "required_signals": [
+        "time",
+        "d1",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "out"
+      ]
+    },
+    {
+      "id": "P_TEXT_OUT_1_1_2_SIGNED",
+      "observable_contract": "```text out = 1.1 * (2 * signed_weighted_sum - 1) ```",
+      "required_signals": [
+        "time",
+        "d1",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "out"
+      ]
+    },
+    {
+      "id": "P_THE_BEHAVIOR_IS_CONTINUOUS_WITH_RESPECT",
+      "observable_contract": "The behavior is continuous with respect to the voltage-coded decision inputs after thresholding.",
+      "required_signals": [
+        "time",
+        "d1",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "out"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "sum5_signed_sar_weight.va"
+  ],
+  "task_id": "v4-1211",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "d1",
+            "port_ref": "d1",
+            "position": 0
+          },
+          {
+            "net": "d2",
+            "port_ref": "d2",
+            "position": 1
+          },
+          {
+            "net": "d3",
+            "port_ref": "d3",
+            "position": 2
+          },
+          {
+            "net": "d4",
+            "port_ref": "d4",
+            "position": 3
+          },
+          {
+            "net": "d5",
+            "port_ref": "d5",
+            "position": 4
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 5
+          }
+        ],
+        "module_ref": "sum5_signed_sar_weight",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "d1",
+      "d2",
+      "d3",
+      "d4",
+      "d5",
+      "out"
+    ]
+  }
+}
