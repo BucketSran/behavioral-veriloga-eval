@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-272",
+    "canonical_task_slug": "272-reset-release-sequencer",
+    "family_spec_sha256": "b96bd9693c7c6c54af56b14ee0690930afe08245a0d3675bd9b6660cf838fb9d",
+    "mutation_catalog_sha256": "d8410ff386c64728494e5082b8e7e164599088a3410d6919d89c00d9dc18cb18",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "272",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_no_reset_clear",
+    "testbench_suite": [
+      "neg_005_wrong_progress_scale",
+      "neg_002_ignore_bias_ok",
+      "neg_004_no_reset_clear",
+      "neg_001_ready_immediate",
+      "neg_003_ignore_supply_ok"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "a9d1f79ea4e84a10bacbade3f61505f1817db3c2a7e0b62ca495c9c5e651379e",
+    "changed_artifacts": [
+      "reset_release_sequencer.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_no_reset_clear",
+    "rationale": "Select fault class state_reset_or_enable_error under trigger 'stimulus exercises neg_004_no_reset_clear' because it exercises P_AFTER_UPDATING_THE_STAGE_COUNT_DRIVE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_005_wrong_progress_scale",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

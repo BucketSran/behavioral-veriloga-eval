@@ -1,0 +1,249 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "rail_normalized_metric_mapper",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vhi",
+                "override_behavior": "overrides vhi",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.60",
+                "name": "span_min",
+                "override_behavior": "overrides span_min",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.20",
+                "name": "span_max",
+                "override_behavior": "overrides span_max",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "50p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "meas",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vdd",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vss",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "en",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "norm",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 5
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "rail_normalized_metric_mapper.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/rail_normalized_metric_mapper.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "274",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "measurement_instrumentation_flows",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Rail Normalized Metric Mapper"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_NORMALIZE_MEAS_RELATIVE_TO_THE_LOCAL",
+      "observable_contract": "Normalize meas relative to the local V(vdd,vss) span and vss rail.",
+      "required_signals": [
+        "time",
+        "en",
+        "meas",
+        "norm",
+        "valid",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_CLIP_THE_NORMALIZED_METRIC_TO_THE",
+      "observable_contract": "Clip the normalized metric to the public voltage-coded range.",
+      "required_signals": [
+        "time",
+        "en",
+        "meas",
+        "norm",
+        "valid",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_ASSERT_VALID_ONLY_WHEN_ENABLE_IS",
+      "observable_contract": "Assert valid only when enable is high, supply span is valid, and the measurement lies inside the local rail window.",
+      "required_signals": [
+        "time",
+        "en",
+        "meas",
+        "norm",
+        "valid",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_CLEAR_NORM_AND_VALID_WHILE_DISABLED",
+      "observable_contract": "Clear norm and valid while disabled or under the minimum supply span.",
+      "required_signals": [
+        "time",
+        "en",
+        "meas",
+        "norm",
+        "valid",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_USE_LOCAL_ANALOG_HELPER_FUNCTIONS_RATHER",
+      "observable_contract": "Use local analog helper functions rather than user task/endtask syntax.",
+      "required_signals": [
+        "time",
+        "en",
+        "meas",
+        "norm",
+        "valid",
+        "vdd",
+        "vss"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "rail_normalized_metric_mapper.va"
+  ],
+  "task_id": "v4-1274",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "meas",
+            "port_ref": "meas",
+            "position": 0
+          },
+          {
+            "net": "vdd",
+            "port_ref": "vdd",
+            "position": 1
+          },
+          {
+            "net": "vss",
+            "port_ref": "vss",
+            "position": 2
+          },
+          {
+            "net": "en",
+            "port_ref": "en",
+            "position": 3
+          },
+          {
+            "net": "norm",
+            "port_ref": "norm",
+            "position": 4
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 5
+          }
+        ],
+        "module_ref": "rail_normalized_metric_mapper",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "en",
+      "meas",
+      "norm",
+      "valid",
+      "vdd",
+      "vss"
+    ]
+  }
+}

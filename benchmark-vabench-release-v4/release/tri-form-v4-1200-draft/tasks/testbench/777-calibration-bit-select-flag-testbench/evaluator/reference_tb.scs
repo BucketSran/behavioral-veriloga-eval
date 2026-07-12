@@ -1,0 +1,20 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/calibration_bit_select_flag.va"
+
+Vvss (vss 0) vsource type=pwl wave=[0 -0.04 4n -0.04 4.05n 0.07 8n 0.07 8.05n -0.02 16n -0.02]
+Vvdd (vdd 0) vsource type=pwl wave=[0 0.94 5n 0.94 5.05n 1.18 10n 1.18 10.05n 0.88 16n 0.88]
+Vin0 (in0 0) vsource type=pwl wave=[0 0.18 2n 0.18 2.05n 0.74 4n 0.74 4.05n 0.36 6n 0.36 6.05n 0.90 8n 0.90 8.05n 0.24 10n 0.24 10.05n 0.68 16n 0.68]
+Vin1 (in1 0) vsource type=pwl wave=[0 0.70 2n 0.70 2.05n 0.28 4n 0.28 4.05n 0.82 6n 0.82 6.05n 0.30 8n 0.30 8.05n 0.76 10n 0.76 10.05n 0.16 16n 0.16]
+Vin2 (in2 0) vsource type=pwl wave=[0 0.42 3n 0.42 3.05n 0.86 6n 0.86 6.05n 0.20 9n 0.20 9.05n 0.58 16n 0.58]
+Vin3 (in3 0) vsource type=pwl wave=[0 0.12 3n 0.12 3.05n 0.64 6n 0.64 6.05n 0.88 9n 0.88 9.05n 0.32 16n 0.32]
+Vctrl0 (ctrl0 0) vsource type=pwl wave=[0 0.0 3n 0.0 3.05n 0.9 6n 0.9 6.05n 0.0 9n 0.0 9.05n 0.9 16n 0.9]
+Vctrl1 (ctrl1 0) vsource type=pwl wave=[0 0.0 4.5n 0.0 4.55n 0.9 8n 0.9 8.05n 0.0 12n 0.0 12.05n 0.9 16n 0.9]
+Ven (en 0) vsource type=pwl wave=[0 0.9 5.8n 0.9 5.85n 0 7.1n 0 7.15n 0.9 12n 0.9]
+
+XDUT (in0 in1 in2 in3 ctrl0 ctrl1 vdd vss en out flag metric) calibration_bit_select_flag
+
+
+tran tran stop=12n maxstep=10p
+save in0 in1 in2 in3 ctrl0 ctrl1 vdd vss en out flag metric time

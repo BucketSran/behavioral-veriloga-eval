@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-276",
+    "canonical_task_slug": "276-bounded-tail-dither-shaper",
+    "family_spec_sha256": "447d8b290b4399b108f347213da88745e9a37ddafa2a81a9769f34f0145701dd",
+    "mutation_catalog_sha256": "c3f178f2f243bd191a16380887b4d74f0e3616b3860baa70bf8b4231bb87a7f8",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "276",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_ignore_enable",
+    "testbench_suite": [
+      "neg_003_wrong_scale",
+      "neg_002_ignore_enable",
+      "neg_001_zero_outputs",
+      "neg_004_ignore_control_or_reset",
+      "neg_005_wrong_flag_metric"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "22fbb67c3388380d4a6f7fe92cdc0b7bb6661a838d7a82c9a9c53c4e105336ad",
+    "changed_artifacts": [
+      "bounded_tail_dither_shaper.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_ignore_enable",
+    "rationale": "Select fault class state_reset_or_enable_error under trigger 'stimulus exercises neg_002_ignore_enable' because it exercises P_FOR_EACH_VALID_UPDATE_COMPUTE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_003_wrong_scale",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-278",
+    "canonical_task_slug": "278-lane-mask-replication-driver",
+    "family_spec_sha256": "f1559e7e1fe7a4a464e8ef338f865dab270f26f87e4021c04c4a1bf60193de3f",
+    "mutation_catalog_sha256": "a3657d642e9ff9dbd12584239f939ca1ef5dfcae63aea2996b692f9de9f8019f",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "278",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_ignore_enable",
+    "testbench_suite": [
+      "neg_003_wrong_scale",
+      "neg_002_ignore_enable",
+      "neg_001_zero_outputs",
+      "neg_004_ignore_control_or_reset",
+      "neg_005_wrong_flag_metric"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "2c21f74b047f81b10bb3ae015d56198f70f2772194062ac5d192c316f44c5626",
+    "changed_artifacts": [
+      "lane_mask_replication_driver.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_ignore_enable",
+    "rationale": "Select fault class state_reset_or_enable_error under trigger 'stimulus exercises neg_002_ignore_enable' because it exercises P_COUNT_THE_NUMBER_OF_NORMALIZED_INPUTS as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_003_wrong_scale",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

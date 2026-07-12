@@ -1,0 +1,225 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "reset_release_sequencer",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vhi",
+                "override_behavior": "overrides vhi",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "3",
+                "name": "final_stage",
+                "override_behavior": "overrides final_stage",
+                "type": "integer",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "60p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "supply_ok",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "bias_ok",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "stage1",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "stage2",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "ready",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "progress",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "reset_release_sequencer.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "272",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "bias_reference_power_management",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Reset Release Sequencer"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_INITIALIZE_THE_INTERNAL_STAGE_COUNT_AND",
+      "observable_contract": "Initialize the internal stage count and all observables to zero. On each rising clock crossing, clear the stage count when `rst` is high, `supply_ok <= vth`, or `bias_ok <= vth`. Otherwise increment the stage count by one until it reaches `final_stage`.",
+      "required_signals": [
+        "time",
+        "bias_ok",
+        "clk",
+        "progress",
+        "ready",
+        "rst",
+        "stage1",
+        "stage2",
+        "supply_ok"
+      ]
+    },
+    {
+      "id": "P_AFTER_UPDATING_THE_STAGE_COUNT_DRIVE",
+      "observable_contract": "After updating the stage count, drive `stage1 = vhi` when `stage_count >= 1`, `stage2 = vhi` when `stage_count >= 2`, and `ready = vhi` when `stage_count >= final_stage`; otherwise drive each of those observables to `0 V`. Drive `progress = vhi * clip01(stage_count / final_stage)`. Hold the last observable values between rising clock crossings.",
+      "required_signals": [
+        "time",
+        "bias_ok",
+        "clk",
+        "progress",
+        "ready",
+        "rst",
+        "stage1",
+        "stage2",
+        "supply_ok"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "reset_release_sequencer.va"
+  ],
+  "task_id": "v4-272",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "supply_ok",
+            "port_ref": "supply_ok",
+            "position": 2
+          },
+          {
+            "net": "bias_ok",
+            "port_ref": "bias_ok",
+            "position": 3
+          },
+          {
+            "net": "stage1",
+            "port_ref": "stage1",
+            "position": 4
+          },
+          {
+            "net": "stage2",
+            "port_ref": "stage2",
+            "position": 5
+          },
+          {
+            "net": "ready",
+            "port_ref": "ready",
+            "position": 6
+          },
+          {
+            "net": "progress",
+            "port_ref": "progress",
+            "position": 7
+          }
+        ],
+        "module_ref": "reset_release_sequencer",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "bias_ok",
+      "clk",
+      "progress",
+      "ready",
+      "rst",
+      "stage1",
+      "stage2",
+      "supply_ok"
+    ]
+  }
+}

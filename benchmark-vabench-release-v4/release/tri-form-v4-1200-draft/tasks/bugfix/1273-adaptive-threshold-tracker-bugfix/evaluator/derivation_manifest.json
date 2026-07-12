@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-273",
+    "canonical_task_slug": "273-adaptive-threshold-tracker",
+    "family_spec_sha256": "492c8881c715ab4f6b2b4e26aed9dafa10d1dd15d61e1818b31245826f68db11",
+    "mutation_catalog_sha256": "cd6ccac618a065420446d8d1f70e71af20067e6069a2e1d0c115f5fd5fbd5364",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "273",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_ignore_reset",
+    "testbench_suite": [
+      "neg_001_fixed_threshold",
+      "neg_003_ignore_reset",
+      "neg_005_wrong_margin_metric",
+      "neg_002_threshold_follows_input",
+      "neg_004_no_threshold_clip"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "1cc3568d389dd575a067de521a011a7b8672a7eae21fb941ded912a33cc077ad",
+    "changed_artifacts": [
+      "adaptive_threshold_tracker.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_ignore_reset",
+    "rationale": "Select fault class state_reset_or_enable_error under trigger 'stimulus exercises neg_003_ignore_reset' because it exercises P_INITIALIZE_THE_STORED_THRESHOLD_TO_THRESHOLD as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_001_fixed_threshold",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}
