@@ -1,0 +1,32 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module buck_ctrl_top(vfb, vref, clk, rst, enable, pwm, duty_metric, soft_ref, pgood);
+    input vfb, vref, clk, rst, enable;
+    output pwm, duty_metric, soft_ref, pgood;
+    electrical vfb, vref, clk, rst, enable, pwm, duty_metric, soft_ref, pgood;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real duty_min = 0.05;
+    parameter real duty_max = 0.95;
+    parameter real soft_step = 25e-3;
+    parameter real pgood_tol = 25e-3;
+    parameter real tr = 200p from (0:inf);
+
+    electrical duty_up;
+
+    soft_start #(.vdd(vdd), .vss(vss), .vth(vth), .soft_step(soft_step), .tr(tr)) u_soft (
+        clk, rst, enable, vref, soft_ref
+    );
+    error_comparator #(.vdd(vdd), .vss(vss), .tr(tr)) u_err (
+        vfb, soft_ref, duty_up
+    );
+    pwm_modulator #(.vdd(vdd), .vss(vss), .vth(vth), .duty_min(duty_min), .duty_max(duty_max), .tr(tr)) u_pwm (
+        clk, rst, enable, duty_up, pwm, duty_metric
+    );
+    power_good #(.vdd(vdd), .vss(vss), .vth(vth), .pgood_tol(pgood_tol), .tr(tr)) u_pgood (
+        clk, rst, enable, vfb, vref, pgood
+    );
+endmodule

@@ -1,0 +1,304 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "crystal_oscillator_startup_monitor",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "40e-3",
+                "name": "amp_step",
+                "override_behavior": "overrides amp_step",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.3",
+                "name": "amp_target",
+                "override_behavior": "overrides amp_target",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "250p from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk_ref",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "osc_out",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "amp_metric",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "startup_done",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "crystal_oscillator_startup_monitor.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/crystal_oscillator_startup_monitor.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "374",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "oscillator_timing_systems",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Crystal Oscillator Startup Monitor"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_ENABLE_IS",
+      "observable_contract": "On reset or when `enable` is low, clear oscillator amplitude, `osc_out`, `valid`, and `startup_done`.",
+      "required_signals": [
+        "time",
+        "enable",
+        "rst",
+        "clk_ref",
+        "osc_out",
+        "amp_metric",
+        "valid",
+        "startup_done"
+      ]
+    },
+    {
+      "id": "P_INCREASE_A_BEHAVIORAL_AMPLITUDE_STATE_BY",
+      "observable_contract": "Increase a behavioral amplitude state by `amp_step` on each rising `clk_ref` edge while enabled until `amp_target` is reached.",
+      "required_signals": [
+        "time",
+        "enable",
+        "rst",
+        "clk_ref",
+        "osc_out",
+        "amp_metric",
+        "valid",
+        "startup_done"
+      ]
+    },
+    {
+      "id": "P_CLAMP_THE_AMPLITUDE_AT_AMP_TARGET",
+      "observable_contract": "Clamp the amplitude at `amp_target` and expose it on `amp_metric`.",
+      "required_signals": [
+        "time",
+        "enable",
+        "rst",
+        "clk_ref",
+        "osc_out",
+        "amp_metric",
+        "valid",
+        "startup_done"
+      ]
+    },
+    {
+      "id": "P_TOGGLE_OSC_OUT_FROM_CLK_REF",
+      "observable_contract": "Toggle `osc_out` from `clk_ref` only after the amplitude state is nonzero.",
+      "required_signals": [
+        "time",
+        "enable",
+        "rst",
+        "clk_ref",
+        "osc_out",
+        "amp_metric",
+        "valid",
+        "startup_done"
+      ]
+    },
+    {
+      "id": "P_ASSERT_STARTUP_DONE_WHEN_AMP_METRIC",
+      "observable_contract": "Assert `startup_done` when `amp_metric` reaches `amp_target`.",
+      "required_signals": [
+        "time",
+        "enable",
+        "rst",
+        "clk_ref",
+        "osc_out",
+        "amp_metric",
+        "valid",
+        "startup_done"
+      ]
+    },
+    {
+      "id": "P_ASSERT_VALID_AFTER_TWO_CONSECUTIVE_SLICED",
+      "observable_contract": "Assert `valid` after two consecutive sliced oscillator periods after startup is done.",
+      "required_signals": [
+        "time",
+        "enable",
+        "rst",
+        "clk_ref",
+        "osc_out",
+        "amp_metric",
+        "valid",
+        "startup_done"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "crystal_oscillator_startup_monitor.va"
+  ],
+  "task_id": "v4-1374",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "clk_ref",
+            "port_ref": "clk_ref",
+            "position": 2
+          },
+          {
+            "net": "osc_out",
+            "port_ref": "osc_out",
+            "position": 3
+          },
+          {
+            "net": "amp_metric",
+            "port_ref": "amp_metric",
+            "position": 4
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 5
+          },
+          {
+            "net": "startup_done",
+            "port_ref": "startup_done",
+            "position": 6
+          }
+        ],
+        "module_ref": "crystal_oscillator_startup_monitor",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "enable",
+      "rst",
+      "clk_ref",
+      "osc_out",
+      "amp_metric",
+      "valid",
+      "startup_done"
+    ]
+  }
+}

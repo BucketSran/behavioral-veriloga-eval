@@ -1,0 +1,40 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-373",
+    "canonical_task_slug": "373-charge-pump-voltage-multiplier-controller",
+    "family_spec_sha256": "f668fbec994e6e9183974674d8ac1b2e3d639d901f82a6ba59c58404b50f61b3",
+    "mutation_catalog_sha256": "abcf6b6eacd075c895f6bf8df59eb0489661279391a1d13ddaaa67dd18e43919",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "373",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_missing_vout_reset",
+    "testbench_suite": [
+      "neg_001_missing_vout_reset",
+      "neg_003_wrong_pump_polarity",
+      "neg_005_ready_asserts_early",
+      "neg_002_overlapping_phases",
+      "neg_004_half_pump_step"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "cfbcff6649229d06b418a47ffd7a9f47218a6b8cc561f2e050cf3b13ca34c439",
+    "changed_artifacts": [
+      "phase_generator.va",
+      "pump_stage_model.va",
+      "regulation_comparator.va",
+      "voltage_multiplier_top.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_missing_vout_reset",
+    "rationale": "Select fault class missing_reset under trigger 'reset is asserted after vout has accumulated charge' because it exercises P_RESET_DISABLE_CLEAR as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 18,
+    "source_preferred_seed": "neg_001_missing_vout_reset",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

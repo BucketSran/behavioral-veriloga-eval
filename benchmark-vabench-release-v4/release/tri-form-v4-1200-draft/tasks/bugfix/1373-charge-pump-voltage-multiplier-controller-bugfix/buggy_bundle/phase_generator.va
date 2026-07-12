@@ -1,0 +1,43 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module phase_generator(clk, rst, enable, phase_a, phase_b, phase_tick);
+    input clk, rst, enable;
+    output phase_a, phase_b, phase_tick;
+    electrical clk, rst, enable, phase_a, phase_b, phase_tick;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    integer phase;
+    integer tick;
+    real phase_a_state;
+    real phase_b_state;
+
+    analog begin
+        @(initial_step) begin
+            phase = 0;
+            tick = 0;
+            phase_a_state = vss;
+            phase_b_state = vss;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            tick = 0;
+            if ((V(rst) > vth) || (V(enable) <= vth))
+                phase = 0;
+            else begin
+                phase = 1 - phase;
+                tick = 1;
+            end
+            phase_a_state = ((V(rst) <= vth) && (V(enable) > vth) && (phase == 0)) ? vdd : vss;
+            phase_b_state = ((V(rst) <= vth) && (V(enable) > vth) && (phase == 1)) ? vdd : vss;
+        end
+
+        V(phase_a) <+ transition(phase_a_state, 0, tr, tr);
+        V(phase_b) <+ transition(phase_b_state, 0, tr, tr);
+        V(phase_tick) <+ transition(tick ? vdd : vss, 0, tr, tr);
+    end
+endmodule

@@ -1,0 +1,609 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "phase_generator",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "overrides the public vdd behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > vss"
+              },
+              {
+                "default": 0,
+                "name": "vss",
+                "override_behavior": "overrides the public vss behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vdd"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "overrides the public vth behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vth is finite and preserves the public operating range"
+              },
+              {
+                "default": 2e-10,
+                "name": "tr",
+                "override_behavior": "overrides the public tr behavior parameter consistently for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_a",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_b",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_tick",
+                "position": 5
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "phase_generator.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "pump_stage_model",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "overrides the public vdd behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > vss"
+              },
+              {
+                "default": 0,
+                "name": "vss",
+                "override_behavior": "overrides the public vss behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vdd"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "overrides the public vth behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vth is finite and preserves the public operating range"
+              },
+              {
+                "default": 0.04,
+                "name": "pump_step",
+                "override_behavior": "overrides the public pump_step behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "pump_step is finite and preserves the public operating range"
+              },
+              {
+                "default": 0.005,
+                "name": "leak_step",
+                "override_behavior": "overrides the public leak_step behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "leak_step is finite and preserves the public operating range"
+              },
+              {
+                "default": 1.8,
+                "name": "vout_max",
+                "override_behavior": "overrides the public vout_max behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vout_max is finite and preserves the public operating range"
+              },
+              {
+                "default": 2e-10,
+                "name": "tr",
+                "override_behavior": "overrides the public tr behavior parameter consistently for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "phase_a",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "phase_b",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "pump_en",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 6
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "pump_stage_model.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "regulation_comparator",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "overrides the public vdd behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > vss"
+              },
+              {
+                "default": 0,
+                "name": "vss",
+                "override_behavior": "overrides the public vss behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vdd"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "overrides the public vth behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vth is finite and preserves the public operating range"
+              },
+              {
+                "default": 0.025,
+                "name": "ready_tol",
+                "override_behavior": "overrides the public ready_tol behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "ready_tol is finite and preserves the public operating range"
+              },
+              {
+                "default": 2e-10,
+                "name": "tr",
+                "override_behavior": "overrides the public tr behavior parameter consistently for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "target",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "pump_en",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "regulation_error",
+                "position": 5
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "regulation_comparator.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "phase_generator",
+              "regulation_comparator",
+              "pump_stage_model"
+            ],
+            "name": "voltage_multiplier_top",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "overrides the public vdd behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > vss"
+              },
+              {
+                "default": 0,
+                "name": "vss",
+                "override_behavior": "overrides the public vss behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vdd"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "overrides the public vth behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vth is finite and preserves the public operating range"
+              },
+              {
+                "default": 0.04,
+                "name": "pump_step",
+                "override_behavior": "overrides the public pump_step behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "pump_step is finite and preserves the public operating range"
+              },
+              {
+                "default": 0.005,
+                "name": "leak_step",
+                "override_behavior": "overrides the public leak_step behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "leak_step is finite and preserves the public operating range"
+              },
+              {
+                "default": 0.025,
+                "name": "ready_tol",
+                "override_behavior": "overrides the public ready_tol behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "ready_tol is finite and preserves the public operating range"
+              },
+              {
+                "default": 1.8,
+                "name": "vout_max",
+                "override_behavior": "overrides the public vout_max behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vout_max is finite and preserves the public operating range"
+              },
+              {
+                "default": 2e-10,
+                "name": "tr",
+                "override_behavior": "overrides the public tr behavior parameter consistently for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "target",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_a",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_b",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "pump_en",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "regulation_error",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "ready",
+                "position": 9
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "voltage_multiplier_top.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "family_id": "373",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "power_management_systems",
+    "difficulty": "D4",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Charge-pump Voltage Multiplier Controller"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain transient behavior.",
+    "Use portable Spectre-compatible Verilog-A and voltage contributions for public outputs.",
+    "Do not use branch-current oracles, hidden pass/fail ports, checker side channels, or testbench code in the DUT bundle."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_DISABLE_CLEAR",
+      "observable_contract": "Reset clears vout, pump control, readiness, and regulation state; disabled operation suppresses pumping.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "vout",
+        "pump_en",
+        "regulation_error",
+        "ready"
+      ]
+    },
+    {
+      "id": "P_NONOVERLAP_PHASES",
+      "observable_contract": "Enabled clock updates alternate phase_a and phase_b while never asserting both phases together.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "phase_a",
+        "phase_b"
+      ]
+    },
+    {
+      "id": "P_PUMP_REGULATION",
+      "observable_contract": "While pump_en is active, enabled phase updates raise vout in bounded pump steps; without pumping, vout leaks downward and remains within rails.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "target",
+        "phase_a",
+        "phase_b",
+        "pump_en",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_ERROR_REPORTING",
+      "observable_contract": "regulation_error continuously reports target minus vout and pump_en requests pumping below the lower tolerance boundary.",
+      "required_signals": [
+        "time",
+        "rst",
+        "enable",
+        "target",
+        "vout",
+        "pump_en",
+        "regulation_error"
+      ]
+    },
+    {
+      "id": "P_READY_QUALIFICATION",
+      "observable_contract": "Ready asserts only after three consecutive enabled clock updates within the regulation tolerance and clears outside qualification.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "regulation_error",
+        "ready"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "phase_generator.va",
+    "pump_stage_model.va",
+    "regulation_comparator.va",
+    "voltage_multiplier_top.va"
+  ],
+  "task_id": "v4-373",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 2
+          },
+          {
+            "net": "target",
+            "port_ref": "target",
+            "position": 3
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 4
+          },
+          {
+            "net": "phase_a",
+            "port_ref": "phase_a",
+            "position": 5
+          },
+          {
+            "net": "phase_b",
+            "port_ref": "phase_b",
+            "position": 6
+          },
+          {
+            "net": "pump_en",
+            "port_ref": "pump_en",
+            "position": 7
+          },
+          {
+            "net": "regulation_error",
+            "port_ref": "regulation_error",
+            "position": 8
+          },
+          {
+            "net": "ready",
+            "port_ref": "ready",
+            "position": 9
+          }
+        ],
+        "module_ref": "voltage_multiplier_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "enable",
+      "target",
+      "vout",
+      "phase_a",
+      "phase_b",
+      "pump_en",
+      "regulation_error",
+      "ready"
+    ]
+  }
+}

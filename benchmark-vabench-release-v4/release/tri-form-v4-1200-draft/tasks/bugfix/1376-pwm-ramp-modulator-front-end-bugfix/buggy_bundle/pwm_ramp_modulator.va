@@ -1,0 +1,59 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pwm_ramp_modulator(clk, rst, enable, vctrl, ramp_out, pwm_out, cycle_start, duty_metric);
+    input clk, rst, enable, vctrl;
+    output ramp_out, pwm_out, cycle_start, duty_metric;
+    electrical clk, rst, enable, vctrl, ramp_out, pwm_out, cycle_start, duty_metric;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real ramp_step = 0.15;
+    parameter real tr = 100p from (0:inf);
+
+    real ramp_value;
+    real pwm_value;
+    real cycle_value;
+    real duty_value;
+
+    analog begin
+        @(initial_step) begin
+            ramp_value = vss;
+            pwm_value = vss;
+            cycle_value = vss;
+            duty_value = vss;
+        end
+
+        @(cross(-V(clk) - vth, +1)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                ramp_value = vss;
+                pwm_value = vss;
+                cycle_value = vss;
+                duty_value = vss;
+            end else begin
+                cycle_value = vss;
+                if (ramp_value >= vdd - ramp_step/2.0) begin
+                    ramp_value = vss;
+                    cycle_value = vdd;
+                end else begin
+                    ramp_value = ramp_value + ramp_step;
+                end
+                if (V(vctrl) > ramp_value)
+                    pwm_value = vdd;
+                else
+                    pwm_value = vss;
+                duty_value = V(vctrl);
+                if (duty_value > vdd)
+                    duty_value = vdd;
+                if (duty_value < vss)
+                    duty_value = vss;
+            end
+        end
+
+        V(ramp_out) <+ transition(ramp_value, 0, tr, tr);
+        V(pwm_out) <+ transition(pwm_value, 0, tr, tr);
+        V(cycle_start) <+ transition(cycle_value, 0, tr, tr);
+        V(duty_metric) <+ transition(duty_value, 0, tr, tr);
+    end
+endmodule

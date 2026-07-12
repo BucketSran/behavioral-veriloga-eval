@@ -1,0 +1,273 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "periodic_sampler_aperture_metric",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.5",
+                "name": "aperture_gain",
+                "override_behavior": "overrides aperture_gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "120p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sample_en",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vhold",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "aperture_metric",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "periodic_sampler_aperture_metric.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "379",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "sampling_analog_memory",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Periodic Sampler with Aperture Metric"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_CLEARS_THE_HELD_VALUE_APERTURE",
+      "observable_contract": "Reset clears the held value, aperture metric, and valid flag.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "sample_en",
+        "vhold",
+        "aperture_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_RISING_CLK_EDGE_WITH",
+      "observable_contract": "On each rising `clk` edge with `sample_en` high, capture `vin` into `vhold`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "sample_en",
+        "vhold",
+        "aperture_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_THE_APERTURE_METRIC_AFTER_A_CAPTURE",
+      "observable_contract": "The aperture metric after a capture is proportional to the absolute difference between the new sample and the previous held sample.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "sample_en",
+        "vhold",
+        "aperture_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_HOLD_VHOLD_AND_THE_LAST_METRIC",
+      "observable_contract": "Hold `vhold` and the last metric between enabled sampling events.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "sample_en",
+        "vhold",
+        "aperture_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_VALID_IS_HIGH_AFTER_THE_FIRST",
+      "observable_contract": "`valid` is high after the first enabled sample and low during reset.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "sample_en",
+        "vhold",
+        "aperture_metric",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/periodic_sampler_aperture_metric.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-879",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "sample_en",
+            "port_ref": "sample_en",
+            "position": 3
+          },
+          {
+            "net": "vhold",
+            "port_ref": "vhold",
+            "position": 4
+          },
+          {
+            "net": "aperture_metric",
+            "port_ref": "aperture_metric",
+            "position": 5
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 6
+          }
+        ],
+        "module_ref": "periodic_sampler_aperture_metric",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "clk",
+      "rst",
+      "sample_en",
+      "vhold",
+      "aperture_metric",
+      "valid"
+    ]
+  }
+}

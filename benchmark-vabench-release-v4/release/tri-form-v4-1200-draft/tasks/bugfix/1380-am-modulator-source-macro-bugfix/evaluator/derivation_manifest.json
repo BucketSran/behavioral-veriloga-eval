@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-380",
+    "canonical_task_slug": "380-am-modulator-source-macro",
+    "family_spec_sha256": "d3df8ed55d2b716d17c828be1d262407b16c97360980e37f6fd55e71f9b701b0",
+    "mutation_catalog_sha256": "812424970eab0c34f518008d3d2599651651c4e845d6f4c950630c2ae7017cbb",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "380",
+  "negative_assignment": {
+    "bugfix_seed": "neg_006_output_not_clamped",
+    "testbench_suite": [
+      "neg_002_envelope_dbg_stuck",
+      "neg_001_no_modulation",
+      "neg_005_carrier_inverted",
+      "neg_004_missing_clear",
+      "neg_006_output_not_clamped"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "37d03dea71e770fefd05db146a36e36c8fb22a9cbb7c432e2c4ae33b8530a209",
+    "changed_artifacts": [
+      "am_modulator_source_macro.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_006_output_not_clamped",
+    "rationale": "Select fault class output_clamp_removed under trigger 'carrier and modulation demand an output beyond a supply rail' because it exercises P_CLAMP_THE_ENVELOPE_MULTIPLIER_SO_THE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 14,
+    "source_preferred_seed": "neg_002_envelope_dbg_stuck",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

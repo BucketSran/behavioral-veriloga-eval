@@ -1,0 +1,290 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "pwm_ramp_modulator",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.15",
+                "name": "ramp_step",
+                "override_behavior": "overrides ramp_step",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "100p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vctrl",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "ramp_out",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "pwm_out",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "cycle_start",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "duty_metric",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "pwm_ramp_modulator.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "376",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "power_control",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "PWM Ramp Modulator Front-end"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_OR_A_LOW_ENABLE_CLEARS",
+      "observable_contract": "Reset or a low `enable` clears the ramp, PWM output, cycle marker, and duty metric.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "vctrl",
+        "ramp_out",
+        "pwm_out",
+        "cycle_start",
+        "duty_metric"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+      "observable_contract": "On each enabled rising `clk` edge, advance `ramp_out` by `ramp_step` and wrap to `vss` at full scale.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "vctrl",
+        "ramp_out",
+        "pwm_out",
+        "cycle_start",
+        "duty_metric"
+      ]
+    },
+    {
+      "id": "P_CYCLE_START_PULSES_HIGH_FOR_THE",
+      "observable_contract": "`cycle_start` pulses high for the clock edge where the ramp wraps.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "vctrl",
+        "ramp_out",
+        "pwm_out",
+        "cycle_start",
+        "duty_metric"
+      ]
+    },
+    {
+      "id": "P_PWM_OUT_IS_HIGH_WHEN_VCTRL",
+      "observable_contract": "`pwm_out` is high when `vctrl` is greater than the current ramp value and low otherwise.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "vctrl",
+        "ramp_out",
+        "pwm_out",
+        "cycle_start",
+        "duty_metric"
+      ]
+    },
+    {
+      "id": "P_DUTY_METRIC_TRACKS_THE_CLIPPED_DUTY",
+      "observable_contract": "`duty_metric` tracks the clipped duty command between `vss` and `vdd`.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "vctrl",
+        "ramp_out",
+        "pwm_out",
+        "cycle_start",
+        "duty_metric"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/pwm_ramp_modulator.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-876",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 2
+          },
+          {
+            "net": "vctrl",
+            "port_ref": "vctrl",
+            "position": 3
+          },
+          {
+            "net": "ramp_out",
+            "port_ref": "ramp_out",
+            "position": 4
+          },
+          {
+            "net": "pwm_out",
+            "port_ref": "pwm_out",
+            "position": 5
+          },
+          {
+            "net": "cycle_start",
+            "port_ref": "cycle_start",
+            "position": 6
+          },
+          {
+            "net": "duty_metric",
+            "port_ref": "duty_metric",
+            "position": 7
+          }
+        ],
+        "module_ref": "pwm_ramp_modulator",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "enable",
+      "vctrl",
+      "ramp_out",
+      "pwm_out",
+      "cycle_start",
+      "duty_metric"
+    ]
+  }
+}

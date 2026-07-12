@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-376",
+    "canonical_task_slug": "376-pwm-ramp-modulator-front-end",
+    "family_spec_sha256": "cc1bdce2ad6c21361744a1948d501e3c445ba7dc7da9344f7ceb90ec4e55c2ec",
+    "mutation_catalog_sha256": "9b9907666bbdaaa78f20800c5a920f24d933e46453def8b73ddd0b5b31036a89",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "376",
+  "negative_assignment": {
+    "bugfix_seed": "neg_005_event_edge_wrong",
+    "testbench_suite": [
+      "neg_004_threshold_shifted",
+      "neg_001_zero",
+      "neg_002_half_scale",
+      "neg_005_event_edge_wrong",
+      "neg_003_inverted_transfer"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "f6d86c1b3f932872dc797ecf3c875bf6ecdf44125e74fc2a894904733ffd8f82",
+    "changed_artifacts": [
+      "pwm_ramp_modulator.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_005_event_edge_wrong",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'semantic delay_edge mutation from gold' because it exercises P_DUTY_METRIC_TRACKS_THE_CLIPPED_DUTY as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 25,
+    "source_preferred_seed": "neg_004_threshold_shifted",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

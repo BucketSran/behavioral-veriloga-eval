@@ -1,0 +1,340 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "bidirectional_hybrid_macro",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "overrides the public vdd behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > vss"
+              },
+              {
+                "default": 0,
+                "name": "vss",
+                "override_behavior": "overrides the public vss behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vdd"
+              },
+              {
+                "default": 0.45,
+                "name": "vcm",
+                "override_behavior": "overrides the public vcm behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vcm is finite and preserves the public operating range"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "overrides the public vth behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vth is finite and preserves the public operating range"
+              },
+              {
+                "default": 0.01,
+                "name": "trim_lsb",
+                "override_behavior": "overrides the public trim_lsb behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "trim_lsb is finite and preserves the public operating range"
+              },
+              {
+                "default": 0.02,
+                "name": "balance_tol",
+                "override_behavior": "overrides the public balance_tol behavior parameter consistently for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "balance_tol is finite and preserves the public operating range"
+              },
+              {
+                "default": 2e-10,
+                "name": "tr",
+                "override_behavior": "overrides the public tr behavior parameter consistently for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "port_a",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "port_b",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "trim_2",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "trim_1",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "trim_0",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sum_out",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "diff_out",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "forward_metric",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "reverse_metric",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "balance_ok",
+                "position": 11
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "bidirectional_hybrid_macro.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/bidirectional_hybrid_macro.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "377",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "rf_afe_behavioral_macromodels",
+    "difficulty": "D3",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Bidirectional Hybrid Macro"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain transient behavior.",
+    "Use portable Spectre-compatible Verilog-A and voltage contributions for public outputs.",
+    "Do not use branch-current oracles, hidden pass/fail ports, checker side channels, or testbench code in the DUT bundle."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_RESET_CLEAR",
+      "observable_contract": "Reset centers the continuous sum and difference outputs and clears sampled metrics and balance qualification.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "sum_out",
+        "diff_out",
+        "forward_metric",
+        "reverse_metric",
+        "balance_ok"
+      ]
+    },
+    {
+      "id": "P_SUM_DIFF_MAPPING",
+      "observable_contract": "sum_out and diff_out implement the clipped common and differential mappings of port_a and port_b around vcm.",
+      "required_signals": [
+        "time",
+        "rst",
+        "port_a",
+        "port_b",
+        "trim_2",
+        "trim_1",
+        "trim_0",
+        "sum_out",
+        "diff_out"
+      ]
+    },
+    {
+      "id": "P_TRIM_RESPONSE",
+      "observable_contract": "The signed three-bit trim correction shifts sum and difference in opposite directions by trim_lsb per code.",
+      "required_signals": [
+        "time",
+        "rst",
+        "trim_2",
+        "trim_1",
+        "trim_0",
+        "sum_out",
+        "diff_out"
+      ]
+    },
+    {
+      "id": "P_DIRECTIONAL_METRICS",
+      "observable_contract": "At rising clock edges forward and reverse metrics reconstruct the directional components from the mapped sum and difference outputs.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "sum_out",
+        "diff_out",
+        "forward_metric",
+        "reverse_metric"
+      ]
+    },
+    {
+      "id": "P_BALANCE_QUALIFICATION",
+      "observable_contract": "balance_ok asserts only after two consecutive metric updates whose directional mismatch is within balance_tol.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "forward_metric",
+        "reverse_metric",
+        "balance_ok"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "bidirectional_hybrid_macro.va"
+  ],
+  "task_id": "v4-1377",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "port_a",
+            "port_ref": "port_a",
+            "position": 0
+          },
+          {
+            "net": "port_b",
+            "port_ref": "port_b",
+            "position": 1
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "trim_2",
+            "port_ref": "trim_2",
+            "position": 4
+          },
+          {
+            "net": "trim_1",
+            "port_ref": "trim_1",
+            "position": 5
+          },
+          {
+            "net": "trim_0",
+            "port_ref": "trim_0",
+            "position": 6
+          },
+          {
+            "net": "sum_out",
+            "port_ref": "sum_out",
+            "position": 7
+          },
+          {
+            "net": "diff_out",
+            "port_ref": "diff_out",
+            "position": 8
+          },
+          {
+            "net": "forward_metric",
+            "port_ref": "forward_metric",
+            "position": 9
+          },
+          {
+            "net": "reverse_metric",
+            "port_ref": "reverse_metric",
+            "position": 10
+          },
+          {
+            "net": "balance_ok",
+            "port_ref": "balance_ok",
+            "position": 11
+          }
+        ],
+        "module_ref": "bidirectional_hybrid_macro",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "port_a",
+      "port_b",
+      "clk",
+      "rst",
+      "trim_2",
+      "trim_1",
+      "trim_0",
+      "sum_out",
+      "diff_out",
+      "forward_metric",
+      "reverse_metric",
+      "balance_ok"
+    ]
+  }
+}

@@ -1,0 +1,288 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "am_modulator_source_macro",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.5",
+                "name": "mod_index",
+                "override_behavior": "overrides mod_index",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "carrier_in",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "mod_in",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "envelope_dbg",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "am_modulator_source_macro.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/am_modulator_source_macro.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "380",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "rf_afe_behavioral_macromodels",
+    "difficulty": "D3",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "AM Modulator Source Macro"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_DRIVE",
+      "observable_contract": "On reset or when disabled, drive `vout` to `vcm`, clear `envelope_dbg`, and clear `valid`.",
+      "required_signals": [
+        "time",
+        "carrier_in",
+        "mod_in",
+        "enable",
+        "rst",
+        "vout",
+        "envelope_dbg",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_WHEN_ENABLED_TREAT_CARRIER_IN_AND",
+      "observable_contract": "When enabled, treat `carrier_in` and `mod_in` as deviations around `vcm`.",
+      "required_signals": [
+        "time",
+        "carrier_in",
+        "mod_in",
+        "enable",
+        "rst",
+        "vout",
+        "envelope_dbg",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_DRIVE_AN_AMPLITUDE_MODULATED_OUTPUT_WHOSE",
+      "observable_contract": "Drive an amplitude-modulated output whose carrier deviation increases when `mod_in` rises above `vcm` and decreases when it falls below `vcm`.",
+      "required_signals": [
+        "time",
+        "carrier_in",
+        "mod_in",
+        "enable",
+        "rst",
+        "vout",
+        "envelope_dbg",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_CLAMP_THE_ENVELOPE_MULTIPLIER_SO_THE",
+      "observable_contract": "Clamp the envelope multiplier so the output stays within `[vss, vdd]`.",
+      "required_signals": [
+        "time",
+        "carrier_in",
+        "mod_in",
+        "enable",
+        "rst",
+        "vout",
+        "envelope_dbg",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ENVELOPE_DBG_MUST_EXPOSE_THE_ACTIVE",
+      "observable_contract": "`envelope_dbg` must expose the active voltage-domain envelope multiplier mapped into the output voltage range.",
+      "required_signals": [
+        "time",
+        "carrier_in",
+        "mod_in",
+        "enable",
+        "rst",
+        "vout",
+        "envelope_dbg",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ASSERT_VALID_WHILE_ENABLED_AFTER_RESET",
+      "observable_contract": "Assert `valid` while enabled after reset has been released.",
+      "required_signals": [
+        "time",
+        "carrier_in",
+        "mod_in",
+        "enable",
+        "rst",
+        "vout",
+        "envelope_dbg",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "am_modulator_source_macro.va"
+  ],
+  "task_id": "v4-1380",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "carrier_in",
+            "port_ref": "carrier_in",
+            "position": 0
+          },
+          {
+            "net": "mod_in",
+            "port_ref": "mod_in",
+            "position": 1
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 4
+          },
+          {
+            "net": "envelope_dbg",
+            "port_ref": "envelope_dbg",
+            "position": 5
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 6
+          }
+        ],
+        "module_ref": "am_modulator_source_macro",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "carrier_in",
+      "mod_in",
+      "enable",
+      "rst",
+      "vout",
+      "envelope_dbg",
+      "valid"
+    ]
+  }
+}

@@ -1,0 +1,288 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "nonoverlap_clock_generator",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "5 from [1:100]",
+                "name": "dead_ticks",
+                "override_behavior": "overrides dead_ticks",
+                "type": "integer",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "100p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk_in",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phi1",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phi2",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "deadtime_metric",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "nonoverlap_clock_generator.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/nonoverlap_clock_generator.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "375",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Non-overlapping Clock Generator"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_RESET_OR_A_LOW_ENABLE_CLEARS",
+      "observable_contract": "Reset or a low `enable` clears both phases, `deadtime_metric`, and `valid`.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst",
+        "enable",
+        "phi1",
+        "phi2",
+        "deadtime_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_A_RISING_CLK_IN_REQUEST_EVENTUALLY",
+      "observable_contract": "A rising `clk_in` request eventually enables `phi1`; a falling `clk_in` request eventually enables `phi2`.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst",
+        "enable",
+        "phi1",
+        "phi2",
+        "deadtime_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_DURING_EACH_HANDOFF_BOTH_PHI1_AND",
+      "observable_contract": "During each handoff, both `phi1` and `phi2` remain low for the configured dead-time interval.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst",
+        "enable",
+        "phi1",
+        "phi2",
+        "deadtime_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_PHI1_AND_PHI2_MUST_NEVER_BE",
+      "observable_contract": "`phi1` and `phi2` must never be high at the same time.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst",
+        "enable",
+        "phi1",
+        "phi2",
+        "deadtime_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_DEADTIME_METRIC_IS_HIGH_ONLY_WHILE",
+      "observable_contract": "`deadtime_metric` is high only while a pending phase request is in the enforced both-low interval.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst",
+        "enable",
+        "phi1",
+        "phi2",
+        "deadtime_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_VALID_BECOMES_HIGH_AFTER_THE_FIRST",
+      "observable_contract": "`valid` becomes high after the first enabled handoff completes and remains high until reset or disable.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst",
+        "enable",
+        "phi1",
+        "phi2",
+        "deadtime_metric",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "nonoverlap_clock_generator.va"
+  ],
+  "task_id": "v4-1375",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk_in",
+            "port_ref": "clk_in",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 2
+          },
+          {
+            "net": "phi1",
+            "port_ref": "phi1",
+            "position": 3
+          },
+          {
+            "net": "phi2",
+            "port_ref": "phi2",
+            "position": 4
+          },
+          {
+            "net": "deadtime_metric",
+            "port_ref": "deadtime_metric",
+            "position": 5
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 6
+          }
+        ],
+        "module_ref": "nonoverlap_clock_generator",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk_in",
+      "rst",
+      "enable",
+      "phi1",
+      "phi2",
+      "deadtime_metric",
+      "valid"
+    ]
+  }
+}
