@@ -1,0 +1,370 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "weighted_balance_summer",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vhi",
+                "override_behavior": "overrides vhi",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.62",
+                "name": "span_min",
+                "override_behavior": "overrides span_min",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.28",
+                "name": "span_max",
+                "override_behavior": "overrides span_max",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "50p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in0",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in1",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in2",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in3",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ctrl0",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ctrl1",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vdd",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vss",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "en",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "flag",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "metric",
+                "position": 11
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "weighted_balance_summer.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/weighted_balance_summer.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "251",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "signal_conditioning_and_measurement",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Weighted Balance Summer"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_MEASURE_ANALOG_INPUTS_RELATIVE_TO_THE",
+      "observable_contract": "Measure analog inputs relative to the local `vss` rail and normalize by the current local supply span. Let `span = V(vdd, vss)` and treat the row as valid only when `V(en) > vth` and `span_min <= span <= span_max`; otherwise drive `out`, `flag`, and `metric` to `0 V`. If `span` is below `0.05 V`, use `0.05 V` as the normalization span. Define `clip01(y)` as `y` limited to the range `[0, 1]` and `x0..x3 = clip01((V(inN) - V(vss)) / span)`.",
+      "required_signals": [
+        "time",
+        "ctrl0",
+        "ctrl1",
+        "en",
+        "flag",
+        "in0",
+        "in1",
+        "in2",
+        "in3",
+        "metric",
+        "out",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_COMPUTE_THE_WEIGHTED_BALANCE_SUM_AS",
+      "observable_contract": "Compute the weighted balance sum as `core = 0.36 * x0 + 0.28 * x1 + 0.18 * x2 + 0.10 * x3 + 0.04`. When valid, drive `out = vhi * clip01(core)`, assert `flag = vhi` when `core > 0.48` and otherwise drive `flag = 0 V`, and drive `metric = vhi * clip01(abs(x0 - x1) / 0.55)`.",
+      "required_signals": [
+        "time",
+        "ctrl0",
+        "ctrl1",
+        "en",
+        "flag",
+        "in0",
+        "in1",
+        "in2",
+        "in3",
+        "metric",
+        "out",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_BUILD_A_VOLTAGE_DOMAIN_ANALOG_MIXED",
+      "observable_contract": "Build a voltage-domain analog/mixed-signal helper or monitor. Weighted analog summer with balance qualification and a voltage-coded imbalance metric.",
+      "required_signals": [
+        "time",
+        "ctrl0",
+        "ctrl1",
+        "en",
+        "flag",
+        "in0",
+        "in1",
+        "in2",
+        "in3",
+        "metric",
+        "out",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_VTH_0_45_V_LOGIC_THRESHOLD",
+      "observable_contract": "`vth = 0.45 V`: logic threshold for voltage-coded controls.",
+      "required_signals": [
+        "time",
+        "ctrl0",
+        "ctrl1",
+        "en",
+        "flag",
+        "in0",
+        "in1",
+        "in2",
+        "in3",
+        "metric",
+        "out",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_VHI_0_9_V_HIGH_LEVEL",
+      "observable_contract": "`vhi = 0.9 V`: high level for output observables.",
+      "required_signals": [
+        "time",
+        "ctrl0",
+        "ctrl1",
+        "en",
+        "flag",
+        "in0",
+        "in1",
+        "in2",
+        "in3",
+        "metric",
+        "out",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_SPAN_MIN_0_62_V_SPAN",
+      "observable_contract": "`span_min = 0.62 V`, `span_max = 1.28 V`: legal local supply span measured as",
+      "required_signals": [
+        "time",
+        "ctrl0",
+        "ctrl1",
+        "en",
+        "flag",
+        "in0",
+        "in1",
+        "in2",
+        "in3",
+        "metric",
+        "out",
+        "vdd",
+        "vss"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "weighted_balance_summer.va"
+  ],
+  "task_id": "v4-1251",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "in0",
+            "port_ref": "in0",
+            "position": 0
+          },
+          {
+            "net": "in1",
+            "port_ref": "in1",
+            "position": 1
+          },
+          {
+            "net": "in2",
+            "port_ref": "in2",
+            "position": 2
+          },
+          {
+            "net": "in3",
+            "port_ref": "in3",
+            "position": 3
+          },
+          {
+            "net": "ctrl0",
+            "port_ref": "ctrl0",
+            "position": 4
+          },
+          {
+            "net": "ctrl1",
+            "port_ref": "ctrl1",
+            "position": 5
+          },
+          {
+            "net": "vdd",
+            "port_ref": "vdd",
+            "position": 6
+          },
+          {
+            "net": "vss",
+            "port_ref": "vss",
+            "position": 7
+          },
+          {
+            "net": "en",
+            "port_ref": "en",
+            "position": 8
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 9
+          },
+          {
+            "net": "flag",
+            "port_ref": "flag",
+            "position": 10
+          },
+          {
+            "net": "metric",
+            "port_ref": "metric",
+            "position": 11
+          }
+        ],
+        "module_ref": "weighted_balance_summer",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "ctrl0",
+      "ctrl1",
+      "en",
+      "flag",
+      "in0",
+      "in1",
+      "in2",
+      "in3",
+      "metric",
+      "out",
+      "vdd",
+      "vss"
+    ]
+  }
+}
