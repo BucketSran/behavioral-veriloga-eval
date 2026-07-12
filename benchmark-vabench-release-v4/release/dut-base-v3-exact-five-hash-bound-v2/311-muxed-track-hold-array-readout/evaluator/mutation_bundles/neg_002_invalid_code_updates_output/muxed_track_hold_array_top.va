@@ -1,0 +1,20 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module muxed_track_hold_array_top(vin0, vin1, vin2, clk, rst, sel_1, sel_0, sample_en, vout, channel_metric, valid);
+    input vin0, vin1, vin2, clk, rst, sel_1, sel_0, sample_en;
+    output vout, channel_metric, valid;
+    electrical vin0, vin1, vin2, clk, rst, sel_1, sel_0, sample_en, vout, channel_metric, valid;
+    electrical vh0, vh1, vh2, valid0, valid1, valid2;
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    track_hold_cell #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr)) XH0 (vin0, clk, rst, sample_en, vh0, valid0);
+    track_hold_cell #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr)) XH1 (vin1, clk, rst, sample_en, vh1, valid1);
+    track_hold_cell #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr)) XH2 (vin2, clk, rst, sample_en, vh2, valid2);
+    readout_mux #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr)) XMUX
+        (vh0, vh1, vh2, valid0, valid1, valid2, rst, sel_1, sel_0, vout, channel_metric, valid);
+endmodule

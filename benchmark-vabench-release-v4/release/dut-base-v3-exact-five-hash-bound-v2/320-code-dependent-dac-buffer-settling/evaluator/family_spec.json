@@ -1,0 +1,422 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "ideal_code_dac",
+              "settling_buffer_state"
+            ],
+            "name": "code_dependent_dac_buffer_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "80e-3 from (0:inf)",
+                "name": "settle_step",
+                "override_behavior": "overrides settle_step",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "8e-3 from (0:inf)",
+                "name": "settle_tol",
+                "override_behavior": "overrides settle_tol",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "code_3",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "code_2",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "code_1",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "code_0",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "target_dbg",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "settling_metric",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "settled",
+                "position": 10
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "code_dependent_dac_buffer_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "ideal_code_dac",
+            "parameters": [
+              {"default": "0.9", "name": "vdd", "override_behavior": "overrides vdd", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "0.0", "name": "vss", "override_behavior": "overrides vss", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "0.45", "name": "vth", "override_behavior": "overrides vth", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "200p from (0:inf)", "name": "tr", "override_behavior": "overrides tr", "type": "real", "units": "s", "valid_range": "positive"}
+            ],
+            "ports": [
+              {"direction": "input", "discipline": "electrical", "name": "rst", "position": 0},
+              {"direction": "input", "discipline": "electrical", "name": "enable", "position": 1},
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "code_3",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "code_2",
+                "position": 3
+              },
+              {"direction": "input", "discipline": "electrical", "name": "code_1", "position": 4},
+              {"direction": "input", "discipline": "electrical", "name": "code_0", "position": 5},
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "target",
+                "position": 6
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "ideal_code_dac.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "settling_buffer_state",
+            "parameters": [
+              {"default": "0.9", "name": "vdd", "override_behavior": "overrides vdd", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "0.0", "name": "vss", "override_behavior": "overrides vss", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "0.45", "name": "vcm", "override_behavior": "overrides vcm", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "0.45", "name": "vth", "override_behavior": "overrides vth", "type": "real", "units": "V", "valid_range": "finite"},
+              {"default": "200p from (0:inf)", "name": "tr", "override_behavior": "overrides tr", "type": "real", "units": "s", "valid_range": "positive"},
+              {"default": "80e-3 from (0:inf)", "name": "settle_step", "override_behavior": "overrides settle_step", "type": "real", "units": "V", "valid_range": "positive"},
+              {"default": "8e-3 from (0:inf)", "name": "settle_tol", "override_behavior": "overrides settle_tol", "type": "real", "units": "V", "valid_range": "positive"}
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {"direction": "input", "discipline": "electrical", "name": "enable", "position": 2},
+              {"direction": "input", "discipline": "electrical", "name": "target", "position": 3},
+              {"direction": "output", "discipline": "electrical", "name": "vout", "position": 4},
+              {"direction": "output", "discipline": "electrical", "name": "settling_metric", "position": 5},
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "settled",
+                "position": 6
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "settling_buffer_state.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "family_id": "320",
+  "identity": {
+    "category": "data_converter_systems",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Code-dependent DAC Buffer Settling"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+      "observable_contract": "On reset or when disabled, drive `vout` to `vcm` and drive `target_dbg`, `settling_metric`, and `settled` to `vss`.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "code_3",
+        "code_2",
+        "code_1",
+        "code_0",
+        "vout",
+        "target_dbg",
+        "settling_metric",
+        "settled"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+      "observable_contract": "Decode code 0..15 linearly from `vss` to `vdd`; on each enabled rising `clk` edge update the buffered output toward that target.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "code_3",
+        "code_2",
+        "code_1",
+        "code_0",
+        "vout",
+        "target_dbg",
+        "settling_metric",
+        "settled"
+      ]
+    },
+    {
+      "id": "P_APPLY_A_CODE_DEPENDENT_SETTLING_STEP",
+      "observable_contract": "Apply a code-dependent settling step so large code jumps take more updates to settle.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "code_3",
+        "code_2",
+        "code_1",
+        "code_0",
+        "vout",
+        "target_dbg",
+        "settling_metric",
+        "settled"
+      ]
+    },
+    {
+      "id": "P_EXPOSE_THE_CURRENT_TARGET_ON_TARGET",
+      "observable_contract": "Expose the current target on `target_dbg` and the remaining error on `settling_metric`.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "code_3",
+        "code_2",
+        "code_1",
+        "code_0",
+        "vout",
+        "target_dbg",
+        "settling_metric",
+        "settled"
+      ]
+    },
+    {
+      "id": "P_ASSERT_SETTLED_AFTER_THE_REMAINING_ERROR",
+      "observable_contract": "Assert `settled` after the remaining error stays below `settle_tol` for two enabled updates.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "code_3",
+        "code_2",
+        "code_1",
+        "code_0",
+        "vout",
+        "target_dbg",
+        "settling_metric",
+        "settled"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1320",
+    "dut": "v4-320",
+    "testbench": "v4-820"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 2
+          },
+          {
+            "net": "code_3",
+            "port_ref": "code_3",
+            "position": 3
+          },
+          {
+            "net": "code_2",
+            "port_ref": "code_2",
+            "position": 4
+          },
+          {
+            "net": "code_1",
+            "port_ref": "code_1",
+            "position": 5
+          },
+          {
+            "net": "code_0",
+            "port_ref": "code_0",
+            "position": 6
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 7
+          },
+          {
+            "net": "target_dbg",
+            "port_ref": "target_dbg",
+            "position": 8
+          },
+          {
+            "net": "settling_metric",
+            "port_ref": "settling_metric",
+            "position": 9
+          },
+          {
+            "net": "settled",
+            "port_ref": "settled",
+            "position": 10
+          }
+        ],
+        "module_ref": "code_dependent_dac_buffer_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "enable",
+      "code_3",
+      "code_2",
+      "code_1",
+      "code_0",
+      "vout",
+      "target_dbg",
+      "settling_metric",
+      "settled"
+    ]
+  }
+}

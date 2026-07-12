@@ -1,0 +1,60 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module readout_mux(vh0, vh1, vh2, valid0, valid1, valid2, rst, sel_1, sel_0, vout, channel_metric, valid);
+    input vh0, vh1, vh2, valid0, valid1, valid2, rst, sel_1, sel_0;
+    output vout, channel_metric, valid;
+    electrical vh0, vh1, vh2, valid0, valid1, valid2, rst, sel_1, sel_0, vout, channel_metric, valid;
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real tick = 400p from (0:inf);
+    integer code, routed_code;
+    real mux_v, metric_v, valid_v, selected_valid;
+
+    analog function real clip01;
+        input x;
+        real x;
+        begin
+            if (x < vss) clip01 = vss;
+            else if (x > vdd) clip01 = vdd;
+            else clip01 = x;
+        end
+    endfunction
+
+    analog function real absval;
+        input x;
+        real x;
+        begin
+            absval = (x < 0.0) ? -x : x;
+        end
+    endfunction
+
+    analog begin
+        @(initial_step) begin mux_v = vcm; metric_v = vss; valid_v = vss; end
+        @(timer(0, tick)) begin
+            if (0) begin
+                mux_v = vcm;
+                metric_v = vss;
+                valid_v = vss;
+            end else begin
+                code = (V(sel_0) > vth ? 1 : 0) + (V(sel_1) > vth ? 2 : 0);
+                routed_code = code;
+                if (code == 3) begin
+                    valid_v = vss;
+                end else begin
+                    if (routed_code == 0) begin mux_v = V(vh0); selected_valid = V(valid0); end
+                    else if (routed_code == 1) begin mux_v = V(vh1); selected_valid = V(valid1); end
+                    else begin mux_v = V(vh2); selected_valid = V(valid2); end
+                    metric_v = clip01((vcm + 0.15 * code));
+                    valid_v = (selected_valid > vth) ? vdd : vss;
+                end
+            end
+        end
+        V(vout) <+ transition(mux_v, 0, tr, tr);
+        V(channel_metric) <+ transition(metric_v, 0, tr, tr);
+        V(valid) <+ transition(valid_v, 0, tr, tr);
+    end
+endmodule

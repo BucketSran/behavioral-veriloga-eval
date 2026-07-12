@@ -1,0 +1,39 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=76n maxstep=80p"
+    ],
+    "body_lines": [
+      "Vvin_a (vin_a 0) vsource type=pwl wave=[0 0.38 7n 0.38 15n 0.76 27n 0.76 36n 0.30 50n 0.30 76n 0.68]",
+      "Vvin_b (vin_b 0) vsource type=pwl wave=[0 0.41 7n 0.41 15n 0.60 27n 0.60 36n 0.52 50n 0.52 76n 0.44]",
+      "Vclk_a (clk_a 0) vsource type=pulse val0=0 val1=0.9 period=5n width=1.8n delay=2n rise=60p fall=60p",
+      "Vclk_b (clk_b 0) vsource type=pulse val0=0 val1=0.9 period=5n width=1.8n delay=3.1n rise=60p fall=60p",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.7n 0.9 1.8n 0 50n 0 50.1n 0.9 53n 0.9 53.1n 0 76n 0]",
+      "Venable (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 41n 0.9 41.1n 0 46n 0 46.1n 0.9 76n 0.9]",
+      "XDUT (vin_a vin_b clk_a clk_b rst enable skew_metric magnitude_metric alarm) interleaved_adc_skew_monitor_top"
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "4d29984c9fcc198629503c762bd2416200ffecb11d10a206322a9b803dc7f938",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "100n"
+  },
+  "profile_name": "score",
+  "property_ids": [
+    "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+    "P_CAPTURE_VIN_A_ON_RISING_CLK",
+    "P_ESTIMATE_A_SKEW_PROXY_FROM_THE",
+    "P_DRIVE_SKEW_METRIC_WITH_THE_ABSOLUTE",
+    "P_ASSERT_ALARM_WHEN_SKEW_METRIC_EXCEEDS",
+    "P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE"
+  ],
+  "public_visible": false,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {}
+}

@@ -1,0 +1,99 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "hysteretic_window_comparator.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=80n maxstep=80p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "rst",
+      "enable",
+      "low_trip",
+      "high_trip",
+      "inside_flag",
+      "state_metric",
+      "toggled"
+    ]
+  },
+  "family_id": "314",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "6d4888a7c6ecf12263ac1327fc57ecaa9a8ed76d44c79d942b0eb38bd38c68ff",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "6739a5997ca5344262d6ef720f3f0045a68c30633cdcab7a72e03a1f92e1bdd8",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.28 8n 0.28 14n 0.43 23n 0.43 31n 0.50 44n 0.50 44.1n 0.625 47n 0.625 47.1n 0.66 50n 0.66 50.1n 0.50 70n 0.50 70.1n 0.395 75n 0.395 75.1n 0.38 80n 0.38]",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2.1n 0.9 2.2n 0 52n 0 52.1n 0.9 55.5n 0.9 55.6n 0 80n 0]",
+          "Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.9 34n 0.9 34.1n 0 38n 0 38.1n 0.9 80n 0.9]",
+          "Vlow_trip (low_trip 0) vsource type=dc dc=0.40",
+          "Vhigh_trip (high_trip 0) vsource type=dc dc=0.62",
+          "XDUT (vin rst enable low_trip high_trip inside_flag state_metric toggled) hysteretic_window_comparator"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=76n maxstep=80p"
+        ],
+        "body_lines": [
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.27 7n 0.27 13n 0.42 22n 0.42 30n 0.51 42n 0.51 42.1n 0.615 46n 0.615 46.1n 0.67 48n 0.67 48.1n 0.50 68n 0.50 68.1n 0.385 72n 0.385 72.1n 0.37 76n 0.37]",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.7n 0.9 1.8n 0 50n 0 50.1n 0.9 53n 0.9 53.1n 0 76n 0]",
+          "Venable (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 33n 0.9 33.1n 0 37n 0 37.1n 0.9 76n 0.9]",
+          "Vlow_trip (low_trip 0) vsource type=dc dc=0.39",
+          "Vhigh_trip (high_trip 0) vsource type=dc dc=0.61",
+          "XDUT (vin rst enable low_trip high_trip inside_flag state_metric toggled) hysteretic_window_comparator"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+    "P_USE_LOW_TRIP_AND_HIGH_TRIP",
+    "P_ASSERT_INSIDE_FLAG_WHEN_VIN_ENTERS",
+    "P_EXPOSE_THE_CURRENT_STATE_AS_STATE",
+    "P_DO_NOT_CHATTER_FOR_SMALL_INPUT"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "78c0aab76d6a242d94d7d7db776200dd77a3c842a9bcfb23d071b51ebaa7db0b",
+    "family_spec_sha256": "6b067e1644942c23938258763f33256c48e6d1d3224eb69b5b0d93de7dff0c8e"
+  },
+  "task_id": "v4-314"
+}

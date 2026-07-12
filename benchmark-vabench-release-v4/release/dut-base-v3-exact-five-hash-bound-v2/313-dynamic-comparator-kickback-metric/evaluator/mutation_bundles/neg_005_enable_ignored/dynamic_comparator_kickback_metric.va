@@ -1,0 +1,51 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dynamic_comparator_kickback_metric(vinp, vinn, clk, rst, enable, decision, kickback_metric, valid);
+    input vinp, vinn, clk, rst, enable;
+    output decision, kickback_metric, valid;
+    electrical vinp, vinn, clk, rst, enable, decision, kickback_metric, valid;
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    real decision_v, metric_v, valid_v, overdrive;
+
+    analog function real clip01;
+        input x;
+        real x;
+        begin
+            if (x < vss) clip01 = vss;
+            else if (x > vdd) clip01 = vdd;
+            else clip01 = x;
+        end
+    endfunction
+
+    analog function real absval;
+        input x;
+        real x;
+        begin
+            absval = (x < 0.0) ? -x : x;
+        end
+    endfunction
+
+    analog begin
+        @(initial_step) begin decision_v = vss; metric_v = vss; valid_v = vss; end
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth || !(1)) begin
+                decision_v = vss;
+                metric_v = vss;
+                valid_v = vss;
+            end else begin
+                overdrive = absval(V(vinp) - V(vinn));
+                decision_v = (V(vinp) >= V(vinn)) ? vdd : vss;
+                metric_v = clip01(vcm + 0.30 / (1.0 + overdrive / 0.030));
+                valid_v = vdd;
+            end
+        end
+        V(decision) <+ transition((V(rst) > vth) ? vss : decision_v, 0, tr, tr);
+        V(kickback_metric) <+ transition((V(rst) > vth) ? vss : metric_v, 0, tr, tr);
+        V(valid) <+ transition((V(rst) > vth) ? vss : valid_v, 0, tr, tr);
+    end
+endmodule

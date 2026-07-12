@@ -1,0 +1,87 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "unary_dac_glitch_energy_metric.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=92n maxstep=200p"
+    ],
+    "body_lines": [
+      "Vclk (clk 0) vsource type=pwl wave=[0 0 9n 0 10n 0.9 12n 0.9 12.2n 0 20n 0.9 22n 0.9 22.2n 0 30n 0.9 32n 0.9 32.2n 0 40n 0.9 42n 0.9 42.2n 0 50n 0.9 52n 0.9 52.2n 0 60n 0.9 62n 0.9 62.2n 0 70n 0.9 72n 0.9 72.2n 0 80n 0.9 82n 0.9 82.2n 0 92n 0]",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]",
+      "Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 80n 0.9 80.2n 0 92n 0]",
+      "Vcode_0 (code_0 0) vsource type=pwl wave=[0 0 8n 0 8.2n 0 18n 0 18.2n 0.9 28n 0.9 28.2n 0.9 38n 0.9 38.2n 0.9 48n 0.9 48.2n 0 58n 0 58.2n 0.9 68n 0.9 68.2n 0 78n 0 78.2n 0 92n 0]",
+      "Vcode_1 (code_1 0) vsource type=pwl wave=[0 0 8n 0 8.2n 0 18n 0 18.2n 0 28n 0 28.2n 0.9 38n 0.9 38.2n 0.9 48n 0.9 48.2n 0.9 58n 0.9 58.2n 0 68n 0 68.2n 0 78n 0 78.2n 0.9 92n 0.9]",
+      "Vcode_2 (code_2 0) vsource type=pwl wave=[0 0 8n 0 8.2n 0 18n 0 18.2n 0 28n 0 28.2n 0 38n 0 38.2n 0.9 48n 0.9 48.2n 0 58n 0 58.2n 0.9 68n 0.9 68.2n 0.9 78n 0.9 78.2n 0.9 92n 0.9]",
+      "XDUT (clk rst enable code_2 code_1 code_0 vout glitch_metric valid) unary_dac_glitch_energy_metric",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "clk",
+      "rst",
+      "enable",
+      "code_2",
+      "code_1",
+      "code_0",
+      "vout",
+      "glitch_metric",
+      "valid"
+    ]
+  },
+  "family_id": "319",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "8f8dba678ff31e40a3b5b0e47139e712fa03a7850311eefbd66800566ec86663",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "8f8dba678ff31e40a3b5b0e47139e712fa03a7850311eefbd66800566ec86663",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+    "P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+    "P_DRIVE_VOUT_PROPORTIONAL_TO_THE_DECODED",
+    "P_DRIVE_GLITCH_METRIC_PROPORTIONAL_TO_THE",
+    "P_ASSERT_VALID_AFTER_THE_FIRST_ENABLED",
+    "P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "22506e81a08bc238d028348e553ec54338ed8217204661789ad2b28f1b80aa6d",
+    "family_spec_sha256": "b0ee317b8eecb09fd8f94314ea10a14981c84209b232d9bc54d4ba2338d727c1"
+  },
+  "task_id": "v4-319"
+}

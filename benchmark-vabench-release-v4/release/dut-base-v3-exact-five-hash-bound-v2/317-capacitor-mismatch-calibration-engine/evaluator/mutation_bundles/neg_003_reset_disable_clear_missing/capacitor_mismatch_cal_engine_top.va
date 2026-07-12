@@ -1,0 +1,14 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module capacitor_mismatch_cal_engine_top(err_in, clk, rst, enable, cal_3, cal_2, cal_1, cal_0, correction_metric, done);
+    inout err_in, clk, rst, enable, cal_3, cal_2, cal_1, cal_0, correction_metric, done;
+    electrical err_in, clk, rst, enable, cal_3, cal_2, cal_1, cal_0, correction_metric, done;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vcm = 0.45;
+    parameter real vth = 0.45; parameter real tr = 200p from (0:inf);
+    parameter real err_tol = 20e-3; parameter real corr_lsb = 6e-3;
+    cal_code_accumulator #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr), .err_tol(err_tol))
+        u_acc(err_in, clk, rst, enable, cal_3, cal_2, cal_1, cal_0, done);
+    correction_metric_dac #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr), .corr_lsb(corr_lsb))
+        u_dac(cal_3, cal_2, cal_1, cal_0, rst, enable, correction_metric);
+endmodule

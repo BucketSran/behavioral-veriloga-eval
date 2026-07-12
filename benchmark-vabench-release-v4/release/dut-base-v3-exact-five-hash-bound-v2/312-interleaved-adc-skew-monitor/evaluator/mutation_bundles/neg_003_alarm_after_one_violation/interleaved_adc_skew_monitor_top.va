@@ -1,0 +1,20 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module interleaved_adc_skew_monitor_top(vin_a, vin_b, clk_a, clk_b, rst, enable, skew_metric, magnitude_metric, alarm);
+    input vin_a, vin_b, clk_a, clk_b, rst, enable;
+    output skew_metric, magnitude_metric, alarm;
+    electrical vin_a, vin_b, clk_a, clk_b, rst, enable, skew_metric, magnitude_metric, alarm;
+    electrical sa, sb, ready;
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real skew_limit = 40e-3;
+
+    sample_pair_latch #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr))
+        XLATCH (vin_a, vin_b, clk_a, clk_b, rst, enable, sa, sb, ready);
+    skew_metric_core #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr), .skew_limit(skew_limit))
+        XMETRIC (sa, sb, ready, rst, enable, skew_metric, magnitude_metric, alarm);
+endmodule

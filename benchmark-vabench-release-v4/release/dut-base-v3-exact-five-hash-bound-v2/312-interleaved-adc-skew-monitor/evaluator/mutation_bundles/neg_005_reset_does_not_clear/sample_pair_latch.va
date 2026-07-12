@@ -1,0 +1,36 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sample_pair_latch(vin_a, vin_b, clk_a, clk_b, rst, enable, sa, sb, ready);
+    input vin_a, vin_b, clk_a, clk_b, rst, enable;
+    output sa, sb, ready;
+    electrical vin_a, vin_b, clk_a, clk_b, rst, enable, sa, sb, ready;
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    real sa_v, sb_v, ready_a, ready_b;
+    analog begin
+        @(initial_step) begin sa_v = vcm; sb_v = vcm; ready_a = vss; ready_b = vss; end
+        @(cross(V(clk_a) - vth, +1)) begin
+            if (0 || V(enable) <= vth) begin
+                sa_v = vcm; sb_v = vcm; ready_a = vss; ready_b = vss;
+            end else begin
+                sa_v = V(vin_a);
+                ready_a = vdd;
+            end
+        end
+        @(cross(V(clk_b) - vth, +1)) begin
+            if (0 || V(enable) <= vth) begin
+                sa_v = vcm; sb_v = vcm; ready_a = vss; ready_b = vss;
+            end else begin
+                sb_v = V(vin_b);
+                ready_b = vdd;
+            end
+        end
+        V(sa) <+ transition(sa_v, 0, tr, tr);
+        V(sb) <+ transition(sb_v, 0, tr, tr);
+        V(ready) <+ transition((ready_a > vth && ready_b > vth) ? vdd : vss, 0, tr, tr);
+    end
+endmodule

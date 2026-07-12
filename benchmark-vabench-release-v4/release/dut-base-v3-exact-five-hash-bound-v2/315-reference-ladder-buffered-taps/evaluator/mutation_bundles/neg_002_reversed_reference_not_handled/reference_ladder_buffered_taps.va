@@ -1,0 +1,54 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module reference_ladder_buffered_taps(vref_hi, vref_lo, enable, rst, tap0, tap1, tap2, tap3, monotonic_ok);
+    inout vref_hi, vref_lo, enable, rst, tap0, tap1, tap2, tap3, monotonic_ok;
+    electrical vref_hi, vref_lo, enable, rst, tap0, tap1, tap2, tap3, monotonic_ok;
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real tick = 500p from (0:inf);
+    real hi_raw, lo_raw, hi_c, lo_c, tmp, span, step;
+    real tap0_v, tap1_v, tap2_v, tap3_v, monotonic_ok_v;
+
+    analog function real clip01;
+        input x;
+        real x;
+        begin
+            if (x < vss) clip01 = vss;
+            else if (x > vdd) clip01 = vdd;
+            else clip01 = x;
+        end
+    endfunction
+
+    analog begin
+        @(initial_step) begin
+            tap0_v = vss; tap1_v = vss; tap2_v = vss; tap3_v = vss; monotonic_ok_v = vss;
+        end
+        @(timer(0, tick)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                tap0_v = vss; tap1_v = vss; tap2_v = vss; tap3_v = vss; monotonic_ok_v = vss;
+            end else begin
+                hi_raw = clip01(V(vref_hi));
+                lo_raw = clip01(V(vref_lo));
+
+                hi_c = hi_raw;
+                lo_c = lo_raw;
+                span = hi_c - lo_c;
+                step = span / 3.0;
+                tap0_v = lo_c;
+                tap1_v = lo_c + step;
+                tap2_v = lo_c + 2.0 * step;
+                tap3_v = hi_c;
+                monotonic_ok_v = vdd;
+            end
+        end
+        V(tap0) <+ transition(tap0_v, 0, tr, tr);
+        V(tap1) <+ transition(tap1_v, 0, tr, tr);
+        V(tap2) <+ transition(tap2_v, 0, tr, tr);
+        V(tap3) <+ transition(tap3_v, 0, tr, tr);
+        V(monotonic_ok) <+ transition(monotonic_ok_v, 0, tr, tr);
+    end
+endmodule

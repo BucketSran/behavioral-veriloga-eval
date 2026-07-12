@@ -1,0 +1,39 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module code_dependent_dac_buffer_top(
+    clk, rst, enable, code_3, code_2, code_1, code_0,
+    vout, target_dbg, settling_metric, settled
+);
+    input clk, rst, enable, code_3, code_2, code_1, code_0;
+    output vout, target_dbg, settling_metric, settled;
+    electrical clk, rst, enable, code_3, code_2, code_1, code_0;
+    electrical vout, target_dbg, settling_metric, settled;
+    electrical target_internal;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real settle_step = 80e-3 from (0:inf);
+    parameter real settle_tol = 8e-3 from (0:inf);
+
+    ideal_code_dac #(
+        .vdd(vdd), .vss(vss), .vth(vth), .tr(tr)
+    ) XDAC (
+        rst, enable, code_3, code_2, code_1, code_0, target_internal
+    );
+
+    settling_buffer_state #(
+        .vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr),
+        .settle_step(settle_step), .settle_tol(settle_tol)
+    ) XBUFFER (
+        clk, rst, enable, target_internal,
+        vout, settling_metric, settled
+    );
+
+    analog begin
+        V(target_dbg) <+ V(target_internal);
+    end
+endmodule

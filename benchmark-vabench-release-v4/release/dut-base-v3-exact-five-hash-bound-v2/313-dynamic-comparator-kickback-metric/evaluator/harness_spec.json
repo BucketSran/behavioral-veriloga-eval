@@ -1,0 +1,100 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "dynamic_comparator_kickback_metric.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=80n maxstep=80p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vinp",
+      "vinn",
+      "clk",
+      "rst",
+      "enable",
+      "decision",
+      "kickback_metric",
+      "valid"
+    ]
+  },
+  "family_id": "313",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "24aeb7580851a6180b1fa737547be4980da33a605b94c98c1e5bfd124d669a2f",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "9137cfd46d4bcf35cb8e0df55bf074918276f14d09d024c26a5735c4800958a0",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vvinp (vinp 0) vsource type=pwl wave=[0 0.40 8n 0.40 14n 0.52 23n 0.52 32n 0.78 44n 0.78 58n 0.42 80n 0.62]",
+          "Vvinn (vinn 0) vsource type=pwl wave=[0 0.50 8n 0.50 14n 0.48 23n 0.48 32n 0.24 44n 0.24 58n 0.58 80n 0.54]",
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=6n width=2n delay=3n rise=60p fall=60p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2.1n 0.9 2.2n 0 50n 0 50.1n 0.9 53.5n 0.9 53.6n 0 80n 0]",
+          "Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.9 43n 0.9 43.1n 0 48n 0 48.1n 0.9 80n 0.9]",
+          "XDUT (vinp vinn clk rst enable decision kickback_metric valid) dynamic_comparator_kickback_metric"
+        ]
+      },
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=76n maxstep=80p"
+        ],
+        "body_lines": [
+          "Vvinp (vinp 0) vsource type=pwl wave=[0 0.38 7n 0.38 13n 0.53 22n 0.53 31n 0.80 43n 0.80 56n 0.40 76n 0.64]",
+          "Vvinn (vinn 0) vsource type=pwl wave=[0 0.52 7n 0.52 13n 0.49 22n 0.49 31n 0.24 43n 0.24 56n 0.60 76n 0.55]",
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=5n width=2n delay=2.4n rise=60p fall=60p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.7n 0.9 1.8n 0 50n 0 50.1n 0.9 53n 0.9 53.1n 0 76n 0]",
+          "Venable (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 41n 0.9 41.1n 0 46n 0 46.1n 0.9 76n 0.9]",
+          "XDUT (vinp vinn clk rst enable decision kickback_metric valid) dynamic_comparator_kickback_metric"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+    "P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+    "P_DRIVE_KICKBACK_METRIC_AS_A_VOLTAGE",
+    "P_SMALL_OVERDRIVE_MUST_PRODUCE_A_LARGER",
+    "P_ASSERT_VALID_AFTER_EACH_COMPLETED_DECISION",
+    "P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "8303a9eb7d1c2c2c636f0eb2956a9aed536e36dc325555b502c2bddf4ccd857c",
+    "family_spec_sha256": "9ccb61f872241f103c8fc5cc34d7fb7c9cc1cfa3c95cb728100883e9ad665beb"
+  },
+  "task_id": "v4-313"
+}

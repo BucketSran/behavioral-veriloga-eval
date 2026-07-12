@@ -1,0 +1,74 @@
+{
+  "agent_visible_files": [
+    "instruction.md",
+    "public_contract.json",
+    "feedback_tb.scs"
+  ],
+  "canonical_dut_id": "312",
+  "canonical_instruction": "instruction.md",
+  "category": "measurement_systems",
+  "counted_in_score": true,
+  "feedback_oracle": {
+    "command": "vabench-feedback --task . --submission ../submission",
+    "public_tb": "feedback_tb.scs",
+    "public_tb_exposed": true
+  },
+  "form": "dut",
+  "gate2_status": "gate2_ready",
+  "language": "verilog-a",
+  "level": "L2",
+  "oracle_policy": {
+    "checker_private": true,
+    "feedback_oracle_materialized": true,
+    "no_model_visible_starter": true,
+    "proposal_only": false,
+    "score_tb_private": true,
+    "single_public_contract": true,
+    "testbench_and_checker_split_required": true
+  },
+  "planned_checker_focus": [
+    "dual-clock sampling",
+    "skew metric",
+    "alarm persistence",
+    "reset/enable behavior"
+  ],
+  "planned_oracle_type": "deterministic_trace_behavior_with_static_module_contract",
+  "public_modules": [
+    "interleaved_adc_skew_monitor_top",
+    "sample_pair_latch",
+    "skew_metric_core"
+  ],
+  "public_observables": [
+    "vin_a",
+    "vin_b",
+    "clk_a",
+    "clk_b",
+    "rst",
+    "enable",
+    "skew_metric",
+    "magnitude_metric",
+    "alarm"
+  ],
+  "schema_version": "v4-proposed-public-contract-v1",
+  "status": "gate2_ready",
+  "target_artifacts": [
+    "interleaved_adc_skew_monitor_top.va",
+    "sample_pair_latch.va",
+    "skew_metric_core.va"
+  ],
+  "task_id": "v4_312_interleaved_adc_skew_monitor",
+  "task_slug": "1010-interleaved-adc-skew-monitor",
+  "title": "Interleaved ADC Timing-skew Monitor",
+  "top_module": "interleaved_adc_skew_monitor_top",
+  "track": "multi_module_ams_system_dut",
+  "validation_status": {
+    "evas_feedback_score_gold": "pass",
+    "gate2": "dut_base_sealed",
+    "next_gate": "canonical_suite_unification_pending",
+    "semantic_negative_certification": "pass",
+    "spectre_score_gold": "clean_pass",
+    "tri_form_gate2": "pending",
+    "tri_form_gate3": "pending",
+    "untriaged_warning_count": 0
+  }
+}

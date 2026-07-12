@@ -1,0 +1,19 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/muxed_track_hold_array_top.va"
+ahdl_include "./dut/track_hold_cell.va"
+ahdl_include "./dut/readout_mux.va"
+
+Vvin0 (vin0 0) vsource type=pwl wave=[0 0.20 7n 0.20 13n 0.70 25n 0.70 32n 0.40 44n 0.40 62n 0.66 76n 0.66]
+Vvin1 (vin1 0) vsource type=pwl wave=[0 0.48 7n 0.48 13n 0.32 25n 0.32 32n 0.76 44n 0.76 62n 0.30 76n 0.30]
+Vvin2 (vin2 0) vsource type=pwl wave=[0 0.64 7n 0.64 13n 0.52 25n 0.52 32n 0.28 39n 0.28 42n 0.74 44n 0.74 62n 0.54 76n 0.54]
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=5n width=2n delay=2.4n rise=60p fall=60p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.7n 0.9 1.8n 0 50n 0 50.1n 0.9 53n 0.9 53.1n 0 76n 0]
+Vsel_1 (sel_1 0) vsource type=pwl wave=[0 0 8n 0 8.1n 0 19n 0 19.1n 0.9 30n 0.9 30.1n 0.9 47n 0.9 47.1n 0 58n 0 58.1n 0.9 76n 0.9]
+Vsel_0 (sel_0 0) vsource type=pwl wave=[0 0 8n 0 8.1n 0.9 19n 0.9 19.1n 0 30n 0 30.1n 0 42n 0 42.1n 0 58n 0 58.1n 0.9 76n 0.9]
+Vsample_en (sample_en 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 38n 0.9 38.1n 0 44n 0 44.1n 0.9 76n 0.9]
+XDUT (vin0 vin1 vin2 clk rst sel_1 sel_0 sample_en vout channel_metric valid) muxed_track_hold_array_top
+
+tran tran stop=76n maxstep=80p
+save vin0 vin1 vin2 clk rst sel_1 sel_0 sample_en vout channel_metric valid

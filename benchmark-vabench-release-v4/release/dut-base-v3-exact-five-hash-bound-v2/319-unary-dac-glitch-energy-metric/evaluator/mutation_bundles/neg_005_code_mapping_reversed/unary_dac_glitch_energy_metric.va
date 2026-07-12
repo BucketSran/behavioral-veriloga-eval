@@ -1,0 +1,33 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module unary_dac_glitch_energy_metric(clk, rst, enable, code_2, code_1, code_0, vout, glitch_metric, valid);
+    inout clk, rst, enable, code_2, code_1, code_0, vout, glitch_metric, valid;
+    electrical clk, rst, enable, code_2, code_1, code_0, vout, glitch_metric, valid;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vth = 0.45; parameter real tr = 200p from (0:inf);
+    parameter real tick = 250p from (0:inf);
+    integer code, mapped_code, prev_code; real prev_clk, vout_v, glitch_v, valid_v;
+    analog function real absval; input x; real x; begin absval = (x < 0.0) ? -x : x; end endfunction
+    analog begin
+        @(initial_step) begin prev_clk = 0.0; prev_code = 0; vout_v = 0.0; glitch_v = 0.0; valid_v = 0.0; end
+        @(timer(0, tick)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                prev_code = 0; vout_v = 0.0; glitch_v = 0.0; valid_v = 0.0;
+            end else if (V(clk) > vth && prev_clk <= vth) begin
+                code = 0;
+                if (V(code_0) > vth) code = code + 1;
+                if (V(code_1) > vth) code = code + 2;
+                if (V(code_2) > vth) code = code + 4;
+                mapped_code = (7 - code);
+                vout_v = mapped_code * (vdd / 7.0);
+                glitch_v = absval(mapped_code - prev_code) * (vdd / 7.0);
+                valid_v = vdd;
+                prev_code = mapped_code;
+            end
+            prev_clk = V(clk);
+        end
+        V(vout) <+ transition(vout_v, 0, tr, tr);
+        V(glitch_metric) <+ transition(glitch_v, 0, tr, tr);
+        V(valid) <+ transition(valid_v, 0, tr, tr);
+    end
+endmodule

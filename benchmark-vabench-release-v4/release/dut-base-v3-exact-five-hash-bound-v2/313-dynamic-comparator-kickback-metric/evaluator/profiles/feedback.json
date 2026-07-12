@@ -1,0 +1,37 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "body_lines": [
+      "Vvinp (vinp 0) vsource type=pwl wave=[0 0.40 8n 0.40 14n 0.52 23n 0.52 32n 0.78 44n 0.78 58n 0.42 80n 0.62]",
+      "Vvinn (vinn 0) vsource type=pwl wave=[0 0.50 8n 0.50 14n 0.48 23n 0.48 32n 0.24 44n 0.24 58n 0.58 80n 0.54]",
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=6n width=2n delay=3n rise=60p fall=60p",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2.1n 0.9 2.2n 0 50n 0 50.1n 0.9 53.5n 0.9 53.6n 0 80n 0]",
+      "Venable (enable 0) vsource type=pwl wave=[0 0 5n 0 5.1n 0.9 43n 0.9 43.1n 0 48n 0 48.1n 0.9 80n 0.9]",
+      "XDUT (vinp vinn clk rst enable decision kickback_metric valid) dynamic_comparator_kickback_metric"
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "3c2cb7c8fb77ba435348a74d94d1166aefe64bdbb7cf4988e3f8b1ead9762aae",
+  "parameters": {
+    "maxstep": "200p",
+    "stop_time": "100n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+    "P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+    "P_DRIVE_KICKBACK_METRIC_AS_A_VOLTAGE",
+    "P_SMALL_OVERDRIVE_MUST_PRODUCE_A_LARGER",
+    "P_ASSERT_VALID_AFTER_EACH_COMPLETED_DECISION",
+    "P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

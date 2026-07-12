@@ -1,0 +1,90 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "reference_ladder_buffered_taps.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=72n maxstep=200p"
+    ],
+    "body_lines": [
+      "Vhi (vref_hi 0) vsource type=pwl wave=[0 0.85 12n 0.85 12.2n 0.62 28n 0.62 28.2n 1.05 50n 1.05 50.2n 0.20 90n 0.20]",
+      "Vlo (vref_lo 0) vsource type=pwl wave=[0 0.10 12n 0.10 12.2n 0.78 28n 0.78 28.2n -0.10 50n -0.10 50.2n 0.70 90n 0.70]",
+      "Ven (enable 0) vsource type=pwl wave=[0 0 4n 0 4.2n 0.9 66n 0.9 66.2n 0 90n 0]",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 40n 0 40.2n 0.9 44n 0.9 44.2n 0 90n 0]",
+      "XDUT (vref_hi vref_lo enable rst tap0 tap1 tap2 tap3 monotonic_ok) reference_ladder_buffered_taps",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vref_hi",
+      "vref_lo",
+      "enable",
+      "rst",
+      "tap0",
+      "tap1",
+      "tap2",
+      "tap3",
+      "monotonic_ok"
+    ]
+  },
+  "family_id": "315",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "6794c523a609bcf9742ac4ec86c36ed1d638016f8ba4bca728e48d7d307f6db0",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "594e89b13bd789941ffe4677a6e71434b771508babafb34fb2b0112198c0f70d",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=90n maxstep=200p"
+        ]
+      },
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ON_RESET_OR_WHEN_DISABLED_DRIVE",
+    "P_WHEN_ENABLED_GENERATE_FOUR_EVENLY_SPACED",
+    "P_CLAMP_REVERSED_OR_OUT_OF_RANGE",
+    "P_ASSERT_MONOTONIC_OK_ONLY_WHEN_THE",
+    "P_SMOOTH_TAP_OUTPUT_TRANSITIONS_WITH_THE",
+    "P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "22b8792d1362999336eb4502f5cc3c3b70acb5533041936b3b904ab0ab8cba29",
+    "family_spec_sha256": "d3f729206c0bfa7cf043257225dd0972a2043fd8cf7b9dd1f68aef386b736ac5"
+  },
+  "task_id": "v4-315"
+}

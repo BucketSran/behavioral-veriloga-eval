@@ -1,0 +1,32 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module cal_code_accumulator(err_in, clk, rst, enable, cal_3, cal_2, cal_1, cal_0, done);
+    inout err_in, clk, rst, enable, cal_3, cal_2, cal_1, cal_0, done;
+    electrical err_in, clk, rst, enable, cal_3, cal_2, cal_1, cal_0, done;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vcm = 0.45;
+    parameter real vth = 0.45; parameter real tr = 200p from (0:inf); parameter real err_tol = 20e-3;
+    parameter real tick = 250p from (0:inf);
+    integer code, updates, tol_count; real prev_clk, done_v;
+    analog function real absval; input x; real x; begin absval = (x < 0.0) ? -x : x; end endfunction
+    analog begin
+        @(initial_step) begin code = 0; updates = 0; tol_count = 0; prev_clk = 0.0; done_v = vss; end
+        @(timer(0, tick)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                code = 0; updates = 0; tol_count = 0; done_v = vss;
+            end else if (V(clk) > vth && prev_clk <= vth) begin
+                updates = updates + 1;
+                if (absval(V(err_in) - vcm) <= err_tol) tol_count = tol_count + 1; else tol_count = 0;
+                if (V(err_in) > vcm + err_tol && code > 0) code = code - 1; else if (V(err_in) < vcm - err_tol && code < 15) code = code + 1;
+                if (code > 15) code = 15;
+                done_v = ((updates >= 8 || tol_count >= 2) ? vdd : vss);
+            end
+            prev_clk = V(clk);
+        end
+        V(cal_0) <+ transition(((code & 1) ? vdd : vss), 0, tr, tr);
+        V(cal_1) <+ transition(((code & 2) ? vdd : vss), 0, tr, tr);
+        V(cal_2) <+ transition(((code & 4) ? vdd : vss), 0, tr, tr);
+        V(cal_3) <+ transition(((code & 8) ? vdd : vss), 0, tr, tr);
+        V(done) <+ transition(done_v, 0, tr, tr);
+    end
+endmodule

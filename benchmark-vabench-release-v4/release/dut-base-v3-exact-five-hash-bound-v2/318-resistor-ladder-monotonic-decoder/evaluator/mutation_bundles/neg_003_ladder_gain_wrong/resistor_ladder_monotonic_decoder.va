@@ -1,0 +1,38 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module resistor_ladder_monotonic_decoder(code_2, code_1, code_0, enable, rst, vout, step_metric, monotonic_ok);
+    inout code_2, code_1, code_0, enable, rst, vout, step_metric, monotonic_ok;
+    electrical code_2, code_1, code_0, enable, rst, vout, step_metric, monotonic_ok;
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real tick = 500p from (0:inf);
+    integer code, mapped_code;
+    real vout_v, step_metric_v, monotonic_ok_v;
+
+    analog begin
+        @(initial_step) begin
+            vout_v = vss; step_metric_v = vss; monotonic_ok_v = vss;
+        end
+        @(timer(0, tick)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                vout_v = vss; step_metric_v = vss; monotonic_ok_v = vss;
+            end else begin
+                code = 0;
+                if (V(code_0) > vth) code = code + 1;
+                if (V(code_1) > vth) code = code + 2;
+                if (V(code_2) > vth) code = code + 4;
+                mapped_code = code;
+                vout_v = mapped_code * (vdd / 6.0);
+                step_metric_v = vdd / 7.0;
+                monotonic_ok_v = vdd;
+            end
+        end
+        V(vout) <+ transition(vout_v, 0, tr, tr);
+        V(step_metric) <+ transition(step_metric_v, 0, tr, tr);
+        V(monotonic_ok) <+ transition(monotonic_ok_v, 0, tr, tr);
+    end
+endmodule

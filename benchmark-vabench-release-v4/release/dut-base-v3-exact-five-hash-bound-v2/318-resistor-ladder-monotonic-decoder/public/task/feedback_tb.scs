@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/resistor_ladder_monotonic_decoder.va"
+
+Venable (enable 0) vsource type=pwl wave=[0 0 4n 0 4.2n 0.9 78n 0.9 78.2n 0 90n 0]
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 82n 0 82.2n 0.9 86n 0.9 86.2n 0]
+Vb0 (code_0 0) vsource type=pwl wave=[0 0 10n 0 10.2n 0.9 20n 0.9 20.2n 0 30n 0 30.2n 0.9 40n 0.9 40.2n 0 50n 0 50.2n 0.9 60n 0.9 60.2n 0 70n 0 70.2n 0.9 90n 0.9]
+Vb1 (code_1 0) vsource type=pwl wave=[0 0 20n 0 20.2n 0.9 40n 0.9 40.2n 0 60n 0 60.2n 0.9 90n 0.9]
+Vb2 (code_2 0) vsource type=pwl wave=[0 0 40n 0 40.2n 0.9 78n 0.9 78.2n 0 90n 0]
+XDUT (code_2 code_1 code_0 enable rst vout step_metric monotonic_ok) resistor_ladder_monotonic_decoder
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=90n maxstep=200p
+save code_2 code_1 code_0 enable rst vout step_metric monotonic_ok

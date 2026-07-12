@@ -1,0 +1,42 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module hysteretic_window_comparator(vin, rst, enable, low_trip, high_trip, inside_flag, state_metric, toggled);
+    input vin, rst, enable, low_trip, high_trip;
+    output inside_flag, state_metric, toggled;
+    electrical vin, rst, enable, low_trip, high_trip, inside_flag, state_metric, toggled;
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real hyst = 10e-3;
+    parameter real tick = 500p from (0:inf);
+    real inside_v, state_v, toggle_v;
+    analog begin
+        @(initial_step) begin inside_v = vss; state_v = vss; toggle_v = vss; end
+        @(timer(0, tick)) begin
+            toggle_v = vss;
+            if (V(rst) > vth || !(V(enable) > vth)) begin
+                inside_v = vss;
+                state_v = vss;
+                toggle_v = vss;
+            end else if (inside_v <= vth) begin
+                if (V(vin) > (V(low_trip) + hyst) && V(vin) < (V(high_trip) - hyst)) begin
+                    inside_v = vdd;
+                    state_v = vdd;
+                    toggle_v = vss;
+                end
+            end else begin
+                if (V(vin) < (V(low_trip) - hyst) || V(vin) > (V(high_trip) + hyst)) begin
+                    inside_v = vss;
+                    state_v = vss;
+                    toggle_v = vss;
+                end
+            end
+        end
+        V(inside_flag) <+ transition((V(rst) > vth) ? vss : inside_v, 0, tr, tr);
+        V(state_metric) <+ transition((V(rst) > vth) ? vss : state_v, 0, tr, tr);
+        V(toggled) <+ transition((V(rst) > vth) ? vss : toggle_v, 0, tr, tr);
+    end
+endmodule

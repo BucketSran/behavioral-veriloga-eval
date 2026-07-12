@@ -1,0 +1,20 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module correction_metric_dac(cal_3, cal_2, cal_1, cal_0, rst, enable, correction_metric);
+    inout cal_3, cal_2, cal_1, cal_0, rst, enable, correction_metric;
+    electrical cal_3, cal_2, cal_1, cal_0, rst, enable, correction_metric;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf); parameter real corr_lsb = 6e-3;
+    integer code; real metric_v;
+    analog begin
+        code = 0;
+        if (V(cal_0) > vth) code = code + 1;
+        if (V(cal_1) > vth) code = code + 2;
+        if (V(cal_2) > vth) code = code + 4;
+        if (V(cal_3) > vth) code = code + 8;
+        if (V(rst) > vth || V(enable) <= vth) metric_v = vss;
+        else metric_v = code * ((2.0 * corr_lsb));
+        V(correction_metric) <+ transition(metric_v, 0, tr, tr);
+    end
+endmodule

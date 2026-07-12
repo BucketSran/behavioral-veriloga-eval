@@ -1,0 +1,85 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "resistor_ladder_monotonic_decoder.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=90n maxstep=200p"
+    ],
+    "body_lines": [
+      "Venable (enable 0) vsource type=pwl wave=[0 0 4n 0 4.2n 0.9 78n 0.9 78.2n 0 90n 0]",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 82n 0 82.2n 0.9 86n 0.9 86.2n 0]",
+      "Vb0 (code_0 0) vsource type=pwl wave=[0 0 10n 0 10.2n 0.9 20n 0.9 20.2n 0 30n 0 30.2n 0.9 40n 0.9 40.2n 0 50n 0 50.2n 0.9 60n 0.9 60.2n 0 70n 0 70.2n 0.9 90n 0.9]",
+      "Vb1 (code_1 0) vsource type=pwl wave=[0 0 20n 0 20.2n 0.9 40n 0.9 40.2n 0 60n 0 60.2n 0.9 90n 0.9]",
+      "Vb2 (code_2 0) vsource type=pwl wave=[0 0 40n 0 40.2n 0.9 78n 0.9 78.2n 0 90n 0]",
+      "XDUT (code_2 code_1 code_0 enable rst vout step_metric monotonic_ok) resistor_ladder_monotonic_decoder",
+      ""
+    ],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "code_2",
+      "code_1",
+      "code_0",
+      "enable",
+      "rst",
+      "vout",
+      "step_metric",
+      "monotonic_ok"
+    ]
+  },
+  "family_id": "318",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "migration": {
+    "legacy_feedback_deck": "test_feedback/public_tb.scs",
+    "legacy_feedback_deck_sha256": "dacc2a913a4771ee19cc60b162c7f7d120130dbaf19dfc2e4c885f8a8896ee25",
+    "legacy_score_deck": "evaluator/score_tb.scs",
+    "legacy_score_deck_sha256": "dacc2a913a4771ee19cc60b162c7f7d120130dbaf19dfc2e4c885f8a8896ee25",
+    "notes": [
+      "legacy feedback deck was used only to seed the canonical harness spec",
+      "legacy score deck seeded private profile-specific overrides"
+    ]
+  },
+  "profile_defaults": {
+    "feedback": {
+      "parameters": {
+        "maxstep": "200p",
+        "stop_time": "100n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "100n"
+      }
+    }
+  },
+  "property_ids": [
+    "P_ON_RESET_OR_WHEN_DISABLED_DRIVE",
+    "P_DECODE_CODE_2_CODE_0_AS",
+    "P_DRIVE_VOUT_TO_THE_CORRESPONDING_EVENLY",
+    "P_EXPOSE_ONE_LSB_STEP_ON_STEP",
+    "P_ASSERT_MONOTONIC_OK_WHEN_THE_ACTIVE",
+    "P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "d667916d91d52479e2af9f48b30a5e3ea1dbb0d28670f3935fde1a4dd41c672a",
+    "family_spec_sha256": "abbf12010a03af2de9769b1eb2fb91069e790664bde1b5124fbe33d2b3429a61"
+  },
+  "task_id": "v4-318"
+}

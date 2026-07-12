@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/capacitor_mismatch_cal_engine_top.va"
+ahdl_include "./dut/cal_code_accumulator.va"
+ahdl_include "./dut/correction_metric_dac.va"
+
+Verr (err_in 0) vsource type=pwl wave=[0 0.58 92n 0.58]
+Vclk (clk 0) vsource type=pwl wave=[0 0 9n 0 10n 0.9 12n 0.9 12.2n 0 15n 0.9 17n 0.9 17.2n 0 20n 0.9 22n 0.9 22.2n 0 25n 0.9 27n 0.9 27.2n 0 30n 0.9 32n 0.9 32.2n 0 35n 0.9 37n 0.9 37.2n 0 40n 0.9 42n 0.9 42.2n 0 45n 0.9 47n 0.9 47.2n 0 50n 0.9 52n 0.9 52.2n 0 55n 0.9 57n 0.9 57.2n 0 60n 0.9 62n 0.9 62.2n 0 65n 0.9 67n 0.9 67.2n 0 70n 0.9 72n 0.9 72.2n 0 75n 0.9 77n 0.9 77.2n 0 80n 0.9 82n 0.9 82.2n 0 85n 0.9 87n 0.9 87.2n 0 92n 0]
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.2n 0 92n 0]
+Ven (enable 0) vsource type=pwl wave=[0 0 5n 0 5.2n 0.9 80n 0.9 80.2n 0 92n 0]
+XDUT (err_in clk rst enable cal_3 cal_2 cal_1 cal_0 correction_metric done) capacitor_mismatch_cal_engine_top
+
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=92n maxstep=200p
+save err_in clk rst enable cal_3 cal_2 cal_1 cal_0 correction_metric done

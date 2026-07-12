@@ -1,0 +1,28 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module track_hold_cell(vin, clk, rst, sample_en, vhold, held_valid);
+    input vin, clk, rst, sample_en;
+    output vhold, held_valid;
+    electrical vin, clk, rst, sample_en, vhold, held_valid;
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    real hold_v, valid_v;
+    analog begin
+        @(initial_step) begin hold_v = vcm; valid_v = vss; end
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth) begin
+                hold_v = vcm;
+                valid_v = vss;
+            end else if (1) begin
+                hold_v = V(vin);
+                valid_v = vdd;
+            end
+        end
+        V(vhold) <+ transition(hold_v, 0, tr, tr);
+        V(held_valid) <+ transition((V(rst) > vth) ? vss : valid_v, 0, tr, tr);
+    end
+endmodule

@@ -1,0 +1,64 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module settling_buffer_state(
+    clk, rst, enable, target, vout, settling_metric, settled
+);
+    input clk, rst, enable, target;
+    output vout, settling_metric, settled;
+    electrical clk, rst, enable, target, vout, settling_metric, settled;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real settle_step = 80e-3 from (0:inf);
+    parameter real settle_tol = 8e-3 from (0:inf);
+
+    real vout_q;
+    real metric_q;
+    real delta;
+    integer within_tol_count;
+    integer settled_q;
+
+    analog begin
+        @(initial_step) begin
+            vout_q = vcm;
+            metric_q = vss;
+            within_tol_count = 0;
+            settled_q = 0;
+        end
+
+        @(cross(V(clk) - vth, +1)
+          or cross(V(rst) - vth, +1)
+          or cross(V(enable) - vth, -1)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                vout_q = vss;
+                metric_q = vss;
+                within_tol_count = 0;
+                settled_q = 0;
+            end else begin
+                delta = V(target) - vout_q;
+                if (delta > settle_step)
+                    vout_q = vout_q + settle_step;
+                else if (delta < -settle_step)
+                    vout_q = vout_q - settle_step;
+                else
+                    vout_q = V(target);
+
+                metric_q = V(target) - vout_q;
+                if (metric_q < 0.0) metric_q = -metric_q;
+                if (metric_q <= settle_tol)
+                    within_tol_count = within_tol_count + 1;
+                else
+                    within_tol_count = 0;
+                settled_q = (within_tol_count >= 2);
+            end
+        end
+
+        V(vout) <+ transition(vout_q, 0.0, tr, tr);
+        V(settling_metric) <+ transition(metric_q, 0.0, tr, tr);
+        V(settled) <+ transition(settled_q ? vdd : vss, 0.0, tr, tr);
+    end
+endmodule
