@@ -1,0 +1,289 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "latched_bus_dac8",
+            "parameters": [
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets the rising-edge and input-bit decision threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vth > 0"
+              },
+              {
+                "default": 1,
+                "name": "vref",
+                "override_behavior": "sets the full-scale analog endpoint",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vref > 0"
+              },
+              {
+                "default": 2e-11,
+                "name": "tr",
+                "override_behavior": "sets analog output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vclk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b7",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b6",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b5",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b4",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b3",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b2",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b1",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b0",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 9
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "latched_bus_dac8.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "051",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Latched Bus DAC8"
+  },
+  "modeling_constraints": [
+    "Use deterministic rising-edge state updates and unconditional voltage output contribution.",
+    "Preserve the public binary bit order and latch behavior.",
+    "Do not make the DAC transparent between clock edges or add undeclared artifacts, validation hooks, current contributions, ddt(), or idt()."
+  ],
+  "properties": [
+    {
+      "id": "P_RISING_EDGE_CAPTURE",
+      "observable_contract": "Each rising crossing of vclk through vth captures the unsigned value of b[7:0].",
+      "required_signals": [
+        "time",
+        "vclk",
+        "b7",
+        "b6",
+        "b5",
+        "b4",
+        "b3",
+        "b2",
+        "b1",
+        "b0",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_HOLD_BETWEEN_EDGES",
+      "observable_contract": "vout retains the value from the most recent rising clock crossing despite input-bus changes between update edges.",
+      "required_signals": [
+        "time",
+        "vclk",
+        "b7",
+        "b6",
+        "b5",
+        "b4",
+        "b3",
+        "b2",
+        "b1",
+        "b0",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_ENDPOINTS",
+      "observable_contract": "Latched code 0 maps to 0 V and latched code 255 maps to vref.",
+      "required_signals": [
+        "time",
+        "vclk",
+        "b7",
+        "b6",
+        "b5",
+        "b4",
+        "b3",
+        "b2",
+        "b1",
+        "b0",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_BINARY_MONOTONICITY",
+      "observable_contract": "Increasing the latched unsigned code never decreases vout, with b7 as MSB and b0 as LSB.",
+      "required_signals": [
+        "time",
+        "vclk",
+        "b7",
+        "b6",
+        "b5",
+        "b4",
+        "b3",
+        "b2",
+        "b1",
+        "b0",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_SMOOTHING",
+      "observable_contract": "vout approaches each newly latched target with finite transition smoothing set by tr.",
+      "required_signals": [
+        "time",
+        "vclk",
+        "vout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "latched_bus_dac8.va"
+  ],
+  "task_id": "v4-051",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vclk",
+            "port_ref": "vclk",
+            "position": 0
+          },
+          {
+            "net": "b7",
+            "port_ref": "b7",
+            "position": 1
+          },
+          {
+            "net": "b6",
+            "port_ref": "b6",
+            "position": 2
+          },
+          {
+            "net": "b5",
+            "port_ref": "b5",
+            "position": 3
+          },
+          {
+            "net": "b4",
+            "port_ref": "b4",
+            "position": 4
+          },
+          {
+            "net": "b3",
+            "port_ref": "b3",
+            "position": 5
+          },
+          {
+            "net": "b2",
+            "port_ref": "b2",
+            "position": 6
+          },
+          {
+            "net": "b1",
+            "port_ref": "b1",
+            "position": 7
+          },
+          {
+            "net": "b0",
+            "port_ref": "b0",
+            "position": 8
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 9
+          }
+        ],
+        "module_ref": "latched_bus_dac8",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vclk",
+      "b7",
+      "b6",
+      "b5",
+      "b4",
+      "b3",
+      "b2",
+      "b1",
+      "b0",
+      "vout"
+    ]
+  }
+}

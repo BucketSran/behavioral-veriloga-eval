@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-055",
+    "canonical_task_slug": "055-first-order-sigma-delta-modulator",
+    "family_spec_sha256": "43aab179babd997455024e3a389931216c6ce89e82c00873af4515937b4ac403",
+    "mutation_catalog_sha256": "13a6eec865d069559871252601ec5016edd226cc4c33732c9ea0331290407327",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "055",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_falling_edge_update",
+    "testbench_suite": [
+      "neg_001_force_zero",
+      "neg_002_no_feedback",
+      "neg_004_falling_edge_update",
+      "neg_005_half_feedback",
+      "neg_003_inverted_decision"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "5202d72f9ed897440e5f3bb6e467e325e368ce02c30172ae211b4d5a5146a763",
+    "changed_artifacts": [
+      "first_order_sigma_delta_modulator.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_falling_edge_update",
+    "rationale": "Select fault class falling_edge_update under trigger 'First Order Sigma Delta Modulator: updates on falling clock crossings, so simple toggling works but rising-edge state checks fail.' because it exercises P_INPUT_DENSITY_ORDER as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 21,
+    "source_preferred_seed": "neg_001_force_zero",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}
