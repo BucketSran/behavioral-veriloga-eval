@@ -1,0 +1,39 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-325",
+    "canonical_task_slug": "325-fine-coarse-tdc-encoder",
+    "family_spec_sha256": "e50e6d55bb6c814210717c272cc91684cdf22a849657658ab35a73c54e5aa698",
+    "mutation_catalog_sha256": "ff9170b6407b77c0d5961e62ff73c6c138a841ceeb4f565b49429f55a5656946",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "325",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_fine_residual_inverted",
+    "testbench_suite": [
+      "neg_002_start_edge_does_not_arm",
+      "neg_003_ref_clk_edges_double_counted",
+      "neg_004_fine_residual_inverted",
+      "neg_005_valid_asserted_at_start",
+      "neg_001_coarse_code_not_cleared_on_disable"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "b8dc92ee7a042b715d6a51532ebd5c4b83e61069766e797502cc25ba167eee66",
+    "changed_artifacts": [
+      "coarse_counter.va",
+      "fine_coarse_tdc_encoder_top.va",
+      "fine_residual_metric.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_fine_residual_inverted",
+    "rationale": "Select fault class fine_residual_polarity_inverted under trigger 'a rising stop edge completes an armed measurement after reference edges have established the period' because it exercises P_LATCH_THE_COARSE_COUNT_INTO_COARSE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 20,
+    "source_preferred_seed": "neg_002_start_edge_does_not_arm",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

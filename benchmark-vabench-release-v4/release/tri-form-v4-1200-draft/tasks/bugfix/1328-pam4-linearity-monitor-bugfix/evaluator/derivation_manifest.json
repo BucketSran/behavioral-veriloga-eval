@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-328",
+    "canonical_task_slug": "328-pam4-linearity-monitor",
+    "family_spec_sha256": "1b476a5e5d2ff87f2e8d7e0c136c145d7d0873c6825972777fd03355a7d78943",
+    "mutation_catalog_sha256": "664350c13e34915433aca62dbbcba34796e324fb3f34389bedfe1ea3217e7ee8",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "328",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_reset_disable_clear_missing",
+    "testbench_suite": [
+      "neg_002_pam4_level_spacing_wrong",
+      "neg_003_linearity_metric_missing",
+      "neg_004_reset_disable_clear_missing",
+      "neg_005_valid_flag_missing",
+      "neg_001_pam4_symbol_mapping_reversed"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "420cc04388fe7b88ebc0daa0b7901a3a3109f34635eea8040e05e9926a91021d",
+    "changed_artifacts": [
+      "pam4_linearity_monitor.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_reset_disable_clear_missing",
+    "rationale": "Select fault class reset_disable_clear_missing under trigger 'reset_disable_clear_missing' because it exercises P_ON_RESET_OR_WHEN_DISABLED_CLEAR as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 9,
+    "source_preferred_seed": "neg_002_pam4_level_spacing_wrong",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

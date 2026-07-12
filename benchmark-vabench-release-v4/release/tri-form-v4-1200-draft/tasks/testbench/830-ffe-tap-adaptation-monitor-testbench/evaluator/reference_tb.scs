@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/ffe_tap_adaptation_monitor_top.va"
+ahdl_include "./dut/tap_update_controller.va"
+ahdl_include "./dut/cursor_metric_core.va"
+
+Verr_in (err_in 0) vsource type=pwl wave=[0 0.300 9n 0.300 15n 0.680 28n 0.680 34n 0.420 48n 0.420 72n 0.315]
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=5n width=2.5n delay=1.2n rise=60p fall=60p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.7n 0.9 1.8n 0 72n 0]
+Venable (enable 0) vsource type=pwl wave=[0 0 4.5n 0 4.6n 0.9 44.64n 0.9 44.74n 0 50.64n 0 50.74n 0.9 72n 0.9]
+
+XDUT (err_in clk rst enable tap_pre tap_post main_out adapt_metric done) ffe_tap_adaptation_monitor_top
+
+
+tran tran stop=72n maxstep=100p
+save err_in clk rst enable tap_pre tap_post main_out adapt_metric done

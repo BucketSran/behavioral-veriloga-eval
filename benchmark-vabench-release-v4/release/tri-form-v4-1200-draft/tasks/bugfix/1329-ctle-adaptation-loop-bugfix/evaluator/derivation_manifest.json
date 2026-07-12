@@ -1,0 +1,39 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-329",
+    "canonical_task_slug": "329-ctle-adaptation-loop",
+    "family_spec_sha256": "dba1323267d6a4300c62cbdd99da6569100aecd8270111de945154dcc443d616",
+    "mutation_catalog_sha256": "e4269a2d1add85c47d1ca2e1255475b006ed262ad6c8605cdeb9f9a62ede7710",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "329",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_edge_metric_sample_delayed_two_cycles",
+    "testbench_suite": [
+      "neg_002_edge_metric_sample_delayed_two_cycles",
+      "neg_003_boost_direction_reversed",
+      "neg_004_boost_output_polarity_inverted",
+      "neg_005_lock_after_one_update",
+      "neg_001_vout_not_cleared_on_disable"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "723d7fbe66a1d04d01efcbde3243b6aeaf8aacb1af0e79375833b3d05fbde98d",
+    "changed_artifacts": [
+      "boost_adapt_controller.va",
+      "ctle_adaptation_loop_top.va",
+      "ctle_boost_core.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_edge_metric_sample_delayed_two_cycles",
+    "rationale": "Select fault class edge_metric_sample_delayed_two_cycles under trigger 'an enabled rising clk edge compares a two-cycle stale edge metric instead of the current input' because it exercises P_ON_EACH_ENABLED_RISING_CLK_EDGE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 22,
+    "source_preferred_seed": "neg_002_edge_metric_sample_delayed_two_cycles",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

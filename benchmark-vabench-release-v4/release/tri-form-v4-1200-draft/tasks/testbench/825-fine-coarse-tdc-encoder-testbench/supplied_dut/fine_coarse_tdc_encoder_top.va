@@ -1,0 +1,27 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module fine_coarse_tdc_encoder_top(
+    start, stop, ref_clk, rst, enable,
+    coarse_3, coarse_2, coarse_1, coarse_0, fine_metric, valid
+);
+    input start, stop, ref_clk, rst, enable;
+    output coarse_3, coarse_2, coarse_1, coarse_0, fine_metric, valid;
+    electrical start, stop, ref_clk, rst, enable;
+    electrical coarse_3, coarse_2, coarse_1, coarse_0, fine_metric, valid;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    coarse_counter #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr)) XCOARSE (
+        start, stop, ref_clk, rst, enable,
+        coarse_3, coarse_2, coarse_1, coarse_0, valid
+    );
+
+    fine_residual_metric #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr)) XFINE (
+        start, stop, ref_clk, rst, enable, fine_metric
+    );
+endmodule

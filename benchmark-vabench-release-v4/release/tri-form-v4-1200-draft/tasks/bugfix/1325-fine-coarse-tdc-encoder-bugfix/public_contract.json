@@ -1,0 +1,409 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "coarse_counter",
+              "fine_residual_metric"
+            ],
+            "name": "fine_coarse_tdc_encoder_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "start",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "stop",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "ref_clk",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "coarse_3",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "coarse_2",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "coarse_1",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "coarse_0",
+                "position": 8
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "fine_metric",
+                "position": 9
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 10
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "fine_coarse_tdc_encoder_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "coarse_counter",
+            "parameters": [
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "a",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "b",
+                "position": 1
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "coarse_counter.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "fine_residual_metric",
+            "parameters": [
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "a",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "b",
+                "position": 1
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "fine_residual_metric.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/fine_coarse_tdc_encoder_top.va",
+    "buggy_bundle/coarse_counter.va",
+    "buggy_bundle/fine_residual_metric.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "325",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "measurement_systems",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Fine/coarse TDC Encoder"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+      "observable_contract": "On reset or when disabled, clear coarse code, fine metric, and `valid`.",
+      "required_signals": [
+        "time",
+        "start",
+        "stop",
+        "ref_clk",
+        "rst",
+        "enable",
+        "coarse_3",
+        "coarse_2",
+        "coarse_1",
+        "coarse_0",
+        "fine_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_A_RISING_START_EDGE_ARMS_A",
+      "observable_contract": "A rising `start` edge arms a measurement and clears the coarse counter.",
+      "required_signals": [
+        "time",
+        "start",
+        "stop",
+        "ref_clk",
+        "rst",
+        "enable",
+        "coarse_3",
+        "coarse_2",
+        "coarse_1",
+        "coarse_0",
+        "fine_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_COUNT_RISING_REF_CLK_EDGES_UNTIL",
+      "observable_contract": "Count rising `ref_clk` edges until the first rising `stop` edge.",
+      "required_signals": [
+        "time",
+        "start",
+        "stop",
+        "ref_clk",
+        "rst",
+        "enable",
+        "coarse_3",
+        "coarse_2",
+        "coarse_1",
+        "coarse_0",
+        "fine_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_LATCH_THE_COARSE_COUNT_INTO_COARSE",
+      "observable_contract": "Latch the coarse count into `coarse_3..coarse_0` and expose a fine residual proxy on `fine_metric`.",
+      "required_signals": [
+        "time",
+        "start",
+        "stop",
+        "ref_clk",
+        "rst",
+        "enable",
+        "coarse_3",
+        "coarse_2",
+        "coarse_1",
+        "coarse_0",
+        "fine_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ASSERT_VALID_ONLY_AFTER_THE_STOP",
+      "observable_contract": "Assert `valid` only after the stop edge completes the measurement.",
+      "required_signals": [
+        "time",
+        "start",
+        "stop",
+        "ref_clk",
+        "rst",
+        "enable",
+        "coarse_3",
+        "coarse_2",
+        "coarse_1",
+        "coarse_0",
+        "fine_metric",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "fine_coarse_tdc_encoder_top.va",
+    "coarse_counter.va",
+    "fine_residual_metric.va"
+  ],
+  "task_id": "v4-1325",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "start",
+            "port_ref": "start",
+            "position": 0
+          },
+          {
+            "net": "stop",
+            "port_ref": "stop",
+            "position": 1
+          },
+          {
+            "net": "ref_clk",
+            "port_ref": "ref_clk",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 4
+          },
+          {
+            "net": "coarse_3",
+            "port_ref": "coarse_3",
+            "position": 5
+          },
+          {
+            "net": "coarse_2",
+            "port_ref": "coarse_2",
+            "position": 6
+          },
+          {
+            "net": "coarse_1",
+            "port_ref": "coarse_1",
+            "position": 7
+          },
+          {
+            "net": "coarse_0",
+            "port_ref": "coarse_0",
+            "position": 8
+          },
+          {
+            "net": "fine_metric",
+            "port_ref": "fine_metric",
+            "position": 9
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 10
+          }
+        ],
+        "module_ref": "fine_coarse_tdc_encoder_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "start",
+      "stop",
+      "ref_clk",
+      "rst",
+      "enable",
+      "coarse_3",
+      "coarse_2",
+      "coarse_1",
+      "coarse_0",
+      "fine_metric",
+      "valid"
+    ]
+  }
+}

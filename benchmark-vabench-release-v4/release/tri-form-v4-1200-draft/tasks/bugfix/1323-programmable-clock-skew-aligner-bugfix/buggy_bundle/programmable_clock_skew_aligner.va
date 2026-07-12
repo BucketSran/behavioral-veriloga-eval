@@ -1,0 +1,45 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module programmable_clock_skew_aligner(clk_in, rst, enable, skew_2, skew_1, skew_0, clk_out, delay_metric, valid);
+    inout clk_in, rst, enable, skew_2, skew_1, skew_0, clk_out, delay_metric, valid;
+    electrical clk_in, rst, enable, skew_2, skew_1, skew_0, clk_out, delay_metric, valid;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vth = 0.45; parameter real tr = 200p from (0:inf);
+    parameter real unit_delay_metric = 0.1; parameter real tick = 200p from (0:inf);
+    integer code, mapped_code, delay_count, pulse_count; real prev_clk, clk_out_v, metric_v, valid_v;
+    analog begin
+        @(initial_step) begin prev_clk = 0.0; delay_count = 0; pulse_count = 0; clk_out_v = 0.0; metric_v = 0.0; valid_v = 0.0; end
+        @(timer(0, tick)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                delay_count = 0; pulse_count = 0; clk_out_v = 0.0; metric_v = 0.0; valid_v = 0.0;
+            end else begin
+                if (V(clk_in) > vth && prev_clk <= vth) begin
+                    code = 0;
+                    if (V(skew_0) > vth) code = code + 1;
+                    if (V(skew_1) > vth) code = code + 2;
+                    if (V(skew_2) > vth) code = code + 4;
+                    mapped_code = code;
+                    delay_count = mapped_code + 1;
+                    metric_v = mapped_code * 0.04;
+                end
+                if (delay_count > 0) begin
+                    delay_count = delay_count - 1;
+                    if (delay_count == 0) begin
+                        pulse_count = 5;
+                        valid_v = vdd;
+                    end
+                end
+                if (pulse_count > 0) begin
+                    clk_out_v = vdd;
+                    pulse_count = pulse_count - 1;
+                end else begin
+                    clk_out_v = vss;
+                end
+            end
+            prev_clk = V(clk_in);
+        end
+        V(clk_out) <+ transition(clk_out_v, 0, tr, tr);
+        V(delay_metric) <+ transition(metric_v, 0, tr, tr);
+        V(valid) <+ transition(valid_v, 0, tr, tr);
+    end
+endmodule

@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/cdr_eye_monitor_top.va"
+ahdl_include "./dut/edge_margin_sampler.va"
+ahdl_include "./dut/eye_metric_filter.va"
+
+Vdata_in (data_in 0) vsource type=pwl wave=[0 0.180 9n 0.180 15n 0.740 28n 0.740 34n 0.420 48n 0.420 72n 0.285]
+Vsample_clk (sample_clk 0) vsource type=pulse val0=0 val1=0.9 period=5n width=2.5n delay=1.2n rise=60p fall=60p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.7n 0.9 1.8n 0 72n 0]
+Venable (enable 0) vsource type=pwl wave=[0 0 4.5n 0 4.6n 0.9 44.64n 0.9 44.74n 0 50.64n 0 50.74n 0.9 72n 0.9]
+
+XDUT (data_in sample_clk rst enable early late eye_metric lock_hint valid) cdr_eye_monitor_top
+
+
+tran tran stop=72n maxstep=100p
+save data_in sample_clk rst enable early late eye_metric lock_hint valid

@@ -1,0 +1,299 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "charge_pump_pulse_balancer",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "20e-3 from (0:inf)",
+                "name": "pump_step",
+                "override_behavior": "overrides pump_step",
+                "type": "real",
+                "units": "V",
+                "valid_range": "positive"
+              },
+              {
+                "default": "30e-3 from (0:inf)",
+                "name": "balance_tol",
+                "override_behavior": "overrides balance_tol",
+                "type": "real",
+                "units": "V",
+                "valid_range": "positive"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "up",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dn",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vctrl",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "imbalance_metric",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "balanced",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "charge_pump_pulse_balancer.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/charge_pump_pulse_balancer.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "321",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "pll_clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Charge-pump Pulse Balancer"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_DRIVE",
+      "observable_contract": "On reset or when disabled, drive `vctrl` to `vcm`, clear imbalance, and clear `balanced`.",
+      "required_signals": [
+        "time",
+        "up",
+        "dn",
+        "clk",
+        "rst",
+        "enable",
+        "vctrl",
+        "imbalance_metric",
+        "balanced"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_RISING_CLK_EDGE_OBSERVE",
+      "observable_contract": "On each rising `clk` edge, observe voltage-coded `up` and `dn` pulse states.",
+      "required_signals": [
+        "time",
+        "up",
+        "dn",
+        "clk",
+        "rst",
+        "enable",
+        "vctrl",
+        "imbalance_metric",
+        "balanced"
+      ]
+    },
+    {
+      "id": "P_INCREASE_VCTRL_FOR_UP_ONLY_DECREASE",
+      "observable_contract": "Increase `vctrl` for UP-only, decrease it for DN-only, and hold for simultaneous or inactive pulses.",
+      "required_signals": [
+        "time",
+        "up",
+        "dn",
+        "clk",
+        "rst",
+        "enable",
+        "vctrl",
+        "imbalance_metric",
+        "balanced"
+      ]
+    },
+    {
+      "id": "P_DRIVE_IMBALANCE_METRIC_FROM_THE_ACCUMULATED",
+      "observable_contract": "Drive `imbalance_metric` from the accumulated UP-minus-DN activity.",
+      "required_signals": [
+        "time",
+        "up",
+        "dn",
+        "clk",
+        "rst",
+        "enable",
+        "vctrl",
+        "imbalance_metric",
+        "balanced"
+      ]
+    },
+    {
+      "id": "P_ASSERT_BALANCED_ONLY_WHEN_THE_RECENT",
+      "observable_contract": "Assert `balanced` only when the recent absolute imbalance is below `balance_tol`.",
+      "required_signals": [
+        "time",
+        "up",
+        "dn",
+        "clk",
+        "rst",
+        "enable",
+        "vctrl",
+        "imbalance_metric",
+        "balanced"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "charge_pump_pulse_balancer.va"
+  ],
+  "task_id": "v4-1321",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "up",
+            "port_ref": "up",
+            "position": 0
+          },
+          {
+            "net": "dn",
+            "port_ref": "dn",
+            "position": 1
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 4
+          },
+          {
+            "net": "vctrl",
+            "port_ref": "vctrl",
+            "position": 5
+          },
+          {
+            "net": "imbalance_metric",
+            "port_ref": "imbalance_metric",
+            "position": 6
+          },
+          {
+            "net": "balanced",
+            "port_ref": "balanced",
+            "position": 7
+          }
+        ],
+        "module_ref": "charge_pump_pulse_balancer",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "up",
+      "dn",
+      "clk",
+      "rst",
+      "enable",
+      "vctrl",
+      "imbalance_metric",
+      "balanced"
+    ]
+  }
+}

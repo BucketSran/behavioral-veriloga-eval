@@ -1,0 +1,39 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-327",
+    "canonical_task_slug": "327-cdr-eye-monitor",
+    "family_spec_sha256": "261d594911ce33b429fb970cd0e993a01125f416a9779ce67cef38eae1a3b58a",
+    "mutation_catalog_sha256": "24478fc56292e9b042c37f7fe9094111fc96b8482645355c9c85ff0ae758bbc9",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "327",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_early_late_flags_swapped",
+    "testbench_suite": [
+      "neg_002_sample_valid_missing",
+      "neg_003_early_late_flags_swapped",
+      "neg_004_eye_metric_not_updated",
+      "neg_005_lock_after_one_good_sample",
+      "neg_001_eye_metric_not_cleared"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "65b882a631ed2e1d20d4bc0b5f9db5f45454fe2a95048d5096383b1c6699ec88",
+    "changed_artifacts": [
+      "cdr_eye_monitor_top.va",
+      "edge_margin_sampler.va",
+      "eye_metric_filter.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_early_late_flags_swapped",
+    "rationale": "Select fault class early_late_polarity_swapped under trigger 'a data transition occurs within the public edge window around a sample edge' because it exercises P_RAISE_EARLY_OR_LATE_ACCORDING_TO as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 20,
+    "source_preferred_seed": "neg_002_sample_valid_missing",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

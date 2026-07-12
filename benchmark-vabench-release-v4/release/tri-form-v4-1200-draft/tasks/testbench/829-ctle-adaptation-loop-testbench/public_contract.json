@@ -1,0 +1,570 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "boost_adapt_controller",
+              "ctle_boost_core"
+            ],
+            "name": "ctle_adaptation_loop_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.55",
+                "name": "edge_target",
+                "override_behavior": "sets the target edge metric for boost adaptation",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite"
+              },
+              {
+                "default": "30e-3 from [0:inf)",
+                "name": "adapt_tol",
+                "override_behavior": "sets the lock tolerance around edge_target",
+                "type": "real",
+                "units": "V",
+                "valid_range": "nonnegative"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "edge_metric_in",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "boost_2",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "boost_1",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "boost_0",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 8
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "adapt_metric",
+                "position": 9
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "locked",
+                "position": 10
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "ctle_adaptation_loop_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "ctle_boost_core",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.12 from [0:inf)",
+                "name": "boost_step",
+                "override_behavior": "sets the gain increment per boost code",
+                "type": "real",
+                "units": "",
+                "valid_range": "nonnegative"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "boost_2",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "boost_1",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "boost_0",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 4
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "ctle_boost_core.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "boost_adapt_controller",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.55",
+                "name": "edge_target",
+                "override_behavior": "sets the target edge metric",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite"
+              },
+              {
+                "default": "30e-3 from [0:inf)",
+                "name": "adapt_tol",
+                "override_behavior": "sets the adaptation lock tolerance",
+                "type": "real",
+                "units": "V",
+                "valid_range": "nonnegative"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "edge_metric_in",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "boost_2",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "boost_1",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "boost_0",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "adapt_metric",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "locked",
+                "position": 8
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "boost_adapt_controller.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "329",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "serdes_equalization_systems",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "CTLE Adaptation Loop"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+      "observable_contract": "On reset or when disabled, clear boost code, output, metric, and `locked`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "edge_metric_in",
+        "clk",
+        "rst",
+        "enable",
+        "boost_2",
+        "boost_1",
+        "boost_0",
+        "vout",
+        "adapt_metric",
+        "locked"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+      "observable_contract": "On each enabled rising `clk` edge, compare `edge_metric_in` with `edge_target`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "edge_metric_in",
+        "clk",
+        "rst",
+        "enable",
+        "boost_2",
+        "boost_1",
+        "boost_0",
+        "vout",
+        "adapt_metric",
+        "locked"
+      ]
+    },
+    {
+      "id": "P_INCREASE_BOOST_CODE_WHEN_EDGE_METRIC",
+      "observable_contract": "Increase boost code when edge metric is too low and decrease it when too high.",
+      "required_signals": [
+        "time",
+        "vin",
+        "edge_metric_in",
+        "clk",
+        "rst",
+        "enable",
+        "boost_2",
+        "boost_1",
+        "boost_0",
+        "vout",
+        "adapt_metric",
+        "locked"
+      ]
+    },
+    {
+      "id": "P_DRIVE_VOUT_AS_A_BOOSTED_VERSION",
+      "observable_contract": "Drive `vout` as a boosted version of `vin - vcm` using the active boost code.",
+      "required_signals": [
+        "time",
+        "vin",
+        "edge_metric_in",
+        "clk",
+        "rst",
+        "enable",
+        "boost_2",
+        "boost_1",
+        "boost_0",
+        "vout",
+        "adapt_metric",
+        "locked"
+      ]
+    },
+    {
+      "id": "P_ASSERT_LOCKED_AFTER_THREE_CONSECUTIVE_UPDATES",
+      "observable_contract": "Assert `locked` after three consecutive updates within the target tolerance.",
+      "required_signals": [
+        "time",
+        "vin",
+        "edge_metric_in",
+        "clk",
+        "rst",
+        "enable",
+        "boost_2",
+        "boost_1",
+        "boost_0",
+        "vout",
+        "adapt_metric",
+        "locked"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/ctle_adaptation_loop_top.va",
+    "supplied_dut/ctle_boost_core.va",
+    "supplied_dut/boost_adapt_controller.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-829",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "edge_metric_in",
+            "port_ref": "edge_metric_in",
+            "position": 1
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 4
+          },
+          {
+            "net": "boost_2",
+            "port_ref": "boost_2",
+            "position": 5
+          },
+          {
+            "net": "boost_1",
+            "port_ref": "boost_1",
+            "position": 6
+          },
+          {
+            "net": "boost_0",
+            "port_ref": "boost_0",
+            "position": 7
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 8
+          },
+          {
+            "net": "adapt_metric",
+            "port_ref": "adapt_metric",
+            "position": 9
+          },
+          {
+            "net": "locked",
+            "port_ref": "locked",
+            "position": 10
+          }
+        ],
+        "module_ref": "ctle_adaptation_loop_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "edge_metric_in",
+      "clk",
+      "rst",
+      "enable",
+      "boost_2",
+      "boost_1",
+      "boost_0",
+      "vout",
+      "adapt_metric",
+      "locked"
+    ]
+  }
+}

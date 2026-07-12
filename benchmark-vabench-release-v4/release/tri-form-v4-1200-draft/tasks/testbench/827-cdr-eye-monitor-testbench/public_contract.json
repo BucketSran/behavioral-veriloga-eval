@@ -1,0 +1,526 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "edge_margin_sampler",
+              "eye_metric_filter"
+            ],
+            "name": "cdr_eye_monitor_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.55",
+                "name": "eye_min",
+                "override_behavior": "overrides eye_min",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "600p from (0:inf)",
+                "name": "edge_window",
+                "override_behavior": "overrides edge_window",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "data_in",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sample_clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "early",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "late",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "eye_metric",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lock_hint",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "cdr_eye_monitor_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "edge_margin_sampler",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "600p from (0:inf)",
+                "name": "edge_window",
+                "override_behavior": "overrides edge_window",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "data_in",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sample_clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "early",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "late",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "margin",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 7
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "edge_margin_sampler.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "eye_metric_filter",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.55",
+                "name": "eye_min",
+                "override_behavior": "overrides eye_min",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sample_clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "margin",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sample_valid",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "eye_metric",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lock_hint",
+                "position": 6
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "eye_metric_filter.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "327",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "serdes_timing_systems",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "CDR Eye Monitor"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+      "observable_contract": "On reset or when disabled, clear early/late flags, eye metric, lock hint, and `valid`.",
+      "required_signals": [
+        "time",
+        "data_in",
+        "sample_clk",
+        "rst",
+        "enable",
+        "early",
+        "late",
+        "eye_metric",
+        "lock_hint",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_SAMPLING_CLOCK_EDGE_COMPARE",
+      "observable_contract": "On each sampling-clock edge, compare the sampled data level with the previous sample.",
+      "required_signals": [
+        "time",
+        "data_in",
+        "sample_clk",
+        "rst",
+        "enable",
+        "early",
+        "late",
+        "eye_metric",
+        "lock_hint",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_RAISE_EARLY_OR_LATE_ACCORDING_TO",
+      "observable_contract": "Raise `early` or `late` according to the sign of the edge-position proxy around the sample instant.",
+      "required_signals": [
+        "time",
+        "data_in",
+        "sample_clk",
+        "rst",
+        "enable",
+        "early",
+        "late",
+        "eye_metric",
+        "lock_hint",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_DRIVE_EYE_METRIC_FROM_RECENT_TRANSITION",
+      "observable_contract": "Drive `eye_metric` from recent transition stability and sample margin.",
+      "required_signals": [
+        "time",
+        "data_in",
+        "sample_clk",
+        "rst",
+        "enable",
+        "early",
+        "late",
+        "eye_metric",
+        "lock_hint",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ASSERT_LOCK_HINT_AFTER_FOUR_CONSECUTIVE",
+      "observable_contract": "Assert `lock_hint` after four consecutive samples with eye metric above `eye_min`.",
+      "required_signals": [
+        "time",
+        "data_in",
+        "sample_clk",
+        "rst",
+        "enable",
+        "early",
+        "late",
+        "eye_metric",
+        "lock_hint",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/cdr_eye_monitor_top.va",
+    "supplied_dut/edge_margin_sampler.va",
+    "supplied_dut/eye_metric_filter.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-827",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "data_in",
+            "port_ref": "data_in",
+            "position": 0
+          },
+          {
+            "net": "sample_clk",
+            "port_ref": "sample_clk",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 3
+          },
+          {
+            "net": "early",
+            "port_ref": "early",
+            "position": 4
+          },
+          {
+            "net": "late",
+            "port_ref": "late",
+            "position": 5
+          },
+          {
+            "net": "eye_metric",
+            "port_ref": "eye_metric",
+            "position": 6
+          },
+          {
+            "net": "lock_hint",
+            "port_ref": "lock_hint",
+            "position": 7
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 8
+          }
+        ],
+        "module_ref": "cdr_eye_monitor_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "data_in",
+      "sample_clk",
+      "rst",
+      "enable",
+      "early",
+      "late",
+      "eye_metric",
+      "lock_hint",
+      "valid"
+    ]
+  }
+}

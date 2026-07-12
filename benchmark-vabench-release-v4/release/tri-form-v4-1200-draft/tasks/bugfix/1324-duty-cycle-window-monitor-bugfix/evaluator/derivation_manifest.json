@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-324",
+    "canonical_task_slug": "324-duty-cycle-window-monitor",
+    "family_spec_sha256": "366664ab3a80ec6fc01424acfa5350255ee20255500040180e25e365c8cfc866",
+    "mutation_catalog_sha256": "8b4abe62a5314914fe7fc9c9b3c5c7f9d11d622108e4eecdea560ff35dbd1608",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "324",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_reset_disable_clear_missing",
+    "testbench_suite": [
+      "neg_001_duty_metric_wrong_quantity",
+      "neg_004_valid_flag_missing",
+      "neg_002_window_flag_inverted",
+      "neg_003_reset_disable_clear_missing",
+      "neg_005_window_flag_missing"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "22c782659c04e25706a2625cf0e3089a148b61431f2f563e34f6c818801190db",
+    "changed_artifacts": [
+      "duty_cycle_window_monitor.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_reset_disable_clear_missing",
+    "rationale": "Select fault class reset_disable_clear_missing under trigger 'reset_disable_clear_missing' because it exercises P_ON_RESET_OR_WHEN_DISABLED_CLEAR as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 9,
+    "source_preferred_seed": "neg_001_duty_metric_wrong_quantity",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,18 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/ctle_adaptation_loop_top.va"
+ahdl_include "./dut/ctle_boost_core.va"
+ahdl_include "./dut/boost_adapt_controller.va"
+
+Vvin (vin 0) vsource type=pwl wave=[0 0.270 9n 0.270 15n 0.720 28n 0.720 34n 0.420 48n 0.420 72n 0.307]
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=5n width=2.5n delay=1.2n rise=60p fall=60p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.7n 0.9 1.8n 0 72n 0]
+Venable (enable 0) vsource type=pwl wave=[0 0 4.5n 0 4.6n 0.9 44.64n 0.9 44.74n 0 50.64n 0 50.74n 0.9 72n 0.9]
+Vedge_metric_in (edge_metric_in 0) vsource type=pwl wave=[0 0.210 9n 0.210 15n 0.740 28n 0.740 34n 0.420 48n 0.420 72n 0.292]
+
+XDUT (vin edge_metric_in clk rst enable boost_2 boost_1 boost_0 vout adapt_metric locked) ctle_adaptation_loop_top
+
+
+tran tran stop=72n maxstep=100p
+save vin edge_metric_in clk rst enable boost_2 boost_1 boost_0 vout adapt_metric locked

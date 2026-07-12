@@ -1,0 +1,308 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "programmable_clock_skew_aligner",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.1",
+                "name": "unit_delay_metric",
+                "override_behavior": "overrides unit_delay_metric",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk_in",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "skew_2",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "skew_1",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "skew_0",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk_out",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "delay_metric",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "programmable_clock_skew_aligner.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/programmable_clock_skew_aligner.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "323",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Programmable Clock Skew Aligner"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_DRIVE",
+      "observable_contract": "On reset or when disabled, drive output and metrics low.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst",
+        "enable",
+        "skew_2",
+        "skew_1",
+        "skew_0",
+        "clk_out",
+        "delay_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_DECODE_SKEW_2_SKEW_0_AS",
+      "observable_contract": "Decode `skew_2..skew_0` as a programmable output-edge delay code.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst",
+        "enable",
+        "skew_2",
+        "skew_1",
+        "skew_0",
+        "clk_out",
+        "delay_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_FOR_EACH_ACCEPTED_INPUT_CLOCK_EDGE",
+      "observable_contract": "For each accepted input clock edge, schedule one output edge after the code-dependent delay.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst",
+        "enable",
+        "skew_2",
+        "skew_1",
+        "skew_0",
+        "clk_out",
+        "delay_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_EXPOSE_THE_ACTIVE_DELAY_CODE_AS",
+      "observable_contract": "Expose the active delay code as `delay_metric`.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst",
+        "enable",
+        "skew_2",
+        "skew_1",
+        "skew_0",
+        "clk_out",
+        "delay_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ASSERT_VALID_AFTER_THE_FIRST_DELAYED",
+      "observable_contract": "Assert `valid` after the first delayed output edge has been generated.",
+      "required_signals": [
+        "time",
+        "clk_in",
+        "rst",
+        "enable",
+        "skew_2",
+        "skew_1",
+        "skew_0",
+        "clk_out",
+        "delay_metric",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "programmable_clock_skew_aligner.va"
+  ],
+  "task_id": "v4-1323",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk_in",
+            "port_ref": "clk_in",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 2
+          },
+          {
+            "net": "skew_2",
+            "port_ref": "skew_2",
+            "position": 3
+          },
+          {
+            "net": "skew_1",
+            "port_ref": "skew_1",
+            "position": 4
+          },
+          {
+            "net": "skew_0",
+            "port_ref": "skew_0",
+            "position": 5
+          },
+          {
+            "net": "clk_out",
+            "port_ref": "clk_out",
+            "position": 6
+          },
+          {
+            "net": "delay_metric",
+            "port_ref": "delay_metric",
+            "position": 7
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 8
+          }
+        ],
+        "module_ref": "programmable_clock_skew_aligner",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk_in",
+      "rst",
+      "enable",
+      "skew_2",
+      "skew_1",
+      "skew_0",
+      "clk_out",
+      "delay_metric",
+      "valid"
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module duty_cycle_window_monitor(clk_in, rst, enable, duty_min, duty_max, duty_metric, in_window, valid);
+    inout clk_in, rst, enable, duty_min, duty_max, duty_metric, in_window, valid;
+    electrical clk_in, rst, enable, duty_min, duty_max, duty_metric, in_window, valid;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vcm = 0.45; parameter real vth = 0.45; parameter real tr = 200p from (0:inf);
+    parameter real tick = 200p from (0:inf);
+    integer high_ticks, low_ticks; real prev_clk, duty, min_duty, max_duty, metric_v, window_v, valid_v;
+    analog begin
+        @(initial_step) begin high_ticks = 0; low_ticks = 0; prev_clk = 0.0; duty = 0.0; metric_v = 0.0; window_v = 0.0; valid_v = 0.0; end
+        @(timer(0, tick)) begin
+            if (0) begin
+                high_ticks = 0; low_ticks = 0; duty = 0.0; metric_v = 0.0; window_v = 0.0; valid_v = 0.0;
+            end else begin
+                if (V(clk_in) > vth) high_ticks = high_ticks + 1; else low_ticks = low_ticks + 1;
+                if (prev_clk <= vth && V(clk_in) > vth && high_ticks > 0 && low_ticks > 0) begin
+                    duty = high_ticks / (high_ticks + low_ticks + 0.0);
+                    min_duty = V(duty_min) / vdd;
+                    max_duty = V(duty_max) / vdd;
+                    metric_v = duty * vdd;
+                    window_v = (duty >= min_duty && duty <= max_duty) ? vdd : vss;
+                    valid_v = vdd;
+                    high_ticks = 0; low_ticks = 0;
+                end
+                prev_clk = V(clk_in);
+            end
+        end
+        V(duty_metric) <+ transition(metric_v, 0, tr, tr);
+        V(in_window) <+ transition(window_v, 0, tr, tr);
+        V(valid) <+ transition(valid_v, 0, tr, tr);
+    end
+endmodule

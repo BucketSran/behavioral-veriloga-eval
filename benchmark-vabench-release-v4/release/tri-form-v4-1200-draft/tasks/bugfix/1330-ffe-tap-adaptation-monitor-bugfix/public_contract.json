@@ -1,0 +1,495 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "cursor_metric_core",
+              "tap_update_controller"
+            ],
+            "name": "ffe_tap_adaptation_monitor_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "3",
+                "name": "tap_limit",
+                "override_behavior": "sets the signed tap-code saturation limit in the controller",
+                "type": "integer",
+                "units": "",
+                "valid_range": "positive"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "err_in",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "tap_pre",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "tap_post",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "main_out",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "adapt_metric",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "done",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "ffe_tap_adaptation_monitor_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "tap_update_controller",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "3",
+                "name": "tap_limit",
+                "override_behavior": "sets the signed tap-code saturation limit",
+                "type": "integer",
+                "units": "",
+                "valid_range": "positive"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "err_in",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "tap_pre",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "tap_post",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "done",
+                "position": 6
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "tap_update_controller.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "cursor_metric_core",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "err_in",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "tap_pre",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "tap_post",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "main_out",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "adapt_metric",
+                "position": 4
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "cursor_metric_core.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/ffe_tap_adaptation_monitor_top.va",
+    "buggy_bundle/tap_update_controller.va",
+    "buggy_bundle/cursor_metric_core.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "330",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "serdes_equalization_systems",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "FFE Tap Adaptation Monitor"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+      "observable_contract": "On reset or when disabled, clear tap states, output, adapt metric, and `done`.",
+      "required_signals": [
+        "time",
+        "err_in",
+        "clk",
+        "rst",
+        "enable",
+        "tap_pre",
+        "tap_post",
+        "main_out",
+        "adapt_metric",
+        "done"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+      "observable_contract": "On each enabled rising `clk` edge, update pre and post tap signs according to `err_in - vcm`.",
+      "required_signals": [
+        "time",
+        "err_in",
+        "clk",
+        "rst",
+        "enable",
+        "tap_pre",
+        "tap_post",
+        "main_out",
+        "adapt_metric",
+        "done"
+      ]
+    },
+    {
+      "id": "P_DRIVE_MAIN_OUT_AS_THE_CURRENT",
+      "observable_contract": "Drive `main_out` as the current main cursor correction around `vcm`.",
+      "required_signals": [
+        "time",
+        "err_in",
+        "clk",
+        "rst",
+        "enable",
+        "tap_pre",
+        "tap_post",
+        "main_out",
+        "adapt_metric",
+        "done"
+      ]
+    },
+    {
+      "id": "P_EXPOSE_AGGREGATE_TAP_MAGNITUDE_ON_ADAPT",
+      "observable_contract": "Expose aggregate tap magnitude on `adapt_metric`.",
+      "required_signals": [
+        "time",
+        "err_in",
+        "clk",
+        "rst",
+        "enable",
+        "tap_pre",
+        "tap_post",
+        "main_out",
+        "adapt_metric",
+        "done"
+      ]
+    },
+    {
+      "id": "P_ASSERT_DONE_AFTER_SIX_ENABLED_ADAPTATION",
+      "observable_contract": "Assert `done` after six enabled adaptation updates.",
+      "required_signals": [
+        "time",
+        "err_in",
+        "clk",
+        "rst",
+        "enable",
+        "tap_pre",
+        "tap_post",
+        "main_out",
+        "adapt_metric",
+        "done"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "ffe_tap_adaptation_monitor_top.va",
+    "tap_update_controller.va",
+    "cursor_metric_core.va"
+  ],
+  "task_id": "v4-1330",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "err_in",
+            "port_ref": "err_in",
+            "position": 0
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 3
+          },
+          {
+            "net": "tap_pre",
+            "port_ref": "tap_pre",
+            "position": 4
+          },
+          {
+            "net": "tap_post",
+            "port_ref": "tap_post",
+            "position": 5
+          },
+          {
+            "net": "main_out",
+            "port_ref": "main_out",
+            "position": 6
+          },
+          {
+            "net": "adapt_metric",
+            "port_ref": "adapt_metric",
+            "position": 7
+          },
+          {
+            "net": "done",
+            "port_ref": "done",
+            "position": 8
+          }
+        ],
+        "module_ref": "ffe_tap_adaptation_monitor_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "err_in",
+      "clk",
+      "rst",
+      "enable",
+      "tap_pre",
+      "tap_post",
+      "main_out",
+      "adapt_metric",
+      "done"
+    ]
+  }
+}
