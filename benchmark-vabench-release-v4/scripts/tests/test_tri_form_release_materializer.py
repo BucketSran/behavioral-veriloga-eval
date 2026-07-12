@@ -18,6 +18,7 @@ from materialize_tri_form_release import (  # noqa: E402
     select_bugfix_seed,
 )
 from export_tri_form_runtime import install_public  # noqa: E402
+from record_runtime_ingestion_evidence import verified_audit  # noqa: E402
 
 
 def sample_spec() -> dict:
@@ -95,3 +96,18 @@ def test_agentic_bugfix_export_seeds_editable_submission(tmp_path: Path) -> None
     install_public(task, public, "bugfix", "G2")
     assert (public / "submission" / "a.va").read_bytes() == (task / "buggy_bundle" / "a.va").read_bytes()
     assert (public / "task" / "buggy_bundle" / "a.va").is_file()
+
+
+def test_runtime_evidence_rejects_handwritten_pass_report(tmp_path: Path) -> None:
+    evidence = tmp_path / "evidence"
+    evidence.mkdir()
+    (evidence / "runtime_export_audit.json").write_text(
+        '{"schema_version":"wrong","status":"pass","problems":[]}\n',
+        encoding="utf-8",
+    )
+    try:
+        verified_audit(tmp_path)
+    except SystemExit as exc:
+        assert "not a valid pass" in str(exc)
+    else:
+        raise AssertionError("handwritten pass report was accepted")
