@@ -1,0 +1,10 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/deadband_voltage.va"
+
+Vin (sigin 0) vsource type=pwl wave=[0 -0.9 0.6n -0.9 0.65n -0.25 1.2n -0.25 1.25n 0.0 1.8n 0.0 1.85n 0.25 2.4n 0.25 2.45n 0.6 3.2n 0.6]
+XDUT (sigin sigout) deadband_voltage
+
+tran tran stop=3.0n maxstep=5p
+save sigin sigout

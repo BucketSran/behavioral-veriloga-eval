@@ -1,0 +1,174 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "safe_analog_divider",
+            "parameters": [
+              {
+                "default": "1.0",
+                "name": "gain",
+                "override_behavior": "overrides gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.2 from (0:inf)",
+                "name": "min_sigdenom",
+                "override_behavior": "overrides min_sigdenom",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "signumer",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigdenom",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sigout",
+                "position": 2
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "safe_analog_divider.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/safe_analog_divider.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "232",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "analog_primitive",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Safe Analog Divider"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_USE_V_SIGDENOM_DIRECTLY_WHEN_ITS",
+      "observable_contract": "For denominator magnitudes at least `min_sigdenom`, use `V(sigdenom)` directly in the divider transfer.",
+      "required_signals": [
+        "time",
+        "sigdenom",
+        "signumer",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_WHEN_V_SIGDENOM_IS_POSITIVE_BUT",
+      "observable_contract": "For positive denominator magnitudes below `min_sigdenom`, use `+min_sigdenom` as the guarded denominator.",
+      "required_signals": [
+        "time",
+        "sigdenom",
+        "signumer",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_WHEN_V_SIGDENOM_IS_EXACTLY_ZERO",
+      "observable_contract": "For exactly zero denominator, use `+min_sigdenom` as the guarded denominator.",
+      "required_signals": [
+        "time",
+        "sigdenom",
+        "signumer",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_WHEN_V_SIGDENOM_IS_NEGATIVE_BUT",
+      "observable_contract": "For negative denominator magnitudes below `min_sigdenom`, use `-min_sigdenom` as the guarded denominator.",
+      "required_signals": [
+        "time",
+        "sigdenom",
+        "signumer",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_DRIVE_SIGOUT_TO_GAIN_V_SIGNUMER",
+      "observable_contract": "Drive `sigout` to the observable transfer `gain * V(signumer) / guarded_denominator`.",
+      "required_signals": [
+        "time",
+        "sigdenom",
+        "signumer",
+        "sigout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "safe_analog_divider.va"
+  ],
+  "task_id": "v4-1232",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "signumer",
+            "port_ref": "signumer",
+            "position": 0
+          },
+          {
+            "net": "sigdenom",
+            "port_ref": "sigdenom",
+            "position": 1
+          },
+          {
+            "net": "sigout",
+            "port_ref": "sigout",
+            "position": 2
+          }
+        ],
+        "module_ref": "safe_analog_divider",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "sigdenom",
+      "signumer",
+      "sigout"
+    ]
+  }
+}

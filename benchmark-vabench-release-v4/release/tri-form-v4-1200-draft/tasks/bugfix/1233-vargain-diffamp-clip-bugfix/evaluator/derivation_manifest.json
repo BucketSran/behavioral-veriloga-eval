@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-233",
+    "canonical_task_slug": "233-vargain-diffamp-clip",
+    "family_spec_sha256": "947bd0b1fdaec3993c8c8144533822ec3505089428d7d76cdac87a119915b5e5",
+    "mutation_catalog_sha256": "bb86ade46ecd404770d452c0fc08ee5eebe15ef1032c8ad675fbf13d1277e5db",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "233",
+  "negative_assignment": {
+    "bugfix_seed": "neg_005_metric_scale_low",
+    "testbench_suite": [
+      "neg_002_missing_input_offset",
+      "neg_001_zero",
+      "neg_003_inverted_control_polarity",
+      "neg_004_no_positive_clip",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "f0606f21e67a26d42a7a40c82c76f5fec248664ffdf9caaaea9d63f34a5eb3aa",
+    "changed_artifacts": [
+      "vargain_diffamp_clip.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_005_metric_scale_low",
+    "rationale": "Select fault class threshold_or_boundary_fault under trigger 'Scales the clipped variable-gain output too low while preserving the module/interface shape.' because it exercises P_DRIVE_SIGOUT_WITH_THE_CLIPPED_TARGET, P_MULTIPLY_THE_OFFSET_CORRECTED_SIGNAL_BY as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 22,
+    "source_preferred_seed": "neg_002_missing_input_offset",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/vargain_diffamp_clip.va"
+
+Vin_p (sigin_p 0) vsource type=pwl wave=[0 0.1 0.75n 0.1 0.80n 0.8 1.55n 0.8 1.60n -0.4 2.35n -0.4 2.40n 0.5 3.3n 0.5]
+Vin_n (sigin_n 0) vsource type=pwl wave=[0 -0.1 1.55n -0.1 1.60n 0.2 3.3n 0.2]
+Vctrl_p (sigctrl_p 0) vsource type=pwl wave=[0 0.4 0.75n 0.4 0.80n 0.9 1.55n 0.9 1.60n 1.2 2.35n 1.2 2.40n 0.1 3.3n 0.1]
+Vctrl_n (sigctrl_n 0) vsource type=pwl wave=[0 0.0 2.35n 0.0 2.40n 0.7 3.3n 0.7]
+XDUT (sigin_p sigin_n sigctrl_p sigctrl_n sigout) vargain_diffamp_clip
+
+tran tran stop=3.1n maxstep=5p
+save sigin_p sigin_n sigctrl_p sigctrl_n sigout

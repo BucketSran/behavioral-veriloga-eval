@@ -1,0 +1,11 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/pfd_timer_reset.va"
+
+Va (a 0) vsource type=pwl wave=[0 0 0.90n 0 0.92n 0.9 1.14n 0.9 1.16n 0 1.80n 0 1.82n 0.9 2.02n 0.9 2.04n 0 3.05n 0 3.07n 0.9 3.25n 0.9 3.27n 0 4.2n 0]
+Vb (b 0) vsource type=pwl wave=[0 0 0.35n 0 0.37n 0.9 0.62n 0.9 0.64n 0 2.35n 0 2.37n 0.9 2.58n 0.9 2.60n 0 3.42n 0 3.44n 0.9 3.66n 0.9 3.68n 0 4.2n 0]
+XDUT (a b ub d) pfd_timer_reset
+
+tran tran stop=4.0n maxstep=2p
+save a b ub d

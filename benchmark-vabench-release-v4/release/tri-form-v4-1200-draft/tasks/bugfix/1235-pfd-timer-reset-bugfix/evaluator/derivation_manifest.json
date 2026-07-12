@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-235",
+    "canonical_task_slug": "235-pfd-timer-reset",
+    "family_spec_sha256": "344b0cd253b7b09c6f6d45eb142b25079985ec3b65aefc001494476610b6a044",
+    "mutation_catalog_sha256": "cf3fabff215aeb309468d446bf4e472c1ae3eff5e246cc3b31482448d6b9a794",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "235",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_no_delayed_reset",
+    "testbench_suite": [
+      "neg_002_no_delayed_reset",
+      "neg_001_zero",
+      "neg_003_active_high_up_output",
+      "neg_004_zero_reset_delay",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "5f2bb07f6fb7052ad759dfbcea7968fc84d8860a841a80e694b67f2780fa4cb6",
+    "changed_artifacts": [
+      "pfd_timer_reset.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_no_delayed_reset",
+    "rationale": "Select fault class state_reset_or_enable_error under trigger 'Never schedules the delayed reset when both PFD sides have occurred.' because it exercises P_DELAYED_MUTUAL_RESET as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 27,
+    "source_preferred_seed": "neg_002_no_delayed_reset",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

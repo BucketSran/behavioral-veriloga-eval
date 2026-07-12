@@ -1,0 +1,149 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "limiting_diffamp",
+            "parameters": [
+              {
+                "default": "4.0",
+                "name": "gain",
+                "override_behavior": "overrides gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.75 from (0:inf)",
+                "name": "limit",
+                "override_behavior": "overrides limit",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigin_p",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigin_n",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sigout",
+                "position": 2
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "limiting_diffamp.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "240",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "baseband_signal_conditioning",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Smooth Limiting Diffamp"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ODD_DIFFERENTIAL_POLARITY",
+      "observable_contract": "Compute `V(sigin_p, sigin_n)`, preserve polarity, and drive an odd differential transfer.",
+      "required_signals": [
+        "time",
+        "sigin_n",
+        "sigin_p",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_SMALL_SIGNAL_GAIN",
+      "observable_contract": "Near zero differential input, drive approximately `gain * V(sigin_p, sigin_n)`.",
+      "required_signals": [
+        "time",
+        "sigin_n",
+        "sigin_p",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_SMOOTH_SYMMETRIC_LIMITING",
+      "observable_contract": "For large positive and negative differential inputs, smoothly approach `+limit` and `-limit` without a hard clamp.",
+      "required_signals": [
+        "time",
+        "sigin_n",
+        "sigin_p",
+        "sigout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "limiting_diffamp.va"
+  ],
+  "task_id": "v4-240",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "sigin_p",
+            "port_ref": "sigin_p",
+            "position": 0
+          },
+          {
+            "net": "sigin_n",
+            "port_ref": "sigin_n",
+            "position": 1
+          },
+          {
+            "net": "sigout",
+            "port_ref": "sigout",
+            "position": 2
+          }
+        ],
+        "module_ref": "limiting_diffamp",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "sigin_n",
+      "sigin_p",
+      "sigout"
+    ]
+  }
+}

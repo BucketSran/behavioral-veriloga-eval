@@ -1,0 +1,192 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "pfd_timer_reset",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vh",
+                "override_behavior": "overrides vh",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "100p from [0:inf)",
+                "name": "reset_delay",
+                "override_behavior": "overrides reset_delay",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "10p from [0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "a",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "b",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "ub",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "d",
+                "position": 3
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "pfd_timer_reset.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "235",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "PFD Timer Reset"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_PFD_STATE_AND_POLARITY",
+      "observable_contract": "A rising crossing of `a` asserts the UP state and a rising crossing of `b` asserts the DOWN state; drive `ub` active-low for UP and `d` active-high for DOWN.",
+      "required_signals": [
+        "time",
+        "a",
+        "b",
+        "d",
+        "ub"
+      ]
+    },
+    {
+      "id": "P_DELAYED_MUTUAL_RESET",
+      "observable_contract": "After both detector states have occurred, schedule the mutual reset after `reset_delay` instead of clearing immediately or never clearing.",
+      "required_signals": [
+        "time",
+        "a",
+        "b",
+        "d",
+        "ub"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_LEVELS_AND_TRANSITIONS",
+      "observable_contract": "Drive asserted/deasserted outputs near the public `vh`/`0 V` levels with the declared transition smoothing.",
+      "required_signals": [
+        "time",
+        "a",
+        "b",
+        "d",
+        "ub"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/pfd_timer_reset.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-735",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "a",
+            "port_ref": "a",
+            "position": 0
+          },
+          {
+            "net": "b",
+            "port_ref": "b",
+            "position": 1
+          },
+          {
+            "net": "ub",
+            "port_ref": "ub",
+            "position": 2
+          },
+          {
+            "net": "d",
+            "port_ref": "d",
+            "position": 3
+          }
+        ],
+        "module_ref": "pfd_timer_reset",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "a",
+      "b",
+      "d",
+      "ub"
+    ]
+  }
+}

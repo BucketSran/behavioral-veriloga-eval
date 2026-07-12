@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-236",
+    "canonical_task_slug": "236-dual-track-sample-hold",
+    "family_spec_sha256": "22d42b9dfc56a3bad2612bb6be98190f07cfcb5e4c049160f180a53c455d42b4",
+    "mutation_catalog_sha256": "ef749f368a583c6a32734df2608ad115ba878f7a3c125399a6329ba7c4812b7f",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "236",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_single_edge_sampler",
+    "testbench_suite": [
+      "neg_003_wrong_track_phase",
+      "neg_004_no_output_hold",
+      "neg_005_phase_monitor_wrong",
+      "neg_001_transparent_output",
+      "neg_002_single_edge_sampler"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "4af7179a7cffd861f86a7837632b62795e34e97debe2d8db8e9054841616cce0",
+    "changed_artifacts": [
+      "dual_track_sample_hold.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_single_edge_sampler",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Uses a single ideal rising-edge sampler instead of the dual complementary track/hold behavior.' because it exercises P_COMPLEMENTARY_TRACK_HOLD_SEQUENCE, P_FINITE_TRACKING_AND_HOLD as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 32,
+    "source_preferred_seed": "neg_003_wrong_track_phase",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

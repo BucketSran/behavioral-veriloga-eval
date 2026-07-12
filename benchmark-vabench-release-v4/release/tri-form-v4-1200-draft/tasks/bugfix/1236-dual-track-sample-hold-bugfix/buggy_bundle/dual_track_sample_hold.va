@@ -1,0 +1,43 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dual_track_sample_hold(vdd, vss, clk, vin, vout, phase);
+    inout vdd, vss;
+    input clk, vin;
+    output vout, phase;
+    electrical vdd, vss, clk, vin, vout, phase;
+
+    parameter real vth = 0.45;
+    parameter real tick = 0.5n from (0:inf);
+    parameter real alpha_in = 0.45 from (0:1];
+    parameter real alpha_out = 0.55 from (0:1];
+    parameter real tedge = 50p from (0:inf);
+    parameter real vinit = 0.0;
+
+    real held;
+    real phase_val;
+    real vspan;
+
+    analog begin
+        @(initial_step) begin
+            held = vinit;
+            phase_val = 0.0;
+            vspan = V(vdd, vss);
+        end
+
+        @(cross(V(clk, vss) - vth, +1)) begin
+            vspan = V(vdd, vss);
+            held = V(vin, vss);
+            if (held < 0.0) held = 0.0;
+            if (held > vspan) held = vspan;
+            phase_val = 1.0;
+        end
+
+        @(cross(V(clk, vss) - vth, -1)) begin
+            phase_val = 0.0;
+        end
+
+        V(vout, vss) <+ transition(held, 0, tedge, tedge);
+        V(phase, vss) <+ transition((phase_val > 0.5) ? vspan : 0.0, 0, tedge, tedge);
+    end
+endmodule

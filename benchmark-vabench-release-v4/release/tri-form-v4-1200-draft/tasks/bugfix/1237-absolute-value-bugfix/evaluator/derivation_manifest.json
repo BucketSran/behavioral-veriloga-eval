@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-237",
+    "canonical_task_slug": "237-absolute-value",
+    "family_spec_sha256": "9c3a9652b34e05ab418e1624c1d0fd5d2967706e4b9c4edfcb52a8b36417d103",
+    "mutation_catalog_sha256": "d0d1465752585569bf30088893dee2f424bdc5d3a65c2b11ae47add79a68813b",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "237",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_half_scale",
+    "testbench_suite": [
+      "neg_004_wrong_smoothing",
+      "neg_002_sharp_abs",
+      "neg_003_half_scale",
+      "neg_005_metric_scale_low",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "b50e9ae4e3ecf2f35b782e38be3e3faa1677c243af7a3b2778489ea6331b38f3",
+    "changed_artifacts": [
+      "absolute_value.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_half_scale",
+    "rationale": "Select fault class metric_or_observable_fault under trigger 'Computes the absolute value with the wrong gain.' because it exercises P_SMOOTH_ABSOLUTE_TRANSFER as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 14,
+    "source_preferred_seed": "neg_004_wrong_smoothing",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

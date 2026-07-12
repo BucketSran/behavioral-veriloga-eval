@@ -1,0 +1,5 @@
+`include "disciplines.vams"
+module limiting_diffamp(sigin_p, sigin_n, sigout);
+input sigin_p, sigin_n; output sigout; electrical sigin_p, sigin_n, sigout; parameter real gain=4.0; parameter real limit=0.75 from (0:inf);
+analog begin V(sigout) <+ limit * tanh(gain * V(sigin_n, sigin_p) / limit); end
+endmodule

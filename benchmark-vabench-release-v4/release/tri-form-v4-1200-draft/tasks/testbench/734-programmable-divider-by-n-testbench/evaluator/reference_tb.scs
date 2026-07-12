@@ -1,0 +1,11 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/programmable_divider_by_n.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 delay=0.25n rise=20p fall=20p width=0.18n period=0.7n
+Vdiv (divctrl 0) vsource type=pwl wave=[0 2 2.0n 2 2.05n 4 5.0n 4]
+XDUT (clk divctrl out) programmable_divider_by_n
+
+tran tran stop=4.8n maxstep=5p
+save clk divctrl out

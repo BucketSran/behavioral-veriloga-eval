@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-238",
+    "canonical_task_slug": "238-deadband-voltage",
+    "family_spec_sha256": "2cb188906ecbc367639ba574f05aecc15da0c6fe0adc6bd4c194dc182231272a",
+    "mutation_catalog_sha256": "e708aeb9bc912348103d97c94e84090263bc196a53346c8d6630dd92932a57cc",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "238",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_wrong_thresholds",
+    "testbench_suite": [
+      "neg_002_no_deadband",
+      "neg_003_wrong_thresholds",
+      "neg_004_rectifies_below_deadband",
+      "neg_005_metric_scale_low",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "84b080df18fbbeecaf209528e3d632d1c80e5222f0317308e367a42b2b76f037",
+    "changed_artifacts": [
+      "deadband_voltage.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_wrong_thresholds",
+    "rationale": "Select fault class deadband_threshold_error under trigger 'Uses too-wide deadband thresholds.' because it exercises P_DEADBAND_EDGE_CONTINUITY, P_DEADBAND_ZERO_REGION as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 15,
+    "source_preferred_seed": "neg_002_no_deadband",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

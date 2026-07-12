@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-232",
+    "canonical_task_slug": "232-safe-analog-divider",
+    "family_spec_sha256": "0bc7b119b0cd02dd316663f62042d00341863e8e3c0c7aede68e72b2fa7b379b",
+    "mutation_catalog_sha256": "dc42164da6ff71a589930ab0c8395276538d13a75e2d17446db3e5b2975c0f79",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "232",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_no_denominator_guard",
+    "testbench_suite": [
+      "neg_002_no_denominator_guard",
+      "neg_004_half_gain",
+      "neg_003_positive_guard_only",
+      "neg_001_zero",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "6e746e31f0efcbb5ef0d5c0362f9f4ee2bbef7671433668099799ce1cdcafeb2",
+    "changed_artifacts": [
+      "safe_analog_divider.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_no_denominator_guard",
+    "rationale": "Select fault class omission_or_incomplete_behavior under trigger 'Divides by the raw denominator without the small-signal clamp.' because it exercises P_WHEN_V_SIGDENOM_IS_EXACTLY_ZERO, P_WHEN_V_SIGDENOM_IS_NEGATIVE_BUT, P_WHEN_V_SIGDENOM_IS_POSITIVE_BUT as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 19,
+    "source_preferred_seed": "neg_002_no_denominator_guard",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}
