@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-115",
+    "canonical_task_slug": "115-two-bit-counter-marker",
+    "family_spec_sha256": "60a9e3676fce060b3aeb9093a25655e6cda6af64ba895d46df2e0b9a6650b358",
+    "mutation_catalog_sha256": "e4917ea5043ef422441e596e25720221a80ec93211fb82485cc562516744a5e0",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "115",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_pulse_every_edge",
+    "testbench_suite": [
+      "neg_001_zero",
+      "neg_003_wrap_after_three_edges",
+      "neg_004_missing_initialization",
+      "neg_005_metric_scale_low",
+      "neg_002_pulse_every_edge"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "5390d6818855f02eb6fa928c303a91c56b4e9ac83d290e12faac5a3b255b25a3",
+    "changed_artifacts": [
+      "two_bit_counter_marker.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_pulse_every_edge",
+    "rationale": "Select fault class fault_002_pulse_every_edge under trigger 'Marks every rising clock edge instead of only modulo-four wrap.' because it exercises P_RISING_EDGE_COUNT as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_001_zero",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

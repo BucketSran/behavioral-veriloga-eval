@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-118",
+    "canonical_task_slug": "118-differential-buffer",
+    "family_spec_sha256": "aac140e52ffe85b525a5fbf347156073cff5a37e80b7472b51fff95c2485ea5c",
+    "mutation_catalog_sha256": "7dc3349e68c72b124df9e44fe0e69b992fc5716f5559eddb23bc66af724d709e",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "118",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_zero",
+    "testbench_suite": [
+      "neg_001_zero",
+      "neg_003_half_gain",
+      "neg_004_common_mode_only",
+      "neg_005_metric_scale_low",
+      "neg_002_swapped_outputs"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "2c08bde5333de370786f496c1ba5678212b73253a27f1a942aabf00a51783e04",
+    "changed_artifacts": [
+      "differential_buffer.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_zero",
+    "rationale": "Select fault class fault_001_zero under trigger 'Drives zero outputs and therefore fails the stable-sample semantic contract.' because it exercises P_POSITIVE_UNITY as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 13,
+    "source_preferred_seed": "neg_001_zero",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

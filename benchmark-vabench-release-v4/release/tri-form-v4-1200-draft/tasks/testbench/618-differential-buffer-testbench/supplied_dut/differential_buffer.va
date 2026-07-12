@@ -1,0 +1,14 @@
+`include "disciplines.vams"
+
+module differential_buffer (VINP, VINN, VOUTP, VOUTN);
+
+input VINP, VINN;
+output VOUTP, VOUTN;
+electrical VINP, VINN, VOUTP, VOUTN;
+
+analog begin
+    V(VOUTP) <+ V(VINP);
+    V(VOUTN) <+ V(VINN);
+end
+
+endmodule

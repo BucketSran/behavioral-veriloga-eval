@@ -1,0 +1,290 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "sar_cdac_residue",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets the rising CLK sampling threshold at one half of vdd",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > 0"
+              },
+              {
+                "default": 0.9,
+                "name": "vrefp",
+                "override_behavior": "sets the upper endpoint of the reference span used by all residue steps",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vrefp > vrefn"
+              },
+              {
+                "default": 0.0,
+                "name": "vrefn",
+                "override_behavior": "sets the lower endpoint of the reference span used by all residue steps",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vrefn < vrefp"
+              },
+              {
+                "default": 1e-12,
+                "name": "tr",
+                "override_behavior": "sets the transition time of the VRES voltage output",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "VIN",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "CLK",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "S6",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "S5",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "S4",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "S3",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "S2",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "S1",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "VRES",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "sar_cdac_residue.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "119",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "mixed_signal",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "SAR CDAC Residue"
+  },
+  "modeling_constraints": [
+    "Use deterministic event-driven residue state updates with the declared edge directions.",
+    "Use the full vrefp minus vrefn span for every weighted update.",
+    "Do not omit S1, substitute different edge polarities, use current contributions, or add validation-only hooks."
+  ],
+  "properties": [
+    {
+      "id": "P_INPUT_SAMPLE",
+      "observable_contract": "At initial_step and each rising CLK crossing through vdd/2, the residue state samples VIN.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "vres"
+      ]
+    },
+    {
+      "id": "P_S6_HALF_ADD",
+      "observable_contract": "Each falling S6 crossing through vdd/2 adds one half of the public reference span to the current residue.",
+      "required_signals": [
+        "time",
+        "s6",
+        "vres"
+      ]
+    },
+    {
+      "id": "P_BINARY_SUBTRACTIONS",
+      "observable_contract": "Rising crossings of S5, S4, S3, S2, and S1 through vdd/2 subtract one fourth, one eighth, one sixteenth, one thirty-second, and one sixty-fourth of the public reference span respectively.",
+      "required_signals": [
+        "time",
+        "s5",
+        "s4",
+        "s3",
+        "s2",
+        "s1",
+        "vres"
+      ]
+    },
+    {
+      "id": "P_EDGE_POLARITY",
+      "observable_contract": "S6 updates only on falling vdd/2 threshold crossings, while S5 through S1 update only on rising vdd/2 threshold crossings.",
+      "required_signals": [
+        "time",
+        "s6",
+        "s5",
+        "s4",
+        "s3",
+        "s2",
+        "s1",
+        "vres"
+      ]
+    },
+    {
+      "id": "P_ACCUMULATED_STATE",
+      "observable_contract": "Between declared sampling and switch events, VRES represents and holds the accumulated residue state.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "s6",
+        "s5",
+        "s4",
+        "s3",
+        "s2",
+        "s1",
+        "vres"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_TRANSITION",
+      "observable_contract": "VRES changes from the residue state using the declared tr transition time.",
+      "required_signals": [
+        "time",
+        "vres"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/sar_cdac_residue.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-619",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "VIN",
+            "position": 0
+          },
+          {
+            "net": "clk",
+            "port_ref": "CLK",
+            "position": 1
+          },
+          {
+            "net": "s6",
+            "port_ref": "S6",
+            "position": 2
+          },
+          {
+            "net": "s5",
+            "port_ref": "S5",
+            "position": 3
+          },
+          {
+            "net": "s4",
+            "port_ref": "S4",
+            "position": 4
+          },
+          {
+            "net": "s3",
+            "port_ref": "S3",
+            "position": 5
+          },
+          {
+            "net": "s2",
+            "port_ref": "S2",
+            "position": 6
+          },
+          {
+            "net": "s1",
+            "port_ref": "S1",
+            "position": 7
+          },
+          {
+            "net": "vres",
+            "port_ref": "VRES",
+            "position": 8
+          }
+        ],
+        "module_ref": "sar_cdac_residue",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "clk",
+      "s6",
+      "s5",
+      "s4",
+      "s3",
+      "s2",
+      "s1",
+      "vres"
+    ]
+  }
+}

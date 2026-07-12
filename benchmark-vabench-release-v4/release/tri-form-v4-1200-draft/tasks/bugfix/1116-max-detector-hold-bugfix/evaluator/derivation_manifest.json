@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-116",
+    "canonical_task_slug": "116-max-detector-hold",
+    "family_spec_sha256": "c82ab38590eed8b2ef3244a2f60183e3032264e6b846ae7ae4a7d1b4589dcd67",
+    "mutation_catalog_sha256": "ba8b3d1351bd41f30287a675041066cb272198508afdfd842ae4967203287054",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "116",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_tracks_input",
+    "testbench_suite": [
+      "neg_001_zero",
+      "neg_003_min_detector",
+      "neg_004_initial_only",
+      "neg_005_metric_scale_low",
+      "neg_002_tracks_input"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "17ef50de5e2f3d62d310d899576afb3350b299d6171bac2d039c7cb42adcbf1c",
+    "changed_artifacts": [
+      "max_detector_hold.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_tracks_input",
+    "rationale": "Select fault class fault_002_tracks_input under trigger 'Tracks input directly instead of holding the maximum.' because it exercises P_CAPTURE_NEW_MAX as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_001_zero",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

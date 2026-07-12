@@ -1,0 +1,141 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "max_detector_hold",
+            "parameters": [],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 1
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "max_detector_hold.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/max_detector_hold.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "116",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "mixed_signal",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Max Detector Hold"
+  },
+  "modeling_constraints": [
+    "Use deterministic Spectre-compatible analog state for the running maximum.",
+    "Use voltage-domain output behavior without an undeclared reset.",
+    "Do not implement a follower, minimum detector, final-sample detector, current contribution, or validation-only hook."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_INITIAL_INPUT",
+      "observable_contract": "At simulation start, the held output is initialized from the input rather than from a fixed rail.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_CAPTURE_NEW_MAX",
+      "observable_contract": "Whenever vin exceeds every previously observed value, vout updates to that new maximum.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_HOLD_ON_FALL",
+      "observable_contract": "When vin falls below the held maximum, vout retains the previously captured maximum.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_MONOTONE_OUTPUT",
+      "observable_contract": "Across transient operation, vout is monotone nondecreasing.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_RUNNING_MAX",
+      "observable_contract": "At each observation time, vout equals the maximum vin value observed from simulation start through that time.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "max_detector_hold.va"
+  ],
+  "task_id": "v4-1116",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 1
+          }
+        ],
+        "module_ref": "max_detector_hold",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "vout"
+    ]
+  }
+}

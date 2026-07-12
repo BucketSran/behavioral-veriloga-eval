@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-112",
+    "canonical_task_slug": "112-latched-comparator-delay",
+    "family_spec_sha256": "8142f6d70c216de0efdd3d2e9228480999d40df3f96b65efd95281c7657d2e42",
+    "mutation_catalog_sha256": "b057074ae9a54b06e0eb9dad4af2a350b948ae57af47cfd3439ef83c63157c38",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "112",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_no_output_delay",
+    "testbench_suite": [
+      "neg_001_zero",
+      "neg_003_no_output_delay",
+      "neg_004_falling_edge_latch",
+      "neg_005_metric_scale_low",
+      "neg_002_inverted_decision"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "0c844309a8a13540774a9a4e84ac3569e85a8e0687ac07813d53305c7d58e6fd",
+    "changed_artifacts": [
+      "latched_comparator_delay.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_no_output_delay",
+    "rationale": "Select fault class fault_003_no_output_delay under trigger 'Forces a half-amplitude output high level instead of rail-to-rail logic.' because it exercises P_DELAY_AND_SMOOTHING, P_OFFSET_DECISION as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 21,
+    "source_preferred_seed": "neg_001_zero",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

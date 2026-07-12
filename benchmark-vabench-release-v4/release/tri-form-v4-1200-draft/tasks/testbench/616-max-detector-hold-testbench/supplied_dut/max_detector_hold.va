@@ -1,0 +1,21 @@
+`include "disciplines.vams"
+
+module max_detector_hold (vin, vout);
+
+input vin;
+output vout;
+electrical vin, vout;
+
+real maxin;
+
+analog begin
+    @(initial_step)
+        maxin = V(vin);
+
+    if (V(vin) > maxin)
+        maxin = V(vin);
+
+    V(vout) <+ maxin;
+end
+
+endmodule

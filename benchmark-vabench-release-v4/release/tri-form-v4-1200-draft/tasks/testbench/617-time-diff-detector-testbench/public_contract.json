@@ -1,0 +1,240 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "time_diff_detector",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets the symmetric positive and negative output clipping magnitude",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > 0"
+              },
+              {
+                "default": 0.45,
+                "name": "vth_clk",
+                "override_behavior": "sets the rising clock threshold that reports and rearms each measurement window",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real value"
+              },
+              {
+                "default": 0.45,
+                "name": "vth_in",
+                "override_behavior": "sets the rising threshold independently used to timestamp vinp and vinn",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real value"
+              },
+              {
+                "default": 0,
+                "name": "td",
+                "override_behavior": "sets output transition delay after a reported measurement",
+                "type": "real",
+                "units": "s",
+                "valid_range": "td >= 0"
+              },
+              {
+                "default": 1e-12,
+                "name": "tr",
+                "override_behavior": "sets output transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              },
+              {
+                "default": 1000000000.0,
+                "name": "scale",
+                "override_behavior": "multiplies the signed input edge-time difference before clipping",
+                "type": "real",
+                "units": "V/s",
+                "valid_range": "finite real value"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vinp",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vinn",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 3
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "time_diff_detector.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "117",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "mixed_signal",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Time Diff Detector"
+  },
+  "modeling_constraints": [
+    "Use deterministic threshold-crossing event detection and per-window state.",
+    "Capture no more than one rising edge per input in each clock window.",
+    "Do not use fixed stimulus timestamps, current contributions, or validation-only hooks."
+  ],
+  "properties": [
+    {
+      "id": "P_FIRST_EDGE_CAPTURE",
+      "observable_contract": "Within each clock window, only the first rising vinp crossing and first rising vinn crossing through vth_in define the stored timing measurement.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vinp",
+        "vinn",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_PREVIOUS_WINDOW_REPORT",
+      "observable_contract": "At each rising clk crossing through vth_clk, vout reports the edge-time difference captured in the preceding valid clock window; if either input edge was absent, vout holds its previous value.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vinp",
+        "vinn",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_SIGNED_DIFFERENCE",
+      "observable_contract": "The reported value preserves the sign of the vinp first-edge time minus the vinn first-edge time and applies the public scale factor.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vinp",
+        "vinn",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_CLIP",
+      "observable_contract": "The scaled reported voltage is bounded to the closed interval from -vdd to +vdd.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vinp",
+        "vinn",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_WINDOW_REARM",
+      "observable_contract": "Each reporting clock edge rearms both input-edge detectors so the next window is measured independently.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vinp",
+        "vinn",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_TRANSITION",
+      "observable_contract": "Reported output changes use the declared td delay and tr transition time.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/time_diff_detector.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-617",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "vinp",
+            "port_ref": "vinp",
+            "position": 1
+          },
+          {
+            "net": "vinn",
+            "port_ref": "vinn",
+            "position": 2
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 3
+          }
+        ],
+        "module_ref": "time_diff_detector",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "vinp",
+      "vinn",
+      "vout"
+    ]
+  }
+}

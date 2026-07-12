@@ -1,0 +1,136 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "two_bit_counter_marker",
+            "parameters": [],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "CLKIN",
+                "position": 0
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "MC",
+                "position": 1
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "two_bit_counter_marker.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "115",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "mixed_signal",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Two Bit Counter Marker"
+  },
+  "modeling_constraints": [
+    "Use deterministic event-driven voltage-domain state updates.",
+    "Use 0.5 V as the fixed public rising-edge threshold and 0.0 V/1.0 V as the marker output levels for AMS timing/readout sequencing.",
+    "Do not count falling crossings, expose undeclared count state, or add validation-only hooks."
+  ],
+  "properties": [
+    {
+      "id": "P_INITIAL_LOW",
+      "observable_contract": "The timing/readout marker output initializes at 0.0 V before any counted edge.",
+      "required_signals": [
+        "time",
+        "clkin",
+        "mc"
+      ]
+    },
+    {
+      "id": "P_RISING_EDGE_COUNT",
+      "observable_contract": "Only rising crossings of CLKIN through 0.5 V advance the internal modulo-four sequence.",
+      "required_signals": [
+        "time",
+        "clkin",
+        "mc"
+      ]
+    },
+    {
+      "id": "P_WRAP_MARKER",
+      "observable_contract": "MC is driven to the 1.0 V marker level on the counted edge that wraps the sequence from count 3 to count 0.",
+      "required_signals": [
+        "time",
+        "clkin",
+        "mc"
+      ]
+    },
+    {
+      "id": "P_NONWRAP_LOW",
+      "observable_contract": "MC is driven to 0.0 V on each of the other three counted edges in every four-edge cycle.",
+      "required_signals": [
+        "time",
+        "clkin",
+        "mc"
+      ]
+    },
+    {
+      "id": "P_PERIOD_FOUR",
+      "observable_contract": "For a continuing valid clock, marker assertions repeat once per four rising threshold crossings.",
+      "required_signals": [
+        "time",
+        "clkin",
+        "mc"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "two_bit_counter_marker.va"
+  ],
+  "task_id": "v4-115",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clkin",
+            "port_ref": "CLKIN",
+            "position": 0
+          },
+          {
+            "net": "mc",
+            "port_ref": "MC",
+            "position": 1
+          }
+        ],
+        "module_ref": "two_bit_counter_marker",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clkin",
+      "mc"
+    ]
+  }
+}

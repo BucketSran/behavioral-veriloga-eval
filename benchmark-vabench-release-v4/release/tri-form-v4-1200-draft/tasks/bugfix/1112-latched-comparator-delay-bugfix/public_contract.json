@@ -1,0 +1,248 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "latched_comparator_delay",
+            "parameters": [
+              {
+                "default": 1e-09,
+                "name": "td",
+                "override_behavior": "sets DOUT delay after a latch event",
+                "type": "real",
+                "units": "s",
+                "valid_range": "td >= 0"
+              },
+              {
+                "default": 1e-10,
+                "name": "tr",
+                "override_behavior": "sets DOUT transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr >= 0"
+              },
+              {
+                "default": 0.0,
+                "name": "vos",
+                "override_behavior": "sets deterministic input-referred decision offset",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite real"
+              },
+              {
+                "default": 0.001,
+                "name": "vn",
+                "override_behavior": "sets standard deviation of the input-referred random decision term; zero disables it",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vn >= 0"
+              },
+              {
+                "default": 0.0,
+                "name": "seed_init",
+                "override_behavior": "initializes the repeatable random decision sequence",
+                "type": "real",
+                "units": null,
+                "valid_range": "finite integer-valued real accepted as a random seed"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "DOUT",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "GND",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "VDD",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "CLK",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "VINN",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "VINP",
+                "position": 5
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "latched_comparator_delay.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/latched_comparator_delay.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "112",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Latched Comparator Delay"
+  },
+  "modeling_constraints": [
+    "Initialize rail references and the random seed at initial_step, then sample only on rising CLK midpoint crossings.",
+    "Use seeded repeatable decision noise and a smoothed supply-referenced voltage contribution for DOUT.",
+    "Do not use current contributions, ddt(), idt(), validation hooks, hard-coded waveform sample points, or simulator-specific side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_SUPPLY_REFERENCED_THRESHOLD",
+      "observable_contract": "The latch clock threshold is the midpoint of VDD and GND, and DOUT low and high levels use those same rails.",
+      "required_signals": [
+        "time",
+        "vdd",
+        "clk",
+        "dout"
+      ]
+    },
+    {
+      "id": "P_RISING_EDGE_LATCH",
+      "observable_contract": "Each rising CLK midpoint crossing latches one comparison result; falling crossings do not resample the input.",
+      "required_signals": [
+        "time",
+        "vdd",
+        "clk",
+        "vinn",
+        "vinp",
+        "dout"
+      ]
+    },
+    {
+      "id": "P_OFFSET_DECISION",
+      "observable_contract": "With vn zero, DOUT latches high exactly when VINP minus VINN exceeds vos and low otherwise.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vinn",
+        "vinp",
+        "dout"
+      ]
+    },
+    {
+      "id": "P_SEEDED_RANDOM_TERM",
+      "observable_contract": "With vn nonzero, each latch decision includes a normal input-referred term scaled by vn from the sequence initialized by seed_init.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vinn",
+        "vinp",
+        "dout"
+      ]
+    },
+    {
+      "id": "P_INTEREDGE_HOLD",
+      "observable_contract": "The latched decision holds between rising CLK events even if VINP or VINN changes.",
+      "required_signals": [
+        "time",
+        "clk",
+        "vinn",
+        "vinp",
+        "dout"
+      ]
+    },
+    {
+      "id": "P_DELAY_AND_SMOOTHING",
+      "observable_contract": "DOUT applies td delay and tr transition smoothing after each latch event.",
+      "required_signals": [
+        "time",
+        "clk",
+        "dout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "latched_comparator_delay.va"
+  ],
+  "task_id": "v4-1112",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "dout",
+            "port_ref": "DOUT",
+            "position": 0
+          },
+          {
+            "net": "gnd",
+            "port_ref": "GND",
+            "position": 1
+          },
+          {
+            "net": "vdd",
+            "port_ref": "VDD",
+            "position": 2
+          },
+          {
+            "net": "clk",
+            "port_ref": "CLK",
+            "position": 3
+          },
+          {
+            "net": "vinn",
+            "port_ref": "VINN",
+            "position": 4
+          },
+          {
+            "net": "vinp",
+            "port_ref": "VINP",
+            "position": 5
+          }
+        ],
+        "module_ref": "latched_comparator_delay",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vdd",
+      "clk",
+      "vinn",
+      "vinp",
+      "dout"
+    ]
+  }
+}

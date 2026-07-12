@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/differential_buffer.va"
+
+Vinp (vinp 0) vsource type=pwl wave=[0 0.25 15n 0.25 15.1n 0.65 30n 0.65 30.1n 0.35 60n 0.35]
+Vinn (vinn 0) vsource type=pwl wave=[0 0.55 15n 0.55 15.1n 0.30 30n 0.30 30.1n 0.70 60n 0.70]
+
+XDUT (vinp vinn voutp voutn) differential_buffer
+
+
+tran tran stop=40n maxstep=25p
+save vinp vinn voutp voutn

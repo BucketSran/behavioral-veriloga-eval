@@ -1,0 +1,236 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "hysteresis_trip_characterizer",
+            "parameters": [
+              {
+                "default": 2e-11,
+                "name": "tr",
+                "override_behavior": "sets transition smoothing for captured trip values, hysteresis width, and valid",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr >= 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vdd",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vss",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "cmp_out",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "trip_rise",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "trip_fall",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "hyst_width",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "hysteresis_trip_characterizer.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "111",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "comparator",
+    "difficulty": "D3",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Hysteresis Trip Characterizer"
+  },
+  "modeling_constraints": [
+    "Treat the companion hysteretic comparator as a supplied harness component observed only through vin and cmp_out.",
+    "Capture trip values on both cmp_out edge polarities and drive reported values with smoothed voltage contributions.",
+    "Do not use current contributions, ddt(), idt(), validation hooks, hard-coded waveform sample points, or simulator-specific side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_SUPPLY_MIDPOINT_THRESHOLD",
+      "observable_contract": "The characterizer detects cmp_out transitions through the instantaneous midpoint of vdd and vss.",
+      "required_signals": [
+        "time",
+        "vdd",
+        "vss",
+        "cmp_out"
+      ]
+    },
+    {
+      "id": "P_RISING_TRIP_CAPTURE",
+      "observable_contract": "On each rising cmp_out midpoint crossing, trip_rise captures the instantaneous vin minus vss value.",
+      "required_signals": [
+        "time",
+        "vss",
+        "vin",
+        "cmp_out",
+        "trip_rise"
+      ]
+    },
+    {
+      "id": "P_FALLING_TRIP_CAPTURE",
+      "observable_contract": "On each falling cmp_out midpoint crossing, trip_fall captures the instantaneous vin minus vss value.",
+      "required_signals": [
+        "time",
+        "vss",
+        "vin",
+        "cmp_out",
+        "trip_fall"
+      ]
+    },
+    {
+      "id": "P_LATEST_EDGE_REFRESH",
+      "observable_contract": "Later rising or falling transitions refresh the corresponding captured trip value rather than leaving only the first measurement.",
+      "required_signals": [
+        "time",
+        "vin",
+        "cmp_out",
+        "trip_rise",
+        "trip_fall"
+      ]
+    },
+    {
+      "id": "P_HYSTERESIS_WIDTH_SIGN",
+      "observable_contract": "After both directions are captured, hyst_width equals trip_rise minus trip_fall with that signed polarity.",
+      "required_signals": [
+        "time",
+        "trip_rise",
+        "trip_fall",
+        "hyst_width"
+      ]
+    },
+    {
+      "id": "P_VALID_AFTER_BOTH_DIRECTIONS",
+      "observable_contract": "Valid remains at vss until at least one rising and one falling trip have been captured, then rises to vdd.",
+      "required_signals": [
+        "time",
+        "vdd",
+        "vss",
+        "cmp_out",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "hysteresis_trip_characterizer.va"
+  ],
+  "task_id": "v4-111",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vdd",
+            "port_ref": "vdd",
+            "position": 0
+          },
+          {
+            "net": "vss",
+            "port_ref": "vss",
+            "position": 1
+          },
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 2
+          },
+          {
+            "net": "cmp_out",
+            "port_ref": "cmp_out",
+            "position": 3
+          },
+          {
+            "net": "trip_rise",
+            "port_ref": "trip_rise",
+            "position": 4
+          },
+          {
+            "net": "trip_fall",
+            "port_ref": "trip_fall",
+            "position": 5
+          },
+          {
+            "net": "hyst_width",
+            "port_ref": "hyst_width",
+            "position": 6
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 7
+          }
+        ],
+        "module_ref": "hysteresis_trip_characterizer",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vdd",
+      "vss",
+      "vin",
+      "cmp_out",
+      "trip_rise",
+      "trip_fall",
+      "hyst_width",
+      "valid"
+    ]
+  }
+}
