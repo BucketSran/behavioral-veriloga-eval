@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-248",
+    "canonical_task_slug": "248-bipolar-dff-sample",
+    "family_spec_sha256": "d4f6a91ab92b996dbd17b7730c65dfebe03c5f5feaac769217c54272b4d998ab",
+    "mutation_catalog_sha256": "c8ab16945b74f47a4a06021f4181fe36fd096948db863eedbe4a8e87953e5a1e",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "248",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_transparent_latch",
+    "testbench_suite": [
+      "neg_005_metric_scale_low",
+      "neg_001_zero",
+      "neg_003_transparent_latch",
+      "neg_002_qbar_same_as_q",
+      "neg_004_falling_edge_sample"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "36bfadaa2d38ca81730008ede7c7616095d474841208a1eca9405efa91658243",
+    "changed_artifacts": [
+      "bipolar_dff_sample.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_transparent_latch",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Tracks D continuously instead of sampling only on rising clock edges.' because it exercises P_ON_EACH_RISING_CROSSING_OF_VCLK, P_VTH_0_0_V_DATA_THRESHOLD_2 as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 27,
+    "source_preferred_seed": "neg_005_metric_scale_low",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

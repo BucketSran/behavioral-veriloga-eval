@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-246",
+    "canonical_task_slug": "246-mux4-priority",
+    "family_spec_sha256": "a2729a996daf3f6e3e7fea9e5687729a0dc0646787e0b6e3e5a9a07587acdfa1",
+    "mutation_catalog_sha256": "808b670281d96a37ab1584409aaaf342c38bec7a4c4bccdf20fe17cde961c3d7",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "246",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_swapped_select_bits",
+    "testbench_suite": [
+      "neg_005_metric_scale_low",
+      "neg_002_swapped_select_bits",
+      "neg_001_zero",
+      "neg_004_always_in0",
+      "neg_003_inverted_select_threshold"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "a718690299039111da33a9d3dcd9c1834748c1405f8c3a83d147476a7eacaa92",
+    "changed_artifacts": [
+      "mux4_priority.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_swapped_select_bits",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Swaps sel0 and sel1 when decoding the mux select.' because it exercises P_DECODE_THE_SELECT_CODE_AS_SEL0, P_USE_DETERMINISTIC_VOLTAGE_DOMAIN_VERILOG_A as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 22,
+    "source_preferred_seed": "neg_005_metric_scale_low",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

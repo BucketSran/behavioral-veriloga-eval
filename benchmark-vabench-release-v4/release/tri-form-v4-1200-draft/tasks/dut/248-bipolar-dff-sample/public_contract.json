@@ -1,0 +1,186 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "bipolar_dff_sample",
+            "parameters": [
+              {
+                "default": "0.0",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vclk_th",
+                "override_behavior": "overrides vclk_th",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin_d",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vclk",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout_q",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout_qbar",
+                "position": 3
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "bipolar_dff_sample.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "248",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Bipolar DFF Sample"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_EACH_RISING_CROSSING_OF_VCLK",
+      "observable_contract": "On each rising crossing of `vclk` through `vclk_th`, sample whether `vin_d` is above `vth`. Hold the sampled state between clock edges. Drive `vout_q` to `+1 V` for sampled high and `-1 V` for sampled low. Drive `vout_qbar` as the complementary bipolar output.",
+      "required_signals": [
+        "time",
+        "vclk",
+        "vin_d",
+        "vout_q",
+        "vout_qbar"
+      ]
+    },
+    {
+      "id": "P_VTH_0_0_V_DATA_THRESHOLD",
+      "observable_contract": "`vth = 0.0 V`: data threshold for `vin_d`.",
+      "required_signals": [
+        "time",
+        "vclk",
+        "vin_d",
+        "vout_q",
+        "vout_qbar"
+      ]
+    },
+    {
+      "id": "P_VCLK_TH_0_45_V_RISING",
+      "observable_contract": "`vclk_th = 0.45 V`: rising-edge threshold for `vclk`.",
+      "required_signals": [
+        "time",
+        "vclk",
+        "vin_d",
+        "vout_q",
+        "vout_qbar"
+      ]
+    },
+    {
+      "id": "P_VTH_0_0_V_DATA_THRESHOLD_2",
+      "observable_contract": "- `vth = 0.0 V`: data threshold for `vin_d`. - `vclk_th = 0.45 V`: rising-edge threshold for `vclk`.",
+      "required_signals": [
+        "time",
+        "vclk",
+        "vin_d",
+        "vout_q",
+        "vout_qbar"
+      ]
+    },
+    {
+      "id": "P_USE_DETERMINISTIC_VOLTAGE_DOMAIN_VERILOG_A",
+      "observable_contract": "Use deterministic voltage-domain Verilog-A and smooth voltage-coded output transitions. Do not emit a testbench, checker logic, out-of-band test hooks, hard-code testbench sample points, use current contributions, transistor-level devices, AC/noise analysis, `ddt()`, `idt()`, or simulator side channels.",
+      "required_signals": [
+        "time",
+        "vclk",
+        "vin_d",
+        "vout_q",
+        "vout_qbar"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "bipolar_dff_sample.va"
+  ],
+  "task_id": "v4-248",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin_d",
+            "port_ref": "vin_d",
+            "position": 0
+          },
+          {
+            "net": "vclk",
+            "port_ref": "vclk",
+            "position": 1
+          },
+          {
+            "net": "vout_q",
+            "port_ref": "vout_q",
+            "position": 2
+          },
+          {
+            "net": "vout_qbar",
+            "port_ref": "vout_qbar",
+            "position": 3
+          }
+        ],
+        "module_ref": "bipolar_dff_sample",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vclk",
+      "vin_d",
+      "vout_q",
+      "vout_qbar"
+    ]
+  }
+}

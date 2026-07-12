@@ -1,0 +1,15 @@
+`include "disciplines.vams"
+module bipolar_dff_sample(vin_d, vclk, vout_q, vout_qbar);
+input vin_d, vclk;
+output vout_q, vout_qbar;
+electrical vin_d, vclk, vout_q, vout_qbar;
+parameter real vth = 0.0;
+parameter real vclk_th = 0.45;
+integer x;
+analog begin
+    @(initial_step) x = 0;
+    @(cross(V(vclk) - vclk_th, +1)) x = (V(vin_d) > vth);
+    V(vout_q) <+ transition((x ? 1.0 : -1.0), 0.0, 10p, 10p);
+    V(vout_qbar) <+ transition((x ? -1.0 : 1.0), 0.0, 10p, 10p);
+end
+endmodule

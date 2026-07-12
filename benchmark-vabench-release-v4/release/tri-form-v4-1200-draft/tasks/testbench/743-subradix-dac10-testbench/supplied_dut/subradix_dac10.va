@@ -1,0 +1,34 @@
+`include "disciplines.vams"
+module subradix_dac10(vd9, vd8, vd7, vd6, vd5, vd4, vd3, vd2, vd1, vd0, vout);
+input vd9, vd8, vd7, vd6, vd5, vd4, vd3, vd2, vd1, vd0;
+output vout;
+electrical vd9, vd8, vd7, vd6, vd5, vd4, vd3, vd2, vd1, vd0, vout;
+parameter real vth = 0.45;
+parameter real vref = 1.0;
+parameter real w0 = 1.0;
+parameter real w1 = 1.8;
+parameter real w2 = 3.24;
+parameter real w3 = 5.832;
+parameter real w4 = 10.4976;
+parameter real w5 = 18.89568;
+parameter real w6 = 34.012224;
+parameter real w7 = 61.2220032;
+parameter real w8 = 110.19960576;
+parameter real w9 = 198.359290368;
+parameter real denom = 447.7429706496;
+real code;
+analog begin
+    code = 0.0;
+    if (V(vd9) > vth) code = code + w9;
+    if (V(vd8) > vth) code = code + w8;
+    if (V(vd7) > vth) code = code + w7;
+    if (V(vd6) > vth) code = code + w6;
+    if (V(vd5) > vth) code = code + w5;
+    if (V(vd4) > vth) code = code + w4;
+    if (V(vd3) > vth) code = code + w3;
+    if (V(vd2) > vth) code = code + w2;
+    if (V(vd1) > vth) code = code + w1;
+    if (V(vd0) > vth) code = code + w0;
+    V(vout) <+ vref * code / denom;
+end
+endmodule

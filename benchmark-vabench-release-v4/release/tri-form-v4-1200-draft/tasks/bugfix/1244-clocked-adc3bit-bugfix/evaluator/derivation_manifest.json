@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-244",
+    "canonical_task_slug": "244-clocked-adc3bit",
+    "family_spec_sha256": "effa9a44b58fecaec4411a7342629d5c905dbdc665e19e8b50def657dd941111",
+    "mutation_catalog_sha256": "3ce132356fc0036a81fe5b2633a7b579fd88e628d68d03d7422ac0f63250f989",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "244",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_falling_edge_sample",
+    "testbench_suite": [
+      "neg_005_metric_scale_low",
+      "neg_001_zero",
+      "neg_003_bit_order_swapped",
+      "neg_002_four_level_adc",
+      "neg_004_falling_edge_sample"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "7b69412847e698ae1748145b4f38399ea4a8da45028623b4b8b51a95e186a9d2",
+    "changed_artifacts": [
+      "clocked_adc3bit.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_falling_edge_sample",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Samples on the falling clock edge instead of the rising edge.' because it exercises P_ON_EACH_RISING_CROSSING_OF_VCLK, P_THE_OUTPUT_LOW_LEVEL_IS_0 as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 27,
+    "source_preferred_seed": "neg_005_metric_scale_low",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

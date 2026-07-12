@@ -1,0 +1,213 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "mux4_priority",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sel0",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sel1",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in0",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in1",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in2",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in3",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 6
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "mux4_priority.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "246",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "digital_logic",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Mux4 Priority"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_DECODE_THE_SELECT_CODE_AS_SEL0",
+      "observable_contract": "Decode the select code as `sel0 + 2*sel1`. For code `0`, forward `in0` to `out`; for code `1`, forward `in1`; for code `2`, forward `in2`; for code `3`, forward `in3`. The selected analog voltage should pass through without quantization or rail coding.",
+      "required_signals": [
+        "time",
+        "in0",
+        "in1",
+        "in2",
+        "in3",
+        "out",
+        "sel0",
+        "sel1"
+      ]
+    },
+    {
+      "id": "P_PROVIDE_OVERRIDEABLE_PUBLIC_PARAMETER_VTH_0",
+      "observable_contract": "Provide overrideable public parameter `vth = 0.45 V` as the decision threshold for `sel0` and `sel1`.",
+      "required_signals": [
+        "time",
+        "in0",
+        "in1",
+        "in2",
+        "in3",
+        "out",
+        "sel0",
+        "sel1"
+      ]
+    },
+    {
+      "id": "P_USE_DETERMINISTIC_VOLTAGE_DOMAIN_VERILOG_A",
+      "observable_contract": "Use deterministic voltage-domain Verilog-A and voltage contributions only. Do not emit a testbench, checker logic, out-of-band test hooks, hard-code testbench sample points, use current contributions, transistor-level devices, `ddt()`, `idt()`, or simulator side channels.",
+      "required_signals": [
+        "time",
+        "in0",
+        "in1",
+        "in2",
+        "in3",
+        "out",
+        "sel0",
+        "sel1"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/mux4_priority.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-746",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "sel0",
+            "port_ref": "sel0",
+            "position": 0
+          },
+          {
+            "net": "sel1",
+            "port_ref": "sel1",
+            "position": 1
+          },
+          {
+            "net": "in0",
+            "port_ref": "in0",
+            "position": 2
+          },
+          {
+            "net": "in1",
+            "port_ref": "in1",
+            "position": 3
+          },
+          {
+            "net": "in2",
+            "port_ref": "in2",
+            "position": 4
+          },
+          {
+            "net": "in3",
+            "port_ref": "in3",
+            "position": 5
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 6
+          }
+        ],
+        "module_ref": "mux4_priority",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "in0",
+      "in1",
+      "in2",
+      "in3",
+      "out",
+      "sel0",
+      "sel1"
+    ]
+  }
+}

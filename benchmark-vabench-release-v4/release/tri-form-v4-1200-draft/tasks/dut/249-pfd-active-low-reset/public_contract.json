@@ -1,0 +1,231 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "pfd_active_low_reset",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vh",
+                "override_behavior": "overrides vh",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "80p from [0:inf)",
+                "name": "reset_delay",
+                "override_behavior": "overrides reset_delay",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "10p from [0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ref",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "fb",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rstb",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "up",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "down",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "pfd_active_low_reset.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "249",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "PFD With External Active Low Reset"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_WHEN_RSTB_IS_BELOW_VTH_CLEAR",
+      "observable_contract": "When `rstb` is below `vth`, clear both PFD states and hold both outputs low. While `rstb` is high, a rising crossing of `ref` asserts `up`, and a rising crossing of `fb` asserts `down`. Once both states have occurred, schedule a reset after `reset_delay` and clear both states at that timer event. The reset input must also clear a pending one-sided UP or DOWN state even if the opposite edge has not arrived.",
+      "required_signals": [
+        "time",
+        "down",
+        "fb",
+        "ref",
+        "rstb",
+        "up"
+      ]
+    },
+    {
+      "id": "P_VTH_0_45_V_THRESHOLD_FOR",
+      "observable_contract": "`vth = 0.45 V`: threshold for `ref`, `fb`, and `rstb`.",
+      "required_signals": [
+        "time",
+        "down",
+        "fb",
+        "ref",
+        "rstb",
+        "up"
+      ]
+    },
+    {
+      "id": "P_VH_0_9_V_LOGIC_HIGH",
+      "observable_contract": "`vh = 0.9 V`: logic-high output level.",
+      "required_signals": [
+        "time",
+        "down",
+        "fb",
+        "ref",
+        "rstb",
+        "up"
+      ]
+    },
+    {
+      "id": "P_RESET_DELAY_80_PS_FROM_0",
+      "observable_contract": "`reset_delay = 80 ps from [0:inf)`: delay from the moment both detector states are asserted to the mutual reset event.",
+      "required_signals": [
+        "time",
+        "down",
+        "fb",
+        "ref",
+        "rstb",
+        "up"
+      ]
+    },
+    {
+      "id": "P_TR_10_PS_FROM_0_INF",
+      "observable_contract": "`tr = 10 ps from [0:inf)`: output transition smoothing time.",
+      "required_signals": [
+        "time",
+        "down",
+        "fb",
+        "ref",
+        "rstb",
+        "up"
+      ]
+    },
+    {
+      "id": "P_VTH_0_45_V_THRESHOLD_FOR_2",
+      "observable_contract": "- `vth = 0.45 V`: threshold for `ref`, `fb`, and `rstb`. - `vh = 0.9 V`: logic-high output level. - `reset_delay = 80 ps from [0:inf)`: delay from the moment both detector states are asserted to the mutual reset event. - `tr = 10 ps from [0:inf)`: output transition smoothing time.",
+      "required_signals": [
+        "time",
+        "down",
+        "fb",
+        "ref",
+        "rstb",
+        "up"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "pfd_active_low_reset.va"
+  ],
+  "task_id": "v4-249",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "ref",
+            "port_ref": "ref",
+            "position": 0
+          },
+          {
+            "net": "fb",
+            "port_ref": "fb",
+            "position": 1
+          },
+          {
+            "net": "rstb",
+            "port_ref": "rstb",
+            "position": 2
+          },
+          {
+            "net": "up",
+            "port_ref": "up",
+            "position": 3
+          },
+          {
+            "net": "down",
+            "port_ref": "down",
+            "position": 4
+          }
+        ],
+        "module_ref": "pfd_active_low_reset",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "down",
+      "fb",
+      "ref",
+      "rstb",
+      "up"
+    ]
+  }
+}

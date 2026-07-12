@@ -1,0 +1,33 @@
+`include "disciplines.vams"
+module pfd_active_low_reset(ref, fb, rstb, up, down);
+input ref, fb, rstb;
+output up, down;
+electrical ref, fb, rstb, up, down;
+parameter real vth = 0.45;
+parameter real vh = 0.9;
+parameter real reset_delay = 80p;
+integer up_state, down_state;
+real trst;
+analog begin
+    @(initial_step) begin
+        up_state = 0;
+        down_state = 0;
+        trst = -1.0;
+    end
+    @(cross(V(ref) - vth, +1)) begin
+        up_state = 1;
+        if (down_state == 1) trst = $abstime + reset_delay;
+    end
+    @(cross(V(fb) - vth, +1)) begin
+        down_state = 1;
+        if (up_state == 1) trst = $abstime + reset_delay;
+    end
+    @(timer(trst)) begin
+        up_state = 0;
+        down_state = 0;
+        trst = -1.0;
+    end
+    V(up) <+ transition(up_state ? vh : 0.0, 0, 10p);
+    V(down) <+ transition(down_state ? vh : 0.0, 0, 10p);
+end
+endmodule

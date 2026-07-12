@@ -1,0 +1,22 @@
+`include "disciplines.vams"
+module hysteretic_comparator_receiver(inp, inm, out);
+input inp, inm;
+output out;
+electrical inp, inm, out;
+parameter real vout_high = 0.9;
+parameter real vout_low = 0.0;
+parameter real offset = 0.0;
+parameter real vhys = 40e-3 from [0:inf);
+parameter real td = 400p from [0:inf);
+parameter real tr = 80p from [0:inf);
+real upper_th, lower_th;
+integer state;
+analog begin
+    upper_th = offset + 0.5 * vhys;
+    lower_th = offset - 0.5 * vhys;
+    @(initial_step) state = (V(inp, inm) >= upper_th);
+    @(cross(V(inp, inm) - upper_th, +1)) state = 1;
+    @(cross(V(inp, inm) - lower_th, -1)) state = 0;
+    V(out) <+ transition(state ? vout_high : vout_low, 0, tr, tr);
+end
+endmodule

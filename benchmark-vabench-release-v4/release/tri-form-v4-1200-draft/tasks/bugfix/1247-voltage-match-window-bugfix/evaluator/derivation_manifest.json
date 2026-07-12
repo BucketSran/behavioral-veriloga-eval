@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-247",
+    "canonical_task_slug": "247-voltage-match-window",
+    "family_spec_sha256": "1acd01f3bfffab52be6b8225841958f4f813c49cdbd8ee104f436d37dcb28866",
+    "mutation_catalog_sha256": "b72fc829810591eecef043c2ced43b9fb7c30ea100fbaaab2c112d415b0c5d83",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "247",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_signed_comparator",
+    "testbench_suite": [
+      "neg_005_metric_scale_low",
+      "neg_003_signed_comparator",
+      "neg_001_zero",
+      "neg_002_threshold_xnor",
+      "neg_004_wrong_tolerance"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "8e534e57868ff05b12319288ec0f2071061a7f3b6a581b0787eb85511943b5d0",
+    "changed_artifacts": [
+      "voltage_match_window.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_signed_comparator",
+    "rationale": "Select fault class timing_or_state_update_fault under trigger 'Uses a signed greater-than comparator instead of an absolute voltage-difference window.' because it exercises P_COMPARE_THE_ANALOG_VOLTAGE_DIFFERENCE_DIRECTLY, P_TR_20_PS_FROM_0_INF as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 24,
+    "source_preferred_seed": "neg_005_metric_scale_low",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

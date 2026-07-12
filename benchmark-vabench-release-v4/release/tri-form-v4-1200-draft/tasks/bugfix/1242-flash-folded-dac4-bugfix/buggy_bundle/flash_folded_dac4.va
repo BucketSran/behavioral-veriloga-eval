@@ -1,0 +1,5 @@
+`include "disciplines.vams"
+module flash_folded_dac4(vd4, vd3, vd2, vd1, vout);
+input vd4, vd3, vd2, vd1; output vout; electrical vd4, vd3, vd2, vd1, vout; parameter real vth=0.45; parameter real vref=1.0; real l;
+analog begin l=((V(vd3)>vth)?4.0:0.0)+((V(vd2)>vth)?2.0:0.0)+((V(vd1)>vth)?1.0:0.0); V(vout)<+vref*((V(vd4)>vth)?(8.0-l):(8.0+l))/16.0; end
+endmodule

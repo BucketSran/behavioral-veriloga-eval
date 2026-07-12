@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-249",
+    "canonical_task_slug": "249-pfd-active-low-reset",
+    "family_spec_sha256": "1129f0892cbdf88b24b306744e3acf71918b65eb613ada62c3e0d41baa185af7",
+    "mutation_catalog_sha256": "ffd6b37d6bf4b246cc1c6998986b6c239dfd06526b5fc19203ea26314344a7ae",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "249",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_ignore_reset",
+    "testbench_suite": [
+      "neg_005_metric_scale_low",
+      "neg_001_zero",
+      "neg_003_no_reset_delay",
+      "neg_002_ignore_reset",
+      "neg_004_swapped_edges"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "19594f75e0fc0d8193a0c077ab1148f39fa6326ddd26d7c1cfa5d5edfadc744a",
+    "changed_artifacts": [
+      "pfd_active_low_reset.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_ignore_reset",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Implements the edge state machine but ignores the external active-low reset input.' because it exercises P_VH_0_9_V_LOGIC_HIGH, P_WHEN_RSTB_IS_BELOW_VTH_CLEAR as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 37,
+    "source_preferred_seed": "neg_005_metric_scale_low",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}
