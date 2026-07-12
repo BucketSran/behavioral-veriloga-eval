@@ -1,0 +1,39 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module peak_detector (
+    input  electrical vin,
+    input  electrical clk,
+    input  electrical rst,
+    input  electrical start,
+    output electrical peak_metric
+);
+    parameter real vth = 0.45;
+    parameter real tr = 200e-12;
+
+    real peak_value;
+
+    analog begin
+        @(initial_step) begin
+            peak_value = 0.0;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth) begin
+                peak_value = 0.0;
+            end else if (V(start) > vth) begin
+                if (V(vin) >= 0.0) begin
+                    peak_value = V(vin);
+                end else begin
+                    peak_value = V(vin);
+                end
+            end
+        end
+
+        @(cross(V(rst) - vth, +1)) begin
+            peak_value = 0.0;
+        end
+
+        V(peak_metric) <+ transition(peak_value, 0, tr);
+    end
+endmodule

@@ -1,0 +1,27 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module binary_weighted_cdac(bit_3, bit_2, bit_1, bit_0, dac_o, dac_dbg);
+input bit_3, bit_2, bit_1, bit_0;
+output dac_o, dac_dbg;
+electrical bit_3, bit_2, bit_1, bit_0, dac_o, dac_dbg;
+
+parameter real vss = 0.0;
+parameter real vref = 0.9;
+parameter real vth = 0.45;
+parameter real tr = 200p;
+
+integer code;
+real dac_level;
+
+analog begin
+    code = 0;
+    if (V(bit_0) > vth) code = code + 1;
+    if (V(bit_1) > vth) code = code + 2;
+    if (V(bit_2) > vth) code = code + 4;
+    if (V(bit_3) > vth) code = code + 8;
+    dac_level = vss + vref * code / 16.0;
+    V(dac_o) <+ transition(dac_level, 0, tr, tr);
+    V(dac_dbg) <+ transition(dac_level, 0, tr, tr);
+end
+endmodule

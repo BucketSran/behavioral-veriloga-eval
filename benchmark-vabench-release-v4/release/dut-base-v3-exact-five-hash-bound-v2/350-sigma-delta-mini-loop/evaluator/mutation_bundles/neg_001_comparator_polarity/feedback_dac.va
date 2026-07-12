@@ -1,0 +1,25 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module feedback_dac(bit_in, rst, feedback);
+    input bit_in, rst;
+    output feedback;
+    electrical bit_in, rst, feedback;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    real feedback_v;
+
+    analog begin
+        if (V(rst) > vth) begin
+            feedback_v = vss;
+        end else begin
+            feedback_v = (V(bit_in) > vth) ? vdd : vss;
+        end
+
+        V(feedback) <+ transition(feedback_v, 0, tr, tr);
+    end
+endmodule

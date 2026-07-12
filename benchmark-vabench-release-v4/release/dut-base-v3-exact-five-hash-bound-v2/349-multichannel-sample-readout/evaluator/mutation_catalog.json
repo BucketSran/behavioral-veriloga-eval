@@ -1,0 +1,136 @@
+{
+  "family_id": "349",
+  "gold_bundle_sha256": "a21ecfb17648392077369da89a6d34cd33599df01282088851eed59dc0eef999",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "sample_hold_bank.va": "3a9791b59d6a01fc84f9e344e43d6e0878ae177f9fb3ac14b8796e6f4ce196f8"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_READOUT_HELD_VALUE",
+          "P_READOUT_SIMULTANEOUS_SAMPLE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_only_channel0_captured/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "sample_hold_bank.va"
+      ],
+      "fault_class": "sample_bank_failure",
+      "id": "neg_001_only_channel0_captured",
+      "trigger_condition": "a sample captures distinct channel values",
+      "violated_property_ids": [
+        "P_READOUT_HELD_VALUE",
+        "P_READOUT_SIMULTANEOUS_SAMPLE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "mux_controller.va": "47e13a3316ee28f3b97a0b66a768d95137abc3c33e0a60d5099bfbbb43fa88f4"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_READOUT_CHANNEL_ORDER",
+          "P_READOUT_HELD_VALUE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_pointer_skips_channels/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "mux_controller.va"
+      ],
+      "fault_class": "pointer_step_error",
+      "id": "neg_002_pointer_skips_channels",
+      "trigger_condition": "consecutive read cycles occur",
+      "violated_property_ids": [
+        "P_READOUT_CHANNEL_ORDER",
+        "P_READOUT_HELD_VALUE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "mux_controller.va": "0884bff2500c96f2d8b7773a5e29ce5fe325970037c1b675fa5ae075bc3dc1d2"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_READOUT_VALID_TIMING"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_valid_stuck_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "mux_controller.va"
+      ],
+      "fault_class": "valid_flag_stuck",
+      "id": "neg_003_valid_stuck_low",
+      "trigger_condition": "a read cycle occurs",
+      "violated_property_ids": [
+        "P_READOUT_VALID_TIMING"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "output_driver.va": "c8167eda94441c0cca54b52aa37e499491f669f61b006c53cdb9102f1fc04aaf"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_READOUT_HELD_VALUE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_selector1_reads_hold2/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "output_driver.va"
+      ],
+      "fault_class": "mux_mapping_error",
+      "id": "neg_004_selector1_reads_hold2",
+      "trigger_condition": "channel one is selected",
+      "violated_property_ids": [
+        "P_READOUT_HELD_VALUE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "output_driver.va": "9eebff23ae3679ce93e26af281cea56db276aa26a70acd83a86f9a5d45ed4c0e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_READOUT_RESET_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_reset_does_not_clear_out/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "output_driver.va"
+      ],
+      "fault_class": "missing_reset",
+      "id": "neg_005_reset_does_not_clear_out",
+      "trigger_condition": "reset is asserted after a nonzero read",
+      "violated_property_ids": [
+        "P_READOUT_RESET_CLEAR"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

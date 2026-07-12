@@ -1,0 +1,31 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module valid_latch(rst, start_evt, valid_i, overflow_i, valid, overflow);
+input rst, start_evt, valid_i, overflow_i;
+output valid, overflow;
+electrical rst, start_evt, valid_i, overflow_i, valid, overflow;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vth = 0.45;
+parameter real tr = 200p;
+
+real valid_level, overflow_level;
+
+analog begin
+    @(initial_step) begin valid_level = vss; overflow_level = vss; end
+    @(cross(V(rst) - vth, +1) or cross(V(start_evt) - vth, +1)) begin
+        valid_level = vss;
+        overflow_level = vss;
+    end
+    @(cross(V(valid_i) - vth, +1)) begin
+        if (V(rst) <= vth) begin
+            valid_level = vdd;
+            overflow_level = (V(overflow_i) > vth) ? vdd : vss;
+        end
+    end
+    V(valid) <+ transition(valid_level, 0, tr, tr);
+    V(overflow) <+ transition(overflow_level, 0, tr, tr);
+end
+endmodule

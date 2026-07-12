@@ -1,0 +1,59 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sample_hold_bank (
+    input  electrical ch0,
+    input  electrical ch1,
+    input  electrical ch2,
+    input  electrical ch3,
+    input  electrical clk,
+    input  electrical rst,
+    input  electrical sample,
+    output electrical hold0,
+    output electrical hold1,
+    output electrical hold2,
+    output electrical hold3
+);
+    parameter real vth = 0.45;
+    parameter real tr = 200e-12;
+
+    real h0;
+    real h1;
+    real h2;
+    real h3;
+
+    analog begin
+        @(initial_step) begin
+            h0 = 0.0;
+            h1 = 0.0;
+            h2 = 0.0;
+            h3 = 0.0;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth) begin
+                h0 = 0.0;
+                h1 = 0.0;
+                h2 = 0.0;
+                h3 = 0.0;
+            end else if (V(sample) > vth) begin
+                h0 = V(ch0);
+                h1 = 0.0;
+                h2 = V(ch2);
+                h3 = V(ch3);
+            end
+        end
+
+        @(cross(V(rst) - vth, +1)) begin
+            h0 = 0.0;
+            h1 = 0.0;
+            h2 = 0.0;
+            h3 = 0.0;
+        end
+
+        V(hold0) <+ transition(h0, 0, tr);
+        V(hold1) <+ transition(h1, 0, tr);
+        V(hold2) <+ transition(h2, 0, tr);
+        V(hold3) <+ transition(h3, 0, tr);
+    end
+endmodule

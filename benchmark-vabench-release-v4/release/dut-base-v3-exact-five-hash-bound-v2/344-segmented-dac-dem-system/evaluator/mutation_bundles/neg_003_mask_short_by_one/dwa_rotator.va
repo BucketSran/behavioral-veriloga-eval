@@ -1,0 +1,67 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dwa_rotator(clk, rst, req_2, req_1, req_0, sel_7, sel_6, sel_5, sel_4, sel_3, sel_2, sel_1, sel_0,
+                   ptr_2, ptr_1, ptr_0);
+input clk, rst, req_2, req_1, req_0;
+output sel_7, sel_6, sel_5, sel_4, sel_3, sel_2, sel_1, sel_0, ptr_2, ptr_1, ptr_0;
+electrical clk, rst, req_2, req_1, req_0;
+electrical sel_7, sel_6, sel_5, sel_4, sel_3, sel_2, sel_1, sel_0, ptr_2, ptr_1, ptr_0;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vth = 0.45;
+parameter real tr = 200p;
+
+integer pointer, req, i, idx;
+integer m0, m1, m2, m3, m4, m5, m6, m7;
+real p2, p1, p0;
+
+analog begin
+    @(initial_step) begin
+        pointer = 0; m0 = 0; m1 = 0; m2 = 0; m3 = 0; m4 = 0; m5 = 0; m6 = 0; m7 = 0;
+    end
+    @(cross(V(rst) - vth, +1)) begin
+        pointer = 0; m0 = 0; m1 = 0; m2 = 0; m3 = 0; m4 = 0; m5 = 0; m6 = 0; m7 = 0;
+    end
+    @(cross(V(clk) - vth, +1)) begin
+        if (V(rst) > vth) begin
+            pointer = 0; m0 = 0; m1 = 0; m2 = 0; m3 = 0; m4 = 0; m5 = 0; m6 = 0; m7 = 0;
+        end else begin
+            req = 0;
+            if (V(req_0) > vth) req = req + 1;
+            if (V(req_1) > vth) req = req + 2;
+            if (V(req_2) > vth) req = req + 4;
+            m0 = 0; m1 = 0; m2 = 0; m3 = 0; m4 = 0; m5 = 0; m6 = 0; m7 = 0;
+            for (i = 0; i < req - 1; i = i + 1) begin
+                idx = pointer + i;
+                if (idx >= 8) idx = idx - 8;
+                if (idx == 0) m0 = 1;
+                if (idx == 1) m1 = 1;
+                if (idx == 2) m2 = 1;
+                if (idx == 3) m3 = 1;
+                if (idx == 4) m4 = 1;
+                if (idx == 5) m5 = 1;
+                if (idx == 6) m6 = 1;
+                if (idx == 7) m7 = 1;
+            end
+            pointer = pointer + req;
+            while (pointer >= 8) pointer = pointer - 8;
+        end
+    end
+    p2 = (pointer >= 4) ? vdd : vss;
+    p1 = ((pointer == 2) || (pointer == 3) || (pointer == 6) || (pointer == 7)) ? vdd : vss;
+    p0 = ((pointer == 1) || (pointer == 3) || (pointer == 5) || (pointer == 7)) ? vdd : vss;
+    V(sel_7) <+ transition(m7 ? vdd : vss, 0, tr, tr);
+    V(sel_6) <+ transition(m6 ? vdd : vss, 0, tr, tr);
+    V(sel_5) <+ transition(m5 ? vdd : vss, 0, tr, tr);
+    V(sel_4) <+ transition(m4 ? vdd : vss, 0, tr, tr);
+    V(sel_3) <+ transition(m3 ? vdd : vss, 0, tr, tr);
+    V(sel_2) <+ transition(m2 ? vdd : vss, 0, tr, tr);
+    V(sel_1) <+ transition(m1 ? vdd : vss, 0, tr, tr);
+    V(sel_0) <+ transition(m0 ? vdd : vss, 0, tr, tr);
+    V(ptr_2) <+ transition(p2, 0, tr, tr);
+    V(ptr_1) <+ transition(p1, 0, tr, tr);
+    V(ptr_0) <+ transition(p0, 0, tr, tr);
+end
+endmodule

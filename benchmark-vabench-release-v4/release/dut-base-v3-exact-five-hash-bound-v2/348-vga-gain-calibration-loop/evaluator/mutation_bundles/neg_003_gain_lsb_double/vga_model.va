@@ -1,0 +1,36 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module vga_model (
+    input  electrical vin,
+    input  electrical gain_3,
+    input  electrical gain_2,
+    input  electrical gain_1,
+    input  electrical gain_0,
+    output electrical vout
+);
+    parameter real vth = 0.45;
+    parameter real gain_min = 0.5;
+    parameter real gain_lsb = 0.1;
+
+    integer gain_code;
+    real gain_value;
+
+    analog begin
+        gain_code = 0;
+        if (V(gain_0) > vth) begin
+            gain_code = gain_code + 1;
+        end
+        if (V(gain_1) > vth) begin
+            gain_code = gain_code + 2;
+        end
+        if (V(gain_2) > vth) begin
+            gain_code = gain_code + 4;
+        end
+        if (V(gain_3) > vth) begin
+            gain_code = gain_code + 8;
+        end
+        gain_value = gain_min + 2.0 * gain_lsb * gain_code;
+        V(vout) <+ gain_value * V(vin);
+    end
+endmodule

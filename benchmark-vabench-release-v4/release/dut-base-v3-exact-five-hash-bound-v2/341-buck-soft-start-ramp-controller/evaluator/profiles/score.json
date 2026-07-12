@@ -1,0 +1,38 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=120n maxstep=100p"
+    ],
+    "body_lines": [
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=5n width=2.5n delay=1.2n rise=60p fall=60p",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.7n 0.9 1.8n 0 120n 0]",
+      "Venable (enable 0) vsource type=pwl wave=[0 0 4.5n 0 4.6n 0.9 94n 0.9 94.1n 0 100n 0 100.1n 0.9 120n 0.9]",
+      "Vtarget_ref (target_ref 0) vsource type=pwl wave=[0 0.300 40n 0.300 43n 0.680 80n 0.680 82n 0.420 120n 0.420]",
+      "",
+      "XDUT (clk rst enable target_ref soft_ref ramp_metric done) buck_soft_start_ramp_controller",
+      ""
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "035fb35c6747725a8000aa1f365ecc62b0207eea31cd7649f9157b6dc4a4af11",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "100n"
+  },
+  "profile_name": "score",
+  "property_ids": [
+    "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+    "P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+    "P_NEVER_ALLOW_SOFT_REF_TO_EXCEED",
+    "P_EXPOSE_THE_REMAINING_RAMP_DISTANCE_ON",
+    "P_ASSERT_DONE_ONLY_AFTER_SOFT_REF"
+  ],
+  "public_visible": false,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {}
+}

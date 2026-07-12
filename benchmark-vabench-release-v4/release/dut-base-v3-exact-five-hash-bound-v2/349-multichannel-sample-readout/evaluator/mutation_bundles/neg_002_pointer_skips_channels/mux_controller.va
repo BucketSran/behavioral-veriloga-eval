@@ -1,0 +1,61 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module mux_controller (
+    input  electrical clk,
+    input  electrical rst,
+    input  electrical read,
+    output electrical ch_sel_1,
+    output electrical ch_sel_0,
+    output electrical valid
+);
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 200e-12;
+
+    integer pointer;
+    integer selected;
+    integer valid_state;
+    real sel1_target;
+    real sel0_target;
+    real valid_target;
+
+    analog begin
+        @(initial_step) begin
+            pointer = 0;
+            selected = 0;
+            valid_state = 0;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth) begin
+                pointer = 0;
+                selected = 0;
+                valid_state = 0;
+            end else if (V(read) > vth) begin
+                selected = pointer;
+                valid_state = 1;
+                pointer = pointer + 2;
+                if (pointer > 3) begin
+                    pointer = 0;
+                end
+            end else begin
+                valid_state = 0;
+            end
+        end
+
+        @(cross(V(rst) - vth, +1)) begin
+            pointer = 0;
+            selected = 0;
+            valid_state = 0;
+        end
+
+        sel1_target = ((selected & 2) != 0) ? vdd : vss;
+        sel0_target = ((selected & 1) != 0) ? vdd : vss;
+        valid_target = (valid_state != 0) ? vdd : vss;
+        V(ch_sel_1) <+ transition(sel1_target, 0, tr);
+        V(ch_sel_0) <+ transition(sel0_target, 0, tr);
+        V(valid) <+ transition(valid_target, 0, tr);
+    end
+endmodule

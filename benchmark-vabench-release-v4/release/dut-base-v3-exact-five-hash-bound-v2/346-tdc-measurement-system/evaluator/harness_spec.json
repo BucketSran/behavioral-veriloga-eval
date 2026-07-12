@@ -1,0 +1,105 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "tdc_measurement_top.va",
+      "edge_detector.va",
+      "interval_counter.va",
+      "binary_encoder.va",
+      "valid_latch.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=100n maxstep=100p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "start",
+      "stop",
+      "clk",
+      "rst",
+      "code_7",
+      "code_6",
+      "code_5",
+      "code_4",
+      "code_3",
+      "code_2",
+      "code_1",
+      "code_0",
+      "valid",
+      "overflow"
+    ]
+  },
+  "family_id": "346",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "profile_defaults": {
+    "feedback": {
+      "corners": [],
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=35n maxstep=50p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=0.1n width=0.04n delay=0.08n rise=10p fall=10p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 0.10n 0.9 0.12n 0 35n 0]",
+          "Vstart (start 0) vsource type=pwl wave=[0 0 0.64n 0 0.66n 0.9 0.72n 0.9 0.74n 0 3.04n 0 3.06n 0.9 3.12n 0.9 3.14n 0 35n 0]",
+          "Vstop (stop 0) vsource type=pwl wave=[0 0 2.03n 0 2.05n 0.9 2.11n 0.9 2.13n 0 35n 0]",
+          "XDUT (start stop clk rst code_7 code_6 code_5 code_4 code_3 code_2 code_1 code_0 valid overflow) tdc_measurement_top"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {
+        "maxstep": "50p",
+        "stop_time": "35n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "corners": [],
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=35n maxstep=50p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=0.1n width=0.04n delay=0.08n rise=10p fall=10p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 0.10n 0.9 0.12n 0 35n 0]",
+          "Vstart (start 0) vsource type=pwl wave=[0 0 0.64n 0 0.66n 0.9 0.72n 0.9 0.74n 0 3.04n 0 3.06n 0.9 3.12n 0.9 3.14n 0 6.04n 0 6.06n 0.9 6.12n 0.9 6.14n 0 35n 0]",
+          "Vstop (stop 0) vsource type=pwl wave=[0 0 1.83n 0 1.85n 0.9 1.91n 0.9 1.93n 0 5.43n 0 5.45n 0.9 5.51n 0.9 5.53n 0 35n 0]",
+          "XDUT (start stop clk rst code_7 code_6 code_5 code_4 code_3 code_2 code_1 code_0 valid overflow) tdc_measurement_top"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {
+        "maxstep": "50p",
+        "stop_time": "35n"
+      },
+      "simulatorOptions": {}
+    }
+  },
+  "property_ids": [
+    "P_TDC_RESET_CLEAR",
+    "P_TDC_RESTART_CLEAR",
+    "P_TDC_INTERVAL_COUNT",
+    "P_TDC_VALID_LATCH",
+    "P_TDC_OVERFLOW"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "a5639753afe0fc7cc5df3f3bc090467f0eb83dca13f1f1fc8f0202c1473c0763",
+    "family_spec_sha256": "3ab9da12ea64b107edcdbdf1f675c0d4b4cf07729bf37c8964e4ac0c7c5cc42b"
+  },
+  "task_id": "v4-346"
+}

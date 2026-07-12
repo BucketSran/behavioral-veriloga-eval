@@ -1,0 +1,23 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module comparator_core(vinp, vinn, threshold_i, rst, decision);
+input vinp, vinn, threshold_i, rst;
+output decision;
+electrical vinp, vinn, threshold_i, rst, decision;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vth = 0.45;
+parameter real tr = 200p;
+
+real decision_level;
+
+analog begin
+    if (V(rst) > vth)
+        decision_level = vdd;
+    else
+        decision_level = ((V(vinp) - V(vinn) + V(threshold_i)) >= 0.0) ? vdd : vss;
+    V(decision) <+ transition(decision_level, 0, tr, tr);
+end
+endmodule

@@ -1,0 +1,74 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sample_mux_readout_top (
+    input  electrical ch0,
+    input  electrical ch1,
+    input  electrical ch2,
+    input  electrical ch3,
+    input  electrical clk,
+    input  electrical rst,
+    input  electrical sample,
+    input  electrical read,
+    output electrical out,
+    output electrical ch_sel_1,
+    output electrical ch_sel_0,
+    output electrical valid
+);
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 200e-12;
+
+    electrical hold0;
+    electrical hold1;
+    electrical hold2;
+    electrical hold3;
+
+    sample_hold_bank #(
+        .vth(vth),
+        .tr(tr)
+    ) u_sample_bank (
+        ch0,
+        ch1,
+        ch2,
+        ch3,
+        clk,
+        rst,
+        sample,
+        hold0,
+        hold1,
+        hold2,
+        hold3
+    );
+
+    mux_controller #(
+        .vdd(vdd),
+        .vss(vss),
+        .vth(vth),
+        .tr(tr)
+    ) u_mux_ctrl (
+        clk,
+        rst,
+        read,
+        ch_sel_1,
+        ch_sel_0,
+        valid
+    );
+
+    output_driver #(
+        .vth(vth),
+        .tr(tr)
+    ) u_driver (
+        hold0,
+        hold1,
+        hold2,
+        hold3,
+        clk,
+        rst,
+        read,
+        ch_sel_1,
+        ch_sel_0,
+        out
+    );
+endmodule

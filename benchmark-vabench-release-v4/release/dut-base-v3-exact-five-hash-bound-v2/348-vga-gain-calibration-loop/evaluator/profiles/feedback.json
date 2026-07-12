@@ -1,0 +1,39 @@
+{
+  "corners": [],
+  "deck_overrides": {
+    "analyses": [
+      "tran tran stop=105n maxstep=100p"
+    ],
+    "body_lines": [
+      "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=5n width=2n delay=2.5n rise=100p fall=100p",
+      "Vrst (rst 0) vsource type=pwl wave=[0 0.9 1n 0.9 1.1n 0 105n 0]",
+      "Vstart (start 0) vsource type=pwl wave=[0 0 3n 0 3.1n 0.9 105n 0.9]",
+      "Vvin (vin 0) vsource type=pwl wave=[0 0.1 35n 0.1 35.1n 0.7 65n 0.7 65.1n 0.4 90n 0.4 90.1n -0.4 105n -0.4]",
+      "Vtarget (target 0) vsource type=pwl wave=[0 0.4 105n 0.4]",
+      "XDUT (vin target clk rst start vout gain_3 gain_2 gain_1 gain_0 locked peak_metric) vga_cal_loop_top"
+    ]
+  },
+  "deterministic_seed": 0,
+  "generated_from": {
+    "script": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "harness_spec_sha256": "f3c6a40cc673093112fb3593fb842a1dc22c5be452de6fac1d656e4a548f7077",
+  "parameters": {
+    "maxstep": "100p",
+    "stop_time": "105n"
+  },
+  "profile_name": "feedback",
+  "property_ids": [
+    "P_VGA_RESET_STATE",
+    "P_VGA_PEAK_SAMPLE",
+    "P_VGA_GAIN_DIRECTION",
+    "P_VGA_OUTPUT_GAIN",
+    "P_VGA_LOCK_QUALIFICATION"
+  ],
+  "public_visible": true,
+  "schema_version": "v4-harness-profile-v1",
+  "simulatorOptions": {
+    "evas_profile": "balanced"
+  }
+}

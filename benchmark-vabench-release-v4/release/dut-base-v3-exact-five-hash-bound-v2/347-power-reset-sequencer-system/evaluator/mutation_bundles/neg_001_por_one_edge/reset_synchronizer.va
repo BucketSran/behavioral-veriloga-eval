@@ -1,0 +1,38 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module reset_synchronizer (
+    input  electrical clk,
+    input  electrical por_n,
+    input  electrical enable_req,
+    output electrical rst_n_core
+);
+    parameter real vhi = 0.9;
+    parameter real vlo = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 200e-12;
+
+    integer rst_state;
+    real rst_target;
+
+    analog begin
+        @(initial_step) begin
+            rst_state = 0;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(por_n) <= vth) begin
+                rst_state = 0;
+            end else if (V(enable_req) > vth) begin
+                rst_state = 1;
+            end
+        end
+
+        @(cross(V(por_n) - vth, -1)) begin
+            rst_state = 0;
+        end
+
+        rst_target = (V(por_n) > vth && (rst_state != 0)) ? vhi : vlo;
+        V(rst_n_core) <+ transition(rst_target, 0, tr);
+    end
+endmodule

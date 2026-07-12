@@ -1,0 +1,95 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "sigma_delta_top.va",
+      "integrator_state.va",
+      "sd_comparator.va",
+      "feedback_dac.va",
+      "decimator_lite.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=160n maxstep=100p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "clk",
+      "rst",
+      "bit_out",
+      "avg_3",
+      "avg_2",
+      "avg_1",
+      "avg_0",
+      "state_metric"
+    ]
+  },
+  "family_id": "350",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "profile_defaults": {
+    "feedback": {
+      "deck_overrides": {
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=4n width=2n delay=4n rise=50p fall=50p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 160n 0]",
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.18 52n 0.18 52.1n 0.45 104n 0.45 104.1n 0.72 160n 0.72]",
+          "",
+          "XDUT (vin clk rst bit_out avg_3 avg_2 avg_1 avg_0 state_metric) sigma_delta_top"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "160n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=160n maxstep=100p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=3n width=1.5n delay=3.5n rise=50p fall=50p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 3n 0.9 3.1n 0 160n 0]",
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.67 45n 0.67 45.1n 0.28 96n 0.28 96.1n 0.52 160n 0.52]",
+          "",
+          "XDUT (vin clk rst bit_out avg_3 avg_2 avg_1 avg_0 state_metric) sigma_delta_top"
+        ]
+      },
+      "deterministic_seed": 1,
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "160n"
+      },
+      "simulatorOptions": {}
+    }
+  },
+  "property_ids": [
+    "P_RESET_CLEAR",
+    "P_FEEDBACK_STATE_UPDATE",
+    "P_COMPARATOR_DECISION",
+    "P_DECIMATOR_WINDOW",
+    "P_STATE_BOUNDED"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "441d631e6b182a264ddf93930dd16f65f06022cc43a8c2ab15bd901991b04e5e",
+    "family_spec_sha256": "1c7d2d9bc7687db08aa7a1b0252e82719d49a279d17875adf17e4d4f5381370a"
+  },
+  "task_id": "v4-350"
+}

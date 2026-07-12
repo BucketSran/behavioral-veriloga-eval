@@ -1,0 +1,100 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "pipeline_adc_top.va",
+      "stage1_quantizer.va",
+      "residue_amp.va",
+      "stage2_quantizer.va",
+      "code_aligner.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=100n maxstep=100p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "clk",
+      "rst",
+      "valid_i",
+      "code_3",
+      "code_2",
+      "code_1",
+      "code_0",
+      "valid_o",
+      "residue_dbg"
+    ]
+  },
+  "family_id": "343",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "profile_defaults": {
+    "feedback": {
+      "corners": [],
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=135n maxstep=100p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=4n delay=5n rise=100p fall=100p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 135n 0]",
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.05 13n 0.05 13.1n 0.05 43n 0.05 43.1n 0.24 73n 0.24 73.1n 0.52 103n 0.52 103.1n 0.84 135n 0.84]",
+          "Vvalid_i (valid_i 0) vsource type=pwl wave=[0 0 13.5n 0 13.6n 0.9 16.5n 0.9 16.6n 0 43.5n 0 43.6n 0.9 46.5n 0.9 46.6n 0 73.5n 0 73.6n 0.9 76.5n 0.9 76.6n 0 103.5n 0 103.6n 0.9 106.5n 0.9 106.6n 0 135n 0]",
+          "XDUT (vin clk rst valid_i code_3 code_2 code_1 code_0 valid_o residue_dbg) pipeline_adc_top"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "135n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "corners": [],
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=195n maxstep=100p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=4n delay=5n rise=100p fall=100p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 195n 0]",
+          "Vvin (vin 0) vsource type=pwl wave=[0 -0.08 13n -0.08 13.1n -0.08 43n -0.08 43.1n 0.225 73n 0.225 73.1n 0.449 103n 0.449 103.1n 0.676 133n 0.676 133.1n 0.899 163n 0.899 163.1n 1.02 195n 1.02]",
+          "Vvalid_i (valid_i 0) vsource type=pwl wave=[0 0 13.5n 0 13.6n 0.9 16.5n 0.9 16.6n 0 43.5n 0 43.6n 0.9 46.5n 0.9 46.6n 0 73.5n 0 73.6n 0.9 76.5n 0.9 76.6n 0 103.5n 0 103.6n 0.9 106.5n 0.9 106.6n 0 133.5n 0 133.6n 0.9 136.5n 0.9 136.6n 0 163.5n 0 163.6n 0.9 166.5n 0.9 166.6n 0 195n 0]",
+          "XDUT (vin clk rst valid_i code_3 code_2 code_1 code_0 valid_o residue_dbg) pipeline_adc_top"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "195n"
+      },
+      "simulatorOptions": {}
+    }
+  },
+  "property_ids": [
+    "P_PIPE_RESET_CLEAR",
+    "P_PIPE_RESIDUE",
+    "P_PIPE_ALIGNED_CODE",
+    "P_PIPE_VALID_LATENCY"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "885e607c4633206e4f0799d4fc98aec3569454ad0d668934be59f8994a26c3e5",
+    "family_spec_sha256": "0178e9fcfb5dd6a8b4e3ed7a39972a061f2cf642a549c196371d9171bff4eb14"
+  },
+  "task_id": "v4-343"
+}

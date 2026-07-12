@@ -1,0 +1,101 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "sar_adc_top.va",
+      "sample_hold.va",
+      "sar_comparator.va",
+      "sar_controller.va",
+      "binary_weighted_cdac.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=100n maxstep=100p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vin",
+      "clk",
+      "rst",
+      "start",
+      "code_3",
+      "code_2",
+      "code_1",
+      "code_0",
+      "done",
+      "sample_dbg",
+      "dac_dbg"
+    ]
+  },
+  "family_id": "342",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "profile_defaults": {
+    "feedback": {
+      "corners": [],
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=140n maxstep=100p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=4n delay=5n rise=100p fall=100p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 140n 0]",
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.18 68n 0.18 68.1n 0.72 140n 0.72]",
+          "Vstart (start 0) vsource type=pwl wave=[0 0 7n 0 7.1n 0.9 8n 0.9 8.1n 0 77n 0 77.1n 0.9 78n 0.9 78.1n 0 140n 0]",
+          "XDUT (vin clk rst start code_3 code_2 code_1 code_0 done sample_dbg dac_dbg) sar_adc_top"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "140n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "corners": [],
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=215n maxstep=100p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=4n delay=5n rise=100p fall=100p",
+          "Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 215n 0]",
+          "Vvin (vin 0) vsource type=pwl wave=[0 0.05 68n 0.05 68.1n 0.43 138n 0.43 138.1n 0.86 215n 0.86]",
+          "Vstart (start 0) vsource type=pwl wave=[0 0 7n 0 7.1n 0.9 8n 0.9 8.1n 0 77n 0 77.1n 0.9 78n 0.9 78.1n 0 147n 0 147.1n 0.9 148n 0.9 148.1n 0 215n 0]",
+          "XDUT (vin clk rst start code_3 code_2 code_1 code_0 done sample_dbg dac_dbg) sar_adc_top"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "215n"
+      },
+      "simulatorOptions": {}
+    }
+  },
+  "property_ids": [
+    "P_SAR_RESET_CLEAR",
+    "P_SAR_SAMPLE_HOLD",
+    "P_SAR_FINAL_CODE",
+    "P_SAR_DAC_TRIAL"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "2a9acf77ebeda40ea4c2966f17aa7064538da5c4048811db0c6780f7cc21f7de",
+    "family_spec_sha256": "6daef18c68b2077ee47e1262b1192430cdfb89058c4f459c840014df247a6072"
+  },
+  "task_id": "v4-342"
+}

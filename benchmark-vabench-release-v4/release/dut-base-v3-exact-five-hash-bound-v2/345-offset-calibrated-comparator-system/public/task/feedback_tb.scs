@@ -1,0 +1,20 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/calibrated_comparator_top.va"
+ahdl_include "./dut/comparator_core.va"
+ahdl_include "./dut/offset_dac.va"
+ahdl_include "./dut/calibration_fsm.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=4n delay=5n rise=100p fall=100p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 2n 0.9 2.1n 0 125n 0]
+Vcal_en (cal_en 0) vsource type=pwl wave=[0 0 7n 0 7.1n 0.9 48n 0.9 48.1n 0 63n 0 63.1n 0.9 104n 0.9 104.1n 0 125n 0]
+Vcal_ref (cal_ref 0) vsource type=pwl wave=[0 0 7n 0 7.1n 0.9 48n 0.9 48.1n 0 63n 0 63.1n 0 104n 0 104.1n 0 125n 0]
+Vvinp (vinp 0) vsource type=pwl wave=[0 0.43 55n 0.43 55.1n 0.5 108n 0.5 108.1n 0.42 125n 0.42]
+Vvinn (vinn 0) vsource type=pwl wave=[0 0.45 125n 0.45]
+XDUT (vinp vinn clk rst cal_en cal_ref decision ready offset_3 offset_2 offset_1 offset_0 threshold_dbg) calibrated_comparator_top
+
+simulatorOptions options evas_profile=balanced
+
+tran tran stop=125n maxstep=100p
+save vinp vinn clk rst cal_en cal_ref decision ready offset_3 offset_2 offset_1 offset_0 threshold_dbg

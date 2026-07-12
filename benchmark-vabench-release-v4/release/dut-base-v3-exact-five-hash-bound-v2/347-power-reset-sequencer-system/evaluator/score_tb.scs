@@ -1,0 +1,17 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/power_reset_seq_top.va"
+ahdl_include "./dut/por_detector.va"
+ahdl_include "./dut/reset_synchronizer.va"
+ahdl_include "./dut/enable_sequencer.va"
+ahdl_include "./dut/ready_flag.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=4n delay=5n rise=100p fall=100p
+Vvdd_sense (vdd_sense 0) vsource type=pwl wave=[0 0 12n 0 12.1n 0.9 92n 0.9 92.1n 0.3 108n 0.3 108.1n 0.9 200n 0.9]
+Vrst_n_ext (rst_n_ext 0) vsource type=pwl wave=[0 0 3n 0 3.1n 0.9 155n 0.9 155.1n 0 166n 0 166.1n 0.9 200n 0.9]
+Venable_req (enable_req 0) vsource type=pwl wave=[0 0 20n 0 20.1n 0.9 135n 0.9 135.1n 0 142n 0 142.1n 0.9 200n 0.9]
+XDUT (vdd_sense clk rst_n_ext enable_req por_n rst_n_core en_ana en_dig ready) power_reset_seq_top
+
+tran tran stop=200n maxstep=100p
+save vdd_sense clk rst_n_ext enable_req por_n rst_n_core en_ana en_dig ready

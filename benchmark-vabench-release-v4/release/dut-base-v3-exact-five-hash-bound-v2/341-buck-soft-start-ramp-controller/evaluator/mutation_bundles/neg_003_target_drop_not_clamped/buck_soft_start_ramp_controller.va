@@ -1,0 +1,77 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module buck_soft_start_ramp_controller(clk, rst, enable, target_ref, soft_ref, ramp_metric, done);
+    inout clk, rst, enable, target_ref, soft_ref, ramp_metric, done;
+    electrical clk, rst, enable, target_ref, soft_ref, ramp_metric, done;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real ramp_step = 40e-3 from (0:inf);
+    parameter real ramp_tol = 5e-3 from [0:inf);
+
+    real target_v;
+    real soft_ref_v;
+    real ramp_metric_v;
+    real done_v;
+
+    analog function real clip01;
+        input x;
+        real x;
+        begin
+            if (x < vss) clip01 = vss;
+            else if (x > vdd) clip01 = vdd;
+            else clip01 = x;
+        end
+    endfunction
+
+    analog function real positive;
+        input value;
+        real value;
+        begin
+            positive = (value > 0.0) ? value : 0.0;
+        end
+    endfunction
+
+    analog begin
+        @(initial_step) begin
+            target_v = vss;
+            soft_ref_v = vss;
+            ramp_metric_v = vss;
+            done_v = vss;
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            soft_ref_v = vss;
+            ramp_metric_v = vss;
+            done_v = vss;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                soft_ref_v = vss;
+                ramp_metric_v = vss;
+                done_v = vss;
+            end else begin
+                target_v = clip01(V(target_ref));
+                if (soft_ref_v > target_v) begin
+                    soft_ref_v = soft_ref_v;
+                end else if ((target_v - soft_ref_v) <= ramp_tol) begin
+                    soft_ref_v = target_v;
+                end else begin
+                    soft_ref_v = soft_ref_v + ramp_step;
+                    if (soft_ref_v > target_v) soft_ref_v = target_v;
+                end
+                ramp_metric_v = positive(target_v - soft_ref_v);
+                done_v = (ramp_metric_v <= ramp_tol) ? vdd : vss;
+            end
+        end
+
+        V(soft_ref) <+ transition(soft_ref_v, 0, tr, tr);
+        V(ramp_metric) <+ transition(ramp_metric_v, 0, tr, tr);
+        V(done) <+ transition(done_v, 0, tr, tr);
+    end
+endmodule

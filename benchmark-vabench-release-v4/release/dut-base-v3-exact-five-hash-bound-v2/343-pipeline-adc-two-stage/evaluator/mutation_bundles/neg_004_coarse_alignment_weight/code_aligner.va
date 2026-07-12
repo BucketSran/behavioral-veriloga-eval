@@ -1,0 +1,54 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module code_aligner(clk, rst, s1_1, s1_0, s1_valid, s2_1, s2_0, s2_valid,
+                    code_3, code_2, code_1, code_0, valid_o);
+input clk, rst, s1_1, s1_0, s1_valid, s2_1, s2_0, s2_valid;
+output code_3, code_2, code_1, code_0, valid_o;
+electrical clk, rst, s1_1, s1_0, s1_valid, s2_1, s2_0, s2_valid;
+electrical code_3, code_2, code_1, code_0, valid_o;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vth = 0.45;
+parameter real tr = 200p;
+
+integer coarse_hold;
+integer final_code;
+real valid_level, c3, c2, c1, c0;
+
+analog begin
+    @(initial_step) begin coarse_hold = 0; final_code = 0; valid_level = vss; end
+    @(cross(V(rst) - vth, +1)) begin coarse_hold = 0; final_code = 0; valid_level = vss; end
+    @(cross(V(clk) - vth, +1)) begin
+        if (V(rst) > vth) begin
+            coarse_hold = 0; final_code = 0; valid_level = vss;
+        end else begin
+            if (V(s2_valid) > vth) begin
+                final_code = 2 * coarse_hold;
+                if (V(s2_0) > vth) final_code = final_code + 1;
+                if (V(s2_1) > vth) final_code = final_code + 2;
+                valid_level = vdd;
+            end else begin
+                valid_level = vss;
+            end
+            if (V(s1_valid) > vth) begin
+                coarse_hold = 0;
+                if (V(s1_0) > vth) coarse_hold = coarse_hold + 1;
+                if (V(s1_1) > vth) coarse_hold = coarse_hold + 2;
+            end
+        end
+    end
+    c3 = (final_code >= 8) ? vdd : vss;
+    c2 = (((final_code >= 4) && (final_code < 8)) || (final_code >= 12)) ? vdd : vss;
+    c1 = (((final_code == 2) || (final_code == 3) || (final_code == 6) || (final_code == 7) ||
+           (final_code == 10) || (final_code == 11) || (final_code == 14) || (final_code == 15))) ? vdd : vss;
+    c0 = (((final_code == 1) || (final_code == 3) || (final_code == 5) || (final_code == 7) ||
+           (final_code == 9) || (final_code == 11) || (final_code == 13) || (final_code == 15))) ? vdd : vss;
+    V(code_3) <+ transition(c3, 0, tr, tr);
+    V(code_2) <+ transition(c2, 0, tr, tr);
+    V(code_1) <+ transition(c1, 0, tr, tr);
+    V(code_0) <+ transition(c0, 0, tr, tr);
+    V(valid_o) <+ transition(valid_level, 0, tr, tr);
+end
+endmodule

@@ -1,0 +1,101 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sar_controller(clk, rst, start, cmp_i, sample_en, trial_3, trial_2, trial_1, trial_0,
+                      code_3, code_2, code_1, code_0, done);
+input clk, rst, start, cmp_i;
+output sample_en, trial_3, trial_2, trial_1, trial_0, code_3, code_2, code_1, code_0, done;
+electrical clk, rst, start, cmp_i, sample_en, trial_3, trial_2, trial_1, trial_0;
+electrical code_3, code_2, code_1, code_0, done;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vth = 0.45;
+parameter real tr = 200p;
+
+integer state;
+integer active_bit;
+integer final_code;
+integer trial_code;
+real sample_en_level, done_level;
+real t3, t2, t1, t0, c3, c2, c1, c0;
+
+analog begin
+    @(initial_step) begin
+        state = 0; active_bit = 0; final_code = 15; trial_code = 15;
+        sample_en_level = vdd; done_level = vdd;
+    end
+
+    @(cross(V(rst) - vth, +1)) begin
+        state = 0; active_bit = 0;
+    end
+
+    @(cross(V(rst) - vth, -1)) begin
+        state = 0; active_bit = 0; final_code = 0; trial_code = 0;
+        sample_en_level = vss; done_level = vss;
+    end
+
+    @(cross(V(start) - vth, +1)) begin
+        if (V(rst) <= vth) begin
+            state = 1; active_bit = 3; final_code = 0; trial_code = 0;
+            sample_en_level = vdd; done_level = vss;
+        end
+    end
+
+    @(cross(V(clk) - vth, +1)) begin
+        if (V(rst) > vth) begin
+            state = 0; active_bit = 0;
+        end else if (state == 1) begin
+            sample_en_level = vss;
+            trial_code = 8;
+            active_bit = 3;
+            state = 2;
+        end else if (state == 2) begin
+            if (V(cmp_i) > vth) begin
+                final_code = trial_code;
+            end else begin
+                if (active_bit == 3) final_code = trial_code - 8;
+                if (active_bit == 2) final_code = trial_code - 4;
+                if (active_bit == 1) final_code = trial_code - 2;
+                if (active_bit == 0) final_code = trial_code - 1;
+            end
+
+            if (active_bit == 3) begin
+                active_bit = 2; trial_code = final_code + 4;
+            end else if (active_bit == 2) begin
+                active_bit = 1; trial_code = final_code + 2;
+            end else if (active_bit == 1) begin
+                active_bit = 0; trial_code = final_code + 1;
+            end else begin
+                trial_code = final_code;
+                done_level = vdd;
+                state = 0;
+            end
+        end
+    end
+
+    t3 = (trial_code >= 8) ? vdd : vss;
+    t2 = (((trial_code >= 4) && (trial_code < 8)) || (trial_code >= 12)) ? vdd : vss;
+    t1 = (((trial_code == 2) || (trial_code == 3) || (trial_code == 6) || (trial_code == 7) ||
+           (trial_code == 10) || (trial_code == 11) || (trial_code == 14) || (trial_code == 15))) ? vdd : vss;
+    t0 = (((trial_code == 1) || (trial_code == 3) || (trial_code == 5) || (trial_code == 7) ||
+           (trial_code == 9) || (trial_code == 11) || (trial_code == 13) || (trial_code == 15))) ? vdd : vss;
+    c3 = (final_code >= 8) ? vdd : vss;
+    c2 = (((final_code >= 4) && (final_code < 8)) || (final_code >= 12)) ? vdd : vss;
+    c1 = (((final_code == 2) || (final_code == 3) || (final_code == 6) || (final_code == 7) ||
+           (final_code == 10) || (final_code == 11) || (final_code == 14) || (final_code == 15))) ? vdd : vss;
+    c0 = (((final_code == 1) || (final_code == 3) || (final_code == 5) || (final_code == 7) ||
+           (final_code == 9) || (final_code == 11) || (final_code == 13) || (final_code == 15))) ? vdd : vss;
+
+    V(sample_en) <+ transition(sample_en_level, 0, tr, tr);
+    V(trial_3) <+ transition(t3, 0, tr, tr);
+    V(trial_2) <+ transition(t2, 0, tr, tr);
+    V(trial_1) <+ transition(t1, 0, tr, tr);
+    V(trial_0) <+ transition(t0, 0, tr, tr);
+    V(code_3) <+ transition(c3, 0, tr, tr);
+    V(code_2) <+ transition(c2, 0, tr, tr);
+    V(code_1) <+ transition(c1, 0, tr, tr);
+    V(code_0) <+ transition(c0, 0, tr, tr);
+    V(done) <+ transition(done_level, 0, tr, tr);
+end
+endmodule

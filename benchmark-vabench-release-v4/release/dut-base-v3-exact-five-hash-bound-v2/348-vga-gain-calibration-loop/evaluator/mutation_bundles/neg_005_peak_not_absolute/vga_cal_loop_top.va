@@ -1,0 +1,82 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module vga_cal_loop_top (
+    input  electrical vin,
+    input  electrical target,
+    input  electrical clk,
+    input  electrical rst,
+    input  electrical start,
+    output electrical vout,
+    output electrical gain_3,
+    output electrical gain_2,
+    output electrical gain_1,
+    output electrical gain_0,
+    output electrical locked,
+    output electrical peak_metric
+);
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real gain_min = 0.5;
+    parameter real gain_lsb = 0.1;
+    parameter real tol = 20e-3;
+    parameter real tr = 200e-12;
+
+    peak_detector #(
+        .vth(vth),
+        .tr(tr)
+    ) u_peak (
+        vin,
+        clk,
+        rst,
+        start,
+        peak_metric
+    );
+
+    gain_controller #(
+        .vdd(vdd),
+        .vss(vss),
+        .vth(vth),
+        .tol(tol),
+        .tr(tr)
+    ) u_gain (
+        peak_metric,
+        target,
+        clk,
+        rst,
+        start,
+        gain_3,
+        gain_2,
+        gain_1,
+        gain_0
+    );
+
+    vga_model #(
+        .vth(vth),
+        .gain_min(gain_min),
+        .gain_lsb(gain_lsb)
+    ) u_vga (
+        vin,
+        gain_3,
+        gain_2,
+        gain_1,
+        gain_0,
+        vout
+    );
+
+    lock_detector #(
+        .vdd(vdd),
+        .vss(vss),
+        .vth(vth),
+        .tol(tol),
+        .tr(tr)
+    ) u_lock (
+        peak_metric,
+        target,
+        clk,
+        rst,
+        start,
+        locked
+    );
+endmodule

@@ -1,0 +1,86 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module interval_counter(clk, rst, start_evt, stop_evt, count_7, count_6, count_5, count_4,
+                        count_3, count_2, count_1, count_0, valid_i, overflow_i, clear_o);
+input clk, rst, start_evt, stop_evt;
+output count_7, count_6, count_5, count_4, count_3, count_2, count_1, count_0, valid_i, overflow_i, clear_o;
+electrical clk, rst, start_evt, stop_evt, count_7, count_6, count_5, count_4, count_3, count_2, count_1, count_0;
+electrical valid_i, overflow_i, clear_o;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vth = 0.45;
+parameter real tr = 200p;
+
+integer armed;
+integer active_count;
+integer latched_count;
+real valid_level, overflow_level, clear_level;
+real b7, b6, b5, b4, b3, b2, b1, b0;
+
+analog begin
+    @(initial_step) begin
+        armed = 0; active_count = 0; latched_count = 0;
+        valid_level = vss; overflow_level = vss; clear_level = vss;
+    end
+    @(cross(V(rst) - vth, +1)) begin
+        armed = 0; active_count = 0; latched_count = 0;
+        valid_level = vss; overflow_level = vss; clear_level = vss;
+    end
+    @(cross(V(start_evt) - vth, +1)) begin
+        if (V(rst) <= vth) begin
+            armed = 1;
+            active_count = 0;
+            latched_count = 0;
+            valid_level = vss;
+            overflow_level = vss;
+            clear_level = vss;
+        end
+    end
+    @(cross(V(stop_evt) - vth, +1)) begin
+        if ((V(rst) <= vth) && (armed == 1)) begin
+            latched_count = active_count;
+            if (latched_count > 255) latched_count = 255;
+            armed = 0;
+            valid_level = vdd;
+            clear_level = vdd;
+        end
+    end
+    @(cross(V(clk) - vth, +1)) begin
+        if (V(rst) > vth) begin
+            armed = 0; active_count = 0; latched_count = 0;
+            valid_level = vss; overflow_level = vss; clear_level = vss;
+        end else if (armed == 1) begin
+            if (active_count >= 127) begin
+                latched_count = 255;
+                armed = 0;
+                valid_level = vdd;
+                overflow_level = vss;
+                clear_level = vdd;
+            end else begin
+                active_count = active_count + 1;
+            end
+        end
+    end
+    b7 = (latched_count >= 128) ? vdd : vss;
+    b6 = (((latched_count / 64) % 2) == 1) ? vdd : vss;
+    b5 = (((latched_count / 32) % 2) == 1) ? vdd : vss;
+    b4 = (((latched_count / 16) % 2) == 1) ? vdd : vss;
+    b3 = (((latched_count / 8) % 2) == 1) ? vdd : vss;
+    b2 = (((latched_count / 4) % 2) == 1) ? vdd : vss;
+    b1 = (((latched_count / 2) % 2) == 1) ? vdd : vss;
+    b0 = ((latched_count % 2) == 1) ? vdd : vss;
+    V(count_7) <+ transition(b7, 0, tr, tr);
+    V(count_6) <+ transition(b6, 0, tr, tr);
+    V(count_5) <+ transition(b5, 0, tr, tr);
+    V(count_4) <+ transition(b4, 0, tr, tr);
+    V(count_3) <+ transition(b3, 0, tr, tr);
+    V(count_2) <+ transition(b2, 0, tr, tr);
+    V(count_1) <+ transition(b1, 0, tr, tr);
+    V(count_0) <+ transition(b0, 0, tr, tr);
+    V(valid_i) <+ transition(valid_level, 0, tr, tr);
+    V(overflow_i) <+ transition(overflow_level, 0, tr, tr);
+    V(clear_o) <+ transition(clear_level, 0, tr, tr);
+end
+endmodule

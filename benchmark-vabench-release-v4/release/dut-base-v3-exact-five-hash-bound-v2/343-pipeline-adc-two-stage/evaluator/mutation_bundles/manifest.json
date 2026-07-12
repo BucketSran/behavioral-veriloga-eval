@@ -1,0 +1,161 @@
+{
+  "family_id": "343",
+  "gold_bundle_sha256": "3521e04ed6dea571df617bb3e67f5ff54e5af34cb8dfa8f1e673aefe7a014c63",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "stage1_quantizer.va": "af2b95b37dc82ce3b885700844a1653d75c574086e3317f91b70a8ea9b437003"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PIPE_ALIGNED_CODE",
+          "P_PIPE_RESIDUE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_stage1_threshold_shift/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "stage1_quantizer.va"
+      ],
+      "fault_class": "decision_threshold_error",
+      "id": "neg_001_stage1_threshold_shift",
+      "trigger_condition": "vin lies near a quarter-scale boundary",
+      "violated_property_ids": [
+        "P_PIPE_ALIGNED_CODE",
+        "P_PIPE_RESIDUE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "residue_amp.va": "32c53b2d1fbef42683170b9d372d3e59bd6debc2238223b56df62d211c17e496"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PIPE_ALIGNED_CODE",
+          "P_PIPE_RESIDUE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_residue_gain_low/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "residue_amp.va"
+      ],
+      "fault_class": "residue_gain_error",
+      "id": "neg_002_residue_gain_low",
+      "trigger_condition": "vin is away from a coarse boundary",
+      "violated_property_ids": [
+        "P_PIPE_ALIGNED_CODE",
+        "P_PIPE_RESIDUE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "stage2_quantizer.va": "4d54ffe39af9dd4c31bf4466721318357bb3802da343947448cd31c269cb0fe4"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PIPE_ALIGNED_CODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_stage2_threshold_shift/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "stage2_quantizer.va"
+      ],
+      "fault_class": "fine_quantizer_error",
+      "id": "neg_003_stage2_threshold_shift",
+      "trigger_condition": "residue lies near a fine boundary",
+      "violated_property_ids": [
+        "P_PIPE_ALIGNED_CODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "code_aligner.va": "08ff409f645f6fd40c0a60619eacdf44319028bf59ec392e2d802016abb1b761"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PIPE_ALIGNED_CODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_coarse_alignment_weight/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "code_aligner.va"
+      ],
+      "fault_class": "code_alignment_error",
+      "id": "neg_004_coarse_alignment_weight",
+      "trigger_condition": "coarse code is nonzero",
+      "violated_property_ids": [
+        "P_PIPE_ALIGNED_CODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "code_aligner.va": "a3f4ec8fee017d60d9a4c94f27722cc7583189b12b71a1fbb1da404fec99c07a"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PIPE_VALID_LATENCY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_valid_stuck_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "code_aligner.va"
+      ],
+      "fault_class": "pipeline_valid_latency_error",
+      "id": "neg_005_valid_stuck_low",
+      "trigger_condition": "completed stage-2 result should assert valid_o with the aligned code",
+      "violated_property_ids": [
+        "P_PIPE_VALID_LATENCY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "code_aligner.va": "e7424f2d31b0905045ee56122e5957878f5c7585c39a72edeb23c4c49b587f99"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PIPE_RESET_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_006_reset_state_not_cleared/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "code_aligner.va"
+      ],
+      "fault_class": "pipeline_reset_state_retention",
+      "id": "neg_006_reset_state_not_cleared",
+      "trigger_condition": "reset is asserted after a nonzero aligned conversion",
+      "violated_property_ids": [
+        "P_PIPE_RESET_CLEAR"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

@@ -1,0 +1,57 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module lock_detector (
+    input  electrical peak_metric,
+    input  electrical target,
+    input  electrical clk,
+    input  electrical rst,
+    input  electrical start,
+    output electrical locked
+);
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tol = 20e-3;
+    parameter real tr = 200e-12;
+
+    integer lock_count;
+    integer locked_state;
+    real err_abs;
+    real locked_target;
+
+    analog begin
+        @(initial_step) begin
+            lock_count = 0;
+            locked_state = 0;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth) begin
+                lock_count = 0;
+                locked_state = 0;
+            end else if (V(start) > vth) begin
+                err_abs = V(peak_metric) - V(target);
+                if (err_abs < 0.0) begin
+                    err_abs = -err_abs;
+                end
+                if (err_abs <= tol) begin
+                    if (lock_count < 3) begin
+                        lock_count = lock_count + 1;
+                    end
+                end else begin
+                    lock_count = 0;
+                end
+                locked_state = (lock_count >= 1) ? 1 : 0;
+            end
+        end
+
+        @(cross(V(rst) - vth, +1)) begin
+            lock_count = 0;
+            locked_state = 0;
+        end
+
+        locked_target = (locked_state != 0) ? vdd : vss;
+        V(locked) <+ transition(locked_target, 0, tr);
+    end
+endmodule

@@ -1,0 +1,59 @@
+{
+  "component_fingerprints": {
+    "assembly": {
+      "policy_sha256": "91f4e21b94263e796c846aedef282c79d4abeb7ccc415a0e6f1311f8816b33a4",
+      "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+    },
+    "backend": {
+      "ahdl_like_sha256": "91ce239e5f278a6d5dfcde85ca2d820c5133d8f8a3de26dc6477164e703342f3",
+      "evas_sha256": "2d71c227644956df64209b49d0da6ef55bc6934891020eb26d762e8cb8cc6df2",
+      "spectre_sha256": "ac4c1cf785d5eab74058944d52bf40869e83c94e19202ab72c8e8a250c4dc51b"
+    },
+    "oracle": {
+      "checker_binding_sha256": "dc543d63366659c605a3be5c201be7d528e15d80adc3884d84ebc68c94ae745d",
+      "checker_implementation_sha256": "66c2314ab58a7f8c1b8262c2d0f1a060b82f383caa7fb91e52b8dd4b0c10f7ce",
+      "checker_profile_sha256": "fedbbdb9833bc145403cfee8872461dca1053ecc0f9b17d324fbfbb5f1794b5c",
+      "diagnostic_policy_sha256": "69b217a349cb0e8a3eab574e7e6d1af03f069fea668b15b37868ef3d2e7deea3",
+      "oracle_runner_sha256": "e70bd46cd3abdfd8ed9658cb13f64bc96e27d364d51ed0fdcd05f8139e63af2b",
+      "property_activation_policy_sha256": "3ec24c6a3e0683b2e5dff9281204751929b21e64996d9ab3f3f74fbb7dfe2b14"
+    },
+    "policy_id": "v4-dependency-scoped-evidence-v2",
+    "schema_version": "v4-evidence-components-v2",
+    "state": "carried_forward",
+    "task_inputs": {
+      "candidate_bundle_sha256": "5d984d6eeabbf0811bd738a60e793793fe6454a19c8dc052b9f83cc14d60ba94",
+      "deck_sha256": "ab7af65018d09730c78f18dff5a514c39668f99db585da905b864351914c0b87",
+      "gold_bundle_sha256": "03f275c0d303d117bf5f821ca8c88bc5b4284e0ba1a7dee942bae80d8cd0bcb7",
+      "harness_spec_sha256": "035fb35c6747725a8000aa1f365ecc62b0207eea31cd7649f9157b6dc4a4af11",
+      "mutation_bundle_sha256": "5d984d6eeabbf0811bd738a60e793793fe6454a19c8dc052b9f83cc14d60ba94",
+      "profile_sha256": "35dd9a053c3184ab9a0c6878d29559e6d3235084fb31e9b03dc05a8fba224afa",
+      "property_contract_sha256": "9d8af1c25512b4b1e614d0e5567d15019221ab5889b67a8365a2e06a96ec738a",
+      "public_support_bundle_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "trace_contract_sha256": "0f6d56d7a50e2bcc814c0a6b881257ad888ae48f6bb7d88c8357ccbdd6d5ae8e"
+    }
+  },
+  "diagnostics": {
+    "expected": "trigger=an enabled rising clock edge occurs while target_ref is more than ramp_tol above soft_ref; violated_properties=P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+    "observed": "EVAS: v4_1039 checked=19 reset_clear=True disabled_clear=True done_seen=True not_done_seen=True ramp_seen=True target_drop_seen=True soft_errors=14 metric_errors=13 done_errors=6 clear_errors=0 step_errors=0 clamp_errors=0; P_ASSERT_DONE_ONLY_AFTER_SOFT_REF mismatch_count=6; P_EXPOSE_THE_REMAINING_RAMP_DISTANCE_ON mismatch_count=13; P_NEVER_ALLOW_SOFT_REF_TO_EXCEED mismatch_count=14; P_ON_EACH_ENABLED_RISING_CLK_EDGE mismatch_count=14; P_ON_RESET_OR_WHEN_DISABLED_CLEAR mismatch_count=0; Spectre: v4_1039 checked=19 reset_clear=True disabled_clear=True done_seen=True not_done_seen=True ramp_seen=True target_drop_seen=True soft_errors=14 metric_errors=13 done_errors=6 clear_errors=0 step_errors=0 clamp_errors=0; P_ASSERT_DONE_ONLY_AFTER_SOFT_REF mismatch_count=6; P_EXPOSE_THE_REMAINING_RAMP_DISTANCE_ON mismatch_count=13; P_NEVER_ALLOW_SOFT_REF_TO_EXCEED mismatch_count=14; P_ON_EACH_ENABLED_RISING_CLK_EDGE mismatch_count=14; P_ON_RESET_OR_WHEN_DISABLED_CLEAR mismatch_count=0",
+    "violated_property_ids": [
+      "P_ON_EACH_ENABLED_RISING_CLK_EDGE"
+    ]
+  },
+  "evaluators": {
+    "ahdl_like": "pass",
+    "evas": "compile_pass_behavior_fail",
+    "spectre": "compile_pass_behavior_fail"
+  },
+  "family_id": "341",
+  "inputs": {
+    "checker_profile_sha256": "731f6caa52cac05bf54704738292e18e49da1649aacdb041b78e9d114afe153b",
+    "harness_spec_sha256": "035fb35c6747725a8000aa1f365ecc62b0207eea31cd7649f9157b6dc4a4af11",
+    "mutation_bundle_sha256": "5d984d6eeabbf0811bd738a60e793793fe6454a19c8dc052b9f83cc14d60ba94",
+    "profile_sha256": "35dd9a053c3184ab9a0c6878d29559e6d3235084fb31e9b03dc05a8fba224afa"
+  },
+  "mutation_id": "neg_002_double_ramp_step",
+  "outcome": "killed_behaviorally",
+  "release_snapshot_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33",
+  "schema_version": "v4-negative-certification-v2",
+  "toolchain_lock_sha256": "563cf8dc56e8652f8055c34f13a5a0cbdba9f7140d030eb4e1185610331f6e33"
+}

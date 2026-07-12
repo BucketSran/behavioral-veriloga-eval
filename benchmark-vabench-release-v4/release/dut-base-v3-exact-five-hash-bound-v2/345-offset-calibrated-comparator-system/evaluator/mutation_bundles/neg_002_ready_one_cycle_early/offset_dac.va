@@ -1,0 +1,29 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module offset_dac(offset_3, offset_2, offset_1, offset_0, rst, threshold_dbg);
+input offset_3, offset_2, offset_1, offset_0, rst;
+output threshold_dbg;
+electrical offset_3, offset_2, offset_1, offset_0, rst, threshold_dbg;
+
+parameter real offset_lsb = 5e-3;
+parameter real vss = 0.0;
+parameter real vth = 0.45;
+parameter real tr = 200p;
+
+integer code;
+real threshold;
+
+analog begin
+    code = 0;
+    if (V(offset_0) > vth) code = code + 1;
+    if (V(offset_1) > vth) code = code + 2;
+    if (V(offset_2) > vth) code = code + 4;
+    if (V(offset_3) > vth) code = code + 8;
+    if (V(rst) > vth)
+        threshold = vss;
+    else
+        threshold = (code - 8) * offset_lsb;
+    V(threshold_dbg) <+ transition(threshold, 0, tr, tr);
+end
+endmodule

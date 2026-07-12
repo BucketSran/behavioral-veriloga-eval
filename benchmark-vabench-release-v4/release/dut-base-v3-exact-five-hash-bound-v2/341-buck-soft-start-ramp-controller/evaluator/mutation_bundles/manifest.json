@@ -1,0 +1,132 @@
+{
+  "family_id": "341",
+  "gold_bundle_sha256": "03f275c0d303d117bf5f821ca8c88bc5b4284e0ba1a7dee942bae80d8cd0bcb7",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "buck_soft_start_ramp_controller.va": "fe6b3c2c9df971a9643e1327d60d9588fec878744903cad6287548274aeccf0e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ON_RESET_OR_WHEN_DISABLED_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_disable_retains_soft_ref/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "buck_soft_start_ramp_controller.va"
+      ],
+      "fault_class": "disable_clear_retains_soft_reference",
+      "id": "neg_001_disable_retains_soft_ref",
+      "trigger_condition": "enable falls after the soft-start state has advanced above vss",
+      "violated_property_ids": [
+        "P_ON_RESET_OR_WHEN_DISABLED_CLEAR"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "buck_soft_start_ramp_controller.va": "1d80d642da1bb0e4cbaf589ca6bfcec07e8c0130bab89208f902e4c8b6a22870"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ON_EACH_ENABLED_RISING_CLK_EDGE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_double_ramp_step/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "buck_soft_start_ramp_controller.va"
+      ],
+      "fault_class": "soft_reference_advances_by_double_ramp_step",
+      "id": "neg_002_double_ramp_step",
+      "trigger_condition": "an enabled rising clock edge occurs while target_ref is more than ramp_tol above soft_ref",
+      "violated_property_ids": [
+        "P_ON_EACH_ENABLED_RISING_CLK_EDGE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "buck_soft_start_ramp_controller.va": "429cbefccf6f4a7191f45e8510a24bc44c52d168af504b5a7f270d4e59f25564"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_NEVER_ALLOW_SOFT_REF_TO_EXCEED"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_target_drop_not_clamped/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "buck_soft_start_ramp_controller.va"
+      ],
+      "fault_class": "soft_reference_not_clamped_after_target_drop",
+      "id": "neg_003_target_drop_not_clamped",
+      "trigger_condition": "target_ref drops below the accumulated soft_ref on an enabled rising clock edge",
+      "violated_property_ids": [
+        "P_NEVER_ALLOW_SOFT_REF_TO_EXCEED"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "buck_soft_start_ramp_controller.va": "ee8bc0e1c28c33f4f5c995f64838a2614e832e97d8069bcb6c022199f326e488"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_EXPOSE_THE_REMAINING_RAMP_DISTANCE_ON"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_ramp_metric_reports_progress/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "buck_soft_start_ramp_controller.va"
+      ],
+      "fault_class": "ramp_metric_reports_accumulated_progress",
+      "id": "neg_004_ramp_metric_reports_progress",
+      "trigger_condition": "soft_ref advances while target_ref remains above it",
+      "violated_property_ids": [
+        "P_EXPOSE_THE_REMAINING_RAMP_DISTANCE_ON"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "buck_soft_start_ramp_controller.va": "56959a1fb6fd09791c3341ccc77b00c2a32eade4b18b5164bdbc47728bb91530"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_ASSERT_DONE_ONLY_AFTER_SOFT_REF"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_done_asserted_before_target/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "buck_soft_start_ramp_controller.va"
+      ],
+      "fault_class": "soft_start_done_asserted_before_target",
+      "id": "neg_005_done_asserted_before_target",
+      "trigger_condition": "the first enabled ramp update occurs before soft_ref reaches target_ref",
+      "violated_property_ids": [
+        "P_ASSERT_DONE_ONLY_AFTER_SOFT_REF"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

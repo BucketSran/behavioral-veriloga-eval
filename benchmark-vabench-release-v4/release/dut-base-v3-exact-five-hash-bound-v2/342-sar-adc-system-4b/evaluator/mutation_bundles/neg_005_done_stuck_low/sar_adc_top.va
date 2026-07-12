@@ -1,0 +1,26 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module sar_adc_top(vin, clk, rst, start, code_3, code_2, code_1, code_0, done, sample_dbg, dac_dbg);
+input vin, clk, rst, start;
+output code_3, code_2, code_1, code_0, done, sample_dbg, dac_dbg;
+electrical vin, clk, rst, start, code_3, code_2, code_1, code_0, done, sample_dbg, dac_dbg;
+electrical sample_node, dac_node, cmp_node, sample_en;
+electrical trial_3, trial_2, trial_1, trial_0;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vref = 0.9;
+parameter real vth = 0.45;
+parameter real tr = 200p;
+
+sample_hold #(.vss(vss), .vth(vth), .tr(tr))
+    XSAMPLE(vin, clk, rst, sample_en, sample_node, sample_dbg);
+binary_weighted_cdac #(.vss(vss), .vref(vref), .vth(vth), .tr(tr))
+    XCDAC(trial_3, trial_2, trial_1, trial_0, dac_node, dac_dbg);
+sar_comparator #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr))
+    XCMP(sample_node, dac_node, cmp_node);
+sar_controller #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr))
+    XCTRL(clk, rst, start, cmp_node, sample_en, trial_3, trial_2, trial_1, trial_0,
+          code_3, code_2, code_1, code_0, done);
+endmodule

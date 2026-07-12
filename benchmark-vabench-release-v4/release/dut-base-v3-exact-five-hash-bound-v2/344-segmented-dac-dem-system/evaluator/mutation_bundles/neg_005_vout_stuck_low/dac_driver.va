@@ -1,0 +1,39 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module dac_driver(clk, rst, req_2, req_1, req_0, fine_2, fine_1, fine_0, vout);
+input clk, rst, req_2, req_1, req_0, fine_2, fine_1, fine_0;
+output vout;
+electrical clk, rst, req_2, req_1, req_0, fine_2, fine_1, fine_0, vout;
+
+parameter real vss = 0.0;
+parameter real vref = 0.9;
+parameter real vth = 0.45;
+parameter real tr = 200p;
+
+integer coarse, fine, code;
+real level;
+
+analog begin
+    @(initial_step) begin code = 63; level = vref; end
+    @(cross(V(rst) - vth, +1)) begin code = 63; level = vref; end
+    @(cross(V(rst) - vth, -1)) begin code = 0; level = vss; end
+    @(cross(V(clk) - vth, +1)) begin
+        if (V(rst) > vth) begin
+            code = 63;
+            level = vref;
+        end else begin
+            coarse = 0; fine = 0;
+            if (V(req_0) > vth) coarse = coarse + 1;
+            if (V(req_1) > vth) coarse = coarse + 2;
+            if (V(req_2) > vth) coarse = coarse + 4;
+            if (V(fine_0) > vth) fine = fine + 1;
+            if (V(fine_1) > vth) fine = fine + 2;
+            if (V(fine_2) > vth) fine = fine + 4;
+            code = coarse * 8 + fine;
+            level = vss + vref * code / 63.0;
+        end
+    end
+    V(vout) <+ transition(level, 0, tr, tr);
+end
+endmodule

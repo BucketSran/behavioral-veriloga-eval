@@ -1,0 +1,38 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module ready_flag (
+    input  electrical clk,
+    input  electrical en_ana,
+    input  electrical en_dig,
+    output electrical ready
+);
+    parameter real vhi = 0.9;
+    parameter real vlo = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 200e-12;
+
+    integer ready_state;
+    real ready_target;
+
+    analog begin
+        @(initial_step) begin
+            ready_state = 0;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if ((V(en_ana) > vth) && (V(en_dig) > vth)) begin
+                ready_state = 1;
+            end else begin
+                ready_state = 0;
+            end
+        end
+
+        @(cross(V(en_ana) - vth, -1) or cross(V(en_dig) - vth, -1)) begin
+            ready_state = 0;
+        end
+
+        ready_target = ((V(en_ana) > vth) && (V(en_dig) > vth) && (ready_state != 0)) ? vhi : vlo;
+        V(ready) <+ transition(ready_target, 0, tr);
+    end
+endmodule

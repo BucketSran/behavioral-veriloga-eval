@@ -1,0 +1,41 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module enable_sequencer (
+    input  electrical clk,
+    input  electrical rst_n_core,
+    output electrical en_ana,
+    output electrical en_dig
+);
+    parameter real vhi = 0.9;
+    parameter real vlo = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 200e-12;
+
+    integer stage;
+    real en_ana_target;
+    real en_dig_target;
+
+    analog begin
+        @(initial_step) begin
+            stage = 0;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst_n_core) <= vth) begin
+                stage = 0;
+            end else if (stage < 2) begin
+                stage = stage + 1;
+            end
+        end
+
+        @(cross(V(rst_n_core) - vth, -1)) begin
+            stage = 0;
+        end
+
+        en_ana_target = (V(rst_n_core) > vth && stage >= 1) ? vhi : vlo;
+        en_dig_target = (V(rst_n_core) > vth && stage >= 1) ? vhi : vlo;
+        V(en_ana) <+ transition(en_ana_target, 0, tr);
+        V(en_dig) <+ transition(en_dig_target, 0, tr);
+    end
+endmodule

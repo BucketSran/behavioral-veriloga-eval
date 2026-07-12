@@ -1,0 +1,132 @@
+{
+  "family_id": "347",
+  "gold_bundle_sha256": "6ea0cfce9701f360acee8e5b4f8f22c4dba7e26b43d01e16e154c3aeed056ee6",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "por_detector.va": "cfca6e954ac62fc8a595271c0ff00053875378767a38e1ac928fc412b07ee214"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PWR_POR_DEBOUNCE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_por_one_edge/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "por_detector.va"
+      ],
+      "fault_class": "por_debounce_error",
+      "id": "neg_001_por_one_edge",
+      "trigger_condition": "power first becomes good",
+      "violated_property_ids": [
+        "P_PWR_POR_DEBOUNCE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "reset_synchronizer.va": "f249925addfad504a582f581edb88da4cc468766ccf94e513e12dcfda3e68a9e"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PWR_SEQUENCE_ORDER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_enable_request_ignored/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "reset_synchronizer.va"
+      ],
+      "fault_class": "enable_gating_error",
+      "id": "neg_002_enable_request_ignored",
+      "trigger_condition": "por_n is high while enable_req is low",
+      "violated_property_ids": [
+        "P_PWR_SEQUENCE_ORDER"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "enable_sequencer.va": "4b1f63559a061893d3984d02bf5a47d49f7069e9925c77c0fe198c7b0621e150"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PWR_SEQUENCE_ORDER"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_enables_same_cycle/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "enable_sequencer.va"
+      ],
+      "fault_class": "sequence_timing_error",
+      "id": "neg_003_enables_same_cycle",
+      "trigger_condition": "core reset is released",
+      "violated_property_ids": [
+        "P_PWR_SEQUENCE_ORDER"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "ready_flag.va": "f1764ea85fc1495a9672466f99bc556d636ef66674aba779cd34601e25a87188"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PWR_READY_DELAY"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_ready_without_extra_edge/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "ready_flag.va"
+      ],
+      "fault_class": "ready_timing_error",
+      "id": "neg_004_ready_without_extra_edge",
+      "trigger_condition": "both enables become high",
+      "violated_property_ids": [
+        "P_PWR_READY_DELAY"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "por_detector.va": "8bbfc19f844cfc3734b4341fd04f9722d5e9c9cd2a59834c4ad6c99c32a360b3"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_PWR_ASYNC_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_brownout_output_ungated/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "por_detector.va"
+      ],
+      "fault_class": "missing_brownout_clear",
+      "id": "neg_005_brownout_output_ungated",
+      "trigger_condition": "vdd_sense falls after startup",
+      "violated_property_ids": [
+        "P_PWR_ASYNC_CLEAR"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

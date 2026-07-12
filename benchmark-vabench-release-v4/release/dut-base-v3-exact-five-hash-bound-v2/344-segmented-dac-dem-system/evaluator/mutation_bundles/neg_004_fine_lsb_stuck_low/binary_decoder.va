@@ -1,0 +1,24 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module binary_decoder(code_2, code_1, code_0, fine_2, fine_1, fine_0);
+input code_2, code_1, code_0;
+output fine_2, fine_1, fine_0;
+electrical code_2, code_1, code_0, fine_2, fine_1, fine_0;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vth = 0.45;
+parameter real tr = 200p;
+
+real f2, f1, f0;
+
+analog begin
+    f2 = vss;
+    f1 = vss;
+    f0 = vss;
+    V(fine_2) <+ transition(f2, 0, tr, tr);
+    V(fine_1) <+ transition(f1, 0, tr, tr);
+    V(fine_0) <+ transition(f0, 0, tr, tr);
+end
+endmodule

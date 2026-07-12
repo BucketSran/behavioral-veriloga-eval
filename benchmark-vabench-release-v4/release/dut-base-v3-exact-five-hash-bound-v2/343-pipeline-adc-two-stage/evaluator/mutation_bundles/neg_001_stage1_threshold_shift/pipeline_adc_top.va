@@ -1,0 +1,25 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pipeline_adc_top(vin, clk, rst, valid_i, code_3, code_2, code_1, code_0, valid_o, residue_dbg);
+input vin, clk, rst, valid_i;
+output code_3, code_2, code_1, code_0, valid_o, residue_dbg;
+electrical vin, clk, rst, valid_i, code_3, code_2, code_1, code_0, valid_o, residue_dbg;
+electrical s1_1, s1_0, s1_valid, residue_node, s2_1, s2_0, s2_valid;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vref = 0.9;
+parameter real vth = 0.45;
+parameter real tr = 200p;
+
+stage1_quantizer #(.vdd(vdd), .vss(vss), .vref(vref), .vth(vth), .tr(tr))
+    XSTAGE1(vin, clk, rst, valid_i, s1_1, s1_0, s1_valid);
+residue_amp #(.vss(vss), .vref(vref), .vth(vth), .tr(tr))
+    XRES(vin, rst, s1_1, s1_0, residue_node, residue_dbg);
+stage2_quantizer #(.vdd(vdd), .vss(vss), .vref(vref), .vth(vth), .tr(tr))
+    XSTAGE2(residue_node, clk, rst, s1_valid, s2_1, s2_0, s2_valid);
+code_aligner #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr))
+    XALIGN(clk, rst, s1_1, s1_0, s1_valid, s2_1, s2_0, s2_valid,
+           code_3, code_2, code_1, code_0, valid_o);
+endmodule

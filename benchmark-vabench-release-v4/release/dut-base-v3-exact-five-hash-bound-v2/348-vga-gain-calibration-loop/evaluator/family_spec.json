@@ -1,0 +1,665 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "peak_detector",
+              "gain_controller",
+              "vga_model",
+              "lock_detector"
+            ],
+            "name": "vga_cal_loop_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.5",
+                "name": "gain_min",
+                "override_behavior": "overrides gain_min for this module",
+                "type": "real",
+                "units": null,
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.1",
+                "name": "gain_lsb",
+                "override_behavior": "overrides gain_lsb for this module",
+                "type": "real",
+                "units": null,
+                "valid_range": "finite"
+              },
+              {
+                "default": "20e-3",
+                "name": "tol",
+                "override_behavior": "overrides tol for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200e-12",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "target",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "start",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "gain_3",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "gain_2",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "gain_1",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "gain_0",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "locked",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "peak_metric",
+                "position": 11
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "vga_cal_loop_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "peak_detector",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200e-12",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "start",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "peak_metric",
+                "position": 4
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "peak_detector.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "gain_controller",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "20e-3",
+                "name": "tol",
+                "override_behavior": "overrides tol for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200e-12",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "peak_metric",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "target",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "start",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "gain_3",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "gain_2",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "gain_1",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "gain_0",
+                "position": 8
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "gain_controller.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "vga_model",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.5",
+                "name": "gain_min",
+                "override_behavior": "overrides gain_min for this module",
+                "type": "real",
+                "units": null,
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.1",
+                "name": "gain_lsb",
+                "override_behavior": "overrides gain_lsb for this module",
+                "type": "real",
+                "units": null,
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "gain_3",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "gain_2",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "gain_1",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "gain_0",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 5
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "vga_model.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "lock_detector",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "20e-3",
+                "name": "tol",
+                "override_behavior": "overrides tol for this module",
+                "type": "real",
+                "units": "V",
+                "valid_range": "finite and consistent with the declared rail domain"
+              },
+              {
+                "default": "200e-12",
+                "name": "tr",
+                "override_behavior": "overrides tr for this module",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "peak_metric",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "target",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "start",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "locked",
+                "position": 5
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "lock_detector.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "family_id": "348",
+  "identity": {
+    "category": "calibration_control_systems",
+    "difficulty": "D4",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "VGA Gain Calibration Loop"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain transient behavioral Verilog-A.",
+    "Preserve the declared multi-module architecture and exact public artifact interfaces.",
+    "Do not use current contributions, unsupported continuous operators, validation logic, hard-coded evaluator timing, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_VGA_RESET_STATE",
+      "observable_contract": "Reset restores gain code four and clears peak_metric and locked.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "gain_3",
+        "gain_2",
+        "gain_1",
+        "gain_0",
+        "peak_metric",
+        "locked"
+      ]
+    },
+    {
+      "id": "P_VGA_PEAK_SAMPLE",
+      "observable_contract": "Each enabled rising clock samples the absolute vin magnitude into peak_metric.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "start",
+        "peak_metric"
+      ]
+    },
+    {
+      "id": "P_VGA_GAIN_DIRECTION",
+      "observable_contract": "The gain code moves one bounded step toward target according to the prior sampled peak and clamps to zero through fifteen.",
+      "required_signals": [
+        "time",
+        "target",
+        "clk",
+        "rst",
+        "start",
+        "peak_metric",
+        "gain_3",
+        "gain_2",
+        "gain_1",
+        "gain_0"
+      ]
+    },
+    {
+      "id": "P_VGA_OUTPUT_GAIN",
+      "observable_contract": "vout continuously equals vin times gain_min plus gain_lsb times gain code.",
+      "required_signals": [
+        "time",
+        "vin",
+        "vout",
+        "gain_3",
+        "gain_2",
+        "gain_1",
+        "gain_0"
+      ]
+    },
+    {
+      "id": "P_VGA_LOCK_QUALIFICATION",
+      "observable_contract": "locked asserts after three consecutive enabled updates whose prior sampled peak lies within tolerance.",
+      "required_signals": [
+        "time",
+        "target",
+        "clk",
+        "rst",
+        "start",
+        "peak_metric",
+        "locked"
+      ]
+    }
+  ],
+  "schema_version": "v4-family-spec-v1",
+  "task_ids": {
+    "bugfix": "v4-1348",
+    "dut": "v4-348",
+    "testbench": "v4-848"
+  },
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "target",
+            "port_ref": "target",
+            "position": 1
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "start",
+            "port_ref": "start",
+            "position": 4
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 5
+          },
+          {
+            "net": "gain_3",
+            "port_ref": "gain_3",
+            "position": 6
+          },
+          {
+            "net": "gain_2",
+            "port_ref": "gain_2",
+            "position": 7
+          },
+          {
+            "net": "gain_1",
+            "port_ref": "gain_1",
+            "position": 8
+          },
+          {
+            "net": "gain_0",
+            "port_ref": "gain_0",
+            "position": 9
+          },
+          {
+            "net": "locked",
+            "port_ref": "locked",
+            "position": 10
+          },
+          {
+            "net": "peak_metric",
+            "port_ref": "peak_metric",
+            "position": 11
+          }
+        ],
+        "module_ref": "vga_cal_loop_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "target",
+      "clk",
+      "rst",
+      "start",
+      "vout",
+      "gain_3",
+      "gain_2",
+      "gain_1",
+      "gain_0",
+      "locked",
+      "peak_metric"
+    ]
+  }
+}

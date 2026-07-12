@@ -1,0 +1,134 @@
+{
+  "family_id": "342",
+  "gold_bundle_sha256": "c691f2e227e949a5573bcd2be14c0a80c1649a42b838b22db3ade4cef0551fd2",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "sample_hold.va": "62a0f8d468bb5d8130cd288db20bf8e09b0e2f2eb9a24a2e2e0f11454c17001d"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SAR_SAMPLE_HOLD"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_sample_stuck_zero/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "sample_hold.va"
+      ],
+      "fault_class": "sample_hold_failure",
+      "id": "neg_001_sample_stuck_zero",
+      "trigger_condition": "sample request captures a nonzero vin",
+      "violated_property_ids": [
+        "P_SAR_SAMPLE_HOLD"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "binary_weighted_cdac.va": "8f3dcd1a8642a49bd1c2fdda39789fe59d2478fa865ffbe6cdb8c48be39544e2"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SAR_DAC_TRIAL"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_cdac_divisor_15/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "binary_weighted_cdac.va"
+      ],
+      "fault_class": "dac_weight_error",
+      "id": "neg_002_cdac_divisor_15",
+      "trigger_condition": "a nonzero trial code is active",
+      "violated_property_ids": [
+        "P_SAR_DAC_TRIAL"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "sar_comparator.va": "eaa120af035e8edff09b164d73e97dda44a6430424fc42006a007d211ab723bf"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SAR_FINAL_CODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_comparator_polarity/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "sar_comparator.va"
+      ],
+      "fault_class": "comparator_polarity",
+      "id": "neg_003_comparator_polarity",
+      "trigger_condition": "held sample and DAC trial differ",
+      "violated_property_ids": [
+        "P_SAR_FINAL_CODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "sar_controller.va": "73a0a19b1e66c9208c8410ced739cf3fceb85a39011dd67073718bcb6fd07979"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SAR_DAC_TRIAL",
+          "P_SAR_FINAL_CODE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_wrong_first_trial/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "sar_controller.va"
+      ],
+      "fault_class": "bit_trial_order",
+      "id": "neg_004_wrong_first_trial",
+      "trigger_condition": "a conversion starts",
+      "violated_property_ids": [
+        "P_SAR_DAC_TRIAL",
+        "P_SAR_FINAL_CODE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "sar_controller.va": "6b9d599401efefc012a57d8bcd366c0d2f345e97671d7cb60b306e0ae473387b"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_SAR_RESET_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_done_stuck_low/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "sar_controller.va"
+      ],
+      "fault_class": "reset_clear_failure",
+      "id": "neg_005_done_stuck_low",
+      "trigger_condition": "rst is asserted at startup",
+      "violated_property_ids": [
+        "P_SAR_RESET_CLEAR"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

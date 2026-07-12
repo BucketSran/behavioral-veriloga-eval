@@ -1,0 +1,99 @@
+{
+  "candidate": {
+    "artifact_paths": [
+      "power_reset_seq_top.va",
+      "por_detector.va",
+      "reset_synchronizer.va",
+      "enable_sequencer.va",
+      "ready_flag.va"
+    ],
+    "source_root": "./dut"
+  },
+  "deck": {
+    "analyses": [
+      "tran tran stop=100n maxstep=100p"
+    ],
+    "body_lines": [],
+    "header": [
+      "simulator lang=spectre",
+      "global 0"
+    ],
+    "include_templates": [
+      "ahdl_include \"{candidate_source_root}/{artifact_path}\""
+    ],
+    "save_signals": [
+      "vdd_sense",
+      "clk",
+      "rst_n_ext",
+      "enable_req",
+      "por_n",
+      "rst_n_core",
+      "en_ana",
+      "en_dig",
+      "ready"
+    ]
+  },
+  "family_id": "347",
+  "generator": {
+    "name": "render_v4_harness.py",
+    "version": "v4-harness-renderer-v1"
+  },
+  "profile_defaults": {
+    "feedback": {
+      "corners": [],
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=160n maxstep=100p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=4n delay=5n rise=100p fall=100p",
+          "Vvdd_sense (vdd_sense 0) vsource type=pwl wave=[0 0 7n 0 7.1n 0.9 72n 0.9 72.1n 0.4 87n 0.4 87.1n 0.9 160n 0.9]",
+          "Vrst_n_ext (rst_n_ext 0) vsource type=pwl wave=[0 0 2n 0 2.1n 0.9 160n 0.9]",
+          "Venable_req (enable_req 0) vsource type=pwl wave=[0 0 8n 0 8.1n 0.9 160n 0.9]",
+          "XDUT (vdd_sense clk rst_n_ext enable_req por_n rst_n_core en_ana en_dig ready) power_reset_seq_top"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "160n"
+      },
+      "simulatorOptions": {
+        "evas_profile": "balanced"
+      }
+    },
+    "score": {
+      "corners": [],
+      "deck_overrides": {
+        "analyses": [
+          "tran tran stop=200n maxstep=100p"
+        ],
+        "body_lines": [
+          "Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=10n width=4n delay=5n rise=100p fall=100p",
+          "Vvdd_sense (vdd_sense 0) vsource type=pwl wave=[0 0 12n 0 12.1n 0.9 92n 0.9 92.1n 0.3 108n 0.3 108.1n 0.9 200n 0.9]",
+          "Vrst_n_ext (rst_n_ext 0) vsource type=pwl wave=[0 0 3n 0 3.1n 0.9 155n 0.9 155.1n 0 166n 0 166.1n 0.9 200n 0.9]",
+          "Venable_req (enable_req 0) vsource type=pwl wave=[0 0 20n 0 20.1n 0.9 135n 0.9 135.1n 0 142n 0 142.1n 0.9 200n 0.9]",
+          "XDUT (vdd_sense clk rst_n_ext enable_req por_n rst_n_core en_ana en_dig ready) power_reset_seq_top"
+        ]
+      },
+      "deterministic_seed": 0,
+      "parameters": {
+        "maxstep": "100p",
+        "stop_time": "200n"
+      },
+      "simulatorOptions": {}
+    }
+  },
+  "property_ids": [
+    "P_PWR_ASYNC_CLEAR",
+    "P_PWR_POR_DEBOUNCE",
+    "P_PWR_SEQUENCE_ORDER",
+    "P_PWR_READY_DELAY"
+  ],
+  "schema_version": "v4-harness-spec-v1",
+  "source_contract": {
+    "checker_profile_sha256": "adbce7d2ba365bd8d4a3b08991f91c4757118d82a05033ebe3634b7ae96ed447",
+    "family_spec_sha256": "53f53541156402704f92c484744f4c56a086e8ca283c13cb3b633f0a85f4a920"
+  },
+  "task_id": "v4-347"
+}

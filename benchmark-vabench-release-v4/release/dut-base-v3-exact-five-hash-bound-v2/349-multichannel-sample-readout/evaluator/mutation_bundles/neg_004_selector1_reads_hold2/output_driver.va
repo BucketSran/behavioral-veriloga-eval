@@ -1,0 +1,53 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module output_driver (
+    input  electrical hold0,
+    input  electrical hold1,
+    input  electrical hold2,
+    input  electrical hold3,
+    input  electrical clk,
+    input  electrical rst,
+    input  electrical read,
+    input  electrical ch_sel_1,
+    input  electrical ch_sel_0,
+    output electrical out
+);
+    parameter real vth = 0.45;
+    parameter real tr = 200e-12;
+
+    integer selected;
+    real out_value;
+
+    analog begin
+        @(initial_step) begin
+            selected = 0;
+            out_value = 0.0;
+        end
+
+        @(cross(V(rst) - vth, +1)) begin
+            selected = 0;
+            out_value = 0.0;
+        end
+
+        if (V(rst) > vth) begin
+            selected = 0;
+            out_value = 0.0;
+        end else if (V(read) > vth) begin
+            selected = 0;
+            if (V(ch_sel_0) > vth) selected = selected + 1;
+            if (V(ch_sel_1) > vth) selected = selected + 2;
+            if (selected == 0) begin
+                out_value = V(hold0);
+            end else if (selected == 1) begin
+                out_value = V(hold2);
+            end else if (selected == 2) begin
+                out_value = V(hold2);
+            end else begin
+                out_value = V(hold3);
+            end
+        end
+
+        V(out) <+ out_value;
+    end
+endmodule

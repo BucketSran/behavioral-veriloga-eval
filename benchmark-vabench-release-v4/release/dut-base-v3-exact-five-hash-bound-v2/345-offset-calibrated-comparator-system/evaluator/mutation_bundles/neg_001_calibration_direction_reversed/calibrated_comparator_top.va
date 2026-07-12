@@ -1,0 +1,22 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module calibrated_comparator_top(vinp, vinn, clk, rst, cal_en, cal_ref, decision, ready,
+                                 offset_3, offset_2, offset_1, offset_0, threshold_dbg);
+input vinp, vinn, clk, rst, cal_en, cal_ref;
+output decision, ready, offset_3, offset_2, offset_1, offset_0, threshold_dbg;
+electrical vinp, vinn, clk, rst, cal_en, cal_ref, decision, ready, offset_3, offset_2, offset_1, offset_0, threshold_dbg;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vth = 0.45;
+parameter real offset_lsb = 5e-3;
+parameter real tr = 200p;
+
+calibration_fsm #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr))
+    XFSM(clk, rst, cal_en, cal_ref, ready, offset_3, offset_2, offset_1, offset_0);
+offset_dac #(.offset_lsb(offset_lsb), .vss(vss), .vth(vth), .tr(tr))
+    XDAC(offset_3, offset_2, offset_1, offset_0, rst, threshold_dbg);
+comparator_core #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr))
+    XCMP(vinp, vinn, threshold_dbg, rst, decision);
+endmodule

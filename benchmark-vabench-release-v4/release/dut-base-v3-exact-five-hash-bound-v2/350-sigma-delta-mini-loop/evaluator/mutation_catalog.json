@@ -1,0 +1,132 @@
+{
+  "family_id": "350",
+  "gold_bundle_sha256": "477f1ac9ca836cbc3c2f4ace0f78dff4cb5cf5635bda84505293cac849fc23aa",
+  "mutations": [
+    {
+      "artifact_hashes": {
+        "sd_comparator.va": "1f3d4324196f5ca76c00e4fef0044ee8f944212bd7bcb83f3e4d41a8abc7cbd2"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_COMPARATOR_DECISION"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_001_comparator_polarity/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "sd_comparator.va"
+      ],
+      "fault_class": "wrong_polarity",
+      "id": "neg_001_comparator_polarity",
+      "trigger_condition": "state crosses VCM",
+      "violated_property_ids": [
+        "P_COMPARATOR_DECISION"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "feedback_dac.va": "1f17352e99be2006f32a857c6d8fa24cee551dd412bfda3c3f324f5150e5ab80"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FEEDBACK_STATE_UPDATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_002_feedback_stuck_low/certification.json",
+        "profile": "feedback",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "feedback_dac.va"
+      ],
+      "fault_class": "stuck_state",
+      "id": "neg_002_feedback_stuck_low",
+      "trigger_condition": "bit_out becomes high",
+      "violated_property_ids": [
+        "P_FEEDBACK_STATE_UPDATE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "integrator_state.va": "16654149738179a52e8df3c19de9a07b83395c635493356e68322574607c55dc"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_FEEDBACK_STATE_UPDATE"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_003_integrator_input_sign/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "integrator_state.va"
+      ],
+      "fault_class": "wrong_polarity",
+      "id": "neg_003_integrator_input_sign",
+      "trigger_condition": "VIN differs from feedback",
+      "violated_property_ids": [
+        "P_FEEDBACK_STATE_UPDATE"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "decimator_lite.va": "9de52631117ffdaab256fccf2eab37f1c319c18cd8975032c4116d1d01c71b61"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_DECIMATOR_WINDOW"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_004_short_decimation_window/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "decimator_lite.va"
+      ],
+      "fault_class": "wrong_window",
+      "id": "neg_004_short_decimation_window",
+      "trigger_condition": "eight or more samples arrive",
+      "violated_property_ids": [
+        "P_DECIMATOR_WINDOW"
+      ]
+    },
+    {
+      "artifact_hashes": {
+        "decimator_lite.va": "c871e26f132f282fa81e523688e92a7d1350223e3956b03e077ca3907433f876"
+      },
+      "certification": {
+        "activated_property_ids": [
+          "P_RESET_CLEAR"
+        ],
+        "behavior_status": "killed_behaviorally",
+        "compile_status": "pass",
+        "evidence_path": "negative_variants/neg_005_decimator_wraps_fullscale/certification.json",
+        "profile": "score",
+        "simulation_status": "pass",
+        "status": "pass"
+      },
+      "changed_artifacts": [
+        "decimator_lite.va"
+      ],
+      "fault_class": "reset_clear_failure",
+      "id": "neg_005_decimator_wraps_fullscale",
+      "trigger_condition": "rst is asserted at startup",
+      "violated_property_ids": [
+        "P_RESET_CLEAR"
+      ]
+    }
+  ],
+  "schema_version": "v4-mutation-catalog-v1"
+}

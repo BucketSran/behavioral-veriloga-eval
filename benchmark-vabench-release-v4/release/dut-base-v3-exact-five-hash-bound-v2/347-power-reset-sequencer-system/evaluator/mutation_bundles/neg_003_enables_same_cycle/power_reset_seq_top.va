@@ -1,0 +1,69 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module power_reset_seq_top (
+    input  electrical vdd_sense,
+    input  electrical clk,
+    input  electrical rst_n_ext,
+    input  electrical enable_req,
+    output electrical por_n,
+    output electrical rst_n_core,
+    output electrical en_ana,
+    output electrical en_dig,
+    output electrical ready
+);
+    parameter real vhi = 0.9;
+    parameter real vlo = 0.0;
+    parameter real vpor = 0.72;
+    parameter real vth = 0.45;
+    parameter real tr = 200e-12;
+
+    por_detector #(
+        .vhi(vhi),
+        .vlo(vlo),
+        .vpor(vpor),
+        .vth(vth),
+        .tr(tr)
+    ) u_por (
+        vdd_sense,
+        clk,
+        rst_n_ext,
+        por_n
+    );
+
+    reset_synchronizer #(
+        .vhi(vhi),
+        .vlo(vlo),
+        .vth(vth),
+        .tr(tr)
+    ) u_reset_sync (
+        clk,
+        por_n,
+        enable_req,
+        rst_n_core
+    );
+
+    enable_sequencer #(
+        .vhi(vhi),
+        .vlo(vlo),
+        .vth(vth),
+        .tr(tr)
+    ) u_enable_seq (
+        clk,
+        rst_n_core,
+        en_ana,
+        en_dig
+    );
+
+    ready_flag #(
+        .vhi(vhi),
+        .vlo(vlo),
+        .vth(vth),
+        .tr(tr)
+    ) u_ready (
+        clk,
+        en_ana,
+        en_dig,
+        ready
+    );
+endmodule

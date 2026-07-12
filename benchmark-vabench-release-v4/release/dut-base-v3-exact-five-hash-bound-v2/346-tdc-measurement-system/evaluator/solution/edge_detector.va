@@ -1,0 +1,19 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module edge_detector(start, stop, rst, clear_i, start_evt, stop_evt);
+input start, stop, rst, clear_i;
+output start_evt, stop_evt;
+electrical start, stop, rst, clear_i, start_evt, stop_evt;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vth = 0.45;
+parameter real tr = 200p;
+
+analog begin
+    // Preserve external event timing exactly; the counter owns arm/disarm state.
+    V(start_evt) <+ ((V(rst) > vth) ? vss : V(start));
+    V(stop_evt) <+ ((V(rst) > vth) ? vss : V(stop));
+end
+endmodule

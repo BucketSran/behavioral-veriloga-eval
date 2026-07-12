@@ -1,0 +1,37 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module integrator_state(vin, feedback, clk, rst, state_metric);
+    input vin, feedback, clk, rst;
+    output state_metric;
+    electrical vin, feedback, clk, rst, state_metric;
+
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real state_limit = 1.8;
+    parameter real tr = 200p from (0:inf);
+
+    real state;
+
+    analog begin
+        @(initial_step) begin
+            state = 0.0;
+        end
+
+        @(cross(V(rst) - vth, +1)) begin
+            state = 0.0;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth) begin
+                state = 0.0;
+            end else begin
+                state = state + V(vin) - V(feedback) + vcm;
+                if (state > state_limit) state = state_limit;
+                if (state < -state_limit) state = -state_limit;
+            end
+        end
+
+        V(state_metric) <+ transition(state, 0, tr, tr);
+    end
+endmodule

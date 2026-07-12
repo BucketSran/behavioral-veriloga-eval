@@ -1,0 +1,61 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module gain_controller (
+    input  electrical peak_metric,
+    input  electrical target,
+    input  electrical clk,
+    input  electrical rst,
+    input  electrical start,
+    output electrical gain_3,
+    output electrical gain_2,
+    output electrical gain_1,
+    output electrical gain_0
+);
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tol = 20e-3;
+    parameter real tr = 200e-12;
+
+    integer gain_code;
+    real bit3_target;
+    real bit2_target;
+    real bit1_target;
+    real bit0_target;
+
+    analog begin
+        @(initial_step) begin
+            gain_code = 0;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth) begin
+                gain_code = 4;
+            end else if (V(start) > vth) begin
+                if (V(peak_metric) < (V(target) - tol)) begin
+                    if (gain_code < 15) begin
+                        gain_code = gain_code + 1;
+                    end
+                end else if (V(peak_metric) > (V(target) + tol)) begin
+                    if (gain_code > 0) begin
+                        gain_code = gain_code - 1;
+                    end
+                end
+            end
+        end
+
+        @(cross(V(rst) - vth, +1)) begin
+            gain_code = 4;
+        end
+
+        bit3_target = ((gain_code & 8) != 0) ? vdd : vss;
+        bit2_target = ((gain_code & 4) != 0) ? vdd : vss;
+        bit1_target = ((gain_code & 2) != 0) ? vdd : vss;
+        bit0_target = ((gain_code & 1) != 0) ? vdd : vss;
+        V(gain_3) <+ transition(bit3_target, 0, tr);
+        V(gain_2) <+ transition(bit2_target, 0, tr);
+        V(gain_1) <+ transition(bit1_target, 0, tr);
+        V(gain_0) <+ transition(bit0_target, 0, tr);
+    end
+endmodule

@@ -1,0 +1,52 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module decimator_lite(bit_in, clk, rst, avg_3, avg_2, avg_1, avg_0);
+    input bit_in, clk, rst;
+    output avg_3, avg_2, avg_1, avg_0;
+    electrical bit_in, clk, rst, avg_3, avg_2, avg_1, avg_0;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+
+    integer sample_count;
+    integer high_count;
+    integer avg_code;
+
+    analog begin
+        @(initial_step) begin
+            sample_count = 0;
+            high_count = 0;
+            avg_code = 0;
+        end
+
+        @(cross(V(rst) - vth, +1)) begin
+            sample_count = 0;
+            high_count = 0;
+            avg_code = 0;
+        end
+
+        @(cross(V(clk) - vth, +1)) begin
+            if (V(rst) > vth) begin
+                sample_count = 0;
+                high_count = 0;
+                avg_code = 0;
+            end else begin
+                if (V(bit_in) > vth) high_count = high_count + 1;
+                sample_count = sample_count + 1;
+                if (sample_count >= 8) begin
+                    avg_code = (high_count > 15) ? 15 : high_count;
+                    sample_count = 0;
+                    high_count = 0;
+                end
+            end
+        end
+
+        V(avg_0) <+ transition((avg_code & 1) ? vdd : vss, 0, tr, tr);
+        V(avg_1) <+ transition((avg_code & 2) ? vdd : vss, 0, tr, tr);
+        V(avg_2) <+ transition((avg_code & 4) ? vdd : vss, 0, tr, tr);
+        V(avg_3) <+ transition((avg_code & 8) ? vdd : vss, 0, tr, tr);
+    end
+endmodule

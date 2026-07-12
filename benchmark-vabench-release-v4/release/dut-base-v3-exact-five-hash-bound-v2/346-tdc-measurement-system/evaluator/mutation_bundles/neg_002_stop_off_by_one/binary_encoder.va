@@ -1,0 +1,36 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module binary_encoder(count_7, count_6, count_5, count_4, count_3, count_2, count_1, count_0,
+                      code_7, code_6, code_5, code_4, code_3, code_2, code_1, code_0);
+input count_7, count_6, count_5, count_4, count_3, count_2, count_1, count_0;
+output code_7, code_6, code_5, code_4, code_3, code_2, code_1, code_0;
+electrical count_7, count_6, count_5, count_4, count_3, count_2, count_1, count_0;
+electrical code_7, code_6, code_5, code_4, code_3, code_2, code_1, code_0;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vth = 0.45;
+parameter real tr = 200p;
+
+real b7, b6, b5, b4, b3, b2, b1, b0;
+
+analog begin
+    b7 = (V(count_7) > vth) ? vdd : vss;
+    b6 = (V(count_6) > vth) ? vdd : vss;
+    b5 = (V(count_5) > vth) ? vdd : vss;
+    b4 = (V(count_4) > vth) ? vdd : vss;
+    b3 = (V(count_3) > vth) ? vdd : vss;
+    b2 = (V(count_2) > vth) ? vdd : vss;
+    b1 = (V(count_1) > vth) ? vdd : vss;
+    b0 = (V(count_0) > vth) ? vdd : vss;
+    V(code_7) <+ transition(b7, 0, tr, tr);
+    V(code_6) <+ transition(b6, 0, tr, tr);
+    V(code_5) <+ transition(b5, 0, tr, tr);
+    V(code_4) <+ transition(b4, 0, tr, tr);
+    V(code_3) <+ transition(b3, 0, tr, tr);
+    V(code_2) <+ transition(b2, 0, tr, tr);
+    V(code_1) <+ transition(b1, 0, tr, tr);
+    V(code_0) <+ transition(b0, 0, tr, tr);
+end
+endmodule

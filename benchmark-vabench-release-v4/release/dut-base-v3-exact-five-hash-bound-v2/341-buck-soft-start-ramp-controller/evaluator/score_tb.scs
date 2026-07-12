@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/buck_soft_start_ramp_controller.va"
+
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=5n width=2.5n delay=1.2n rise=60p fall=60p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.7n 0.9 1.8n 0 120n 0]
+Venable (enable 0) vsource type=pwl wave=[0 0 4.5n 0 4.6n 0.9 94n 0.9 94.1n 0 100n 0 100.1n 0.9 120n 0.9]
+Vtarget_ref (target_ref 0) vsource type=pwl wave=[0 0.300 40n 0.300 43n 0.680 80n 0.680 82n 0.420 120n 0.420]
+
+XDUT (clk rst enable target_ref soft_ref ramp_metric done) buck_soft_start_ramp_controller
+
+
+tran tran stop=120n maxstep=100p
+save clk rst enable target_ref soft_ref ramp_metric done

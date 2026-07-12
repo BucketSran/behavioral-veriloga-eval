@@ -1,0 +1,58 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module calibration_fsm(clk, rst, cal_en, cal_ref, ready, offset_3, offset_2, offset_1, offset_0);
+input clk, rst, cal_en, cal_ref;
+output ready, offset_3, offset_2, offset_1, offset_0;
+electrical clk, rst, cal_en, cal_ref, ready, offset_3, offset_2, offset_1, offset_0;
+
+parameter real vdd = 0.9;
+parameter real vss = 0.0;
+parameter real vth = 0.45;
+parameter real tr = 200p;
+
+integer code;
+integer update_count;
+integer in_window;
+real ready_level, b3, b2, b1, b0;
+
+analog begin
+    @(initial_step) begin
+        code = 0; update_count = 0; in_window = 0; ready_level = vss;
+    end
+    @(cross(V(rst) - vth, +1)) begin
+        code = 0; update_count = 0; in_window = 0; ready_level = vss;
+    end
+    @(cross(V(clk) - vth, +1)) begin
+        if (V(rst) > vth) begin
+            code = 0; update_count = 0; in_window = 0; ready_level = vss;
+        end else if (V(cal_en) > vth) begin
+            if (in_window == 0) begin
+                update_count = 0;
+                ready_level = vss;
+                in_window = 1;
+            end
+            if (V(cal_ref) > vth) begin
+                if (code < 15) code = code + 1;
+            end else begin
+                if (code > 0) code = code - 1;
+            end
+            update_count = update_count + 1;
+            if (update_count >= 3) ready_level = vdd;
+        end else begin
+            in_window = 0;
+        end
+    end
+    b3 = (code >= 8) ? vdd : vss;
+    b2 = (((code >= 4) && (code < 8)) || (code >= 12)) ? vdd : vss;
+    b1 = (((code == 2) || (code == 3) || (code == 6) || (code == 7) ||
+           (code == 10) || (code == 11) || (code == 14) || (code == 15))) ? vdd : vss;
+    b0 = (((code == 1) || (code == 3) || (code == 5) || (code == 7) ||
+           (code == 9) || (code == 11) || (code == 13) || (code == 15))) ? vdd : vss;
+    V(offset_3) <+ transition(b3, 0, tr, tr);
+    V(offset_2) <+ transition(b2, 0, tr, tr);
+    V(offset_1) <+ transition(b1, 0, tr, tr);
+    V(offset_0) <+ transition(b0, 0, tr, tr);
+    V(ready) <+ transition(ready_level, 0, tr, tr);
+end
+endmodule
