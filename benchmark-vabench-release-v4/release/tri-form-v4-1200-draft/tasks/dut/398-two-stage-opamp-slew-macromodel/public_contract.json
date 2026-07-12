@@ -1,0 +1,405 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "two_stage_opamp_slew_macromodel",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "20.0",
+                "name": "stage1_gain",
+                "override_behavior": "overrides stage1_gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "5.0",
+                "name": "stage2_gain",
+                "override_behavior": "overrides stage2_gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "80e-3",
+                "name": "slew_step",
+                "override_behavior": "overrides slew_step",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "10e-3",
+                "name": "settle_tol",
+                "override_behavior": "overrides settle_tol",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "250p from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vinp",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vinn",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "load_step",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "stage1_metric",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "slew_metric",
+                "position": 8
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clamp_flag",
+                "position": 9
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "settled",
+                "position": 10
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "two_stage_opamp_slew_macromodel.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "398",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "operational_amplifier_macromodels",
+    "difficulty": "D3",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Two-stage Op-amp Slew Macromodel"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_ENABLE_IS",
+      "observable_contract": "On reset or when `enable` is low, drive `vout` and `stage1_metric` to `vcm`, clear `slew_metric`, `clamp_flag`, and `settled`.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "enable",
+        "load_step",
+        "vout",
+        "stage1_metric",
+        "slew_metric",
+        "clamp_flag",
+        "settled"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_RISING_CLK_EDGE_WHILE",
+      "observable_contract": "On each rising `clk` edge while enabled, sample the differential input `vinp - vinn`.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "enable",
+        "load_step",
+        "vout",
+        "stage1_metric",
+        "slew_metric",
+        "clamp_flag",
+        "settled"
+      ]
+    },
+    {
+      "id": "P_COMPUTE_A_FIRST_STAGE_METRIC_FROM",
+      "observable_contract": "Compute a first-stage metric from the sampled differential input, centered around `vcm` and limited to `[vss, vdd]`.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "enable",
+        "load_step",
+        "vout",
+        "stage1_metric",
+        "slew_metric",
+        "clamp_flag",
+        "settled"
+      ]
+    },
+    {
+      "id": "P_COMPUTE_AN_OUTPUT_TARGET_FROM_THE",
+      "observable_contract": "Compute an output target from the first-stage metric and `stage2_gain`; `load_step` may request a bounded target perturbation around the same common-mode reference.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "enable",
+        "load_step",
+        "vout",
+        "stage1_metric",
+        "slew_metric",
+        "clamp_flag",
+        "settled"
+      ]
+    },
+    {
+      "id": "P_CLAMP_THE_OUTPUT_TARGET_TO_VSS",
+      "observable_contract": "Clamp the output target to `[vss, vdd]` and assert `clamp_flag` only when clamping occurs.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "enable",
+        "load_step",
+        "vout",
+        "stage1_metric",
+        "slew_metric",
+        "clamp_flag",
+        "settled"
+      ]
+    },
+    {
+      "id": "P_MOVE_VOUT_TOWARD_THE_CLAMPED_TARGET",
+      "observable_contract": "Move `vout` toward the clamped target by no more than `slew_step` per enabled clock edge.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "enable",
+        "load_step",
+        "vout",
+        "stage1_metric",
+        "slew_metric",
+        "clamp_flag",
+        "settled"
+      ]
+    },
+    {
+      "id": "P_ASSERT_SETTLED_ONLY_AFTER_TWO_CONSECUTIVE_UPDATES",
+      "observable_contract": "Assert `settled` only after the output error has remained within `settle_tol` for two consecutive enabled updates.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "enable",
+        "load_step",
+        "vout",
+        "stage1_metric",
+        "slew_metric",
+        "clamp_flag",
+        "settled"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "two_stage_opamp_slew_macromodel.va"
+  ],
+  "task_id": "v4-398",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vinp",
+            "port_ref": "vinp",
+            "position": 0
+          },
+          {
+            "net": "vinn",
+            "port_ref": "vinn",
+            "position": 1
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 4
+          },
+          {
+            "net": "load_step",
+            "port_ref": "load_step",
+            "position": 5
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 6
+          },
+          {
+            "net": "stage1_metric",
+            "port_ref": "stage1_metric",
+            "position": 7
+          },
+          {
+            "net": "slew_metric",
+            "port_ref": "slew_metric",
+            "position": 8
+          },
+          {
+            "net": "clamp_flag",
+            "port_ref": "clamp_flag",
+            "position": 9
+          },
+          {
+            "net": "settled",
+            "port_ref": "settled",
+            "position": 10
+          }
+        ],
+        "module_ref": "two_stage_opamp_slew_macromodel",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vinp",
+      "vinn",
+      "clk",
+      "rst",
+      "enable",
+      "load_step",
+      "vout",
+      "stage1_metric",
+      "slew_metric",
+      "clamp_flag",
+      "settled"
+    ]
+  }
+}

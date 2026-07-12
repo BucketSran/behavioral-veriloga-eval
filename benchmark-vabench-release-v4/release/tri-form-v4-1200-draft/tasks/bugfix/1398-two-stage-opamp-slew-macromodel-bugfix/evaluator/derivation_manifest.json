@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-398",
+    "canonical_task_slug": "398-two-stage-opamp-slew-macromodel",
+    "family_spec_sha256": "4814ffa8f2c4ad144b1b3b52389c12cef5f6b346d34c7fbcefe853b76e33129c",
+    "mutation_catalog_sha256": "efb19287f920443e26325769491750711eb7a026342cebdc9458f98dfaead047",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "398",
+  "negative_assignment": {
+    "bugfix_seed": "neg_006_asynchronous_update",
+    "testbench_suite": [
+      "neg_001_stage1_wrong",
+      "neg_002_no_slew_limit",
+      "neg_003_settled_stuck_high",
+      "neg_005_clamp_flag_stuck_low",
+      "neg_006_asynchronous_update"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "3ec3659295f1aaa0d462b65b57400bf033db051963c74ed2d4935d5b9e99d533",
+    "changed_artifacts": [
+      "two_stage_opamp_slew_macromodel.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_006_asynchronous_update",
+    "rationale": "Select fault class asynchronous_state_update under trigger 'inputs change while clk remains away from a rising edge' because it exercises P_ON_EACH_RISING_CLK_EDGE_WHILE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 31,
+    "source_preferred_seed": "neg_001_stage1_wrong",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

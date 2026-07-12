@@ -1,0 +1,321 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "downconversion_mixer_lo_polarity",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets the logic-high output level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > vss"
+              },
+              {
+                "default": 0.0,
+                "name": "vss",
+                "override_behavior": "sets the logic-low output level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vdd"
+              },
+              {
+                "default": 0.45,
+                "name": "vcm",
+                "override_behavior": "sets RF and output common mode",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vcm < vdd"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets the digital-voltage crossing threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vth < vdd"
+              },
+              {
+                "default": 0.5,
+                "name": "conversion_gain",
+                "override_behavior": "sets baseband conversion gain",
+                "type": "real",
+                "units": "1",
+                "valid_range": "conversion_gain >= 0"
+              },
+              {
+                "default": 2e-10,
+                "name": "tr",
+                "override_behavior": "sets discrete polarity/status smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rf_in",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "lo_i",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "lo_q",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "i_out",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "q_out",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lo_i_metric",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lo_q_metric",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "polarity_ok",
+                "position": 9
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "downconversion_mixer_lo_polarity.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "400",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "rf_front_end_mixer_macromodels",
+    "difficulty": "D3",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Downconversion Mixer with LO Polarity"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not use current contributions, transistor-level devices, validation logic, or simulator side channels.",
+    "Do not hard-code evaluator stimulus timing, stop times, sample windows, or checker tolerances."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_DISABLE_CENTER",
+      "observable_contract": "Reset or disable centers I/Q outputs and clears LO metrics and polarity_ok.",
+      "required_signals": [
+        "time",
+        "rf_in",
+        "lo_i",
+        "lo_q",
+        "rst",
+        "enable",
+        "i_out",
+        "q_out",
+        "lo_i_metric",
+        "lo_q_metric",
+        "polarity_ok"
+      ]
+    },
+    {
+      "id": "P_LO_POLARITY_METRICS",
+      "observable_contract": "Each LO threshold state selects signed polarity and is mirrored by its public metric.",
+      "required_signals": [
+        "time",
+        "rf_in",
+        "lo_i",
+        "lo_q",
+        "rst",
+        "enable",
+        "i_out",
+        "q_out",
+        "lo_i_metric",
+        "lo_q_metric",
+        "polarity_ok"
+      ]
+    },
+    {
+      "id": "P_IQ_CONVERSION",
+      "observable_contract": "I and Q outputs follow the declared common-mode referenced conversion-gain equations with independent LO signs.",
+      "required_signals": [
+        "time",
+        "rf_in",
+        "lo_i",
+        "lo_q",
+        "rst",
+        "enable",
+        "i_out",
+        "q_out",
+        "lo_i_metric",
+        "lo_q_metric",
+        "polarity_ok"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_CLAMP",
+      "observable_contract": "Both baseband outputs remain within the declared supply rails.",
+      "required_signals": [
+        "time",
+        "rf_in",
+        "lo_i",
+        "lo_q",
+        "rst",
+        "enable",
+        "i_out",
+        "q_out",
+        "lo_i_metric",
+        "lo_q_metric",
+        "polarity_ok"
+      ]
+    },
+    {
+      "id": "P_POLARITY_QUALIFICATION",
+      "observable_contract": "polarity_ok asserts only after both LO controls have toggled while enabled.",
+      "required_signals": [
+        "time",
+        "rf_in",
+        "lo_i",
+        "lo_q",
+        "rst",
+        "enable",
+        "i_out",
+        "q_out",
+        "lo_i_metric",
+        "lo_q_metric",
+        "polarity_ok"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "downconversion_mixer_lo_polarity.va"
+  ],
+  "task_id": "v4-400",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "rf_in",
+            "port_ref": "rf_in",
+            "position": 0
+          },
+          {
+            "net": "lo_i",
+            "port_ref": "lo_i",
+            "position": 1
+          },
+          {
+            "net": "lo_q",
+            "port_ref": "lo_q",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 4
+          },
+          {
+            "net": "i_out",
+            "port_ref": "i_out",
+            "position": 5
+          },
+          {
+            "net": "q_out",
+            "port_ref": "q_out",
+            "position": 6
+          },
+          {
+            "net": "lo_i_metric",
+            "port_ref": "lo_i_metric",
+            "position": 7
+          },
+          {
+            "net": "lo_q_metric",
+            "port_ref": "lo_q_metric",
+            "position": 8
+          },
+          {
+            "net": "polarity_ok",
+            "port_ref": "polarity_ok",
+            "position": 9
+          }
+        ],
+        "module_ref": "downconversion_mixer_lo_polarity",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "rf_in",
+      "lo_i",
+      "lo_q",
+      "rst",
+      "enable",
+      "i_out",
+      "q_out",
+      "lo_i_metric",
+      "lo_q_metric",
+      "polarity_ok"
+    ]
+  }
+}

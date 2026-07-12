@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-391",
+    "canonical_task_slug": "391-lc-vco-behavioral-source",
+    "family_spec_sha256": "c01da4797396a4b4d9fb3def35c213db32a2d95a5cc7fc1696603673f1c4e34e",
+    "mutation_catalog_sha256": "65209ab8cce48af3f3d601257a6df12495a20afbb25f2372f41bdc3d3b81e7e7",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "391",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_reversed_frequency_map",
+    "testbench_suite": [
+      "neg_001_reversed_frequency_map",
+      "neg_003_valid_after_one_cycle",
+      "neg_004_wrong_amplitude_metric",
+      "neg_005_disabled_output_not_centered",
+      "neg_002_noncomplementary_output"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "54cc57403b40030f50a7c026c03fffb79d2aee181781e025e77e98e83b2c80b1",
+    "changed_artifacts": [
+      "lc_vco_behavioral_source.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_reversed_frequency_map",
+    "rationale": "Select fault class wrong_gain_polarity under trigger 'vctrl changes between low and high values' because it exercises P_CONTROL_FREQUENCY_MAP as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 19,
+    "source_preferred_seed": "neg_001_reversed_frequency_map",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

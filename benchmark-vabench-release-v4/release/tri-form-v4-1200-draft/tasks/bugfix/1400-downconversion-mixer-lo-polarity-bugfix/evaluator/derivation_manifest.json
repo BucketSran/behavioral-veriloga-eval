@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-400",
+    "canonical_task_slug": "400-downconversion-mixer-lo-polarity",
+    "family_spec_sha256": "d76b65dacea1ed48dd0ae4596a4cc1c160229856e6526ba228d41c1db9357179",
+    "mutation_catalog_sha256": "fa9a4b09f1496e2ec0d154a82d42ea4dac47025c25b07c92389428ec8f45e23c",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "400",
+  "negative_assignment": {
+    "bugfix_seed": "neg_005_reset_disable_not_centered",
+    "testbench_suite": [
+      "neg_001_i_lo_sign_inverted",
+      "neg_005_reset_disable_not_centered",
+      "neg_003_no_output_clamp",
+      "neg_004_polarity_ok_after_i_only",
+      "neg_002_half_conversion_gain"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "16c101d90b31bb88188e75ee1f44d30842d611a9d3dfd3918be851cb9ad005c9",
+    "changed_artifacts": [
+      "downconversion_mixer_lo_polarity.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_005_reset_disable_not_centered",
+    "rationale": "Select fault class missing_reset_disable_center under trigger 'reset is asserted or enable is deasserted while RF is away from common mode' because it exercises P_LO_POLARITY_METRICS, P_RESET_DISABLE_CENTER as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 19,
+    "source_preferred_seed": "neg_001_i_lo_sign_inverted",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-393",
+    "canonical_task_slug": "393-deserializer-demux-alignment-macro",
+    "family_spec_sha256": "2b3f498f27a1f73c2f67c79ce2d9d77d089cc799abfe852286df34b3d74958b6",
+    "mutation_catalog_sha256": "7e02263113423216d71ed598ed953a57c86d9bfc3a4fd2dd4a42b521e3439d4b",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "393",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_inverted_transfer",
+    "testbench_suite": [
+      "neg_004_threshold_shifted",
+      "neg_001_zero",
+      "neg_002_half_scale",
+      "neg_005_event_edge_wrong",
+      "neg_003_inverted_transfer"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "4c4cd1c2835cccb02668f596989fb841c6e28b692c209ba74003c903b55cc4ce",
+    "changed_artifacts": [
+      "deserializer_demux_alignment_macro.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_inverted_transfer",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'semantic invert mutation from gold' because it exercises P_ASSERT_WORD_VALID_AFTER_ALL_FOUR, P_ON_EACH_RISING_CLK_EDGE_WHILE, P_PHASE_METRIC_MUST_EXPOSE_THE_ACTIVE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 22,
+    "source_preferred_seed": "neg_004_threshold_shifted",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

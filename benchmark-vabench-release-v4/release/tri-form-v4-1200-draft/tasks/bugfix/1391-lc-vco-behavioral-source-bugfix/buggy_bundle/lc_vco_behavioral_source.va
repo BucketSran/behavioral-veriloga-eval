@@ -1,0 +1,106 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module lc_vco_behavioral_source(vctrl, enable, rst, osc_p, osc_n, freq_metric, amp_metric, valid);
+    input vctrl, enable, rst;
+    output osc_p, osc_n, freq_metric, amp_metric, valid;
+    electrical vctrl, enable, rst, osc_p, osc_n, freq_metric, amp_metric, valid;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real fmin = 5e6;
+    parameter real fmax = 25e6;
+    parameter real vth = 0.45;
+    parameter real amplitude = 0.4;
+    parameter real tr = 200p from (0:inf);
+
+    integer osc_state;
+    integer half_edges;
+    real next_edge_time;
+    real ctrl_v;
+    real freq;
+    real osc_p_v;
+    real osc_n_v;
+    real freq_v;
+    real amp_v;
+    real valid_v;
+
+    analog begin
+        @(initial_step) begin
+            osc_state = 0;
+            half_edges = 0;
+            next_edge_time = 1.0e99;
+            osc_p_v = vcm;
+            osc_n_v = vcm;
+            freq_v = vss;
+            amp_v = vss;
+            valid_v = vss;
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            osc_state = 0;
+            half_edges = 0;
+            next_edge_time = 1.0e99;
+            osc_p_v = vcm;
+            osc_n_v = vcm;
+            freq_v = vss;
+            amp_v = vss;
+            valid_v = vss;
+        end
+
+        @(cross(V(enable) - vth, +1)) begin
+            if (V(rst) <= vth) begin
+                osc_state = 0;
+                half_edges = 0;
+                osc_p_v = vcm;
+                osc_n_v = vcm;
+                ctrl_v = V(vctrl);
+                if (ctrl_v < vss) ctrl_v = vss;
+                if (ctrl_v > vdd) ctrl_v = vdd;
+                freq = fmax - (fmax - fmin) * (ctrl_v - vss) / (vdd - vss);
+                freq_v = ctrl_v;
+                amp_v = amplitude;
+                valid_v = vss;
+                next_edge_time = $abstime + 0.5 / freq;
+            end
+        end
+
+        @(timer(next_edge_time)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin
+                osc_state = 0;
+                half_edges = 0;
+                next_edge_time = 1.0e99;
+                osc_p_v = vcm;
+                osc_n_v = vcm;
+                freq_v = vss;
+                amp_v = vss;
+                valid_v = vss;
+            end else begin
+                osc_state = 1 - osc_state;
+                half_edges = half_edges + 1;
+                if (osc_state != 0) begin
+                    osc_p_v = vcm + amplitude;
+                    osc_n_v = vcm - amplitude;
+                end else begin
+                    osc_p_v = vcm - amplitude;
+                    osc_n_v = vcm + amplitude;
+                end
+                if (half_edges >= 4) valid_v = vdd;
+                ctrl_v = V(vctrl);
+                if (ctrl_v < vss) ctrl_v = vss;
+                if (ctrl_v > vdd) ctrl_v = vdd;
+                freq = fmax - (fmax - fmin) * (ctrl_v - vss) / (vdd - vss);
+                freq_v = ctrl_v;
+                amp_v = amplitude;
+                next_edge_time = $abstime + 0.5 / freq;
+            end
+        end
+
+        V(osc_p) <+ transition(osc_p_v, 0, tr, tr);
+        V(osc_n) <+ transition(osc_n_v, 0, tr, tr);
+        V(freq_metric) <+ transition(freq_v, 0, tr, tr);
+        V(amp_metric) <+ transition(amp_v, 0, tr, tr);
+        V(valid) <+ transition(valid_v, 0, tr, tr);
+    end
+endmodule

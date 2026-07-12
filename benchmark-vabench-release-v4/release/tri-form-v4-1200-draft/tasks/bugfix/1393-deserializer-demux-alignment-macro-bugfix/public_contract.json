@@ -1,0 +1,334 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "deserializer_demux_alignment_macro",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "250p from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "serial_in",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "align_pulse",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "out0",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "out1",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "out2",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "out3",
+                "position": 8
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "phase_metric",
+                "position": 9
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "word_valid",
+                "position": 10
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "deserializer_demux_alignment_macro.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/deserializer_demux_alignment_macro.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "393",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "serdes_io",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Deserializer DEMUX Alignment Macro"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+      "observable_contract": "On reset or when disabled, clear all parallel outputs, `phase_metric`, and `word_valid`.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "serial_in",
+        "align_pulse",
+        "out0",
+        "out1",
+        "out2",
+        "out3",
+        "phase_metric",
+        "word_valid"
+      ]
+    },
+    {
+      "id": "P_A_RISING_ALIGN_PULSE_RESETS_THE",
+      "observable_contract": "A rising `align_pulse` resets the slot pointer so the next sampled serial bit is written to `out0`.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "serial_in",
+        "align_pulse",
+        "out0",
+        "out1",
+        "out2",
+        "out3",
+        "phase_metric",
+        "word_valid"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_RISING_CLK_EDGE_WHILE",
+      "observable_contract": "On each rising `clk` edge while enabled, sample `serial_in` into the active output slot and advance the slot pointer.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "serial_in",
+        "align_pulse",
+        "out0",
+        "out1",
+        "out2",
+        "out3",
+        "phase_metric",
+        "word_valid"
+      ]
+    },
+    {
+      "id": "P_ASSERT_WORD_VALID_AFTER_ALL_FOUR",
+      "observable_contract": "Assert `word_valid` after all four output slots have been updated since the most recent alignment event.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "serial_in",
+        "align_pulse",
+        "out0",
+        "out1",
+        "out2",
+        "out3",
+        "phase_metric",
+        "word_valid"
+      ]
+    },
+    {
+      "id": "P_PHASE_METRIC_MUST_EXPOSE_THE_ACTIVE",
+      "observable_contract": "`phase_metric` must expose the active slot pointer.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "serial_in",
+        "align_pulse",
+        "out0",
+        "out1",
+        "out2",
+        "out3",
+        "phase_metric",
+        "word_valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "deserializer_demux_alignment_macro.va"
+  ],
+  "task_id": "v4-1393",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 2
+          },
+          {
+            "net": "serial_in",
+            "port_ref": "serial_in",
+            "position": 3
+          },
+          {
+            "net": "align_pulse",
+            "port_ref": "align_pulse",
+            "position": 4
+          },
+          {
+            "net": "out0",
+            "port_ref": "out0",
+            "position": 5
+          },
+          {
+            "net": "out1",
+            "port_ref": "out1",
+            "position": 6
+          },
+          {
+            "net": "out2",
+            "port_ref": "out2",
+            "position": 7
+          },
+          {
+            "net": "out3",
+            "port_ref": "out3",
+            "position": 8
+          },
+          {
+            "net": "phase_metric",
+            "port_ref": "phase_metric",
+            "position": 9
+          },
+          {
+            "net": "word_valid",
+            "port_ref": "word_valid",
+            "position": 10
+          }
+        ],
+        "module_ref": "deserializer_demux_alignment_macro",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "enable",
+      "serial_in",
+      "align_pulse",
+      "out0",
+      "out1",
+      "out2",
+      "out3",
+      "phase_metric",
+      "word_valid"
+    ]
+  }
+}

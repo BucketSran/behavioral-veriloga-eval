@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-399",
+    "canonical_task_slug": "399-supply-supervisor-brownout-por",
+    "family_spec_sha256": "d65f258848c9d7758b1e34d45211310469156130dcccdcaf0b39c55663d49e60",
+    "mutation_catalog_sha256": "49edda7fabc40bcb00aa11387b5cf16b71a67ed42571df4b1e33cc08fbcc3a44",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "399",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_no_uvlo_hysteresis",
+    "testbench_suite": [
+      "neg_001_no_uvlo_hysteresis",
+      "neg_004_supply_dip_keeps_counter",
+      "neg_005_reset_disable_outputs_not_safe",
+      "neg_002_release_one_cycle_early",
+      "neg_003_brownout_polarity_inverted"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "ad526fc5e119791332596cc91003fb366f424abda3eba80e089cce059c0d4eaf",
+    "changed_artifacts": [
+      "supply_supervisor_brownout_por.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_no_uvlo_hysteresis",
+    "rationale": "Select fault class wrong_threshold under trigger 'supply lies between falling and rising thresholds' because it exercises P_STATE_METRICS, P_UVLO_HYSTERESIS as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 24,
+    "source_preferred_seed": "neg_001_no_uvlo_hysteresis",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

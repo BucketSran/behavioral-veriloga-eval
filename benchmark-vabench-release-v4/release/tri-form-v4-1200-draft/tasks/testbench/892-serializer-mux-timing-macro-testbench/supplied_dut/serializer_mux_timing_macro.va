@@ -1,0 +1,30 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module serializer_mux_timing_macro(clk, rst, enable, d0, d1, d2, d3, serial_out, slot_1, slot_0, valid);
+    inout clk, rst, enable, d0, d1, d2, d3, serial_out, slot_1, slot_0, valid;
+    electrical clk, rst, enable, d0, d1, d2, d3, serial_out, slot_1, slot_0, valid;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vth = 0.45; parameter real tr = 200p from (0:inf); parameter real tick = 250p from (0:inf);
+    real prev_clk, selected, serial_v, s1_v, s0_v, valid_v; integer slot, frame_count, metric_slot;
+    analog begin
+        @(initial_step) begin prev_clk = 0.0; slot = 0; frame_count = 0; serial_v = 0.0; s1_v = 0.0; s0_v = 0.0; valid_v = 0.0; end
+        @(timer(0, tick)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin slot = 0; frame_count = 0; serial_v = 0.0; s1_v = 0.0; s0_v = 0.0; valid_v = 0.0; end
+            else if (V(clk) > vth && prev_clk <= vth) begin
+                if (slot == 0) selected = V(d0); else if (slot == 1) selected = V(d1); else if (slot == 2) selected = V(d2); else selected = V(d3);
+                serial_v = (selected > vth) ? vdd : vss;
+                metric_slot = slot;
+                s1_v = (metric_slot >= 2) ? vdd : vss;
+                s0_v = ((metric_slot == 1) || (metric_slot == 3)) ? vdd : vss;
+                if (slot == 3) frame_count = frame_count + 1;
+                valid_v = ((frame_count >= 1)) ? vdd : vss;
+                slot = (slot + 1) % 4;
+            end
+            prev_clk = V(clk);
+        end
+        V(serial_out) <+ transition(serial_v, 0, tr, tr);
+        V(slot_1) <+ transition(s1_v, 0, tr, tr);
+        V(slot_0) <+ transition(s0_v, 0, tr, tr);
+        V(valid) <+ transition(valid_v, 0, tr, tr);
+    end
+endmodule

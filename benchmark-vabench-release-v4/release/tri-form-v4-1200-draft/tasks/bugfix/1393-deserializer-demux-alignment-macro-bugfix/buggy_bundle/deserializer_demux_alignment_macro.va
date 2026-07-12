@@ -1,0 +1,35 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module deserializer_demux_alignment_macro(clk, rst, enable, serial_in, align_pulse, out0, out1, out2, out3, phase_metric, word_valid);
+    inout clk, rst, enable, serial_in, align_pulse, out0, out1, out2, out3, phase_metric, word_valid;
+    electrical clk, rst, enable, serial_in, align_pulse, out0, out1, out2, out3, phase_metric, word_valid;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vth = 0.45; parameter real tr = 200p from (0:inf); parameter real tick = 250p from (0:inf);
+    real prev_clk, prev_align, bit_v, o0, o1, o2, o3, metric_v, valid_v; integer slot, write_slot, updated, metric_slot;
+    analog begin
+        @(initial_step) begin prev_clk = 0.0; prev_align = 0.0; slot = 0; updated = 0; o0 = 0.0; o1 = 0.0; o2 = 0.0; o3 = 0.0; metric_v = 0.0; valid_v = 0.0; end
+        @(timer(0, tick)) begin
+            if (V(rst) > vth || V(enable) <= vth) begin slot = 0; updated = 0; o0 = 0.0; o1 = 0.0; o2 = 0.0; o3 = 0.0; metric_v = 0.0; valid_v = 0.0; end
+            else begin
+                if (V(align_pulse) > vth && prev_align <= vth) begin slot = 0; updated = 0; end
+                if (V(clk) > vth && prev_clk <= vth) begin
+                    bit_v = (V(serial_in) > vth) ? vdd : vss;
+                    write_slot = slot;
+                    if (write_slot == 0) o0 = bit_v; else if (write_slot == 1) o1 = bit_v; else if (write_slot == 2) o2 = bit_v; else o3 = bit_v;
+                    metric_slot = slot;
+                    metric_v = vdd * metric_slot / 3.0;
+                    slot = (slot + 1) % 4;
+                    if (updated < 4) updated = updated + 1;
+                    valid_v = ((updated >= 4)) ? vdd : vss;
+                end
+            end
+            prev_clk = V(clk); prev_align = V(align_pulse);
+        end
+        V(out0) <+ -(transition(o0, 0, tr, tr));
+        V(out1) <+ -(transition(o1, 0, tr, tr));
+        V(out2) <+ -(transition(o2, 0, tr, tr));
+        V(out3) <+ -(transition(o3, 0, tr, tr));
+        V(phase_metric) <+ -(transition(metric_v, 0, tr, tr));
+        V(word_valid) <+ -(transition(valid_v, 0, tr, tr));
+    end
+endmodule

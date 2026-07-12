@@ -1,0 +1,307 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "pam4_slicer_gray_decoder",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets the logic-high output level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > vss"
+              },
+              {
+                "default": 0.0,
+                "name": "vss",
+                "override_behavior": "sets the logic-low output level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vdd"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets the digital-voltage crossing threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vth < vdd"
+              },
+              {
+                "default": 0.225,
+                "name": "t0",
+                "override_behavior": "sets lower slice threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "t0 < t1"
+              },
+              {
+                "default": 0.45,
+                "name": "t1",
+                "override_behavior": "sets middle slice threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "t0 < t1 < t2"
+              },
+              {
+                "default": 0.675,
+                "name": "t2",
+                "override_behavior": "sets upper slice threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "t1 < t2"
+              },
+              {
+                "default": 2e-10,
+                "name": "tr",
+                "override_behavior": "sets transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "bit_msb",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "bit_lsb",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "level_metric",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "pam4_slicer_gray_decoder.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "394",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "serdes_io",
+    "difficulty": "D3",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "PAM4 Slicer and Gray Decoder"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not use current contributions, transistor-level devices, validation logic, or simulator side channels.",
+    "Do not hard-code evaluator stimulus timing, stop times, sample windows, or checker tolerances."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_DISABLE_CLEAR",
+      "observable_contract": "Reset or disable clears both bits, level metric, and valid.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "bit_msb",
+        "bit_lsb",
+        "level_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_RISING_EDGE_SAMPLE_HOLD",
+      "observable_contract": "vin is sliced only on enabled rising clk edges and outputs hold between samples.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "bit_msb",
+        "bit_lsb",
+        "level_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_PAM4_THRESHOLDS",
+      "observable_contract": "The three ordered thresholds divide vin into levels zero through three.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "bit_msb",
+        "bit_lsb",
+        "level_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_GRAY_MAPPING",
+      "observable_contract": "Levels zero through three map to Gray codes 00, 01, 11, and 10.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "bit_msb",
+        "bit_lsb",
+        "level_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_LEVEL_METRIC",
+      "observable_contract": "level_metric reports the sliced level as vss plus k/3 of the output span.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "bit_msb",
+        "bit_lsb",
+        "level_metric",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/pam4_slicer_gray_decoder.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-894",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 3
+          },
+          {
+            "net": "bit_msb",
+            "port_ref": "bit_msb",
+            "position": 4
+          },
+          {
+            "net": "bit_lsb",
+            "port_ref": "bit_lsb",
+            "position": 5
+          },
+          {
+            "net": "level_metric",
+            "port_ref": "level_metric",
+            "position": 6
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 7
+          }
+        ],
+        "module_ref": "pam4_slicer_gray_decoder",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "clk",
+      "rst",
+      "enable",
+      "bit_msb",
+      "bit_lsb",
+      "level_metric",
+      "valid"
+    ]
+  }
+}

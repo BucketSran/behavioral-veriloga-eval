@@ -1,0 +1,71 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module clock_data_valid_qualifier(clk, data, rst, enable, valid_out, edge_age_metric, qualified);
+    input clk, data, rst, enable;
+    output valid_out, edge_age_metric, qualified;
+    electrical clk, data, rst, enable;
+    electrical valid_out, edge_age_metric, qualified;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter integer max_age_cycles = 3 from [1:inf);
+    parameter real tr = 200p from (0:inf);
+
+    integer data_seen;
+    integer age_count;
+    integer qualified_state;
+    integer valid_state;
+    real age_output;
+    real qualified_output;
+    real valid_output;
+
+    analog begin
+        @(initial_step) begin
+            data_seen = 0;
+            age_count = max_age_cycles + 1;
+            qualified_state = 0;
+            valid_state = 0;
+        end
+
+        @(cross(V(data) - vth, +1) or cross(V(data) - vth, -1)) begin
+            if ((V(rst) <= vth) && (V(enable) > vth)) begin
+                data_seen = 1;
+                age_count = 0;
+            end
+        end
+
+        @(cross(V(clk) - vth, +1) or cross(V(rst) - vth, +1) or
+          cross(V(enable) - vth, -1)) begin
+            if ((V(rst) > vth) || (V(enable) <= vth)) begin
+                data_seen = 0;
+                age_count = max_age_cycles + 1;
+                qualified_state = 0;
+                valid_state = 0;
+            end else begin
+                if (data_seen && (age_count < (max_age_cycles + 1)))
+                    age_count = age_count + 1;
+                qualified_state = data_seen && (age_count <= max_age_cycles);
+                valid_state = qualified_state;
+            end
+        end
+
+        if ((V(rst) > vth) || (V(enable) <= vth)) begin
+            age_output = vss;
+            qualified_output = vss;
+            valid_output = vss;
+        end else begin
+            if (age_count > max_age_cycles)
+                age_output = vdd;
+            else
+                age_output = vss + (vdd - vss) * (max_age_cycles - age_count) / max_age_cycles;
+            qualified_output = qualified_state ? vdd : vss;
+            valid_output = valid_state ? vdd : vss;
+        end
+
+        V(valid_out) <+ transition(valid_output, 0, tr, tr);
+        V(edge_age_metric) <+ transition(age_output, 0, tr, tr);
+        V(qualified) <+ transition(qualified_output, 0, tr, tr);
+    end
+endmodule

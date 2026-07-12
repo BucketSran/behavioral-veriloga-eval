@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-396",
+    "canonical_task_slug": "396-quadrature-lo-generator-divided-clock",
+    "family_spec_sha256": "0e462f2083bb57adfb947a51c8b0f3acedd3eaa413390fcb14452f2630886c5e",
+    "mutation_catalog_sha256": "4cc07569a3e5ea266fad33235333fa2b2d6cb22058f68f8e1d87d084ffef9de0",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "396",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_wrong_second_state",
+    "testbench_suite": [
+      "neg_001_wrong_second_state",
+      "neg_003_quad_ok_after_one_cycle",
+      "neg_004_metric_reversed",
+      "neg_005_enable_disable_not_cleared",
+      "neg_002_lo_q_copies_lo_i"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "55d14a2da78d9f0e9dccc4cbbf170aaf58d6d2d6a231b6cb32fd2d6b5547ddb6",
+    "changed_artifacts": [
+      "quadrature_lo_generator_divided_clock.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_wrong_second_state",
+    "rationale": "Select fault class wrong_phase_sequence under trigger 'the second enabled input edge occurs' because it exercises P_DIVIDE_BY_FOUR, P_QUADRATURE_SEQUENCE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 29,
+    "source_preferred_seed": "neg_001_wrong_second_state",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

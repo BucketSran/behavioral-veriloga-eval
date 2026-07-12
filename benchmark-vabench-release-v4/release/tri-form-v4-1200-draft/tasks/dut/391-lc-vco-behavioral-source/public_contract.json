@@ -1,0 +1,303 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "lc_vco_behavioral_source",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "vdd",
+                "override_behavior": "sets the logic-high output level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vdd > vss"
+              },
+              {
+                "default": 0.0,
+                "name": "vss",
+                "override_behavior": "sets the logic-low output level",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vdd"
+              },
+              {
+                "default": 0.45,
+                "name": "vcm",
+                "override_behavior": "sets output common mode",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vcm < vdd"
+              },
+              {
+                "default": 5000000.0,
+                "name": "fmin",
+                "override_behavior": "sets minimum frequency",
+                "type": "real",
+                "units": "Hz",
+                "valid_range": "fmin > 0"
+              },
+              {
+                "default": 25000000.0,
+                "name": "fmax",
+                "override_behavior": "sets maximum frequency",
+                "type": "real",
+                "units": "Hz",
+                "valid_range": "fmax > fmin"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets the digital-voltage crossing threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vth < vdd"
+              },
+              {
+                "default": 0.4,
+                "name": "amplitude",
+                "override_behavior": "sets differential half-amplitude",
+                "type": "real",
+                "units": "V",
+                "valid_range": "0 < amplitude <= min(vcm-vss,vdd-vcm)"
+              },
+              {
+                "default": 2e-10,
+                "name": "tr",
+                "override_behavior": "sets transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vctrl",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "osc_p",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "osc_n",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "freq_metric",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "amp_metric",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "lc_vco_behavioral_source.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "391",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "pll_clock_timing",
+    "difficulty": "D4",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "LC VCO Behavioral Source"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not use current contributions, transistor-level devices, validation logic, or simulator side channels.",
+    "Do not hard-code evaluator stimulus timing, stop times, sample windows, or checker tolerances."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_DISABLE_CENTER",
+      "observable_contract": "Reset or disable centers both oscillator outputs at vcm and clears metrics and valid.",
+      "required_signals": [
+        "time",
+        "vctrl",
+        "enable",
+        "rst",
+        "osc_p",
+        "osc_n",
+        "freq_metric",
+        "amp_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_CONTROL_FREQUENCY_MAP",
+      "observable_contract": "Enabled edge periods follow the linear clamped vctrl mapping from fmin to fmax without retiming an already pending edge.",
+      "required_signals": [
+        "time",
+        "vctrl",
+        "enable",
+        "rst",
+        "osc_p",
+        "osc_n",
+        "freq_metric",
+        "amp_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_COMPLEMENTARY_AMPLITUDE",
+      "observable_contract": "Enabled oscillator outputs are complementary around vcm with the declared amplitude.",
+      "required_signals": [
+        "time",
+        "vctrl",
+        "enable",
+        "rst",
+        "osc_p",
+        "osc_n",
+        "freq_metric",
+        "amp_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_METRIC_REPORTING",
+      "observable_contract": "freq_metric reports clamped vctrl and amp_metric reports amplitude while enabled.",
+      "required_signals": [
+        "time",
+        "vctrl",
+        "enable",
+        "rst",
+        "osc_p",
+        "osc_n",
+        "freq_metric",
+        "amp_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_VALID_AFTER_TWO_CYCLES",
+      "observable_contract": "valid remains low until two complete oscillator cycles have elapsed after enable.",
+      "required_signals": [
+        "time",
+        "vctrl",
+        "enable",
+        "rst",
+        "osc_p",
+        "osc_n",
+        "freq_metric",
+        "amp_metric",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "lc_vco_behavioral_source.va"
+  ],
+  "task_id": "v4-391",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vctrl",
+            "port_ref": "vctrl",
+            "position": 0
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "osc_p",
+            "port_ref": "osc_p",
+            "position": 3
+          },
+          {
+            "net": "osc_n",
+            "port_ref": "osc_n",
+            "position": 4
+          },
+          {
+            "net": "freq_metric",
+            "port_ref": "freq_metric",
+            "position": 5
+          },
+          {
+            "net": "amp_metric",
+            "port_ref": "amp_metric",
+            "position": 6
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 7
+          }
+        ],
+        "module_ref": "lc_vco_behavioral_source",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vctrl",
+      "enable",
+      "rst",
+      "osc_p",
+      "osc_n",
+      "freq_metric",
+      "amp_metric",
+      "valid"
+    ]
+  }
+}

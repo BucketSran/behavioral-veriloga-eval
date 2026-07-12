@@ -1,0 +1,324 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "supply_supervisor_brownout_por",
+            "parameters": [
+              {
+                "default": 0.9,
+                "name": "voh",
+                "override_behavior": "sets logic high",
+                "type": "real",
+                "units": "V",
+                "valid_range": "voh > vol"
+              },
+              {
+                "default": 0.0,
+                "name": "vol",
+                "override_behavior": "sets logic low",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vol < voh"
+              },
+              {
+                "default": 0.45,
+                "name": "vth",
+                "override_behavior": "sets the digital-voltage crossing threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "vss < vth < vdd"
+              },
+              {
+                "default": 0.72,
+                "name": "uvlo_rise",
+                "override_behavior": "sets brownout release threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "uvlo_rise > uvlo_fall"
+              },
+              {
+                "default": 0.64,
+                "name": "uvlo_fall",
+                "override_behavior": "sets brownout assertion threshold",
+                "type": "real",
+                "units": "V",
+                "valid_range": "uvlo_fall < uvlo_rise"
+              },
+              {
+                "default": 4,
+                "name": "release_cycles",
+                "override_behavior": "sets consecutive good cycles before release",
+                "type": "integer",
+                "units": "cycles",
+                "valid_range": "release_cycles >= 1"
+              },
+              {
+                "default": 1e-10,
+                "name": "tr",
+                "override_behavior": "sets transition smoothing",
+                "type": "real",
+                "units": "s",
+                "valid_range": "tr > 0"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vdd_sense",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "por_n",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "pgood",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "brownout",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "delay_metric",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "state_metric",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "supply_supervisor_brownout_por.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "399",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "power_management_supervisors",
+    "difficulty": "D3",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Supply Supervisor with Brownout POR"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not use current contributions, transistor-level devices, validation logic, or simulator side channels.",
+    "Do not hard-code evaluator stimulus timing, stop times, sample windows, or checker tolerances."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_DISABLE_SAFE",
+      "observable_contract": "Reset or disable asserts brownout, holds POR low, clears pgood and both metrics.",
+      "required_signals": [
+        "time",
+        "vdd_sense",
+        "clk",
+        "rst",
+        "enable",
+        "por_n",
+        "pgood",
+        "brownout",
+        "delay_metric",
+        "state_metric"
+      ]
+    },
+    {
+      "id": "P_UVLO_HYSTERESIS",
+      "observable_contract": "Supply below uvlo_fall enters brownout and supply must exceed uvlo_rise to leave it.",
+      "required_signals": [
+        "time",
+        "vdd_sense",
+        "clk",
+        "rst",
+        "enable",
+        "por_n",
+        "pgood",
+        "brownout",
+        "delay_metric",
+        "state_metric"
+      ]
+    },
+    {
+      "id": "P_RELEASE_DELAY",
+      "observable_contract": "POR and pgood assert only after release_cycles consecutive good rising clock edges.",
+      "required_signals": [
+        "time",
+        "vdd_sense",
+        "clk",
+        "rst",
+        "enable",
+        "por_n",
+        "pgood",
+        "brownout",
+        "delay_metric",
+        "state_metric"
+      ]
+    },
+    {
+      "id": "P_DIP_RESTART",
+      "observable_contract": "A supply dip below uvlo_fall immediately reasserts brownout and clears release progress.",
+      "required_signals": [
+        "time",
+        "vdd_sense",
+        "clk",
+        "rst",
+        "enable",
+        "por_n",
+        "pgood",
+        "brownout",
+        "delay_metric",
+        "state_metric"
+      ]
+    },
+    {
+      "id": "P_STATE_METRICS",
+      "observable_contract": "Delay and state metrics report the saturated release count and four public supervisor states.",
+      "required_signals": [
+        "time",
+        "vdd_sense",
+        "clk",
+        "rst",
+        "enable",
+        "por_n",
+        "pgood",
+        "brownout",
+        "delay_metric",
+        "state_metric"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/supply_supervisor_brownout_por.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-899",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vdd_sense",
+            "port_ref": "vdd_sense",
+            "position": 0
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 3
+          },
+          {
+            "net": "por_n",
+            "port_ref": "por_n",
+            "position": 4
+          },
+          {
+            "net": "pgood",
+            "port_ref": "pgood",
+            "position": 5
+          },
+          {
+            "net": "brownout",
+            "port_ref": "brownout",
+            "position": 6
+          },
+          {
+            "net": "delay_metric",
+            "port_ref": "delay_metric",
+            "position": 7
+          },
+          {
+            "net": "state_metric",
+            "port_ref": "state_metric",
+            "position": 8
+          }
+        ],
+        "module_ref": "supply_supervisor_brownout_por",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vdd_sense",
+      "clk",
+      "rst",
+      "enable",
+      "por_n",
+      "pgood",
+      "brownout",
+      "delay_metric",
+      "state_metric"
+    ]
+  }
+}

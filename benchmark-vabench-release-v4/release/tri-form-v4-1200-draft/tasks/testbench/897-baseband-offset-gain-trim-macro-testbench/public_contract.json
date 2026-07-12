@@ -1,0 +1,419 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "baseband_offset_gain_trim_macro",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.7",
+                "name": "gain_base",
+                "override_behavior": "overrides gain_base",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.1",
+                "name": "gain_step",
+                "override_behavior": "overrides gain_step",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.025",
+                "name": "offset_lsb",
+                "override_behavior": "overrides offset_lsb",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "150p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "gain_2",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "gain_1",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "gain_0",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "offset_2",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "offset_1",
+                "position": 8
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "offset_0",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "residual_metric",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 12
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "baseband_offset_gain_trim_macro.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "397",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "baseband_signal_conditioning",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Baseband Offset-and-gain Trim Macro"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_OR_LOW_ENABLE_DRIVES_VOUT",
+      "observable_contract": "Reset or low `enable` drives `vout` to common mode, clears residual metric, and clears `valid`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "gain_2",
+        "gain_1",
+        "gain_0",
+        "offset_2",
+        "offset_1",
+        "offset_0",
+        "vout",
+        "residual_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_ENABLED_RISING_CLK_SAMPLE",
+      "observable_contract": "On each enabled rising `clk`, sample gain and offset trim codes.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "gain_2",
+        "gain_1",
+        "gain_0",
+        "offset_2",
+        "offset_1",
+        "offset_0",
+        "vout",
+        "residual_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_USE_GAIN_GAIN_BASE_GAIN_STEP",
+      "observable_contract": "Use `gain = gain_base + gain_step * gain_code`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "gain_2",
+        "gain_1",
+        "gain_0",
+        "offset_2",
+        "offset_1",
+        "offset_0",
+        "vout",
+        "residual_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_USE_SIGNED_OFFSET_OFFSET_CODE_3",
+      "observable_contract": "Use signed offset `(offset_code - 3) * offset_lsb`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "gain_2",
+        "gain_1",
+        "gain_0",
+        "offset_2",
+        "offset_1",
+        "offset_0",
+        "vout",
+        "residual_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_DRIVE_VOUT_AS_THE_CLIPPED_GAIN",
+      "observable_contract": "Drive `vout` as the clipped gain-and-offset adjusted input around common mode.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "gain_2",
+        "gain_1",
+        "gain_0",
+        "offset_2",
+        "offset_1",
+        "offset_0",
+        "vout",
+        "residual_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_RESIDUAL_METRIC_REPORTS_THE_ABSOLUTE_OUTPUT",
+      "observable_contract": "`residual_metric` reports the absolute output distance from common mode and `valid` marks that a trim sample has occurred.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "enable",
+        "gain_2",
+        "gain_1",
+        "gain_0",
+        "offset_2",
+        "offset_1",
+        "offset_0",
+        "vout",
+        "residual_metric",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/baseband_offset_gain_trim_macro.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-897",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 3
+          },
+          {
+            "net": "gain_2",
+            "port_ref": "gain_2",
+            "position": 4
+          },
+          {
+            "net": "gain_1",
+            "port_ref": "gain_1",
+            "position": 5
+          },
+          {
+            "net": "gain_0",
+            "port_ref": "gain_0",
+            "position": 6
+          },
+          {
+            "net": "offset_2",
+            "port_ref": "offset_2",
+            "position": 7
+          },
+          {
+            "net": "offset_1",
+            "port_ref": "offset_1",
+            "position": 8
+          },
+          {
+            "net": "offset_0",
+            "port_ref": "offset_0",
+            "position": 9
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 10
+          },
+          {
+            "net": "residual_metric",
+            "port_ref": "residual_metric",
+            "position": 11
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 12
+          }
+        ],
+        "module_ref": "baseband_offset_gain_trim_macro",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "clk",
+      "rst",
+      "enable",
+      "gain_2",
+      "gain_1",
+      "gain_0",
+      "offset_2",
+      "offset_1",
+      "offset_0",
+      "vout",
+      "residual_metric",
+      "valid"
+    ]
+  }
+}
