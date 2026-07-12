@@ -1,0 +1,364 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "ref_flash_15level_decoder",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "10p",
+                "name": "tt",
+                "override_behavior": "overrides tt",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dt0",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dt1",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dt2",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dt3",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dt4",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dt5",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dt6",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dt7",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dt8",
+                "position": 8
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dt9",
+                "position": 9
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dt10",
+                "position": 10
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dt11",
+                "position": 11
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dt12",
+                "position": 12
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dt13",
+                "position": 13
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dt14",
+                "position": 14
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clks",
+                "position": 15
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dout",
+                "position": 16
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "ref_flash_15level_decoder.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/ref_flash_15level_decoder.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "159",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Ref Flash 15level Decoder"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_CLOCKED_FIFTEEN_TAP_COUNT",
+      "observable_contract": "Each rising `clks` crossing counts voltage-coded assertions across the 15 tap inputs.",
+      "required_signals": [
+        "time",
+        "clks",
+        "dout",
+        "dt0",
+        "dt1",
+        "dt10",
+        "dt11",
+        "dt12",
+        "dt13",
+        "dt14",
+        "dt2",
+        "dt3",
+        "dt4",
+        "dt5",
+        "dt6",
+        "dt7",
+        "dt8",
+        "dt9"
+      ]
+    },
+    {
+      "id": "P_FULL_TAP_COVERAGE",
+      "observable_contract": "Upper and lower tap inputs all contribute to the count; no subset of taps is ignored.",
+      "required_signals": [
+        "time",
+        "clks",
+        "dout",
+        "dt0",
+        "dt1",
+        "dt10",
+        "dt11",
+        "dt12",
+        "dt13",
+        "dt14",
+        "dt2",
+        "dt3",
+        "dt4",
+        "dt5",
+        "dt6",
+        "dt7",
+        "dt8",
+        "dt9"
+      ]
+    },
+    {
+      "id": "P_FRACTION_NORMALIZATION_AND_GAIN",
+      "observable_contract": "`dout` reports the count divided by 15 without additional gain scaling.",
+      "required_signals": [
+        "time",
+        "clks",
+        "dout",
+        "dt0",
+        "dt1",
+        "dt10",
+        "dt11",
+        "dt12",
+        "dt13",
+        "dt14",
+        "dt2",
+        "dt3",
+        "dt4",
+        "dt5",
+        "dt6",
+        "dt7",
+        "dt8",
+        "dt9"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "ref_flash_15level_decoder.va"
+  ],
+  "task_id": "v4-1159",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "dt0",
+            "port_ref": "dt0",
+            "position": 0
+          },
+          {
+            "net": "dt1",
+            "port_ref": "dt1",
+            "position": 1
+          },
+          {
+            "net": "dt2",
+            "port_ref": "dt2",
+            "position": 2
+          },
+          {
+            "net": "dt3",
+            "port_ref": "dt3",
+            "position": 3
+          },
+          {
+            "net": "dt4",
+            "port_ref": "dt4",
+            "position": 4
+          },
+          {
+            "net": "dt5",
+            "port_ref": "dt5",
+            "position": 5
+          },
+          {
+            "net": "dt6",
+            "port_ref": "dt6",
+            "position": 6
+          },
+          {
+            "net": "dt7",
+            "port_ref": "dt7",
+            "position": 7
+          },
+          {
+            "net": "dt8",
+            "port_ref": "dt8",
+            "position": 8
+          },
+          {
+            "net": "dt9",
+            "port_ref": "dt9",
+            "position": 9
+          },
+          {
+            "net": "dt10",
+            "port_ref": "dt10",
+            "position": 10
+          },
+          {
+            "net": "dt11",
+            "port_ref": "dt11",
+            "position": 11
+          },
+          {
+            "net": "dt12",
+            "port_ref": "dt12",
+            "position": 12
+          },
+          {
+            "net": "dt13",
+            "port_ref": "dt13",
+            "position": 13
+          },
+          {
+            "net": "dt14",
+            "port_ref": "dt14",
+            "position": 14
+          },
+          {
+            "net": "clks",
+            "port_ref": "clks",
+            "position": 15
+          },
+          {
+            "net": "dout",
+            "port_ref": "dout",
+            "position": 16
+          }
+        ],
+        "module_ref": "ref_flash_15level_decoder",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clks",
+      "dout",
+      "dt0",
+      "dt1",
+      "dt10",
+      "dt11",
+      "dt12",
+      "dt13",
+      "dt14",
+      "dt2",
+      "dt3",
+      "dt4",
+      "dt5",
+      "dt6",
+      "dt7",
+      "dt8",
+      "dt9"
+    ]
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "divide_by_two_toggle",
+            "parameters": [],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clkin",
+                "position": 0
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "clkout",
+                "position": 1
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "divide_by_two_toggle.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "155",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "clocking",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Divide By Two Toggle"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RISING_EDGE_TOGGLE_STATE",
+      "observable_contract": "Each rising `clkin` crossing through 0.5 V toggles the retained divider state.",
+      "required_signals": [
+        "time",
+        "clkin",
+        "clkout"
+      ]
+    },
+    {
+      "id": "P_INITIAL_LOW_STATE",
+      "observable_contract": "The retained state and `clkout` start low before the first input-clock edge.",
+      "required_signals": [
+        "time",
+        "clkin",
+        "clkout"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_RAIL_LEVELS",
+      "observable_contract": "`clkout` drives 0.9 V for high state and 0.0 V for low state without amplitude scaling.",
+      "required_signals": [
+        "time",
+        "clkin",
+        "clkout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "divide_by_two_toggle.va"
+  ],
+  "task_id": "v4-155",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clkin",
+            "port_ref": "clkin",
+            "position": 0
+          },
+          {
+            "net": "clkout",
+            "port_ref": "clkout",
+            "position": 1
+          }
+        ],
+        "module_ref": "divide_by_two_toggle",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clkin",
+      "clkout"
+    ]
+  }
+}

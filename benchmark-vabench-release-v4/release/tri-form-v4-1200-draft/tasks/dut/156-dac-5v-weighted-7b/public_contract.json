@@ -1,0 +1,263 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "dac_5v_weighted_7b",
+            "parameters": [
+              {
+                "default": "0.75",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from [1p:inf]",
+                "name": "tt",
+                "override_behavior": "overrides tt",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1n from [1p:inf]",
+                "name": "delay",
+                "override_behavior": "overrides delay",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "5",
+                "name": "refp",
+                "override_behavior": "overrides refp",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1",
+                "name": "refn",
+                "override_behavior": "overrides refn",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clks",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din0",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din1",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din2",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din3",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din4",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din5",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din6",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "dac_5v_weighted_7b.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "156",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "DAC 5V Weighted 7b"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_CLOCKED_SEVEN_BIT_WEIGHTED_SUM",
+      "observable_contract": "Each rising `clks` crossing samples `din0` through `din6` into the declared seven-bit weighted DAC sum.",
+      "required_signals": [
+        "time",
+        "clks",
+        "din0",
+        "din1",
+        "din2",
+        "din3",
+        "din4",
+        "din5",
+        "din6",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_MSB_AND_TERMINATION_CONTRIBUTIONS",
+      "observable_contract": "`din0` contributes the largest switched weight and the fixed termination contribution is included.",
+      "required_signals": [
+        "time",
+        "clks",
+        "din0",
+        "din1",
+        "din2",
+        "din3",
+        "din4",
+        "din5",
+        "din6",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_REFERENCE_ENDPOINTS_AND_SCALE",
+      "observable_contract": "The output uses the declared `refp` and `refn` endpoints and full DAC scale.",
+      "required_signals": [
+        "time",
+        "clks",
+        "din0",
+        "din1",
+        "din2",
+        "din3",
+        "din4",
+        "din5",
+        "din6",
+        "vout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "dac_5v_weighted_7b.va"
+  ],
+  "task_id": "v4-156",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clks",
+            "port_ref": "clks",
+            "position": 0
+          },
+          {
+            "net": "din0",
+            "port_ref": "din0",
+            "position": 1
+          },
+          {
+            "net": "din1",
+            "port_ref": "din1",
+            "position": 2
+          },
+          {
+            "net": "din2",
+            "port_ref": "din2",
+            "position": 3
+          },
+          {
+            "net": "din3",
+            "port_ref": "din3",
+            "position": 4
+          },
+          {
+            "net": "din4",
+            "port_ref": "din4",
+            "position": 5
+          },
+          {
+            "net": "din5",
+            "port_ref": "din5",
+            "position": 6
+          },
+          {
+            "net": "din6",
+            "port_ref": "din6",
+            "position": 7
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 8
+          }
+        ],
+        "module_ref": "dac_5v_weighted_7b",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clks",
+      "din0",
+      "din1",
+      "din2",
+      "din3",
+      "din4",
+      "din5",
+      "din6",
+      "vout"
+    ]
+  }
+}

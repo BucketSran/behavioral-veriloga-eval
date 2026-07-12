@@ -1,0 +1,31 @@
+`include "disciplines.vams"
+
+module folded_flash_dac_4b(vd4, vd3, vd2, vd1, vout);
+input vd4, vd3, vd2, vd1;
+output vout;
+electrical vd4, vd3, vd2, vd1, vout;
+
+parameter real vref = 1 from [0:inf];
+parameter real trise = 1p from [0:inf];
+parameter real tfall = 1p from [0:inf];
+parameter real tdel = 0 from [0:inf];
+parameter real vtrans = 0.45;
+real out_scaled;
+real out_value;
+
+analog begin
+    @(initial_step or cross(V(vd4) - vtrans, 0) or cross(V(vd3) - vtrans, 0) or
+      cross(V(vd2) - vtrans, 0) or cross(V(vd1) - vtrans, 0)) begin
+        out_scaled = 0;
+        out_scaled = out_scaled + ((V(vd4) > vtrans) ? 8 : 0);
+        out_scaled = out_scaled + ((V(vd3) > vtrans) ? 4 : 0);
+        out_scaled = out_scaled + ((V(vd2) > vtrans) ? 2 : 0);
+        out_scaled = out_scaled + ((V(vd1) > vtrans) ? 1 : 0);
+        out_scaled = ((V(vd4) > vtrans) ? (8 - out_scaled) : out_scaled);
+        out_value = vref * out_scaled / 16.0;
+    end
+
+    V(vout) <+ out_value;
+end
+
+endmodule

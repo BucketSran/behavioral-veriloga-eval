@@ -1,0 +1,15 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/two_channel_sample_demux.va"
+
+Vs1 (samp1 0) vsource type=pwl wave=[0 0.6 8n 0.6 8.1n 0.2 18n 0.2 18.1n 0.8 28n 0.8 28.1n 0.4 42n 0.4]
+Vs2 (samp2 0) vsource type=pwl wave=[0 0.1 8n 0.1 8.1n 0.7 18n 0.7 18.1n 0.3 28n 0.3 28.1n 0.9 42n 0.9]
+Vc1 (clks1 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 4.5n 0.9 4.6n 0 24n 0 24.1n 0.9 24.5n 0.9 24.6n 0 42n 0]
+Vc2 (clks2 0) vsource type=pwl wave=[0 0 10n 0 10.1n 0.9 10.5n 0.9 10.6n 0 34n 0 34.1n 0.9 34.5n 0.9 34.6n 0 42n 0]
+
+XDUT (samp1 samp2 clks1 clks2 vout) two_channel_sample_demux
+
+
+tran tran stop=40n maxstep=20p
+save clks1 clks2 samp1 samp2 vout

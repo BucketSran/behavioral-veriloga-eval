@@ -1,0 +1,247 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "flash_8level_sum_delay",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.5",
+                "name": "ref_scaling",
+                "override_behavior": "overrides ref_scaling",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "10p",
+                "name": "tt",
+                "override_behavior": "overrides tt",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vip",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vim",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clks",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "reset",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "refp",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "refn",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "doutsum",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "doutsumdelay",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "flash_8level_sum_delay.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "151",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Flash 8level Sum Delay"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_CLOCKED_FLASH_THRESHOLD_SUM",
+      "observable_contract": "Each rising `clks` crossing compares `V(vip,vim)` against the symmetric flash thresholds and updates `doutsum`.",
+      "required_signals": [
+        "time",
+        "clks",
+        "doutsum",
+        "doutsumdelay",
+        "refn",
+        "refp",
+        "reset",
+        "vim",
+        "vip"
+      ]
+    },
+    {
+      "id": "P_REFERENCE_SCALING",
+      "observable_contract": "The flash thresholds use `V(refp)-V(refn)` multiplied by `ref_scaling`.",
+      "required_signals": [
+        "time",
+        "clks",
+        "doutsum",
+        "doutsumdelay",
+        "refn",
+        "refp",
+        "reset",
+        "vim",
+        "vip"
+      ]
+    },
+    {
+      "id": "P_ONE_CYCLE_DELAYED_SUM",
+      "observable_contract": "`doutsumdelay` reports the previous sampled flash summary, not the current summary.",
+      "required_signals": [
+        "time",
+        "clks",
+        "doutsum",
+        "doutsumdelay",
+        "refn",
+        "refp",
+        "reset",
+        "vim",
+        "vip"
+      ]
+    },
+    {
+      "id": "P_NORMALIZED_OUTPUT",
+      "observable_contract": "The flash summary is normalized by the eight-level count before being driven.",
+      "required_signals": [
+        "time",
+        "clks",
+        "doutsum",
+        "doutsumdelay",
+        "refn",
+        "refp",
+        "reset",
+        "vim",
+        "vip"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "flash_8level_sum_delay.va"
+  ],
+  "task_id": "v4-151",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vip",
+            "port_ref": "vip",
+            "position": 0
+          },
+          {
+            "net": "vim",
+            "port_ref": "vim",
+            "position": 1
+          },
+          {
+            "net": "clks",
+            "port_ref": "clks",
+            "position": 2
+          },
+          {
+            "net": "reset",
+            "port_ref": "reset",
+            "position": 3
+          },
+          {
+            "net": "refp",
+            "port_ref": "refp",
+            "position": 4
+          },
+          {
+            "net": "refn",
+            "port_ref": "refn",
+            "position": 5
+          },
+          {
+            "net": "doutsum",
+            "port_ref": "doutsum",
+            "position": 6
+          },
+          {
+            "net": "doutsumdelay",
+            "port_ref": "doutsumdelay",
+            "position": 7
+          }
+        ],
+        "module_ref": "flash_8level_sum_delay",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clks",
+      "doutsum",
+      "doutsumdelay",
+      "refn",
+      "refp",
+      "reset",
+      "vim",
+      "vip"
+    ]
+  }
+}

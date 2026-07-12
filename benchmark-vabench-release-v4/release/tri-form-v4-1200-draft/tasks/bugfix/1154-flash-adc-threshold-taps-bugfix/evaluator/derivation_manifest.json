@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-154",
+    "canonical_task_slug": "154-flash-adc-threshold-taps",
+    "family_spec_sha256": "c6ca1c452ddd07e7eb0ddbbbfa4511c0b1983abcc21893ea0ca20b119d95d04c",
+    "mutation_catalog_sha256": "4d6a87df4096990e4b106eaafa451b76aca054c0fa8f359293b88e4a0e614cd9",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "154",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_missing_top_tap",
+    "testbench_suite": [
+      "neg_002_missing_top_tap",
+      "neg_001_zero",
+      "neg_003_inverted_outputs",
+      "neg_004_half_high_level",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "73acfc2e3f1a75785f4a4671623dd3a6b0b6831c718fcd05ac5704c1cb65369f",
+    "changed_artifacts": [
+      "flash_adc_threshold_taps.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_missing_top_tap",
+    "rationale": "Select fault class threshold_or_boundary_fault under trigger 'Forces the top threshold tap low.' because it exercises P_CLOCKED_SELECTED_THRESHOLD_TAPS as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_002_missing_top_tap",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

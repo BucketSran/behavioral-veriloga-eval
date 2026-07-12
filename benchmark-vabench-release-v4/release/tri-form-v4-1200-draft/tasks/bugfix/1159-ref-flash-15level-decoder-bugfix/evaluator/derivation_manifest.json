@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-159",
+    "canonical_task_slug": "159-ref-flash-15level-decoder",
+    "family_spec_sha256": "0978bee71fe2d6754746b922e169cc62418931b622a96af249816f5da636d536",
+    "mutation_catalog_sha256": "0436978050ec26f81ae58d2ce6782dd0fc122776dd7dc2e534a3d5a72c2ce85e",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "159",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_half_output_gain",
+    "testbench_suite": [
+      "neg_002_wrong_normalization",
+      "neg_001_zero",
+      "neg_004_half_output_gain",
+      "neg_003_ignore_upper_taps",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "58806ad521e06082540c6a5db7b6ae482eb993783d86184ea46916ebd8662609",
+    "changed_artifacts": [
+      "ref_flash_15level_decoder.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_half_output_gain",
+    "rationale": "Select fault class metric_or_observable_fault under trigger 'Outputs half of the normalized fraction.' because it exercises P_FRACTION_NORMALIZATION_AND_GAIN as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 12,
+    "source_preferred_seed": "neg_002_wrong_normalization",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-152",
+    "canonical_task_slug": "152-two-channel-sample-demux",
+    "family_spec_sha256": "6ded92d71cae912035cd715fb957eaa845a5ad60efd4a8a9a3ac17d7410d41bf",
+    "mutation_catalog_sha256": "7859de103d32425efc76422f3775f9541bc609682a485223fb971723097ece0d",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "152",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_swap_channels",
+    "testbench_suite": [
+      "neg_002_swap_channels",
+      "neg_003_ignore_second_channel",
+      "neg_004_half_output_gain",
+      "neg_001_zero",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "725cd767ab22baf96ddb3df76905d77e88ca13c4c2f62d95a1a2d24338e387b8",
+    "changed_artifacts": [
+      "two_channel_sample_demux.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_swap_channels",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Swaps clks1/clks2 sample assignments.' because it exercises P_CLOCKED_CHANNEL_SELECTION as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 17,
+    "source_preferred_seed": "neg_002_swap_channels",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}
