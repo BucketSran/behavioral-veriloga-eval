@@ -1,0 +1,11 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/phase_detector_chopper.va"
+
+Vlo (vlocal_osc 0) vsource type=pwl wave=[0 -0.5 0.9n -0.5 1.0n 0.5 1.9n 0.5 2.0n -0.5 2.9n -0.5 3.0n 0.5 4n 0.5]
+Vrf (vin_rf 0) vsource type=pwl wave=[0 0.10 0.9n 0.10 1.0n 0.20 1.9n 0.20 2.0n -0.16 2.9n -0.16 3.0n -0.24 4n -0.24]
+XDUT (vlocal_osc vin_rf vif) phase_detector_chopper
+
+tran tran stop=3.8n maxstep=10p
+save vif vin_rf vlocal_osc

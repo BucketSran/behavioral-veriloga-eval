@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-198",
+    "canonical_task_slug": "198-qtz-differential-2level",
+    "family_spec_sha256": "d291eae157a9fd2a77166727658290ec5a36a4933bf46ad0c4293d850eded32f",
+    "mutation_catalog_sha256": "1d5bf6c57dc488d2cd84b5493a23a430bcebee7d1cd90d7fb178328d3d1491b4",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "198",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_wrong_threshold",
+    "testbench_suite": [
+      "neg_003_wrong_threshold",
+      "neg_001_zero",
+      "neg_004_unipolar_output",
+      "neg_005_metric_scale_low",
+      "neg_002_invert_decision"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "cc1d56af17ae253152e8bb7e6076f19c28787bf6dc038bb8300e591fa654dfee",
+    "changed_artifacts": [
+      "qtz_differential_2level.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_wrong_threshold",
+    "rationale": "Select fault class threshold_or_boundary_fault under trigger 'Compares against the full differential reference instead of the midpoint threshold.' because it exercises P_DIFFERENTIAL_MIDPOINT_DECISION as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 21,
+    "source_preferred_seed": "neg_003_wrong_threshold",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,179 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "clock_sample_1600n_sequencer",
+            "parameters": [],
+            "ports": [
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 0
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "s",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "nc",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "res",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "conv",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "clock_sample_1600n_sequencer.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/clock_sample_1600n_sequencer.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "195",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Clock Sample 1600n Sequencer"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_PERIODIC_16NS_FRAME",
+      "observable_contract": "Generate a repeating 16 ns ADC timing frame.",
+      "required_signals": [
+        "time",
+        "conv",
+        "nc",
+        "res",
+        "rst",
+        "s"
+      ]
+    },
+    {
+      "id": "P_RESET_AND_SAMPLE_WINDOWS",
+      "observable_contract": "`rst` and `s` are high only in the declared frame windows, including both sample windows.",
+      "required_signals": [
+        "time",
+        "conv",
+        "nc",
+        "res",
+        "rst",
+        "s"
+      ]
+    },
+    {
+      "id": "P_NONOVERLAP_AND_RESIDUE_WINDOWS",
+      "observable_contract": "`nc` and `res` use the declared non-overlap and residue windows without swapping outputs.",
+      "required_signals": [
+        "time",
+        "conv",
+        "nc",
+        "res",
+        "rst",
+        "s"
+      ]
+    },
+    {
+      "id": "P_CONVERSION_OUTPUT_TIMING",
+      "observable_contract": "`conv` is asserted in the declared conversion windows with valid timing and level.",
+      "required_signals": [
+        "time",
+        "conv",
+        "nc",
+        "res",
+        "rst",
+        "s"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "clock_sample_1600n_sequencer.va"
+  ],
+  "task_id": "v4-1195",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 0
+          },
+          {
+            "net": "s",
+            "port_ref": "s",
+            "position": 1
+          },
+          {
+            "net": "nc",
+            "port_ref": "nc",
+            "position": 2
+          },
+          {
+            "net": "res",
+            "port_ref": "res",
+            "position": 3
+          },
+          {
+            "net": "conv",
+            "port_ref": "conv",
+            "position": 4
+          }
+        ],
+        "module_ref": "clock_sample_1600n_sequencer",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "conv",
+      "nc",
+      "res",
+      "rst",
+      "s"
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-194",
+    "canonical_task_slug": "194-pipe-adc-gain-control-loop",
+    "family_spec_sha256": "cf5e224b7936a4a374271c7ff1b89bf61a4b35d1e6f3ebdfae4a3d6cf8ab016c",
+    "mutation_catalog_sha256": "f23367ab43f9bb841ebe3bcf00a883e9b7a5bc250bd527922576f7ff841f8263",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "194",
+  "negative_assignment": {
+    "bugfix_seed": "neg_005_metric_scale_low",
+    "testbench_suite": [
+      "neg_002_wrong_target_diff",
+      "neg_005_metric_scale_low",
+      "neg_004_half_gain_outputs",
+      "neg_003_no_gain_update",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "9e5906a94cdba140f9fc69f54f2b80ad8f60b558a5c38bce112e770a945ed987",
+    "changed_artifacts": [
+      "pipe_adc_gain_control_loop.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_005_metric_scale_low",
+    "rationale": "Select fault class scalar_monitor_scale_error under trigger 'Pipe ADC Gain Control Loop: scales the metric output, preserving the main path while failing measurement checks.' because it exercises P_ALTERNATING_TEST_DAC_PHASES, P_GAIN_CONTROL_INITIAL_STATE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 17,
+    "source_preferred_seed": "neg_002_wrong_target_diff",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

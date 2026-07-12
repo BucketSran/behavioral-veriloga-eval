@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-193",
+    "canonical_task_slug": "193-pfd-tdomain-reset-window",
+    "family_spec_sha256": "f3e45096b05673f83790b51f9e39064c4e866da48d28e883e36ab611f793438b",
+    "mutation_catalog_sha256": "a3de000e0488d8e18cf3a5e7be19ae1aa176dd6cb06b50d13dcd0e0b314e6748",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "193",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_short_reset_window",
+    "testbench_suite": [
+      "neg_002_short_reset_window",
+      "neg_001_zero",
+      "neg_004_invert_up_down_outputs",
+      "neg_003_no_hide_state",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "f8f1ba6d12fafcf61e25533d4303c909d5db34ddc130d2fd0e849bf5cbdfaea1",
+    "changed_artifacts": [
+      "pfd_tdomain_reset_window.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_short_reset_window",
+    "rationale": "Select fault class state_reset_or_enable_error under trigger 'Clears hide_state on timer expiry but leaves directional state latched, so overlap reset does not fully clear outputs.' because it exercises P_RESET_OVERLAP_WINDOW as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 27,
+    "source_preferred_seed": "neg_002_short_reset_window",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

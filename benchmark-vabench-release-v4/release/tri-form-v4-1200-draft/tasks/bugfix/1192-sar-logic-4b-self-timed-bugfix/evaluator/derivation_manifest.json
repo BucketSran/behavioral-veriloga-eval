@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-192",
+    "canonical_task_slug": "192-sar-logic-4b-self-timed",
+    "family_spec_sha256": "5f936d8d2426b956bf10102b56dcd2e9732cf5cf7c75cc00275a90964a70e5f4",
+    "mutation_catalog_sha256": "66898c693a014e7d9099555b550ff16afe637e4467a249fd4320dd2658178874",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "192",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_invert_decision",
+    "testbench_suite": [
+      "neg_002_invert_decision",
+      "neg_003_no_step_decrement",
+      "neg_004_half_cmpck",
+      "neg_001_zero",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "2a4d69f98892669f6a676979894e4cb9a993da0b445890965d754ec8b27d798f",
+    "changed_artifacts": [
+      "sar_logic_4b_self_timed.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_invert_decision",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Stores comparator decisions with inverted dcmpp/dcmpn polarity.' because it exercises P_COMPARATOR_PULSE_DECISION_POLARITY as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 20,
+    "source_preferred_seed": "neg_002_invert_decision",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

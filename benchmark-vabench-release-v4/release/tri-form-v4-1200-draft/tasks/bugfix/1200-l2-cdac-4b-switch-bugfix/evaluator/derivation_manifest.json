@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-200",
+    "canonical_task_slug": "200-l2-cdac-4b-switch",
+    "family_spec_sha256": "edabb7f416acf7ccb448edd0b448fc706c5c933db7365cf7bae9e9f915aceefa",
+    "mutation_catalog_sha256": "0ff9a520017d30f3db29b0cba884c356fa6d05def473c59a5bde0b10e8ae722e",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "200",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_no_ready_skip",
+    "testbench_suite": [
+      "neg_003_wrong_denominator",
+      "neg_002_no_ready_skip",
+      "neg_004_unipolar_output",
+      "neg_005_metric_scale_low",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "cc331b56acc65d9b8437cb701b1331476debbc61b2d3ee7261c0e8a4286a4252",
+    "changed_artifacts": [
+      "l2_cdac_4b_switch.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_no_ready_skip",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Updates aout on the first ready edge instead of skipping it.' because it exercises P_FIRST_READY_EDGE_ARMS_ONLY as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 24,
+    "source_preferred_seed": "neg_003_wrong_denominator",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,236 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "single_adc_7b_weighted",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din0",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din1",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din2",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din3",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din4",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din5",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "din6",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dout",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "single_adc_7b_weighted.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/single_adc_7b_weighted.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "197",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Single ADC 7b Weighted"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_INPUT_THRESHOLDING",
+      "observable_contract": "Treat each `din` input as high only when it is above `vth`.",
+      "required_signals": [
+        "time",
+        "din0",
+        "din1",
+        "din2",
+        "din3",
+        "din4",
+        "din5",
+        "din6",
+        "dout"
+      ]
+    },
+    {
+      "id": "P_WEIGHTED_CODE_SUM",
+      "observable_contract": "Sum the selected 7-bit weights, including the MSB contribution, using the declared weight basis.",
+      "required_signals": [
+        "time",
+        "din0",
+        "din1",
+        "din2",
+        "din3",
+        "din4",
+        "din5",
+        "din6",
+        "dout"
+      ]
+    },
+    {
+      "id": "P_NORMALIZED_SINGLE_ENDED_OUTPUT",
+      "observable_contract": "Drive the normalized single-ended ADC output from the weighted code without extra fixed offsets or scale errors.",
+      "required_signals": [
+        "time",
+        "din0",
+        "din1",
+        "din2",
+        "din3",
+        "din4",
+        "din5",
+        "din6",
+        "dout"
+      ]
+    },
+    {
+      "id": "P_MONOTONIC_CODE_RESPONSE",
+      "observable_contract": "The output changes monotonically with increasing selected code weight.",
+      "required_signals": [
+        "time",
+        "din0",
+        "din1",
+        "din2",
+        "din3",
+        "din4",
+        "din5",
+        "din6",
+        "dout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "single_adc_7b_weighted.va"
+  ],
+  "task_id": "v4-1197",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "din0",
+            "port_ref": "din0",
+            "position": 0
+          },
+          {
+            "net": "din1",
+            "port_ref": "din1",
+            "position": 1
+          },
+          {
+            "net": "din2",
+            "port_ref": "din2",
+            "position": 2
+          },
+          {
+            "net": "din3",
+            "port_ref": "din3",
+            "position": 3
+          },
+          {
+            "net": "din4",
+            "port_ref": "din4",
+            "position": 4
+          },
+          {
+            "net": "din5",
+            "port_ref": "din5",
+            "position": 5
+          },
+          {
+            "net": "din6",
+            "port_ref": "din6",
+            "position": 6
+          },
+          {
+            "net": "dout",
+            "port_ref": "dout",
+            "position": 7
+          }
+        ],
+        "module_ref": "single_adc_7b_weighted",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "din0",
+      "din1",
+      "din2",
+      "din3",
+      "din4",
+      "din5",
+      "din6",
+      "dout"
+    ]
+  }
+}

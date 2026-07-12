@@ -1,0 +1,63 @@
+`include "disciplines.vams"
+module sar_logic_4b_self_timed(vdd, gnd, clkc, rst, dcmpp, dcmpn, cmpck, dout1, dout2, dout3, dout4, dbotp1, dbotp2, dbotp3, dbotn1, dbotn2, dbotn3);
+input vdd, gnd, clkc, rst, dcmpp, dcmpn;
+output cmpck, dout1, dout2, dout3, dout4, dbotp1, dbotp2, dbotp3, dbotn1, dbotn2, dbotn3;
+electrical vdd, gnd, clkc, rst, dcmpp, dcmpn, cmpck, dout1, dout2, dout3, dout4, dbotp1, dbotp2, dbotp3, dbotn1, dbotn2, dbotn3;
+parameter real t_logic_delay = 100p;
+real vh, vl, vth, ts_up, ts_down;
+integer step, cmpck_i, d1, d2, d3, d4, bp1, bp2, bp3, bn1, bn2, bn3;
+analog begin
+    @(initial_step or cross(V(rst) - vth, +1)) begin
+        vh = V(vdd);
+        vl = V(gnd);
+        vth = (vh + vl) / 2.0;
+        step = 4;
+        cmpck_i = 0;
+        d1 = 0; d2 = 0; d3 = 0; d4 = 0;
+        bp1 = 1; bp2 = 1; bp3 = 1;
+        bn1 = 1; bn2 = 1; bn3 = 1;
+        ts_up = -1.0;
+        ts_down = -1.0;
+    end
+    @(cross(V(clkc) - vth, +1)) begin
+        ts_up = $abstime + t_logic_delay;
+    end
+    @(timer(ts_up)) cmpck_i = 1;
+    @(timer(ts_down)) cmpck_i = 0;
+    @(cross(V(dcmpp) - vth, +1) or cross(V(dcmpn) - vth, +1)) begin
+        ts_down = $abstime + t_logic_delay;
+        if (step == 4) d4 = V(dcmpn) > V(dcmpp);
+        else if (step == 3) d3 = V(dcmpn) > V(dcmpp);
+        else if (step == 2) d2 = V(dcmpn) > V(dcmpp);
+        else if (step == 1) d1 = V(dcmpn) > V(dcmpp);
+        if (step > 1) begin
+            if (V(dcmpn) > V(dcmpp)) begin
+                if (step == 4) bp3 = 0;
+                else if (step == 3) bp2 = 0;
+                else if (step == 2) bp1 = 0;
+            end else begin
+                if (step == 4) bn3 = 0;
+                else if (step == 3) bn2 = 0;
+                else if (step == 2) bn1 = 0;
+            end
+        end
+    end
+    @(cross(V(dcmpp) - vth, -1) or cross(V(dcmpn) - vth, -1)) begin
+        if (step > 1) begin
+            ts_up = $abstime + t_logic_delay;
+            step = step - 1;
+        end
+    end
+    V(cmpck) <+ transition(cmpck_i ? vh : vl, 0, 20p, 20p);
+    V(dout1) <+ transition(d1 ? vh : vl, 0, 20p, 20p);
+    V(dout2) <+ transition(d2 ? vh : vl, 0, 20p, 20p);
+    V(dout3) <+ transition(d3 ? vh : vl, 0, 20p, 20p);
+    V(dout4) <+ transition(d4 ? vh : vl, 0, 20p, 20p);
+    V(dbotp1) <+ transition(bp1 ? vh : vl, 0, 20p, 20p);
+    V(dbotp2) <+ transition(bp2 ? vh : vl, 0, 20p, 20p);
+    V(dbotp3) <+ transition(bp3 ? vh : vl, 0, 20p, 20p);
+    V(dbotn1) <+ transition(bn1 ? vh : vl, 0, 20p, 20p);
+    V(dbotn2) <+ transition(bn2 ? vh : vl, 0, 20p, 20p);
+    V(dbotn3) <+ transition(bn3 ? vh : vl, 0, 20p, 20p);
+end
+endmodule

@@ -1,0 +1,16 @@
+`include "disciplines.vams"
+module single_adc_7b_weighted(din0, din1, din2, din3, din4, din5, din6, dout);
+input din0, din1, din2, din3, din4, din5, din6;
+output dout;
+electrical din0, din1, din2, din3, din4, din5, din6, dout;
+parameter real vth = 0.45;
+analog begin
+    V(dout) <+ 0.125 + ((V(din6) > vth) ? 16.0 / 32.0 : 0.0)
+             + ((V(din5) > vth) ? 8.0 / 32.0 : 0.0)
+             + ((V(din4) > vth) ? 4.0 / 32.0 : 0.0)
+             + ((V(din3) > vth) ? 2.0 / 32.0 : 0.0)
+             + ((V(din2) > vth) ? 1.0 / 32.0 : 0.0)
+             + ((V(din1) > vth) ? 0.5 / 32.0 : 0.0)
+             + ((V(din0) > vth) ? 0.25 / 32.0 : 0.0);
+end
+endmodule

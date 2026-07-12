@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-195",
+    "canonical_task_slug": "195-clock-sample-1600n-sequencer",
+    "family_spec_sha256": "359da5fac124d0879ff84034919283b75973d5ab10d1698ec71b6b8a7ddb62b9",
+    "mutation_catalog_sha256": "9a18321c5eb033b7c77df8b57a53ad7a43227a883b7bde098f36881cf9bd9383",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "195",
+  "negative_assignment": {
+    "bugfix_seed": "neg_005_metric_scale_low",
+    "testbench_suite": [
+      "neg_002_half_conv_level",
+      "neg_003_swap_nc_res",
+      "neg_004_missing_second_sample",
+      "neg_005_metric_scale_low",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "b117a2e2783be34196fabd3a562f04b2a3304f5e6fe107f62fc1b00c0d2f04fe",
+    "changed_artifacts": [
+      "clock_sample_1600n_sequencer.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_005_metric_scale_low",
+    "rationale": "Select fault class timing_or_state_update_fault under trigger 'Clock Sample 1600n Sequencer: scales the metric output, preserving the main path while failing measurement checks.' because it exercises P_PERIODIC_16NS_FRAME as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 26,
+    "source_preferred_seed": "neg_002_half_conv_level",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

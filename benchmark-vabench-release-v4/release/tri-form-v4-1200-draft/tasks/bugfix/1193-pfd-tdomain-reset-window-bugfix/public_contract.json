@@ -1,0 +1,228 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "pfd_tdomain_reset_window",
+            "parameters": [
+              {
+                "default": "5f",
+                "name": "ttol",
+                "override_behavior": "overrides ttol",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0",
+                "name": "td",
+                "override_behavior": "overrides td",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "10p",
+                "name": "tt",
+                "override_behavior": "overrides tt",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "120p",
+                "name": "ton",
+                "override_behavior": "overrides ton",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in1",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in2",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "up",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dn",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vdd",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "gnd",
+                "position": 5
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "pfd_tdomain_reset_window.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/pfd_tdomain_reset_window.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "193",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "clock_timing",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "PFD Tdomain Reset Window"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_LEADING_EDGE_DIRECTION",
+      "observable_contract": "A leading `in1` edge asserts `up`, and a leading `in2` edge asserts `dn`.",
+      "required_signals": [
+        "time",
+        "dn",
+        "in1",
+        "in2",
+        "up",
+        "vdd",
+        "gnd"
+      ]
+    },
+    {
+      "id": "P_RESET_OVERLAP_WINDOW",
+      "observable_contract": "After both inputs arrive, both outputs remain asserted for the `ton` reset-overlap window.",
+      "required_signals": [
+        "time",
+        "dn",
+        "in1",
+        "in2",
+        "up",
+        "vdd",
+        "gnd"
+      ]
+    },
+    {
+      "id": "P_CLEAR_AFTER_RESET_WINDOW",
+      "observable_contract": "After the reset-overlap window, both `up` and `dn` clear before the next phase event.",
+      "required_signals": [
+        "time",
+        "dn",
+        "in1",
+        "in2",
+        "up",
+        "vdd",
+        "gnd"
+      ]
+    },
+    {
+      "id": "P_PFD_OUTPUT_LEVELS",
+      "observable_contract": "`up` and `dn` use rail-referenced voltage-coded low/high levels.",
+      "required_signals": [
+        "time",
+        "dn",
+        "in1",
+        "in2",
+        "up",
+        "vdd",
+        "gnd"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "pfd_tdomain_reset_window.va"
+  ],
+  "task_id": "v4-1193",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "in1",
+            "port_ref": "in1",
+            "position": 0
+          },
+          {
+            "net": "in2",
+            "port_ref": "in2",
+            "position": 1
+          },
+          {
+            "net": "up",
+            "port_ref": "up",
+            "position": 2
+          },
+          {
+            "net": "dn",
+            "port_ref": "dn",
+            "position": 3
+          },
+          {
+            "net": "vdd",
+            "port_ref": "vdd",
+            "position": 4
+          },
+          {
+            "net": "gnd",
+            "port_ref": "gnd",
+            "position": 5
+          }
+        ],
+        "module_ref": "pfd_tdomain_reset_window",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "dn",
+      "in1",
+      "in2",
+      "up",
+      "vdd",
+      "gnd"
+    ]
+  }
+}

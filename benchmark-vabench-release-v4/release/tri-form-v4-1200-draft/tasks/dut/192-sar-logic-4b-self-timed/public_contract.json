@@ -1,0 +1,375 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "sar_logic_4b_self_timed",
+            "parameters": [
+              {
+                "default": "100p",
+                "name": "t_logic_delay",
+                "override_behavior": "overrides t_logic_delay",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vdd",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "gnd",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clkc",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dcmpp",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "dcmpn",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "cmpck",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dout1",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dout2",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dout3",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dout4",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dbotp1",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dbotp2",
+                "position": 12
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dbotp3",
+                "position": 13
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dbotn1",
+                "position": 14
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dbotn2",
+                "position": 15
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "dbotn3",
+                "position": 16
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "sar_logic_4b_self_timed.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "192",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "data_converter",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "SAR Logic 4b Self Timed"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_INITIALIZES_SELF_TIMED_STATE",
+      "observable_contract": "Initialization and rising `rst` reset the conversion step, clear `cmpck/dout`, and initialize DAC bottom-plate controls.",
+      "required_signals": [
+        "time",
+        "clkc",
+        "cmpck",
+        "dbotn1",
+        "dbotn2",
+        "dbotn3",
+        "dbotp1",
+        "dbotp2",
+        "dbotp3",
+        "dcmpn",
+        "dcmpp",
+        "dout1",
+        "dout2",
+        "dout3",
+        "dout4",
+        "rst",
+        "vdd",
+        "gnd"
+      ]
+    },
+    {
+      "id": "P_COMPARATOR_PULSE_DECISION_POLARITY",
+      "observable_contract": "Rising `dcmpp` or `dcmpn` pulses store comparator decisions with the declared polarity.",
+      "required_signals": [
+        "time",
+        "clkc",
+        "cmpck",
+        "dbotn1",
+        "dbotn2",
+        "dbotn3",
+        "dbotp1",
+        "dbotp2",
+        "dbotp3",
+        "dcmpn",
+        "dcmpp",
+        "dout1",
+        "dout2",
+        "dout3",
+        "dout4",
+        "rst",
+        "vdd",
+        "gnd"
+      ]
+    },
+    {
+      "id": "P_STEP_ADVANCE_ON_COMPARATOR_FALL",
+      "observable_contract": "Comparator-output falling events advance the SAR step and update the next control state.",
+      "required_signals": [
+        "time",
+        "clkc",
+        "cmpck",
+        "dbotn1",
+        "dbotn2",
+        "dbotn3",
+        "dbotp1",
+        "dbotp2",
+        "dbotp3",
+        "dcmpn",
+        "dcmpp",
+        "dout1",
+        "dout2",
+        "dout3",
+        "dout4",
+        "rst",
+        "vdd",
+        "gnd"
+      ]
+    },
+    {
+      "id": "P_CMPCK_TIMING_AND_LEVEL",
+      "observable_contract": "`cmpck` is scheduled low after `t_logic_delay` and driven with valid voltage-coded levels.",
+      "required_signals": [
+        "time",
+        "clkc",
+        "cmpck",
+        "dbotn1",
+        "dbotn2",
+        "dbotn3",
+        "dbotp1",
+        "dbotp2",
+        "dbotp3",
+        "dcmpn",
+        "dcmpp",
+        "dout1",
+        "dout2",
+        "dout3",
+        "dout4",
+        "rst",
+        "vdd",
+        "gnd"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "sar_logic_4b_self_timed.va"
+  ],
+  "task_id": "v4-192",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vdd",
+            "port_ref": "vdd",
+            "position": 0
+          },
+          {
+            "net": "gnd",
+            "port_ref": "gnd",
+            "position": 1
+          },
+          {
+            "net": "clkc",
+            "port_ref": "clkc",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "dcmpp",
+            "port_ref": "dcmpp",
+            "position": 4
+          },
+          {
+            "net": "dcmpn",
+            "port_ref": "dcmpn",
+            "position": 5
+          },
+          {
+            "net": "cmpck",
+            "port_ref": "cmpck",
+            "position": 6
+          },
+          {
+            "net": "dout1",
+            "port_ref": "dout1",
+            "position": 7
+          },
+          {
+            "net": "dout2",
+            "port_ref": "dout2",
+            "position": 8
+          },
+          {
+            "net": "dout3",
+            "port_ref": "dout3",
+            "position": 9
+          },
+          {
+            "net": "dout4",
+            "port_ref": "dout4",
+            "position": 10
+          },
+          {
+            "net": "dbotp1",
+            "port_ref": "dbotp1",
+            "position": 11
+          },
+          {
+            "net": "dbotp2",
+            "port_ref": "dbotp2",
+            "position": 12
+          },
+          {
+            "net": "dbotp3",
+            "port_ref": "dbotp3",
+            "position": 13
+          },
+          {
+            "net": "dbotn1",
+            "port_ref": "dbotn1",
+            "position": 14
+          },
+          {
+            "net": "dbotn2",
+            "port_ref": "dbotn2",
+            "position": 15
+          },
+          {
+            "net": "dbotn3",
+            "port_ref": "dbotn3",
+            "position": 16
+          }
+        ],
+        "module_ref": "sar_logic_4b_self_timed",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clkc",
+      "cmpck",
+      "dbotn1",
+      "dbotn2",
+      "dbotn3",
+      "dbotp1",
+      "dbotp2",
+      "dbotp3",
+      "dcmpn",
+      "dcmpp",
+      "dout1",
+      "dout2",
+      "dout3",
+      "dout4",
+      "rst",
+      "vdd",
+      "gnd"
+    ]
+  }
+}
