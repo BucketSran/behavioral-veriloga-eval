@@ -1,0 +1,306 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "hysteretic_window_comparator",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "10e-3",
+                "name": "hyst",
+                "override_behavior": "overrides hyst",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "500p from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "low_trip",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "high_trip",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "inside_flag",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "state_metric",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "toggled",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "hysteretic_window_comparator.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "314",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "comparator_decision_systems",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Hysteretic Window Comparator"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+      "observable_contract": "On reset or when disabled, clear `inside_flag`, `state_metric`, and `toggled`.",
+      "required_signals": [
+        "time",
+        "vin",
+        "rst",
+        "enable",
+        "low_trip",
+        "high_trip",
+        "inside_flag",
+        "state_metric",
+        "toggled"
+      ]
+    },
+    {
+      "id": "P_USE_LOW_TRIP_AND_HIGH_TRIP",
+      "observable_contract": "Use `low_trip` and `high_trip` as public voltage thresholds.",
+      "required_signals": [
+        "time",
+        "vin",
+        "rst",
+        "enable",
+        "low_trip",
+        "high_trip",
+        "inside_flag",
+        "state_metric",
+        "toggled"
+      ]
+    },
+    {
+      "id": "P_ASSERT_INSIDE_FLAG_WHEN_VIN_ENTERS",
+      "observable_contract": "Assert `inside_flag` when `vin` enters the window and keep it asserted until `vin` crosses outside the hysteresis margins.",
+      "required_signals": [
+        "time",
+        "vin",
+        "rst",
+        "enable",
+        "low_trip",
+        "high_trip",
+        "inside_flag",
+        "state_metric",
+        "toggled"
+      ]
+    },
+    {
+      "id": "P_EXPOSE_THE_CURRENT_STATE_AS_STATE",
+      "observable_contract": "Expose the current state as `state_metric` and pulse `toggled` high on state changes.",
+      "required_signals": [
+        "time",
+        "vin",
+        "rst",
+        "enable",
+        "low_trip",
+        "high_trip",
+        "inside_flag",
+        "state_metric",
+        "toggled"
+      ]
+    },
+    {
+      "id": "P_DO_NOT_CHATTER_FOR_SMALL_INPUT",
+      "observable_contract": "Do not chatter for small input movement inside the hysteresis band.",
+      "required_signals": [
+        "time",
+        "vin",
+        "rst",
+        "enable",
+        "low_trip",
+        "high_trip",
+        "inside_flag",
+        "state_metric",
+        "toggled"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/hysteretic_window_comparator.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-814",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 2
+          },
+          {
+            "net": "low_trip",
+            "port_ref": "low_trip",
+            "position": 3
+          },
+          {
+            "net": "high_trip",
+            "port_ref": "high_trip",
+            "position": 4
+          },
+          {
+            "net": "inside_flag",
+            "port_ref": "inside_flag",
+            "position": 5
+          },
+          {
+            "net": "state_metric",
+            "port_ref": "state_metric",
+            "position": 6
+          },
+          {
+            "net": "toggled",
+            "port_ref": "toggled",
+            "position": 7
+          }
+        ],
+        "module_ref": "hysteretic_window_comparator",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "rst",
+      "enable",
+      "low_trip",
+      "high_trip",
+      "inside_flag",
+      "state_metric",
+      "toggled"
+    ]
+  }
+}

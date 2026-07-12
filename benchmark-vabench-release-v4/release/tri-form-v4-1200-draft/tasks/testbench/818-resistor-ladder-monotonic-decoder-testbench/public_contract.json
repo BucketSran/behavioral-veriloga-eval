@@ -1,0 +1,313 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "resistor_ladder_monotonic_decoder",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "500p from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "code_2",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "code_1",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "code_0",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "step_metric",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "monotonic_ok",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "resistor_ladder_monotonic_decoder.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "318",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "data_converter_systems",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Resistor Ladder Monotonic Decoder"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_DRIVE",
+      "observable_contract": "On reset or when disabled, drive `vout` low, clear `step_metric`, and clear `monotonic_ok`.",
+      "required_signals": [
+        "time",
+        "code_2",
+        "code_1",
+        "code_0",
+        "enable",
+        "rst",
+        "vout",
+        "step_metric",
+        "monotonic_ok"
+      ]
+    },
+    {
+      "id": "P_DECODE_CODE_2_CODE_0_AS",
+      "observable_contract": "Decode `code_2..code_0` as an unsigned ladder tap index from 0 to 7.",
+      "required_signals": [
+        "time",
+        "code_2",
+        "code_1",
+        "code_0",
+        "enable",
+        "rst",
+        "vout",
+        "step_metric",
+        "monotonic_ok"
+      ]
+    },
+    {
+      "id": "P_DRIVE_VOUT_TO_THE_CORRESPONDING_EVENLY",
+      "observable_contract": "Drive `vout` to the corresponding evenly spaced ladder voltage between `vss` and `vdd`.",
+      "required_signals": [
+        "time",
+        "code_2",
+        "code_1",
+        "code_0",
+        "enable",
+        "rst",
+        "vout",
+        "step_metric",
+        "monotonic_ok"
+      ]
+    },
+    {
+      "id": "P_EXPOSE_ONE_LSB_STEP_ON_STEP",
+      "observable_contract": "Expose one LSB step on `step_metric` while enabled.",
+      "required_signals": [
+        "time",
+        "code_2",
+        "code_1",
+        "code_0",
+        "enable",
+        "rst",
+        "vout",
+        "step_metric",
+        "monotonic_ok"
+      ]
+    },
+    {
+      "id": "P_ASSERT_MONOTONIC_OK_WHEN_THE_ACTIVE",
+      "observable_contract": "Assert `monotonic_ok` when the active code-to-output mapping is nondecreasing.",
+      "required_signals": [
+        "time",
+        "code_2",
+        "code_1",
+        "code_0",
+        "enable",
+        "rst",
+        "vout",
+        "step_metric",
+        "monotonic_ok"
+      ]
+    },
+    {
+      "id": "P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE",
+      "observable_contract": "Use only voltage-domain behavioral state and voltage contributions on public electrical outputs.",
+      "required_signals": [
+        "time",
+        "code_2",
+        "code_1",
+        "code_0",
+        "enable",
+        "rst",
+        "vout",
+        "step_metric",
+        "monotonic_ok"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/resistor_ladder_monotonic_decoder.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-818",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "code_2",
+            "port_ref": "code_2",
+            "position": 0
+          },
+          {
+            "net": "code_1",
+            "port_ref": "code_1",
+            "position": 1
+          },
+          {
+            "net": "code_0",
+            "port_ref": "code_0",
+            "position": 2
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 3
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 4
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 5
+          },
+          {
+            "net": "step_metric",
+            "port_ref": "step_metric",
+            "position": 6
+          },
+          {
+            "net": "monotonic_ok",
+            "port_ref": "monotonic_ok",
+            "position": 7
+          }
+        ],
+        "module_ref": "resistor_ladder_monotonic_decoder",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "code_2",
+      "code_1",
+      "code_0",
+      "enable",
+      "rst",
+      "vout",
+      "step_metric",
+      "monotonic_ok"
+    ]
+  }
+}

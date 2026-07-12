@@ -1,0 +1,26 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module residue_amp_core(vin, rst, cal_en, gain_2, gain_1, gain_0, vout);
+    inout vin, rst, cal_en, gain_2, gain_1, gain_0, vout;
+    electrical vin, rst, cal_en, gain_2, gain_1, gain_0, vout;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vcm = 0.45;
+    parameter real vth = 0.45; parameter real tr = 200p from (0:inf);
+    parameter real base_gain = 2.0; parameter real gain_lsb = 0.25;
+    parameter real tick = 250p from (0:inf);
+    integer code; real gain, out_v;
+    analog function real clip01; input x; real x; begin if (x < vss) clip01 = vss; else if (x > vdd) clip01 = vdd; else clip01 = x; end endfunction
+    analog begin
+        @(initial_step) out_v = vcm;
+        @(timer(0, tick)) begin
+            code = 0;
+            if (V(gain_0) > vth) code = code + 1;
+            if (V(gain_1) > vth) code = code + 2;
+            if (V(gain_2) > vth) code = code + 4;
+            gain = base_gain + (0.25) * code;
+            if (V(rst) > vth || V(cal_en) <= vth) out_v = vcm;
+            else out_v = clip01(vcm + gain * (V(vin) - vcm));
+        end
+        V(vout) <+ transition(out_v, 0, tr, tr);
+    end
+endmodule

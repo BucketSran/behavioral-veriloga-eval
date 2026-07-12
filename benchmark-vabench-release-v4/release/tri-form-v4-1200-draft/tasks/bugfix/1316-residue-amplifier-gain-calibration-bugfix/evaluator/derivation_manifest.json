@@ -1,0 +1,39 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-316",
+    "canonical_task_slug": "316-residue-amplifier-gain-calibration",
+    "family_spec_sha256": "22b2fb251bdaac64bd7574f35d03b4b2153088b668d03ad3f522db781e61fcaa",
+    "mutation_catalog_sha256": "656137f0fa927a7dd8d6dfc61fb4b6d2465774cd698936e7f1539133bbefab1e",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "316",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_reset_disable_clear_missing",
+    "testbench_suite": [
+      "neg_001_controller_update_direction_wrong",
+      "neg_003_reset_disable_clear_missing",
+      "neg_004_lock_qualification_too_early",
+      "neg_005_error_metric_wrong",
+      "neg_002_residue_core_gain_step_wrong"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "832e73a0aec4e37efb14df09a656aa487107df2e0334a6cdb7dced8ae1f8b478",
+    "changed_artifacts": [
+      "gain_cal_controller.va",
+      "residue_amp_core.va",
+      "residue_amp_gain_calibration_top.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_reset_disable_clear_missing",
+    "rationale": "Select fault class reset_disable_clear_missing under trigger 'reset_disable_clear_missing' because it exercises P_INCREMENT_OR_DECREMENT_THE_GAIN_CODE, P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 12,
+    "source_preferred_seed": "neg_001_controller_update_direction_wrong",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

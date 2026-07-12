@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-315",
+    "canonical_task_slug": "315-reference-ladder-buffered-taps",
+    "family_spec_sha256": "d3f729206c0bfa7cf043257225dd0972a2043fd8cf7b9dd1f68aef386b736ac5",
+    "mutation_catalog_sha256": "d5a67461f5b653ae04fb922779e69871811c0f60eeba43d5b963d5f229cbd2b0",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "315",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_rail_clamp_missing",
+    "testbench_suite": [
+      "neg_001_tap_spacing_wrong",
+      "neg_003_rail_clamp_missing",
+      "neg_004_enable_reset_ignored",
+      "neg_005_monotonic_flag_wrong",
+      "neg_002_reversed_reference_not_handled"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "7e73a792d2c30a84ea5c16d4cd66f45ef17372f9133bc7e9c29458c9f601be7d",
+    "changed_artifacts": [
+      "reference_ladder_buffered_taps.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_rail_clamp_missing",
+    "rationale": "Select fault class rail_clamp_missing under trigger 'rail_clamp_missing' because it exercises P_CLAMP_REVERSED_OR_OUT_OF_RANGE, P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 10,
+    "source_preferred_seed": "neg_001_tap_spacing_wrong",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

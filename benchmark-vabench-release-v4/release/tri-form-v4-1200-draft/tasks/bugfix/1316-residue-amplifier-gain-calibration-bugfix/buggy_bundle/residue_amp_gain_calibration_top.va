@@ -1,0 +1,14 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module residue_amp_gain_calibration_top(vin, residue_ref, clk, rst, cal_en, gain_2, gain_1, gain_0, vout, error_metric, locked);
+    inout vin, residue_ref, clk, rst, cal_en, gain_2, gain_1, gain_0, vout, error_metric, locked;
+    electrical vin, residue_ref, clk, rst, cal_en, gain_2, gain_1, gain_0, vout, error_metric, locked;
+    parameter real vdd = 0.9; parameter real vss = 0.0; parameter real vcm = 0.45;
+    parameter real vth = 0.45; parameter real tr = 200p from (0:inf);
+    parameter real base_gain = 2.0; parameter real gain_lsb = 0.25; parameter real lock_tol = 15e-3;
+    residue_amp_core #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr), .base_gain(base_gain), .gain_lsb(gain_lsb))
+        u_core(vin, rst, cal_en, gain_2, gain_1, gain_0, vout);
+    gain_cal_controller #(.vdd(vdd), .vss(vss), .vcm(vcm), .vth(vth), .tr(tr), .lock_tol(lock_tol))
+        u_ctrl(vout, residue_ref, clk, rst, cal_en, gain_2, gain_1, gain_0, error_metric, locked);
+endmodule

@@ -1,0 +1,558 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "interleaved_adc_skew_monitor_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "40e-3",
+                "name": "skew_limit",
+                "override_behavior": "overrides skew_limit",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin_a",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin_b",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk_a",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk_b",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "skew_metric",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "magnitude_metric",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "alarm",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "interleaved_adc_skew_monitor_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "interleaved_adc_skew_monitor_top"
+            ],
+            "name": "sample_pair_latch",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin_a",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin_b",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk_a",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk_b",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sa",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sb",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "ready",
+                "position": 8
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "sample_pair_latch.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "interleaved_adc_skew_monitor_top"
+            ],
+            "name": "skew_metric_core",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "500p from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "40e-3",
+                "name": "skew_limit",
+                "override_behavior": "overrides skew_limit",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sa",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sb",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ready",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "skew_metric",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "magnitude_metric",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "alarm",
+                "position": 7
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "skew_metric_core.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/interleaved_adc_skew_monitor_top.va",
+    "buggy_bundle/sample_pair_latch.va",
+    "buggy_bundle/skew_metric_core.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "312",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "measurement_systems",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Interleaved ADC Timing-skew Monitor"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+      "observable_contract": "On reset or when disabled, clear both sample states and all metrics.",
+      "required_signals": [
+        "time",
+        "vin_a",
+        "vin_b",
+        "clk_a",
+        "clk_b",
+        "rst",
+        "enable",
+        "skew_metric",
+        "magnitude_metric",
+        "alarm"
+      ]
+    },
+    {
+      "id": "P_CAPTURE_VIN_A_ON_RISING_CLK",
+      "observable_contract": "Capture `vin_a` on rising `clk_a` and `vin_b` on rising `clk_b`.",
+      "required_signals": [
+        "time",
+        "vin_a",
+        "vin_b",
+        "clk_a",
+        "clk_b",
+        "rst",
+        "enable",
+        "skew_metric",
+        "magnitude_metric",
+        "alarm"
+      ]
+    },
+    {
+      "id": "P_ESTIMATE_A_SKEW_PROXY_FROM_THE",
+      "observable_contract": "Estimate a skew proxy from the signed difference between the two most recent samples.",
+      "required_signals": [
+        "time",
+        "vin_a",
+        "vin_b",
+        "clk_a",
+        "clk_b",
+        "rst",
+        "enable",
+        "skew_metric",
+        "magnitude_metric",
+        "alarm"
+      ]
+    },
+    {
+      "id": "P_DRIVE_SKEW_METRIC_WITH_THE_ABSOLUTE",
+      "observable_contract": "Drive `skew_metric` with the absolute skew proxy and `magnitude_metric` with the average sample magnitude.",
+      "required_signals": [
+        "time",
+        "vin_a",
+        "vin_b",
+        "clk_a",
+        "clk_b",
+        "rst",
+        "enable",
+        "skew_metric",
+        "magnitude_metric",
+        "alarm"
+      ]
+    },
+    {
+      "id": "P_ASSERT_ALARM_WHEN_SKEW_METRIC_EXCEEDS",
+      "observable_contract": "Assert `alarm` when `skew_metric` exceeds `skew_limit` for two consecutive comparisons.",
+      "required_signals": [
+        "time",
+        "vin_a",
+        "vin_b",
+        "clk_a",
+        "clk_b",
+        "rst",
+        "enable",
+        "skew_metric",
+        "magnitude_metric",
+        "alarm"
+      ]
+    },
+    {
+      "id": "P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE",
+      "observable_contract": "Use only voltage-domain behavioral state and voltage contributions on public electrical outputs.",
+      "required_signals": [
+        "time",
+        "vin_a",
+        "vin_b",
+        "clk_a",
+        "clk_b",
+        "rst",
+        "enable",
+        "skew_metric",
+        "magnitude_metric",
+        "alarm"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "interleaved_adc_skew_monitor_top.va",
+    "sample_pair_latch.va",
+    "skew_metric_core.va"
+  ],
+  "task_id": "v4-1312",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin_a",
+            "port_ref": "vin_a",
+            "position": 0
+          },
+          {
+            "net": "vin_b",
+            "port_ref": "vin_b",
+            "position": 1
+          },
+          {
+            "net": "clk_a",
+            "port_ref": "clk_a",
+            "position": 2
+          },
+          {
+            "net": "clk_b",
+            "port_ref": "clk_b",
+            "position": 3
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 4
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 5
+          },
+          {
+            "net": "skew_metric",
+            "port_ref": "skew_metric",
+            "position": 6
+          },
+          {
+            "net": "magnitude_metric",
+            "port_ref": "magnitude_metric",
+            "position": 7
+          },
+          {
+            "net": "alarm",
+            "port_ref": "alarm",
+            "position": 8
+          }
+        ],
+        "module_ref": "interleaved_adc_skew_monitor_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin_a",
+      "vin_b",
+      "clk_a",
+      "clk_b",
+      "rst",
+      "enable",
+      "skew_metric",
+      "magnitude_metric",
+      "alarm"
+    ]
+  }
+}

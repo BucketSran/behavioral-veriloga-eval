@@ -1,0 +1,578 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "capacitor_mismatch_cal_engine_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "20e-3",
+                "name": "err_tol",
+                "override_behavior": "overrides err_tol",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "6e-3",
+                "name": "corr_lsb",
+                "override_behavior": "overrides corr_lsb",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "err_in",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "cal_3",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "cal_2",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "cal_1",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "cal_0",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "correction_metric",
+                "position": 8
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "done",
+                "position": 9
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "capacitor_mismatch_cal_engine_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "capacitor_mismatch_cal_engine_top"
+            ],
+            "name": "cal_code_accumulator",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "20e-3",
+                "name": "err_tol",
+                "override_behavior": "overrides err_tol",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "250p from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "err_in",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "cal_3",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "cal_2",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "cal_1",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "cal_0",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "done",
+                "position": 8
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "cal_code_accumulator.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "capacitor_mismatch_cal_engine_top"
+            ],
+            "name": "correction_metric_dac",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "6e-3",
+                "name": "corr_lsb",
+                "override_behavior": "overrides corr_lsb",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "cal_3",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "cal_2",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "cal_1",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "cal_0",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "correction_metric",
+                "position": 6
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "correction_metric_dac.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/capacitor_mismatch_cal_engine_top.va",
+    "buggy_bundle/cal_code_accumulator.va",
+    "buggy_bundle/correction_metric_dac.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "317",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "calibration_control_systems",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Capacitor Mismatch Calibration Engine"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+      "observable_contract": "On reset or when disabled, clear the calibration code, metric, and `done`.",
+      "required_signals": [
+        "time",
+        "err_in",
+        "clk",
+        "rst",
+        "enable",
+        "cal_3",
+        "cal_2",
+        "cal_1",
+        "cal_0",
+        "correction_metric",
+        "done"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+      "observable_contract": "On each enabled rising `clk` edge, update a signed correction accumulator using the sign of `err_in - vcm`.",
+      "required_signals": [
+        "time",
+        "err_in",
+        "clk",
+        "rst",
+        "enable",
+        "cal_3",
+        "cal_2",
+        "cal_1",
+        "cal_0",
+        "correction_metric",
+        "done"
+      ]
+    },
+    {
+      "id": "P_SATURATE_THE_PUBLIC_4_BIT_CALIBRATION",
+      "observable_contract": "Saturate the public 4-bit calibration code at the endpoints.",
+      "required_signals": [
+        "time",
+        "err_in",
+        "clk",
+        "rst",
+        "enable",
+        "cal_3",
+        "cal_2",
+        "cal_1",
+        "cal_0",
+        "correction_metric",
+        "done"
+      ]
+    },
+    {
+      "id": "P_DRIVE_CORRECTION_METRIC_AS_THE_VOLTAGE",
+      "observable_contract": "Drive `correction_metric` as the voltage-coded correction applied by the active code.",
+      "required_signals": [
+        "time",
+        "err_in",
+        "clk",
+        "rst",
+        "enable",
+        "cal_3",
+        "cal_2",
+        "cal_1",
+        "cal_0",
+        "correction_metric",
+        "done"
+      ]
+    },
+    {
+      "id": "P_ASSERT_DONE_AFTER_EIGHT_ENABLED_UPDATES",
+      "observable_contract": "Assert `done` after eight enabled updates or when the error remains within `err_tol` for two updates.",
+      "required_signals": [
+        "time",
+        "err_in",
+        "clk",
+        "rst",
+        "enable",
+        "cal_3",
+        "cal_2",
+        "cal_1",
+        "cal_0",
+        "correction_metric",
+        "done"
+      ]
+    },
+    {
+      "id": "P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE",
+      "observable_contract": "Use only voltage-domain behavioral state and voltage contributions on public electrical outputs.",
+      "required_signals": [
+        "time",
+        "err_in",
+        "clk",
+        "rst",
+        "enable",
+        "cal_3",
+        "cal_2",
+        "cal_1",
+        "cal_0",
+        "correction_metric",
+        "done"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "capacitor_mismatch_cal_engine_top.va",
+    "cal_code_accumulator.va",
+    "correction_metric_dac.va"
+  ],
+  "task_id": "v4-1317",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "err_in",
+            "port_ref": "err_in",
+            "position": 0
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 3
+          },
+          {
+            "net": "cal_3",
+            "port_ref": "cal_3",
+            "position": 4
+          },
+          {
+            "net": "cal_2",
+            "port_ref": "cal_2",
+            "position": 5
+          },
+          {
+            "net": "cal_1",
+            "port_ref": "cal_1",
+            "position": 6
+          },
+          {
+            "net": "cal_0",
+            "port_ref": "cal_0",
+            "position": 7
+          },
+          {
+            "net": "correction_metric",
+            "port_ref": "correction_metric",
+            "position": 8
+          },
+          {
+            "net": "done",
+            "port_ref": "done",
+            "position": 9
+          }
+        ],
+        "module_ref": "capacitor_mismatch_cal_engine_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "err_in",
+      "clk",
+      "rst",
+      "enable",
+      "cal_3",
+      "cal_2",
+      "cal_1",
+      "cal_0",
+      "correction_metric",
+      "done"
+    ]
+  }
+}

@@ -1,0 +1,56 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module skew_metric_core(sa, sb, ready, rst, enable, skew_metric, magnitude_metric, alarm);
+    input sa, sb, ready, rst, enable;
+    output skew_metric, magnitude_metric, alarm;
+    electrical sa, sb, ready, rst, enable, skew_metric, magnitude_metric, alarm;
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200p from (0:inf);
+    parameter real tick = 500p from (0:inf);
+    parameter real skew_limit = 40e-3;
+    integer consecutive;
+    real skew_v, mag_v, alarm_v;
+
+    analog function real clip01;
+        input x;
+        real x;
+        begin
+            if (x < vss) clip01 = vss;
+            else if (x > vdd) clip01 = vdd;
+            else clip01 = x;
+        end
+    endfunction
+
+    analog function real absval;
+        input x;
+        real x;
+        begin
+            absval = (x < 0.0) ? -x : x;
+        end
+    endfunction
+
+    analog begin
+        @(initial_step) begin consecutive = 0; skew_v = vss; mag_v = vss; alarm_v = vss; end
+        @(timer(0, tick)) begin
+            if (V(rst) > vth || V(enable) <= vth || V(ready) <= vth) begin
+                consecutive = 0;
+                skew_v = vss;
+                mag_v = vss;
+                alarm_v = vss;
+            end else begin
+                skew_v = clip01(absval(0.5 * (V(sa) + V(sb)) - vcm));
+                mag_v = clip01(0.5 * (absval(V(sa) - vcm) + absval(V(sb) - vcm)));
+                if (skew_v > skew_limit) consecutive = consecutive + 1;
+                else consecutive = 0;
+                alarm_v = (consecutive >= 2) ? vdd : vss;
+            end
+        end
+        V(skew_metric) <+ transition(skew_v, 0, tr, tr);
+        V(magnitude_metric) <+ transition(mag_v, 0, tr, tr);
+        V(alarm) <+ transition(alarm_v, 0, tr, tr);
+    end
+endmodule

@@ -1,0 +1,316 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "unary_dac_glitch_energy_metric",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "250p from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "code_2",
+                "position": 3
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "code_1",
+                "position": 4
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "code_0",
+                "position": 5
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 6
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "glitch_metric",
+                "position": 7
+              },
+              {
+                "direction": "inout",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "unary_dac_glitch_energy_metric.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/unary_dac_glitch_energy_metric.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "319",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "data_converter_systems",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Unary DAC Glitch-energy Metric"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+      "observable_contract": "On reset or when disabled, clear output, previous code, glitch metric, and `valid`.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "code_2",
+        "code_1",
+        "code_0",
+        "vout",
+        "glitch_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+      "observable_contract": "On each enabled rising `clk` edge, decode the 3-bit code as a unary element count.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "code_2",
+        "code_1",
+        "code_0",
+        "vout",
+        "glitch_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_DRIVE_VOUT_PROPORTIONAL_TO_THE_DECODED",
+      "observable_contract": "Drive `vout` proportional to the decoded count.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "code_2",
+        "code_1",
+        "code_0",
+        "vout",
+        "glitch_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_DRIVE_GLITCH_METRIC_PROPORTIONAL_TO_THE",
+      "observable_contract": "Drive `glitch_metric` proportional to the absolute change in count since the previous enabled update.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "code_2",
+        "code_1",
+        "code_0",
+        "vout",
+        "glitch_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ASSERT_VALID_AFTER_THE_FIRST_ENABLED",
+      "observable_contract": "Assert `valid` after the first enabled code update.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "code_2",
+        "code_1",
+        "code_0",
+        "vout",
+        "glitch_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE",
+      "observable_contract": "Use only voltage-domain behavioral state and voltage contributions on public electrical outputs.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "enable",
+        "code_2",
+        "code_1",
+        "code_0",
+        "vout",
+        "glitch_metric",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "unary_dac_glitch_energy_metric.va"
+  ],
+  "task_id": "v4-1319",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 2
+          },
+          {
+            "net": "code_2",
+            "port_ref": "code_2",
+            "position": 3
+          },
+          {
+            "net": "code_1",
+            "port_ref": "code_1",
+            "position": 4
+          },
+          {
+            "net": "code_0",
+            "port_ref": "code_0",
+            "position": 5
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 6
+          },
+          {
+            "net": "glitch_metric",
+            "port_ref": "glitch_metric",
+            "position": 7
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 8
+          }
+        ],
+        "module_ref": "unary_dac_glitch_energy_metric",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "rst",
+      "enable",
+      "code_2",
+      "code_1",
+      "code_0",
+      "vout",
+      "glitch_metric",
+      "valid"
+    ]
+  }
+}

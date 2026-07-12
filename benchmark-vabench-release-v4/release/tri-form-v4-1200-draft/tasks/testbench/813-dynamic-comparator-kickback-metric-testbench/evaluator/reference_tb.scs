@@ -1,0 +1,14 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/dynamic_comparator_kickback_metric.va"
+
+Vvinp (vinp 0) vsource type=pwl wave=[0 0.38 7n 0.38 13n 0.53 22n 0.53 31n 0.80 43n 0.80 56n 0.40 76n 0.64]
+Vvinn (vinn 0) vsource type=pwl wave=[0 0.52 7n 0.52 13n 0.49 22n 0.49 31n 0.24 43n 0.24 56n 0.60 76n 0.55]
+Vclk (clk 0) vsource type=pulse val0=0 val1=0.9 period=5n width=2n delay=2.4n rise=60p fall=60p
+Vrst (rst 0) vsource type=pwl wave=[0 0.9 1.7n 0.9 1.8n 0 50n 0 50.1n 0.9 53n 0.9 53.1n 0 76n 0]
+Venable (enable 0) vsource type=pwl wave=[0 0 4n 0 4.1n 0.9 41n 0.9 41.1n 0 46n 0 46.1n 0.9 76n 0.9]
+XDUT (vinp vinn clk rst enable decision kickback_metric valid) dynamic_comparator_kickback_metric
+
+tran tran stop=76n maxstep=80p
+save vinp vinn clk rst enable decision kickback_metric valid

@@ -1,0 +1,589 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "muxed_track_hold_array_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin0",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin1",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin2",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sel_1",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sel_0",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sample_en",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "channel_metric",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 10
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "muxed_track_hold_array_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "muxed_track_hold_array_top"
+            ],
+            "name": "track_hold_cell",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sample_en",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vhold",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "held_valid",
+                "position": 5
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "track_hold_cell.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "muxed_track_hold_array_top"
+            ],
+            "name": "readout_mux",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "400p from (0:inf)",
+                "name": "tick",
+                "override_behavior": "overrides tick",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vh0",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vh1",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vh2",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "valid0",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "valid1",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "valid2",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sel_1",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sel_0",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "channel_metric",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 11
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "readout_mux.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "311",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "sampling_analog_memory",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Muxed Track-hold Array Readout"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_RESET_CLEAR_ALL_HELD_CHANNEL",
+      "observable_contract": "On reset, clear all held channel states, output, channel metric, and `valid`.",
+      "required_signals": [
+        "time",
+        "vin0",
+        "vin1",
+        "vin2",
+        "clk",
+        "rst",
+        "sel_1",
+        "sel_0",
+        "sample_en",
+        "vout",
+        "channel_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_ENABLED_SAMPLING_CLOCK_EDGE",
+      "observable_contract": "On each enabled sampling clock edge, capture all three input channels into separate hold states.",
+      "required_signals": [
+        "time",
+        "vin0",
+        "vin1",
+        "vin2",
+        "clk",
+        "rst",
+        "sel_1",
+        "sel_0",
+        "sample_en",
+        "vout",
+        "channel_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_DECODE_SEL_1_SEL_0_AND",
+      "observable_contract": "Decode `sel_1..sel_0` and route the selected held channel to `vout`; invalid code 3 must hold the previous output and clear `valid`.",
+      "required_signals": [
+        "time",
+        "vin0",
+        "vin1",
+        "vin2",
+        "clk",
+        "rst",
+        "sel_1",
+        "sel_0",
+        "sample_en",
+        "vout",
+        "channel_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_EXPOSE_THE_SELECTED_CHANNEL_INDEX_ON",
+      "observable_contract": "Expose the selected channel index on `channel_metric` as a voltage-coded metric.",
+      "required_signals": [
+        "time",
+        "vin0",
+        "vin1",
+        "vin2",
+        "clk",
+        "rst",
+        "sel_1",
+        "sel_0",
+        "sample_en",
+        "vout",
+        "channel_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_HOLD_ALL_CHANNEL_SAMPLES_BETWEEN_SAMPLING",
+      "observable_contract": "Hold all channel samples between sampling events.",
+      "required_signals": [
+        "time",
+        "vin0",
+        "vin1",
+        "vin2",
+        "clk",
+        "rst",
+        "sel_1",
+        "sel_0",
+        "sample_en",
+        "vout",
+        "channel_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE",
+      "observable_contract": "Use only voltage-domain behavioral state and voltage contributions on public electrical outputs.",
+      "required_signals": [
+        "time",
+        "vin0",
+        "vin1",
+        "vin2",
+        "clk",
+        "rst",
+        "sel_1",
+        "sel_0",
+        "sample_en",
+        "vout",
+        "channel_metric",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/muxed_track_hold_array_top.va",
+    "supplied_dut/track_hold_cell.va",
+    "supplied_dut/readout_mux.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-811",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin0",
+            "port_ref": "vin0",
+            "position": 0
+          },
+          {
+            "net": "vin1",
+            "port_ref": "vin1",
+            "position": 1
+          },
+          {
+            "net": "vin2",
+            "port_ref": "vin2",
+            "position": 2
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 3
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 4
+          },
+          {
+            "net": "sel_1",
+            "port_ref": "sel_1",
+            "position": 5
+          },
+          {
+            "net": "sel_0",
+            "port_ref": "sel_0",
+            "position": 6
+          },
+          {
+            "net": "sample_en",
+            "port_ref": "sample_en",
+            "position": 7
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 8
+          },
+          {
+            "net": "channel_metric",
+            "port_ref": "channel_metric",
+            "position": 9
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 10
+          }
+        ],
+        "module_ref": "muxed_track_hold_array_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin0",
+      "vin1",
+      "vin2",
+      "clk",
+      "rst",
+      "sel_1",
+      "sel_0",
+      "sample_en",
+      "vout",
+      "channel_metric",
+      "valid"
+    ]
+  }
+}

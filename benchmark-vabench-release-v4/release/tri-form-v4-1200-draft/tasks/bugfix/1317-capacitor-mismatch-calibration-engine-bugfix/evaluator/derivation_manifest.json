@@ -1,0 +1,39 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-317",
+    "canonical_task_slug": "317-capacitor-mismatch-calibration-engine",
+    "family_spec_sha256": "2b29141377d9be92578a6d3bd2ffe534c3d1b1b2caf5be56ede3a322dfe78a9e",
+    "mutation_catalog_sha256": "3d516a9de463375c0ca7bdc4d16fc85a18740f39eb124ef5c58b71dce1ed68ff",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "317",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_accumulator_update_direction_wrong",
+    "testbench_suite": [
+      "neg_001_accumulator_update_direction_wrong",
+      "neg_002_correction_metric_lsb_wrong",
+      "neg_003_reset_disable_clear_missing",
+      "neg_004_done_qualification_too_early",
+      "neg_005_saturation_endpoint_wrong"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "342a1f9c92830106e9519b96b1d8ed52cffa3b3f5d982e877d2c5392f0c35aae",
+    "changed_artifacts": [
+      "cal_code_accumulator.va",
+      "capacitor_mismatch_cal_engine_top.va",
+      "correction_metric_dac.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_accumulator_update_direction_wrong",
+    "rationale": "Select fault class accumulator_update_direction_wrong under trigger 'accumulator_update_direction_wrong' because it exercises P_ON_RESET_OR_WHEN_DISABLED_CLEAR as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 10,
+    "source_preferred_seed": "neg_001_accumulator_update_direction_wrong",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-313",
+    "canonical_task_slug": "313-dynamic-comparator-kickback-metric",
+    "family_spec_sha256": "9ccb61f872241f103c8fc5cc34d7fb7c9cc1cfa3c95cb728100883e9ad665beb",
+    "mutation_catalog_sha256": "e7c7e68c412b9632baa95165e53b12c846d64eb3e4ec36659b549dd8e5105c27",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "313",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_decision_polarity_inverted",
+    "testbench_suite": [
+      "neg_002_kickback_increases_with_overdrive",
+      "neg_001_decision_polarity_inverted",
+      "neg_003_valid_asserts_without_clock",
+      "neg_004_reset_does_not_clear",
+      "neg_005_enable_ignored"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "26f4ded5b0df06be94fc039c2ec5747150c2766e465f482b1df0eba4e1ceb8cf",
+    "changed_artifacts": [
+      "dynamic_comparator_kickback_metric.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_decision_polarity_inverted",
+    "rationale": "Select fault class decision_polarity_inverted under trigger 'decision_polarity_inverted' because it exercises P_ON_RESET_OR_WHEN_DISABLED_CLEAR, P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 11,
+    "source_preferred_seed": "neg_002_kickback_increases_with_overdrive",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

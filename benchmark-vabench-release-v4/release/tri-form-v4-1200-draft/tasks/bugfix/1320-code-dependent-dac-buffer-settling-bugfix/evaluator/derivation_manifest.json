@@ -1,0 +1,39 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-320",
+    "canonical_task_slug": "320-code-dependent-dac-buffer-settling",
+    "family_spec_sha256": "fa05e3a81f9ac287e2858a489dba34bff08af535896812f87b935bf35f8f17d0",
+    "mutation_catalog_sha256": "2a099e98ec2de17e5691c9afe273ed42926b33c0b91af2ef15c46b1c700dd191",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "320",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_wrong_clock_edge",
+    "testbench_suite": [
+      "neg_002_wrong_clock_edge",
+      "neg_003_wrong_msb_weight",
+      "neg_004_unbounded_settling_jump",
+      "neg_005_single_update_settled",
+      "neg_001_wrong_clear_level"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "dd6c35320b6e4515457b1256d5602fd311e7047b437cdb66964ec829e8818f8e",
+    "changed_artifacts": [
+      "code_dependent_dac_buffer_top.va",
+      "ideal_code_dac.va",
+      "settling_buffer_state.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_wrong_clock_edge",
+    "rationale": "Select fault class wrong_clock_edge under trigger 'enabled rising and falling clock phases are both exercised' because it exercises P_ON_EACH_ENABLED_RISING_CLK_EDGE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 18,
+    "source_preferred_seed": "neg_002_wrong_clock_edge",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

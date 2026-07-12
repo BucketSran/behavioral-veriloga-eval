@@ -1,0 +1,298 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "dynamic_comparator_kickback_metric",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vinp",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vinn",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "decision",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "kickback_metric",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "dynamic_comparator_kickback_metric.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/dynamic_comparator_kickback_metric.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "313",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "comparator_decision_systems",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Dynamic Comparator Kickback Metric"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_ON_RESET_OR_WHEN_DISABLED_CLEAR",
+      "observable_contract": "On reset or when disabled, clear `decision`, `kickback_metric`, and `valid`.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "enable",
+        "decision",
+        "kickback_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_ENABLED_RISING_CLK_EDGE",
+      "observable_contract": "On each enabled rising `clk` edge, latch the sign of `vinp - vinn` into `decision`.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "enable",
+        "decision",
+        "kickback_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_DRIVE_KICKBACK_METRIC_AS_A_VOLTAGE",
+      "observable_contract": "Drive `kickback_metric` as a voltage-coded function of the absolute input overdrive.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "enable",
+        "decision",
+        "kickback_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_SMALL_OVERDRIVE_MUST_PRODUCE_A_LARGER",
+      "observable_contract": "Small overdrive must produce a larger kickback metric than large overdrive, up to the public rail limits.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "enable",
+        "decision",
+        "kickback_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_ASSERT_VALID_AFTER_EACH_COMPLETED_DECISION",
+      "observable_contract": "Assert `valid` after each completed decision update.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "enable",
+        "decision",
+        "kickback_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE",
+      "observable_contract": "Use only voltage-domain behavioral state and voltage contributions on public electrical outputs.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "clk",
+        "rst",
+        "enable",
+        "decision",
+        "kickback_metric",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "dynamic_comparator_kickback_metric.va"
+  ],
+  "task_id": "v4-1313",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vinp",
+            "port_ref": "vinp",
+            "position": 0
+          },
+          {
+            "net": "vinn",
+            "port_ref": "vinn",
+            "position": 1
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 4
+          },
+          {
+            "net": "decision",
+            "port_ref": "decision",
+            "position": 5
+          },
+          {
+            "net": "kickback_metric",
+            "port_ref": "kickback_metric",
+            "position": 6
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 7
+          }
+        ],
+        "module_ref": "dynamic_comparator_kickback_metric",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vinp",
+      "vinn",
+      "clk",
+      "rst",
+      "enable",
+      "decision",
+      "kickback_metric",
+      "valid"
+    ]
+  }
+}

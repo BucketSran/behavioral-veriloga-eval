@@ -1,0 +1,39 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-311",
+    "canonical_task_slug": "311-muxed-track-hold-array-readout",
+    "family_spec_sha256": "6d9ff3fab0b003f24ea9315039611c6ffe238b808bb10d14450d72c3426e62ff",
+    "mutation_catalog_sha256": "c254061bd4a1c28fef3fbb9e64a70a9dc276d034ee2b9d7bf06f14356b9d634e",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "311",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_invalid_code_updates_output",
+    "testbench_suite": [
+      "neg_002_invalid_code_updates_output",
+      "neg_003_sample_enable_ignored",
+      "neg_004_reset_does_not_clear",
+      "neg_005_channel_metric_reversed",
+      "neg_001_select_code_reversed"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "9d4e6404acc2f6e3bf38bd7d23e258adb7b46a093b9e991dc7a6345c18a37f0c",
+    "changed_artifacts": [
+      "muxed_track_hold_array_top.va",
+      "readout_mux.va",
+      "track_hold_cell.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_invalid_code_updates_output",
+    "rationale": "Select fault class invalid_code_updates_output under trigger 'invalid_code_updates_output' because it exercises P_ON_EACH_ENABLED_SAMPLING_CLOCK_EDGE, P_USE_ONLY_VOLTAGE_DOMAIN_BEHAVIORAL_STATE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 9,
+    "source_preferred_seed": "neg_002_invalid_code_updates_output",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

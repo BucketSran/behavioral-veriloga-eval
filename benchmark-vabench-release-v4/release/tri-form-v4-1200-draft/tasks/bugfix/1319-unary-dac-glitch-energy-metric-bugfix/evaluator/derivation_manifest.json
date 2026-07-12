@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-319",
+    "canonical_task_slug": "319-unary-dac-glitch-energy-metric",
+    "family_spec_sha256": "b0ee317b8eecb09fd8f94314ea10a14981c84209b232d9bc54d4ba2338d727c1",
+    "mutation_catalog_sha256": "400218ad054855993c0180a181324f874fe424a1c2818d5a43ce2cc4ee1d09db",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "319",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_reset_disable_clear_missing",
+    "testbench_suite": [
+      "neg_001_unary_transfer_scale_wrong",
+      "neg_002_glitch_metric_missing",
+      "neg_003_reset_disable_clear_missing",
+      "neg_004_valid_flag_missing",
+      "neg_005_code_mapping_reversed"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "1ed78c200a273b354fc5874e6820f620a5a451d1134ecb2def85670c157d5a63",
+    "changed_artifacts": [
+      "unary_dac_glitch_energy_metric.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_reset_disable_clear_missing",
+    "rationale": "Select fault class reset_disable_clear_missing under trigger 'reset_disable_clear_missing' because it exercises P_DRIVE_VOUT_PROPORTIONAL_TO_THE_DECODED as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 9,
+    "source_preferred_seed": "neg_001_unary_transfer_scale_wrong",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}
