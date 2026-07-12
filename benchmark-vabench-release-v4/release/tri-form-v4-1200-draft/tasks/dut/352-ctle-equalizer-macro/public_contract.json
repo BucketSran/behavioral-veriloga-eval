@@ -1,0 +1,327 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "ctle_equalizer",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.0",
+                "name": "base_gain",
+                "override_behavior": "overrides base_gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.08",
+                "name": "boost_step",
+                "override_behavior": "overrides boost_step",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "120p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "boost_2",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "boost_1",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "boost_0",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "edge_metric",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sat_flag",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "ctle_equalizer.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "family_id": "352",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "serdes_equalization_systems",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "CTLE Equalizer Macro"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_INITIALIZES_THE_EQUALIZED_OUTPUT_TO",
+      "observable_contract": "Reset initializes the equalized output to common mode and clears metric outputs.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "boost_2",
+        "boost_1",
+        "boost_0",
+        "vout",
+        "edge_metric",
+        "sat_flag"
+      ]
+    },
+    {
+      "id": "P_ON_EACH_RISING_CLK_SAMPLE_THE",
+      "observable_contract": "On each rising `clk`, sample the boost code and the current input.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "boost_2",
+        "boost_1",
+        "boost_0",
+        "vout",
+        "edge_metric",
+        "sat_flag"
+      ]
+    },
+    {
+      "id": "P_DRIVE_VOUT_FROM_THE_CURRENT_INPUT",
+      "observable_contract": "Drive `vout` from the current input plus a boost-code-scaled edge term relative to the previous sampled input.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "boost_2",
+        "boost_1",
+        "boost_0",
+        "vout",
+        "edge_metric",
+        "sat_flag"
+      ]
+    },
+    {
+      "id": "P_CLAMP_VOUT_TO_THE_VSS_TO",
+      "observable_contract": "Clamp `vout` to the `vss` to `vdd` range.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "boost_2",
+        "boost_1",
+        "boost_0",
+        "vout",
+        "edge_metric",
+        "sat_flag"
+      ]
+    },
+    {
+      "id": "P_EDGE_METRIC_REPORTS_THE_ABSOLUTE_BOOSTED",
+      "observable_contract": "`edge_metric` reports the absolute boosted edge contribution after clipping to full scale.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "boost_2",
+        "boost_1",
+        "boost_0",
+        "vout",
+        "edge_metric",
+        "sat_flag"
+      ]
+    },
+    {
+      "id": "P_SAT_FLAG_IS_HIGH_WHEN_THE",
+      "observable_contract": "`sat_flag` is high when the unclamped equalized target would exceed either output rail.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "boost_2",
+        "boost_1",
+        "boost_0",
+        "vout",
+        "edge_metric",
+        "sat_flag"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "ctle_equalizer.va"
+  ],
+  "task_id": "v4-352",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "boost_2",
+            "port_ref": "boost_2",
+            "position": 3
+          },
+          {
+            "net": "boost_1",
+            "port_ref": "boost_1",
+            "position": 4
+          },
+          {
+            "net": "boost_0",
+            "port_ref": "boost_0",
+            "position": 5
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 6
+          },
+          {
+            "net": "edge_metric",
+            "port_ref": "edge_metric",
+            "position": 7
+          },
+          {
+            "net": "sat_flag",
+            "port_ref": "sat_flag",
+            "position": 8
+          }
+        ],
+        "module_ref": "ctle_equalizer",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "clk",
+      "rst",
+      "boost_2",
+      "boost_1",
+      "boost_0",
+      "vout",
+      "edge_metric",
+      "sat_flag"
+    ]
+  }
+}

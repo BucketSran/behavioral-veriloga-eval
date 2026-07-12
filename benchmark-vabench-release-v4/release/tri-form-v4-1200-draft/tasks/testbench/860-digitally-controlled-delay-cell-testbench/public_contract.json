@@ -1,0 +1,326 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "digitally_controlled_delay_cell",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides public vdd behavior for module digitally_controlled_delay_cell",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides public vss behavior for module digitally_controlled_delay_cell",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides public vth behavior for module digitally_controlled_delay_cell",
+                "type": "real",
+                "units": null,
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "20e-12",
+                "name": "delay_min",
+                "override_behavior": "overrides public delay_min behavior for module digitally_controlled_delay_cell",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "3e-12",
+                "name": "delay_lsb",
+                "override_behavior": "overrides public delay_lsb behavior for module digitally_controlled_delay_cell",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              },
+              {
+                "default": "100p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides public tr behavior for module digitally_controlled_delay_cell",
+                "type": "real",
+                "units": "s",
+                "valid_range": "declared Verilog-A parameter constraint or finite portable value"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in_clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "load",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "code_5",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "code_4",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "code_3",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "code_2",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "code_1",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "code_0",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out_clk",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "delay_metric",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "valid",
+                "position": 11
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "digitally_controlled_delay_cell.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "360",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "pll_clock_timing_systems",
+    "difficulty": "D3",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Digitally Controlled Delay Cell"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A suitable for transient simulation.",
+    "Use public voltage contributions only and preserve the declared artifact and module interfaces.",
+    "Do not hard-code evaluator stimulus, sample windows, checker tolerances, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_CLEAR",
+      "observable_contract": "Reset clears the loaded code state, delayed clock, delay metric, valid indication, and pending edges.",
+      "required_signals": [
+        "time",
+        "rst",
+        "load",
+        "out_clk",
+        "delay_metric",
+        "valid"
+      ]
+    },
+    {
+      "id": "P_CODE_CAPTURE_METRIC",
+      "observable_contract": "A rising load edge captures the six-bit unsigned code and the delay metric reports the normalized captured code.",
+      "required_signals": [
+        "time",
+        "load",
+        "code_5",
+        "code_4",
+        "code_3",
+        "code_2",
+        "code_1",
+        "code_0",
+        "delay_metric"
+      ]
+    },
+    {
+      "id": "P_EDGE_DELAY_MAPPING",
+      "observable_contract": "Each input-clock edge appears at the output after delay_min plus delay_lsb times the code captured for that edge.",
+      "required_signals": [
+        "time",
+        "in_clk",
+        "out_clk",
+        "load",
+        "code_5",
+        "code_4",
+        "code_3",
+        "code_2",
+        "code_1",
+        "code_0"
+      ]
+    },
+    {
+      "id": "P_PULSE_INTEGRITY_VALID",
+      "observable_contract": "Rising and falling edges receive equal delay, preserving pulse width, and valid asserts after the first delayed rising edge.",
+      "required_signals": [
+        "time",
+        "rst",
+        "in_clk",
+        "out_clk",
+        "valid"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/digitally_controlled_delay_cell.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-860",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "in_clk",
+            "port_ref": "in_clk",
+            "position": 0
+          },
+          {
+            "net": "load",
+            "port_ref": "load",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "code_5",
+            "port_ref": "code_5",
+            "position": 3
+          },
+          {
+            "net": "code_4",
+            "port_ref": "code_4",
+            "position": 4
+          },
+          {
+            "net": "code_3",
+            "port_ref": "code_3",
+            "position": 5
+          },
+          {
+            "net": "code_2",
+            "port_ref": "code_2",
+            "position": 6
+          },
+          {
+            "net": "code_1",
+            "port_ref": "code_1",
+            "position": 7
+          },
+          {
+            "net": "code_0",
+            "port_ref": "code_0",
+            "position": 8
+          },
+          {
+            "net": "out_clk",
+            "port_ref": "out_clk",
+            "position": 9
+          },
+          {
+            "net": "delay_metric",
+            "port_ref": "delay_metric",
+            "position": 10
+          },
+          {
+            "net": "valid",
+            "port_ref": "valid",
+            "position": 11
+          }
+        ],
+        "module_ref": "digitally_controlled_delay_cell",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "in_clk",
+      "load",
+      "rst",
+      "code_5",
+      "code_4",
+      "code_3",
+      "code_2",
+      "code_1",
+      "code_0",
+      "out_clk",
+      "delay_metric",
+      "valid"
+    ]
+  }
+}

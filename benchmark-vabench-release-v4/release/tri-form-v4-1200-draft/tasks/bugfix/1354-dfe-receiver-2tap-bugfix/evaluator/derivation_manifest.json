@@ -1,0 +1,40 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-354",
+    "canonical_task_slug": "354-dfe-receiver-2tap",
+    "family_spec_sha256": "6ea4bdf1b3727c894fdf9cda716f0f19c78f8a895ddc309af2eaa70940112656",
+    "mutation_catalog_sha256": "21b06b1d9786f5e8e292d02c98ebbeb81af6f9b6d28d68d323bd3996926e44a6",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "354",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_feedback_sign",
+    "testbench_suite": [
+      "neg_001_slicer_polarity",
+      "neg_005_reset_preserves_history",
+      "neg_003_second_tap_ignored",
+      "neg_004_wrong_clock_edge",
+      "neg_002_feedback_sign"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "5949b504358438222b8172848e412bb3c8db1a7d4b5e02194042ebb72ed214a9",
+    "changed_artifacts": [
+      "decision_latch.va",
+      "dfe_rx_top.va",
+      "feedback_filter.va",
+      "slicer.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_feedback_sign",
+    "rationale": "Select fault class wrong_polarity under trigger 'nonzero decision history and tap code' because it exercises P_CORRECTED_INPUT, P_TWO_TAP_FEEDBACK as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_001_slicer_polarity",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

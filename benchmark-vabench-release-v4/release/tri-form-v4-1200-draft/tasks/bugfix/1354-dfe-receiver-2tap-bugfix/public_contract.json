@@ -1,0 +1,584 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "slicer",
+              "feedback_filter",
+              "decision_latch"
+            ],
+            "name": "dfe_rx_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module dfe_rx_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module dfe_rx_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm for module dfe_rx_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module dfe_rx_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "20e-3",
+                "name": "tap_lsb",
+                "override_behavior": "overrides tap_lsb for module dfe_rx_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200e-12",
+                "name": "tr",
+                "override_behavior": "overrides tr for module dfe_rx_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "tap1_1",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "tap1_0",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "tap2_1",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "tap2_0",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "decision",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "fb_metric",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "slicer_in_dbg",
+                "position": 9
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "dfe_rx_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "slicer",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module slicer",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module slicer",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm for module slicer",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module slicer",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200e-12",
+                "name": "tr",
+                "override_behavior": "overrides tr for module slicer",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "fb_metric",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "decision_raw",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "slicer_in_dbg",
+                "position": 4
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "slicer.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "feedback_filter",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module feedback_filter",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module feedback_filter",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module feedback_filter",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "20e-3",
+                "name": "tap_lsb",
+                "override_behavior": "overrides tap_lsb for module feedback_filter",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200e-12",
+                "name": "tr",
+                "override_behavior": "overrides tr for module feedback_filter",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "tap1_1",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "tap1_0",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "tap2_1",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "tap2_0",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "hist1",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "hist2",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "fb_metric",
+                "position": 6
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "feedback_filter.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "decision_latch",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module decision_latch",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module decision_latch",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm for module decision_latch",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module decision_latch",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200e-12",
+                "name": "tr",
+                "override_behavior": "overrides tr for module decision_latch",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "slicer_in_dbg",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "decision",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "hist1",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "hist2",
+                "position": 5
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "decision_latch.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/dfe_rx_top.va",
+    "buggy_bundle/slicer.va",
+    "buggy_bundle/feedback_filter.va",
+    "buggy_bundle/decision_latch.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "354",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "serdes_equalization_systems",
+    "difficulty": "D4",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "2-tap DFE Receiver"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Preserve the declared module graph, port order, parameter override behavior, and public trace observability.",
+    "Do not hard-code evaluator stimulus, stop times, sample windows, checker tolerances, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_RESET_CLEAR",
+      "observable_contract": "Reset clears the decision history and all public outputs.",
+      "required_signals": [
+        "time",
+        "rst",
+        "decision",
+        "fb_metric",
+        "slicer_in_dbg"
+      ]
+    },
+    {
+      "id": "P_TWO_TAP_FEEDBACK",
+      "observable_contract": "The feedback metric uses both configured taps and the previous two decisions.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "tap1_1",
+        "tap1_0",
+        "tap2_1",
+        "tap2_0",
+        "decision",
+        "fb_metric"
+      ]
+    },
+    {
+      "id": "P_CORRECTED_INPUT",
+      "observable_contract": "The debug slicer input equals VIN minus the active signed feedback correction.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "fb_metric",
+        "slicer_in_dbg"
+      ]
+    },
+    {
+      "id": "P_CLOCKED_DECISION",
+      "observable_contract": "Each rising clock edge latches the threshold decision derived from the corrected input.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "decision",
+        "slicer_in_dbg"
+      ]
+    },
+    {
+      "id": "P_HISTORY_ORDER",
+      "observable_contract": "Feedback for a decision is based only on decisions from preceding clock edges.",
+      "required_signals": [
+        "time",
+        "vin",
+        "clk",
+        "rst",
+        "decision",
+        "fb_metric",
+        "slicer_in_dbg"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "dfe_rx_top.va",
+    "slicer.va",
+    "feedback_filter.va",
+    "decision_latch.va"
+  ],
+  "task_id": "v4-1354",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin",
+            "port_ref": "vin",
+            "position": 0
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "tap1_1",
+            "port_ref": "tap1_1",
+            "position": 3
+          },
+          {
+            "net": "tap1_0",
+            "port_ref": "tap1_0",
+            "position": 4
+          },
+          {
+            "net": "tap2_1",
+            "port_ref": "tap2_1",
+            "position": 5
+          },
+          {
+            "net": "tap2_0",
+            "port_ref": "tap2_0",
+            "position": 6
+          },
+          {
+            "net": "decision",
+            "port_ref": "decision",
+            "position": 7
+          },
+          {
+            "net": "fb_metric",
+            "port_ref": "fb_metric",
+            "position": 8
+          },
+          {
+            "net": "slicer_in_dbg",
+            "port_ref": "slicer_in_dbg",
+            "position": 9
+          }
+        ],
+        "module_ref": "dfe_rx_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin",
+      "clk",
+      "rst",
+      "tap1_1",
+      "tap1_0",
+      "tap2_1",
+      "tap2_0",
+      "decision",
+      "fb_metric",
+      "slicer_in_dbg"
+    ]
+  }
+}

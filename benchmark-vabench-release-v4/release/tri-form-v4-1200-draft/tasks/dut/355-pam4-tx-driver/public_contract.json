@@ -1,0 +1,549 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "gray_mapper",
+              "level_dac",
+              "preemphasis_driver"
+            ],
+            "name": "pam4_tx_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module pam4_tx_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module pam4_tx_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module pam4_tx_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.3",
+                "name": "level_step",
+                "override_behavior": "overrides level_step for module pam4_tx_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "60e-3",
+                "name": "emph_step",
+                "override_behavior": "overrides emph_step for module pam4_tx_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200e-12",
+                "name": "tr",
+                "override_behavior": "overrides tr for module pam4_tx_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "bit_msb",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "bit_lsb",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "emph_en",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "level_1",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "level_0",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "delta_dbg",
+                "position": 8
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "pam4_tx_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "gray_mapper",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module gray_mapper",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module gray_mapper",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module gray_mapper",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200e-12",
+                "name": "tr",
+                "override_behavior": "overrides tr for module gray_mapper",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "bit_msb",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "bit_lsb",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "level_1",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "level_0",
+                "position": 4
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "gray_mapper.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "level_dac",
+            "parameters": [
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module level_dac",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module level_dac",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.3",
+                "name": "level_step",
+                "override_behavior": "overrides level_step for module level_dac",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200e-12",
+                "name": "tr",
+                "override_behavior": "overrides tr for module level_dac",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "level_1",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "level_0",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "level_v",
+                "position": 3
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "level_dac.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "preemphasis_driver",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module preemphasis_driver",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module preemphasis_driver",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module preemphasis_driver",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.3",
+                "name": "level_step",
+                "override_behavior": "overrides level_step for module preemphasis_driver",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "60e-3",
+                "name": "emph_step",
+                "override_behavior": "overrides emph_step for module preemphasis_driver",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200e-12",
+                "name": "tr",
+                "override_behavior": "overrides tr for module preemphasis_driver",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "emph_en",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "level_1",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "level_0",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "level_v",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "delta_dbg",
+                "position": 7
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "preemphasis_driver.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "family_id": "355",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "serdes_io_systems",
+    "difficulty": "D4",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "PAM4 Transmitter Driver"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Preserve the declared module graph, port order, parameter override behavior, and public trace observability.",
+    "Do not hard-code evaluator stimulus, stop times, sample windows, checker tolerances, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_CLEAR",
+      "observable_contract": "Reset clears mapped level, transition delta, and output drive.",
+      "required_signals": [
+        "time",
+        "rst",
+        "vout",
+        "level_1",
+        "level_0",
+        "delta_dbg"
+      ]
+    },
+    {
+      "id": "P_GRAY_LEVEL_MAP",
+      "observable_contract": "The input bits map to levels 0, 1, 2, 3 in the declared Gray order.",
+      "required_signals": [
+        "time",
+        "bit_msb",
+        "bit_lsb",
+        "clk",
+        "rst",
+        "level_1",
+        "level_0"
+      ]
+    },
+    {
+      "id": "P_LEVEL_DAC",
+      "observable_contract": "The mapped level selects the corresponding level-step voltage.",
+      "required_signals": [
+        "time",
+        "clk",
+        "rst",
+        "level_1",
+        "level_0",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_PREEMPHASIS",
+      "observable_contract": "Enabled pre-emphasis follows the sign of the symbol-to-symbol mapped-level transition.",
+      "required_signals": [
+        "time",
+        "bit_msb",
+        "bit_lsb",
+        "clk",
+        "rst",
+        "emph_en",
+        "vout",
+        "level_1",
+        "level_0",
+        "delta_dbg"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_CLAMP",
+      "observable_contract": "The driven output remains between VSS and VDD.",
+      "required_signals": [
+        "time",
+        "rst",
+        "vout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "pam4_tx_top.va",
+    "gray_mapper.va",
+    "level_dac.va",
+    "preemphasis_driver.va"
+  ],
+  "task_id": "v4-355",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "bit_msb",
+            "port_ref": "bit_msb",
+            "position": 0
+          },
+          {
+            "net": "bit_lsb",
+            "port_ref": "bit_lsb",
+            "position": 1
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "emph_en",
+            "port_ref": "emph_en",
+            "position": 4
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 5
+          },
+          {
+            "net": "level_1",
+            "port_ref": "level_1",
+            "position": 6
+          },
+          {
+            "net": "level_0",
+            "port_ref": "level_0",
+            "position": 7
+          },
+          {
+            "net": "delta_dbg",
+            "port_ref": "delta_dbg",
+            "position": 8
+          }
+        ],
+        "module_ref": "pam4_tx_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "bit_msb",
+      "bit_lsb",
+      "clk",
+      "rst",
+      "emph_en",
+      "vout",
+      "level_1",
+      "level_0",
+      "delta_dbg"
+    ]
+  }
+}

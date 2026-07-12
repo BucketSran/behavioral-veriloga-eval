@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-353",
+    "canonical_task_slug": "353-ffe-transmitter-3tap",
+    "family_spec_sha256": "48070b562efbe38ed280971493ce0b86418d0f9ef0fe0eaabaac5bd55acb7e91",
+    "mutation_catalog_sha256": "f03cc8681c90e4bec8ef5492f58a3338a1daf693e2f5f42333997f8b2b2080d5",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "353",
+  "negative_assignment": {
+    "bugfix_seed": "neg_005_event_edge_wrong",
+    "testbench_suite": [
+      "neg_004_threshold_shifted",
+      "neg_001_zero",
+      "neg_002_half_scale",
+      "neg_005_event_edge_wrong",
+      "neg_003_inverted_transfer"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "c83d89ffe8ef1c58deb5732e61db41572b06e4e511563b43f79893015bfeee38",
+    "changed_artifacts": [
+      "ffe_tx_3tap.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_005_event_edge_wrong",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'semantic delay_edge mutation from gold' because it exercises P_HIGHER_TAP_CONTROL_CODES_MUST_INCREASE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 25,
+    "source_preferred_seed": "neg_004_threshold_shifted",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

@@ -1,0 +1,309 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "sst_driver_macro",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module sst_driver_macro",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module sst_driver_macro",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vcm",
+                "override_behavior": "overrides vcm for module sst_driver_macro",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module sst_driver_macro",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.15",
+                "name": "swing_min",
+                "override_behavior": "overrides swing_min for module sst_driver_macro",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "25e-3",
+                "name": "swing_lsb",
+                "override_behavior": "overrides swing_lsb for module sst_driver_macro",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr for module sst_driver_macro",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "data",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "z_2",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "z_1",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "z_0",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "swing_metric",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "z_metric",
+                "position": 9
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "sst_driver_macro.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/sst_driver_macro.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "356",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "serdes_io_systems",
+    "difficulty": "D3",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "SST Driver Impedance Macro"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Preserve the declared module graph, port order, parameter override behavior, and public trace observability.",
+    "Do not hard-code evaluator stimulus, stop times, sample windows, checker tolerances, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_RESET_DISABLE_CLEAR",
+      "observable_contract": "Reset or low enable drives common mode and clears public metrics.",
+      "required_signals": [
+        "time",
+        "rst",
+        "enable",
+        "vout",
+        "swing_metric",
+        "z_metric"
+      ]
+    },
+    {
+      "id": "P_CLOCKED_DATA",
+      "observable_contract": "The data decision updates only on enabled rising clock edges.",
+      "required_signals": [
+        "time",
+        "data",
+        "enable",
+        "clk",
+        "rst",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_SWING_MAPPING",
+      "observable_contract": "The trim code selects swing_min plus swing_lsb per code step.",
+      "required_signals": [
+        "time",
+        "z_2",
+        "z_1",
+        "z_0",
+        "vout",
+        "swing_metric"
+      ]
+    },
+    {
+      "id": "P_DATA_POLARITY",
+      "observable_contract": "High and low latched data drive equal-polarity swings around VCM.",
+      "required_signals": [
+        "time",
+        "data",
+        "clk",
+        "rst",
+        "enable",
+        "vout",
+        "swing_metric"
+      ]
+    },
+    {
+      "id": "P_TRIM_METRIC",
+      "observable_contract": "The trim metric maps unsigned codes 0 and 7 to the public rails linearly.",
+      "required_signals": [
+        "time",
+        "z_2",
+        "z_1",
+        "z_0",
+        "z_metric"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "sst_driver_macro.va"
+  ],
+  "task_id": "v4-1356",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "data",
+            "port_ref": "data",
+            "position": 0
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 1
+          },
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 2
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 3
+          },
+          {
+            "net": "z_2",
+            "port_ref": "z_2",
+            "position": 4
+          },
+          {
+            "net": "z_1",
+            "port_ref": "z_1",
+            "position": 5
+          },
+          {
+            "net": "z_0",
+            "port_ref": "z_0",
+            "position": 6
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 7
+          },
+          {
+            "net": "swing_metric",
+            "port_ref": "swing_metric",
+            "position": 8
+          },
+          {
+            "net": "z_metric",
+            "port_ref": "z_metric",
+            "position": 9
+          }
+        ],
+        "module_ref": "sst_driver_macro",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "data",
+      "enable",
+      "clk",
+      "rst",
+      "z_2",
+      "z_1",
+      "z_0",
+      "vout",
+      "swing_metric",
+      "z_metric"
+    ]
+  }
+}

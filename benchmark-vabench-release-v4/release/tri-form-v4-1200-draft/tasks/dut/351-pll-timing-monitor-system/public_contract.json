@@ -1,0 +1,701 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "phase_detector",
+              "divider",
+              "lock_detector",
+              "reacquire_timer"
+            ],
+            "name": "pll_timing_monitor_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module pll_timing_monitor_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module pll_timing_monitor_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module pll_timing_monitor_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "2",
+                "name": "lock_window",
+                "override_behavior": "overrides lock_window for module pll_timing_monitor_top",
+                "type": "integer",
+                "units": "",
+                "valid_range": "integer"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr for module pll_timing_monitor_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ref_clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "fb_clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "up",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "down",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lock",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "reacquire",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "div2_clk",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_3",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_2",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_1",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_0",
+                "position": 12
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "pll_timing_monitor_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "phase_detector",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module phase_detector",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module phase_detector",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module phase_detector",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "2",
+                "name": "lock_window",
+                "override_behavior": "overrides lock_window for module phase_detector",
+                "type": "integer",
+                "units": "",
+                "valid_range": "integer"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr for module phase_detector",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ref_clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "fb_clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "up",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "down",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_3",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_2",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_1",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_0",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "compare_tick",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out_of_window",
+                "position": 11
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "phase_detector.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "divider",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module divider",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module divider",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module divider",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr for module divider",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "fb_clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "div2_clk",
+                "position": 3
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "divider.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "lock_detector",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module lock_detector",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module lock_detector",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module lock_detector",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr for module lock_detector",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "compare_tick",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "out_of_window",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lock",
+                "position": 4
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "lock_detector.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "reacquire_timer",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module reacquire_timer",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module reacquire_timer",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module reacquire_timer",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p from (0:inf)",
+                "name": "tr",
+                "override_behavior": "overrides tr for module reacquire_timer",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "compare_tick",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "out_of_window",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "lock",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "reacquire",
+                "position": 5
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "reacquire_timer.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "family_id": "351",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "dut",
+  "identity": {
+    "category": "pll_clock_timing_systems",
+    "difficulty": "D5",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "PLL Timing Monitor System"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Preserve the declared module graph, port order, parameter override behavior, and public trace observability.",
+    "Do not hard-code evaluator stimulus, stop times, sample windows, checker tolerances, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_DISABLE_CLEAR",
+      "observable_contract": "Reset or low enable clears pulse, lock, reacquire, divider, and phase-code outputs.",
+      "required_signals": [
+        "time",
+        "rst",
+        "enable",
+        "up",
+        "down",
+        "lock",
+        "reacquire",
+        "div2_clk",
+        "phase_3",
+        "phase_2",
+        "phase_1",
+        "phase_0"
+      ]
+    },
+    {
+      "id": "P_PHASE_COMPARE",
+      "observable_contract": "UP and DOWN identify which observed rising edge led each completed comparison.",
+      "required_signals": [
+        "time",
+        "ref_clk",
+        "fb_clk",
+        "rst",
+        "enable",
+        "up",
+        "down"
+      ]
+    },
+    {
+      "id": "P_PHASE_CODE",
+      "observable_contract": "The offset-binary phase code updates by one per completed comparison and clamps to its public range.",
+      "required_signals": [
+        "time",
+        "ref_clk",
+        "fb_clk",
+        "rst",
+        "enable",
+        "phase_3",
+        "phase_2",
+        "phase_1",
+        "phase_0"
+      ]
+    },
+    {
+      "id": "P_DIVIDE_BY_FOUR_EDGES",
+      "observable_contract": "DIV2 toggles after each pair of feedback-clock rising edges.",
+      "required_signals": [
+        "time",
+        "fb_clk",
+        "rst",
+        "enable",
+        "div2_clk"
+      ]
+    },
+    {
+      "id": "P_LOCK_REACQUIRE",
+      "observable_contract": "Lock requires four consecutive in-window comparisons and reacquire requires two post-lock out-of-window comparisons.",
+      "required_signals": [
+        "time",
+        "ref_clk",
+        "fb_clk",
+        "rst",
+        "enable",
+        "lock",
+        "reacquire",
+        "phase_3",
+        "phase_2",
+        "phase_1",
+        "phase_0"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "pll_timing_monitor_top.va",
+    "phase_detector.va",
+    "divider.va",
+    "lock_detector.va",
+    "reacquire_timer.va"
+  ],
+  "task_id": "v4-351",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "ref_clk",
+            "port_ref": "ref_clk",
+            "position": 0
+          },
+          {
+            "net": "fb_clk",
+            "port_ref": "fb_clk",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 3
+          },
+          {
+            "net": "up",
+            "port_ref": "up",
+            "position": 4
+          },
+          {
+            "net": "down",
+            "port_ref": "down",
+            "position": 5
+          },
+          {
+            "net": "lock",
+            "port_ref": "lock",
+            "position": 6
+          },
+          {
+            "net": "reacquire",
+            "port_ref": "reacquire",
+            "position": 7
+          },
+          {
+            "net": "div2_clk",
+            "port_ref": "div2_clk",
+            "position": 8
+          },
+          {
+            "net": "phase_3",
+            "port_ref": "phase_3",
+            "position": 9
+          },
+          {
+            "net": "phase_2",
+            "port_ref": "phase_2",
+            "position": 10
+          },
+          {
+            "net": "phase_1",
+            "port_ref": "phase_1",
+            "position": 11
+          },
+          {
+            "net": "phase_0",
+            "port_ref": "phase_0",
+            "position": 12
+          }
+        ],
+        "module_ref": "pll_timing_monitor_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "ref_clk",
+      "fb_clk",
+      "rst",
+      "enable",
+      "up",
+      "down",
+      "lock",
+      "reacquire",
+      "div2_clk",
+      "phase_3",
+      "phase_2",
+      "phase_1",
+      "phase_0"
+    ]
+  }
+}

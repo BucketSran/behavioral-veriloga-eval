@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-358",
+    "canonical_task_slug": "358-quadrature-phase-interpolator",
+    "family_spec_sha256": "4f3348c1878040f9ec850823b712b36c254e3a03af5a9206abb609f939da422f",
+    "mutation_catalog_sha256": "80dbc405de623ff77f56bff5900c95274b03039c279df93074669ce25c0e2556",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "358",
+  "negative_assignment": {
+    "bugfix_seed": "neg_004_threshold_shifted",
+    "testbench_suite": [
+      "neg_004_threshold_shifted",
+      "neg_001_zero",
+      "neg_002_half_scale",
+      "neg_005_event_edge_wrong",
+      "neg_003_inverted_transfer"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "757b01a820d2b6f82cdc8c7aaed19f43ca2f9f457031124ad3db1fdf26fb8852",
+    "changed_artifacts": [
+      "quadrature_phase_interpolator.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_004_threshold_shifted",
+    "rationale": "Select fault class threshold_or_boundary_fault under trigger 'semantic threshold mutation from gold' because it exercises P_DECODE_CODE_4_CODE_0_AS, P_GENERATE_CLK_OUT_EDGES_DELAYED_FROM, P_OBSERVE_THE_RISING_EDGES_OF_CLK, P_ON_RESET_CLEAR_CLK_OUT_QUADRANT, P_PHASE_METRIC_MUST_EXPOSE_THE_DECODED, P_QUADRANT_1_QUADRANT_0_MUST_EXPOSE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 30,
+    "source_preferred_seed": "neg_004_threshold_shifted",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

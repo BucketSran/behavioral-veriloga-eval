@@ -1,0 +1,35 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module slicer (
+    input  electrical vin,
+    input  electrical rst,
+    input  electrical fb_metric,
+    output electrical decision_raw,
+    output electrical slicer_in_dbg
+);
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vcm = 0.45;
+    parameter real vth = 0.45;
+    parameter real tr = 200e-12;
+
+    real corrected;
+    real decision_target;
+    real dbg_target;
+
+    analog begin
+        corrected = V(vin) - V(fb_metric);
+
+        if (V(rst) > vth) begin
+            decision_target = vss;
+            dbg_target = vss;
+        end else begin
+            decision_target = (corrected >= vcm) ? vdd : vss;
+            dbg_target = corrected;
+        end
+
+        V(decision_raw) <+ transition(decision_target, 0, tr, tr);
+        V(slicer_in_dbg) <+ dbg_target;
+    end
+endmodule

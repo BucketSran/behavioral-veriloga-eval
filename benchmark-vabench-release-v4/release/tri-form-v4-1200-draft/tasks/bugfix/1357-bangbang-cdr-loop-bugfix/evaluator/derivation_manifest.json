@@ -1,0 +1,40 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-357",
+    "canonical_task_slug": "357-bangbang-cdr-loop",
+    "family_spec_sha256": "52923cc7835f9815e4345afd3083b1b959f3c199e2700f1b72eeb80bb474f01d",
+    "mutation_catalog_sha256": "25ebfa33e8c7e6e251ae41d5e72785e740b9fd5038561bbbf47164aef639852d",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "357",
+  "negative_assignment": {
+    "bugfix_seed": "neg_001_early_late_swapped",
+    "testbench_suite": [
+      "neg_001_early_late_swapped",
+      "neg_003_phase_code_resets_zero",
+      "neg_004_rotator_has_no_delay",
+      "neg_005_lock_asserts_early",
+      "neg_002_loop_direction_reversed"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "0b1b116cb40bfe3ac66c76c0861c993ee1ba91e46bb80cc204a693e85e5caf81",
+    "changed_artifacts": [
+      "bbpd.va",
+      "cdr_top.va",
+      "loop_filter_code.va",
+      "phase_rotator.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_001_early_late_swapped",
+    "rationale": "Select fault class wrong_polarity under trigger 'data and recovered edges are separated' because it exercises P_BANGBANG_DECISION, P_PHASE_CODE_UPDATE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 23,
+    "source_preferred_seed": "neg_001_early_late_swapped",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

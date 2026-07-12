@@ -1,0 +1,99 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module bbpd(data_edge, recovered_clk, rst, enable, early, late, decision_clk, phase_error);
+    input data_edge, recovered_clk, rst, enable;
+    output early, late, decision_clk, phase_error;
+    electrical data_edge, recovered_clk, rst, enable, early, late, decision_clk, phase_error;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real unit_phase_delay = 5e-12;
+    parameter real tr = 200p;
+
+    integer early_state;
+    integer late_state;
+    integer decision_state;
+    integer have_data;
+    integer have_rec;
+    integer have_prev_rec;
+    real last_data_t;
+    real last_rec_t;
+    real prev_rec_t;
+    real err_code;
+    real dt;
+    real abs_prev;
+    real abs_next;
+
+    analog begin
+        @(initial_step) begin
+            early_state = 0;
+            late_state = 0;
+            decision_state = 0;
+            have_data = 0;
+            have_rec = 0;
+            have_prev_rec = 0;
+            last_data_t = 0.0;
+            last_rec_t = 0.0;
+            prev_rec_t = 0.0;
+            err_code = 0.0;
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            early_state = 0;
+            late_state = 0;
+            decision_state = 0;
+            have_data = 0;
+            have_rec = 0;
+            have_prev_rec = 0;
+            err_code = 0.0;
+        end
+
+        @(cross(V(recovered_clk) - vth, +1)) begin
+            if (V(rst) <= vth && V(enable) > vth) begin
+                prev_rec_t = last_rec_t;
+                have_prev_rec = have_rec;
+                last_rec_t = $abstime;
+                have_rec = 1;
+            end
+        end
+
+        @(cross(V(data_edge) - vth, +1)) begin
+            if (V(rst) <= vth && V(enable) > vth) begin
+                last_data_t = $abstime;
+                have_data = 1;
+            end
+        end
+
+        @(cross(V(recovered_clk) - vth, +1)) begin
+            if (V(rst) <= vth && V(enable) > vth && have_data != 0 && have_prev_rec != 0) begin
+                abs_prev = last_data_t - prev_rec_t;
+                abs_next = ($abstime - last_data_t);
+                if (abs_prev < 0.0) abs_prev = -abs_prev;
+                if (abs_next < 0.0) abs_next = -abs_next;
+                if (abs_next <= abs_prev) begin
+                    dt = last_data_t - $abstime;
+                    early_state = 1;
+                    late_state = 0;
+                end else begin
+                    dt = last_data_t - prev_rec_t;
+                    early_state = 1;
+                    late_state = 0;
+                end
+                if (dt < unit_phase_delay * 0.25 && dt > -unit_phase_delay * 0.25) begin
+                    early_state = 0;
+                    late_state = 0;
+                end
+                err_code = dt / unit_phase_delay;
+                decision_state = 1 - decision_state;
+                have_data = 0;
+            end
+        end
+
+        V(early) <+ transition(early_state ? vdd : vss, 0, tr, tr);
+        V(late) <+ transition(late_state ? vdd : vss, 0, tr, tr);
+        V(decision_clk) <+ transition(decision_state ? vdd : vss, 0, tr, tr);
+        V(phase_error) <+ transition(err_code, 0, tr, tr);
+    end
+endmodule

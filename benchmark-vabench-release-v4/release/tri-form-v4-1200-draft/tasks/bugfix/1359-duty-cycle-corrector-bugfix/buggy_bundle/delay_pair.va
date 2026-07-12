@@ -1,0 +1,68 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module delay_pair(clk_in, rst, enable, trim_3, trim_2, trim_1, trim_0, clk_out);
+    input clk_in, rst, enable, trim_3, trim_2, trim_1, trim_0;
+    output clk_out;
+    electrical clk_in, rst, enable, trim_3, trim_2, trim_1, trim_0, clk_out;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter real trim_step = 5e-12;
+    parameter real tr = 100p;
+
+    integer out_state;
+    integer fall_token;
+    integer fall_id;
+    integer fall_pending;
+    integer trim_code;
+    real fall_time;
+
+    analog begin
+        @(initial_step) begin
+            out_state = 0;
+            fall_token = 0;
+            fall_id = 0;
+            fall_pending = 0;
+            fall_time = 1.0e99;
+        end
+
+        @(cross(V(rst) - vth, +1) or cross(V(enable) - vth, -1)) begin
+            out_state = 0;
+            fall_token = fall_token + 1;
+            fall_pending = 0;
+            fall_time = 1.0e99;
+        end
+
+        @(cross(V(clk_in) - vth, +1)) begin
+            if (V(rst) <= vth && V(enable) > vth) begin
+                trim_code = 0;
+                if (V(trim_0) > vth) trim_code = trim_code + 1;
+                if (V(trim_1) > vth) trim_code = trim_code + 2;
+                if (V(trim_2) > vth) trim_code = trim_code + 4;
+                if (V(trim_3) > vth) trim_code = trim_code + 8;
+                out_state = 1;
+            end
+        end
+
+        @(cross(V(clk_in) - vth, -1)) begin
+            if (V(rst) <= vth && V(enable) > vth) begin
+                fall_token = fall_token + 1;
+                fall_id = fall_token;
+                fall_pending = 1;
+                fall_time = $abstime;
+            end
+        end
+
+        @(timer(fall_time)) begin
+            if (fall_pending != 0 && fall_id == fall_token && V(rst) <= vth && V(enable) > vth) begin
+                out_state = 0;
+                fall_pending = 0;
+            end
+            fall_time = 1.0e99;
+        end
+
+        V(clk_out) <+ transition(out_state ? vdd : vss, 0, tr, tr);
+    end
+endmodule

@@ -1,0 +1,41 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-351",
+    "canonical_task_slug": "351-pll-timing-monitor-system",
+    "family_spec_sha256": "ef0c80f7ac0211a174c187b5825cebdc71a40744c0c48373cd5765f35dd65948",
+    "mutation_catalog_sha256": "f3380a14ee3f773775c1a5160d9ba99a4836a2129b39e544ca653525ae7666dd",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "351",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_phase_step_reversed",
+    "testbench_suite": [
+      "neg_001_up_down_swapped",
+      "neg_003_divider_toggles_each_edge",
+      "neg_004_lock_asserts_early",
+      "neg_005_reacquire_not_cleared_on_disable",
+      "neg_002_phase_step_reversed"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "d33522763c5abb60598f527a96b86f70d8660707032a9e4b97b57d0d8daf426c",
+    "changed_artifacts": [
+      "divider.va",
+      "lock_detector.va",
+      "phase_detector.va",
+      "pll_timing_monitor_top.va",
+      "reacquire_timer.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_phase_step_reversed",
+    "rationale": "Select fault class wrong_polarity under trigger 'reference edge arrives first' because it exercises P_PHASE_CODE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_001_up_down_swapped",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

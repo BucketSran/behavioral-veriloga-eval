@@ -1,0 +1,20 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module pll_timing_monitor_top(ref_clk, fb_clk, rst, enable, up, down, lock, reacquire, div2_clk, phase_3, phase_2, phase_1, phase_0);
+    input ref_clk, fb_clk, rst, enable;
+    output up, down, lock, reacquire, div2_clk, phase_3, phase_2, phase_1, phase_0;
+    electrical ref_clk, fb_clk, rst, enable, up, down, lock, reacquire, div2_clk, phase_3, phase_2, phase_1, phase_0;
+    electrical compare_tick, out_of_window;
+
+    parameter real vdd = 0.9;
+    parameter real vss = 0.0;
+    parameter real vth = 0.45;
+    parameter integer lock_window = 2;
+    parameter real tr = 200p from (0:inf);
+
+    phase_detector #(.vdd(vdd), .vss(vss), .vth(vth), .lock_window(lock_window), .tr(tr)) u_pd(ref_clk, fb_clk, rst, enable, up, down, phase_3, phase_2, phase_1, phase_0, compare_tick, out_of_window);
+    divider #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr)) u_divider(fb_clk, rst, enable, div2_clk);
+    lock_detector #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr)) u_lock(compare_tick, out_of_window, rst, enable, lock);
+    reacquire_timer #(.vdd(vdd), .vss(vss), .vth(vth), .tr(tr)) u_reacquire(compare_tick, out_of_window, lock, rst, enable, reacquire);
+endmodule

@@ -1,0 +1,723 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [
+              "bbpd",
+              "loop_filter_code",
+              "phase_rotator"
+            ],
+            "name": "cdr_top",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module cdr_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module cdr_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module cdr_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "16",
+                "name": "phase_center",
+                "override_behavior": "overrides phase_center for module cdr_top",
+                "type": "integer",
+                "units": "",
+                "valid_range": "integer"
+              },
+              {
+                "default": "5e-12",
+                "name": "unit_phase_delay",
+                "override_behavior": "overrides unit_phase_delay for module cdr_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "2",
+                "name": "lock_window",
+                "override_behavior": "overrides lock_window for module cdr_top",
+                "type": "integer",
+                "units": "",
+                "valid_range": "integer"
+              },
+              {
+                "default": "200p",
+                "name": "tr",
+                "override_behavior": "overrides tr for module cdr_top",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "data_edge",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ref_clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "recovered_clk",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "early",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "late",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_4",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_3",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_2",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_1",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_0",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lock",
+                "position": 12
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "cdr_top.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "bbpd",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module bbpd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module bbpd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module bbpd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "5e-12",
+                "name": "unit_phase_delay",
+                "override_behavior": "overrides unit_phase_delay for module bbpd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p",
+                "name": "tr",
+                "override_behavior": "overrides tr for module bbpd",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "data_edge",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "recovered_clk",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "early",
+                "position": 4
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "late",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "decision_clk",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_error",
+                "position": 7
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "bbpd.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "loop_filter_code",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module loop_filter_code",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module loop_filter_code",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module loop_filter_code",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "16",
+                "name": "phase_center",
+                "override_behavior": "overrides phase_center for module loop_filter_code",
+                "type": "integer",
+                "units": "",
+                "valid_range": "integer"
+              },
+              {
+                "default": "2",
+                "name": "lock_window",
+                "override_behavior": "overrides lock_window for module loop_filter_code",
+                "type": "integer",
+                "units": "",
+                "valid_range": "integer"
+              },
+              {
+                "default": "200p",
+                "name": "tr",
+                "override_behavior": "overrides tr for module loop_filter_code",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "decision_clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "early",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "late",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "phase_error",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_4",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_3",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_2",
+                "position": 8
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_1",
+                "position": 9
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "phase_0",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "lock",
+                "position": 11
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "loop_filter_code.va"
+      },
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "phase_rotator",
+            "parameters": [
+              {
+                "default": "0.9",
+                "name": "vdd",
+                "override_behavior": "overrides vdd for module phase_rotator",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.0",
+                "name": "vss",
+                "override_behavior": "overrides vss for module phase_rotator",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth for module phase_rotator",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "5e-12",
+                "name": "unit_phase_delay",
+                "override_behavior": "overrides unit_phase_delay for module phase_rotator",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "200p",
+                "name": "tr",
+                "override_behavior": "overrides tr for module phase_rotator",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ref_clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "enable",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "phase_4",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "phase_3",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "phase_2",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "phase_1",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "phase_0",
+                "position": 7
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "recovered_clk",
+                "position": 8
+              }
+            ],
+            "role": "required_submodule"
+          }
+        ],
+        "path": "phase_rotator.va"
+      }
+    ],
+    "mode": "system_bundle"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "357",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "pll_clock_timing_systems",
+    "difficulty": "D5",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Bang-bang CDR Loop"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Preserve the declared module graph, port order, parameter override behavior, and public trace observability.",
+    "Do not hard-code evaluator stimulus, stop times, sample windows, checker tolerances, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_RESET_DISABLE_CLEAR",
+      "observable_contract": "Reset or low enable restores phase_center and clears detector, lock, and recovered-clock state.",
+      "required_signals": [
+        "time",
+        "rst",
+        "enable",
+        "recovered_clk",
+        "early",
+        "late",
+        "phase_4",
+        "phase_3",
+        "phase_2",
+        "phase_1",
+        "phase_0",
+        "lock"
+      ]
+    },
+    {
+      "id": "P_BANGBANG_DECISION",
+      "observable_contract": "Each data edge is classified against the nearest recovered-clock edge as early, late, or coincident.",
+      "required_signals": [
+        "time",
+        "data_edge",
+        "recovered_clk",
+        "rst",
+        "enable",
+        "early",
+        "late"
+      ]
+    },
+    {
+      "id": "P_PHASE_CODE_UPDATE",
+      "observable_contract": "Late and early decisions move the clamped phase code in opposite declared directions.",
+      "required_signals": [
+        "time",
+        "data_edge",
+        "recovered_clk",
+        "early",
+        "late",
+        "phase_4",
+        "phase_3",
+        "phase_2",
+        "phase_1",
+        "phase_0"
+      ]
+    },
+    {
+      "id": "P_PHASE_ROTATION",
+      "observable_contract": "Recovered-clock edges preserve the reference-clock waveform with phase-code-proportional delay.",
+      "required_signals": [
+        "time",
+        "ref_clk",
+        "recovered_clk",
+        "rst",
+        "enable",
+        "phase_4",
+        "phase_3",
+        "phase_2",
+        "phase_1",
+        "phase_0"
+      ]
+    },
+    {
+      "id": "P_LOCK_QUALIFICATION",
+      "observable_contract": "Lock requires four in-window decisions and drops after two consecutive out-of-window decisions.",
+      "required_signals": [
+        "time",
+        "data_edge",
+        "recovered_clk",
+        "rst",
+        "enable",
+        "phase_4",
+        "phase_3",
+        "phase_2",
+        "phase_1",
+        "phase_0",
+        "lock"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/cdr_top.va",
+    "supplied_dut/bbpd.va",
+    "supplied_dut/loop_filter_code.va",
+    "supplied_dut/phase_rotator.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-857",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "data_edge",
+            "port_ref": "data_edge",
+            "position": 0
+          },
+          {
+            "net": "ref_clk",
+            "port_ref": "ref_clk",
+            "position": 1
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 2
+          },
+          {
+            "net": "enable",
+            "port_ref": "enable",
+            "position": 3
+          },
+          {
+            "net": "recovered_clk",
+            "port_ref": "recovered_clk",
+            "position": 4
+          },
+          {
+            "net": "early",
+            "port_ref": "early",
+            "position": 5
+          },
+          {
+            "net": "late",
+            "port_ref": "late",
+            "position": 6
+          },
+          {
+            "net": "phase_4",
+            "port_ref": "phase_4",
+            "position": 7
+          },
+          {
+            "net": "phase_3",
+            "port_ref": "phase_3",
+            "position": 8
+          },
+          {
+            "net": "phase_2",
+            "port_ref": "phase_2",
+            "position": 9
+          },
+          {
+            "net": "phase_1",
+            "port_ref": "phase_1",
+            "position": 10
+          },
+          {
+            "net": "phase_0",
+            "port_ref": "phase_0",
+            "position": 11
+          },
+          {
+            "net": "lock",
+            "port_ref": "lock",
+            "position": 12
+          }
+        ],
+        "module_ref": "cdr_top",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "data_edge",
+      "ref_clk",
+      "rst",
+      "enable",
+      "recovered_clk",
+      "early",
+      "late",
+      "phase_4",
+      "phase_3",
+      "phase_2",
+      "phase_1",
+      "phase_0",
+      "lock"
+    ]
+  }
+}
