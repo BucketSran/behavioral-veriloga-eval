@@ -1,0 +1,170 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "variable_gain_differential_amplifier",
+            "parameters": [],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigin_p",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigin_n",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigctrl_p",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigctrl_n",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sigout",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "variable_gain_differential_amplifier.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "137",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "mixed_signal",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Variable Gain Differential Amplifier"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_DIFFERENTIAL_SIGNAL_AND_CONTROL",
+      "observable_contract": "Use `V(sigin_p, sigin_n)` as signal input and `V(sigctrl_p, sigctrl_n)` as gain-control input.",
+      "required_signals": [
+        "time",
+        "sigin_p",
+        "sigin_n",
+        "sigctrl_p",
+        "sigctrl_n",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_VARIABLE_GAIN_MIDPOINT",
+      "observable_contract": "Drive the unclamped target as `2.0 * V(sigctrl_p, sigctrl_n) * V(sigin_p, sigin_n) + 0.2`.",
+      "required_signals": [
+        "time",
+        "sigin_p",
+        "sigin_n",
+        "sigctrl_p",
+        "sigctrl_n",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_CLAMP",
+      "observable_contract": "Clamp the final output target to the inclusive interval `[-0.4 V, 0.8 V]`.",
+      "required_signals": [
+        "time",
+        "sigout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/variable_gain_differential_amplifier.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-637",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "sigin_p",
+            "port_ref": "sigin_p",
+            "position": 0
+          },
+          {
+            "net": "sigin_n",
+            "port_ref": "sigin_n",
+            "position": 1
+          },
+          {
+            "net": "sigctrl_p",
+            "port_ref": "sigctrl_p",
+            "position": 2
+          },
+          {
+            "net": "sigctrl_n",
+            "port_ref": "sigctrl_n",
+            "position": 3
+          },
+          {
+            "net": "sigout",
+            "port_ref": "sigout",
+            "position": 4
+          }
+        ],
+        "module_ref": "variable_gain_differential_amplifier",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "sigctrl_n",
+      "sigctrl_p",
+      "sigin_n",
+      "sigin_p",
+      "sigout"
+    ]
+  }
+}

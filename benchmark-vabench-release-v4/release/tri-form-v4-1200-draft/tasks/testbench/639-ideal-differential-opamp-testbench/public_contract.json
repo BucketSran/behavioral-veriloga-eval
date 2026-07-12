@@ -1,0 +1,157 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "ideal_differential_opamp",
+            "parameters": [],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vinp",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vinn",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "voutp",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "voutn",
+                "position": 3
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "ideal_differential_opamp.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "139",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "mixed_signal",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Ideal Differential Opamp"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_FIXED_COMMON_MODE",
+      "observable_contract": "Maintain both outputs symmetric around a fixed 0.5 V common mode.",
+      "required_signals": [
+        "time",
+        "voutp",
+        "voutn"
+      ]
+    },
+    {
+      "id": "P_DIFFERENTIAL_GAIN_FOUR",
+      "observable_contract": "Make the differential output `V(voutp) - V(voutn)` equal to four times `V(vinp, vinn)`.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "voutp",
+        "voutn"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_POLARITY",
+      "observable_contract": "For positive `V(vinp, vinn)`, drive `voutp` above common mode and `voutn` below common mode.",
+      "required_signals": [
+        "time",
+        "vinp",
+        "vinn",
+        "voutp",
+        "voutn"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/ideal_differential_opamp.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-639",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vinp",
+            "port_ref": "vinp",
+            "position": 0
+          },
+          {
+            "net": "vinn",
+            "port_ref": "vinn",
+            "position": 1
+          },
+          {
+            "net": "voutp",
+            "port_ref": "voutp",
+            "position": 2
+          },
+          {
+            "net": "voutn",
+            "port_ref": "voutn",
+            "position": 3
+          }
+        ],
+        "module_ref": "ideal_differential_opamp",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vinn",
+      "vinp",
+      "voutn",
+      "voutp"
+    ]
+  }
+}

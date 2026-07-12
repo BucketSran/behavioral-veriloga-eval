@@ -1,0 +1,146 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "analog_multiplier_gain",
+            "parameters": [
+              {
+                "default": "1",
+                "name": "gain",
+                "override_behavior": "overrides gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigin1",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigin2",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sigout",
+                "position": 2
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "analog_multiplier_gain.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/analog_multiplier_gain.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "132",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "mixed_signal",
+    "difficulty": "D1",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Analog Multiplier"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_ANALOG_PRODUCT",
+      "observable_contract": "Drive `sigout` to `V(sigin1) * V(sigin2)` scaled by `gain`, preserving product sign.",
+      "required_signals": [
+        "time",
+        "sigin1",
+        "sigin2",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_GAIN_PARAMETER_APPLIED",
+      "observable_contract": "Apply the overridable `gain` parameter multiplicatively to the input product.",
+      "required_signals": [
+        "time",
+        "sigin1",
+        "sigin2",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_MULTIPLICATIVE_NOT_ADDITIVE",
+      "observable_contract": "The transfer must be multiplicative and must not replace the product with addition or a square of one input.",
+      "required_signals": [
+        "time",
+        "sigin1",
+        "sigin2",
+        "sigout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "analog_multiplier_gain.va"
+  ],
+  "task_id": "v4-1132",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "sigin1",
+            "port_ref": "sigin1",
+            "position": 0
+          },
+          {
+            "net": "sigin2",
+            "port_ref": "sigin2",
+            "position": 1
+          },
+          {
+            "net": "sigout",
+            "port_ref": "sigout",
+            "position": 2
+          }
+        ],
+        "module_ref": "analog_multiplier_gain",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "sigin1",
+      "sigin2",
+      "sigout"
+    ]
+  }
+}

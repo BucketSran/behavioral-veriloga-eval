@@ -1,0 +1,13 @@
+simulator lang=spectre
+global 0
+
+ahdl_include "./dut/differential_amplifier_core.va"
+
+Vp (sigin_p 0) vsource type=pwl wave=[0 0.20 8n 0.20 8.1n 0.45 18n 0.45 18.1n 0.70 28n 0.70 28.1n 0.38 45n 0.38]
+Vn (sigin_n 0) vsource dc=0.40
+
+XDUT (sigin_p sigin_n sigout) differential_amplifier_core
+
+
+tran tran stop=40n maxstep=25p
+save sigin_n sigin_p sigout

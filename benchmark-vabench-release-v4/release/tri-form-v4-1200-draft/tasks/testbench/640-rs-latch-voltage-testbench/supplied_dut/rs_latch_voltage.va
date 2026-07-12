@@ -1,0 +1,21 @@
+`include "disciplines.vams"
+
+module rs_latch_voltage(vin_s, vin_r, vout_q, vout_qbar);
+input vin_s, vin_r;
+output vout_q, vout_qbar;
+electrical vin_s, vin_r, vout_q, vout_qbar;
+
+integer q;
+
+analog begin
+    @(initial_step) q = 0;
+    if (V(vin_s) > 0.45 && V(vin_r) <= 0.45) begin
+        q = 1;
+    end else if (V(vin_r) > 0.45 && V(vin_s) <= 0.45) begin
+        q = 0;
+    end
+    V(vout_q) <+ transition(q ? 0.9 : 0.0, 0, 0);
+    V(vout_qbar) <+ transition(q ? 0.0 : 0.9, 0, 0);
+end
+
+endmodule

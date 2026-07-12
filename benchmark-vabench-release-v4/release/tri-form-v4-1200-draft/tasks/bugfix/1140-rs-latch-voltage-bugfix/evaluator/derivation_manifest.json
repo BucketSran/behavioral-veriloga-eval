@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-140",
+    "canonical_task_slug": "140-rs-latch-voltage",
+    "family_spec_sha256": "c590a9dac1b970520868f440ed1d57dee29839130ab29415feee5a5cd5c954d9",
+    "mutation_catalog_sha256": "744f287c200cd84c8d42aeda0449c96e5a8627c2c48fb28e9135c3bf4a1dd0d3",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "140",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_swapped_set_reset",
+    "testbench_suite": [
+      "neg_002_no_hold",
+      "neg_003_swapped_set_reset",
+      "neg_004_qbar_not_complement",
+      "neg_005_metric_scale_low",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "4e66bfedc8f35d3fa0aefc033f933a0199faf7241ad063cedf24619c9c7f771e",
+    "changed_artifacts": [
+      "rs_latch_voltage.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_swapped_set_reset",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Treats reset as set and set as reset.' because it exercises P_SET_RESET_PRIORITY as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 24,
+    "source_preferred_seed": "neg_002_no_hold",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

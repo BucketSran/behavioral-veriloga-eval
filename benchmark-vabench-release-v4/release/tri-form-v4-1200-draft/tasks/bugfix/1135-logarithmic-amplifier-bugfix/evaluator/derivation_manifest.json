@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-135",
+    "canonical_task_slug": "135-logarithmic-amplifier",
+    "family_spec_sha256": "5167db504b93186000791fdbc91d719d97dd1e2f454f6b0c41c43f795a4f7159",
+    "mutation_catalog_sha256": "a4d6463287638a2f29b925661e0dcb3616b5d2f3c85013b77838931f4cc6dc00",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "135",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_missing_floor",
+    "testbench_suite": [
+      "neg_004_wrong_offset",
+      "neg_002_no_abs",
+      "neg_005_metric_scale_low",
+      "neg_003_missing_floor",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "934f76ac952e90e00f84ba48b176bd2fc991e2044cd7626f6e913b11756445be",
+    "changed_artifacts": [
+      "logarithmic_amplifier.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_missing_floor",
+    "rationale": "Select fault class omission_or_incomplete_behavior under trigger 'Does not floor the logarithm argument at 0.1.' because it exercises P_MAGNITUDE_FLOOR as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 11,
+    "source_preferred_seed": "neg_004_wrong_offset",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

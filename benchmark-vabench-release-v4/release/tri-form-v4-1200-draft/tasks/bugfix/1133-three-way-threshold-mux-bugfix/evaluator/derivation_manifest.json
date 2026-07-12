@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-133",
+    "canonical_task_slug": "133-three-way-threshold-mux",
+    "family_spec_sha256": "21d24756364cf0a24269bb981c6642898a32389acc47e8b45681079e229761a0",
+    "mutation_catalog_sha256": "fe51f56abb7109545a14fde848586e0a2443ea536ae58ca6cda9c66047966766",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "133",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_swapped_low_high_outputs",
+    "testbench_suite": [
+      "neg_002_swapped_low_high_outputs",
+      "neg_003_uses_single_ended_control",
+      "neg_004_missing_middle_selection",
+      "neg_005_metric_scale_low",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "7611e49059ed860889715b732e7f2c7fff2182d46457d66f1211661a9d34c7ec",
+    "changed_artifacts": [
+      "three_way_threshold_mux.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_swapped_low_high_outputs",
+    "rationale": "Select fault class polarity_or_direction_error under trigger 'Swaps the below-window and above-window selected inputs.' because it exercises P_HIGH_REGION_SELECTS_SIGIN3, P_LOW_REGION_SELECTS_SIGIN1 as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 23,
+    "source_preferred_seed": "neg_002_swapped_low_high_outputs",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

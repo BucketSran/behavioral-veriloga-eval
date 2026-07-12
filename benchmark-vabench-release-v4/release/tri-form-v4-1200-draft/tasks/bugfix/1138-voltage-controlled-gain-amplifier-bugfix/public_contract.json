@@ -1,0 +1,161 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "voltage_controlled_gain_amplifier",
+            "parameters": [],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin_p",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin_n",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vctrl_p",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vctrl_n",
+                "position": 3
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout",
+                "position": 4
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "voltage_controlled_gain_amplifier.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "buggy_input_artifacts": [
+    "buggy_bundle/voltage_controlled_gain_amplifier.va"
+  ],
+  "editable_scope": "complete_declared_verilog_a_bundle",
+  "family_id": "138",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "bugfix",
+  "identity": {
+    "category": "mixed_signal",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Voltage Controlled Gain Amplifier"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "problem_statement": "the supplied system violates the public contract",
+  "properties": [
+    {
+      "id": "P_DIFFERENTIAL_CONTROL",
+      "observable_contract": "Use `V(vctrl_p, vctrl_n)` as the gain-control voltage.",
+      "required_signals": [
+        "time",
+        "vctrl_p",
+        "vctrl_n",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_INPUT_OFFSET_AND_GAIN",
+      "observable_contract": "Compute the unclamped target as `1.5 * V(vctrl_p, vctrl_n) * (V(vin_p, vin_n) - 0.05) + 0.5`.",
+      "required_signals": [
+        "time",
+        "vin_p",
+        "vin_n",
+        "vctrl_p",
+        "vctrl_n",
+        "vout"
+      ]
+    },
+    {
+      "id": "P_UNIPOLAR_OUTPUT_CLAMP",
+      "observable_contract": "Clamp the final output target to the inclusive interval `[0.1 V, 0.9 V]`.",
+      "required_signals": [
+        "time",
+        "vout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "target_artifacts": [
+    "voltage_controlled_gain_amplifier.va"
+  ],
+  "task_id": "v4-1138",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin_p",
+            "port_ref": "vin_p",
+            "position": 0
+          },
+          {
+            "net": "vin_n",
+            "port_ref": "vin_n",
+            "position": 1
+          },
+          {
+            "net": "vctrl_p",
+            "port_ref": "vctrl_p",
+            "position": 2
+          },
+          {
+            "net": "vctrl_n",
+            "port_ref": "vctrl_n",
+            "position": 3
+          },
+          {
+            "net": "vout",
+            "port_ref": "vout",
+            "position": 4
+          }
+        ],
+        "module_ref": "voltage_controlled_gain_amplifier",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vctrl_n",
+      "vctrl_p",
+      "vin_n",
+      "vin_p",
+      "vout"
+    ]
+  }
+}

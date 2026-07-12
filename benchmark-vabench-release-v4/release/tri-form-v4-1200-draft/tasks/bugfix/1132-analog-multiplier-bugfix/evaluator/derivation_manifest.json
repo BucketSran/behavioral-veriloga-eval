@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-132",
+    "canonical_task_slug": "132-analog-multiplier",
+    "family_spec_sha256": "17141b1418cfffdc0dd71a67049776fb193bcc03250823ec0439be4d1636b53a",
+    "mutation_catalog_sha256": "0be2fa6543f91accc7726cd9e59ceac04b48a80036453beb124ec11c2024d311",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "132",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_adds_inputs",
+    "testbench_suite": [
+      "neg_002_adds_inputs",
+      "neg_003_missing_gain",
+      "neg_001_zero",
+      "neg_004_square_first_input",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "3e8fd9162a4c8be6f509f784cddc1e5627b9f83181f9c096dfc0278124ce738e",
+    "changed_artifacts": [
+      "analog_multiplier_gain.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_adds_inputs",
+    "rationale": "Select fault class adds_inputs under trigger 'Adds the inputs instead of multiplying them.' because it exercises P_MULTIPLICATIVE_NOT_ADDITIVE as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 12,
+    "source_preferred_seed": "neg_002_adds_inputs",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

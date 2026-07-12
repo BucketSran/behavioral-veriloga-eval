@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-138",
+    "canonical_task_slug": "138-voltage-controlled-gain-amplifier",
+    "family_spec_sha256": "7bfc808d5d32d05fe2786844112f3b6027625c21aec7ed71c21e22f97e09faaa",
+    "mutation_catalog_sha256": "ab4d12e22890fd1faf06860063128bf41f1519f7accf436388995c63b2aa66d4",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "138",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_missing_input_offset",
+    "testbench_suite": [
+      "neg_002_missing_input_offset",
+      "neg_003_single_ended_control",
+      "neg_004_no_clamp",
+      "neg_005_metric_scale_low",
+      "neg_001_zero"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "105218e9a5fb48bab8ea6bf61c6a9ed2fdcc3190c7944faad9dd633fd3e7965c",
+    "changed_artifacts": [
+      "voltage_controlled_gain_amplifier.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_missing_input_offset",
+    "rationale": "Select fault class threshold_or_boundary_fault under trigger 'Omits the 0.05 input offset.' because it exercises P_INPUT_OFFSET_AND_GAIN as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 15,
+    "source_preferred_seed": "neg_002_missing_input_offset",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

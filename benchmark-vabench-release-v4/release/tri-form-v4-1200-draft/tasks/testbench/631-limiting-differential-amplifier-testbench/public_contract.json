@@ -1,0 +1,177 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "limiting_differential_amplifier",
+            "parameters": [
+              {
+                "default": "1",
+                "name": "gain",
+                "override_behavior": "overrides gain",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "10",
+                "name": "sigout_high",
+                "override_behavior": "overrides sigout_high",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "-10",
+                "name": "sigout_low",
+                "override_behavior": "overrides sigout_low",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0",
+                "name": "sigin_offset",
+                "override_behavior": "overrides sigin_offset",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigin_p",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "sigin_n",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "sigout",
+                "position": 2
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "limiting_differential_amplifier.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "131",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "mixed_signal",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Limiting Differential Amplifier"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_OFFSET_CORRECTED_DIFFERENTIAL_GAIN",
+      "observable_contract": "Compute `gain * (V(sigin_p, sigin_n) - sigin_offset)`.",
+      "required_signals": [
+        "time",
+        "sigin_p",
+        "sigin_n",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_MIDPOINT_REFERENCE",
+      "observable_contract": "Center the amplified value at `(sigout_high + sigout_low) / 2`.",
+      "required_signals": [
+        "time",
+        "sigin_p",
+        "sigin_n",
+        "sigout"
+      ]
+    },
+    {
+      "id": "P_OUTPUT_RAIL_CLAMP",
+      "observable_contract": "Clamp the final target to the inclusive interval `[sigout_low, sigout_high]`.",
+      "required_signals": [
+        "time",
+        "sigin_p",
+        "sigin_n",
+        "sigout"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/limiting_differential_amplifier.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-631",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "sigin_p",
+            "port_ref": "sigin_p",
+            "position": 0
+          },
+          {
+            "net": "sigin_n",
+            "port_ref": "sigin_n",
+            "position": 1
+          },
+          {
+            "net": "sigout",
+            "port_ref": "sigout",
+            "position": 2
+          }
+        ],
+        "module_ref": "limiting_differential_amplifier",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "sigin_n",
+      "sigin_p",
+      "sigout"
+    ]
+  }
+}

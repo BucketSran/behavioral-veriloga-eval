@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-134",
+    "canonical_task_slug": "134-differential-amplifier-core",
+    "family_spec_sha256": "f3cb58a47b0561c23f5edfe2bcc120964672afe102e665637232aa502b4eb797",
+    "mutation_catalog_sha256": "607f7fde8bb70945799d9b1a1850e15fef1886647900f562020db9d711ade3c6",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "134",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_missing_offset",
+    "testbench_suite": [
+      "neg_003_missing_offset",
+      "neg_002_single_ended_input",
+      "neg_004_wrong_gain",
+      "neg_001_zero",
+      "neg_005_metric_scale_low"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "c1ddac03d46fd7e0cc06e4e27803c0383f1e4b82f70ce5130554363742695f9c",
+    "changed_artifacts": [
+      "differential_amplifier_core.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_missing_offset",
+    "rationale": "Select fault class threshold_or_boundary_fault under trigger 'Does not subtract the 0.05 input offset.' because it exercises P_INPUT_OFFSET as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 17,
+    "source_preferred_seed": "neg_003_missing_offset",
+    "source_preferred_seed_preserved": true,
+    "triviality_markers": []
+  }
+}

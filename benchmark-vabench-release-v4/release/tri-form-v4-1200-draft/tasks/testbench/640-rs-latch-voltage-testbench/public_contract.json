@@ -1,0 +1,168 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "rs_latch_voltage",
+            "parameters": [],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin_s",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vin_r",
+                "position": 1
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout_q",
+                "position": 2
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "vout_qbar",
+                "position": 3
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "rs_latch_voltage.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "140",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "digital_logic",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "RS Latch Voltage"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_LOGIC_THRESHOLDS_OUTPUT_AMPLITUDE",
+      "observable_contract": "Interpret set and reset as logic high above 0.45 V and drive outputs with 0.9 V high and 0.0 V low levels.",
+      "required_signals": [
+        "time",
+        "vin_s",
+        "vin_r",
+        "vout_q",
+        "vout_qbar"
+      ]
+    },
+    {
+      "id": "P_SET_RESET_PRIORITY",
+      "observable_contract": "A set-only input drives Q high, and a reset-only input drives Q low.",
+      "required_signals": [
+        "time",
+        "vin_s",
+        "vin_r",
+        "vout_q",
+        "vout_qbar"
+      ]
+    },
+    {
+      "id": "P_HOLD_STATE",
+      "observable_contract": "When neither set-only nor reset-only is asserted, preserve the previous Q state after initializing Q low.",
+      "required_signals": [
+        "time",
+        "vin_s",
+        "vin_r",
+        "vout_q",
+        "vout_qbar"
+      ]
+    },
+    {
+      "id": "P_QBAR_COMPLEMENT",
+      "observable_contract": "Drive `vout_qbar` as the logical complement of Q.",
+      "required_signals": [
+        "time",
+        "vout_q",
+        "vout_qbar"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/rs_latch_voltage.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-640",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "vin_s",
+            "port_ref": "vin_s",
+            "position": 0
+          },
+          {
+            "net": "vin_r",
+            "port_ref": "vin_r",
+            "position": 1
+          },
+          {
+            "net": "vout_q",
+            "port_ref": "vout_q",
+            "position": 2
+          },
+          {
+            "net": "vout_qbar",
+            "port_ref": "vout_qbar",
+            "position": 3
+          }
+        ],
+        "module_ref": "rs_latch_voltage",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "vin_r",
+      "vin_s",
+      "vout_q",
+      "vout_qbar"
+    ]
+  }
+}
