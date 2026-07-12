@@ -1,0 +1,75 @@
+`include "disciplines.vams"
+
+module enable_saturating_ready_counter(clk, rst, in0, in1, in2, in3, ctrl0, ctrl1, vdd, vss, en, out, flag, metric);
+input clk, rst, in0, in1, in2, in3, ctrl0, ctrl1, vdd, vss, en;
+output out, flag, metric;
+electrical clk, rst, in0, in1, in2, in3, ctrl0, ctrl1, vdd, vss, en, out, flag, metric;
+
+parameter real vth = 0.45;
+parameter real vhi = 0.9;
+parameter real span_min = 0.62;
+parameter real span_max = 1.28;
+parameter real tr = 50p;
+
+real span_v, x0, x1, x2, x3, c0, c1, valid_v;
+real out_v, flag_v, metric_v;
+real core_v, aux_v;
+
+analog function real clip01;
+    input x;
+    real x;
+    begin
+        if (x < 0.0) clip01 = 0.0;
+        else if (x > 1.0) clip01 = 1.0;
+        else clip01 = x;
+    end
+endfunction
+
+analog function real absr;
+    input x;
+    real x;
+    begin
+        absr = (x < 0.0) ? -x : x;
+    end
+endfunction
+analog begin
+    @(initial_step) begin
+        out_v = 0.0;
+        flag_v = 0.0;
+        metric_v = 0.0;
+        core_v = 0.0;
+    end
+
+    @(cross(V(clk) - vth, +1) or cross(V(rst) - vth, +1)) begin
+        span_v = V(vdd, vss);
+        valid_v = ((V(en) > vth) && (span_v >= span_min) && (span_v <= span_max)) ? 1.0 : 0.0;
+        if (span_v < 0.05) span_v = 0.05;
+        x0 = clip01((V(in0) - V(vss)) / span_v);
+        x1 = clip01((V(in1) - V(vss)) / span_v);
+        x2 = clip01((V(in2) - V(vss)) / span_v);
+        x3 = clip01((V(in3) - V(vss)) / span_v);
+        c0 = clip01(V(ctrl0) / vhi);
+        c1 = clip01(V(ctrl1) / vhi);
+        if ((V(rst) > vth) || !(valid_v > 0.5)) begin
+            out_v = 0.0;
+            flag_v = 0.0;
+            metric_v = 0.0;
+            core_v = 0.0;
+        end else begin
+        if ((valid_v > 0.5) && (x0 > 0.25) && (x1 > 0.20)) begin
+            core_v = core_v + 1.0;
+            if (core_v > 4.0) core_v = 4.0;
+        end else begin
+            core_v = 0.0;
+        end
+        out_v = vhi * clip01(core_v / 4.0);
+        flag_v = (core_v >= 3.0) ? vhi : 0.0;
+        metric_v = vhi * clip01(absr(x0 - x1));
+        end
+    end
+
+    V(out) <+ transition(out_v, 0.0, tr, tr);
+    V(flag) <+ transition(flag_v, 0.0, tr, tr);
+    V(metric) <+ transition(metric_v, 0.0, tr, tr);
+end
+endmodule

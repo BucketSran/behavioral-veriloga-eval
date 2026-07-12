@@ -1,0 +1,413 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "edge_delay_qualified_driver",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vhi",
+                "override_behavior": "overrides vhi",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.62",
+                "name": "span_min",
+                "override_behavior": "overrides span_min",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.28",
+                "name": "span_max",
+                "override_behavior": "overrides span_max",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "50p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in0",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in1",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in2",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "in3",
+                "position": 5
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ctrl0",
+                "position": 6
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "ctrl1",
+                "position": 7
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vdd",
+                "position": 8
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "vss",
+                "position": 9
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "en",
+                "position": 10
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 11
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "flag",
+                "position": 12
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "metric",
+                "position": 13
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "edge_delay_qualified_driver.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "287",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "pll_clock_timing",
+    "difficulty": "D2",
+    "level": "L2",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Edge Delay Qualified Driver"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_MEASURE_ANALOG_INPUTS_RELATIVE_TO_THE",
+      "observable_contract": "Measure analog inputs relative to the local `vss` rail and normalize by the current local supply span. Clear all observables when `en` is low or when the local supply span is outside the public range. The DUT updates its observable state on the public clock edge and clears state while reset is high. Drive `out` with the task-specific bounded analog result, drive `flag` with the task-specific qualification condition, and drive `metric` with a bounded diagnostic magnitude.",
+      "required_signals": [
+        "time",
+        "clk",
+        "ctrl0",
+        "ctrl1",
+        "en",
+        "flag",
+        "in0",
+        "in1",
+        "in2",
+        "in3",
+        "metric",
+        "out",
+        "rst",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_BUILD_A_VOLTAGE_DOMAIN_ANALOG_MIXED",
+      "observable_contract": "Build a voltage-domain analog/mixed-signal helper or monitor. Clock-edge qualified delay-style driver replacing specify/specparam timing with explicit event state.",
+      "required_signals": [
+        "time",
+        "clk",
+        "ctrl0",
+        "ctrl1",
+        "en",
+        "flag",
+        "in0",
+        "in1",
+        "in2",
+        "in3",
+        "metric",
+        "out",
+        "rst",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_VTH_0_45_V_LOGIC_THRESHOLD",
+      "observable_contract": "`vth = 0.45 V`: logic threshold for voltage-coded controls.",
+      "required_signals": [
+        "time",
+        "clk",
+        "ctrl0",
+        "ctrl1",
+        "en",
+        "flag",
+        "in0",
+        "in1",
+        "in2",
+        "in3",
+        "metric",
+        "out",
+        "rst",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_VHI_0_9_V_HIGH_LEVEL",
+      "observable_contract": "`vhi = 0.9 V`: high level for output observables.",
+      "required_signals": [
+        "time",
+        "clk",
+        "ctrl0",
+        "ctrl1",
+        "en",
+        "flag",
+        "in0",
+        "in1",
+        "in2",
+        "in3",
+        "metric",
+        "out",
+        "rst",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_SPAN_MIN_0_62_V_SPAN",
+      "observable_contract": "`span_min = 0.62 V`, `span_max = 1.28 V`: legal local supply span measured as",
+      "required_signals": [
+        "time",
+        "clk",
+        "ctrl0",
+        "ctrl1",
+        "en",
+        "flag",
+        "in0",
+        "in1",
+        "in2",
+        "in3",
+        "metric",
+        "out",
+        "rst",
+        "vdd",
+        "vss"
+      ]
+    },
+    {
+      "id": "P_TR_50P_OUTPUT_TRANSITION_SMOOTHING_TIME",
+      "observable_contract": "`tr = 50p`: output transition smoothing time.",
+      "required_signals": [
+        "time",
+        "clk",
+        "ctrl0",
+        "ctrl1",
+        "en",
+        "flag",
+        "in0",
+        "in1",
+        "in2",
+        "in3",
+        "metric",
+        "out",
+        "rst",
+        "vdd",
+        "vss"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/edge_delay_qualified_driver.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-787",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "in0",
+            "port_ref": "in0",
+            "position": 2
+          },
+          {
+            "net": "in1",
+            "port_ref": "in1",
+            "position": 3
+          },
+          {
+            "net": "in2",
+            "port_ref": "in2",
+            "position": 4
+          },
+          {
+            "net": "in3",
+            "port_ref": "in3",
+            "position": 5
+          },
+          {
+            "net": "ctrl0",
+            "port_ref": "ctrl0",
+            "position": 6
+          },
+          {
+            "net": "ctrl1",
+            "port_ref": "ctrl1",
+            "position": 7
+          },
+          {
+            "net": "vdd",
+            "port_ref": "vdd",
+            "position": 8
+          },
+          {
+            "net": "vss",
+            "port_ref": "vss",
+            "position": 9
+          },
+          {
+            "net": "en",
+            "port_ref": "en",
+            "position": 10
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 11
+          },
+          {
+            "net": "flag",
+            "port_ref": "flag",
+            "position": 12
+          },
+          {
+            "net": "metric",
+            "port_ref": "metric",
+            "position": 13
+          }
+        ],
+        "module_ref": "edge_delay_qualified_driver",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "ctrl0",
+      "ctrl1",
+      "en",
+      "flag",
+      "in0",
+      "in1",
+      "in2",
+      "in3",
+      "metric",
+      "out",
+      "rst",
+      "vdd",
+      "vss"
+    ]
+  }
+}

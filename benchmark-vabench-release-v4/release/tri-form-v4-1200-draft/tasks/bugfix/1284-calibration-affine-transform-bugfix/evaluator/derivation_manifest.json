@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-284",
+    "canonical_task_slug": "284-calibration-affine-transform",
+    "family_spec_sha256": "cb75b861a25a08be81cc497fd66c1a0861c5dd5d1e2117b6b23215ca53b05579",
+    "mutation_catalog_sha256": "2155ab09709a8c4a5189e22117440ca3992c2efdb0743a0b5248eb74649f8688",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "284",
+  "negative_assignment": {
+    "bugfix_seed": "neg_003_ignore_enable",
+    "testbench_suite": [
+      "neg_002_ignore_offset_ctrl",
+      "neg_001_ignore_gain_ctrl",
+      "neg_003_ignore_enable",
+      "neg_005_wrong_residual_metric",
+      "neg_004_no_output_clip"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "8ceef4899c1eaaa83d21c5f71c61c024e1b3603135bfef1aca81c6804fb3abda",
+    "changed_artifacts": [
+      "calibration_affine_transform.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_003_ignore_enable",
+    "rationale": "Select fault class state_reset_or_enable_error under trigger 'stimulus exercises neg_003_ignore_enable' because it exercises P_CLEAR_OUTPUT_AND_METRIC_WHILE_RESET as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 16,
+    "source_preferred_seed": "neg_002_ignore_offset_ctrl",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

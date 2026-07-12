@@ -1,0 +1,37 @@
+{
+  "base_dut": {
+    "canonical_task_id": "v4-289",
+    "canonical_task_slug": "289-iterative-decay-estimator",
+    "family_spec_sha256": "fe69e82f542bc8cb511c58c88e5fce52817a64ed6b0e36a7e3dff54bd9e0e844",
+    "mutation_catalog_sha256": "91931bd5a53e471b7e9f1db06099ca524b1b47c90e2ac3380c505f1e8e461f32",
+    "source_release_manifest_sha256": "52278bac89017d62349a2577944cda8717bde78c3adef975280ba2bf988c643b"
+  },
+  "family_id": "289",
+  "negative_assignment": {
+    "bugfix_seed": "neg_002_ignore_enable",
+    "testbench_suite": [
+      "neg_003_wrong_scale",
+      "neg_002_ignore_enable",
+      "neg_001_zero_outputs",
+      "neg_004_ignore_control_or_reset",
+      "neg_005_wrong_flag_metric"
+    ]
+  },
+  "private_materialization": {
+    "buggy_bundle_sha256": "42e1d8b7a14dc7a26d6f15c5ba55460062ed9219b7f88b41ddbf06513d35db2f",
+    "changed_artifacts": [
+      "iterative_decay_estimator.va"
+    ]
+  },
+  "schema_version": "v4-derivation-manifest-v2",
+  "selection_evidence": {
+    "mutation_id": "neg_002_ignore_enable",
+    "rationale": "Select fault class state_reset_or_enable_error under trigger 'stimulus exercises neg_002_ignore_enable' because it exercises P_INITIALIZE_THE_DECAY_STATE_AND_ALL, P_VTH_0_45_V_LOGIC_THRESHOLD as one compile-pass semantic defect.",
+    "selection_policy": "semantic_fault_complexity_v1",
+    "selection_status": "policy_reviewed",
+    "semantic_score": 19,
+    "source_preferred_seed": "neg_003_wrong_scale",
+    "source_preferred_seed_preserved": false,
+    "triviality_markers": []
+  }
+}

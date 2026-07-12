@@ -1,0 +1,306 @@
+{
+  "artifact_contract": {
+    "files": [
+      {
+        "modules": [
+          {
+            "depends_on": [],
+            "name": "calibration_affine_transform",
+            "parameters": [
+              {
+                "default": "0.45",
+                "name": "vth",
+                "override_behavior": "overrides vth",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.9",
+                "name": "vhi",
+                "override_behavior": "overrides vhi",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "center",
+                "override_behavior": "overrides center",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.50",
+                "name": "gain_base",
+                "override_behavior": "overrides gain_base",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "1.00",
+                "name": "gain_span",
+                "override_behavior": "overrides gain_span",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "0.45",
+                "name": "resid_fullscale",
+                "override_behavior": "overrides resid_fullscale",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              },
+              {
+                "default": "60p",
+                "name": "tr",
+                "override_behavior": "overrides tr",
+                "type": "real",
+                "units": "",
+                "valid_range": "finite"
+              }
+            ],
+            "ports": [
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "clk",
+                "position": 0
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "rst",
+                "position": 1
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "raw",
+                "position": 2
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "gain_ctrl",
+                "position": 3
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "offset_ctrl",
+                "position": 4
+              },
+              {
+                "direction": "input",
+                "discipline": "electrical",
+                "name": "en",
+                "position": 5
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "out",
+                "position": 6
+              },
+              {
+                "direction": "output",
+                "discipline": "electrical",
+                "name": "resid_metric",
+                "position": 7
+              }
+            ],
+            "role": "entry"
+          }
+        ],
+        "path": "calibration_affine_transform.va"
+      }
+    ],
+    "mode": "single_file"
+  },
+  "evaluation_summary": {
+    "anonymous_negative_cases": 5,
+    "full_credit": "valid candidate and reference pass and all five negatives killed behaviorally",
+    "reference_cases": 1
+  },
+  "family_id": "284",
+  "feedback": {
+    "available_in_modes": [
+      "G2",
+      "G3",
+      "G4",
+      "G5"
+    ],
+    "command": "vabench feedback run"
+  },
+  "form": "testbench",
+  "identity": {
+    "category": "calibration_control",
+    "difficulty": "D2",
+    "level": "L1",
+    "supported_scope": "pure voltage-domain event-driven transient behavioral Verilog-A",
+    "title": "Calibration Affine Transform"
+  },
+  "modeling_constraints": [
+    "Use deterministic voltage-domain behavioral Verilog-A.",
+    "Do not hard-code validation stimulus, stop times, sample windows, gold internals, or simulator side channels."
+  ],
+  "properties": [
+    {
+      "id": "P_ON_EACH_RISING_CLOCK_CROSSING_COMPUTE",
+      "observable_contract": "On each rising clock crossing, compute a local affine calibration transform from raw, gain_ctrl, and offset_ctrl while reset is low and enable is high.",
+      "required_signals": [
+        "time",
+        "clk",
+        "en",
+        "gain_ctrl",
+        "offset_ctrl",
+        "out",
+        "raw",
+        "resid_metric",
+        "rst"
+      ]
+    },
+    {
+      "id": "P_MAP_GAIN_CTRL_TO_A_PUBLIC",
+      "observable_contract": "Map gain_ctrl to a public gain range and offset_ctrl to a centered offset.",
+      "required_signals": [
+        "time",
+        "clk",
+        "en",
+        "gain_ctrl",
+        "offset_ctrl",
+        "out",
+        "raw",
+        "resid_metric",
+        "rst"
+      ]
+    },
+    {
+      "id": "P_CLEAR_OUTPUT_AND_METRIC_WHILE_RESET",
+      "observable_contract": "Clear output and metric while reset is high or enable is low; otherwise clip the transformed output into the public voltage-coded range.",
+      "required_signals": [
+        "time",
+        "clk",
+        "en",
+        "gain_ctrl",
+        "offset_ctrl",
+        "out",
+        "raw",
+        "resid_metric",
+        "rst"
+      ]
+    },
+    {
+      "id": "P_EXPOSE_A_BOUNDED_RESIDUAL_METRIC_FOR",
+      "observable_contract": "Expose a bounded residual metric for the transform magnitude.",
+      "required_signals": [
+        "time",
+        "clk",
+        "en",
+        "gain_ctrl",
+        "offset_ctrl",
+        "out",
+        "raw",
+        "resid_metric",
+        "rst"
+      ]
+    },
+    {
+      "id": "P_USE_LOCAL_ANALOG_HELPER_FUNCTIONS_RATHER",
+      "observable_contract": "Use local analog helper functions rather than user task/endtask syntax.",
+      "required_signals": [
+        "time",
+        "clk",
+        "en",
+        "gain_ctrl",
+        "offset_ctrl",
+        "out",
+        "raw",
+        "resid_metric",
+        "rst"
+      ]
+    }
+  ],
+  "schema_version": "v4-tri-form-public-contract-v1",
+  "security_summary": [
+    "only declared ./dut source bindings are allowed",
+    "DUT redefinition, direct output drive, private hierarchical probes, arbitrary file access, and unbounded analyses are rejected"
+  ],
+  "supplied_dut_artifacts": [
+    "supplied_dut/calibration_affine_transform.va"
+  ],
+  "target_artifacts": [
+    "testbench.scs"
+  ],
+  "task_id": "v4-784",
+  "testbench_binding": {
+    "dut_source_root": "dut",
+    "instances": [
+      {
+        "connections": [
+          {
+            "net": "clk",
+            "port_ref": "clk",
+            "position": 0
+          },
+          {
+            "net": "rst",
+            "port_ref": "rst",
+            "position": 1
+          },
+          {
+            "net": "raw",
+            "port_ref": "raw",
+            "position": 2
+          },
+          {
+            "net": "gain_ctrl",
+            "port_ref": "gain_ctrl",
+            "position": 3
+          },
+          {
+            "net": "offset_ctrl",
+            "port_ref": "offset_ctrl",
+            "position": 4
+          },
+          {
+            "net": "en",
+            "port_ref": "en",
+            "position": 5
+          },
+          {
+            "net": "out",
+            "port_ref": "out",
+            "position": 6
+          },
+          {
+            "net": "resid_metric",
+            "port_ref": "resid_metric",
+            "position": 7
+          }
+        ],
+        "module_ref": "calibration_affine_transform",
+        "name": "XDUT"
+      }
+    ],
+    "source_path_template": "./dut/{artifact_path}"
+  },
+  "trace_contract": {
+    "required_signals": [
+      "time",
+      "clk",
+      "en",
+      "gain_ctrl",
+      "offset_ctrl",
+      "out",
+      "raw",
+      "resid_metric",
+      "rst"
+    ]
+  }
+}
