@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Consume one tri-form task record and export an isolated runtime package."""
+"""Consume one benchmarkv4 task record and export an isolated runtime package."""
 from __future__ import annotations
 
 import argparse
@@ -12,7 +12,6 @@ from typing import Any
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_RELEASE = PACKAGE_ROOT / "release" / "benchmarkv4"
-DEFAULT_PRIVATE_SUBDIR = "private_evaluator"
 AGENTIC = {"G2", "G3", "G4", "G5"}
 FORM_SKILLS = {
     "dut": "dut_modeling.md",
@@ -65,21 +64,22 @@ def task_record(release: Path, task_id: str) -> tuple[dict[str, Any], Path]:
     if len(matches) != 1:
         raise SystemExit(f"expected one task record for {task_id}, found {len(matches)}")
     task_dir = release / str(matches[0]["task_dir"])
-    return read_json(task_dir / "TASK_RECORD.json"), task_dir
+    return read_json(task_dir / "task_record.json"), task_dir
 
 
 def serialize_public_artifacts(task_dir: Path, form: str) -> str:
     lines: list[str] = []
+    public = task_dir / "public"
     roots = []
     if form == "testbench":
-        roots.append(task_dir / "supplied_dut")
+        roots.append(public / "supplied_dut")
     elif form == "bugfix":
-        roots.append(task_dir / "buggy_bundle")
+        roots.append(public / "buggy_bundle")
     for root in roots:
         for path in sorted(root.rglob("*")):
             if not path.is_file():
                 continue
-            relative = path.relative_to(task_dir).as_posix()
+            relative = path.relative_to(public).as_posix()
             lines.extend([
                 f'<<<VABENCH_INPUT_ARTIFACT path="{relative}">>>',
                 path.read_text(encoding="utf-8"),
@@ -136,13 +136,13 @@ def build_mode_record(release: Path, task_dir: Path, record: dict[str, Any], mod
     form = str(record["form"])
     if form == "testbench":
         public_inputs.extend(
-            f"public_input:{path.relative_to(task_dir).as_posix()}"
-            for path in sorted((task_dir / "supplied_dut").rglob("*.va"))
+            f"public_input:{path.relative_to(task_dir / 'public').as_posix()}"
+            for path in sorted((task_dir / "public" / "supplied_dut").rglob("*.va"))
         )
     elif form == "bugfix":
         public_inputs.extend(
-            f"public_input:{path.relative_to(task_dir).as_posix()}"
-            for path in sorted((task_dir / "buggy_bundle").rglob("*.va"))
+            f"public_input:{path.relative_to(task_dir / 'public').as_posix()}"
+            for path in sorted((task_dir / "public" / "buggy_bundle").rglob("*.va"))
         )
     guide_components: list[str] = []
     if policy.get("form_skill"):
@@ -173,7 +173,7 @@ def build_mode_record(release: Path, task_dir: Path, record: dict[str, Any], mod
 
 def render_prompt(release: Path, task_dir: Path, record: dict[str, Any], mode_record: dict[str, Any], *, inline_artifacts: bool) -> str:
     mode = str(mode_record["mode"])
-    parts = [(task_dir / "instruction.md").read_text(encoding="utf-8")]
+    parts = [(task_dir / "public" / "instruction.md").read_text(encoding="utf-8")]
     artifacts = serialize_public_artifacts(task_dir, str(record["form"])) if inline_artifacts else ""
     if artifacts:
         parts.append(artifacts)
@@ -194,15 +194,16 @@ def render_prompt(release: Path, task_dir: Path, record: dict[str, Any], mode_re
 
 
 def install_public(task_dir: Path, public_root: Path, form: str, mode: str) -> None:
+    source_public = task_dir / "public"
     target = public_root / "task"
     target.mkdir(parents=True)
-    shutil.copy2(task_dir / "instruction.md", target / "instruction.md")
+    shutil.copy2(source_public / "instruction.md", target / "instruction.md")
     if form == "testbench":
-        copy_tree(task_dir / "supplied_dut", target / "supplied_dut")
+        copy_tree(source_public / "supplied_dut", target / "supplied_dut")
     elif form == "bugfix":
-        copy_tree(task_dir / "buggy_bundle", target / "buggy_bundle")
+        copy_tree(source_public / "buggy_bundle", target / "buggy_bundle")
         if mode in AGENTIC:
-            copy_tree(task_dir / "buggy_bundle", public_root / "submission")
+            copy_tree(source_public / "buggy_bundle", public_root / "submission")
     if mode in AGENTIC:
         write_json(public_root / "tool_manifest.json", {
             "schema_version": "v4-public-tool-manifest-v1",
@@ -212,8 +213,9 @@ def install_public(task_dir: Path, public_root: Path, form: str, mode: str) -> N
         })
 
 
-def install_evaluator(private_task_dir: Path, evaluator_root: Path, record: dict[str, Any]) -> None:
-    task_eval = private_task_dir / "evaluator"
+def install_evaluator(task_dir: Path, evaluator_root: Path, record: dict[str, Any]) -> None:
+    task_eval = task_dir / "evaluator"
+    provenance = task_dir / "provenance"
     form = str(record["form"])
     evaluator_root.mkdir(parents=True)
     for name in ("task_record.json", "family_spec.json", "checker_profile.json", "harness_spec.json"):
@@ -227,17 +229,18 @@ def install_evaluator(private_task_dir: Path, evaluator_root: Path, record: dict
         copy_tree(task_eval / "solution", evaluator_root / "trusted_solution")
         copy_tree(task_eval / "mutation_bundles", evaluator_root / "mutation_bundles")
         shutil.copy2(task_eval / "mutation_catalog.json", evaluator_root / "mutation_catalog.json")
-        for name in ("derivation_manifest.json", "reference_tb.scs", "reference_certificate.json", "testbench_security_policy.json"):
+        for name in ("reference_tb.scs", "testbench_security_policy.json"):
             shutil.copy2(task_eval / name, evaluator_root / name)
+        for name in ("derivation_manifest.json", "reference_certificate.json"):
+            shutil.copy2(provenance / name, evaluator_root / name)
     elif form == "bugfix":
         for name in ("derivation_manifest.json", "gold_repair_reference.json"):
-            shutil.copy2(task_eval / name, evaluator_root / name)
+            shutil.copy2(provenance / name, evaluator_root / name)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--release", type=Path, default=DEFAULT_RELEASE)
-    parser.add_argument("--private-evaluator", type=Path)
     parser.add_argument("--task", required=True)
     parser.add_argument("--mode", choices=[f"G{x}" for x in range(6)], required=True)
     parser.add_argument("--output", type=Path, required=True)
@@ -245,11 +248,6 @@ def main() -> int:
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
     release = args.release.expanduser().resolve()
-    private_evaluator = (
-        args.private_evaluator.expanduser().resolve()
-        if args.private_evaluator is not None
-        else release / DEFAULT_PRIVATE_SUBDIR
-    )
     output = args.output.expanduser().resolve()
     if output.exists():
         if not args.force:
@@ -257,12 +255,11 @@ def main() -> int:
         shutil.rmtree(output)
     output.mkdir(parents=True)
     record, task_dir = task_record(release, args.task)
-    private_task_dir = private_evaluator / str(record["task_dir"])
     mode_record = build_mode_record(release, task_dir, record, args.mode)
     public_root = output / "public"
     (public_root / "submission").mkdir(parents=True)
     install_public(task_dir, public_root, str(record["form"]), args.mode)
-    install_evaluator(private_task_dir, output / "evaluator", record)
+    install_evaluator(task_dir, output / "evaluator", record)
     prompt = render_prompt(
         release,
         task_dir,

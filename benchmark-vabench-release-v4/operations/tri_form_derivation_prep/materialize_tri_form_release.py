@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Materialize 400 DUT, 400 Testbench, and 400 Bugfix task views.
+"""Materialize the standalone benchmarkv4 task package.
 
 The frozen exact-five DUT release is the only family source.  The generated
-public release contains only solver-visible task inputs and prompt components.
-The private evaluator package contains scoring assets required by the local
-runner, but excludes generated audit/runtime evidence from version control.
+benchmarkv4 package keeps each task self-contained: solver-visible inputs live
+under ``public/``, local scoring assets under ``evaluator/``, and hash-bound
+audit provenance under ``provenance/``.
 """
 from __future__ import annotations
 
@@ -21,7 +21,6 @@ PACKAGE_ROOT = Path(__file__).resolve().parents[2]
 PREP_ROOT = Path(__file__).resolve().parent
 DEFAULT_SOURCE = PACKAGE_ROOT / "provenance" / "dut-base-v3-exact-five-hash-bound-v2"
 DEFAULT_OUTPUT = PACKAGE_ROOT / "release" / "benchmarkv4"
-DEFAULT_PRIVATE_SUBDIR = "private_evaluator"
 PROMPT_ASSETS = PREP_ROOT / "prompt_assets"
 MODES = {
     "G0": {"process": "direct_one_shot", "form_skill": False, "feedback_guide": False, "feedback_cli": False},
@@ -41,12 +40,13 @@ FEEDBACK_GUIDES = {
     "testbench": "feedback_testbench.md",
     "bugfix": "feedback_bugfix.md",
 }
-PUBLIC_MATERIALIZED_ARTIFACTS = (
+MATERIALIZED_ARTIFACTS = (
     "TASK_INDEX.json",
+    "BUGFIX_SEED_REVIEW.json",
     "prompt_modes/modes.json",
     "prompt_modes/manifest.json",
 )
-PRIVATE_MATERIALIZED_ARTIFACTS = (".gitattributes", "BUGFIX_SEED_REVIEW.json")
+PUBLIC_MATERIALIZED_ARTIFACTS = MATERIALIZED_ARTIFACTS
 WRAPPERS_BY_PROCESS = {
     "direct_one_shot": "direct_wrapper.md",
     "agentic": "agentic_wrapper.md",
@@ -78,6 +78,7 @@ STANDALONE_EVALUATOR_COMMON = (
     "harness_spec.json",
     "score_tb.scs",
 )
+TASK_RECORD_FILENAME = "task_record.json"
 TRIVIAL_FAULT_CLASSES = {
     "zero_stub_output",
     "holds_clock_output_low",
@@ -338,12 +339,13 @@ def public_semantics(spec: dict[str, Any]) -> dict[str, Any]:
 
 def public_contract_relative_path(task_dir: Path) -> str:
     form = task_dir.parent.name
-    return f"public_contracts/{form}/{task_dir.name}.json"
+    return f"tasks/{form}/{task_dir.name}/public_contract.json"
 
 
 def write_public_contract(output: Path, task_dir: Path, contract: dict[str, Any]) -> str:
-    relative = public_contract_relative_path(task_dir)
-    write_json(output / relative, contract)
+    target = task_dir / "public_contract.json"
+    relative = rel(target, output)
+    write_json(target, contract)
     return relative
 
 
@@ -429,7 +431,7 @@ def overlay_mutation(source_task: Path, mutation_id: str, destination: Path, art
 
 def common_task_record(
     *, task_id: str, form: str, family_id: str, directory: str, spec_sha: str,
-    source_task: str, candidate_artifacts: list[str], public_contract: str, public_bundle_sha: str,
+    source_task_slug: str, candidate_artifacts: list[str], public_contract: str, public_bundle_sha: str,
 ) -> dict[str, Any]:
     return {
         "schema_version": "v4-benchmarkv4-task-record-v1",
@@ -440,7 +442,7 @@ def common_task_record(
         "public_contract": public_contract,
         "candidate_artifacts": candidate_artifacts,
         "family_spec_sha256": spec_sha,
-        "canonical_dut_source": source_task,
+        "canonical_dut_source_slug": source_task_slug,
         "public_bundle_sha256": public_bundle_sha,
         "scored": True,
         "modes": list(MODES),
@@ -448,10 +450,11 @@ def common_task_record(
 
 
 def public_bundle_hash(task_dir: Path) -> str:
-    included = [path for path in sorted(task_dir.rglob("*")) if path.is_file() and "evaluator" not in path.parts]
+    public = task_dir / "public"
+    included = [path for path in sorted(public.rglob("*")) if path.is_file()]
     digest = hashlib.sha256()
     for path in included:
-        digest.update(path.relative_to(task_dir).as_posix().encode("utf-8"))
+        digest.update(path.relative_to(public).as_posix().encode("utf-8"))
         digest.update(b"\0")
         digest.update(path.read_bytes())
         digest.update(b"\0")
@@ -459,7 +462,7 @@ def public_bundle_hash(task_dir: Path) -> str:
 
 
 def write_task_record(task_dir: Path, record: dict[str, Any]) -> None:
-    write_json(task_dir / "TASK_RECORD.json", record)
+    write_json(task_dir / TASK_RECORD_FILENAME, record)
 
 
 def copy_tree(source: Path, target: Path) -> None:
@@ -477,7 +480,7 @@ def copy_tree_skipping(source: Path, target: Path, *, excluded_names: set[str]) 
 
 
 def materialize_standalone_evaluator(source_task: Path, evaluator: Path, *, include_negative_suite: bool) -> None:
-    """Copy private scoring assets into a tri-form task evaluator directory."""
+    """Copy local scoring assets into a benchmarkv4 task evaluator directory."""
     source_eval = source_task / "evaluator"
     evaluator.mkdir(parents=True, exist_ok=True)
     for name in STANDALONE_EVALUATOR_COMMON:
@@ -495,8 +498,6 @@ def materialize_standalone_evaluator(source_task: Path, evaluator: Path, *, incl
 
 def build_dut_view(
     output: Path,
-    private_output: Path,
-    source: Path,
     source_task: Path,
     row: dict[str, Any],
     spec: dict[str, Any],
@@ -505,8 +506,10 @@ def build_dut_view(
     family = str(row["canonical_dut_id"])
     task_dir = output / "tasks" / "dut" / source_task.name
     task_dir.mkdir(parents=True)
+    public = task_dir / "public"
+    public.mkdir()
     write_text(
-        task_dir / "instruction.md",
+        public / "instruction.md",
         sanitize_instruction_text(
             (source_task / "public" / "task" / "instruction.md").read_text(encoding="utf-8"),
             "dut",
@@ -521,23 +524,33 @@ def build_dut_view(
         "feedback": {"available_in_modes": ["G2", "G3", "G4", "G5"], "command": "vabench feedback run"},
     })
     public_contract = write_public_contract(output, task_dir, contract)
-    private_task_dir = private_output / rel(task_dir, output)
-    evaluator = private_task_dir / "evaluator"
-    evaluator.mkdir(parents=True)
+    evaluator = task_dir / "evaluator"
     materialize_standalone_evaluator(source_task, evaluator, include_negative_suite=False)
+    provenance = task_dir / "provenance"
+    provenance.mkdir()
+    shutil.copy2(source_task / "evaluator" / "task_record.json", provenance / "source_task_record.json")
+    shutil.copy2(source_task / "evaluator" / "derivation_manifest.json", provenance / "source_derivation_manifest.json")
     write_json(evaluator / "score_policy.json", {
         "schema_version": "v4-dut-score-policy-v1",
         "task_id": f"v4-{family}",
         "candidate_artifacts": contract["target_artifacts"],
         "full_contract_pass_required": True,
         "spectre_final_judge": True,
-        "source_checker_profile": rel(source_task / "evaluator" / "checker_profile.json", PACKAGE_ROOT),
+        "materialized_checker_profile": "evaluator/checker_profile.json",
+        "checker_profile_sha256": file_sha(evaluator / "checker_profile.json"),
+    })
+    write_json(provenance / "gold_reference.json", {
+        "schema_version": "v4-gold-reference-v1",
+        "materialized_solution": "evaluator/solution",
+        "solution_tree_sha256": tree_sha(evaluator / "solution"),
+        "gold_dut_certification_sha256": row["hashes"]["task_certification_sha256"],
+        "simulation_rerun_required_for_materialization": False,
     })
     bundle_sha = public_bundle_hash(task_dir)
     write_task_record(task_dir, common_task_record(
         task_id=f"v4-{family}", form="dut", family_id=family,
         directory=rel(task_dir, output), spec_sha=spec_sha,
-        source_task=rel(source_task, PACKAGE_ROOT),
+        source_task_slug=source_task.name,
         candidate_artifacts=contract["target_artifacts"], public_contract=public_contract,
         public_bundle_sha=bundle_sha,
     ))
@@ -552,7 +565,6 @@ def build_dut_view(
 
 def build_testbench_view(
     output: Path,
-    private_output: Path,
     source_task: Path,
     row: dict[str, Any],
     spec: dict[str, Any],
@@ -565,8 +577,10 @@ def build_testbench_view(
     slug = source_task.name.split("-", 1)[1]
     task_dir = output / "tasks" / "testbench" / f"{task_num:03d}-{slug}-testbench"
     task_dir.mkdir(parents=True)
-    write_text(task_dir / "instruction.md", render_testbench_instruction(spec))
-    supplied = task_dir / "supplied_dut"
+    public = task_dir / "public"
+    public.mkdir()
+    write_text(public / "instruction.md", render_testbench_instruction(spec))
+    supplied = public / "supplied_dut"
     artifacts = copy_solution(source_task, supplied, spec)
     contract = public_semantics(spec)
     contract.update({
@@ -587,10 +601,12 @@ def build_testbench_view(
         ],
     })
     public_contract = write_public_contract(output, task_dir, contract)
-    private_task_dir = private_output / rel(task_dir, output)
-    evaluator = private_task_dir / "evaluator"
-    evaluator.mkdir(parents=True)
+    evaluator = task_dir / "evaluator"
     materialize_standalone_evaluator(source_task, evaluator, include_negative_suite=True)
+    provenance = task_dir / "provenance"
+    provenance.mkdir()
+    shutil.copy2(source_task / "evaluator" / "task_record.json", provenance / "source_task_record.json")
+    shutil.copy2(source_task / "evaluator" / "derivation_manifest.json", provenance / "source_derivation_manifest.json")
     suite = [str(item["mutation_id"]) for item in row["active_mutations"]]
     derivation = {
         "schema_version": "v4-derivation-manifest-v2",
@@ -605,7 +621,6 @@ def build_testbench_view(
         },
         "negative_assignment": negative_assignment(row, seed_review),
     }
-    write_json(evaluator / "derivation_manifest.json", derivation)
     write_json(evaluator / "score_policy.json", {
         "schema_version": "v4-testbench-score-policy-v1",
         "task_id": f"v4-{task_num:03d}",
@@ -615,7 +630,8 @@ def build_testbench_view(
         "full_credit": "reference_gate and five_of_five_killed_behaviorally",
         "kill_ratio_denominator": 5,
         "spectre_final_judge": True,
-        "source_checker_profile": rel(source_task / "evaluator" / "checker_profile.json", PACKAGE_ROOT),
+        "materialized_checker_profile": "evaluator/checker_profile.json",
+        "checker_profile_sha256": file_sha(evaluator / "checker_profile.json"),
     })
     write_json(evaluator / "testbench_security_policy.json", {
         "schema_version": "v4-testbench-security-policy-v1",
@@ -628,7 +644,8 @@ def build_testbench_view(
         "require": ["declared_dut_binding", "transient_analysis", "all_required_public_traces"],
     })
     shutil.copy2(source_task / "evaluator" / "score_tb.scs", evaluator / "reference_tb.scs")
-    write_json(evaluator / "reference_certificate.json", {
+    write_json(provenance / "derivation_manifest.json", derivation)
+    write_json(provenance / "reference_certificate.json", {
         "schema_version": "v4-reference-testbench-certificate-v1",
         "evidence_source": "canonical_score_profile_hash_reuse",
         "reference_tb_sha256": file_sha(evaluator / "reference_tb.scs"),
@@ -641,7 +658,7 @@ def build_testbench_view(
     write_task_record(task_dir, common_task_record(
         task_id=f"v4-{task_num:03d}", form="testbench", family_id=family,
         directory=rel(task_dir, output), spec_sha=spec_sha,
-        source_task=rel(source_task, PACKAGE_ROOT), candidate_artifacts=["testbench.scs"],
+        source_task_slug=source_task.name, candidate_artifacts=["testbench.scs"],
         public_contract=public_contract,
         public_bundle_sha=bundle_sha,
     ))
@@ -656,7 +673,6 @@ def build_testbench_view(
 
 def build_bugfix_view(
     output: Path,
-    private_output: Path,
     source_task: Path,
     row: dict[str, Any],
     spec: dict[str, Any],
@@ -669,8 +685,10 @@ def build_bugfix_view(
     slug = source_task.name.split("-", 1)[1]
     task_dir = output / "tasks" / "bugfix" / f"{task_num:04d}-{slug}-bugfix"
     task_dir.mkdir(parents=True)
-    write_text(task_dir / "instruction.md", render_bugfix_instruction(spec))
-    buggy = task_dir / "buggy_bundle"
+    public = task_dir / "public"
+    public.mkdir()
+    write_text(public / "instruction.md", render_bugfix_instruction(spec))
+    buggy = public / "buggy_bundle"
     artifacts = copy_solution(source_task, buggy, spec)
     changed = overlay_mutation(source_task, seed_review["mutation_id"], buggy, artifacts)
     contract = public_semantics(spec)
@@ -685,10 +703,12 @@ def build_bugfix_view(
         "feedback": {"available_in_modes": ["G2", "G3", "G4", "G5"], "command": "vabench feedback run"},
     })
     public_contract = write_public_contract(output, task_dir, contract)
-    private_task_dir = private_output / rel(task_dir, output)
-    evaluator = private_task_dir / "evaluator"
-    evaluator.mkdir(parents=True)
+    evaluator = task_dir / "evaluator"
     materialize_standalone_evaluator(source_task, evaluator, include_negative_suite=False)
+    provenance = task_dir / "provenance"
+    provenance.mkdir()
+    shutil.copy2(source_task / "evaluator" / "task_record.json", provenance / "source_task_record.json")
+    shutil.copy2(source_task / "evaluator" / "derivation_manifest.json", provenance / "source_derivation_manifest.json")
     write_json(evaluator / "score_policy.json", {
         "schema_version": "v4-bugfix-score-policy-v1",
         "task_id": f"v4-{task_num}",
@@ -696,10 +716,11 @@ def build_bugfix_view(
         "artifact_mode": spec["artifact_contract"]["mode"],
         "full_contract_pass_required": True,
         "spectre_final_judge": True,
-        "source_checker_profile": rel(source_task / "evaluator" / "checker_profile.json", PACKAGE_ROOT),
-        "gold_solution_tree_sha256": tree_sha(source_task / "evaluator" / "solution"),
+        "materialized_checker_profile": "evaluator/checker_profile.json",
+        "checker_profile_sha256": file_sha(evaluator / "checker_profile.json"),
+        "gold_solution_tree_sha256": tree_sha(evaluator / "solution"),
     })
-    write_json(evaluator / "derivation_manifest.json", {
+    write_json(provenance / "derivation_manifest.json", {
         "schema_version": "v4-derivation-manifest-v2",
         "family_id": family,
         "base_dut": {
@@ -716,10 +737,9 @@ def build_bugfix_view(
             "buggy_bundle_sha256": tree_sha(buggy),
         },
     })
-    write_json(evaluator / "gold_repair_reference.json", {
+    write_json(provenance / "gold_repair_reference.json", {
         "schema_version": "v4-gold-repair-reference-v1",
         "materialized_solution": "evaluator/solution",
-        "source_solution": rel(source_task / "evaluator" / "solution", PACKAGE_ROOT),
         "solution_tree_sha256": tree_sha(evaluator / "solution"),
         "gold_dut_certification_sha256": row["hashes"]["task_certification_sha256"],
         "simulation_rerun_required_for_materialization": False,
@@ -728,7 +748,7 @@ def build_bugfix_view(
     write_task_record(task_dir, common_task_record(
         task_id=f"v4-{task_num}", form="bugfix", family_id=family,
         directory=rel(task_dir, output), spec_sha=spec_sha,
-        source_task=rel(source_task, PACKAGE_ROOT), candidate_artifacts=artifacts,
+        source_task_slug=source_task.name, candidate_artifacts=artifacts,
         public_contract=public_contract,
         public_bundle_sha=bundle_sha,
     ))
@@ -801,42 +821,28 @@ def install_prompt_assets(output: Path) -> dict[str, dict[str, Any]]:
     return records
 
 
-def iter_public_inputs(task_dir: Path, form: str, mode: str) -> Iterable[Path]:
-    yield task_dir / "instruction.md"
+def iter_public_inputs(task_dir: Path, form: str, mode: str | None = None) -> Iterable[Path]:
+    public = task_dir / "public"
+    yield public / "instruction.md"
     if form == "testbench":
-        yield from sorted((task_dir / "supplied_dut").rglob("*.va"))
+        yield from sorted((public / "supplied_dut").rglob("*.va"))
     elif form == "bugfix":
-        yield from sorted((task_dir / "buggy_bundle").rglob("*.va"))
+        yield from sorted((public / "buggy_bundle").rglob("*.va"))
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
-    parser.add_argument("--private-output", type=Path)
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
     source = args.source.expanduser().resolve()
     output = args.output.expanduser().resolve()
-    private_output = (
-        args.private_output.expanduser().resolve()
-        if args.private_output is not None
-        else output / DEFAULT_PRIVATE_SUBDIR
-    )
-    for path, label in ((output, "output"), (private_output, "private output")):
-        if not path.exists():
-            continue
+    if output.exists():
         if not args.force:
-            raise SystemExit(f"{label} exists; pass --force to replace it: {path}")
-        shutil.rmtree(path)
+            raise SystemExit(f"output exists; pass --force to replace it: {output}")
+        shutil.rmtree(output)
     output.mkdir(parents=True)
-    private_output.mkdir(parents=True)
-    write_text(
-        private_output / ".gitattributes",
-        "# Private evaluator Verilog-A fixtures are hash-bound canonical copies.\n"
-        "# Do not rewrite whitespace in these files during package hygiene checks.\n"
-        "*.va -whitespace\n",
-    )
 
     denominator_path = source / "score_denominator_manifest.json"
     denominator = read_json(denominator_path)
@@ -857,14 +863,14 @@ def main() -> int:
         seed_review = select_bugfix_seed(row)
         seed_rows.append({"family_id": family, **seed_review})
         task_rows.extend([
-            build_dut_view(output, private_output, source, source_task, row, spec, spec_sha),
-            build_testbench_view(output, private_output, source_task, row, spec, spec_sha, source_manifest_sha, seed_review),
-            build_bugfix_view(output, private_output, source_task, row, spec, spec_sha, source_manifest_sha, seed_review),
+            build_dut_view(output, source_task, row, spec, spec_sha),
+            build_testbench_view(output, source_task, row, spec, spec_sha, source_manifest_sha, seed_review),
+            build_bugfix_view(output, source_task, row, spec, spec_sha, source_manifest_sha, seed_review),
         ])
 
     task_rows.sort(key=lambda item: (item["form"], int(item["family_id"])))
     install_prompt_assets(output)
-    write_json(private_output / "BUGFIX_SEED_REVIEW.json", {
+    write_json(output / "BUGFIX_SEED_REVIEW.json", {
         "schema_version": "v4-bugfix-seed-review-v1",
         "selection_policy": "semantic_fault_complexity_v1",
         "families": seed_rows,
@@ -877,7 +883,7 @@ def main() -> int:
         "family_count": 400,
         "task_count": len(task_rows),
         "task_counts": counts,
-        "source_release": rel(source, PACKAGE_ROOT),
+        "source_release_label": source.name,
         "source_score_denominator_manifest_sha256": source_manifest_sha,
         "source_active_mutation_count": denominator.get("active_mutation_count"),
         "active_mutations_per_family": denominator.get("active_mutations_per_family"),
@@ -893,32 +899,19 @@ def main() -> int:
         "release_surface": "benchmarkv4_package",
         "public_surface": {
             "tasks": "tasks",
-            "public_contracts": "public_contracts",
             "prompt_modes": "prompt_modes",
             "task_index": "TASK_INDEX.json",
         },
-        "private_evaluator": rel(private_output, output),
+        "package_layout": {
+            "task_public_inputs": "tasks/<form>/<task>/public",
+            "task_evaluator_assets": "tasks/<form>/<task>/evaluator",
+            "task_provenance": "tasks/<form>/<task>/provenance",
+            "task_contract": "tasks/<form>/<task>/public_contract.json",
+        },
         "tasks_index": "TASK_INDEX.json",
-        "public_contracts_tree_sha256": tree_sha(output / "public_contracts"),
-        "materialized_artifact_sha256": materialized_artifact_hashes(output, PUBLIC_MATERIALIZED_ARTIFACTS),
+        "materialized_artifact_sha256": materialized_artifact_hashes(output, MATERIALIZED_ARTIFACTS),
     }
     write_json(output / "MANIFEST.json", manifest)
-    private_manifest = {
-        "schema_version": "v4-benchmarkv4-private-evaluator-manifest-v1",
-        "release_surface": "private_evaluator_package",
-        "public_release": rel(output, PACKAGE_ROOT),
-        "task_count": len(task_rows),
-        "task_counts": counts,
-        "source_release": rel(source, PACKAGE_ROOT),
-        "source_score_denominator_manifest_sha256": source_manifest_sha,
-        "bugfix_seed_review": "BUGFIX_SEED_REVIEW.json",
-        "private_materialized_artifact_sha256": materialized_artifact_hashes(
-            private_output,
-            PRIVATE_MATERIALIZED_ARTIFACTS,
-        ),
-        "git_policy": "tracked scoring assets; generated evidence and prompt records are ignored",
-    }
-    write_json(private_output / "MANIFEST.json", private_manifest)
     print(json.dumps(manifest, indent=2, sort_keys=True))
     return 0
 

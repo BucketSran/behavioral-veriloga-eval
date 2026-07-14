@@ -1,4 +1,4 @@
-# Tri-Form Release Handoff
+# benchmarkv4 Release Handoff
 
 This lane derives Testbench and Bugfix task views without changing the frozen
 DUT family assets.
@@ -20,12 +20,19 @@ DUT family assets.
 - Structure and bundle-isolation audit: PASS
 - Release status: `materialized_gate3_audit_pending`
 
-The tracked materialized package is `release/benchmarkv4/`. Its root is the
-solver-facing public surface, and its `private_evaluator/` subdirectory
-contains the gold references, mutation bundles, score policies, and derivation
-records needed to run the benchmark scorer. The private evaluator assets are
-tracked as part of the complete benchmark package; generated audit/runtime
-evidence and optional prompt-record snapshots remain ignored.
+The tracked materialized package is `release/benchmarkv4/`. It is a single
+standalone benchmark package, not a public tree plus a separate private mirror.
+Each task carries its related assets together:
+
+- `public/`: solver-visible instruction and supplied starter/DUT files;
+- `public_contract.json`: machine-readable contract metadata for tooling;
+- `task_record.json`: task identity, candidate artifacts, hashes, and modes;
+- `evaluator/`: gold solution, checker profile, harness, score policy, and
+  local scoring fixtures;
+- `provenance/`: hash-bound derivation/certification references.
+
+Generated audit/runtime evidence and optional prompt-record snapshots remain
+outside the tracked release unless intentionally promoted to compact reports.
 
 ## Remaining Release Work
 

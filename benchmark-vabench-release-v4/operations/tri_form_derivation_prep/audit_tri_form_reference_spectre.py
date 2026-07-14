@@ -3,7 +3,7 @@
 
 This is intentionally narrower than the model/API runner: it validates sealed
 benchmark reference assets by running each selected testbench-form task's local
-private evaluator ``reference_tb.scs`` against its public ``supplied_dut``
+``evaluator/reference_tb.scs`` against its public ``public/supplied_dut``
 artifacts, then scores the resulting Spectre CSV with the canonical private
 checker.
 """
@@ -25,7 +25,6 @@ PACKAGE = HERE.parents[1]
 REPO = PACKAGE.parent
 RUNNERS = REPO / "runners"
 DEFAULT_RELEASE = PACKAGE / "release" / "benchmarkv4"
-DEFAULT_PRIVATE_SUBDIR = "private_evaluator"
 
 for import_dir in (RUNNERS,):
     if str(import_dir) not in sys.path:
@@ -107,9 +106,9 @@ def resolve_task_rows(release: Path, requested: list[str]) -> list[dict[str, Any
 
 
 def checker_task_id(task_dir: Path, task_record: dict[str, Any]) -> str:
-    source_eval = PACKAGE / str(task_record["canonical_dut_source"]) / "evaluator"
-    source_task_record = read_json(source_eval / "task_record.json")
-    checker_profile = read_json(source_eval / "checker_profile.json")
+    task_eval = task_dir / "evaluator"
+    source_task_record = read_json(task_eval / "task_record.json")
+    checker_profile = read_json(task_eval / "checker_profile.json")
     source_slug = str(source_task_record.get("source_slug") or "")
     source_name = source_slug.partition("-")[2].replace("-", "_")
     candidates = [
@@ -128,8 +127,8 @@ def checker_task_id(task_dir: Path, task_record: dict[str, Any]) -> str:
 
 
 def include_paths_for_reference_tb(task_dir: Path, tb_path: Path) -> tuple[list[Path], list[str]]:
-    supplied_dut = task_dir / "supplied_dut"
-    public_support = task_dir / "public_support"
+    supplied_dut = task_dir / "public" / "supplied_dut"
+    public_support = task_dir / "public" / "public_support"
     search_dirs = [supplied_dut, public_support, tb_path.parent]
     found: list[Path] = []
     missing: list[str] = []
@@ -168,7 +167,6 @@ def compact_spectre_result(spectre: dict[str, Any]) -> dict[str, Any]:
 def run_one(
     *,
     release: Path,
-    private_evaluator: Path,
     row: dict[str, Any],
     output_root: Path,
     spectre_backend: str,
@@ -181,9 +179,8 @@ def run_one(
 ) -> dict[str, Any]:
     task_id = str(row["task_id"])
     task_dir = release / str(row["task_dir"])
-    private_task_dir = private_evaluator / str(row["task_dir"])
-    task_record = read_json(task_dir / "TASK_RECORD.json")
-    tb_path = private_task_dir / "evaluator" / "reference_tb.scs"
+    task_record = read_json(task_dir / "task_record.json")
+    tb_path = task_dir / "evaluator" / "reference_tb.scs"
     try:
         checker_id = checker_task_id(task_dir, task_record)
     except RuntimeError as exc:
@@ -282,7 +279,6 @@ def run_one(
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--release", type=Path, default=DEFAULT_RELEASE)
-    parser.add_argument("--private-evaluator", type=Path)
     parser.add_argument("--task-id", action="append", required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--work-root", type=Path, required=True)
@@ -296,11 +292,6 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     release = args.release.expanduser().resolve()
-    private_evaluator = (
-        args.private_evaluator.expanduser().resolve()
-        if args.private_evaluator is not None
-        else release / DEFAULT_PRIVATE_SUBDIR
-    )
     output_root = args.work_root.expanduser().resolve()
     output_root.mkdir(parents=True, exist_ok=True)
     backend = normalize_spectre_backend(args.spectre_backend)
@@ -312,7 +303,6 @@ def main(argv: list[str] | None = None) -> int:
     for row in rows:
         result = run_one(
             release=release,
-            private_evaluator=private_evaluator,
             row=row,
             output_root=output_root,
             spectre_backend=backend,

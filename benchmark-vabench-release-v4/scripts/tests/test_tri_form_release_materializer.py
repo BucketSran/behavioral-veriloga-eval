@@ -162,8 +162,8 @@ def test_render_prompt_places_guides_before_wrapper_without_public_contract_inli
         path = release / "prompt_modes" / subdir / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8")
-    task.mkdir()
-    (task / "instruction.md").write_text("repair task\n", encoding="utf-8")
+    (task / "public").mkdir(parents=True)
+    (task / "public" / "instruction.md").write_text("repair task\n", encoding="utf-8")
     mode_record = {
         "mode": "G5",
         "component_order": [
@@ -198,41 +198,41 @@ def test_render_prompt_places_guides_before_wrapper_without_public_contract_inli
 
 def test_prompt_inputs_exclude_contract_json_from_model_surface(tmp_path: Path) -> None:
     task = tmp_path / "task"
-    task.mkdir()
-    for name in ("instruction.md", "public_contract.json"):
-        (task / name).write_text(f"{name}\n", encoding="utf-8")
+    (task / "public").mkdir(parents=True)
+    (task / "public" / "instruction.md").write_text("instruction.md\n", encoding="utf-8")
+    (task / "public_contract.json").write_text("public_contract.json\n", encoding="utf-8")
     assert [path.name for path in iter_public_inputs(task, "dut", "G0")] == ["instruction.md"]
     assert [path.name for path in iter_public_inputs(task, "dut", "G1")] == ["instruction.md"]
     assert [path.name for path in iter_public_inputs(task, "dut", "G2")] == ["instruction.md"]
 
 
-def test_public_contracts_live_in_top_level_form_directories(tmp_path: Path) -> None:
+def test_public_contracts_live_in_task_directories(tmp_path: Path) -> None:
     output = tmp_path / "release"
     task = output / "tasks" / "dut" / "001-sample"
     task.mkdir(parents=True)
-    assert public_contract_relative_path(task) == "public_contracts/dut/001-sample.json"
+    assert public_contract_relative_path(task) == "tasks/dut/001-sample/public_contract.json"
     relative = write_public_contract(output, task, {"task_id": "v4-001", "form": "dut"})
-    assert relative == "public_contracts/dut/001-sample.json"
+    assert relative == "tasks/dut/001-sample/public_contract.json"
     assert (output / relative).is_file()
-    assert not (task / "public_contract.json").exists()
+    assert (task / "public_contract.json").is_file()
 
 
 def test_agentic_bugfix_export_seeds_editable_submission(tmp_path: Path) -> None:
     task = tmp_path / "task"
-    (task / "buggy_bundle").mkdir(parents=True)
-    (task / "buggy_bundle" / "a.va").write_text("module a; endmodule\n", encoding="utf-8")
-    (task / "instruction.md").write_text("Repair the bundle.\n", encoding="utf-8")
+    (task / "public" / "buggy_bundle").mkdir(parents=True)
+    (task / "public" / "buggy_bundle" / "a.va").write_text("module a; endmodule\n", encoding="utf-8")
+    (task / "public" / "instruction.md").write_text("Repair the bundle.\n", encoding="utf-8")
     public = tmp_path / "public"
     (public / "submission").mkdir(parents=True)
     install_public(task, public, "bugfix", "G2")
-    assert (public / "submission" / "a.va").read_bytes() == (task / "buggy_bundle" / "a.va").read_bytes()
+    assert (public / "submission" / "a.va").read_bytes() == (task / "public" / "buggy_bundle" / "a.va").read_bytes()
     assert (public / "task" / "buggy_bundle" / "a.va").is_file()
 
 
 def test_export_omits_public_contract_mount(tmp_path: Path) -> None:
     task = tmp_path / "task"
-    task.mkdir()
-    (task / "instruction.md").write_text("Build the DUT.\n", encoding="utf-8")
+    (task / "public").mkdir(parents=True)
+    (task / "public" / "instruction.md").write_text("Build the DUT.\n", encoding="utf-8")
     for mode in ("G0", "G2"):
         public = tmp_path / f"public-{mode}"
         (public / "submission").mkdir(parents=True)

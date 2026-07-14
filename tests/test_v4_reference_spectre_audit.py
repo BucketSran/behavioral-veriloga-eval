@@ -33,7 +33,6 @@ def audit():
 
 def test_default_release_and_testbench_index_match_current_package(audit) -> None:
     assert audit.DEFAULT_RELEASE.name == "benchmarkv4"
-    assert audit.DEFAULT_PRIVATE_SUBDIR == "private_evaluator"
     rows = audit.resolve_task_rows(audit.DEFAULT_RELEASE, [])
 
     assert len(rows) == 400
@@ -43,9 +42,7 @@ def test_default_release_and_testbench_index_match_current_package(audit) -> Non
         "task_dir": "tasks/testbench/501-bang-bang-phase-detector-testbench",
         "task_id": "v4-501",
     }
-    assert rows[0]["public_contract"] == (
-        "public_contracts/testbench/501-bang-bang-phase-detector-testbench.json"
-    )
+    assert rows[0]["public_contract"] == "tasks/testbench/501-bang-bang-phase-detector-testbench/public_contract.json"
 
 def test_resolve_task_rows_rejects_unknown_or_non_testbench_task(audit) -> None:
     with pytest.raises(SystemExit, match="unknown testbench task id"):
@@ -55,9 +52,8 @@ def test_resolve_task_rows_rejects_unknown_or_non_testbench_task(audit) -> None:
 def test_checker_and_include_resolution_use_current_canonical_assets(audit) -> None:
     row = audit.resolve_task_rows(audit.DEFAULT_RELEASE, ["v4-501"])[0]
     task_dir = audit.DEFAULT_RELEASE / row["task_dir"]
-    private_task_dir = audit.DEFAULT_RELEASE / audit.DEFAULT_PRIVATE_SUBDIR / row["task_dir"]
-    task_record = audit.read_json(task_dir / "TASK_RECORD.json")
-    tb_path = private_task_dir / "evaluator" / "reference_tb.scs"
+    task_record = audit.read_json(task_dir / "task_record.json")
+    tb_path = task_dir / "evaluator" / "reference_tb.scs"
 
     assert audit.checker_task_id(task_dir, task_record) == "v3_001_bang_bang_phase_detector"
     include_paths, missing = audit.include_paths_for_reference_tb(task_dir, tb_path)
@@ -99,7 +95,6 @@ def test_run_one_scores_reference_with_registered_checker(audit, tmp_path: Path,
 
     result = audit.run_one(
         release=audit.DEFAULT_RELEASE,
-        private_evaluator=audit.DEFAULT_RELEASE / audit.DEFAULT_PRIVATE_SUBDIR,
         row=row,
         output_root=tmp_path,
         spectre_backend="sui-direct",
@@ -131,7 +126,6 @@ def test_run_one_reports_unregistered_checker_without_starting_spectre(
 
     result = audit.run_one(
         release=audit.DEFAULT_RELEASE,
-        private_evaluator=audit.DEFAULT_RELEASE / audit.DEFAULT_PRIVATE_SUBDIR,
         row=row,
         output_root=tmp_path,
         spectre_backend="sui-direct",
