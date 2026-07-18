@@ -83,7 +83,7 @@ def check_v4_330_ffe_tap_adaptation_monitor(rows: list[dict[str, float]]) -> tup
         and reset_clear
         and disabled_clear
         and main_errors <= max(3, checked // 3)
-        and adapt_errors <= max(3, checked // 3)
+        and adapt_errors <= max(2, checked // 4)
         and polarity_errors == 0
         and done_errors <= 3
         and clear_errors <= 6

@@ -1104,6 +1104,8 @@ def load_csv(csv_path: Path) -> list[dict[str, float]]:
     with csv_path.open(newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
+            if any(value is None or value.strip() == "" for value in row.values()):
+                continue
             parsed = {k: float(v) for k, v in row.items()}
             # EVAS2 preserves netlist node spelling while most checkers use
             # canonical lowercase signal names. Keep both views so legacy
@@ -2423,9 +2425,9 @@ def _stream_cross_hysteresis_window_csv(csv_path: Path) -> tuple[float, list[str
 
 
 def _stream_cross_interval_163p333_csv(csv_path: Path) -> tuple[float, list[str]]:
-    indices, missing = _csv_required_indices(csv_path, {"time", "a", "b", "delay_out", "seen_out"})
+    indices, _missing = _csv_required_indices(csv_path, {"time", "a", "b", "delay_out", "seen_out"})
     if indices is None:
-        return 0.0, [f"missing {'/'.join(missing)}"]
+        return 0.0, ["missing time/a/b/delay_out/seen_out"]
     assert indices is not None
 
     seen_hi = 0.0
@@ -21692,8 +21694,8 @@ def check_final_step_file_metric(rows: list[dict[str, float]]) -> tuple[bool, st
     ref_high = max(r["ref"] for r in rows)
     vth = 0.45 if ref_high < 1.0 else 0.5 * ref_high
     ref_edges = rising_edges([r["ref"] for r in rows], [r["time"] for r in rows], threshold=vth)
-    if len(ref_edges) < 3:
-        return False, f"too_few_ref_edges={len(ref_edges)}"
+    if len(ref_edges) != 4:
+        return False, f"expected_4_ref_edges={len(ref_edges)}"
 
     metric_vals = [r["metric_out"] for r in rows]
     vmax = max(metric_vals)

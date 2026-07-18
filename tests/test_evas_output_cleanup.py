@@ -1,8 +1,13 @@
 import json
 import subprocess
+import sys
 from pathlib import Path
 
-import simulate_evas
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "runners"))
+
+import simulate_evas  # noqa: E402
 
 
 def test_run_case_removes_stale_tran_csv_before_evas(monkeypatch, tmp_path: Path) -> None:
@@ -46,6 +51,27 @@ def test_run_case_removes_stale_tran_csv_before_evas(monkeypatch, tmp_path: Path
     assert result["scores"]["tb_compile"] == 0.0
     assert result["status"] == "FAIL_TB_COMPILE"
     assert result["evas_engine_used"] == "evas2"
+
+
+def test_load_csv_skips_incomplete_rows_and_keeps_lowercase_aliases(tmp_path: Path) -> None:
+    csv_path = tmp_path / "tran.csv"
+    csv_path.write_text(
+        "\n".join(
+            [
+                "time,VOUT,metric",
+                "0,0.1,0.2",
+                "1e-9,,0.3",
+                "2e-9,0.4,0.5",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    rows = simulate_evas.load_csv(csv_path)
+
+    assert len(rows) == 2
+    assert rows[0]["VOUT"] == rows[0]["vout"] == 0.1
+    assert rows[1]["time"] == 2e-9
 
 
 def test_run_evas_defaults_to_strict_rust_evas2(monkeypatch, tmp_path: Path) -> None:

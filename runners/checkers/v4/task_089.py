@@ -24,9 +24,9 @@ def _float_at(row: list[str], index: int, default: float = 0.0) -> float:
         return default
 
 def _stream_cross_interval_163p333_csv(csv_path: Path) -> tuple[float, list[str]]:
-    indices, missing = _csv_required_indices(csv_path, {"time", "a", "b", "delay_out", "seen_out"})
+    indices, _missing = _csv_required_indices(csv_path, {"time", "a", "b", "delay_out", "seen_out"})
     if indices is None:
-        return 0.0, [f"missing {'/'.join(missing)}"]
+        return 0.0, ["missing time/a/b/delay_out/seen_out"]
     assert indices is not None
 
     seen_hi = 0.0
