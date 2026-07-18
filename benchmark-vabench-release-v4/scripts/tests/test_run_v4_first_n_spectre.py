@@ -441,6 +441,28 @@ def test_toolchain_host_must_match_requested_host(tmp_path: Path) -> None:
         module.load_toolchain(lock, "thu-sui")
 
 
+def test_toolchain_accepts_strict_standalone_rust_schema(tmp_path: Path) -> None:
+    module = load_module()
+    lock = tmp_path / "TOOLCHAIN_LOCK.json"
+    write_toolchain_lock(module, lock)
+    payload = json.loads(lock.read_text(encoding="utf-8"))
+    payload["schema_version"] = "v4-standalone-rust-toolchain-lock-v1"
+    lock.write_text(json.dumps(payload), encoding="utf-8")
+
+    loaded, observed_sha = module.load_toolchain(lock, "thu-wei")
+
+    assert loaded["schema_version"] == "v4-standalone-rust-toolchain-lock-v1"
+    assert observed_sha == sha256(lock)
+
+
+def test_canonical_range_expands_contiguous_ids() -> None:
+    module = load_module()
+
+    assert module.canonical_range("81-83") == ["081", "082", "083"]
+    with pytest.raises(Exception, match="1 <= START <= END <= 400"):
+        module.canonical_range("83-81")
+
+
 def test_execute_uses_runner_checker_and_side_effect_contract_without_network(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -528,14 +550,15 @@ def test_cache_key_covers_every_reusable_result_input(tmp_path: Path) -> None:
         "deck_sha256": "deck_sha256",
         "candidate_bundle_sha256": "gold_bundle_sha256",
         "public_support_bundle_sha256": "public_support_bundle_sha256",
-        "harness_spec_sha256": "harness_spec_sha256",
-        "profile_sha256": "score_profile_sha256",
         "backend_sha256": "spectre_sha256",
     }
     for cache_field, hash_field in cache_to_hash.items():
         assert cache_field in module.cache_inputs(case, mode="ax")
         changed = replace(case, hashes={**case.hashes, hash_field: "f" * 64})
         assert module.cache_key(changed, mode="ax") != baseline
+    for sidecar_hash in ("harness_spec_sha256", "score_profile_sha256"):
+        changed = replace(case, hashes={**case.hashes, sidecar_hash: "f" * 64})
+        assert module.cache_key(changed, mode="ax") == baseline
     assert module.cache_key(case, mode="cx") != baseline
 
 
@@ -637,8 +660,8 @@ def write_legacy_spectre_cache_entry(
             "deck_sha256": inputs["deck_sha256"],
             "gold_bundle_sha256": inputs["candidate_bundle_sha256"],
             "public_support_bundle_sha256": inputs["public_support_bundle_sha256"],
-            "harness_spec_sha256": inputs["harness_spec_sha256"],
-            "score_profile_sha256": inputs["profile_sha256"],
+            "harness_spec_sha256": case.hashes["harness_spec_sha256"],
+            "score_profile_sha256": case.hashes["score_profile_sha256"],
             "spectre_mode": inputs["spectre_mode"],
         }
     inputs.update(input_overrides or {})
@@ -718,6 +741,7 @@ def test_legacy_cache_migration_reuses_raw_trace_after_checker_only_change(
     assert record is not None
     assert record["status"] == "PASS"
     assert record["behavior"]["notes"] == ["current checker pass"]
+    assert record["hashes"] == current.hashes
     assert record["cache"]["hit"] is True
     assert any("migrated_from_legacy_cache" in note for note in record["cache"]["notes"])
     manifest = json.loads((local_entry / "cache_manifest.json").read_text(encoding="utf-8"))
@@ -851,6 +875,106 @@ def test_execute_reuses_valid_local_cache_without_running_spectre(
     assert second["summary"]["executed_rows"] == 0
     assert second["summary"]["cache_hit_rows"] == 1
     assert second["rows"][0]["cache"]["source"] == "local"
+
+
+def test_offline_cache_only_replays_checker_without_any_remote_action(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    module = load_module()
+    tasks_root = tmp_path / "tasks"
+    write_task(module, tasks_root)
+    plan = tmp_path / "numbering_plan.json"
+    lock = tmp_path / "TOOLCHAIN_LOCK.json"
+    write_numbering_plan(plan)
+    write_toolchain_lock(module, lock)
+    cache_root = tmp_path / "cache"
+
+    def seed_runner(**kwargs):
+        output_dir = Path(kwargs["output_dir"])
+        output_dir.mkdir(parents=True, exist_ok=True)
+        (output_dir / "tran_spectre.csv").write_text("time,out\n0,0\n1e-9,1\n")
+        (output_dir / "metric.out").write_text("ok\n")
+        return {
+            "ok": True,
+            "rows": 2,
+            "signals": ["time", "out"],
+            "errors": [],
+            "warnings": [],
+            "remote_run_dir": "/remote/fixture",
+            "timing": {"tran_elapsed_s": 0.01},
+        }
+
+    monkeypatch.setattr(
+        module,
+        "evaluate_behavior_with_timeout",
+        lambda *_args, **_kwargs: (1.0, ["current checker pass"]),
+    )
+    common = {
+        "first_n": 1,
+        "numbering_plan_path": plan,
+        "tasks_root": tasks_root,
+        "toolchain_lock_path": lock,
+        "host": "thu-wei",
+        "mode": "ax",
+        "timeout_s": 30,
+        "keep_case_dirs": False,
+        "dry_run": False,
+        "fail_fast": False,
+        "sui_work_root": None,
+        "cache_enabled": True,
+        "local_cache_root": cache_root,
+    }
+    module.execute(
+        **common,
+        evidence_output=tmp_path / "seed.json",
+        case_root=tmp_path / "seed-cases",
+        runner=seed_runner,
+        identity_probe=lambda lock, *, host, mode: module._identity(
+            lock, host=host, mode=mode, verification="remote_probe_match"
+        ),
+    )
+
+    replay = module.execute(
+        **common,
+        evidence_output=tmp_path / "replay.json",
+        case_root=tmp_path / "replay-cases",
+        offline_cache_only=True,
+        remote_cache_root="remote-cache",
+        identity_probe=lambda *_args, **_kwargs: pytest.fail("offline replay probed SSH"),
+        cache_ssh_runner=lambda *_args, **_kwargs: pytest.fail("offline replay fetched cache"),
+        runner=lambda **_kwargs: pytest.fail("offline replay executed Spectre"),
+    )
+
+    assert replay["status"] == "pass"
+    assert replay["summary"]["executed_rows"] == 0
+    assert replay["summary"]["cache_hit_rows"] == 1
+    assert replay["rows"][0]["behavior"]["notes"] == ["current checker pass"]
+    assert replay["rows"][0]["spectre_identity"]["verification"] == (
+        "locked_identity_offline_cache_replay"
+    )
+    assert replay["execution"]["offline_cache_only"] is True
+
+    missing = module.execute(
+        **{**common, "local_cache_root": tmp_path / "empty-cache"},
+        evidence_output=tmp_path / "missing.json",
+        case_root=tmp_path / "missing-cases",
+        offline_cache_only=True,
+        remote_cache_root="remote-cache",
+        identity_probe=lambda *_args, **_kwargs: pytest.fail("offline replay probed SSH"),
+        cache_ssh_runner=lambda *_args, **_kwargs: pytest.fail("offline replay fetched cache"),
+        runner=lambda **_kwargs: pytest.fail("offline replay executed Spectre"),
+    )
+    assert missing["status"] == "fail"
+    assert missing["rows"][0]["status"] == "FAIL_CACHE_MISS"
+    assert missing["rows"][0]["materialization"]["status"] == "complete"
+
+    schema = json.loads(
+        (ROOT / "schemas" / "first_n_spectre_evidence.schema.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    Draft202012Validator(schema).validate(replay)
+    Draft202012Validator(schema).validate(missing)
 
 
 def test_dry_run_records_materialization_failure_as_schema_valid_evidence(tmp_path: Path) -> None:

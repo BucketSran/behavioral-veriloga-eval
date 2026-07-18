@@ -56,6 +56,7 @@ def test_public_interface_fragments_are_not_gold_leaks() -> None:
                             "name": "top",
                             "role": "entry",
                             "ports": [{"name": name} for name in ["clk", "rst", "vin", "vout"]],
+                            "parameters": [{"name": "gain"}],
                         }
                     ]
                 }
@@ -65,6 +66,11 @@ def test_public_interface_fragments_are_not_gold_leaks() -> None:
 
     assert module.public_entry_module_declaration("module top(clk, rst, vin, vout);", family)
     assert module.public_entry_module_declaration("rst, vin, vout", family)
+    assert module.public_entry_module_declaration("output electrical vout;", family)
+    assert module.public_entry_module_declaration("electrical clk, rst, vin, vout;", family)
+    assert module.public_entry_module_declaration("parameter real gain = 2.0;", family)
+    assert not module.public_entry_module_declaration("parameter real hidden_gain = 2.0;", family)
+    assert not module.public_entry_module_declaration("`define clip(x, lo, hi) x", family)
     assert not module.public_entry_module_declaration("vin = vin + 1.0;", family)
 
 
@@ -643,6 +649,34 @@ def test_ready_fixture_passes_gate2_and_gate3_with_bus_trace_normalization(tmp_p
     assert "testbench" not in issue_codes(record, "gate2")
 
 
+def test_gate3_accepts_canonical_v2_negative_assignment(tmp_path: Path) -> None:
+    module = load_module()
+    numbering = write_fixture(tmp_path)
+    derivation_path = tmp_path / "tasks" / "010-demo-source" / "evaluator" / "derivation_manifest.json"
+    derivation = json.loads(derivation_path.read_text(encoding="utf-8"))
+    partition = derivation.pop("mutation_partition")
+    suite = sorted(
+        {
+            *partition["bugfix_seed"],
+            *partition["testbench_public_feedback"],
+            *partition["testbench_private_score"],
+        }
+    )
+    derivation["schema_version"] = "v4-derivation-manifest-v2"
+    derivation["negative_assignment"] = {
+        "bugfix_seed": partition["bugfix_seed"][0],
+        "testbench_suite": suite,
+    }
+    write_json(derivation_path, derivation)
+
+    report = module.audit_release(root=tmp_path, numbering_plan_path=numbering, canonical_first=1)
+
+    gate3 = report["records"][0]["gate3"]
+    assert gate3["ready"] is True
+    assert gate3["assignment_counts"] == {"B": 1, "T": 5}
+    assert gate3["legacy_partition_counts"] is None
+
+
 def test_spectre_evidence_selection_prefers_current_gold_bundle_over_newer_report(tmp_path: Path) -> None:
     module = load_module()
     numbering = write_fixture(tmp_path)
@@ -802,7 +836,7 @@ def test_external_evidence_paths_override_stale_package_defaults(tmp_path: Path)
     assert "evas_score_behavior_failure" not in issue_codes(record, "gate2")
 
 
-def test_gate3_reports_partition_and_property_coverage(tmp_path: Path) -> None:
+def test_gate3_reports_assignment_and_property_coverage(tmp_path: Path) -> None:
     module = load_module()
     numbering = write_fixture(tmp_path)
     catalog_path = tmp_path / "tasks" / "010-demo-source" / "negative_variants" / "manifest.json"
@@ -824,8 +858,8 @@ def test_gate3_reports_partition_and_property_coverage(tmp_path: Path) -> None:
 
     record = report["records"][0]
     assert record["gate3"]["ready"] is False
-    assert "mutation_partition_not_total" in issue_codes(record, "gate3")
-    assert "mutation_partition_count_insufficient" in issue_codes(record, "gate3")
+    assert "testbench_suite_not_total" in issue_codes(record, "gate3")
+    assert "negative_assignment_invalid" in issue_codes(record, "gate3")
     assert "mutation_diversity_insufficient" in issue_codes(record, "gate3")
     assert "mutation_property_coverage_incomplete" in issue_codes(record, "gate3")
 

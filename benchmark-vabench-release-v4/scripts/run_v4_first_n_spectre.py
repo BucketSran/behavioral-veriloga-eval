@@ -36,8 +36,6 @@ SIMULATION_CACHE_INPUT_KEYS = (
     "deck_sha256",
     "candidate_bundle_sha256",
     "public_support_bundle_sha256",
-    "harness_spec_sha256",
-    "profile_sha256",
     "spectre_mode",
 )
 SOURCE_SLUG_RE = re.compile(r"^[0-9]{3,4}-[A-Za-z0-9_.-]+$")
@@ -206,6 +204,16 @@ def normalize_canonical_ids(task_ids: Iterable[str]) -> list[str]:
     return normalized
 
 
+def canonical_range(raw: str) -> list[str]:
+    parts = raw.split("-", 1)
+    if len(parts) != 2 or not all(part.isdigit() for part in parts):
+        raise argparse.ArgumentTypeError("task range must be START-END")
+    start, end = (int(part) for part in parts)
+    if not 1 <= start <= end <= 400:
+        raise argparse.ArgumentTypeError("task range must satisfy 1 <= START <= END <= 400")
+    return [f"{task_id:03d}" for task_id in range(start, end + 1)]
+
+
 def load_roster(
     numbering_plan_path: Path,
     first_n: int | None = None,
@@ -249,7 +257,10 @@ def load_toolchain(toolchain_lock_path: Path, host: str) -> tuple[dict[str, Any]
     if host not in ALLOWED_HOSTS:
         raise SidecarError(f"unsupported Spectre host: {host}")
     lock = read_json(toolchain_lock_path)
-    if lock.get("schema_version") != "v4-toolchain-lock-v1" or lock.get("status") != "valid":
+    if lock.get("schema_version") not in {
+        "v4-toolchain-lock-v1",
+        "v4-standalone-rust-toolchain-lock-v1",
+    } or lock.get("status") != "valid":
         raise SidecarError("toolchain lock is not a valid v4 lock")
     spectre = lock.get("spectre") or {}
     if spectre.get("backend") != "sui-direct":
@@ -546,7 +557,7 @@ def materialize_case(
 
 
 def cache_inputs(case: MaterializedCase, *, mode: str) -> dict[str, str]:
-    return simulation_cache_inputs(
+    inputs = simulation_cache_inputs(
         task_id=case.task_id,
         profile="score",
         backend="spectre",
@@ -554,6 +565,12 @@ def cache_inputs(case: MaterializedCase, *, mode: str) -> dict[str, str]:
         hashes=case.hashes,
         spectre_mode=mode,
     )
+    # The rendered deck already captures simulation-affecting harness/profile
+    # changes. Keep provenance-only sidecar hashes in evidence, not the raw
+    # simulation cache key.
+    inputs.pop("harness_spec_sha256", None)
+    inputs.pop("profile_sha256", None)
+    return inputs
 
 
 def cache_key(case: MaterializedCase, *, mode: str) -> str:
@@ -716,6 +733,7 @@ def load_local_cache(
     old_snapshot = ((row.get("component_fingerprints") or {}).get("assembly") or {}).get(
         "release_snapshot_sha256"
     ) or (row.get("hashes") or {}).get("toolchain_lock_sha256")
+    row["hashes"] = json.loads(json.dumps(case.hashes))
     row["component_fingerprints"] = json.loads(json.dumps(case.component_fingerprints))
     row["component_fingerprints"]["state"] = "carried_forward"
     row["component_fingerprints"]["assembly"][
@@ -785,16 +803,6 @@ def _legacy_observed_inputs(row: dict[str, Any], manifest: dict[str, Any]) -> di
         "public_support_bundle_sha256": str(
             raw.get("public_support_bundle_sha256")
             or hashes.get("public_support_bundle_sha256")
-            or ""
-        ),
-        "harness_spec_sha256": str(
-            raw.get("harness_spec_sha256") or hashes.get("harness_spec_sha256") or ""
-        ),
-        "profile_sha256": str(
-            raw.get("profile_sha256")
-            or raw.get("score_profile_sha256")
-            or hashes.get("profile_sha256")
-            or hashes.get("score_profile_sha256")
             or ""
         ),
         "spectre_mode": mode,
@@ -1321,6 +1329,7 @@ def execute(
     sui_work_root: str | None,
     cache_enabled: bool = False,
     refresh_cache: bool = False,
+    offline_cache_only: bool = False,
     local_cache_root: Path = DEFAULT_LOCAL_CACHE_ROOT,
     legacy_cache_root: Path | None = None,
     remote_cache_root: str = "",
@@ -1330,6 +1339,10 @@ def execute(
 ) -> dict[str, Any]:
     started_at = now_utc()
     mode = normalize_spectre_mode(mode)
+    if offline_cache_only and (dry_run or not cache_enabled or refresh_cache):
+        raise SidecarError(
+            "offline cache replay requires cache enabled, non-dry execution, and no refresh"
+        )
     roster, numbering_sha256 = load_roster(
         numbering_plan_path, first_n, task_ids=task_ids
     )
@@ -1346,11 +1359,19 @@ def execute(
         remote_cache_root = safe_remote_cache_root(remote_cache_root)
     toolchain, toolchain_sha256 = load_toolchain(toolchain_lock_path, host)
     _verify_locked_components(toolchain)
-    identity = (
-        _identity(toolchain, host=host, mode=mode, verification="not_probed_dry_run")
-        if dry_run
-        else identity_probe(toolchain, host=host, mode=mode)
-    )
+    if dry_run:
+        identity = _identity(
+            toolchain, host=host, mode=mode, verification="not_probed_dry_run"
+        )
+    elif offline_cache_only:
+        identity = _identity(
+            toolchain,
+            host=host,
+            mode=mode,
+            verification="locked_identity_offline_cache_replay",
+        )
+    else:
+        identity = identity_probe(toolchain, host=host, mode=mode)
     backend_hashes = backend_fingerprints(
         toolchain,
         spectre_mode=mode,
@@ -1416,7 +1437,7 @@ def execute(
                                     source="local",
                                     timeout_s=timeout_s,
                                 )
-                        if record is None and remote_cache_root:
+                        if record is None and remote_cache_root and not offline_cache_only:
                             if fetch_remote_cache(
                                 host=host,
                                 remote_root=remote_cache_root,
@@ -1435,6 +1456,24 @@ def execute(
                                     source="remote",
                                     timeout_s=timeout_s,
                                 )
+                    if record is not None:
+                        record["spectre_identity"] = dict(identity)
+                    if record is None and offline_cache_only:
+                        record = _base_record(case, identity, retained=keep_case_dirs)
+                        record["status"] = "FAIL_CACHE_MISS"
+                        record["cache"] = cache_metadata(
+                            case,
+                            mode=mode,
+                            key=key,
+                            local_entry=local_entry,
+                            remote_root=remote_cache_root,
+                            hit=False,
+                            source="none",
+                            cacheable=False,
+                        )
+                        record["cache"]["notes"].append(
+                            f"{case.task_id}: no content-matching local Spectre cache entry"
+                        )
                     if record is None:
                         record = run_materialized_case(
                             case,
@@ -1531,7 +1570,7 @@ def execute(
         "toolchain_lock": {
             "path": str(toolchain_lock_path),
             "sha256": toolchain_sha256,
-            "schema_version": "v4-toolchain-lock-v1",
+            "schema_version": str(toolchain.get("schema_version") or ""),
             "status": "valid",
         },
         "execution": {
@@ -1550,6 +1589,7 @@ def execute(
             "fail_fast": fail_fast,
             "cache_enabled": cache_enabled,
             "refresh_cache": refresh_cache,
+            "offline_cache_only": offline_cache_only,
             "local_cache_root": str(local_cache_root),
             "remote_cache_root": remote_cache_root,
             "started_at": started_at,
@@ -1568,6 +1608,7 @@ def parse_args() -> argparse.Namespace:
     selection = parser.add_mutually_exclusive_group(required=True)
     selection.add_argument("--first-n", type=int)
     selection.add_argument("--task", dest="task_ids", action="append")
+    selection.add_argument("--task-range", type=canonical_range)
     parser.add_argument("--numbering-plan", type=Path, default=NUMBERING_PLAN)
     parser.add_argument("--tasks-root", type=Path, default=TASKS_ROOT)
     parser.add_argument("--toolchain-lock", type=Path, default=TOOLCHAIN_LOCK)
@@ -1582,6 +1623,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--sui-work-root")
     parser.add_argument("--no-cache", action="store_true")
     parser.add_argument("--refresh-cache", action="store_true")
+    parser.add_argument(
+        "--offline-cache-only",
+        action="store_true",
+        help=(
+            "Replay the current checker from an exact local Spectre cache hit; "
+            "never probe SSH, fetch remote cache, or execute Spectre."
+        ),
+    )
     parser.add_argument("--local-cache-root", type=Path, default=DEFAULT_LOCAL_CACHE_ROOT)
     parser.add_argument("--legacy-cache-root", type=Path)
     parser.add_argument("--remote-cache-root", default=DEFAULT_REMOTE_CACHE_ROOT)
@@ -1593,7 +1642,7 @@ def main() -> int:
     try:
         payload = execute(
             first_n=args.first_n,
-            task_ids=args.task_ids,
+            task_ids=args.task_ids if args.task_ids is not None else args.task_range,
             numbering_plan_path=args.numbering_plan.resolve(),
             tasks_root=args.tasks_root.resolve(),
             toolchain_lock_path=args.toolchain_lock.resolve(),
@@ -1608,6 +1657,7 @@ def main() -> int:
             sui_work_root=args.sui_work_root,
             cache_enabled=not args.no_cache,
             refresh_cache=args.refresh_cache,
+            offline_cache_only=args.offline_cache_only,
             local_cache_root=args.local_cache_root,
             legacy_cache_root=args.legacy_cache_root,
             remote_cache_root=args.remote_cache_root,

@@ -225,7 +225,7 @@ def load_optional_json(path: Path, issues: list[dict[str, str]], *, gate: str, l
 
 
 def public_entry_module_declaration(line: str, family: dict[str, Any]) -> bool:
-    """Allow module interfaces and port fragments declared by the public contract."""
+    """Allow interface declarations already specified by the public contract."""
     match = re.fullmatch(r"module\s+([A-Za-z_][A-Za-z0-9_$]*)\s*\([^;]*\)\s*;", line)
     modules = [
         module
@@ -235,8 +235,31 @@ def public_entry_module_declaration(line: str, family: dict[str, Any]) -> bool:
     if match:
         return match.group(1) in {str(module.get("name")) for module in modules}
 
+    parameter_match = re.match(
+        r"parameter\s+(?:real|integer|string)\s+([A-Za-z_][A-Za-z0-9_$]*)\b",
+        line,
+    )
+    if parameter_match:
+        declared_parameters = {
+            str(parameter.get("name"))
+            for module in modules
+            for parameter in module.get("parameters") or []
+        }
+        return parameter_match.group(1) in declared_parameters
+
     identifiers = re.findall(r"[A-Za-z_][A-Za-z0-9_$]*", line)
-    if len(identifiers) < 2:
+    declaration_keywords = {
+        "electrical",
+        "inout",
+        "input",
+        "integer",
+        "output",
+        "real",
+        "reg",
+        "wire",
+    }
+    identifiers = [identifier for identifier in identifiers if identifier not in declaration_keywords]
+    if not identifiers:
         return False
     for module in modules:
         ports = [str(port.get("name")) for port in module.get("ports") or []]
@@ -982,37 +1005,48 @@ def audit_gate3(row: dict[str, Any], task_dir: Path, context: dict[str, Any]) ->
                 )
             )
 
-    partition = derivation.get("mutation_partition") or {}
-    b = set(partition.get("bugfix_seed") or [])
-    p = set(partition.get("testbench_public_feedback") or [])
-    h = set(partition.get("testbench_private_score") or [])
-    if b & p or b & h or p & h:
+    assignment = derivation.get("negative_assignment") or {}
+    if assignment:
+        seed = str(assignment.get("bugfix_seed") or "")
+        b = {seed} if seed else set()
+        suite = {str(item) for item in assignment.get("testbench_suite") or []}
+        p: set[str] = set()
+        h: set[str] = set()
+        legacy_overlap = False
+    else:
+        partition = derivation.get("mutation_partition") or {}
+        b = {str(item) for item in partition.get("bugfix_seed") or []}
+        p = {str(item) for item in partition.get("testbench_public_feedback") or []}
+        h = {str(item) for item in partition.get("testbench_private_score") or []}
+        suite = b | p | h
+        legacy_overlap = bool(b & p or b & h or p & h)
+    if legacy_overlap:
         issues.append(
             issue(
-                "mutation_partition_overlap",
+                "legacy_mutation_partition_overlap",
                 "contract",
-                "B/P/H mutation partitions overlap.",
-                "Assign each mutation id to exactly one B/P/H partition.",
+                "Legacy B/P/H migration buckets overlap.",
+                "Remove duplicate ids while preserving one Bugfix seed and the five-case Testbench suite.",
                 gate="gate3",
             )
         )
-    if b | p | h != mutation_ids:
+    if suite != mutation_ids:
         issues.append(
             issue(
-                "mutation_partition_not_total",
+                "testbench_suite_not_total",
                 "contract",
-                "B/P/H mutation partitions do not cover exactly the catalog ids.",
-                "Refresh derivation_manifest.mutation_partition from mutation_catalog.",
+                "The Testbench suite does not cover exactly the five catalog ids.",
+                "Refresh derivation_manifest.negative_assignment from the certified mutation catalog.",
                 gate="gate3",
             )
         )
-    if len(b) != 1 or len(p) < 1 or len(h) < 3:
+    if len(b) != 1 or len(suite) != 5 or not b <= suite:
         issues.append(
             issue(
-                "mutation_partition_count_insufficient",
+                "negative_assignment_invalid",
                 "contract",
-                f"Partition counts are B={len(b)} P={len(p)} H={len(h)}, expected B=1 P>=1 H>=3.",
-                "Add or repartition certified semantic mutations.",
+                f"Assignment sizes are B={len(b)} T={len(suite)}; expected one Bugfix seed contained in a five-case Testbench suite.",
+                "Select one representative Bugfix seed and assign all five certified mutations to Testbench.",
                 gate="gate3",
             )
         )
@@ -1053,7 +1087,10 @@ def audit_gate3(row: dict[str, Any], task_dir: Path, context: dict[str, Any]) ->
         "mutation_count": len(mutation_ids),
         "certified_mutation_count": certified_count,
         "fault_class_count": len({item for item in fault_classes if item}),
-        "partition_counts": {"B": len(b), "P": len(p), "H": len(h)},
+        "assignment_counts": {"B": len(b), "T": len(suite)},
+        "legacy_partition_counts": (
+            None if assignment else {"B": len(b), "P": len(p), "H": len(h)}
+        ),
     }
 
 
