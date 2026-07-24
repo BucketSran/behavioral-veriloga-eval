@@ -175,7 +175,7 @@
     },
     {
       "id": "P_FOR_EACH_INPUT_EDGE_EMIT_ONE",
-      "observable_contract": "For each input edge, emit one output edge with a delay proportional to the fractional code.",
+      "observable_contract": "On each rising `clk_in` edge, latch `code = frac_0 + 2*frac_1 + 4*frac_2 + 8*frac_3` using `vth` and emit one rising output edge after `(code+1)*200 ps`.",
       "required_signals": [
         "time",
         "clk_in",
@@ -192,7 +192,7 @@
     },
     {
       "id": "P_EXPOSE_THE_FRACTIONAL_DELAY_AS_PHASE",
-      "observable_contract": "Expose the fractional delay as `phase_metric`.",
+      "observable_contract": "From each accepted rising edge onward, drive `phase_metric = vss + (vdd-vss)*code/15`.",
       "required_signals": [
         "time",
         "clk_in",

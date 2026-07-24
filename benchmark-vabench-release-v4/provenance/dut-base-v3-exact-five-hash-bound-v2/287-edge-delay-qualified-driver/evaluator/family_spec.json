@@ -157,7 +157,7 @@
   "properties": [
     {
       "id": "P_MEASURE_ANALOG_INPUTS_RELATIVE_TO_THE",
-      "observable_contract": "Measure analog inputs relative to the local `vss` rail and normalize by the current local supply span. Clear all observables when `en` is low or when the local supply span is outside the public range. The DUT updates its observable state on the public clock edge and clears state while reset is high. Drive `out` with the task-specific bounded analog result, drive `flag` with the task-specific qualification condition, and drive `metric` with a bounded diagnostic magnitude.",
+      "observable_contract": "Update on rising clk or rising rst. Let xN=clip01((V(inN)-V(vss))/max(V(vdd,vss),0.05)). Reset or invalid enable/span clears all outputs. Otherwise out=flag=vhi exactly when x0>x1, and metric=vhi*clip01(abs(x0-x1)). in2, in3, and controls have no effect.",
       "required_signals": [
         "time",
         "clk",

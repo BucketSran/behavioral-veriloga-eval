@@ -28,11 +28,14 @@ clock and `rst` clears the observable state.
 
 ## Required Behavior
 
-Measure analog inputs relative to the local `vss` rail and normalize by the
-current local supply span. Clear all observables when `en` is low or when the
-local supply span is outside the public range. Drive `out` with the
-task-specific bounded analog result, drive `flag` with the task-specific
-qualification condition, and drive `metric` with a bounded diagnostic magnitude.
+Let `span = V(vdd, vss)` and
+`xN = clip01((V(inN) - V(vss)) / max(span, 0.05))` for all four inputs.
+The row is valid exactly when `V(en) > vth` and
+`span_min <= span <= span_max`; otherwise drive all outputs to `0 V`.
+When valid, let `core = 0.36*x0 + 0.28*x1 + 0.18*x2 + 0.10*x3 + 0.04`.
+Drive `out = vhi * clip01(core)`, assert `flag = vhi` exactly when
+`core > 0.48`, and drive `metric = vhi * clip01(abs(x0 - x1) / 0.55)`.
+The `ctrl0` and `ctrl1` inputs do not affect these observables.
 
 ## Modeling Constraints
 

@@ -367,7 +367,7 @@
   "properties": [
     {
       "id": "P_ON_RESET_CLEAR_ALL_HELD_CHANNEL",
-      "observable_contract": "On reset, clear all held channel states, output, channel metric, and `valid`.",
+      "observable_contract": "On reset, initialize all three held channels and vout to vcm, and drive channel_metric=vss and valid=vss.",
       "required_signals": [
         "time",
         "vin0",
@@ -403,7 +403,7 @@
     },
     {
       "id": "P_DECODE_SEL_1_SEL_0_AND",
-      "observable_contract": "Decode `sel_1..sel_0` and route the selected held channel to `vout`; invalid code 3 must hold the previous output and clear `valid`.",
+      "observable_contract": "Decode code=(sel_0>vth?1:0)+2*(sel_1>vth?1:0), route held channel 0..2, and propagate its held-valid state. Code 3 holds vout and channel_metric and clears valid.",
       "required_signals": [
         "time",
         "vin0",
@@ -421,7 +421,7 @@
     },
     {
       "id": "P_EXPOSE_THE_SELECTED_CHANNEL_INDEX_ON",
-      "observable_contract": "Expose the selected channel index on `channel_metric` as a voltage-coded metric.",
+      "observable_contract": "For valid codes 0..2, drive channel_metric=clamp(vcm+0.15*code,vss,vdd).",
       "required_signals": [
         "time",
         "vin0",

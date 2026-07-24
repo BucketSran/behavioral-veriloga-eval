@@ -19,6 +19,10 @@ from .stimulus_relative import canonical_time_rows
 
 
 _TASK_MODULE_RE = re.compile(r"task_\d{3}\.py$")
+_COMPATIBILITY_CHECKER_MODULES = {
+    "v4_074_crossing_metric_writer": "legacy_task_074",
+    "v4_091_final_step_file_metric": "legacy_task_091",
+}
 
 
 def _checker_id_from_source(text: str) -> str | None:
@@ -65,6 +69,12 @@ def published_checker_ids() -> tuple[str, ...]:
     return tuple(sorted(checker_modules()))
 
 
+def _module_suffix_for_checker_id(checker_id: str) -> str | None:
+    return checker_modules().get(checker_id) or _COMPATIBILITY_CHECKER_MODULES.get(
+        checker_id
+    )
+
+
 def _validated_checker(module: ModuleType, checker_id: str) -> Checker | None:
     if getattr(module, "CHECKER_ID", None) != checker_id:
         return None
@@ -88,7 +98,7 @@ def _validated_streaming_checker(module: ModuleType, checker_id: str) -> Checker
 
 @lru_cache(maxsize=None)
 def load_checker(checker_id: str) -> Checker | None:
-    module_suffix = checker_modules().get(checker_id)
+    module_suffix = _module_suffix_for_checker_id(checker_id)
     if module_suffix is None:
         return None
     try:
@@ -100,7 +110,7 @@ def load_checker(checker_id: str) -> Checker | None:
 
 @lru_cache(maxsize=None)
 def load_streaming_checker(checker_id: str) -> Checker | None:
-    module_suffix = checker_modules().get(checker_id)
+    module_suffix = _module_suffix_for_checker_id(checker_id)
     if module_suffix is None:
         return None
     try:

@@ -26,10 +26,10 @@ All listed ports are electrical and must keep this order:
 - `tr` (real, default `60p`): overrides tr.
 
 ## Required Behavior
-- `P_RESET_CLEARS_STATE_AND_OBSERVABLES`: While rst is high at a rising clock edge, clear the stable count, out, err_metric, and progress.
-- `P_CORRECTED_OUTPUT_USES_SAMPLE_TARGET_AND_COEF`: At each enabled rising clock edge, compute the clipped coefficient and drive the clamped corrected sample from sample, target, and coef.
-- `P_ERROR_METRIC_REPORTS_ABSOLUTE_ERROR`: Drive err_metric from the bounded absolute target-minus-sample error.
-- `P_PROGRESS_COUNTS_CONSECUTIVE_IN_WINDOW_SAMPLES`: Increment progress only for consecutive in-window sampled errors, clear it on an out-of-window sample, and saturate at ready_count.
+- `P_RESET_CLEARS_STATE_AND_OBSERVABLES`: At each rising `clk` edge with `V(rst) > vth`, clear the stable count, `out`, `err_metric`, and `progress` to zero.
+- `P_CORRECTED_OUTPUT_USES_SAMPLE_TARGET_AND_COEF`: At each reset-low rising edge, let `coeff = clip01(V(coef) / vhi)` and `error = V(target) - V(sample)`, then store `out = clamp(V(sample) + coeff * error, 0, vhi)`.
+- `P_ERROR_METRIC_REPORTS_ABSOLUTE_ERROR`: Store `err_metric = vhi * clip01(abs(error) / err_fullscale)` at the same edge.
+- `P_PROGRESS_COUNTS_CONSECUTIVE_IN_WINDOW_SAMPLES`: When `abs(error) <= err_window`, increment the stable count capped at `ready_count`; otherwise clear it. Store `progress = vhi * clip01(stable_count / ready_count)`.
 
 The evaluator saves and may inspect these public trace signals: `time`, `clk`, `coef`, `err_metric`, `out`, `progress`, `rst`, `sample`, `target`.
 

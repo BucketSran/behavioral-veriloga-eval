@@ -28,11 +28,14 @@ clock and `rst` clears the observable state.
 
 ## Required Behavior
 
-Measure analog inputs relative to the local `vss` rail and normalize by the
-current local supply span. Clear all observables when `en` is low or when the
-local supply span is outside the public range. The DUT updates its observable state on the public clock edge and clears state while reset is high. Drive `out` with the
-task-specific bounded analog result, drive `flag` with the task-specific
-qualification condition, and drive `metric` with a bounded diagnostic magnitude.
+Update state on each rising `clk` crossing and asynchronously on a rising
+`rst` crossing. Let `span = V(vdd, vss)` and
+`xN = clip01((V(inN) - V(vss)) / max(span, 0.05))`.
+If reset is high, enable is low, or `span` is outside `[span_min, span_max]`,
+clear all outputs. Otherwise drive both `out` and `flag` to `vhi` exactly when
+`x0 > x1`, and to `0 V` otherwise; drive
+`metric = vhi * clip01(abs(x0 - x1))`. Inputs `in2`, `in3`, `ctrl0`, and
+`ctrl1` do not affect these observables.
 
 ## Modeling Constraints
 

@@ -117,7 +117,7 @@
   "properties": [
     {
       "id": "P_RECORD_REFERENCE_CLOCK_RISING_EDGE_TIME",
-      "observable_contract": "Record reference clock rising-edge time and evaluate feedback clock rising edges against it.",
+      "observable_contract": "A rising ref_clk records $abstime. A reset-low rising fb_clk uses the absolute elapsed time since that reference, or metric_fullscale before any reference edge.",
       "required_signals": [
         "time",
         "fb_clk",
@@ -130,7 +130,7 @@
     },
     {
       "id": "P_REQUIRE_CONSECUTIVE_IN_WINDOW_FEEDBACK_EDGE",
-      "observable_contract": "Require consecutive in-window feedback edge errors before lock asserts.",
+      "observable_contract": "A feedback edge with a recorded reference and phase_error <= lock_window increments the good count capped at lock_count; another feedback edge clears it. lock = vhi exactly when the count reaches lock_count.",
       "required_signals": [
         "time",
         "fb_clk",
@@ -143,7 +143,7 @@
     },
     {
       "id": "P_CLEAR_LOCK_STATE_AND_PROGRESS_WHEN",
-      "observable_contract": "Clear lock state and progress when reset rises or is sampled high.",
+      "observable_contract": "Reset rising or sampled high on a feedback edge clears the good count, lock, phase_metric, and state_mon.",
       "required_signals": [
         "time",
         "fb_clk",
@@ -156,7 +156,7 @@
     },
     {
       "id": "P_EXPOSE_PHASE_METRIC_AND_STATE_MON",
-      "observable_contract": "Expose phase_metric and state_mon as bounded voltage-coded observables.",
+      "observable_contract": "After each reset-low feedback edge, phase_metric = vhi * clip01(phase_error / metric_fullscale) and state_mon = vhi * clip01(good_count / lock_count).",
       "required_signals": [
         "time",
         "fb_clk",

@@ -23,10 +23,10 @@ All listed ports are electrical and must keep this order:
 - `tr` (real, default `50p`): overrides tr.
 
 ## Required Behavior
-- `P_NORMALIZE_MEAS_RELATIVE_TO_THE_LOCAL`: Normalize meas relative to the local V(vdd,vss) span and vss rail.
-- `P_CLIP_THE_NORMALIZED_METRIC_TO_THE`: Clip the normalized metric to the public voltage-coded range.
-- `P_ASSERT_VALID_ONLY_WHEN_ENABLE_IS`: Assert valid only when enable is high, supply span is valid, and the measurement lies inside the local rail window.
-- `P_CLEAR_NORM_AND_VALID_WHILE_DISABLED`: Clear norm and valid while disabled or under the minimum supply span.
+- `P_NORMALIZE_MEAS_RELATIVE_TO_THE_LOCAL`: Let `span = V(vdd, vss)` and `local_meas = V(meas) - V(vss)`. When `V(en) > vth` and `span >= span_min`, drive `norm = vhi * clip01(local_meas / span)`.
+- `P_CLIP_THE_NORMALIZED_METRIC_TO_THE`: `clip01(x)` limits `x` to `[0, 1]`, so enabled `norm` is clipped to `[0 V, vhi]` even when `meas` lies outside the local rails.
+- `P_ASSERT_VALID_ONLY_WHEN_ENABLE_IS`: Drive `valid = vhi` exactly when `V(en) > vth`, `span_min <= span <= span_max`, and `0 <= local_meas <= span`; otherwise drive `valid = 0 V`.
+- `P_CLEAR_NORM_AND_VALID_WHILE_DISABLED`: Drive both `norm` and `valid` to `0 V` while disabled or when `span < span_min`. A span above `span_max` clears `valid` but does not by itself clear the clipped `norm` measurement.
 - `P_USE_LOCAL_ANALOG_HELPER_FUNCTIONS_RATHER`: Use local analog helper functions rather than user task/endtask syntax.
 
 The evaluator saves and may inspect these public trace signals: `time`, `en`, `meas`, `norm`, `valid`, `vdd`, `vss`.

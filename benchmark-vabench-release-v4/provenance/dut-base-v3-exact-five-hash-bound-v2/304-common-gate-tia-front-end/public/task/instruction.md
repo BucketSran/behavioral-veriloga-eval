@@ -32,9 +32,9 @@ Provide these overrideable public parameters on the top module and propagate com
 
 - On reset or when disabled, drive `vout` to `vcm` and clear the metrics.
 - Treat `vin_proxy` as a voltage-domain proxy for input current magnitude.
-- Generate an output deviation around `vcm` proportional to the proxy input and `rz_gain`.
-- Reduce effective gain when `bias` falls below `bias_min` and expose the effective gain on `transimpedance_metric`.
-- Assert `overload` when the unclamped output target would exceed the rails.
+- Let `gain_scale = clamp((V(bias)-bias_min)/(vcm-bias_min), vss, vdd)`, then floor `gain_scale` at `0.35`; let `effective_gain = rz_gain * gain_scale`.
+- Let `raw_target = vcm + effective_gain * (V(vin_proxy)-vcm)` and drive `vout = clamp(raw_target, vss, vdd)`.
+- Drive `transimpedance_metric = clamp(vdd * effective_gain / rz_gain, vss, vdd)` and assert `overload = vdd` exactly when `raw_target` lies outside `[vss, vdd]`.
 - Use only voltage-domain behavioral state and voltage contributions on public electrical outputs.
 - Do not expose pass/fail flags; expose only the public observable metrics named in the interface.
 

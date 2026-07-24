@@ -145,7 +145,7 @@
   "properties": [
     {
       "id": "P_MEASURE_ANALOG_INPUTS_RELATIVE_TO_THE",
-      "observable_contract": "Measure analog inputs relative to the local `vss` rail and normalize by the current local supply span. Clear all observables when `en` is low or when the local supply span is outside the public range. Drive `out` with the task-specific bounded analog result, drive `flag` with the task-specific qualification condition, and drive `metric` with a bounded diagnostic magnitude.",
+      "observable_contract": "Let xN=clip01((V(inN)-V(vss))/max(V(vdd,vss),0.05)). Invalid enable/span clears all outputs. Otherwise core=0.36*x0+0.28*x1+0.18*x2+0.10*x3+0.04, out=vhi*clip01(core), flag=vhi exactly when core>0.48, and metric=vhi*clip01(abs(x0-x1)/0.55). Controls have no effect.",
       "required_signals": [
         "time",
         "ctrl0",

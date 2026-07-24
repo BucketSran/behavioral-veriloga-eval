@@ -167,7 +167,7 @@
     },
     {
       "id": "P_FOR_EACH_ACCEPTED_INPUT_CLOCK_EDGE",
-      "observable_contract": "For each accepted input clock edge, schedule one output edge after the code-dependent delay.",
+      "observable_contract": "On each accepted rising `clk_in` edge, latch `code = skew_0 + 2*skew_1 + 4*skew_2` using `vth` and schedule one rising output edge after `code*200 ps`; code zero has no added delay.",
       "required_signals": [
         "time",
         "clk_in",
@@ -183,7 +183,7 @@
     },
     {
       "id": "P_EXPOSE_THE_ACTIVE_DELAY_CODE_AS",
-      "observable_contract": "Expose the active delay code as `delay_metric`.",
+      "observable_contract": "From each accepted rising edge onward, expose the latched code as `delay_metric = clamp(code*unit_delay_metric, vss, vdd)`.",
       "required_signals": [
         "time",
         "clk_in",

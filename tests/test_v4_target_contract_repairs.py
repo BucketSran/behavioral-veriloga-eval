@@ -36,6 +36,31 @@ def _public_contract(task_name: str) -> dict[str, object]:
     return json.loads((_task(task_name) / "public_contract.json").read_text())
 
 
+def _source_prefix_for_task_name(task_name: str) -> str:
+    family_id = int(task_name.split("-", 1)[0])
+    if family_id >= 1000:
+        family_id -= 1000
+    elif family_id >= 500:
+        family_id -= 500
+    return f"{family_id:03d}"
+
+
+def _source_instruction_for_task(task_name: str) -> str:
+    return (
+        _family(_source_prefix_for_task_name(task_name))
+        / "public"
+        / "task"
+        / "instruction.md"
+    ).read_text(encoding="utf-8")
+
+
+def _source_properties_for_task(task_name: str) -> dict[str, str]:
+    return {
+        item["id"]: item["observable_contract"]
+        for item in _spec(_source_prefix_for_task_name(task_name))["properties"]
+    }
+
+
 def _binding_nets(task_name: str) -> dict[str, str]:
     contract = _public_contract(task_name)
     nets: dict[str, str] = {}
@@ -43,6 +68,36 @@ def _binding_nets(task_name: str) -> dict[str, str]:
         for connection in instance["connections"]:
             nets[connection["port_ref"]] = connection["net"]
     return nets
+
+
+def _spectre_seconds(token: str) -> float:
+    multipliers = {
+        "f": 1e-15,
+        "p": 1e-12,
+        "n": 1e-9,
+        "u": 1e-6,
+        "m": 1e-3,
+    }
+    match = re.fullmatch(r"([0-9.]+)([fpnum]?)", token)
+    assert match is not None, token
+    value = float(match.group(1))
+    suffix = match.group(2)
+    return value * multipliers.get(suffix, 1.0)
+
+
+def _pwl_wave(deck: str, source_name: str) -> list[tuple[float, float]]:
+    match = re.search(
+        rf"^{re.escape(source_name)}\s+\([^)]*\)\s+vsource\s+type=pwl\s+wave=\[([^\]]+)\]",
+        deck,
+        re.MULTILINE,
+    )
+    assert match is not None
+    tokens = match.group(1).split()
+    assert len(tokens) % 2 == 0
+    return [
+        (_spectre_seconds(tokens[index]), float(tokens[index + 1]))
+        for index in range(0, len(tokens), 2)
+    ]
 
 
 def test_masked_config_public_binding_uses_its_declared_trace_net_names() -> None:
@@ -129,15 +184,31 @@ def test_strengthened_reference_testbenches_cover_previous_survivors() -> None:
     strongarm = (
         _family("017") / "evaluator" / "reference_tb.scs"
     ).read_text(encoding="utf-8")
-    assert "4.30n  0.450" in strongarm
+    vinp = _pwl_wave(strongarm, "V_VINP")
+    vinn = _pwl_wave(strongarm, "V_VINN")
+    zero_diff_times = [
+        time
+        for (time, vinp_value), (_, vinn_value) in zip(vinp, vinn, strict=True)
+        if abs(vinp_value - vinn_value) < 1e-12
+    ]
+    assert any(4.05e-9 <= time <= 4.15e-9 for time in zero_diff_times)
+    assert any(
+        4.05e-9 <= time <= 4.15e-9
+        and abs(vinp_value - 0.45) < 1e-12
+        and abs(vinn_value - 0.45) < 1e-12
+        for (time, vinp_value), (_, vinn_value) in zip(vinp, vinn, strict=True)
+    )
     assert "tran tran stop=5n" in strongarm
 
     sample_hold = (
         _family("024") / "evaluator" / "reference_tb.scs"
     ).read_text(encoding="utf-8")
-    assert "4.0n    0.78" in sample_hold
-    assert "24.0n   0.22" in sample_hold
-    assert "tran tran stop=1u maxstep=1n" in sample_hold
+    input_ramp = _pwl_wave(sample_hold, "V_IN")
+    assert input_ramp[0] == (0.0, 0.0)
+    assert abs(input_ramp[-1][0] - 240e-9) < 1e-18
+    assert input_ramp[-1][1] == 0.9
+    assert "period=20n" in sample_hold
+    assert "tran tran stop=240n maxstep=1n" in sample_hold
 
 
 def test_charge_pump_reference_never_drives_a_declared_dut_output() -> None:
@@ -232,17 +303,13 @@ def test_sarfend_public_contract_exposes_trial_and_bit_mapping_semantics() -> No
         "1186-sarfend-logic-4b-bugfix",
     )
     for task_name in task_names:
-        task = _task(task_name)
-        instruction = (task / "public" / "instruction.md").read_text()
+        instruction = _source_instruction_for_task(task_name)
         assert "dp4=dm4=0" in instruction
         assert "dp3=dm3=dp2=dm2=dp1=dm1=1" in instruction
         assert "dout3=dp4" in instruction
         assert "`dtest3`, `dtest2`, `dtest1`, then `dtest0`" in instruction
 
-        properties = {
-            item["id"]: item["observable_contract"]
-            for item in _public_contract(task_name)["properties"]
-        }
+        properties = _source_properties_for_task(task_name)
         assert "dp4=dm4=0" in properties["P_CONVERSION_RESET_AND_PREVIOUS_WORD"]
         assert "MSB-to-LSB" in properties["P_SAMPLE_AND_COMPARATOR_DECISIONS"]
 
@@ -447,17 +514,13 @@ def test_rail_normalized_mapper_exposes_formula_and_distinct_valid_gate() -> Non
         "1274-rail-normalized-metric-mapper-bugfix",
     )
     for task_name in task_names:
-        task = _task(task_name)
-        instruction = (task / "public" / "instruction.md").read_text()
+        instruction = _source_instruction_for_task(task_name)
         assert "local_meas = V(meas) - V(vss)" in instruction
         assert "norm = vhi * clip01(local_meas / span)" in instruction
         assert "span_min <= span <= span_max" in instruction
         assert "above `span_max`" in instruction
 
-        properties = {
-            item["id"]: item["observable_contract"]
-            for item in _public_contract(task_name)["properties"]
-        }
+        properties = _source_properties_for_task(task_name)
         assert "local_meas / span" in properties[
             "P_NORMALIZE_MEAS_RELATIVE_TO_THE_LOCAL"
         ]
@@ -473,17 +536,13 @@ def test_affine_calibration_exposes_sampled_update_and_exact_formula() -> None:
         "1284-calibration-affine-transform-bugfix",
     )
     for task_name in task_names:
-        task = _task(task_name)
-        instruction = (task / "public" / "instruction.md").read_text()
+        instruction = _source_instruction_for_task(task_name)
         assert "only on" in instruction
         assert "gain_base + gain_span * clip01(V(gain_ctrl) / vhi)" in instruction
         assert "center + gain * (V(raw) - center) + offset" in instruction
         assert "abs(transformed - V(raw)) / resid_fullscale" in instruction
 
-        properties = {
-            item["id"]: item["observable_contract"]
-            for item in _public_contract(task_name)["properties"]
-        }
+        properties = _source_properties_for_task(task_name)
         assert "only on each rising clk crossing" in properties[
             "P_ON_EACH_RISING_CLOCK_CROSSING_COMPUTE"
         ]
@@ -499,17 +558,13 @@ def test_reacquire_lock_exposes_count_and_metric_encoding() -> None:
         "1291-event-reacquire-lock-detector-bugfix",
     )
     for task_name in task_names:
-        task = _task(task_name)
-        instruction = (task / "public" / "instruction.md").read_text()
+        instruction = _source_instruction_for_task(task_name)
         assert "phase_error" in instruction
         assert "metric_fullscale" in instruction
         assert "phase_error / metric_fullscale" in instruction
         assert "good_count / lock_count" in instruction
 
-        properties = {
-            item["id"]: item["observable_contract"]
-            for item in _public_contract(task_name)["properties"]
-        }
+        properties = _source_properties_for_task(task_name)
         assert "phase_error <= lock_window" in properties[
             "P_REQUIRE_CONSECUTIVE_IN_WINDOW_FEEDBACK_EDGE"
         ]
@@ -531,12 +586,8 @@ def test_generated_monitor_families_replace_task_specific_placeholders() -> None
             f"{int(family_id) + 500}-{slug}-testbench",
             f"{int(family_id) + 1000}-{slug}-bugfix",
         ):
-            task = _task(task_name)
-            instruction = (task / "public" / "instruction.md").read_text()
-            contracts = " ".join(
-                item["observable_contract"]
-                for item in _public_contract(task_name)["properties"]
-            )
+            instruction = _source_instruction_for_task(task_name)
+            contracts = " ".join(_source_properties_for_task(task_name).values())
             assert "task-specific" not in instruction
             assert "task-specific" not in contracts
             assert formula.replace(" ", "") in instruction.replace(" ", "")
@@ -548,8 +599,7 @@ def test_sampled_error_monitor_exposes_update_equations() -> None:
         "770-sampled-error-update-monitor-testbench",
         "1270-sampled-error-update-monitor-bugfix",
     ):
-        task = _task(task_name)
-        instruction = (task / "public" / "instruction.md").read_text()
+        instruction = _source_instruction_for_task(task_name)
         compact = instruction.replace(" ", "")
         assert "V(target)-V(sample)" in compact
         assert "V(sample)+coeff*error" in compact
@@ -564,9 +614,7 @@ def test_tia_and_track_hold_expose_numeric_metric_contracts() -> None:
         "804-common-gate-tia-front-end-testbench",
         "1304-common-gate-tia-front-end-bugfix",
     ):
-        compact = (_task(task_name) / "public" / "instruction.md").read_text().replace(
-            " ", ""
-        )
+        compact = _source_instruction_for_task(task_name).replace(" ", "")
         assert "(V(bias)-bias_min)/(vcm-bias_min)" in compact
         assert "vdd*effective_gain/rz_gain" in compact
         assert "raw_target" in compact
@@ -576,9 +624,7 @@ def test_tia_and_track_hold_expose_numeric_metric_contracts() -> None:
         "811-muxed-track-hold-array-readout-testbench",
         "1311-muxed-track-hold-array-readout-bugfix",
     ):
-        compact = (_task(task_name) / "public" / "instruction.md").read_text().replace(
-            " ", ""
-        )
+        compact = _source_instruction_for_task(task_name).replace(" ", "")
         assert "vcm+0.15*code" in compact
         assert "held-valid" in compact
         assert "vout" in compact and "vcm" in compact
@@ -593,18 +639,14 @@ def test_long_running_families_expose_exact_numeric_contracts() -> None:
         "326": ("(code+1)*200ps", "(vdd-vss)*code/15"),
     }
     for family_id, snippets in expected.items():
-        task_root = RELEASE / "tasks"
-        for task_dir in sorted(task_root.glob(f"{family_id}-*")) + sorted(
-            task_root.glob(f"{int(family_id) + 500}-*")
-        ) + sorted(task_root.glob(f"{int(family_id) + 1000}-*")):
-            compact = (
-                (task_dir / "public" / "instruction.md")
-                .read_text()
-                .lower()
-                .replace(" ", "")
-            )
-            for snippet in snippets:
-                assert snippet in compact
+        compact = (
+            (_family(family_id) / "public" / "task" / "instruction.md")
+            .read_text()
+            .lower()
+            .replace(" ", "")
+        )
+        for snippet in snippets:
+            assert snippet in compact
 
 
 def test_dfe_family_exposes_exact_state_transition_contract() -> None:
@@ -1035,9 +1077,8 @@ def test_v4_batch_certifier_uses_the_active_suite_not_the_full_catalog() -> None
     assert "load_family_rows" in certifier
     assert "selected_mutation_ids(task, active_suites)" in certifier
     assert 'if str(row["id"]) in mutation_ids' in certifier
-    assert 'field in note for field in ("category=", "expected=", "observed=", "event=")' in certifier
-    assert '"sample_time="' in certifier
-    assert '"metric_gap="' in certifier
+    assert "non-empty diagnostic, not one particular rendering vocabulary" in certifier
+    assert 'return bool(note.strip()) and "=" in note' in certifier
 
 
 def test_legacy_event_checkers_replay_submitted_stimulus_instead_of_gold_times() -> None:

@@ -36,6 +36,8 @@ Provide these overrideable public parameters on the top module and propagate com
 - Use only voltage-domain behavioral state and voltage contributions on public electrical outputs.
 - Do not expose pass/fail flags; expose only the public observable metrics named in the interface.
 
+The exact metric contract is `overdrive = abs(V(vinp)-V(vinn))` and `kickback_metric = clamp(vcm + 0.30/(1.0 + overdrive/0.030), vss, vdd)`.
+
 ## Modeling Constraints
 
 Use deterministic voltage-domain behavioral Verilog-A suitable for transient simulation. Use voltage contributions for public electrical outputs. Do not instantiate transistor-level devices. Do not add verification harnesses, simulation decks, generated result files, logs, reports, debug-only ports, or pass/fail flags.

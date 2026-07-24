@@ -137,7 +137,7 @@
   "properties": [
     {
       "id": "P_ON_EACH_RISING_CLOCK_CROSSING_COMPUTE",
-      "observable_contract": "On each rising clock crossing, compute a local affine calibration transform from raw, gain_ctrl, and offset_ctrl while reset is low and enable is high.",
+      "observable_contract": "Update the stored output and residual metric only on each rising clk crossing.",
       "required_signals": [
         "time",
         "clk",
@@ -152,7 +152,7 @@
     },
     {
       "id": "P_MAP_GAIN_CTRL_TO_A_PUBLIC",
-      "observable_contract": "Map gain_ctrl to a public gain range and offset_ctrl to a centered offset.",
+      "observable_contract": "Let gain = gain_base + gain_span * clip01(V(gain_ctrl) / vhi), offset = V(offset_ctrl) - center, and transformed = center + gain * (V(raw) - center) + offset.",
       "required_signals": [
         "time",
         "clk",
@@ -167,7 +167,7 @@
     },
     {
       "id": "P_CLEAR_OUTPUT_AND_METRIC_WHILE_RESET",
-      "observable_contract": "Clear output and metric while reset is high or enable is low; otherwise clip the transformed output into the public voltage-coded range.",
+      "observable_contract": "At a rising edge, V(rst) > vth or V(en) <= vth stores both outputs at 0 V; otherwise store out = clamp(transformed, 0, vhi).",
       "required_signals": [
         "time",
         "clk",
@@ -182,7 +182,7 @@
     },
     {
       "id": "P_EXPOSE_A_BOUNDED_RESIDUAL_METRIC_FOR",
-      "observable_contract": "Expose a bounded residual metric for the transform magnitude.",
+      "observable_contract": "Store resid_metric = vhi * clip01(abs(transformed - V(raw)) / resid_fullscale), where clip01 limits its argument to [0, 1].",
       "required_signals": [
         "time",
         "clk",

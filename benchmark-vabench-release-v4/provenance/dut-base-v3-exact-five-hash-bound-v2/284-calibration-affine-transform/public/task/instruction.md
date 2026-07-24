@@ -24,10 +24,10 @@ module calibration_affine_transform(clk, rst, raw, gain_ctrl, offset_ctrl, en, o
 
 ## Required Behavior
 
-- On each rising clock crossing, compute a local affine calibration transform from raw, gain_ctrl, and offset_ctrl while reset is low and enable is high.
-- Map gain_ctrl to a public gain range and offset_ctrl to a centered offset.
-- Clear output and metric while reset is high or enable is low; otherwise clip the transformed output into the public voltage-coded range.
-- Expose a bounded residual metric for the transform magnitude.
+- Update the stored output and metric only on each rising `clk` crossing. At that edge, if `V(rst) > vth` or `V(en) <= vth`, store `out = 0 V` and `resid_metric = 0 V`.
+- Otherwise let `gain = gain_base + gain_span * clip01(V(gain_ctrl) / vhi)` and `offset = V(offset_ctrl) - center`.
+- Compute `transformed = center + gain * (V(raw) - center) + offset` and store `out = clamp(transformed, 0, vhi)`.
+- Store `resid_metric = vhi * clip01(abs(transformed - V(raw)) / resid_fullscale)`. Here `clip01(x)` limits `x` to `[0, 1]`.
 - Use local analog helper functions rather than user task/endtask syntax.
 
 ## Modeling Constraints

@@ -28,10 +28,10 @@ Provide these overrideable public parameters on the top module and propagate com
 
 ## Required Behavior
 
-- On reset, clear all held channel states, output, channel metric, and `valid`.
+- On reset, initialize all three held channels and `vout` to `vcm`, and drive `channel_metric = vss` and `valid = vss`.
 - On each enabled sampling clock edge, capture all three input channels into separate hold states.
-- Decode `sel_1..sel_0` and route the selected held channel to `vout`; invalid code 3 must hold the previous output and clear `valid`.
-- Expose the selected channel index on `channel_metric` as a voltage-coded metric.
+- Decode `code = (sel_0 > vth ? 1 : 0) + 2*(sel_1 > vth ? 1 : 0)` and route held channel 0, 1, or 2 to `vout`; propagate that channel's held-valid state to `valid`. Invalid code 3 holds the previous `vout` and `channel_metric` and clears `valid`.
+- For valid codes 0..2, drive `channel_metric = clamp(vcm + 0.15*code, vss, vdd)`.
 - Hold all channel samples between sampling events.
 - Use only voltage-domain behavioral state and voltage contributions on public electrical outputs.
 - Do not expose pass/fail flags; expose only the public observable metrics named in the interface.
