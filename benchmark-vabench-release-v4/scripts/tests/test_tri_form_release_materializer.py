@@ -14,6 +14,11 @@ if str(PREP) not in sys.path:
 CALIBRATION = Path(__file__).resolve().parents[2] / "operations" / "calibration_pilot"
 if str(CALIBRATION) not in sys.path:
     sys.path.insert(0, str(CALIBRATION))
+PROVENANCE = (
+    Path(__file__).resolve().parents[2]
+    / "provenance"
+    / "dut-base-v3-exact-five-hash-bound-v2"
+)
 
 from materialize_tri_form_release import (  # noqa: E402
     COMPONENT_METADATA,
@@ -629,6 +634,64 @@ def test_derived_instructions_preserve_canonical_required_behavior(tmp_path: Pat
     assert behavior == "Capture `vin` on each rising sample edge and hold it until the next edge."
     assert behavior in render_bugfix_instruction(sample_spec(), canonical_behavior=behavior)
     assert behavior in render_testbench_instruction(sample_spec(), canonical_behavior=behavior)
+
+
+@pytest.mark.parametrize(
+    ("source_slug", "semantic_marker"),
+    [
+        ("081-adpll-ratio-hop-timer", "models an ADPLL timing loop"),
+        ("084-bbpd-data-edge-alignment", "bang-bang phase detector front end"),
+        ("088-cppll-tracking-reacquire-timer", "Use `ref_clk` as the reference timing input."),
+        ("089-edge-crossing-interval-timer", "measures the interval"),
+        ("090-dither-adder", "standalone differential dither injection block"),
+        ("092-fixed-gain-amplifier", "standalone fixed-gain differential amplifier"),
+        ("098-reference-step-clock", "checks the generated `CLK` waveform"),
+        ("101-settling-time-measurement", "Use a 1 ns timer update"),
+        ("105-single-shot-pulse", "voltage-domain one-shot pulse generator"),
+        ("108-crossing-pulse-detector", "emits a fixed-width pulse"),
+        ("302-fractional-n-divider-accumulator-flow", "fractional accumulator"),
+    ],
+)
+def test_testbench_canonical_behavior_removes_dut_authoring_directives(
+    source_slug: str,
+    semantic_marker: str,
+) -> None:
+    behavior = canonical_required_behavior(PROVENANCE / source_slug, "testbench")
+
+    assert semantic_marker in behavior
+    assert not re.search(
+        r"(?is)"
+        r"not\s+(?:a\s+)?Spectre\s+testbench|"
+        r"testbench-generation task|"
+        r"Return only the Verilog-A source|"
+        r"graded as the candidate implementation|"
+        r"Both\s+files\s+are\s+scored\s+DUT\s+source\s+artifacts|"
+        r"Do not generate a Spectre `?\.scs`? file|"
+        r"^Implement\s",
+        behavior,
+    )
+
+
+def test_all_testbench_canonical_behavior_is_form_neutral() -> None:
+    forbidden = re.compile(
+        r"not\s+(?:a\s+)?Spectre\s+testbench|"
+        r"testbench-generation task|"
+        r"Return only the Verilog-A source|"
+        r"graded as the candidate implementation|"
+        r"Both\s+files\s+are\s+scored\s+DUT\s+source\s+artifacts|"
+        r"Do not generate a Spectre `?\.scs`? file|"
+        r"^Implement(?:\s|:)",
+        flags=re.IGNORECASE | re.DOTALL | re.MULTILINE,
+    )
+    problems = []
+    for source_task in sorted(PROVENANCE.iterdir()):
+        if not source_task.is_dir():
+            continue
+        behavior = canonical_required_behavior(source_task, "testbench")
+        if match := forbidden.search(behavior):
+            problems.append(f"{source_task.name}: {match.group(0)!r}")
+
+    assert problems == []
 
 
 def test_testbench_instruction_has_one_candidate_and_five_anonymous_negatives() -> None:
