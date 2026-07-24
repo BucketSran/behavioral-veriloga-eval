@@ -447,6 +447,38 @@ def row_before(rows: list[Row], time_s: float) -> Row:
     return rows[max(0, bisect_left(times, time_s) - 1)]
 
 
+def representative_clear_rows(rows: list[Row], *, has_enable: bool) -> list[Row]:
+    """Select settled clear samples from rows in nondecreasing time order."""
+
+    if not rows:
+        return []
+
+    def clear(row: Row) -> bool:
+        reset = float(row.get("rst", 0.0)) > 0.45
+        disabled = has_enable and float(row.get("enable", 0.0)) <= 0.45
+        return reset or disabled
+
+    selected: list[Row] = []
+    last_selected = -1e99
+    settled_index = 0
+    for row in rows:
+        time_s = float(row["time"])
+        settled_time = time_s - 0.6e-9
+        while (
+            settled_index + 1 < len(rows)
+            and float(rows[settled_index + 1]["time"]) < settled_time
+        ):
+            settled_index += 1
+        if (
+            clear(row)
+            and clear(rows[settled_index])
+            and time_s - last_selected >= 1e-9
+        ):
+            selected.append(row)
+            last_selected = time_s
+    return selected
+
+
 def event_settle_delay(event_times: list[float], *, fraction: float = 0.12,
                        minimum_s: float = 1.5e-10, maximum_s: float = 2.0e-9) -> float:
     spacings = [right - left for left, right in zip(event_times, event_times[1:])

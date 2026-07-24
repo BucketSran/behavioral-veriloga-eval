@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from ..api import Checker
+from .stimulus_relative import representative_clear_rows as _representative_clear_rows
 from dataclasses import dataclass
 
 VTH = 0.45
@@ -87,19 +88,6 @@ def _nearest_after(times: list[float], time: float, *, limit: float | None = Non
         if value >= time and (limit is None or value <= limit):
             return value
     return None
-
-def _representative_clear_rows(rows: list[dict[str, float]], *, has_enable: bool) -> list[dict[str, float]]:
-    selected: list[dict[str, float]] = []
-    last_selected = -1e99
-    for row in rows:
-        clear = _high(row, "rst") or (has_enable and not _high(row, "enable"))
-        time = float(row["time"])
-        settled = _before(rows, time - 0.6e-9)
-        settled_clear = _high(settled, "rst") or (has_enable and not _high(settled, "enable"))
-        if clear and settled_clear and time - last_selected >= 1e-9:
-            selected.append(row)
-            last_selected = time
-    return selected
 
 def _inactive_between(rows: list[dict[str, float]], start: float, stop: float) -> bool:
     return any(

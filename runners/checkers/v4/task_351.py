@@ -4,6 +4,7 @@ from __future__ import annotations
 from bisect import bisect_left, bisect_right
 
 from ..api import Checker
+from .stimulus_relative import representative_clear_rows as _representative_clear_rows
 from dataclasses import dataclass
 
 VTH = 0.45
@@ -89,19 +90,6 @@ def _after(rows: list[dict[str, float]], time: float) -> dict[str, float]:
         if float(row["time"]) >= time:
             return row
     return rows[-1]
-
-def _representative_clear_rows(rows: list[dict[str, float]], *, has_enable: bool) -> list[dict[str, float]]:
-    selected: list[dict[str, float]] = []
-    last_selected = -1e99
-    for row in rows:
-        clear = _high(row, "rst") or (has_enable and not _high(row, "enable"))
-        time = float(row["time"])
-        settled = _before(rows, time - 0.6e-9)
-        settled_clear = _high(settled, "rst") or (has_enable and not _high(settled, "enable"))
-        if clear and settled_clear and time - last_selected >= 1e-9:
-            selected.append(row)
-            last_selected = time
-    return selected
 
 def check_v4_351_pll_timing_monitor_system(rows: list[dict[str, float]]) -> tuple[bool, str]:
     ids = ["P_RESET_DISABLE_CLEAR", "P_PHASE_COMPARE", "P_PHASE_CODE", "P_DIVIDE_BY_FOUR_EDGES", "P_LOCK_REACQUIRE"]
