@@ -48,6 +48,10 @@ DEFAULT_OUTPUTS = {
     "r51": PACKAGE_ROOT / "release" / "benchmarkv4-r51",
 }
 PROMPT_ASSETS = PREP_ROOT / "prompt_assets"
+NEXT_RUNTIME_TRANSPORT_WRAPPER_REVISIONS = frozenset({"r52"})
+NEXT_RUNTIME_TRANSPORT_WRAPPER = (
+    PROMPT_ASSETS / "wrappers" / "direct_wrapper_runtime_transport.md"
+)
 SKILLS_ROOT = PACKAGE_ROOT.parent / "skills"
 SKILL_IDS = ("veriloga", "vabench-feedback")
 REAL_SKILL_REVISIONS = frozenset({"r50", "r51"})
@@ -1219,7 +1223,14 @@ def install_prompt_assets(
     if missing_sources:
         raise SystemExit(f"prompt component source(s) missing: {missing_sources}")
     for component_id in component_metadata:
-        source = sources[component_id]
+        source = (
+            NEXT_RUNTIME_TRANSPORT_WRAPPER
+            if (
+                component_id == "direct_wrapper.md"
+                and release_revision in NEXT_RUNTIME_TRANSPORT_WRAPPER_REVISIONS
+            )
+            else sources[component_id]
+        )
         destination = (
             output
             / "prompt_modes"
