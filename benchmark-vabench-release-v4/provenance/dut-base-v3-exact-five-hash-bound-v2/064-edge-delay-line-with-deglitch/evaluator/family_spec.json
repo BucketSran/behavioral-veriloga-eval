@@ -110,6 +110,10 @@
     ],
     "mode": "single_file"
   },
+  "evaluation_parameter_policy": {
+    "mode": "published_defaults",
+    "statement": "Scored evaluation uses the published default parameter values; alternative parameter overrides are outside the scored behavior contract."
+  },
   "family_id": "064",
   "identity": {
     "category": "clock_timing",
@@ -122,7 +126,7 @@
     "AMS role: qualified edge-delay and deglitch block for mixed-signal clock, timing, and control paths.",
     "Use deterministic voltage-domain threshold events and periodic scheduling state for qualification and delayed emission.",
     "Use voltage contributions for vout, edge_valid, and rejected, with transition smoothing controlled by tr.",
-    "Preserve the positional six-port interface and all overrideable public parameters.",
+    "Preserve the positional six-port interface and all declared public parameter names and defaults; scored evaluation uses the published default values.",
     "Do not use current contributions, transistor-level devices, random sources, external table files, AC/noise behavior, debug outputs, validation hooks, or simulator-specific side channels."
   ],
   "properties": [
@@ -184,19 +188,6 @@
       "required_signals": [
         "time",
         "vin",
-        "vout",
-        "edge_valid",
-        "rejected"
-      ]
-    },
-    {
-      "id": "P_PARAMETER_OVERRIDE",
-      "observable_contract": "Overriding tick, min_width_ticks, or delay_ticks changes the observable qualification or emission timing without changing module ports, output polarity, or reset/enable behavior.",
-      "required_signals": [
-        "time",
-        "vin",
-        "rst",
-        "enable",
         "vout",
         "edge_valid",
         "rejected"

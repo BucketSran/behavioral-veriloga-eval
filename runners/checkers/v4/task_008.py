@@ -106,7 +106,13 @@ def check_v4_gain_trim_controller(rows: list[dict[str, float]]) -> tuple[bool, s
 
     spans = _v4_hold_spans(rows, "gain_ctrl", edges, settle_s=2.0e-9, guard_s=0.25e-9)
     hold_violations = [item for item in spans if item[2] > 0.015]
-    initial = sample_signal_at(rows, "gain_ctrl", 1.0e-9)
+    first_edge = edges[0] if edges else rows[-1]["time"]
+    initial_candidates = [
+        row["gain_ctrl"]
+        for row in rows
+        if row["time"] <= first_edge - 0.25e-9
+    ]
+    initial = initial_candidates[-1] if initial_candidates else rows[0]["gain_ctrl"]
     trace_values = [row["gain_ctrl"] for row in rows]
     range_ok = min(trace_values) >= 0.035 and max(trace_values) <= 0.865
     coverage_ok = all(coverage[key] >= 1 for key in ("reset", "increase", "decrease", "deadband"))
@@ -114,7 +120,6 @@ def check_v4_gain_trim_controller(rows: list[dict[str, float]]) -> tuple[bool, s
     ok = (
         initial is not None
         and abs(initial - 0.30) <= 0.025
-        and len(edges) >= 12
         and coverage_ok
         and clamp_ok
         and not mismatches

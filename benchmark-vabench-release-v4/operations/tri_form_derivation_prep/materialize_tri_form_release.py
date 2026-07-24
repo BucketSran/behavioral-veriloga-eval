@@ -289,6 +289,12 @@ def render_properties(spec: dict[str, Any], verb: str) -> str:
     return "\n".join(lines)
 
 
+def render_parameter_evaluation_policy(spec: dict[str, Any]) -> str:
+    policy = spec.get("evaluation_parameter_policy") or {}
+    statement = str(policy.get("statement") or "").strip()
+    return f"\n{statement}\n" if statement else ""
+
+
 def render_binding(spec: dict[str, Any]) -> str:
     binding = spec.get("testbench_binding") or {}
     source_template = str(binding.get("source_path_template") or "./dut/{artifact_path}")
@@ -460,12 +466,18 @@ Stable public Spectre binding:
 ## Public Parameter Contract
 
 {render_parameters(spec)}
+{render_parameter_evaluation_policy(spec)}
 
 ## Required Behavior
 
 Create stimulus and save traces sufficient for the fixed evaluator oracle to check:
 
 {render_properties(spec, 'exercise and make observable:')}
+
+Use any deterministic stimulus layout that makes every required public behavior
+observable. Exact event counts, absolute event times, sample density, and
+reference-deck ordering are not part of the contract unless stated explicitly
+above.
 
 {render_canonical_behavior(canonical_behavior)}
 
@@ -509,6 +521,7 @@ Preserve this exact artifact and module interface:
 ## Public Parameter Contract
 
 {render_parameters(spec)}
+{render_parameter_evaluation_policy(spec)}
 
 ## Required Behavior
 

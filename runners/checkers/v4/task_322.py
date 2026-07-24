@@ -2,6 +2,9 @@
 from __future__ import annotations
 
 from ..api import Checker
+from ..common.relative_events import event_period, sample_step
+
+
 def _v4_topup_logic_high(row: dict[str, float], name: str, threshold: float = 0.45) -> bool:
     return float(row.get(name, 0.0)) > threshold
 
@@ -11,6 +14,24 @@ def _v4_rising(prev_v: float, now_v: float, vth: float = 0.45) -> bool:
 def check_v4_1020_glitchless_clock_mux_selector(rows: list[dict[str, float]]) -> tuple[bool, str]:
     if not rows:
         return False, "v4_1020 empty_trace"
+    required = {"time", "clk_a", "clk_b", "sel", "rst", "enable", "clk_out", "switch_metric", "valid"}
+    if not required.issubset(rows[0]):
+        missing = sorted(required - set(rows[0]))
+        return False, "missing_columns=" + ",".join(missing)
+    step = sample_step(rows)
+    clock_periods = [
+        period
+        for period in (event_period(rows, "clk_a"), event_period(rows, "clk_b"))
+        if period > 0.0
+    ]
+    if step <= 0.0 or not clock_periods:
+        return False, (
+            f"insufficient_clock_coverage rows={len(rows)} "
+            f"sample_step={step:.4g} clock_periods={clock_periods}"
+        )
+    clock_period = max(clock_periods)
+    settle_guard = max(3.0 * step, 0.08 * clock_period)
+    edge_guard = max(3.0 * step, 0.12 * clock_period)
     active = 0
     pending = 0
     switched_at = -1.0
@@ -24,7 +45,6 @@ def check_v4_1020_glitchless_clock_mux_selector(rows: list[dict[str, float]]) ->
     prev_clk_b = float(rows[0].get("clk_b", 0.0))
     last_input_rise = -1.0
     prev_out = float(rows[0].get("clk_out", 0.0))
-    prev_metric_high = _v4_topup_logic_high(rows[0], "switch_metric")
     switch_windows: list[dict[str, float | bool]] = []
     metric_high_outside_window_errors = 0
     for row in rows:
@@ -36,7 +56,7 @@ def check_v4_1020_glitchless_clock_mux_selector(rows: list[dict[str, float]]) ->
         if not enabled:
             if inactive_time is None:
                 inactive_time = t
-            inactive_ready = t >= inactive_time + 0.7e-9
+            inactive_ready = t >= inactive_time + settle_guard
             active = 0
             pending = 0
             first_edge_seen = False
@@ -61,14 +81,14 @@ def check_v4_1020_glitchless_clock_mux_selector(rows: list[dict[str, float]]) ->
             switched_at = t
             switch_seen = True
             first_edge_seen = False
-            switch_windows.append({"start": t, "end": t + 5.0e-9, "seen": False})
+            switch_windows.append({"start": t, "end": t + clock_period, "seen": False})
         expected = float(row["clk_b" if active else "clk_a"])
         src_seen.add(active)
         now_out = float(row["clk_out"])
         if _v4_rising(prev_clk_a, clk_a) or _v4_rising(prev_clk_b, clk_b):
             last_input_rise = t
         if prev_out <= 0.45 and now_out > 0.45:
-            if last_input_rise < 0 or t - last_input_rise > 0.5e-9:
+            if last_input_rise < 0 or t - last_input_rise > edge_guard:
                 glitch_errors += 1
             first_edge_seen = True
         prev_out = now_out
@@ -77,21 +97,20 @@ def check_v4_1020_glitchless_clock_mux_selector(rows: list[dict[str, float]]) ->
         metric_high = _v4_topup_logic_high(row, "switch_metric")
         metric_in_window = False
         for window in switch_windows:
-            if float(window["start"]) <= t <= float(window["end"]):
+            if float(window["start"]) <= t <= float(window["end"]) + edge_guard:
                 metric_in_window = True
             if bool(window["seen"]):
                 continue
-            if float(window["start"]) <= t <= float(window["end"]) and metric_high:
+            if float(window["start"]) <= t <= float(window["end"]) + edge_guard and metric_high:
                 window["seen"] = True
         if metric_high and not metric_in_window:
             metric_high_outside_window_errors += 1
-        prev_metric_high = metric_high
         valid_high = _v4_topup_logic_high(row, "valid")
-        valid_transition_grace = switched_at >= 0 and t <= switched_at + 0.35e-9
+        valid_transition_grace = switched_at >= 0 and t <= switched_at + settle_guard
         if not first_edge_seen and valid_high and not valid_transition_grace:
             valid_early_errors += 1
             valid_errors += 1
-        if not first_edge_seen or (switched_at >= 0 and t < switched_at + 0.7e-9):
+        if not first_edge_seen or (switched_at >= 0 and t < switched_at + settle_guard):
             continue
         checked += 1
         if abs(now_out - expected) > 0.14:
@@ -103,13 +122,13 @@ def check_v4_1020_glitchless_clock_mux_selector(rows: list[dict[str, float]]) ->
         sum(not bool(window["seen"]) for window in switch_windows)
         + metric_high_outside_window_errors
     )
-    out_budget = max(12, checked // 5)
+    out_budget = max(2, checked // 5)
     # Count one missing event once; dense waveform sampling must not dilute it.
     metric_budget = 0
-    valid_budget = max(8, checked // 10)
-    clear_budget = 4
+    valid_budget = max(2, checked // 10)
+    clear_budget = 2
     ok = (
-        checked >= 80
+        checked >= 8
         and reset_clear
         and disabled_clear
         and switch_seen

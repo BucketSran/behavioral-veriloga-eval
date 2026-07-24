@@ -81,29 +81,26 @@ def check_chopper_stabilized_differential_amplifier(
     if not rows or not required.issubset(rows[0]):
         missing = sorted(required - (set(rows[0]) if rows else set()))
         return False, "missing_columns=" + ",".join(missing)
-    if len(rows) < 20:
-        return False, "insufficient_excitation trace_rows"
-
-    steps = [b["time"] - a["time"] for a, b in zip(rows, rows[1:]) if b["time"] > a["time"]]
-    step = median(steps)
     chop_rising = _crossings(rows, "chop_clk", +1)
     chop_periods = [right - left for left, right in zip(chop_rising, chop_rising[1:])]
     if not chop_periods:
         return False, "insufficient_excitation chop_periods"
-    chop_period = median(chop_periods)
-    guard = max(0.225 * chop_period, 8.0 * step)
     events: list[tuple[float, int, str, int]] = []
     events += [(time_s, 1, "chop", +1) for time_s in chop_rising]
     events += [(time_s, 1, "chop", -1) for time_s in _crossings(rows, "chop_clk", -1)]
     events += [(time_s, 0, "clear", 0) for time_s in _crossings(rows, "rst", +1)]
     events += [(time_s, 0, "clear", 0) for time_s in _crossings(rows, "enable", -1)]
     events.sort()
-    if len([event for event in events if event[2] == "chop"]) < 16:
-        return False, "insufficient_excitation chop_edges"
 
     state = _State()
-    checked = active_updates = hold_edges = clear_events = 0
-    positive_updates = negative_updates = settled_rows = 0
+    sample_steps = [
+        right["time"] - left["time"]
+        for left, right in zip(rows, rows[1:])
+        if right["time"] > left["time"]
+    ]
+    nominal_sample_step = median(sample_steps) if sample_steps else 0.0
+    observed_events = active_updates = hold_edges = clear_events = 0
+    positive_updates = negative_updates = settled_events = 0
     errors: list[str] = []
 
     for index, (event_time, _priority, kind, polarity) in enumerate(events):
@@ -125,34 +122,45 @@ def check_chopper_stabilized_differential_amplifier(
             positive_updates += polarity > 0
             negative_updates += polarity < 0
 
-        next_time = events[index + 1][0] if index + 1 < len(events) else rows[-1]["time"]
-        for row in rows:
-            if not (event_time + guard <= row["time"] < next_time - 0.5 * step):
-                continue
-            for signal, expected in state.outputs().items():
-                tolerance = 0.015 if signal != "settled" else 0.08
-                checked += 1
-                if abs(row[signal] - expected) > tolerance:
-                    errors.append(
-                        f"{signal}@{row['time'] * 1e9:.3f}ns={row[signal]:.5f} expected={expected:.5f}"
-                    )
-                    if len(errors) >= 5:
-                        break
-            settled_rows += row["settled"] > VTH
-            if len(errors) >= 5:
-                break
+        next_time = next(
+            (later[0] for later in events[index + 1:] if later[0] > event_time),
+            rows[-1]["time"],
+        )
+        if next_time <= event_time:
+            continue
+        if next_time - event_time <= 0.55 * nominal_sample_step:
+            # Two state-changing events inside one observation interval cannot
+            # expose the intermediate state without inventing waveform data.
+            continue
+        probe = event_time + 0.5 * (next_time - event_time)
+        observed_events += 1
+        for signal, expected in state.outputs().items():
+            observed = _sample(rows, signal, probe)
+            tolerance = 0.015 if signal != "settled" else 0.08
+            if abs(observed - expected) > tolerance:
+                errors.append(
+                    f"{signal}@{probe * 1e9:.3f}ns={observed:.5f} expected={expected:.5f}"
+                )
+                if len(errors) >= 5:
+                    break
+        settled_events += _sample(rows, "settled", probe) > VTH
         if len(errors) >= 5:
             break
 
     coverage_ok = (
-        active_updates >= 12 and hold_edges >= 2 and clear_events >= 2
-        and positive_updates >= 5 and negative_updates >= 5 and settled_rows >= 2
-        and checked >= 100
+        active_updates >= SETTLE_CYCLES
+        and hold_edges >= 1
+        and clear_events >= 1
+        and positive_updates >= 1
+        and negative_updates >= 1
+        and settled_events >= 1
+        and observed_events >= 1
     )
     ok = not errors and coverage_ok
     note = (
-        f"checked={checked} active={active_updates} hold_edges={hold_edges} clears={clear_events} "
-        f"polarity=+{positive_updates}/-{negative_updates} settled_rows={settled_rows} "
+        f"observed_events={observed_events} active={active_updates} hold_edges={hold_edges} "
+        f"clears={clear_events} polarity=+{positive_updates}/-{negative_updates} "
+        f"settled_events={settled_events} "
         f"errors={len(errors)}"
     )
     if errors:

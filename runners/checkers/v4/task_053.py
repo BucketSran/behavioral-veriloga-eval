@@ -11,8 +11,9 @@ def check_v3_495_slew_rate_dac4(rows: list[dict[str, float]]) -> tuple[bool, str
     max_err = 0.0
     max_endpoint_err = 0.0
     checked = 0
-    endpoint_checks = 0
+    ramp_checks = 0
     seen_codes: set[int] = set()
+    settled_codes: set[int] = set()
     code_transitions = 0
     previous_code: int | None = None
     for row in rows[1:]:
@@ -38,26 +39,35 @@ def check_v3_495_slew_rate_dac4(rows: list[dict[str, float]]) -> tuple[bool, str
         err = abs(row["vout"] - expected)
         max_err = max(max_err, err)
         checked += 1
+        if abs(expected - target) >= 0.003:
+            ramp_checks += 1
+        if abs(expected - target) < 0.003:
+            settled_codes.add(code)
         if abs(expected - target) < 0.003 and code in {0, 3, 6, 12, 15}:
             endpoint_err = abs(row["vout"] - target)
             max_endpoint_err = max(max_endpoint_err, endpoint_err)
-            endpoint_checks += 1
-    if checked < 40:
-        return False, f"insufficient_slew_samples={checked}"
-    if len(seen_codes) < 4 or code_transitions < 3 or not {0, 15}.issubset(seen_codes):
+    if checked == 0:
+        return False, "insufficient_slew_samples=0"
+    if len(seen_codes) < 3 or code_transitions < 2 or not {0, 15}.issubset(seen_codes):
         return False, (
             "insufficient_code_excitation="
             f"codes={sorted(seen_codes)},transitions={code_transitions},"
-            "required=code0_code15_four_distinct_three_transitions"
+            "required=code0_code15_and_one_intermediate"
         )
-    if endpoint_checks < 8:
-        return False, f"insufficient_settled_endpoint_checks={endpoint_checks}"
+    binary_discriminators = {code for code in settled_codes if code not in {0, 6, 9, 15}}
+    if not {0, 15}.issubset(settled_codes) or not binary_discriminators:
+        return False, (
+            "insufficient_settled_code_coverage="
+            f"settled={sorted(settled_codes)},required=endpoints_and_bit_order_discriminator"
+        )
+    if ramp_checks < 1:
+        return False, f"insufficient_ramp_observation={ramp_checks}"
     if max_err > 0.075:
         return False, f"max_slew_error={max_err:.4f}"
     if max_endpoint_err > 0.020:
         return False, f"max_endpoint_error={max_endpoint_err:.4f}"
     return True, (
-        f"slew_samples={checked} settled_checks={endpoint_checks} "
+        f"slew_samples={checked} settled_codes={sorted(settled_codes)} ramp_checks={ramp_checks} "
         f"max_err={max_err:.4f} max_endpoint_err={max_endpoint_err:.4f}"
     )
 

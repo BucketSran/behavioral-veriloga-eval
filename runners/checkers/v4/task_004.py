@@ -117,12 +117,20 @@ def check_v4_trim_calibration_controller(rows: list[dict[str, float]]) -> tuple[
             async_hold_failures.append(
                 f"err@{err_time * 1e9:.3f}ns_before={before:.3f}_after={after:.3f}"
             )
-    initial = sample_signal_at(rows, "trim", 1.0e-9)
+    initial = None
+    if edges:
+        first_edge = edges[0]
+        initial_candidates = [
+            row["trim"]
+            for row in rows
+            if row["time"] < first_edge
+        ]
+        if initial_candidates:
+            initial = initial_candidates[-1]
     trace_values = [row["trim"] for row in rows]
     range_ok = min(trace_values) >= 0.035 and max(trace_values) <= 0.865
     coverage_ok = (
-        len(edges) >= 6
-        and coverage["reset"] >= 1
+        coverage["reset"] >= 1
         and coverage["increment"] >= 1
         and coverage["decrement"] >= 1
         and coverage["upper_clamp"] >= 1

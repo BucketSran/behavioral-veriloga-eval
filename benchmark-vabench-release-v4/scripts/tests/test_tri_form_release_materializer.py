@@ -704,6 +704,29 @@ def test_testbench_instruction_has_one_candidate_and_five_anonymous_negatives() 
     assert "- Required saved public traces: `vin`" in text
     assert "one bounded transient analysis with a finite positive stop time" in text
     assert "Do not redefine the DUT, drive DUT output nets" in text
+    assert "Exact event counts, absolute event times, sample density" in text
+    assert "reference-deck ordering are not part of the contract" in text
+
+
+def test_family_064_uses_default_parameter_policy_without_override_property() -> None:
+    source = PROVENANCE / "064-edge-delay-line-with-deglitch"
+    spec = json.loads(
+        (source / "evaluator" / "family_spec.json").read_text(encoding="utf-8")
+    )
+    instruction = (source / "public" / "task" / "instruction.md").read_text(
+        encoding="utf-8"
+    )
+    rendered = render_testbench_instruction(
+        spec,
+        canonical_behavior=canonical_required_behavior(source, "testbench"),
+    )
+
+    property_ids = {item["id"] for item in spec["properties"]}
+    assert "P_PARAMETER_OVERRIDE" not in property_ids
+    assert "Scored evaluation\nuses these published default values" in instruction
+    assert "alternative parameter overrides are outside" in instruction
+    assert "P_PARAMETER_OVERRIDE" not in rendered
+    assert "alternative parameter overrides are outside" in rendered
 
 
 def test_testbench_instruction_renders_multi_file_instances_and_parameter_overrides() -> None:

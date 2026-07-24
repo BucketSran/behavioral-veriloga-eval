@@ -200,6 +200,47 @@ def test_batch35_evas_evidence_records_clean_source_revision(
     assert runtime["evas_source_tree"] == "clean"
 
 
+def test_batch35_evas_evidence_can_require_a_newer_release_lane_version(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = _load_evas_smoke_runner()
+    monkeypatch.setenv("EVAS_ENGINE", "evas2")
+    monkeypatch.setenv("VAEVAS_DEFAULT_EVAS_ENGINE", "evas2")
+    monkeypatch.setattr(runner, "effective_evas_engine", lambda: "evas2")
+    monkeypatch.setattr(
+        runner,
+        "evas_source_env",
+        lambda: {"PYTHONPATH": str(tmp_path)},
+    )
+    monkeypatch.setattr(runner, "evas_module_python", lambda: "python3")
+
+    def fake_run(command, **_kwargs):
+        if command[:3] == ["git", "-C", str(tmp_path)]:
+            if command[3:] == ["rev-parse", "HEAD"]:
+                return subprocess.CompletedProcess(command, 0, "revision-084\n", "")
+            if command[3:] == ["status", "--porcelain"]:
+                return subprocess.CompletedProcess(command, 0, "", "")
+            if command[3:] == ["remote", "get-url", "upstream"]:
+                return subprocess.CompletedProcess(
+                    command,
+                    0,
+                    "https://github.com/Arcadia-1/EVAS.git\n",
+                    "",
+                )
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            json.dumps({"version": "0.8.4", "rust_backend_loaded": True}) + "\n",
+            "",
+        )
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    runtime = runner.probe_evas2_runtime(required_evas_version="0.8.4")
+
+    assert runtime["evas_version"] == "0.8.4"
+
+
 @pytest.mark.parametrize(
     ("log_text", "valid", "version", "backend"),
     [
