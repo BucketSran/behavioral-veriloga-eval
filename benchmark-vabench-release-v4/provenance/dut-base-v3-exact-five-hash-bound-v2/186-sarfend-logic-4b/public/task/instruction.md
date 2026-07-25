@@ -25,11 +25,29 @@ No overrideable public parameters are required. Use 0.45 V thresholds and 0/1 V 
 
 ## Required Behavior
 
-On each rising `clks` crossing, publish the previous cycle DAC-P word with `dout3=dp4`, `dout2=dp3`, `dout1=dp2`, and `dout0=dp1`; reset the conversion pointer; initialize `dp4=dm4=0` and `dp3=dm3=dp2=dm2=dp1=dm1=1`; capture the test override word; and clear `clkc`. On falling `clks`, assert `clkc` to start comparison. While `clks` is low, comparator output reset/recovery should reassert `clkc`; comparator decision activity should capture one MSB-to-LSB decision per step. With `test` low, use the live comparator decision. With `test` high, consume the captured override bits in the order `dtest3`, `dtest2`, `dtest1`, then `dtest0`. Drive complementary `dp`/`dm` controls and stop requesting comparisons after four decisions without changing the completed word.
+On each rising `clks` crossing, publish the previous cycle DAC-P word,
+reset the conversion pointer, initialize the DAC controls for a new conversion,
+capture the test override word, and clear `clkc`.
+
+- Publish the previous P-side state as `dout3=dp4`, `dout2=dp3`,
+  `dout1=dp2`, and `dout0=dp1` before reinitializing the DAC controls.
+- Initialize the new conversion to `dp4=dm4=0` and to
+  `dp3=dm3=dp2=dm2=dp1=dm1=1`. These equal-valued pairs are intentional
+  undecided/trial states; only an accepted decision makes that pair
+  complementary.
+- On falling `clks`, assert `clkc` to start comparison. While `clks` is low,
+  comparator reset/recovery with both comparator outputs low reasserts `clkc`.
+- Accept decisions in the order `dp4/dm4`, `dp3/dm3`, `dp2/dm2`, then
+  `dp1/dm1`. A `dcomp`-high/`dcompb`-low decision produces P/M=`1/0`;
+  `dcomp`-low/`dcompb`-high produces P/M=`0/1`.
+- With `test` low, use the live comparator decision. With `test` high, use
+  captured `dtest3`, `dtest2`, `dtest1`, then `dtest0` for the four decisions.
+- Clear `clkc` when a decision is accepted and stop requesting comparisons
+  after four decisions.
 
 ## Modeling Constraints
 
-Use deterministic voltage-domain Verilog-A with voltage contributions and event-driven state where needed. Do not add checker logic, hard-code testbench-only sample times, add simulator-private side channels, use transistor-level devices, or introduce current-domain behavior.
+Use deterministic voltage-domain Verilog-A with voltage contributions and event-driven state where needed. Do not force every P/M pair to be complementary during the documented undecided/trial initialization state. Do not add checker logic, hard-code testbench-only sample times, add simulator-private side channels, use transistor-level devices, or introduce current-domain behavior.
 
 ## Output Contract
 

@@ -64,6 +64,57 @@ def test_v4_checker_loader_fails_closed_for_unknown_or_malformed_ids() -> None:
     assert load_checker("../../task_044") is None
 
 
+def test_v4_checker_loader_preserves_released_checker_semantics() -> None:
+    from checkers.v4.registry import load_checker, published_checker_ids
+
+    crossing_checker = load_checker("v4_074_crossing_metric_writer")
+    current_074_checker = load_checker(
+        "v4_074_sampled_true_rms_to_dc_converter"
+    )
+    assert crossing_checker is not None
+    assert current_074_checker is not None
+
+    crossing_rows = [
+        {"time": 0.0, "vin": 0.0, "done": 0.0},
+        {"time": 1.0e-9, "vin": 0.0, "done": 0.0},
+        {"time": 2.0e-9, "vin": 0.9, "done": 0.9},
+        {"time": 4.0e-9, "vin": 0.9, "done": 0.9},
+    ]
+    assert crossing_checker(crossing_rows)[0]
+    assert not current_074_checker(crossing_rows)[0]
+
+    final_step_checker = load_checker("v4_091_final_step_file_metric")
+    current_091_checker = load_checker(
+        "v4_091_chopper_stabilized_differential_amplifier"
+    )
+    assert final_step_checker is not None
+    assert current_091_checker is not None
+
+    final_step_rows: list[dict[str, float]] = []
+    for edge, level in zip(
+        (10e-9, 30e-9, 50e-9, 70e-9),
+        (0.225, 0.45, 0.675, 0.9),
+    ):
+        final_step_rows.extend(
+            [
+                {"time": edge - 0.2e-9, "ref": 0.0, "metric_out": level},
+                {"time": edge, "ref": 0.9, "metric_out": level},
+                {"time": edge + 1.0e-9, "ref": 0.0, "metric_out": level},
+                {"time": edge + 2.0e-9, "ref": 0.0, "metric_out": level},
+                {"time": edge + 5.0e-9, "ref": 0.0, "metric_out": level},
+                {"time": edge + 8.0e-9, "ref": 0.0, "metric_out": level},
+            ]
+        )
+    final_step_rows.sort(key=lambda row: row["time"])
+    assert final_step_checker(final_step_rows)[0]
+    assert not current_091_checker(final_step_rows)[0]
+
+    published = published_checker_ids()
+    assert len(published) == 400
+    assert "v4_074_crossing_metric_writer" not in published
+    assert "v4_091_final_step_file_metric" not in published
+
+
 def _lowpass_rows(
     *,
     vin_low: float,

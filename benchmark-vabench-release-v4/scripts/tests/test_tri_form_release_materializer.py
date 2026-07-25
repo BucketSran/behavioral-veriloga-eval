@@ -570,6 +570,64 @@ def test_testbench_builder_records_reference_hash_and_source_kind(tmp_path: Path
     assert contract["evas"]["visible_and_final_suite"] == "identical_reference_plus_five_mutations"
 
 
+def test_materializer_preserves_exact_public_contract_text_for_all_forms(
+    tmp_path: Path,
+) -> None:
+    source_task, row, seed_review = sample_source_task(
+        tmp_path, independent_reference=True
+    )
+    seed_review.update({
+        "selection_status": "policy_reviewed",
+        "triviality_markers": [],
+    })
+    instruction = source_task / "public" / "task" / "instruction.md"
+    instruction.write_text(
+        "# Sample Hold\n\n"
+        "## Required Behavior\n\n"
+        "- `P_HOLD`: Let `span = V(vdd, vss)` and `local_meas = V(vin) - V(vss)`; "
+        "drive `vout = vss + clip01(local_meas / span) * span` only after "
+        "the sampled rising edge.\n\n"
+        "## Modeling Constraints\n\nRemain deterministic.\n",
+        encoding="utf-8",
+    )
+    spec = sample_spec()
+    spec["properties"][0]["observable_contract"] = (
+        "Let span = V(vdd, vss) and local_meas = V(vin) - V(vss); "
+        "drive vout = vss + clip01(local_meas / span) * span only after "
+        "the sampled rising edge."
+    )
+    (source_task / "evaluator" / "family_spec.json").write_text(
+        json.dumps(spec) + "\n", encoding="utf-8"
+    )
+
+    output = tmp_path / "release"
+    spec_sha = file_sha(source_task / "evaluator" / "family_spec.json")
+    build_dut_view(output, source_task, row, spec, spec_sha)
+    build_testbench_view(output, source_task, row, spec, spec_sha, seed_review)
+    build_bugfix_view(output, source_task, row, spec, spec_sha, seed_review)
+
+    for task_dir in (
+        "001-sample",
+        "501-sample-testbench",
+        "1001-sample-bugfix",
+    ):
+        task = output / "tasks" / task_dir
+        public_instruction = (task / "public" / "instruction.md").read_text(
+            encoding="utf-8"
+        )
+        public_contract = json.loads(
+            (task / "public_contract.json").read_text(encoding="utf-8")
+        )
+        properties = {
+            item["id"]: item["observable_contract"]
+            for item in public_contract["properties"]
+        }
+        assert "local_meas = V(vin) - V(vss)" in public_instruction
+        assert "clip01(local_meas / span)" in public_instruction
+        assert "local_meas = V(vin) - V(vss)" in properties["P_HOLD"]
+        assert "clip01(local_meas / span)" in properties["P_HOLD"]
+
+
 def test_testbench_builder_mounts_reference_support_below_dut(tmp_path: Path) -> None:
     source_task, row, seed_review = sample_source_task(tmp_path, independent_reference=True)
     support = source_task / "public" / "task" / "public_support"

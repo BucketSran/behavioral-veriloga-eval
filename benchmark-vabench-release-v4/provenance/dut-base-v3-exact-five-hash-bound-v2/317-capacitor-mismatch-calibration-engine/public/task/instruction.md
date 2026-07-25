@@ -38,6 +38,8 @@ Provide these overrideable public parameters on the top module and propagate com
 - Use only voltage-domain behavioral state and voltage contributions on public electrical outputs.
 - Do not expose pass/fail flags; expose only the public observable metrics named in the interface.
 
+Decode the public calibration outputs as `code = cal_0 + 2*cal_1 + 4*cal_2 + 8*cal_3` using `vth`, and drive `correction_metric = clamp(code*corr_lsb, vss, vdd)`.
+
 ## Modeling Constraints
 
 Use deterministic voltage-domain behavioral Verilog-A suitable for transient simulation. Use voltage contributions for public electrical outputs. Do not instantiate transistor-level devices. Do not add verification harnesses, simulation decks, generated result files, logs, reports, debug-only ports, or pass/fail flags.

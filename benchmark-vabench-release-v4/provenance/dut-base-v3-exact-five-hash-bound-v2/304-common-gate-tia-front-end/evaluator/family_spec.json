@@ -167,7 +167,7 @@
     },
     {
       "id": "P_GENERATE_AN_OUTPUT_DEVIATION_AROUND_VCM",
-      "observable_contract": "Generate an output deviation around `vcm` proportional to the proxy input and `rz_gain`.",
+      "observable_contract": "Let raw_target=vcm+effective_gain*(V(vin_proxy)-vcm) and drive vout=clamp(raw_target,vss,vdd).",
       "required_signals": [
         "time",
         "vin_proxy",
@@ -181,7 +181,7 @@
     },
     {
       "id": "P_REDUCE_EFFECTIVE_GAIN_WHEN_BIAS_FALLS",
-      "observable_contract": "Reduce effective gain when `bias` falls below `bias_min` and expose the effective gain on `transimpedance_metric`.",
+      "observable_contract": "Let gain_scale=clamp((V(bias)-bias_min)/(vcm-bias_min),vss,vdd) floored at 0.35, effective_gain=rz_gain*gain_scale, and transimpedance_metric=clamp(vdd*effective_gain/rz_gain,vss,vdd).",
       "required_signals": [
         "time",
         "vin_proxy",
@@ -195,7 +195,7 @@
     },
     {
       "id": "P_ASSERT_OVERLOAD_WHEN_THE_UNCLAMPED_OUTPUT",
-      "observable_contract": "Assert `overload` when the unclamped output target would exceed the rails.",
+      "observable_contract": "Assert overload=vdd exactly when raw_target lies outside [vss,vdd], otherwise drive overload=vss.",
       "required_signals": [
         "time",
         "vin_proxy",

@@ -191,7 +191,7 @@
     },
     {
       "id": "P_MOVE_VOUT_TOWARD_VCM_GAIN_SAMPLE",
-      "observable_contract": "Move `vout` toward `vcm + gain * (sample - vcm)` with bounded per-update movement.",
+      "observable_contract": "Decode `code = (gain_0 > vth ? 1 : 0) + 2*(gain_1 > vth ? 1 : 0)` and `gain = 1.0 + gain_step*code`; on each accepted edge drive `vout = clamp(vcm + gain*(sample - vcm), vss, vdd)` without an additional slew step.",
       "required_signals": [
         "time",
         "vin",

@@ -36,6 +36,8 @@ Provide these overrideable public parameters on the top module and propagate com
 - Use only voltage-domain behavioral state and voltage contributions on public electrical outputs.
 - Do not expose pass/fail flags; expose only the public observable metrics named in the interface.
 
+On each rising `clk_in` edge, latch `code = frac_0 + 2*frac_1 + 4*frac_2 + 8*frac_3` using `vth`, emit one rising output edge after `(code+1)*200 ps`, and from the accepted edge onward drive `phase_metric = vss + (vdd-vss)*code/15`.
+
 ## Modeling Constraints
 
 Use deterministic voltage-domain behavioral Verilog-A suitable for transient simulation. Use voltage contributions for public electrical outputs. Do not instantiate transistor-level devices. Do not add verification harnesses, simulation decks, generated result files, logs, reports, debug-only ports, or pass/fail flags.

@@ -109,7 +109,7 @@
   "properties": [
     {
       "id": "P_NORMALIZE_MEAS_RELATIVE_TO_THE_LOCAL",
-      "observable_contract": "Normalize meas relative to the local V(vdd,vss) span and vss rail.",
+      "observable_contract": "Let span = V(vdd, vss) and local_meas = V(meas) - V(vss). When V(en) > vth and span >= span_min, drive norm = vhi * clip01(local_meas / span).",
       "required_signals": [
         "time",
         "en",
@@ -122,7 +122,7 @@
     },
     {
       "id": "P_CLIP_THE_NORMALIZED_METRIC_TO_THE",
-      "observable_contract": "Clip the normalized metric to the public voltage-coded range.",
+      "observable_contract": "clip01(x) limits x to [0, 1], so enabled norm is clipped to [0 V, vhi] even when meas lies outside the local rails.",
       "required_signals": [
         "time",
         "en",
@@ -135,7 +135,7 @@
     },
     {
       "id": "P_ASSERT_VALID_ONLY_WHEN_ENABLE_IS",
-      "observable_contract": "Assert valid only when enable is high, supply span is valid, and the measurement lies inside the local rail window.",
+      "observable_contract": "Drive valid = vhi exactly when V(en) > vth, span_min <= span <= span_max, and 0 <= local_meas <= span; otherwise drive valid = 0 V.",
       "required_signals": [
         "time",
         "en",
@@ -148,7 +148,7 @@
     },
     {
       "id": "P_CLEAR_NORM_AND_VALID_WHILE_DISABLED",
-      "observable_contract": "Clear norm and valid while disabled or under the minimum supply span.",
+      "observable_contract": "Drive both norm and valid to 0 V while disabled or when span < span_min. A span above span_max clears valid but does not by itself clear clipped norm.",
       "required_signals": [
         "time",
         "en",

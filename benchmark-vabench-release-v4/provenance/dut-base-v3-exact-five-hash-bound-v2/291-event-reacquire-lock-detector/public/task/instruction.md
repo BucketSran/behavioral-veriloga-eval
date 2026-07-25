@@ -23,10 +23,10 @@ module event_reacquire_lock_detector(ref_clk, fb_clk, rst, lock, phase_metric, s
 
 ## Required Behavior
 
-- Record reference clock rising-edge time and evaluate feedback clock rising edges against it.
-- Require consecutive in-window feedback edge errors before lock asserts.
-- Clear lock state and progress when reset rises or is sampled high.
-- Expose phase_metric and state_mon as bounded voltage-coded observables.
+- On each rising `ref_clk` crossing, record `last_ref_time = $abstime`. On each rising `fb_clk` crossing while reset is low, let `phase_error = abs($abstime - last_ref_time)`; before any reference edge, use `metric_fullscale` as the phase error.
+- A feedback edge with a recorded reference and `phase_error <= lock_window` increments the consecutive-good count, capped at `lock_count`; any other feedback edge resets the count to zero. Drive `lock = vhi` exactly when the count reaches `lock_count`.
+- Clear the consecutive-good count, `lock`, `phase_metric`, and `state_mon` when reset rises or when a feedback edge samples reset high.
+- After each reset-low feedback edge, drive `phase_metric = vhi * clip01(phase_error / metric_fullscale)` and `state_mon = vhi * clip01(good_count / lock_count)`, where `clip01` limits its argument to `[0, 1]`.
 - Use event-body state updates plus local analog helper functions rather than user task/endtask syntax.
 
 ## Modeling Constraints
