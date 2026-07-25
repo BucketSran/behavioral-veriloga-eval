@@ -293,6 +293,12 @@ def render_properties(spec: dict[str, Any], verb: str) -> str:
     return "\n".join(lines)
 
 
+def render_parameter_evaluation_policy(spec: dict[str, Any]) -> str:
+    policy = spec.get("evaluation_parameter_policy") or {}
+    statement = str(policy.get("statement") or "").strip()
+    return f"\n{statement}\n" if statement else ""
+
+
 def render_binding(spec: dict[str, Any]) -> str:
     binding = spec.get("testbench_binding") or {}
     source_template = str(binding.get("source_path_template") or "./dut/{artifact_path}")
@@ -359,6 +365,52 @@ def sanitize_instruction_text(text: str, form: str) -> str:
     return text
 
 
+def neutralize_testbench_authoring_directives(text: str) -> str:
+    """Keep canonical behavior while removing DUT-form submission directions."""
+    substitutions = (
+        r"\bThis task asks for\b.*?\bnot\s+(?:a\s+)?Spectre\s+testbench\.\s*",
+        r"\bThis is a measurement-helper DUT task,\s*"
+        r"not a Spectre testbench-generation task\.\s*",
+        r"\bReturn only the Verilog-A source file `[^`]+`\.\s*",
+        r"\bBoth\s+files\s+are\s+scored\s+DUT\s+source\s+artifacts;.*?"
+        r"\breturning\s+the\s+bundle\.\s*",
+        r"\bOnly `[^`]+` is graded as the candidate implementation\.\s*",
+        r"\bDo not generate a Spectre `?\.scs`? file despite the historical "
+        r"`_tb` filename\.\s*",
+    )
+    for pattern in substitutions:
+        text = re.sub(pattern, "", text, flags=re.IGNORECASE | re.DOTALL)
+
+    text = re.sub(
+        r"^Implement (?P<article>an?) ",
+        r"The supplied DUT is \g<article> ",
+        text,
+        flags=re.MULTILINE,
+    )
+    text = re.sub(
+        r"(?m)^Implement ",
+        "The supplied DUT implements ",
+        text,
+    )
+    text = re.sub(
+        r"(?m)^Implement:\s*$",
+        "The supplied DUT provides:",
+        text,
+    )
+    text = re.sub(
+        r"\bThat support source is not the candidate implementation,\s*"
+        r"but\s+the fractional-N model\b",
+        "The supplied DUT",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(r"\bThe module\b", "The supplied DUT", text)
+    text = re.sub(r"\bthe module\b", "the supplied DUT", text)
+    text = re.sub(r"\bthis module\b", "the supplied DUT", text)
+    text = re.sub(r"\byour module\b", "the supplied DUT", text)
+    return re.sub(r"\n{3,}", "\n\n", text).strip()
+
+
 def canonical_required_behavior(source_task: Path, form: str) -> str:
     instruction = source_task / "public" / "task" / "instruction.md"
     if not instruction.is_file():
@@ -368,7 +420,12 @@ def canonical_required_behavior(source_task: Path, form: str) -> str:
         r"(?ms)^## Required Behavior\s*\n(?P<body>.*?)(?=^##\s|\Z)",
         text,
     )
-    return match.group("body").strip() if match else ""
+    if not match:
+        return ""
+    behavior = match.group("body").strip()
+    if form == "testbench":
+        behavior = neutralize_testbench_authoring_directives(behavior)
+    return behavior
 
 
 def render_canonical_behavior(value: str) -> str:
@@ -413,12 +470,18 @@ Stable public Spectre binding:
 ## Public Parameter Contract
 
 {render_parameters(spec)}
+{render_parameter_evaluation_policy(spec)}
 
 ## Required Behavior
 
 Create stimulus and save traces sufficient for the fixed evaluator oracle to check:
 
 {render_properties(spec, 'exercise and make observable:')}
+
+Use any deterministic stimulus layout that makes every required public behavior
+observable. Exact event counts, absolute event times, sample density, and
+reference-deck ordering are not part of the contract unless stated explicitly
+above.
 
 {render_canonical_behavior(canonical_behavior)}
 
@@ -462,6 +525,7 @@ Preserve this exact artifact and module interface:
 ## Public Parameter Contract
 
 {render_parameters(spec)}
+{render_parameter_evaluation_policy(spec)}
 
 ## Required Behavior
 

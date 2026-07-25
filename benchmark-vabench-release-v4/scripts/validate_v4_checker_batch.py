@@ -40,7 +40,10 @@ sys.path.insert(
     0,
     str(ROOT / "benchmark-vabench-release-v4" / "operations" / "tri_form_derivation_prep"),
 )
-from run_v4_reference_evas_smoke import probe_evas2_runtime  # noqa: E402
+from run_v4_reference_evas_smoke import (  # noqa: E402
+    REQUIRED_EVAS_VERSION,
+    probe_evas2_runtime,
+)
 from score_denominator_registry import load_family_rows  # noqa: E402
 
 
@@ -361,10 +364,20 @@ def main() -> int:
     parser.add_argument("--timeout-s", type=int, default=120)
     parser.add_argument("--timing-scale", type=float, default=1.37)
     parser.add_argument("--timing-shift-s", type=float, default=2e-9)
+    parser.add_argument(
+        "--required-evas-version",
+        default=REQUIRED_EVAS_VERSION,
+        help=(
+            "exact evas-sim version required for this evidence run "
+            f"(default: {REQUIRED_EVAS_VERSION})"
+        ),
+    )
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
     evas_engine = require_explicit_evas2_backend()
-    runtime = probe_evas2_runtime()
+    runtime = probe_evas2_runtime(
+        required_evas_version=args.required_evas_version
+    )
 
     source = args.source.expanduser().resolve()
     output = args.output.expanduser().resolve()
@@ -439,7 +452,8 @@ def main() -> int:
                 f"{start:03d}-{stop:03d} --output <output.json> "
                 f"--work-root <work-root> --workers {max(1, args.workers)} "
                 f"--timeout-s {args.timeout_s} --timing-scale {args.timing_scale} "
-                f"--timing-shift-s {args.timing_shift_s} --force"
+                f"--timing-shift-s {args.timing_shift_s} "
+                f"--required-evas-version {args.required_evas_version} --force"
             ),
             "working_directory": "<repository-root>",
         },

@@ -92,81 +92,59 @@ def _check_v3_pfd_active_low_reset_generic(
     up_state = 0
     down_state = 0
     pending_reset: float | None = None
-    reset_times: list[float] = []
+    transitions: list[tuple[float, int, int, str]] = []
     for event_time, kind in events:
         if pending_reset is not None and pending_reset <= event_time:
             up_state = 0
             down_state = 0
+            transitions.append((pending_reset, up_state, down_state, "reset"))
             pending_reset = None
         if kind == "ref":
             up_state = 1
         else:
             down_state = 1
+        transitions.append((event_time, up_state, down_state, kind))
         if up_state and down_state:
             pending_reset = event_time + reset_delay
-            reset_times.append(pending_reset)
+    if pending_reset is not None and pending_reset <= rows[-1]["time"]:
+        transitions.append((pending_reset, 0, 0, "reset"))
 
-    guard_times = [t for t, _ in events] + reset_times
-    transition_guard = min(20e-12, reset_delay / 5.0)
-    samples = sorted(
-        {
-            row["time"]
-            for row in rows
-            if row["time"] > rows[0]["time"] + 0.05e-9
-            and _v3_away_from_edges(row["time"], guard_times, transition_guard)
-        }
-    )
-    if len(samples) < 20:
-        return False, f"too_few_pfd_samples={len(samples)}"
-
-    up = 0
-    down = 0
-    reset_time: float | None = None
-    idx = 0
     max_err = 0.0
     checked = 0
-    up_asserted = 0
-    down_asserted = 0
-    reset_seen = 0
-    for t in samples:
-        while idx < len(events) and events[idx][0] <= t:
-            _, kind = events[idx]
-            if kind == "ref":
-                up = 1
-                if down:
-                    reset_time = events[idx][0] + reset_delay
-            else:
-                down = 1
-                if up:
-                    reset_time = events[idx][0] + reset_delay
-            idx += 1
-        if reset_time is not None and t >= reset_time:
-            up = 0
-            down = 0
-            reset_time = None
-            reset_seen += 1
-        got_upb = sample_signal_at(rows, upb_name, t)
-        got_down = sample_signal_at(rows, down_name, t)
+    coverage = {"up_only": 0, "down_only": 0, "both_pending": 0, "reset": 0}
+    for index, (event_time, up, down, kind) in enumerate(transitions):
+        next_time = next(
+            (later[0] for later in transitions[index + 1:] if later[0] > event_time),
+            rows[-1]["time"],
+        )
+        if next_time <= event_time:
+            continue
+        probe_time = event_time + 0.5 * (next_time - event_time)
+        got_upb = sample_signal_at(rows, upb_name, probe_time)
+        got_down = sample_signal_at(rows, down_name, probe_time)
         if got_upb is None or got_down is None:
             continue
         want_upb = 0.0 if up else 0.9
         want_down = 0.9 if down else 0.0
         max_err = max(max_err, abs(got_upb - want_upb), abs(got_down - want_down))
         checked += 1
-        if up:
-            up_asserted += 1
-        if down:
-            down_asserted += 1
-    if checked < 20 or up_asserted == 0 or down_asserted == 0 or reset_seen == 0:
+        if up and not down:
+            coverage["up_only"] += 1
+        elif down and not up:
+            coverage["down_only"] += 1
+        if up and down:
+            coverage["both_pending"] += 1
+        if kind == "reset":
+            coverage["reset"] += 1
+    if any(count == 0 for count in coverage.values()):
         return False, (
-            f"insufficient_pfd_state_coverage checked={checked} up={up_asserted} "
-            f"down={down_asserted} resets={reset_seen}"
+            f"insufficient_pfd_state_coverage checked={checked} coverage={coverage}"
         )
     if max_err > 0.10:
         return False, f"pfd_level_error={max_err:.4f} checked={checked}"
     return True, (
         f"ref_edges={len(ref_edges)} fb_edges={len(fb_edges)} checked={checked} "
-        f"up={up_asserted} down={down_asserted} resets={reset_seen} max_err={max_err:.4f}"
+        f"coverage={coverage} max_err={max_err:.4f}"
     )
 
 def check_v3_pfd_timer_reset(rows: list[dict[str, float]]) -> tuple[bool, str]:

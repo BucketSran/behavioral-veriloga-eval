@@ -66,7 +66,9 @@ def file_sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def probe_evas2_runtime() -> dict[str, str]:
+def probe_evas2_runtime(
+    *, required_evas_version: str = REQUIRED_EVAS_VERSION
+) -> dict[str, str]:
     """Require the pinned EVAS2/Rust runtime before producing evidence."""
     explicit_engine = os.environ.get("EVAS_ENGINE", "").strip().lower()
     explicit_default = os.environ.get("VAEVAS_DEFAULT_EVAS_ENGINE", "").strip().lower()
@@ -149,9 +151,10 @@ def probe_evas2_runtime() -> dict[str, str]:
     except json.JSONDecodeError as exc:
         raise SystemExit(f"EVAS2 runtime probe returned invalid JSON: {exc}") from exc
     version = str(metadata.get("version") or "")
-    if version != REQUIRED_EVAS_VERSION:
+    if version != required_evas_version:
         raise SystemExit(
-            f"EVAS2 evidence requires evas-sim {REQUIRED_EVAS_VERSION}; got {version!r}"
+            "EVAS2 evidence requires evas-sim "
+            f"{required_evas_version}; got {version!r}"
         )
     if metadata.get("rust_backend_loaded") is not True:
         raise SystemExit("EVAS2 Rust backend is unavailable; refusing Python fallback")

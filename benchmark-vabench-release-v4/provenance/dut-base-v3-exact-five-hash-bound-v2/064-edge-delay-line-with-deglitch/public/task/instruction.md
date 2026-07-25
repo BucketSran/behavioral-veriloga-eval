@@ -17,7 +17,9 @@ Declare module `edge_delay_line_deglitch` with positional electrical ports `vin,
 
 ## Public Parameter Contract
 
-Provide these overrideable public parameters:
+Provide these public parameters with the following defaults. Scored evaluation
+uses these published default values; alternative parameter overrides are outside
+the scored behavior contract.
 
 - `vdd = 0.9 V`: logic-high output level
 - `vss = 0.0 V`: logic-low output level
@@ -40,7 +42,8 @@ Provide these overrideable public parameters:
 
 Use deterministic voltage-domain behavioral Verilog-A suitable for transient simulation. Use voltage contributions for public electrical outputs. Do not use current contributions, transistor-level devices, AC/noise analysis, random sources, table files, or topology-level assumptions. Use explicit initialization for stored state and smooth public voltage outputs with transition-style behavior.
 
-Do not add extra ports, debug-only files, simulation decks, generated result files, or pass/fail flags.
+Preserve the declared parameter names and defaults. Do not add extra ports,
+debug-only files, simulation decks, generated result files, or pass/fail flags.
 
 ## Output Contract
 

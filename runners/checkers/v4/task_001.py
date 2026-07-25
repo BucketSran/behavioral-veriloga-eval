@@ -24,7 +24,7 @@ def check_bbpd(rows: list[dict[str, float]]) -> tuple[bool, str]:
 
     edge_trigger_ok = len(up_edges) + len(down_edges) >= max(4, len(data_edges) // 4)
     pulse_presence_ok = len(up_edges) >= 2 and len(down_edges) >= 2
-    non_overlap_ok = overlap_frac < 0.02
+    non_overlap_ok = overlap == 0
 
     directional_counts = {
         "up_expected": 0,
@@ -134,13 +134,13 @@ def _v4_edge_times(
     return times
 
 def check_v4_bbpd(rows: list[dict[str, float]]) -> tuple[bool, str]:
-    base_ok, base_note = check_bbpd(rows)
     required = {"time", "data", "clk", "retimed_data", "up", "down"}
     if not rows or not required.issubset(rows[0]):
-        return False, base_note
+        missing = sorted(required - set(rows[0])) if rows else sorted(required)
+        return False, "missing_columns=" + ",".join(missing)
 
     data_edges = [
-        index
+        (index, "rising" if rows[index - 1]["data"] < 0.45 <= rows[index]["data"] else "falling")
         for index in range(1, len(rows))
         if (
             rows[index - 1]["data"] < 0.45 <= rows[index]["data"]
@@ -153,8 +153,18 @@ def check_v4_bbpd(rows: list[dict[str, float]]) -> tuple[bool, str]:
     )
     rail_failures: list[str] = []
     clear_failures: list[str] = []
+    coverage = {
+        "up": 0,
+        "down": 0,
+        "none": 0,
+        "rising_direction": 0,
+        "falling_direction": 0,
+        "clear": 0,
+    }
     checked_pulses = 0
-    for index in data_edges:
+    overlap = sum(1 for row in rows if row["up"] > 0.45 and row["down"] > 0.45)
+    overlap_frac = overlap / max(len(rows), 1)
+    for index, polarity in data_edges:
         edge_time = rows[index]["time"]
         clk_high = rows[index]["clk"] > 0.45
         retimed_high = rows[index]["retimed_data"] > 0.45
@@ -164,6 +174,8 @@ def check_v4_bbpd(rows: list[dict[str, float]]) -> tuple[bool, str]:
             continue
         if expected:
             checked_pulses += 1
+            coverage[expected] += 1
+            coverage[f"{polarity}_direction"] += 1
             inactive = "down" if expected == "up" else "up"
             expected_peak = max(row[expected] for row in window)
             inactive_peak = max(row[inactive] for row in window)
@@ -176,14 +188,19 @@ def check_v4_bbpd(rows: list[dict[str, float]]) -> tuple[bool, str]:
                     f"{inactive}@{edge_time * 1e9:.3f}ns_low={inactive_peak:.3f}>0.090"
                 )
             next_clock = next((time_s for time_s in clock_edges if time_s > edge_time + 1e-13), None)
-            if next_clock is not None:
-                up_after = sample_signal_at(rows, "up", next_clock + 0.10e-9)
-                down_after = sample_signal_at(rows, "down", next_clock + 0.10e-9)
-                if up_after is None or down_after is None or up_after > 0.09 or down_after > 0.09:
-                    clear_failures.append(
-                        f"clk@{next_clock * 1e9:.3f}ns_up={up_after}_down={down_after}"
-                    )
+            if next_clock is None:
+                clear_failures.append(f"{expected}@{edge_time * 1e9:.3f}ns_no_following_clk")
+                continue
+            up_after = sample_signal_at(rows, "up", next_clock + 0.10e-9)
+            down_after = sample_signal_at(rows, "down", next_clock + 0.10e-9)
+            if up_after is None or down_after is None or up_after > 0.09 or down_after > 0.09:
+                clear_failures.append(
+                    f"clk@{next_clock * 1e9:.3f}ns_up={up_after}_down={down_after}"
+                )
+            else:
+                coverage["clear"] += 1
         else:
+            coverage["none"] += 1
             up_peak = max(row["up"] for row in window)
             down_peak = max(row["down"] for row in window)
             if up_peak > 0.09 or down_peak > 0.09:
@@ -191,9 +208,18 @@ def check_v4_bbpd(rows: list[dict[str, float]]) -> tuple[bool, str]:
                     f"none@{edge_time * 1e9:.3f}ns_up={up_peak:.3f}_down={down_peak:.3f}"
                 )
 
-    strict_ok = checked_pulses >= 4 and not rail_failures and not clear_failures
-    return base_ok and strict_ok, (
-        f"{base_note} strict_pulses={checked_pulses} "
+    coverage_ok = (
+        coverage["up"] >= 1
+        and coverage["down"] >= 1
+        and coverage["none"] >= 1
+        and coverage["rising_direction"] >= 1
+        and coverage["falling_direction"] >= 1
+        and coverage["clear"] >= 1
+    )
+    ok = coverage_ok and overlap == 0 and checked_pulses >= 2 and not rail_failures and not clear_failures
+    return ok, (
+        f"data_edges={len(data_edges)} strict_pulses={checked_pulses} "
+        f"overlap_frac={overlap_frac:.4f} coverage={coverage} "
         f"rail_failures={len(rail_failures)} clear_failures={len(clear_failures)}"
         + (" rail_detail=" + ";".join(rail_failures[:4]) if rail_failures else "")
         + (" clear_detail=" + ";".join(clear_failures[:4]) if clear_failures else "")

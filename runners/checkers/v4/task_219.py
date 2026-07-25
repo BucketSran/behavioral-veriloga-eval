@@ -74,6 +74,11 @@ def check_v3_bin2ther_2b(rows: list[dict[str, float]]) -> tuple[bool, str]:
     failures: list[str] = []
     saw_local_threshold_distinction = False
     spans_seen: list[float] = []
+    b1_levels = set()
+    b0_levels = set()
+    stable_states: set[tuple[bool, bool]] = set()
+    output_high: dict[str, int] = {"t0": 0, "t1": 0, "t2": 0}
+    output_low: dict[str, int] = {"t0": 0, "t1": 0, "t2": 0}
     stride = max(1, len(rows) // 120)
     for row in rows[::stride]:
         if row["time"] < 0.05e-9 or not _v3_away_from_edges(row["time"], edge_times, margin_s=90e-12):
@@ -82,31 +87,48 @@ def check_v3_bin2ther_2b(rows: list[dict[str, float]]) -> tuple[bool, str]:
         vl = row["gnd"]
         vth = 0.5 * (vh + vl)
         spans_seen.append(vh - vl)
+        b1_high = row["b1"] > vth
+        b0_high = row["b0"] > vth
+        b1_levels.add(b1_high)
+        b0_levels.add(b0_high)
+        stable_states.add((b1_high, b0_high))
         saw_local_threshold_distinction = saw_local_threshold_distinction or any(
             (row[signal] > vth) != (row[signal] > 0.45)
             for signal in logic_signals
         )
         expected = {
-            "t0": vh if row["b1"] > vth else vl,
-            "t1": vh if row["b1"] > vth else vl,
-            "t2": vh if row["b0"] > vth else vl,
+            "t0": vh if b1_high else vl,
+            "t1": vh if b1_high else vl,
+            "t2": vh if b0_high else vl,
         }
         checked += 1
         for signal, exp in expected.items():
+            if exp == vh:
+                output_high[signal] += 1
+            else:
+                output_low[signal] += 1
             err = abs(row[signal] - exp)
             max_err = max(max_err, err)
             if err > 0.08:
                 failures.append(f"{signal}@{row['time'] * 1e9:.3f}ns={row[signal]:.3f} expected={exp:.3f}")
-    if checked < 16:
-        return False, f"insufficient_bin2ther_checks={checked}"
-    if max(spans_seen) - min(spans_seen) < 0.20:
-        return False, "missing_local_rail_span_coverage"
+    required_states = {(False, False), (False, True), (True, False), (True, True)}
+    if stable_states != required_states:
+        return False, f"missing_logic_combinations={sorted(required_states - stable_states)}"
+    if len(b1_levels) < 2 or len(b0_levels) < 2:
+        return False, f"missing_input_level_coverage b1={len(b1_levels)} b0={len(b0_levels)}"
     if not saw_local_threshold_distinction:
         return False, "missing_local_threshold_distinction"
+    missing_output_coverage = [
+        signal for signal in ("t0", "t1", "t2")
+        if output_high[signal] == 0 or output_low[signal] == 0
+    ]
+    if missing_output_coverage:
+        return False, "missing_output_level_coverage=" + ",".join(missing_output_coverage)
     if failures:
         return False, " ".join(failures[:6])
     return True, (
-        f"checked={checked} rail_span_range={max(spans_seen) - min(spans_seen):.3f} "
+        f"checked={checked} logic_combinations={len(stable_states)} "
+        f"rail_span_range={max(spans_seen) - min(spans_seen):.3f} "
         f"local_threshold_distinction={saw_local_threshold_distinction} max_err={max_err:.3f}"
     )
 
