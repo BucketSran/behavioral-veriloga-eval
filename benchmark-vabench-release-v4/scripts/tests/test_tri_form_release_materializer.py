@@ -812,8 +812,8 @@ def test_pre_r50_prompt_assets_remain_reproducible_as_legacy_inline_components(
     assert "skills" not in modes["G1"]
 
 
-def test_direct_wrapper_defines_unambiguous_artifact_protocol(tmp_path: Path) -> None:
-    install_prompt_assets(tmp_path)
+def test_released_direct_wrapper_defines_marker_protocol(tmp_path: Path) -> None:
+    install_prompt_assets(tmp_path, "r51")
     wrapper = (tmp_path / "prompt_modes" / "wrappers" / "direct_wrapper.md").read_text(encoding="utf-8")
 
     assert '`<<<VABENCH_ARTIFACT path="`' in wrapper
@@ -823,6 +823,46 @@ def test_direct_wrapper_defines_unambiguous_artifact_protocol(tmp_path: Path) ->
     assert "Only `VABENCH_ARTIFACT` is a valid submission marker" in wrapper
     assert "Do not wrap the artifact body in Markdown code fences" in wrapper
     assert "Do not include explanatory prose" in wrapper
+
+
+@pytest.mark.parametrize(
+    "release_revision",
+    ("r45", "r47", "r48", "r49", "r50", "r51"),
+)
+def test_released_direct_wrapper_materialization_remains_byte_identical(
+    tmp_path: Path,
+    release_revision: str,
+) -> None:
+    output = tmp_path / release_revision
+    install_prompt_assets(output, release_revision)
+
+    materialized = output / "prompt_modes" / "wrappers" / "direct_wrapper.md"
+    released = (
+        DEFAULT_OUTPUTS[release_revision]
+        / "prompt_modes"
+        / "wrappers"
+        / "direct_wrapper.md"
+    )
+
+    assert materialized.read_bytes() == released.read_bytes()
+
+
+def test_next_direct_wrapper_uses_only_runtime_transport(tmp_path: Path) -> None:
+    install_prompt_assets(tmp_path, "r52")
+    wrapper = (
+        tmp_path / "prompt_modes" / "wrappers" / "direct_wrapper.md"
+    ).read_text(encoding="utf-8")
+    normalized = " ".join(wrapper.split())
+
+    assert "output transport provided by the evaluation runtime" in normalized
+    assert (
+        "Follow the runtime's transport-specific instruction exactly"
+        in normalized
+    )
+    assert "The transport is delivery-only" in normalized
+    assert "VABENCH_ARTIFACT" not in wrapper
+    assert "Markdown fence" not in wrapper
+    assert "JSON envelope" not in wrapper
 
 
 def test_agentic_wrapper_discloses_evas_spectre_portability_boundary(
