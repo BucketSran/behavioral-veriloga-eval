@@ -1191,6 +1191,7 @@ def test_r50_mode_matrix_exports_only_declared_real_skills(
         (["list_files", "read_file", "write_file", "run_evas", "finalize"]
          if mode in {"G2", "G3", "G4", "G5"} else [])
         + (["list_skills", "read_skill"] if expected_skills else [])
+        + (["submit_artifacts"] if mode in {"G0", "G1"} else [])
     )
     skills_root = runtime / "public" / "skills"
     observed_skills = {

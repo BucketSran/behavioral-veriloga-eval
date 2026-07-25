@@ -90,6 +90,7 @@ FILENAME_TOKEN_RE = re.compile(
     re.IGNORECASE,
 )
 AGENTIC = {"G2", "G3", "G4", "G5"}
+MAX_ONESHOT_TRANSPORT_FAILURES = 2
 RESUMABLE_TERMINAL_STATUSES = {
     "submitted",
     "submitted_at_budget",
@@ -122,6 +123,13 @@ PUBLIC_ESCAPE_RE = re.compile(
     r"\b(?:shell|system|exec|spawn|unix|socket|tcp|udp|https?|ftp|curl|wget|ocean|skill|ipcBeginProcess)\b",
     re.IGNORECASE,
 )
+ONESHOT_TRANSPORT_INSTRUCTION = """\
+Complete the task in the user message without changing its requested behavior.
+For final delivery, call `submit_artifacts` exactly once with the complete text
+of every artifact named by the function schema. Do not add undeclared paths.
+This function is only an output transport: it does not execute the candidate,
+reveal diagnostics, or provide checker feedback.
+"""
 
 
 class ProviderRequestTimeout(TimeoutError):
@@ -1217,6 +1225,83 @@ def compact_feedback_result(result: dict[str, Any]) -> dict[str, Any]:
     return compact
 
 
+def complete_one_missing_json_closer(raw: str) -> dict[str, Any] | None:
+    expected: list[str] = []
+    in_string = False
+    escaped = False
+    for character in raw:
+        if in_string:
+            if escaped:
+                escaped = False
+            elif character == "\\":
+                escaped = True
+            elif character == '"':
+                in_string = False
+            continue
+        if character == '"':
+            in_string = True
+        elif character == "{":
+            expected.append("}")
+        elif character == "[":
+            expected.append("]")
+        elif character in "}]":
+            if not expected or expected.pop() != character:
+                return None
+    if in_string or escaped or len(expected) != 1:
+        return None
+    try:
+        decoded = json.loads(raw + expected[-1])
+    except json.JSONDecodeError:
+        return None
+    return decoded if isinstance(decoded, dict) else None
+
+
+def decode_tool_arguments(
+    name: str, raw_arguments: str | None,
+) -> tuple[dict[str, Any], bool, str | None]:
+    raw = raw_arguments or "{}"
+    try:
+        decoded = json.loads(raw)
+        if not isinstance(decoded, dict):
+            raise ValueError("tool arguments must be a JSON object")
+        return decoded, True, None
+    except json.JSONDecodeError:
+        if name != "submit_artifacts":
+            raise
+
+    stripped = raw.lstrip()
+    if stripped.endswith(">}"):
+        without_marker_fragment = stripped[:-2] + "}"
+        try:
+            decoded = json.loads(without_marker_fragment)
+        except json.JSONDecodeError:
+            pass
+        else:
+            if isinstance(decoded, dict):
+                return decoded, False, "removed_trailing_marker_fragment"
+    completed = complete_one_missing_json_closer(stripped)
+    if completed is not None:
+        return completed, False, "completed_missing_closer"
+    decoded, end = json.JSONDecoder().raw_decode(stripped)
+    if not isinstance(decoded, dict):
+        raise ValueError("submit_artifacts arguments must be a JSON object")
+    trailing = stripped[end:].strip()
+    if not trailing or any(character not in "}]" for character in trailing):
+        raise ValueError("ambiguous trailing submit_artifacts content")
+    artifacts = decoded.get("artifacts")
+    if not isinstance(artifacts, dict):
+        raise ValueError("submit_artifacts requires an artifacts object")
+    redundant = {
+        key: value for key, value in decoded.items() if key != "artifacts"
+    }
+    if any(
+        key not in artifacts or value != artifacts[key]
+        for key, value in redundant.items()
+    ):
+        raise ValueError("conflicting submit_artifacts wrapper fields")
+    return {"artifacts": artifacts}, False, "redundant_artifact_wrapper"
+
+
 def execute_tool(
     name: str,
     arguments: dict[str, Any],
@@ -1281,6 +1366,37 @@ def execute_tool(
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(str(arguments["content"]), encoding="utf-8")
         return json.dumps({"written": relative.as_posix(), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}), False
+    if name == "submit_artifacts":
+        raw_artifacts = arguments.get("artifacts")
+        if not isinstance(raw_artifacts, dict):
+            raise ValueError("submit_artifacts requires an artifacts object")
+        expected = expected_candidate_artifacts(runtime)
+        observed = [str(path) for path in raw_artifacts]
+        diagnostics = [
+            *(f"missing_artifact_path:{path}" for path in expected if path not in observed),
+            *(
+                f"undeclared_artifact_path:{path}"
+                for path in observed
+                if path not in set(expected)
+            ),
+        ]
+        if diagnostics:
+            raise ValueError(", ".join(diagnostics))
+        mapping: dict[str, str] = {}
+        for path in expected:
+            content = raw_artifacts[path]
+            if not isinstance(content, str) or not content.strip():
+                raise ValueError(f"empty_or_nontext_artifact:{path}")
+            mapping[path] = content
+        saved = write_artifact_mapping(mapping, runtime)
+        gate = submission_artifact_gate(runtime)
+        if not gate["passed"]:
+            raise ValueError(", ".join(gate["diagnostics"]))
+        return json.dumps({
+            "status": "submitted",
+            "saved_files": saved,
+            "artifact_gate": gate,
+        }, sort_keys=True), True
     if name == "run_evas":
         return json.dumps(run_public_evas(runtime, arguments, timeout_s, evas_command)), False
     if name == "finalize":
@@ -1410,9 +1526,10 @@ def active_tool_schemas(runtime: Path, mode: str) -> list[dict[str, Any]] | None
             raise ValueError("runtime skill manifest and model access policy disagree")
     if mode in AGENTIC:
         return [*TOOLS, *SKILL_TOOLS] if has_skills else TOOLS
+    submission_tool = submit_artifacts_tool_schema(runtime)
     if has_skills:
-        return SKILL_TOOLS
-    return None
+        return [*SKILL_TOOLS, submission_tool]
+    return [submission_tool]
 
 
 def read_skill_file(runtime: Path, skill_id: str, raw_path: str) -> str:
@@ -1498,6 +1615,38 @@ def expected_candidate_artifacts(runtime: Path) -> list[str]:
         return []
     policy = read_json(policy_path)
     return [safe_relative(str(item)).as_posix() for item in policy.get("candidate_artifacts") or []]
+
+
+def submit_artifacts_tool_schema(runtime: Path) -> dict[str, Any]:
+    expected = expected_candidate_artifacts(runtime)
+    if not expected:
+        raise ValueError("submit_artifacts requires declared candidate artifacts")
+    return {
+        "type": "function",
+        "function": {
+            "name": "submit_artifacts",
+            "description": (
+                "Submit the complete final candidate bundle. This output-only "
+                "transport returns no execution or checker feedback."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "artifacts": {
+                        "type": "object",
+                        "properties": {
+                            path: {"type": "string", "minLength": 1}
+                            for path in expected
+                        },
+                        "required": expected,
+                        "additionalProperties": False,
+                    }
+                },
+                "required": ["artifacts"],
+                "additionalProperties": False,
+            },
+        },
+    }
 
 
 def validated_artifact_mapping(
@@ -1859,6 +2008,36 @@ def extract_direct_submission(text: str, runtime: Path) -> dict[str, Any]:
     }
 
 
+def extract_normalized_direct_submission(text: str, runtime: Path) -> dict[str, Any]:
+    strict_mapping, strict_protocol, strict_diagnostics = (
+        parse_direct_artifacts_detailed(text, runtime)
+    )
+    mapping = strict_mapping
+    protocol = strict_protocol
+    normalized = False
+    if mapping is None:
+        mapping, protocol = parse_recoverable_direct_artifacts(text, runtime)
+        normalized = mapping is not None
+    saved = write_artifact_mapping(mapping, runtime) if mapping is not None else []
+    gate = submission_artifact_gate(runtime) if mapping is not None else None
+    compliant = bool(mapping is not None and gate and gate["passed"])
+    return {
+        "saved_files": saved,
+        "extraction_protocol": protocol,
+        "submission_protocol_compliant": compliant,
+        "original_protocol_compliant": strict_mapping is not None,
+        "submission_transport": (
+            "runner_normalized_text" if normalized else "model_text"
+        ),
+        "response_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+        "response_parser_version": DIRECT_PARSER_VERSION,
+        "parse_diagnostics": [] if compliant else strict_diagnostics,
+        "strict_parse_diagnostics": strict_diagnostics,
+        "artifact_gate": gate,
+        "artifact_sha256": dict((gate or {}).get("artifact_sha256") or {}),
+    }
+
+
 def gate_agentic_submission(runtime: Path, result: dict[str, Any]) -> bool:
     gate = submission_artifact_gate(runtime)
     result["artifact_gate"] = gate
@@ -2194,7 +2373,12 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
         finalized = bool(checkpoint.get("finalized"))
         resumed_agent_elapsed_s = float(checkpoint.get("agent_elapsed_s") or 0.0)
     else:
-        messages = [{"role": "user", "content": prompt}]
+        messages = []
+        if cell.get("process") == "direct_one_shot":
+            messages.append(
+                {"role": "system", "content": ONESHOT_TRANSPORT_INSTRUCTION}
+            )
+        messages.append({"role": "user", "content": prompt})
         output_tokens = 0
         events = []
         finalized = False
@@ -2202,6 +2386,18 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
     per_turn_max_tokens = cell_per_turn_max_tokens(cell)
     tools_for_cell = active_tool_schemas(runtime, str(cell["mode"]))
     agent_deadline = agent_started_monotonic + max(0.0, args.agent_timeout_s - resumed_agent_elapsed_s)
+    submission_tool_normalized = any(
+        event.get("name") == "submit_artifacts"
+        and event.get("argument_protocol_compliant") is False
+        for event in events
+    )
+    submission_transport_failures = sum(
+        event.get("name") == "submit_artifacts"
+        and event.get("transport_error") is True
+        for event in events
+    )
+    submission_transport_failures_this_run = 0
+    invalid_submit_bundle = False
 
     def current_agent_elapsed_s() -> float:
         return resumed_agent_elapsed_s + max(0.0, time.monotonic() - agent_started_monotonic)
@@ -2234,15 +2430,53 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
         return model_event_hit_limit(last_model)
 
     def process_tool_calls(calls: list[dict[str, Any]]) -> None:
-        nonlocal finalized
+        nonlocal finalized, invalid_submit_bundle
+        nonlocal submission_tool_normalized, submission_transport_failures
+        nonlocal submission_transport_failures_this_run
+        if (
+            cell.get("process") == "direct_one_shot"
+            and any(call.get("function", {}).get("name") == "submit_artifacts" for call in calls)
+            and (
+                len(calls) != 1
+                or calls[0].get("function", {}).get("name") != "submit_artifacts"
+            )
+        ):
+            invalid_submit_bundle = True
+            events.append({
+                "type": "tool",
+                "name": "submit_artifacts",
+                "reference_tokens": 0,
+                "argument_protocol_compliant": False,
+                "error": "submit_artifacts must be the only tool call",
+            })
+            save_conversation()
+            return
         for call in calls:
             remaining = remaining_agent_s()
             if remaining <= 0:
                 return
             function = call["function"]
             arguments: dict[str, Any] = {}
+            argument_protocol_compliant = True
+            argument_normalization: str | None = None
+            transport_error = False
+            decoding_arguments = True
+            tool_error_type: str | None = None
             try:
-                arguments = json.loads(function.get("arguments") or "{}")
+                (
+                    arguments,
+                    argument_protocol_compliant,
+                    argument_normalization,
+                ) = decode_tool_arguments(
+                    str(function.get("name") or ""),
+                    function.get("arguments"),
+                )
+                if function.get("name") == "submit_artifacts":
+                    submission_tool_normalized = (
+                        submission_tool_normalized
+                        or not argument_protocol_compliant
+                    )
+                decoding_arguments = False
                 text, done = execute_tool(
                     function["name"],
                     arguments,
@@ -2251,10 +2485,19 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
                     args.evas_command,
                 )
             except Exception as exc:  # Model tool mistakes are episode evidence, not runner failures.
+                tool_error_type = type(exc).__name__
+                if (
+                    function.get("name") == "submit_artifacts"
+                    and decoding_arguments
+                ):
+                    argument_protocol_compliant = False
+                    transport_error = True
+                    submission_transport_failures += 1
+                    submission_transport_failures_this_run += 1
                 text = json.dumps({
                     "status": "tool_error",
                     "tool": function.get("name"),
-                    "error_type": type(exc).__name__,
+                    "error_type": tool_error_type,
                     "error": str(exc)[:2000],
                 })
                 done = False
@@ -2263,7 +2506,18 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
                 "type": "tool",
                 "name": function["name"],
                 "reference_tokens": delivered,
+                "argument_protocol_compliant": argument_protocol_compliant,
             }
+            if function["name"] == "submit_artifacts":
+                raw_arguments = str(function.get("arguments") or "")
+                tool_event["argument_sha256"] = hashlib.sha256(
+                    raw_arguments.encode("utf-8")
+                ).hexdigest()
+                tool_event["transport_error"] = transport_error
+                if tool_error_type is not None:
+                    tool_event["error_type"] = tool_error_type
+            if argument_normalization is not None:
+                tool_event["argument_normalization"] = argument_normalization
             if function["name"] == "read_skill":
                 tool_event.update({
                     "skill": str(arguments.get("skill") or ""),
@@ -2281,6 +2535,50 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
             messages.append({"role": "tool", "tool_call_id": call["id"], "content": text})
             finalized = finalized or done
             save_conversation()
+
+    def record_direct_tool_submission() -> None:
+        gate = submission_artifact_gate(runtime)
+        result.update({
+            "status": "submitted" if gate["passed"] else "invalid_submission",
+            "termination_reason": (
+                "completed" if gate["passed"] else "invalid_submit_artifacts_call"
+            ),
+            "saved_files": list(gate["observed_artifacts"]) if gate["passed"] else [],
+            "artifact_gate": gate,
+            "artifact_sha256": dict(gate.get("artifact_sha256") or {}),
+            "extraction_protocol": "submit_artifacts_tool-v1",
+            "submission_transport": (
+                "runner_normalized_tool"
+                if submission_tool_normalized
+                else "runner_managed"
+            ),
+            "original_protocol_compliant": not submission_tool_normalized,
+            "submission_protocol_compliant": bool(gate["passed"]),
+            "transport_retry_count": submission_transport_failures,
+            "response_parser_version": None,
+            "parse_diagnostics": (
+                [] if gate["passed"] else ["invalid_submit_artifacts_call"]
+            ),
+        })
+
+    def record_submission_transport_failure() -> None:
+        result.update({
+            "status": "provider_transport_failure",
+            "termination_reason": "malformed_submit_artifacts_transport",
+            "submission_protocol_compliant": False,
+            "parse_diagnostics": ["malformed_submit_artifacts_transport"],
+            "transport_failure_count": submission_transport_failures,
+            "transport_failure_count_this_run": (
+                submission_transport_failures_this_run
+            ),
+            "incidents": [{
+                "category": "malformed_submit_artifacts_transport",
+                "component": "provider",
+                "phase": "submission_transport",
+                "responsibility": "infrastructure",
+                "retryable": True,
+            }],
+        })
 
     def model_limit_reason() -> str | None:
         return "model_output_limit" if current_turn_hit_limit() else None
@@ -2301,9 +2599,32 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
         if pending:
             process_tool_calls(pending)
             save_conversation()
+            if invalid_submit_bundle:
+                result.update({
+                    "status": "invalid_submission",
+                    "termination_reason": "invalid_submit_artifacts_call",
+                    "submission_protocol_compliant": False,
+                    "parse_diagnostics": ["mixed_submit_artifacts_tool_bundle"],
+                })
+            elif finalized:
+                record_direct_tool_submission()
+            if invalid_submit_bundle or finalized:
+                result.update({
+                    "finished_at": now(),
+                    "output_tokens": output_tokens,
+                    "working_tokens": output_tokens,
+                    "output_token_budget": None,
+                    "per_turn_max_tokens": per_turn_max_tokens,
+                    "agent_elapsed_s": current_agent_elapsed_s(),
+                    "events": events,
+                    "recovered_from_checkpoint": True,
+                })
+                attach_experiment_result(result, runtime, messages, args, "completed")
+                write_json(runtime / "evidence" / "campaign_result.json", result)
+                return result
         elif messages[-1].get("role") == "assistant":
             content = str(messages[-1].get("content") or "")
-            direct_submission = extract_direct_submission(content, runtime)
+            direct_submission = extract_normalized_direct_submission(content, runtime)
             complete = bool(direct_submission["submission_protocol_compliant"])
             set_terminal_submission_status(complete, default_reason="completed")
             result.update({
@@ -2400,9 +2721,29 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
             calls = choice.get("tool_calls") or []
             if calls:
                 process_tool_calls(calls)
+                if invalid_submit_bundle:
+                    result.update({
+                        "status": "invalid_submission",
+                        "termination_reason": "invalid_submit_artifacts_call",
+                        "submission_protocol_compliant": False,
+                        "parse_diagnostics": ["mixed_submit_artifacts_tool_bundle"],
+                    })
+                    break
+                if (
+                    submission_transport_failures_this_run
+                    >= MAX_ONESHOT_TRANSPORT_FAILURES
+                ):
+                    record_submission_transport_failure()
+                    break
+                if finalized:
+                    record_direct_tool_submission()
+                    break
                 continue
-            direct_submission = extract_direct_submission(content, runtime)
+            direct_submission = extract_normalized_direct_submission(content, runtime)
             complete = bool(direct_submission["submission_protocol_compliant"])
+            if not complete and submission_transport_failures:
+                record_submission_transport_failure()
+                break
             hit_limit = model_event_hit_limit(model_event)
             result.update({
                 "status": "submitted" if complete else "invalid_submission",
@@ -2438,7 +2779,17 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
         "agent_elapsed_s": current_agent_elapsed_s(),
         "events": events,
     })
-    attach_experiment_result(result, runtime, messages, args, "completed")
+    attach_experiment_result(
+        result,
+        runtime,
+        messages,
+        args,
+        (
+            "provider_failure"
+            if result.get("status") == "provider_transport_failure"
+            else "completed"
+        ),
+    )
     write_json(runtime / "evidence" / "campaign_result.json", result)
     return result
 

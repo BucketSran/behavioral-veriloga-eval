@@ -651,6 +651,526 @@ def test_direct_parser_preserves_exact_body_and_records_evidence(tmp_path: Path)
     ).hexdigest()
 
 
+def test_direct_submission_tool_requires_the_complete_declared_bundle(
+    tmp_path: Path,
+) -> None:
+    runner = load_run_campaign()
+    runtime = tmp_path / "runtime"
+    write_runtime_policy(runtime, ["model.va", "support.inc"])
+    (runtime / "MODEL_ACCESS_POLICY.json").write_text(
+        json.dumps({
+            "mode": "G0",
+            "available_skills": {},
+            "provider_tools": [],
+        }),
+        encoding="utf-8",
+    )
+
+    tools = runner.active_tool_schemas(runtime, "G0")
+
+    assert tools is not None
+    assert [tool["function"]["name"] for tool in tools] == ["submit_artifacts"]
+    artifacts = tools[0]["function"]["parameters"]["properties"]["artifacts"]
+    assert artifacts["required"] == ["model.va", "support.inc"]
+    assert artifacts["additionalProperties"] is False
+
+
+def test_submit_artifacts_writes_only_a_complete_declared_bundle(tmp_path: Path) -> None:
+    runner = load_run_campaign()
+    runtime = tmp_path / "runtime"
+    write_runtime_policy(runtime, ["top.va", "blocks/child.va"])
+    (runtime / "public" / "submission").mkdir(parents=True)
+
+    text, finalized = runner.execute_tool(
+        "submit_artifacts",
+        {
+            "artifacts": {
+                "top.va": "module top; endmodule\n",
+                "blocks/child.va": "module child; endmodule\n",
+            }
+        },
+        runtime,
+        30,
+        "evas",
+    )
+
+    result = json.loads(text)
+    assert finalized is True
+    assert result["status"] == "submitted"
+    assert result["saved_files"] == ["blocks/child.va", "top.va"]
+
+    with pytest.raises(ValueError, match="missing_artifact_path:blocks/child.va"):
+        runner.execute_tool(
+            "submit_artifacts",
+            {"artifacts": {"top.va": "module top; endmodule\n"}},
+            runtime,
+            30,
+            "evas",
+        )
+
+
+def test_direct_text_fallback_normalizes_transport_without_reading_semantics(
+    tmp_path: Path,
+) -> None:
+    runner = load_run_campaign()
+    runtime = tmp_path / "runtime"
+    write_runtime_policy(runtime, ["model.va"])
+    (runtime / "public" / "submission").mkdir(parents=True)
+
+    result = runner.extract_normalized_direct_submission(
+        "```verilog\nmodule model; endmodule\n```",
+        runtime,
+    )
+
+    assert result["submission_protocol_compliant"] is True
+    assert result["original_protocol_compliant"] is False
+    assert result["submission_transport"] == "runner_normalized_text"
+    assert (runtime / "public" / "submission" / "model.va").read_text(
+        encoding="utf-8"
+    ) == "module model; endmodule\n"
+
+
+def test_submit_artifacts_normalizer_accepts_only_identical_redundant_content() -> None:
+    runner = load_run_campaign()
+    artifacts = {"model.va": "module model; endmodule\n"}
+
+    decoded, compliant, normalization = runner.decode_tool_arguments(
+        "submit_artifacts",
+        json.dumps({"artifacts": artifacts, **artifacts}) + "}",
+    )
+
+    assert decoded == {"artifacts": artifacts}
+    assert compliant is False
+    assert normalization == "redundant_artifact_wrapper"
+    with pytest.raises(ValueError, match="conflicting submit_artifacts wrapper fields"):
+        runner.decode_tool_arguments(
+            "submit_artifacts",
+            json.dumps({
+                "artifacts": artifacts,
+                "model.va": "module conflicting; endmodule\n",
+            }) + "}",
+        )
+
+
+def test_submit_artifacts_normalizer_completes_one_missing_object_closer() -> None:
+    runner = load_run_campaign()
+    artifacts = {"testbench.scs": "simulator lang=spectre\n"}
+    malformed = json.dumps({"artifacts": artifacts})[:-1]
+
+    decoded, compliant, normalization = runner.decode_tool_arguments(
+        "submit_artifacts", malformed
+    )
+
+    assert decoded == {"artifacts": artifacts}
+    assert compliant is False
+    assert normalization == "completed_missing_closer"
+
+
+def test_submit_artifacts_normalizer_removes_trailing_marker_fragment() -> None:
+    runner = load_run_campaign()
+    artifacts = {"testbench.scs": "save vout\n"}
+    malformed = json.dumps({"artifacts": artifacts})[:-1] + ">}"
+
+    decoded, compliant, normalization = runner.decode_tool_arguments(
+        "submit_artifacts", malformed
+    )
+
+    assert decoded == {"artifacts": artifacts}
+    assert compliant is False
+    assert normalization == "removed_trailing_marker_fragment"
+
+
+def test_submit_artifacts_tool_uses_provider_neutral_auto_tool_choice() -> None:
+    runner = load_run_campaign()
+    client = runner.OpenAICompatible(
+        base_url="https://provider.invalid/v1",
+        model="test-model",
+        api_key="test-key",
+        timeout_s=30,
+        temperature=0.0,
+        stream=True,
+    )
+    captured: dict[str, object] = {}
+
+    def capture(payload, *, timeout_s):
+        captured.update(payload)
+        return {"choices": [{"message": {"role": "assistant", "content": ""}}]}
+
+    client._complete_stream = capture
+    client.complete(
+        [{"role": "user", "content": "task"}],
+        4096,
+        [{
+            "type": "function",
+            "function": {
+                "name": "submit_artifacts",
+                "parameters": {"type": "object", "properties": {}},
+            },
+        }],
+    )
+
+    assert captured["tool_choice"] == "auto"
+
+
+def test_direct_run_cell_submits_with_one_transport_tool_call(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = load_run_campaign()
+    cell = {
+        "cell_id": "v4-001-G0-r0",
+        "task_id": "v4-001",
+        "mode": "G0",
+        "process": "direct_one_shot",
+        "per_turn_max_tokens": 4096,
+    }
+    args = run_args(tmp_path / "run", tmp_path / "release")
+
+    def prepare_runtime(
+        _cell: dict, _release: Path, runtime: Path, *, timeout_s: int
+    ) -> None:
+        assert timeout_s == args.setup_timeout_s
+        (runtime / "public" / "submission").mkdir(parents=True)
+        (runtime / "evaluator").mkdir(parents=True)
+        (runtime / "direct_prompt.txt").write_text("Create model.va.\n")
+        (runtime / "evaluator" / "score_policy.json").write_text(
+            json.dumps({"candidate_artifacts": ["model.va"]})
+        )
+        (runtime / "MODEL_ACCESS_POLICY.json").write_text(
+            json.dumps({
+                "mode": "G0",
+                "available_skills": {},
+                "provider_tools": [],
+            })
+        )
+
+    monkeypatch.setattr(runner, "export_runtime", prepare_runtime)
+
+    class SubmitClient:
+        def complete(self, messages, _max_tokens, tools, **_kwargs):
+            assert messages[0] == {
+                "role": "system",
+                "content": runner.ONESHOT_TRANSPORT_INSTRUCTION,
+            }
+            assert [tool["function"]["name"] for tool in tools] == [
+                "submit_artifacts"
+            ]
+            return {
+                "choices": [{
+                    "finish_reason": "tool_calls",
+                    "message": {
+                        "role": "assistant",
+                        "content": "",
+                        "tool_calls": [{
+                            "id": "submit-call",
+                            "type": "function",
+                            "function": {
+                                "name": "submit_artifacts",
+                                "arguments": json.dumps({
+                                    "artifacts": {
+                                        "model.va": "module model; endmodule\n"
+                                    }
+                                }),
+                            },
+                        }],
+                    },
+                }],
+                "usage": {"completion_tokens": 16},
+            }
+
+    result = runner.run_cell(cell, args, SubmitClient())
+
+    assert result["status"] == "submitted"
+    assert result["submission_protocol_compliant"] is True
+    assert result["extraction_protocol"] == "submit_artifacts_tool-v1"
+    assert result["submission_transport"] == "runner_managed"
+
+
+def test_direct_transport_failures_are_bounded_and_not_scored_as_model_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = load_run_campaign()
+    cell = {
+        "cell_id": "v4-001-G0-r0",
+        "task_id": "v4-001",
+        "mode": "G0",
+        "process": "direct_one_shot",
+        "per_turn_max_tokens": 4096,
+    }
+    args = run_args(tmp_path / "run", tmp_path / "release")
+
+    def prepare_runtime(
+        _cell: dict, _release: Path, runtime: Path, *, timeout_s: int
+    ) -> None:
+        (runtime / "public" / "submission").mkdir(parents=True)
+        (runtime / "evaluator").mkdir(parents=True)
+        (runtime / "direct_prompt.txt").write_text("Create model.va.\n")
+        (runtime / "evaluator" / "score_policy.json").write_text(
+            json.dumps({"candidate_artifacts": ["model.va"]})
+        )
+        (runtime / "MODEL_ACCESS_POLICY.json").write_text(
+            json.dumps({"mode": "G0", "available_skills": {}, "provider_tools": []})
+        )
+
+    monkeypatch.setattr(runner, "export_runtime", prepare_runtime)
+
+    class MalformedTransportClient:
+        calls = 0
+
+        def complete(self, _messages, _max_tokens, _tools, **_kwargs):
+            self.calls += 1
+            if self.calls > 2:
+                raise AssertionError("submission transport retries were not bounded")
+            return {
+                "choices": [{
+                    "finish_reason": "tool_calls",
+                    "message": {
+                        "role": "assistant",
+                        "content": "",
+                        "tool_calls": [{
+                            "id": f"submit-call-{self.calls}",
+                            "type": "function",
+                            "function": {
+                                "name": "submit_artifacts",
+                                "arguments": '{"artifacts":',
+                            },
+                        }],
+                    },
+                }],
+                "usage": {"completion_tokens": 8},
+            }
+
+    client = MalformedTransportClient()
+    result = runner.run_cell(cell, args, client)
+
+    assert client.calls == 2
+    assert result["status"] == "provider_transport_failure"
+    assert result["termination_reason"] == "malformed_submit_artifacts_transport"
+    assert result["submission_protocol_compliant"] is False
+    assert result["experiment_result"]["outcome"] == "infrastructure_failure"
+    assert result["experiment_result"]["score_eligible"] is False
+    assert result["incidents"] == [{
+        "category": "malformed_submit_artifacts_transport",
+        "component": "provider",
+        "phase": "submission_transport",
+        "responsibility": "infrastructure",
+        "retryable": True,
+    }]
+    tool_events = [
+        event for event in result["events"] if event.get("name") == "submit_artifacts"
+    ]
+    assert len(tool_events) == 2
+    assert all(event["argument_protocol_compliant"] is False for event in tool_events)
+    assert all(event["transport_error"] is True for event in tool_events)
+
+
+def test_direct_transport_retry_can_submit_without_checker_feedback(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = load_run_campaign()
+    cell = {
+        "cell_id": "v4-001-G0-r0",
+        "task_id": "v4-001",
+        "mode": "G0",
+        "process": "direct_one_shot",
+        "per_turn_max_tokens": 4096,
+    }
+    args = run_args(tmp_path / "run", tmp_path / "release")
+
+    def prepare_runtime(
+        _cell: dict, _release: Path, runtime: Path, *, timeout_s: int
+    ) -> None:
+        (runtime / "public" / "submission").mkdir(parents=True)
+        (runtime / "evaluator").mkdir(parents=True)
+        (runtime / "direct_prompt.txt").write_text("Create model.va.\n")
+        (runtime / "evaluator" / "score_policy.json").write_text(
+            json.dumps({"candidate_artifacts": ["model.va"]})
+        )
+        (runtime / "MODEL_ACCESS_POLICY.json").write_text(
+            json.dumps({"mode": "G0", "available_skills": {}, "provider_tools": []})
+        )
+
+    monkeypatch.setattr(runner, "export_runtime", prepare_runtime)
+
+    class RetryClient:
+        calls = 0
+
+        def complete(self, messages, _max_tokens, _tools, **_kwargs):
+            self.calls += 1
+            arguments = (
+                '{"artifacts":'
+                if self.calls == 1
+                else json.dumps({
+                    "artifacts": {"model.va": "module model; endmodule\n"}
+                })
+            )
+            if self.calls == 2:
+                tool_feedback = json.loads(messages[-1]["content"])
+                assert tool_feedback["status"] == "tool_error"
+                assert tool_feedback["tool"] == "submit_artifacts"
+                assert "checker" not in messages[-1]["content"].lower()
+            return {
+                "choices": [{
+                    "finish_reason": "tool_calls",
+                    "message": {
+                        "role": "assistant",
+                        "content": "",
+                        "tool_calls": [{
+                            "id": f"submit-call-{self.calls}",
+                            "type": "function",
+                            "function": {
+                                "name": "submit_artifacts",
+                                "arguments": arguments,
+                            },
+                        }],
+                    },
+                }],
+                "usage": {"completion_tokens": 8},
+            }
+
+    client = RetryClient()
+    result = runner.run_cell(cell, args, client)
+
+    assert client.calls == 2
+    assert result["status"] == "submitted"
+    assert result["transport_retry_count"] == 1
+    assert result["submission_transport"] == "runner_managed"
+    assert (
+        args.output / cell["cell_id"] / "public" / "submission" / "model.va"
+    ).read_text() == "module model; endmodule\n"
+
+
+def test_direct_resume_finalizes_a_pending_submit_artifacts_call(
+    tmp_path: Path,
+) -> None:
+    runner = load_run_campaign()
+    cell = {
+        "cell_id": "v4-001-G0-r0",
+        "task_id": "v4-001",
+        "mode": "G0",
+        "process": "direct_one_shot",
+        "per_turn_max_tokens": 4096,
+    }
+    args = run_args(tmp_path / "run", tmp_path / "release")
+    args.resume = True
+    runtime = args.output / cell["cell_id"]
+    (runtime / "public" / "submission").mkdir(parents=True)
+    (runtime / "evaluator").mkdir(parents=True)
+    (runtime / "evidence").mkdir(parents=True)
+    (runtime / "direct_prompt.txt").write_text("Create model.va.\n")
+    (runtime / "evaluator" / "score_policy.json").write_text(
+        json.dumps({"candidate_artifacts": ["model.va"]})
+    )
+    (runtime / "MODEL_ACCESS_POLICY.json").write_text(
+        json.dumps({"mode": "G0", "available_skills": {}, "provider_tools": []})
+    )
+    (runtime / "evidence" / "conversation_checkpoint.json").write_text(
+        json.dumps({
+            "cell_id": cell["cell_id"],
+            "started_at": "2026-07-24T00:00:00+00:00",
+            "messages": [
+                {"role": "system", "content": runner.ONESHOT_TRANSPORT_INSTRUCTION},
+                {"role": "user", "content": "Create model.va."},
+                {
+                    "role": "assistant",
+                    "content": "",
+                    "tool_calls": [{
+                        "id": "submit-call",
+                        "type": "function",
+                        "function": {
+                            "name": "submit_artifacts",
+                            "arguments": json.dumps({
+                                "artifacts": {
+                                    "model.va": "module model; endmodule\n"
+                                }
+                            }),
+                        },
+                    }],
+                },
+            ],
+            "output_tokens": 16,
+            "events": [],
+            "finalized": False,
+            "agent_elapsed_s": 1.0,
+        })
+    )
+
+    result = runner.run_cell(cell, args, object())
+
+    assert result["status"] == "submitted"
+    assert result["recovered_from_checkpoint"] is True
+    assert result["termination_reason"] == "completed"
+
+
+def test_direct_run_rejects_mixed_submit_artifacts_tool_bundle(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = load_run_campaign()
+    cell = {
+        "cell_id": "v4-001-G0-r0",
+        "task_id": "v4-001",
+        "mode": "G0",
+        "process": "direct_one_shot",
+        "per_turn_max_tokens": 4096,
+    }
+    args = run_args(tmp_path / "run", tmp_path / "release")
+
+    def prepare_runtime(
+        _cell: dict, _release: Path, runtime: Path, *, timeout_s: int
+    ) -> None:
+        (runtime / "public" / "submission").mkdir(parents=True)
+        (runtime / "evaluator").mkdir(parents=True)
+        (runtime / "direct_prompt.txt").write_text("Create model.va.\n")
+        (runtime / "evaluator" / "score_policy.json").write_text(
+            json.dumps({"candidate_artifacts": ["model.va"]})
+        )
+        (runtime / "MODEL_ACCESS_POLICY.json").write_text(
+            json.dumps({"mode": "G0", "available_skills": {}, "provider_tools": []})
+        )
+
+    monkeypatch.setattr(runner, "export_runtime", prepare_runtime)
+
+    class MixedClient:
+        def complete(self, _messages, _max_tokens, _tools, **_kwargs):
+            return {
+                "choices": [{
+                    "finish_reason": "tool_calls",
+                    "message": {
+                        "role": "assistant",
+                        "content": "",
+                        "tool_calls": [
+                            {
+                                "id": "read-call",
+                                "type": "function",
+                                "function": {
+                                    "name": "read_skill",
+                                    "arguments": "{}",
+                                },
+                            },
+                            {
+                                "id": "submit-call",
+                                "type": "function",
+                                "function": {
+                                    "name": "submit_artifacts",
+                                    "arguments": json.dumps({
+                                        "artifacts": {
+                                            "model.va": "module model; endmodule\n"
+                                        }
+                                    }),
+                                },
+                            },
+                        ],
+                    },
+                }],
+                "usage": {"completion_tokens": 16},
+            }
+
+    result = runner.run_cell(cell, args, MixedClient())
+
+    assert result["status"] == "invalid_submission"
+    assert result["termination_reason"] == "invalid_submit_artifacts_call"
+    assert result["parse_diagnostics"] == ["mixed_submit_artifacts_tool_bundle"]
+
+
 def test_usage_fallback_counts_reasoning_and_tool_arguments() -> None:
     runner = load_run_campaign()
 
@@ -936,7 +1456,7 @@ def test_g1_direct_run_cell_can_read_a_skill_before_submitting(
         def complete(self, messages, _max_tokens, tools, **_kwargs):
             self.calls += 1
             names = [tool["function"]["name"] for tool in tools]
-            assert names == ["list_skills", "read_skill"]
+            assert names == ["list_skills", "read_skill", "submit_artifacts"]
             if self.calls == 1:
                 return {
                     "id": "skill-read",
