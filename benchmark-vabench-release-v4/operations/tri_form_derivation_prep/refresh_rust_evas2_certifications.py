@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build revision-scoped Rust EVAS2 evidence from a full checker report."""
+"""Build revision-scoped Rust EVAS2 evidence from checker reports."""
 from __future__ import annotations
 
 import argparse
@@ -309,22 +309,66 @@ def main() -> int:
             "evidence-only certification of an immutable source release"
         ),
     )
+    parser.add_argument(
+        "--family",
+        action="append",
+        default=[],
+        help=(
+            "refresh only this canonical family ID; repeat for a selective "
+            "recertification, or omit to require full-400 evidence"
+        ),
+    )
     args = parser.parse_args()
     source = args.source.expanduser().resolve()
     report_paths = [path.expanduser().resolve() for path in args.report]
     release_revision = str(args.release_revision)
-    campaign = f"{release_revision}-full400"
     family_cases, runtime = report_cases(report_paths)
     rows = {str(row["canonical_dut_id"]): row for row in load_family_rows(source)}
     if set(rows) != {f"{value:03d}" for value in range(1, 401)}:
         raise SystemExit("source denominator does not contain exactly families 001-400")
-    if set(family_cases) != set(rows):
+    try:
+        requested = {f"{int(value):03d}" for value in args.family}
+    except ValueError as exc:
+        raise SystemExit(f"invalid family ID: {exc}") from exc
+    unknown = requested - set(rows)
+    if unknown:
+        raise SystemExit(f"requested families are absent from source: {sorted(unknown)}")
+    selected = requested or set(rows)
+    if set(family_cases) != selected:
         raise SystemExit(
-            f"evidence coverage mismatch: missing={sorted(set(rows) - set(family_cases))} "
-            f"extra={sorted(set(family_cases) - set(rows))}"
+            f"evidence coverage mismatch: missing={sorted(selected - set(family_cases))} "
+            f"extra={sorted(set(family_cases) - selected)}"
         )
+    selected_ids = sorted(selected)
+    campaign = (
+        f"{release_revision}-full400"
+        if len(selected_ids) == 400
+        else f"{release_revision}-selective-{'-'.join(selected_ids)}"
+    )
+    output = args.output.expanduser().resolve()
+    package_root = Path(__file__).resolve().parents[2]
+    evidence_path: str | None = None
     if args.update_source_certifications:
-        for family, row in sorted(rows.items()):
+        try:
+            evidence_path = output.relative_to(package_root).as_posix()
+        except ValueError as exc:
+            raise SystemExit(
+                "certification output must be inside benchmark-vabench-release-v4"
+            ) from exc
+        evidence_parts = Path(evidence_path).parts
+        if (
+            len(evidence_parts) >= 2
+            and evidence_parts[0] == "evidence"
+            and evidence_parts[1].startswith("r")
+            and evidence_parts[1][1:].isdigit()
+        ):
+            raise SystemExit(
+                "source-updating evidence must not be written into a sealed "
+                "revision namespace; use evidence/canonical-source/"
+            )
+    if args.update_source_certifications:
+        for family in selected_ids:
+            row = rows[family]
             task = source / str(row["release_dir"])
             mutation_ids = [
                 str(item["mutation_id"])
@@ -334,7 +378,7 @@ def main() -> int:
     source_definition_sha256 = source_certification_definition_sha256(source, rows)
 
     compact_cases: list[dict[str, Any]] = []
-    for family in sorted(rows):
+    for family in selected_ids:
         row = rows[family]
         cases = family_cases[family]
         mutation_ids = validate_family_cases(family, row, cases)
@@ -358,7 +402,6 @@ def main() -> int:
                 }
             )
 
-    output = args.output.expanduser().resolve()
     payload = {
         "schema_version": f"v4-{release_revision}-rust-evas2-certification-report-v2",
         "status": "pass",
@@ -367,10 +410,10 @@ def main() -> int:
         "source_certification_definition_sha256": source_definition_sha256,
         "runtime": runtime,
         "summary": {
-            "family_count": 400,
-            "gold_pass_count": 400,
-            "negative_case_count": 2000,
-            "mutation_kill_count": 2000,
+            "family_count": len(selected_ids),
+            "gold_pass_count": len(selected_ids),
+            "negative_case_count": len(selected_ids) * 5,
+            "mutation_kill_count": len(selected_ids) * 5,
             "trace_axis_invariant_count": sum(
                 case.get("timing_invariant") is True for case in compact_cases
             ),
@@ -384,7 +427,7 @@ def main() -> int:
                 and case.get("insufficient_excitation_rejected") is None
                 for case in compact_cases
             ),
-            "diagnostic_present_count": 2400,
+            "diagnostic_present_count": len(compact_cases),
         },
         "input_report_sha256": [
             {"name": path.name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
@@ -393,22 +436,22 @@ def main() -> int:
         "cases": compact_cases,
         "source_certifications_updated": bool(args.update_source_certifications),
     }
+    if args.update_source_certifications:
+        payload["evidence_scope"] = "canonical_source"
+    if requested:
+        payload["selected_family_ids"] = selected_ids
     write_json(output, payload)
     if not args.update_source_certifications:
         print(json.dumps({"status": "pass", **payload["summary"]}, indent=2, sort_keys=True))
         return 0
 
-    package_root = Path(__file__).resolve().parents[2]
-    try:
-        evidence_path = output.relative_to(package_root).as_posix()
-    except ValueError as exc:
-        raise SystemExit("certification output must be inside benchmark-vabench-release-v4") from exc
+    assert evidence_path is not None
     evidence_ref = {
         "report_path": evidence_path,
         "report_sha256": file_sha(output),
     }
 
-    for family in sorted(rows):
+    for family in selected_ids:
         row = rows[family]
         task = source / str(row["release_dir"])
         cases = family_cases[family]
