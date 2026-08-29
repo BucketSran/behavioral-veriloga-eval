@@ -47,7 +47,7 @@
       "items": {"type": "string", "minLength": 1}
     },
     "mutation_kind": {
-      "enum": ["seed", "create", "refine", "merge", "failed_mutation"]
+      "enum": ["seed", "create", "refine", "failed_mutation"]
     },
     "source_event_sha256": {
       "type": "string",
@@ -64,6 +64,50 @@
     {
       "if": {"properties": {"status": {"enum": ["active", "rejected", "selected", "frozen"]}}},
       "then": {"properties": {"failure_reason": {"const": null}}}
+    },
+    {
+      "if": {"properties": {"mutation_kind": {"const": "seed"}}},
+      "then": {
+        "properties": {
+          "round_index": {"const": 0},
+          "artifact_parent_candidate_id": {"const": null},
+          "influence_candidate_ids": {"maxItems": 0}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"mutation_kind": {"const": "failed_mutation"}}},
+      "then": {
+        "properties": {
+          "status": {"const": "failed"},
+          "artifact_parent_candidate_id": {"type": "string", "minLength": 1},
+          "failure_reason": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"mutation_kind": {"const": "refine"}}},
+      "then": {
+        "properties": {
+          "artifact_parent_candidate_id": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"mutation_kind": {"const": "create"}}},
+      "then": {
+        "properties": {
+          "artifact_parent_candidate_id": {"const": null}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "failed"}}},
+      "then": {
+        "properties": {
+          "mutation_kind": {"const": "failed_mutation"}
+        }
+      }
     }
   ],
   "additionalProperties": false

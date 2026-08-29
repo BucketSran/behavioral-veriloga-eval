@@ -6,6 +6,7 @@
   "type": "object",
   "required": [
     "schema_version",
+    "redaction_policy",
     "snapshot_id",
     "snapshot_sha256",
     "episode_id",
@@ -19,6 +20,7 @@
   ],
   "properties": {
     "schema_version": {"const": "vaevas-memory-snapshot-v1"},
+    "redaction_policy": {"const": "public-feedback-redaction-v1"},
     "snapshot_id": {"type": "string", "minLength": 1},
     "snapshot_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "episode_id": {"type": "string", "minLength": 1},
@@ -65,5 +67,21 @@
       }
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "retry_parent_attempt_id": {"type": "string"}
+        }
+      },
+      "then": {
+        "properties": {
+          "round_index": {"const": 0},
+          "parent_snapshot_sha256": {"const": null},
+          "entries": {"maxItems": 0}
+        }
+      }
+    }
+  ],
   "additionalProperties": false
 }
