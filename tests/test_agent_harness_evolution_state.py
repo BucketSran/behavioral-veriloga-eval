@@ -9,7 +9,6 @@ import pytest
 
 from runners.agent_harness.evolution_state import (
     CandidateLineage,
-    MemorySnapshot,
     candidate_lineage_sha256,
     freeze_memory_snapshot,
     validate_candidate_lineage_graph,
