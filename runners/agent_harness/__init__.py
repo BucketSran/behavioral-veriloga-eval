@@ -35,6 +35,7 @@ from .result_artifact import (
     result_artifact_sha256,
     validate_scored_result_artifact,
 )
+from .reserved_tools import reserved_domain_tool_descriptors
 from .state import (
     AgentAction,
     EnvironmentStep,
@@ -106,6 +107,7 @@ __all__ = [
     "project_model_visible_events",
     "public_validation_profile_sha256",
     "read_trajectory",
+    "reserved_domain_tool_descriptors",
     "result_artifact_sha256",
     "select_candidate",
     "select_last_sealed_incumbent",
