@@ -84,6 +84,7 @@ class EpisodeContext:
     task_id: str
     condition: str
     max_steps: int
+    budget_limits: Mapping[str, int] = field(default_factory=dict)
     parent_attempt_id: str | None = None
     retry_index: int = 0
     retry_reason: str | None = None
@@ -93,6 +94,17 @@ class EpisodeContext:
             _require_identity(getattr(self, field_name), field_name=field_name)
         if self.max_steps <= 0:
             raise ValueError("max_steps must be positive")
+        frozen_budget_limits = _freeze_json_object(
+            self.budget_limits,
+            field_name="budget_limits",
+        )
+        for counter, value in frozen_budget_limits.items():
+            _require_identity(counter, field_name="budget counter")
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise TypeError("budget_limits values must be integers")
+            if value < 0:
+                raise ValueError("budget_limits values cannot be negative")
+        object.__setattr__(self, "budget_limits", frozen_budget_limits)
         if self.retry_index < 0:
             raise ValueError("retry_index cannot be negative")
         if self.retry_index == 0:

@@ -7,6 +7,7 @@ from .authority_profiles import (
     public_validation_profile_sha256,
 )
 from .backend_profile import backend_profile_sha256
+from .budget import BudgetContractError, BudgetLedger, BudgetLimitExceeded, BudgetUpdate
 from .contracts import FinalJudge, PublicValidator
 from .controller import EpisodeController
 from .evolution_manifest import (
@@ -58,6 +59,10 @@ from .trajectory import (
 
 __all__ = [
     "AgentAction",
+    "BudgetContractError",
+    "BudgetLedger",
+    "BudgetLimitExceeded",
+    "BudgetUpdate",
     "CandidateLineage",
     "EffectiveToolset",
     "EnvironmentStep",

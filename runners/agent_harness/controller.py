@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 
+from .budget import BudgetContractError, BudgetLedger, BudgetLimitExceeded
 from .contracts import Environment, FinalJudge, Policy, TrajectorySink
 from .state import (
     AgentAction,
@@ -135,6 +136,7 @@ class EpisodeController:
     def run(self, context: EpisodeContext) -> EpisodeResult:
         result: EpisodeResult | None = None
         submission = None
+        budget_ledger = BudgetLedger(context.budget_limits)
         phase = "tool_authority_resolution"
         try:
             effective_toolset = self._tool_registry.resolve(
@@ -148,6 +150,7 @@ class EpisodeController:
                 visibility="harness",
                 payload={
                     "max_steps": context.max_steps,
+                    "budget_limits": dict(context.budget_limits),
                     "effective_capability_sha256": (
                         effective_toolset.effective_capability_sha256
                     ),
@@ -261,6 +264,33 @@ class EpisodeController:
                                 "does not match the current environment state"
                             ),
                         )
+                try:
+                    budget_ledger.ensure_available(capability)
+                except BudgetLimitExceeded as exc:
+                    self._record(
+                        context,
+                        actor="controller",
+                        event_type="action_rejected",
+                        visibility="harness",
+                        payload={
+                            "action_id": action.action_id,
+                            "tool_name": capability.tool_name,
+                            "tool_id": capability.tool_id,
+                            "rejection_code": exc.code,
+                            "budget_counter": exc.counter,
+                            "budget_limit": exc.limit,
+                            "candidate_tree_sha256": (
+                                observation.candidate_tree_sha256
+                            ),
+                        },
+                    )
+                    raise _ControllerFailure(
+                        category=exc.code,
+                        phase="controller_budget",
+                        message=str(exc),
+                        primary_outcome="budget_exhausted",
+                        terminal_reason="hard_budget_exhausted",
+                    ) from exc
                 self._record(
                     context,
                     actor="controller",
@@ -321,6 +351,31 @@ class EpisodeController:
                     capability=capability,
                     before_sha256=observation.candidate_tree_sha256,
                     step=step,
+                )
+                try:
+                    budget_update = budget_ledger.consume(
+                        capability,
+                        step.observation.budget_delta,
+                    )
+                except BudgetContractError as exc:
+                    raise _ProtocolFailure(
+                        category="budget_contract_violation",
+                        phase="environment_step",
+                        message=str(exc),
+                    ) from exc
+                self._record(
+                    context,
+                    actor="controller",
+                    event_type="budget_updated",
+                    visibility="harness",
+                    payload={
+                        "action_id": action.action_id,
+                        "tool_name": capability.tool_name,
+                        "budget_class": capability.budget_class,
+                        "delta": budget_update.delta,
+                        "consumed": budget_update.consumed,
+                        "remaining": budget_update.remaining,
+                    },
                 )
                 self._record(
                     context,

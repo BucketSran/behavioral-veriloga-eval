@@ -86,6 +86,31 @@ def test_episode_context_requires_joinable_identity(field_name: str) -> None:
         EpisodeContext(max_steps=4, **values)
 
 
+def test_episode_context_freezes_non_negative_attempt_budget_limits() -> None:
+    limits = {"tool_calls": 2}
+    context = EpisodeContext(
+        episode_id="episode-001",
+        attempt_id="attempt-001",
+        task_id="v4-001",
+        condition="Agentic+EVAS",
+        max_steps=4,
+        budget_limits=limits,
+    )
+
+    limits["tool_calls"] = 99
+
+    assert dict(context.budget_limits) == {"tool_calls": 2}
+    with pytest.raises(ValueError, match="negative"):
+        EpisodeContext(
+            episode_id="episode-001",
+            attempt_id="attempt-001",
+            task_id="v4-001",
+            condition="Agentic+EVAS",
+            max_steps=4,
+            budget_limits={"tool_calls": -1},
+        )
+
+
 class PublicFeedbackPolicy:
     def __init__(self) -> None:
         self.seen: list[str] = []
@@ -1338,6 +1363,129 @@ def test_step_budget_exhaustion_is_a_terminal_result() -> None:
     assert result.final_judgment is None
 
 
+def test_public_validation_budget_exhausts_before_second_environment_step(
+    tmp_path,
+) -> None:
+    trajectory_path = tmp_path / "public-validation-budget.jsonl"
+    boundary_log: list[str] = []
+    action = AgentAction(
+        action_id="action-validate-1",
+        tool_name="public_validate",
+        arguments={},
+        source_backend="fake-backend",
+        candidate_tree_sha256="a" * 64,
+    )
+    controller = EpisodeController(
+        policy=SequencePolicy(
+            [
+                action,
+                AgentAction(
+                    action_id="action-validate-2",
+                    tool_name="public_validate",
+                    arguments={},
+                    source_backend="fake-backend",
+                    candidate_tree_sha256="a" * 64,
+                ),
+            ]
+        ),
+        environment=PublicValidationEnvironment(
+            boundary_log,
+            FakePublicValidator(boundary_log),
+        ),
+        final_judge=PassingFinalJudge(boundary_log),
+        trajectory=JsonlTrajectoryRecorder(trajectory_path),
+        tool_registry=_controller_registry("public_validate"),
+    )
+
+    result = controller.run(
+        EpisodeContext(
+            episode_id="episode-001",
+            attempt_id="attempt-001",
+            task_id="v4-001",
+            condition="Agentic+EVAS",
+            max_steps=4,
+            budget_limits={"tool_calls": 2, "public_validation_calls": 1},
+        )
+    )
+
+    assert result.primary_outcome == "budget_exhausted"
+    assert result.failure is not None
+    assert result.failure.category == "public_validation_budget_exhausted"
+    assert result.failure.phase == "controller_budget"
+    assert boundary_log == [
+        "start:attempt-001",
+        "step:public_validate",
+        f"public_validate:public-default:{'a' * 64}",
+        "close",
+    ]
+    updates = [
+        event
+        for event in read_trajectory(trajectory_path)
+        if event["event_type"] == "budget_updated"
+    ]
+    assert len(updates) == 1
+    assert updates[0]["payload"]["consumed"] == {
+        "public_validation_calls": 1,
+        "tool_calls": 1,
+    }
+
+
+class UnboundBudgetDeltaEnvironment(ReadMutatingEnvironment):
+    def step(
+        self,
+        action: AgentAction,
+        _capability: ToolCapability,
+    ) -> EnvironmentStep:
+        self.boundary_log.append(f"step:{action.tool_name}")
+        return EnvironmentStep(
+            observation=Observation(
+                observation_id="observation-bash",
+                tool_name=action.tool_name,
+                status="succeeded",
+                payload={"message": "bash completed"},
+                candidate_tree_sha256="b" * 64,
+                budget_delta={"public_validation_calls": 1},
+            ),
+            done=False,
+        )
+
+
+def test_controller_rejects_budget_delta_not_bound_to_capability() -> None:
+    boundary_log: list[str] = []
+    controller = EpisodeController(
+        policy=SequencePolicy(
+            [
+                AgentAction(
+                    action_id="action-bash",
+                    tool_name="bash",
+                    arguments={"command": "true"},
+                    source_backend="fake-backend",
+                    candidate_tree_sha256="a" * 64,
+                )
+            ]
+        ),
+        environment=UnboundBudgetDeltaEnvironment(boundary_log),
+        final_judge=PassingFinalJudge(boundary_log),
+        tool_registry=_controller_registry("bash"),
+    )
+
+    result = controller.run(
+        EpisodeContext(
+            episode_id="episode-001",
+            attempt_id="attempt-001",
+            task_id="v4-001",
+            condition="Agentic+EVAS",
+            max_steps=4,
+        )
+    )
+
+    assert result.primary_outcome == "protocol_failure"
+    assert result.failure is not None
+    assert result.failure.category == "budget_contract_violation"
+    assert "unbound_budget_delta" in result.failure.message
+    assert boundary_log == ["start:attempt-001", "step:bash", "close"]
+
+
 def test_environment_failure_is_materialized_separately_from_cleanup() -> None:
     boundary_log: list[str] = []
     controller = EpisodeController(
@@ -1548,6 +1696,7 @@ def test_controller_writes_attempt_scoped_tamper_evident_trajectory(
         "episode_started",
         "action_proposed",
         "action_authorized",
+        "budget_updated",
         "environment_observed",
         "submission_frozen",
         "final_judgment_completed",
@@ -1561,7 +1710,11 @@ def test_controller_writes_attempt_scoped_tamper_evident_trajectory(
     assert action_payload["tool_name"] == "submit"
     assert action_payload["source_backend"] == "fake-backend"
     assert action_payload["candidate_tree_sha256"] == "a" * 64
-    observation_payload = events[3]["payload"]
+    observation_payload = next(
+        event["payload"]
+        for event in events
+        if event["event_type"] == "environment_observed"
+    )
     assert observation_payload["schema_version"] == "vaevas-observation-v1"
     assert observation_payload["observation_id"] == "observation-submission"
     assert observation_payload["tool_name"] == "submit"
