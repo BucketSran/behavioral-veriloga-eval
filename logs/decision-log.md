@@ -395,6 +395,11 @@
 - Make descriptor effects executable contracts. Read/none tools cannot change
   the candidate; mutating tools must report a candidate hash; freeze tools must
   terminate as submitted and bind to the actual frozen submission.
+- Treat a mismatched freeze artifact as untrusted evidence. The controller may
+  inspect it to reject the episode, but must not expose it as
+  `EpisodeResult.submission`.
+- Allow inactive descriptors to omit retired runtime handlers while preserving
+  their registry identity for audit and compatibility history.
 - Derive canonical tool/public-validation costs from the resolved capability.
   The environment may confirm a bound counter but cannot relabel a Bash call as
   validation or invent an unrelated budget delta.

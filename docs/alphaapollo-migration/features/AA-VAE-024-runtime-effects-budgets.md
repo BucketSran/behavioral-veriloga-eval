@@ -31,7 +31,7 @@
 | --- | --- | --- |
 | `runners/agent_harness/tool_registry.py::ToolRegistry` | active/inactive/reserved、registry hash、effect contract | harness |
 | `schemas/vaevas-tool-descriptor-v1.schema.json` | state/candidate/submission-budget 组合约束 | schema |
-| `runners/agent_harness/controller.py::EpisodeController` | execution rejection、candidate postcondition、freeze binding、hard-budget preflight | harness |
+| `runners/agent_harness/controller.py::EpisodeController` | execution rejection、candidate postcondition、trusted freeze binding、hard-budget preflight | harness |
 | `runners/agent_harness/budget.py::BudgetLedger` | attempt-scoped capability-derived counter ledger | harness |
 | `runners/agent_harness/state.py::EpisodeContext` | immutable non-negative attempt budget limits | state |
 
@@ -40,6 +40,7 @@
 - 输入：resolved `ToolCapability`、trusted previous observation、`EnvironmentStep`、attempt limits。
 - 中间状态：candidate before/after、canonical delta、consumed/remaining counters。
 - 输出：accepted observation、classified rejection、`budget_updated` evidence 或 terminal failure。
+  freeze mismatch 会拒绝 episode，且不会把未通过绑定校验的 frozen submission 暴露为 result。
 - 新增 schema 字段：tool lifecycle 增加 `inactive`；未改变 action/observation wire schema。
 - backward compatibility：generic harness contract 更严格；production mini-swe 尚未接入，旧 runner
   行为与 r53 bytes 未改变。
@@ -52,6 +53,7 @@
 
 ## Claim boundary
 
-- 能支持：通用 controller 会检测 capability/state/budget contract 违规并 fail closed。
+- 能支持：通用 controller 会检测 capability/state/budget contract 违规并 fail closed；
+  frozen submission 只有在与 terminal candidate hash 匹配后才成为可信结果。
 - 不能支持：production mini-swe 已使用该账本，或该机制提升模型分数。
 - 本功能不修改 EVAS，不触发 Spectre parity gate。

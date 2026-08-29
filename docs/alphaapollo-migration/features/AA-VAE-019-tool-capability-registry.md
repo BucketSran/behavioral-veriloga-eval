@@ -20,8 +20,8 @@
 - 新增 `vaevas-tool-descriptor-v1`，记录 tool identity、lifecycle、model visibility、
   condition allowlist、budget class、state/candidate/submission effect、
   argument/observation schema、evidence policy 和 handler。
-- `active` tool 必须有 handler；`inactive` tool 保留审计身份但不能调度；
-  `reserved` tool 作为未来领域工具占位，不能调用。
+- `active` tool 必须有 handler；`inactive` tool 保留审计身份但不能调度，
+  可省略已经下线的 runtime handler；`reserved` tool 作为未来领域工具占位，不能调用。
 - final judge 不是普通工具 lifecycle：它完全位于 registry 之外，由独立 final-test
   authority profile 管理；final-shaped descriptor 会被拒绝。
 - registry 只解析 capability，不执行工具；production runner 暂不导入。
