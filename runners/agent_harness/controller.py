@@ -383,6 +383,7 @@ class EpisodeController:
                     event_type="environment_observed",
                     visibility="model",
                     payload={
+                        "action_id": action.action_id,
                         "schema_version": step.observation.schema_version,
                         "observation_id": step.observation.observation_id,
                         "tool_name": step.observation.tool_name,

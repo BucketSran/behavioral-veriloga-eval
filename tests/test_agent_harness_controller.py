@@ -18,6 +18,7 @@ from runners.agent_harness import (
     project_model_visible_events,
     read_trajectory,
     validate_trajectory,
+    validate_trajectory_semantics,
 )
 
 
@@ -1537,6 +1538,7 @@ def test_start_failure_still_has_a_complete_attempt_trajectory(tmp_path) -> None
 
     events = read_trajectory(trajectory_path)
     assert validate_trajectory(events) is True
+    assert validate_trajectory_semantics(events) is True
     assert [event["event_type"] for event in events] == [
         "episode_started",
         "episode_failed",
@@ -1690,6 +1692,7 @@ def test_controller_writes_attempt_scoped_tamper_evident_trajectory(
 
     events = read_trajectory(trajectory_path)
     assert validate_trajectory(events) is True
+    assert validate_trajectory_semantics(events) is True
     assert [row["sequence"] for row in events] == list(range(len(events)))
     assert {row["attempt_id"] for row in events} == {"attempt-002"}
     assert [row["event_type"] for row in events] == [

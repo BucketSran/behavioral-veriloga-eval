@@ -13,6 +13,22 @@ from .state import EpisodeContext, EventVisibility
 
 
 _EVENT_VISIBILITIES = frozenset({"model", "harness", "trusted"})
+_REQUIRED_EVENT_VISIBILITY = {
+    "episode_started": "harness",
+    "action_proposed": "model",
+    "action_authorized": "harness",
+    "action_rejected": "harness",
+    "candidate_transition_rejected": "harness",
+    "budget_updated": "harness",
+    "environment_observed": "model",
+    "submission_freeze_rejected": "harness",
+    "submission_frozen": "harness",
+    "final_judgment_completed": "trusted",
+    "episode_failed": "harness",
+    "cleanup_failed": "harness",
+    "cleanup_completed": "harness",
+    "episode_completed": "harness",
+}
 
 
 def _event_sha256(event_without_hash: Mapping[str, Any]) -> str:
@@ -92,6 +108,94 @@ def validate_trajectory(events: list[dict[str, Any]]) -> bool:
         if recorded_hash != _event_sha256(unhashed):
             return False
         previous_hash = recorded_hash
+    return True
+
+
+def validate_trajectory_semantics(events: list[dict[str, Any]]) -> bool:
+    """Validate attempt identity and lifecycle in an intact event chain."""
+
+    if not events or not validate_trajectory(events):
+        return False
+    identity_fields = ("episode_id", "attempt_id", "task_id", "condition")
+    expected_identity = tuple(events[0].get(field) for field in identity_fields)
+    if any(value is None for value in expected_identity):
+        return False
+    if any(
+        tuple(event.get(field) for field in identity_fields) != expected_identity
+        for event in events
+    ):
+        return False
+    event_types = [event.get("event_type") for event in events]
+    if not (
+        event_types[0] == "episode_started"
+        and event_types[-1] == "episode_completed"
+        and event_types.count("episode_started") == 1
+        and event_types.count("episode_completed") == 1
+    ):
+        return False
+    if any(
+        event.get("event_type") in _REQUIRED_EVENT_VISIBILITY
+        and event.get("visibility")
+        != _REQUIRED_EVENT_VISIBILITY[event["event_type"]]
+        for event in events
+    ):
+        return False
+    terminal_count = event_types.count("episode_failed") + event_types.count(
+        "final_judgment_completed"
+    )
+    if terminal_count != 1:
+        return False
+    if "final_judgment_completed" in event_types and not (
+        "submission_frozen" in event_types
+        and event_types.index("submission_frozen")
+        < event_types.index("final_judgment_completed")
+    ):
+        return False
+    if "submission_frozen" in event_types:
+        freeze_index = event_types.index("submission_frozen")
+        if any(
+            event.get("visibility") == "model"
+            for event in events[freeze_index + 1 :]
+        ):
+            return False
+    proposed_action_id: str | None = None
+    authorized_action_id: str | None = None
+    for event in events:
+        event_type = event.get("event_type")
+        payload = event.get("payload")
+        if not isinstance(payload, Mapping):
+            return False
+        action_id = payload.get("action_id")
+        if event_type == "action_proposed":
+            if (
+                not isinstance(action_id, str)
+                or proposed_action_id is not None
+                or authorized_action_id is not None
+            ):
+                return False
+            proposed_action_id = action_id
+        elif event_type == "action_authorized":
+            if action_id != proposed_action_id or authorized_action_id is not None:
+                return False
+            authorized_action_id = action_id
+        elif event_type == "action_rejected":
+            if action_id != proposed_action_id:
+                return False
+            proposed_action_id = None
+            authorized_action_id = None
+        elif event_type == "candidate_transition_rejected":
+            if action_id != authorized_action_id:
+                return False
+            proposed_action_id = None
+            authorized_action_id = None
+        elif event_type == "budget_updated":
+            if action_id != authorized_action_id:
+                return False
+        elif event_type == "environment_observed":
+            if action_id != authorized_action_id:
+                return False
+            proposed_action_id = None
+            authorized_action_id = None
     return True
 
 

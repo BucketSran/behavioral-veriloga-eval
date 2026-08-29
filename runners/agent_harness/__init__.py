@@ -55,6 +55,7 @@ from .trajectory import (
     project_model_visible_events,
     read_trajectory,
     validate_trajectory,
+    validate_trajectory_semantics,
 )
 
 __all__ = [
@@ -104,4 +105,5 @@ __all__ = [
     "tool_descriptor_sha256",
     "validate_candidate_lineage_graph",
     "validate_trajectory",
+    "validate_trajectory_semantics",
 ]
