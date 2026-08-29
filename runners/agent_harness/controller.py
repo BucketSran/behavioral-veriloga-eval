@@ -411,8 +411,11 @@ class EpisodeController:
                     )
 
                 phase = "submission_freeze"
-                submission = self._environment.freeze_submission()
-                if submission.tree_sha256 != observation.candidate_tree_sha256:
+                frozen_submission = self._environment.freeze_submission()
+                if (
+                    frozen_submission.tree_sha256
+                    != observation.candidate_tree_sha256
+                ):
                     self._record(
                         context,
                         actor="controller",
@@ -424,7 +427,9 @@ class EpisodeController:
                             "candidate_tree_sha256": (
                                 observation.candidate_tree_sha256
                             ),
-                            "submission_tree_sha256": submission.tree_sha256,
+                            "submission_tree_sha256": (
+                                frozen_submission.tree_sha256
+                            ),
                         },
                     )
                     raise _ProtocolFailure(
@@ -435,6 +440,7 @@ class EpisodeController:
                             "candidate observation"
                         ),
                     )
+                submission = frozen_submission
                 self._record(
                     context,
                     actor="environment",

@@ -329,8 +329,11 @@ def _normalize_descriptor(descriptor: Mapping[str, Any]) -> Mapping[str, Any]:
         )
     _require_evidence_policy(descriptor["evidence_policy"])
     handler_id = descriptor["handler_id"]
-    if descriptor["lifecycle"] in {"active", "inactive"}:
+    if descriptor["lifecycle"] == "active":
         _require_nonempty_string(handler_id, field_name="handler_id")
+    elif descriptor["lifecycle"] == "inactive":
+        if handler_id is not None:
+            _require_nonempty_string(handler_id, field_name="handler_id")
     elif handler_id is not None:
         raise ToolRegistryError(
             "reserved_tool_handler",

@@ -1147,8 +1147,9 @@ class MismatchedFreezeEnvironment(ReadMutatingEnvironment):
         )
 
 
-def test_controller_binds_freeze_observation_to_frozen_submission() -> None:
+def test_controller_binds_freeze_observation_to_frozen_submission(tmp_path) -> None:
     boundary_log: list[str] = []
+    trajectory_path = tmp_path / "freeze-mismatch.jsonl"
     controller = EpisodeController(
         policy=SequencePolicy(
             [
@@ -1164,6 +1165,7 @@ def test_controller_binds_freeze_observation_to_frozen_submission() -> None:
         environment=MismatchedFreezeEnvironment(boundary_log),
         final_judge=PassingFinalJudge(boundary_log),
         tool_registry=_controller_registry("submit"),
+        trajectory=JsonlTrajectoryRecorder(trajectory_path),
     )
 
     result = controller.run(
@@ -1180,6 +1182,11 @@ def test_controller_binds_freeze_observation_to_frozen_submission() -> None:
     assert result.failure is not None
     assert result.failure.category == "submission_freeze_mismatch"
     assert result.failure.phase == "submission_freeze"
+    assert result.submission is None
+    assert not any(
+        event["event_type"] == "submission_frozen"
+        for event in read_trajectory(trajectory_path)
+    )
     assert boundary_log == [
         "start:attempt-001",
         "step:submit",

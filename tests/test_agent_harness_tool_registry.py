@@ -126,6 +126,24 @@ def test_inactive_tool_is_valid_but_not_resolved_or_callable() -> None:
         )
 
 
+def test_inactive_tool_may_drop_its_runtime_handler() -> None:
+    descriptor = _descriptor(lifecycle="inactive", handler_id=None)
+
+    jsonschema.validate(descriptor, _schema())
+    registry = ToolRegistry([descriptor])
+
+    assert registry.resolve(
+        condition_id="Agentic+EVAS",
+        model_visible=True,
+    ).accepted_tool_names == frozenset()
+    with pytest.raises(ToolRegistryError, match="inactive_tool"):
+        registry.authorize(
+            "bash",
+            condition_id="Agentic+EVAS",
+            model_visible=True,
+        )
+
+
 @pytest.mark.parametrize(
     ("tool_name", "condition_id", "error_code"),
     [
