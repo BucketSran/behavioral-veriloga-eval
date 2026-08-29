@@ -457,3 +457,20 @@
 - Treat this as Phase 3 compatibility closure, not a formal campaign switch.
   Production runtime meters, candidate transaction safety, scored-result joins,
   and hosted-provider parity remain separate gates.
+
+## 2026-08-30 - Reserve domain-tool families without granting authority
+
+- Reserve candidate, public-validation, retrieval, submission, and waveform
+  namespaces as harness-internal descriptors with no handler and no evidence,
+  budget, or state-transition authority.
+- Include markers in full registry identity but exclude them from every
+  condition-effective capability hash. Matched backend comparisons therefore
+  see the same callable surface.
+- Defer all five concrete families. Activation requires a separate failure
+  analysis, public/licence-safe source contract, leak review, clean-room RED
+  test, and tool-specific ablation.
+- Keep final judges outside the ordinary registry. A public-validation helper
+  cannot silently inherit final-test authority, and neither EVAS nor Spectre
+  final judging is represented by these placeholders.
+- Do not freeze future active names or schemas from the reserved marker. Phase
+  4 closes the design gate, not the concrete tool implementations.

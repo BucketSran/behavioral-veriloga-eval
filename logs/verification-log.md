@@ -622,3 +622,17 @@
 - Scope boundary: the adapter is opt-in. Production `DefaultAgent`/campaign
   routing, r53 release bytes, EVAS 0.8.7, score authority, and Spectre gate are
   unchanged.
+
+## 2026-08-30 - Domain-tool namespace gate
+
+- TDD RED failed during collection because
+  `runners.agent_harness.reserved_tools` did not exist.
+- Focused reserved/tool-registry invocation reports `36 passed`.
+- Registry tests prove that markers alter the complete registry identity but
+  do not alter the model-visible effective capability hash or active Bash set.
+- Every marker fails before environment dispatch with `reserved_tool`; final
+  judge names are absent.
+- Ruff 0.12.12, Python bytecode compilation, and `git diff --check` pass for
+  the code slice.
+- Scope boundary: no concrete domain tool, production routing, r53 release
+  byte, EVAS 0.8.7 behavior, final-score authority, or Spectre gate changed.

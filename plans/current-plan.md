@@ -512,7 +512,7 @@ Completed compatibility slice:
 
 ### Phase 4 - Reserve domain-tool extension points and run a design gate
 
-Status: `pending`
+Status: `completed`
 
 Goal: make the harness extensible without treating the previously discussed
 candidate, waveform, diagnostic, retrieval, or submission helpers as approved
@@ -564,6 +564,23 @@ Tests first:
 - an unregistered tool fails closed before state mutation;
 - final judge can never appear in a model-visible registry;
 - capability manifests resolve identically for matched backend comparisons.
+
+Completed design-gate slice:
+
+- five harness-internal namespace markers reserve candidate, public-validation,
+  retrieval, submission, and waveform families without granting a handler,
+  model visibility, budget, state mutation, or evidence-flow authority;
+- reserved markers change the complete registry identity but do not change the
+  effective capability hash used by matched backend comparisons;
+- every reserved family fails closed before dispatch, and final judges remain
+  outside the ordinary tool registry;
+- all five concrete tool families are `deferred`. Existing sandboxed Bash,
+  public EVAS, and `vabench-submit` remain the minimum production surface until
+  a family-specific failure analysis, source/licence review, clean-room test,
+  and ablation justify activation;
+- this phase reserves compatibility space only. It does not promise that the
+  placeholder name, arguments, observation schema, or handler will become the
+  final active tool contract.
 
 ### Phase 5 - Implement public validation / final test separation
 
