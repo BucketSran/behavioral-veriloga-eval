@@ -12,6 +12,7 @@ from runners.agent_harness import (
     JsonlTrajectoryRecorder,
     Observation,
     PublicValidator,
+    ToolCapability,
     ToolRegistry,
     project_model_visible_events,
     read_trajectory,
@@ -148,7 +149,11 @@ class PublicValidationEnvironment:
             payload={"message": "implement the public task"},
         )
 
-    def step(self, action: AgentAction) -> EnvironmentStep:
+    def step(
+        self,
+        action: AgentAction,
+        _capability: ToolCapability,
+    ) -> EnvironmentStep:
         self.boundary_log.append(f"step:{action.tool_name}")
         if action.tool_name == "public_validate":
             return EnvironmentStep(
@@ -301,7 +306,11 @@ class PassingEnvironment:
             payload={"message": "implement the public task"},
         )
 
-    def step(self, action: AgentAction) -> EnvironmentStep:
+    def step(
+        self,
+        action: AgentAction,
+        _capability: ToolCapability,
+    ) -> EnvironmentStep:
         assert action.tool_name == "submit"
         self.boundary_log.append("step:submit")
         return EnvironmentStep(
@@ -417,7 +426,11 @@ class SequencePolicy:
 
 
 class DispatchRecordingEnvironment(PassingEnvironment):
-    def step(self, action: AgentAction) -> EnvironmentStep:
+    def step(
+        self,
+        action: AgentAction,
+        _capability: ToolCapability,
+    ) -> EnvironmentStep:
         self.boundary_log.append(f"step:{action.tool_name}")
         if action.tool_name == "submit":
             return EnvironmentStep(
@@ -444,7 +457,11 @@ class DispatchRecordingEnvironment(PassingEnvironment):
 
 
 class MutationFailingEnvironment(PassingEnvironment):
-    def step(self, action: AgentAction) -> EnvironmentStep:
+    def step(
+        self,
+        action: AgentAction,
+        _capability: ToolCapability,
+    ) -> EnvironmentStep:
         raise AssertionError("environment.step must not run for denied tools")
 
 
@@ -461,16 +478,24 @@ class BoundMutationFailingEnvironment(MutationFailingEnvironment):
 
 
 class CapabilityRecordingEnvironment(PassingEnvironment):
-    def step(self, action: AgentAction, capability) -> Observation:
+    def step(
+        self,
+        action: AgentAction,
+        capability: ToolCapability,
+    ) -> EnvironmentStep:
         self.boundary_log.append(
             f"dispatch:{capability.handler_id}:{action.tool_name}"
         )
-        return Observation(
-            observation_id="observation-submission",
-            tool_name=action.tool_name,
-            status="succeeded",
-            payload={"message": "submission accepted"},
-            candidate_tree_sha256=action.candidate_tree_sha256,
+        return EnvironmentStep(
+            observation=Observation(
+                observation_id="observation-submission",
+                tool_name=action.tool_name,
+                status="succeeded",
+                payload={"message": "submission accepted"},
+                candidate_tree_sha256=action.candidate_tree_sha256,
+            ),
+            done=True,
+            terminal_reason="submitted",
         )
 
 
@@ -817,7 +842,11 @@ def test_final_judgment_must_bind_the_frozen_submission_hash() -> None:
 
 
 class InvalidTerminalEnvironment(PassingEnvironment):
-    def step(self, action: AgentAction) -> EnvironmentStep:
+    def step(
+        self,
+        action: AgentAction,
+        _capability: ToolCapability,
+    ) -> EnvironmentStep:
         self.boundary_log.append("step:invalid-terminal")
         return EnvironmentStep(
             observation=Observation(
@@ -839,7 +868,11 @@ class StartFailingEnvironment(PassingEnvironment):
 
 
 class NeverTerminalEnvironment(PassingEnvironment):
-    def step(self, action: AgentAction) -> EnvironmentStep:
+    def step(
+        self,
+        action: AgentAction,
+        _capability: ToolCapability,
+    ) -> EnvironmentStep:
         self.boundary_log.append("step:continue")
         return EnvironmentStep(
             observation=Observation(

@@ -203,7 +203,7 @@ class EpisodeController:
                     },
                 )
                 phase = "environment_step"
-                step = self._environment.step(action)
+                step = self._environment.step(action, capability)
                 self._record(
                     context,
                     actor="environment",

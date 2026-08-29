@@ -13,6 +13,7 @@ from .state import (
     FrozenSubmission,
     Observation,
 )
+from .tool_registry import ToolCapability
 
 
 class Policy(Protocol):
@@ -24,8 +25,12 @@ class Environment(Protocol):
     def start(self, context: EpisodeContext) -> Observation:
         """Start one clean-room attempt and return its public observation."""
 
-    def step(self, action: AgentAction) -> EnvironmentStep:
-        """Apply one action to the attempt-owned environment."""
+    def step(
+        self,
+        action: AgentAction,
+        capability: ToolCapability,
+    ) -> EnvironmentStep:
+        """Apply one registry-authorized action to the owned environment."""
 
     def freeze_submission(self) -> FrozenSubmission:
         """Freeze and content-address the final submission."""
