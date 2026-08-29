@@ -12,6 +12,7 @@ from .state import (
     FailureDisposition,
     Incident,
 )
+from .tool_registry import ToolRegistry, ToolRegistryError
 
 
 class _ProtocolFailure(RuntimeError):
@@ -33,12 +34,16 @@ class EpisodeController:
         policy: Policy,
         environment: Environment,
         final_judge: FinalJudge,
+        tool_registry: ToolRegistry,
         trajectory: TrajectorySink | None = None,
     ) -> None:
+        if not isinstance(tool_registry, ToolRegistry):
+            raise TypeError("tool_registry must be a ToolRegistry")
         self._policy = policy
         self._environment = environment
         self._final_judge = final_judge
         self._trajectory = trajectory
+        self._tool_registry = tool_registry
 
     def _record(
         self,
@@ -62,8 +67,12 @@ class EpisodeController:
     def run(self, context: EpisodeContext) -> EpisodeResult:
         result: EpisodeResult | None = None
         submission = None
-        phase = "environment_start"
+        phase = "tool_authority_resolution"
         try:
+            effective_toolset = self._tool_registry.resolve(
+                condition_id=context.condition,
+                model_visible=True,
+            )
             self._record(
                 context,
                 actor="controller",
@@ -71,6 +80,9 @@ class EpisodeController:
                 visibility="harness",
                 payload={
                     "max_steps": context.max_steps,
+                    "effective_capability_sha256": (
+                        effective_toolset.effective_capability_sha256
+                    ),
                     "attempt_lineage": {
                         "parent_attempt_id": context.parent_attempt_id,
                         "retry_index": context.retry_index,
@@ -78,6 +90,7 @@ class EpisodeController:
                     },
                 },
             )
+            phase = "environment_start"
             observation = self._environment.start(context)
             for _ in range(context.max_steps):
                 phase = "policy_action"
@@ -94,6 +107,99 @@ class EpisodeController:
                         "arguments_sha256": action.arguments_sha256,
                         "source_backend": action.source_backend,
                         "candidate_tree_sha256": action.candidate_tree_sha256,
+                    },
+                )
+                phase = "tool_authorization"
+                try:
+                    capability = self._tool_registry.authorize(
+                        action.tool_name,
+                        condition_id=context.condition,
+                        model_visible=True,
+                    )
+                except ToolRegistryError as exc:
+                    self._record(
+                        context,
+                        actor="controller",
+                        event_type="action_rejected",
+                        visibility="harness",
+                        payload={
+                            "action_id": action.action_id,
+                            "tool_name": action.tool_name,
+                            "candidate_tree_sha256": (
+                                action.candidate_tree_sha256
+                            ),
+                            "rejection_code": exc.code,
+                            "condition": context.condition,
+                            "effective_capability_sha256": (
+                                effective_toolset.effective_capability_sha256
+                            ),
+                        },
+                    )
+                    raise _ProtocolFailure(
+                        category="tool_authorization_rejected",
+                        phase="tool_authorization",
+                        message=str(exc),
+                    ) from exc
+                if capability.evidence_policy["requires_candidate_binding"]:
+                    expected_candidate_sha256 = (
+                        observation.candidate_tree_sha256
+                    )
+                    if expected_candidate_sha256 is None:
+                        rejection_code = "candidate_binding_unavailable"
+                    elif action.candidate_tree_sha256 is None:
+                        rejection_code = "missing_candidate_binding"
+                    elif action.candidate_tree_sha256 != expected_candidate_sha256:
+                        rejection_code = "candidate_binding_mismatch"
+                    else:
+                        rejection_code = None
+                    if rejection_code is not None:
+                        self._record(
+                            context,
+                            actor="controller",
+                            event_type="action_rejected",
+                            visibility="harness",
+                            payload={
+                                "action_id": action.action_id,
+                                "tool_name": action.tool_name,
+                                "tool_id": capability.tool_id,
+                                "candidate_tree_sha256": (
+                                    action.candidate_tree_sha256
+                                ),
+                                "expected_candidate_tree_sha256": (
+                                    expected_candidate_sha256
+                                ),
+                                "rejection_code": rejection_code,
+                                "condition": context.condition,
+                                "effective_capability_sha256": (
+                                    effective_toolset.effective_capability_sha256
+                                ),
+                            },
+                        )
+                        raise _ProtocolFailure(
+                            category="tool_contract_rejected",
+                            phase="tool_authorization",
+                            message=(
+                                f"{rejection_code}: action candidate binding "
+                                "does not match the current environment state"
+                            ),
+                        )
+                self._record(
+                    context,
+                    actor="controller",
+                    event_type="action_authorized",
+                    visibility="harness",
+                    payload={
+                        "action_id": action.action_id,
+                        "tool_name": capability.tool_name,
+                        "tool_id": capability.tool_id,
+                        "tool_version": capability.tool_version,
+                        "handler_id": capability.handler_id,
+                        "descriptor_sha256": capability.descriptor_sha256,
+                        "candidate_tree_sha256": action.candidate_tree_sha256,
+                        "condition": context.condition,
+                        "effective_capability_sha256": (
+                            effective_toolset.effective_capability_sha256
+                        ),
                     },
                 )
                 phase = "environment_step"

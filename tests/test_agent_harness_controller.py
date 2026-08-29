@@ -4,15 +4,16 @@ import pytest
 
 from runners.agent_harness import (
     AgentAction,
+    EnvironmentStep,
     EpisodeContext,
     EpisodeController,
-    EnvironmentStep,
     FinalJudgment,
     FrozenSubmission,
+    JsonlTrajectoryRecorder,
     Observation,
     PublicValidator,
+    ToolRegistry,
     project_model_visible_events,
-    JsonlTrajectoryRecorder,
     read_trajectory,
     validate_trajectory,
 )
@@ -201,6 +202,7 @@ def test_public_feedback_can_continue_but_final_judgment_cannot() -> None:
             FakePublicValidator(boundary_log),
         ),
         final_judge=TerminalFinalJudge(boundary_log),
+        tool_registry=_controller_registry("public_validate", "submit"),
     )
 
     result = controller.run(
@@ -242,6 +244,7 @@ def test_model_visible_trajectory_projection_excludes_final_judgment(
             FakePublicValidator(boundary_log),
         ),
         final_judge=TerminalFinalJudge(boundary_log),
+        tool_registry=_controller_registry("public_validate", "submit"),
         trajectory=JsonlTrajectoryRecorder(trajectory_path),
     )
 
@@ -339,6 +342,437 @@ class PassingFinalJudge:
         )
 
 
+def _tool_descriptor(
+    *,
+    tool_name: str,
+    tool_id: str | None = None,
+    lifecycle: str = "active",
+    allowed_conditions: list[str] | None = None,
+    handler_id: str | None = "tool.fake",
+    budget_class: str = "tool_call",
+    state_effect: str = "candidate_mutation",
+    candidate_effect: str = "mutate",
+    model_visibility: str = "model_visible",
+    requires_candidate_binding: bool = False,
+) -> dict:
+    return {
+        "schema_version": "vaevas-tool-descriptor-v1",
+        "tool_id": tool_id or f"core/{tool_name}-v1",
+        "tool_name": tool_name,
+        "tool_version": "1",
+        "lifecycle": lifecycle,
+        "model_visibility": model_visibility,
+        "allowed_conditions": allowed_conditions or ["Agentic+EVAS"],
+        "budget_class": budget_class,
+        "state_effect": state_effect,
+        "candidate_effect": candidate_effect,
+        "argument_schema": {
+            "type": "object",
+            "additionalProperties": True,
+        },
+        "observation_schema": {
+            "type": "object",
+            "additionalProperties": True,
+        },
+        "evidence_policy": {
+            "records_private_evidence": True,
+            "may_enter_model_observation": True,
+            "may_enter_shared_memory": False,
+            "requires_candidate_binding": requires_candidate_binding,
+        },
+        "handler_id": handler_id,
+    }
+
+
+def _controller_registry(*tool_names: str) -> ToolRegistry:
+    semantics = {
+        "public_validate": ("public_validation", "read_only", "read"),
+        "submit": ("submission", "terminal_submission", "freeze"),
+    }
+    descriptors = []
+    for tool_name in tool_names:
+        budget_class, state_effect, candidate_effect = semantics.get(
+            tool_name,
+            ("tool_call", "candidate_mutation", "mutate"),
+        )
+        descriptors.append(
+            _tool_descriptor(
+                tool_name=tool_name,
+                handler_id=f"tool.{tool_name}",
+                budget_class=budget_class,
+                state_effect=state_effect,
+                candidate_effect=candidate_effect,
+            )
+        )
+    return ToolRegistry(descriptors)
+
+
+class SequencePolicy:
+    def __init__(self, actions: list[AgentAction]) -> None:
+        self._actions = list(actions)
+
+    def act(self, observation: Observation) -> AgentAction:
+        assert observation.status in {"ready", "succeeded"}
+        return self._actions.pop(0)
+
+
+class DispatchRecordingEnvironment(PassingEnvironment):
+    def step(self, action: AgentAction) -> EnvironmentStep:
+        self.boundary_log.append(f"step:{action.tool_name}")
+        if action.tool_name == "submit":
+            return EnvironmentStep(
+                observation=Observation(
+                    observation_id="observation-submission",
+                    tool_name="submit",
+                    status="succeeded",
+                    payload={"message": "submission accepted"},
+                    candidate_tree_sha256="a" * 64,
+                ),
+                done=True,
+                terminal_reason="submitted",
+            )
+        return EnvironmentStep(
+            observation=Observation(
+                observation_id=f"observation-{action.tool_name}",
+                tool_name=action.tool_name,
+                status="succeeded",
+                payload={"message": f"{action.tool_name} completed"},
+                candidate_tree_sha256=action.candidate_tree_sha256,
+            ),
+            done=False,
+        )
+
+
+class MutationFailingEnvironment(PassingEnvironment):
+    def step(self, action: AgentAction) -> EnvironmentStep:
+        raise AssertionError("environment.step must not run for denied tools")
+
+
+class BoundMutationFailingEnvironment(MutationFailingEnvironment):
+    def start(self, context: EpisodeContext) -> Observation:
+        self.boundary_log.append(f"start:{context.attempt_id}")
+        return Observation(
+            observation_id="observation-task",
+            tool_name="task",
+            status="ready",
+            payload={"message": "implement the public task"},
+            candidate_tree_sha256="a" * 64,
+        )
+
+
+class CapabilityRecordingEnvironment(PassingEnvironment):
+    def step(self, action: AgentAction, capability) -> Observation:
+        self.boundary_log.append(
+            f"dispatch:{capability.handler_id}:{action.tool_name}"
+        )
+        return Observation(
+            observation_id="observation-submission",
+            tool_name=action.tool_name,
+            status="succeeded",
+            payload={"message": "submission accepted"},
+            candidate_tree_sha256=action.candidate_tree_sha256,
+        )
+
+
+def test_controller_requires_a_trusted_tool_registry() -> None:
+    with pytest.raises(TypeError, match="tool_registry"):
+        EpisodeController(
+            policy=SubmitPolicy(),
+            environment=PassingEnvironment([]),
+            final_judge=PassingFinalJudge([]),
+        )
+
+
+def test_controller_rejects_a_null_tool_registry() -> None:
+    with pytest.raises(TypeError, match="tool_registry must be a ToolRegistry"):
+        EpisodeController(
+            policy=SubmitPolicy(),
+            environment=PassingEnvironment([]),
+            final_judge=PassingFinalJudge([]),
+            tool_registry=None,  # type: ignore[arg-type]
+        )
+
+
+def test_controller_passes_the_resolved_capability_to_the_environment() -> None:
+    boundary_log: list[str] = []
+    controller = EpisodeController(
+        policy=SubmitPolicy(),
+        environment=CapabilityRecordingEnvironment(boundary_log),
+        final_judge=PassingFinalJudge(boundary_log),
+        tool_registry=_controller_registry("submit"),
+    )
+
+    result = controller.run(
+        EpisodeContext(
+            episode_id="episode-001",
+            attempt_id="attempt-001",
+            task_id="v4-001",
+            condition="Agentic+EVAS",
+            max_steps=4,
+        )
+    )
+
+    assert result.primary_outcome == "passed"
+    assert boundary_log == [
+        "start:attempt-001",
+        "dispatch:tool.submit:submit",
+        "freeze",
+        "final_judge",
+        "close",
+    ]
+
+
+def test_controller_authorizes_tool_before_environment_step_and_records_capability(
+    tmp_path,
+) -> None:
+    trajectory_path = tmp_path / "authorized-dispatch.jsonl"
+    boundary_log: list[str] = []
+    registry = ToolRegistry(
+        [
+            _tool_descriptor(tool_name="bash", handler_id="tool.bash"),
+            _tool_descriptor(tool_name="submit", handler_id="tool.submit"),
+        ]
+    )
+    controller = EpisodeController(
+        policy=SequencePolicy(
+            [
+                AgentAction(
+                    action_id="action-bash",
+                    tool_name="bash",
+                    arguments={"command": "true"},
+                    source_backend="fake-backend",
+                    candidate_tree_sha256="a" * 64,
+                ),
+                AgentAction(
+                    action_id="action-submit",
+                    tool_name="submit",
+                    arguments={},
+                    source_backend="fake-backend",
+                    candidate_tree_sha256="a" * 64,
+                ),
+            ]
+        ),
+        environment=DispatchRecordingEnvironment(boundary_log),
+        final_judge=PassingFinalJudge(boundary_log),
+        trajectory=JsonlTrajectoryRecorder(trajectory_path),
+        tool_registry=registry,
+    )
+
+    result = controller.run(
+        EpisodeContext(
+            episode_id="episode-001",
+            attempt_id="attempt-001",
+            task_id="v4-001",
+            condition="Agentic+EVAS",
+            max_steps=4,
+        )
+    )
+
+    assert result.primary_outcome == "passed"
+    assert boundary_log[:3] == ["start:attempt-001", "step:bash", "step:submit"]
+    events = read_trajectory(trajectory_path)
+    authorized = [
+        event for event in events if event["event_type"] == "action_authorized"
+    ]
+    assert [event["payload"]["tool_name"] for event in authorized] == [
+        "bash",
+        "submit",
+    ]
+    assert authorized[0]["payload"]["handler_id"] == "tool.bash"
+    effective_capability_sha256 = registry.resolve(
+        condition_id="Agentic+EVAS",
+        model_visible=True,
+    ).effective_capability_sha256
+    assert events[0]["payload"]["effective_capability_sha256"] == (
+        effective_capability_sha256
+    )
+    assert authorized[0]["payload"]["effective_capability_sha256"] == (
+        effective_capability_sha256
+    )
+    assert len(authorized[0]["payload"]["descriptor_sha256"]) == 64
+    assert not any(
+        "handler_id" in event["payload"]
+        for event in project_model_visible_events(events)
+    )
+    assert not any(
+        "effective_capability_sha256" in event["payload"]
+        for event in project_model_visible_events(events)
+    )
+
+
+def test_controller_rejects_unauthorized_tool_before_environment_mutation(
+    tmp_path,
+) -> None:
+    trajectory_path = tmp_path / "rejected-dispatch.jsonl"
+    boundary_log: list[str] = []
+    registry = ToolRegistry(
+        [
+            _tool_descriptor(
+                tool_name="waveform.inspect",
+                tool_id="domain/waveform-v1",
+                lifecycle="reserved",
+                handler_id=None,
+            ),
+        ]
+    )
+    controller = EpisodeController(
+        policy=SequencePolicy(
+            [
+                AgentAction(
+                    action_id="action-waveform",
+                    tool_name="waveform.inspect",
+                    arguments={},
+                    source_backend="fake-backend",
+                    candidate_tree_sha256="a" * 64,
+                ),
+            ]
+        ),
+        environment=MutationFailingEnvironment(boundary_log),
+        final_judge=PassingFinalJudge(boundary_log),
+        trajectory=JsonlTrajectoryRecorder(trajectory_path),
+        tool_registry=registry,
+    )
+
+    result = controller.run(
+        EpisodeContext(
+            episode_id="episode-001",
+            attempt_id="attempt-001",
+            task_id="v4-001",
+            condition="Agentic+EVAS",
+            max_steps=4,
+        )
+    )
+
+    assert result.primary_outcome == "protocol_failure"
+    assert result.failure is not None
+    assert result.failure.category == "tool_authorization_rejected"
+    assert result.failure.phase == "tool_authorization"
+    assert "reserved_tool" in result.failure.message
+    assert boundary_log == ["start:attempt-001", "close"]
+    events = read_trajectory(trajectory_path)
+    rejected = next(
+        event for event in events if event["event_type"] == "action_rejected"
+    )
+    assert rejected["payload"] == {
+        "action_id": "action-waveform",
+        "tool_name": "waveform.inspect",
+        "candidate_tree_sha256": "a" * 64,
+        "rejection_code": "reserved_tool",
+        "condition": "Agentic+EVAS",
+        "effective_capability_sha256": registry.resolve(
+            condition_id="Agentic+EVAS",
+            model_visible=True,
+        ).effective_capability_sha256,
+    }
+
+
+def test_controller_rejects_stale_candidate_binding_before_environment_mutation(
+    tmp_path,
+) -> None:
+    trajectory_path = tmp_path / "stale-candidate-binding.jsonl"
+    boundary_log: list[str] = []
+    controller = EpisodeController(
+        policy=SequencePolicy(
+            [
+                AgentAction(
+                    action_id="action-bash",
+                    tool_name="bash",
+                    arguments={"command": "true"},
+                    source_backend="fake-backend",
+                    candidate_tree_sha256="b" * 64,
+                ),
+            ]
+        ),
+        environment=BoundMutationFailingEnvironment(boundary_log),
+        final_judge=PassingFinalJudge(boundary_log),
+        trajectory=JsonlTrajectoryRecorder(trajectory_path),
+        tool_registry=ToolRegistry(
+            [
+                _tool_descriptor(
+                    tool_name="bash",
+                    handler_id="tool.bash",
+                    requires_candidate_binding=True,
+                ),
+            ]
+        ),
+    )
+
+    result = controller.run(
+        EpisodeContext(
+            episode_id="episode-001",
+            attempt_id="attempt-001",
+            task_id="v4-001",
+            condition="Agentic+EVAS",
+            max_steps=4,
+        )
+    )
+
+    assert result.primary_outcome == "protocol_failure"
+    assert result.failure is not None
+    assert result.failure.category == "tool_contract_rejected"
+    assert result.failure.phase == "tool_authorization"
+    assert "candidate_binding_mismatch" in result.failure.message
+    assert boundary_log == ["start:attempt-001", "close"]
+    rejected = next(
+        event
+        for event in read_trajectory(trajectory_path)
+        if event["event_type"] == "action_rejected"
+    )
+    assert rejected["payload"]["rejection_code"] == "candidate_binding_mismatch"
+    assert rejected["payload"]["expected_candidate_tree_sha256"] == "a" * 64
+
+
+def test_controller_rejects_final_only_tool_from_model_visible_dispatch(
+    tmp_path,
+) -> None:
+    trajectory_path = tmp_path / "final-only-tool.jsonl"
+    boundary_log: list[str] = []
+    controller = EpisodeController(
+        policy=SequencePolicy(
+            [
+                AgentAction(
+                    action_id="action-final-judge",
+                    tool_name="evas.final_judge",
+                    arguments={},
+                    source_backend="fake-backend",
+                ),
+            ]
+        ),
+        environment=MutationFailingEnvironment(boundary_log),
+        final_judge=PassingFinalJudge(boundary_log),
+        trajectory=JsonlTrajectoryRecorder(trajectory_path),
+        tool_registry=ToolRegistry(
+            [
+                _tool_descriptor(
+                    tool_name="evas.final_judge",
+                    tool_id="authority/evas-final-v1",
+                    handler_id="authority.evas_final",
+                    model_visibility="harness_internal",
+                    budget_class="no_budget",
+                    state_effect="read_only",
+                    candidate_effect="none",
+                ),
+            ]
+        ),
+    )
+
+    result = controller.run(
+        EpisodeContext(
+            episode_id="episode-001",
+            attempt_id="attempt-001",
+            task_id="v4-001",
+            condition="Agentic+EVAS",
+            max_steps=4,
+        )
+    )
+
+    assert result.primary_outcome == "protocol_failure"
+    assert result.failure is not None
+    assert result.failure.category == "tool_authorization_rejected"
+    assert "not_model_visible" in result.failure.message
+    assert boundary_log == ["start:attempt-001", "close"]
+
+
 class CleanupFailingEnvironment(PassingEnvironment):
     def close(self) -> None:
         self.boundary_log.append("close")
@@ -360,6 +794,7 @@ def test_final_judgment_must_bind_the_frozen_submission_hash() -> None:
         policy=SubmitPolicy(),
         environment=PassingEnvironment([]),
         final_judge=MismatchedFinalJudge(),
+        tool_registry=_controller_registry("submit"),
     )
 
     result = controller.run(
@@ -423,6 +858,7 @@ def test_step_budget_exhaustion_is_a_terminal_result() -> None:
         policy=SubmitPolicy(),
         environment=NeverTerminalEnvironment([]),
         final_judge=PassingFinalJudge([]),
+        tool_registry=_controller_registry("submit"),
     )
 
     result = controller.run(
@@ -450,6 +886,7 @@ def test_environment_failure_is_materialized_separately_from_cleanup() -> None:
         policy=SubmitPolicy(),
         environment=StartFailingEnvironment(boundary_log),
         final_judge=PassingFinalJudge(boundary_log),
+        tool_registry=_controller_registry("submit"),
     )
 
     result = controller.run(
@@ -478,6 +915,7 @@ def test_start_failure_still_has_a_complete_attempt_trajectory(tmp_path) -> None
         policy=SubmitPolicy(),
         environment=StartFailingEnvironment([]),
         final_judge=PassingFinalJudge([]),
+        tool_registry=_controller_registry("submit"),
         trajectory=JsonlTrajectoryRecorder(trajectory_path),
     )
 
@@ -527,6 +965,7 @@ def test_protocol_failure_is_materialized_in_the_episode_result() -> None:
         policy=SubmitPolicy(),
         environment=InvalidTerminalEnvironment([]),
         final_judge=PassingFinalJudge([]),
+        tool_registry=_controller_registry("submit"),
     )
 
     result = controller.run(
@@ -555,6 +994,7 @@ def test_controller_freezes_submission_before_verification() -> None:
         policy=SubmitPolicy(),
         environment=PassingEnvironment(boundary_log),
         final_judge=PassingFinalJudge(boundary_log),
+        tool_registry=_controller_registry("submit"),
     )
 
     result = controller.run(
@@ -589,6 +1029,7 @@ def test_cleanup_failure_is_an_incident_not_the_primary_outcome() -> None:
         policy=SubmitPolicy(),
         environment=CleanupFailingEnvironment(boundary_log),
         final_judge=PassingFinalJudge(boundary_log),
+        tool_registry=_controller_registry("submit"),
     )
 
     result = controller.run(
@@ -617,6 +1058,7 @@ def test_controller_writes_attempt_scoped_tamper_evident_trajectory(
         policy=SubmitPolicy(),
         environment=PassingEnvironment(boundary_log),
         final_judge=PassingFinalJudge(boundary_log),
+        tool_registry=_controller_registry("submit"),
         trajectory=JsonlTrajectoryRecorder(trajectory_path),
     )
 
@@ -637,6 +1079,7 @@ def test_controller_writes_attempt_scoped_tamper_evident_trajectory(
     assert [row["event_type"] for row in events] == [
         "episode_started",
         "action_proposed",
+        "action_authorized",
         "environment_observed",
         "submission_frozen",
         "final_judgment_completed",
@@ -650,7 +1093,7 @@ def test_controller_writes_attempt_scoped_tamper_evident_trajectory(
     assert action_payload["tool_name"] == "submit"
     assert action_payload["source_backend"] == "fake-backend"
     assert action_payload["candidate_tree_sha256"] == "a" * 64
-    observation_payload = events[2]["payload"]
+    observation_payload = events[3]["payload"]
     assert observation_payload["schema_version"] == "vaevas-observation-v1"
     assert observation_payload["observation_id"] == "observation-submission"
     assert observation_payload["tool_name"] == "submit"
@@ -679,6 +1122,7 @@ def test_retry_creates_a_linked_attempt_without_reusing_identity(tmp_path) -> No
         policy=SubmitPolicy(),
         environment=PassingEnvironment([]),
         final_judge=PassingFinalJudge([]),
+        tool_registry=_controller_registry("submit"),
         trajectory=JsonlTrajectoryRecorder(tmp_path / "attempt-002.jsonl"),
     )
 
