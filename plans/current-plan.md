@@ -649,15 +649,28 @@ Completed authority-binding slice:
 - final profile also binds `score_authority`; legacy v1 profiles safely default
   to `development_only`, and formal sidecars require an explicit formal
   authority declaration.
+- `write_immutable_score_sidecar` now validates before I/O and publishes
+  canonical, content-addressed evidence without overwrite using same-directory
+  fsync plus exclusive-link semantics; its receipt binds sidecar, profile,
+  profile-input, and submission identities without emitting a model event.
 
 Still required before Phase 5 completion:
 
 - a production EVAS 0.8.7 public-validation adapter that emits this binding;
-- a production EVAS 0.8.7 final executor and atomic immutable sidecar writer;
+- a production EVAS 0.8.7 final executor that invokes the generic immutable
+  sidecar writer and records its receipt;
 - clean-room evidence that final outputs never enter generation, candidate
   selection, or shared memory;
 - a real campaign result join using native typed trajectory evidence rather
   than a fabricated conversion from incomplete legacy traces.
+
+Recommended execution order after the generic store:
+
+1. production final executor + receipt integration;
+2. production public-validation adapter;
+3. production resume/checkpoint no-reentry gate;
+4. native typed campaign result join;
+5. only then start the AlphaApollo reasoning/evolution backend comparison.
 
 ### Phase 6 - Add the AlphaApollo single-trajectory reasoning backend
 

@@ -513,3 +513,17 @@
 - Keep writing and production execution outside this generic adapter. Atomic
   file creation, native typed trajectory join, and clean-room no-reentry remain
   explicit Phase 5/8 work.
+
+## 2026-08-30 - Publish final sidecars as append-only content-addressed evidence
+
+- Keep persistence outside `ProfileBoundFinalJudge` and the controller. The
+  store accepts trusted typed state, revalidates authority before any I/O, and
+  has no trajectory or model-observation output.
+- Name the file by the exact canonical JSON byte SHA-256. Write and fsync a
+  same-directory temporary file, set it read-only, publish with an exclusive
+  hard link, remove the temporary name, and fsync the directory.
+- Never overwrite or silently reuse an existing sidecar, even when its content
+  matches. A repeated judge attempt must remain visible in attempt lineage
+  rather than being collapsed by persistence.
+- Treat this as a generic persistence seam only. Production runner integration,
+  no-reentry evidence, and campaign result-ledger joins remain separate gates.

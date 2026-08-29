@@ -679,3 +679,20 @@
 - Scope boundary: no EVAS invocation, production sidecar write, default runner
   switch, r53 release mutation, production score-authority escalation, or
   Spectre trigger occurred.
+
+## 2026-08-30 - Immutable score sidecar store
+
+- TDD RED failed at collection because the result-store module did not exist.
+- Focused result-store invocation reports `9 passed`.
+- Complete generic harness plus meta-schema invocation reports `306 passed`.
+- Tests prove canonical file bytes match the content-addressed filename,
+  repeated writes fail closed, invalid authority produces no file, publish
+  failure removes its temporary file, symlinked evidence directories are
+  rejected, and the writer does not modify model-visible trajectory events.
+- Ruff 0.12.12, Python bytecode compilation, and `git diff --check` pass.
+- A parallel architecture audit recommends keeping this as an independent
+  commit before production adapter integration; it identifies production
+  public/final adapters and no-reentry evidence as the next Phase 5 blockers.
+- Scope boundary: the store is not yet called by `run_evas`, trusted replay, or
+  `score_campaign`; r53, EVAS 0.8.7, production routing, and score authority are
+  unchanged.
