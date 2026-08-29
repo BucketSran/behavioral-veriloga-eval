@@ -218,6 +218,36 @@
   compiler behavior, simulator semantics, ABI, or packaging changes, and when
   an explicitly named external or paper protocol demands Spectre-backed
   evidence.
+
+## 2026-08-30 - Harness evolution phase-1 contract split
+
+- Freeze tool capability, public-validation authority, final-test authority,
+  memory snapshot, candidate lineage, and evolution manifest as separate
+  protocol contracts before any production runner integration.
+- Keep proposal syntax allowlists separate from execution authority. A tool may
+  be syntactically accepted by a backend proposal parser and still be rejected
+  by the trusted registry when it is unknown, reserved, final-only, disabled for
+  the condition, or missing a handler.
+- Keep future vaEVAS domain tools as `reserved` descriptors until each tool has
+  an explicit semantics, evidence policy, budget impact, and ablation decision.
+- Treat public EVAS validation and final EVAS trusted replay as separate
+  authorities even when both use `evas-sim==0.8.7`. Public validation may
+  produce model-visible feedback and episode-local public memory; final replay
+  is post-freeze, trusted-only, cannot select candidates, cannot repair, and
+  cannot re-enter model generation.
+- Model-visible memory may contain only public candidate summaries, public
+  validation, and public tool observations. Final judgments, final score
+  sidecars, private checker evidence, and trusted events are forbidden memory
+  sources.
+- Candidate lineage uses one artifact parent plus multiple influence
+  references. This preserves a real edit parent while still recording
+  cross-candidate inspiration from shared public feedback.
+- Round-based evolution selection is deterministic over public evidence:
+  public metrics first, then `candidate_tree_sha256`, then `candidate_id`.
+  Completion order, model identity, and final score are not selection inputs.
+- This contract slice does not implement a new AlphaApollo backend, does not
+  alter mini-swe, does not alter r53, does not alter EVAS, and does not trigger
+  Spectre parity.
 - EVAS-backed results may not be described as Spectre-backed or
   simulator-independent unless that conditional parity protocol was executed
   and joined to the same frozen submissions.
@@ -271,3 +301,42 @@
 - Content-address schema-validated profiles with canonical SHA-256. The hash
   helper does not replace schema validation; campaign/result joins are later
   work.
+
+## 2026-08-30 - Tool registry owns execution authority
+
+- Treat proposal `accepted_tool_names` as a syntax gate only. A normalized
+  action receives execution authority only after `ToolRegistry` resolves an
+  active, condition-eligible descriptor.
+- Freeze argument, observation, evidence, budget, state-effect, candidate-
+  effect, handler, and visibility contracts into the resolved capability and
+  its content hash.
+- Keep domain-tool namespaces reserved and non-callable until a separate
+  accepted design record and ablation exist.
+- Keep final judging outside the tool registry. The public EVAS invocation may
+  later be represented as a model-visible validation capability, while final
+  trusted replay remains terminal-only authority after submission freeze.
+- Reject malformed descriptors at both JSON-schema and operational registry
+  boundaries; do not rely on parser allowlists or caller-side validation for
+  runtime safety.
+
+## 2026-08-30 - Phase 1 contracts closed before runtime integration
+
+- Freeze public-validation and final-test authority profiles as separate
+  schema families even when both currently use r53 and EVAS 0.8.7. Public
+  validation may be model-visible and may feed episode-local public memory;
+  final trusted replay remains post-freeze, trusted-only, non-adaptive, and
+  may replay only for infrastructure failures against the same frozen
+  submission with a fresh judge attempt.
+- Freeze evolution memory as public-only. Candidate summaries, public
+  validation, and public tool observations are allowed; final judgments, final
+  score sidecars, private checker evidence, and trusted events are forbidden.
+- Freeze candidate lineage as one artifact parent plus optional influence
+  references. Failed mutations create explicit lineage records without
+  changing the candidate tree hash; frozen candidates are terminal.
+- Freeze the first evolution manifest/reducer contract before implementing a
+  real AlphaApollo backend. Round snapshots are invariant to provider
+  completion order, final/trusted feedback is rejected, and selection uses only
+  public metrics followed by `candidate_tree_sha256` and `candidate_id`.
+- Phase 1 is now a protocol-contract closure. Runtime dispatch, mini-swe
+  adapter parity, real multi-model scheduling, CI wiring, and result-ledger
+  joins move to subsequent phases.

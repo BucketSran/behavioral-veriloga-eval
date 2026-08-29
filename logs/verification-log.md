@@ -218,6 +218,25 @@
   prototype) and ten `pending` phases covering protocols, controller/state,
   mini-swe compatibility, domain tools, validation/test separation,
   AlphaApollo reasoning/evolution, evidence, ablations, and CI/merge gates.
+
+## 2026-08-30 - Harness phase-1 contracts
+
+- Added focused RED -> GREEN protocol tests for tool capability registry,
+  public/final authority profiles, public-only memory snapshots, candidate
+  lineage, and evolution manifest round snapshots.
+- Targeted phase-1 contract invocation:
+  `./.venv/bin/python -m pytest -q -p no:cacheprovider tests/test_agent_harness_tool_registry.py tests/test_agent_harness_authority_profiles.py tests/test_agent_harness_evolution_state.py tests/test_agent_harness_evolution_manifest.py`
+  reports `49 passed`.
+- The tests prove active/reserved/final-only tool registry behavior,
+  syntax-not-authority rejection, public/final authority separation, conditional
+  Spectre policy, infrastructure-only final replay, memory rejection of final
+  or private feedback, retry memory reset, single-artifact-parent lineage,
+  lineage cycle detection, completion-order-invariant round snapshots, public
+  metric/hash/id candidate selection, final-feedback rejection, and unsealed
+  global-deadline rejection.
+- This is protocol-layer evidence only. Production runner integration,
+  mini-swe adapter parity, real multi-model execution, and formal campaign
+  score generation remain unexecuted.
 - `git diff --check` passes for the planning and decision-log changes.
 - The behavioral repository remains on fork `main`; the only pre-existing code
   work remains the untracked paused `runners/agent_harness/` prototype and its
@@ -378,3 +397,93 @@
   dependencies only. Campaign/result profile-hash joins, adapter enforcement,
   tool/validation/evolution manifests, and real multi-model execution remain
   unimplemented and unclaimed.
+
+## 2026-08-30 - Phase 1 tool capability registry
+
+- TDD RED 1 failed at collection with `ModuleNotFoundError` for
+  `runners.agent_harness.tool_registry`, proving no common runtime capability
+  authority existed.
+- Independent main-agent review added a second RED pass for final-judge/tool
+  separation, deep descriptor freezing, duplicate IDs, object-root I/O
+  schemas, retained dispatcher contracts, and runtime validation independent
+  of JSON Schema. Those additions initially reported `6 failed, 5 passed`,
+  followed by `9 failed, 11 passed` for the final malformed-descriptor cases.
+- GREEN focused verification:
+  `./.venv/bin/python -m pytest -q -p no:cacheprovider
+  tests/test_agent_harness_tool_registry.py` reports `20 passed`.
+- Python bytecode compilation passes for `tool_registry.py`; Ruff 0.12.12
+  reports `All checks passed!`; the tool descriptor passes Draft 2020-12
+  schema self-validation; `git diff --check` passes.
+- Scope boundary: this slice adds no production dispatcher or callable domain
+  tool, changes no r53/EVAS asset, and keeps final trusted replay outside the
+  ordinary tool registry.
+
+## 2026-08-30 - Phase 1 contract batch verification refresh
+
+- Fresh focused contract invocation:
+  `./.venv/bin/python -m pytest -q -p no:cacheprovider tests/test_agent_harness_tool_registry.py tests/test_agent_harness_authority_profiles.py tests/test_agent_harness_evolution_state.py tests/test_agent_harness_evolution_manifest.py`
+  reports `49 passed`.
+- Fresh full generic harness invocation:
+  `./.venv/bin/python -m pytest -q -p no:cacheprovider tests/test_agent_harness_tool_registry.py tests/test_agent_harness_authority_profiles.py tests/test_agent_harness_evolution_state.py tests/test_agent_harness_evolution_manifest.py tests/test_agent_harness_backend_profile.py tests/test_agent_harness_proposals.py tests/test_agent_harness_protocol.py tests/test_agent_harness_controller.py`
+  reports `132 passed`.
+- Static checks pass for the modified harness/test surface:
+  `./.venv/bin/python -m py_compile runners/agent_harness/*.py tests/test_agent_harness_tool_registry.py tests/test_agent_harness_authority_profiles.py tests/test_agent_harness_evolution_state.py tests/test_agent_harness_evolution_manifest.py`,
+  Draft 2020-12 schema self-validation over `schemas/vaevas-*-v1.schema.json`,
+  `uvx ruff==0.12.12 check runners/agent_harness tests/test_agent_harness_tool_registry.py tests/test_agent_harness_authority_profiles.py tests/test_agent_harness_evolution_state.py tests/test_agent_harness_evolution_manifest.py`,
+  and `git diff --check`.
+- Active r53 entrypoints remain green:
+  `./.venv/bin/python -m pytest -q -p no:cacheprovider tests/test_v4_r53_active_entrypoints.py`
+  reports `9 passed`.
+- The combined mini-swe/r53 smoke invocation found the existing timeout-sensitive
+  mini-swe telemetry regression:
+  `tests/test_mini_swe_vabench.py::test_direct_evas_timeout_is_recorded_without_leaking_control_markers`
+  currently reports `len(environment.evas_invocations) == 0` instead of `1`.
+  This test exercises the existing production mini-swe adapter; none of the
+  Phase 1 contract commits modify that file. Treat it as an unresolved
+  mini-swe timeout-recording risk before claiming broader agentic-runner parity.
+
+## 2026-08-30 - Phase 1 authority, memory, lineage, and evolution closure
+
+- Focused public/final authority profile tests pass:
+  `./.venv/bin/python -m pytest -q -p no:cacheprovider
+  tests/test_agent_harness_authority_profiles.py` reports `11 passed`.
+- Focused memory and candidate-lineage tests pass:
+  `./.venv/bin/python -m pytest -q -p no:cacheprovider
+  tests/test_agent_harness_evolution_state.py` reports `12 passed`.
+- Focused evolution-manifest reducer tests pass:
+  `./.venv/bin/python -m pytest -q -p no:cacheprovider
+  tests/test_agent_harness_evolution_manifest.py` reports `6 passed`.
+- Combined new contract surface passes:
+  `./.venv/bin/python -m pytest -q -p no:cacheprovider
+  tests/test_agent_harness_tool_registry.py
+  tests/test_agent_harness_authority_profiles.py
+  tests/test_agent_harness_evolution_state.py
+  tests/test_agent_harness_evolution_manifest.py` reports `49 passed`.
+- Complete current `runners/agent_harness` regression surface passes:
+  `./.venv/bin/python -m pytest -q -p no:cacheprovider
+  tests/test_agent_harness_backend_profile.py tests/test_agent_harness_protocol.py
+  tests/test_agent_harness_proposals.py tests/test_agent_harness_controller.py
+  tests/test_agent_harness_tool_registry.py
+  tests/test_agent_harness_authority_profiles.py
+  tests/test_agent_harness_evolution_state.py
+  tests/test_agent_harness_evolution_manifest.py` reports `132 passed`.
+- Existing mini-swe regressions remain green:
+  `./.venv/bin/python -m pytest -q -p no:cacheprovider
+  tests/test_mini_swe_vabench.py` reports `30 passed, 3 skipped`.
+- Active r53 entrypoint regressions remain green:
+  `./.venv/bin/python -m pytest -q -p no:cacheprovider
+  tests/test_v4_r53_active_entrypoints.py` reports `9 passed`.
+- Python bytecode compilation passes for `runners/agent_harness/*.py` and the
+  new authority/tool/evolution tests.
+- All `schemas/vaevas-*-v1.schema.json` files pass
+  `Draft202012Validator.check_schema`; `git diff --check` passes.
+- Production-import scan with
+  `rg -n "runners\\.agent_harness" benchmark-vabench-release-v4 scripts -g
+  '*.py'` returns no matches, so current production runners remain
+  disconnected from the new contract package.
+- Ruff could not be re-run in the current environment because neither
+  `./.venv/bin/ruff` nor `uv run ruff` resolves a `ruff` executable. This is a
+  local dev-tool availability gap, not a test failure from the changed files.
+- Scope boundary: no production runner imports the new contracts yet; no r53
+  release bytes, EVAS code, evaluator version, score sidecar, or Spectre gate
+  changed.

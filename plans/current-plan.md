@@ -278,7 +278,7 @@ Disposition recorded in `AA-VAE-015`:
 
 ### Phase 1 - Freeze canonical protocols and manifests
 
-Status: `in_progress`
+Status: `completed`
 
 Goal: make backend, action, tool, memory, validation, and final-test contracts
 machine-checkable before implementation.
@@ -314,13 +314,34 @@ Completed slice:
   external contract dependencies without copying campaign/environment values;
 - backend profiles are content-addressed with a canonical SHA-256 that is
   stable across mapping order and sensitive to contract changes.
+- `vaevas-tool-descriptor-v1` and the fail-closed `ToolRegistry` now separate
+  parser syntax allowlists from execution authority, deep-freeze resolved
+  capability contracts, and content-address effective condition-specific tool
+  sets;
+- reserved domain-tool placeholders have no handler and cannot be authorized;
+  final judging remains outside the ordinary tool registry.
+- `vaevas-public-validation-profile-v1` and `vaevas-final-test-profile-v1`
+  now freeze the public EVAS feedback authority separately from terminal
+  trusted replay, even though both currently bind to r53 and EVAS 0.8.7;
+- final replay is classified as infrastructure-only and must reuse the same
+  frozen submission with a fresh judge attempt and no model reentry.
+- `vaevas-memory-snapshot-v1` admits only public model/tool/validation evidence
+  into episode-local memory and rejects final or private feedback sources;
+- `vaevas-candidate-lineage-v1` records one artifact parent plus optional
+  influence references, freezes terminal candidates, and validates lineage
+  order/cycles.
+- `vaevas-evolution-manifest-v1` now freezes AlphaApollo-style round-based
+  condition contracts, including roster, budgets, tool registry hash, authority
+  hashes, memory policy, barrier/deadline policy, and selection rule;
+- round snapshots are completion-order invariant, reject final feedback, and
+  select candidates only from public metrics plus candidate hash/id tie-breaks.
 
-Still pending in this phase:
+Still pending after this phase:
 
-- tool, validation/final-test, evolution-manifest, memory, and candidate lineage
-  schemas;
-- capability-aware tool descriptors and dispatch beyond the proposal
-  envelope's syntax-only allowlist.
+- capability-aware dispatch and production adapter integration beyond the
+  frozen protocol contracts;
+- campaign/result joins for backend/tool/profile/manifest hashes;
+- CI selection for the new contract tests.
 
 Formal parsing policy:
 
@@ -342,7 +363,7 @@ Tests first:
 
 ### Phase 2 - Build the common controller, state, and event core
 
-Status: `pending`
+Status: `in_progress`
 
 Goal: one controller contract serves mini-swe and AlphaApollo without changing
 the evaluator authority.
