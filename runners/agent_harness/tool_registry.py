@@ -10,8 +10,9 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Any, Literal, TypeAlias
 
-ToolLifecycle: TypeAlias = Literal["active", "reserved"]
+ToolLifecycle: TypeAlias = Literal["active", "inactive", "reserved"]
 ToolVisibility: TypeAlias = Literal["model_visible", "harness_internal"]
+_FINAL_JUDGE_TOOL_NAMES = frozenset({"evas.final_judge", "spectre.final_judge"})
 
 
 class ToolRegistryError(ValueError):
@@ -61,6 +62,12 @@ class ToolRegistry:
     def __init__(self, descriptors: Sequence[Mapping[str, Any]]) -> None:
         self._descriptors = tuple(_normalize_descriptor(item) for item in descriptors)
         self._by_tool_name = _index_by_tool_name(self._descriptors)
+        self._registry_sha256 = _canonical_sha256(self._descriptors)
+
+    @property
+    def registry_sha256(self) -> str:
+        """Hash the complete registry, including non-effective descriptors."""
+        return self._registry_sha256
 
     def resolve(
         self,
@@ -116,6 +123,11 @@ class ToolRegistry:
         """Return the trusted capability for one tool call or fail closed."""
         _require_nonempty_string(tool_name, field_name="tool_name")
         _require_nonempty_string(condition_id, field_name="condition_id")
+        if tool_name in _FINAL_JUDGE_TOOL_NAMES:
+            raise ToolRegistryError(
+                "final_judge_forbidden",
+                "final judges are not ordinary model-dispatchable tools",
+            )
         descriptor = self._by_tool_name.get(tool_name)
         if descriptor is None:
             raise ToolRegistryError(
@@ -126,6 +138,11 @@ class ToolRegistry:
             raise ToolRegistryError(
                 "reserved_tool",
                 f"tool is reserved and has no callable authority: {tool_name}",
+            )
+        if descriptor["lifecycle"] == "inactive":
+            raise ToolRegistryError(
+                "inactive_tool",
+                f"tool is registered but inactive: {tool_name}",
             )
         if not _condition_matches(descriptor, condition_id):
             raise ToolRegistryError(
@@ -240,7 +257,7 @@ def _normalize_descriptor(descriptor: Mapping[str, Any]) -> Mapping[str, Any]:
         )
     for field_name in ("tool_id", "tool_name", "tool_version"):
         _require_nonempty_string(descriptor[field_name], field_name=field_name)
-    if descriptor["lifecycle"] not in {"active", "reserved"}:
+    if descriptor["lifecycle"] not in {"active", "inactive", "reserved"}:
         raise ToolRegistryError(
             "invalid_lifecycle",
             f"unsupported tool lifecycle: {descriptor['lifecycle']}",
@@ -311,7 +328,7 @@ def _normalize_descriptor(descriptor: Mapping[str, Any]) -> Mapping[str, Any]:
         )
     _require_evidence_policy(descriptor["evidence_policy"])
     handler_id = descriptor["handler_id"]
-    if descriptor["lifecycle"] == "active":
+    if descriptor["lifecycle"] in {"active", "inactive"}:
         _require_nonempty_string(handler_id, field_name="handler_id")
     elif handler_id is not None:
         raise ToolRegistryError(

@@ -12,6 +12,7 @@ from .state import (
     FinalJudgment,
     FrozenSubmission,
     Observation,
+    ToolExecutionRejection,
 )
 from .tool_registry import ToolCapability
 
@@ -29,7 +30,7 @@ class Environment(Protocol):
         self,
         action: AgentAction,
         capability: ToolCapability,
-    ) -> EnvironmentStep:
+    ) -> EnvironmentStep | ToolExecutionRejection:
         """Apply one registry-authorized action to the owned environment."""
 
     def freeze_submission(self) -> FrozenSubmission:

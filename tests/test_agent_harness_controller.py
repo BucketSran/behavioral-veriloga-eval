@@ -13,6 +13,7 @@ from runners.agent_harness import (
     Observation,
     PublicValidator,
     ToolCapability,
+    ToolExecutionRejection,
     ToolRegistry,
     project_model_visible_events,
     read_trajectory,
@@ -499,6 +500,22 @@ class CapabilityRecordingEnvironment(PassingEnvironment):
         )
 
 
+class MissingHandlerEnvironment(BoundMutationFailingEnvironment):
+    def step(
+        self,
+        action: AgentAction,
+        capability: ToolCapability,
+    ) -> ToolExecutionRejection:
+        self.boundary_log.append(f"dispatch:{capability.handler_id}")
+        return ToolExecutionRejection(
+            code="missing_handler",
+            failure_category="tool_handler_unavailable",
+            primary_outcome="infrastructure_failure",
+            message=f"no runtime handler is bound for {capability.handler_id}",
+            candidate_tree_sha256=action.candidate_tree_sha256,
+        )
+
+
 def test_controller_requires_a_trusted_tool_registry() -> None:
     with pytest.raises(TypeError, match="tool_registry"):
         EpisodeController(
@@ -545,6 +562,146 @@ def test_controller_passes_the_resolved_capability_to_the_environment() -> None:
         "final_judge",
         "close",
     ]
+
+
+def test_controller_materializes_classified_execution_rejection_without_mutation(
+    tmp_path,
+) -> None:
+    trajectory_path = tmp_path / "missing-handler.jsonl"
+    boundary_log: list[str] = []
+    registry = _controller_registry("bash")
+    controller = EpisodeController(
+        policy=SequencePolicy(
+            [
+                AgentAction(
+                    action_id="action-bash",
+                    tool_name="bash",
+                    arguments={"command": "true"},
+                    source_backend="fake-backend",
+                    candidate_tree_sha256="a" * 64,
+                )
+            ]
+        ),
+        environment=MissingHandlerEnvironment(boundary_log),
+        final_judge=PassingFinalJudge(boundary_log),
+        trajectory=JsonlTrajectoryRecorder(trajectory_path),
+        tool_registry=registry,
+    )
+
+    result = controller.run(
+        EpisodeContext(
+            episode_id="episode-001",
+            attempt_id="attempt-001",
+            task_id="v4-001",
+            condition="Agentic+EVAS",
+            max_steps=4,
+        )
+    )
+
+    assert result.primary_outcome == "infrastructure_failure"
+    assert result.failure is not None
+    assert result.failure.category == "tool_handler_unavailable"
+    assert result.failure.phase == "tool_execution"
+    assert boundary_log == [
+        "start:attempt-001",
+        "dispatch:tool.bash",
+        "close",
+    ]
+    rejected = next(
+        event
+        for event in read_trajectory(trajectory_path)
+        if event["event_type"] == "action_rejected"
+    )
+    assert rejected["payload"]["rejection_code"] == "missing_handler"
+    assert rejected["payload"]["source_backend"] == "fake-backend"
+    assert rejected["payload"]["candidate_tree_sha256_before"] == "a" * 64
+    assert rejected["payload"]["candidate_tree_sha256_after"] == "a" * 64
+    assert rejected["payload"]["registry_sha256"] == registry.registry_sha256
+
+
+@pytest.mark.parametrize(
+    ("descriptor", "tool_name", "expected_code"),
+    [
+        (
+            _tool_descriptor(
+                tool_name="waveform.inspect",
+                lifecycle="inactive",
+                handler_id="tool.waveform",
+            ),
+            "waveform.inspect",
+            "inactive_tool",
+        ),
+        (
+            _tool_descriptor(
+                tool_name="bash",
+                allowed_conditions=["One-shot"],
+                handler_id="tool.bash",
+            ),
+            "bash",
+            "condition_ineligible",
+        ),
+        (
+            _tool_descriptor(
+                tool_name="evas.final_judge",
+                handler_id="authority.evas_final",
+                state_effect="read_only",
+                candidate_effect="none",
+            ),
+            "evas.final_judge",
+            "final_judge_forbidden",
+        ),
+    ],
+)
+def test_controller_denial_matrix_fails_closed_before_candidate_mutation(
+    tmp_path,
+    descriptor: dict,
+    tool_name: str,
+    expected_code: str,
+) -> None:
+    trajectory_path = tmp_path / f"{expected_code}.jsonl"
+    boundary_log: list[str] = []
+    registry = ToolRegistry([descriptor])
+    controller = EpisodeController(
+        policy=SequencePolicy(
+            [
+                AgentAction(
+                    action_id=f"action-{expected_code}",
+                    tool_name=tool_name,
+                    arguments={},
+                    source_backend="fake-backend",
+                    candidate_tree_sha256="a" * 64,
+                )
+            ]
+        ),
+        environment=BoundMutationFailingEnvironment(boundary_log),
+        final_judge=PassingFinalJudge(boundary_log),
+        trajectory=JsonlTrajectoryRecorder(trajectory_path),
+        tool_registry=registry,
+    )
+
+    result = controller.run(
+        EpisodeContext(
+            episode_id="episode-001",
+            attempt_id="attempt-001",
+            task_id="v4-001",
+            condition="Agentic+EVAS",
+            max_steps=4,
+        )
+    )
+
+    assert result.primary_outcome == "protocol_failure"
+    assert result.failure is not None
+    assert expected_code in result.failure.message
+    assert boundary_log == ["start:attempt-001", "close"]
+    rejected = next(
+        event
+        for event in read_trajectory(trajectory_path)
+        if event["event_type"] == "action_rejected"
+    )
+    assert rejected["payload"]["rejection_code"] == expected_code
+    assert rejected["payload"]["candidate_tree_sha256_before"] == "a" * 64
+    assert rejected["payload"]["candidate_tree_sha256_after"] == "a" * 64
+    assert rejected["payload"]["registry_sha256"] == registry.registry_sha256
 
 
 def test_controller_authorizes_tool_before_environment_step_and_records_capability(
@@ -682,8 +839,12 @@ def test_controller_rejects_unauthorized_tool_before_environment_mutation(
         "action_id": "action-waveform",
         "tool_name": "waveform.inspect",
         "candidate_tree_sha256": "a" * 64,
+        "candidate_tree_sha256_before": None,
+        "candidate_tree_sha256_after": None,
+        "source_backend": "fake-backend",
         "rejection_code": "reserved_tool",
         "condition": "Agentic+EVAS",
+        "registry_sha256": registry.registry_sha256,
         "effective_capability_sha256": registry.resolve(
             condition_id="Agentic+EVAS",
             model_visible=True,
@@ -794,7 +955,7 @@ def test_controller_rejects_final_only_tool_from_model_visible_dispatch(
     assert result.primary_outcome == "protocol_failure"
     assert result.failure is not None
     assert result.failure.category == "tool_authorization_rejected"
-    assert "not_model_visible" in result.failure.message
+    assert "final_judge_forbidden" in result.failure.message
     assert boundary_log == ["start:attempt-001", "close"]
 
 

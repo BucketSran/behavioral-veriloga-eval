@@ -108,6 +108,24 @@ def test_reserved_placeholder_is_valid_but_not_callable() -> None:
         )
 
 
+def test_inactive_tool_is_valid_but_not_resolved_or_callable() -> None:
+    descriptor = _descriptor(lifecycle="inactive", handler_id="tool.bash")
+
+    jsonschema.validate(descriptor, _schema())
+    registry = ToolRegistry([descriptor])
+
+    assert registry.resolve(
+        condition_id="Agentic+EVAS",
+        model_visible=True,
+    ).accepted_tool_names == frozenset()
+    with pytest.raises(ToolRegistryError, match="inactive_tool"):
+        registry.authorize(
+            "bash",
+            condition_id="Agentic+EVAS",
+            model_visible=True,
+        )
+
+
 @pytest.mark.parametrize(
     ("tool_name", "condition_id", "error_code"),
     [
@@ -158,7 +176,7 @@ def test_accepted_tool_names_are_syntax_not_authority() -> None:
     model_syntax_allowlist = frozenset({"bash", "evas.final_judge"})
 
     assert "evas.final_judge" in model_syntax_allowlist
-    with pytest.raises(ToolRegistryError, match="unknown_tool"):
+    with pytest.raises(ToolRegistryError, match="final_judge_forbidden"):
         registry.authorize(
             "evas.final_judge",
             condition_id="Agentic+EVAS",
@@ -177,6 +195,32 @@ def test_effective_capability_hash_changes_with_resolved_contract() -> None:
     )
 
     assert first.effective_capability_sha256 != changed.effective_capability_sha256
+
+
+def test_registry_hash_includes_non_effective_descriptors() -> None:
+    active = _descriptor()
+    first_reserved = _descriptor(
+        tool_id="domain/waveform-v1",
+        tool_name="waveform.inspect",
+        lifecycle="reserved",
+        budget_class="reserved",
+        state_effect="read_only",
+        candidate_effect="read",
+        handler_id=None,
+    )
+    changed_reserved = dict(first_reserved, tool_version="2")
+    first = ToolRegistry([active, first_reserved])
+    changed = ToolRegistry([active, changed_reserved])
+
+    assert len(first.registry_sha256) == 64
+    assert first.registry_sha256 != changed.registry_sha256
+    assert first.resolve(
+        condition_id="Agentic+EVAS",
+        model_visible=True,
+    ).effective_capability_sha256 == changed.resolve(
+        condition_id="Agentic+EVAS",
+        model_visible=True,
+    ).effective_capability_sha256
 
 
 def test_registry_deep_freezes_descriptor_inputs() -> None:

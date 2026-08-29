@@ -40,6 +40,7 @@ from .state import (
     FrozenSubmission,
     Incident,
     Observation,
+    ToolExecutionRejection,
 )
 from .tool_registry import (
     EffectiveToolset,
@@ -78,6 +79,7 @@ __all__ = [
     "ProposalNormalizationError",
     "PublicValidator",
     "ToolCapability",
+    "ToolExecutionRejection",
     "ToolRegistry",
     "ToolRegistryError",
     "backend_profile_sha256",

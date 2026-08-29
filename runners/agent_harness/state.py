@@ -214,6 +214,30 @@ class EnvironmentStep:
 
 
 @dataclass(frozen=True, slots=True)
+class ToolExecutionRejection:
+    """Classified fail-closed outcome from a trusted environment dispatcher."""
+
+    code: str
+    failure_category: str
+    primary_outcome: str
+    message: str
+    candidate_tree_sha256: str | None = None
+
+    def __post_init__(self) -> None:
+        for field_name in (
+            "code",
+            "failure_category",
+            "primary_outcome",
+            "message",
+        ):
+            _require_identity(getattr(self, field_name), field_name=field_name)
+        _require_optional_sha256(
+            self.candidate_tree_sha256,
+            field_name="candidate_tree_sha256",
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class FrozenSubmission:
     tree_sha256: str
     artifacts: tuple[str, ...]

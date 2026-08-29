@@ -11,18 +11,33 @@ from .state import (
     EventVisibility,
     FailureDisposition,
     Incident,
+    ToolExecutionRejection,
 )
 from .tool_registry import ToolRegistry, ToolRegistryError
 
 
-class _ProtocolFailure(RuntimeError):
-    def __init__(self, *, category: str, phase: str, message: str) -> None:
+class _ControllerFailure(RuntimeError):
+    def __init__(
+        self,
+        *,
+        category: str,
+        phase: str,
+        message: str,
+        primary_outcome: str = "protocol_failure",
+        terminal_reason: str = "protocol_failure",
+    ) -> None:
         super().__init__(message)
+        self.primary_outcome = primary_outcome
+        self.terminal_reason = terminal_reason
         self.disposition = FailureDisposition(
             category=category,
             phase=phase,
             message=message,
         )
+
+
+class _ProtocolFailure(_ControllerFailure):
+    pass
 
 
 class EpisodeController:
@@ -128,8 +143,18 @@ class EpisodeController:
                             "candidate_tree_sha256": (
                                 action.candidate_tree_sha256
                             ),
+                            "candidate_tree_sha256_before": (
+                                observation.candidate_tree_sha256
+                            ),
+                            "candidate_tree_sha256_after": (
+                                observation.candidate_tree_sha256
+                            ),
+                            "source_backend": action.source_backend,
                             "rejection_code": exc.code,
                             "condition": context.condition,
+                            "registry_sha256": (
+                                self._tool_registry.registry_sha256
+                            ),
                             "effective_capability_sha256": (
                                 effective_toolset.effective_capability_sha256
                             ),
@@ -204,6 +229,39 @@ class EpisodeController:
                 )
                 phase = "environment_step"
                 step = self._environment.step(action, capability)
+                if isinstance(step, ToolExecutionRejection):
+                    self._record(
+                        context,
+                        actor="environment",
+                        event_type="action_rejected",
+                        visibility="harness",
+                        payload={
+                            "action_id": action.action_id,
+                            "tool_name": capability.tool_name,
+                            "tool_id": capability.tool_id,
+                            "rejection_code": step.code,
+                            "source_backend": action.source_backend,
+                            "candidate_tree_sha256_before": (
+                                observation.candidate_tree_sha256
+                            ),
+                            "candidate_tree_sha256_after": (
+                                step.candidate_tree_sha256
+                            ),
+                            "registry_sha256": (
+                                self._tool_registry.registry_sha256
+                            ),
+                            "effective_capability_sha256": (
+                                effective_toolset.effective_capability_sha256
+                            ),
+                        },
+                    )
+                    raise _ControllerFailure(
+                        category=step.failure_category,
+                        phase="tool_execution",
+                        message=step.message,
+                        primary_outcome=step.primary_outcome,
+                        terminal_reason="tool_execution_rejected",
+                    )
                 self._record(
                     context,
                     actor="environment",
@@ -308,11 +366,11 @@ class EpisodeController:
                         "message": failure.message,
                     },
                 )
-        except _ProtocolFailure as exc:
+        except _ControllerFailure as exc:
             result = EpisodeResult(
                 context=context,
-                primary_outcome="protocol_failure",
-                terminal_reason="protocol_failure",
+                primary_outcome=exc.primary_outcome,
+                terminal_reason=exc.terminal_reason,
                 submission=submission,
                 final_judgment=None,
                 incidents=(),
