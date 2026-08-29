@@ -653,6 +653,9 @@ Completed authority-binding slice:
   canonical, content-addressed evidence without overwrite using same-directory
   fsync plus exclusive-link semantics; its receipt binds sidecar, profile,
   profile-input, and submission identities without emitting a model event.
+- production score reports now label EVAS trusted replay as
+  `development_only` and reserve `formal` for the explicit `final_spectre`
+  judge kind; terminal position no longer implies formal authority.
 
 Still required before Phase 5 completion:
 

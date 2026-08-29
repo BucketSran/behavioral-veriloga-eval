@@ -527,3 +527,13 @@
   rather than being collapsed by persistence.
 - Treat this as a generic persistence seam only. Production runner integration,
   no-reentry evidence, and campaign result-ledger joins remain separate gates.
+
+## 2026-08-30 - Label terminal evaluator authority instead of saying final
+
+- Interpret `final_trusted_replay` as the terminal EVAS execution position, not
+  as formal/Spectre-equivalent score authority.
+- Emit `development_only` for EVAS trusted replay, `formal` only for the
+  explicit `final_spectre` judge kind, and retain the legacy provisional label
+  for feedback-only scoring.
+- Keep verdicts and denominator unchanged. This is a claim-boundary repair,
+  not an evaluator or protocol conversion.

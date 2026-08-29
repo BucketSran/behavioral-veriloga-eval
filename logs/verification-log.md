@@ -696,3 +696,14 @@
 - Scope boundary: the store is not yet called by `run_evas`, trusted replay, or
   `score_campaign`; r53, EVAS 0.8.7, production routing, and score authority are
   unchanged.
+
+## 2026-08-30 - Score authority report labels
+
+- TDD RED reports `2 failed, 1 passed`: both terminal EVAS replay and explicit
+  Spectre were previously collapsed to `score_authority=final`.
+- Focused authority/scorer invocation reports `5 passed` after the mapping.
+- Complete calibration-pilot invocation reports `110 passed`.
+- Ruff 0.12.12, Python bytecode compilation, and `git diff --check` pass.
+- Scope boundary: this changes only aggregate authority labeling. It does not
+  execute a judge, alter verdicts/denominators, promote existing EVAS results,
+  mutate r53, or change EVAS 0.8.7.
