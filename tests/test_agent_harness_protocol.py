@@ -93,6 +93,18 @@ def test_canonical_action_and_observation_documents_follow_strict_schemas() -> N
     )
 
 
+def test_observation_schema_accepts_pre_binding_v1_documents() -> None:
+    document = Observation(
+        observation_id="observation-legacy-v1",
+        tool_name="bash",
+        status="completed",
+        payload={},
+    ).to_document()
+    document.pop("validation_profile_sha256")
+
+    jsonschema.validate(document, _load_schema(OBSERVATION_SCHEMA_PATH))
+
+
 @pytest.mark.parametrize(
     ("schema_path", "document"),
     [
