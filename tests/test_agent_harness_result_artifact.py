@@ -265,6 +265,20 @@ def test_builder_rejects_untrusted_or_unbound_sidecar(
         _build(events, score_sidecar=_sidecar(**sidecar_updates))
 
 
+def test_builder_rejects_sidecar_schema_not_bound_by_final_profile(tmp_path) -> None:
+    events = _trajectory(tmp_path)
+    profile = _final_profile(
+        score_sidecar_contract={
+            "schema_id": "future-score-sidecar-v2",
+            "immutable": True,
+            "binds_submission_tree": True,
+        }
+    )
+
+    with pytest.raises(ValueError, match="score sidecar schema"):
+        _build(events, final_test_profile=profile)
+
+
 def test_builder_rejects_model_visible_final_judgment(tmp_path) -> None:
     events = _trajectory(tmp_path, final_visibility="model")
 

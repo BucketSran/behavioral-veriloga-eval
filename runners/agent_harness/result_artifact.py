@@ -13,7 +13,7 @@ from .authority_profiles import (
     profile_input_identity_sha256,
     public_validation_profile_sha256,
 )
-from .state import EpisodeResult
+from .state import EpisodeResult, FinalJudgment, FrozenSubmission
 from .trajectory import validate_trajectory_semantics
 
 
@@ -52,6 +52,38 @@ def result_artifact_sha256(artifact: Mapping[str, Any]) -> str:
     unhashed = dict(document)
     unhashed.pop("artifact_sha256", None)
     return _canonical_sha256(unhashed)
+
+
+def score_sidecar_sha256(score_sidecar: Mapping[str, Any]) -> str:
+    """Validate and hash one immutable score sidecar document."""
+    return _canonical_sha256(_validate_score_sidecar(score_sidecar))
+
+
+def validate_score_sidecar_authority(
+    *,
+    score_sidecar: Mapping[str, Any],
+    final_test_profile: Mapping[str, Any],
+    judgment: FinalJudgment,
+    submission: FrozenSubmission,
+) -> Mapping[str, Any]:
+    """Validate a sidecar against one frozen submission and final profile."""
+    if not isinstance(judgment, FinalJudgment):
+        raise TypeError("judgment must be a FinalJudgment")
+    if not isinstance(submission, FrozenSubmission):
+        raise TypeError("submission must be a FrozenSubmission")
+    final_test_profile_sha256(final_test_profile)
+    if judgment.submission_tree_sha256 != submission.tree_sha256:
+        raise ValueError("final judgment is not bound to the frozen submission")
+    sidecar = _validate_score_sidecar(score_sidecar)
+    _validate_sidecar_authority(
+        sidecar=sidecar,
+        final_profile=final_test_profile,
+        judgment_status=judgment.status,
+        judgment_engine=judgment.judge_engine,
+        judgment_score=judgment.score,
+        submission_tree_sha256=submission.tree_sha256,
+    )
+    return sidecar
 
 
 def build_scored_result_artifact(
@@ -94,22 +126,17 @@ def build_scored_result_artifact(
             raise ValueError(
                 f"public and final authority disagree on {field_name}"
             )
-    sidecar = _validate_score_sidecar(score_sidecar)
     submission = result.submission
     judgment = result.final_judgment
-    if judgment.submission_tree_sha256 != submission.tree_sha256:
-        raise ValueError("final judgment is not bound to the frozen submission")
     if result.primary_outcome != judgment.status:
         raise ValueError("episode outcome does not match final judgment")
     if result.terminal_reason != "submitted":
         raise ValueError("scored episode must terminate through submission")
-    _validate_sidecar_authority(
-        sidecar=sidecar,
-        final_profile=final_test_profile,
-        judgment_status=judgment.status,
-        judgment_engine=judgment.judge_engine,
-        judgment_score=judgment.score,
-        submission_tree_sha256=submission.tree_sha256,
+    sidecar = validate_score_sidecar_authority(
+        score_sidecar=score_sidecar,
+        final_test_profile=final_test_profile,
+        judgment=judgment,
+        submission=submission,
     )
     final_input_sha256 = profile_input_identity_sha256(
         profile_sha256=final_profile_sha256,
@@ -360,6 +387,11 @@ def _validate_sidecar_authority(
     judgment_score: float | None,
     submission_tree_sha256: str,
 ) -> None:
+    if (
+        sidecar["schema_version"]
+        != final_profile["score_sidecar_contract"]["schema_id"]
+    ):
+        raise ValueError("score sidecar schema does not match final profile")
     expected = {
         "benchmark_release": final_profile["benchmark_release"],
         "benchmark_manifest_sha256": final_profile[

@@ -6,6 +6,11 @@ from .authority_profiles import (
     profile_input_identity_sha256,
     public_validation_profile_sha256,
 )
+from .authority_adapters import (
+    AuthorityAdapterError,
+    FinalTestExecution,
+    ProfileBoundFinalJudge,
+)
 from .backend_profile import backend_profile_sha256
 from .budget import BudgetContractError, BudgetLedger, BudgetLimitExceeded, BudgetUpdate
 from .contracts import FinalJudge, PublicValidator
@@ -33,6 +38,8 @@ from .proposals import (
 from .result_artifact import (
     build_scored_result_artifact,
     result_artifact_sha256,
+    score_sidecar_sha256,
+    validate_score_sidecar_authority,
     validate_scored_result_artifact,
 )
 from .reserved_tools import reserved_domain_tool_descriptors
@@ -66,6 +73,7 @@ from .trajectory import (
 
 __all__ = [
     "AgentAction",
+    "AuthorityAdapterError",
     "BudgetContractError",
     "BudgetLedger",
     "BudgetLimitExceeded",
@@ -81,6 +89,7 @@ __all__ = [
     "FailureDisposition",
     "FinalJudge",
     "FinalJudgment",
+    "FinalTestExecution",
     "FrozenSubmission",
     "Incident",
     "JsonlTrajectoryRecorder",
@@ -89,6 +98,7 @@ __all__ = [
     "ProposalEnvelope",
     "ProposalFormat",
     "ProposalNormalizationError",
+    "ProfileBoundFinalJudge",
     "PublicValidator",
     "ToolCapability",
     "ToolExecutionRejection",
@@ -109,6 +119,7 @@ __all__ = [
     "read_trajectory",
     "reserved_domain_tool_descriptors",
     "result_artifact_sha256",
+    "score_sidecar_sha256",
     "select_candidate",
     "select_last_sealed_incumbent",
     "tool_descriptor_sha256",
@@ -116,4 +127,5 @@ __all__ = [
     "validate_trajectory",
     "validate_trajectory_semantics",
     "validate_scored_result_artifact",
+    "validate_score_sidecar_authority",
 ]
