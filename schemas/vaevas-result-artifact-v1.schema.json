@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arcadia-1.github.io/vaEVAS/schemas/vaevas-result-artifact-v1.schema.json",
+  "title": "vaEVAS scored result artifact",
+  "description": "Content-addressed join of terminal trajectory, frozen submission, authority contracts, final judgment, and score sidecar.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "episode",
+    "contract_identity",
+    "trajectory",
+    "submission",
+    "final_judgment",
+    "score_sidecar",
+    "artifact_sha256"
+  ],
+  "properties": {
+    "schema_version": {"const": "vaevas-result-artifact-v1"},
+    "episode": {
+      "type": "object",
+      "required": ["episode_id", "attempt_id", "task_id", "condition", "primary_outcome", "terminal_reason", "incidents"],
+      "properties": {
+        "episode_id": {"type": "string", "minLength": 1},
+        "attempt_id": {"type": "string", "minLength": 1},
+        "task_id": {"type": "string", "minLength": 1},
+        "condition": {"type": "string", "minLength": 1},
+        "primary_outcome": {"type": "string", "minLength": 1},
+        "terminal_reason": {"const": "submitted"},
+        "incidents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["category", "message"],
+            "properties": {
+              "category": {"type": "string", "minLength": 1},
+              "message": {"type": "string", "minLength": 1}
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "contract_identity": {
+      "type": "object",
+      "required": ["backend_profile_sha256", "registry_sha256", "effective_capability_sha256", "public_validation_profile_sha256", "final_test_profile_sha256", "final_profile_input_identity_sha256"],
+      "properties": {
+        "backend_profile_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "registry_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "effective_capability_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "public_validation_profile_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "final_test_profile_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "final_profile_input_identity_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      },
+      "additionalProperties": false
+    },
+    "trajectory": {
+      "type": "object",
+      "required": ["tail_sha256"],
+      "properties": {"tail_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}},
+      "additionalProperties": false
+    },
+    "submission": {
+      "type": "object",
+      "required": ["tree_sha256", "artifacts"],
+      "properties": {
+        "tree_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "artifacts": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+      },
+      "additionalProperties": false
+    },
+    "final_judgment": {
+      "type": "object",
+      "required": ["status", "judge_engine", "score", "submission_tree_sha256"],
+      "properties": {
+        "status": {"type": "string", "minLength": 1},
+        "judge_engine": {"type": "string", "minLength": 1},
+        "score": {"type": ["number", "null"]},
+        "submission_tree_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      },
+      "additionalProperties": false
+    },
+    "score_sidecar": {
+      "type": "object",
+      "required": ["schema_id", "sha256", "immutable", "submission_tree_sha256", "score_authority"],
+      "properties": {
+        "schema_id": {"const": "vaevas-score-sidecar-v1"},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "immutable": {"const": true},
+        "submission_tree_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "score_authority": {"enum": ["development_only", "formal"]}
+      },
+      "additionalProperties": false
+    },
+    "artifact_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "additionalProperties": false
+}

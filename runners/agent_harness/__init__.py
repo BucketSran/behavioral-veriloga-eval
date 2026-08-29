@@ -30,6 +30,11 @@ from .proposals import (
     ProposalNormalizationError,
     normalize_proposal,
 )
+from .result_artifact import (
+    build_scored_result_artifact,
+    result_artifact_sha256,
+    validate_scored_result_artifact,
+)
 from .state import (
     AgentAction,
     EnvironmentStep,
@@ -89,6 +94,7 @@ __all__ = [
     "ToolRegistry",
     "ToolRegistryError",
     "backend_profile_sha256",
+    "build_scored_result_artifact",
     "build_round_snapshot",
     "candidate_lineage_sha256",
     "classify_final_replay_request",
@@ -100,10 +106,12 @@ __all__ = [
     "project_model_visible_events",
     "public_validation_profile_sha256",
     "read_trajectory",
+    "result_artifact_sha256",
     "select_candidate",
     "select_last_sealed_incumbent",
     "tool_descriptor_sha256",
     "validate_candidate_lineage_graph",
     "validate_trajectory",
     "validate_trajectory_semantics",
+    "validate_scored_result_artifact",
 ]

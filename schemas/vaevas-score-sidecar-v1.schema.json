@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arcadia-1.github.io/vaEVAS/schemas/vaevas-score-sidecar-v1.schema.json",
+  "title": "vaEVAS score sidecar",
+  "description": "Model-invisible immutable score evidence bound to one frozen submission.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "benchmark_release",
+    "benchmark_manifest_sha256",
+    "score_authority",
+    "immutable",
+    "binds_submission_tree",
+    "submission_tree_sha256",
+    "judge",
+    "checker_identity_sha256",
+    "runtime_identity_sha256",
+    "campaign_config_sha256",
+    "command_signature_sha256",
+    "structured_result",
+    "model_observation_allowed",
+    "memory_entry_allowed"
+  ],
+  "properties": {
+    "schema_version": {"const": "vaevas-score-sidecar-v1"},
+    "benchmark_release": {"type": "string", "minLength": 1},
+    "benchmark_manifest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "score_authority": {"enum": ["development_only", "formal"]},
+    "immutable": {"const": true},
+    "binds_submission_tree": {"const": true},
+    "submission_tree_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "judge": {
+      "type": "object",
+      "required": ["engine", "version", "identity_sha256"],
+      "properties": {
+        "engine": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "identity_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      },
+      "additionalProperties": false
+    },
+    "checker_identity_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "runtime_identity_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "campaign_config_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "command_signature_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "structured_result": {
+      "type": "object",
+      "required": ["status", "score"],
+      "properties": {
+        "status": {"type": "string", "minLength": 1},
+        "score": {"type": ["number", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "model_observation_allowed": {"const": false},
+    "memory_entry_allowed": {"const": false}
+  },
+  "additionalProperties": false
+}
