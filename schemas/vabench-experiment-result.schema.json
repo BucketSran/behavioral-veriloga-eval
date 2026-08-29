@@ -69,8 +69,18 @@
           }
         },
         "tree_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
-        "diagnostics": {"type": "array", "items": {"type": "string"}}
+        "diagnostics": {"type": "array", "items": {"type": "string"}},
+        "immutable": {"type": "boolean"}
       },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "available"}}},
+          "then": {
+            "required": ["immutable"],
+            "properties": {"immutable": {"const": true}}
+          }
+        }
+      ],
       "additionalProperties": false
     },
     "final_trusted_replay": {

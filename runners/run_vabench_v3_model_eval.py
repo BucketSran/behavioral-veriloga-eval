@@ -60,7 +60,8 @@ DEFAULT_SCORE_ROSTER = PACKAGE_ROOT / "reports" / "score_denominator_manifest.js
 RESULTS_ROOT = ROOT / "results"
 
 CLAIM_BOUNDARY = (
-    "Pinned strict EVAS hidden scoring is the formal vaBench judge. Spectre is "
+    "Legacy V3 contract only: pinned strict EVAS hidden scoring is the formal "
+    "judge for this archived evaluation path. Spectre is "
     "optional parity evidence and is never required for certification or model-score "
     "claims. Exploratory candidate runs cannot support a formal model-score claim; "
     "formal claims require a frozen counted denominator, verified evaluator identity, "
@@ -1061,7 +1062,10 @@ def write_summary(
         "spectre_parity": {
             "status": "not_run",
             "required": False,
-            "reason": "Spectre is optional parity evidence; pinned strict EVAS is the formal judge.",
+            "reason": (
+                "Legacy V3 contract only: Spectre is optional parity evidence; "
+                "pinned strict EVAS is the judge for this archived evaluation path."
+            ),
         },
         "provenance": {
             "inputs": input_provenance,

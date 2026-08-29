@@ -96,3 +96,115 @@
   result artifacts, and infrastructure failures.
 - Independent code review reproduced the gate's corrupt-metrics rejection and
   returned `ACCEPT` with no remaining blocker.
+
+## 2026-08-29 - r53 three-arm clean-room smoke
+
+- Branch/baseline recheck:
+  `behavioral-veriloga-eval` is on `audit/vaevas-eval-closure` at
+  `23c3d7bf0f852af19cb62e63f0d45aaf41f38203`; `origin/main` and
+  `upstream/main` both remain at
+  `7b5616dc52195ec275ec6d21c71d7763613702cd`.
+- EVAS recheck:
+  `/Users/bucketsran/Documents/TsingProject/vaEVAS-next/EVAS` is on
+  `audit/evas-evaluator-compat`; `HEAD`, `origin/main`, `upstream/main`, and
+  `origin/audit/evas-evaluator-compat` all remain at
+  `6cb6fa7a7dac70fc0d4120126d8cf74258e6637b`.
+- An inherited first draft passed one test but was rejected during review
+  because it copied the hidden evaluator solution into the submission and did
+  not execute the generation harness. No claim is based on that draft.
+- Revised RED: `tests/test_v4_r53_clean_room_smoke.py` failed four checks because
+  the draft did not expose a test-only sandbox control, accepted EVAS 0.8.3,
+  allowed freeze replacement, and treated a zero-exit adapter without a
+  structured result as passed.
+- Revised GREEN: the same file now reports `4 passed`. The result-protocol plus
+  smoke invocation reports `55 passed`.
+- Affected v4 regression surface:
+  `benchmark-vabench-release-v4/scripts/tests/test_v4_experiment_result_protocol.py`,
+  `tests/test_benchmarkv4_calibration_pilot.py`, `tests/test_mini_swe_vabench.py`,
+  `tests/test_v4_r53_active_entrypoints.py`, and
+  `tests/test_v4_r53_clean_room_smoke.py` report `201 passed, 3 skipped`.
+- Ruff `0.12.12`, Python bytecode compilation, Ruby YAML parsing of
+  `.github/workflows/evaluator-closure.yml`, and `git diff --check` pass.
+- Environment negative checks behaved as intended. The host PATH resolves
+  `evas` to version `0.8.3`, which the new smoke rejects. The clean EVAS fork
+  reports package `0.8.7` but initially produced structured
+  `infrastructure_failure` sidecars because no Rust core existed in that
+  worktree.
+- A read-only-source Rust build used a temporary `CARGO_TARGET_DIR` outside the
+  EVAS repository. With `EVAS_RUST_CORE_LIB` bound to that artifact, identity
+  became `evas-sim 0.8.7 (rust-core 0.2.4, ABI 20260718, revision unknown,
+  loadable)`. The existing public and no-EVAS Docker images also built and
+  verified their pinned 0.8.7 capability boundary.
+- The final real Docker smoke artifact is
+  `generated-smoke-r53-closure-v2/smoke.json` (ignored generated evidence),
+  SHA256
+  `629f1f3352bd6a057078b0bbbe5c6243d624007b6e0e2646f3c1f899e48a37ae`.
+  It records `status=PASS`, no blockers, release r53, and three fresh matched
+  runtimes.
+- `Agent-No-EVAS` records zero in-loop EVAS calls and `Agentic` records one.
+  All three trajectory hash chains verify, all final submissions are immutable,
+  and every sidecar joins to submission tree SHA256
+  `ed247e3e8f80ac258bb3e1c07330af63399241af519a679121b31c3e82ab8a67`.
+- The intentionally incomplete public-contract candidate receives structured
+  `behavior_failure` in all three arms. That verdict is expected and is not a
+  failed smoke: the gate validates evaluator connectivity and evidence
+  integrity, not candidate quality. The aggregate EVAS 0.8.7 sidecar SHA256 is
+  `00c58581601acb361c588407052824c8c36b83575c163dcc9b4629b5054985ee`.
+- The claim gate permits only
+  `single_task_three_arm_clean_room_pipeline`; both model-score and paper-result
+  claims remain false, and paper-facing result authority still requires the
+  separately declared Spectre protocol.
+
+## 2026-08-29 - r53 smoke verifier refresh
+
+- Fresh local syntax check passes:
+  `./.venv/bin/python -m py_compile scripts/run_v4_r53_clean_room_smoke.py benchmark-vabench-release-v4/operations/calibration_pilot/run_campaign.py benchmark-vabench-release-v4/operations/calibration_pilot/result_protocol.py benchmark-vabench-release-v4/operations/calibration_pilot/score_campaign.py`.
+- Fresh focused tests pass:
+  `./.venv/bin/python -m pytest -q tests/test_v4_r53_clean_room_smoke.py tests/test_v4_r53_active_entrypoints.py`
+  reports `13 passed`.
+- Fresh evaluator-closure subset passes:
+  `./.venv/bin/python -m pytest -q benchmark-vabench-release-v4/scripts/tests/test_v4_experiment_result_protocol.py tests/test_v4_r53_clean_room_smoke.py`
+  reports `57 passed`.
+- Fresh affected v4 surface passes:
+  `./.venv/bin/python -m pytest -q benchmark-vabench-release-v4/scripts/tests/test_v4_experiment_result_protocol.py tests/test_benchmarkv4_calibration_pilot.py tests/test_mini_swe_vabench.py tests/test_v4_r53_active_entrypoints.py tests/test_v4_r53_clean_room_smoke.py`
+  reports `203 passed, 3 skipped`.
+- `.github/workflows/evaluator-closure.yml` parses with Ruby YAML, and
+  `git diff --check` passes.
+- `generated-smoke-r53-closure-v2/smoke.json` remains the accepted artifact:
+  SHA256 `629f1f3352bd6a057078b0bbbe5c6243d624007b6e0e2646f3c1f899e48a37ae`.
+  Its aggregate EVAS sidecar
+  `generated-smoke-r53-closure-v2/output/SCORE_EVAS_0_8_7.json` has SHA256
+  `00c58581601acb361c588407052824c8c36b83575c163dcc9b4629b5054985ee`.
+- Artifact inspection confirms `status=PASS`, release `r53`, EVAS
+  `0.8.7`, `Agent-No-EVAS` has zero EVAS calls, `Agentic` has one EVAS call,
+  all three trajectory chains verify, all final submissions are immutable, and
+  every score sidecar joins to frozen submission tree
+  `ed247e3e8f80ac258bb3e1c07330af63399241af519a679121b31c3e82ab8a67`.
+- Boundary recheck: `benchmarkv4-r53` has no diff; the clean EVAS fork has no
+  diff; the old `/Users/bucketsran/Documents/TsingProject/vaEvas/EVAS`
+  worktree still shows only the pre-existing dirty files
+  `evas/compiler/linter.py`, `evas/compiler/parser.py`, and
+  `tests/test_linter.py`.
+
+## 2026-08-29 - Independent review closure
+
+- Independent code review accepted the generated single-task smoke evidence
+  but found three merge-readiness gaps: order-sensitive multi-file freeze
+  verification, missing protocol regressions in evaluator-closure CI, and a
+  schema that did not require `immutable=true` for available submissions.
+- The freeze now canonicalizes artifact order. A new regression proves that a
+  non-lexicographically declared two-file submission can be frozen twice
+  without drift while preserving deterministic tree identity.
+- Evaluator-closure CI now runs the protocol, calibration-pilot, mini-SWE,
+  active-entrypoint, and r53 smoke regressions; its path filter includes the
+  protocol regression file.
+- The experiment-result schema now conditionally requires `immutable=true`
+  whenever `final_submission.status=available`, with an explicit negative
+  schema regression.
+- Post-fix focused tests report `57 passed`; the fresh affected v4 surface
+  reports `203 passed, 3 skipped`.
+- Ruff `0.12.12`, Python bytecode compilation, workflow YAML parsing, schema
+  JSON parsing, and `git diff --check` all pass after the review fixes.
+- A separate verifier returned `PASS` for this first milestone. Its accepted
+  claim remains only the r53 three-arm clean-room pipeline; it explicitly does
+  not treat the smoke as baseline reproduction or paper-result evidence.

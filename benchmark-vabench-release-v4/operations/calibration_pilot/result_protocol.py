@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
+import tempfile
 from typing import Any
 
 
@@ -247,29 +248,73 @@ def snapshot_submission(runtime: Path, artifact_gate: dict[str, Any]) -> dict[st
 
     source_root = runtime / "public" / "submission"
     snapshot_root = runtime / "evidence" / "final_submission"
-    if snapshot_root.exists():
-        shutil.rmtree(snapshot_root)
     artifacts: list[dict[str, Any]] = []
-    for relative in expected:
+    # Canonicalize artifact order so an unchanged multi-file submission is
+    # idempotent even when the score policy lists targets non-lexicographically.
+    for relative in sorted(expected):
         source = source_root / relative
         data = source.read_bytes()
-        target = snapshot_root / relative
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(data)
         artifacts.append({
             "path": relative,
             "snapshot_path": f"evidence/final_submission/{relative}",
             "bytes": len(data),
             "sha256": hashlib.sha256(data).hexdigest(),
         })
-    return {
+    frozen = {
         "status": "available",
         "artifacts": artifacts,
         "tree_sha256": canonical_sha256(
             [{"path": row["path"], "sha256": row["sha256"]} for row in artifacts]
         ),
         "diagnostics": [],
+        "immutable": True,
     }
+    if snapshot_root.exists():
+        observed_files = sorted(
+            path.relative_to(snapshot_root).as_posix()
+            for path in snapshot_root.rglob("*")
+            if path.is_file() and not path.is_symlink()
+        )
+        observed = []
+        for relative in observed_files:
+            data = (snapshot_root / relative).read_bytes()
+            observed.append(
+                {
+                    "path": relative,
+                    "snapshot_path": f"evidence/final_submission/{relative}",
+                    "bytes": len(data),
+                    "sha256": hashlib.sha256(data).hexdigest(),
+                }
+            )
+        if observed != artifacts:
+            raise ValueError(
+                "frozen submission does not match the current gated submission"
+            )
+        return frozen
+
+    evidence_root = snapshot_root.parent
+    evidence_root.mkdir(parents=True, exist_ok=True)
+    staging_root = Path(
+        tempfile.mkdtemp(prefix=".final_submission-", dir=evidence_root)
+    )
+    try:
+        for row in artifacts:
+            source = source_root / row["path"]
+            target = staging_root / row["path"]
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(source.read_bytes())
+            target.chmod(0o444)
+        staging_root.rename(snapshot_root)
+        for directory in sorted(
+            (path for path in snapshot_root.rglob("*") if path.is_dir()),
+            reverse=True,
+        ):
+            directory.chmod(0o555)
+        snapshot_root.chmod(0o555)
+    except Exception:
+        shutil.rmtree(staging_root, ignore_errors=True)
+        raise
+    return frozen
 
 
 def hash_test_tree(evaluator_dir: Path) -> dict[str, Any]:
@@ -376,9 +421,6 @@ def trusted_replay(
                     taxonomy_adapter_result = adapter_result
             else:
                 taxonomy_adapter_result = adapter_result
-    elif command.get("returncode") == 0:
-        status = "passed"
-        diagnostics = ["legacy_adapter_without_structured_result"]
     else:
         status = "infrastructure_failure"
         diagnostics = ["missing_structured_trusted_replay_result"]

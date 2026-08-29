@@ -301,6 +301,7 @@ def evaluate_cell(
     evas_command: str | None = None,
     reuse_existing: bool = False,
     testbench_timeout_s: int = DEFAULT_TESTBENCH_TIMEOUT_S,
+    write_back: bool = True,
 ) -> dict[str, Any]:
     result = read_json(result_path)
     cell = result["cell"]
@@ -424,7 +425,8 @@ def evaluate_cell(
         )
         result["experiment_result"] = experiment
         result["final_judge"] = replay["command"]
-        write_json(result_path, result)
+        if write_back:
+            write_json(result_path, result)
         attach_failure_taxonomy(
             row,
             experiment,

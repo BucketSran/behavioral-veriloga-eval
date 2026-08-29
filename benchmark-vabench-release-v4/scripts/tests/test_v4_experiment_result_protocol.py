@@ -65,6 +65,52 @@ def runtime_with_submission(tmp_path: Path) -> Path:
     return runtime
 
 
+def test_submission_freeze_canonicalizes_multifile_artifact_order(
+    tmp_path: Path,
+) -> None:
+    runtime = tmp_path / "runtime"
+    submission = runtime / "public" / "submission"
+    submission.mkdir(parents=True)
+    (submission / "z.va").write_text("module z; endmodule\n", encoding="utf-8")
+    (submission / "a.va").write_text("module a; endmodule\n", encoding="utf-8")
+    gate = {
+        "passed": True,
+        "expected_artifacts": ["z.va", "a.va"],
+        "diagnostics": [],
+    }
+
+    first = PROTOCOL.snapshot_submission(runtime, gate)
+    second = PROTOCOL.snapshot_submission(runtime, gate)
+
+    assert second == first
+    assert [row["path"] for row in first["artifacts"]] == ["a.va", "z.va"]
+
+
+def test_available_submission_schema_requires_immutable_true(
+    tmp_path: Path,
+) -> None:
+    runtime = runtime_with_submission(tmp_path)
+    record = PROTOCOL.build_experiment_result(
+        cell={"cell_id": "v4-001-G0-r01", "task_id": "v4-001", "mode": "G0"},
+        model_status="completed",
+        messages=[],
+        artifact_gate=RUNNER.submission_artifact_gate(runtime),
+        runtime=runtime,
+        replay=PROTOCOL.trusted_replay(
+            None,
+            None,
+            PROTOCOL.hash_test_tree(runtime / "evaluator"),
+            {"available": False},
+        ),
+    )
+    schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
+
+    jsonschema.Draft7Validator(schema).validate(record)
+    record["final_submission"].pop("immutable")
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.Draft7Validator(schema).validate(record)
+
+
 @pytest.mark.parametrize("mode", [f"G{index}" for index in range(6)])
 def test_all_modes_preserve_raw_final_and_artifact_snapshot(
     tmp_path: Path, mode: str
@@ -680,6 +726,17 @@ def test_score_report_resume_reuses_persisted_trusted_replay(
         runtime=runtime,
         replay=replay,
     )
+    signature, signature_sha256 = SCORER.trusted_replay_input_signature(
+        result={"cell": cell},
+        runtime=runtime,
+        command="adapter",
+        replay_timeout_s=5,
+        evas_command="/absolute/evas",
+        final_submission=experiment["final_submission"],
+    )
+    replay["input_signature"] = signature
+    replay["input_signature_sha256"] = signature_sha256
+    experiment["final_trusted_replay"] = replay
     result_path.write_text(
         json.dumps(
             {
