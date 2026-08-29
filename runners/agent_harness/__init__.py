@@ -2,6 +2,12 @@
 
 from .contracts import FinalJudge, PublicValidator
 from .controller import EpisodeController
+from .proposals import (
+    ProposalEnvelope,
+    ProposalFormat,
+    ProposalNormalizationError,
+    normalize_proposal,
+)
 from .state import (
     AgentAction,
     EpisodeContext,
@@ -35,7 +41,11 @@ __all__ = [
     "Incident",
     "JsonlTrajectoryRecorder",
     "Observation",
+    "ProposalEnvelope",
+    "ProposalFormat",
+    "ProposalNormalizationError",
     "PublicValidator",
+    "normalize_proposal",
     "project_model_visible_events",
     "read_trajectory",
     "validate_trajectory",

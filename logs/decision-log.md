@@ -238,3 +238,20 @@
 - Keep this slice disconnected from production mini-swe/r53 runners. Native
   tool-call and strict-JSON normalization remain the next independent Phase 1
   protocol slice.
+
+## 2026-08-30 - Untrusted proposal and trusted action boundary
+
+- Normalize provider-native function calls and strict standalone JSON through
+  one protocol boundary before controller or environment execution.
+- Limit model-owned fields to `tool_name` and `arguments`. Inject action ID,
+  backend identity, candidate hash, and accepted syntax-level tool names from
+  a trusted envelope; compute the argument digest in `AgentAction`.
+- Require exactly one native function call. Reject malformed/fenced/repaired
+  JSON, duplicate keys, non-finite constants, missing or extra fields, and
+  unknown tool names without executing any tool.
+- Treat the envelope tool-name set as a parser allowlist only, not the future
+  capability registry. It does not approve domain tools or define condition,
+  visibility, budget, or state-effect policy.
+- Keep legacy artifact regex and `submit_artifacts` repair behavior outside the
+  formal action protocol. The future mini-swe adapter should reuse the existing
+  `BASH_TOOL` and environment rather than duplicate execution semantics.

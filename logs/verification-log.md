@@ -318,3 +318,38 @@
 - Scope boundary: this slice does not modify or execute EVAS, does not change
   the frozen benchmark, does not connect a production runner, and does not
   trigger the conditional Spectre parity gate.
+
+## 2026-08-30 - Phase 1 fail-closed proposal normalization
+
+- TDD RED 1: the first proposal regression failed at collection with
+  `ModuleNotFoundError: runners.agent_harness.proposals`, proving there was no
+  common provider/JSON normalization boundary.
+- TDD RED 2: switching the test to the package API failed because proposal
+  symbols were not exported; the public harness API was then added explicitly.
+- Adversarial RED regressions covered trusted-field forgery, malformed/fenced
+  JSON, duplicate keys, NaN, missing/extra fields, invalid argument roots,
+  zero/multiple calls, invalid call shapes, unknown tools, and invalid trusted
+  envelope identity.
+- Independent review initially found two medium gaps: the parser rejected the
+  existing provider-native optional `id`, and JSON numeric overflow (`1e999`)
+  escaped the classified error boundary. New RED tests reproduced all three
+  failures (one ID case plus strict/native overflow cases).
+- The fixes accept and validate optional provider `id` metadata without copying
+  it to canonical action identity, and reject overflowing floats as
+  `ProposalNormalizationError(code="invalid_number")` in both formats.
+- GREEN proposal/protocol/controller regressions pass:
+  `./.venv/bin/python -m pytest -q -p no:cacheprovider
+  tests/test_agent_harness_proposals.py tests/test_agent_harness_protocol.py
+  tests/test_agent_harness_controller.py` reports `57 passed` (`29` proposal,
+  `10` protocol, and `18` controller cases).
+- Existing mini-swe regressions report `30 passed, 3 skipped`; active r53
+  entrypoint regressions report `9 passed`; meta-schema tests report `4 passed`.
+- Ruff 0.12.12 reports `All checks passed!`; Python bytecode compilation and
+  `git diff --check` pass.
+- Independent re-review reports `APPROVE` with zero findings. Independent
+  verifier reports `PASS`; capability descriptors/dispatch, observation
+  normalization, mini-swe parity, and production integration remain explicit
+  later work.
+- Scope boundary: the normalizer creates one `AgentAction` or a classified
+  rejection only. It executes no tool, writes no candidate, imports no
+  production runner, changes no r53/EVAS asset, and does not trigger Spectre.

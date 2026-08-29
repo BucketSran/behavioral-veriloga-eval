@@ -303,12 +303,19 @@ Completed slice:
 - argument and payload digests are canonical across mapping insertion order;
 - constructors reject non-object roots, non-string object keys, non-finite
   numbers, and invalid budget deltas before a wire document can be emitted.
+- provider-native function calls and strict standalone JSON proposals now
+  normalize through one fail-closed boundary to the same `AgentAction`;
+- action/backend/candidate/digest identity remains harness-owned, while an
+  envelope-level syntax allowlist rejects unknown tool names before execution;
+- duplicate keys, non-finite JSON constants, missing/extra fields, malformed
+  JSON, and zero/multiple native calls are classified protocol rejections.
 
 Still pending in this phase:
 
 - backend, tool, validation/final-test, evolution, memory, and candidate
   lineage schemas;
-- provider-native/strict-JSON input normalization and fail-closed tool lookup.
+- capability-aware tool descriptors and dispatch beyond the proposal
+  envelope's syntax-only allowlist.
 
 Formal parsing policy:
 
