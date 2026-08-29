@@ -8,7 +8,13 @@
     "schema_version",
     "profile_id",
     "benchmark_release",
+    "benchmark_manifest_sha256",
     "judge",
+    "judge_identity_sha256",
+    "checker_identity_sha256",
+    "runtime_identity_sha256",
+    "campaign_config_sha256",
+    "command_signature_sha256",
     "authority_phase",
     "visibility",
     "model_observation_allowed",
@@ -18,20 +24,46 @@
     "input_scope",
     "submission_binding_required",
     "score_sidecar_required",
+    "structured_result_contract",
+    "score_sidecar_contract",
     "spectre_policy"
   ],
   "properties": {
     "schema_version": {"const": "vaevas-final-test-profile-v1"},
     "profile_id": {"type": "string", "minLength": 1},
-    "benchmark_release": {"const": "benchmarkv4-r53"},
+    "benchmark_release": {"type": "string", "minLength": 1},
+    "benchmark_manifest_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
     "judge": {
       "type": "object",
       "required": ["engine", "version"],
       "properties": {
-        "engine": {"const": "evas"},
-        "version": {"const": "0.8.7"}
+        "engine": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1}
       },
       "additionalProperties": false
+    },
+    "judge_identity_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "checker_identity_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "runtime_identity_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "campaign_config_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "command_signature_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
     },
     "authority_phase": {"const": "post_submission_freeze_only"},
     "visibility": {"const": "trusted_only"},
@@ -42,13 +74,99 @@
     "input_scope": {"const": "frozen_submission_tree"},
     "submission_binding_required": {"const": true},
     "score_sidecar_required": {"const": true},
+    "structured_result_contract": {
+      "type": "object",
+      "required": ["schema_id", "requires_structured_verdict"],
+      "properties": {
+        "schema_id": {"type": "string", "minLength": 1},
+        "requires_structured_verdict": {"const": true}
+      },
+      "additionalProperties": false
+    },
+    "score_sidecar_contract": {
+      "type": "object",
+      "required": ["schema_id", "immutable", "binds_submission_tree"],
+      "properties": {
+        "schema_id": {"type": "string", "minLength": 1},
+        "immutable": {"const": true},
+        "binds_submission_tree": {"const": true}
+      },
+      "additionalProperties": false
+    },
     "spectre_policy": {
       "type": "object",
-      "required": ["required", "trigger"],
+      "required": [
+        "required",
+        "trigger",
+        "spectre_judge_identity_sha256",
+        "spectre_command_signature_sha256",
+        "spectre_report_schema_id"
+      ],
       "properties": {
-        "required": {"const": false},
-        "trigger": {"const": "conditional_evas_or_external_protocol_change"}
+        "required": {"type": "boolean"},
+        "trigger": {
+          "enum": [
+            "conditional_evas_or_external_protocol_change",
+            "external_protocol_requires_spectre",
+            "evas_abi_changed",
+            "evas_compiler_changed",
+            "evas_simulator_changed",
+            "evas_package_changed"
+          ]
+        },
+        "spectre_judge_identity_sha256": {
+          "oneOf": [
+            {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            {"type": "null"}
+          ]
+        },
+        "spectre_command_signature_sha256": {
+          "oneOf": [
+            {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            {"type": "null"}
+          ]
+        },
+        "spectre_report_schema_id": {
+          "oneOf": [
+            {"type": "string", "minLength": 1},
+            {"type": "null"}
+          ]
+        }
       },
+      "oneOf": [
+        {
+          "properties": {
+            "required": {"const": false},
+            "trigger": {"const": "conditional_evas_or_external_protocol_change"},
+            "spectre_judge_identity_sha256": {"const": null},
+            "spectre_command_signature_sha256": {"const": null},
+            "spectre_report_schema_id": {"const": null}
+          }
+        },
+        {
+          "properties": {
+            "required": {"const": true},
+            "trigger": {
+              "enum": [
+                "external_protocol_requires_spectre",
+                "evas_abi_changed",
+                "evas_compiler_changed",
+                "evas_simulator_changed",
+                "evas_package_changed"
+              ]
+            },
+            "spectre_judge_identity_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "spectre_command_signature_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "spectre_report_schema_id": {"type": "string", "minLength": 1}
+          }
+        }
+      ],
       "additionalProperties": false
     }
   },
