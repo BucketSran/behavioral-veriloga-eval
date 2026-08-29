@@ -145,6 +145,16 @@ def validate_trajectory_semantics(events: list[dict[str, Any]]) -> bool:
     )
     if terminal_count != 1:
         return False
+    cleanup_count = event_types.count("cleanup_completed") + event_types.count(
+        "cleanup_failed"
+    )
+    if cleanup_count != 1 or event_types[-2] not in {
+        "cleanup_completed",
+        "cleanup_failed",
+    }:
+        return False
+    if event_types.count("submission_frozen") > 1:
+        return False
     if "final_judgment_completed" in event_types and not (
         "submission_frozen" in event_types
         and event_types.index("submission_frozen")
@@ -196,7 +206,7 @@ def validate_trajectory_semantics(events: list[dict[str, Any]]) -> bool:
                 return False
             proposed_action_id = None
             authorized_action_id = None
-    return True
+    return proposed_action_id is None and authorized_action_id is None
 
 
 def project_model_visible_events(

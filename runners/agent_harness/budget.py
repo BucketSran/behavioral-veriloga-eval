@@ -48,6 +48,15 @@ class BudgetLedger:
     """Track one attempt; campaign/branch aggregation remains outside this module."""
 
     def __init__(self, limits: Mapping[str, int]) -> None:
+        if not isinstance(limits, Mapping):
+            raise TypeError("budget limits must be a mapping")
+        for counter, limit in limits.items():
+            if not isinstance(counter, str) or not counter.strip():
+                raise ValueError("budget counter names must be non-empty strings")
+            if isinstance(limit, bool) or not isinstance(limit, int):
+                raise TypeError("budget limits must be integers")
+            if limit < 0:
+                raise ValueError("budget limits cannot be negative")
         self._limits = dict(limits)
         self._consumed: dict[str, int] = {}
 
@@ -62,6 +71,7 @@ class BudgetLedger:
         capability: ToolCapability,
         reported_delta: Mapping[str, int],
     ) -> BudgetUpdate:
+        self.ensure_available(capability)
         expected = self._cost(capability)
         for counter, amount in reported_delta.items():
             if counter not in expected:
