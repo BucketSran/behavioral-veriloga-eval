@@ -88,6 +88,7 @@ def _final_profile(**updates: Any) -> dict[str, Any]:
             "schema_id": "vaevas-score-sidecar-v1",
             "immutable": True,
             "binds_submission_tree": True,
+            "score_authority": "development_only",
         },
         "spectre_policy": {
             "required": False,
@@ -112,6 +113,25 @@ def test_public_validation_profile_is_model_visible_and_hashable() -> None:
     )
     assert profile["benchmark_release"] == "benchmarkv4-r53"
     assert profile["evaluator"] == {"engine": "evas", "version": "0.8.7"}
+
+
+def test_legacy_final_profile_without_score_authority_remains_hashable() -> None:
+    profile = _final_profile()
+    profile["score_sidecar_contract"].pop("score_authority")
+
+    jsonschema.validate(profile, _schema(FINAL_SCHEMA_PATH))
+
+    assert len(final_test_profile_sha256(profile)) == 64
+
+
+def test_final_profile_rejects_unknown_score_authority() -> None:
+    profile = _final_profile()
+    profile["score_sidecar_contract"]["score_authority"] = "untrusted"
+
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(profile, _schema(FINAL_SCHEMA_PATH))
+    with pytest.raises(ValueError, match="score_authority"):
+        final_test_profile_sha256(profile)
 
 
 def test_final_test_profile_is_terminal_trusted_and_hashable() -> None:

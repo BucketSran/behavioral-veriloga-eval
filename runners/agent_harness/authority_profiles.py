@@ -410,11 +410,20 @@ def _require_structured_result_contract(value: Any) -> None:
 
 def _require_score_sidecar_contract(value: Any) -> None:
     contract = _require_mapping(value, field_name="score_sidecar_contract")
-    _require_exact_fields(
-        contract,
-        {"schema_id", "immutable", "binds_submission_tree"},
-        field_name="score_sidecar_contract",
-    )
+    required_fields = {"schema_id", "immutable", "binds_submission_tree"}
+    allowed_fields = required_fields | {"score_authority"}
+    missing = required_fields - set(contract)
+    if missing:
+        raise ValueError(
+            "score_sidecar_contract missing required field: "
+            f"{min(missing)}"
+        )
+    unexpected = set(contract) - allowed_fields
+    if unexpected:
+        raise ValueError(
+            "score_sidecar_contract has unexpected field: "
+            f"{min(unexpected)}"
+        )
     _require_nonempty(
         contract["schema_id"],
         field_name="score_sidecar_contract.schema_id",
@@ -429,6 +438,12 @@ def _require_score_sidecar_contract(value: Any) -> None:
         True,
         field_name="score_sidecar_contract.binds_submission_tree",
     )
+    score_authority = contract.get("score_authority", "development_only")
+    if score_authority not in {"development_only", "formal"}:
+        raise ValueError(
+            "score_sidecar_contract.score_authority must be "
+            "'development_only' or 'formal'"
+        )
 
 
 def _require_spectre_policy(value: Any) -> None:

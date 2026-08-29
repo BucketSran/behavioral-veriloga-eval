@@ -63,6 +63,7 @@ def _profile(**updates: Any) -> dict[str, Any]:
             "schema_id": "vaevas-score-sidecar-v1",
             "immutable": True,
             "binds_submission_tree": True,
+            "score_authority": "development_only",
         },
         "spectre_policy": {
             "required": False,
@@ -180,6 +181,7 @@ def test_final_judge_adapter_is_single_use_even_after_executor_failure() -> None
     [
         ({}, {"checker_identity_sha256": SHA_D}, "checker_identity_sha256"),
         ({}, {"submission_tree_sha256": SHA_B}, "submission_tree_sha256"),
+        ({}, {"score_authority": "formal"}, "score_authority"),
         (
             {
                 "score_sidecar_contract": {
@@ -221,3 +223,57 @@ def test_final_judge_adapter_rejects_sidecar_authority_mismatch(
     assert adapter.profile_input_identity_sha256 is None
     assert adapter.score_sidecar is None
     assert adapter.score_sidecar_sha256 is None
+
+
+def test_legacy_final_profile_defaults_to_development_only_authority() -> None:
+    profile = _profile()
+    profile["score_sidecar_contract"].pop("score_authority")
+
+    def execute(
+        submission: FrozenSubmission,
+        received_profile: dict[str, Any],
+    ) -> FinalTestExecution:
+        del submission, received_profile
+        return FinalTestExecution(
+            judgment=_judgment(),
+            score_sidecar=_sidecar(score_authority="formal"),
+        )
+
+    adapter = ProfileBoundFinalJudge(
+        context=_context(),
+        final_test_profile=profile,
+        execute=execute,
+    )
+
+    with pytest.raises(ValueError, match="score_authority"):
+        adapter.judge(_submission())
+
+
+def test_final_judge_accepts_formal_authority_only_when_profile_declares_it() -> None:
+    profile = _profile(
+        score_sidecar_contract={
+            "schema_id": "vaevas-score-sidecar-v1",
+            "immutable": True,
+            "binds_submission_tree": True,
+            "score_authority": "formal",
+        }
+    )
+
+    def execute(
+        submission: FrozenSubmission,
+        received_profile: dict[str, Any],
+    ) -> FinalTestExecution:
+        del submission, received_profile
+        return FinalTestExecution(
+            judgment=_judgment(),
+            score_sidecar=_sidecar(score_authority="formal"),
+        )
+
+    adapter = ProfileBoundFinalJudge(
+        context=_context(),
+        final_test_profile=profile,
+        execute=execute,
+    )
+
+    assert adapter.judge(_submission()) == _judgment()
+    assert adapter.score_sidecar["score_authority"] == "formal"

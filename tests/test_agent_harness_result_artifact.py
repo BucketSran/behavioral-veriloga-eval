@@ -84,6 +84,7 @@ def _final_profile(**updates: Any) -> dict[str, Any]:
             "schema_id": "vaevas-score-sidecar-v1",
             "immutable": True,
             "binds_submission_tree": True,
+            "score_authority": "development_only",
         },
         "spectre_policy": {
             "required": False,
@@ -272,11 +273,19 @@ def test_builder_rejects_sidecar_schema_not_bound_by_final_profile(tmp_path) -> 
             "schema_id": "future-score-sidecar-v2",
             "immutable": True,
             "binds_submission_tree": True,
+            "score_authority": "development_only",
         }
     )
 
     with pytest.raises(ValueError, match="score sidecar schema"):
         _build(events, final_test_profile=profile)
+
+
+def test_builder_rejects_overstated_score_authority(tmp_path) -> None:
+    events = _trajectory(tmp_path)
+
+    with pytest.raises(ValueError, match="score_authority"):
+        _build(events, score_sidecar=_sidecar(score_authority="formal"))
 
 
 def test_builder_rejects_model_visible_final_judgment(tmp_path) -> None:

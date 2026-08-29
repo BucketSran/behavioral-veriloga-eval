@@ -392,6 +392,12 @@ def _validate_sidecar_authority(
         != final_profile["score_sidecar_contract"]["schema_id"]
     ):
         raise ValueError("score sidecar schema does not match final profile")
+    expected_score_authority = final_profile["score_sidecar_contract"].get(
+        "score_authority",
+        "development_only",
+    )
+    if sidecar["score_authority"] != expected_score_authority:
+        raise ValueError("score sidecar does not match score_authority")
     expected = {
         "benchmark_release": final_profile["benchmark_release"],
         "benchmark_manifest_sha256": final_profile[
