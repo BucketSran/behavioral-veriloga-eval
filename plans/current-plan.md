@@ -467,7 +467,7 @@ Tests first:
 
 ### Phase 3 - Preserve mini-swe through a backend adapter
 
-Status: `pending`
+Status: `completed`
 
 Goal: route the current mini-swe behavior through the new interfaces without
 changing its task capability or score.
@@ -492,6 +492,23 @@ Tests first:
 - capability isolation for One-shot, Agent-No-EVAS, and Agentic+EVAS remains
   unchanged;
 - no evaluator/private path appears in model-visible mounts or events.
+
+Completed compatibility slice:
+
+- `MiniSwePolicyBridge` converts one provider-native Bash call into a canonical,
+  harness-identified, candidate-bound action.
+- `MiniSweBashEnvironmentBridge` wraps the existing `execute(dict)` surface,
+  preserves gate rejection as non-terminal feedback, maps only the explicitly
+  bound mini-swe `Submitted` exception to the submitted terminal state, and
+  delegates candidate identity/freeze to trusted runtime callbacks.
+- the generic Bash descriptor freezes handler identity, argument schema,
+  candidate effect, evidence policy, and condition eligibility.
+- deterministic integration coverage compares the direct legacy environment
+  with the typed bridge for candidate creation, submission, artifact hash,
+  command disposition, no-EVAS behavior, and immutable freeze.
+- production `DefaultAgent` and campaign selection remain legacy-first. This
+  phase proves an opt-in differential path; it does not switch formal runs or
+  claim hosted-provider trajectory equivalence.
 
 ### Phase 4 - Reserve domain-tool extension points and run a design gate
 

@@ -440,3 +440,20 @@
 - Scope this to the generic harness. Production campaign writers must opt in
   through a later adapter/result-ledger slice before paper or benchmark claims
   rely on this artifact.
+
+## 2026-08-30 - Preserve mini-swe with an opt-in typed bridge
+
+- Keep the existing mini-swe `DefaultAgent` and `execute(dict)` production path
+  unchanged as the recoverable regression baseline.
+- Normalize provider-native Bash calls with harness-owned action IDs, backend
+  identity, and current candidate binding; provider call IDs remain untrusted
+  transport metadata.
+- Reuse legacy Bash execution through a thin environment bridge. Map only an
+  explicitly bound mini-swe `Submitted` exception to terminal submission;
+  submission-gate rejection remains non-terminal and unrelated runtime failures
+  propagate.
+- Require production-owned candidate-hash and freeze callbacks. EVAS telemetry
+  is invocation evidence, not a complete candidate-state authority.
+- Treat this as Phase 3 compatibility closure, not a formal campaign switch.
+  Production runtime meters, candidate transaction safety, scored-result joins,
+  and hosted-provider parity remain separate gates.

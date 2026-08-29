@@ -596,3 +596,29 @@
 - Scope boundary: this remains a generic harness artifact builder/validator.
   Production campaign result writers, real r53 result ledgers, EVAS code, and
   Spectre parity paths are unchanged.
+
+## 2026-08-30 - mini-swe typed compatibility bridge
+
+- TDD proposal RED failed at collection because
+  `runners.agent_harness.backends.mini_swe` did not exist. GREEN proposal and
+  normalizer coverage then reported `35 passed`.
+- Typed environment coverage exercises Bash output mapping, candidate hashes,
+  condition-bound handler dispatch, rejected submission, precise submitted
+  exception handling, invalid arguments before execution, cleanup idempotence,
+  and a complete generic-controller episode.
+- A deterministic integration test drives the real existing
+  `VaBenchBashEnvironment` both directly and through the typed bridge. The paths
+  produce the same candidate artifact hash and command dispositions; terminal
+  freeze matches the observation hash and remains immutable after a live-tree
+  mutation. The no-EVAS arm records zero EVAS invocations.
+- Complete generic harness invocation reports `265 passed`.
+- Generic harness plus existing mini-swe regression reports
+  `295 passed, 3 skipped`.
+- Independent production boundary regression reports
+  `137 passed, 3 skipped` for mini-swe plus calibration-pilot tests.
+- Ruff 0.12.12 reports `All checks passed!` for the adapter and its tests;
+  Python bytecode compilation and `git diff --check` pass.
+- Independent code review reports `APPROVE` with zero findings.
+- Scope boundary: the adapter is opt-in. Production `DefaultAgent`/campaign
+  routing, r53 release bytes, EVAS 0.8.7, score authority, and Spectre gate are
+  unchanged.
