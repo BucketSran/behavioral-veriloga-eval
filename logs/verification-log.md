@@ -543,3 +543,33 @@
 - Independent completion verification reports `PASS` and reconfirms the
   BucketSran-only remote boundary, clean EVAS fork, untouched r53 release, and
   preserved `fix/dynamic-zero-period-timer` dirty worktree.
+
+## 2026-08-30 - Phase 2 effects, budgets, trajectory, and CI slices
+
+- TDD dispatch hardening started from uncommitted RED contracts for inactive
+  tools, full-registry identity, final-judge dispatch denial, and classified
+  missing-handler outcomes. The first GREEN focused run reported `51 passed`.
+- Candidate-effect RED/GREEN slices cover read-only mutation, missing mutation
+  hash, non-terminal freeze, and terminal-observation/frozen-submission hash
+  mismatch. The focused controller/registry run reported `55 passed` before
+  the static effect matrix was added.
+- JSON Schema and runtime registry both reject inconsistent state/candidate/
+  submission-budget combinations; the focused controller/registry invocation
+  then reported `60 passed`.
+- Attempt budget RED/GREEN proves a second public-validation call is rejected
+  before `Environment.step`; canonical consumption is
+  `tool_calls=1, public_validation_calls=1`. Cross-capability reported deltas
+  fail as `budget_contract_violation`.
+- Semantic trajectory RED/GREEN covers a valid SHA chain with mixed attempt
+  IDs, authorization without proposal, model-visible final judgment, and an
+  arbitrary model event after submission freeze.
+- Current complete generic harness invocation:
+  `PYTHONDONTWRITEBYTECODE=1 ./.venv/bin/python -m pytest -q -p
+  no:cacheprovider tests/test_agent_harness_*.py` reports `227 passed`.
+- Ruff 0.12.12 reports `All checks passed!` for `runners/agent_harness` and all
+  generic harness tests; `git diff --check` passes.
+- `.github/workflows/evaluator-closure.yml` now triggers on generic harness,
+  vaEVAS harness schemas, and tests, and runs the same wildcard test surface.
+- Scope boundary: production mini-swe still does not import the generic
+  harness. No r53 release bytes, EVAS code/version, score sidecar, or Spectre
+  path changed in these slices.

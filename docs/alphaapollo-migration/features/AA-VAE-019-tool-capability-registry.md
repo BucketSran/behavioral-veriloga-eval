@@ -18,9 +18,10 @@
 ## vaEVAS 适配决策
 
 - 新增 `vaevas-tool-descriptor-v1`，记录 tool identity、lifecycle、model visibility、
-  condition allowlist、budget class、state/candidate effect、argument/observation
-  schema、evidence policy 和 handler。
-- `active` tool 必须有 handler；`reserved` tool 作为未来领域工具占位，不能调用。
+  condition allowlist、budget class、state/candidate/submission effect、
+  argument/observation schema、evidence policy 和 handler。
+- `active` tool 必须有 handler；`inactive` tool 保留审计身份但不能调度；
+  `reserved` tool 作为未来领域工具占位，不能调用。
 - final judge 不是普通工具 lifecycle：它完全位于 registry 之外，由独立 final-test
   authority profile 管理；final-shaped descriptor 会被拒绝。
 - registry 只解析 capability，不执行工具；production runner 暂不导入。
@@ -30,7 +31,7 @@
 | 文件/符号 | 改动 | 所属层 |
 | --- | --- | --- |
 | `schemas/vaevas-tool-descriptor-v1.schema.json` | strict tool descriptor schema | schema |
-| `runners/agent_harness/tool_registry.py` | condition-aware capability resolution and fail-closed authorization | harness protocol |
+| `runners/agent_harness/tool_registry.py` | condition-aware capability resolution, full-registry identity, effect-contract validation, and fail-closed authorization | harness protocol |
 | `runners/agent_harness/__init__.py` | 导出 registry/capability/hash API | harness API |
 | `tests/test_agent_harness_tool_registry.py` | active/reserved/final-authority-separation/syntax-not-authority regressions | tests |
 
@@ -38,12 +39,14 @@
 
 - 输入：schema-shaped tool descriptor documents。
 - 中间状态：condition-specific effective toolset。
-- 输出：accepted tool names、capability hash、classified registry errors。
+- 输出：accepted tool names、effective condition hash、complete registry hash、
+  classified registry errors。
 - backward compatibility：不改变 mini-swe、r53、EVAS 0.8.7 或现有 runner。
 
 ## 验证证据
 
-- regression tests：`tests/test_agent_harness_tool_registry.py`，`20 passed`。
+- regression tests：完整 generic harness invocation 见
+  `logs/verification-log.md`，当前为 `227 passed`。
 - clean-room smoke：未执行；此切片未接 runtime。
 - 未验证部分：真实 tool dispatch、domain tool semantics、per-tool ablation impact。
 

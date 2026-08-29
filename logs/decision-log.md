@@ -383,3 +383,39 @@
 - Keep this work at the protocol layer. Production adapter integration, CI
   wiring, real multi-model scheduling, and result-ledger joins remain later
   work and are not implied by Phase 1 completion.
+
+## 2026-08-30 - Runtime effects and budgets are capability-owned
+
+- Distinguish complete registry identity from the condition-effective toolset:
+  `registry_sha256` includes active, inactive, and reserved descriptors, while
+  `effective_capability_sha256` identifies only currently callable authority.
+- Treat runtime handler absence as a classified execution failure after
+  authorization, not as an unstructured environment exception. Preserve
+  candidate before/after identity and cleanup evidence.
+- Make descriptor effects executable contracts. Read/none tools cannot change
+  the candidate; mutating tools must report a candidate hash; freeze tools must
+  terminate as submitted and bind to the actual frozen submission.
+- Derive canonical tool/public-validation costs from the resolved capability.
+  The environment may confirm a bound counter but cannot relabel a Bash call as
+  validation or invent an unrelated budget delta.
+- Scope this ledger to one attempt. Evolution branch/campaign totals remain in
+  the evolution manifest and must be aggregated by a later coordinator.
+- Do not claim transactional rollback: postconditions detect an invalid
+  environment mutation; a production adapter must discard or restore the
+  affected workspace before reuse.
+
+## 2026-08-30 - Trajectory integrity has cryptographic and semantic layers
+
+- Preserve `validate_trajectory` as the SHA-chain check and add a separate
+  semantic validator for attempt identity, lifecycle, action pairing,
+  visibility, submission/final order, and the post-freeze model boundary.
+- Add action identity to environment-observation events so semantic validation
+  can join proposal, authorization, budget, and observation without relying on
+  adjacency alone.
+- Reject every model-visible event after `submission_frozen`, including unknown
+  future event types; final judgments remain trusted-only.
+- Make the generic harness a required evaluator-closure CI surface by adding
+  path filters and the complete `tests/test_agent_harness_*.py` suite.
+- Keep production mini-swe normalization and the immutable result/score-sidecar
+  join as later slices; this decision does not claim existing campaign traces
+  already satisfy the new semantic protocol.

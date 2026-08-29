@@ -411,11 +411,36 @@ Completed slice:
 - Harness-internal/final-only tools cannot enter model-visible dispatch.
 - `FinalJudge` remains outside ordinary tool dispatch and is still reachable
   only through the post-freeze terminal controller phase.
+- Tool descriptors now distinguish active, inactive, and reserved lifecycle;
+  the complete registry and the condition-effective toolset have separate
+  hashes, and missing runtime handlers return classified execution failures.
+- Static schema/registry validation rejects inconsistent state, candidate, and
+  submission-budget effects before an episode starts.
+- Runtime postconditions enforce read/none immutability, require mutating tools
+  to report a candidate hash, require freeze tools to terminate as submitted,
+  and bind the terminal observation to the frozen submission tree.
+- An attempt-scoped `BudgetLedger` derives canonical tool/public-validation
+  costs from the resolved capability, blocks the next over-budget dispatch
+  before environment mutation, and rejects environment-reported counters that
+  are not bound to that capability.
+- SHA-chain validation now has a separate semantic layer covering attempt
+  identity, lifecycle, action proposal/authorization pairing, required event
+  visibility, submission-before-final order, and the no-model-events-after-
+  freeze boundary.
+- `.github/workflows/evaluator-closure.yml` now triggers on and runs the full
+  generic harness contract suite.
 
-Remaining gap for the next controller slice:
+Remaining Phase 2 gaps:
 
-- enforce descriptor-declared candidate effects across trusted environment
-  transitions and bind budget deltas to the resolved tool capability.
+- model request/response identity and model token accounting need a backend
+  adapter source of truth;
+- wall-time, disk, and evaluator-runtime budgets need trusted runtime meters,
+  not model- or tool-reported values;
+- postcondition checks detect an incorrect environment mutation but cannot
+  roll it back; production adapters need transactional candidate snapshots or
+  fresh-workspace discard semantics;
+- candidate lineage events and the immutable trajectory/submission/authority/
+  score-sidecar join remain to be connected to production result artifacts.
 
 Required event types include:
 
