@@ -565,8 +565,8 @@
   arbitrary model event after submission freeze.
 - Current complete generic harness invocation:
   `PYTHONDONTWRITEBYTECODE=1 ./.venv/bin/python -m pytest -q -p
-  no:cacheprovider tests/test_agent_harness_*.py` reports `236 passed` after
-  the budget/trajectory invariant hardening.
+  no:cacheprovider tests/test_agent_harness_*.py` reports `237 passed` after
+  the budget/trajectory invariant and trusted-freeze hardening.
 - Focused controller/registry verification for untrusted freeze artifacts and
   inactive handler compatibility reports `64 passed`.
 - Ruff 0.12.12 reports `All checks passed!` for `runners/agent_harness` and all

@@ -46,7 +46,7 @@
 ## 验证证据
 
 - regression tests：完整 generic harness invocation 见
-  `logs/verification-log.md`，当前为 `227 passed`。
+  `logs/verification-log.md`，当前为 `237 passed`。
 - clean-room smoke：未执行；此切片未接 runtime。
 - 未验证部分：真实 tool dispatch、domain tool semantics、per-tool ablation impact。
 
