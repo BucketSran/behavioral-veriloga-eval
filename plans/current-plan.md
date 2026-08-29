@@ -391,6 +391,29 @@ Responsibilities:
 - scoring coordinator/final judge owns terminal replay after freeze;
 - trajectory recorder owns ordered, append-only evidence.
 
+Completed slice:
+
+- `EpisodeController` now requires a trusted `ToolRegistry`, resolves the exact
+  condition-specific toolset at episode start, and authorizes every
+  model-visible action before `environment.step`.
+- Authorized actions emit harness-visible `action_authorized` evidence with
+  effective capability hash, tool identity, handler identity, descriptor hash,
+  candidate hash, and condition; handler/capability evidence stays out of the
+  model-visible projection.
+- Registry denials emit `action_rejected`, materialize as protocol failures,
+  and stop before any environment/candidate mutation while still preserving
+  cleanup evidence.
+- Descriptor-declared candidate binding rejects missing or stale action
+  bindings against the latest trusted environment observation.
+- Harness-internal/final-only tools cannot enter model-visible dispatch.
+- `FinalJudge` remains outside ordinary tool dispatch and is still reachable
+  only through the post-freeze terminal controller phase.
+
+Remaining gap for the next controller slice:
+
+- enforce descriptor-declared candidate effects across trusted environment
+  transitions and bind budget deltas to the resolved tool capability.
+
 Required event types include:
 
 - episode and attempt lifecycle;

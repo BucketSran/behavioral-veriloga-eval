@@ -269,6 +269,27 @@
   tool-call and strict-JSON normalization remain the next independent Phase 1
   protocol slice.
 
+## 2026-08-30 - Controller dispatch authority
+
+- Move tool capability enforcement one step inward from static registry
+  contracts to the common `EpisodeController` dispatch boundary.
+- Every model-visible action must be authorized by a trusted registry for the
+  current condition before `environment.step` may run.
+- Record both positive capability identity and negative rejection evidence in
+  the trajectory. A rejected action is a protocol failure, not an environment
+  mutation or candidate failure.
+- Bind positive dispatch evidence to the effective condition-specific toolset
+  hash as well as the individual descriptor hash. Keep handler/capability
+  evidence harness-visible, not model-visible.
+- Require a concrete trusted registry at controller construction. The common
+  harness has no production compatibility dependency yet, so a registry-free
+  path would be an avoidable authority bypass.
+- Enforce descriptor-declared candidate binding against the latest trusted
+  environment observation before dispatch. Missing, unavailable, or stale
+  candidate identities fail closed without calling `environment.step`.
+- Keep final judging outside ordinary dispatch; it remains terminal-only after
+  submission freeze.
+
 ## 2026-08-30 - Untrusted proposal and trusted action boundary
 
 - Normalize provider-native function calls and strict standalone JSON through

@@ -250,6 +250,32 @@
   decision/verification documentation. Runtime verification remains required
   per implementation slice.
 
+## 2026-08-30 - Controller capability-aware dispatch
+
+- RED/GREEN evidence includes three explicit contract failures before their
+  implementations: missing required `tool_registry`, explicit null registry,
+  and stale candidate binding. Each focused test passed after the smallest
+  corresponding controller change.
+- `tests/test_agent_harness_controller.py` reports `24 passed`.
+- Complete generic harness regression:
+  `./.venv/bin/python -m pytest -q -p no:cacheprovider tests/test_agent_harness_*.py`
+  reports `203 passed`.
+- Preserved production-boundary regressions run separately:
+  `tests/test_mini_swe_vabench.py` reports `30 passed, 3 skipped`; and
+  `tests/test_v4_r53_active_entrypoints.py tests/test_meta_schema.py` reports
+  `13 passed`.
+- Python bytecode compilation for `runners/agent_harness/*.py` and
+  `tests/test_agent_harness_controller.py` passes, and `git diff --check`
+  passes.
+- `uvx ruff==0.12.12 check runners/agent_harness tests/test_agent_harness_*.py`
+  reports `All checks passed!`.
+- The new tests prove that authorized actions record capability evidence before
+  execution, bind the episode and action to the effective capability hash, keep
+  handler identity out of the model-visible projection, and reject reserved,
+  final-only, or stale-bound actions before `environment.step`.
+- This remains a generic harness prototype slice. No production runner, r53
+  release asset, EVAS code, score sidecar, or Spectre gate was changed.
+
 ## 2026-08-29 - Harness plan and publication-contract refinement
 
 - The current plan now treats vaEVAS domain tools as non-callable extension
