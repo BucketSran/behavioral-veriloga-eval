@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arcadia-1.github.io/vaEVAS/schemas/vaevas-final-test-profile-v1.schema.json",
+  "title": "vaEVAS final test profile",
+  "description": "Model-invisible terminal scoring authority bound to a frozen submission tree and immutable sidecar.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "profile_id",
+    "benchmark_release",
+    "judge",
+    "authority_phase",
+    "visibility",
+    "model_observation_allowed",
+    "memory_entry_allowed",
+    "candidate_selection_allowed",
+    "repair_allowed",
+    "input_scope",
+    "submission_binding_required",
+    "score_sidecar_required",
+    "spectre_policy"
+  ],
+  "properties": {
+    "schema_version": {"const": "vaevas-final-test-profile-v1"},
+    "profile_id": {"type": "string", "minLength": 1},
+    "benchmark_release": {"const": "benchmarkv4-r53"},
+    "judge": {
+      "type": "object",
+      "required": ["engine", "version"],
+      "properties": {
+        "engine": {"const": "evas"},
+        "version": {"const": "0.8.7"}
+      },
+      "additionalProperties": false
+    },
+    "authority_phase": {"const": "post_submission_freeze_only"},
+    "visibility": {"const": "trusted_only"},
+    "model_observation_allowed": {"const": false},
+    "memory_entry_allowed": {"const": false},
+    "candidate_selection_allowed": {"const": false},
+    "repair_allowed": {"const": false},
+    "input_scope": {"const": "frozen_submission_tree"},
+    "submission_binding_required": {"const": true},
+    "score_sidecar_required": {"const": true},
+    "spectre_policy": {
+      "type": "object",
+      "required": ["required", "trigger"],
+      "properties": {
+        "required": {"const": false},
+        "trigger": {"const": "conditional_evas_or_external_protocol_change"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
