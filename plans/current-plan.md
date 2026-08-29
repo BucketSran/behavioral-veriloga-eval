@@ -627,6 +627,28 @@ Tests first:
 - candidate selection uses public-validation evidence only;
 - final sidecar binds submission, judge, profile, checker, and result hashes.
 
+Completed authority-binding slice:
+
+- canonical observations now carry an optional
+  `validation_profile_sha256`; public-validation observations must bind the
+  exact campaign-owned profile before they can enter the next model turn;
+- the controller rejects an unbound campaign profile before environment
+  dispatch and rejects missing or mismatched observation profiles before
+  recording a model-visible observation;
+- public-validation capabilities are schema- and registry-constrained to be
+  model-visible, candidate-bound, read-only, and free of private evidence;
+- trajectory observation events record the validation profile hash for later
+  memory, evolution, and result joins.
+
+Still required before Phase 5 completion:
+
+- a production EVAS 0.8.7 public-validation adapter that emits this binding;
+- a profile-bound final-test adapter and immutable score-sidecar writer;
+- clean-room evidence that final outputs never enter generation, candidate
+  selection, or shared memory;
+- a real campaign result join using native typed trajectory evidence rather
+  than a fabricated conversion from incomplete legacy traces.
+
 ### Phase 6 - Add the AlphaApollo single-trajectory reasoning backend
 
 Status: `pending`

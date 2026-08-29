@@ -636,3 +636,21 @@
   the code slice.
 - Scope boundary: no concrete domain tool, production routing, r53 release
   byte, EVAS 0.8.7 behavior, final-score authority, or Spectre gate changed.
+
+## 2026-08-30 - Public-validation runtime binding
+
+- TDD RED reported `5 failed` for missing campaign profile binding, missing
+  canonical observation identity, mismatched profile acceptance, and an
+  over-permissive public-validation descriptor.
+- Focused authority/protocol/registry/controller/meta-schema invocation reports
+  `86 passed` after the observation-v1 compatibility regression.
+- Complete generic harness plus meta-schema invocation reports `285 passed`.
+- Ruff 0.12.12, Python bytecode compilation, and `git diff --check` pass.
+- The model-visible trajectory projection now carries the exact validation
+  profile hash while final judgment remains trusted-only.
+- Independent review initially raised one HIGH finding because the new field
+  was required under the existing v1 schema identity. Commit `8146253c2c`
+  made the field optional for historical readers while retaining runtime
+  enforcement; follow-up review reports `APPROVE` with no remaining finding.
+- Scope boundary: production `run_evas`, campaign routing, r53 release bytes,
+  EVAS 0.8.7, final sidecar authority, and Spectre policy are unchanged.

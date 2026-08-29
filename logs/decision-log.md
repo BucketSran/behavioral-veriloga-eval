@@ -474,3 +474,21 @@
   final judging is represented by these placeholders.
 - Do not freeze future active names or schemas from the reserved marker. Phase
   4 closes the design gate, not the concrete tool implementations.
+
+## 2026-08-30 - Bind public validation before model reentry
+
+- Treat public validation profile identity as a first-class observation field,
+  not an unstructured payload convention.
+- Require the campaign to bind one expected public profile to the controller.
+  Missing authority fails before environment dispatch; a missing or different
+  observation profile fails before model-visible recording or policy reentry.
+- Restrict every `public_validation` capability to model-visible, read-only,
+  candidate-bound evidence that does not record private evaluator material.
+- Keep this distinct from final authority. The validation hash may enter the
+  public trajectory and episode memory; final judgment remains trusted-only
+  after submission freeze.
+- Keep Phase 5 open until a production EVAS adapter, profile-bound final
+  adapter, immutable sidecar, and clean-room no-reentry evidence exist.
+- Preserve read compatibility for historical `vaevas-observation-v1` documents
+  that predate the optional profile field. New serializers emit it, while the
+  public-validation controller gate—not schema presence alone—enforces it.
