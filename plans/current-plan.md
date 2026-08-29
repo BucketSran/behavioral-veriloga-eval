@@ -584,7 +584,7 @@ Completed design-gate slice:
 
 ### Phase 5 - Implement public validation / final test separation
 
-Status: `pending`
+Status: `in_progress`
 
 Goal: allow strong iterative feedback without converting the terminal judge
 into an adaptive oracle.
@@ -639,11 +639,21 @@ Completed authority-binding slice:
   model-visible, candidate-bound, read-only, and free of private evidence;
 - trajectory observation events record the validation profile hash for later
   memory, evolution, and result joins.
+- `ProfileBoundFinalJudge` accepts only a `FrozenSubmission`, validates the
+  returned judgment and immutable score sidecar against the detached final
+  profile, computes the exact profile-input identity, and is single-use even
+  after an executor failure;
+- final sidecar schema identity is now joined to the final profile contract;
+  the adapter exposes a detached sidecar document and canonical hash to a
+  trusted outer writer without adding it to model-visible controller events.
+- final profile also binds `score_authority`; legacy v1 profiles safely default
+  to `development_only`, and formal sidecars require an explicit formal
+  authority declaration.
 
 Still required before Phase 5 completion:
 
 - a production EVAS 0.8.7 public-validation adapter that emits this binding;
-- a profile-bound final-test adapter and immutable score-sidecar writer;
+- a production EVAS 0.8.7 final executor and atomic immutable sidecar writer;
 - clean-room evidence that final outputs never enter generation, candidate
   selection, or shared memory;
 - a real campaign result join using native typed trajectory evidence rather

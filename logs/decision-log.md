@@ -492,3 +492,24 @@
 - Preserve read compatibility for historical `vaevas-observation-v1` documents
   that predate the optional profile field. New serializers emit it, while the
   public-validation controller gate—not schema presence alone—enforces it.
+
+## 2026-08-30 - Make final authority a single-use judgment/sidecar pair
+
+- Require a final executor to return judgment and score sidecar from the same
+  single-use adapter invocation over one `FrozenSubmission`.
+- Detach the final profile from caller and executor mutation. On success, bind
+  profile, attempt/task, submission tree, judgment, and sidecar into explicit
+  profile-input and sidecar hashes.
+- Consume the adapter before invoking the executor. Infrastructure or contract
+  failure therefore requires a new judge attempt under the existing replay
+  classifier; an in-place retry cannot accidentally reuse hidden state.
+- Reuse the result-artifact sidecar validator and add the missing link from
+  `score_sidecar_contract.schema_id` to the actual sidecar schema. Do not create
+  a second final-result protocol.
+- Bind `score_authority` through the same final profile contract. Historical v1
+  profiles without this optional field default to `development_only`; only an
+  explicit `formal` declaration can authorize a formal sidecar. This preserves
+  read compatibility without allowing authority escalation.
+- Keep writing and production execution outside this generic adapter. Atomic
+  file creation, native typed trajectory join, and clean-room no-reentry remain
+  explicit Phase 5/8 work.

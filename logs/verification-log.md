@@ -654,3 +654,28 @@
   enforcement; follow-up review reports `APPROVE` with no remaining finding.
 - Scope boundary: production `run_evas`, campaign routing, r53 release bytes,
   EVAS 0.8.7, final sidecar authority, and Spectre policy are unchanged.
+
+## 2026-08-30 - Final authority sidecar adapter
+
+- TDD RED failed at collection because the profile-bound final adapter did not
+  exist.
+- Focused final-authority/result-artifact/controller/authority-profile
+  invocation reports `92 passed`.
+- Initial complete generic harness plus meta-schema invocation reports
+  `291 passed`.
+- Tests cover caller/executor profile mutation isolation, detached sidecar
+  access, single-use after executor failure, checker/submission mismatch, and
+  final-profile/sidecar-schema mismatch.
+- Independent review raised one HIGH finding: the sidecar schema was bound but
+  `score_authority` was not, so a development-only profile could accept a
+  formal sidecar. Commit `5719fac7fa` binds this field, defaults legacy v1
+  profiles to `development_only`, and requires explicit formal authorization.
+- The authority-fix focused invocation reports `66 passed`; complete generic
+  harness plus meta-schema reports `297 passed`.
+- Follow-up independent review reports `APPROVE` with zero remaining findings
+  after dynamically checking legacy, explicit development-only, and explicit
+  formal profiles.
+- Ruff 0.12.12, Python bytecode compilation, and `git diff --check` pass.
+- Scope boundary: no EVAS invocation, production sidecar write, default runner
+  switch, r53 release mutation, production score-authority escalation, or
+  Spectre trigger occurred.
