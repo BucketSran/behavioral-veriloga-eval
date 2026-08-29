@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arcadia-1.github.io/vaEVAS/schemas/vaevas-candidate-lineage-v1.schema.json",
+  "title": "vaEVAS candidate lineage",
+  "description": "Content-addressed candidate record with one artifact parent and zero or more influence references.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "candidate_id",
+    "candidate_lineage_sha256",
+    "episode_id",
+    "attempt_id",
+    "task_id",
+    "condition",
+    "round_index",
+    "candidate_tree_sha256",
+    "artifact_parent_candidate_id",
+    "influence_candidate_ids",
+    "mutation_kind",
+    "source_event_sha256",
+    "status",
+    "failure_reason"
+  ],
+  "properties": {
+    "schema_version": {"const": "vaevas-candidate-lineage-v1"},
+    "candidate_id": {"type": "string", "minLength": 1},
+    "candidate_lineage_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "episode_id": {"type": "string", "minLength": 1},
+    "attempt_id": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "condition": {"type": "string", "minLength": 1},
+    "round_index": {"type": "integer", "minimum": 0},
+    "candidate_tree_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "artifact_parent_candidate_id": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "influence_candidate_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "mutation_kind": {
+      "enum": ["seed", "create", "refine", "merge", "failed_mutation"]
+    },
+    "source_event_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "status": {"enum": ["active", "rejected", "selected", "frozen", "failed"]},
+    "failure_reason": {"type": ["string", "null"], "minLength": 1}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "failed"}}},
+      "then": {"properties": {"failure_reason": {"type": "string", "minLength": 1}}}
+    },
+    {
+      "if": {"properties": {"status": {"enum": ["active", "rejected", "selected", "frozen"]}}},
+      "then": {"properties": {"failure_reason": {"const": null}}}
+    }
+  ],
+  "additionalProperties": false
+}

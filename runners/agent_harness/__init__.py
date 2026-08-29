@@ -3,6 +3,13 @@
 from .backend_profile import backend_profile_sha256
 from .contracts import FinalJudge, PublicValidator
 from .controller import EpisodeController
+from .evolution_state import (
+    CandidateLineage,
+    MemorySnapshot,
+    candidate_lineage_sha256,
+    freeze_memory_snapshot,
+    validate_candidate_lineage_graph,
+)
 from .proposals import (
     ProposalEnvelope,
     ProposalFormat,
@@ -30,6 +37,7 @@ from .trajectory import (
 
 __all__ = [
     "AgentAction",
+    "CandidateLineage",
     "EpisodeContext",
     "EpisodeController",
     "EpisodeResult",
@@ -41,14 +49,18 @@ __all__ = [
     "FrozenSubmission",
     "Incident",
     "JsonlTrajectoryRecorder",
+    "MemorySnapshot",
     "Observation",
     "ProposalEnvelope",
     "ProposalFormat",
     "ProposalNormalizationError",
     "PublicValidator",
     "backend_profile_sha256",
+    "candidate_lineage_sha256",
+    "freeze_memory_snapshot",
     "normalize_proposal",
     "project_model_visible_events",
     "read_trajectory",
+    "validate_candidate_lineage_graph",
     "validate_trajectory",
 ]

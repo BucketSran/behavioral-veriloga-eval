@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arcadia-1.github.io/vaEVAS/schemas/vaevas-memory-snapshot-v1.schema.json",
+  "title": "vaEVAS evolution memory snapshot",
+  "description": "Episode-local, model-visible memory snapshot built only from public candidate and validation evidence.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "snapshot_id",
+    "snapshot_sha256",
+    "episode_id",
+    "attempt_id",
+    "task_id",
+    "condition",
+    "round_index",
+    "parent_snapshot_sha256",
+    "retry_parent_attempt_id",
+    "entries"
+  ],
+  "properties": {
+    "schema_version": {"const": "vaevas-memory-snapshot-v1"},
+    "snapshot_id": {"type": "string", "minLength": 1},
+    "snapshot_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "episode_id": {"type": "string", "minLength": 1},
+    "attempt_id": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "condition": {"type": "string", "minLength": 1},
+    "round_index": {"type": "integer", "minimum": 0},
+    "parent_snapshot_sha256": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "retry_parent_attempt_id": {"type": ["string", "null"], "minLength": 1},
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "entry_id",
+          "source_kind",
+          "source_event_sha256",
+          "summary"
+        ],
+        "properties": {
+          "entry_id": {"type": "string", "minLength": 1},
+          "source_kind": {
+            "enum": [
+              "candidate_summary",
+              "public_validation",
+              "public_tool_observation"
+            ]
+          },
+          "source_event_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "candidate_id": {"type": ["string", "null"], "minLength": 1},
+          "candidate_tree_sha256": {
+            "type": ["string", "null"],
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "summary": {"type": "object"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
