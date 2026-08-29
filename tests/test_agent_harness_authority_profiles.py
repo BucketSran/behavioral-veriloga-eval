@@ -144,6 +144,13 @@ def test_authority_profile_schemas_are_generic_but_instances_pin_current_baselin
     )
 
 
+def test_runtime_boolean_constants_reject_integer_aliases() -> None:
+    with pytest.raises(ValueError, match="may_select_candidates"):
+        public_validation_profile_sha256(
+            _public_profile(may_select_candidates=1),
+        )
+
+
 @pytest.mark.parametrize(
     ("profile_factory", "field_name", "hash_fn"),
     [
@@ -446,3 +453,34 @@ def test_final_replay_retry_allows_only_infrastructure_replay_without_model_reen
         classify_final_replay_request(
             **(replay_kwargs | {"model_reentry_requested": True}),
         )
+
+
+@pytest.mark.parametrize("malformed_value", [0, "", None, []])
+def test_final_replay_rejects_non_boolean_model_reentry_flags(
+    malformed_value: object,
+) -> None:
+    replay_kwargs: dict[str, Any] = {
+        "failure_kind": "infrastructure_failure",
+        "frozen_submission_tree_sha256": SHA_A,
+        "previous_frozen_submission_tree_sha256": SHA_A,
+        "final_profile_sha256": SHA_B,
+        "previous_final_profile_sha256": SHA_B,
+        "profile_input_identity_sha256": SHA_C,
+        "previous_profile_input_identity_sha256": SHA_C,
+        "judge_identity_sha256": SHA_D,
+        "previous_judge_identity_sha256": SHA_D,
+        "checker_identity_sha256": SHA_E,
+        "previous_checker_identity_sha256": SHA_E,
+        "runtime_identity_sha256": SHA_F,
+        "previous_runtime_identity_sha256": SHA_F,
+        "campaign_config_sha256": SHA_0,
+        "previous_campaign_config_sha256": SHA_0,
+        "command_signature_sha256": SHA_A,
+        "previous_command_signature_sha256": SHA_A,
+        "previous_judge_attempt_id": "judge-attempt-1",
+        "judge_attempt_id": "judge-attempt-2",
+        "model_reentry_requested": malformed_value,
+    }
+
+    with pytest.raises(TypeError, match="model_reentry_requested"):
+        classify_final_replay_request(**replay_kwargs)

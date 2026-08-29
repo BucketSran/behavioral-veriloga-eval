@@ -138,6 +138,8 @@ def classify_final_replay_request(
     model_reentry_requested: bool,
 ) -> str:
     """Validate whether a final replay is an infrastructure-only retry."""
+    if not isinstance(model_reentry_requested, bool):
+        raise TypeError("model_reentry_requested must be a boolean")
     _require_nonempty(failure_kind, field_name="failure_kind")
     _require_sha256(
         frozen_submission_tree_sha256,
@@ -355,7 +357,11 @@ def _require_exact_fields(
 
 
 def _require_const(value: Any, expected: Any, *, field_name: str) -> None:
-    if value != expected:
+    if isinstance(expected, bool):
+        matches = value is expected
+    else:
+        matches = value == expected
+    if not matches:
         raise ValueError(f"{field_name} must be {expected!r}")
 
 
