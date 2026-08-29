@@ -6,14 +6,16 @@ from dataclasses import replace
 
 from .contracts import Environment, FinalJudge, Policy, TrajectorySink
 from .state import (
+    AgentAction,
     EpisodeContext,
     EpisodeResult,
+    EnvironmentStep,
     EventVisibility,
     FailureDisposition,
     Incident,
     ToolExecutionRejection,
 )
-from .tool_registry import ToolRegistry, ToolRegistryError
+from .tool_registry import ToolCapability, ToolRegistry, ToolRegistryError
 
 
 class _ControllerFailure(RuntimeError):
@@ -78,6 +80,57 @@ class EpisodeController:
             visibility=visibility,
             payload=payload,
         )
+
+    def _enforce_candidate_effect(
+        self,
+        context: EpisodeContext,
+        *,
+        action: AgentAction,
+        capability: ToolCapability,
+        before_sha256: str | None,
+        step: EnvironmentStep,
+    ) -> None:
+        after_sha256 = step.observation.candidate_tree_sha256
+        violation_message: str | None = None
+        if (
+            capability.candidate_effect in {"none", "read"}
+            and after_sha256 != before_sha256
+        ):
+            violation_message = (
+                f"{capability.candidate_effect} tool changed the trusted "
+                "candidate tree"
+            )
+        elif capability.candidate_effect == "mutate" and after_sha256 is None:
+            violation_message = "mutate tool did not report a candidate tree hash"
+        elif capability.candidate_effect == "freeze" and (
+            not step.done or step.terminal_reason != "submitted"
+        ):
+            violation_message = (
+                "freeze tool must terminate the environment as submitted"
+            )
+        elif capability.candidate_effect == "freeze" and after_sha256 is None:
+            violation_message = "freeze tool did not report a candidate tree hash"
+        if violation_message is not None:
+            self._record(
+                context,
+                actor="controller",
+                event_type="candidate_transition_rejected",
+                visibility="harness",
+                payload={
+                    "action_id": action.action_id,
+                    "tool_name": capability.tool_name,
+                    "tool_id": capability.tool_id,
+                    "candidate_effect": capability.candidate_effect,
+                    "candidate_tree_sha256_before": before_sha256,
+                    "candidate_tree_sha256_after": after_sha256,
+                    "descriptor_sha256": capability.descriptor_sha256,
+                },
+            )
+            raise _ProtocolFailure(
+                category="candidate_effect_violation",
+                phase="environment_step",
+                message=violation_message,
+            )
 
     def run(self, context: EpisodeContext) -> EpisodeResult:
         result: EpisodeResult | None = None
@@ -262,6 +315,13 @@ class EpisodeController:
                         primary_outcome=step.primary_outcome,
                         terminal_reason="tool_execution_rejected",
                     )
+                self._enforce_candidate_effect(
+                    context,
+                    action=action,
+                    capability=capability,
+                    before_sha256=observation.candidate_tree_sha256,
+                    step=step,
+                )
                 self._record(
                     context,
                     actor="environment",
@@ -296,6 +356,29 @@ class EpisodeController:
 
                 phase = "submission_freeze"
                 submission = self._environment.freeze_submission()
+                if submission.tree_sha256 != observation.candidate_tree_sha256:
+                    self._record(
+                        context,
+                        actor="controller",
+                        event_type="submission_freeze_rejected",
+                        visibility="harness",
+                        payload={
+                            "tool_name": capability.tool_name,
+                            "tool_id": capability.tool_id,
+                            "candidate_tree_sha256": (
+                                observation.candidate_tree_sha256
+                            ),
+                            "submission_tree_sha256": submission.tree_sha256,
+                        },
+                    )
+                    raise _ProtocolFailure(
+                        category="submission_freeze_mismatch",
+                        phase="submission_freeze",
+                        message=(
+                            "frozen submission does not match the terminal "
+                            "candidate observation"
+                        ),
+                    )
                 self._record(
                     context,
                     actor="environment",

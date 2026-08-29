@@ -148,6 +148,7 @@ class PublicValidationEnvironment:
             tool_name="task",
             status="ready",
             payload={"message": "implement the public task"},
+            candidate_tree_sha256="a" * 64,
         )
 
     def step(
@@ -908,6 +909,259 @@ def test_controller_rejects_stale_candidate_binding_before_environment_mutation(
     assert rejected["payload"]["expected_candidate_tree_sha256"] == "a" * 64
 
 
+class ReadMutatingEnvironment(PassingEnvironment):
+    def start(self, context: EpisodeContext) -> Observation:
+        self.boundary_log.append(f"start:{context.attempt_id}")
+        return Observation(
+            observation_id="observation-task",
+            tool_name="task",
+            status="ready",
+            payload={"message": "implement the public task"},
+            candidate_tree_sha256="a" * 64,
+        )
+
+    def step(
+        self,
+        action: AgentAction,
+        _capability: ToolCapability,
+    ) -> EnvironmentStep:
+        self.boundary_log.append(f"step:{action.tool_name}")
+        return EnvironmentStep(
+            observation=Observation(
+                observation_id="observation-read",
+                tool_name=action.tool_name,
+                status="succeeded",
+                payload={"message": "read completed"},
+                candidate_tree_sha256="b" * 64,
+            ),
+            done=False,
+        )
+
+
+def test_controller_rejects_candidate_mutation_by_read_only_tool(tmp_path) -> None:
+    trajectory_path = tmp_path / "read-mutated-candidate.jsonl"
+    boundary_log: list[str] = []
+    controller = EpisodeController(
+        policy=SequencePolicy(
+            [
+                AgentAction(
+                    action_id="action-read",
+                    tool_name="public_validate",
+                    arguments={},
+                    source_backend="fake-backend",
+                    candidate_tree_sha256="a" * 64,
+                )
+            ]
+        ),
+        environment=ReadMutatingEnvironment(boundary_log),
+        final_judge=PassingFinalJudge(boundary_log),
+        trajectory=JsonlTrajectoryRecorder(trajectory_path),
+        tool_registry=_controller_registry("public_validate"),
+    )
+
+    result = controller.run(
+        EpisodeContext(
+            episode_id="episode-001",
+            attempt_id="attempt-001",
+            task_id="v4-001",
+            condition="Agentic+EVAS",
+            max_steps=4,
+        )
+    )
+
+    assert result.primary_outcome == "protocol_failure"
+    assert result.failure is not None
+    assert result.failure.category == "candidate_effect_violation"
+    assert result.failure.phase == "environment_step"
+    assert boundary_log == [
+        "start:attempt-001",
+        "step:public_validate",
+        "close",
+    ]
+    rejected = next(
+        event
+        for event in read_trajectory(trajectory_path)
+        if event["event_type"] == "candidate_transition_rejected"
+    )
+    assert rejected["payload"]["candidate_effect"] == "read"
+    assert rejected["payload"]["candidate_tree_sha256_before"] == "a" * 64
+    assert rejected["payload"]["candidate_tree_sha256_after"] == "b" * 64
+    assert not any(
+        event["event_type"] == "environment_observed"
+        for event in read_trajectory(trajectory_path)
+    )
+
+
+class MutatingWithoutCandidateEnvironment(ReadMutatingEnvironment):
+    def step(
+        self,
+        action: AgentAction,
+        _capability: ToolCapability,
+    ) -> EnvironmentStep:
+        self.boundary_log.append(f"step:{action.tool_name}")
+        return EnvironmentStep(
+            observation=Observation(
+                observation_id="observation-mutation",
+                tool_name=action.tool_name,
+                status="succeeded",
+                payload={"message": "mutation completed"},
+            ),
+            done=False,
+        )
+
+
+def test_controller_requires_mutating_tool_to_report_candidate_hash() -> None:
+    boundary_log: list[str] = []
+    controller = EpisodeController(
+        policy=SequencePolicy(
+            [
+                AgentAction(
+                    action_id="action-bash",
+                    tool_name="bash",
+                    arguments={"command": "touch public/model.va"},
+                    source_backend="fake-backend",
+                    candidate_tree_sha256="a" * 64,
+                )
+            ]
+        ),
+        environment=MutatingWithoutCandidateEnvironment(boundary_log),
+        final_judge=PassingFinalJudge(boundary_log),
+        tool_registry=_controller_registry("bash"),
+    )
+
+    result = controller.run(
+        EpisodeContext(
+            episode_id="episode-001",
+            attempt_id="attempt-001",
+            task_id="v4-001",
+            condition="Agentic+EVAS",
+            max_steps=4,
+        )
+    )
+
+    assert result.primary_outcome == "protocol_failure"
+    assert result.failure is not None
+    assert result.failure.category == "candidate_effect_violation"
+    assert "mutate tool did not report" in result.failure.message
+    assert boundary_log == ["start:attempt-001", "step:bash", "close"]
+
+
+class NonTerminalSubmissionEnvironment(ReadMutatingEnvironment):
+    def step(
+        self,
+        action: AgentAction,
+        _capability: ToolCapability,
+    ) -> EnvironmentStep:
+        self.boundary_log.append(f"step:{action.tool_name}")
+        return EnvironmentStep(
+            observation=Observation(
+                observation_id="observation-submission",
+                tool_name=action.tool_name,
+                status="succeeded",
+                payload={"message": "submission deferred"},
+                candidate_tree_sha256="a" * 64,
+            ),
+            done=False,
+        )
+
+
+def test_controller_requires_freeze_tool_to_terminate_as_submitted() -> None:
+    boundary_log: list[str] = []
+    controller = EpisodeController(
+        policy=SequencePolicy(
+            [
+                AgentAction(
+                    action_id="action-submit",
+                    tool_name="submit",
+                    arguments={},
+                    source_backend="fake-backend",
+                    candidate_tree_sha256="a" * 64,
+                )
+            ]
+        ),
+        environment=NonTerminalSubmissionEnvironment(boundary_log),
+        final_judge=PassingFinalJudge(boundary_log),
+        tool_registry=_controller_registry("submit"),
+    )
+
+    result = controller.run(
+        EpisodeContext(
+            episode_id="episode-001",
+            attempt_id="attempt-001",
+            task_id="v4-001",
+            condition="Agentic+EVAS",
+            max_steps=4,
+        )
+    )
+
+    assert result.primary_outcome == "protocol_failure"
+    assert result.failure is not None
+    assert result.failure.category == "candidate_effect_violation"
+    assert "freeze tool must terminate" in result.failure.message
+    assert boundary_log == ["start:attempt-001", "step:submit", "close"]
+
+
+class MismatchedFreezeEnvironment(ReadMutatingEnvironment):
+    def step(
+        self,
+        action: AgentAction,
+        _capability: ToolCapability,
+    ) -> EnvironmentStep:
+        self.boundary_log.append(f"step:{action.tool_name}")
+        return EnvironmentStep(
+            observation=Observation(
+                observation_id="observation-submission",
+                tool_name=action.tool_name,
+                status="succeeded",
+                payload={"message": "submission accepted"},
+                candidate_tree_sha256="b" * 64,
+            ),
+            done=True,
+            terminal_reason="submitted",
+        )
+
+
+def test_controller_binds_freeze_observation_to_frozen_submission() -> None:
+    boundary_log: list[str] = []
+    controller = EpisodeController(
+        policy=SequencePolicy(
+            [
+                AgentAction(
+                    action_id="action-submit",
+                    tool_name="submit",
+                    arguments={},
+                    source_backend="fake-backend",
+                    candidate_tree_sha256="a" * 64,
+                )
+            ]
+        ),
+        environment=MismatchedFreezeEnvironment(boundary_log),
+        final_judge=PassingFinalJudge(boundary_log),
+        tool_registry=_controller_registry("submit"),
+    )
+
+    result = controller.run(
+        EpisodeContext(
+            episode_id="episode-001",
+            attempt_id="attempt-001",
+            task_id="v4-001",
+            condition="Agentic+EVAS",
+            max_steps=4,
+        )
+    )
+
+    assert result.primary_outcome == "protocol_failure"
+    assert result.failure is not None
+    assert result.failure.category == "submission_freeze_mismatch"
+    assert result.failure.phase == "submission_freeze"
+    assert boundary_log == [
+        "start:attempt-001",
+        "step:submit",
+        "freeze",
+        "close",
+    ]
+
+
 def test_controller_rejects_final_only_tool_from_model_visible_dispatch(
     tmp_path,
 ) -> None:
@@ -1049,10 +1303,20 @@ class NeverTerminalEnvironment(PassingEnvironment):
 
 def test_step_budget_exhaustion_is_a_terminal_result() -> None:
     controller = EpisodeController(
-        policy=SubmitPolicy(),
+        policy=SequencePolicy(
+            [
+                AgentAction(
+                    action_id="action-bash",
+                    tool_name="bash",
+                    arguments={"command": "true"},
+                    source_backend="fake-backend",
+                    candidate_tree_sha256="a" * 64,
+                )
+            ]
+        ),
         environment=NeverTerminalEnvironment([]),
         final_judge=PassingFinalJudge([]),
-        tool_registry=_controller_registry("submit"),
+        tool_registry=_controller_registry("bash"),
     )
 
     result = controller.run(
@@ -1156,10 +1420,20 @@ def test_trajectory_rejects_unknown_visibility(tmp_path) -> None:
 
 def test_protocol_failure_is_materialized_in_the_episode_result() -> None:
     controller = EpisodeController(
-        policy=SubmitPolicy(),
+        policy=SequencePolicy(
+            [
+                AgentAction(
+                    action_id="action-bash",
+                    tool_name="bash",
+                    arguments={"command": "true"},
+                    source_backend="fake-backend",
+                    candidate_tree_sha256="a" * 64,
+                )
+            ]
+        ),
         environment=InvalidTerminalEnvironment([]),
         final_judge=PassingFinalJudge([]),
-        tool_registry=_controller_registry("submit"),
+        tool_registry=_controller_registry("bash"),
     )
 
     result = controller.run(
