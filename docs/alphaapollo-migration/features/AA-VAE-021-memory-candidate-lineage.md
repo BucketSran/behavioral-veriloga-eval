@@ -18,9 +18,13 @@
 
 - memory snapshot 只接受 candidate summary、public validation、public tool observation。
 - final judgment、final score sidecar、private checker、trusted event 不得进入 memory。
-- retry snapshot 默认重新开始，不继承 partial memory，除非显式声明 parent snapshot。
+- retry attempt 必须从 round 0、空 entries、无 parent snapshot 重新开始；只保留
+  `retry_parent_attempt_id` 作为审计 lineage，不允许继承 partial memory。
+- memory entries 采用稳定 canonical order，并应用递归 public-feedback redaction；重复
+  entry、额外字段、private/final/trusted/credential-like 内容全部 fail closed。
 - candidate lineage 采用一个 artifact parent 加多个 influence refs；frozen candidate
-  是 terminal，不可继续 mutation。
+  是 terminal，不可继续 mutation；refine 必须有仍可变的 artifact parent，create
+  不得伪装成 artifact mutation，所有 parent/influence 都必须来自更早轮次。
 - failed mutation 保留原 tree hash 并写明失败 lineage。
 
 ## 代码改动
@@ -40,7 +44,7 @@
 
 ## 验证证据
 
-- regression tests：`tests/test_agent_harness_evolution_state.py`。
+- regression tests：`tests/test_agent_harness_evolution_state.py`，`26 passed`。
 - clean-room smoke：未执行；此切片未接 runtime。
 - 未验证部分：real candidate store integration and cross-cell isolation at runtime。
 

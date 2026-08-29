@@ -21,7 +21,8 @@
   condition allowlist、budget class、state/candidate effect、argument/observation
   schema、evidence policy 和 handler。
 - `active` tool 必须有 handler；`reserved` tool 作为未来领域工具占位，不能调用。
-- `final_judge_only` 工具不能进入 model-visible registry，也不能写入共享 memory。
+- final judge 不是普通工具 lifecycle：它完全位于 registry 之外，由独立 final-test
+  authority profile 管理；final-shaped descriptor 会被拒绝。
 - registry 只解析 capability，不执行工具；production runner 暂不导入。
 
 ## 代码改动
@@ -31,7 +32,7 @@
 | `schemas/vaevas-tool-descriptor-v1.schema.json` | strict tool descriptor schema | schema |
 | `runners/agent_harness/tool_registry.py` | condition-aware capability resolution and fail-closed authorization | harness protocol |
 | `runners/agent_harness/__init__.py` | 导出 registry/capability/hash API | harness API |
-| `tests/test_agent_harness_tool_registry.py` | active/reserved/final-only/syntax-not-authority regressions | tests |
+| `tests/test_agent_harness_tool_registry.py` | active/reserved/final-authority-separation/syntax-not-authority regressions | tests |
 
 ## 数据与状态变化
 
@@ -42,7 +43,7 @@
 
 ## 验证证据
 
-- regression tests：`tests/test_agent_harness_tool_registry.py`。
+- regression tests：`tests/test_agent_harness_tool_registry.py`，`20 passed`。
 - clean-room smoke：未执行；此切片未接 runtime。
 - 未验证部分：真实 tool dispatch、domain tool semantics、per-tool ablation impact。
 

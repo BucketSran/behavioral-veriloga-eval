@@ -340,3 +340,22 @@
 - Phase 1 is now a protocol-contract closure. Runtime dispatch, mini-swe
   adapter parity, real multi-model scheduling, CI wiring, and result-ledger
   joins move to subsequent phases.
+
+## 2026-08-30 - Phase 1 hardening keeps schemas generic and instances frozen
+
+- Keep authority and evolution schemas reusable across later benchmark and
+  evaluator releases; freeze the current experiment instance to r53 + EVAS
+  0.8.7 through profile/manifest content and regression fixtures rather than
+  hard-coding those values into the schema vocabulary.
+- Treat final judging as a separate post-freeze authority, not a
+  `final_judge_only` ordinary tool lifecycle. The ordinary registry accepts
+  only active callable capabilities and reserved non-callable placeholders.
+- Make retry isolation absolute: a retry records its parent attempt for audit
+  but starts at round 0 with empty memory and no memory parent.
+- Make persisted evolution snapshots self-verifying. Reload must validate the
+  manifest and snapshot hashes, strict roster barrier, retry contract,
+  canonical candidate ordering, exact public metrics, and recomputed winner
+  before a prior incumbent can be reused.
+- Keep this work at the protocol layer. Production adapter integration, CI
+  wiring, real multi-model scheduling, and result-ledger joins remain later
+  work and are not implied by Phase 1 completion.

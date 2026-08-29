@@ -16,13 +16,20 @@
 
 ## vaEVAS 适配决策
 
-- public profile 固定为 r53 + EVAS 0.8.7、in-episode、model observation、
-  episode-local public memory、candidate-tree input。
-- final profile 固定为 r53 + EVAS 0.8.7、post-submission-freeze-only、trusted-only、
-  forbidden model observation/memory/selection/repair、frozen-submission input。
-- final replay 只允许 infrastructure failure 下的同一 frozen submission、新 judge
-  attempt，且禁止模型重入。
-- Spectre policy 保持 conditional，不进入日常 EVAS 0.8.7 development scoring。
+- schema 保持 benchmark/evaluator 通用；当前冻结的评测实例由测试锁定为 r53 +
+  EVAS 0.8.7。public profile 是 in-episode、model observation、episode-local public
+  memory、candidate-tree input。
+- final profile 是 post-submission-freeze-only、trusted-only，禁止 model observation、
+  memory、selection 和 repair，只接受 frozen-submission input。
+- public/final profile 都绑定 benchmark manifest、checker、runtime 和 campaign config
+  identity；final 额外绑定 judge、command signature、structured result 与 immutable
+  score-sidecar contract。
+- final replay 只允许 infrastructure failure 下复用完全相同的 frozen submission、
+  profile/input/judge/checker/runtime/campaign/command identity，并使用新的 judge attempt，
+  且禁止模型重入。
+- Spectre 在日常 EVAS 0.8.7 development scoring 中保持关闭；若外部协议或 EVAS
+  ABI/compiler/simulator/package 变化触发，则必须同时绑定 Spectre judge、command 和
+  report schema identity。
 
 ## 代码改动
 
@@ -41,7 +48,7 @@
 
 ## 验证证据
 
-- regression tests：`tests/test_agent_harness_authority_profiles.py`。
+- regression tests：`tests/test_agent_harness_authority_profiles.py`，`39 passed`。
 - clean-room smoke：未执行；此切片未接 runtime。
 - 未验证部分：runner-level enforcement and sidecar joins。
 

@@ -487,3 +487,31 @@
 - Scope boundary: no production runner imports the new contracts yet; no r53
   release bytes, EVAS code, evaluator version, score sidecar, or Spectre gate
   changed.
+
+## 2026-08-30 - Phase 1 contract hardening superseding verification
+
+- Focused contract invocation over tool registry, authority profiles, memory
+  and lineage, and evolution reducer reports `114 passed`.
+- Complete `tests/test_agent_harness_*.py` invocation reports `197 passed`.
+- Existing mini-swe regression invocation reports `30 passed, 3 skipped`.
+  The timeout-sensitive telemetry case failed once inside a combined boundary
+  invocation, then passed alone and in the subsequent full mini-swe suite; it
+  remains a known flaky residual risk rather than a Phase 1 contract failure.
+- Active r53 entrypoints plus schema meta-tests report `13 passed`.
+- Ruff 0.12.12 reports `All checks passed!` for the full generic harness and
+  focused tests; the current Ruff release also passes the files modified by
+  this hardening pass. `python -m py_compile runners/agent_harness/*.py`
+  succeeds.
+- All six Phase 1 tool/authority/memory/lineage/evolution schemas pass
+  `Draft202012Validator.check_schema`; `git diff --check` passes.
+- No production runner imports the new Phase 1 package, and
+  `git diff -- benchmark-vabench-release-v4` is empty. EVAS, r53, production
+  scoring, and the conditional Spectre gate remain unchanged.
+- Independent adversarial review initially requested changes for Python
+  bool/int aliasing, falsey replay flags, current-Ruff findings, an error-code
+  spelling, and dead local state. TDD regressions and the two follow-up commits
+  `c3ad9e4e6f` and `0c00aee52f` resolved all findings; final review reports
+  `APPROVE` with zero blocking issues.
+- Independent completion verification reports `PASS` and reconfirms the
+  BucketSran-only remote boundary, clean EVAS fork, untouched r53 release, and
+  preserved `fix/dynamic-zero-period-timer` dirty worktree.

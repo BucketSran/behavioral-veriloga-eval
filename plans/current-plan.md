@@ -336,6 +336,19 @@ Completed slice:
 - round snapshots are completion-order invariant, reject final feedback, and
   select candidates only from public metrics plus candidate hash/id tie-breaks.
 
+Review hardening completed for this phase:
+
+- authority profiles bind benchmark, evaluator/judge, checker, runtime,
+  campaign, command, structured-result, and immutable-sidecar identities;
+- retry memory always starts empty and lineage validation rejects same-round,
+  terminal-parent, forged-parent, cyclic, or non-canonical state;
+- sealed evolution rounds enforce one terminal record per frozen roster branch,
+  exact finite metrics, deterministic winner recomputation, and validated
+  last-sealed-incumbent fallback after a global deadline;
+- the four focused contract suites pass `114` tests and the complete generic
+  harness suite passes `197` tests, without importing the package from the
+  production r53/mini-swe runner.
+
 Still pending after this phase:
 
 - capability-aware dispatch and production adapter integration beyond the
