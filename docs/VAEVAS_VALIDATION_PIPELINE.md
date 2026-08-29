@@ -212,6 +212,14 @@ Before a benchmark task is promoted:
 5. Any optional EVAS/Spectre disagreement is entered into the conformance
    backlog without blocking promotion.
 
+## Track 5: Model Evaluation Closure
+
+Use `docs/V3_EVALUATOR_CONTRACT.md` for the pinned Python/package/native-core
+identity, the single-task clean-room hidden-scoring smoke, the full v3 model
+evaluation command, evidence requirements, failure taxonomy, and machine
+checked claim boundary. This track uses strict EVAS as the formal judge;
+Spectre remains optional parity evidence.
+
 ## Current Operational Gaps
 
 | Gap | Effect | Next action |

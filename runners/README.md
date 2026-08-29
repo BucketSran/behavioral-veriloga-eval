@@ -21,6 +21,13 @@ Planned runner split:
   Reuses the gold-backed end-to-end tasks, runs EVAS plus remote Spectre,
   exports `tran_spectre.csv`, reuses the same behavior checks, and emits
   waveform-parity summaries for coordination backfill
+- `run_vabench_v3_model_eval.py`
+  Runs the v3 public-prompt generation and private hidden-scoring entrypoint,
+  indexes environment/input/result provenance, and derives the formal claim
+  gate from executed evidence.
+- `../scripts/run_v3_clean_room_smoke.py`
+  Executes one deterministic generation-to-hidden-scoring path in a temporary
+  public clean room and verifies private-path isolation plus cleanup.
 - `simulate_openvaf.py`
   Out of scope for this benchmark
 - `score.py`

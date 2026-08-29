@@ -4,7 +4,9 @@ on:
   pull_request:
     paths:
       - ".github/workflows/public-agent-runtime.yml"
+      - ".github/workflows/evaluator-closure.yml"
       - "environment/**"
+      - "scripts/verify_evaluator_environment.py"
       - "benchmark-vabench-release-v4/public-agent-runtime/**"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/mini_swe_vabench.py"
       - "tests/test_mini_swe_vabench.py"
@@ -13,7 +15,9 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/public-agent-runtime.yml"
+      - ".github/workflows/evaluator-closure.yml"
       - "environment/**"
+      - "scripts/verify_evaluator_environment.py"
       - "benchmark-vabench-release-v4/public-agent-runtime/**"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/mini_swe_vabench.py"
       - "tests/test_mini_swe_vabench.py"
@@ -29,7 +33,9 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Check runtime contract
-        run: python3 benchmark-vabench-release-v4/scripts/tests/test_public_agent_runtime.py
+        run: |
+          python3 scripts/verify_evaluator_environment.py --json
+          python3 benchmark-vabench-release-v4/scripts/tests/test_public_agent_runtime.py
 
       - name: Build pinned runtime image
         working-directory: benchmark-vabench-release-v4/public-agent-runtime

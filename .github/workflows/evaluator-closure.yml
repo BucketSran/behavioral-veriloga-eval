@@ -1,0 +1,98 @@
+name: Evaluator Closure
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/evaluator-closure.yml"
+      - "environment/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - "runners/run_vabench_v3_model_eval.py"
+      - "runners/simulate_evas.py"
+      - "scripts/run_v3_clean_room_smoke.py"
+      - "scripts/verify_evaluator_environment.py"
+      - "tests/test_evaluator_environment_contract.py"
+      - "tests/test_v3_clean_room_smoke.py"
+      - "tests/test_v3_model_eval_claim_gate.py"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/evaluator-closure.yml"
+      - "environment/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - "runners/run_vabench_v3_model_eval.py"
+      - "runners/simulate_evas.py"
+      - "scripts/run_v3_clean_room_smoke.py"
+      - "scripts/verify_evaluator_environment.py"
+      - "tests/test_evaluator_environment_contract.py"
+      - "tests/test_v3_clean_room_smoke.py"
+      - "tests/test_v3_model_eval_claim_gate.py"
+
+permissions:
+  contents: read
+
+jobs:
+  evaluator-closure:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11.13"
+
+      - name: Install locked runtime and test environment
+        run: |
+          python -m pip install "uv==0.11.7"
+          uv sync --locked --group dev --python 3.11.13
+
+      - name: Verify installed evaluator identity
+        run: |
+          uv run python scripts/verify_evaluator_environment.py \
+            --run-evas \
+            --evas-command evas \
+            --json \
+            > "$RUNNER_TEMP/evaluator-environment.json"
+          uv run python - "$RUNNER_TEMP/evaluator-environment.json" <<'PY'
+          import json
+          import pathlib
+          import sys
+
+          evidence = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          assert evidence["status"] == "pass", evidence
+          assert evidence["live_evas"]["status"] == "pass", evidence
+          PY
+
+      - name: Run evaluator closure tests
+        run: |
+          uv run python -m pytest -q \
+            tests/test_evaluator_environment_contract.py \
+            tests/test_v3_clean_room_smoke.py \
+            tests/test_v3_model_eval_claim_gate.py
+
+      - name: Run one-task clean-room hidden-scoring smoke
+        run: |
+          uv run python scripts/run_v3_clean_room_smoke.py \
+            --task 014 \
+            --evas-command evas \
+            --environment-evidence "$RUNNER_TEMP/evaluator-environment.json" \
+            --output-root "$RUNNER_TEMP/v3-clean-room-output" \
+            --out "$RUNNER_TEMP/v3-clean-room-smoke.json" \
+            --json
+          uv run python - "$RUNNER_TEMP/v3-clean-room-smoke.json" <<'PY'
+          import json
+          import pathlib
+          import sys
+
+          smoke = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          assert smoke["status"] == "PASS", smoke
+          assert smoke["clean_room_contract"]["private_paths_absent"] is True, smoke
+          assert smoke["cleanup"]["post_cleanup_exists"] is False, smoke
+          assert smoke["claim_gate"]["allowed"] is True, smoke
+          assert smoke["claim_gate"]["model_score_claim_allowed"] is False, smoke
+          assert smoke["score"]["evas_identity"]["rust_core_loadable"] is True, smoke
+          PY

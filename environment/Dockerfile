@@ -1,4 +1,4 @@
-FROM python:3.10.14-slim-bookworm@sha256:2407c61b1a18067393fecd8a22cf6fceede893b6aaca817bf9fbfe65e33614a3
+FROM python:3.11.13-slim-bookworm@sha256:86adf8dbadc3d6e82ee5dd2c74bec2e1c2467cdad47886280501df722372d2e1
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -7,11 +7,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 ARG VABENCH_EXECUTABLE_FEEDBACK=1
 
+COPY evaluator-contract.json /opt/vabench-evaluator-contract.json
 COPY requirements.lock /tmp/requirements.lock
 RUN python3 -m pip install --no-cache-dir --require-hashes -r /tmp/requirements.lock \
     && rm /tmp/requirements.lock \
     && evas --version --format json > /tmp/evas-identity.json \
-    && python3 -c 'import json; p=json.load(open("/tmp/evas-identity.json")); assert p["package_version"] == "0.8.7" and p["rust_core_present"] and p["rust_core_loadable"]' \
+    && python3 -c 'import json; p=json.load(open("/tmp/evas-identity.json")); c=json.load(open("/opt/vabench-evaluator-contract.json"))["evaluator"]["evas"]; assert p["package_version"] == "0.8.7" and p["engine"] == "evas-rust" and p["rust_core_present"] and p["rust_core_loadable"] and p["rust_core_abi_version"] == 20260718 and p["rust_core_version"] == "0.2.4"; assert all(p[k] == c[k] for k in ("package_name", "package_version", "engine", "rust_core_present", "rust_core_loadable", "rust_core_abi_version", "rust_core_version"))' \
     && rm /tmp/evas-identity.json \
     && if [ "$VABENCH_EXECUTABLE_FEEDBACK" = "0" ]; then \
          python3 -m pip uninstall -y evas-sim && hash -r; \

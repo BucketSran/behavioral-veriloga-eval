@@ -13,10 +13,15 @@ from __future__ import annotations
 import argparse
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextlib import contextmanager
 from datetime import datetime, timezone
+import hashlib
 import json
+import os
 from pathlib import Path
+import platform
 import shutil
+import subprocess
 import sys
 import time
 from typing import Any
@@ -33,9 +38,9 @@ from run_vabench_release_minimax_baseline import (
     resolved_api_metadata,
 )
 from simulate_evas import (
+    read_meta,
     read_task_artifact_supports,
     read_task_artifact_targets,
-    read_task_index_id,
     run_case,
 )
 from vabench_release_prompt_wrapper import (
@@ -50,14 +55,37 @@ from vabench_release_prompt_wrapper import (
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_ROOT = ROOT / "benchmark-vabench-release-v3"
 TASKS_JSON = PACKAGE_ROOT / "TASKS.json"
+CHECKS_YAML = PACKAGE_ROOT / "CHECKS.yaml"
 DEFAULT_SCORE_ROSTER = PACKAGE_ROOT / "reports" / "score_denominator_manifest.json"
 RESULTS_ROOT = ROOT / "results"
 
 CLAIM_BOUNDARY = (
-    "v3 model runs are exploratory unless a future manifest marks "
-    "counted_in_score=true. EVAS is the fast behavior gate; Spectre remains the "
-    "final paper-facing judge."
+    "Pinned strict EVAS hidden scoring is the formal vaBench judge. Spectre is "
+    "optional parity evidence and is never required for certification or model-score "
+    "claims. Exploratory candidate runs cannot support a formal model-score claim; "
+    "formal claims require a frozen counted denominator, verified evaluator identity, "
+    "and complete terminal evidence for every selected row."
 )
+
+FORMAL_SCORE_SCOPE = "formal_model_score"
+EXPLORATORY_SCOPE = "exploratory_candidate_eval"
+VALID_SCORE_FAILURES = {
+    "FAIL_DUT_COMPILE",
+    "FAIL_TB_COMPILE",
+    "FAIL_SIM_CORRECTNESS",
+}
+INFRA_SCORE_FAILURES = {"FAIL_INFRA", "FAIL_UNKNOWN"}
+TERMINAL_SCORE_STATUSES = {"PASS", *VALID_SCORE_FAILURES, *INFRA_SCORE_FAILURES}
+EXPECTED_EVAS_IDENTITY = {
+    "package_name": "evas-sim",
+    "package_version": "0.8.7",
+    "engine": "evas-rust",
+    "rust_core_present": True,
+    "rust_core_loadable": True,
+    "rust_core_abi_version": 20260718,
+    "rust_core_version": "0.2.4",
+}
+EXPECTED_PYTHON_VERSION = "3.11.13"
 
 
 def rel(path: Path) -> str:
@@ -74,6 +102,66 @@ def read_json(path: Path) -> dict[str, Any]:
 def write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def file_identity(path: Path) -> dict[str, Any]:
+    identity: dict[str, Any] = {"path": rel(path), "exists": path.is_file()}
+    if path.is_file():
+        identity.update({"sha256": sha256_file(path), "size_bytes": path.stat().st_size})
+    return identity
+
+
+def repository_identity(root: Path) -> dict[str, Any]:
+    try:
+        revision = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=root,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        ).stdout.strip()
+        status = subprocess.run(
+            ["git", "status", "--porcelain=v1", "--untracked-files=normal"],
+            cwd=root,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=120,
+        ).stdout.splitlines()
+        return {
+            "status": "available",
+            "commit": revision,
+            "dirty": bool(status),
+        }
+    except (FileNotFoundError, subprocess.SubprocessError) as exc:
+        return {"status": "unavailable", "error": f"{type(exc).__name__}: {exc}"}
+
+
+@contextmanager
+def evaluator_execution_environment(args: argparse.Namespace):
+    updates = {
+        "VABENCH_EVAS_COMMAND": str(args.evas_command),
+        "VAEVAS_EVAS_PERSISTENT_WORKER": "1" if args.persistent_evas_worker else "0",
+    }
+    previous = {name: os.environ.get(name) for name in updates}
+    try:
+        os.environ.update(updates)
+        yield
+    finally:
+        for name, value in previous.items():
+            if value is None:
+                os.environ.pop(name, None)
+            else:
+                os.environ[name] = value
 
 
 def resolve_repo_path(value: str) -> Path:
@@ -474,12 +562,15 @@ def fail_score(row: dict[str, Any], reason: str, output_root: Path, args: argpar
         "difficulty": row.get("difficulty"),
         "category": row.get("category"),
         "status": "FAIL_INFRA",
+        "failure_class": "infrastructure",
+        "termination_reason": reason,
         "scores": {
             "dut_compile": 0.0,
             "tb_compile": 0.0,
             "sim_correct": 0.0,
             "weighted_total": 0.0,
         },
+        "required_score_axes": ["dut_compile", "tb_compile", "sim_correct"],
         "sample_idx": args.sample_idx,
         "temperature": args.temperature,
         "top_p": args.top_p,
@@ -490,6 +581,46 @@ def fail_score(row: dict[str, Any], reason: str, output_root: Path, args: argpar
     path = output_root / str(row.get("release_entry_id")) / "result.json"
     write_json(path, result)
     return result
+
+
+def runtime_identity_matches(identity: Any) -> bool:
+    return isinstance(identity, dict) and all(
+        identity.get(key) == expected for key, expected in EXPECTED_EVAS_IDENTITY.items()
+    )
+
+
+def infrastructure_failure_reason(raw: dict[str, Any], identity: Any) -> str | None:
+    notes = [str(note) for note in raw.get("notes", [])]
+    infrastructure_markers = (
+        "strict_spectre_lint_error=FileNotFoundError",
+        "evas_command_not_found",
+        "Rust backend library not found",
+        "rust_core_loadable=False",
+        "EVAS does not fall back",
+    )
+    if any(marker in note for note in notes for marker in infrastructure_markers):
+        return "evaluator_runtime_unavailable"
+    if not isinstance(identity, dict):
+        return "per_run_evas_identity_missing"
+    if not runtime_identity_matches(identity):
+        return "per_run_evas_identity_mismatch"
+    return None
+
+
+def required_score_axes(directory: Path) -> list[str]:
+    try:
+        meta = read_meta(directory)
+    except FileNotFoundError:
+        meta = {}
+    scoring = set(meta.get("scoring", ["dut_compile", "tb_compile", "sim_correct"]))
+    axes: list[str] = []
+    if "dut_compile" in scoring or "syntax" in scoring:
+        axes.append("dut_compile")
+    if "tb_compile" in scoring or {"routing", "simulation"} & scoring:
+        axes.append("tb_compile")
+    if "sim_correct" in scoring:
+        axes.append("sim_correct")
+    return axes or ["dut_compile", "tb_compile", "sim_correct"]
 
 
 def score_one(row: dict[str, Any], args: argparse.Namespace, output_root: Path) -> dict[str, Any]:
@@ -513,17 +644,27 @@ def score_one(row: dict[str, Any], args: argparse.Namespace, output_root: Path) 
     if tb_path is None:
         return fail_score(row, "missing_hidden_testbench", output_root, args)
     primary = sample_path / targets[0]
+    evas_output_root = output_root / slug / "evas_output"
     try:
         raw = run_case(
             directory,
             primary,
             tb_path,
-            output_root=output_root / slug / "evas_output",
+            output_root=evas_output_root,
             timeout_s=args.score_timeout_s,
             task_id_override=str(row.get("task_id") or slug),
         )
     except Exception as exc:
         return fail_score(row, f"{type(exc).__name__}: {str(exc)[:500]}", output_root, args)
+    status = str(raw.get("status", "FAIL_UNKNOWN"))
+    identity_path = evas_output_root / "evas_identity.json"
+    try:
+        per_run_identity = read_json(identity_path) if identity_path.is_file() else None
+    except (OSError, json.JSONDecodeError):
+        per_run_identity = None
+    infra_reason = infrastructure_failure_reason(raw, per_run_identity)
+    if infra_reason is not None:
+        status = "FAIL_INFRA"
     result = {
         "benchmark": "benchmark-vabench-release-v3",
         "model": model_key,
@@ -539,11 +680,28 @@ def score_one(row: dict[str, Any], args: argparse.Namespace, output_root: Path) 
         "sample_idx": args.sample_idx,
         "temperature": args.temperature,
         "top_p": args.top_p,
-        "status": raw.get("status", "FAIL_UNKNOWN"),
+        "status": status,
+        "failure_class": (
+            None
+            if status == "PASS"
+            else "candidate"
+            if status in VALID_SCORE_FAILURES
+            else "infrastructure"
+        ),
+        "termination_reason": infra_reason or status.lower(),
         "checker_task_id": raw.get("checker_task_id"),
         "scores": raw.get("scores", {}),
+        "required_score_axes": required_score_axes(directory),
         "evas_notes": raw.get("notes", []),
         "evas_timing": raw.get("timing", {}),
+        "evas_identity": per_run_identity,
+        "evidence_artifacts": {
+            "candidate": file_identity(primary),
+            "hidden_testbench": file_identity(tb_path),
+            "waveform": file_identity(evas_output_root / "tran.csv"),
+            "strobe": file_identity(evas_output_root / "strobe.txt"),
+            "evas_identity": file_identity(identity_path),
+        },
         "claim_allowed": False,
         "claim_boundary": CLAIM_BOUNDARY,
     }
@@ -579,6 +737,248 @@ def status_counts(items: list[dict[str, Any]]) -> dict[str, int]:
     return dict(sorted(Counter(str(item.get("status") or "missing") for item in items).items()))
 
 
+def score_metrics_valid(score: dict[str, Any]) -> bool:
+    metrics = score.get("scores")
+    required = ("dut_compile", "tb_compile", "sim_correct", "weighted_total")
+    if not isinstance(metrics, dict):
+        return False
+    if not all(
+        isinstance(metrics.get(key), (int, float))
+        and not isinstance(metrics.get(key), bool)
+        and 0.0 <= float(metrics[key]) <= 1.0
+        for key in required
+    ):
+        return False
+    axes = score.get("required_score_axes")
+    if (
+        not isinstance(axes, list)
+        or not axes
+        or len(set(axes)) != len(axes)
+        or any(axis not in required[:3] for axis in axes)
+    ):
+        return False
+    expected = round(sum(float(metrics[axis]) for axis in axes) / len(axes), 4)
+    return abs(float(metrics["weighted_total"]) - expected) <= 0.00005
+
+
+def score_status_consistent(score: dict[str, Any]) -> bool:
+    status = str(score.get("status") or "")
+    if status in INFRA_SCORE_FAILURES:
+        return True
+    if not score_metrics_valid(score):
+        return False
+    axes = score["required_score_axes"]
+    metrics = score["scores"]
+    expected = "PASS"
+    for axis, failure_status in (
+        ("dut_compile", "FAIL_DUT_COMPILE"),
+        ("tb_compile", "FAIL_TB_COMPILE"),
+        ("sim_correct", "FAIL_SIM_CORRECTNESS"),
+    ):
+        if axis in axes and float(metrics[axis]) < 1.0:
+            expected = failure_status
+            break
+    return status == expected
+
+
+def environment_evidence(args: argparse.Namespace) -> tuple[dict[str, Any] | None, list[str]]:
+    raw_path = str(getattr(args, "environment_evidence", "") or "").strip()
+    if not raw_path:
+        return None, ["environment_evidence_not_provided"]
+    path = resolve_repo_path(raw_path)
+    if not path.is_file():
+        return {"path": rel(path), "exists": False}, ["environment_evidence_missing"]
+    identity = file_identity(path)
+    try:
+        payload = read_json(path)
+    except (OSError, json.JSONDecodeError) as exc:
+        identity["load_error"] = f"{type(exc).__name__}: {exc}"
+        return identity, ["environment_evidence_invalid_json"]
+
+    identity["status"] = payload.get("status")
+    identity["payload"] = payload
+    problems: list[str] = []
+    if str(payload.get("status") or "").lower() != "pass":
+        problems.append("environment_verification_not_passed")
+    if payload.get("schema_version") != "vabench-evaluator-environment-verification-v1":
+        problems.append("environment_evidence_schema_mismatch")
+    live_evas = payload.get("live_evas", {})
+    if not isinstance(live_evas, dict) or live_evas.get("status") != "pass":
+        problems.append("environment_live_evas_not_verified")
+    elif not runtime_identity_matches(live_evas.get("observed")):
+        problems.append("environment_live_evas_identity_mismatch")
+    live_python = payload.get("live_python", {})
+    if not isinstance(live_python, dict) or live_python.get("status") != "pass":
+        problems.append("environment_live_python_not_verified")
+    elif str(live_python.get("observed_version") or "") != EXPECTED_PYTHON_VERSION:
+        problems.append("environment_live_python_version_mismatch")
+    return identity, problems
+
+
+def score_evidence_index(scores: list[dict[str, Any]], output_root: Path) -> list[dict[str, Any]]:
+    index: list[dict[str, Any]] = []
+    for score in sorted(scores, key=lambda item: str(item.get("task_slug") or "")):
+        slug = str(score.get("task_slug") or "")
+        path = output_root / "evas_results" / slug / "result.json"
+        result_identity = file_identity(path)
+        artifact_status: str | None = None
+        if path.is_file():
+            try:
+                artifact_status = str(read_json(path).get("status") or "")
+            except (OSError, json.JSONDecodeError):
+                artifact_status = None
+        row = {
+            "task_slug": slug,
+            "task_id": score.get("task_id"),
+            "status": score.get("status"),
+            "artifact_status": artifact_status,
+            "result": result_identity,
+        }
+        index.append(row)
+    return index
+
+
+def derive_claim_gate(
+    *,
+    rows: list[dict[str, Any]],
+    scores: list[dict[str, Any]],
+    args: argparse.Namespace,
+    environment_provenance: dict[str, Any] | None,
+    environment_problems: list[str],
+    result_evidence: list[dict[str, Any]],
+    input_provenance: dict[str, dict[str, Any]],
+    full_counted_rows: list[dict[str, Any]],
+    current_repository: dict[str, Any],
+    roster_path: Path,
+    executed_python_version: str,
+) -> dict[str, Any]:
+    scope = str(getattr(args, "claim_scope", EXPLORATORY_SCOPE))
+    selected_slugs = [str(row.get("release_entry_id") or "") for row in rows]
+    scored_slugs = [str(score.get("task_slug") or "") for score in scores]
+    score_statuses = [str(score.get("status") or "missing") for score in scores]
+    counted_slugs = [str(row.get("release_entry_id") or "") for row in full_counted_rows]
+    blocking_reasons: list[str] = []
+
+    if scope != FORMAL_SCORE_SCOPE:
+        blocking_reasons.append("claim_scope_is_exploratory")
+    if args.stage not in {"score", "all"} or args.dry_run:
+        blocking_reasons.append("hidden_scoring_not_executed")
+    if args.selection_surface != "counted":
+        blocking_reasons.append("selection_surface_is_not_counted")
+    if not rows:
+        blocking_reasons.append("selected_denominator_is_empty")
+    if any(row.get("counted_in_score") is not True for row in rows):
+        blocking_reasons.append("selected_row_not_counted_in_score")
+    if len(set(selected_slugs)) != len(selected_slugs):
+        blocking_reasons.append("selected_denominator_contains_duplicates")
+    if len(scores) != len(rows) or sorted(scored_slugs) != sorted(selected_slugs):
+        blocking_reasons.append("score_evidence_incomplete")
+    if len(result_evidence) != len(scores) or any(
+        item.get("result", {}).get("exists") is not True for item in result_evidence
+    ):
+        blocking_reasons.append("score_result_artifact_missing")
+    if any(item.get("artifact_status") != item.get("status") for item in result_evidence):
+        blocking_reasons.append("score_result_artifact_status_mismatch")
+    if any(status not in TERMINAL_SCORE_STATUSES for status in score_statuses):
+        blocking_reasons.append("score_evidence_has_nonterminal_status")
+    if any(status in INFRA_SCORE_FAILURES for status in score_statuses):
+        blocking_reasons.append("score_evidence_has_infrastructure_failure")
+    if any(not runtime_identity_matches(score.get("evas_identity")) for score in scores):
+        blocking_reasons.append("score_evidence_evas_identity_mismatch")
+    if any(not score_metrics_valid(score) for score in scores):
+        blocking_reasons.append("score_evidence_metrics_invalid")
+    if any(not score_status_consistent(score) for score in scores):
+        blocking_reasons.append("score_status_metrics_inconsistent")
+    repository = (
+        (environment_provenance or {}).get("payload", {}).get("source", {}).get("repository", {})
+    )
+    if scope == FORMAL_SCORE_SCOPE:
+        if roster_path.resolve() != DEFAULT_SCORE_ROSTER.resolve():
+            blocking_reasons.append("formal_score_roster_is_not_canonical")
+        filtered = (
+            any(
+                (
+                    getattr(args, "task", []),
+                    getattr(args, "task_file", []),
+                    getattr(args, "level", []),
+                    getattr(args, "track", []),
+                    getattr(args, "difficulty", []),
+                    getattr(args, "category", []),
+                )
+            )
+            or bool(getattr(args, "exclude_spectre_divergent", False))
+            or getattr(args, "limit", None) is not None
+        )
+        if filtered:
+            blocking_reasons.append("formal_denominator_is_filtered")
+        if not full_counted_rows:
+            blocking_reasons.append("frozen_counted_denominator_is_empty")
+        elif sorted(selected_slugs) != sorted(counted_slugs):
+            blocking_reasons.append("formal_denominator_is_incomplete")
+        if any(
+            identity.get("exists") is not True or not identity.get("sha256")
+            for identity in input_provenance.values()
+        ):
+            blocking_reasons.append("input_provenance_incomplete")
+        if not isinstance(repository, dict) or repository.get("status") != "available":
+            blocking_reasons.append("environment_source_identity_unavailable")
+        elif repository.get("dirty") is not False:
+            blocking_reasons.append("environment_source_is_dirty")
+        if current_repository.get("status") != "available":
+            blocking_reasons.append("current_source_identity_unavailable")
+        elif current_repository.get("dirty") is not False:
+            blocking_reasons.append("current_source_is_dirty")
+        elif repository.get("commit") != current_repository.get("commit"):
+            blocking_reasons.append("environment_source_commit_is_stale")
+        live_evas = (environment_provenance or {}).get("payload", {}).get("live_evas", {})
+        verified_command = live_evas.get("command") if isinstance(live_evas, dict) else None
+        if verified_command != str(getattr(args, "evas_command", "evas")):
+            blocking_reasons.append("executed_evas_command_not_bound_to_environment_evidence")
+        if bool(getattr(args, "persistent_evas_worker", False)):
+            blocking_reasons.append("persistent_evas_worker_not_allowed_for_formal_claim")
+        if executed_python_version != EXPECTED_PYTHON_VERSION:
+            blocking_reasons.append("executed_python_version_mismatch")
+    blocking_reasons.extend(environment_problems)
+
+    unique_reasons = list(dict.fromkeys(blocking_reasons))
+    return {
+        "scope": scope,
+        "status": "allowed" if not unique_reasons else "blocked",
+        "allowed": not unique_reasons,
+        "formal_judge": "pinned_strict_evas",
+        "spectre_required": False,
+        "selection_surface": args.selection_surface,
+        "selected_rows": len(rows),
+        "frozen_counted_rows": len(full_counted_rows),
+        "scored_rows": len(scores),
+        "terminal_score_rows": sum(status in TERMINAL_SCORE_STATUSES for status in score_statuses),
+        "valid_failure_rows": sum(status in VALID_SCORE_FAILURES for status in score_statuses),
+        "infrastructure_failure_rows": sum(status in INFRA_SCORE_FAILURES for status in score_statuses),
+        "environment_verified": environment_provenance is not None and not environment_problems,
+        "blocking_reasons": unique_reasons,
+    }
+
+
+def execution_status(
+    *,
+    rows: list[dict[str, Any]],
+    generation: list[dict[str, Any]],
+    scores: list[dict[str, Any]],
+    args: argparse.Namespace,
+) -> str:
+    if args.dry_run:
+        return "completed_dry_run"
+    if str(getattr(args, "claim_scope", EXPLORATORY_SCOPE)) == FORMAL_SCORE_SCOPE and not rows:
+        return "blocked_empty_denominator"
+    if args.stage == "generate":
+        return "completed" if len(generation) == len(rows) else "incomplete"
+    if len(scores) != len(rows):
+        return "incomplete"
+    if any(str(item.get("status") or "") in INFRA_SCORE_FAILURES for item in scores):
+        return "completed_with_infrastructure_failures"
+    return "completed"
+
+
 def write_summary(
     *,
     rows: list[dict[str, Any]],
@@ -586,7 +986,46 @@ def write_summary(
     scores: list[dict[str, Any]],
     output_root: Path,
     args: argparse.Namespace,
+    current_repository: dict[str, Any] | None = None,
+    executed_python_version: str | None = None,
 ) -> dict[str, Any]:
+    environment_provenance, environment_problems = environment_evidence(args)
+    result_evidence = score_evidence_index(scores, output_root)
+    roster_path = resolve_repo_path(args.score_roster)
+    input_provenance = {
+        "tasks": file_identity(TASKS_JSON),
+        "checks": file_identity(CHECKS_YAML),
+        "score_roster": file_identity(roster_path),
+    }
+    full_counted_rows = [
+        row
+        for row in base_rows_from_denominator(roster_path, load_tasks())
+        if row.get("counted_in_score") is True
+    ]
+    if current_repository is None:
+        current_repository = (
+            repository_identity(ROOT)
+            if str(getattr(args, "claim_scope", EXPLORATORY_SCOPE)) == FORMAL_SCORE_SCOPE
+            else {
+                "status": "not_checked",
+                "reason": "current source identity is required only for formal score scope",
+            }
+        )
+    if executed_python_version is None:
+        executed_python_version = platform.python_version()
+    claim_gate = derive_claim_gate(
+        rows=rows,
+        scores=scores,
+        args=args,
+        environment_provenance=environment_provenance,
+        environment_problems=environment_problems,
+        result_evidence=result_evidence,
+        input_provenance=input_provenance,
+        full_counted_rows=full_counted_rows,
+        current_repository=current_repository,
+        roster_path=roster_path,
+        executed_python_version=executed_python_version,
+    )
     summary = {
         "date": datetime.now(timezone.utc).isoformat(),
         "benchmark": "benchmark-vabench-release-v3",
@@ -596,10 +1035,13 @@ def write_summary(
         "stage": args.stage,
         "selection_surface": args.selection_surface,
         "dry_run": args.dry_run,
-        "status": "completed",
-        "claim_allowed": False,
+        "status": execution_status(rows=rows, generation=generation, scores=scores, args=args),
+        "claim_scope": claim_gate["scope"],
+        "claim_allowed": claim_gate["allowed"],
         "claim_boundary": CLAIM_BOUNDARY,
-        "score_roster": rel(resolve_repo_path(args.score_roster)),
+        "claim_gate": claim_gate,
+        "score_roster": rel(roster_path),
+        "frozen_counted_rows": len(full_counted_rows),
         "selected_rows": len(rows),
         "selected_by_level": count_by(rows, "level"),
         "selected_by_track": count_by(rows, "track"),
@@ -609,9 +1051,23 @@ def write_summary(
         "evas_pass_count": pass_count(scores),
         "evas_pass_rate": round(pass_count(scores) / len(scores), 4) if scores else 0.0,
         "score_status_counts": status_counts(scores),
-        "spectre_final_judge": {
-            "status": "pending",
-            "reason": "v3 model eval uses EVAS hidden behavior gate; run targeted Spectre before paper-facing model claims.",
+        "execution_policy": {
+            "python_version": executed_python_version,
+            "evas_command": str(getattr(args, "evas_command", "evas")),
+            "persistent_evas_worker": bool(getattr(args, "persistent_evas_worker", False)),
+            "score_workers": int(getattr(args, "score_workers", 1)),
+            "score_timeout_s": int(getattr(args, "score_timeout_s", 0)),
+        },
+        "spectre_parity": {
+            "status": "not_run",
+            "required": False,
+            "reason": "Spectre is optional parity evidence; pinned strict EVAS is the formal judge.",
+        },
+        "provenance": {
+            "inputs": input_provenance,
+            "source_repository": current_repository,
+            "environment": environment_provenance,
+            "score_results": result_evidence,
         },
         "paths": {
             "output_root": rel(output_root),
@@ -635,7 +1091,13 @@ def list_rows(args: argparse.Namespace) -> int:
         "selected_by_level": count_by(rows, "level"),
         "selected_by_track": count_by(rows, "track"),
         "selected_by_category": count_by(rows, "category"),
+        "claim_scope": str(getattr(args, "claim_scope", EXPLORATORY_SCOPE)),
         "claim_allowed": False,
+        "claim_gate": {
+            "status": "blocked",
+            "allowed": False,
+            "blocking_reasons": ["listing_has_no_executed_evidence"],
+        },
         "claim_boundary": CLAIM_BOUNDARY,
         "rows": rows,
     }
@@ -692,6 +1154,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     ap.add_argument("--max-tokens", type=int, default=8192)
     ap.add_argument("--request-timeout-s", type=int, default=420)
     ap.add_argument("--score-timeout-s", type=int, default=180)
+    ap.add_argument(
+        "--evas-command",
+        default="evas",
+        help="Installed EVAS CLI to bind for scoring; formal claims require the same command in environment evidence.",
+    )
+    ap.add_argument(
+        "--persistent-evas-worker",
+        action="store_true",
+        help="Opt in to the persistent EVAS worker for exploratory throughput; forbidden for formal claims.",
+    )
     ap.add_argument("--gen-workers", type=int, default=1)
     ap.add_argument("--score-workers", type=int, default=4)
     ap.add_argument("--api-attempts", type=int, default=2)
@@ -700,6 +1172,17 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     ap.add_argument("--token-param", choices=["auto", "max_tokens", "max_completion_tokens"], default="auto")
     ap.add_argument("--auth-header", choices=["auto", "authorization", "api-key", "both"], default="auto")
     ap.add_argument("--extra-body-json", default="")
+    ap.add_argument(
+        "--claim-scope",
+        choices=[EXPLORATORY_SCOPE, FORMAL_SCORE_SCOPE],
+        default=EXPLORATORY_SCOPE,
+        help="Formal scope is allowed only when the executed evidence satisfies every claim gate.",
+    )
+    ap.add_argument(
+        "--environment-evidence",
+        default="",
+        help="PASS JSON emitted by scripts/verify_evaluator_environment.py.",
+    )
     ap.add_argument("--resume", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
     return ap.parse_args(argv)
@@ -711,7 +1194,7 @@ def main(argv: list[str] | None = None) -> int:
         return list_rows(args)
 
     rows = selected_rows(args)
-    if not rows:
+    if not rows and args.claim_scope != FORMAL_SCORE_SCOPE:
         print("No v3 rows selected.", file=sys.stderr)
         return 1
     output_root = resolve_repo_path(args.output_root) if args.output_root else output_root_for(args.model, args.tag)
@@ -720,7 +1203,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.stage in {"generate", "all"}:
         generation = run_generation(rows, args, output_root)
     if args.stage in {"score", "all"} and not args.dry_run:
-        scores = run_scoring(rows, args, output_root / "evas_results")
+        with evaluator_execution_environment(args):
+            scores = run_scoring(rows, args, output_root / "evas_results")
     summary = write_summary(rows=rows, generation=generation, scores=scores, output_root=output_root, args=args)
     if args.json:
         print(json.dumps(summary, indent=2, sort_keys=True))
@@ -731,6 +1215,8 @@ def main(argv: list[str] | None = None) -> int:
             f"summary={summary['paths']['summary']}",
             flush=True,
         )
+    if args.claim_scope == FORMAL_SCORE_SCOPE and not summary["claim_allowed"]:
+        return 2
     return 0
 
 

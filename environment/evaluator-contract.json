@@ -1,0 +1,118 @@
+{
+  "schema_version": "vabench-evaluator-environment-contract-v1",
+  "status": "active",
+  "python": {
+    "version": "3.11.13",
+    "base_image": "python:3.11.13-slim-bookworm",
+    "base_image_digest": "sha256:86adf8dbadc3d6e82ee5dd2c74bec2e1c2467cdad47886280501df722372d2e1",
+    "platform": "linux/amd64"
+  },
+  "dependencies": {
+    "requirements_input": "environment/requirements.in",
+    "requirements_lock": "environment/requirements.lock",
+    "lock_mode": "pip --require-hashes",
+    "project_manifest": "pyproject.toml",
+    "project_lock": "uv.lock",
+    "project_lock_mode": "uv sync --locked --group dev --python 3.11.13",
+    "packages": {
+      "evas-sim": "0.8.7"
+    }
+  },
+  "evaluator": {
+    "formal_judge": "pinned_strict_evas",
+    "spectre_required": false,
+    "evas": {
+      "package_name": "evas-sim",
+      "package_version": "0.8.7",
+      "engine": "evas-rust",
+      "rust_core_present": true,
+      "rust_core_loadable": true,
+      "rust_core_abi_version": 20260718,
+      "rust_core_version": "0.2.4"
+    }
+  },
+  "runtime_boundary": {
+    "network": "none",
+    "root_filesystem": "read-only",
+    "model_mounts": [
+      {
+        "source": "task",
+        "target": "/workspace/public/task",
+        "mode": "ro",
+        "allowed_contents": [
+          "public instructions",
+          "public visible tests",
+          "public support artifacts"
+        ],
+        "forbidden_contents": [
+          "hidden tests",
+          "checker source",
+          "gold solutions",
+          "private evaluator assets",
+          "credentials"
+        ]
+      },
+      {
+        "source": "submission",
+        "target": "/workspace/public/submission",
+        "mode": "rw",
+        "allowed_contents": [
+          "declared candidate artifacts"
+        ]
+      },
+      {
+        "source": "work",
+        "target": "/workspace/work",
+        "mode": "rw",
+        "allowed_contents": [
+          "scratch files"
+        ]
+      },
+      {
+        "source": "skills",
+        "target": "/workspace/public/skills",
+        "mode": "ro",
+        "optional": true,
+        "allowed_contents": [
+          "declared public skill packages"
+        ]
+      }
+    ],
+    "forbidden_model_paths": [
+      "/workspace/evaluator",
+      "/opt/benchmark"
+    ]
+  },
+  "input_contract": {
+    "task_input": "public/task",
+    "candidate_output": "public/submission",
+    "scratch_output": "work",
+    "hidden_scoring_input": "benchmark private evaluator only",
+    "score_command_boundary": "runners/run_vabench_v3_model_eval.py --stage score consumes candidate artifacts plus private hidden tests outside the model runtime"
+  },
+  "commands": {
+    "verify_environment": "python scripts/verify_evaluator_environment.py --run-evas --evas-command evas --json",
+    "clean_room_smoke": "python scripts/run_v3_clean_room_smoke.py --task 014 --evas-command evas --environment-evidence <environment.json> --json",
+    "full_evaluation": "python runners/run_vabench_v3_model_eval.py --stage all --selection-surface candidate --claim-scope exploratory_candidate_eval --evas-command evas --environment-evidence <environment.json>"
+  },
+  "claim_boundary": {
+    "claim_scope": [
+      "exploratory_candidate_eval",
+      "formal_model_score"
+    ],
+    "formal_claim_requires": [
+      "counted score denominator",
+      "canonical repository score roster",
+      "entire unfiltered frozen counted denominator",
+      "complete terminal hidden scoring evidence for every selected row",
+      "live evaluator evidence matching this contract",
+      "per-run evaluator identity matching this contract",
+      "clean repository source identity",
+      "executed EVAS command matching the live environment evidence",
+      "persistent EVAS worker disabled",
+      "executed Python version exactly 3.11.13",
+      "no infrastructure failures"
+    ],
+    "spectre_policy": "Spectre is optional non-blocking parity evidence and is never required for EVAS certification or model-score claims."
+  }
+}

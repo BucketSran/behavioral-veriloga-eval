@@ -20,13 +20,24 @@ Spectre optional.
 
 - [x] Synchronize both fork `main` branches with their upstream repositories.
 - [x] Create clean audit worktrees from the synchronized fork branches.
-- [>] Define one evaluator environment contract: Python version, locked runtime
+- [x] Define one evaluator environment contract: Python version, locked runtime
   and test dependencies, EVAS package/native-core identity, mounts, and inputs.
-- [ ] Add a single-task generation-to-hidden-scoring clean-room smoke test.
-- [ ] Add the smoke test to CI and document the full scoring command.
-- [ ] Bind summary claim state to executed evidence and explicit claim scope.
-- [ ] Audit EVAS changes only where the integration test proves a simulator or
+- [x] Add a single-task generation-to-hidden-scoring clean-room smoke test.
+- [x] Add the smoke test to CI and document the full scoring command.
+- [x] Bind summary claim state to executed evidence and explicit claim scope.
+- [x] Audit EVAS changes only where the integration test proves a simulator or
   packaging defect; keep benchmark-policy repairs in this repository.
+
+## Current closure state
+
+- Phase-one evaluator closure is implemented in the behavioral-eval fork.
+- The pinned environment and task-014 clean-room hidden scorer pass with the
+  installed `evas-sim==0.8.7` Rust runtime.
+- No EVAS compiler, simulator, or packaging defect was reproduced, so the EVAS
+  audit fork remains unchanged.
+- Aggregate formal model-score claims remain intentionally blocked because the
+  v3 frozen `counted_in_score=true` denominator is empty. Pipeline connectivity
+  evidence does not relax that claim boundary.
 
 ## Stop condition
 
