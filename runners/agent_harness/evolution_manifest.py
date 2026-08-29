@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
 import hashlib
 import json
 import math
+from collections.abc import Mapping, Sequence
 from typing import Any
 
 
@@ -177,7 +177,7 @@ def select_last_sealed_incumbent(
             sealed.append(snapshot)
     if not sealed:
         raise EvolutionReducerError(
-            "no sealed incumbent",
+            "no_sealed_incumbent",
             "no sealed incumbent is available before the global deadline",
         )
     selected_snapshot = max(sealed, key=lambda snapshot: snapshot["round_index"])
@@ -548,7 +548,7 @@ def _select_normalized_candidate(
             candidate["candidate_id"],
         )
 
-    return sorted(candidates, key=sort_key)[0]
+    return min(candidates, key=sort_key)
 
 
 def _require_unique_round_candidates(candidates: Sequence[Mapping[str, Any]]) -> None:

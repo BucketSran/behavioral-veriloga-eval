@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, field
 import hashlib
 import json
 import math
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import Any, Literal, TypeAlias
-
 
 MemorySourceKind: TypeAlias = Literal[
     "candidate_summary",
@@ -247,7 +246,7 @@ class CandidateLineage:
         source_event_sha256: str,
         candidate_id: str | None = None,
         mutation_kind: MutationKind = "refine",
-    ) -> "CandidateLineage":
+    ) -> CandidateLineage:
         if self.status not in {"active", "selected"}:
             raise ValueError(f"{self.status} candidate cannot be mutated")
         if mutation_kind != "refine":
@@ -273,7 +272,7 @@ class CandidateLineage:
         candidate_id: str,
         source_event_sha256: str,
         failure_reason: str,
-    ) -> "CandidateLineage":
+    ) -> CandidateLineage:
         if self.status not in {"active", "selected"}:
             raise ValueError(f"{self.status} candidate cannot be mutated")
         return CandidateLineage(

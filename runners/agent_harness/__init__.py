@@ -9,19 +9,19 @@ from .authority_profiles import (
 from .backend_profile import backend_profile_sha256
 from .contracts import FinalJudge, PublicValidator
 from .controller import EpisodeController
-from .evolution_state import (
-    CandidateLineage,
-    MemorySnapshot,
-    candidate_lineage_sha256,
-    freeze_memory_snapshot,
-    validate_candidate_lineage_graph,
-)
 from .evolution_manifest import (
     EvolutionReducerError,
     build_round_snapshot,
     evolution_manifest_sha256,
     select_candidate,
     select_last_sealed_incumbent,
+)
+from .evolution_state import (
+    CandidateLineage,
+    MemorySnapshot,
+    candidate_lineage_sha256,
+    freeze_memory_snapshot,
+    validate_candidate_lineage_graph,
 )
 from .proposals import (
     ProposalEnvelope,
@@ -31,9 +31,9 @@ from .proposals import (
 )
 from .state import (
     AgentAction,
+    EnvironmentStep,
     EpisodeContext,
     EpisodeResult,
-    EnvironmentStep,
     EventVisibility,
     FailureDisposition,
     FinalJudgment,
@@ -58,11 +58,11 @@ from .trajectory import (
 __all__ = [
     "AgentAction",
     "CandidateLineage",
+    "EffectiveToolset",
+    "EnvironmentStep",
     "EpisodeContext",
     "EpisodeController",
     "EpisodeResult",
-    "EnvironmentStep",
-    "EffectiveToolset",
     "EventVisibility",
     "EvolutionReducerError",
     "FailureDisposition",
@@ -84,9 +84,9 @@ __all__ = [
     "build_round_snapshot",
     "candidate_lineage_sha256",
     "classify_final_replay_request",
+    "evolution_manifest_sha256",
     "final_test_profile_sha256",
     "freeze_memory_snapshot",
-    "evolution_manifest_sha256",
     "normalize_proposal",
     "profile_input_identity_sha256",
     "project_model_visible_events",

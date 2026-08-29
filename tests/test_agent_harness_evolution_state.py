@@ -14,7 +14,6 @@ from runners.agent_harness.evolution_state import (
     validate_candidate_lineage_graph,
 )
 
-
 ROOT = Path(__file__).resolve().parents[1]
 MEMORY_SCHEMA_PATH = ROOT / "schemas" / "vaevas-memory-snapshot-v1.schema.json"
 CANDIDATE_SCHEMA_PATH = ROOT / "schemas" / "vaevas-candidate-lineage-v1.schema.json"

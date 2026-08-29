@@ -16,7 +16,6 @@ from runners.agent_harness.evolution_manifest import (
     select_last_sealed_incumbent,
 )
 
-
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_PATH = ROOT / "schemas" / "vaevas-evolution-manifest-v1.schema.json"
 SHA_A = "a" * 64
@@ -551,7 +550,7 @@ def test_global_deadline_never_adopts_unsealed_round_and_uses_last_sealed_incumb
             round_sealed=False,
             global_deadline_reached=True,
         )
-    with pytest.raises(EvolutionReducerError, match="no sealed incumbent"):
+    with pytest.raises(EvolutionReducerError, match="no_sealed_incumbent"):
         select_last_sealed_incumbent([], manifest=_manifest())
 
 
