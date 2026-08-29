@@ -26,6 +26,11 @@ SPEC.loader.exec_module(RUNNER)
 ARTIFACT_READY = {"submitted", "submitted_at_budget", "workspace_ready"}
 DEFAULT_TRUSTED_REPLAY_TIMEOUT_S = 150
 DEFAULT_TESTBENCH_TIMEOUT_S = 750
+SCORE_AUTHORITY_BY_JUDGE_KIND = {
+    "legacy_feedback_evas": "legacy_provisional_feedback_only",
+    "final_trusted_replay": "development_only",
+    "final_spectre": "formal",
+}
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -596,11 +601,7 @@ def summarize(rows: list[dict[str, Any]], judge_kind: str) -> dict[str, Any]:
         "schema_version": "v4-calibration-score-report-v2",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "judge_kind": judge_kind,
-        "score_authority": (
-            "final"
-            if judge_kind in {"final_trusted_replay", "final_spectre"}
-            else "legacy_provisional_feedback_only"
-        ),
+        "score_authority": SCORE_AUTHORITY_BY_JUDGE_KIND[judge_kind],
         "cell_count": len(rows),
         "submission_statuses": dict(Counter(row["submission_status"] for row in rows)),
         "judge_statuses": dict(Counter(row["judge_status"] for row in rows)),

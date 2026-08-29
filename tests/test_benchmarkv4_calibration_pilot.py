@@ -2448,6 +2448,37 @@ def test_scorer_keeps_agent_no_evas_separate_from_agentic() -> None:
     assert report["telemetry_by_arm"]["Agentic"]["direct_evas_calls_total"] == 2
 
 
+@pytest.mark.parametrize(
+    ("judge_kind", "expected_authority"),
+    [
+        ("legacy_feedback_evas", "legacy_provisional_feedback_only"),
+        ("final_trusted_replay", "development_only"),
+        ("final_spectre", "formal"),
+    ],
+)
+def test_scorer_labels_authority_by_judge_kind(
+    judge_kind: str,
+    expected_authority: str,
+) -> None:
+    scorer = load_score_campaign()
+    row = {
+        "form": "dut",
+        "mode": "G0",
+        "experimental_arm": None,
+        "submission_status": "submitted",
+        "judge_status": "passed",
+        "incidents": [],
+        "output_tokens": 1,
+        "episode_elapsed_s": 1.0,
+        "telemetry": {},
+        "evas_usage": {},
+    }
+
+    report = scorer.summarize([row], judge_kind)
+
+    assert report["score_authority"] == expected_authority
+
+
 def test_mini_swe_provider_failure_keeps_partial_trajectory(
     tmp_path: Path, r45_release: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
