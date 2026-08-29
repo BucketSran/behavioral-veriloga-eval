@@ -120,3 +120,73 @@
   declaration order is not semantic and must not create false drift.
 - Require `immutable=true` in the machine-checkable schema for every available
   frozen submission, and keep the protocol regression surface in closure CI.
+
+## 2026-08-29 - AI-native harness evolution direction
+
+- Keep the existing mini-swe backend and add AlphaApollo reasoning as a
+  differential backend rather than replacing mini-swe.
+- Add AlphaApollo multi-model evolution as a separately named and budgeted
+  condition. The first version uses different models in parallel, immutable
+  round feedback snapshots, and deterministic public-validation-based
+  candidate selection.
+- Learn reasoning, memory, and evolution structure from public AlphaApollo;
+  learn workspace, shell, editing, sandbox, and event-loop patterns from public
+  coding-agent frameworks. Do not adopt any framework wholesale.
+- Keep sandboxed Bash as a first-class coding tool. Use JSON/native function
+  calls as the canonical action/observation protocol; do not replace it with
+  XML plus regex parsing in the formal path.
+- Add structured candidate, public EVAS, waveform, frozen-documentation RAG,
+  and submission tools behind one capability and budget registry. Treat helper
+  tools as separate interventions where they can affect results.
+- Separate model-visible public validation from the model-invisible final
+  test. If a final outcome drives another generation or selection step, that
+  invocation is a verifier call and cannot remain the terminal score for the
+  same episode.
+- For r53 Testbench tasks, preserve reference-DUT validation versus
+  evaluator-only certified faults. For r53 DUT/bugfix tasks, describe the
+  current protocol as shared-stimulus with a held-out checker, not a fully
+  held-out test set.
+- Keep r53 and EVAS 0.8.7 immutable. A future disjoint DUT/bugfix stimulus
+  profile requires a named successor protocol/release, not an in-place r53
+  edit.
+- The untracked `runners/agent_harness/` prototype is paused evidence, not an
+  approved production architecture. Reconcile its useful tests and split its
+  conflated verifier authority before any commit or integration.
+
+## 2026-08-29 - Domain-tool deferral and coding-agent transfer mapping
+
+- Supersede the earlier same-day wording that could be read as approving a
+  fixed candidate/EVAS/waveform/RAG/submission tool inventory. Preserve only a
+  capability registry and non-callable extension points until each proposed
+  tool is discussed and receives an explicit accepted/rejected/deferred
+  decision, evidence contract, and ablation requirement.
+- Map SWE-agent/mini-swe to the model-facing agent-computer interface,
+  observation normalization, terminal submission, and mini-swe compatibility
+  adapter.
+- Map OpenHands to ordered Action/Observation events, an event-derived bounded
+  controller, isolated runtime ownership, and pre-dispatch capability checks.
+- Map Aider only as a future design input for atomic edit formats, diffs, and
+  content-addressed candidate checkpoints; do not adopt automatic Git commits
+  or repository-wide context by default.
+- Map Codex CLI to sandbox/capability policy, explicit denial, atomic edit
+  separation, and tool-policy evidence; do not adopt interactive approval,
+  desktop, or general plugin/MCP surfaces into formal cells.
+- Treat all coding-agent sources as bounded pattern references, not runtime
+  dependencies. Production transfer requires named landing files, RED tests,
+  claim impact, and rejected upstream assumptions in the migration ledger.
+
+## 2026-08-29 - Incremental harness commit policy
+
+- Publish the harness migration as multiple focused, independently reviewable
+  and revertible commits rather than one repository-wide implementation
+  commit.
+- Keep planning/contract changes separate from runtime implementation when
+  practical. Split controller/state, backend adapters, capability policy,
+  validation/final-test authority, evolution, and evidence/results into their
+  own verified slices.
+- RED tests remain a local development step. Do not push a knowingly broken
+  intermediate state to `main`; every published commit must keep the supported
+  path and CI-safe checks green.
+- Stage and inspect only the intended files for each slice, record focused
+  verification with the corresponding change, and push only to the writable
+  BucketSran `origin`, never Arcadia-1 `upstream`.

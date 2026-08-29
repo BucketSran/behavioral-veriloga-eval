@@ -290,6 +290,30 @@ failures or removed from the scheduled set.
   changes when that checker is present. Otherwise run the repository's current
   layout/runtime-contract tests and record the missing dedicated layout gate.
 
+### Commit And Publication Discipline
+
+- Deliver harness evolution as a sequence of focused commits, not one
+  repository-wide implementation dump. Protocols/tests, controller/state,
+  backend adapters, capability policy, validation/final-test separation,
+  evolution, evidence/results, and documentation are separate commit slices
+  unless a smaller inseparable change is required for correctness.
+- Every commit must be independently reviewable and safely revertible. Its
+  subject names the feature slice, and its body or accompanying log records
+  the contract changed, focused verification, and any remaining gap.
+- Use RED -> GREEN locally, but do not publish a knowingly broken intermediate
+  state to `main`. A tests-only contract commit is allowed only when it is
+  intentional, CI-safe, and does not make the supported path fail.
+- Before each commit, stage only the exact slice, inspect the staged diff, run
+  its focused tests plus applicable static/repository checks, and exclude raw
+  trajectories, generated experiment outputs, caches, credentials, and
+  unrelated user changes.
+- Push completed commits only to the writable BucketSran `origin`. Never push
+  to Arcadia-1 `upstream`. Recheck branch, ahead/behind state, remotes, and the
+  committed diff before every push.
+- Keep planning/contract changes separate from runtime implementation when
+  practical. Update the decision and verification logs in the commit that
+  establishes the corresponding evidence so history remains reconstructable.
+
 ## Implementation And Verification Workflow
 
 1. State the exact claim or contract being changed and its stop condition.

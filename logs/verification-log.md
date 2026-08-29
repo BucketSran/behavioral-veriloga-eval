@@ -208,3 +208,39 @@
 - A separate verifier returned `PASS` for this first milestone. Its accepted
   claim remains only the r53 three-arm clean-room pipeline; it explicitly does
   not treat the smoke as baseline reproduction or paper-result evidence.
+
+## 2026-08-29 - AI-native harness evolution plan verification
+
+- Replaced the completed first-milestone current plan with the next-phase
+  AI-native harness evolution plan; no business/runtime implementation was
+  performed in this planning step.
+- The plan records exactly one `in_progress` phase (reconcile the paused
+  prototype) and ten `pending` phases covering protocols, controller/state,
+  mini-swe compatibility, domain tools, validation/test separation,
+  AlphaApollo reasoning/evolution, evidence, ablations, and CI/merge gates.
+- `git diff --check` passes for the planning and decision-log changes.
+- The behavioral repository remains on fork `main`; the only pre-existing code
+  work remains the untracked paused `runners/agent_harness/` prototype and its
+  test. It was inspected but not integrated, committed, or expanded.
+- The clean EVAS fork remains on `audit/evas-evaluator-compat` with no changes.
+- The older `/Users/bucketsran/Documents/TsingProject/vaEvas/EVAS` worktree
+  remains on `fix/dynamic-zero-period-timer` with only its pre-existing
+  modifications to `evas/compiler/linter.py`, `evas/compiler/parser.py`, and
+  `tests/test_linter.py`.
+- No code tests were run because this step changed only tracked planning and
+  decision/verification documentation. Runtime verification remains required
+  per implementation slice.
+
+## 2026-08-29 - Harness plan and publication-contract refinement
+
+- The current plan now treats vaEVAS domain tools as non-callable extension
+  points pending a separate tool-design decision and per-tool ablation review.
+- The plan maps SWE-agent/mini-swe, OpenHands, Aider, and Codex CLI patterns to
+  named vaEVAS landing files, required regressions, and explicit rejection
+  boundaries; none is introduced as a runtime dependency.
+- `AGENTS.md` now requires multiple focused, CI-safe, independently revertible
+  commits, exact-scope staging, per-slice verification, and fork-only pushes.
+- Baseline audit before the documentation commit reports `main...origin/main`
+  as `0/0` and `upstream/main...main` as `0/4`: fork `main` contains four
+  reviewed vaEVAS commits on top of the current Arcadia-1 upstream baseline.
+- No runtime code or frozen r53/EVAS asset is part of this documentation slice.
