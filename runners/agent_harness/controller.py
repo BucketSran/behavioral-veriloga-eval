@@ -54,6 +54,7 @@ class EpisodeController:
         final_judge: FinalJudge,
         tool_registry: ToolRegistry,
         trajectory: TrajectorySink | None = None,
+        public_validation_profile_sha256: str | None = None,
     ) -> None:
         if not isinstance(tool_registry, ToolRegistry):
             raise TypeError("tool_registry must be a ToolRegistry")
@@ -62,6 +63,20 @@ class EpisodeController:
         self._final_judge = final_judge
         self._trajectory = trajectory
         self._tool_registry = tool_registry
+        if public_validation_profile_sha256 is not None and (
+            not isinstance(public_validation_profile_sha256, str)
+            or len(public_validation_profile_sha256) != 64
+            or any(
+                character not in "0123456789abcdef"
+                for character in public_validation_profile_sha256
+            )
+        ):
+            raise ValueError(
+                "public_validation_profile_sha256 must be a lowercase SHA-256 digest"
+            )
+        self._public_validation_profile_sha256 = (
+            public_validation_profile_sha256
+        )
 
     def _record(
         self,
@@ -291,6 +306,33 @@ class EpisodeController:
                         primary_outcome="budget_exhausted",
                         terminal_reason="hard_budget_exhausted",
                     ) from exc
+                if (
+                    capability.budget_class == "public_validation"
+                    and self._public_validation_profile_sha256 is None
+                ):
+                    self._record(
+                        context,
+                        actor="controller",
+                        event_type="action_rejected",
+                        visibility="harness",
+                        payload={
+                            "action_id": action.action_id,
+                            "tool_name": capability.tool_name,
+                            "tool_id": capability.tool_id,
+                            "rejection_code": "public_validation_profile_unbound",
+                            "candidate_tree_sha256": (
+                                observation.candidate_tree_sha256
+                            ),
+                        },
+                    )
+                    raise _ProtocolFailure(
+                        category="public_validation_profile_unbound",
+                        phase="public_validation_authority",
+                        message=(
+                            "public validation requires a campaign-bound "
+                            "authority profile"
+                        ),
+                    )
                 self._record(
                     context,
                     actor="controller",
@@ -352,6 +394,38 @@ class EpisodeController:
                     before_sha256=observation.candidate_tree_sha256,
                     step=step,
                 )
+                if capability.budget_class == "public_validation" and (
+                    step.observation.validation_profile_sha256
+                    != self._public_validation_profile_sha256
+                ):
+                    self._record(
+                        context,
+                        actor="controller",
+                        event_type="public_validation_rejected",
+                        visibility="harness",
+                        payload={
+                            "action_id": action.action_id,
+                            "tool_name": capability.tool_name,
+                            "tool_id": capability.tool_id,
+                            "candidate_tree_sha256": (
+                                step.observation.candidate_tree_sha256
+                            ),
+                            "expected_validation_profile_sha256": (
+                                self._public_validation_profile_sha256
+                            ),
+                            "observed_validation_profile_sha256": (
+                                step.observation.validation_profile_sha256
+                            ),
+                        },
+                    )
+                    raise _ProtocolFailure(
+                        category="public_validation_profile_mismatch",
+                        phase="public_validation_authority",
+                        message=(
+                            "public validation observation does not match "
+                            "the campaign-bound authority profile"
+                        ),
+                    )
                 try:
                     budget_update = budget_ledger.consume(
                         capability,
@@ -392,6 +466,9 @@ class EpisodeController:
                         "truncated": step.observation.truncated,
                         "candidate_tree_sha256": (
                             step.observation.candidate_tree_sha256
+                        ),
+                        "validation_profile_sha256": (
+                            step.observation.validation_profile_sha256
                         ),
                         "budget_delta": dict(step.observation.budget_delta),
                         "done": step.done,

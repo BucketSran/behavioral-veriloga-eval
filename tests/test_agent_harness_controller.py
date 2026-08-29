@@ -154,6 +154,7 @@ class FakePublicValidator:
             status="succeeded",
             payload={"message": "public validation: syntax ok"},
             candidate_tree_sha256=candidate_tree_sha256,
+            validation_profile_sha256="b" * 64,
             budget_delta={"public_validation_calls": 1},
         )
 
@@ -236,6 +237,7 @@ def test_public_feedback_can_continue_but_final_judgment_cannot() -> None:
         ),
         final_judge=TerminalFinalJudge(boundary_log),
         tool_registry=_controller_registry("public_validate", "submit"),
+        public_validation_profile_sha256="b" * 64,
     )
 
     result = controller.run(
@@ -279,6 +281,7 @@ def test_model_visible_trajectory_projection_excludes_final_judgment(
         final_judge=TerminalFinalJudge(boundary_log),
         tool_registry=_controller_registry("public_validate", "submit"),
         trajectory=JsonlTrajectoryRecorder(trajectory_path),
+        public_validation_profile_sha256="b" * 64,
     )
 
     controller.run(
@@ -297,6 +300,12 @@ def test_model_visible_trajectory_projection_excludes_final_judgment(
         event["payload"].get("observation_id") == "observation-validation"
         for event in model_visible
     )
+    public_event = next(
+        event
+        for event in model_visible
+        if event["payload"].get("observation_id") == "observation-validation"
+    )
+    assert public_event["payload"]["validation_profile_sha256"] == "b" * 64
     assert not any(
         event["event_type"] == "final_judgment_completed"
         for event in model_visible
@@ -392,6 +401,7 @@ def _tool_descriptor(
     model_visibility: str = "model_visible",
     requires_candidate_binding: bool = False,
 ) -> dict:
+    is_public_validation = budget_class == "public_validation"
     return {
         "schema_version": "vaevas-tool-descriptor-v1",
         "tool_id": tool_id or f"core/{tool_name}-v1",
@@ -412,10 +422,12 @@ def _tool_descriptor(
             "additionalProperties": True,
         },
         "evidence_policy": {
-            "records_private_evidence": True,
+            "records_private_evidence": not is_public_validation,
             "may_enter_model_observation": True,
-            "may_enter_shared_memory": False,
-            "requires_candidate_binding": requires_candidate_binding,
+            "may_enter_shared_memory": is_public_validation,
+            "requires_candidate_binding": (
+                requires_candidate_binding or is_public_validation
+            ),
         },
         "handler_id": handler_id,
     }
@@ -983,6 +995,7 @@ def test_controller_rejects_candidate_mutation_by_read_only_tool(tmp_path) -> No
         final_judge=PassingFinalJudge(boundary_log),
         trajectory=JsonlTrajectoryRecorder(trajectory_path),
         tool_registry=_controller_registry("public_validate"),
+        public_validation_profile_sha256="b" * 64,
     )
 
     result = controller.run(
@@ -1403,6 +1416,7 @@ def test_public_validation_budget_exhausts_before_second_environment_step(
         final_judge=PassingFinalJudge(boundary_log),
         trajectory=JsonlTrajectoryRecorder(trajectory_path),
         tool_registry=_controller_registry("public_validate"),
+        public_validation_profile_sha256="b" * 64,
     )
 
     result = controller.run(

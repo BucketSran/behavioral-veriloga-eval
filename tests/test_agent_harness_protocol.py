@@ -57,6 +57,7 @@ def test_action_and_observation_expose_detached_canonical_documents() -> None:
         "payload": {"stdout": "ok", "exit_code": 0},
         "payload_sha256": observation.payload_sha256,
         "candidate_tree_sha256": candidate_sha256,
+        "validation_profile_sha256": None,
         "truncated": False,
         "budget_delta": {"tool_calls": 1},
     }

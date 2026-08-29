@@ -134,6 +134,7 @@ class Observation:
     status: str
     payload: Mapping[str, Any]
     candidate_tree_sha256: str | None = None
+    validation_profile_sha256: str | None = None
     truncated: bool = False
     budget_delta: Mapping[str, int] = field(default_factory=dict)
     schema_version: str = field(default="vaevas-observation-v1", init=False)
@@ -146,6 +147,10 @@ class Observation:
         _require_optional_sha256(
             self.candidate_tree_sha256,
             field_name="candidate_tree_sha256",
+        )
+        _require_optional_sha256(
+            self.validation_profile_sha256,
+            field_name="validation_profile_sha256",
         )
         frozen_payload = _freeze_json_object(self.payload, field_name="payload")
         frozen_budget_delta = _freeze_json_object(
@@ -171,6 +176,7 @@ class Observation:
             "payload": _json_ready(self.payload),
             "payload_sha256": self.payload_sha256,
             "candidate_tree_sha256": self.candidate_tree_sha256,
+            "validation_profile_sha256": self.validation_profile_sha256,
             "truncated": self.truncated,
             "budget_delta": _json_ready(self.budget_delta),
         }

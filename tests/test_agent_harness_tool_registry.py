@@ -207,7 +207,17 @@ def test_effective_capability_hash_changes_with_resolved_contract() -> None:
         condition_id="Agentic+EVAS",
         model_visible=True,
     )
-    changed = ToolRegistry([_descriptor(budget_class="public_validation")]).resolve(
+    changed = ToolRegistry([_descriptor(
+        budget_class="public_validation",
+        state_effect="read_only",
+        candidate_effect="read",
+        evidence_policy={
+            "records_private_evidence": False,
+            "may_enter_model_observation": True,
+            "may_enter_shared_memory": True,
+            "requires_candidate_binding": True,
+        },
+    )]).resolve(
         condition_id="Agentic+EVAS",
         model_visible=True,
     )

@@ -24,7 +24,7 @@ def _capability(*, budget_class: str = "public_validation"):
         "argument_schema": {"type": "object"},
         "observation_schema": {"type": "object"},
         "evidence_policy": {
-            "records_private_evidence": True,
+            "records_private_evidence": False,
             "may_enter_model_observation": True,
             "may_enter_shared_memory": True,
             "requires_candidate_binding": True,

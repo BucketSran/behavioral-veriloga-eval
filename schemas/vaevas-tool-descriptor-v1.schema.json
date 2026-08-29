@@ -154,6 +154,23 @@
           "handler_id": {"type": "null"}
         }
       }
+    },
+    {
+      "if": {"properties": {"budget_class": {"const": "public_validation"}}},
+      "then": {
+        "properties": {
+          "model_visibility": {"const": "model_visible"},
+          "state_effect": {"const": "read_only"},
+          "candidate_effect": {"const": "read"},
+          "evidence_policy": {
+            "properties": {
+              "records_private_evidence": {"const": false},
+              "may_enter_model_observation": {"const": true},
+              "requires_candidate_binding": {"const": true}
+            }
+          }
+        }
+      }
     }
   ],
   "additionalProperties": false

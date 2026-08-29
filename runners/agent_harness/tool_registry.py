@@ -328,6 +328,7 @@ def _normalize_descriptor(descriptor: Mapping[str, Any]) -> Mapping[str, Any]:
             "wildcard allowed_conditions must not be mixed with explicit conditions",
         )
     _require_evidence_policy(descriptor["evidence_policy"])
+    _require_public_validation_contract(descriptor)
     handler_id = descriptor["handler_id"]
     if descriptor["lifecycle"] == "active":
         _require_nonempty_string(handler_id, field_name="handler_id")
@@ -340,6 +341,26 @@ def _normalize_descriptor(descriptor: Mapping[str, Any]) -> Mapping[str, Any]:
             "reserved tool descriptors must not declare a handler",
         )
     return _freeze_json(dict(descriptor))
+
+
+def _require_public_validation_contract(descriptor: Mapping[str, Any]) -> None:
+    if descriptor["budget_class"] != "public_validation":
+        return
+    evidence_policy = descriptor["evidence_policy"]
+    valid = (
+        descriptor["model_visibility"] == "model_visible"
+        and descriptor["state_effect"] == "read_only"
+        and descriptor["candidate_effect"] == "read"
+        and evidence_policy["records_private_evidence"] is False
+        and evidence_policy["may_enter_model_observation"] is True
+        and evidence_policy["requires_candidate_binding"] is True
+    )
+    if not valid:
+        raise ToolRegistryError(
+            "invalid_public_validation_evidence",
+            "public validation must be model-visible, candidate-bound, "
+            "read-only, and free of private evidence",
+        )
 
 
 def _require_evidence_policy(value: object) -> None:
