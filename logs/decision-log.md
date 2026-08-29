@@ -424,3 +424,19 @@
 - Keep production mini-swe normalization and the immutable result/score-sidecar
   join as later slices; this decision does not claim existing campaign traces
   already satisfy the new semantic protocol.
+
+## 2026-08-30 - Scored result artifacts bind terminal evidence
+
+- Treat the scored result as a join artifact, not an isolated verdict field.
+  A valid artifact must bind the semantic trajectory tail, frozen submission
+  tree, final judgment, public/final authority profile hashes, final profile
+  input identity, and EVAS score sidecar hash.
+- Keep the sidecar itself immutable and model-invisible. The result artifact
+  records the sidecar schema, hash, submission binding, immutability flag, and
+  score authority; validation receives the full sidecar document and rejects
+  hash or semantic substitutions.
+- Require public and final authority profiles to agree on benchmark release,
+  benchmark manifest, and campaign config before their hashes can be joined.
+- Scope this to the generic harness. Production campaign writers must opt in
+  through a later adapter/result-ledger slice before paper or benchmark claims
+  rely on this artifact.

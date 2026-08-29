@@ -439,8 +439,10 @@ Remaining Phase 2 gaps:
 - postcondition checks detect an incorrect environment mutation but cannot
   roll it back; production adapters need transactional candidate snapshots or
   fresh-workspace discard semantics;
-- candidate lineage events and the immutable trajectory/submission/authority/
-  score-sidecar join remain to be connected to production result artifacts.
+- candidate lineage events still need production candidate-store/runtime joins;
+- the immutable trajectory/submission/authority/score-sidecar artifact now
+  exists at the generic harness protocol layer, but still needs to be connected
+  to production campaign result writers and real r53 result ledgers.
 
 Required event types include:
 

@@ -576,3 +576,23 @@
 - Scope boundary: production mini-swe still does not import the generic
   harness. No r53 release bytes, EVAS code/version, score sidecar, or Spectre
   path changed in these slices.
+
+## 2026-08-30 - Scored result artifact join
+
+- New focused result-artifact invocation:
+  `PYTHONDONTWRITEBYTECODE=1 ./.venv/bin/python -m pytest -q -p
+  no:cacheprovider tests/test_agent_harness_result_artifact.py` reports
+  `11 passed`.
+- Complete generic harness invocation after result artifact:
+  `PYTHONDONTWRITEBYTECODE=1 ./.venv/bin/python -m pytest -q -p
+  no:cacheprovider tests/test_agent_harness_*.py` reports `248 passed`.
+- Existing mini-swe/r53/schema boundary invocation:
+  `PYTHONDONTWRITEBYTECODE=1 ./.venv/bin/python -m pytest -q -p
+  no:cacheprovider tests/test_mini_swe_vabench.py
+  tests/test_v4_r53_active_entrypoints.py tests/test_meta_schema.py` reports
+  `43 passed, 3 skipped`.
+- Ruff 0.12.12 reports `All checks passed!` for `runners/agent_harness` and
+  all `tests/test_agent_harness_*.py`; `git diff --check` passes.
+- Scope boundary: this remains a generic harness artifact builder/validator.
+  Production campaign result writers, real r53 result ledgers, EVAS code, and
+  Spectre parity paths are unchanged.
