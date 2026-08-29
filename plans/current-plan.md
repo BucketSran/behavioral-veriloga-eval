@@ -309,11 +309,16 @@ Completed slice:
   envelope-level syntax allowlist rejects unknown tool names before execution;
 - duplicate keys, non-finite JSON constants, missing/extra fields, malformed
   JSON, and zero/multiple native calls are classified protocol rejections.
+- `vaevas-backend-profile-v1` now freezes backend identity, inference mode,
+  proposal compatibility, model-interface capability, state scope, and named
+  external contract dependencies without copying campaign/environment values;
+- backend profiles are content-addressed with a canonical SHA-256 that is
+  stable across mapping order and sensitive to contract changes.
 
 Still pending in this phase:
 
-- backend, tool, validation/final-test, evolution, memory, and candidate
-  lineage schemas;
+- tool, validation/final-test, evolution-manifest, memory, and candidate lineage
+  schemas;
 - capability-aware tool descriptors and dispatch beyond the proposal
   envelope's syntax-only allowlist.
 

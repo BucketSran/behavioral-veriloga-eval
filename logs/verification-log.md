@@ -353,3 +353,28 @@
 - Scope boundary: the normalizer creates one `AgentAction` or a classified
   rejection only. It executes no tool, writes no candidate, imports no
   production runner, changes no r53/EVAS asset, and does not trigger Spectre.
+
+## 2026-08-30 - Phase 1 backend profile contract
+
+- TDD RED 1: the initial backend-profile test failed at collection because
+  `backend_profile_sha256` did not exist in the harness API.
+- TDD RED 2: an interface claiming strict-JSON support while omitting it from
+  `supported_proposal_formats` initially passed schema validation; a new
+  bidirectional conditional closed that mismatch.
+- `tests/test_agent_harness_backend_profile.py` reports `26 passed`, covering
+  mini-swe, AlphaApollo reasoning/evolution, ownership rejection, state
+  isolation, proposal-format/interface agreement, evolution dependencies,
+  canonical hash stability/change sensitivity, and invalid JSON values.
+- The complete prototype harness surface reports `83 passed` across controller,
+  action/observation protocol, proposal normalization, and backend profile.
+- Existing mini-swe, active r53 entrypoint, and meta-schema regression suites
+  remain part of the per-slice gate; Ruff 0.12.12, Python bytecode compilation,
+  schema meta-validation, and `git diff --check` pass.
+- Independent code review reports `APPROVE` with zero findings after manual
+  schema-conditional probes. Independent completion verification reports
+  `PASS` and confirms no production runner, benchmark, EVAS, tool, or judge
+  value entered the profile slice.
+- Scope boundary: this feature declares backend identity and named external
+  dependencies only. Campaign/result profile-hash joins, adapter enforcement,
+  tool/validation/evolution manifests, and real multi-model execution remain
+  unimplemented and unclaimed.

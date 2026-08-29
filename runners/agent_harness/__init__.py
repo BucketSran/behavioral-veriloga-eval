@@ -1,5 +1,6 @@
 """Public interfaces for the vaEVAS agent harness."""
 
+from .backend_profile import backend_profile_sha256
 from .contracts import FinalJudge, PublicValidator
 from .controller import EpisodeController
 from .proposals import (
@@ -45,6 +46,7 @@ __all__ = [
     "ProposalFormat",
     "ProposalNormalizationError",
     "PublicValidator",
+    "backend_profile_sha256",
     "normalize_proposal",
     "project_model_visible_events",
     "read_trajectory",

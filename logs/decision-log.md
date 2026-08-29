@@ -255,3 +255,19 @@
 - Keep legacy artifact regex and `submit_artifacts` repair behavior outside the
   formal action protocol. The future mini-swe adapter should reuse the existing
   `BASH_TOOL` and environment rather than duplicate execution semantics.
+
+## 2026-08-30 - Backend profile owns identity, not campaign values
+
+- Add `vaevas-backend-profile-v1` to distinguish mini-swe, AlphaApollo
+  reasoning, and round-based evolution by backend identity, inference mode,
+  proposal compatibility, model-interface flags, and state scope.
+- Keep model/provider/snapshot, decoding, budget, release, condition, concrete
+  tool exposure, runtime, and judge values in campaign/environment contracts.
+  The backend profile declares only the external contract names it requires.
+- Require evolution profiles to name roster, round-budget, feedback-scope,
+  selection, and final-submission contracts without embedding their values.
+- Forbid cross-task and cross-condition state; memory remains none or
+  episode-local.
+- Content-address schema-validated profiles with canonical SHA-256. The hash
+  helper does not replace schema validation; campaign/result joins are later
+  work.
