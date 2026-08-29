@@ -197,6 +197,35 @@ def test_effective_capability_hash_changes_with_resolved_contract() -> None:
     assert first.effective_capability_sha256 != changed.effective_capability_sha256
 
 
+@pytest.mark.parametrize(
+    "updates",
+    [
+        {"state_effect": "read_only", "candidate_effect": "mutate"},
+        {"state_effect": "candidate_mutation", "candidate_effect": "read"},
+        {"state_effect": "terminal_submission", "candidate_effect": "mutate"},
+        {
+            "budget_class": "submission",
+            "state_effect": "candidate_mutation",
+            "candidate_effect": "mutate",
+        },
+        {
+            "budget_class": "tool_call",
+            "state_effect": "terminal_submission",
+            "candidate_effect": "freeze",
+        },
+    ],
+)
+def test_registry_and_schema_reject_inconsistent_effect_contracts(
+    updates: dict[str, str],
+) -> None:
+    descriptor = _descriptor(**updates)
+
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(descriptor, _schema())
+    with pytest.raises(ToolRegistryError, match="inconsistent_effect_contract"):
+        ToolRegistry([descriptor])
+
+
 def test_registry_hash_includes_non_effective_descriptors() -> None:
     active = _descriptor()
     first_reserved = _descriptor(

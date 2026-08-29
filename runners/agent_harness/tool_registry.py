@@ -295,6 +295,7 @@ def _normalize_descriptor(descriptor: Mapping[str, Any]) -> Mapping[str, Any]:
             "invalid_candidate_effect",
             f"unsupported tool candidate effect: {descriptor['candidate_effect']}",
         )
+    _require_effect_contract(descriptor)
     for schema_field in ("argument_schema", "observation_schema"):
         io_schema = descriptor[schema_field]
         if not isinstance(io_schema, Mapping) or io_schema.get("type") != "object":
@@ -359,6 +360,28 @@ def _require_evidence_policy(value: object) -> None:
         raise ToolRegistryError(
             "invalid_evidence_policy",
             "evidence_policy values must be booleans",
+        )
+
+
+def _require_effect_contract(descriptor: Mapping[str, Any]) -> None:
+    candidate_effects_by_state = {
+        "read_only": {"none", "read"},
+        "candidate_mutation": {"mutate"},
+        "terminal_submission": {"freeze"},
+    }
+    state_effect = descriptor["state_effect"]
+    candidate_effect = descriptor["candidate_effect"]
+    if candidate_effect not in candidate_effects_by_state[state_effect]:
+        raise ToolRegistryError(
+            "inconsistent_effect_contract",
+            "state_effect and candidate_effect describe different transitions",
+        )
+    submission_budget = descriptor["budget_class"] == "submission"
+    terminal_submission = state_effect == "terminal_submission"
+    if submission_budget != terminal_submission:
+        raise ToolRegistryError(
+            "inconsistent_effect_contract",
+            "submission budget and terminal submission effect must be declared together",
         )
 
 

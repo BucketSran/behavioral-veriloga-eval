@@ -105,6 +105,44 @@
   },
   "allOf": [
     {
+      "oneOf": [
+        {
+          "properties": {
+            "state_effect": {"const": "read_only"},
+            "candidate_effect": {"enum": ["none", "read"]}
+          }
+        },
+        {
+          "properties": {
+            "state_effect": {"const": "candidate_mutation"},
+            "candidate_effect": {"const": "mutate"}
+          }
+        },
+        {
+          "properties": {
+            "state_effect": {"const": "terminal_submission"},
+            "candidate_effect": {"const": "freeze"}
+          }
+        }
+      ]
+    },
+    {
+      "oneOf": [
+        {
+          "properties": {
+            "budget_class": {"const": "submission"},
+            "state_effect": {"const": "terminal_submission"}
+          }
+        },
+        {
+          "properties": {
+            "budget_class": {"not": {"const": "submission"}},
+            "state_effect": {"not": {"const": "terminal_submission"}}
+          }
+        }
+      ]
+    },
+    {
       "if": {"properties": {"lifecycle": {"const": "active"}}},
       "then": {"properties": {"handler_id": {"type": "string", "minLength": 1}}}
     },
