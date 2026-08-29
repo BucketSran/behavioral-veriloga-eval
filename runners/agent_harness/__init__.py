@@ -42,6 +42,11 @@ from .result_artifact import (
     validate_score_sidecar_authority,
     validate_scored_result_artifact,
 )
+from .result_store import (
+    ImmutableEvidenceError,
+    ImmutableScoreSidecarRecord,
+    write_immutable_score_sidecar,
+)
 from .reserved_tools import reserved_domain_tool_descriptors
 from .state import (
     AgentAction,
@@ -92,6 +97,8 @@ __all__ = [
     "FinalTestExecution",
     "FrozenSubmission",
     "Incident",
+    "ImmutableEvidenceError",
+    "ImmutableScoreSidecarRecord",
     "JsonlTrajectoryRecorder",
     "MemorySnapshot",
     "Observation",
@@ -128,4 +135,5 @@ __all__ = [
     "validate_trajectory_semantics",
     "validate_scored_result_artifact",
     "validate_score_sidecar_authority",
+    "write_immutable_score_sidecar",
 ]
