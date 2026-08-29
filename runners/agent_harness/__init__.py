@@ -28,6 +28,13 @@ from .state import (
     Incident,
     Observation,
 )
+from .tool_registry import (
+    EffectiveToolset,
+    ToolCapability,
+    ToolRegistry,
+    ToolRegistryError,
+    tool_descriptor_sha256,
+)
 from .trajectory import (
     JsonlTrajectoryRecorder,
     project_model_visible_events,
@@ -42,6 +49,7 @@ __all__ = [
     "EpisodeController",
     "EpisodeResult",
     "EnvironmentStep",
+    "EffectiveToolset",
     "EventVisibility",
     "FailureDisposition",
     "FinalJudge",
@@ -55,12 +63,16 @@ __all__ = [
     "ProposalFormat",
     "ProposalNormalizationError",
     "PublicValidator",
+    "ToolCapability",
+    "ToolRegistry",
+    "ToolRegistryError",
     "backend_profile_sha256",
     "candidate_lineage_sha256",
     "freeze_memory_snapshot",
     "normalize_proposal",
     "project_model_visible_events",
     "read_trajectory",
+    "tool_descriptor_sha256",
     "validate_candidate_lineage_graph",
     "validate_trajectory",
 ]

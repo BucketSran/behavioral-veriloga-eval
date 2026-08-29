@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arcadia-1.github.io/vaEVAS/schemas/vaevas-tool-descriptor-v1.schema.json",
+  "title": "vaEVAS agent harness tool descriptor",
+  "description": "Trusted, versioned description of one harness tool capability. Proposal allowlists are syntax gates only; this descriptor is the authority boundary.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "tool_id",
+    "tool_name",
+    "tool_version",
+    "lifecycle",
+    "model_visibility",
+    "allowed_conditions",
+    "budget_class",
+    "state_effect",
+    "candidate_effect",
+    "argument_schema",
+    "observation_schema",
+    "evidence_policy",
+    "handler_id"
+  ],
+  "properties": {
+    "schema_version": {"const": "vaevas-tool-descriptor-v1"},
+    "tool_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$"
+    },
+    "tool_name": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*(\\.[A-Za-z0-9][A-Za-z0-9._-]*)*$"
+    },
+    "tool_version": {"type": "string", "minLength": 1},
+    "lifecycle": {"enum": ["active", "reserved"]},
+    "model_visibility": {
+      "enum": ["model_visible", "harness_internal"]
+    },
+    "allowed_conditions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1},
+      "not": {
+        "allOf": [
+          {"contains": {"const": "*"}},
+          {"minItems": 2}
+        ]
+      }
+    },
+    "budget_class": {
+      "enum": [
+        "no_budget",
+        "tool_call",
+        "public_validation",
+        "submission",
+        "reserved"
+      ]
+    },
+    "state_effect": {
+      "enum": [
+        "read_only",
+        "candidate_mutation",
+        "terminal_submission"
+      ]
+    },
+    "candidate_effect": {
+      "enum": ["none", "read", "mutate", "freeze"]
+    },
+    "argument_schema": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {"type": {"const": "object"}},
+      "additionalProperties": true
+    },
+    "observation_schema": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {"type": {"const": "object"}},
+      "additionalProperties": true
+    },
+    "evidence_policy": {
+      "type": "object",
+      "required": [
+        "records_private_evidence",
+        "may_enter_model_observation",
+        "may_enter_shared_memory",
+        "requires_candidate_binding"
+      ],
+      "properties": {
+        "records_private_evidence": {"type": "boolean"},
+        "may_enter_model_observation": {"type": "boolean"},
+        "may_enter_shared_memory": {"type": "boolean"},
+        "requires_candidate_binding": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "handler_id": {
+      "oneOf": [
+        {"type": "string", "minLength": 1},
+        {"type": "null"}
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"lifecycle": {"const": "active"}}},
+      "then": {"properties": {"handler_id": {"type": "string", "minLength": 1}}}
+    },
+    {
+      "if": {"properties": {"lifecycle": {"const": "reserved"}}},
+      "then": {
+        "properties": {
+          "budget_class": {"const": "reserved"},
+          "handler_id": {"type": "null"}
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}
