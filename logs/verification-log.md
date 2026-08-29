@@ -256,10 +256,10 @@
   implementations: missing required `tool_registry`, explicit null registry,
   and stale candidate binding. Each focused test passed after the smallest
   corresponding controller change.
-- `tests/test_agent_harness_controller.py` reports `24 passed`.
+- `tests/test_agent_harness_controller.py` reports `25 passed`.
 - Complete generic harness regression:
   `./.venv/bin/python -m pytest -q -p no:cacheprovider tests/test_agent_harness_*.py`
-  reports `203 passed`.
+  reports `204 passed`.
 - Preserved production-boundary regressions run separately:
   `tests/test_mini_swe_vabench.py` reports `30 passed, 3 skipped`; and
   `tests/test_v4_r53_active_entrypoints.py tests/test_meta_schema.py` reports
@@ -272,7 +272,9 @@
 - The new tests prove that authorized actions record capability evidence before
   execution, bind the episode and action to the effective capability hash, keep
   handler identity out of the model-visible projection, and reject reserved,
-  final-only, or stale-bound actions before `environment.step`.
+  final-only, or stale-bound actions before `environment.step`. A dedicated
+  regression also proves that the environment receives the exact resolved
+  capability used for authorization.
 - This remains a generic harness prototype slice. No production runner, r53
   release asset, EVAS code, score sidecar, or Spectre gate was changed.
 

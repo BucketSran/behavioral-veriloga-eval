@@ -287,6 +287,9 @@
 - Enforce descriptor-declared candidate binding against the latest trusted
   environment observation before dispatch. Missing, unavailable, or stale
   candidate identities fail closed without calling `environment.step`.
+- Pass the exact resolved `ToolCapability` into `Environment.step` with the
+  action. The environment executes controller-bound authority rather than
+  re-resolving or trusting an unbound model-supplied tool name.
 - Keep final judging outside ordinary dispatch; it remains terminal-only after
   submission freeze.
 

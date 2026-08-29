@@ -400,6 +400,9 @@ Completed slice:
   effective capability hash, tool identity, handler identity, descriptor hash,
   candidate hash, and condition; handler/capability evidence stays out of the
   model-visible projection.
+- The controller passes the resolved `ToolCapability` into `Environment.step`,
+  so execution is bound to trusted registry resolution rather than a second
+  lookup of the model-supplied tool name.
 - Registry denials emit `action_rejected`, materialize as protocol failures,
   and stop before any environment/candidate mutation while still preserving
   cleanup evidence.

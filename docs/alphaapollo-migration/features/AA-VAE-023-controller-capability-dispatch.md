@@ -25,6 +25,8 @@
   tool id/version、handler id、descriptor hash、candidate hash 和 condition，用于后续
   trajectory/evidence join；这些 handler/capability 证据是 harness-visible，不进入
   model-visible projection。
+- controller 会把同一个 resolved `ToolCapability` 与 action 一起传给
+  `Environment.step`，避免执行层重新解析或信任模型提供的裸 `tool_name`。
 - 授权失败会写入 `action_rejected` harness event，并以 `protocol_failure` 收束当前
   episode；环境会执行 cleanup，但不会进入 `step`，因此 reserved/unknown/ineligible
   tool 不能突变 candidate/workspace。
@@ -38,7 +40,8 @@
 
 | 文件/符号 | 改动 | 所属层 |
 | --- | --- | --- |
-| `runners/agent_harness/controller.py::EpisodeController` | 强制 trusted `tool_registry`，在 `environment.step` 前授权 action、校验 candidate binding，并记录 capability/rejection evidence | harness controller |
+| `runners/agent_harness/controller.py::EpisodeController` | 强制 trusted `tool_registry`，在 `environment.step` 前授权 action、校验 candidate binding，并把 resolved capability 交给 environment | harness controller |
+| `runners/agent_harness/contracts.py::Environment` | `step` 接收 `AgentAction` 与 trusted `ToolCapability` | harness environment contract |
 | `tests/test_agent_harness_controller.py` | 增加 registry 必填、授权 dispatch、reserved/final-only tool 拒绝、candidate binding 与 visibility 回归 | tests |
 
 ## 数据与状态变化
