@@ -232,7 +232,7 @@ popular framework is not itself an acceptance criterion.
 
 ### Phase 0 - Reconcile the paused prototype
 
-Status: `in_progress`
+Status: `completed`
 
 Goal: decide what to retain from the untracked `runners/agent_harness/`
 prototype before any production integration.
@@ -268,9 +268,17 @@ Tests first:
 Stop condition: the prototype has an explicit keep/rework/delete disposition
 for every module and is not committed as an accidental parallel harness.
 
+Disposition recorded in `AA-VAE-015`:
+
+- keep and rework `contracts.py`, `state.py`, `controller.py`, and `__init__.py`;
+- keep the attempt-scoped hash-chain implementation in `trajectory.py`;
+- keep and expand the public regression surface;
+- keep the package disconnected from production runners until formal schemas
+  and mini-swe compatibility are proven in later slices.
+
 ### Phase 1 - Freeze canonical protocols and manifests
 
-Status: `pending`
+Status: `in_progress`
 
 Goal: make backend, action, tool, memory, validation, and final-test contracts
 machine-checkable before implementation.

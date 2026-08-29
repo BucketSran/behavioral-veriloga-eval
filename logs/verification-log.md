@@ -244,3 +244,45 @@
   as `0/0` and `upstream/main...main` as `0/4`: fork `main` contains four
   reviewed vaEVAS commits on top of the current Arcadia-1 upstream baseline.
 - No runtime code or frozen r53/EVAS asset is part of this documentation slice.
+
+## 2026-08-29 - Phase 0 generic harness boundary prototype
+
+- Baseline audit before staging reports branch `main` at `fb49d53df2`,
+  `main...origin/main` as `0/0`, and `upstream/main...main` as `0/5`.
+  The writable remote remains BucketSran `origin`; Arcadia-1 `upstream` remains
+  read-only.
+- Phase 0 now has an explicit keep/rework disposition in
+  `docs/alphaapollo-migration/features/AA-VAE-015-generic-harness-boundaries.md`
+  and `plans/current-plan.md` marks Phase 0 completed with Phase 1 in progress.
+- Focused harness contract tests pass:
+  `./.venv/bin/python -m pytest -q -p no:cacheprovider
+  tests/test_agent_harness_controller.py` reports `18 passed`.
+- Existing mini-swe regressions remain green:
+  `./.venv/bin/python -m pytest -q -p no:cacheprovider
+  tests/test_mini_swe_vabench.py` reports `30 passed, 3 skipped`.
+- One earlier combined run observed the existing timeout-sensitive
+  `test_direct_evas_timeout_is_recorded_without_leaking_control_markers` fail
+  to record its invocation. Its exact rerun passed (`1 passed`) and the fresh
+  standalone mini-swe suite then passed. The prototype is not imported by that
+  path; no mini-swe production change was made in this slice.
+- Active r53 entrypoint regressions remain green:
+  `./.venv/bin/python -m pytest -q -p no:cacheprovider
+  tests/test_v4_r53_active_entrypoints.py` reports `9 passed`.
+- Python bytecode compilation passes for `runners/agent_harness/*.py` and
+  `tests/test_agent_harness_controller.py`.
+- Ruff 0.12.12 reports `All checks passed!` for the new package and test.
+- The repository has no `scripts/check_repo_layout.py`; the applicable
+  mini-swe and active-entrypoint runtime-contract regressions were run instead.
+- A targeted production-import scan finds `runners.agent_harness` only in
+  `tests/test_agent_harness_controller.py`; current v4 runners and
+  calibration-pilot entrypoints do not import the prototype package.
+- Independent code review initially found mutable freeze artifacts, missing
+  event visibility, and empty episode identities. RED regressions were added,
+  all three were fixed, and re-review returned APPROVE with no blocking issue.
+- The re-review's remaining LOW note (unconstrained visibility strings) was
+  also closed by an `EventVisibility` literal, runtime allowlist, and a
+  rejection regression before commit.
+- `git diff --check` passes.
+- Boundary: this prototype changes no r53 task bytes, no EVAS code, no existing
+  mini-swe execution path, and no formal score authority. It does not trigger
+  Spectre parity.

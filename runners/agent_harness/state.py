@@ -1,0 +1,221 @@
+"""Explicit public state carried across an agent-harness episode."""
+
+from __future__ import annotations
+
+from collections.abc import Mapping
+from dataclasses import dataclass, field, replace
+import hashlib
+import json
+from types import MappingProxyType
+from typing import Any, Literal, TypeAlias
+
+
+EventVisibility: TypeAlias = Literal["model", "harness", "trusted"]
+
+
+def _freeze_json(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return MappingProxyType(
+            {str(key): _freeze_json(item) for key, item in value.items()}
+        )
+    if isinstance(value, (list, tuple)):
+        return tuple(_freeze_json(item) for item in value)
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    raise TypeError(f"value is not JSON-compatible: {type(value).__name__}")
+
+
+def _json_ready(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return {key: _json_ready(item) for key, item in value.items()}
+    if isinstance(value, tuple):
+        return [_json_ready(item) for item in value]
+    return value
+
+
+def _json_sha256(value: Mapping[str, Any]) -> str:
+    canonical = json.dumps(
+        _json_ready(value),
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
+
+
+def _require_identity(value: str, *, field_name: str) -> None:
+    if not value or not value.strip():
+        raise ValueError(f"{field_name} must be non-empty")
+
+
+def _require_optional_sha256(value: str | None, *, field_name: str) -> None:
+    if value is None:
+        return
+    if len(value) != 64 or any(
+        character not in "0123456789abcdef" for character in value
+    ):
+        raise ValueError(f"{field_name} must be a lowercase SHA-256 digest")
+
+
+def _require_sha256(value: str, *, field_name: str) -> None:
+    if value is None:
+        raise ValueError(f"{field_name} must be a lowercase SHA-256 digest")
+    _require_optional_sha256(value, field_name=field_name)
+
+
+@dataclass(frozen=True, slots=True)
+class EpisodeContext:
+    episode_id: str
+    attempt_id: str
+    task_id: str
+    condition: str
+    max_steps: int
+    parent_attempt_id: str | None = None
+    retry_index: int = 0
+    retry_reason: str | None = None
+
+    def __post_init__(self) -> None:
+        for field_name in ("episode_id", "attempt_id", "task_id", "condition"):
+            _require_identity(getattr(self, field_name), field_name=field_name)
+        if self.max_steps <= 0:
+            raise ValueError("max_steps must be positive")
+        if self.retry_index < 0:
+            raise ValueError("retry_index cannot be negative")
+        if self.retry_index == 0:
+            if self.parent_attempt_id is not None or self.retry_reason is not None:
+                raise ValueError("an initial attempt cannot have retry lineage")
+        elif self.parent_attempt_id is None or not self.retry_reason:
+            raise ValueError("a retry requires parent_attempt_id and retry_reason")
+        if self.parent_attempt_id == self.attempt_id:
+            raise ValueError("a retry cannot reuse its parent attempt_id")
+
+    def next_attempt(self, *, attempt_id: str, reason: str) -> "EpisodeContext":
+        if attempt_id == self.attempt_id:
+            raise ValueError("a retry requires a new attempt_id")
+        return replace(
+            self,
+            attempt_id=attempt_id,
+            parent_attempt_id=self.attempt_id,
+            retry_index=self.retry_index + 1,
+            retry_reason=reason,
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class Observation:
+    observation_id: str
+    tool_name: str
+    status: str
+    payload: Mapping[str, Any]
+    candidate_tree_sha256: str | None = None
+    truncated: bool = False
+    budget_delta: Mapping[str, int] = field(default_factory=dict)
+    schema_version: str = field(default="vaevas-observation-v1", init=False)
+    payload_sha256: str = field(init=False)
+
+    def __post_init__(self) -> None:
+        _require_identity(self.observation_id, field_name="observation_id")
+        _require_identity(self.tool_name, field_name="tool_name")
+        _require_identity(self.status, field_name="status")
+        _require_optional_sha256(
+            self.candidate_tree_sha256,
+            field_name="candidate_tree_sha256",
+        )
+        frozen_payload = _freeze_json(self.payload)
+        frozen_budget_delta = _freeze_json(self.budget_delta)
+        if any(value < 0 for value in frozen_budget_delta.values()):
+            raise ValueError("budget_delta values cannot be negative")
+        object.__setattr__(self, "payload", frozen_payload)
+        object.__setattr__(self, "budget_delta", frozen_budget_delta)
+        object.__setattr__(self, "payload_sha256", _json_sha256(frozen_payload))
+
+
+@dataclass(frozen=True, slots=True)
+class AgentAction:
+    action_id: str
+    tool_name: str
+    arguments: Mapping[str, Any]
+    source_backend: str
+    candidate_tree_sha256: str | None = None
+    schema_version: str = field(default="vaevas-action-v1", init=False)
+    arguments_sha256: str = field(init=False)
+
+    def __post_init__(self) -> None:
+        _require_identity(self.action_id, field_name="action_id")
+        _require_identity(self.tool_name, field_name="tool_name")
+        _require_identity(self.source_backend, field_name="source_backend")
+        _require_optional_sha256(
+            self.candidate_tree_sha256,
+            field_name="candidate_tree_sha256",
+        )
+        frozen_arguments = _freeze_json(self.arguments)
+        object.__setattr__(self, "arguments", frozen_arguments)
+        object.__setattr__(
+            self,
+            "arguments_sha256",
+            _json_sha256(frozen_arguments),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class EnvironmentStep:
+    observation: Observation
+    done: bool
+    terminal_reason: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class FrozenSubmission:
+    tree_sha256: str
+    artifacts: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        _require_sha256(self.tree_sha256, field_name="tree_sha256")
+        artifacts = tuple(self.artifacts)
+        if not artifacts or any(
+            not isinstance(artifact, str) or not artifact.strip()
+            for artifact in artifacts
+        ):
+            raise ValueError("artifacts must contain non-empty artifact paths")
+        object.__setattr__(self, "artifacts", artifacts)
+
+
+@dataclass(frozen=True, slots=True)
+class FinalJudgment:
+    status: str
+    judge_engine: str
+    score: float | None
+    submission_tree_sha256: str
+
+    def __post_init__(self) -> None:
+        _require_identity(self.status, field_name="status")
+        _require_identity(self.judge_engine, field_name="judge_engine")
+        _require_sha256(
+            self.submission_tree_sha256,
+            field_name="submission_tree_sha256",
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class Incident:
+    category: str
+    message: str
+
+
+@dataclass(frozen=True, slots=True)
+class FailureDisposition:
+    category: str
+    phase: str
+    message: str
+
+
+@dataclass(frozen=True, slots=True)
+class EpisodeResult:
+    context: EpisodeContext
+    primary_outcome: str
+    terminal_reason: str
+    submission: FrozenSubmission | None
+    final_judgment: FinalJudgment | None
+    incidents: tuple[Incident, ...]
+    failure: FailureDisposition | None = None
+    trajectory_tail_sha256: str | None = None

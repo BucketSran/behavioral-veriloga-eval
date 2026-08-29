@@ -190,3 +190,34 @@
 - Stage and inspect only the intended files for each slice, record focused
   verification with the corresponding change, and push only to the writable
   BucketSran `origin`, never Arcadia-1 `upstream`.
+
+## 2026-08-29 - Phase 0 generic harness disposition
+
+- Retain and rework the paused `agent_harness` prototype instead of deleting
+  it or committing it unchanged. Preserve its useful freeze-before-score,
+  cleanup-incident, retry-lineage, and tamper-evident trajectory behavior.
+- Replace generic `Verifier` authority with an environment-owned,
+  model-visible `PublicValidator` and a terminal-only, model-invisible
+  `FinalJudge`. A final judgment must bind the exact frozen submission hash.
+- Replace stringly typed actions and observations with immutable, versioned,
+  structured records carrying backend/tool/candidate/budget identities and
+  canonical payload hashes.
+- Materialize protocol, infrastructure, and budget failures in
+  `EpisodeResult`; keep cleanup failure as an orthogonal incident.
+- Do not connect the package to production runners in Phase 0. Formal schemas
+  and mini-swe compatibility remain separate, reviewable commits.
+
+## 2026-08-29 - Judge authority supersedes earlier same-day wording
+
+- Supersede earlier same-day language that could be read as making private
+  Spectre the routine paper-facing score authority.
+- The current default development and evaluation judge is strict EVAS 0.8.7
+  trusted replay, with every claim explicitly bound to `judge_engine=evas`,
+  the frozen submission hash, checker/runtime identity, and score sidecar.
+- Private Spectre is conditional: it is required when EVAS code/version,
+  compiler behavior, simulator semantics, ABI, or packaging changes, and when
+  an explicitly named external or paper protocol demands Spectre-backed
+  evidence.
+- EVAS-backed results may not be described as Spectre-backed or
+  simulator-independent unless that conditional parity protocol was executed
+  and joined to the same frozen submissions.
