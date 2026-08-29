@@ -1,6 +1,6 @@
 # vaEVAS AI-Native Harness Evolution Plan
 
-Updated: 2026-08-29
+Updated: 2026-08-30
 
 ## Objective
 
@@ -295,6 +295,20 @@ Add or extend:
 - evolution manifest fields for rounds, branch/model roster, per-branch and
   total budgets, feedback scope, failure policy, selection rule, and tie-break;
 - memory snapshot and candidate lineage schemas.
+
+Completed slice:
+
+- `vaevas-action-v1` and `vaevas-observation-v1` now have strict JSON schemas
+  and trusted state serializers that emit detached JSON-compatible documents;
+- argument and payload digests are canonical across mapping insertion order;
+- constructors reject non-object roots, non-string object keys, non-finite
+  numbers, and invalid budget deltas before a wire document can be emitted.
+
+Still pending in this phase:
+
+- backend, tool, validation/final-test, evolution, memory, and candidate
+  lineage schemas;
+- provider-native/strict-JSON input normalization and fail-closed tool lookup.
 
 Formal parsing policy:
 

@@ -286,3 +286,35 @@
 - Boundary: this prototype changes no r53 task bytes, no EVAS code, no existing
   mini-swe execution path, and no formal score authority. It does not trigger
   Spectre parity.
+
+## 2026-08-30 - Phase 1 canonical action/observation schemas
+
+- TDD RED 1: the first focused regression failed with
+  `AttributeError: 'AgentAction' object has no attribute 'to_document'`, proving
+  that Phase 0 state objects had no public canonical wire serializer.
+- TDD RED 2: the schema regression failed with `FileNotFoundError` for
+  `schemas/vaevas-action-v1.schema.json`; five invalid-input cases also failed
+  to reject non-object roots, invalid budget values, non-string keys, and NaN.
+- GREEN protocol/controller regressions pass:
+  `./.venv/bin/python -m pytest -q -p no:cacheprovider
+  tests/test_agent_harness_protocol.py tests/test_agent_harness_controller.py`
+  reports `28 passed` (`10` protocol and `18` controller cases).
+- Existing mini-swe regressions remain green:
+  `./.venv/bin/python -m pytest -q -p no:cacheprovider
+  tests/test_mini_swe_vabench.py` reports `30 passed, 3 skipped`.
+- Active r53 entrypoint regressions remain green:
+  `./.venv/bin/python -m pytest -q -p no:cacheprovider
+  tests/test_v4_r53_active_entrypoints.py` reports `9 passed`.
+- Existing meta-schema tests report `4 passed`; both new schemas pass
+  `Draft202012Validator.check_schema`.
+- Ruff 0.12.12 reports `All checks passed!` for `runners/agent_harness` and the
+  new protocol tests. Python bytecode compilation also passes.
+- Production-import scan finds no `runners.agent_harness` import in current
+  operations/scripts. The frozen r53 release has no diff.
+- Independent code review reports `APPROVE` with no critical, high, medium, or
+  low findings. Independent completion verification reports `PASS` and agrees
+  that provider parsing, unknown-tool dispatch, and mini-swe parity remain
+  later slices rather than claims of this change.
+- Scope boundary: this slice does not modify or execute EVAS, does not change
+  the frozen benchmark, does not connect a production runner, and does not
+  trigger the conditional Spectre parity gate.

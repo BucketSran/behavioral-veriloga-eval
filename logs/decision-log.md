@@ -221,3 +221,20 @@
 - EVAS-backed results may not be described as Spectre-backed or
   simulator-independent unless that conditional parity protocol was executed
   and joined to the same frozen submissions.
+
+## 2026-08-30 - Canonical action/observation wire authority
+
+- Freeze `vaevas-action-v1` and `vaevas-observation-v1` as strict internal wire
+  documents before adding backend adapters or provider parsers.
+- Treat the state constructor/serializer as the authority that computes
+  argument and payload hashes. JSON Schema validates document shape and digest
+  syntax; it does not claim to recompute or prove digest binding.
+- Keep `tool_name` extensible at the wire layer. Tool existence, condition
+  eligibility, visibility, budget, and state effects belong to a later
+  capability registry and fail-closed dispatcher.
+- Reject inputs that cannot have a canonical JSON representation before they
+  enter the trajectory: non-object roots, non-string object keys, non-finite
+  numbers, and invalid budget deltas.
+- Keep this slice disconnected from production mini-swe/r53 runners. Native
+  tool-call and strict-JSON normalization remain the next independent Phase 1
+  protocol slice.

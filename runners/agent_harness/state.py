@@ -6,6 +6,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 import hashlib
 import json
+import math
 from types import MappingProxyType
 from typing import Any, Literal, TypeAlias
 
@@ -15,12 +16,19 @@ EventVisibility: TypeAlias = Literal["model", "harness", "trusted"]
 
 def _freeze_json(value: Any) -> Any:
     if isinstance(value, Mapping):
-        return MappingProxyType(
-            {str(key): _freeze_json(item) for key, item in value.items()}
-        )
+        frozen: dict[str, Any] = {}
+        for key, item in value.items():
+            if not isinstance(key, str):
+                raise TypeError("JSON object keys must be strings")
+            frozen[key] = _freeze_json(item)
+        return MappingProxyType(frozen)
     if isinstance(value, (list, tuple)):
         return tuple(_freeze_json(item) for item in value)
-    if value is None or isinstance(value, (str, int, float, bool)):
+    if value is None or isinstance(value, (str, int, bool)):
+        return value
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError("JSON numbers must be finite")
         return value
     raise TypeError(f"value is not JSON-compatible: {type(value).__name__}")
 
@@ -41,6 +49,12 @@ def _json_sha256(value: Mapping[str, Any]) -> str:
         sort_keys=True,
     ).encode("utf-8")
     return hashlib.sha256(canonical).hexdigest()
+
+
+def _freeze_json_object(value: Any, *, field_name: str) -> Mapping[str, Any]:
+    if not isinstance(value, Mapping):
+        raise TypeError(f"{field_name} must be a JSON object")
+    return _freeze_json(value)
 
 
 def _require_identity(value: str, *, field_name: str) -> None:
@@ -121,13 +135,33 @@ class Observation:
             self.candidate_tree_sha256,
             field_name="candidate_tree_sha256",
         )
-        frozen_payload = _freeze_json(self.payload)
-        frozen_budget_delta = _freeze_json(self.budget_delta)
-        if any(value < 0 for value in frozen_budget_delta.values()):
-            raise ValueError("budget_delta values cannot be negative")
+        frozen_payload = _freeze_json_object(self.payload, field_name="payload")
+        frozen_budget_delta = _freeze_json_object(
+            self.budget_delta,
+            field_name="budget_delta",
+        )
+        for value in frozen_budget_delta.values():
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise TypeError("budget_delta values must be integers")
+            if value < 0:
+                raise ValueError("budget_delta values cannot be negative")
         object.__setattr__(self, "payload", frozen_payload)
         object.__setattr__(self, "budget_delta", frozen_budget_delta)
         object.__setattr__(self, "payload_sha256", _json_sha256(frozen_payload))
+
+    def to_document(self) -> dict[str, Any]:
+        """Return a detached JSON-compatible canonical observation document."""
+        return {
+            "schema_version": self.schema_version,
+            "observation_id": self.observation_id,
+            "tool_name": self.tool_name,
+            "status": self.status,
+            "payload": _json_ready(self.payload),
+            "payload_sha256": self.payload_sha256,
+            "candidate_tree_sha256": self.candidate_tree_sha256,
+            "truncated": self.truncated,
+            "budget_delta": _json_ready(self.budget_delta),
+        }
 
 
 @dataclass(frozen=True, slots=True)
@@ -148,13 +182,28 @@ class AgentAction:
             self.candidate_tree_sha256,
             field_name="candidate_tree_sha256",
         )
-        frozen_arguments = _freeze_json(self.arguments)
+        frozen_arguments = _freeze_json_object(
+            self.arguments,
+            field_name="arguments",
+        )
         object.__setattr__(self, "arguments", frozen_arguments)
         object.__setattr__(
             self,
             "arguments_sha256",
             _json_sha256(frozen_arguments),
         )
+
+    def to_document(self) -> dict[str, Any]:
+        """Return a detached JSON-compatible canonical action document."""
+        return {
+            "schema_version": self.schema_version,
+            "action_id": self.action_id,
+            "tool_name": self.tool_name,
+            "arguments": _json_ready(self.arguments),
+            "arguments_sha256": self.arguments_sha256,
+            "source_backend": self.source_backend,
+            "candidate_tree_sha256": self.candidate_tree_sha256,
+        }
 
 
 @dataclass(frozen=True, slots=True)

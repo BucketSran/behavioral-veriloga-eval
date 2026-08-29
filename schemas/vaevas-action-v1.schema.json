@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arcadia-1.github.io/vaEVAS/schemas/vaevas-action-v1.schema.json",
+  "title": "vaEVAS canonical agent action",
+  "description": "Strict wire shape for a trusted vaEVAS action serializer. The schema validates the digest shape; the trusted serializer computes and binds arguments_sha256.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "action_id",
+    "tool_name",
+    "arguments",
+    "arguments_sha256",
+    "source_backend",
+    "candidate_tree_sha256"
+  ],
+  "properties": {
+    "schema_version": {"const": "vaevas-action-v1"},
+    "action_id": {"type": "string", "minLength": 1},
+    "tool_name": {"type": "string", "minLength": 1},
+    "arguments": {"type": "object"},
+    "arguments_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "source_backend": {"type": "string", "minLength": 1},
+    "candidate_tree_sha256": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "additionalProperties": false
+}

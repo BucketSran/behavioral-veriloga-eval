@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arcadia-1.github.io/vaEVAS/schemas/vaevas-observation-v1.schema.json",
+  "title": "vaEVAS canonical tool observation",
+  "description": "Strict wire shape for a trusted vaEVAS observation serializer. The schema validates the digest shape; the trusted serializer computes and binds payload_sha256.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "observation_id",
+    "tool_name",
+    "status",
+    "payload",
+    "payload_sha256",
+    "candidate_tree_sha256",
+    "truncated",
+    "budget_delta"
+  ],
+  "properties": {
+    "schema_version": {"const": "vaevas-observation-v1"},
+    "observation_id": {"type": "string", "minLength": 1},
+    "tool_name": {"type": "string", "minLength": 1},
+    "status": {"type": "string", "minLength": 1},
+    "payload": {"type": "object"},
+    "payload_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "candidate_tree_sha256": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "truncated": {"type": "boolean"},
+    "budget_delta": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
+    }
+  },
+  "additionalProperties": false
+}
