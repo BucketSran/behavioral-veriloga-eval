@@ -12,6 +12,14 @@
   synchronized EVAS fork.
 - Pre-existing dirty EVAS branch `fix/dynamic-zero-period-timer` was not
   modified.
+- Behavioral-eval audit plan commit
+  `a84c0281949742a190f234bcdacf7f4c51755425` was pushed to
+  `origin/audit/vaevas-eval-closure`.
+- EVAS audit branch `origin/audit/evas-evaluator-compat` points to the clean
+  synchronized baseline `6cb6fa7a7dac70fc0d4120126d8cf74258e6637b`.
+- The original EVAS worktree still contains only its pre-existing modifications
+  to `evas/compiler/linter.py`, `evas/compiler/parser.py`, and
+  `tests/test_linter.py` on `fix/dynamic-zero-period-timer`.
 
 ## 2026-08-29 - Existing evaluation baseline
 
