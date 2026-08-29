@@ -21,6 +21,7 @@ from .evolution_manifest import (
     build_round_snapshot,
     evolution_manifest_sha256,
     select_candidate,
+    select_last_sealed_incumbent,
 )
 from .proposals import (
     ProposalEnvelope,
@@ -92,6 +93,7 @@ __all__ = [
     "public_validation_profile_sha256",
     "read_trajectory",
     "select_candidate",
+    "select_last_sealed_incumbent",
     "tool_descriptor_sha256",
     "validate_candidate_lineage_graph",
     "validate_trajectory",
