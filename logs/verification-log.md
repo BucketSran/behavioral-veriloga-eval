@@ -1,5 +1,32 @@
 # Verification Log
 
+## 2026-08-30 - Free DeepSeek pilot preparation (no paid model run)
+
+- Baseline fork main is `38375909aee7103df154c72b2c3d7f3fbb3dee1c`, matching
+  live origin/main. Live upstream/main remains
+  `7b5616dc52195ec275ec6d21c71d7763613702cd`. No runtime code or r53 bytes changed.
+- Official pricing was re-read, not taken from older cached model prices.
+  `deepseek-v4-flash` is the cheapest current text model; model/currency/peak
+  rates and their source URLs are recorded in `plans/deepseek-budget-pilot.md`.
+- Environment check found no `DEEPSEEK_API_KEY`; no customary project env/key
+  file was discovered in the scoped filename check. No credential values or
+  private project directories were read. API requests/spend: **0 / 0**.
+- Existing wrapper dry-runs for native mini-swe and Reasoning each returned
+  **3 prepared** cells. Seed `20260830` selected family `029`; canonical cell
+  arrays compare equal. Paths and exact campaign hashes are in the pilot plan.
+  Outputs are under the existing ignored reports tree, not staged for Git.
+- Layout/entrypoint gate:
+  `uv run --locked --extra agentic python -m pytest
+  tests/test_v4_r53_active_entrypoints.py tests/test_evas_output_cleanup.py
+  tests/test_task_count_filters.py -q --tb=short`: **48 passed in 1.40s**.
+- This is free preparation, not a successful DeepSeek generation/EVAS score.
+  A tested pre-HTTP monetary guard and explicit provider-mode request binding
+  remain necessary before live execution; existing output caps are not a
+  claimed spending guarantee. Credentials remain the external launch blocker.
+- Independent read-only price/plan review confirmed rates and boundaries;
+  its provider-default caveat is incorporated as an actual outbound
+  non-thinking-parameter assertion before any paid execution.
+
 ## 2026-08-30 - Runtime closure published and hosted-verified
 
 - Final runtime commit `164131a8a4ec2da5c71e10d584549355bd932929` is published

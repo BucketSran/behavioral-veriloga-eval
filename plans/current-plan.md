@@ -13,6 +13,14 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
+- Authorized next experiment: [budget-controlled DeepSeek pilot](deepseek-budget-pilot.md).
+  Select official `deepseek-v4-flash`; one seeded family, three forms, two
+  Agentic backends, one repetition. CNY 5.00 cap (USD 0.70 only for a USD account).
+  Credentials are currently absent. Free preparation may proceed; paid execution
+  requires a tested per-HTTP spend guard and explicit provider mode. This
+  development pilot does not change r53's normal wall-time policy or authorize
+  full-r53/Evolution execution.
+
 - Completed authorized follow-up: [remaining harness closure](remaining-harness-closure.md).
   The user approved completing the remaining functionality. Native Testbench
   public authority and nine-cell Docker integration are locally verified in
@@ -31,7 +39,8 @@ implementation and does not change the phase statuses below.
   Final runtime commit `164131a8a4` is published to fork/main; all three triggered
   hosted workflows passed. Local final harness gate: 702 passed / 11 skipped.
   Implementation and real-model experimental evidence remain separate gates.
-  Paid model pilot awaits a named model/service and budget.
+  Model/service/budget are now selected in the pilot plan above; credentials
+  and verified operational spending protection remain the live-execution gates.
 
 - Earlier completed milestone: [native DUT/bugfix three-arm campaign](native-three-arm-campaign.md).
   Implemented absent public authority, native conditions and minimal
@@ -50,7 +59,7 @@ implementation and does not change the phase statuses below.
   are verified through deterministic integration gates.
 - Phase 6 is runtime-integrated and deterministically verified (AA-VAE-046),
   with real-model evidence still pending. Phase 7/8 runtime integration is
-  implemented; Phase 9 experiments need named model/service/budget. Phase 10
+  implemented; Phase 9 now has an authorized bounded DeepSeek pilot. Phase 10
   runtime closeout is verified and fork-published.
 - Legacy mini-swe remains default. Native format recovery, multi-action and
   deadline behavior intentionally differ; see [AA-VAE-038](../docs/alphaapollo-migration/features/AA-VAE-038-mini-swe-behavior-differential.md).
@@ -491,9 +500,10 @@ Tests first:
 
 ### Phase 9 - Define experimental conditions and ablations
 
-Status: `protocol defined / experiments pending`. Conditions and runtime
-entrypoints are distinct; no paid experiment is authorized without model,
-service and budget. Deferred domain tools are not required closure work.
+Status: `bounded DeepSeek pilot authorized / execution pending`. The selected
+model/service/budget and live gates are frozen in `deepseek-budget-pilot.md`.
+Conditions and runtime entrypoints remain distinct; no broader paid experiment
+is authorized. Deferred domain tools are not required closure work.
 
 Primary conditions:
 

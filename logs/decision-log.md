@@ -1,5 +1,24 @@
 # Decision Log
 
+## 2026-08-30 - Lowest-price DeepSeek pilot with a separate spending gate
+
+- The user authorized the cheapest available DeepSeek model and delegated
+  pilot choices while requiring budget control. Current official pricing
+  selects `deepseek-v4-flash` / documented `DeepSeek-V4-Flash-0731`.
+- Limit the first pilot to one seeded family, three forms and two separate
+  Agentic backends (native mini-swe/Reasoning), one repetition and global
+  concurrency one. No Evolution/full benchmark, no score-driven retuning.
+- Set CNY 5.00 total (USD 0.70 only for a USD-denominated account). Plan a
+  pre-HTTP reservation guard using peak/miss prices; unknown usage keeps its
+  reservation and every transport retry requires another reservation.
+- Existing wall-time/output limits do not enforce a currency cap. Do not
+  silently turn a normal r53 run into a different protocol; operational
+  request/budget stops are explicitly censored development-pilot outcomes.
+- Credentials are absent. This slice prepares two free dry-runs and the
+  controlled plan only; the guard/provider-mode integration is not implemented
+  or claimed verified. Paid execution remains gated. Details and official
+  references: `plans/deepseek-budget-pilot.md`.
+
 ## 2026-08-30 - Evolution is separate inference, not another single-run label
 
 - Reuse the existing Reasoning policy, controller, Bash environment, transport,
