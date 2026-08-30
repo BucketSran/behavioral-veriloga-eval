@@ -1,5 +1,17 @@
 # Verification Log
 
+## 2026-08-30 - Candidate-only and round runtime (AA-VAE-047)
+
+- Candidate-only controller + existing final controller/trajectory + round
+  runtime/manifest gate: **106 passed in 1.46s**. Earlier candidate-only RED
+  proved unknown trusted-visibility events were accepted; repaired generic
+  trusted-event rejection without changing the final validator.
+- Round-runtime independent review found unsafe branch paths and fabricated
+  zero failed costs. Both are repaired with RED/GREEN tests; follow-up found
+  no new blocker. Candidate-only independent review also found no blocker.
+- This is the shared runtime seam, not a claim that actual Evolution public
+  validation/final composition or a multi-model experiment has completed.
+
 ## 2026-08-30 - Reasoning runtime integration (AA-VAE-046)
 
 - Initial production RED: **3 failed** (backend absent/unsupported in runner

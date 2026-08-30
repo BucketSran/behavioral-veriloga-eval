@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-08-30 - Candidate snapshots are not final submissions
+
+- Use a distinct candidate terminal type/handler on the existing controller,
+  without weakening the final-episode validator or installing a fake judge.
+  Candidate trajectories reject all trusted events, not only known final names.
+- Run actual parallel branches with fixed per-round information sets and
+  deterministic reducer ordering. Keep final judging outside this runtime.
+- Account failed/unknown branch consumption conservatively, confine branch
+  paths and explicitly limit deadline claims to cooperative callbacks/cleanup.
+
 ## 2026-08-30 - Reasoning is a policy replacement, not a second harness
 
 - Keep controller, Bash environment, capture, authority and scoring shared.

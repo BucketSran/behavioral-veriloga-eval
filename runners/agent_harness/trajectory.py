@@ -21,6 +21,7 @@ _REQUIRED_EVENT_VISIBILITY = {
     "candidate_transition_rejected": "harness",
     "budget_updated": "harness",
     "environment_observed": "model",
+    "candidate_snapshot_frozen": "harness",
     "submission_freeze_rejected": "harness",
     "submission_frozen": "harness",
     "final_judgment_completed": "trusted",
@@ -147,6 +148,8 @@ def validate_trajectory_semantics(events: list[dict[str, Any]]) -> bool:
     )
     if terminal_count != 1:
         return False
+    if "candidate_snapshot_frozen" in event_types:
+        return False
     cleanup_count = event_types.count("cleanup_completed") + event_types.count(
         "cleanup_failed"
     )
@@ -187,6 +190,100 @@ def validate_trajectory_semantics(events: list[dict[str, Any]]) -> bool:
             for event in events[freeze_index + 1 :]
         ):
             return False
+    return _validate_action_lifecycle(events)
+
+
+def validate_candidate_trajectory_semantics(events: list[dict[str, Any]]) -> bool:
+    """Validate an evolution-branch trajectory that freezes no final judgment."""
+
+    if not events or not validate_trajectory(events):
+        return False
+    identity_fields = ("episode_id", "attempt_id", "task_id", "condition")
+    expected_identity = tuple(events[0].get(field) for field in identity_fields)
+    if any(value is None for value in expected_identity):
+        return False
+    if any(
+        tuple(event.get(field) for field in identity_fields) != expected_identity
+        for event in events
+    ):
+        return False
+    event_types = [event.get("event_type") for event in events]
+    if not (
+        event_types[0] == "episode_started"
+        and event_types[-1] == "episode_completed"
+        and event_types.count("episode_started") == 1
+        and event_types.count("episode_completed") == 1
+    ):
+        return False
+    if any(
+        event.get("event_type") in _REQUIRED_EVENT_VISIBILITY
+        and event.get("visibility")
+        != _REQUIRED_EVENT_VISIBILITY[event["event_type"]]
+        for event in events
+    ):
+        return False
+    if any(event.get("visibility") == "trusted" for event in events):
+        return False
+    if (
+        "final_judgment_completed" in event_types
+        or "submission_frozen" in event_types
+    ):
+        return False
+    terminal_count = event_types.count("episode_failed") + event_types.count(
+        "candidate_snapshot_frozen"
+    )
+    if terminal_count != 1:
+        return False
+    cleanup_count = event_types.count("cleanup_completed") + event_types.count(
+        "cleanup_failed"
+    )
+    if cleanup_count != 1 or event_types[-2] not in {
+        "cleanup_completed",
+        "cleanup_failed",
+    }:
+        return False
+    deadline_count = event_types.count("deadline_reached")
+    if deadline_count > 1:
+        return False
+    if not isinstance(events[-1].get("payload"), Mapping):
+        return False
+    terminal_reason = events[-1]["payload"].get("terminal_reason")
+    if terminal_reason == "agent_timeout" and deadline_count != 1:
+        return False
+    if deadline_count:
+        deadline_index = event_types.index("deadline_reached")
+        if any(event.get("visibility") == "model" for event in events[deadline_index + 1:]):
+            return False
+        if (
+            "candidate_snapshot_frozen" in event_types
+            and deadline_index > event_types.index("candidate_snapshot_frozen")
+        ):
+            return False
+    if "candidate_snapshot_frozen" in event_types:
+        snapshot_index = event_types.index("candidate_snapshot_frozen")
+        snapshot_payload = events[snapshot_index].get("payload")
+        if not isinstance(snapshot_payload, Mapping):
+            return False
+        tree_sha256 = snapshot_payload.get("tree_sha256")
+        artifacts = snapshot_payload.get("artifacts")
+        if (
+            not isinstance(tree_sha256, str)
+            or len(tree_sha256) != 64
+            or any(character not in "0123456789abcdef" for character in tree_sha256)
+            or not isinstance(artifacts, list)
+            or not artifacts
+            or any(not isinstance(item, str) or not item.strip() for item in artifacts)
+        ):
+            return False
+        if any(
+            event.get("visibility") == "model"
+            for event in events[snapshot_index + 1 :]
+        ):
+            return False
+    return _validate_action_lifecycle(events)
+
+
+def _validate_action_lifecycle(events: list[dict[str, Any]]) -> bool:
     proposed_action_id: str | None = None
     authorized_action_id: str | None = None
     for event in events:

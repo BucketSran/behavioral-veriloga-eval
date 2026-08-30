@@ -6,6 +6,8 @@ from typing import Any, Mapping, Protocol
 
 from .state import (
     AgentAction,
+    CandidateEpisodeResult,
+    CandidateSnapshot,
     EpisodeContext,
     EnvironmentStep,
     EventVisibility,
@@ -53,6 +55,26 @@ class PublicValidator(Protocol):
 class FinalJudge(Protocol):
     def judge(self, submission: FrozenSubmission) -> FinalJudgment:
         """Score an immutable frozen submission without returning an observation."""
+
+
+class CandidateTerminalHandler(Protocol):
+    def capture_candidate(
+        self,
+        *,
+        context: EpisodeContext,
+        expected_candidate_tree_sha256: str,
+        terminal_reason: str,
+    ) -> CandidateSnapshot:
+        """Capture one candidate snapshot without invoking final freeze semantics."""
+
+    def complete(
+        self,
+        *,
+        context: EpisodeContext,
+        candidate_snapshot: CandidateSnapshot,
+        terminal_reason: str,
+    ) -> CandidateEpisodeResult:
+        """Accept one candidate snapshot without running a trusted final judge."""
 
 
 class TrajectorySink(Protocol):

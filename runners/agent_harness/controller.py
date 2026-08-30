@@ -9,10 +9,18 @@ import math
 import time
 
 from .budget import BudgetContractError, BudgetLedger, BudgetLimitExceeded
-from .contracts import Environment, FinalJudge, Policy, TrajectorySink
+from .contracts import (
+    CandidateTerminalHandler,
+    Environment,
+    FinalJudge,
+    Policy,
+    TrajectorySink,
+)
 from .proposals import ProposalNormalizationError
 from .state import (
     AgentAction,
+    CandidateEpisodeResult,
+    CandidateSnapshot,
     EpisodeContext,
     EpisodeResult,
     EnvironmentStep,
@@ -56,8 +64,9 @@ class EpisodeController:
         *,
         policy: Policy,
         environment: Environment,
-        final_judge: FinalJudge,
         tool_registry: ToolRegistry,
+        final_judge: FinalJudge | None = None,
+        candidate_terminal_handler: CandidateTerminalHandler | None = None,
         trajectory: TrajectorySink | None = None,
         public_validation_profile_sha256: str | None = None,
         deadline_monotonic: float | None = None,
@@ -65,9 +74,14 @@ class EpisodeController:
     ) -> None:
         if not isinstance(tool_registry, ToolRegistry):
             raise TypeError("tool_registry must be a ToolRegistry")
+        if (final_judge is None) == (candidate_terminal_handler is None):
+            raise ValueError(
+                "exactly one of final_judge or candidate_terminal_handler is required"
+            )
         self._policy = policy
         self._environment = environment
         self._final_judge = final_judge
+        self._candidate_terminal_handler = candidate_terminal_handler
         self._trajectory = trajectory
         self._tool_registry = tool_registry
         if public_validation_profile_sha256 is not None and (
@@ -163,8 +177,8 @@ class EpisodeController:
                 message=violation_message,
             )
 
-    def run(self, context: EpisodeContext) -> EpisodeResult:
-        result: EpisodeResult | None = None
+    def run(self, context: EpisodeContext) -> EpisodeResult | CandidateEpisodeResult:
+        result: EpisodeResult | CandidateEpisodeResult | None = None
         submission = None
         budget_ledger = BudgetLedger(context.budget_limits)
         phase = "tool_authority_resolution"
@@ -193,8 +207,81 @@ class EpisodeController:
                 message="observation carries undeclared public-validation authority",
             )
 
-        def score_submission(expected_sha256, terminal_reason, capability=None):
+        def complete_terminal(expected_sha256, terminal_reason, capability=None):
             nonlocal phase, submission
+            if self._candidate_terminal_handler is not None:
+                phase = "candidate_snapshot"
+                candidate_snapshot = self._candidate_terminal_handler.capture_candidate(
+                    context=context,
+                    expected_candidate_tree_sha256=expected_sha256,
+                    terminal_reason=terminal_reason,
+                )
+                if not isinstance(candidate_snapshot, CandidateSnapshot):
+                    raise TypeError(
+                        "candidate_terminal_handler must capture CandidateSnapshot"
+                    )
+                if candidate_snapshot.tree_sha256 != expected_sha256:
+                    self._record(
+                        context,
+                        actor="controller",
+                        event_type="candidate_snapshot_rejected",
+                        visibility="harness",
+                        payload={
+                            "tool_name": capability.tool_name if capability else None,
+                            "tool_id": capability.tool_id if capability else None,
+                            "candidate_tree_sha256": expected_sha256,
+                            "snapshot_tree_sha256": candidate_snapshot.tree_sha256,
+                        },
+                    )
+                    raise _ProtocolFailure(
+                        category="candidate_snapshot_mismatch",
+                        phase="candidate_snapshot",
+                        message=(
+                            "candidate snapshot does not match the terminal "
+                            "candidate observation"
+                        ),
+                    )
+                phase = "candidate_terminal"
+                candidate_result = self._candidate_terminal_handler.complete(
+                    context=context,
+                    candidate_snapshot=candidate_snapshot,
+                    terminal_reason=terminal_reason,
+                )
+                if not isinstance(candidate_result, CandidateEpisodeResult):
+                    raise TypeError(
+                        "candidate_terminal_handler must return CandidateEpisodeResult"
+                    )
+                if candidate_result.context != context:
+                    raise _ProtocolFailure(
+                        category="candidate_terminal_mismatch",
+                        phase="candidate_terminal",
+                        message="candidate terminal result is not bound to this context",
+                    )
+                if candidate_result.terminal_reason != terminal_reason:
+                    raise _ProtocolFailure(
+                        category="candidate_terminal_mismatch",
+                        phase="candidate_terminal",
+                        message="candidate terminal result has the wrong terminal reason",
+                    )
+                if candidate_result.candidate_snapshot != candidate_snapshot:
+                    raise _ProtocolFailure(
+                        category="candidate_terminal_mismatch",
+                        phase="candidate_terminal",
+                        message="candidate terminal result is not bound to the snapshot",
+                    )
+                self._record(
+                    context,
+                    actor="candidate_terminal",
+                    event_type="candidate_snapshot_frozen",
+                    visibility="harness",
+                    payload={
+                        "tree_sha256": candidate_snapshot.tree_sha256,
+                        "artifacts": list(candidate_snapshot.artifacts),
+                        "terminal_reason": terminal_reason,
+                    },
+                )
+                return candidate_result
+
             phase = "submission_freeze"
             frozen_submission = self._environment.freeze_submission()
             if (
@@ -225,6 +312,7 @@ class EpisodeController:
                         "candidate observation"
                     ),
                 )
+            assert self._final_judge is not None
             submission = frozen_submission
             self._record(
                 context,
@@ -288,7 +376,7 @@ class EpisodeController:
                     message="deadline reached without a complete declared submission",
                     primary_outcome="agent_timeout", terminal_reason="agent_timeout",
                 )
-            return score_submission(candidate, "agent_timeout")
+            return complete_terminal(candidate, "agent_timeout")
 
         try:
             if context.max_steps is None and self._deadline is None:
@@ -668,7 +756,7 @@ class EpisodeController:
                         message=f"unsupported terminal reason: {terminal_reason}",
                     )
 
-                result = score_submission(
+                result = complete_terminal(
                     observation.candidate_tree_sha256, terminal_reason, capability,
                 )
                 break
@@ -724,6 +812,7 @@ class EpisodeController:
         except Exception as exc:
             category_by_phase = {
                 "policy_action": "backend_failure",
+                "candidate_terminal": "candidate_terminal_failure",
                 "final_judge": "final_judge_failure",
             }
             failure = FailureDisposition(
@@ -783,16 +872,20 @@ class EpisodeController:
         assert result is not None
         if cleanup_incident is not None:
             result = replace(result, incidents=(cleanup_incident,))
+        completed_payload = {
+            "terminal_reason": result.terminal_reason,
+            "incidents": [incident.category for incident in result.incidents],
+        }
+        if isinstance(result, EpisodeResult):
+            completed_payload["primary_outcome"] = result.primary_outcome
+        else:
+            completed_payload["terminal_kind"] = "candidate_snapshot"
         self._record(
             context,
             actor="controller",
             event_type="episode_completed",
             visibility="harness",
-            payload={
-                "primary_outcome": result.primary_outcome,
-                "terminal_reason": result.terminal_reason,
-                "incidents": [incident.category for incident in result.incidents],
-            },
+            payload=completed_payload,
         )
         if self._trajectory is not None:
             result = replace(

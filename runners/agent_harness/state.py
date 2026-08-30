@@ -272,6 +272,23 @@ class FrozenSubmission:
 
 
 @dataclass(frozen=True, slots=True)
+class CandidateSnapshot:
+    """A content-addressed candidate tree frozen for public evolution only."""
+
+    tree_sha256: str
+    artifacts: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        _require_sha256(self.tree_sha256, field_name="tree_sha256")
+        artifacts = tuple(self.artifacts)
+        if not artifacts or any(
+            not isinstance(artifact, str) or not artifact.strip()
+            for artifact in artifacts
+        ):
+            raise ValueError("artifacts must contain non-empty artifact paths")
+        object.__setattr__(self, "artifacts", artifacts)
+
+@dataclass(frozen=True, slots=True)
 class FinalJudgment:
     status: str
     judge_engine: str
@@ -310,3 +327,27 @@ class EpisodeResult:
     incidents: tuple[Incident, ...]
     failure: FailureDisposition | None = None
     trajectory_tail_sha256: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class CandidateEpisodeResult:
+    """Candidate-only terminal result for evolution branches.
+
+    This intentionally carries no final judgment, score, or pass/fail outcome.
+    The selected candidate is scored later by a separate trusted final replay.
+    """
+
+    context: EpisodeContext
+    terminal_reason: str
+    candidate_snapshot: CandidateSnapshot
+    incidents: tuple[Incident, ...]
+    failure: FailureDisposition | None = None
+    trajectory_tail_sha256: str | None = None
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.context, EpisodeContext):
+            raise TypeError("context must be an EpisodeContext")
+        _require_identity(self.terminal_reason, field_name="terminal_reason")
+        if not isinstance(self.candidate_snapshot, CandidateSnapshot):
+            raise TypeError("candidate_snapshot must be a CandidateSnapshot")
+        object.__setattr__(self, "incidents", tuple(self.incidents))
