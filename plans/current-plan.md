@@ -21,13 +21,14 @@ This file is the active queue, not a cumulative execution log.
 
 ## Latest bounded slice: native campaign evidence bridge (AA-VAE-039)
 
-Implemented and locally verified: a deterministic one-task/three-arm gate
+Implemented, fork-published and hosted-verified: a deterministic one-task/three-arm gate
 reuses the campaign manifest, legacy OneShot / Agent-No-EVAS, and opt-in native
 Agentic. The read-only native evidence projection checks trajectory, freeze,
 profile and sidecar joins, preserves null-score failures, and gates aggregation
 on the exact scheduled cells. No fake legacy record or repeated final scoring.
 Real Docker passes; independent review is COMMENT (code APPROVE, architecture
-WATCH for private-path coupling). Publication/hosted evidence is in the log.
+WATCH for private-path coupling). Hosted regression: 660 passed / 10 skipped;
+both mixed-native and legacy Docker smokes pass. Exact evidence is in the log.
 
 This is explicitly mixed-backend connectivity, not parity or model quality.
 The next prerequisite for matched native arms is an absent-public-authority

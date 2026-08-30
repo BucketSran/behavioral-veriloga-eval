@@ -1,5 +1,38 @@
 # Verification Log
 
+## 2026-08-30 - Native campaign bridge fork publication and hosted confirmation
+
+- Published only to BucketSran `origin/main`: `3cfab02e68` scope,
+  `6fe964838b` implementation/tests/CI/feature note, and `a86586b869` validation
+  documentation. Main/origin matched `a86586b869ad9432f63906834353cab1140bcd91`;
+  no tracked/untracked worktree changes remained. Upstream had zero missing
+  commits (82 fork-only); no push to Arcadia-1. EVAS checkout/origin/upstream
+  remain `6cb6fa7a7d`, clean. The sealed r53 release is unchanged.
+- [Evaluator Closure run 33300037302](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33300037302)
+  succeeded in **2m32s** on that exact SHA. Fresh hosted regression:
+  **660 passed, 10 skipped in 42.40s**. Public-validation Docker smoke:
+  **1 passed in 3.41s**; native episode join: **1 passed in 6.11s**;
+  native launcher: **1 passed in 4.76s**; new mixed native campaign bridge:
+  **1 passed in 9.91s**. The original three-arm bound-final smoke also reports
+  **PASS**. These deterministic fixtures prove connectivity, not model quality,
+  native parity, or all-native campaign completion.
+- [Runner Smoke run 33300037300](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33300037300)
+  succeeded: Linux boundary **2 passed, 31 deselected in 0.26s**; runner
+  tests **34 passed in 0.78s**; v4 materializer/entrypoint tests **276 passed,
+  6 skipped in 15.85s**.
+- [Public Agent Runtime run 33300037299](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33300037299)
+  succeeded; real shared-image mini-swe Docker checks **2 passed, 31 deselected
+  in 1.60s**. All three triggered workflows are complete and successful.
+- Hosted success does not erase the local broad result below: **636 passed,
+  7 skipped, 1 failed** on the unchanged legacy one-second timeout test.
+  Combined independent review remains **COMMENT** (code APPROVE, architecture
+  WATCH), with no blocker for this bounded bridge. Node-action deprecation is
+  still a non-blocking maintenance warning, not repaired by this slice.
+- This final follow-up changes only verification, plan status and ownership.
+  Native authority absence for No-EVAS/OneShot, full campaign CLI, retry,
+  Testbench and Reasoning/Evolution remain explicit future work; no paid model,
+  Spectre, r53, EVAS, private AlphaApollo or protected old-worktree change.
+
 ## 2026-08-30 - Native campaign evidence bridge (AA-VAE-039)
 
 - Baseline main/origin `7425d70b728be41f15235f896a5e5be87b31747e` was clean;

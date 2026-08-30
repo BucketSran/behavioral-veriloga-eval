@@ -91,7 +91,7 @@ Integration sequence:
 
 ### Native campaign evidence bridge (2026-08-30)
 
-Status: `active` (publication only); base `7425d70b728be41f15235f896a5e5be87b31747e`.
+Status: `closed`; base `7425d70b728be41f15235f896a5e5be87b31747e`.
 Main owns `operations/calibration_pilot/score_campaign.py` (under v4),
 `scripts/run_v4_r53_clean_room_smoke.py`, new
 `tests/test_agent_harness_native_campaign.py`, smoke/CI tests,
@@ -117,8 +117,11 @@ Implementation and read-only reviews are complete: code APPROVE, architecture
 WATCH for the bounded private-path reader dependency; combined COMMENT, no
 blocker. Final local focused checks are 61 passed / 3 skipped, plus the
 derived-reference authority check and real Docker three-arm PASS. The broad
-legacy one-second timeout failure remains recorded. Only coordinator commits,
-fork publication and hosted evidence remain; no delegated writer is active.
+legacy one-second timeout failure remains recorded. Scope, implementation and
+validation docs are published through `a86586b869` on fork main. All three
+triggered hosted workflows pass; Evaluator Closure reports 660 passed / 10
+skipped and both mixed-native and legacy Docker smokes pass. This final
+coordinator-only record closes the assignment; no delegated writer is active.
 
 ### Repository hygiene slice (2026-08-30)
 
