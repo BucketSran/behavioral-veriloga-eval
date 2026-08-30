@@ -2,6 +2,18 @@
 
 ## 2026-08-30 - Recoverable branch and documentation hygiene
 
+- Fork publication: `5299b1e1c3` records the cleanup scope; `4ad7b61c1e` publishes
+  documentation, snapshot, tests and local evidence. Main/origin matched
+  `4ad7b61c1ea27955f5a303001606546d5486c4ab` with a clean worktree.
+  [Runner Smoke run 33297074957](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33297074957)
+  succeeded on that SHA: **276 passed, 6 skipped in 19.28s** for the materializer/
+  entrypoint group, **34 passed in 1.03s** for runner smoke, and **2 passed,
+  31 deselected in 0.26s** for the Linux sandbox boundary. Evaluator Closure
+  was not triggered; no new full evaluator/clean-room run is claimed here.
+- Post-cleanup inventory: 342 local heads remain, 137 ancestor-merged into
+  `origin/main` (including main) and 205 not ancestor-merged. This is ancestry,
+  not a patch-equivalence or abandonment audit; all those refs remain intact.
+  The following publication confirmation changes only docs/ownership records.
 - Behavioral baseline `892ada7cf1` matched `origin/main`; fetched origin/upstream
   main, with upstream still `7b5616dc52`. The next workspace is a linked worktree
   sharing historical refs with the protected old workspace: no bulk cleanup.

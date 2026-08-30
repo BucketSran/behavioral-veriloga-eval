@@ -91,6 +91,9 @@ Integration sequence:
 
 ### Repository hygiene slice (2026-08-30)
 
+Status: `closed`; implementation and independent review are complete. The final
+coordinator publication records only hosted verification and this disposition.
+
 Brief: make current documentation unambiguous and retire only this coordinator's
 unused, merged local branch. This is documentation/metadata maintenance, not a
 runtime, evaluator, release, or experiment cleanup.
