@@ -5,6 +5,12 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "evaluator-closure.yml"
 
 
+def test_deepseek_pilot_driver_triggers_six_cell_and_censored_integration():
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    assert workflow.count('"benchmark-vabench-release-v4/operations/calibration_pilot/run_deepseek_pilot.py"') == 2
+    assert "tests/test_agent_harness_deepseek_pilot.py::test_pilot_real_docker_free_http_preserves_all_six_rows" in workflow
+
+
 def test_pilot_credential_helper_changes_trigger_its_regressions():
     workflow = WORKFLOW.read_text(encoding="utf-8")
     assert workflow.count('"benchmark-vabench-release-v4/operations/calibration_pilot/pilot_credentials.py"') == 2

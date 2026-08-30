@@ -21,9 +21,10 @@ the six-cell live run. Request metadata to confirm model/currency/access but
 do not issue a separate diagnostic generation or spend outside the journal.
 
 Date: 2026-08-30. Base: `38375909aee7103df154c72b2c3d7f3fbb3dee1c`.
-Status: authorized pilot; local credentials are saved and the budgeted client
-is verified. A fresh live schedule/driver remains the implementation gate.
-No paid request has been made at this plan update.
+Status: authorized pilot; metadata access passed for the selected model and CNY
+account. The guarded serial driver and complete pilot index are implemented
+(AA-VAE-052); verify and commit them before freezing the live schedule.
+No paid generation at this implementation checkpoint.
 
 ## Brief and KPI
 
@@ -132,7 +133,8 @@ Before paid execution:
    costs stop retry, and fresh clients cannot reset the eight-call cell limit.
    Preserve `PilotBudgetStop` and journal stop reasons as operationally censored
    dispositions in the live pilot index, including all not-started cells.
-   The existing general native scorer is not that separate pilot index.
+   `run_deepseek_pilot.py` now owns this separate pilot index; the existing
+   general native scorer remains unchanged.
    Then execute the six-cell schedule within the shared cap, retaining stops.
 
 The guard is a separate operational safety layer, not a silent change to the

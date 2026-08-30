@@ -1,5 +1,21 @@
 # Decision Log
 
+## 2026-08-30 - Reuse native execution; separate six-cell pilot projection (AA-VAE-052)
+
+- The new opt-in driver freezes identical Agentic cells and alternates backend
+  order: DUT mini/reasoning, bugfix reasoning/mini, Testbench mini/reasoning.
+  Request timeout 120s; r53 agent/setup/tool/judge limits remain 1800s.
+- Preserve every planned row in a separate private pilot index. Budget stops
+  are null-scored operational censoring, not benchmark model zeros. No native
+  receipt is synthesized for an unstarted cell. Native evidence is read and
+  verified, never regenerated or fed to a later model.
+- Model metadata and CNY account availability passed without generation.
+  Neither credential values nor balances are persisted. Clear both provider
+  keys from this process environment before child execution.
+- A single-cell eight-call stop permits later cells; uncertain HTTP cost,
+  global reservation failure or evidence/infrastructure failure stops further
+  generation. Existing roots/journals cannot resume or reset the budget.
+
 ## 2026-08-30 - User explicitly selects DeepSeek after Coding Plan clarification
 
 - GLM key is Coding Plan only; the user has no standard GLM API access and

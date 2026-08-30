@@ -1,5 +1,39 @@
 # Verification Log
 
+## 2026-08-30 - Guarded six-cell DeepSeek driver (AA-VAE-052)
+
+- Base `42f35332aa`. No default runner/scorer, r53, EVAS or dependency changes.
+  Metadata-only authenticated preflight passed: selected model available,
+  CNY account sufficient for the cap. No paid generation before this commit.
+- TDD RED: missing driver/preflight (6 failures), missing frozen schedule
+  (1 failure), missing executor (2 failures), missing CI selector (1 failure).
+  GREEN: focused pilot/CI/budget/credentials **63 passed, 3 opt-in skipped**
+  in 0.26s, including later USD metadata and frozen-input drift regressions.
+- Real Docker/EVAS with free HTTP only:
+  `VABENCH_TEST_DOCKER_RUNTIME=1 uv run --locked --extra agentic python -m
+  pytest tests/test_agent_harness_deepseek_pilot.py -q --tb=short
+  --basetemp=benchmark-vabench-release-v4/reports/deepseek-driver-free-02`:
+  **10 passed in 78.79s** (before the two additional non-Docker regressions).
+  Initial default macOS temp path was not Docker-mounted; moving fixtures
+  into the already-ignored shared reports root resolved that environment issue.
+- Private fixture index SHA-256 / dispositions / fixture HTTP attempts:
+  - `2fe7c108fed0f863aaa624dc017cf580bbd873a2fbee2d3377915a38971735e9`:
+    6 completed, 18 attempts.
+  - `ec2a0e1abc5e0897359006d1efd4d159f5786cfd4ff31c50f778715c13fa73d4`:
+    unknown cost: 1 censored + 5 unstarted, 1 attempt, full CNY 3.182592 reserved.
+  - `9a35172255618ca62fcb47b7c6f2bb72620859deeef57890145dd209b5b21694`:
+    eight-call cell stop: 1 censored + 5 completed, 23 attempts.
+- Full `tests/test_agent_harness_*.py`: **754 passed, 16 skipped in 78.11s**;
+  later two non-Docker tests pass in the focused gate above. Layout/entrypoint
+  gate **48 passed in 0.88s**; Ruff 0.12.12, py_compile, workflow YAML and
+  diff checks pass. Opt-in skips are not counted as integration passes.
+- Two independent read-only review lanes reported no blocker. Code reviewer
+  checked provider/secret/budget/denominator/evidence/CI boundaries and ran
+  free focused tests; main owns the real Docker evidence. No delegated writes.
+- This proves guarded orchestration and preserved evidence, not DeepSeek
+  quality or a paper baseline. Live generation starts only after this verified
+  implementation is committed and its source/image/schedule identities freeze.
+
 ## 2026-08-30 - User-selected DeepSeek return, pre-implementation gate
 
 - Live HEAD/origin: `07b1f33e2a8b67ec40521c64b385e1b1b788dd77`;

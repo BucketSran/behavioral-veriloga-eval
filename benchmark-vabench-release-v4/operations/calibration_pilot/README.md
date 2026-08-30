@@ -1,5 +1,28 @@
 # V4 Calibration Pilot
 
+## Opt-in budgeted DeepSeek engineering pilot
+
+`run_deepseek_pilot.py` composes the existing native harness for the predeclared
+family029 three-form/two-backend pilot. It is not the normal campaign CLI:
+one shared CNY 5.00 (USD 0.70 for USD accounts) cap, eight calls/cell, one attempt,
+serial execution, no resume. It loads only `DEEPSEEK_API_KEY` from an external
+owner-only literal credential file; never use `source` or pass the two-key file
+to the older raw-key argument. GLM is not called.
+
+Use `--output-root FRESH_PRIVATE_DIRECTORY --credential-file EXTERNAL_ENV_FILE
+--evas-command ABSOLUTE_EVAS_COMMAND` with a clean committed source tree and
+the pinned local Docker image. This is a live paid entrypoint, not a dry-run:
+only use it for the explicitly authorized pilot. Freeze/execute once; do not
+rerun it with a new budget after a stop. See `plans/deepseek-budget-pilot.md`
+at the repository root for the design and prior execution status.
+
+The private pilot index preserves all six scheduled rows, including operational
+stops and unstarted cells. Read-only native evidence validation never invokes
+another final judge. Raw outputs remain outside Git; costs are protective
+upper bounds rather than invoices, and scores are development-only.
+
+## General campaign tools
+
 The default release target is
 `benchmark-vabench-release-v4/release/benchmarkv4-r53`, paired with the pinned
 EVAS 0.8.7 public runtime. Tools that support

@@ -20,6 +20,10 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
+AA-VAE-052 implementation is owned and verified by main. `pilot_budget_surface`
+and `deepseek_driver_review` completed independent read-only reviews; no blocker
+and no delegated writes. Main alone commits and launches the bounded live run.
+
 `main coordinator` means the task identified above, not whichever task happens
 to be checked out on Git branch `main`. New tasks do not become coordinators
 simply by reading this file. Any future coordinator transfer must be explicit
