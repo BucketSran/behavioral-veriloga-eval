@@ -1,5 +1,38 @@
 # Verification Log
 
+## 2026-08-31 - Fresh public waveform executor (AA-VAE-060)
+
+- Plan commit `ee13be755e`; implementation commit `8b747e977c`. Main owns all
+  shared code/Git. Mapping, design and implementation reviewers were read-only.
+- TDD: initial byte parser/read-only mount tests produced 5 failed / 1 passed;
+  primitive gate then 18 passed. Profile binding and fresh execution tests each
+  failed on missing API, then passed. Drift, failed/timeout execution, cleanup
+  preservation, unsafe input and fixed output-reader regressions were added.
+  CI registration test failed (missing workflow trigger/gate), then passed.
+- First real Docker run: 2 failed because macOS system temp was not Docker-shared,
+  not an EVAS/compiler defect. Changed fresh scratch to a private runtime sibling,
+  outside original public mounts. No EVAS or benchmark bytes changed.
+- Final `uv run --locked --extra agentic python -m pytest -q tests/test_agent_harness_*.py --tb=short`:
+  **939 passed, 21 skipped, 138.61 s**. Skips are opt-in; this does not replace the
+  historical compact-checkout missing-asset limitations of broader legacy tests.
+- `VABENCH_TEST_DOCKER_RUNTIME=1 uv run --locked --extra agentic python -m pytest -q tests/test_agent_harness_public_waveform.py -k r53_docker --basetemp=benchmark-vabench-release-v4/reports/aa060-waveform-smoke-20260831-03 --tb=short`:
+  **2 passed, 30 deselected, 18.93 s**. DUT and Testbench each perform two fresh
+  calls; actual Docker mount/network config and removed containers are checked.
+  Only public export/stub inputs are used; no hidden checker is read by this smoke.
+- Focused executor: 30 passed / 2 skipped. Active-entrypoint and CI gate files:
+  **38 passed**. Ruff 0.12.12, AST parse, py_compile, workflow YAML and diff checks
+  pass; staged secret-pattern scan has no matches.
+- Independent code review found zero issues; reviewer withheld a full-toolchain
+  approval because LSP/typecheck tools were unavailable. Main confirms no callable
+  LSP diagnostic tool; records that gap and uses the above static/runtime evidence
+  for this bounded publication, without claiming a typecheck pass.
+- r53 has no diff from `2f2c159fc4`; upstream behavioral main remains ancestor.
+  EVAS checkout/origin-main/upstream-main remain `6cb6fa7a7dac70fc0d4120126d8cf74258e6637b`, clean.
+  No paid API/credential use, old-worktree mutation, corpus ingestion or training.
+- Native tool/profile/budget/scorer integration is a separately reviewed next
+  slice. Host/Docker/coordinator ownership is trusted; receipts are not signatures.
+  This is connectivity/provenance evidence, not model-quality or Spectre parity.
+
 ## 2026-08-31 - Fork publication and hosted extension verification
 
 - Runtime/source head `fdff3460f27ea860772273c26333535ea8c5be59` is published to

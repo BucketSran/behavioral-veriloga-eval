@@ -20,6 +20,7 @@ on:
       - "benchmark-vabench-release-v4/operations/calibration_pilot/result_protocol.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/final_replay.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/public_validation.py"
+      - "benchmark-vabench-release-v4/operations/calibration_pilot/public_waveform.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/native_episode.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/run_native_mini_swe.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/run_native_attempts.py"
@@ -60,6 +61,7 @@ on:
       - "benchmark-vabench-release-v4/operations/calibration_pilot/result_protocol.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/final_replay.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/public_validation.py"
+      - "benchmark-vabench-release-v4/operations/calibration_pilot/public_waveform.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/native_episode.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/run_native_mini_swe.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/run_native_attempts.py"
@@ -168,6 +170,14 @@ jobs:
           uv run --locked --extra agentic python -m pytest -q \
             tests/test_agent_harness_docs_integration.py::test_r53_docker_synthetic_docs_freeze_and_evas_score \
             --basetemp "$RUNNER_TEMP/r53-synthetic-docs"
+
+      - name: Run r53 isolated public waveform receipt smoke
+        env:
+          VABENCH_TEST_DOCKER_RUNTIME: '1'
+        run: |
+          uv run --locked --extra agentic python -m pytest -q \
+            tests/test_agent_harness_public_waveform.py::test_r53_docker_fresh_waveform_receipt \
+            --basetemp "$RUNNER_TEMP/r53-public-waveform"
 
       - name: Run r53 mixed native campaign evidence bridge
         env:

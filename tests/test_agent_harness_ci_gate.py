@@ -5,6 +5,12 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "evaluator-closure.yml"
 
 
+def test_evaluator_closure_gates_fresh_public_waveform_receipts() -> None:
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    assert workflow.count('"benchmark-vabench-release-v4/operations/calibration_pilot/public_waveform.py"') == 2
+    assert "tests/test_agent_harness_public_waveform.py::test_r53_docker_fresh_waveform_receipt" in workflow
+
+
 def test_synthetic_docs_have_an_opt_in_real_docker_gate():
     assert "tests/test_agent_harness_docs_integration.py::test_r53_docker_synthetic_docs_freeze_and_evas_score" in WORKFLOW.read_text()
 

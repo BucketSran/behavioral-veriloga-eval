@@ -6,6 +6,10 @@ Completed detail and the original design matrix are preserved in the
 [dated plan snapshot](archive/2026-08-30-harness-plan-snapshot.md).
 This file is the active queue, not a cumulative execution log.
 
+For the current cross-cutting backlog, read the [global follow-up roadmap](../docs/alphaapollo-migration/03_全局后续路线_2026-08-31.md).
+It separates implemented core infrastructure from extension wiring, fairness,
+real-model evidence, reporting and separately gated training work.
+
 Human review checkpoint (2026-08-30): the user requested a current-state record
 before reorganizing the project. Read the [capability and gap snapshot](../docs/alphaapollo-migration/02_项目现状与功能缺口_2026-08-30.md)
 at baseline `f1a2a06db7`. This documentation-only checkpoint starts no new
@@ -13,9 +17,15 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
-- Active bounded follow-up: [trusted public waveform executor](trusted-public-waveform-executor.md)
-  (AA-VAE-060). Implement fresh public-only execution and candidate/profile/output
-  receipts before model feedback. No model tool activation or paid run in this slice.
+- Implemented bounded follow-up: [trusted public waveform executor](trusted-public-waveform-executor.md)
+  ([AA-VAE-060](../docs/alphaapollo-migration/features/AA-VAE-060-isolated-public-waveform.md)).
+  Fresh public-only execution binds candidate/profile/invocation/output receipts.
+  Final local gate: 939 harness passes / 21 opt-in skips; two real DUT/Testbench
+  Docker tests (two fresh executions each). Independent review found no code issue;
+  LSP/typecheck was unavailable, with Ruff/AST/compilation checks recorded instead.
+  No model tool activation or paid run. Next: review and implement the
+  [explicit native feedback slice](native-public-waveform-feedback.md), including
+  source-container pause/resume, budget admission and score identity joins.
 
 - Implemented bounded slice: [synthetic extension implementation](rag-waveform-training-implementation.md).
   [AA-VAE-057](../docs/alphaapollo-migration/features/AA-VAE-057-synthetic-offline-docs.md)
@@ -35,8 +45,8 @@ implementation and does not change the phase statuses below.
 
 - Remaining extension gates, from [AA-VAE-056](../docs/alphaapollo-migration/features/AA-VAE-056-rag-waveform-training-design.md):
   approve/license/decontaminate an actual public corpus and freeze matched RAG
-  conditions before CLI/Evolution/aggregation; isolate fresh public simulator
-  outputs and bind candidate/profile/invocation receipts before waveform feedback;
+  conditions before CLI/Evolution/aggregation; wire AA-VAE-060's isolated public
+  receipts into explicit native waveform feedback with budgets and evidence joins;
   separately authorize actual trajectory export, splits/provider use and training.
   These are explicit follow-ups, not evidence from synthetic tests. r53/EVAS and
   stopped live evidence stay unchanged; no automatic paid rerun.

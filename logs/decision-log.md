@@ -1,5 +1,28 @@
 # Decision Log
 
+## 2026-08-31 - Publish isolated execution before native waveform activation (AA-VAE-060)
+
+- Reuse the existing Docker sandbox, adding only a default-false read-only
+  submission mount. Reject that option on non-Docker before I/O. Fresh task and
+  candidate snapshots are the only public inputs; fixed absolute EVAS bypasses
+  the model-visible wrapper. Parse captured bytes through the existing parser.
+- Temporary execution lives in a private sibling of the operator runtime, not
+  a system temp root the Docker VM may not share and not model-writable scratch.
+  Validate Testbench safety and reference identity against copied/frozen bytes.
+- Failed/timed-out execution never reuses waveform output. Preserve cleanup
+  incidents separately and invalidate unusable results. Do not call hash-bound
+  receipts cryptographic attestation or protection against hostile host/EVAS bugs.
+- Keep this publication standalone. Native feedback requires an explicit action,
+  pre-execution budget admission, pause/resume against background Bash mutation,
+  frozen profile/receipt identity and read-only score reconstruction. Its new plan
+  and the global backlog prevent both silent activation and forgetting other work.
+- Next-slice design review identified incomplete-candidate requests as distinct
+  from infrastructure failures. Specify a recoverable, budget-charged, no-execution
+  observation before the isolated executor; reject unsafe trees separately.
+  Keep admitted request counts distinct from actual EVAS simulation launches.
+  These are acceptance requirements for the next integration, not AA-VAE-060
+  runtime behavior or a new compiler precheck.
+
 ## 2026-08-31 - Fresh waveform execution before tool activation (AA-VAE-060)
 
 - Treat forgeable Bash markers and existing shared output as diagnostics, not
