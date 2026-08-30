@@ -109,8 +109,10 @@ def build_native_campaign_ledger(
         },
         "deadline_terminal_stats": _deadline_terminal_stats(records),
         "paired_coverage": paired["coverage"],
+        "paired_summary": _paired_summary(records, paired["coverage"]),
         "unmatched_reasons": paired["unmatched_reasons"],
         "claim_index": _claim_index(records),
+        "case_study_index": _case_study_index(records),
         "records": records,
     }
     result["ledger_sha256"] = _canonical_sha256(result)
@@ -292,6 +294,35 @@ def _hash_references(row: Mapping[str, Any]) -> dict[str, Any]:
             sidecar.get("sha256") if isinstance(sidecar, Mapping) else None,
             "score_sidecar_sha256",
         ),
+        "trajectory_sha256": _optional_sha(
+            files.get("evidence/native-episode/trajectory.jsonl") if isinstance(files, Mapping) else None,
+            "trajectory_sha256",
+        ),
+        "private_events_sha256": _optional_sha(
+            files.get("evidence/native-launcher/private-events.jsonl",
+                      files.get("evidence/native-episode/private-events.jsonl")) if isinstance(files, Mapping) else None,
+            "private_events_sha256",
+        ),
+        "reviewer_export_sha256": _optional_sha(
+            files.get("evidence/native-launcher/reviewer-export.json",
+                      files.get("evidence/native-episode/reviewer-export.json")) if isinstance(files, Mapping) else None,
+            "reviewer_export_sha256",
+        ),
+        "submission_tree_sha256": _optional_sha(
+            trusted.get("submission_tree_sha256") if isinstance(trusted, Mapping) else None,
+            "submission_tree_sha256",
+        ),
+        "final_test_profile_sha256": (
+            _canonical_sha256(final_profile)
+            if isinstance(final_profile, Mapping)
+            else None
+        ),
+        "final_profile_input_identity_sha256": _optional_sha(
+            trusted.get("final_profile_input_identity_sha256")
+            if isinstance(trusted, Mapping)
+            else None,
+            "final_profile_input_identity_sha256",
+        ),
         "score_authority": _optional_identity(
             contract.get("score_authority") if isinstance(contract, Mapping) else None,
             "score_authority",
@@ -439,6 +470,141 @@ def _paired_coverage(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
             "ineligible_actual_score": dict(sorted(ineligible_reasons.items())),
             "missing_arm": dict(sorted(missing_reasons.items())),
         },
+    }
+
+
+def _paired_summary(
+    records: Sequence[Mapping[str, Any]],
+    coverage: Mapping[str, Mapping[str, Any]],
+) -> dict[str, Any]:
+    arms = {arm: _empty_arm_summary() for arm in _THREE_ARM_ORDER}
+    by_cell = {record["identity"]["cell_id"]: record for record in records}
+    for record in by_cell.values():
+        arm = str(record["identity"]["experimental_arm"])
+        summary = arms[arm]
+        summary["planned"] += 1
+        summary["observed"] += 1
+        if record["actual_score_eligible"]:
+            summary["score_eligible"] += 1
+            if record["actual_score"] == 1:
+                summary["passed"] += 1
+        else:
+            reason = str(record["actual_score_ineligible_reason"])
+            summary["ineligible_reasons"][reason] += 1
+    for summary in arms.values():
+        summary["ineligible_reasons"] = dict(sorted(summary["ineligible_reasons"].items()))
+        denominator = summary["score_eligible"]
+        summary["pass_rate"] = summary["passed"] / denominator if denominator else None
+
+    pairs = {
+        f"{left}_minus_{right}": _empty_pair_summary()
+        for left, right in _DELTA_PAIRS
+    }
+    for group in coverage.values():
+        ineligible = group["ineligible_arms"]
+        missing = set(group["missing_arms"])
+        for left, right in _DELTA_PAIRS:
+            label = f"{left}_minus_{right}"
+            summary = pairs[label]
+            summary["planned_pair_slots"] += 1
+            delta = group["deltas"][label]
+            if delta is None:
+                summary["skipped_pairs"] += 1
+                for reason in _pair_skip_reasons(left, right, missing, ineligible):
+                    summary["skip_reasons"][reason] += 1
+                continue
+            summary["matched_eligible_pairs"] += 1
+            summary["delta_sum"] += delta
+            if delta > 0:
+                summary["left_wins"] += 1
+            elif delta < 0:
+                summary["right_wins"] += 1
+            else:
+                summary["ties"] += 1
+    for summary in pairs.values():
+        summary["skip_reasons"] = dict(sorted(summary["skip_reasons"].items()))
+        denominator = summary["matched_eligible_pairs"]
+        summary["mean_delta"] = summary["delta_sum"] / denominator if denominator else None
+    return {"arms": arms, "pairs": pairs}
+
+
+def _empty_arm_summary() -> dict[str, Any]:
+    return {
+        "planned": 0,
+        "observed": 0,
+        "score_eligible": 0,
+        "passed": 0,
+        "pass_rate": None,
+        "ineligible_reasons": Counter(),
+    }
+
+
+def _empty_pair_summary() -> dict[str, Any]:
+    return {
+        "planned_pair_slots": 0,
+        "matched_eligible_pairs": 0,
+        "skipped_pairs": 0,
+        "skip_reasons": Counter(),
+        "left_wins": 0,
+        "right_wins": 0,
+        "ties": 0,
+        "delta_sum": 0,
+        "mean_delta": None,
+    }
+
+
+def _pair_skip_reasons(
+    left: str,
+    right: str,
+    missing: set[str],
+    ineligible: Mapping[str, str],
+) -> list[str]:
+    reasons = []
+    for side, arm in (("left", left), ("right", right)):
+        if arm in missing:
+            reasons.append(f"{side}_missing:{arm}")
+        elif arm in ineligible:
+            reasons.append(f"{side}_ineligible:{ineligible[arm]}")
+    return reasons or ["unknown"]
+
+
+def _case_study_index(records: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    return [_case_study_entry(record) for record in records]
+
+
+def _case_study_entry(record: Mapping[str, Any]) -> dict[str, Any]:
+    evidence = {
+        key: record["hashes"].get(key)
+        for key in (
+            "row_sha256",
+            "runtime_sha256",
+            "artifact_sha256",
+            "trajectory_sha256",
+            "private_events_sha256",
+            "reviewer_export_sha256",
+            "submission_tree_sha256",
+            "final_test_profile_sha256",
+            "final_profile_input_identity_sha256",
+            "score_sidecar_sha256",
+            "score_authority",
+        )
+    }
+    incomplete = [
+        key
+        for key, value in evidence.items()
+        if value is None and key not in {"score_authority"}
+    ]
+    return {
+        "identity": record["identity"],
+        "backend": record["backend"],
+        "status": record["status"],
+        "actual_score": record["actual_score"],
+        "actual_score_eligible": record["actual_score_eligible"],
+        "actual_score_ineligible_reason": record["actual_score_ineligible_reason"],
+        "usage": record["usage"],
+        "evidence": evidence,
+        "selected_attempt": record["selected_attempt"],
+        "incomplete_evidence": incomplete,
     }
 
 

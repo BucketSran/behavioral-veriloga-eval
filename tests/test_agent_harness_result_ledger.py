@@ -89,16 +89,31 @@ def _row(cell: dict, *, score: int | None, status: str, attempts: list[dict] | N
         },
         "evas_usage": {"calls_executed": 1 if score is not None else 0},
         "trusted_replay": {
+            "submission_tree_sha256": SHA_B,
             "final_test_profile": {
                 "score_sidecar_contract": {"score_authority": "development_only"}
             },
             "derived_score_sidecar_reference": {"sha256": SHA_A},
         },
         "native_evidence": {
-            "files": {"runtime_sha256": SHA_B},
+            "files": {
+                "runtime_sha256": SHA_B,
+                "evidence/native-episode/trajectory.jsonl": SHA_A,
+                "evidence/native-launcher/private-events.jsonl": SHA_B,
+                "evidence/native-launcher/reviewer-export.json": SHA_A,
+            },
             "artifact_sha256": SHA_A,
         },
         "raw_output": "do not leak raw output",
+        "trajectory_tail": [
+            {
+                "event_type": "model_response",
+                "actor": "model",
+                "visibility": "private",
+                "payload": {"content": "do not leak trajectory text"},
+                "event_sha256": SHA_A,
+            }
+        ],
     }
     for key in ("model", "repetition"):
         if key in cell:
@@ -269,6 +284,166 @@ def test_native_campaign_ledger_reports_three_arm_paired_delta_and_infra_gap() -
     assert ledger["unmatched_reasons"] == {
         "ineligible_actual_score": {"infrastructure_failure": 1},
         "missing_arm": {},
+    }
+    assert ledger["paired_summary"]["arms"]["Agentic"] == {
+        "planned": 1,
+        "observed": 1,
+        "score_eligible": 1,
+        "passed": 1,
+        "pass_rate": 1.0,
+        "ineligible_reasons": {},
+    }
+    assert ledger["paired_summary"]["arms"]["Agent-No-EVAS"] == {
+        "planned": 1,
+        "observed": 1,
+        "score_eligible": 0,
+        "passed": 0,
+        "pass_rate": None,
+        "ineligible_reasons": {"infrastructure_failure": 1},
+    }
+    assert ledger["paired_summary"]["pairs"]["Agentic_minus_OneShot"] == {
+        "planned_pair_slots": 1,
+        "matched_eligible_pairs": 1,
+        "skipped_pairs": 0,
+        "skip_reasons": {},
+        "left_wins": 1,
+        "right_wins": 0,
+        "ties": 0,
+        "delta_sum": 1,
+        "mean_delta": 1.0,
+    }
+    assert ledger["paired_summary"]["pairs"]["Agentic_minus_Agent-No-EVAS"] == {
+        "planned_pair_slots": 1,
+        "matched_eligible_pairs": 0,
+        "skipped_pairs": 1,
+        "skip_reasons": {"right_ineligible:infrastructure_failure": 1},
+        "left_wins": 0,
+        "right_wins": 0,
+        "ties": 0,
+        "delta_sum": 0,
+        "mean_delta": None,
+    }
+
+
+def test_native_campaign_ledger_exports_reviewer_safe_case_index() -> None:
+    campaign = _campaign()
+    rows = [
+        _row(campaign["cells"][0], score=0, status="behavior_failure"),
+        _row(campaign["cells"][1], score=1, status="passed"),
+        _row(campaign["cells"][2], score=1, status="passed"),
+    ]
+    rows[1]["native_evidence"]["files"].pop("evidence/native-launcher/reviewer-export.json")
+    rows[1]["trusted_replay"].pop("submission_tree_sha256")
+
+    ledger = result_ledger.build_native_campaign_ledger(
+        campaign,
+        rows,
+        campaign_file_sha256=SHA_A,
+    )
+
+    case = ledger["case_study_index"][0]
+    assert case == {
+        "identity": ledger["records"][0]["identity"],
+        "backend": "native-mini-swe",
+        "status": ledger["records"][0]["status"],
+        "actual_score": 0,
+        "actual_score_eligible": True,
+        "actual_score_ineligible_reason": None,
+        "usage": ledger["records"][0]["usage"],
+        "evidence": {
+            "row_sha256": case["evidence"]["row_sha256"],
+            "runtime_sha256": SHA_B,
+            "artifact_sha256": SHA_A,
+            "trajectory_sha256": SHA_A,
+            "private_events_sha256": SHA_B,
+            "reviewer_export_sha256": SHA_A,
+            "submission_tree_sha256": SHA_B,
+            "final_test_profile_sha256": case["evidence"]["final_test_profile_sha256"],
+            "final_profile_input_identity_sha256": None,
+            "score_sidecar_sha256": SHA_A,
+            "score_authority": "development_only",
+        },
+        "selected_attempt": ledger["records"][0]["selected_attempt"],
+        "incomplete_evidence": ["final_profile_input_identity_sha256"],
+    }
+    assert ledger["case_study_index"][1]["incomplete_evidence"] == [
+        "reviewer_export_sha256",
+        "submission_tree_sha256",
+        "final_profile_input_identity_sha256",
+    ]
+    dumped = json.dumps(ledger, sort_keys=True)
+    assert "do not leak this prompt" not in dumped
+    assert "do not leak raw output" not in dumped
+    assert "do not leak trajectory text" not in dumped
+
+
+def test_native_campaign_ledger_reports_all_pass_ties() -> None:
+    campaign = _campaign()
+    rows = [_row(cell, score=1, status="passed") for cell in campaign["cells"]]
+
+    ledger = result_ledger.build_native_campaign_ledger(
+        campaign,
+        rows,
+        campaign_file_sha256=SHA_A,
+    )
+
+    assert ledger["paired_summary"]["pairs"]["Agentic_minus_OneShot"] == {
+        "planned_pair_slots": 1,
+        "matched_eligible_pairs": 1,
+        "skipped_pairs": 0,
+        "skip_reasons": {},
+        "left_wins": 0,
+        "right_wins": 0,
+        "ties": 1,
+        "delta_sum": 0,
+        "mean_delta": 0.0,
+    }
+
+
+@pytest.mark.parametrize("private_prefix", ["native-launcher", "native-episode"])
+def test_case_index_uses_production_evidence_paths_not_invented_fields(private_prefix: str) -> None:
+    campaign = _campaign()
+    rows = [_row(cell, score=1, status="passed") for cell in campaign["cells"]]
+    for row in rows:
+        row["native_evidence"]["files"] = {
+            "evidence/native-episode/trajectory.jsonl": SHA_A,
+            f"evidence/{private_prefix}/private-events.jsonl": SHA_B,
+            f"evidence/{private_prefix}/reviewer-export.json": SHA_A,
+        }
+        row["trajectory_tail"][0]["event_type"] = "RAW_PRIVATE_TEXT_SENTINEL"
+    ledger = result_ledger.build_native_campaign_ledger(campaign, rows, campaign_file_sha256=SHA_A)
+    evidence = ledger["case_study_index"][0]["evidence"]
+    assert evidence["trajectory_sha256"] == SHA_A
+    assert evidence["private_events_sha256"] == SHA_B
+    assert evidence["reviewer_export_sha256"] == SHA_A
+    assert "RAW_PRIVATE_TEXT_SENTINEL" not in json.dumps(ledger)
+
+
+def test_native_campaign_ledger_keeps_incomplete_arm_coverage_explicit() -> None:
+    campaign = _campaign()
+    campaign["cells"] = campaign["cells"][:2]
+    rows = [_row(cell, score=1, status="passed") for cell in campaign["cells"]]
+
+    ledger = result_ledger.build_native_campaign_ledger(
+        campaign,
+        rows,
+        campaign_file_sha256=SHA_A,
+    )
+
+    key = "native-mini-swe|v4-001|dut|fixture-model|0"
+    assert ledger["denominator"]["scheduled_cells"] == 2
+    assert ledger["paired_coverage"][key]["missing_arms"] == ["Agentic"]
+    assert ledger["unmatched_reasons"]["missing_arm"] == {"Agentic": 1}
+    assert ledger["paired_summary"]["pairs"]["Agentic_minus_OneShot"] == {
+        "planned_pair_slots": 1,
+        "matched_eligible_pairs": 0,
+        "skipped_pairs": 1,
+        "skip_reasons": {"left_missing:Agentic": 1},
+        "left_wins": 0,
+        "right_wins": 0,
+        "ties": 0,
+        "delta_sum": 0,
+        "mean_delta": None,
     }
 
 

@@ -1,5 +1,14 @@
 # Decision Log
 
+## 2026-08-31 - Reuse ledger evidence instead of inventing case payloads (AA-VAE-063)
+
+- Add pure paired/case projections to the current validated ledger; no renderer,
+  second scorer, new dependency or filesystem reads. Eligible score rates and
+  pair means expose their denominator; absent evidence remains explicit.
+- Bind the canonical file hashes emitted by both production evidence layouts.
+  Remove trajectory-tail passthrough: the current reader supplies a full-file
+  digest, not a safe semantic tail. Keep final/private contents out of reports.
+
 ## 2026-08-31 - Bind fixed waveform requests without inventing execution totals (AA-VAE-061)
 
 - Reuse controller public-validation admission and the isolated executor;

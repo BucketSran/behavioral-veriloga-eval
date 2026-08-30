@@ -1,5 +1,21 @@
 # Verification Log
 
+## 2026-08-31 - Paired summaries and safe case index (AA-VAE-063)
+
+- Writer handed back two leaves, then main integrated. Independent review found
+  invented evidence field names instead of the production path-to-hash map, and
+  then missing native-episode private/reviewer path fallback. Each production
+  layout regression failed before repair. Removed unsupported/raw trajectory-tail
+  projection; malicious raw-text sentinel does not enter the report.
+- Final ledger and ledger-integration gate: **33 passed, 2.21 s**. Ruff passes.
+  Pair statistics reuse eligibility/coverage and keep infrastructure/missing
+  cases visible; zero eligible denominators are null. No raw evidence IO.
+- AA-VAE-062 source `811d82e806395185b51400da3d41621d5cca0654` hosted gates passed:
+  [Evaluator Closure](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33329243573)
+  and [Runner Smoke](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33329243593).
+  Native waveform source is separately published as `240b381e23`; its hosted
+  results remain pending at this record, not inferred from the adapter run.
+
 ## 2026-08-31 - Native public waveform feedback (AA-VAE-061)
 
 - Main-only runtime integration under the independently accepted plan. REDs
