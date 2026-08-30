@@ -122,6 +122,16 @@ def test_real_public_execution_returns_candidate_and_profile_bound_observation(
     assert adapter.candidate_tree_sha256() == candidate
 
 
+def test_public_invocation_digest_is_independent_of_agent_working_directory(public_case):
+    environment, _, _ = public_case
+    adapter, _ = bind(public_case)
+    expected = validation._invocation_tree_sha256(
+        environment.workspace / "submission", environment.candidate_artifacts
+    )
+    environment.execute({"command": "cd work && evas --version"})
+    assert environment.evas_invocations[-1]["candidate_tree_sha256"] == expected
+
+
 def test_resource_failure_cannot_be_reported_as_successful_public_validation(
     public_case, monkeypatch
 ):
@@ -268,7 +278,7 @@ def test_process_status_and_truncation_are_not_task_correctness(
     assert not {"passed", "score", "metric"}.intersection(observation.payload)
 
 
-@pytest.mark.parametrize("corruption", ["missing", "hash_error", "wrong_schema"])
+@pytest.mark.parametrize("corruption", ["missing", "hash_error", "wrong_schema", "wrong_candidate"])
 def test_invalid_invocation_evidence_cannot_reach_observation(
     public_case, monkeypatch, corruption
 ):
@@ -284,6 +294,8 @@ def test_invalid_invocation_evidence_cannot_reach_observation(
             environment.evas_invocations[-1]["candidate_tree_sha256"] = (
                 mini.CANDIDATE_TREE_HASH_ERROR_SHA256
             )
+        elif corruption == "wrong_candidate":
+            environment.evas_invocations[-1]["candidate_tree_sha256"] = "b" * 64
         else:
             environment.evas_invocations[-1]["candidate_tree_schema_version"] = (
                 "unknown"
@@ -433,7 +445,8 @@ def test_controller_records_real_feedback_and_stops_before_second_execution(
     assert "FINAL_PRIVATE_SENTINEL" not in json.dumps(observation.to_document())
 
 
-def test_r53_docker_public_validation_native_trajectory_smoke(tmp_path):
+@pytest.mark.parametrize("task_id,form", [("v4-001", "dut"), ("v4-501", "testbench")])
+def test_r53_docker_public_validation_native_trajectory_smoke(tmp_path, task_id, form):
     if os.environ.get("VABENCH_TEST_DOCKER_RUNTIME") != "1":
         pytest.skip("opt-in real r53 public EVAS Docker smoke")
     from scripts import run_v4_r53_clean_room_smoke as smoke
@@ -450,11 +463,11 @@ def test_r53_docker_public_validation_native_trajectory_smoke(tmp_path):
     assert spec is not None and spec.loader is not None
     exporter = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(exporter)
-    row = smoke.task_index_row(RELEASE, "v4-001")
-    artifacts = smoke.public_stub_artifacts(smoke.public_contract(RELEASE, "v4-001"))
+    row = smoke.task_index_row(RELEASE, task_id)
+    artifacts = smoke.public_stub_artifacts(smoke.public_contract(RELEASE, task_id))
     runtime = tmp_path / "runtime"
     # Only the public export path is used; no task record/private binding/checker reads.
-    exporter.install_public(RELEASE / row["task_dir"], runtime / "public", "dut", "G2")
+    exporter.install_public(RELEASE / row["task_dir"], runtime / "public", form, "G2")
     submission = runtime / "public/submission"
     submission.mkdir()
     for name, content in artifacts.items():
@@ -472,9 +485,9 @@ def test_r53_docker_public_validation_native_trajectory_smoke(tmp_path):
     )
     try:
         context = EpisodeContext(
-            "public-smoke-v4-001",
+            f"public-smoke-{task_id}",
             "public-smoke-attempt-001",
-            "v4-001",
+            task_id,
             "Agentic",
             2,
             budget_limits={"tool_calls": 2, "public_validation_calls": 1},
@@ -498,6 +511,9 @@ def test_r53_docker_public_validation_native_trajectory_smoke(tmp_path):
         )
         observation, events = _controller_smoke(environment, context, adapter, tmp_path)
         assert observation.status == "succeeded", observation.to_document()
+        assert observation.payload["feedback_scope"] == (
+            "reference_dut_only" if form == "testbench" else "public_simulation_only"
+        )
         config = environment.serialize()["info"]["config"]["environment"]
         assert config["network"] is False
         assert config["evaluator_mounted"] is False

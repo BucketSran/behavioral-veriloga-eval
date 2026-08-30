@@ -37,8 +37,8 @@ public profile with `build_public_validation_profile`, then construct
 `validate(candidate_tree_sha256=...)` only through the owning controller's
 capability and budget checks; the adapter does not maintain another budget ledger.
 
-The initial contract supports only the fixed r53 DUT/bugfix public simulation
-command in Docker. It rejects unsupported Testbench contracts, undeclared
+The contract supports fixed r53 DUT/bugfix public simulation and Testbench
+reference-DUT-only commands in Docker. It rejects unsupported contracts, undeclared
 submission files, authority/candidate drift, incomplete invocation evidence,
 resource overflow, and validation after submission/final reservation. A contract
 failure invalidates the adapter; discard the attempt rather than reconstructing
@@ -504,7 +504,7 @@ limits or simulator resource contention.
 ## Opt-in native mini-swe single-cell launcher
 
 `run_native_mini_swe.py` is a separate, development-only entry point for a
-OneShot, Agent-No-EVAS or Agentic DUT/bugfix cell from `build_campaign.py`. It does not replace the
+OneShot, Agent-No-EVAS or Agentic DUT/bugfix/Testbench cell from `build_campaign.py`. It does not replace the
 legacy runner or reinterpret `--agent-scaffold native`.
 
 ```bash
@@ -572,11 +572,12 @@ That dated mixed-backend slice is preserved as regression evidence. Native
 three-condition support is now available via the separate opt-in below;
 retries and real-model comparisons remain open. R53 and EVAS 0.8.7 are unchanged.
 
-### Opt-in all-native DUT/bugfix campaign
+### Opt-in all-native three-form campaign
 
 The existing wrapper accepts `--episode-backend native-mini-swe` with
-`--comparison-profile executable-feedback-control`. Select DUT and/or bugfix
-explicitly; Testbench, in-place resume and post-freeze `--cell`/`--limit`
+`--comparison-profile executable-feedback-control`. Select the intended forms
+explicitly; Testbench public feedback uses only the supplied reference DUT.
+In-place resume and post-freeze `--cell`/`--limit`
 selection are unsupported. Keep `--agent-scaffold mini-swe` (default): the old
 `--agent-scaffold native` flag still means the legacy sensitivity controller.
 
@@ -610,6 +611,6 @@ uv run --locked --extra agentic python \
 
 Missing/corrupt evidence blocks the report; valid infrastructure failure
 receipts remain in the denominator with null scores. The score authority is
-`development_only`, never Spectre-backed implicitly. The six-cell Docker gate
+`development_only`, never Spectre-backed implicitly. The nine-cell Docker gate
 uses deterministic public-contract candidates, not a model benchmark result.
-See migration notes AA-VAE-040, AA-VAE-041 and AA-VAE-042 for code/evidence maps.
+See migration notes AA-VAE-040 through AA-VAE-043 for code/evidence maps.

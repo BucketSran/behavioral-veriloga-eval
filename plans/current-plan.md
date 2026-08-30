@@ -14,14 +14,17 @@ implementation and does not change the phase statuses below.
 ## Current Status
 
 - Active authorized follow-up: [remaining harness closure](remaining-harness-closure.md).
-  The user approved completing the remaining functionality. Start with native
-  Testbench; implementation and experimental evidence remain separate gates.
+  The user approved completing the remaining functionality. Native Testbench
+  public authority and nine-cell Docker integration are locally verified in
+  [AA-VAE-043](../docs/alphaapollo-migration/features/AA-VAE-043-native-testbench-reference-authority.md).
+  Retry, evidence/metering and Reasoning/Evolution remain active follow-ups;
+  implementation and experimental evidence remain separate gates.
   Paid model pilot awaits a named model/service and budget.
 
 - Latest completed milestone: [native DUT/bugfix three-arm campaign](native-three-arm-campaign.md).
   Implemented absent public authority, native conditions and minimal
-  existing-campaign dispatch/accounting. Native Testbench and automatic retries
-  remain deferred; legacy defaults and all frozen evaluation assets are unchanged.
+  existing-campaign dispatch/accounting. Testbench is extended by AA-VAE-043;
+  automatic retries remain pending. Legacy defaults and frozen assets are unchanged.
   Shared absent-authority contract is locally verified in
   [AA-VAE-040](../docs/alphaapollo-migration/features/AA-VAE-040-absent-public-authority.md);
   launcher/campaign integration and real six-cell smoke are locally and hosted verified
@@ -31,7 +34,7 @@ implementation and does not change the phase statuses below.
 
 - Phase 0/1/3/4 bounded contracts and compatibility work are complete.
 - Phase 2/5 are **in progress**: the opt-in native single-cell path works,
-  with a verified all-native DUT/bugfix three-arm campaign; full form/retry/
+  with a locally verified all-native three-form three-arm campaign; retry/
   content/ledger closure remains open.
 - Phase 6-10 are **pending**. Reasoning/Evolution are not implemented.
 - Legacy mini-swe remains default. Native format recovery, multi-action and

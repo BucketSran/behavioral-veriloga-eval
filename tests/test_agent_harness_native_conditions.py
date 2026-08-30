@@ -265,6 +265,6 @@ def test_native_condition_form_validation_accepts_only_dut_bugfix(arm, form):
 
     assert validate_native_cell(_cell(arm=arm, form=form)) == arm
 
-    bad = _cell(arm=arm, form="testbench")
+    bad = _cell(arm=arm, form="unsupported")
     with pytest.raises(ValueError, match="DUT/bugfix"):
         validate_native_cell(bad)

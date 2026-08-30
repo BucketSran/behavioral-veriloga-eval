@@ -3,6 +3,11 @@
 Date: 2026-08-30. Base: `0f014c39e1016e8c6877ff7c48dbddb2733d8f93`.
 Status: approved implementation in progress; no completion claim yet.
 
+Progress: AA-VAE-043 native Testbench authority and three-form nine-cell
+connectivity are locally verified (2026-08-30). The stronger invocation identity
+gate also fixed cwd-dependent telemetry hashing. Remaining items below are not
+implicitly completed; Reasoning/evidence leaves still require runtime integration.
+
 ## Brief and scope
 
 Layer: behavioral-veriloga-eval. The user approved closing the remaining

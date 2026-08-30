@@ -26,6 +26,36 @@ PUBLIC_COMMAND = (
     "evas simulate public/task/visible_test.scs "
     "-o /tmp/vabench-visible/evas-output --spectre-strict"
 )
+TESTBENCH_COMMAND = (
+    "rm -rf /tmp/vabench-visible/reference /tmp/vabench-visible/evas-output/reference "
+    "&& mkdir -p /tmp/vabench-visible/reference "
+    "&& cp submission/testbench.scs /tmp/vabench-visible/reference/testbench.scs "
+    '&& ln -sfn "$(pwd)/task/supplied_dut" /tmp/vabench-visible/reference/dut '
+    "&& evas simulate /tmp/vabench-visible/reference/testbench.scs "
+    "-o /tmp/vabench-visible/evas-output/reference --spectre-strict"
+)
+
+
+def public_execution_contract(contract: dict) -> tuple[str, str]:
+    """Select a pinned public command, never an arbitrary command from metadata."""
+    if (
+        contract.get("schema_version") == "r53-direct-evas-runtime-v2"
+        and contract.get("working_directory") == "runtime_package_root"
+        and contract.get("command") == PUBLIC_COMMAND
+    ):
+        return PUBLIC_COMMAND, "public_simulation_only"
+    expected = {
+        "schema_version": "r53-direct-evas-testbench-reference-v1",
+        "working_directory": "public_root",
+        "candidate_command": TESTBENCH_COMMAND,
+        "candidate": "submission/testbench.scs",
+        "candidate_dut_binding": "./dut",
+        "feedback_scope": "reference_dut_only",
+        "reference_dut_root": "task/supplied_dut",
+    }
+    if all(contract.get(key) == value for key, value in expected.items()):
+        return "cd public && " + TESTBENCH_COMMAND, "reference_dut_only"
+    raise ValueError("unsupported public validation contract")
 
 
 def _files(root: Path, names: tuple[str, ...]) -> list[dict[str, str]]:
@@ -53,6 +83,29 @@ def _files(root: Path, names: tuple[str, ...]) -> list[dict[str, str]]:
     return rows
 
 
+def _invocation_tree_sha256(root: Path, names: tuple[str, ...]) -> str:
+    """Expected wrapper telemetry digest, distinct from the submission digest.
+
+    The v4 wrapper frames schema/path/state/size/content hash (including absent
+    files during generation). Validation only accepts complete regular files.
+    Real-wrapper regression tests lock this projection to its existing schema.
+    """
+    rows = _files(root, names)
+    digest = hashlib.sha256()
+
+    def frame(value: bytes) -> None:
+        digest.update(len(value).to_bytes(8, "big"))
+        digest.update(value)
+
+    frame(mini.CANDIDATE_TREE_SCHEMA_VERSION.encode())
+    for row in rows:
+        frame(row["path"].encode())
+        frame(b"file")
+        frame(str((root / row["path"]).stat().st_size).encode())
+        frame(bytes.fromhex(row["sha256"]))
+    return digest.hexdigest()
+
+
 def _authority(
     environment: mini.VaBenchBashEnvironment, *, allow_insecure_test_sandbox: bool
 ) -> dict:
@@ -78,12 +131,15 @@ def _authority(
         ),
     )
     contract = json.loads((task / "evas_runtime.json").read_text())
-    if (
-        contract.get("command") != PUBLIC_COMMAND
-        or contract.get("working_directory") != "runtime_package_root"
-        or contract.get("schema_version") != "r53-direct-evas-runtime-v2"
-    ):
-        raise ValueError("unsupported public validation contract (DUT/bugfix only)")
+    command, scope = public_execution_contract(contract)
+    if scope == "reference_dut_only":
+        from run_campaign import skill_tree_sha
+
+        if names != ("testbench.scs",):
+            raise ValueError("public Testbench requires exactly testbench.scs")
+        reference_files = [row for row in public_files if row["path"].startswith("supplied_dut/")]
+        if not reference_files or skill_tree_sha(task / "supplied_dut") != contract.get("reference_dut_tree_sha256"):
+            raise ValueError("public reference DUT identity mismatch")
     identity = environment.inspect_public_evas()
     if not re.search(r"\bevas-sim\s+0\.8\.7\b", identity["version_output"]):
         raise ValueError("public validation requires EVAS 0.8.7")
@@ -105,9 +161,9 @@ def _authority(
         # No public checker exists here: bind the public execution inputs instead.
         "checker_identity_sha256": canonical_sha256(
             {
-                "kind": "public_simulation_only",
+                "kind": scope,
                 "files": public_files,
-                "command": PUBLIC_COMMAND,
+                "command": command,
                 "candidate_artifacts": list(names),
             }
         ),
@@ -219,8 +275,18 @@ class PublicEvasValidator:
         self._verify_authority()
         if self.candidate_tree_sha256() != candidate_tree_sha256:
             raise ValueError("public validation candidate drift")
+        command, scope = public_execution_contract(json.loads(
+            (self.environment.workspace / "task/evas_runtime.json").read_text()
+        ))
+        if scope == "reference_dut_only":
+            from run_campaign import validate_public_testbench
+
+            validate_public_testbench(self.environment.workspace / "submission/testbench.scs")
+        expected_invocation_hash = _invocation_tree_sha256(
+            self.environment.workspace / "submission", self.environment.candidate_artifacts
+        )
         start = len(self.environment.evas_invocations)
-        result = self.environment.execute({"command": PUBLIC_COMMAND})
+        result = self.environment.execute({"command": command})
         self._verify_authority()
         if result.get("resources", {}).get("exceeded"):
             raise ValueError("public validation resource limit exceeded")
@@ -239,9 +305,10 @@ class PublicEvasValidator:
             or not isinstance(invocation_hash, str)
             or re.fullmatch(r"[0-9a-f]{64}", invocation_hash) is None
             or invocation_hash == mini.CANDIDATE_TREE_HASH_ERROR_SHA256
+            or invocation_hash != expected_invocation_hash
         ):
             raise ValueError(
-                "public validation invocation candidate identity unavailable"
+                "public validation invocation candidate identity unavailable or mismatched"
             )
         self._sequence += 1
         output = result["output"]
@@ -257,7 +324,7 @@ class PublicEvasValidator:
             ),
             budget_delta={"public_validation_calls": 1},
             payload={
-                "feedback_scope": "public_simulation_only",
+                "feedback_scope": scope,
                 "attempt_id": self.context.attempt_id,
                 "task_id": self.context.task_id,
                 "profile_input_identity_sha256": profile_input_identity_sha256(

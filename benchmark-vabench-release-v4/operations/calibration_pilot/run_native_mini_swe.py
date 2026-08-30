@@ -113,8 +113,8 @@ def _backend_profile():
 def validate_native_cell(cell: dict) -> str:
     """Return the supported native condition name or fail before model use."""
     condition = str(cell.get("experimental_arm") or "")
-    if cell.get("form") not in {"dut", "bugfix"}:
-        raise ValueError("native launcher supports DUT/bugfix forms only")
+    if cell.get("form") not in {"dut", "bugfix", "testbench"}:
+        raise ValueError("native launcher supports DUT/bugfix/Testbench forms only")
     if condition == "Agentic":
         if (
             cell.get("mode") != "G2"
@@ -515,7 +515,7 @@ def run_prepared_native_mini_swe(
     allow_insecure_test_sandbox: bool = False,
     campaign_file_sha256: str | None = None,
 ) -> native_episode.NativeEpisodeRun:
-    """Run an exclusively owned fresh exported native DUT/bugfix cell.
+    """Run an exclusively owned fresh exported native tri-form cell.
 
     This API does not attest that a caller's export came from the sealed release.
     Use the CLI for exporter/config composition. No resume or automatic retry.

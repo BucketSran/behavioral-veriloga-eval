@@ -1,4 +1,4 @@
-"""DUT/bugfix all-native connectivity, deliberately not model performance."""
+"""Three-form all-native connectivity, deliberately not model performance."""
 
 from concurrent.futures import ThreadPoolExecutor
 import os
@@ -8,6 +8,7 @@ import sys
 import pytest
 
 from scripts import run_v4_r53_clean_room_smoke as smoke
+from public_validation import public_execution_contract
 
 
 def test_public_stub_supports_the_bugfix_artifact_contract():
@@ -17,9 +18,23 @@ def test_public_stub_supports_the_bugfix_artifact_contract():
     assert all("not a reference solution" in content for content in artifacts.values())
 
 
+def test_public_testbench_stub_uses_declared_binding_and_no_fault_knowledge(tmp_path):
+    contract = smoke.public_contract(smoke.DEFAULT_RELEASE, "v4-501")
+    artifacts = smoke.public_stub_artifacts(contract)
+    assert list(artifacts) == ["testbench.scs"]
+    deck = artifacts["testbench.scs"]
+    template = contract["testbench_binding"]["source_path_template"]
+    assert f'ahdl_include "{template.format(artifact_path="bbpd_ref.va")}"' in deck
+    assert "XDUT (data clk retimed_data up down) bbpd_ref" in deck
+    assert "not a reference solution" in deck
+    candidate = tmp_path / "testbench.scs"
+    candidate.write_text(deck)
+    smoke.run_campaign.validate_public_testbench(candidate)
+
+
 def test_r53_docker_all_native_three_arm_campaign(tmp_path):
     if os.environ.get("VABENCH_TEST_DOCKER_RUNTIME") != "1":
-        pytest.skip("opt-in real Docker/EVAS two-form three-arm campaign")
+        pytest.skip("opt-in real Docker/EVAS three-form three-arm campaign")
 
     campaign = smoke.campaign_builder.build_campaign(
         smoke.DEFAULT_RELEASE,
@@ -30,8 +45,8 @@ def test_r53_docker_all_native_three_arm_campaign(tmp_path):
         repetitions=1,
         three_arm_g0_g2=True,
     )
-    cells = [cell for cell in campaign["cells"] if cell["form"] in {"dut", "bugfix"}]
-    assert len(cells) == 6
+    cells = campaign["cells"]
+    assert len(cells) == 9
     campaign["cells"] = cells
     campaign["execution_config"] = {
         "episode_backend": "native-mini-swe", "workers": 2,
@@ -52,9 +67,13 @@ def test_r53_docker_all_native_three_arm_campaign(tmp_path):
 
     def execute(cell):
         contract = smoke.public_contract(smoke.DEFAULT_RELEASE, cell["task_id"])
+        public_root = (smoke.DEFAULT_RELEASE / smoke.task_index_row(
+            smoke.DEFAULT_RELEASE, cell["task_id"]
+        )["public_contract"]).parent / "public"
+        command, _ = public_execution_contract(smoke.read_json(public_root / "evas_runtime.json"))
         client = smoke.client_for_arm(
             cell["experimental_arm"], smoke.public_stub_artifacts(contract),
-            smoke.DEFAULT_MODEL, contract["evas"]["command"],
+            smoke.DEFAULT_MODEL, command,
         )
         return smoke.run_campaign.run_cell_preserving_failure(cell, args, client)
 
@@ -79,9 +98,9 @@ def test_r53_docker_all_native_three_arm_campaign(tmp_path):
     ], text=True, capture_output=True, timeout=60, check=False)
     assert completed.returncode == 0, completed.stdout + completed.stderr
     report = smoke.read_json(report_path)
-    assert report["cell_count"] == 6
+    assert report["cell_count"] == 9
     assert report["score_authority"] == "development_only"
-    assert report["judge_statuses"] == {"behavior_failure": 6}
+    assert report["judge_statuses"] == {"behavior_failure": 9}
     assert evidence_hashes() == before
     assert smoke.sha256_file(campaign_path) == campaign_sha
 
@@ -124,7 +143,7 @@ def test_r53_docker_all_native_three_arm_campaign(tmp_path):
             "trajectory_sha256": smoke.sha256_file(runtime / "evidence/native-episode/trajectory.jsonl"),
         })
     smoke.write_immutable_json(tmp_path / "smoke-evidence-index.json", {
-        "status": "PASS", "claim_scope": "six_cell_connectivity_only",
+        "status": "PASS", "claim_scope": "nine_cell_connectivity_only",
         "model_score_claim_allowed": False, "paper_result_claim_allowed": False,
         "campaign_sha256": campaign_sha, "score_report_sha256": smoke.sha256_file(report_path),
         "cells": evidence_index,

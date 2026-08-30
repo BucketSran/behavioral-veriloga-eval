@@ -32,7 +32,7 @@ and recorded here before the new coordinator starts writing.
 | Shared harness contracts/state/controller/tool registry, package exports, and their tests | main coordinator | none; old dispatch task is closed |
 | `runners/agent_harness/result_store.py` and `tests/test_agent_harness_result_store.py` | main coordinator | none; historical store slice is integrated |
 | Production opt-in final replay/scorer receipt path and its tests | main coordinator | none; the bounded receipt integration is verified |
-| Production public-validation adapter and campaign wiring | main coordinator | none; bounded native DUT/bugfix three-condition campaign verified; native Testbench/retry remain pending |
+| Production public-validation adapter and campaign wiring | main coordinator | none; bounded native three-form three-condition campaign locally verified; retry remains pending |
 | Trajectory/result joins, backend adapters, evolution/memory/lineage, and their tests | main coordinator | none; assign exact leaf files before parallel implementation |
 | All other tracked files not explicitly assigned below | main coordinator | none |
 
@@ -98,6 +98,9 @@ Main owns native Testbench integration in calibration `public_validation.py`,
 `run_native_mini_swe.py`, `run_campaign.py`, the v4 campaign wrapper, related
 existing tests, new `tests/test_agent_harness_native_testbench.py`, the nine-cell
 smoke, all shared contracts/schemas, CI, docs/logs and Git operations.
+Integration evidence additionally authorizes main's minimal `mini_swe_vabench.py`
+candidate-root repair and production-public-validation regression: no EVAS
+compiler/simulator/package changes are involved.
 
 Read-only advisers: `tb_surface_map`, `retry_evidence_map`,
 `reasoning_evolution_map`, `alpha_public_reference`. No write/Git authority.
@@ -121,6 +124,17 @@ Both leaf assignments are `active` only when dispatched by main. Follow vertical
 TDD; no index/history/push, no other file writes, no old-worktree/private reads,
 no EVAS/r53 changes, no dependencies. Return changed files, RED/GREEN evidence,
 risks and stopped-writing confirmation. Main integrates after handback/review.
+
+Leaf assignment `reasoning_policy_impl` follow-up `attempt_sequence`: `active`
+on base `d5d656161b` after the reasoning leaf handback. Exact new files:
+`runners/agent_harness/attempt_sequence.py` and
+`tests/test_agent_harness_attempt_sequence.py`. Build a bounded fresh-attempt
+coordinator with frozen policy, EpisodeContext.next_attempt lineage, exclusive
+immutable journal/selection records and a caller-owned execution callback.
+Only explicit pre-final infrastructure dispositions permit retry; never inspect
+scores to retry, reuse prior candidate/memory or overwrite an existing root.
+The callback/runtime wiring and score reader remain main-owned. Vertical TDD,
+no Git/shared/dependency/evaluator/release edits; stop writing at handback.
 
 ### Native DUT/bugfix three-arm campaign (2026-08-30)
 

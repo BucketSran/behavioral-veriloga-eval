@@ -203,6 +203,29 @@ def verilog_number(value: Any) -> str:
 
 
 def public_stub_artifacts(contract: dict[str, Any]) -> dict[str, str]:
+    if contract.get("form") == "testbench":
+        # Deliberately constant inputs: this is plumbing evidence, not a test design.
+        files = contract["artifact_contract"]["files"]
+        modules = {module["name"]: module for row in files for module in row["modules"]}
+        lines = ["// Public-contract smoke only; not a reference solution.", "simulator lang=spectre"]
+        template = contract["testbench_binding"]["source_path_template"]
+        lines.extend(f'ahdl_include "{template.format(artifact_path=row["path"])}"' for row in files)
+        driven = set()
+        for instance in contract["testbench_binding"]["instances"]:
+            connections = sorted(instance["connections"], key=lambda row: row["position"])
+            nets = " ".join(row["net"] for row in connections)
+            lines.append(f'{instance["name"]} ({nets}) {instance["module_ref"]}')
+            inputs = {port["name"] for port in modules[instance["module_ref"]]["ports"] if port["direction"] == "input"}
+            for row in connections:
+                if row["port_ref"] in inputs and row["net"] not in driven:
+                    lines.append(f'VSMOKE{len(driven)} ({row["net"]} 0) vsource dc=0')
+                    driven.add(row["net"])
+        lines.extend(["tran tran stop=10n maxstep=0.1n", "save " + " ".join(
+            signal for signal in contract["trace_contract"]["required_signals"] if signal != "time"
+        ), ""])
+        if contract["target_artifacts"] != ["testbench.scs"]:
+            raise ValueError("unsupported public Testbench target artifacts")
+        return {"testbench.scs": "\n".join(lines)}
     if contract.get("form") not in {"dut", "bugfix"}:
         raise ValueError("the deterministic closure fixture supports DUT/bugfix tasks")
     files = (contract.get("artifact_contract") or {}).get("files") or []

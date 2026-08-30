@@ -1,5 +1,20 @@
 # Decision Log
 
+## 2026-08-30 - Native Testbench reference authority and telemetry binding
+
+- Extend only the opt-in native route to Testbench. Public execution must match
+  r53's reference-only command/path/scope and supplied-DUT digest; final faults
+  remain in trusted replay. No EVAS/release/domain-tool changes.
+- Keep invocation and final-submission hash schemas distinct. Recompute the
+  expected invocation digest instead of directly comparing incompatible hashes.
+  Real Docker evidence exposed the old cwd-dependent wrapper hash root; anchor
+  it to the trusted workspace. This is a harness evidence repair.
+- Smoke candidates obey public source-path/instance/trace declarations and
+  deliberately use constant stimuli. No hidden-fault-driven candidate tuning;
+  nine structured failures prove connectivity only, not model quality.
+- Remaining retry/evidence/Reasoning/Evolution/result slices stay active and
+  independent. Do not publish standalone adapter tests as runtime closure.
+
 ## 2026-08-30 - Remaining native functionality authorized
 
 - The user approved the seven remaining work groups after AA-VAE-042. Deliver

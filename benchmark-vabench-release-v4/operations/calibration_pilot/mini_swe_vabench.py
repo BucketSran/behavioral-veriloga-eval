@@ -143,7 +143,9 @@ def _candidate_artifact_paths(
     return tuple(sorted(normalized))
 
 
-def _candidate_tree_hasher_source(candidate_artifacts: tuple[str, ...]) -> str:
+def _candidate_tree_hasher_source(
+    candidate_artifacts: tuple[str, ...], *, candidate_root: str
+) -> str:
     return f"""import errno
 import hashlib
 import os
@@ -151,7 +153,7 @@ from pathlib import PurePosixPath
 import stat
 
 SCHEMA_VERSION = {CANDIDATE_TREE_SCHEMA_VERSION!r}
-CANDIDATE_ROOT = "public/submission"
+CANDIDATE_ROOT = {candidate_root!r}
 CANDIDATE_ARTIFACTS = {candidate_artifacts!r}
 
 
@@ -624,7 +626,14 @@ class VaBenchBashEnvironment:
         evas_wrapper = self.tools_dir / "evas"
         candidate_tree_hasher = self.tools_dir / ".candidate-tree-sha256.py"
         candidate_tree_hasher.write_text(
-            _candidate_tree_hasher_source(self.candidate_artifacts),
+            _candidate_tree_hasher_source(
+                self.candidate_artifacts,
+                candidate_root=(
+                    "/workspace/public/submission"
+                    if self.config.sandbox_backend == "docker"
+                    else str(self.workspace / "submission")
+                ),
+            ),
             encoding="utf-8",
         )
         candidate_tree_hasher.chmod(0o444)

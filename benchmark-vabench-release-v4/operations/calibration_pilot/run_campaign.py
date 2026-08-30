@@ -200,8 +200,8 @@ def run_prepared_native_mini_swe(**kwargs: Any) -> Any:
 
 
 def validate_native_mini_swe_cell(cell: dict[str, Any]) -> None:
-    if cell.get("form") not in {"dut", "bugfix"}:
-        raise ValueError("native-mini-swe currently supports DUT/bugfix cells only")
+    if cell.get("form") not in {"dut", "bugfix", "testbench"}:
+        raise ValueError("native-mini-swe supports DUT/bugfix/Testbench cells only")
     arm = cell.get("experimental_arm")
     if arm not in NATIVE_MINI_SWE_ARM_CONTRACT:
         raise ValueError("native-mini-swe requires a supported experimental arm")

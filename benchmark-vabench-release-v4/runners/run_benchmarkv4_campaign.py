@@ -309,8 +309,6 @@ def main() -> int:
                 "native-mini-swe does not support --limit; freeze the intended "
                 "selection with task/family filters"
             )
-        if args.form and "testbench" in args.form:
-            raise SystemExit("native-mini-swe currently supports DUT/bugfix only")
     evas_identity = None
     if args.evas_command:
         args.evas_command, evas_identity = resolve_evas_command(args.evas_command)

@@ -26,8 +26,9 @@ def read_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+@pytest.mark.parametrize("form,task_id", [("dut", "v4-001"), ("testbench", "v4-501")])
 def test_wrapper_dry_run_records_native_episode_backend_without_legacy_fallback(
-    tmp_path: Path,
+    tmp_path: Path, form: str, task_id: str,
 ) -> None:
     output = tmp_path / "native-campaign"
     completed = subprocess.run(
@@ -39,9 +40,9 @@ def test_wrapper_dry_run_records_native_episode_backend_without_legacy_fallback(
             "--model",
             "fixture-model",
             "--task-id",
-            "v4-001",
+            task_id,
             "--form",
-            "dut",
+            form,
             "--comparison-profile",
             "executable-feedback-control",
             "--episode-backend",
@@ -79,7 +80,6 @@ def test_wrapper_dry_run_records_native_episode_backend_without_legacy_fallback(
     [
         (["--agent-scaffold", "native"], "agent-scaffold"),
         (["--limit", "1"], "limit"),
-        (["--form", "testbench"], "DUT/bugfix"),
         (["--resume"], "resume"),
     ],
 )
@@ -207,7 +207,7 @@ def test_run_campaign_native_backend_dispatches_prepared_runtime(
 @pytest.mark.parametrize(
     ("override", "message"),
     [
-        ({"form": "testbench"}, "DUT/bugfix"),
+        ({"form": "unsupported"}, "DUT/bugfix/Testbench"),
         ({"experimental_arm": None}, "experimental arm"),
         ({"experimental_arm": "Agentic", "mode": "G3"}, "experimental arm"),
     ],

@@ -1,5 +1,35 @@
 # Verification Log
 
+## 2026-08-30 - Native Testbench / candidate-root integrity (AA-VAE-043)
+
+- Vertical RED/GREEN covered Testbench profile rejection, fixed reference-only
+  execution, unsafe includes, public authority drift, wrapper form guards,
+  exact public source-template generation, wrong-candidate invocation evidence
+  and agent-cwd-independent telemetry. The invocation digest is length-framed
+  under its existing schema, not the canonical final-submission digest.
+- First nine-cell run produced three compile failures because the smoke fixture
+  omitted the public binding template's leading `./`; fixed only the fixture.
+  Stronger digest validation then exposed the real wrapper's relative candidate
+  root under `cd public`. The harness now supplies the trusted absolute root;
+  EVAS and r53 were not edited. Failed output roots are preserved for audit.
+- Final fresh real Docker/EVAS gate: **5 passed in 44.06s**, comprising DUT and
+  Testbench public-adapter runs plus the nine-cell all-native campaign and two
+  public-fixture tests. All nine final outcomes are structured behavior_failure
+  from intentionally incomplete public-only fixtures. Score reader hash invariance,
+  complete denominator, absent authority and sidecar joins pass.
+- Final evidence: ignored
+  `benchmark-vabench-release-v4/reports/native-nine-cell-cgoDPgBp/cwd-bound/test_r53_docker_all_native_thr0/`;
+  index SHA-256 `c4fc92a2fc650ad7cae55213f07a586a75abd012729c7c30d1409d2c256231d5`.
+- Stable final focused native/public/entrypoint/smoke suite: **91 passed,
+  3 skipped in 24.69s**. Candidate-hash/working-directory regression: **9 passed,
+  50 deselected**. Intermediate workspace-wide harness suite (including then
+  uncommitted parallel leaves) was 532 passed / 5 skipped; it is not claimed as
+  an exact published-commit gate. Ruff 0.12.12 and whitespace checks pass.
+- Independent read-only follow-up reviewed hash-schema matching, trusted-root
+  selection and sandbox/legacy behavior: no remaining code blocker. LSP remains
+  unavailable; compact historical assets remain absent. Hosted CI is pending
+  publication. No real-model, full-r53, parity or Spectre claim follows.
+
 ## 2026-08-30 - Native three-arm final hosted confirmation
 
 - Final runtime commit `c2da249c8ad1e5db6eeb09c9e60713fe12d2afc6` was pushed
