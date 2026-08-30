@@ -1,5 +1,22 @@
 # Verification Log
 
+## 2026-08-30 - AA-VAE-044 hosted regression and compatibility repair
+
+- `51dea247152398260ff7474e8c467a92b249fc71` passed Public Agent Runtime
+  run 33313340706, but Evaluator Closure 33313340758 failed (**1 failed,
+  768 passed, 12 skipped**) and Runner Smoke 33313340715 failed (**1 failed,
+  275 passed, 6 skipped**). Both expose the same streaming adapter regression:
+  an unset optional transport observer was passed to an old override.
+- Reproduced the existing provider-neutral auto-tool-choice test locally RED.
+  Preserve its original call shape when capture is not enabled; pass the new
+  keyword only for an explicit observer. Focused legacy/capture gate: **4 passed
+  in 0.09s**; independent one-hunk review found no blocker. Retry work remains
+  unstaged and is not part of this small repair.
+- Broad local calibration/capture attempt: **24 failed, 77 passed, 12 errors**;
+  the compact historical assets remain absent. This is not a passed full suite.
+  Exact published repair requires a new hosted run; do not relabel the failed
+  run as successful or discard its evidence.
+
 ## 2026-08-30 - Native evidence and actual metering (AA-VAE-044)
 
 - RED/GREEN covers automatic reviewer export, source/reference tampering,

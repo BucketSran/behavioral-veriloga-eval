@@ -687,8 +687,10 @@ class OpenAICompatible:
             payload["tool_choice"] = "auto"
         if self.stream:
             payload["stream"] = True
+            capture_options = ({"transport_observer": transport_observer}
+                               if transport_observer is not None else {})
             return self._complete_stream(payload, timeout_s=effective_timeout_s,
-                                         transport_observer=transport_observer)
+                                         **capture_options)
         completed = None
         deadline = time.monotonic() + effective_timeout_s
         for attempt in range(1, 4):
