@@ -13,13 +13,13 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
-- Authorized next experiment: [GLM-first budget-controlled pilot](glm-budget-pilot.md).
-  The user saved local keys and changed provider priority from DeepSeek to GLM.
-  Proposed model is `glm-4.7-flash`; key platform confirmation is still pending.
+- Authorized next experiment: [budget-controlled DeepSeek pilot](deepseek-budget-pilot.md).
+  The user confirmed GLM Coding Plan only, then explicitly chose DeepSeek API.
+  Use the saved DeepSeek key and `deepseek-v4-flash`; do not call GLM.
   Keep one seeded family, three forms, two Agentic backends, one repetition
   and the CNY 5.00 ceiling. Safe local credential parsing is verified (AA-VAE-051);
   the earlier DeepSeek-only guard remains verified separately (AA-VAE-050).
-  GLM request/usage protection, a fresh live manifest, serial driver and complete
+  Provider metadata preflight, a fresh live manifest, serial driver and complete
   censored-result index remain launch gates. No real provider call yet. This
   development pilot does not change r53's normal wall-time policy or authorize
   full-r53/Evolution execution.
@@ -42,7 +42,7 @@ implementation and does not change the phase statuses below.
   Final runtime commit `164131a8a4` is published to fork/main; all three triggered
   hosted workflows passed. Local final harness gate: 702 passed / 11 skipped.
   Implementation and real-model experimental evidence remain separate gates.
-  The pilot budget/design are selected above; GLM platform confirmation and
+  The pilot budget/design and DeepSeek service are selected above; verified
   frozen guarded execution remain the live-execution gates.
 
 - Earlier completed milestone: [native DUT/bugfix three-arm campaign](native-three-arm-campaign.md).
@@ -62,7 +62,7 @@ implementation and does not change the phase statuses below.
   are verified through deterministic integration gates.
 - Phase 6 is runtime-integrated and deterministically verified (AA-VAE-046),
   with real-model evidence still pending. Phase 7/8 runtime integration is
-  implemented; Phase 9 now has an authorized bounded GLM-first pilot. Phase 10
+  implemented; Phase 9 now has an authorized bounded DeepSeek pilot. Phase 10
   runtime closeout is verified and fork-published.
 - Legacy mini-swe remains default. Native format recovery, multi-action and
   deadline behavior intentionally differ; see [AA-VAE-038](../docs/alphaapollo-migration/features/AA-VAE-038-mini-swe-behavior-differential.md).

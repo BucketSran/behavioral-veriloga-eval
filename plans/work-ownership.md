@@ -89,6 +89,12 @@ Integration sequence:
 
 ## Immediate Follow-up
 
+DeepSeek live-driver slice on `07b1f33e2a`: main owns new calibration
+`run_deepseek_pilot.py`, its new tests, CI selectors and records. All earlier
+writers remain closed. `deepseek_price_contract` refreshes official API facts
+read-only; `pilot_budget_surface` reviews driver/budget/denominator boundaries
+read-only before launch. No delegated credential access or provider calls.
+
 GLM preference update on `2aea03a828`: main owns the local-only credential
 helper/tests, CI selector and GLM pilot plan/records. `deepseek_price_contract`
 researched public GLM documentation; `native_campaign_impl` mapped existing

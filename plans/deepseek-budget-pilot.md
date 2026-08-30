@@ -1,14 +1,29 @@
 # Budget-controlled DeepSeek pilot
 
-Superseded launch preference (2026-08-30): the user now prioritizes GLM and has
-saved local keys. Use [the GLM-first plan](glm-budget-pilot.md) for current gates.
-The remainder preserves the DeepSeek design and free verification history; it
-does not authorize automatic DeepSeek execution or fallback.
+Active again (2026-08-30): after confirming that the GLM credential is Coding
+Plan only, the user explicitly chose the saved DeepSeek API key. GLM will not
+be called. Retain the earlier fixed family/design and budget below; historical
+credential-absence statements describe earlier preparation, not current state.
+
+Current implementation slice: add one opt-in `run_deepseek_pilot.py` driver,
+reuse the campaign builder, existing guarded client, native dispatch and
+read-only native evidence reader. The driver owns the six-row pilot index,
+including operationally censored and not-started rows; do not forge native
+results or weaken the general scorer to fill unstarted cells. Freeze all six
+identities/order and image/code/rate bindings before model calls. Normal CLI,
+r53, EVAS 0.8.7 and the guarded client's accounting rules remain unchanged.
+
+Test-first acceptance: immutable schedule and no resume; metadata-only provider
+preflight; one shared budget and serial fresh cells; all-six denominator after
+budget/error stops; no key in records or subprocess environment; actual free
+HTTP fixture through Docker/EVAS with the new driver. Independently review before
+the six-cell live run. Request metadata to confirm model/currency/access but
+do not issue a separate diagnostic generation or spend outside the journal.
 
 Date: 2026-08-30. Base: `38375909aee7103df154c72b2c3d7f3fbb3dee1c`.
-Status: authorized pilot; free preparation and the opt-in budgeted client are
-verified. Credentials and a fresh live schedule/driver remain launch gates.
-No paid request has been made.
+Status: authorized pilot; local credentials are saved and the budgeted client
+is verified. A fresh live schedule/driver remains the implementation gate.
+No paid request has been made at this plan update.
 
 ## Brief and KPI
 

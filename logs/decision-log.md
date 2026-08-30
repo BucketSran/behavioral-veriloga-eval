@@ -1,5 +1,18 @@
 # Decision Log
 
+## 2026-08-30 - User explicitly selects DeepSeek after Coding Plan clarification
+
+- GLM key is Coding Plan only; the user has no standard GLM API access and
+  explicitly authorizes returning to DeepSeek API. Do not consume GLM quota.
+- Reuse seeded family029, two Agentic backends, three forms, one attempt,
+  eight calls/cell, concurrency one and CNY 5 / USD 0.70 account-specific cap.
+- Minimal pilot driver composes existing builder/guard/native execution and
+  evidence reader. Keep a separate complete pilot index for operational stops;
+  do not invent native score receipts for unstarted cells or rerun final judges.
+- Account every generation request in the shared journal. Metadata-only
+  access/currency checks are separate preflight; no extra diagnostic generation.
+  Freeze exact code, image, provider mode and schedule before the real run.
+
 ## 2026-08-30 - Prefer GLM; platform confirmation precedes authentication
 
 - User saved the shared local key file and switched priority to GLM. Retain

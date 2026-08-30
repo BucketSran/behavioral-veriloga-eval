@@ -1,5 +1,19 @@
 # Verification Log
 
+## 2026-08-30 - User-selected DeepSeek return, pre-implementation gate
+
+- Live HEAD/origin: `07b1f33e2a8b67ec40521c64b385e1b1b788dd77`;
+  upstream: `7b5616dc52195ec275ec6d21c71d7763613702cd`.
+  Prior commit workflows Runner Smoke 33318337957, Public Agent Runtime
+  33318337975 and Evaluator Closure 33318337990 all succeeded.
+- Official model/pricing, chat-completions and balance docs rechecked:
+  Flash alias/version and peak input/output rates still match the guard.
+  4096 is our local output cap, not the provider maximum; 1,048,576 is our
+  conservative interpretation of the documented 1M context.
+- Layout/entrypoint tests: 48 passed; diff whitespace passes. Planning-only
+  changes restore the explicit DeepSeek choice and keep all six denominators.
+  No authenticated metadata or generation request at this commit; spend zero.
+
 ## 2026-08-30 - GLM-first preparation and local credential reader (AA-VAE-051)
 
 - Starting HEAD/live origin main: `2aea03a828fa62d4b979929827c86692576f548d`;

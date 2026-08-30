@@ -1,5 +1,9 @@
 # GLM-first bounded API pilot
 
+Historical preference: the user confirmed Coding Plan only, with no standard
+GLM API access, and explicitly switched back to DeepSeek. Do not run this GLM
+plan; current execution is governed by [the DeepSeek pilot](deepseek-budget-pilot.md).
+
 Updated: 2026-08-30. Base: `2aea03a828fa62d4b979929827c86692576f548d`.
 Status: preparation only; platform confirmation and verified live execution
 remain open. No authenticated provider request has been made.
