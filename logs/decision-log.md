@@ -1,5 +1,20 @@
 # Decision Log
 
+## 2026-08-30 - Native campaign evidence bridge scope (AA-VAE-039)
+
+- Reuse the existing three-arm manifest, native single-cell executor and score
+  summary; do not create a second campaign ledger, simulator or scorer.
+- First prove a mixed-backend integration: legacy direct OneShot, legacy
+  No-EVAS, native Agentic. Name the routing in frozen configuration and reports;
+  it cannot support a matched workflow or backend performance claim.
+- Native episodes currently require a real public EVAS profile. Proper native
+  No-EVAS / OneShot authority absence is separate work, not permission to mint
+  a fictitious available validator or turn OneShot into a Bash agent.
+- Consume completed native evidence read-only, never run terminal replay twice.
+  Keep unscored failures explicit and require exact scheduled-row identity
+  before aggregation. Missing/corrupt evidence blocks the report.
+- No r53, EVAS, legacy default, paid provider, retry or new domain tool change.
+
 ## 2026-08-30 - Bounded local branch and documentation hygiene
 
 - Separate RAM, disk use, and navigation clutter. Git branches are shared refs,

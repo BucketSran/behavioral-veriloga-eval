@@ -20,6 +20,22 @@ This file is the active queue, not a cumulative execution log.
 
 ## Objective
 
+### Immediate slice: native campaign evidence bridge (AA-VAE-039)
+
+Build a deterministic one-task/three-arm integration gate using the existing
+campaign manifest, legacy OneShot / Agent-No-EVAS execution, and opt-in native
+Agentic launcher. This is an explicitly mixed-backend connectivity check, not
+a matched backend comparison or an all-native campaign. Native No-EVAS needs
+an absent-public-authority contract; do not fake an enabled EVAS profile.
+
+Tests first: consume native terminal evidence without another judge/model call;
+verify trajectory/freeze/profile/sidecar joins; preserve unscored protocol and
+infrastructure failures; reject missing, duplicate, extra, or mismatched rows
+against the frozen scheduled cells. Then connect the existing three-arm smoke,
+freeze backend routing before generation, and run real Docker / EVAS 0.8.7.
+Keep legacy defaults, r53 and EVAS unchanged; no API experiment or retry.
+Commit scope, verified implementation, and integration evidence separately.
+
 Evolve the current VABench r53 evaluation harness into a reusable AI-native
 agent harness by combining:
 

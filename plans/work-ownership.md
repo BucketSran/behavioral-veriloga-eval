@@ -89,6 +89,30 @@ Integration sequence:
 
 ## Immediate Follow-up
 
+### Native campaign evidence bridge (2026-08-30)
+
+Status: `active`; base `7425d70b728be41f15235f896a5e5be87b31747e`.
+Main owns `operations/calibration_pilot/score_campaign.py` (under v4),
+`scripts/run_v4_r53_clean_room_smoke.py`, new
+`tests/test_agent_harness_native_campaign.py`, smoke/CI tests,
+`.github/workflows/evaluator-closure.yml`, calibration README, AA-VAE-039,
+feature ledger and shared plans/logs. No delegated writes or Git authority.
+`native_campaign_reuse_map` and `native_campaign_design_review` are read-only.
+
+Brief/KPIs: reuse the existing native launcher and score summarizer; exactly
+one row per scheduled cell, with explicit backend routing and terminal
+disposition. Read native artifacts without rescoring or mutating generation
+evidence; reject broken joins. An unscored failure has no fabricated score.
+Prove deterministic three-arm Docker connectivity using legacy OneShot and
+No-EVAS plus native Agentic, not native parity or model quality. Preserve the
+known local legacy timeout-test gap. Native No-EVAS, full campaign CLI, retries,
+Testbench, model experiments, Reasoning/Evolution and domain tools are deferred.
+
+Plan: scope commit; vertical RED/GREEN result join and denominator checks;
+smoke wiring; independent code/architecture reviews; focused and real Docker
+verification; separate verified commits and fork-only push. Use fresh test
+outputs under existing ignored `benchmark-vabench-release-v4/reports/`.
+
 ### Repository hygiene slice (2026-08-30)
 
 Status: `closed`; implementation and independent review are complete. The final
