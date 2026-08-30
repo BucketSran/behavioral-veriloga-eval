@@ -436,3 +436,19 @@ def test_native_existing_dispatch_is_not_exported_or_overwritten(tmp_path, monke
     with pytest.raises(runner.FinalReplayReservedError):
         runner.run_cell_preserving_failure(cell, args, None)
     assert receipt.read_text() == "preserve previous attempt"
+
+
+def test_native_wrapper_preserves_existing_campaign_before_dispatch(tmp_path):
+    output = tmp_path / "existing-campaign"
+    output.mkdir()
+    manifest = output / "campaign.json"
+    manifest.write_text("frozen original manifest")
+    completed = subprocess.run([
+        sys.executable, str(WRAPPER), "--output-root", str(output),
+        "--model", "fixture-model", "--task-id", "v4-001", "--form", "dut",
+        "--comparison-profile", "executable-feedback-control",
+        "--episode-backend", "native-mini-swe", "--dry-run",
+    ], text=True, capture_output=True, timeout=60, check=False)
+    assert completed.returncode != 0
+    assert manifest.read_text() == "frozen original manifest"
+    assert not (output / "run").exists()

@@ -9,6 +9,8 @@
 - `benchmark-vabench-release-v4/runners/run_benchmarkv4_campaign.py`：独立
   `--episode-backend native-mini-swe` opt-in，记录 execution config 并透传。
   旧 `--agent-scaffold native` 保持 legacy sensitivity 含义。
+  后续审计补充 root 原子预留：已有 campaign 输出目录在写 manifest 前即拒绝，
+  防止“下层拒绝重入，但上层已覆盖冻结配置”。独立 subprocess RED→GREEN。
 - `operations/calibration_pilot/run_campaign.py`（v4 下）：复用 exporter 和
   prepared launcher，按条件选择 image；OneShot 不传 Bash image。每个 cell
   要求全新 runtime；已有 runtime/终评记录禁止重入。native dispatch 结果单独

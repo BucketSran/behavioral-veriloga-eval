@@ -95,6 +95,9 @@ Status: `closed`; base `24f2b834b012271af8d05221cc6e4855e2488f72`.
 Both leaf writers handed back and stopped. Main integrated their changes,
 repaired review/integration findings and ran the six-cell real Docker gate.
 Independent reviews have no substantive blocker; diagnostic gaps are logged.
+The coordinator also owns the final wrapper root-reservation regression/fix in
+`runners/run_benchmarkv4_campaign.py` and the existing native dispatch test file;
+the campaign reviewer checks it read-only. No leaf writing lane is reopened.
 Scope/KPIs/stop conditions: [controlled plan](native-three-arm-campaign.md).
 The main coordinator owns all shared contracts/schemas/exports, native episode
 composition, CI, smoke integration, plans/logs and migration notes. Main-owned

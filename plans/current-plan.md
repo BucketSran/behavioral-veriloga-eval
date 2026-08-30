@@ -29,9 +29,10 @@ implementation and does not change the phase statuses below.
 - Phase 6-10 are **pending**. Reasoning/Evolution are not implemented.
 - Legacy mini-swe remains default. Native format recovery, multi-action and
   deadline behavior intentionally differ; see [AA-VAE-038](../docs/alphaapollo-migration/features/AA-VAE-038-mini-swe-behavior-differential.md).
-- Last local broad regression retains **636 passed / 7 skipped / 1 failed**
+- Earlier local broad regression retained **636 passed / 7 skipped / 1 failed**
   (the legacy one-second timeout case). Hosted CI success is separate evidence,
-  not a replacement for that failure. Exact results: [verification log](../logs/verification-log.md).
+  not a replacement for that failure. The newer compact-checkout result below
+  has additional missing-asset failures. Exact results: [verification log](../logs/verification-log.md).
 
 ## Latest bounded slice: all-native DUT/bugfix campaign (AA-VAE-040–042)
 

@@ -1,5 +1,22 @@
 # Verification Log
 
+## 2026-08-30 - Native campaign publication and root-reservation follow-up
+
+- Fork-only publication succeeded: `c842ea980e` absent authority,
+  `82d3ae5103` three-condition launcher and `435957967c` campaign/CI integration,
+  following scope commit `1e5092e7bd`. Eval main/origin matched `435957967c`;
+  EVAS remained clean at `6cb6fa7a7d`; r53 tracked bytes are unchanged.
+- Final coordinator audit found the wrapper could replace an existing campaign
+  manifest before lower-level runtime reentry checks. A real subprocess test
+  reproduced the overwrite (`1 failed`); native wrapper now atomically reserves
+  a fresh root before any manifest write. Legacy existing-root behavior is unchanged.
+- Focused native dispatch + r53 entrypoint + CI selection after this repair:
+  **47 passed in 1.75s**; Ruff 0.12.12 and whitespace pass. This is a small
+  freeze-boundary repair, not new retry/resume functionality.
+- Independent follow-up review: no blocking code/spec/security finding;
+  dispatch tests 16 passed, wrapper subset 6 passed, and a manual existing-root
+  legacy dry-run still works. LSP remains unavailable, explicitly not a passed gate.
+
 ## 2026-08-30 - All-native campaign integration (AA-VAE-042)
 
 - Leaf writers handed back exact files; main integrated and independently

@@ -355,7 +355,12 @@ def main() -> int:
         )
     release = args.release.expanduser().resolve()
     output_root = args.output_root.expanduser().resolve()
-    output_root.mkdir(parents=True, exist_ok=True)
+    try:
+        output_root.mkdir(
+            parents=True, exist_ok=args.episode_backend != "native-mini-swe"
+        )
+    except FileExistsError as exc:
+        raise SystemExit("native-mini-swe requires a fresh campaign output root") from exc
     explicit_family_ids = None
     if args.task_id and args.selection is None and args.sample_families is None:
         explicit_family_ids = family_ids_for_task_ids(release, args.task_id)

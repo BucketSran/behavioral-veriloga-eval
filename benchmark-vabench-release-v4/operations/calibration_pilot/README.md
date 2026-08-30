@@ -519,8 +519,9 @@ uv run --locked --extra agentic python \
 Dry-run only exports a fresh runtime: no credentials, Docker, model, or scoring.
 For a separately authorized executable run, omit `--dry-run` and provide
 `--base-url`, `--api-key-env` (default `VABENCH_API_KEY`) or `--api-key-file`, and
-an absolute pinned `--evas-command`. The runtime requires the existing pinned
-public Docker image. Legacy `execution_config` overrides are rejected; this
+an absolute pinned `--evas-command`. Agentic uses the pinned public Docker image;
+No-EVAS uses the paired no-EVAS image; OneShot has no Bash runtime image.
+Legacy `execution_config` overrides are rejected; this
 launcher currently fixes its own documented runtime/watchdog defaults.
 
 Every invocation requires a new output directory, including after dry-run or
