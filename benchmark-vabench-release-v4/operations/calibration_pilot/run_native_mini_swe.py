@@ -41,6 +41,8 @@ from runners.agent_harness.proposals import (  # noqa: E402
     ProposalEnvelope,
     normalize_proposal,
 )
+from runners.agent_harness.evidence_export import build_reviewer_evidence_export  # noqa: E402
+from runners.agent_harness.trajectory import read_trajectory  # noqa: E402
 from runners.agent_harness.backends.mini_swe import (  # noqa: E402
     MiniSwePolicyBridge,
     MiniSweBashEnvironmentBridge,
@@ -188,11 +190,18 @@ class _RecordedClient:
                 "max_tokens": max_tokens,
                 "tools": deepcopy(tools),
                 "timeout_s": timeout_s,
+                "transport_capture_supported": isinstance(self.client, runner.OpenAICompatible),
             },
         )
         try:
+            transport = {}
+            if isinstance(self.client, runner.OpenAICompatible):
+                transport["transport_observer"] = lambda payload: self.record(
+                    "provider_transport_attempt",
+                    _redact({**identity, **payload}, getattr(self.client, "api_key", "")),
+                )
             response = self.client.complete(
-                messages, max_tokens, tools, timeout_s=timeout_s
+                messages, max_tokens, tools, timeout_s=timeout_s, **transport,
             )
         except Exception as exc:
             self.record(
@@ -200,8 +209,9 @@ class _RecordedClient:
             )
             message = _redact(str(exc), getattr(self.client, "api_key", ""))
             raise RuntimeError(f"provider {type(exc).__name__}: {message}") from None
+        response = _redact(response, getattr(self.client, "api_key", ""))
         self.record("provider_response", {**identity, "response": deepcopy(response)})
-        return _redact(response, getattr(self.client, "api_key", ""))
+        return response
 
 
 class _RecordedEnvironment(MiniSweBashEnvironmentBridge):
@@ -211,7 +221,18 @@ class _RecordedEnvironment(MiniSweBashEnvironmentBridge):
 
     def step(self, action, capability):
         self.record("tool_request", action.to_document())
-        result = super().step(action, capability)
+        self._legacy_environment.private_output_sink = lambda capture: self.record(
+            "tool_output_capture", {"action_id": action.action_id, **capture},
+        )
+        try:
+            result = super().step(action, capability)
+        except Exception as exc:
+            self.record("tool_failure", {
+                "action_id": action.action_id, "error_type": type(exc).__name__,
+            })
+            raise
+        finally:
+            self._legacy_environment.private_output_sink = None
         if hasattr(result, "observation"):
             self.record(
                 "tool_result",
@@ -220,6 +241,10 @@ class _RecordedEnvironment(MiniSweBashEnvironmentBridge):
                     "observation": result.observation.to_document(),
                 },
             )
+        else:
+            self.record("tool_failure", {
+                "action_id": action.action_id, "error_type": type(result).__name__,
+            })
         return result
 
 
@@ -265,36 +290,10 @@ class _OneShotModel:
             float(self.request_timeout_s),
             max(0.1, self.deadline_monotonic - time.monotonic()),
         )
-        identity = {
-            "request_id": f"{self.context.attempt_id}/request-0001",
-            "action_id": f"{self.context.attempt_id}-0001",
-        }
-        self.record(
-            "provider_request",
-            {
-                **identity,
-                "messages": deepcopy(messages),
-                "max_tokens": self.per_turn_max_tokens,
-                "tools": deepcopy(self.tools),
-                "timeout_s": timeout_s,
-            },
-        )
         started = time.monotonic()
-        try:
-            response = self.client.complete(
-                messages,
-                self.per_turn_max_tokens,
-                self.tools,
-                timeout_s=timeout_s,
-            )
-        except Exception as exc:
-            self.record(
-                "provider_failure", {**identity, "error_type": type(exc).__name__}
-            )
-            message = _redact(str(exc), getattr(self.client, "api_key", ""))
-            raise RuntimeError(f"provider {type(exc).__name__}: {message}") from None
-        response = _redact(response, getattr(self.client, "api_key", ""))
-        self.record("provider_response", {**identity, "response": deepcopy(response)})
+        response = _RecordedClient(self.client, self.record, self.context).complete(
+            messages, self.per_turn_max_tokens, self.tools, timeout_s=timeout_s,
+        )
         choice_row = response["choices"][0]
         choice = dict(choice_row["message"])
         content = str(choice.get("content") or "")
@@ -628,7 +627,8 @@ def run_prepared_native_mini_swe(
                 )
             },
             "claim_scope": "development_only_opt_in_single_cell",
-            "raw_trace_scope": "decoded_provider_exchanges_and_bounded_tool_observations",
+            "raw_trace_scope": "decoded_provider_exchanges_bounded_transport_and_tool_capture_v1",
+            "reviewer_export_contract": "vaevas-reviewer-evidence-export-v1",
         }
         config_sha = runner.RESULT_PROTOCOL.canonical_sha256(manifest)
         public_profile = None
@@ -766,6 +766,13 @@ def run_prepared_native_mini_swe(
             deadline_monotonic=deadline,
             deadline_finalizer=deadline_finalize,
         )
+        reviewer_export = build_reviewer_evidence_export(
+            trajectory_events=read_trajectory(run.trajectory_path),
+            private_events=read_trajectory(trace_path),
+            trajectory_bytes=run.trajectory_path.read_bytes(),
+            private_event_bytes=trace_path.read_bytes(),
+        )
+        native_episode._write_once(directory / "reviewer-export.json", reviewer_export)
         native_episode._write_once(
             directory / "result.json",
             {
@@ -774,6 +781,7 @@ def run_prepared_native_mini_swe(
                 "private_events_sha256": _sha_file(trace_path),
                 "private_events_tail_sha256": trace.tail_sha256,
                 "trajectory_sha256": _sha_file(run.trajectory_path),
+                "reviewer_export_sha256": _sha_file(directory / "reviewer-export.json"),
                 "artifact_file_sha256": _sha_file(run.artifact_path)
                 if run.artifact_path
                 else None,

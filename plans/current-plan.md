@@ -17,7 +17,9 @@ implementation and does not change the phase statuses below.
   The user approved completing the remaining functionality. Native Testbench
   public authority and nine-cell Docker integration are locally verified in
   [AA-VAE-043](../docs/alphaapollo-migration/features/AA-VAE-043-native-testbench-reference-authority.md).
-  Retry, evidence/metering and Reasoning/Evolution remain active follow-ups;
+  Evidence/metering and safe reviewer exports are integrated and locally verified
+  in [AA-VAE-044](../docs/alphaapollo-migration/features/AA-VAE-044-native-evidence-metering.md).
+  Retry and Reasoning/Evolution remain active follow-ups;
   implementation and experimental evidence remain separate gates.
   Paid model pilot awaits a named model/service and budget.
 

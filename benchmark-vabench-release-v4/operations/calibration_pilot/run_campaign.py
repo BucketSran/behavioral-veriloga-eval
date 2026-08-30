@@ -673,6 +673,7 @@ class OpenAICompatible:
         tools: list[dict[str, Any]] | None,
         *,
         timeout_s: float | None = None,
+        transport_observer=None,
     ) -> dict[str, Any]:
         effective_timeout_s = max(0.1, float(timeout_s or self.timeout_s))
         payload: dict[str, Any] = {
@@ -686,7 +687,8 @@ class OpenAICompatible:
             payload["tool_choice"] = "auto"
         if self.stream:
             payload["stream"] = True
-            return self._complete_stream(payload, timeout_s=effective_timeout_s)
+            return self._complete_stream(payload, timeout_s=effective_timeout_s,
+                                         transport_observer=transport_observer)
         completed = None
         deadline = time.monotonic() + effective_timeout_s
         for attempt in range(1, 4):
@@ -701,7 +703,7 @@ class OpenAICompatible:
                     encoding="utf-8",
                 )
                 header_path.chmod(0o600)
-                completed = subprocess.run(
+                completed = self._capture_transport(lambda: subprocess.run(
                     [
                         "curl", "-sS", "--max-time", f"{attempt_timeout_s:.3f}",
                         self.endpoint, "-H", f"@{header_path}",
@@ -709,7 +711,7 @@ class OpenAICompatible:
                     ],
                     text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                     timeout=attempt_timeout_s + 0.5, check=False,
-                )
+                ), attempt=attempt, observer=transport_observer)
             if completed.returncode == 0:
                 break
             if attempt < 3 and time.monotonic() < deadline:
@@ -745,6 +747,46 @@ class OpenAICompatible:
             raise ProviderAPIError(f"provider error: {error}")
         return response
 
+    def _capture_transport(self, execute, *, attempt: int, observer):
+        """Opt-in private decoded transport capture; never retain auth headers."""
+        if observer is None:
+            return execute()
+        started = time.monotonic()
+
+        def captured(value):
+            if isinstance(value, bytes):
+                value = value.decode("utf-8", errors="replace")
+            text = self._redact(value or "")
+            raw = text.encode("utf-8")
+            limit = 64 * 1024
+            retained = raw if len(raw) <= limit else raw[:limit // 2] + raw[-limit // 2:]
+            return {
+                "encoding": "utf8_redacted_decoded_transport",
+                "text": retained.decode("utf-8", errors="replace"),
+                "bytes_sha256": hashlib.sha256(raw).hexdigest(),
+                "total_bytes": len(raw), "retained_bytes": len(retained),
+                "truncated_bytes": len(raw) - len(retained),
+            }
+
+        try:
+            completed = execute()
+        except Exception as exc:
+            observer({
+                "transport_attempt": attempt, "returncode": None,
+                "error_type": type(exc).__name__, "capture_complete": False,
+                "elapsed_s": time.monotonic() - started,
+                "stdout": captured(getattr(exc, "stdout", None)),
+                "stderr": captured(getattr(exc, "stderr", None)),
+            })
+            raise
+        observer({
+            "transport_attempt": attempt, "returncode": completed.returncode,
+            "error_type": None, "capture_complete": True,
+            "elapsed_s": time.monotonic() - started,
+            "stdout": captured(completed.stdout), "stderr": captured(completed.stderr),
+        })
+        return completed
+
     def _curl_payload(self, payload: dict[str, Any], *, timeout_s: float) -> subprocess.CompletedProcess[str]:
         with tempfile.TemporaryDirectory(prefix="v4_provider_") as td:
             root = Path(td)
@@ -766,12 +808,16 @@ class OpenAICompatible:
                 timeout=timeout_s + 0.5, check=False,
             )
 
-    def _complete_stream(self, payload: dict[str, Any], *, timeout_s: float) -> dict[str, Any]:
+    def _complete_stream(self, payload: dict[str, Any], *, timeout_s: float,
+                         transport_observer=None) -> dict[str, Any]:
         completed = None
         deadline = time.monotonic() + timeout_s
         for attempt in range(1, 4):
             attempt_timeout_s = max(0.1, deadline - time.monotonic())
-            completed = self._curl_payload(payload, timeout_s=attempt_timeout_s)
+            completed = self._capture_transport(
+                lambda: self._curl_payload(payload, timeout_s=attempt_timeout_s),
+                attempt=attempt, observer=transport_observer,
+            )
             if completed.returncode == 0:
                 break
             if attempt < 3 and time.monotonic() < deadline:

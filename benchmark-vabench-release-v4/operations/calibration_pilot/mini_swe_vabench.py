@@ -247,9 +247,13 @@ class _BoundedOutput:
         self.head = bytearray()
         self.tail = bytearray()
         self.total_bytes = 0
+        self._sha256 = hashlib.sha256()
+        self.eof = False
+        self.read_error = False
 
     def append(self, chunk: bytes) -> None:
         self.total_bytes += len(chunk)
+        self._sha256.update(chunk)
         head_remaining = max(0, COMMAND_OUTPUT_HEAD_BYTES - len(self.head))
         if head_remaining:
             self.head.extend(chunk[:head_remaining])
@@ -272,6 +276,10 @@ class _BoundedOutput:
                 f"\n[vaBench truncated {self.truncated_bytes} command-output bytes]\n"
             ).encode()
         return bytes(self.head + marker + self.tail).decode("utf-8", errors="replace")
+
+    @property
+    def sha256(self) -> str:
+        return self._sha256.hexdigest()
 
 
 def load_mini_swe() -> tuple[type, type, type, Callable[..., list[dict[str, Any]]]]:
@@ -551,6 +559,7 @@ class VaBenchBashEnvironment:
         deadline_monotonic: float | None = None,
         submission_gate: Callable[[Path], dict[str, Any]],
         candidate_artifacts: list[str] | tuple[str, ...] = (),
+        private_output_sink: Callable[[dict[str, Any]], None] | None = None,
     ) -> None:
         self.runtime = runtime.resolve()
         self.workspace = (self.runtime / "public").resolve()
@@ -598,6 +607,7 @@ class VaBenchBashEnvironment:
         self._install_shell_tools()
         self.commands: list[dict[str, Any]] = []
         self._submitted_exception: type | None = None
+        self.private_output_sink = private_output_sink
 
     def _install_shell_tools(self) -> None:
         self.evas_read_roots: list[Path] = []
@@ -1144,7 +1154,9 @@ class VaBenchBashEnvironment:
             try:
                 while chunk := process.stdout.read(64 * 1024):
                     capture.append(chunk)
+                capture.eof = True
             except (OSError, ValueError):
+                capture.read_error = True
                 return
 
         reader = threading.Thread(target=drain_output, name="vabench-output", daemon=True)
@@ -1177,6 +1189,15 @@ class VaBenchBashEnvironment:
             command_timed_out=command_timed_out,
         )
         resources = self._resource_usage()
+        self._emit_private_output_capture(
+            capture,
+            returncode=returncode,
+            elapsed_s=elapsed_s,
+            resources=resources,
+            capture_complete=(
+                capture.eof and not capture.read_error and not reader.is_alive()
+            ),
+        )
         resource_exhausted = bool(resources["exceeded"])
         if resource_exhausted:
             returncode = 125
@@ -1202,6 +1223,38 @@ class VaBenchBashEnvironment:
             "output_truncated_bytes": capture.truncated_bytes,
             "resources": resources,
         }
+
+    def _emit_private_output_capture(
+        self,
+        capture: _BoundedOutput,
+        *,
+        returncode: int,
+        elapsed_s: float,
+        resources: dict[str, Any],
+        capture_complete: bool,
+    ) -> None:
+        if self.private_output_sink is None:
+            return
+        self.private_output_sink(
+            {
+                "schema_version": "vabench-private-tool-output-capture-v1",
+                "tool_name": "bash",
+                "returncode": returncode,
+                "elapsed_s": elapsed_s,
+                "output_sha256": capture.sha256,
+                "output_total_bytes": capture.total_bytes,
+                "output_captured_bytes": min(
+                    capture.total_bytes, COMMAND_OUTPUT_CAPTURE_BYTES
+                ),
+                "output_truncated_bytes": capture.truncated_bytes,
+                "output_capture_complete": capture_complete,
+                "output_capture_eof": capture.eof,
+                "output_capture_read_error": capture.read_error,
+                "retained_output_scope": "bounded_head_tail_pre_model_capture",
+                "output": capture.text(),
+                "resources": resources,
+            }
+        )
 
     def _record_evas_invocations(
         self,

@@ -136,6 +136,60 @@ scores to retry, reuse prior candidate/memory or overwrite an existing root.
 The callback/runtime wiring and score reader remain main-owned. Vertical TDD,
 no Git/shared/dependency/evaluator/release edits; stop writing at handback.
 
+Follow-up integration assignments on `67d1b55f4e` (2026-08-30): the attempt
+sequence leaf is `handed_back`; `tb_surface_map` re-reviews it read-only.
+`reasoning_policy_impl` is active only on its original two reasoning leaf files:
+repair strict-JSON multi-turn history, remove duplicate native observations,
+bind action IDs to the launcher's existing attempt-number format, and test
+numeric request/usage validation. No launcher or transport ownership transfers.
+`evidence_export_impl` is active only on its original two evidence leaf files:
+accept legitimate optional null terminal fields, allowlist counter keys,
+reject malformed hashes/nonfinite or negative usage, and retain truthful
+unknown-usage semantics. Main owns launcher/scorer wiring and integration tests.
+Each delegate must stop at handback; all records/Git operations stay with main.
+
+`native_campaign_impl` owns only
+`benchmark-vabench-release-v4/operations/calibration_pilot/mini_swe_vabench.py`
+and new `tests/test_agent_harness_private_tool_capture.py` during the bounded
+private-output capture follow-up on `67d1b55f4e`. Add an optional native private
+sink retaining the bounded pre-model output plus full-stream byte/hash and
+truncation/completion evidence, without changing legacy/model-visible output.
+Main binds this sink to action IDs and immutable private events. No controller,
+launcher/scorer, provider transport, shared docs, release or evaluator edits.
+
+Reasoning leaf follow-up is `handed_back`. `reasoning_policy_impl` reopens only
+its two attempt-sequence files to repair exact retry-index/adjacent-decision
+verification, recompute decisions from frozen policy/outcome, and reject typed
+outcome boolean drift. This is a review repair, not campaign integration.
+
+Private tool-capture leaf is `handed_back`. Main owns provider transport capture
+in calibration `run_campaign.py`, native callback wiring, new
+`tests/test_agent_harness_private_provider_capture.py`, and existing launcher /
+campaign tests. `evidence_export_impl` reopens only its original two leaf files
+to normalize joined per-request transport attempts and per-action bounded tool
+captures, with explicit unobserved/incomplete/truncated counts and safe structural
+metadata. Raw outputs never enter reviewer payload or shared model memory.
+
+`alpha_public_reference` now owns only new
+`runners/agent_harness/evolution_runtime.py` and new
+`tests/test_agent_harness_evolution_runtime.py`. Implement a bounded round
+coordinator over the existing manifest/reducers and memory/lineage contracts,
+using a caller-owned candidate-branch callback (no final judge callback exposed
+to branches). Freeze each prior-round information set, preallocate deterministic
+branch budgets, await the strict barrier, persist write-once receipts and count
+all branches/costs. Concrete Bash/provider/candidate/final wiring stays with main.
+No shared interfaces/schema/launcher/Git/dependency edits; TDD and handback apply.
+
+Attempt verifier leaf is `handed_back`. `reasoning_policy_impl` next owns only
+new `benchmark-vabench-release-v4/operations/calibration_pilot/run_native_attempts.py`
+and new `tests/test_agent_harness_native_attempts.py`. Compose the fresh-attempt
+journal with the existing campaign single-cell runner and read-only scorer;
+main supplies context/CLI dispatch wiring. Each journal runtime contains one
+fresh cell export, preserving existing no-reentry guards. Select one terminal
+attempt per cell while preserving all source receipts and all-attempt costs.
+Only typed, positively classified pre-final transport/startup failures qualify;
+cleanup uncertainty, final reservation and model/protocol failures do not.
+
 ### Native DUT/bugfix three-arm campaign (2026-08-30)
 
 Status: `closed`; base `24f2b834b012271af8d05221cc6e4855e2488f72`.

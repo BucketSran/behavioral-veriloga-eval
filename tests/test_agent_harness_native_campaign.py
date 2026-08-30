@@ -83,6 +83,9 @@ def test_native_row_reads_verified_evidence_without_execution_or_mutation(launch
     assert "score_sidecar_receipt" not in row["trusted_replay"]
     assert row["trusted_replay"]["derived_score_sidecar_reference"]["sha256"]
     assert row["attempt_id"] == "attempt-001"
+    assert row["metering"]["provider"]["requests"] == 2
+    assert row["output_tokens"] == 10
+    assert row["telemetry"]["tool_calls_total"] == 2
     assert row["native_evidence"]["artifact_sha256"] == json.loads(run.artifact_path.read_text())["artifact_sha256"]
     assert row["native_evidence"]["artifact_path"] == str(run.artifact_path.relative_to(runtime))
     assert row["native_evidence"]["artifact_file_sha256"] == before[
@@ -94,6 +97,49 @@ def test_native_row_reads_verified_evidence_without_execution_or_mutation(launch
     assert "FINAL_JUDGE_SENTINEL" not in json.dumps(row)
     with pytest.raises(ValueError, match="authority"):
         scorer.summarize([row], "final_spectre", scheduled_cells=[cell])
+
+
+def test_native_unknown_tokens_stay_unknown_through_report(launched):
+    class MissingUsageProvider(Provider):
+        def complete(self, *args, **kwargs):
+            response = super().complete(*args, **kwargs)
+            response.pop("usage")
+            return response
+
+    runtime, cell, _, _ = launched(MissingUsageProvider([
+        "printf 'module model; endmodule\\n' > public/submission/model.va",
+        "vabench-submit",
+    ]))
+    row = scorer.read_native_cell(runtime, cell, campaign_file_sha256="c" * 64)
+    assert row["output_tokens"] is None
+    assert row["metering"]["provider"]["usage_status"] == "partial"
+    report = scorer.summarize([row], "final_trusted_replay", scheduled_cells=[cell])
+    summary = report["telemetry_by_arm"]["Agentic"]
+    assert summary["output_tokens_total"] is None
+    assert summary["output_tokens_median"] is None
+    assert summary["output_tokens_reported_subtotal"] == 0
+    assert summary["output_tokens_unknown_cells"] == 1
+
+
+@pytest.mark.parametrize("tamper", ["replace", "remove_reference"])
+def test_native_reviewer_export_is_required_and_recomputed(launched, tamper):
+    runtime, cell, _, _ = launched()
+    directory = runtime / "evidence/native-launcher"
+    result_path = directory / "result.json"
+    result = json.loads(result_path.read_text())
+    if tamper == "replace":
+        export_path = directory / "reviewer-export.json"
+        export = json.loads(export_path.read_text())
+        export["usage"]["provider"]["requests"] = 999
+        export_path.chmod(0o600)
+        export_path.write_text(json.dumps(export))
+        result["reviewer_export_sha256"] = hashlib.sha256(export_path.read_bytes()).hexdigest()
+    else:
+        result.pop("reviewer_export_sha256")
+    result_path.chmod(0o600)
+    result_path.write_text(json.dumps(result))
+    with pytest.raises(ValueError, match="reviewer"):
+        scorer.read_native_cell(runtime, cell, campaign_file_sha256="c" * 64)
 
 
 @pytest.mark.parametrize("kind", ["protocol", "provider"])

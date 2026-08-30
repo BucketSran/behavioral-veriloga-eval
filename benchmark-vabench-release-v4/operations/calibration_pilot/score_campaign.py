@@ -479,6 +479,7 @@ def read_native_cell(
         validate_absent_public_authority,
         validate_trajectory,
     )
+    from runners.agent_harness.evidence_export import build_reviewer_evidence_export
 
     if not isinstance(campaign_file_sha256, str) or not re.fullmatch(r"[0-9a-f]{64}", campaign_file_sha256):
         raise ValueError("expected campaign identity must be a SHA-256")
@@ -539,7 +540,7 @@ def read_native_cell(
             "judge_status": "infrastructure_failure",
             "outcome": "infrastructure_failure",
             "score": None,
-            "output_tokens": 0,
+            "output_tokens": None,
             "telemetry": event_telemetry([]),
             "evas_usage": RUNNER.summarize_evas_invocations([]),
             "incidents": [
@@ -598,6 +599,28 @@ def read_native_cell(
         raise ValueError("native trajectory/terminal identity mismatch")
     if expected_public_sha is None and not validate_absent_public_authority(events):
         raise ValueError("native absent-public-authority trajectory mismatch")
+    reviewer_export = build_reviewer_evidence_export(
+        trajectory_events=events, private_events=private,
+        trajectory_bytes=(runtime / "evidence/native-episode/trajectory.jsonl").read_bytes(),
+        private_event_bytes=(runtime / (prefix + "private-events.jsonl")).read_bytes(),
+    )
+    export_sha = result.get("reviewer_export_sha256")
+    if manifest.get("reviewer_export_contract") is not None and export_sha is None:
+        raise ValueError("native reviewer export reference missing")
+    if export_sha is not None:
+        exported = read_json(evidence(prefix + "reviewer-export.json", export_sha))
+        if exported != reviewer_export:
+            raise ValueError("native reviewer export differs from source evidence")
+    metering = reviewer_export["usage"]
+    # Historical mini-swe estimates remain in private evidence, never relabeled
+    # as provider-reported usage. New backends use the same raw-event meter.
+    telemetry = event_telemetry(result["model_telemetry"].get("provider_events", []))
+    telemetry.update({
+        "model_calls": metering["provider"]["requests"],
+        "tool_calls_total": metering["tools"]["requests"],
+        "provider_output_tokens_total": metering["provider"]["usage"]["completion_tokens"],
+        "provider_reasoning_tokens_total": metering["provider"]["usage"]["reasoning_tokens"],
+    })
     expected_config_sha = native_launcher_profile_config_sha256(manifest)
     for profile in [candidate for candidate in (public_profile, final_profile) if candidate is not None]:
         if profile["campaign_config_sha256"] != expected_config_sha:
@@ -611,8 +634,9 @@ def read_native_cell(
         "termination_reason": outcome["terminal_reason"],
         "judge_status": outcome["primary_outcome"], "outcome": outcome["primary_outcome"],
         "score": None,
-        "output_tokens": result["model_telemetry"]["provider_output_tokens"],
-        "telemetry": event_telemetry(result["model_telemetry"]["provider_events"]),
+        "output_tokens": metering["provider"]["usage"]["completion_tokens"],
+        "telemetry": telemetry,
+        "metering": metering,
         "evas_usage": RUNNER.summarize_evas_invocations(result["evas_invocations"]),
         "incidents": [{"category": incident["category"]} for incident in outcome["incidents"]],
         "native_evidence": {
@@ -765,10 +789,12 @@ def summarize(
         )
         for value in values:
             selected = [row for row in rows if row.get(field) == value]
-            output = [
-                int(row.get("output_tokens", row.get("working_tokens", 0)) or 0)
-                for row in selected
-            ]
+            raw_output = [row.get("output_tokens", row.get("working_tokens")) for row in selected]
+            output = [int(value) for value in raw_output if value is not None]
+            unknown_output = len(selected) - len(output)
+            output_total = sum(output) if not unknown_output else None
+            output_median = statistics.median(output) if output and not unknown_output else None
+            reasoning = [row.get("telemetry", {}).get("provider_reasoning_tokens_total") for row in selected]
             elapsed = [
                 float(row["episode_elapsed_s"])
                 for row in selected
@@ -788,10 +814,12 @@ def summarize(
                         )
             telemetry[value] = {
                 "cell_count": len(selected),
-                "output_tokens_total": sum(output),
-                "output_tokens_median": statistics.median(output),
-                "working_tokens_total": sum(output),
-                "working_tokens_median": statistics.median(output),
+                "output_tokens_total": output_total,
+                "output_tokens_median": output_median,
+                "output_tokens_reported_subtotal": sum(output),
+                "output_tokens_unknown_cells": unknown_output,
+                "working_tokens_total": output_total,
+                "working_tokens_median": output_median,
                 "episode_elapsed_s_median": (
                     statistics.median(elapsed) if elapsed else None
                 ),
@@ -849,13 +877,8 @@ def summarize(
                     int(row.get("telemetry", {}).get("legacy_feedback_calls", 0))
                     for row in selected
                 ),
-                "provider_reasoning_tokens_total": sum(
-                    int(
-                        row.get("telemetry", {}).get(
-                            "provider_reasoning_tokens_total", 0
-                        )
-                    )
-                    for row in selected
+                "provider_reasoning_tokens_total": (
+                    sum(reasoning) if all(value is not None for value in reasoning) else None
                 ),
                 "budget_hit_model_calls": sum(
                     int(

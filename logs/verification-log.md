@@ -1,5 +1,37 @@
 # Verification Log
 
+## 2026-08-30 - Native evidence and actual metering (AA-VAE-044)
+
+- RED/GREEN covers automatic reviewer export, source/reference tampering,
+  missing provider usage in Agentic and OneShot, private transport attempts,
+  bounded tool capture, signed process return codes and unknown finish reasons.
+  Independent review found an unconditional transport-completeness flag; its
+  new RED regression failed before repair and is now GREEN. Follow-up found
+  no blocking issue. Unsupported capture remains explicitly distinguishable
+  through the supported flag and unobserved-request count.
+- Final focused export/native/capture/scorer suite: **97 passed, 2 skipped in
+  21.69s**. Fresh post-review nine-cell Docker/EVAS campaign: **1 passed in
+  27.43s**. Earlier broader Docker invocation: **4 passed in 35.05s**.
+- Final evidence index:
+  `benchmark-vabench-release-v4/reports/native-evidence-bCDbfj/reviewed/test_r53_docker_all_native_thr0/smoke-evidence-index.json`,
+  SHA-256 `ac17de531a0e730929517bc5d1a7ec97ae76b527f29932b65195b634f3f145c7`.
+  The nine deliberately incomplete public-only candidates prove connectivity,
+  not quality. Score-time source hashes remain unchanged.
+- Ruff 0.12.12 and whitespace checks pass. LSP remains unavailable and the
+  compact checkout's historical missing-asset limitation remains explicit.
+  Hosted CI awaits publication of this slice. No paid model experiment, EVAS
+  change, release change or Spectre execution occurred.
+
+## 2026-08-30 - AA-VAE-043 hosted confirmation
+
+- Runtime commit `67d1b55f4e5f0dbb68bfd79f14ee567ee256139e` is on BucketSran
+  `origin/main`. All three triggered workflows succeeded on that exact commit:
+  [Evaluator Closure 33312476098](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33312476098),
+  [Public Agent Runtime 33312476010](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33312476010),
+  [Runner Smoke 33312476035](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33312476035).
+- This closes the prior entry's pending hosted status only. It does not establish
+  model quality, full-r53 coverage, or completion of later in-progress leaves.
+
 ## 2026-08-30 - Native Testbench / candidate-root integrity (AA-VAE-043)
 
 - Vertical RED/GREEN covered Testbench profile rejection, fixed reference-only

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 import json
+import hashlib
 from pathlib import Path
 import sys
 import time
@@ -158,7 +159,24 @@ def test_prepared_launcher_joins_provider_bash_freeze_and_final_result(native_ca
     assert "response-1" in private_events
     assert "public simulator diagnostic" in private_events
     assert "FINAL_JUDGE_SENTINEL" not in private_events
+    captures = [json.loads(line)["payload"] for line in private_events.splitlines()
+                if json.loads(line)["event_type"] == "tool_output_capture"]
+    assert len(captures) == 3
+    assert all(capture["output_capture_complete"] for capture in captures)
+    assert all(capture["action_id"].startswith("attempt-001-") for capture in captures)
+    assert "public simulator diagnostic" in json.dumps(captures)
     assert json.loads((evidence / "result.json").read_text())["artifact_file_sha256"]
+    export_path = evidence / "reviewer-export.json"
+    export = json.loads(export_path.read_text())
+    result = json.loads((evidence / "result.json").read_text())
+    assert result["reviewer_export_sha256"] == hashlib.sha256(export_path.read_bytes()).hexdigest()
+    assert export["usage"]["provider"]["requests"] == 3
+    assert export["usage"]["provider"]["usage"]["completion_tokens"] == 15
+    assert export["usage"]["provider"]["usage"]["total_tokens"] is None
+    assert export["usage"]["tools"]["requests"] == 3
+    assert export["usage"]["completeness"]["all_tool_requests_resolved"]
+    assert "public simulator diagnostic" not in export_path.read_text()
+    assert "FINAL_JUDGE_SENTINEL" not in export_path.read_text()
     with pytest.raises(RuntimeError, match="fresh"):
         run_prepared_native_mini_swe(
             runtime=runtime,

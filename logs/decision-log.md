@@ -1,5 +1,23 @@
 # Decision Log
 
+## 2026-08-30 - Separate private capture, reviewer export and actual metering
+
+- Record logical provider requests separately from transport attempts. Preserve
+  bounded redacted decoded transport output and pre-model bounded tool output,
+  with byte counts, stream hashes and explicit capture/truncation metadata.
+  This is not exact wire capture or an unlimited output archive.
+- Generate a deterministic reviewer-only structural export from both validated
+  source event chains. Freeze its contract before generation, reference its
+  file hash in the launcher result and recompute it at score time. Never put
+  private messages, commands, hidden outcomes or reviewer exports in memory.
+- Native aggregate tokens use provider-reported counts only. Missing values
+  remain null, with reported subtotals and unknown counts; legacy compatibility
+  estimates do not become native usage evidence. Unknown finish reasons are
+  hashed instead of exporting arbitrary text; signed process return codes are
+  valid without weakening nonnegative resource counters.
+- A missing transport capture is not a complete join, even when the client
+  declared observer support. Reasoning/retry/Evolution remain later slices.
+
 ## 2026-08-30 - Native Testbench reference authority and telemetry binding
 
 - Extend only the opt-in native route to Testbench. Public execution must match

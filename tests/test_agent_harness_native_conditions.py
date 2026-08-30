@@ -131,6 +131,27 @@ def _submit_response(artifacts: dict[str, str], *, tool: str = "submit_artifacts
     }
 
 
+def test_native_oneshot_unknown_usage_is_not_a_zero_cost_score(native_case, tmp_path):  # noqa: F811
+    import score_campaign
+    from run_native_mini_swe import run_prepared_native_mini_swe
+
+    arguments, _, _ = native_case
+    runtime = _native_runtime(native_case, tmp_path, name="oneshot-unknown-usage")
+    response = _submit_response({"model.va": "module model; endmodule\n"})
+    response.pop("usage")
+    cell = {**_cell(arm="OneShot"), "family_id": "001"}
+    run_prepared_native_mini_swe(
+        runtime=runtime, cell=cell, client=Provider([response]), attempt_id="one",
+        evas_command=arguments["evas_command"], final_judge_command=arguments["command"],
+        campaign_file_sha256="c" * 64,
+    )
+    row = score_campaign.read_native_cell(runtime, cell, campaign_file_sha256="c" * 64)
+    assert row["output_tokens"] is None
+    assert row["metering"]["provider"]["requests"] == 1
+    assert row["metering"]["tools"]["requests"] == 0
+    assert row["judge_status"] == "behavior_failure"
+
+
 def test_native_no_evas_uses_absent_public_authority_and_no_evas_runtime(native_case, tmp_path):  # noqa: F811
     from run_native_mini_swe import run_prepared_native_mini_swe
 
