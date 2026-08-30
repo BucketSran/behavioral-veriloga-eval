@@ -46,6 +46,7 @@ from .result_store import (
     ImmutableEvidenceError,
     ImmutableScoreSidecarRecord,
     write_immutable_score_sidecar,
+    write_immutable_scored_result,
 )
 from .reserved_tools import reserved_domain_tool_descriptors
 from .state import (
@@ -136,4 +137,5 @@ __all__ = [
     "validate_scored_result_artifact",
     "validate_score_sidecar_authority",
     "write_immutable_score_sidecar",
+    "write_immutable_scored_result",
 ]

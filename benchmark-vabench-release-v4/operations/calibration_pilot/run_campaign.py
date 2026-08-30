@@ -2571,6 +2571,9 @@ def run_mini_swe_agentic_cell(
 def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompatible | None) -> dict[str, Any]:
     runtime = args.output / cell["cell_id"]
     assert_final_replay_not_started(runtime)
+    native_reservation = runtime / "evidence/native-episode"
+    if native_reservation.exists() or native_reservation.is_symlink():
+        raise FinalReplayReservedError("native episode already reserved; legacy model reentry is forbidden")
     result_path = runtime / "evidence" / "campaign_result.json"
     if args.resume and result_path.is_file():
         previous = read_json(result_path)

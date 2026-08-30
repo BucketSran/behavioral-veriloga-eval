@@ -1,4 +1,4 @@
-"""Trusted, append-only persistence for validated final score sidecars."""
+"""Trusted, append-only persistence for validated terminal evidence."""
 
 from __future__ import annotations
 
@@ -18,6 +18,7 @@ from .authority_profiles import (
 from .result_artifact import (
     score_sidecar_sha256,
     validate_score_sidecar_authority,
+    validate_scored_result_artifact,
 )
 from .state import EpisodeContext, FinalJudgment, FrozenSubmission
 
@@ -70,28 +71,9 @@ def write_immutable_score_sidecar(
     )
     payload = _canonical_json_bytes(detached_sidecar)
 
-    sidecar_dir = _prepare_sidecar_directory(output_dir)
-    destination = sidecar_dir / f"{sidecar_sha256}.json"
-    temp_path = _write_fsynced_temporary(sidecar_dir, sidecar_sha256, payload)
-    try:
-        _publish_exclusive(temp_path, destination)
-    except FileExistsError as exc:
-        raise ImmutableEvidenceError(
-            f"score sidecar already exists: {destination.name}"
-        ) from exc
-    except OSError as exc:
-        raise ImmutableEvidenceError(
-            f"failed to publish score sidecar: {exc}"
-        ) from exc
-    finally:
-        temp_path.unlink(missing_ok=True)
-
-    try:
-        _fsync_directory(sidecar_dir)
-    except OSError as exc:
-        raise ImmutableEvidenceError(
-            f"failed to sync score sidecar directory: {exc}"
-        ) from exc
+    destination = _write_document(
+        output_dir, "score-sidecars", sidecar_sha256, payload
+    )
 
     return ImmutableScoreSidecarRecord(
         path=destination,
@@ -102,21 +84,82 @@ def write_immutable_score_sidecar(
     )
 
 
-def _prepare_sidecar_directory(output_dir: Path) -> Path:
+def write_immutable_scored_result(
+    *,
+    output_dir: Path,
+    artifact: Mapping[str, Any],
+    trajectory_events: list[dict[str, Any]],
+    score_sidecar: Mapping[str, Any],
+    public_validation_profile: Mapping[str, Any],
+    final_test_profile: Mapping[str, Any],
+) -> Path:
+    """Validate protocol joins, then publish under the artifact's self-hash.
+
+    This generic store does not attest execution or resolve sidecar receipts.
+    Production callers must first verify receipt bytes and provenance against
+    their trusted evidence root (as the native episode coordinator does).
+    """
+    if not isinstance(output_dir, Path):
+        raise TypeError("output_dir must be a Path")
+    document = deepcopy(dict(artifact))
+    if not validate_scored_result_artifact(
+        document,
+        trajectory_events=trajectory_events,
+        score_sidecar=score_sidecar,
+        public_validation_profile=public_validation_profile,
+        final_test_profile=final_test_profile,
+    ):
+        raise ValueError("invalid scored result evidence join")
+    return _write_document(
+        output_dir, "scored-results", document["artifact_sha256"],
+        _canonical_json_bytes(document),
+    )
+
+
+def _write_document(
+    output_dir: Path, collection: str, digest: str, payload: bytes,
+) -> Path:
+    directory = _prepare_directory(output_dir, collection)
+    destination = directory / f"{digest}.json"
+    temp_path = _write_fsynced_temporary(directory, digest, payload)
+    try:
+        _publish_exclusive(temp_path, destination)
+    except FileExistsError as exc:
+        raise ImmutableEvidenceError(
+            f"{collection} evidence already exists: {destination.name}"
+        ) from exc
+    except OSError as exc:
+        raise ImmutableEvidenceError(
+            f"failed to publish {collection} evidence: {exc}"
+        ) from exc
+    finally:
+        temp_path.unlink(missing_ok=True)
+
+    try:
+        _fsync_directory(directory)
+    except OSError as exc:
+        raise ImmutableEvidenceError(
+            f"failed to sync {collection} directory: {exc}"
+        ) from exc
+
+    return destination
+
+
+def _prepare_directory(output_dir: Path, collection: str) -> Path:
     if output_dir.is_symlink():
         raise ImmutableEvidenceError("output directory must not be a symlink")
     if output_dir.exists() and not output_dir.is_dir():
         raise ImmutableEvidenceError("output directory must be a directory")
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    sidecar_dir = output_dir / "score-sidecars"
+    sidecar_dir = output_dir / collection
     if sidecar_dir.is_symlink():
-        raise ImmutableEvidenceError("score-sidecars directory must not be a symlink")
+        raise ImmutableEvidenceError(f"{collection} directory must not be a symlink")
     if sidecar_dir.exists() and not sidecar_dir.is_dir():
-        raise ImmutableEvidenceError("score-sidecars path must be a directory")
+        raise ImmutableEvidenceError(f"{collection} path must be a directory")
     sidecar_dir.mkdir(exist_ok=True)
     if sidecar_dir.resolve(strict=True).parent != output_dir.resolve(strict=True):
-        raise ImmutableEvidenceError("score-sidecars directory escaped output directory")
+        raise ImmutableEvidenceError(f"{collection} directory escaped output directory")
     return sidecar_dir
 
 

@@ -236,6 +236,49 @@ def test_scored_result_artifact_binds_all_terminal_evidence(tmp_path) -> None:
     assert len(artifact["artifact_sha256"]) == 64
 
 
+def test_scored_result_writer_publishes_without_overwriting(tmp_path) -> None:
+    from runners.agent_harness.result_store import (
+        ImmutableEvidenceError,
+        write_immutable_scored_result,
+    )
+
+    events = _trajectory(tmp_path)
+    artifact = _build(events)
+    arguments = dict(
+        output_dir=tmp_path / "evidence",
+        artifact=artifact,
+        trajectory_events=events,
+        score_sidecar=_sidecar(),
+        public_validation_profile=_public_profile(),
+        final_test_profile=_final_profile(),
+    )
+    path = write_immutable_scored_result(**arguments)
+    assert path.name == f"{artifact['artifact_sha256']}.json"
+    assert json.loads(path.read_text()) == artifact
+    assert path.stat().st_mode & 0o222 == 0
+    before = path.read_bytes()
+    with pytest.raises(ImmutableEvidenceError, match="already exists"):
+        write_immutable_scored_result(**arguments)
+    assert path.read_bytes() == before
+    assert list(path.parent.iterdir()) == [path]
+
+
+def test_scored_result_writer_rejects_invalid_join_before_creating_output(tmp_path) -> None:
+    from runners.agent_harness.result_store import write_immutable_scored_result
+
+    events = _trajectory(tmp_path)
+    artifact = _build(events)
+    artifact["submission"]["tree_sha256"] = SHA_B
+    output = tmp_path / "evidence"
+    with pytest.raises(ValueError, match="evidence join"):
+        write_immutable_scored_result(
+            output_dir=output, artifact=artifact, trajectory_events=events,
+            score_sidecar=_sidecar(), public_validation_profile=_public_profile(),
+            final_test_profile=_final_profile(),
+        )
+    assert not output.exists()
+
+
 def test_result_artifact_hash_is_canonical_across_sidecar_key_order(tmp_path) -> None:
     events = _trajectory(tmp_path)
     ordered = _build(events, score_sidecar=_sidecar())
