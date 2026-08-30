@@ -1,5 +1,27 @@
 # Verification Log
 
+## 2026-08-30 - Runtime closure published and hosted-verified
+
+- Final runtime commit `164131a8a4ec2da5c71e10d584549355bd932929` is published
+  to BucketSran fork/main. Every workflow triggered by that exact commit passed:
+  [Evaluator Closure 33315716080](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33315716080),
+  [Runner Smoke 33315716079](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33315716079),
+  [Public Agent Runtime 33315716078](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33315716078).
+  Evaluator Closure includes all native nine-cell campaign variants and the new
+  three-form, two-branch/two-round, selected-final-only Evolution smoke.
+- Final local harness suite: **702 passed / 11 skipped**. Exact commands,
+  timings, real-Docker indexes and limitations are recorded below. Hosted
+  full-checkout success does not erase the compact local historical-asset gap.
+- AA-VAE-043–049 implementation scope is complete. Each capability has a
+  separate feature note and focused commit; the earlier streaming regression
+  and its repair remain in history. No delegated writer remains active.
+- r53 has no changes from starting `0f014c39e1016e8c6877ff7c48dbddb2733d8f93`;
+  EVAS remains clean at `6cb6fa7a7dac70fc0d4120126d8cf74258e6637b`.
+  Only the BucketSran behavioral-eval fork was pushed. No paid model call,
+  full-r53 model result, Spectre execution or domain-tool activation is claimed.
+- This following closeout changes documentation only; the hosted results above
+  belong to the named runtime commit, not an untriggered documentation rerun.
+
 ## 2026-08-30 - Production Evolution integration (AA-VAE-049)
 
 - Final stable-tree command `uv run --locked --extra agentic python -m pytest

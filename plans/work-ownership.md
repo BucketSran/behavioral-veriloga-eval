@@ -90,8 +90,9 @@ Integration sequence:
 ## Immediate Follow-up
 
 Current closeout: all delegated implementation lanes are handed back and stopped.
-The coordinator owns the complete tree, final verification, documentation and
-fork publication. AA-VAE-049 includes the bounded candidate-store helper lane
+The coordinator verified and published the integrated runtime as `164131a8a4`;
+all three triggered hosted workflows passed. No writing lane remains open.
+AA-VAE-049 includes the bounded candidate-store helper lane
 and `tests/test_agent_harness_evolution_candidate_store.py` handed back by
 `alpha_public_reference`; main owns subsequent integration repairs. Independent
 boundary and result/cost reviewers are read-only. The entries below are dated

@@ -42,3 +42,6 @@ campaign 的真实接口回归。精确最终结果与 Docker evidence 见 verif
 这是审计可追溯性和计量修复，不是模型能力改进证据。真实 API/local model
 质量、全 r53、跨 backend 统计结论和 Spectre parity 都需各自实验。新 attempt
 恢复、Reasoning 和 Evolution 的运行接入由后续独立提交验收。
+
+后续状态：恢复、Reasoning/Evolution 与结果账本已分别接入 AA-VAE-045–049；
+模型质量实验仍未完成。最终本地与 hosted 证据见 `logs/verification-log.md`。

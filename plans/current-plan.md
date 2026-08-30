@@ -13,7 +13,7 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
-- Active authorized follow-up: [remaining harness closure](remaining-harness-closure.md).
+- Completed authorized follow-up: [remaining harness closure](remaining-harness-closure.md).
   The user approved completing the remaining functionality. Native Testbench
   public authority and nine-cell Docker integration are locally verified in
   [AA-VAE-043](../docs/alphaapollo-migration/features/AA-VAE-043-native-testbench-reference-authority.md).
@@ -28,8 +28,9 @@ implementation and does not change the phase statuses below.
   Evolution is runtime-integrated in
   [AA-VAE-049](../docs/alphaapollo-migration/features/AA-VAE-049-production-evolution.md),
   with real Docker two-model/two-round connectivity across all three forms.
-  Final closeout verification is active; implementation and real-model
-  experimental evidence remain separate gates.
+  Final runtime commit `164131a8a4` is published to fork/main; all three triggered
+  hosted workflows passed. Local final harness gate: 702 passed / 11 skipped.
+  Implementation and real-model experimental evidence remain separate gates.
   Paid model pilot awaits a named model/service and budget.
 
 - Earlier completed milestone: [native DUT/bugfix three-arm campaign](native-three-arm-campaign.md).
@@ -49,8 +50,8 @@ implementation and does not change the phase statuses below.
   are verified through deterministic integration gates.
 - Phase 6 is runtime-integrated and deterministically verified (AA-VAE-046),
   with real-model evidence still pending. Phase 7/8 runtime integration is
-  implemented; Phase 9 experiments need named model/service/budget, and Phase 10
-  final closeout remains active.
+  implemented; Phase 9 experiments need named model/service/budget. Phase 10
+  runtime closeout is verified and fork-published.
 - Legacy mini-swe remains default. Native format recovery, multi-action and
   deadline behavior intentionally differ; see [AA-VAE-038](../docs/alphaapollo-migration/features/AA-VAE-038-mini-swe-behavior-differential.md).
 - Earlier local broad regression retained **636 passed / 7 skipped / 1 failed**
@@ -524,9 +525,10 @@ Reporting rules:
 
 ### Phase 10 - CI, clean-room smoke, documentation, and merge gates
 
-Status: `in_progress`; AA-VAE-043–048 have focused tests and all triggered
-hosted gates green. AA-VAE-049 local integration passes; its final stable-tree
-and hosted verification are recorded separately in the verification log.
+Status: `completed` for the approved AA-VAE-043–049 runtime scope. Focused tests,
+final stable-tree harness gate and all triggered hosted gates passed. Exact
+commit/run links and the compact-checkout/LSP limitations are recorded in the
+verification log. This does not complete Phase 9 real-model experiments.
 
 CI layers:
 

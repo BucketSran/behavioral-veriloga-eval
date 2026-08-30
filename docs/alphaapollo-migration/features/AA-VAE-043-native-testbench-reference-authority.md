@@ -51,3 +51,6 @@ telemetry 根错误；`cd work` 单测 RED→GREEN 后，最终两个 public ada
 新旧 backend 全量 parity 或 Spectre 一致性。EVAS 仍为 0.8.7、score authority
 仍为 `development_only`。自动 retry、完整证据导出、Reasoning/Evolution
 运行接入和统计结果闭环由后续独立提交完成，不能据此标为已完成。
+
+后续状态：上述运行功能已分别由 AA-VAE-044–049 实现并验证；本篇仍只证明
+Testbench 切片自身的范围。当前状态以 `plans/current-plan.md` 为准。

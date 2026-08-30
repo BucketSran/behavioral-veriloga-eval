@@ -1,7 +1,8 @@
 # Remaining native harness functionality
 
 Date: 2026-08-30. Base: `0f014c39e1016e8c6877ff7c48dbddb2733d8f93`.
-Status: approved runtime scope implemented; final verification/publication active.
+Status: approved runtime scope implemented, verified and fork-published at
+`164131a8a4ec2da5c71e10d584549355bd932929`; all triggered hosted workflows passed.
 Real-model experimental evidence is a separate unfulfilled gate.
 
 Progress: AA-VAE-043 native Testbench authority and three-form nine-cell
@@ -15,6 +16,11 @@ the reviewed candidate-only/round runtime; AA-VAE-048 integrates the separate
 safe single-trajectory ledger. AA-VAE-049 integrates actual Evolution provider
 entrypoints, candidate/public-feedback rounds, selected-only final replay and
 all-branch evidence/costs; three-form real Docker connectivity passes.
+
+The remaining gate is experimental: select the named model/service/budget,
+freeze matched pilot controls and inspect actual model failures/results. Domain
+tools remain a separate design decision; no further runtime feature is implied
+by that deferral. See `logs/verification-log.md` for exact closure evidence.
 
 ## Brief and scope
 

@@ -1,7 +1,8 @@
 # AA-VAE-047 — Candidate-only episodes and sealed parallel rounds
 
-Status: reviewed reusable runtime; production Evolution composition remains a
-separate slice. These unit tests alone do not establish runnable Evolution.
+Status: reviewed reusable runtime; production Evolution composition is now
+implemented and separately verified in AA-VAE-049. These unit tests alone do
+not establish runnable Evolution.
 
 ## Public idea and deviations
 
