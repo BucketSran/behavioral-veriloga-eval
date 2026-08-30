@@ -675,6 +675,29 @@ Recommended execution order after the generic store:
 4. native typed campaign result join;
 5. only then start the AlphaApollo reasoning/evolution backend comparison.
 
+#### Active slice - production final replay receipt (2026-08-30)
+
+Brief: connect the existing trusted replay executor to the typed final-authority
+adapter and immutable sidecar store through an opt-in production scoring path.
+Keep legacy mini-swe generation and scoring behavior available for comparison.
+
+Acceptance / KPI:
+
+- real replay returns a verified content-addressed sidecar receipt;
+- frozen submission, evaluator, EVAS, command, and runtime identity drift fails
+  closed before publication; missing structured output never becomes a pass;
+- repeated invocation cannot overwrite evidence or silently rerun the judge;
+- scoring leaves generation/checkpoint/trajectory bytes unchanged;
+- the deterministic r53 three-arm Docker smoke exercises this path without
+  implying model-quality, fully typed trajectory, or Spectre evidence.
+
+Execution: one behavioral RED/GREEN at a time; production adapter and tests,
+then smoke/resume boundary and documentation as separate reviewable commits.
+Independent review precedes fork-only publication. No new dependencies, domain
+tools, r53 edits, EVAS edits, or model API experiments are in this slice.
+Explicit infrastructure retry orchestration and native typed campaign ledgers
+remain separate follow-ups; do not fabricate them from legacy messages.
+
 ### Phase 6 - Add the AlphaApollo single-trajectory reasoning backend
 
 Status: `pending`

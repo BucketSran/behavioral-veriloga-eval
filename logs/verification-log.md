@@ -1,5 +1,15 @@
 # Verification Log
 
+## 2026-08-30 - Production final integration baseline
+
+- Fresh fetch/audit: behavioral fork main and origin/main agree at
+  `7c49bb95a6a0ff282a006f8028660169c5c202ba`; upstream/main remains
+  `7b5616dc52195ec275ec6d21c71d7763613702cd` (0 upstream-only, 53 fork-only).
+- The EVAS audit branch, origin/main, and upstream/main all remain
+  `6cb6fa7a7dac70fc0d4120126d8cf74258e6637b`; its worktree is clean.
+- Both worktrees were clean before this slice. This planning update defines
+  the production adapter acceptance gate, not completed integration evidence.
+
 ## 2026-08-29 - Fork synchronization
 
 - `BucketSran/behavioral-veriloga-eval` `main` equals upstream at

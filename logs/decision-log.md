@@ -1,5 +1,19 @@
 # Decision Log
 
+## 2026-08-30 - Opt-in production final replay integration scope
+
+- Connect the existing production executor to the generic authority adapter and
+  immutable writer without switching mini-swe generation or reconstructing
+  native typed trajectories from legacy messages.
+- Require explicit trusted profile/context inputs; preserve the legacy path
+  for differential comparison. Bound scoring does not write into the frozen
+  generation result or checkpoint.
+- Reserve a persistent final-test boundary before execution. A failed or
+  interrupted invocation cannot silently rerun or resume model generation;
+  infrastructure retry orchestration remains an explicit follow-up.
+- Verify runtime/submission/evaluator/command identity around execution and
+  preserve the scorer's infrastructure classification for outer watchdogs.
+
 ## 2026-08-29 - Fork-first development
 
 - Continue development and audit on the `BucketSran` forks.
