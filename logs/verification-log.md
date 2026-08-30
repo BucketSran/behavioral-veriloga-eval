@@ -1,5 +1,68 @@
 # Verification Log
 
+## 2026-08-30 - Native episode / production result join (AA-VAE-036)
+
+- Fresh fork audit with `--fetch`: behavioral main/origin started clean at
+  `4879ee64bb05b99e0ccec7bd64a16ab42eb1045c`; upstream remained
+  `7b5616dc52195ec275ec6d21c71d7763613702cd` (0 behind, 63 ahead).
+  EVAS remained clean at `6cb6fa7a7dac70fc0d4120126d8cf74258e6637b`.
+- Vertical TDD RED/GREEN: missing immutable result writer, missing native entry,
+  legacy entry bypass after pre-final native failure, acceptance of prior
+  generation/freeze evidence, missing CI selection, and relative runtime paths
+  resolving incorrectly inside the legacy judge subprocess. One early test
+  proposal omitted required native-call `type`; fixed the fixture, not parser.
+- Additional regressions cover authority mismatch, receipt path/digest/bytes/
+  attempt/input identity tampering, missing structured verdict, publication
+  failure, same-chain public feedback and final result, and no final model event.
+- Broad affected suite (all `test_agent_harness_*`, evaluator environment,
+  v3 claim/smoke, v4 result protocol, calibration, score reuse, mini-swe,
+  r53 entrypoints and clean-room smoke): **590 passed, 5 skipped in 226.59s**.
+  JUnit: `/Users/bucketsran/Documents/TsingProject/vaEVAS-next/native-episode-smoke-mpGFIz/regression.xml`.
+  This run began before the final relative-path regression was added. After its
+  fix, the complete native/result-store/artifact/CI focused set passed
+  **45 passed, 1 skipped in 14.85s**, with fresh evidence at
+  `native-episode-smoke-mpGFIz/focused-final.xml`. Meta-schema: 4 passed.
+- Real r53 `v4-001` Docker same-chain smoke passed first in 31.84s and again on
+  the final code in **19.54s**. Command:
+
+  ```sh
+  VABENCH_TEST_DOCKER_RUNTIME=1 uv run --locked --extra agentic python -m pytest -q \
+    tests/test_agent_harness_native_episode.py::test_r53_docker_native_episode_result_join \
+    --basetemp /Users/bucketsran/Documents/TsingProject/vaEVAS-next/native-episode-smoke-mpGFIz/docker-final
+  ```
+
+- Final smoke document:
+  `/Users/bucketsran/Documents/TsingProject/vaEVAS-next/native-episode-smoke-mpGFIz/docker-final/test_r53_docker_native_episode0/native-episode-smoke.json`;
+  byte SHA-256 `02f4c57a3b38760014dff7ef3e6a5eef6b0cd71d666a929447258bec352e084f`.
+  Native artifact self-hash:
+  `6cc1f834b53f5d86868e056f367e33f3f482441771fa55b2848033da75030135`;
+  trajectory tail:
+  `53f9a8573a6fe0dd9a7e9b2f1063bda25540fa763db193cc00473079f2e093dd`;
+  candidate/freeze:
+  `ed247e3e8f80ac258bb3e1c07330af63399241af519a679121b31c3e82ab8a67`;
+  actual sidecar bytes:
+  `62abcae4366bf0a7a5e3129f44e1062fccc43f2fddd397fe6078b047d4951f82`.
+- The public-contract-derived incomplete DUT produced successful public
+  simulation and expected final `behavior_failure`, score 0.0. The native
+  result binds both to the frozen candidate; Docker network was disabled and
+  evaluator not mounted. Final verdict never entered the policy/projection.
+  This is a scripted pipeline test, not a model baseline or quality experiment.
+- Independent read-only review found no current behavioral/authority blocker;
+  the final relative-path delta was separately reviewed and tested (1 passed).
+  The reviewer returned COMMENT, not formal APPROVE, because language-server
+  diagnostics were unavailable. No delegated edits or Git operations occurred.
+- Ruff 0.12.12 (`uvx --offline`, isolated default rules) passed for all new or
+  changed harness/test files. Including `run_campaign.py` reports pre-existing
+  F841 at line 3330; the same warning was reproduced from pre-edit HEAD at line
+  3327. It was not silently waived or repaired as unrelated work. An initial
+  cached Ruff 0.16.5 invocation also reported broader import/style rules; no
+  dependency or repository lint policy was changed. Python compilation,
+  workflow YAML parsing and `git diff --check` passed; full type checking was
+  not run (no configured Python type checker/language server).
+- r53/EVAS, model tools, default mini-swe selection, model APIs and Spectre
+  remain unchanged. Complete CLI/provider wiring, Testbench, raw-content trace
+  archives, retry, memory/lineage and aggregate ledgers remain outside this slice.
+
 ## 2026-08-30 - Public validation fork publication and hosted confirmation
 
 - Published only to BucketSran `origin/main`: `7801193007` scope plan,

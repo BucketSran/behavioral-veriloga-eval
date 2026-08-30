@@ -451,8 +451,8 @@ Remaining Phase 2 gaps:
   fresh-workspace discard semantics;
 - candidate lineage events still need production candidate-store/runtime joins;
 - the immutable trajectory/submission/authority/score-sidecar artifact now
-  exists at the generic harness protocol layer, but still needs to be connected
-  to production campaign result writers and real r53 result ledgers.
+  has an opt-in native episode / production replay writer and r53 smoke;
+  complete campaign CLI, raw-content archives and aggregate ledgers remain open.
 
 Required event types include:
 
@@ -695,7 +695,8 @@ Recommended execution order after the generic store:
 2. production public-validation adapter (opt-in DUT slice verified);
 3. broader resume/checkpoint/retry lineage verification (bound runtime's
    persistent no-reentry gate implemented);
-4. native typed campaign result join;
+4. native typed campaign result join (opt-in episode writer verified; full
+   campaign launch/distribution and aggregate ledger still pending);
 5. only then start the AlphaApollo reasoning/evolution backend comparison.
 
 #### Verified slice - production final replay receipt (2026-08-30)
@@ -767,7 +768,7 @@ complete trajectory content/typed result joins, Testbench support, and retry
 lineage remain open. Phase 5 stays `in_progress`; no reasoning/evolution
 backend implementation or baseline-quality claim is implied.
 
-#### Active slice - native episode / production final result join (2026-08-30)
+#### Verified slice - native episode / production final result join (2026-08-30)
 
 Brief: compose the existing controller and trusted replay into an opt-in Python
 entry point. Persist its native trajectory and validated scored-result artifact
@@ -798,6 +799,14 @@ full CLI/backend launcher, model API experiment, raw trace archive, aggregate
 ledger, retry coordinator, or proof of hostile-host isolation. Existing hash
 events do not imply full replayable model/tool content. Authority/provenance
 and exclusive workspace ownership remain coordinator responsibilities.
+
+Implemented as AA-VAE-036. The same-chain r53 Docker smoke now joins public
+simulation, a real freeze, EVAS final replay and an immutable native artifact.
+The production composition API does not install the smoke's test-only public
+dispatcher. Phase 5 remains `in_progress`; production tool/CLI integration,
+Testbench, retry, memory/lineage and complete campaign ledgers remain open.
+Verification, the relative-runtime-path RED/GREEN repair and review limitations
+are recorded in `logs/verification-log.md`.
 
 ### Phase 6 - Add the AlphaApollo single-trajectory reasoning backend
 

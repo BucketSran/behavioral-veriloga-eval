@@ -409,6 +409,47 @@ Generated campaign manifests, runtime workspaces, API responses, simulator
 outputs, and credentials belong outside the repository. Only runner source,
 tests, schemas, and compact aggregate reports should enter a PR.
 
+## Opt-in Native Episode Result Join
+
+`native_episode.run_native_episode(...)` composes a caller-owned typed policy
+and environment with the existing controller and production final replay. It
+does not replace `DefaultAgent`, launch a provider, install `run_evas`, or add a
+campaign CLI mode. Mini-swe bridges remain available as caller components.
+
+The trusted coordinator supplies a fresh, exclusively owned runtime,
+`EpisodeContext`, policy/environment/registry, a validated backend profile hash,
+public/final profiles frozen before generation, and the existing final command,
+watchdog and EVAS executable. The environment's freeze callback must use the
+existing submission snapshot and return its real `FrozenSubmission`.
+
+The API reserves `evidence/native-episode` before policy entry. It writes a
+request journal, the controller's native trajectory, and an outcome journal;
+only verified terminal evidence produces an atomic, non-overwritable
+`scored-results/<artifact_sha256>.json`. The returned `NativeEpisodeRun` contains
+the typed outcome, trajectory path, optional artifact path and verified sidecar
+receipt. All of these terminal outputs are trusted coordinator data, never
+model feedback. Unscored failures have no fabricated score; classified final
+infrastructure failures retain `score=null`.
+
+Native attempts cannot resume in place, including through the old campaign
+entry point after a pre-scoring failure. A crash or publication failure keeps
+the runtime reserved. Explicit retry orchestration, aggregate ledgers, complete
+raw trace archives and the production public-tool dispatch are still pending.
+The caller retains environment cleanup responsibility on preflight rejection;
+the controller owns normal cleanup after it starts.
+
+Test the bounded same-chain integration after building the pinned images:
+
+```sh
+VABENCH_TEST_DOCKER_RUNTIME=1 uv run --locked --extra agentic python -m pytest -q \
+  tests/test_agent_harness_native_episode.py::test_r53_docker_native_episode_result_join
+```
+
+On local Docker VMs, place pytest `--basetemp` under a shared workspace path.
+The deterministic public-contract stub and test-only public-tool router prove
+pipeline binding, not a model baseline or an activated domain tool. See
+`docs/alphaapollo-migration/features/AA-VAE-036-native-episode-result-join.md`.
+
 ## Score A Completed Campaign
 
 Run a judge adapter over every complete submission and aggregate model, form,

@@ -89,8 +89,9 @@ Integration sequence:
 
 ## Immediate Follow-up
 
-The public-validation adapter slice is verified. The coordinator now owns the
-opt-in native episode / production final result join described in the current
-plan, including `native_episode.py`, minimal result-store/reentry changes and
-their tests. Parallel mapping/review remains read-only; no delegated writing
-lane is opened by this document.
+The public-validation adapter and opt-in native episode / production final
+result join are verified. Complete production tool/CLI integration, Testbench,
+retry, raw trace archives and aggregate ledgers remain follow-ups under the
+current plan. The coordinator defines the next bounded files/tests before
+implementation; mapping/review stays read-only and no delegated writing lane
+is opened by this document.

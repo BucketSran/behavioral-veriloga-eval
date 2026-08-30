@@ -1,5 +1,24 @@
 # Decision Log
 
+## 2026-08-30 - Native episode result join and failure boundary
+
+- The native entry accepts trusted policy/environment components and frozen
+  profiles; it does not launch a model or activate a public-validation tool.
+  The r53 same-chain smoke's public dispatcher remains test-only.
+- Reserve the native attempt before policy entry; reject known prior generation
+  or freeze evidence and reject native-to-legacy model reentry. Crashes and
+  publication failures do not authorize a retry or another model call.
+- Verify the production sidecar receipt and actual bytes before constructing
+  the native result. Generic result persistence validates protocol joins, not
+  execution provenance; the production coordinator owns receipt verification.
+- Preserve unscored failure evidence without a score; a classified final
+  infrastructure outcome keeps a null score, not candidate zero.
+- Resolve runtime paths before invoking the legacy judge's changed working
+  directory. The RED fixture proved a relative path otherwise addressed the
+  wrong runtime and produced an infrastructure outcome.
+- Keep the pre-existing `run_campaign.py` unused-variable lint warning outside
+  this behavioral slice; record it rather than claim all-file lint is clean.
+
 ## 2026-08-30 - Native episode / production result join scope
 
 - Reuse `EpisodeController`, mini-swe bridges, bound final replay and the

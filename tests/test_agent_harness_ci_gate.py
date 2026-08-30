@@ -48,3 +48,12 @@ def test_evaluator_closure_runs_public_validation_docker_native_trajectory() -> 
         "tests/test_agent_harness_production_public_validation.py::"
         "test_r53_docker_public_validation_native_trajectory_smoke"
     ) in workflow
+
+
+def test_evaluator_closure_runs_native_episode_result_join() -> None:
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    prefix = '"benchmark-vabench-release-v4/operations/calibration_pilot/'
+    assert workflow.count(prefix + 'native_episode.py"') == 2
+    assert (
+        "tests/test_agent_harness_native_episode.py::test_r53_docker_native_episode_result_join"
+    ) in workflow
