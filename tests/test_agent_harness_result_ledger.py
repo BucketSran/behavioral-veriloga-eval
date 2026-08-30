@@ -131,6 +131,23 @@ def _attempt(attempt_id: str, *, provider_requests: int | None, output_tokens: i
     }
 
 
+def test_optional_call_budget_is_exported_and_bound_to_campaign():
+    campaign = _campaign()
+    campaign["execution_config"]["native_model_call_limit"] = 1
+    rows = [_row(cell, score=None, status="budget_exhausted") for cell in campaign["cells"]]
+    summary = {"limit": 1, "used_before_attempt": 0, "admitted_in_attempt": 1,
+               "used_total": 1, "remaining": 0}
+    for row in rows:
+        row.update(model_call_limit=1, model_call_budget=summary, terminal_reason="model_call_limit",
+                   termination_reason="model_call_limit")
+    ledger = result_ledger.build_native_campaign_ledger(campaign, rows, campaign_file_sha256=SHA_A)
+    assert all(record["model_call_budget"] == summary for record in ledger["records"])
+    assert ledger["denominator"]["eligible_actual_score_cells"] == 0
+    rows[0]["model_call_limit"] = 2
+    with pytest.raises(ValueError, match="model-call limit"):
+        result_ledger.build_native_campaign_ledger(campaign, rows, campaign_file_sha256=SHA_A)
+
+
 def test_native_campaign_ledger_projects_safe_rows_and_cost_missingness() -> None:
     campaign = _campaign()
     attempts = [

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+import json
 
 from .tool_registry import ToolCapability
 
@@ -14,6 +15,26 @@ _CAPABILITY_COSTS: dict[str, dict[str, int]] = {
     "public_validation": {"tool_calls": 1, "public_validation_calls": 1},
     "submission": {"tool_calls": 1},
 }
+
+
+def validate_model_call_limit(value: int | None) -> int | None:
+    if value is not None and (type(value) is not int or value <= 0):
+        raise ValueError("model-call limit must be a positive integer or omitted")
+    return value
+
+
+def model_call_budget_text(payload: Mapping) -> str:
+    """Public policy guidance; absence preserves uncapped request bytes."""
+    budget = payload.get("model_call_budget")
+    if budget is None:
+        return ""
+    return (
+        "\n\nController model-call budget (logical requests, including this response): "
+        + json.dumps(dict(budget), sort_keys=True)
+        + "\nThis response's legal action can still execute when remaining is zero. "
+        "Submit explicitly before the limit; reaching it without submission does not trigger scoring. "
+        "Existing time and cost limits still apply."
+    )
 
 
 class BudgetContractError(ValueError):
@@ -47,7 +68,7 @@ class BudgetUpdate:
 class BudgetLedger:
     """Track one attempt; campaign/branch aggregation remains outside this module."""
 
-    def __init__(self, limits: Mapping[str, int]) -> None:
+    def __init__(self, limits: Mapping[str, int], *, model_calls_before_attempt: int = 0) -> None:
         if not isinstance(limits, Mapping):
             raise TypeError("budget limits must be a mapping")
         for counter, limit in limits.items():
@@ -57,8 +78,36 @@ class BudgetLedger:
                 raise TypeError("budget limits must be integers")
             if limit < 0:
                 raise ValueError("budget limits cannot be negative")
+        validate_model_call_limit(limits.get("model_calls"))
         self._limits = dict(limits)
         self._consumed: dict[str, int] = {}
+        if (type(model_calls_before_attempt) is not int
+                or not 0 <= model_calls_before_attempt <= limits.get("model_calls", 0)):
+            raise ValueError("invalid prior model-call consumption")
+        self._model_calls_before = model_calls_before_attempt
+        if "model_calls" in limits:
+            self._consumed["model_calls"] = model_calls_before_attempt
+
+    def admit_model_call(self) -> dict[str, int] | None:
+        """Reserve a logical policy request, including failed/invalid responses."""
+        limit = self._limits.get("model_calls")
+        if limit is None:
+            return None
+        used = self._consumed.get("model_calls", 0)
+        if used >= limit:
+            raise BudgetLimitExceeded(counter="model_calls", limit=limit)
+        self._consumed["model_calls"] = used + 1
+        return {"limit": limit, "call_number": used + 1,
+                "remaining_after_this_call": limit - used - 1}
+
+    def model_call_summary(self) -> dict[str, int] | None:
+        limit = self._limits.get("model_calls")
+        if limit is None:
+            return None
+        used = self._consumed.get("model_calls", 0)
+        return {"limit": limit, "used_before_attempt": self._model_calls_before,
+                "admitted_in_attempt": used - self._model_calls_before,
+                "used_total": used, "remaining": limit - used}
 
     def ensure_available(self, capability: ToolCapability) -> None:
         for counter, amount in self._cost(capability).items():

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 import hashlib
 import json
 import math
@@ -204,6 +204,16 @@ def run_attempt_sequence(
                 failure_phase="unresolved",
                 evidence={"error_type": type(exc).__name__},
             )
+        if "model_calls" in context.budget_limits:
+            try:
+                _model_calls_after(_context_document(context), outcome.evidence)
+            except AttemptSequenceError:
+                # Unknown usage cannot be interpreted as zero or retried safely.
+                outcome = replace(
+                    outcome, primary_outcome="infrastructure_failure",
+                    terminal_reason="model_call_accounting_unknown", score=None,
+                    failure_category="unresolved_callback_exception", failure_phase="unresolved",
+                )
         outcome_document = outcome.to_document()
         outcome_sha256 = _canonical_sha256(outcome_document)
         retry_decision = _retry_decision(
@@ -241,6 +251,10 @@ def run_attempt_sequence(
             attempt_id=str(retry_decision["next_attempt_id"]),
             reason=str(outcome.failure_category),
         )
+        if "model_calls" in context.budget_limits:
+            context = replace(context, model_calls_before_attempt=_model_calls_after(
+                _context_document(context), outcome.evidence,
+            ))
 
     selected = attempts[-1]
     selection = {
@@ -333,6 +347,7 @@ def verify_attempt_sequence_receipts(output_root: Path) -> bool:
         seen_ids: set[str] = set()
         previous_attempt_id: str | None = None
         previous_failure_category: str | None = None
+        previous_model_calls = initial_context.get("model_calls_before_attempt", 0)
         for index, row in enumerate(attempts):
             if not isinstance(row, Mapping):
                 return False
@@ -391,6 +406,8 @@ def verify_attempt_sequence_receipts(output_root: Path) -> bool:
             )
             if request_context != attempt_context:
                 return False
+            if request_context.get("model_calls_before_attempt", 0) != previous_model_calls:
+                return False
             if request_context["attempt_id"] != attempt_id:
                 return False
             if not _expected_lineage(
@@ -420,6 +437,18 @@ def verify_attempt_sequence_receipts(output_root: Path) -> bool:
             if attempt.get("request_sha256") != _canonical_sha256(request):
                 return False
             outcome = _validated_outcome_document(attempt.get("outcome"))
+            if "model_calls" in request_context["budget_limits"]:
+                try:
+                    previous_model_calls = _model_calls_after(request_context, outcome["evidence"])
+                except AttemptSequenceError:
+                    if not (
+                        outcome.get("failure_category") == "unresolved_callback_exception"
+                        and outcome.get("failure_phase") == "unresolved"
+                        and outcome.get("primary_outcome") == "infrastructure_failure"
+                        and outcome.get("terminal_reason") == "model_call_accounting_unknown"
+                        and outcome.get("score_present") is False
+                    ):
+                        return False
             if attempt.get("outcome_sha256") != _canonical_sha256(outcome):
                 return False
             if row.get("receipt_sha256") != _canonical_sha256(attempt):
@@ -488,6 +517,8 @@ def _retry_rejection_reason(
         return "not_infrastructure_failure"
     if outcome.failure_category == "unresolved_callback_exception" or outcome.failure_phase == "unresolved":
         return "unresolved_callback_exception"
+    if outcome.evidence.get("model_call_budget", {}).get("remaining") == 0:
+        return "model_call_limit"
     if outcome.submission_frozen or outcome.final_started:
         return "post_freeze_failure"
     if outcome.failure_phase != "pre_final":
@@ -592,6 +623,8 @@ def _context_document(context: EpisodeContext) -> dict[str, Any]:
         "condition": context.condition,
         "max_steps": context.max_steps,
         "budget_limits": _json_ready(context.budget_limits),
+        **({"model_calls_before_attempt": context.model_calls_before_attempt}
+           if "model_calls" in context.budget_limits else {}),
         "parent_attempt_id": context.parent_attempt_id,
         "retry_index": context.retry_index,
         "retry_reason": context.retry_reason,
@@ -663,7 +696,7 @@ def _validated_context_document(
             "parent_attempt_id",
             "retry_index",
             "retry_reason",
-        },
+        } | ({"model_calls_before_attempt"} if "model_calls" in value.get("budget_limits", {}) else set()),
     ):
         raise AttemptSequenceError("context contains unknown or missing keys")
     required_strings = ("episode_id", "attempt_id", "task_id", "condition")
@@ -683,6 +716,8 @@ def _validated_context_document(
             raise AttemptSequenceError("invalid budget counter")
         if isinstance(item, bool) or not isinstance(item, int) or item < 0:
             raise AttemptSequenceError("invalid budget limit")
+        if key == "model_calls" and item == 0:
+            raise AttemptSequenceError("model-call limit must be positive")
     retry_index = value.get("retry_index")
     if isinstance(retry_index, bool) or not isinstance(retry_index, int) or retry_index < 0:
         raise AttemptSequenceError("invalid context retry_index")
@@ -705,11 +740,32 @@ def _validated_context_document(
         "retry_index": retry_index,
         "retry_reason": retry_reason,
     }
+    if "model_calls" in budget_limits:
+        prior = value.get("model_calls_before_attempt")
+        if type(prior) is not int or not 0 <= prior <= budget_limits["model_calls"]:
+            raise AttemptSequenceError("invalid prior model calls")
+        document["model_calls_before_attempt"] = prior
     if expected is not None:
         for field_name in ("episode_id", "task_id", "condition", "max_steps", "budget_limits"):
             if document[field_name] != expected[field_name]:
                 raise AttemptSequenceError("context drift")
     return document
+
+
+def _model_calls_after(context: Mapping, evidence: Mapping) -> int:
+    """Validate cumulative usage before allowing a fresh attempt; never refund."""
+    budget = evidence.get("model_call_budget")
+    limit = context["budget_limits"]["model_calls"]
+    before = context["model_calls_before_attempt"]
+    if not isinstance(budget, Mapping) or any(type(value) is not int for value in budget.values()):
+        raise AttemptSequenceError("missing or invalid model-call accounting")
+    admitted = budget.get("admitted_in_attempt", -1)
+    used = before + admitted
+    if (admitted < 0 or used > limit or dict(budget) != {
+            "limit": limit, "used_before_attempt": before, "admitted_in_attempt": admitted,
+            "used_total": used, "remaining": limit - used}):
+        raise AttemptSequenceError("model-call accounting mismatch")
+    return used
 
 
 def _validated_outcome_document(value: object) -> dict[str, Any]:

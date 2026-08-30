@@ -180,7 +180,8 @@ class EpisodeController:
     def run(self, context: EpisodeContext) -> EpisodeResult | CandidateEpisodeResult:
         result: EpisodeResult | CandidateEpisodeResult | None = None
         submission = None
-        budget_ledger = BudgetLedger(context.budget_limits)
+        budget_ledger = BudgetLedger(context.budget_limits,
+                                     model_calls_before_attempt=context.model_calls_before_attempt)
         phase = "tool_authority_resolution"
 
         def require_observation_authority(observation, action=None):
@@ -360,8 +361,18 @@ class EpisodeController:
         def deadline_expired():
             return self._deadline is not None and time.monotonic() >= self._deadline
 
+        def stop_if_model_limit():
+            summary = budget_ledger.model_call_summary()
+            if summary is not None and summary["remaining"] == 0:
+                raise _ControllerFailure(
+                    category="model_call_limit", phase="controller_budget",
+                    message="configured model-call limit exhausted without submission",
+                    primary_outcome="budget_exhausted", terminal_reason="model_call_limit",
+                )
+
         def finalize_deadline():
             nonlocal phase
+            stop_if_model_limit()
             phase = "deadline_finalization"
             self._record(
                 context, actor="controller", event_type="deadline_reached",
@@ -393,6 +404,8 @@ class EpisodeController:
                 payload={
                     "max_steps": context.max_steps,
                     "budget_limits": dict(context.budget_limits),
+                    **({"model_calls_before_attempt": context.model_calls_before_attempt}
+                       if "model_calls" in context.budget_limits else {}),
                     "public_validation_profile_sha256": self._public_validation_profile_sha256,
                     "effective_capability_sha256": (
                         effective_toolset.effective_capability_sha256
@@ -409,9 +422,28 @@ class EpisodeController:
             require_observation_authority(observation)
             steps = range(context.max_steps) if context.max_steps is not None else itertools.count()
             for _ in steps:
+                stop_if_model_limit()
                 if deadline_expired():
                     result = finalize_deadline()
                     break
+                phase = "controller_budget"
+                try:
+                    model_budget = budget_ledger.admit_model_call()
+                except BudgetLimitExceeded as exc:
+                    raise _ControllerFailure(
+                        category="model_call_limit", phase=phase,
+                        message="configured model-call limit exhausted without submission",
+                        primary_outcome="budget_exhausted", terminal_reason="model_call_limit",
+                    ) from exc
+                if model_budget is not None:
+                    # This controller-owned snapshot overwrites any tool-provided value.
+                    observation = replace(observation, payload={
+                        **observation.payload, "model_call_budget": model_budget,
+                    })
+                    self._record(
+                        context, actor="controller", event_type="model_call_admitted",
+                        visibility="harness", payload=model_budget,
+                    )
                 phase = "policy_action"
                 try:
                     action = self._policy.act(observation)
@@ -761,6 +793,7 @@ class EpisodeController:
                 )
                 break
             if result is None:
+                stop_if_model_limit()
                 failure = FailureDisposition(
                     category="step_budget_exhausted",
                     phase="controller_budget",
@@ -876,6 +909,9 @@ class EpisodeController:
             "terminal_reason": result.terminal_reason,
             "incidents": [incident.category for incident in result.incidents],
         }
+        model_budget_summary = budget_ledger.model_call_summary()
+        if model_budget_summary is not None:
+            completed_payload["model_call_budget"] = model_budget_summary
         if isinstance(result, EpisodeResult):
             completed_payload["primary_outcome"] = result.primary_outcome
         else:

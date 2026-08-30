@@ -4,7 +4,7 @@
 
 `run_deepseek_pilot.py` composes the existing native harness for the predeclared
 family029 three-form/two-backend pilot. It is not the normal campaign CLI:
-one shared CNY 5.00 (USD 0.70 for USD accounts) cap, eight calls/cell, one attempt,
+one shared CNY 5.00 (USD 0.70 for USD accounts) cap, eight calls/cell by pilot default, one attempt,
 serial execution, no resume. It loads only `DEEPSEEK_API_KEY` from an external
 owner-only literal credential file; never use `source` or pass the two-key file
 to the older raw-key argument. GLM is not called.
@@ -62,6 +62,23 @@ strict_json` explicitly to study that protocol. Run separate matched campaigns,
 not a mixture of backend identities in one result table. Native fresh-attempt
 recovery is opt-in with `--native-max-attempts` (default one): it recovers only
 eligible infrastructure failures before terminal activity, not wrong answers.
+
+The campaign wrapper also accepts `--native-model-call-limit N` for either
+native backend, with N a positive integer. Omission adds no model-call limit;
+eight is only the named DeepSeek pilot's default, not a harness or r53 rule.
+The frozen execution config and every model request carry the configured limit
+and current remaining calls. Each admitted logical policy request counts,
+including failed requests, and fresh infrastructure attempts cannot refund it.
+Underlying HTTP retries and provider output-token caps are separate controls.
+The Nth response's legal action can execute and submit; exhaustion without a
+submission is `budget_exhausted / model_call_limit`, with a null score and no
+automatic freeze/judge. Other time, tool and cost limits still apply. An actual
+terminal failure keeps its own cause even if it consumed the last allowance.
+OneShot still makes only one output-only generation. Legacy rejects this opt-in.
+The historical single-cell CLI has no new flag; its native Python API accepts
+`model_call_limit`. Evolution retains its separately frozen branch budgets.
+See [AA-VAE-054](../../../docs/alphaapollo-migration/features/AA-VAE-054-optional-model-call-budget.md)
+for exact counting, evidence fields and tests. This does not authorize a paid run.
 
 For native campaigns, `score_campaign.py --ledger-output /absolute/new-ledger.json`
 adds a write-once reviewer-safe ledger outside the generation directory. It

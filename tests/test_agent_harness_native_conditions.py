@@ -193,7 +193,8 @@ def test_native_no_evas_uses_absent_public_authority_and_no_evas_runtime(native_
     assert "FINAL_JUDGE_SENTINEL" not in json.dumps(provider.requests)
 
 
-def test_native_oneshot_submits_once_without_bash_or_public_feedback(native_case, tmp_path):  # noqa: F811
+@pytest.mark.parametrize("limit", [None, 1, 7])
+def test_native_oneshot_submits_once_without_bash_or_public_feedback(native_case, tmp_path, limit):  # noqa: F811
     from run_native_mini_swe import run_prepared_native_mini_swe
 
     arguments, _, _ = native_case
@@ -207,6 +208,7 @@ def test_native_oneshot_submits_once_without_bash_or_public_feedback(native_case
         cell=_cell(arm="OneShot"),
         client=provider,
         attempt_id="attempt-oneshot",
+        model_call_limit=limit,
         evas_command=arguments["evas_command"],
         final_judge_command=arguments["command"],
         allow_insecure_test_sandbox=True,
@@ -215,6 +217,11 @@ def test_native_oneshot_submits_once_without_bash_or_public_feedback(native_case
     assert run.result.primary_outcome == "behavior_failure"
     assert run.artifact_path is not None
     assert len(provider.requests) == 1
+    latest = provider.requests[0]["messages"][-1]["content"]
+    if limit is None:
+        assert "remaining_after_this_call" not in latest
+    else:
+        assert f'"remaining_after_this_call": {limit - 1}' in latest
     assert provider.requests[0]["tools"][0]["function"]["name"] == "submit_artifacts"
     assert "bash" not in json.dumps(provider.requests[0]["tools"])
     evidence = runtime / "evidence/native-launcher"

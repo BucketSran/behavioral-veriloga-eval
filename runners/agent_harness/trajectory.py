@@ -20,6 +20,7 @@ _REQUIRED_EVENT_VISIBILITY = {
     "action_rejected": "harness",
     "candidate_transition_rejected": "harness",
     "budget_updated": "harness",
+    "model_call_admitted": "harness",
     "environment_observed": "model",
     "candidate_snapshot_frozen": "harness",
     "submission_freeze_rejected": "harness",
@@ -190,7 +191,7 @@ def validate_trajectory_semantics(events: list[dict[str, Any]]) -> bool:
             for event in events[freeze_index + 1 :]
         ):
             return False
-    return _validate_action_lifecycle(events)
+    return _validate_action_lifecycle(events) and _validate_model_call_budget(events)
 
 
 def validate_candidate_trajectory_semantics(events: list[dict[str, Any]]) -> bool:
@@ -280,7 +281,56 @@ def validate_candidate_trajectory_semantics(events: list[dict[str, Any]]) -> boo
             for event in events[snapshot_index + 1 :]
         ):
             return False
-    return _validate_action_lifecycle(events)
+    return _validate_action_lifecycle(events) and _validate_model_call_budget(events)
+
+
+def _validate_model_call_budget(events: list[dict[str, Any]]) -> bool:
+    started = events[0]["payload"]
+    limits = started.get("budget_limits", {})
+    if not isinstance(limits, Mapping) or any(not isinstance(e.get("event_type"), str) for e in events):
+        return False
+    limit = limits.get("model_calls")
+    summary = events[-1]["payload"].get("model_call_budget")
+    admitted = [e for e in events if e["event_type"] == "model_call_admitted"]
+    if limit is None:
+        return not admitted and summary is None
+    before = started.get("model_calls_before_attempt", 0)
+    if (type(limit) is not int or limit <= 0 or type(before) is not int or not 0 <= before <= limit
+            or not isinstance(summary, Mapping)
+            or any(type(value) is not int for value in summary.values())):
+        return False
+    used, awaiting_action, terminal = before, False, False
+    for event in events:
+        kind = event["event_type"]
+        if kind == "model_call_admitted":
+            used += 1
+            if (terminal or awaiting_action or used > limit or event.get("actor") != "controller"
+                    or any(type(value) is not int for value in event["payload"].values())
+                    or event["payload"] != {"limit": limit, "call_number": used,
+                                            "remaining_after_this_call": limit - used}):
+                return False
+            awaiting_action = True
+        elif kind == "action_proposed":
+            if not awaiting_action or terminal:
+                return False
+            awaiting_action = False
+        elif kind in {"episode_failed", "submission_frozen", "candidate_snapshot_frozen", "deadline_reached"}:
+            terminal = True
+    if summary != {"limit": limit, "used_before_attempt": before,
+                   "admitted_in_attempt": used - before, "used_total": used,
+                   "remaining": limit - used}:
+        return False
+    if events[-1]["payload"].get("terminal_reason") == "model_call_limit":
+        failures = [e["payload"] for e in events if e["event_type"] == "episode_failed"]
+        return (
+            used == limit and len(failures) == 1
+            and failures[0].get("category") == "model_call_limit"
+            and failures[0].get("phase") == "controller_budget"
+            and failures[0].get("primary_outcome") == "budget_exhausted"
+            and not any(e["event_type"] in {"submission_frozen", "final_judgment_completed",
+                                            "candidate_snapshot_frozen"} for e in events)
+        )
+    return True
 
 
 def _validate_action_lifecycle(events: list[dict[str, Any]]) -> bool:

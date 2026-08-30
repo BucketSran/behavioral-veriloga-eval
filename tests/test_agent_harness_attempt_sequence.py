@@ -16,6 +16,26 @@ from runners.agent_harness.attempt_sequence import (
 from runners.agent_harness.state import EpisodeContext
 
 
+@pytest.mark.parametrize("evidence", [{}, {"model_call_budget": {}}, {"model_call_budget": {"used_total": True}}])
+def test_missing_budget_accounting_cannot_remain_successful(tmp_path, evidence):
+    context = EpisodeContext("cell", "attempt", "task", "Agentic", None, {"model_calls": 3})
+    root = tmp_path / "sequence"
+    result = run_attempt_sequence(
+        initial_context=context, output_root=root, retry_policy=_policy(),
+        execute=lambda *_: AttemptOutcome("passed", "submitted", score=1.0, evidence=evidence),
+    )
+    assert result.selected.primary_outcome == "infrastructure_failure"
+    assert result.selected.terminal_reason == "model_call_accounting_unknown"
+    assert result.selected.score is None and result.attempt_count == 1
+    assert verify_attempt_sequence_receipts(root)
+    receipt = _receipt(root / "attempt/attempt.json")
+    receipt["outcome"].update(primary_outcome="passed", terminal_reason="submitted", score_present=True)
+    receipt["retry_decision"]["reason"] = "not_infrastructure_failure"
+    _overwrite_receipt(root / "attempt/attempt.json", receipt)
+    _rewrite_attempt_and_selection_hashes(root, "attempt")
+    assert not verify_attempt_sequence_receipts(root)
+
+
 def _context() -> EpisodeContext:
     return EpisodeContext(
         episode_id="episode-001",
@@ -25,6 +45,37 @@ def _context() -> EpisodeContext:
         max_steps=4,
         budget_limits={"tool_call": 3},
     )
+
+
+def test_verifier_rejects_rehashed_zero_model_call_limit(tmp_path):
+    root = tmp_path / "sequence"
+    context = EpisodeContext("cell", "attempt", "task", "Agentic", None, {"model_calls": 1})
+    run_attempt_sequence(
+        initial_context=context, output_root=root, retry_policy=_policy(),
+        execute=lambda *_: AttemptOutcome("infrastructure_failure", "fixture", evidence={
+            "model_call_budget": {"limit": 1, "used_before_attempt": 0,
+                                  "admitted_in_attempt": 0, "used_total": 0, "remaining": 1},
+        }),
+    )
+    assert verify_attempt_sequence_receipts(root)
+    sequence = _receipt(root / "request.json")
+    sequence["initial_context"]["budget_limits"]["model_calls"] = 0
+    _overwrite_receipt(root / "request.json", sequence)
+    sequence_hash = _canonical_sha256(sequence)
+    for name in ("request.json", "attempt.json"):
+        path = root / "attempt" / name
+        document = _receipt(path)
+        document["sequence_request_sha256"] = sequence_hash
+        document["context"]["budget_limits"]["model_calls"] = 0
+        if name == "attempt.json":
+            document["outcome"]["evidence"]["model_call_budget"].update(limit=0, remaining=0)
+            document["retry_decision"]["reason"] = "model_call_limit"
+        _overwrite_receipt(path, document)
+    selection = _receipt(root / "selection.json")
+    selection["sequence_request_sha256"] = sequence_hash
+    _overwrite_receipt(root / "selection.json", selection)
+    _rewrite_request_hashes(root, "attempt")
+    assert not verify_attempt_sequence_receipts(root)
 
 
 def _policy() -> RetryPolicy:

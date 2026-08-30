@@ -248,6 +248,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--native-max-attempts", type=int, default=1,
                         help="Frozen fresh-attempt cap for native infrastructure failures.")
+    parser.add_argument("--native-model-call-limit", type=int, default=None,
+                        help="Optional positive logical-call cap per cell, shared across retries.")
     parser.add_argument("--reasoning-proposal-format", default="native_tool_calls",
                         choices=("native_tool_calls", "strict_json"))
     parser.add_argument(
@@ -304,6 +306,10 @@ def main() -> int:
             f"{args.comparison_profile} requires --agent-scaffold mini-swe"
         )
     from run_native_attempts import retry_policy
+    from runners.agent_harness.budget import validate_model_call_limit
+    validate_model_call_limit(args.native_model_call_limit)
+    if args.episode_backend == "legacy" and args.native_model_call_limit is not None:
+        raise SystemExit("model-call limits require a native episode backend")
     if args.episode_backend != "native-reasoning" and args.reasoning_proposal_format != "native_tool_calls":
         raise SystemExit("strict_json requires native-reasoning")
     try:
@@ -408,6 +414,8 @@ def main() -> int:
         "episode_backend": args.episode_backend,
         "reasoning_proposal_format": args.reasoning_proposal_format,
         "native_retry_policy": native_retry_policy.to_document(),
+        **({"native_model_call_limit": args.native_model_call_limit}
+           if args.native_model_call_limit is not None else {}),
         "agent_scaffold": args.agent_scaffold,
         "mini_swe_sandbox": args.mini_swe_sandbox,
         "mini_swe_image": args.mini_swe_image,
@@ -480,6 +488,8 @@ def main() -> int:
     ]
     if args.evas_command:
         command.extend(["--evas-command", args.evas_command])
+    if args.native_model_call_limit is not None:
+        command.extend(["--native-model-call-limit", str(args.native_model_call_limit)])
     if args.api_key_file:
         command.extend(["--api-key-file", args.api_key_file])
     if args.final_judge_command:

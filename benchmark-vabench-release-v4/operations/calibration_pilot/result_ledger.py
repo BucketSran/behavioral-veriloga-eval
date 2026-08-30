@@ -69,6 +69,11 @@ def build_native_campaign_ledger(
     row_list = [_mapping(row, "row") for row in rows]
     _validate_schedule_join(campaign_obj, cells, row_list)
     _validate_campaign_backend(campaign_obj, row_list)
+    limit = (campaign_obj.get("execution_config") or {}).get("native_model_call_limit")
+    if limit is not None and (type(limit) is not int or limit <= 0):
+        raise ValueError("invalid campaign model-call limit")
+    if any(row.get("model_call_limit") != limit for row in row_list):
+        raise ValueError("row model-call limit differs from frozen campaign")
     records = [
         _record_projection(campaign_obj, cell, row)
         for cell, row in _ordered_pairs(cells, row_list)
@@ -108,6 +113,22 @@ def build_native_campaign_ledger(
     }
     result["ledger_sha256"] = _canonical_sha256(result)
     return result
+
+
+def _model_call_budget_projection(row: Mapping[str, Any]) -> dict[str, Any]:
+    if "model_call_limit" not in row:
+        return {}
+    limit, budget = row["model_call_limit"], row.get("model_call_budget")
+    if budget is not None:
+        fields = {"limit", "used_before_attempt", "admitted_in_attempt", "used_total", "remaining"}
+        if (not isinstance(budget, Mapping) or set(budget) != fields
+                or any(type(value) is not int or value < 0 for value in budget.values())
+                or budget["limit"] != limit
+                or budget["used_total"] != budget["used_before_attempt"] + budget["admitted_in_attempt"]
+                or budget["remaining"] != limit - budget["used_total"]):
+            raise ValueError("invalid model-call budget summary")
+        budget = dict(budget)
+    return {"model_call_limit": limit, "model_call_budget": budget}
 
 
 def _cells(campaign: Mapping[str, Any]) -> list[dict[str, Any]]:
@@ -201,6 +222,7 @@ def _record_projection(
     score_authority = _score_authority(row)
     return {
         "backend": backend,
+        **_model_call_budget_projection(row),
         "identity": identity,
         "identity_sources": {
             "model": model_source,

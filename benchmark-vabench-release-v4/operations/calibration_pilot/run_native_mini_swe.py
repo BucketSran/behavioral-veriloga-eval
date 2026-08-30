@@ -43,6 +43,9 @@ from runners.agent_harness.proposals import (  # noqa: E402
 )
 from runners.agent_harness.evidence_export import build_reviewer_evidence_export  # noqa: E402
 from runners.agent_harness.trajectory import read_trajectory  # noqa: E402
+from runners.agent_harness.budget import (  # noqa: E402
+    model_call_budget_text, validate_model_call_limit,
+)
 from runners.agent_harness.backends.mini_swe import (  # noqa: E402
     MiniSwePolicyBridge,
     MiniSweBashEnvironmentBridge,
@@ -307,7 +310,7 @@ class _OneShotModel:
         self.total_output_tokens = 0
         self.calls = 0
 
-    def submit_once(self) -> dict:
+    def submit_once(self, observation: Observation) -> dict:
         if self.calls:
             raise ProposalNormalizationError(
                 "oneshot_reprompt_forbidden",
@@ -316,7 +319,7 @@ class _OneShotModel:
         self.calls += 1
         messages = [
             {"role": "system", "content": runner.ONESHOT_TRANSPORT_INSTRUCTION},
-            {"role": "user", "content": self.prompt},
+            {"role": "user", "content": self.prompt + model_call_budget_text(observation.payload)},
         ]
         timeout_s = min(
             float(self.request_timeout_s),
@@ -377,7 +380,7 @@ class _OneShotPolicy:
         self._used = True
         if observation.candidate_tree_sha256 is None:
             raise ValueError("candidate_tree_sha256 is required for OneShot")
-        proposal = self.model.submit_once()
+        proposal = self.model.submit_once(observation)
         return normalize_proposal(
             ProposalEnvelope(
                 action_id=f"{self._action_id_prefix}-0001",
@@ -548,6 +551,7 @@ def run_prepared_native_mini_swe(
     episode_context: EpisodeContext | None = None,
     episode_backend: str = "native-mini-swe",
     reasoning_proposal_format: str = "native_tool_calls",
+    model_call_limit: int | None = None,
 ) -> native_episode.NativeEpisodeRun:
     """Run an exclusively owned fresh exported native tri-form cell.
 
@@ -555,6 +559,8 @@ def run_prepared_native_mini_swe(
     Use the CLI for exporter/config composition. No resume or automatic retry.
     """
     condition = validate_native_cell(cell)
+    validate_model_call_limit(model_call_limit)
+    budget_limits = {} if model_call_limit is None else {"model_calls": model_call_limit}
     backend = _backend_profile(episode_backend, reasoning_proposal_format)
     docker_image = _select_docker_image(condition, docker_image)
     if min(request_timeout_s, tool_timeout_s, judge_timeout_s) <= 0:
@@ -580,12 +586,13 @@ def run_prepared_native_mini_swe(
             )
     policy_config = runner.load_experiment_policy()
     context = episode_context or EpisodeContext(
-        cell["cell_id"], attempt_id, cell["task_id"], condition, None
+        cell["cell_id"], attempt_id, cell["task_id"], condition, None,
+        budget_limits=budget_limits,
     )
     if (
         (context.episode_id, context.attempt_id, context.task_id, context.condition)
         != (cell["cell_id"], attempt_id, cell["task_id"], condition)
-        or context.max_steps is not None or context.budget_limits
+        or context.max_steps is not None or dict(context.budget_limits) != budget_limits
     ):
         raise ValueError("attempt context differs from frozen native cell policy")
     directory = runtime / "evidence/native-launcher"
@@ -652,6 +659,9 @@ def run_prepared_native_mini_swe(
             "experiment_policy": policy_config,
             "experiment_policy_sha256": runner.experiment_policy_sha256(),
             "max_steps": None,
+            **({"model_call_limit": model_call_limit,
+                "model_calls_before_attempt": context.model_calls_before_attempt}
+               if model_call_limit is not None else {}),
             "request_timeout_s": request_timeout_s,
             "tool_timeout_s": tool_timeout_s,
             "judge_timeout_s": judge_timeout_s,
@@ -909,6 +919,10 @@ class NativeMiniSwePolicy:
                     [observation.to_document()["payload"]],
                 )
             )
+        budget_text = model_call_budget_text(observation.payload)
+        if budget_text:
+            # Append after tool feedback; never mutate old observations or prompts.
+            self.messages.append(self.model.format_message(role="user", content=budget_text))
         try:
             message = self.model.query(self.messages)
         except self._format_error:

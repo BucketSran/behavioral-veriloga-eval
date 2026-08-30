@@ -1,6 +1,7 @@
 # Native operational contract and optional model-call budget
 
 Date: 2026-08-30. Base: `32b63963bd2c71a9076f7d36066512f6a191c464`.
+Implementation update: 2026-08-31.
 The user approved implementation of both changes after confirming the budget
 semantics. Main owns implementation, integration and fork-only publication.
 
@@ -67,3 +68,20 @@ No-EVAS misleading instructions, changed history/score compatibility and cap
 exhaustion being mislabeled as infrastructure failure. Stop the affected lane
 on concurrent edits, unexplained release drift or required scoring-policy
 expansion; do not expand the experiment or spend to validate the repair.
+
+## Implementation closeout
+
+- AA-VAE-053 is independently published as `ad40f11496`. Actual outbound
+  requests now contain condition-appropriate guidance; the native-only prompt
+  delta is explicit in legacy differential tests.
+- AA-VAE-054 implements the optional cap through the normal campaign wrapper,
+  native API, controller and result/attempt joins. No-cap fields and requests
+  remain unchanged. Last actions execute; unsubmitted exhaustion cannot invoke
+  the deadline finalizer. Unknown accounting cannot remain successful or retry.
+- Main implements all files; two independent read-only reviews approve the
+  bounded change. Review-discovered accounting/semantic-validation edges have
+  regression tests, including rejection of rehashed zero-limit receipts.
+- Exact free-test results, validation gaps and fresh Docker evidence are in
+  `logs/verification-log.md`; code maps are in AA-VAE-053 and AA-VAE-054 notes.
+  These close the requested repair, not real-model experimental evidence or
+  broader installed-example/tool-surface questions. No paid rerun is started.

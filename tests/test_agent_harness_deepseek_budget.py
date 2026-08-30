@@ -104,21 +104,23 @@ def test_truncated_or_mismatched_response_never_refunds_reservation(tmp_path, mo
         assert budget.committed == Decimal("3.182592")
 
 
-def test_eight_call_limit_cannot_reset_with_a_fresh_client(tmp_path, monkeypatch):
+@pytest.mark.parametrize("limit", [1, 5, 8, 11])
+def test_call_limit_cannot_reset_with_a_fresh_client(tmp_path, monkeypatch, limit):
     pilot = importlib.import_module("deepseek_budget")
     sent = []
     monkeypatch.setattr(subprocess, "run", lambda *a, **k:
         (sent.append(a) or subprocess.CompletedProcess([], 0, _stream({
             "prompt_tokens": 10, "completion_tokens": 1, "total_tokens": 11,
         }), "")))
-    with pilot.DeepSeekPilotBudget(tmp_path / "spend.jsonl", cell_ids=["a", "b"]) as budget:
-        for _ in range(8):
+    with pilot.DeepSeekPilotBudget(tmp_path / "spend.jsonl", cell_ids=["a", "b"],
+                                  model_call_limit=limit) as budget:
+        for _ in range(limit):
             pilot.BudgetedDeepSeekClient(budget=budget, cell_id="a", api_key="fixture").complete([], 10, [])
         with pytest.raises(pilot.PilotBudgetStop, match="model-call"):
             pilot.BudgetedDeepSeekClient(budget=budget, cell_id="a", api_key="fixture").complete([], 10, [])
         # A cell-local call ceiling does not discard other scheduled cells.
         pilot.BudgetedDeepSeekClient(budget=budget, cell_id="b", api_key="fixture").complete([], 10, [])
-    assert len(sent) == 9
+    assert len(sent) == limit + 1
 
 
 def test_transport_failure_stops_before_inherited_retry_can_spend(tmp_path, monkeypatch):

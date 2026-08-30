@@ -1,5 +1,24 @@
 # Decision Log
 
+## 2026-08-31 - Optional model-call budget is operational configuration (AA-VAE-054)
+
+- Normal native campaigns may freeze any positive integer N; omission adds no
+  call-count rule. Eight stays the named DeepSeek pilot's default, not r53 policy.
+  Native model requests expose current trusted remaining calls; the Nth legal
+  action may submit. No unsubmitted call-limit stop may auto-freeze or score.
+- Reserve before each logical policy request, including failures. HTTP attempts,
+  provider output tokens and monetary reservations remain separate. Fresh
+  infrastructure attempts carry cumulative usage; unknown accounting cannot
+  retry or retain a successful/scored status. Only proven pre-controller sandbox
+  startup with an empty provider trace may record zero newly admitted calls.
+- Join frozen config, context offset, event sequence, terminal summary, native
+  score row and safe ledger. Rehashed malformed/zero-limit evidence fails semantic
+  validation. Configured caps reject legacy usage; Evolution keeps its own
+  branch budget interface. No r53/EVAS/legacy-source or stopped evidence changes.
+- Two read-only reviews approve; main alone owns edits and fork publication.
+  All implementation checks use free fixtures, including real Docker/EVAS.
+  No credentials or paid provider generation are required or authorized here.
+
 ## 2026-08-31 - Repair public operational guidance independently (AA-VAE-053)
 
 - Reuse the existing condition-specific Bash contract for both native interactive

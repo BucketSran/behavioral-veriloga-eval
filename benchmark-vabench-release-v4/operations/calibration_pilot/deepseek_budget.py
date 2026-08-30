@@ -30,7 +30,11 @@ class PilotBudgetStop(RuntimeError):
 
 
 class DeepSeekPilotBudget:
-    def __init__(self, journal: Path, *, cell_ids: list[str], currency="CNY", cap=None):
+    def __init__(self, journal: Path, *, cell_ids: list[str], currency="CNY", cap=None,
+                 model_call_limit=8):
+        if type(model_call_limit) is not int or model_call_limit <= 0:
+            raise ValueError("pilot model-call limit must be a positive integer")
+        self.model_call_limit = model_call_limit
         if currency not in RATES:
             raise ValueError("pilot currency must be CNY or USD")
         self.input_rate, self.output_rate, maximum = RATES[currency]
@@ -58,7 +62,7 @@ class DeepSeekPilotBudget:
                          input_miss_peak_per_million=str(self.input_rate),
                          output_peak_per_million=str(self.output_rate),
                          context_token_bound=CONTEXT_TOKEN_BOUND, model=MODEL,
-                         model_call_limit_per_cell=8, max_output_tokens=MAX_OUTPUT_TOKENS,
+                         model_call_limit_per_cell=model_call_limit, max_output_tokens=MAX_OUTPUT_TOKENS,
                          pricing_date="2026-08-30", may_enter_model_memory=False)
         except BaseException:
             self.journal.close()
@@ -84,7 +88,7 @@ class DeepSeekPilotBudget:
     def begin_call(self, cell_id):
         with self.lock:
             self._check_active_cell(cell_id)
-            if self.model_calls[cell_id] >= 8:
+            if self.model_calls[cell_id] >= self.model_call_limit:
                 self._record("cell_stopped", reason="model_call_limit", cell_id=cell_id)
                 raise PilotBudgetStop("pilot model-call ceiling reached for this cell")
             self.model_calls[cell_id] += 1

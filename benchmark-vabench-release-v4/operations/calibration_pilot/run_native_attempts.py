@@ -25,6 +25,7 @@ from runners.agent_harness.attempt_sequence import (  # noqa: E402
     verify_attempt_sequence_receipts,
 )
 from runners.agent_harness.state import EpisodeContext  # noqa: E402
+from runners.agent_harness.budget import validate_model_call_limit  # noqa: E402
 
 
 TRANSPORT_ERROR_TYPES = frozenset(
@@ -58,7 +59,8 @@ def run_native_attempt_sequence(
     _validate_inputs(cell=cell, args=args, client_factory=client_factory, retry_policy=retry_policy)
     campaign_sha = _campaign_file_sha256(args)
     root = args.output / cell["cell_id"]
-    initial_context = _initial_context(cell)
+    limit = validate_model_call_limit(getattr(args, "native_model_call_limit", None))
+    initial_context = _initial_context(cell, limit)
 
     def execute(context: EpisodeContext, reserved_runtime: Path) -> AttemptOutcome:
         attempt_args = copy(args)
@@ -139,6 +141,8 @@ def read_native_attempt_sequence(
         ):
             raise ValueError("native row sidecar mismatch")
         _validate_native_row_identity(native_row, cell=cell, attempt_context=context)
+        if evidence.get("model_call_budget") != native_row.get("model_call_budget"):
+            raise ValueError("native attempt budget evidence mismatch")
         _validate_attempt_lineage_artifacts(cell_runtime=cell_runtime, context=context)
         if _canonical_sha256(native_row) != evidence["native_row_sha256"]:
             raise ValueError("native attempt source hash mismatch")
@@ -210,13 +214,14 @@ def _validate_inputs(
         raise TypeError("retry_policy must be a RetryPolicy")
 
 
-def _initial_context(cell: Mapping[str, Any]) -> EpisodeContext:
+def _initial_context(cell: Mapping[str, Any], model_call_limit=None) -> EpisodeContext:
     return EpisodeContext(
         episode_id=str(cell["cell_id"]),
         attempt_id=f"{cell['cell_id']}-attempt-0001",
         task_id=str(cell["task_id"]),
         condition=str(cell["experimental_arm"]),
         max_steps=None,
+        budget_limits={} if model_call_limit is None else {"model_calls": model_call_limit},
     )
 
 
@@ -269,6 +274,8 @@ def _attempt_outcome_from_row(
         "native_row_sha256": _canonical_sha256(row),
         "source_hashes": source_hashes(cell_runtime),
     }
+    if "model_call_budget" in row:
+        evidence["model_call_budget"] = row["model_call_budget"]
     return AttemptOutcome(
         primary_outcome=primary,
         terminal_reason=terminal,
@@ -483,6 +490,11 @@ def _validate_native_row_identity(
 ) -> None:
     if row.get("attempt_id") != attempt_context.get("attempt_id"):
         raise ValueError("native row attempt identity mismatch")
+    if "model_call_budget" in row:
+        budget = row["model_call_budget"]
+        if (budget["limit"] != attempt_context["budget_limits"].get("model_calls")
+                or budget["used_before_attempt"] != attempt_context.get("model_calls_before_attempt")):
+            raise ValueError("native row budget context mismatch")
     for key in ("cell_id", "task_id", "family_id", "form", "mode", "experimental_arm"):
         if row.get(key) != cell.get(key):
             raise ValueError("native row cell identity mismatch")

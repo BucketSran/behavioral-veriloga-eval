@@ -557,6 +557,26 @@ def read_native_cell(
             fallback_model_status="runner_failure",
             artifact_gate={"passed": False},
         )
+        if "model_call_limit" in dispatch:
+            from runners.agent_harness.budget import validate_model_call_limit
+            limit = validate_model_call_limit(dispatch["model_call_limit"])
+            before = dispatch.get("model_calls_before_attempt")
+            if limit is None or type(before) is not int or not 0 <= before <= limit:
+                raise ValueError("invalid dispatch model-call budget")
+            row["model_call_limit"] = limit
+            # Only positively identified pre-controller startup failure proves zero.
+            # Partial post-start traces remain unknown and cannot authorize a retry.
+            if (dispatch.get("error_type") == "SandboxStartupError"
+                    and not (runtime / "evidence/native-episode").exists()):
+                startup = read_trajectory(evidence(prefix + "private-events.jsonl"))
+                if (startup and not validate_trajectory(startup)) or any(
+                    str(event.get("event_type", "")).startswith("provider_") for event in startup
+                ):
+                    raise ValueError("startup failure contains model-call evidence")
+                row["model_call_budget"] = {
+                    "limit": limit, "used_before_attempt": before, "admitted_in_attempt": 0,
+                    "used_total": before, "remaining": limit - before,
+                }
         return row
     result = read_json(evidence(prefix + "result.json"))
     manifest = read_json(evidence(prefix + "manifest.json", result["manifest_sha256"]))
@@ -656,6 +676,24 @@ def read_native_cell(
         },
     }
     artifact_path = result["artifact_path"]
+    if "model_call_limit" in manifest:
+        from runners.agent_harness.budget import validate_model_call_limit
+        limit = validate_model_call_limit(manifest["model_call_limit"])
+        budget = outcome.get("model_call_budget")
+        if (
+            limit is None or not isinstance(budget, dict)
+            or budget != events[-1]["payload"].get("model_call_budget")
+            or budget["limit"] != limit
+            or request["budget_limits"] != {"model_calls": limit}
+            or request.get("model_calls_before_attempt") != manifest.get("model_calls_before_attempt")
+            or budget["used_before_attempt"] != manifest.get("model_calls_before_attempt")
+            or metering["provider"]["requests"] > budget["admitted_in_attempt"]
+        ):
+            raise ValueError("native model-call budget evidence mismatch")
+        row["model_call_budget"] = budget
+        row["model_call_limit"] = limit
+    elif request.get("budget_limits") or outcome.get("model_call_budget") is not None:
+        raise ValueError("native model-call budget missing from manifest")
     if artifact_path is None:
         failure = outcome["failure"]
         failed = [event["payload"] for event in events if event["event_type"] == "episode_failed"]
@@ -1097,6 +1135,9 @@ def main() -> int:
         expected_format = (campaign.get("execution_config") or {}).get("reasoning_proposal_format", "native_tool_calls")
         if any(row.get("proposal_format", "native_tool_calls") != expected_format for row in rows):
             raise ValueError("native row proposal format differs from frozen campaign")
+        expected_limit = (campaign.get("execution_config") or {}).get("native_model_call_limit")
+        if any(row.get("model_call_limit") != expected_limit for row in rows):
+            raise ValueError("native row model-call limit differs from frozen campaign")
         if campaign.get("model") and any(row.get("model", campaign["model"]) != campaign["model"] for row in rows):
             raise ValueError("native row model differs from frozen campaign")
         output = (

@@ -2770,6 +2770,7 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
             episode_context=attempt_context,
             episode_backend=args.episode_backend,
             reasoning_proposal_format=getattr(args, "reasoning_proposal_format", "native_tool_calls"),
+            model_call_limit=getattr(args, "native_model_call_limit", None),
         )
         result = {
             "cell": cell,
@@ -3332,6 +3333,10 @@ def run_cell_preserving_failure(
         if getattr(args, "episode_backend", "legacy") in {"native-mini-swe", "native-reasoning"}:
             failure = {
                 "backend": args.episode_backend,
+                **({"model_call_limit": args.native_model_call_limit,
+                    "model_calls_before_attempt": getattr(
+                        getattr(args, "_native_attempt_context", None), "model_calls_before_attempt", 0)}
+                   if getattr(args, "native_model_call_limit", None) is not None else {}),
                 "proposal_format": getattr(args, "reasoning_proposal_format", "native_tool_calls"),
                 "cell": cell,
                 "runtime": str(runtime),
@@ -3405,6 +3410,7 @@ def main() -> int:
         help="Opt-in episode implementation; legacy preserves the historical path.",
     )
     parser.add_argument("--native-max-attempts", type=int, default=1)
+    parser.add_argument("--native-model-call-limit", type=int, default=None)
     parser.add_argument("--reasoning-proposal-format", default="native_tool_calls",
                         choices=("native_tool_calls", "strict_json"))
     parser.add_argument(
@@ -3495,6 +3501,12 @@ def main() -> int:
             f"observed={args.mini_swe_no_evas_image}"
         )
     execution_config = campaign.get("execution_config") or {}
+    from run_native_attempts import validate_model_call_limit
+    validate_model_call_limit(args.native_model_call_limit)
+    if args.episode_backend == "legacy" and args.native_model_call_limit is not None:
+        parser.error("model-call limits require a native episode backend")
+    if args.native_model_call_limit != execution_config.get("native_model_call_limit"):
+        parser.error("model-call limit differs from frozen execution config")
     if args.reasoning_proposal_format != execution_config.get("reasoning_proposal_format", "native_tool_calls"):
         raise SystemExit("campaign frozen reasoning proposal format differs from CLI")
     if args.episode_backend != "native-reasoning" and args.reasoning_proposal_format != "native_tool_calls":

@@ -18,6 +18,7 @@ from ..proposals import (
     normalize_proposal,
 )
 from ..state import AgentAction, EpisodeContext, Observation
+from ..budget import model_call_budget_text
 
 
 DEFAULT_REASONING_SYSTEM_PROMPT = (
@@ -348,6 +349,8 @@ def _request_content(context: EpisodeContext, observation: Observation) -> str:
                 "condition": context.condition,
             },
             "observation": observation.to_document(),
+            **({"budget_instruction": model_call_budget_text(observation.payload)}
+               if "model_call_budget" in observation.payload else {}),
         },
         ensure_ascii=False,
         sort_keys=True,

@@ -1,6 +1,6 @@
 # vaEVAS AI-Native Harness Evolution Plan
 
-Updated: 2026-08-30
+Updated: 2026-08-31
 
 Completed detail and the original design matrix are preserved in the
 [dated plan snapshot](archive/2026-08-30-harness-plan-snapshot.md).
@@ -13,12 +13,16 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
-- Active authorized repair: [native operational contract and optional call budget](native-operational-contract-and-call-budget.md).
-  First repair Reasoning's missing condition-appropriate Bash/submit guidance;
-  then implement an optional positive call limit with trusted remaining-budget
-  observations and explicit unscored exhaustion. Eight is a pilot parameter,
-  not a general harness/r53 rule. Use test-first independent commits and free
-  fixtures only; no paid rerun is authorized by this implementation task.
+- Implemented authorized repair: [native operational contract and optional call budget](native-operational-contract-and-call-budget.md).
+  [AA-VAE-053](../docs/alphaapollo-migration/features/AA-VAE-053-public-operational-contract.md)
+  repairs Reasoning's condition-appropriate Bash/submit guidance, independently
+  published as `ad40f11496`.
+  [AA-VAE-054](../docs/alphaapollo-migration/features/AA-VAE-054-optional-model-call-budget.md)
+  adds an optional positive call limit, trusted remaining-budget observations,
+  unscored exhaustion and cumulative attempt accounting. Eight remains a pilot
+  parameter, not a general harness/r53 rule. Independent reviews pass; final
+  free-fixture verification and publication evidence are recorded in the log.
+  No paid rerun is authorized by this implementation task.
 
 - Bounded experiment executed and safely stopped: [DeepSeek pilot audit](../docs/alphaapollo-migration/experiments/deepseek-pilot-20260830.md).
   The user confirmed GLM Coding Plan only, then explicitly chose DeepSeek API.
@@ -31,10 +35,10 @@ implementation and does not change the phase statuses below.
   handshake failure stopped the shared budget. CNY3.420315 is the conservative
   committed/reserved upper bound, not an invoice. No automatic paid rerun.
   [Offline trajectory diagnosis](../docs/alphaapollo-migration/experiments/deepseek-pilot-20260830-diagnosis.md)
-  is complete: Reasoning omits the public Bash/submit contract; neither backend
-  sees the pilot call horizon. Path/status and installed-example boundaries are
-  also recorded. Next is a focused, test-first operational-contract repair, not
-  a paid rerun; runtime code is unchanged in this diagnosis slice. This
+  is complete: the stopped run lacked Reasoning's public Bash/submit contract
+  and both backends' call horizon. AA-VAE-053/054 now repair those defects for
+  future runs; the old evidence remains unchanged. Path/status and installed-example
+  boundaries are also recorded. This is not authorization for a paid rerun. The
   development pilot does not change r53's normal wall-time policy or authorize
   full-r53/Evolution execution.
 

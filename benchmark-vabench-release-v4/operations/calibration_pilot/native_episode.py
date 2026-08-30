@@ -218,6 +218,8 @@ def run_native_episode(
             "max_steps": context.max_steps,
             "deadline_monotonic": deadline_monotonic,
             "budget_limits": dict(context.budget_limits),
+            **({"model_calls_before_attempt": context.model_calls_before_attempt}
+               if "model_calls" in context.budget_limits else {}),
             "parent_attempt_id": context.parent_attempt_id,
             "retry_index": context.retry_index,
             "retry_reason": context.retry_reason,
@@ -260,6 +262,8 @@ def run_native_episode(
             "failure": asdict(result.failure) if result.failure else None,
             "incidents": [asdict(incident) for incident in result.incidents],
             "trajectory_tail_sha256": result.trajectory_tail_sha256,
+            **({"model_call_budget": read_trajectory(trajectory_path)[-1]["payload"]["model_call_budget"]}
+               if "model_calls" in context.budget_limits else {}),
         },
     )
     artifact_path = None

@@ -78,13 +78,15 @@ def test_bad_metadata_never_starts_generation_or_echoes_response(monkeypatch, st
     assert "fixture-key" not in str(error.value)
 
 
-def test_freeze_keeps_six_cells_order_bindings_and_refuses_resume(tmp_path):
+@pytest.mark.parametrize("limit", [1, 8, 13])
+def test_freeze_keeps_six_cells_order_bindings_and_refuses_resume(tmp_path, limit):
     pilot = importlib.import_module("run_deepseek_pilot")
     root = tmp_path / "pilot"
     manifest = pilot.freeze_pilot(
         root, preflight={"currency": "CNY", "model_available": True},
         image_id="sha256:" + "a" * 64, code_commit="b" * 40,
         evas_identity={"available": True, "version_output": "evas-sim 0.8.7"},
+        model_call_limit=limit,
     )
     assert [(row["form"], row["backend"]) for row in manifest["schedule"]] == [
         ("dut", "native-mini-swe"), ("dut", "native-reasoning"),
@@ -94,12 +96,14 @@ def test_freeze_keeps_six_cells_order_bindings_and_refuses_resume(tmp_path):
     assert {row["family_id"] for row in manifest["schedule"]} == {"029"}
     assert len({row["pilot_cell_id"] for row in manifest["schedule"]}) == 6
     assert manifest["cap"] == "5.00" and manifest["native_max_attempts"] == 1
+    assert manifest["model_calls_per_cell"] == limit
     for backend, binding in manifest["campaigns"].items():
         path = root / binding["path"]
         assert pilot.sha256(path) == binding["sha256"]
         campaign = json.loads(path.read_text())
         assert len(campaign["cells"]) == 3
         assert campaign["execution_config"]["episode_backend"] == backend
+        assert campaign["execution_config"]["native_model_call_limit"] == limit
     before = {path: path.read_bytes() for path in root.rglob("*.json")}
     with pytest.raises(FileExistsError):
         pilot.freeze_pilot(root, preflight={}, image_id="", code_commit="", evas_identity={})
@@ -137,12 +141,14 @@ def test_pilot_real_docker_free_http_preserves_all_six_rows(tmp_path, monkeypatc
     ).strip()
     evas_command, identity = smoke.resolve_evas_command(str(smoke.ROOT / ".venv/bin/evas"))
     root = tmp_path / "pilot"
+    limit = 5 if failure_mode == "cell-limit" else 8
     manifest = pilot.freeze_pilot(root, preflight={"currency": "CNY", "model_available": True},
-                                 image_id=image_id, code_commit="b" * 40, evas_identity=identity)
+                                 image_id=image_id, code_commit="b" * 40, evas_identity=identity,
+                                 model_call_limit=limit)
     commands = []
     for index, row in enumerate(manifest["schedule"]):
         if index == 0 and failure_mode == "cell-limit":
-            commands.extend(["true"] * 8)
+            commands.extend(["true"] * limit)
             continue
         artifacts = smoke.public_stub_artifacts(smoke.public_contract(smoke.DEFAULT_RELEASE, row["task_id"]))
         commands.extend(["test ! -r /runtime/evaluator/check.py", *[
@@ -158,6 +164,7 @@ def test_pilot_real_docker_free_http_preserves_all_six_rows(tmp_path, monkeypatc
             return real_run(argv, **kwargs)
         payload = json.loads(Path(argv[argv.index("--data-binary") + 1][1:]).read_text())
         assert payload["thinking"] == {"type": "disabled"}
+        assert '"remaining_after_this_call"' in payload["messages"][-1]["content"]
         requests.append(payload)
         if failure_mode == "unknown-cost":
             return subprocess.CompletedProcess(argv, 28, "", "fixture timeout")
@@ -188,7 +195,8 @@ def test_pilot_real_docker_free_http_preserves_all_six_rows(tmp_path, monkeypatc
         assert result["dispositions"] == {"operationally_censored": 1, "completed": 5}
         assert result["rows"][0]["score"] is None
         assert result["rows"][0]["reason"] == "model_call_limit"
-        assert result["rows"][0]["http_attempts"] == result["rows"][0]["model_calls"] == 8
+        assert result["rows"][0]["http_attempts"] == result["rows"][0]["model_calls"] == limit
+        assert result["rows"][0]["native_evidence"]["model_call_budget"]["limit"] == limit
         assert result["stop_reason"] is None
     else:
         assert result["dispositions"] == {"completed": 6}

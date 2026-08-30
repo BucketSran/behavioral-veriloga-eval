@@ -1,5 +1,48 @@
 # Verification Log
 
+## 2026-08-31 - Optional model-call budget (AA-VAE-054)
+
+- Base `ad40f11496` after the independent AA-VAE-053 commit. Test-first slices
+  observed real missing behavior: exact-N enforcement (8 RED), cumulative failed
+  admissions (3 RED), deadline collision (2 RED), native API/request integration,
+  readonly budget projection, retry carry-forward and frozen wrapper config.
+  Test setup/path/import errors were corrected separately, not counted as proof
+  of missing behavior. Shared pilot guard arbitrary limits: 4 RED -> 24 passes;
+  pilot freeze arbitrary limits: 3 RED; ledger projection: 1 RED -> 24 passes.
+- Independent read-only core review found two issues: unknown budget evidence
+  retaining success and rehashed missing event_type raising instead of rejecting.
+  Both have failing-before/fixed regressions; re-review approves (63 focused
+  passes). Integration review approves (169 passes / 3 skips, overlapping);
+  its zero-limit verifier hardening note was also implemented. After fixing the
+  receipt-forgery fixture, zero-limit core/trajectory/receipt checks gave
+  **4 RED / 2 passes**, then the expanded targeted gate gave **113 passes in 18.78s**.
+- Final stable-source full harness command:
+  `uv run --locked --extra agentic python -m pytest -q tests/test_agent_harness_*.py --tb=short`:
+  **834 passed, 16 skipped in 88.59s**. Earlier 831-pass run predates the final
+  three added zero-limit cases; do not add overlapping suite counts together.
+  Ruff 0.12.12 on all changed Python files and diff whitespace checks pass.
+  Active-entrypoint/navigation gate: **23 passed in 0.12s**. No dedicated
+  LSP/typecheck service is available; executable regressions/static lint are
+  the checked gates. Historical missing-asset suite limitations remain unchanged.
+- Final real Docker/EVAS + free HTTP command:
+  `VABENCH_TEST_DOCKER_RUNTIME=1 uv run --locked --extra agentic python -m pytest
+  -q tests/test_agent_harness_deepseek_pilot.py -k real_docker
+  --basetemp=benchmark-vabench-release-v4/reports/aa054-free-smoke-20260831-02 --tb=short`:
+  **3 passed, 11 deselected in 76.73s**. Normal six-cell completion, unknown-cost
+  stop (1 censored + 5 unstarted), and non-eight N=5 exhaustion (1 censored +
+  5 completed) all preserve the six-row schedule. The capped cell has exactly
+  five admitted calls, remaining=0, `model_call_limit`, and a null score.
+  Every fake HTTP request asserts current remaining-budget guidance. No paid
+  provider or credentials are used; the earlier `...-01` smoke is intermediate.
+- Final private fixture index SHA-256 (ht0 normal / ht1 unknown / ht2 N=5):
+  - `d2b2bd448c8ed1bddfb49b6407697f2f356f98fc1830e96153e54c81a63c4ec0`
+  - `56cc8ccd66ef29f6350573e7926ffd8c83c458c606998f5d5e3303892964b800`
+  - `891a1423db419c502ef51b4f209c414d09cddfdcde476cacc7940011c0d2f21c`
+- Scope: only native harness/integration/tests/notes. No r53 release bytes,
+  EVAS, legacy mini-swe implementation/defaults, dependencies, old working trees
+  or stopped live evidence changed. Local verification is not hosted CI or
+  real-model quality evidence; future paid execution remains a separate decision.
+
 ## 2026-08-31 - Public operational contract repair (AA-VAE-053)
 
 - Base `32b63963bd`; first real outbound-request RED: 2 failures for the missing

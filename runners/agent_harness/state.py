@@ -88,6 +88,7 @@ class EpisodeContext:
     parent_attempt_id: str | None = None
     retry_index: int = 0
     retry_reason: str | None = None
+    model_calls_before_attempt: int = 0
 
     def __post_init__(self) -> None:
         for field_name in ("episode_id", "attempt_id", "task_id", "condition"):
@@ -104,7 +105,14 @@ class EpisodeContext:
                 raise TypeError("budget_limits values must be integers")
             if value < 0:
                 raise ValueError("budget_limits values cannot be negative")
+            if counter == "model_calls" and value == 0:
+                raise ValueError("model-call limit must be positive")
         object.__setattr__(self, "budget_limits", frozen_budget_limits)
+        prior = self.model_calls_before_attempt
+        if type(prior) is not int or prior < 0:
+            raise ValueError("model_calls_before_attempt must be a non-negative integer")
+        if prior > frozen_budget_limits.get("model_calls", 0):
+            raise ValueError("prior model calls exceed the configured limit")
         if self.retry_index < 0:
             raise ValueError("retry_index cannot be negative")
         if self.retry_index == 0:

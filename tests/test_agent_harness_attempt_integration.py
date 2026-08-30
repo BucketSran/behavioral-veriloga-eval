@@ -88,6 +88,40 @@ def test_real_native_pipeline_retries_transport_with_fresh_lineage(attempt_case)
     assert len(clients) == 2  # scoring cannot run the provider or judge again
 
 
+@pytest.mark.parametrize("limit", [1, 2, 3])
+def test_native_retry_carries_admitted_calls_including_failed_request(attempt_case, limit):
+    cell, args = attempt_case
+    args.native_model_call_limit = limit
+    clients = []
+
+    def factory():
+        client = Provider([
+            "printf 'module model; endmodule\\n' > public/submission/model.va",
+            "vabench-submit",
+        ])
+        if not clients:
+            def fail(*args, **kwargs):
+                raise TimeoutError("provider unavailable")
+            client.complete = fail
+        clients.append(client)
+        return client
+
+    result = runner.run_cell_preserving_failure(cell, args, None, client_factory=factory)
+    assert len(clients) == (1 if limit == 1 else 2)
+    assert result["model_call_budget"]["used_total"] == limit
+    assert result["model_call_budget"]["used_before_attempt"] == (0 if limit == 1 else 1)
+    assert result["termination_reason"] == {
+        1: "infrastructure_failure", 2: "model_call_limit", 3: "submitted",
+    }[limit]
+    if limit < 3:
+        assert result["score"] is None
+    from run_native_attempts import read_native_attempt_sequence, retry_policy
+    assert read_native_attempt_sequence(
+        args.output / cell["cell_id"], cell, campaign_file_sha256="c" * 64,
+        expected_retry_policy=retry_policy(2),
+    ) == result
+
+
 def test_real_protocol_failure_is_not_automatically_retried(attempt_case):
     cell, args = attempt_case
     clients = []
@@ -106,10 +140,12 @@ def test_real_protocol_failure_is_not_automatically_retried(attempt_case):
     assert len(clients) == 1
 
 
-def test_preflight_timeout_retries_only_before_agent_deadline(attempt_case, monkeypatch):
+@pytest.mark.parametrize("limit", [None, 3])
+def test_preflight_timeout_retries_only_before_agent_deadline(attempt_case, monkeypatch, limit):
     import mini_swe_vabench as mini
 
     cell, args = attempt_case
+    args.native_model_call_limit = limit
     original = mini.VaBenchBashEnvironment.preflight
     starts = []
 
@@ -128,6 +164,9 @@ def test_preflight_timeout_retries_only_before_agent_deadline(attempt_case, monk
     )
     assert result["attempt_count"] == 2
     assert result["attempt_sequence"]["attempts"][0]["failure_category"] == "sandbox_startup"
+    if limit is not None:
+        assert result["model_call_budget"]["used_before_attempt"] == 0
+        assert result["model_call_budget"]["used_total"] == 2
 
 
 def test_expired_agent_deadline_is_not_a_startup_retry(attempt_case, monkeypatch):

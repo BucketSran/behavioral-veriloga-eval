@@ -72,8 +72,10 @@ def provider_preflight(api_key: str) -> dict:
 
 
 def freeze_pilot(root: Path, *, preflight: dict, image_id: str,
-                 code_commit: str, evas_identity: dict) -> dict:
+                 code_commit: str, evas_identity: dict, model_call_limit: int = 8) -> dict:
     """Freeze identical Agentic cells and an alternating serial execution order."""
+    if type(model_call_limit) is not int or model_call_limit <= 0:
+        raise ValueError("pilot model-call limit must be a positive integer")
     root.mkdir(mode=0o700, parents=True, exist_ok=False)
     campaign = build_campaign(
         DEFAULT_RELEASE, sample_families=1, seed=20260830, model_provider="deepseek",
@@ -92,6 +94,7 @@ def freeze_pilot(root: Path, *, preflight: dict, image_id: str,
         directory.mkdir(mode=0o700)
         campaign["execution_config"] = {
             "episode_backend": backend, "workers": 1, "native_max_attempts": 1,
+            "native_model_call_limit": model_call_limit,
             "mini_swe_sandbox": "docker", "mini_swe_image": image_id,
             "reasoning_proposal_format": "native_tool_calls", "temperature": 0, "stream": True,
             "thinking": {"type": "disabled"}, "request_timeout_s": 120,
@@ -115,7 +118,7 @@ def freeze_pilot(root: Path, *, preflight: dict, image_id: str,
         "currency": currency, "cap": str(RATES[currency][2]),
         "input_peak_miss_per_million": str(RATES[currency][0]),
         "output_peak_per_million": str(RATES[currency][1]), "pricing_date": "2026-08-30",
-        "max_output_tokens": MAX_OUTPUT_TOKENS, "model_calls_per_cell": 8,
+        "max_output_tokens": MAX_OUTPUT_TOKENS, "model_calls_per_cell": model_call_limit,
         "native_max_attempts": 1, "workers": 1, "preflight": preflight,
         "code_commit": code_commit, "docker_image_id": image_id, "evas_identity": evas_identity,
         "release_manifest_sha256": campaign["release_manifest_sha256"],
@@ -146,7 +149,7 @@ def execute_pilot(root: Path, manifest: dict, *, api_key: str, evas_command: str
 
         with DeepSeekPilotBudget(journal_path, cell_ids=[
             row["pilot_cell_id"] for row in manifest["schedule"]
-        ], currency=manifest["currency"]) as budget:
+        ], currency=manifest["currency"], model_call_limit=manifest["model_calls_per_cell"]) as budget:
             for scheduled in manifest["schedule"]:
                 row = {key: scheduled[key] for key in (
                     "pilot_cell_id", "cell_id", "task_id", "family_id", "form", "backend", "runtime")}
@@ -164,11 +167,14 @@ def execute_pilot(root: Path, manifest: dict, *, api_key: str, evas_command: str
                                 or sha256(DEFAULT_RELEASE / "MANIFEST.json") != manifest["release_manifest_sha256"]):
                             raise ValueError("frozen input drift")
                         campaign = json.loads(campaign_path.read_text())
+                        if campaign["execution_config"].get("native_model_call_limit") != manifest["model_calls_per_cell"]:
+                            raise ValueError("pilot call limit differs from frozen campaign")
                         cell = next(cell for cell in campaign["cells"] if cell["cell_id"] == row["cell_id"])
                         args = argparse.Namespace(
                             output=root / row["backend"] / "run", release=DEFAULT_RELEASE,
                             resume=False, dry_run=False, episode_backend=row["backend"],
                             native_max_attempts=1, agent_timeout_s=1800, setup_timeout_s=1800,
+                            native_model_call_limit=manifest["model_calls_per_cell"],
                             request_timeout_s=120, tool_timeout_s=1800, judge_timeout_s=1800,
                             evas_command=evas_command, mini_swe_image=manifest["docker_image_id"],
                             mini_swe_sandbox="docker", campaign_file_sha256=binding["sha256"],
@@ -183,6 +189,8 @@ def execute_pilot(root: Path, manifest: dict, *, api_key: str, evas_command: str
                                                   campaign_file_sha256=binding["sha256"])
                         row.update(disposition="completed", reason=native["terminal_reason"],
                                    score=native["score"], native_evidence=native)
+                        if native["terminal_reason"] == "model_call_limit":
+                            row.update(disposition="operationally_censored", score=None)
                         if native["judge_status"] == "infrastructure_failure":
                             row.update(disposition="operationally_censored", score=None)
                             stop_reason = "native_infrastructure_failure"

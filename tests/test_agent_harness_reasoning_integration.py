@@ -21,6 +21,60 @@ from test_agent_harness_native_conditions import _cell, _native_runtime
     ("native-reasoning", "native_tool_calls"),
     ("native-reasoning", "strict_json"),
 ])
+@pytest.mark.parametrize("limit,submit", [(1, False), (1, True), (3, False), (3, True)])
+@pytest.mark.parametrize("arm", ["Agentic", "Agent-No-EVAS"])
+def test_native_call_horizon_reaches_real_requests_and_frozen_evidence(
+    native_case, tmp_path, backend, proposal_format, limit, submit, arm,  # noqa: F811
+):
+    from run_native_mini_swe import run_prepared_native_mini_swe
+    import score_campaign as scorer
+
+    runtime = _native_runtime(native_case, tmp_path, name="budget-runtime")
+    arguments, _, _ = native_case
+    (runtime / "public/submission/model.va").write_text("module model; endmodule\n")
+    client = Provider(["true"] * (limit - 1) + ["vabench-submit" if submit else "true"])
+    complete = client.complete
+
+    def response(*args, **kwargs):
+        result = complete(*args, **kwargs)
+        if proposal_format == "strict_json":
+            message = result["choices"][0]["message"]
+            command = json.loads(message.pop("tool_calls")[0]["function"]["arguments"])
+            message["content"] = json.dumps({"tool_name": "bash", "arguments": command})
+        return result
+
+    client.complete = response
+    cell = {**_cell(arm=arm), "family_id": "001"}
+    run = run_prepared_native_mini_swe(
+        runtime=runtime, cell=cell, client=client, attempt_id="budget",
+        evas_command=arguments["evas_command"], final_judge_command=arguments["command"],
+        allow_insecure_test_sandbox=True, episode_backend=backend,
+        reasoning_proposal_format=proposal_format, model_call_limit=limit,
+        campaign_file_sha256="c" * 64,
+    )
+    assert len(client.requests) == limit
+    for index, request in enumerate(client.requests, 1):
+        # Current horizon must be in the latest model-visible content, not stale history.
+        latest = request[-1]["content"]
+        assert f'"call_number": {index}' in latest
+        assert f'"remaining_after_this_call": {limit - index}' in latest
+        assert "FINAL_JUDGE_SENTINEL" not in json.dumps(request)
+    row = scorer.read_native_cell(runtime, cell, campaign_file_sha256="c" * 64)
+    assert row["model_call_budget"] == {
+        "limit": limit, "used_before_attempt": 0, "admitted_in_attempt": limit,
+        "used_total": limit, "remaining": 0,
+    }
+    assert row["termination_reason"] == ("submitted" if submit else "model_call_limit")
+    if not submit:
+        assert run.artifact_path is None and row["score"] is None
+        assert not (runtime / "judge-called").exists()
+
+
+@pytest.mark.parametrize("backend,proposal_format", [
+    ("native-mini-swe", "native_tool_calls"),
+    ("native-reasoning", "native_tool_calls"),
+    ("native-reasoning", "strict_json"),
+])
 @pytest.mark.parametrize("arm", ["Agentic", "Agent-No-EVAS"])
 def test_interactive_request_explains_actual_shell_authority(
     native_case, tmp_path, backend, proposal_format, arm,  # noqa: F811
@@ -113,7 +167,8 @@ def test_reasoning_runs_real_native_pipeline_and_readonly_score(attempt_case, pr
     assert len(requests) == 2
 
 
-def test_reasoning_wrapper_freezes_and_forwards_format(tmp_path):
+@pytest.mark.parametrize("limit", [None, 1, 5, 13])
+def test_reasoning_wrapper_freezes_and_forwards_format(tmp_path, limit):
     output = tmp_path / "reasoning"
     completed = subprocess.run([
         sys.executable, str(WRAPPER), "--output-root", str(output),
@@ -121,23 +176,29 @@ def test_reasoning_wrapper_freezes_and_forwards_format(tmp_path):
         "--comparison-profile", "executable-feedback-control", "--dry-run",
         "--episode-backend", "native-reasoning",
         "--reasoning-proposal-format", "strict_json",
+        *([] if limit is None else ["--native-model-call-limit", str(limit)]),
     ], text=True, capture_output=True, timeout=60, check=False)
     assert completed.returncode == 0, completed.stdout + completed.stderr
     campaign = runner.read_json(output / "campaign.json")
     assert campaign["execution_config"]["episode_backend"] == "native-reasoning"
     assert campaign["execution_config"]["reasoning_proposal_format"] == "strict_json"
+    assert campaign["execution_config"].get("native_model_call_limit") == limit
 
 
-def test_score_rejects_proposal_format_different_from_frozen_campaign(tmp_path, monkeypatch):
+@pytest.mark.parametrize("mismatch", ["proposal format", "model-call limit"])
+def test_score_rejects_proposal_format_different_from_frozen_campaign(tmp_path, monkeypatch, mismatch):
     campaign_path = tmp_path / "campaign.json"
     cell = {"cell_id": "cell", "experimental_arm": "Agentic"}
     campaign_path.write_text(json.dumps({
         "cells": [cell], "execution_config": {
             "episode_backend": "native-reasoning", "reasoning_proposal_format": "strict_json",
+            **({"native_model_call_limit": 3} if mismatch == "model-call limit" else {}),
         },
     }))
     monkeypatch.setattr(scorer, "read_native_cell", lambda *a, **k: {
-        **cell, "backend": "native-reasoning", "proposal_format": "native_tool_calls",
+        **cell, "backend": "native-reasoning",
+        "proposal_format": "strict_json" if mismatch == "model-call limit" else "native_tool_calls",
+        **({"model_call_limit": 2} if mismatch == "model-call limit" else {}),
     })
     monkeypatch.setattr(scorer, "summarize", lambda *a, **k: {})
     monkeypatch.setattr(sys, "argv", [
@@ -145,6 +206,37 @@ def test_score_rejects_proposal_format_different_from_frozen_campaign(tmp_path, 
         "--campaign", str(campaign_path), "--episode-backend", "native-reasoning",
         "--judge-kind", "final_trusted_replay", "--output", str(tmp_path / "score.json"),
     ])
-    with pytest.raises(ValueError, match="proposal format"):
+    with pytest.raises(ValueError, match=mismatch):
         scorer.main()
     assert not (tmp_path / "score.json").exists()
+
+
+@pytest.mark.parametrize("backend,limit", [
+    ("native-mini-swe", "0"), ("native-reasoning", "-1"),
+    ("native-mini-swe", "1.5"), ("legacy", "1"),
+])
+def test_wrapper_rejects_invalid_or_legacy_call_limits_before_export(tmp_path, backend, limit):
+    output = tmp_path / "invalid"
+    completed = subprocess.run([
+        sys.executable, str(WRAPPER), "--output-root", str(output), "--model", "fixture",
+        "--dry-run", "--episode-backend", backend, "--native-model-call-limit", limit,
+    ], capture_output=True, text=True, timeout=30)
+    assert completed.returncode != 0
+    assert not output.exists()
+
+
+@pytest.mark.parametrize("limit", [0, -1, True, "3", 1.5])
+def test_prepared_launcher_rejects_invalid_limit_before_runtime_reservation(
+    native_case, tmp_path, limit,  # noqa: F811
+):
+    from run_native_mini_swe import run_prepared_native_mini_swe
+    runtime = _native_runtime(native_case, tmp_path, name="invalid-budget-runtime")
+    arguments, _, _ = native_case
+    client = Provider([])
+    with pytest.raises(ValueError, match="model-call limit"):
+        run_prepared_native_mini_swe(
+            runtime=runtime, cell=_cell(arm="Agentic"), client=client, attempt_id="budget",
+            evas_command=arguments["evas_command"], model_call_limit=limit,
+        )
+    assert client.requests == []
+    assert not (runtime / "evidence/native-launcher").exists()
