@@ -1,5 +1,19 @@
 # Decision Log
 
+## 2026-08-30 - Public EVAS observation integration scope
+
+- Reuse the current mini-swe sandbox execution, not the historical
+  `feedback_adapter`/`feedback_oracle` paths that read evaluator assets.
+- Add an opt-in trusted environment adapter with frozen public authority and
+  candidate binding; do not install a new model-facing tool or switch the
+  default campaign controller.
+- Public EVAS process success remains process feedback, never a hidden-checker
+  verdict. Testbench validation must remain reference-only; no certified fault
+  may enter this adapter.
+- Main owns implementation and publication; independent mapping/review is
+  read-only. TDD, real execution, clean-room evidence, and migration notes are
+  required before calling the bounded slice complete.
+
 ## 2026-08-30 - Main-coordinator integration and file ownership
 
 - User approved explicit ownership and centralized integration/publication.

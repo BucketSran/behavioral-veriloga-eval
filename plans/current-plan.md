@@ -720,6 +720,40 @@ Implemented and verified as AA-VAE-033/034. Detailed RED/GREEN, independent
 review, clean-room evidence, and validation limitations are recorded in
 `logs/verification-log.md`. Phase 5 remains `in_progress`.
 
+#### Active slice - production public EVAS observation (2026-08-30)
+
+Brief: adapt the existing sandboxed public EVAS execution into canonical,
+candidate/profile-bound observations. Preserve mini-swe's default Bash surface;
+this is an opt-in environment API, not activation of a deferred domain tool.
+
+Acceptance / KPI:
+
+- freeze the r53 manifest, public inputs, declared command, EVAS 0.8.7 runtime,
+  candidate declarations, limits, and campaign identity before validation;
+- execute only the declared public command in the existing isolated runtime;
+- bind feedback to the exact candidate and attempt; reject authority/input
+  drift and refuse validation after submission freeze or final reservation;
+- expose only public process diagnostics, never a task-correctness verdict;
+- prove canonical observation/trajectory binding using real execution, then a
+  Docker r53 smoke; keep legacy regression behavior unchanged.
+
+Scope/ownership: main coordinator owns
+`operations/calibration_pilot/public_validation.py`, the minimal inspection
+seam in `mini_swe_vabench.py`, focused `test_agent_harness_*` tests, smoke/CI,
+and shared records. Parallel exploration/review is read-only. Base is
+`3b0a62a9e6`; no delegated writers or new dependencies.
+
+Execute one behavioral RED/GREEN at a time, review the adapter independently,
+then add integration/smoke coverage and update the migration ledger in focused
+GREEN commits. Preserve all failed-run evidence outside the repository.
+
+Non-goals: no hidden checker, historical feedback oracle, new model tool,
+model API campaign, r53/EVAS change, Spectre run, full CLI switch, or fabricated
+conversion of legacy traces. Pre/post hashes detect drift but do not prove
+transactional rollback or a hostile concurrent-process security boundary.
+Stop if execution requires private fixtures, changes scoring semantics, or
+cannot preserve the existing isolation/capability contract.
+
 ### Phase 6 - Add the AlphaApollo single-trajectory reasoning backend
 
 Status: `pending`
