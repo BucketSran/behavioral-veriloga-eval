@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-08-31 - Keep synthetic training format wiring distinct from training (AA-VAE-062)
+
+- Reuse native lifecycle/hash validation and the existing training export builder.
+  Project controller metadata/hashes only; no hidden/provider payload extraction.
+  Bind the full input trace digest, not a display prefix. Keep SFT target/context
+  separation and separately declared public RL reward.
+- This closes an in-memory fixture-format seam, not semantic training data or a
+  trainer. Real source rights, semantic content, deduplication and contamination
+  review remain explicit gates; no r53/final evidence export or paid work.
+
 ## 2026-08-31 - Extend overnight work to the current engineering queue
 
 - The user asked to complete current functional gaps for morning audit. Extend

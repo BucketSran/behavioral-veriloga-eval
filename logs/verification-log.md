@@ -1,5 +1,16 @@
 # Verification Log
 
+## 2026-08-31 - Synthetic native training adapter (AA-VAE-062)
+
+- Exact two-file delegated implementation; no shared schema/export changes or
+  worker Git. Main integrated after independent read-only review (no blocker).
+- RED: first SFT adapter test failed on missing module. GREEN: existing exporter
+  plus adapter **41 passed**. Main added full trace digest binding: RED on the
+  old 16-character prefix, then **41 passed** after preserving all 64 characters.
+- Ruff and bytecode checks passed for delegated leaves; source remains synthetic
+  in-memory only. Metadata/hash projection does not constitute semantic coding
+  training samples, real data export, provenance authentication or training.
+
 ## 2026-08-31 - AA-VAE-060 fork publication and hosted gates
 
 - Source/CI head `cfd11121a03dc596e94155fa2c2ef6c8d9dc3ceb` is published to

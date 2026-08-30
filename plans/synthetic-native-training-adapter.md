@@ -3,6 +3,11 @@
 Updated: 2026-08-31. Approved overnight queue N3; independent read-only design
 audit recommends this leaf. Main retains final review and publication.
 
+Implementation verified: 41 focused exporter/adapter tests pass. Independent
+read-only review found no blocker; main added a full input-digest regression.
+Projection contains action/observation metadata and hashes, not raw semantic
+training targets. Real-data/semantic projection and training remain separate gates.
+
 ## Brief and KPI
 
 Add a pure in-memory adapter from explicitly synthetic native event documents
