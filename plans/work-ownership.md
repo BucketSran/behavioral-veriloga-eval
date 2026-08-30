@@ -482,3 +482,22 @@ archives and aggregate ledgers remain follow-ups under the
 current plan. The coordinator defines the next bounded files/tests before
 implementation; mapping/review stays read-only and no delegated writing lane
 is opened by this document.
+# Synthetic extension leaves (2026-08-31)
+
+Active only after coordinator dispatch; base `7004ee095f`. Main owns shared
+interfaces, launcher/controller/registry wiring, docs, integration tests and all
+Git. Three exact non-overlapping assignments:
+
+- `rag_impl`: `runners/agent_harness/tools/offline_docs.py` and
+  `tests/test_agent_harness_offline_docs.py` only.
+- `waveform_impl`: `runners/agent_harness/tools/waveform_summary.py` and
+  `tests/test_agent_harness_waveform_summary.py` only.
+- `training_impl`: `runners/agent_harness/training_export.py` and
+  `tests/test_agent_harness_training_export.py` only.
+
+Follow [the controlled brief](rag-waveform-training-implementation.md) and
+vertical TDD. No other file writes, Git operations, dependencies, credentials,
+paid calls, private project access, old-worktree edits or sealed r53/EVAS changes.
+Writers are concurrent, must preserve others' changes, report interface conflicts
+upward and stop writing at handback. This newer assignment supersedes earlier
+read-only extension-design lanes; it does not reopen any historical writer.

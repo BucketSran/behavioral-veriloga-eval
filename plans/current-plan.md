@@ -13,6 +13,12 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
+- Active implementation: [synthetic extension slice](rag-waveform-training-implementation.md).
+  User approved proceeding after AA-VAE-056. Three isolated module/test leaves
+  cover offline retrieval, CSV summaries and synthetic training projections;
+  main owns shared opt-in wiring and publication. Real data, paid runs and
+  training remain disabled. Module tests are not runtime/quality evidence.
+
 - Next extension queue: [AA-VAE-056 RAG/waveform/training design](../docs/alphaapollo-migration/features/AA-VAE-056-rag-waveform-training-design.md).
   Read-only advisers returned three independent designs; main synthesized them.
   Small future leaves are synthetic offline retrieval, bounded CSV parsing and
