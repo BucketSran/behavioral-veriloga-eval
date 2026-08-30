@@ -178,6 +178,7 @@ class _RecordedClient:
 
     def complete(self, messages, max_tokens, tools, *, timeout_s=None):
         self.calls += 1
+        capture_supported = getattr(self.client, "supports_transport_capture", False) is True
         identity = {
             "request_id": f"{self.context.attempt_id}/request-{self.calls:04d}",
             "action_id": f"{self.context.attempt_id}-{self.calls:04d}",
@@ -190,12 +191,12 @@ class _RecordedClient:
                 "max_tokens": max_tokens,
                 "tools": deepcopy(tools),
                 "timeout_s": timeout_s,
-                "transport_capture_supported": isinstance(self.client, runner.OpenAICompatible),
+                "transport_capture_supported": capture_supported,
             },
         )
         try:
             transport = {}
-            if isinstance(self.client, runner.OpenAICompatible):
+            if capture_supported:
                 transport["transport_observer"] = lambda payload: self.record(
                     "provider_transport_attempt",
                     _redact({**identity, **payload}, getattr(self.client, "api_key", "")),
@@ -513,6 +514,7 @@ def run_prepared_native_mini_swe(
     docker_image: str | None = None,
     allow_insecure_test_sandbox: bool = False,
     campaign_file_sha256: str | None = None,
+    episode_context: EpisodeContext | None = None,
 ) -> native_episode.NativeEpisodeRun:
     """Run an exclusively owned fresh exported native tri-form cell.
 
@@ -543,9 +545,15 @@ def run_prepared_native_mini_swe(
                 "native launcher requires a fresh runtime; attempt already reserved"
             )
     policy_config = runner.load_experiment_policy()
-    context = EpisodeContext(
+    context = episode_context or EpisodeContext(
         cell["cell_id"], attempt_id, cell["task_id"], condition, None
     )
+    if (
+        (context.episode_id, context.attempt_id, context.task_id, context.condition)
+        != (cell["cell_id"], attempt_id, cell["task_id"], condition)
+        or context.max_steps is not None or context.budget_limits
+    ):
+        raise ValueError("attempt context differs from frozen native cell policy")
     directory = runtime / "evidence/native-launcher"
     directory.parent.mkdir(parents=True, exist_ok=True)
     directory.mkdir(mode=0o700)
@@ -581,7 +589,12 @@ def run_prepared_native_mini_swe(
                 candidate_artifacts=runner.expected_candidate_artifacts(runtime),
                 executable_feedback=(condition == "Agentic"),
             )
-            environment.preflight()
+            try:
+                environment.preflight()
+            except (OSError, subprocess.TimeoutExpired) as exc:
+                if time.monotonic() >= deadline:
+                    raise RuntimeError("agent deadline exhausted during startup") from exc
+                raise runner.SandboxStartupError("transient sandbox preflight failure") from exc
             _, submitted, _, _ = mini.load_mini_swe()
             environment.bind_submitted_exception(submitted)
         prompt = _native_prompt_path(runtime, condition).read_text()
@@ -591,6 +604,11 @@ def run_prepared_native_mini_swe(
             "cell": deepcopy(cell),
             "condition": condition,
             "attempt_id": attempt_id,
+            "attempt_lineage": {
+                "parent_attempt_id": context.parent_attempt_id,
+                "retry_index": context.retry_index,
+                "retry_reason": context.retry_reason,
+            },
             "backend_profile": backend,
             "campaign_file_sha256": campaign_file_sha256,
             "model": client.model,

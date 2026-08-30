@@ -783,18 +783,29 @@ def summarize(
             failure_grouped[f"arm:{row['experimental_arm']}"][failure_class] += 1
 
     def telemetry_by(field: str) -> dict[str, Any]:
+        def cost(row, key, fallback):
+            if row.get("attempt_costs") is not None:
+                return row["attempt_costs"]["summary"][key]["total"]
+            return fallback
+
+        def total(values):
+            values = list(values)
+            return sum(values) if all(value is not None for value in values) else None
+
         telemetry = {}
         values = sorted(
             {str(row[field]) for row in rows if row.get(field) is not None}
         )
         for value in values:
             selected = [row for row in rows if row.get(field) == value]
-            raw_output = [row.get("output_tokens", row.get("working_tokens")) for row in selected]
+            raw_output = [cost(row, "output_tokens", row.get("output_tokens", row.get("working_tokens")))
+                          for row in selected]
             output = [int(value) for value in raw_output if value is not None]
             unknown_output = len(selected) - len(output)
             output_total = sum(output) if not unknown_output else None
             output_median = statistics.median(output) if output and not unknown_output else None
-            reasoning = [row.get("telemetry", {}).get("provider_reasoning_tokens_total") for row in selected]
+            reasoning = [row.get("telemetry", {}).get("provider_reasoning_tokens_total")
+                         if row.get("attempt_count", 1) == 1 else None for row in selected]
             elapsed = [
                 float(row["episode_elapsed_s"])
                 for row in selected
@@ -814,29 +825,36 @@ def summarize(
                         )
             telemetry[value] = {
                 "cell_count": len(selected),
+                "primary_cost_scope": "all_attempts",
+                "evaluator_detail_scope": "selected_attempt",
                 "output_tokens_total": output_total,
                 "output_tokens_median": output_median,
-                "output_tokens_reported_subtotal": sum(output),
+                "output_tokens_reported_subtotal": sum(
+                    row["attempt_costs"]["summary"]["output_tokens"]["reported_subtotal"]
+                    if row.get("attempt_costs") is not None else
+                    (row.get("output_tokens", row.get("working_tokens")) or 0)
+                    for row in selected
+                ),
                 "output_tokens_unknown_cells": unknown_output,
                 "working_tokens_total": output_total,
                 "working_tokens_median": output_median,
                 "episode_elapsed_s_median": (
                     statistics.median(elapsed) if elapsed else None
                 ),
-                "model_calls_total": sum(
-                    int(row.get("telemetry", {}).get("model_calls", 0))
+                "model_calls_total": total(
+                    cost(row, "provider_requests", row.get("telemetry", {}).get("model_calls", 0))
                     for row in selected
                 ),
-                "tool_calls_total": sum(
-                    int(row.get("telemetry", {}).get("tool_calls_total", 0))
+                "tool_calls_total": total(
+                    cost(row, "tool_requests", row.get("telemetry", {}).get("tool_calls_total", 0))
                     for row in selected
                 ),
                 "evas_calls_total": sum(
                     int(row.get("telemetry", {}).get("evas_calls", 0))
                     for row in selected
                 ),
-                "direct_evas_calls_total": sum(
-                    int(row.get("evas_usage", {}).get("calls_executed", 0))
+                "direct_evas_calls_total": total(
+                    cost(row, "evas_invocations", row.get("evas_usage", {}).get("calls_executed", 0))
                     for row in selected
                 ),
                 "direct_evas_successes_total": sum(
@@ -1024,27 +1042,28 @@ def main() -> int:
         campaign = read_json(args.campaign)
         scheduled_cells = list(campaign["cells"])
         campaign_file_sha256 = hashlib.sha256(args.campaign.read_bytes()).hexdigest()
-        if args.workers == 1:
-            rows = [
-                read_native_cell(
-                    args.campaign_output / cell["cell_id"],
-                    cell,
-                    campaign_file_sha256=campaign_file_sha256,
+        from run_native_attempts import read_native_attempt_sequence, retry_policy
+        policy_document = (campaign.get("execution_config") or {}).get(
+            "native_retry_policy", retry_policy(1).to_document()
+        )
+        policy = retry_policy(policy_document.get("max_attempts"))
+        if policy.to_document() != policy_document:
+            raise ValueError("invalid frozen native retry policy")
+
+        def read_scheduled(cell):
+            runtime = args.campaign_output / cell["cell_id"]
+            if policy.max_attempts > 1:
+                return read_native_attempt_sequence(
+                    runtime, cell, campaign_file_sha256=campaign_file_sha256,
+                    expected_retry_policy=policy,
                 )
-                for cell in scheduled_cells
-            ]
+            return read_native_cell(runtime, cell, campaign_file_sha256=campaign_file_sha256)
+
+        if args.workers == 1:
+            rows = [read_scheduled(cell) for cell in scheduled_cells]
         else:
             with ThreadPoolExecutor(max_workers=args.workers) as pool:
-                rows = list(
-                    pool.map(
-                        lambda cell: read_native_cell(
-                            args.campaign_output / cell["cell_id"],
-                            cell,
-                            campaign_file_sha256=campaign_file_sha256,
-                        ),
-                        scheduled_cells,
-                    )
-                )
+                rows = list(pool.map(read_scheduled, scheduled_cells))
         report = summarize(
             rows, args.judge_kind, scheduled_cells=scheduled_cells
         )

@@ -175,8 +175,16 @@ class ProviderAPIError(RuntimeError):
     """Provider returned a structured API error that is not transport failure."""
 
 
+class ProviderTransportError(RuntimeError):
+    """Transport failed before a provider response could be decoded."""
+
+
 class RuntimeExportError(RuntimeError):
     """The isolated public runtime could not be materialized for a cell."""
+
+
+class SandboxStartupError(RuntimeError):
+    """Typed transient preflight failure, before any model or final call."""
 
 
 def now() -> str:
@@ -446,6 +454,16 @@ def evas_invocation_incidents(invocations: list[dict[str, Any]]) -> list[dict[st
 def classify_execution_exception(exc: Exception) -> dict[str, Any]:
     error_type = type(exc).__name__
     message = str(exc).lower()
+    if isinstance(exc, SandboxStartupError):
+        return {
+            "status": "infrastructure_failure", "termination_reason": "sandbox_startup",
+            "model_status": "runner_failure",
+            "incident": {
+                "category": "sandbox_startup", "component": "sandbox",
+                "error_type": error_type, "phase": "setup",
+                "responsibility": "infrastructure", "retryable": True,
+            },
+        }
     if isinstance(exc, RuntimeExportError):
         return {
             "status": "infrastructure_failure",
@@ -644,6 +662,8 @@ def load_key(path: str | None, env_name: str) -> str:
 
 
 class OpenAICompatible:
+    supports_transport_capture = True
+
     def __init__(
         self,
         *,
@@ -726,7 +746,7 @@ class OpenAICompatible:
                 f"provider request exceeded {self.timeout_s}s after 3 attempts"
             )
         if completed.returncode != 0:
-            raise RuntimeError(
+            raise ProviderTransportError(
                 f"provider transport failed after 3 attempts rc={completed.returncode}: "
                 f"{self._redact(completed.stderr[-2000:])}"
             )
@@ -832,7 +852,7 @@ class OpenAICompatible:
                 f"provider streaming request exceeded {self.timeout_s}s after 3 attempts"
             )
         if completed.returncode != 0:
-            raise RuntimeError(
+            raise ProviderTransportError(
                 f"provider streaming transport failed after 3 attempts rc={completed.returncode}: "
                 f"{self._redact(completed.stderr[-2000:])}"
             )
@@ -2717,7 +2737,9 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
             }
             return result
         assert client is not None
-        attempt_id = f"{cell['cell_id']}-attempt-0001"
+        attempt_context = getattr(args, "_native_attempt_context", None)
+        attempt_id = (attempt_context.attempt_id if attempt_context is not None
+                      else f"{cell['cell_id']}-attempt-0001")
         run = run_prepared_native_mini_swe(
             runtime=runtime,
             cell=cell,
@@ -2745,6 +2767,7 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
                 or getattr(args, "mini_swe_sandbox", None) == "none"
             ),
             campaign_file_sha256=getattr(args, "campaign_file_sha256", None),
+            episode_context=attempt_context,
         )
         result = {
             "cell": cell,
@@ -3268,8 +3291,29 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
 
 
 def run_cell_preserving_failure(
-    cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompatible | None
+    cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompatible | None,
+    *, client_factory=None,
 ) -> dict[str, Any]:
+    if (getattr(args, "episode_backend", "legacy") == "native-mini-swe"
+            and getattr(args, "native_max_attempts", 1) > 1 and not args.dry_run):
+        from run_native_attempts import run_native_attempt_sequence, retry_policy
+
+        if args.resume:
+            raise ValueError("native attempt sequences cannot resume")
+        if client_factory is None:
+            if not isinstance(client, OpenAICompatible):
+                raise ValueError("retry requires a fresh client factory")
+
+            def client_factory():
+                return OpenAICompatible(
+                    base_url=client.endpoint, model=client.model, api_key=client.api_key,
+                    timeout_s=client.timeout_s, temperature=client.temperature,
+                    stream=client.stream,
+                )
+        return run_native_attempt_sequence(
+            cell=cell, args=args, client_factory=client_factory,
+            retry_policy=retry_policy(args.native_max_attempts),
+        )
     try:
         return run_cell(cell, args, client)
     except FinalReplayReservedError:
@@ -3294,7 +3338,11 @@ def run_cell_preserving_failure(
                 "traceback": trace,
                 "incidents": [classification["incident"]],
                 "finished_at": now(),
-                "attempt_id": f"{cell['cell_id']}-attempt-0001",
+                "attempt_id": (
+                    args._native_attempt_context.attempt_id
+                    if getattr(args, "_native_attempt_context", None) is not None
+                    else f"{cell['cell_id']}-attempt-0001"
+                ),
                 "campaign_file_sha256": getattr(args, "campaign_file_sha256", None),
             }
             return write_native_dispatch_result(runtime, failure)
@@ -3352,6 +3400,7 @@ def main() -> int:
         default="legacy",
         help="Opt-in episode implementation; legacy preserves the historical path.",
     )
+    parser.add_argument("--native-max-attempts", type=int, default=1)
     parser.add_argument(
         "--mini-swe-sandbox",
         choices=("auto", "docker", "sandbox-exec", "bubblewrap", "none"),
@@ -3440,6 +3489,16 @@ def main() -> int:
             f"observed={args.mini_swe_no_evas_image}"
         )
     execution_config = campaign.get("execution_config") or {}
+    from run_native_attempts import retry_policy
+    try:
+        native_retry_policy = retry_policy(args.native_max_attempts).to_document()
+    except (TypeError, ValueError) as exc:
+        raise SystemExit(str(exc)) from exc
+    if args.episode_backend == "legacy" and args.native_max_attempts != 1:
+        raise SystemExit("native retries require a native episode backend")
+    expected_retry_policy = execution_config.get("native_retry_policy", retry_policy(1).to_document())
+    if native_retry_policy != expected_retry_policy:
+        raise SystemExit("campaign frozen retry policy differs from --native-max-attempts")
     expected_agent_scaffold = execution_config.get("agent_scaffold")
     if expected_agent_scaffold and args.agent_scaffold != expected_agent_scaffold:
         raise SystemExit(

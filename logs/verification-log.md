@@ -1,5 +1,32 @@
 # Verification Log
 
+## 2026-08-30 - Streaming compatibility repair hosted confirmation
+
+- Exact repair commit `4460b9f7b4668d40c14c4d92055ec38188a4c694` passed
+  [Evaluator Closure 33313575663](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33313575663)
+  and [Runner Smoke 33313575696](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33313575696).
+  These are all workflows triggered by that commit; Public Agent Runtime was
+  not triggered. The earlier failed runs remain recorded below.
+
+## 2026-08-30 - Fresh native attempt integration (AA-VAE-045)
+
+- Vertical RED/GREEN covers frozen policy, fresh workspace/client, typed startup
+  and transport failures, terminal markers (including broken symlink markers),
+  source/row/lineage tampering and all-attempt unknown-cost accounting.
+- Integration gate before final review: **120 passed, 2 skipped in 27.66s**.
+  Subsequent terminal-marker regression gate: **56 passed in 2.44s**.
+  Fresh real Docker retry gate: **1 passed in 41.85s**, nine form/condition cells
+  each with a failed transport attempt and a fresh terminal attempt.
+- Evidence index: `benchmark-vabench-release-v4/reports/native-retry-XExB9a/test_r53_docker_all_native_thr0/smoke-evidence-index.json`,
+  SHA-256 `73fd7c1948cc6f63119d4ec7b2c7d337163f720a05aff510af8107f8d1617fdf`.
+- Independent review identified the actual `sandbox_cleanup_failure` category
+  and cancellation propagation as two final blockers. Both reproduced RED and
+  are repaired; follow-up review found no blocker (**54 passed in 0.62s**).
+  Final integration gate: **124 passed, 2 skipped in 18.95s**. Ruff 0.12.12,
+  bytecode compilation of attempt leaves and whitespace checks passed.
+- LSP unavailable; compact historical asset gaps remain. No real-model quality,
+  full-r53 result, EVAS change or Spectre claim follows from scripted connectivity.
+
 ## 2026-08-30 - AA-VAE-044 hosted regression and compatibility repair
 
 - `51dea247152398260ff7474e8c467a92b249fc71` passed Public Agent Runtime

@@ -47,6 +47,7 @@ def test_wrapper_dry_run_records_native_episode_backend_without_legacy_fallback(
             "executable-feedback-control",
             "--episode-backend",
             "native-mini-swe",
+            "--native-max-attempts", "2",
             "--dry-run",
         ],
         text=True,
@@ -61,6 +62,7 @@ def test_wrapper_dry_run_records_native_episode_backend_without_legacy_fallback(
     execution = campaign["execution_config"]
     assert execution["episode_backend"] == "native-mini-swe"
     assert execution["agent_scaffold"] == "mini-swe"
+    assert execution["native_retry_policy"]["max_attempts"] == 2
     assert {cell["experimental_arm"] for cell in campaign["cells"]} == {
         "OneShot",
         "Agent-No-EVAS",
@@ -71,6 +73,7 @@ def test_wrapper_dry_run_records_native_episode_backend_without_legacy_fallback(
     command = summary["command"]
     assert "--episode-backend" in command
     assert command[command.index("--episode-backend") + 1] == "native-mini-swe"
+    assert command[command.index("--native-max-attempts") + 1] == "2"
     assert "--agent-scaffold" in command
     assert command[command.index("--agent-scaffold") + 1] == "mini-swe"
 

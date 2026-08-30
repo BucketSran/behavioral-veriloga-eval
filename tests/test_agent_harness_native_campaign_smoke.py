@@ -32,7 +32,8 @@ def test_public_testbench_stub_uses_declared_binding_and_no_fault_knowledge(tmp_
     smoke.run_campaign.validate_public_testbench(candidate)
 
 
-def test_r53_docker_all_native_three_arm_campaign(tmp_path):
+@pytest.mark.parametrize("native_max_attempts", [1, 2])
+def test_r53_docker_all_native_three_arm_campaign(tmp_path, native_max_attempts):
     if os.environ.get("VABENCH_TEST_DOCKER_RUNTIME") != "1":
         pytest.skip("opt-in real Docker/EVAS three-form three-arm campaign")
 
@@ -50,9 +51,11 @@ def test_r53_docker_all_native_three_arm_campaign(tmp_path):
     campaign["cells"] = cells
     campaign["execution_config"] = {
         "episode_backend": "native-mini-swe", "workers": 2,
-        "automatic_cell_retry": False,
+        "automatic_cell_retry": native_max_attempts > 1,
         "evidence_scope": "deterministic_connectivity_not_model_quality",
     }
+    from run_native_attempts import retry_policy, read_native_attempt_sequence
+    campaign["execution_config"]["native_retry_policy"] = retry_policy(native_max_attempts).to_document()
     campaign_path = tmp_path / "campaign.json"
     smoke.write_immutable_json(campaign_path, campaign)
     campaign_sha = smoke.sha256_file(campaign_path)
@@ -64,6 +67,7 @@ def test_r53_docker_all_native_three_arm_campaign(tmp_path):
     smoke.configure_runner_args(args, tmp_path / "run", identity)
     args.episode_backend = "native-mini-swe"
     args.campaign_file_sha256 = campaign_sha
+    args.native_max_attempts = native_max_attempts
 
     def execute(cell):
         contract = smoke.public_contract(smoke.DEFAULT_RELEASE, cell["task_id"])
@@ -71,11 +75,24 @@ def test_r53_docker_all_native_three_arm_campaign(tmp_path):
             smoke.DEFAULT_RELEASE, cell["task_id"]
         )["public_contract"]).parent / "public"
         command, _ = public_execution_contract(smoke.read_json(public_root / "evas_runtime.json"))
-        client = smoke.client_for_arm(
-            cell["experimental_arm"], smoke.public_stub_artifacts(contract),
-            smoke.DEFAULT_MODEL, command,
+        clients = []
+
+        def factory():
+            client = smoke.client_for_arm(
+                cell["experimental_arm"], smoke.public_stub_artifacts(contract),
+                smoke.DEFAULT_MODEL, command,
+            )
+            if native_max_attempts > 1 and not clients:
+                def unavailable(*args, **kwargs):
+                    raise TimeoutError("deterministic transport outage before final")
+                client.complete = unavailable
+            clients.append(client)
+            return client
+
+        return smoke.run_campaign.run_cell_preserving_failure(
+            cell, args, factory() if native_max_attempts == 1 else None,
+            client_factory=factory,
         )
-        return smoke.run_campaign.run_cell_preserving_failure(cell, args, client)
 
     with ThreadPoolExecutor(max_workers=2) as pool:
         results = list(pool.map(execute, cells))
@@ -107,6 +124,16 @@ def test_r53_docker_all_native_three_arm_campaign(tmp_path):
     evidence_index = []
     for cell in cells:
         runtime = args.output / cell["cell_id"]
+        if native_max_attempts > 1:
+            selected = read_native_attempt_sequence(
+                runtime, cell, campaign_file_sha256=campaign_sha,
+                expected_retry_policy=retry_policy(native_max_attempts),
+            )
+            assert selected["attempt_count"] == 2
+            first, last = selected["attempt_sequence"]["attempts"]
+            assert first["failure_category"] == "provider_transport"
+            assert not (runtime / first["cell_runtime"] / "evidence/bound-final-test").exists()
+            runtime = runtime / last["cell_runtime"]
         row = smoke.score_campaign.read_native_cell(
             runtime, cell, campaign_file_sha256=campaign_sha,
         )
@@ -115,7 +142,10 @@ def test_r53_docker_all_native_three_arm_campaign(tmp_path):
         request = smoke.read_json(runtime / "evidence/native-episode/request.json")
         arm = cell["experimental_arm"]
         assert not (runtime / "evidence/campaign_result.json").exists()
-        assert row["attempt_id"] == f"{cell['cell_id']}-attempt-0001"
+        expected_attempt = f"{cell['cell_id']}-attempt-0001"
+        if native_max_attempts > 1:
+            expected_attempt += "-retry-0001"
+        assert row["attempt_id"] == expected_attempt
         assert manifest["environment"]["network"] is False
         assert manifest["environment"]["evaluator_mounted"] is False
         if arm == "Agentic":

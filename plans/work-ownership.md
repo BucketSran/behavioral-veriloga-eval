@@ -89,6 +89,66 @@ Integration sequence:
 
 ## Immediate Follow-up
 
+On `4460b9f7b4`, all previous leaves are handed back. Main retains shared
+launcher/campaign/scorer wiring. `alpha_public_reference` owns only new
+calibration `run_native_evolution.py` and new
+`tests/test_agent_harness_native_evolution.py`: runnable candidate-only
+Reasoning branches, fixed public validation, sealed round memory and exactly one
+selected-submission final replay. Reuse existing controller/transport/export/
+authority and round-runtime APIs; do not write shared files or Git. Main owns
+CLI integration and records. `tb_surface_map` reviews the repaired round runtime
+read-only. `case_trajectory_delta` reviews the ledger leaf read-only. All writers
+must preserve concurrent changes and return interface blockers to main.
+
+`reasoning_policy_impl` reopens only `runners/agent_harness/attempt_sequence.py`,
+calibration `run_native_attempts.py` and their two original unit test files for
+the final AA-VAE-045 review findings: real `sandbox_cleanup_failure` must block
+retry; cancellation/SystemExit must propagate without a terminal selection.
+All other paths and Git remain unassigned to this delegate.
+
+`evidence_export_impl` reopens only calibration `result_ledger.py` and
+`tests/test_agent_harness_result_ledger.py` for explicit single-trajectory backend
+and condition eligibility, rejecting candidate-only/Evolution records and
+unannounced mixed-backend pairing. Main keeps scorer integration ownership.
+
+Integration on `51dea24715`: AA-VAE-044 leaves are closed. Main owns all shared
+runtime/CLI/scorer wiring and the handed-back attempt files. `native_campaign_impl`
+reviews attempts read-only; `alpha_public_reference` advises candidate-only
+controller integration read-only. `reasoning_policy_impl` reopens only its two
+original reasoning leaf files for deadline-bounded provider requests and explicit
+strict-JSON/tool-schema prompting, with focused RED/GREEN tests. No shared files
+or Git operations transfer. All delegates are concurrent with main and must
+preserve others' edits, stop at handback and report conflicts upward.
+
+Reasoning deadline/prompt handback is complete. `reasoning_policy_impl` now
+reopens only `run_native_attempts.py` (calibration) and its original
+`tests/test_agent_harness_native_attempts.py` for independent-review repairs:
+physical terminal-marker blocking, confined derived runtime paths, row/context
+receipt verification and accurate all-attempt costs. Main owns integration tests
+and shared wiring concurrently. `alpha_public_reference` owns only
+`runners/agent_harness/{controller,state,contracts,trajectory}.py` and new
+`tests/test_agent_harness_candidate_episode.py` for a candidate-only terminal
+seam reusing the existing loop. Existing final episode semantics must remain
+unchanged; no fake final judge or relaxed final trajectory validation. All other
+tests/schemas/package exports/launcher/Git remain main-owned.
+
+`evidence_export_impl` is assigned only new calibration `result_ledger.py` and
+new `tests/test_agent_harness_result_ledger.py` on `4460b9f7b4`. Build a read-only
+deterministic campaign-ledger/report projection over frozen schedule and already
+verified native rows: denominator/identity checks, selected/all-attempt costs,
+explicit unknown metrics, matched-pair coverage, deadline outcomes and bounded
+claim/source index. No scoring/provider execution, no free-text/raw-content
+export, no cross-backend/evolution pooling, no inferred model-quality claims.
+Main owns actual scorer/CLI invocation and all records. Vertical TDD and handback;
+no other writer's edits, dependencies, assets or Git operations may be changed.
+
+Result-ledger leaf is handed back. `evidence_export_impl` is reassigned only
+`runners/agent_harness/evolution_runtime.py` and its original
+`tests/test_agent_harness_evolution_runtime.py` for review repairs: safe branch
+path segments/confinement and explicit unknown/partial observed failure costs.
+The candidate controller writer remains on its non-overlapping files. No shared
+schema, reducer, launcher, ledger or Git writes are delegated by this repair.
+
 ### Remaining harness functionality (2026-08-30)
 
 Status: `active`; base `0f014c39e1016e8c6877ff7c48dbddb2733d8f93`.

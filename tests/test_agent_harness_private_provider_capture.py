@@ -1,6 +1,7 @@
 """Private transport evidence separates HTTP attempts from model decisions."""
 
 import hashlib
+import importlib.util
 import json
 from pathlib import Path
 import subprocess
@@ -60,3 +61,22 @@ def test_timeout_preserves_partial_transport_evidence(monkeypatch):
     assert attempt["capture_complete"] is False
     assert attempt["stdout"]["text"] == "partial"
     assert events[-1][0] == "provider_failure"
+
+
+def test_cli_module_identity_does_not_disable_transport_capture(monkeypatch):
+    # Running run_campaign.py as __main__ creates a distinct Python class from
+    # the launcher's imported run_campaign module; this is still the same adapter.
+    spec = importlib.util.spec_from_file_location("campaign_cli_identity", runner.__file__)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    client = module.OpenAICompatible(base_url="https://fixture.invalid", model="fixture",
+        api_key="", timeout_s=1, temperature=0)
+    assert not isinstance(client, runner.OpenAICompatible)
+    monkeypatch.setattr(module.subprocess, "run", lambda *a, **k:
+        subprocess.CompletedProcess([], 0, '{"choices":[]}', ""))
+    events = []
+    wrapped = _RecordedClient(client, lambda kind, payload: events.append((kind, payload)),
+        EpisodeContext("cell", "attempt", "task", "Agentic", None))
+    wrapped.complete([], 10, [])
+    assert events[0][1]["transport_capture_supported"] is True
+    assert [kind for kind, _ in events].count("provider_transport_attempt") == 1

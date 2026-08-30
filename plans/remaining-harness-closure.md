@@ -7,7 +7,9 @@ Progress: AA-VAE-043 native Testbench authority and three-form nine-cell
 connectivity are locally verified (2026-08-30). The stronger invocation identity
 gate also fixed cwd-dependent telemetry hashing. Remaining items below are not
 implicitly completed. AA-VAE-044 evidence/metering is now runtime-integrated and
-locally verified; retry, Reasoning and Evolution still require shared wiring.
+locally verified. AA-VAE-045 now integrates opt-in infrastructure retry with
+all-attempt costs and nine-cell Docker verification. Reasoning and Evolution
+still require shared wiring.
 
 ## Brief and scope
 

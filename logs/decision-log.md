@@ -1,5 +1,17 @@
 # Decision Log
 
+## 2026-08-30 - Fresh attempts are infrastructure recovery, not answer search
+
+- Freeze `native_retry_policy` in the campaign; default one attempt preserves
+  existing behavior. Retry only typed transport/startup failures before final
+  activity and before the agent deadline, with no cleanup failure.
+- New attempt means new export/client/context and no inherited candidate or
+  feedback. Preserve immutable failed-attempt evidence and verify its source,
+  manifest/trajectory lineage and selected-row joins at score time.
+- Keep one scheduled result but aggregate all consumed attempts. Unknown usage
+  remains null with known subtotals. Do not turn cancellation into a normal
+  reportable failure. Final-score-driven generation is explicitly excluded.
+
 ## 2026-08-30 - Separate private capture, reviewer export and actual metering
 
 - Record logical provider requests separately from transport attempts. Preserve

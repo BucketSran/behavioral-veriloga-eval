@@ -246,6 +246,8 @@ def build_parser() -> argparse.ArgumentParser:
             "meaning."
         ),
     )
+    parser.add_argument("--native-max-attempts", type=int, default=1,
+                        help="Frozen fresh-attempt cap for native infrastructure failures.")
     parser.add_argument(
         "--mini-swe-sandbox",
         choices=("auto", "docker", "sandbox-exec", "bubblewrap", "none"),
@@ -299,6 +301,13 @@ def main() -> int:
         raise SystemExit(
             f"{args.comparison_profile} requires --agent-scaffold mini-swe"
         )
+    from run_native_attempts import retry_policy
+    try:
+        native_retry_policy = retry_policy(args.native_max_attempts)
+    except (TypeError, ValueError) as exc:
+        raise SystemExit(str(exc)) from exc
+    if args.episode_backend == "legacy" and args.native_max_attempts != 1:
+        raise SystemExit("native retries require a native episode backend")
     if args.episode_backend == "native-mini-swe":
         if args.agent_scaffold != "mini-swe":
             raise SystemExit("native-mini-swe requires --agent-scaffold mini-swe")
@@ -393,6 +402,7 @@ def main() -> int:
         "per_turn_max_tokens": args.per_turn_max_tokens,
         "token_accounting": "telemetry_only",
         "episode_backend": args.episode_backend,
+        "native_retry_policy": native_retry_policy.to_document(),
         "agent_scaffold": args.agent_scaffold,
         "mini_swe_sandbox": args.mini_swe_sandbox,
         "mini_swe_image": args.mini_swe_image,
@@ -434,6 +444,8 @@ def main() -> int:
         args.agent_scaffold,
         "--episode-backend",
         args.episode_backend,
+        "--native-max-attempts",
+        str(args.native_max_attempts),
         "--mini-swe-sandbox",
         args.mini_swe_sandbox,
         "--docker-command",

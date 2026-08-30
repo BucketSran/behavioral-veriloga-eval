@@ -595,7 +595,13 @@ and endpoint, and `--evas-command /absolute/path/to/evas`. OneShot is one logica
 generation using output-only `submit_artifacts`; No-EVAS uses the paired
 no-EVAS image and absent public profile; Agentic retains public EVAS access.
 All conditions use the same native freeze/final sidecar path. No automatic
-episode retry is enabled; existing low-level provider transport retry remains.
+episode retry is enabled by default; existing low-level provider transport retry remains.
+For fresh-attempt infrastructure recovery, set `--native-max-attempts N` on the
+campaign wrapper before freezing the campaign. Only typed pre-final transport
+or sandbox-startup failure can retry, never cleanup/protocol/deadline/final
+failure. Every attempt has a fresh export/client and immutable lineage. Scoring
+counts one terminal row per cell and includes failed attempts in primary costs;
+unknown usage stays null. In-place resume remains unsupported. See AA-VAE-045.
 
 Native scoring reads the full frozen schedule and existing evidence, without
 calling EVAS again or requiring `--judge-command`:

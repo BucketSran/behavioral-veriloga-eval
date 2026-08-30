@@ -19,14 +19,16 @@ implementation and does not change the phase statuses below.
   [AA-VAE-043](../docs/alphaapollo-migration/features/AA-VAE-043-native-testbench-reference-authority.md).
   Evidence/metering and safe reviewer exports are integrated and locally verified
   in [AA-VAE-044](../docs/alphaapollo-migration/features/AA-VAE-044-native-evidence-metering.md).
-  Retry and Reasoning/Evolution remain active follow-ups;
+  Fresh-attempt recovery is runtime-integrated in
+  [AA-VAE-045](../docs/alphaapollo-migration/features/AA-VAE-045-native-fresh-attempt-recovery.md).
+  Reasoning/Evolution remain active follow-ups;
   implementation and experimental evidence remain separate gates.
   Paid model pilot awaits a named model/service and budget.
 
 - Latest completed milestone: [native DUT/bugfix three-arm campaign](native-three-arm-campaign.md).
   Implemented absent public authority, native conditions and minimal
   existing-campaign dispatch/accounting. Testbench is extended by AA-VAE-043;
-  automatic retries remain pending. Legacy defaults and frozen assets are unchanged.
+  opt-in infrastructure retries are added by AA-VAE-045. Legacy defaults and frozen assets are unchanged.
   Shared absent-authority contract is locally verified in
   [AA-VAE-040](../docs/alphaapollo-migration/features/AA-VAE-040-absent-public-authority.md);
   launcher/campaign integration and real six-cell smoke are locally and hosted verified
