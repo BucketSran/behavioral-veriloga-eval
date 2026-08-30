@@ -5,6 +5,10 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "evaluator-closure.yml"
 
 
+def test_synthetic_docs_have_an_opt_in_real_docker_gate():
+    assert "tests/test_agent_harness_docs_integration.py::test_r53_docker_synthetic_docs_freeze_and_evas_score" in WORKFLOW.read_text()
+
+
 def test_public_evas_process_feedback_has_real_docker_gate():
     workflow = WORKFLOW.read_text(encoding="utf-8")
     assert "tests/test_agent_harness_public_evas_feedback.py::test_real_docker_evas_failure_remains_visible_after_tail" in workflow

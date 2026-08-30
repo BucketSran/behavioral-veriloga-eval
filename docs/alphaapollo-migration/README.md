@@ -22,12 +22,18 @@ AI-native benchmark、agent harness、trajectory、评分与结果生成链路�
 2. [01_功能迁移台账.md](01_功能迁移台账.md)：查看每项能力的代码落点、证据与缺口。
 3. [features/README.md](features/README.md)：新增功能时按模板建立独立记录。
 
-最新修复与后续设计：
+最新修复与扩展：
 
 - [AA-VAE-055：公开 EVAS 分层诊断](features/AA-VAE-055-public-evas-process-feedback.md)：
   已实现并免费验证；sandbox 标记明确不具备可信执行/预算/评分权限。
 - [AA-VAE-056：RAG、波形、SFT/RL 并行设计](features/AA-VAE-056-rag-waveform-training-design.md)：
-  设计完成、未实施；包含各方向的现有代码、拟改落点、测试和启用条件。
+  三方向的设计依据；具体实施状态以下列记录为准。
+- [AA-VAE-057：合成离线检索](features/AA-VAE-057-synthetic-offline-docs.md)：
+  native mini-swe/Reasoning 的显式开发 API；接通反馈、预算与评分身份，不自动启用。
+- [AA-VAE-058：有界波形 parser](features/AA-VAE-058-bounded-waveform-parser.md)：
+  独立模块已验证；等待同次公开调用的可信输出绑定，尚未接入模型。
+- [AA-VAE-059：合成训练导出契约](features/AA-VAE-059-synthetic-training-export.md)：
+  独立 SFT/RL fixture 校验，不是实际轨迹导出或训练流水线。
 
 ## 证据边界
 

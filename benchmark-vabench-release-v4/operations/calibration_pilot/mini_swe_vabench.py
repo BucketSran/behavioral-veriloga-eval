@@ -8,6 +8,7 @@ by G2--G5.  Evaluator assets never enter the model-visible shell sandbox.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from copy import deepcopy
 import hashlib
 import json
 import os
@@ -1458,6 +1459,7 @@ class VaBenchMiniModel:
         deadline_monotonic: float,
         usage_parser: Callable[..., dict[str, Any]],
         response_metadata: Callable[[dict[str, Any]], dict[str, Any]],
+        tools: list[dict[str, Any]] | None = None,
     ) -> None:
         self.client = client
         self.per_turn_max_tokens = per_turn_max_tokens
@@ -1465,6 +1467,10 @@ class VaBenchMiniModel:
         self.deadline_monotonic = deadline_monotonic
         self.usage_parser = usage_parser
         self.response_metadata = response_metadata
+        self.tools = deepcopy([BASH_TOOL] if tools is None else tools)
+        self._tool_names = frozenset(tool["function"]["name"] for tool in self.tools)
+        if "bash" not in self._tool_names or len(self._tool_names) != len(self.tools):
+            raise ValueError("mini-SWE tools must be unique and include bash")
         self.config = SimpleNamespace(model_name=client.model)
         self.events: list[dict[str, Any]] = []
         self.total_output_tokens = 0
@@ -1498,7 +1504,7 @@ class VaBenchMiniModel:
         response = self.client.complete(
             provider_messages,
             self.per_turn_max_tokens,
-            [BASH_TOOL],
+            deepcopy(self.tools),
             timeout_s=timeout_s,
         )
         choice_row = response["choices"][0]
@@ -1544,13 +1550,15 @@ class VaBenchMiniModel:
             )
         for call in calls:
             function = call.get("function") or {}
-            if function.get("name") != "bash":
+            if function.get("name") not in self._tool_names:
                 if self._format_error is None:
                     raise RuntimeError("mini-SWE-agent FormatError was not bound")
                 raise self._format_error(
                     {
                         "role": "user",
-                        "content": f"Unknown tool {function.get('name')!r}; use bash.",
+                        "content": (f"Unknown tool {function.get('name')!r}; use bash."
+                                    if self._tool_names == frozenset({"bash"}) else
+                                    f"Unknown tool {function.get('name')!r}; use a declared tool."),
                         "extra": {"interrupt_type": "FormatError"},
                     }
                 )
@@ -1566,7 +1574,9 @@ class VaBenchMiniModel:
                         "extra": {"interrupt_type": "FormatError"},
                     }
                 ) from exc
-            if not isinstance(arguments, dict) or not isinstance(arguments.get("command"), str):
+            if not isinstance(arguments, dict) or (
+                function["name"] == "bash" and not isinstance(arguments.get("command"), str)
+            ):
                 if self._format_error is None:
                     raise RuntimeError("mini-SWE-agent FormatError was not bound")
                 raise self._format_error(
@@ -1576,7 +1586,7 @@ class VaBenchMiniModel:
                         "extra": {"interrupt_type": "FormatError"},
                     }
                 )
-            actions.append({"command": arguments["command"], "tool_call_id": str(call.get("id") or "")})
+            actions.append({"command": arguments.get("command", ""), "tool_call_id": str(call.get("id") or "")})
         choice["extra"] = {"actions": actions, "cost": 0.0, "provider_event": event}
         return choice
 

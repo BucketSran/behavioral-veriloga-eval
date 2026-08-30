@@ -1,5 +1,23 @@
 # Decision Log
 
+## 2026-08-31 - Opt-in synthetic docs share native controls, not ordinary comparison claims (AA-VAE-057)
+
+- Load a bounded, immutable, operator-declared synthetic corpus. Freeze source,
+  index, retrieval policy and profile identities; hash identity is not proof of
+  license/decontamination. Reuse existing controller capability/budget admission,
+  native adapters and canonical observations instead of adding a second loop.
+- Expose only the explicit native Python API for Agentic/Agent-No-EVAS. Default
+  legacy/native tools remain unchanged; OneShot rejects interactive retrieval.
+  No online service, real corpus, new dependency, Evolution or CLI activation.
+- Native score reading reconstructs the expected registry even with no extension
+  declaration. Missing/mismatched capability identities reject; ordinary aggregate
+  and paired ledgers refuse extension rows pending a frozen matched protocol.
+- Closed bounded observation schemas distinguish reference data from authority.
+  Deliberate argument validation has its own error type; internal retrieval errors
+  remain execution failures, not fabricated model protocol mistakes. Final scores
+  never return to the model or retrieval corpus. Three leaves are handed back;
+  main owns shared repairs, documentation, local verification and fork publication.
+
 ## 2026-08-31 - Synthetic SFT/RL export contract is not a training pipeline (AA-VAE-059)
 
 - Accept only the fixed synthetic fixture release/namespace and explicit source,

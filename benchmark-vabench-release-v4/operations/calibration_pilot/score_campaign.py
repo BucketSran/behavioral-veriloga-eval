@@ -654,6 +654,49 @@ def read_native_cell(
     for profile in [candidate for candidate in (public_profile, final_profile) if candidate is not None]:
         if profile["campaign_config_sha256"] != expected_config_sha:
             raise ValueError("native authority/config mismatch")
+    from runners.agent_harness.backends.mini_swe import mini_swe_bash_tool_descriptor
+    from runners.agent_harness.tool_registry import ToolRegistry
+    from run_native_mini_swe import _submit_artifacts_tool_descriptor
+    condition = cell["experimental_arm"]
+    descriptors = (
+        [_submit_artifacts_tool_descriptor(runtime)] if condition == "OneShot"
+        else [mini_swe_bash_tool_descriptor(allowed_conditions=[condition])]
+    )
+    extensions = manifest.get("extensions")
+    if extensions is not None:
+        from runners.agent_harness.tools.offline_docs_tool import docs_tool_descriptor
+        from runners.agent_harness.tools.offline_docs import corpus_profile_sha256
+        if not isinstance(extensions, dict) or set(extensions) != {"offline_docs"}:
+            raise ValueError("unsupported native extension manifest")
+        docs = extensions["offline_docs"]
+        if (not isinstance(docs, dict)
+                or set(docs) != {"profile", "profile_sha256", "intervention", "tool_name"}
+                or docs["intervention"] != "synthetic-frozen-docs-v1"
+                or docs["tool_name"] != "vaevas_docs_search"
+                or docs["profile_sha256"] != corpus_profile_sha256(docs["profile"])):
+            raise ValueError("native docs profile mismatch")
+        descriptors.append(docs_tool_descriptor(docs["profile"], condition=condition))
+        for event in private:
+            if (event["event_type"] == "tool_result"
+                    and event["payload"]["observation"]["tool_name"] == "vaevas_docs_search"
+                    and event["payload"]["observation"]["payload"].get("corpus_profile_sha256") != docs["profile_sha256"]):
+                raise ValueError("native docs observation/profile mismatch")
+    elif any(
+        event["event_type"] == "environment_observed"
+        and event["payload"].get("tool_name") == "vaevas_docs_search"
+        for event in events
+    ) or any(
+        event["event_type"] == "tool_result"
+        and event["payload"]["observation"]["tool_name"] == "vaevas_docs_search"
+        for event in private
+    ):
+        raise ValueError("undeclared native docs capability")
+    registry = ToolRegistry(descriptors)
+    if (request["registry_sha256"] != registry.registry_sha256
+            or request["effective_capability_sha256"] != registry.resolve(
+                condition_id=condition, model_visible=True,
+            ).effective_capability_sha256):
+        raise ValueError("native capability/manifest mismatch")
     row = {
         **{key: cell[key] for key in ("cell_id", "task_id", "family_id", "form", "mode", "experimental_arm")},
         "backend": backend,
@@ -674,6 +717,7 @@ def read_native_cell(
             "files": hashes, "artifact_path": result["artifact_path"],
             "artifact_file_sha256": result["artifact_file_sha256"], "artifact_sha256": None,
         },
+        **({"extensions": extensions} if extensions is not None else {}),
     }
     artifact_path = result["artifact_path"]
     if "model_call_limit" in manifest:
@@ -762,6 +806,8 @@ def summarize(
     rows: list[dict[str, Any]], judge_kind: str, *,
     scheduled_cells: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
+    if any("extensions" in row for row in rows):
+        raise ValueError("synthetic extension rows require a separately frozen comparison protocol")
     if scheduled_cells is not None:
         scheduled = {cell["cell_id"]: cell for cell in scheduled_cells}
         observed = {row["cell_id"]: row for row in rows}

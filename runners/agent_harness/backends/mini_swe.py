@@ -50,6 +50,7 @@ class MiniSwePolicyBridge:
         propose: Callable[[Observation], object],
         action_id_prefix: str,
         source_backend: str = "mini-swe",
+        accepted_tool_names: frozenset[str] = frozenset({"bash"}),
     ) -> None:
         if not callable(propose):
             raise TypeError("propose must be callable")
@@ -60,6 +61,9 @@ class MiniSwePolicyBridge:
         self._propose = propose
         self._action_id_prefix = action_id_prefix
         self._source_backend = source_backend
+        if not isinstance(accepted_tool_names, frozenset) or "bash" not in accepted_tool_names:
+            raise ValueError("mini-SWE tools must explicitly include bash")
+        self._accepted_tool_names = accepted_tool_names
         self._next_action_number = 1
 
     def act(self, observation: Observation) -> AgentAction:
@@ -77,7 +81,7 @@ class MiniSwePolicyBridge:
             ProposalEnvelope(
                 action_id=action_id,
                 source_backend=self._source_backend,
-                accepted_tool_names=frozenset({"bash"}),
+                accepted_tool_names=self._accepted_tool_names,
                 proposal_format="native_tool_calls",
                 candidate_tree_sha256=observation.candidate_tree_sha256,
             ),

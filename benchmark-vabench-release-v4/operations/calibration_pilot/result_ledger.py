@@ -67,6 +67,8 @@ def build_native_campaign_ledger(
     campaign_obj = _mapping(campaign, "campaign")
     cells = _cells(campaign_obj)
     row_list = [_mapping(row, "row") for row in rows]
+    if any("extensions" in row for row in row_list):
+        raise ValueError("synthetic extension rows require a separately frozen comparison protocol")
     _validate_schedule_join(campaign_obj, cells, row_list)
     _validate_campaign_backend(campaign_obj, row_list)
     limit = (campaign_obj.get("execution_config") or {}).get("native_model_call_limit")

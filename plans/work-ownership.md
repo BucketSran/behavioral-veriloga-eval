@@ -20,6 +20,13 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
+AA-VAE-057–059: the three exact synthetic module/test leaves below have handed
+back and stopped writing. Main owns all remaining shared integration, review
+repairs, documentation and Git. `docs_runtime_review` and
+`extension_boundary_review` are independent read-only reviewers; no delegate has
+index/history/push authority. Their source/provenance findings are covered by
+regressions, not treated as permission to expand into real data or training.
+
 AA-VAE-055 follow-up on `8467af3d38`: main alone writes public EVAS feedback,
 native bridge/launcher, operation-aware summary tests and shared records.
 Scope/KPIs: `public-evas-feedback-and-extension-design.md`. Three advisers
@@ -482,9 +489,9 @@ archives and aggregate ledgers remain follow-ups under the
 current plan. The coordinator defines the next bounded files/tests before
 implementation; mapping/review stays read-only and no delegated writing lane
 is opened by this document.
-# Synthetic extension leaves (2026-08-31)
+## Synthetic extension leaves (2026-08-31, handed_back)
 
-Active only after coordinator dispatch; base `7004ee095f`. Main owns shared
+Dispatched on base `7004ee095f`, now handed back. Main owns shared
 interfaces, launcher/controller/registry wiring, docs, integration tests and all
 Git. Three exact non-overlapping assignments:
 

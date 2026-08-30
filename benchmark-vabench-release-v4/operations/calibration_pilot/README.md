@@ -126,6 +126,24 @@ Deterministic providers test connectivity, not model quality. Actual model
 experiments require a named model/service, explicit budget and frozen controls.
 No domain/RAG/waveform tools, SFT/RL or Spectre path are activated here.
 
+## Synthetic docs development API (not a campaign flag)
+
+`run_prepared_native_mini_swe(..., docs_corpus=corpus)` explicitly adds the
+`vaevas_docs_search` tool to native mini-swe or Reasoning in Agentic/Agent-No-EVAS.
+Build `corpus` through `OfflineDocsCorpus.from_manifest`; only bounded synthetic
+CC0 fixtures are currently accepted. OneShot rejects it before runtime reservation.
+Omitting the argument preserves the existing Bash-only native path and legacy default.
+
+The corpus profile freezes sources, policy, limits and index identity. It binds
+tool capability, observations, launcher configuration and final evidence joins;
+the controller still owns admission and `tool_call` charging. Single-cell reading
+can verify this intervention, but ordinary aggregation and paired result ledgers
+reject extension rows pending a separately frozen comparison protocol. There is
+no RAG CLI/Evolution integration, real corpus or automatic online retrieval.
+See [AA-VAE-057](../../../docs/alphaapollo-migration/features/AA-VAE-057-synthetic-offline-docs.md).
+The separate waveform parser and synthetic training projection are not activated
+by this API and do not confer public/final authority or authorize paid runs.
+
 ## Opt-in public validation observations
 
 Native single-trajectory Agentic Bash observations also carry `public_evas`

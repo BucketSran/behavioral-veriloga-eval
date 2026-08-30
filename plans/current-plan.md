@@ -13,25 +13,25 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
-- Active implementation: [synthetic extension slice](rag-waveform-training-implementation.md).
-  User approved proceeding after AA-VAE-056. Three isolated module/test leaves
-  cover offline retrieval, CSV summaries and synthetic training projections;
-  main owns shared opt-in wiring and publication. Real data, paid runs and
-  training remain disabled. Module tests are not runtime/quality evidence.
-  Waveform leaf is verified as [AA-VAE-058](../docs/alphaapollo-migration/features/AA-VAE-058-bounded-waveform-parser.md):
-  12 parser tests and independent review pass. Model-visible activation still
-  requires fresh isolated public execution and a candidate-bound output receipt.
-  Training leaf is verified as [AA-VAE-059](../docs/alphaapollo-migration/features/AA-VAE-059-synthetic-training-export.md):
-  24 tests and independent repair re-review pass; real trajectory export/training
-  remains disabled. Retrieval integration is undergoing final review.
+- Implemented bounded slice: [synthetic extension implementation](rag-waveform-training-implementation.md).
+  [AA-VAE-057](../docs/alphaapollo-migration/features/AA-VAE-057-synthetic-offline-docs.md)
+  adds explicit synthetic docs to native mini-swe/Reasoning through a Python API,
+  shared budgets and trajectory/freeze/score identity. No default/CLI/Evolution
+  activation; ordinary aggregate rejects extensions until a matched protocol is frozen.
+  [AA-VAE-058](../docs/alphaapollo-migration/features/AA-VAE-058-bounded-waveform-parser.md)
+  is a verified standalone CSV parser (12 tests), not a model-visible waveform tool.
+  [AA-VAE-059](../docs/alphaapollo-migration/features/AA-VAE-059-synthetic-training-export.md)
+  is a verified synthetic projection/validator (24 tests), not real trace export
+  or training. Main owns shared wiring/review/publication; see verification log
+  for final suite and Docker evidence. No real data, credentials or paid calls.
 
-- Next extension queue: [AA-VAE-056 RAG/waveform/training design](../docs/alphaapollo-migration/features/AA-VAE-056-rag-waveform-training-design.md).
-  Read-only advisers returned three independent designs; main synthesized them.
-  Small future leaves are synthetic offline retrieval, bounded CSV parsing and
-  public-only training-export/split validation. Shared registry/profile/result
-  interfaces stay main-owned. Real corpus licenses, waveform caps/activation
-  and training split/use authority must be frozen before real-data activation.
-  No tool/schema/handler/corpus/export/training has been activated by these notes.
+- Remaining extension gates, from [AA-VAE-056](../docs/alphaapollo-migration/features/AA-VAE-056-rag-waveform-training-design.md):
+  approve/license/decontaminate an actual public corpus and freeze matched RAG
+  conditions before CLI/Evolution/aggregation; isolate fresh public simulator
+  outputs and bind candidate/profile/invocation receipts before waveform feedback;
+  separately authorize actual trajectory export, splits/provider use and training.
+  These are explicit follow-ups, not evidence from synthetic tests. r53/EVAS and
+  stopped live evidence stay unchanged; no automatic paid rerun.
 
 - Implemented follow-up: [public EVAS feedback and extension design](public-evas-feedback-and-extension-design.md).
   [AA-VAE-055](../docs/alphaapollo-migration/features/AA-VAE-055-public-evas-process-feedback.md)
@@ -39,7 +39,7 @@ implementation and does not change the phase statuses below.
   Review identified forgeable sandbox markers: data is explicitly unauthenticated,
   not hard-budget/validator/final authority. Trusted per-process accounting needs
   a separate isolated executor. Three read-only extension designs are complete;
-  no RAG/waveform tool activation, corpus ingestion, training or paid run.
+  no RAG/waveform tool activation, corpus ingestion, training or paid run in AA-VAE-055.
   Final local gate: 849 harness passes / 17 opt-in skips; 2 real Docker/free-HTTP
   smoke passes. Independent scoped review approves; historical compact-checkout
   missing-script test limitation is retained in the verification log.

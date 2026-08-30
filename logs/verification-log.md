@@ -1,5 +1,46 @@
 # Verification Log
 
+## 2026-08-31 - Synthetic docs native integration and final extension gate (AA-VAE-057–059)
+
+- Base `7004ee095fb1e5c21dd4751a2a1ff613c343f32a`; scope committed first as
+  `e8b8406def`. Reviewed waveform and training slices are separate commits
+  `bc62c625d6` and `eb0f04d140`; main alone owns shared wiring and Git publication.
+- RAG leaf: 7 tests after strict manifest/profile identity, metadata bounds and
+  safe bounded-read hardening. Optional mini-swe tool support had a genuine RED
+  (missing `tools` parameter), then the bridge/differential gate passed 32 tests.
+  Six format/arm cases plus OneShot rejection initially failed for missing
+  `docs_corpus`; the implemented shared native path passed all seven. Aggregation
+  and the new CI selector each had a missing-behavior RED before repair.
+- Independent RAG review found three defects: absent extension declarations
+  skipped capability identity validation, broad ValueError handling masked an
+  internal failure as bad model arguments, and observation schema was not closed.
+  Four added cases showed genuine RED before the repairs; the initial two fixture
+  writes were separately corrected to chmod their fresh test-only immutable
+  request files, not live evidence. Re-review: **36 passed / 2 skipped**, compile,
+  Ruff and diff checks pass, no actionable findings. Dedicated LSP/typecheck is
+  unavailable; no formal typecheck pass is claimed.
+- Final stable-runtime full harness command:
+  `uv run --locked --extra agentic python -m pytest -q tests/test_agent_harness_*.py --tb=short`:
+  **908 passed, 19 skipped in 103.07s**. Earlier 898 passes predates the final
+  review repairs and is not the final count. Entry/navigation plus CI contract:
+  **37 passed in 0.26s**. Ruff 0.12.12 on all new/changed Python, workflow YAML parse
+  and whitespace checks pass. Historical compact-checkout limitations recorded
+  under AA-VAE-055 remain; this does not claim the whole historical suite is green.
+- Final real Docker / EVAS 0.8.7 command:
+  `VABENCH_TEST_DOCKER_RUNTIME=1 uv run --locked --extra agentic python -m pytest -q
+  tests/test_agent_harness_docs_integration.py -k r53_docker
+  --basetemp=benchmark-vabench-release-v4/reports/aa057-docs-smoke-20260831-03 --tb=short`:
+  **2 passed, 13 deselected in 20.64s**. Both backends perform synthetic retrieval,
+  receive feedback, submit a public-neutral fixture, freeze, then join the real
+  EVAS final sidecar. Scripted providers cost no API calls. The first `.01` run
+  used an incorrect test assertion (`evaluator` instead of `judge`); `.02` passed
+  before review repairs, `.03` is final. These are integration, not quality results.
+- CI now selects the two real docs smoke cases. Hosted outcome is separate and
+  not implied by local passes. No credentials, paid provider/training calls,
+  r53/gold/fault/evaluator bytes, old worktrees or stopped live evidence changed.
+  Waveform remains a parser without invocation authority; training remains a
+  synthetic contract without a real native trajectory adapter or trainer.
+
 ## 2026-08-31 - Synthetic training-export contract and review repairs (AA-VAE-059)
 
 - Leaf implementation and main hardening initially reached 18 tests. Independent

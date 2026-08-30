@@ -58,3 +58,14 @@ exact tests and code mappings in migration notes. Actual corpus licensing and
 decontamination, real training use authority, paid experiments and matched
 tool-effect ablations remain separate decisions. A failed provenance check must
 disable the affected extension, never fall back to unbound output.
+
+## Bounded implementation outcome
+
+Three isolated leaves handed back; main owns all shared integration and publication.
+AA-VAE-057 adds a synthetic docs Python API for native mini-swe/Reasoning, common
+budget admission, next-request delivery and score joins. It deliberately rejects
+ordinary aggregate/ledger use until a comparison protocol is frozen. There is
+no campaign CLI or Evolution docs path. AA-VAE-058 is a standalone parser only:
+the exclusive execution/output receipt prerequisite is not implemented. AA-VAE-059
+is a synthetic source projection only, not a native trajectory adapter or trainer.
+Feature notes map exact code and verification; logs separate local and hosted gates.
