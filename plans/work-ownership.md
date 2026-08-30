@@ -24,8 +24,9 @@ N1–N5 implementation assignments are closed and returned to main. Published
 AA-VAE-061–066 end at `8d782880c7`; independent reviews and final local tests
 are complete (1013 harness passes / 25 skips; 12 real Docker passes). No
 delegated writer remains active. Main alone owns N6 documentation/navigation
-tests, hosted verification, final audit records and fork publication. Any final
-documentation reviewer is read-only. The assignment details below are historical
+tests, hosted verification, final audit records and fork publication. N6 review
+APPROVE and source/audit hosted gates are green; only final record publication
+remains with main. The assignment details below are historical
 scope records, not authorization to resume a writer.
 
 N4/N5 main-only slice followed `evolution-extension-surface-closure.md` for exact

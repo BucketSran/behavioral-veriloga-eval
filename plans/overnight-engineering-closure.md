@@ -37,7 +37,7 @@ external inputs do not block unrelated engineering items.
 | N3 / AA-VAE-062 | Synthetic native-trajectory-to-SFT/RL adapter with explicit source/split/public-reward boundaries | Published `811d82e806`; metadata/hash fixture adapter, not semantic training samples |
 | N4 / AA-VAE-065 | Frozen synthetic Evolution docs API and separate intervention evidence/aggregation guard | Published `72a9f8614d`; real two-model/two-round smoke green; no real RAG/CLI rollout |
 | N5 / AA-VAE-064/066 | Coding-agent interface/fairness audit and demonstrated reporting repairs | NoEVAS branch export repair `9e98100cd1`; declared surface/failure projection `8d782880c7`. Existing Bash retained |
-| N6 | Reconcile active docs/entrypoints, CI and morning audit index against completed code | Final full harness 1013 passed / 25 opt-in skips; 41 active-entry/CI tests pass; final Docker/hosted closeout tracked in log |
+| N6 | Reconcile active docs/entrypoints, CI and morning audit index against completed code | Closed: 1013 local harness passes / 25 skips, 12 real Docker passes, 41 entry/CI passes; final source hosted gates green (1253 / 31 in broader suite). Audit `5816024f27` published/CI green |
 
 No item promises a default switch or an invented benchmark condition. A new
 comparison/intervention contract is frozen and reviewed before its runtime
@@ -83,3 +83,8 @@ when the user requests a pause/review. Do not claim all research work complete.
   checks pass 41 tests. Exact hosted status belongs in the verification log;
   the [morning audit](../docs/alphaapollo-migration/04_夜间工程闭环审计_2026-08-31.md)
   distinguishes implemented software from remaining data/experiment decisions.
+
+Disposition: N1–N6 are closed; all triggered final-source hosted gates and the
+audit/navigation commit gate passed. Pause the existing heartbeat after final
+record publication. Future data/protocol/experiment decisions belong to morning
+review; this queue does not authorize another automatic implementation cycle.

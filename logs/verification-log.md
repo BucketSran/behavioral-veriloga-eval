@@ -1,5 +1,30 @@
 # Verification Log
 
+## 2026-08-31 - Final source hosted GREEN and overnight closeout
+
+- Final runtime SHA `8d782880c72b861822983befc30188165072d78e` passed both
+  triggered workflows:
+  [Evaluator Closure](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33330481695)
+  and [Runner Smoke](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33330481748).
+  Evaluator Closure finished in 5m21s; its broader test selection reports
+  **1253 passed, 31 skipped, 54.75 s**. All subsequent real Docker stages pass,
+  including nine-cell native campaign, free HTTP fixture, waveform, docs,
+  multi-model Evolution and final three-arm clean-room hidden scoring.
+- Public Agent Runtime did not retrigger for AA-VAE-066: its relevant inputs
+  did not change after the separately verified AA-VAE-065 run. Do not describe
+  that earlier workflow as a run on the final source SHA.
+- Audit/navigation commit `5816024f2780b8ef4f3e8fda8df1b303096bc357` passed its
+  triggered [Runner Smoke](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33330623374).
+  Runtime, schema and workflow paths have no diff from `8d782880c7`.
+  This last closeout only records those results and queue disposition.
+- Nonblocking hosted annotation: existing checkout/setup-python actions target
+  Node 20 and the runner forces Node 24. The job passed; no action/dependency
+  upgrade was mixed into this frozen harness slice.
+- N1–N6 safe engineering work is verified and published. Named real-data,
+  matched-protocol, training and paid-experiment decisions remain in the morning
+  audit. No new provider calls, credentials, corpus, training, r53/EVAS changes,
+  private AlphaApollo access or historical-worktree edits were introduced.
+
 ## 2026-08-31 - Overnight N1–N6 final local integration and baseline audit
 
 - Final runtime source: `8d782880c72b861822983befc30188165072d78e`.

@@ -17,7 +17,7 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
-- Active overnight request: [engineering closure queue](overnight-engineering-closure.md).
+- Completed overnight request: [engineering closure queue](overnight-engineering-closure.md).
   The user authorized completing current free engineering gaps, not only the
   two waveform slices. Preserve separate gates for real data, paid experiments,
   training and benchmark changes. AA-VAE-061–066 implement native waveform
@@ -25,7 +25,8 @@ implementation and does not change the phase statuses below.
   Evolution generation-surface repair, branch-local synthetic docs and declared
   information-surface/failure reporting. Each is independently reviewed and
   separately committed. Full final harness gate: 1013 passed / 25 opt-in skips;
-  final real Docker/hosted evidence is recorded by source SHA in the log.
+  final real Docker gate: 12 passed. Final source `8d782880c7` hosted gates are
+  green (broader suite 1253 passed / 31 skipped); exact links are in the log.
   Read the [morning audit](../docs/alphaapollo-migration/04_夜间工程闭环审计_2026-08-31.md)
   for commits/code maps and external data/experiment/protocol gates. No new paid run.
 
