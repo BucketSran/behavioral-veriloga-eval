@@ -1,5 +1,27 @@
 # Verification Log
 
+## 2026-08-31 - Fork publication and hosted extension verification
+
+- Runtime/source head `fdff3460f27ea860772273c26333535ea8c5be59` is published to
+  BucketSran fork/main. Scope, waveform parser, synthetic training contract and
+  RAG integration are separate commits: `e8b8406def`, `bc62c625d6`, `eb0f04d140`,
+  `fdff3460f2`. The following closeout changes documentation only.
+- All three hosted workflows completed successfully for that exact source head:
+  [Evaluator Closure](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33325162446),
+  [Public Agent Runtime](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33325162430),
+  [Runner Smoke](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33325162431).
+  Evaluator Closure includes the new two-backend synthetic-docs Docker smoke
+  and the existing three-form, Evolution and clean-room final-scoring gates.
+- Read-only baseline checks: behavioral fork/main contains Arcadia-1 main
+  `7b5616dc52195ec275ec6d21c71d7763613702cd` plus the fork development commits.
+  EVAS checkout `audit/evas-evaluator-compat`, fork main and upstream main resolve
+  to `6cb6fa7a7dac70fc0d4120126d8cf74258e6637b` (0.8.7); EVAS is unchanged.
+  No sealed r53, environment lock or dependency changes occurred in this slice.
+  The old workspace and stopped live-run evidence were not modified.
+- Hosted success verifies engineering gates, not retrieval usefulness, model
+  quality, real training or authenticated waveform provenance. Activation gaps
+  remain explicit in AA-VAE-057–059 and the current plan.
+
 ## 2026-08-31 - Synthetic docs native integration and final extension gate (AA-VAE-057–059)
 
 - Base `7004ee095fb1e5c21dd4751a2a1ff613c343f32a`; scope committed first as

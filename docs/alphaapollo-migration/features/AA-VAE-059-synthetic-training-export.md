@@ -1,6 +1,7 @@
 # AA-VAE-059：独立的合成训练样本契约
 
 日期：2026-08-31。状态：synthetic projection/validator；不导出真实轨迹、不训练。
+实现提交：`eb0f04d140`（fork/main）。
 
 沿用 AlphaApollo 将推理轨迹与未来 SFT/RL 分开的架构思想，但不把 vaEVAS reviewer
 export 或最终评分产物改名成训练数据。没有引入训练框架、GPU、模型权重或依赖。

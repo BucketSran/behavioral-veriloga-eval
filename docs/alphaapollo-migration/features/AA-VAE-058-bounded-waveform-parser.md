@@ -1,6 +1,7 @@
 # AA-VAE-058：有界公开波形摘要器
 
 日期：2026-08-31。状态：独立 parser 实现；**尚未接入模型 observation**。
+实现提交：`bc62c625d6`（fork/main）。
 
 沿用 AA-VAE-056 的公开反馈压缩思想，而不是复制 hidden checker 的容差或默认值。
 新增 `runners/agent_harness/tools/waveform_summary.py`，唯一输入为可信调用方选定的

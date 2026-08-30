@@ -24,6 +24,10 @@ implementation and does not change the phase statuses below.
   is a verified synthetic projection/validator (24 tests), not real trace export
   or training. Main owns shared wiring/review/publication; see verification log
   for final suite and Docker evidence. No real data, credentials or paid calls.
+  Published runtime head `fdff3460f2`: all three triggered hosted workflows passed.
+  Local final gate is 908 harness passes / 19 opt-in skips and two real docs
+  Docker/EVAS passes. Feature commits and source-specific hosted links are in
+  the verification log; this is not evidence of model-quality improvement.
 
 - Remaining extension gates, from [AA-VAE-056](../docs/alphaapollo-migration/features/AA-VAE-056-rag-waveform-training-design.md):
   approve/license/decontaminate an actual public corpus and freeze matched RAG
