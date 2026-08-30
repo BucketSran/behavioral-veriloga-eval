@@ -42,9 +42,16 @@ campaign CLI, Evolution activation, real corpus, provider expense or training.
   incompleteness. Do not add a precompiler: syntactically invalid but complete
   candidates reach EVAS and return its actual failed-process receipt.
 - `public_validation_calls` counts admitted feedback requests, including the
-  recoverable incomplete case. Separate telemetry
-  `public_waveform_evas_invocations_executed` counts actual fixed simulation
-  launches only (including launched failures/timeouts, not preflight probes).
+  recoverable incomplete case. `public_waveform_evas_invocations_confirmed`
+  counts receipt-confirmed fixed executions (including failed/time-out processes,
+  not preflight probes). `public_waveform_execution_count_complete` reports whether
+  every admitted request has a confirmed execution count.
+  `public_waveform_evas_invocations_executed` is the total only when complete;
+  otherwise it is null, never a fabricated zero. An exception after entering the
+  executor without a receipt remains unknown; a pre-executor failure is confirmed
+  zero. Keep private failure-stage metadata and any completed receipt, including
+  if generation resume subsequently fails. This independently reviewed repair
+  avoids duplicating the subprocess loop or changing shared controller semantics.
   It is not a second budget and never counts marker-reported Bash operations.
   Neither counter is a global cap on all EVAS processes: unchanged ordinary Bash
   may still invoke EVAS outside this fixed-action path. Report that scope rather

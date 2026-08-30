@@ -20,6 +20,12 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
+`paired_report_impl` (N2 / AA-VAE-063) owns only calibration-pilot
+`result_ledger.py` and `tests/test_agent_harness_result_ledger.py`, following
+`paired-report-case-study.md`. No other files or Git; main integrates/reviews.
+The N3 synthetic adapter writer has handed back its two leaves and stopped;
+main owns their integration, with independent read-only review completed.
+
 `synthetic_training_adapter_impl` (N3 / AA-VAE-062), active assignment from
 `961fa99fdc`: exclusively owns new `runners/agent_harness/training_trace_adapter.py`
 and `tests/test_agent_harness_training_trace_adapter.py`. Follow
