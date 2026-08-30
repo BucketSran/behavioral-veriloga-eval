@@ -1,8 +1,9 @@
 # Native DUT/bugfix three-arm campaign
 
 Date: 2026-08-30. Base: `24f2b834b012271af8d05221cc6e4855e2488f72`.
-Status: bounded implementation and local verification complete; fork publication
-is recorded in the verification log. No full evaluation closure is claimed.
+Status: bounded implementation, local/hosted verification and fork publication
+complete at runtime commit `c2da249c8a`; exact evidence is recorded in the
+verification log. No full evaluation closure is claimed.
 
 ## Brief
 

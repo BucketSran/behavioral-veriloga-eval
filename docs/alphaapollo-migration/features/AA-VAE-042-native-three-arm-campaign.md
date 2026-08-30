@@ -48,7 +48,13 @@ runtime 文件 hash 不变；公开 EVAS 调用只在 Agentic 出现。
 当前 harness + score reuse + r53 entrypoint/smoke 回归：**492 passed, 5 skipped**。
 独立 campaign 审查无实质阻断；Ruff 0.12.12 / AST / whitespace 通过。
 LSP 不可用，广泛历史回归因本地精简资产缺失未全绿，详见 verification log；
-不把局部 GREEN 写成全仓测试成功。未来 hosted 结果必须另行绑定 commit。
+不把局部 GREEN 写成全仓测试成功。
+
+最终 runtime commit `c2da249c8a` 已推送 fork main；
+[Evaluator Closure](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33310942146)
+通过 **703 passed, 11 skipped**，六-cell Docker gate **1 passed in 10.62s**，
+原 mixed/legacy smoke 同样通过；该 commit 的 Runner Smoke 也成功。
+完整远端 checkout 的结果与本地精简资产缺失分别记录，不覆盖历史失败。
 
 ## 保留的限制
 

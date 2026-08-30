@@ -13,14 +13,16 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
-- Active authorized milestone: [native DUT/bugfix three-arm campaign](native-three-arm-campaign.md).
+- Latest completed milestone: [native DUT/bugfix three-arm campaign](native-three-arm-campaign.md).
   Implemented absent public authority, native conditions and minimal
   existing-campaign dispatch/accounting. Native Testbench and automatic retries
   remain deferred; legacy defaults and all frozen evaluation assets are unchanged.
   Shared absent-authority contract is locally verified in
   [AA-VAE-040](../docs/alphaapollo-migration/features/AA-VAE-040-absent-public-authority.md);
-  launcher/campaign integration and real six-cell smoke are locally verified
+  launcher/campaign integration and real six-cell smoke are locally and hosted verified
   in [AA-VAE-042](../docs/alphaapollo-migration/features/AA-VAE-042-native-three-arm-campaign.md).
+  Final runtime commit `c2da249c8a` is published to fork main; all workflows
+  triggered by it passed. No new implementation slice is opened by this closeout.
 
 - Phase 0/1/3/4 bounded contracts and compatibility work are complete.
 - Phase 2/5 are **in progress**: the opt-in native single-cell path works,
@@ -46,6 +48,9 @@ Broad historical suite is not green on the compact checkout (34 failed,
 657 passed, 8 skipped, 12 errors); absent V3/r45/r52/provenance/runtime assets
 are an explicit validation limitation, not permission to restore history.
 Independent review has no substantive blocker; LSP diagnostics were unavailable.
+Final runtime commit `c2da249c8a` passed hosted Evaluator Closure (703 passed /
+11 skipped), every Docker smoke including all six native cells, and Runner Smoke.
+Hosted full-checkout success is separate from the local missing-asset limitation.
 No paid model experiment or full closure is claimed.
 
 ### Previous bridge checkpoint (AA-VAE-039)
@@ -98,7 +103,7 @@ reasoning backend, and a separately named AlphaApollo evolution condition.
 The main coordinator owns shared interfaces, plans/logs, integration, and all
 Git publication. Delegated tasks are read-only unless assigned exact,
 non-overlapping files in [work-ownership.md](work-ownership.md). The native
-condition and campaign leaf lanes are assigned there; shared contracts remain
+condition and campaign leaf lanes are closed there; shared contracts remain
 coordinator-owned. The historical result-store task is complete;
 the unfinished dispatch task's interface question is reassigned to the main
 coordinator for review, not automatic implementation. This workflow change

@@ -1,5 +1,41 @@
 # Verification Log
 
+## 2026-08-30 - Native three-arm final hosted confirmation
+
+- Final runtime commit `c2da249c8ad1e5db6eeb09c9e60713fe12d2afc6` was pushed
+  only to BucketSran `origin/main`, including the root-reservation repair.
+  Main/origin matched and the worktree was clean before this documentation
+  follow-up. R53 tracked bytes remain unchanged from baseline `24f2b834b0`;
+  EVAS HEAD/origin/upstream remain `6cb6fa7a7d`, clean and unchanged.
+- [Evaluator Closure run 33310942146](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33310942146)
+  succeeded on that exact runtime commit: **703 passed, 11 skipped in 44.05s**.
+  Real Docker checks also passed: public validation **1 passed in 3.47s**,
+  native episode join **1 passed in 6.19s**, native launcher **1 passed in
+  4.77s**, mixed native campaign **1 passed in 9.94s**, and the new all-native
+  DUT/bugfix six-cell campaign **1 passed in 10.62s**. The original three-arm
+  clean-room hidden-scoring smoke reports **PASS**.
+- [Runner Smoke run 33310942132](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33310942132)
+  succeeded on the same commit: Linux boundary **2 passed, 31 deselected in
+  0.30s**, runner suite **34 passed in 1.03s**, and v4 materializer/entrypoint
+  suite **276 passed, 6 skipped in 19.24s**.
+- [Public Agent Runtime run 33310807079](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33310807079)
+  succeeded on the preceding integration commit `435957967c`: real shared-image
+  adapter checks **2 passed, 31 deselected in 1.62s**. The root-reservation fix
+  did not touch that workflow's path filters, so it did not trigger again;
+  Evaluator Closure above rebuilt and tested both images on the final commit.
+- All workflows triggered by the final runtime commit completed successfully.
+  This does not erase the local compact-checkout historical-asset failures or
+  make unavailable LSP diagnostics a passed gate. The Node-action deprecation
+  annotation remains non-blocking maintenance work, outside this slice.
+- Documentation closeout: 23 active-entrypoint/navigation tests passed in
+  0.09s; whitespace checks passed. Independent read-only review of the five
+  closeout documents found no substantive issue or unsupported completion claim.
+- This closes the bounded native DUT/bugfix three-condition campaign milestone,
+  not the full harness roadmap. Deterministic incomplete candidates prove
+  evidence connectivity, not model quality, legacy parity, full-r53 coverage,
+  or Spectre equivalence. No paid model, Testbench, automatic episode retry,
+  Reasoning/Evolution, private AlphaApollo, or old-worktree work was performed.
+
 ## 2026-08-30 - Native campaign publication and root-reservation follow-up
 
 - Fork-only publication succeeded: `c842ea980e` absent authority,

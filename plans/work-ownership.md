@@ -32,7 +32,7 @@ and recorded here before the new coordinator starts writing.
 | Shared harness contracts/state/controller/tool registry, package exports, and their tests | main coordinator | none; old dispatch task is closed |
 | `runners/agent_harness/result_store.py` and `tests/test_agent_harness_result_store.py` | main coordinator | none; historical store slice is integrated |
 | Production opt-in final replay/scorer receipt path and its tests | main coordinator | none; the bounded receipt integration is verified |
-| Production public-validation adapter and complete campaign wiring | main coordinator | none; opt-in public-simulation slice verified, complete campaign wiring still pending |
+| Production public-validation adapter and campaign wiring | main coordinator | none; bounded native DUT/bugfix three-condition campaign verified; native Testbench/retry remain pending |
 | Trajectory/result joins, backend adapters, evolution/memory/lineage, and their tests | main coordinator | none; assign exact leaf files before parallel implementation |
 | All other tracked files not explicitly assigned below | main coordinator | none |
 
@@ -98,6 +98,9 @@ Independent reviews have no substantive blocker; diagnostic gaps are logged.
 The coordinator also owns the final wrapper root-reservation regression/fix in
 `runners/run_benchmarkv4_campaign.py` and the existing native dispatch test file;
 the campaign reviewer checks it read-only. No leaf writing lane is reopened.
+Fork publication and hosted verification are complete at runtime commit
+`c2da249c8a`. All triggered workflows passed. Main owns only the final evidence
+documentation closeout here; no further implementation lane is activated.
 Scope/KPIs/stop conditions: [controlled plan](native-three-arm-campaign.md).
 The main coordinator owns all shared contracts/schemas/exports, native episode
 composition, CI, smoke integration, plans/logs and migration notes. Main-owned
