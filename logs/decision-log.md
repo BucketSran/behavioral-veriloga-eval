@@ -1,5 +1,18 @@
 # Decision Log
 
+## 2026-08-30 - Native episode / production result join scope
+
+- Reuse `EpisodeController`, mini-swe bridges, bound final replay and the
+  validated result-artifact contract; do not build another harness.
+- Add a trusted opt-in composition API and immutable native result persistence.
+  Reserve the attempt before policy entry and block in-place reentry, including
+  attempts that failed before final scoring. Preserve failure evidence.
+- Keep public-tool routing explicitly test-only until its separate design gate.
+  Production defaults, model APIs and deferred domain-tool capabilities do not
+  change. The same-chain smoke is infrastructure evidence, not a baseline rerun.
+- Preserve the distinction between hash-bound native events, complete raw trace
+  archives and aggregate campaign ledgers; only the first join is in this slice.
+
 ## 2026-08-30 - Public simulation feedback binding and claim boundary
 
 - Bind actual sandbox EVAS version/image, public task bytes, fixed command,

@@ -767,6 +767,38 @@ complete trajectory content/typed result joins, Testbench support, and retry
 lineage remain open. Phase 5 stays `in_progress`; no reasoning/evolution
 backend implementation or baseline-quality claim is implied.
 
+#### Active slice - native episode / production final result join (2026-08-30)
+
+Brief: compose the existing controller and trusted replay into an opt-in Python
+entry point. Persist its native trajectory and validated scored-result artifact
+without translating incomplete legacy traces or changing campaign defaults.
+
+Acceptance / KPI:
+
+- freeze public/final profile and backend/tool identities before policy entry;
+- reserve one fresh runtime attempt before generation; never resume it in place;
+- accept only the controller's frozen submission for the existing bound replay;
+- read and verify the published sidecar receipt, then join the real trajectory,
+  submission, profiles and judgment into an immutable result artifact;
+- keep unscored failures visible without fabricating a zero or scored row;
+- prove public feedback -> submission -> final replay -> result join in one
+  deterministic r53 Docker smoke; final output never reaches the policy;
+- retain legacy mini-swe, r53, EVAS 0.8.7 and all deferred tool decisions.
+
+Main owns `operations/calibration_pilot/native_episode.py`, the minimal reusable
+result-store and legacy reentry gates, focused tests, CI and shared records.
+Base: `4879ee64bb`. Native subagents map/review only; no delegated writes.
+Implement one RED/GREEN behavior at a time, independently review, and publish
+focused GREEN commits only to the BucketSran fork.
+
+The smoke may use explicitly test-only public-tool dispatch; this does not
+approve or install `run_evas` in a production model registry. The entry point
+accepts trusted caller-supplied policy/environment components; it is not a
+full CLI/backend launcher, model API experiment, raw trace archive, aggregate
+ledger, retry coordinator, or proof of hostile-host isolation. Existing hash
+events do not imply full replayable model/tool content. Authority/provenance
+and exclusive workspace ownership remain coordinator responsibilities.
+
 ### Phase 6 - Add the AlphaApollo single-trajectory reasoning backend
 
 Status: `pending`

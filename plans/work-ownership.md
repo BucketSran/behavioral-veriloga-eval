@@ -89,6 +89,8 @@ Integration sequence:
 
 ## Immediate Follow-up
 
-The next functional slice remains the production public-validation adapter,
-followed by native trajectory/result joins. The coordinator first defines its
-exact files/tests; no new implementation lane is started by this document.
+The public-validation adapter slice is verified. The coordinator now owns the
+opt-in native episode / production final result join described in the current
+plan, including `native_episode.py`, minimal result-store/reentry changes and
+their tests. Parallel mapping/review remains read-only; no delegated writing
+lane is opened by this document.
