@@ -785,6 +785,26 @@ class VaBenchBashEnvironment:
             return
         self._preflight()
 
+    def inspect_public_evas(self) -> dict[str, Any]:
+        """Inspect the executable in this runtime, outside model/tool telemetry."""
+        if not self.executable_feedback:
+            raise ValueError("public EVAS is disabled")
+        self.preflight()
+        command = (
+            "/usr/local/bin/evas --version"
+            if self.config.sandbox_backend == "docker"
+            else shlex.join([*shlex.split(self.evas_command), "--version"])
+        )
+        result = subprocess.run(
+            self._sandbox_argv(command), cwd=self.workspace, env=self._shell_env(),
+            text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            timeout=min(self.preflight_timeout_s, self._remaining_command_timeout_s()),
+            check=False,
+        )
+        if result.returncode != 0:
+            raise RuntimeError("public EVAS identity probe failed")
+        return {"version_output": result.stdout.strip(), "image_id": self.docker_image_id}
+
     def _preflight(self) -> None:
         if self.config.sandbox_backend == "docker":
             self._ensure_docker_container()
