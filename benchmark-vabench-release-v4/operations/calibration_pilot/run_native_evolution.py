@@ -727,11 +727,12 @@ def _run_branch(
     controller_closed_environment = False
     started = time.monotonic()
     try:
-        _export_runtime(ops, cell, release, runtime, timeout_s)
+        generation_cell = _branch_generation_cell(cell)
+        _export_runtime(ops, generation_cell, release, runtime, timeout_s)
         make_environment = ops.make_branch_environment or _default_make_branch_environment
         environment = make_environment(
             runtime=runtime,
-            cell=cell,
+            cell=generation_cell,
             branch=branch,
             context=context,
             timeout_s=timeout_s,
@@ -750,6 +751,7 @@ def _run_branch(
             "requested_image": branch_docker_image or mini.DEFAULT_NO_EVAS_DOCKER_IMAGE,
             "observed_image_id": getattr(environment, "docker_image_id", None),
             "sandbox_backend": branch_sandbox_backend, "executable_feedback": False,
+            "logical_condition": condition, "exported_experimental_arm": "Agent-No-EVAS",
         })
         client = branch.client_factory()
         if getattr(client, "model", None) != branch.model_ref:
@@ -1093,6 +1095,7 @@ def _native_evolution_config_document(
             "sandbox_backend": branch_sandbox_backend,
             "docker_image": branch_docker_image,
             "executable_feedback": False,
+            "exported_experimental_arm": "Agent-No-EVAS",
         },
         "branch_roster": [
             {
@@ -1473,6 +1476,11 @@ def _evolution_evidence_summary(output_dir: Path) -> dict[str, Any]:
                            "model_quality_claim_allowed": False, "single_trajectory_pooling_allowed": False,
                            "may_enter_shared_memory": False},
     }
+
+
+def _branch_generation_cell(cell: Mapping[str, Any]) -> dict[str, Any]:
+    """Only generation gets the NoEVAS overlay; checker runtimes keep the cell."""
+    return {**cell, "experimental_arm": "Agent-No-EVAS", "executable_feedback": False}
 
 
 def _export_runtime(

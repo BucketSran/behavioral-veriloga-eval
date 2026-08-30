@@ -24,6 +24,8 @@ dependency, CLI default switch, sealed r53 or EVAS change.
    hashing, include profile identity in the task prompt and final evidence.
    Only exact AlphaApollo-Evolution+EVAS may enable this opt-in; no new CLI flags.
    Docs are branch-local reference observations, not new shared-memory records;
+   the Evolution-only descriptor sets may_enter_shared_memory=false. Initial
+   prompts expose profile identity, not corpus text; retrieval is tool-mediated.
    existing sealed prior candidate/public-checker feedback remains the only
    cross-branch projection. Final results never reenter generation. Ordinary
    single-trajectory summary/ledger must reject Evolution/intervention rows.

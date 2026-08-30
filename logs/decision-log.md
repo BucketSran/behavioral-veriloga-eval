@@ -1,5 +1,18 @@
 # Decision Log
 
+## 2026-08-31 - Separate Evolution logical identity from its generation surface (AA-VAE-064)
+
+- Keep the logical Evolution condition in controller/context, but give branch
+  export and environment a NoEVAS cell copy. Existing separate public/final
+  runtimes retain the original cell and required checker inputs. Record both
+  identities; do not globally strip public validation inputs.
+- Scope NoEVAS feedback wording to the generation workspace, and describe final
+  frozen trusted replay without asserting routine private Spectre evaluation.
+  No change to benchmark, EVAS, branch selection, final authority or model costs.
+- N4/N5 plan review accepted after locking Evolution docs observations out of
+  shared memory, freezing profile before config hashing and testing both export
+  and environment identity. AA066 declared policy is not image attestation.
+
 ## 2026-08-31 - Reuse ledger evidence instead of inventing case payloads (AA-VAE-063)
 
 - Add pure paired/case projections to the current validated ledger; no renderer,

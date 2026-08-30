@@ -1,5 +1,23 @@
 # Verification Log
 
+## 2026-08-31 - Evolution generation surface repair (AA-VAE-064)
+
+- New export/runtime-surface tests: 2 REDs, then GREEN; independent review
+  requested the same generation-cell identity at the environment factory.
+  Added RED then repaired both call sites; final independent review OKAY,
+  **2 passed**. Logical controller condition and original cell remain unchanged.
+- Evolution unit/campaign/extension gate: **21 passed, 3 skipped, 1.18 s**.
+  Real Docker three-form double-model/double-round Evolution:
+  **3 passed, 3 deselected, 122.83 s**, fresh basetemp
+  `benchmark-vabench-release-v4/reports/aa064-evolution-surface-01`.
+  This run started before the extra factory-argument repair; the default factory
+  ignores that argument. The final factory contract has its independent fixture
+  regression; subsequent integration gates cover the final source together.
+- Ruff/diff checks pass. Broader legacy NoEVAS subset: 1 passed, 2 failed because
+  compact checkout intentionally lacks r52/TASK_INDEX.json. No historical asset
+  restoration or evaluator modification; new real-r53 export regression passes.
+- No paid provider, real corpus, training, selection-rule or final-score change.
+
 ## 2026-08-31 - Paired summaries and safe case index (AA-VAE-063)
 
 - Writer handed back two leaves, then main integrated. Independent review found

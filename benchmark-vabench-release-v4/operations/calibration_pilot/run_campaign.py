@@ -151,9 +151,9 @@ artifacts under `public/submission/`. Preserve exact file names, module names,
 ports, parameters, and required artifact paths.
 
 EVAS execution is not available in this experimental arm. No public simulator
-diagnostics or waveforms are provided. Reason from the public specification and
+diagnostics or waveforms are provided by this generation workspace. Reason from the public specification and
 task files, then run `vabench-submit` after the declared artifacts are complete.
-The final private Spectre judge is outside the model-visible workspace.
+Final trusted replay scores only the frozen submission outside the model-visible workspace.
 """
 ONESHOT_TRANSPORT_INSTRUCTION = """\
 Complete the task in the user message without changing its requested behavior.
