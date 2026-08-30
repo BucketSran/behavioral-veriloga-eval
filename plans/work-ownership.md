@@ -489,6 +489,15 @@ archives and aggregate ledgers remain follow-ups under the
 current plan. The coordinator defines the next bounded files/tests before
 implementation; mapping/review stays read-only and no delegated writing lane
 is opened by this document.
+## Trusted public waveform executor (2026-08-31, active)
+
+Main owns `benchmark-vabench-release-v4/operations/calibration_pilot/public_waveform.py`,
+`tests/test_agent_harness_public_waveform.py`, the minimal read-only mount option
+in `mini_swe_vabench.py`, parser byte-input reuse in `waveform_summary.py`, related
+regressions, CI and shared records/Git. `waveform_executor_map` and
+`waveform_boundary_review` are read-only, with no source/index/history authority.
+Follow `trusted-public-waveform-executor.md`; no legacy/default/model-tool activation.
+
 ## Synthetic extension leaves (2026-08-31, handed_back)
 
 Dispatched on base `7004ee095f`, now handed back. Main owns shared

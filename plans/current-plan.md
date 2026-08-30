@@ -13,6 +13,10 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
+- Active bounded follow-up: [trusted public waveform executor](trusted-public-waveform-executor.md)
+  (AA-VAE-060). Implement fresh public-only execution and candidate/profile/output
+  receipts before model feedback. No model tool activation or paid run in this slice.
+
 - Implemented bounded slice: [synthetic extension implementation](rag-waveform-training-implementation.md).
   [AA-VAE-057](../docs/alphaapollo-migration/features/AA-VAE-057-synthetic-offline-docs.md)
   adds explicit synthetic docs to native mini-swe/Reasoning through a Python API,

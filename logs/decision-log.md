@@ -1,5 +1,17 @@
 # Decision Log
 
+## 2026-08-31 - Fresh waveform execution before tool activation (AA-VAE-060)
+
+- Treat forgeable Bash markers and existing shared output as diagnostics, not
+  waveform provenance. Snapshot public inputs into a new isolated Docker runtime
+  for every fixed EVAS invocation; use actual host-observed process outcome.
+- Reuse existing Docker lifecycle and parser with narrow opt-in seams. Freeze
+  the executable/image/input/policy identity and bind accepted output to the
+  candidate and invocation. Trust remains in the exclusive coordinator and host.
+- First implement/test this independent executor only. Native tool, budget,
+  trajectory/scorer and Evolution integration remain explicit follow-ups; no
+  paid calls, real data, r53 or EVAS changes.
+
 ## 2026-08-31 - Opt-in synthetic docs share native controls, not ordinary comparison claims (AA-VAE-057)
 
 - Load a bounded, immutable, operator-declared synthetic corpus. Freeze source,
