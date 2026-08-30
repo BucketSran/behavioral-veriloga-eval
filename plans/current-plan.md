@@ -18,6 +18,9 @@ implementation and does not change the phase statuses below.
   cover offline retrieval, CSV summaries and synthetic training projections;
   main owns shared opt-in wiring and publication. Real data, paid runs and
   training remain disabled. Module tests are not runtime/quality evidence.
+  Waveform leaf is verified as [AA-VAE-058](../docs/alphaapollo-migration/features/AA-VAE-058-bounded-waveform-parser.md):
+  12 parser tests and independent review pass. Model-visible activation still
+  requires fresh isolated public execution and a candidate-bound output receipt.
 
 - Next extension queue: [AA-VAE-056 RAG/waveform/training design](../docs/alphaapollo-migration/features/AA-VAE-056-rag-waveform-training-design.md).
   Read-only advisers returned three independent designs; main synthesized them.

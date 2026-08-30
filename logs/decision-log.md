@@ -1,5 +1,16 @@
 # Decision Log
 
+## 2026-08-31 - Keep bounded waveform parsing separate from execution authority (AA-VAE-058)
+
+- Implement a standalone fixed-name CSV parser with frozen byte/row/column/signal
+  limits, deterministic diagnostics and no verdict, task threshold or inferred unit.
+- Do not attach arbitrary sandbox files to public observations. AA-VAE-055 markers
+  are forgeable, not proof that output belongs to the current candidate/invocation.
+  Fresh exclusive public execution and a bound output receipt remain a separate
+  integration gate. No PublicEvasValidator profile or EVAS version changes here.
+- The leaf writer owns only module/tests and has handed back. Main owns review,
+  records, integration and Git; an independent reviewer found no parser blocker.
+
 ## 2026-08-31 - Parallel extension designs remain separate from activation (AA-VAE-056)
 
 - RAG first freezes offline corpus identity/license/exclusions and matched

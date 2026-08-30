@@ -1,5 +1,19 @@
 # Verification Log
 
+## 2026-08-31 - Bounded standalone waveform parser (AA-VAE-058)
+
+- Test-first leaf followed by main boundary probes: repair gate initially had
+  **7 failures / 5 passes**, covering extreme finite means, root/ancestor links,
+  FIFO, oversized header/error output, malformed CSV and incomplete-scan markers.
+  The repaired module and tests give **12 passed**. No simulator code was changed.
+- Independent read-only review repeated all 12 tests, Python compile and Ruff
+  0.12.12 successfully; no blocker for the scoped parser. No LSP service available.
+- `tests/test_agent_harness_waveform_summary.py` exercises deterministic source
+  hashes, finite/nonfinite/empty counters, truncation and invalid/missing/too-large
+  states. These tests do not establish simulator provenance or tool usefulness.
+  Public invocation/receipt wiring is explicitly absent; no waveform enters a
+  model request, final score or shared memory in this slice.
+
 ## 2026-08-31 - Parallel extension design synthesis (AA-VAE-056)
 
 - Three read-only advisers mapped current seams and returned RAG, waveform and
