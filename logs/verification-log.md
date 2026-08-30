@@ -1,5 +1,27 @@
 # Verification Log
 
+## 2026-08-30 - Public validation fork publication and hosted confirmation
+
+- Published only to BucketSran `origin/main`: `7801193007` scope plan,
+  `00187f326e` public EVAS adapter and tests, `72f25321c8` CI/migration records.
+  Local main/origin agreed at `72f25321c85046414fbc26d8703b636b01e090cf` with
+  a clean worktree after publication. No upstream push occurred.
+- [Evaluator Closure run 33291156533](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33291156533)
+  succeeded on that code commit in 2m12s: installed evaluator identity,
+  regression tests, pinned image builds, the new public-validation native
+  trajectory smoke, and the existing bound-final three-arm smoke all passed.
+  Hosted regressions: `569 passed, 7 skipped in 38.92s`; the separately enabled
+  public Docker smoke: `1 passed in 3.58s`.
+- [Public Agent Runtime run 33291156462](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33291156462)
+  and [Runner Smoke run 33291156419](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33291156419)
+  also succeeded on the same code commit.
+- The hosted job warns that existing checkout/setup-python action versions
+  target deprecated Node 20 and are being run under Node 24. It did not fail;
+  action-version maintenance is outside this adapter slice.
+- This is hosted evidence for the bounded integration, not a full native
+  campaign or model-quality result. Raw local smoke/JUnit evidence remains
+  outside the repository at the paths below.
+
 ## 2026-08-30 - Production public EVAS observation and native smoke
 
 - Starting fork audit (`--fetch`) found behavioral main/origin at
