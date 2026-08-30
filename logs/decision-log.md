@@ -1,5 +1,18 @@
 # Decision Log
 
+## 2026-08-31 - Synthetic SFT/RL export contract is not a training pipeline (AA-VAE-059)
+
+- Accept only the fixed synthetic fixture release/namespace and explicit source,
+  license, provider-use and project declarations. Exact split buckets and no
+  heldout export; r53/test/final authority cannot supply training or reward.
+- Keep SFT assistant targets distinct from environment/user context and reject
+  positive budget-stopped examples. RL accepts a declared public reward only.
+  Export validation rebuilds from the declared inputs, not a rehashed output.
+- Metadata marker checks reject contradictory declarations, not prove arbitrary
+  text provenance or decontamination. `exporter_contract_sha256` identifies the
+  frozen contract descriptor, not implementation bytes. No native trace adapter,
+  real dataset export, rollout collector, trainer, paid call or GPU job is added.
+
 ## 2026-08-31 - Keep bounded waveform parsing separate from execution authority (AA-VAE-058)
 
 - Implement a standalone fixed-name CSV parser with frozen byte/row/column/signal

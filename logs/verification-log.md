@@ -1,5 +1,21 @@
 # Verification Log
 
+## 2026-08-31 - Synthetic training-export contract and review repairs (AA-VAE-059)
+
+- Leaf implementation and main hardening initially reached 18 tests. Independent
+  review found permissive source/provenance declarations and ignored extra split
+  buckets. Added regressions produced **7 failures** before repairs; the final
+  focused command `uv run --locked --extra agentic python -m pytest -q
+  tests/test_agent_harness_training_export.py --tb=short` gives **24 passed**.
+- Re-review independently repeats the 24 tests, extra private/trusted/unknown
+  declaration and extra-split probes, Python compile and Ruff 0.12.12: no remaining
+  actionable finding. No LSP/typecheck service available. A misleading descriptor
+  hash name is repaired to `exporter_contract_sha256` and covered by the tests.
+- Evidence covers strict synthetic source/split structure, content/hash joins,
+  ordered SFT loss masks, public RL reward, budget-stop rejection and tampered
+  exports. It does not establish a real native trajectory-to-training pipeline,
+  legal authorization, text decontamination or model-training effectiveness.
+
 ## 2026-08-31 - Bounded standalone waveform parser (AA-VAE-058)
 
 - Test-first leaf followed by main boundary probes: repair gate initially had

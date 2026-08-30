@@ -21,6 +21,9 @@ implementation and does not change the phase statuses below.
   Waveform leaf is verified as [AA-VAE-058](../docs/alphaapollo-migration/features/AA-VAE-058-bounded-waveform-parser.md):
   12 parser tests and independent review pass. Model-visible activation still
   requires fresh isolated public execution and a candidate-bound output receipt.
+  Training leaf is verified as [AA-VAE-059](../docs/alphaapollo-migration/features/AA-VAE-059-synthetic-training-export.md):
+  24 tests and independent repair re-review pass; real trajectory export/training
+  remains disabled. Retrieval integration is undergoing final review.
 
 - Next extension queue: [AA-VAE-056 RAG/waveform/training design](../docs/alphaapollo-migration/features/AA-VAE-056-rag-waveform-training-design.md).
   Read-only advisers returned three independent designs; main synthesized them.
