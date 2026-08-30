@@ -1,5 +1,23 @@
 # Verification Log
 
+## 2026-08-30 - Native result join fork publication and hosted confirmation
+
+- Published three reviewable commits only to BucketSran `origin/main`:
+  `b5912c3123` scope, `0955f75cee` implementation/tests, and `1760a944b8`
+  CI/migration/evidence records. Post-push audit found both scoped worktrees
+  clean and synchronized with their fork tracking branches. EVAS and r53
+  remained unchanged; no upstream push occurred.
+- [Evaluator Closure run 33292530761](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33292530761)
+  succeeded on `1760a944b897695289928decdca4bb9cdba62ce7` in 2m25s.
+  Hosted full regression: **588 passed, 8 skipped in 32.63s**. Separately
+  enabled public-only Docker smoke: **1 passed in 2.95s**; native same-chain
+  result smoke: **1 passed in 4.94s**. The existing three-arm bound-final
+  clean-room smoke and pinned evaluator identity/image checks also succeeded.
+- [Public Agent Runtime run 33292530806](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33292530806)
+  and [Runner Smoke run 33292530776](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33292530776)
+  succeeded on the same code SHA. This entry is a documentation-only follow-up;
+  it does not relabel the scoped API/smoke as a full campaign or model result.
+
 ## 2026-08-30 - Native episode / production result join (AA-VAE-036)
 
 - Fresh fork audit with `--fetch`: behavioral main/origin started clean at
