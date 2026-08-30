@@ -1,5 +1,35 @@
 # Verification Log
 
+## 2026-08-30 - Mini-swe differential fork publication and hosted confirmation
+
+- Published only to BucketSran `origin/main`: `375c941fa9` scope,
+  `b2096a05e6` differential tests/classification repair, and `06b7101808`
+  bounded closure documentation. New test and migration-note files are tracked.
+  Behavioral main/origin matched `06b71018088105e9489e1ef2662179c8202c358d`;
+  upstream had zero unique commits missing from the fork (75 fork-only).
+  EVAS remained clean at `6cb6fa7a7d`; r53 and the legacy default were unchanged.
+- [Evaluator Closure run 33296053523](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33296053523)
+  succeeded in 2m20s on `06b71018088105e9489e1ef2662179c8202c358d`.
+  Hosted regression: **623 passed, 9 skipped in 41.99s**. Separately enabled
+  Docker public-validation smoke: **1 passed in 3.60s**; native episode
+  final-result join: **1 passed in 6.46s**; native launcher provider-to-score:
+  **1 passed in 4.99s**. Three-arm bound-final clean-room smoke reported
+  **PASS**, with three expected fixture `behavior_failure` results and
+  development-only EVAS 0.8.7 score authority; this is not model-quality evidence.
+- [Runner Smoke run 33296053525](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33296053525)
+  succeeded on the same SHA: Linux Bubblewrap boundary **2 passed, 31 deselected
+  in 0.28s**; runner smoke **34 passed in 0.97s**; v4 materializer **262 passed,
+  6 skipped in 19.39s**. Public Agent Runtime was not triggered for this slice.
+- Hosted success does not erase the local full-run result below: **625 passed,
+  6 skipped, 1 failed**, plus two failed isolated repeats of the unchanged
+  one-second legacy timeout test. That local timing gap remains unresolved;
+  no legacy test was weakened or runtime changed to obtain the hosted result.
+  Independent review synthesis remains **COMMENT** (code COMMENT, architecture
+  WATCH; no blocker for this bounded slice), not an unconditional approval.
+- This follow-up changes only the verification log. CI's non-blocking
+  Node-action deprecation warning remains a separate maintenance concern.
+  No paid model run, full campaign, Reasoning/Evolution, or Spectre claim.
+
 ## 2026-08-30 - Mini-swe behavior differential (AA-VAE-038)
 
 - Baseline: clean behavioral main/origin `bc7a36b8b9`, upstream `7b5616dc52`
