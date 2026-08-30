@@ -10,6 +10,7 @@ import time
 
 from .budget import BudgetContractError, BudgetLedger, BudgetLimitExceeded
 from .contracts import Environment, FinalJudge, Policy, TrajectorySink
+from .proposals import ProposalNormalizationError
 from .state import (
     AgentAction,
     EpisodeContext,
@@ -302,6 +303,12 @@ class EpisodeController:
                     action = self._policy.act(observation)
                 except Exception as exc:
                     if not deadline_expired():
+                        if isinstance(exc, ProposalNormalizationError):
+                            raise _ProtocolFailure(
+                                category="proposal_rejected",
+                                phase=phase,
+                                message=f"proposal rejected ({exc.code})",
+                            ) from exc
                         raise
                     self._record(
                         context, actor="policy", event_type="deadline_interruption",

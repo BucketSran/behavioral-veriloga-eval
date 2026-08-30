@@ -1,5 +1,77 @@
 # Verification Log
 
+## 2026-08-30 - Mini-swe behavior differential (AA-VAE-038)
+
+- Baseline: clean behavioral main/origin `bc7a36b8b9`, upstream `7b5616dc52`
+  (0 upstream-only / 72 fork-only); EVAS main/origin/upstream `6cb6fa7a7d`.
+  Behavioral upstream fetch initially hit an SSL network error, then succeeded;
+  no baseline drift. Only the main coordinator wrote or staged files.
+- TDD RED: the missing-tool response was wrongly classified as
+  `infrastructure_failure` with an empty message (**1 failed in 2.73s**).
+  Minimal adapter/controller repair made it **1 passed in 10.11s**. During
+  expansion, two interim runs used an incorrect expected final-event name;
+  corrected the test to the existing `final_judgment_completed`, not runtime.
+- Added 14 differential cases and 5 controller cases. Focused command:
+  `uv run --locked --extra agentic python -m pytest -q
+  tests/test_agent_harness_mini_swe_differential.py
+  tests/test_agent_harness_controller.py tests/test_agent_harness_native_launcher.py
+  --basetemp benchmark-vabench-release-v4/reports/mini-swe-differential-20260830-focused`
+  reports **69 passed, 1 skipped in 19.93s**. Docker is enabled separately.
+- Real clean-room command:
+  `VABENCH_TEST_DOCKER_RUNTIME=1 uv run --locked --extra agentic python -m pytest -q
+  tests/test_agent_harness_native_launcher.py::test_r53_docker_native_launcher_provider_to_score
+  --basetemp /Users/bucketsran/Documents/TsingProject/vaEVAS-next/behavioral-veriloga-eval/benchmark-vabench-release-v4/reports/mini-swe-differential-20260830-docker`
+  reports **1 passed in 30.67s**. It used the existing deterministic provider,
+  one public EVAS invocation, Docker pause/freeze and real EVAS 0.8.7 final
+  `behavior_failure`; this is expected fixture behavior, not model performance.
+- Private smoke report (relative to repository):
+  `benchmark-vabench-release-v4/reports/mini-swe-differential-20260830-docker/test_r53_docker_native_launche0/native-launcher-smoke.json`.
+  Manifest file SHA `e54605b300a535b4a34986ef3842e80906f237fd78412ae2450526100c07bbf8`;
+  private-events file SHA `7ff8862e4b1cbddb87bae21674b04113edf6574060b17179ad8811058021d2c0`;
+  trajectory file SHA `12d056dbc297d0a45722235a5b2320ca389eafbe8e476d192a8fe19db056a474`;
+  artifact file SHA `1bb84c41dcacf90a6f5fab2e4f2d6a37dd1e90e8c463e1257dc1b82a297b6555`.
+- First full regression: **625 passed, 6 skipped, 1 failed in 538.51s**.
+  Failure: unchanged legacy
+  `test_direct_evas_timeout_is_recorded_without_leaking_control_markers`
+  observed zero invocation records under its one-second watchdog, the same
+  intermittent case recorded for AA-VAE-037. No legacy source/test was changed.
+  Full command: `uv run --locked --extra agentic python -m pytest -q
+  tests/test_agent_harness_*.py tests/test_evaluator_environment_contract.py
+  tests/test_v3_clean_room_smoke.py tests/test_v3_model_eval_claim_gate.py
+  benchmark-vabench-release-v4/scripts/tests/test_v4_experiment_result_protocol.py
+  tests/test_benchmarkv4_calibration_pilot.py tests/test_score_campaign_reuse.py
+  tests/test_mini_swe_vabench.py tests/test_v4_r53_active_entrypoints.py
+  tests/test_v4_r53_clean_room_smoke.py
+  --basetemp benchmark-vabench-release-v4/reports/mini-swe-differential-20260830-full`.
+- The same legacy test also failed alone (**1 failed in 1.28s**, then
+  **1 failed in 1.27s**) under `reports/aa038-timeout-recheck` and
+  `reports/aa038-timeout-warm` (paths below `benchmark-vabench-release-v4`).
+  A queued full repeat was deliberately interrupted after **243 passed in
+  53.80s** when the isolated failure was known; it is not a passing full run.
+  Bounded diagnosis reproduced zero captured bytes/START records at 1.016s.
+  The shim runs its candidate-hash subprocess before emitting START, so its
+  one-second test assumes that startup completes within that window. FD 9 is
+  established before the pipeline; a minimal probe disproved the initial
+  pipe-buffer-loss hypothesis. No runtime repair or test weakening was made.
+  Local full-suite validation therefore retains this explicit legacy timing
+  gap; hosted locked-environment CI is reported separately, not substituted
+  for a claim that the local invocation passed.
+- Layout-policy suggested cleanup/count subset: **25 passed in 5.04s** with
+  `tests/test_evas_output_cleanup.py tests/test_task_count_filters.py`.
+  Scoped Ruff 0.12.12 (existing offline cache), py_compile, and whitespace checks
+  pass. No dedicated layout checker or mypy/pyright is configured; no new
+  dependency or all-project type-check claim.
+- Independent code review: **COMMENT, zero findings**, independently reran
+  controller+differential tests (**61 passed in 20.05s**). Independent architect:
+  **WATCH, no blocker**. Publication reminders require explicitly including the
+  new test/note and this evidence entry. The remaining design WATCH is that
+  policies must use `ProposalNormalizationError` only for model proposal
+  rejection, not internal failures; AA-VAE-038 documents that restriction.
+- Remaining limits: fixture-only differential evidence, coarse native provider
+  taxonomy, intentional recovery/multi-action/deadline differences, no hard
+  real-time interruption or blanket parity. r53, EVAS, legacy default/source,
+  paid APIs, domain tools, Reasoning/Evolution and Spectre were not changed.
+
 ## 2026-08-30 - Native launcher fork publication and hosted confirmation
 
 - Published only to BucketSran `origin/main`: `c3e0dd6fc3` scope,

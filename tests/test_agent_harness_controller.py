@@ -11,6 +11,7 @@ from runners.agent_harness import (
     FrozenSubmission,
     JsonlTrajectoryRecorder,
     Observation,
+    ProposalNormalizationError,
     PublicValidator,
     ToolCapability,
     ToolExecutionRejection,
@@ -1700,6 +1701,63 @@ def test_trajectory_rejects_unknown_visibility(tmp_path) -> None:
             visibility="models",  # type: ignore[arg-type]
             payload={},
         )
+
+
+@pytest.mark.parametrize("deadline", [False, True])
+@pytest.mark.parametrize("protocol_error", [False, True])
+def test_policy_rejection_classification_keeps_deadline_priority(
+    tmp_path, monkeypatch, deadline, protocol_error,
+):
+    import runners.agent_harness.controller as module
+
+    clock = [1.0]
+    monkeypatch.setattr(module.time, "monotonic", lambda: clock[0])
+    log = []
+    error = (
+        ProposalNormalizationError("malformed_json", "UNTRUSTED_ERROR_DETAIL")
+        if protocol_error else RuntimeError("backend failed")
+    )
+
+    class RejectingPolicy:
+        def act(self, observation):
+            if deadline:
+                clock[0] = 6.0
+            raise error
+
+    path = tmp_path / "rejected.jsonl"
+    result = EpisodeController(
+        policy=RejectingPolicy(), environment=PassingEnvironment(log),
+        final_judge=PassingFinalJudge(log), tool_registry=_controller_registry("submit"),
+        trajectory=JsonlTrajectoryRecorder(path), deadline_monotonic=5.0,
+        deadline_finalizer=lambda: None,
+    ).run(EpisodeContext("cell", "attempt", "v4-001", "Agentic", None))
+    assert log == ["start:attempt", "close"]
+    assert result.submission is result.final_judgment is None
+    assert result.primary_outcome == (
+        "agent_timeout" if deadline else "protocol_failure" if protocol_error
+        else "infrastructure_failure"
+    )
+    if not deadline:
+        assert result.failure.category == ("proposal_rejected" if protocol_error else "backend_failure")
+        assert result.failure.phase == "policy_action"
+    assert "UNTRUSTED_ERROR_DETAIL" not in path.read_text()
+    assert validate_trajectory_semantics(read_trajectory(path))
+
+
+def test_normalization_exception_from_environment_is_still_infrastructure_failure():
+    log = []
+
+    class BrokenEnvironment(PassingEnvironment):
+        def start(self, context):
+            raise ProposalNormalizationError("malformed_json", "environment bug")
+
+    result = EpisodeController(
+        policy=SubmitPolicy(), environment=BrokenEnvironment(log),
+        final_judge=PassingFinalJudge(log), tool_registry=_controller_registry("submit"),
+    ).run(EpisodeContext("cell", "attempt", "v4-001", "Agentic", 1))
+    assert result.primary_outcome == "infrastructure_failure"
+    assert result.failure.category == "environment_failure"
+    assert log == ["close"]
 
 
 def test_protocol_failure_is_materialized_in_the_episode_result() -> None:

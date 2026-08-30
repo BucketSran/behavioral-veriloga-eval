@@ -28,6 +28,7 @@ from runners.agent_harness import (  # noqa: E402
     EpisodeContext,
     FrozenSubmission,
     JsonlTrajectoryRecorder,
+    ProposalNormalizationError,
     ToolRegistry,
     backend_profile_sha256,
 )
@@ -425,6 +426,7 @@ class NativeMiniSwePolicy:
     def __init__(self, *, model, prompt: str, action_id_prefix: str):
         _, _, format_error, formatter = mini.load_mini_swe()
         model.bind_mini_swe_protocol(formatter, format_error)
+        self._format_error = format_error
         self.model = model
         self.messages = [
             model.format_message(role="system", content=mini.SYSTEM_PROMPT),
@@ -446,7 +448,15 @@ class NativeMiniSwePolicy:
                     [observation.to_document()["payload"]],
                 )
             )
-        message = self.model.query(self.messages)
+        try:
+            message = self.model.query(self.messages)
+        except self._format_error:
+            # The opt-in controller deliberately does not reprompt like legacy
+            # DefaultAgent. A malformed model action is still a protocol error,
+            # not a provider outage; do not persist untrusted error text here.
+            raise ProposalNormalizationError(
+                "mini_swe_format_error", "mini-swe rejected the model action"
+            ) from None
         self.messages.append(message)
         self._last_message = message
         return message
