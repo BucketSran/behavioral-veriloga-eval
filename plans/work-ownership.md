@@ -89,6 +89,17 @@ Integration sequence:
 
 ## Immediate Follow-up
 
+Active differential slice (base `bc7a36b8b9`): the main coordinator owns
+`tests/test_agent_harness_mini_swe_differential.py`, minimal repairs in
+`runners/agent_harness/controller.py` and
+`benchmark-vabench-release-v4/operations/calibration_pilot/run_native_mini_swe.py`,
+their focused tests, AA-VAE-038 and shared records. The
+`mini_swe_legacy_behavior_map` child maps legacy behavior read-only; subsequent
+code/architecture reviewers also have no write or Git authority. Existing
+legacy source/defaults are not assigned for modification. Test outputs go
+under the already ignored `benchmark-vabench-release-v4/reports/` subtree;
+no new repository-root scratch/output directory is authorized.
+
 Locally verified bounded slice (base `bbb76139ee`): main coordinator owns new
 `operations/calibration_pilot/run_native_mini_swe.py` (under
 `benchmark-vabench-release-v4/`), `tests/test_agent_harness_native_launcher.py`,
