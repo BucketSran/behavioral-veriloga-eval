@@ -1,5 +1,20 @@
 # Decision Log
 
+## 2026-08-30 - Prefer GLM; platform confirmation precedes authentication
+
+- User saved the shared local key file and switched priority to GLM. Retain
+  the six-cell design and CNY 5 ceiling; no automatic DeepSeek fallback.
+- Propose `glm-4.7-flash` from current official free-model/tool documentation.
+  The variable name cannot distinguish BigModel ordinary API, Coding Plan
+  or Z.ai; ask the user for the platform only, never for the credential value.
+  Do not try credentials against guessed endpoints or mix billing contracts.
+- Add a local-only strict literal reader (AA-VAE-051). It selects one key
+  without sourcing/exporting the two-provider file; raw-key CLI is unchanged.
+  File permissions and format checks fail closed without echoing secrets.
+- Preserve DeepSeek plan/evidence as history. GLM-specific requests/accounting,
+  serial schedule and complete operationally censored index are still pending.
+  The local helper is not an authenticated API test or a completed pilot.
+
 ## 2026-08-30 - Pilot spending authority is an opt-in transport guard (AA-VAE-050)
 
 - Keep the usual CLI and sealed r53 stopping rule unchanged. Add a separately

@@ -1,5 +1,39 @@
 # Verification Log
 
+## 2026-08-30 - GLM-first preparation and local credential reader (AA-VAE-051)
+
+- Starting HEAD/live origin main: `2aea03a828fa62d4b979929827c86692576f548d`;
+  upstream main: `7b5616dc52195ec275ec6d21c71d7763613702cd`. That preceding
+  runtime commit's three hosted workflows are now confirmed successful:
+  [Evaluator Closure 33316990933](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33316990933),
+  [Runner Smoke 33316990846](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33316990846),
+  [Public Agent Runtime 33316990842](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33316990842).
+  These are previous-commit results, not hosted verification of this new slice.
+- User-named external key file: POSIX file mode 0600, directory mode 0700.
+  Both fields are present; the new helper successfully loaded the selected GLM
+  field without printing it, executing shell data or making a network request.
+  Platform confirmation is pending. No credential value/path was staged.
+- TDD RED: missing module (1 failure), absent file-permission/bounded-read/error
+  checks (6 failures), then missing CI path filter (1 failure). Corresponding
+  GREEN gates pass. Local fixtures never contain actual provider credentials.
+- Focused command: `uv run --locked --extra agentic python -m pytest
+  tests/test_agent_harness_pilot_credentials.py tests/test_agent_harness_ci_gate.py
+  tests/test_agent_harness_deepseek_budget.py -q --tb=short`:
+  **53 passed in 0.17s**. Independent read-only reviewer also ran credential
+  tests: **21 passed in 0.07s**, no blocker; plan/CI follow-up review has no blocker.
+- Full harness: `uv run --locked --extra agentic python -m pytest
+  tests/test_agent_harness_*.py -q --tb=short`: **746 passed / 13 skipped in
+  65.59s**. Opt-in Docker skips are not counted as passed integration evidence.
+- Layout/entrypoints: `uv run --locked --extra agentic python -m pytest
+  tests/test_v4_r53_active_entrypoints.py tests/test_evas_output_cleanup.py
+  tests/test_task_count_filters.py -q --tb=short`: **48 passed in 1.17s**.
+  Ruff 0.12.12, helper bytecode compilation, workflow YAML and diff whitespace
+  checks pass. No dependencies, r53, EVAS, runner/scorer/default changes.
+- This helper is not wired into a live CLI. Therefore no new Docker/EVAS
+  integration or GLM response-compatibility claim is made. GLM-specific guarded
+  request handling, frozen live schedule and complete censored pilot index
+  remain pending. Provider requests/spend to date: **0 / 0**.
+
 ## 2026-08-30 - Budgeted DeepSeek client, free boundary and real EVAS tests
 
 - Base: `306eb45c9b70d4e1f49a3ca4b6a3198c4a46c5f0`. That earlier docs commit's

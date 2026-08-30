@@ -5,6 +5,12 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "evaluator-closure.yml"
 
 
+def test_pilot_credential_helper_changes_trigger_its_regressions():
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    assert workflow.count('"benchmark-vabench-release-v4/operations/calibration_pilot/pilot_credentials.py"') == 2
+    assert "tests/test_agent_harness_*.py \\" in workflow
+
+
 def test_budgeted_pilot_client_changes_trigger_free_native_integration():
     workflow = WORKFLOW.read_text(encoding="utf-8")
     assert workflow.count('"benchmark-vabench-release-v4/operations/calibration_pilot/deepseek_budget.py"') == 2

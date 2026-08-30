@@ -1,5 +1,10 @@
 # Budget-controlled DeepSeek pilot
 
+Superseded launch preference (2026-08-30): the user now prioritizes GLM and has
+saved local keys. Use [the GLM-first plan](glm-budget-pilot.md) for current gates.
+The remainder preserves the DeepSeek design and free verification history; it
+does not authorize automatic DeepSeek execution or fallback.
+
 Date: 2026-08-30. Base: `38375909aee7103df154c72b2c3d7f3fbb3dee1c`.
 Status: authorized pilot; free preparation and the opt-in budgeted client are
 verified. Credentials and a fresh live schedule/driver remain launch gates.

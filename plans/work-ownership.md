@@ -89,6 +89,14 @@ Integration sequence:
 
 ## Immediate Follow-up
 
+GLM preference update on `2aea03a828`: main owns the local-only credential
+helper/tests, CI selector and GLM pilot plan/records. `deepseek_price_contract`
+researched public GLM documentation; `native_campaign_impl` mapped existing
+driver/scorer seams; `pilot_budget_surface` reviewed the credential helper.
+All three lanes were read-only, with no real credential-file access or Git
+authority. No delegated writer is open. Platform confirmation and GLM live
+budget/driver integration remain pending; no authenticated API call occurred.
+
 Budgeted DeepSeek pilot on `306eb45c9b`: main owns all new
 `deepseek_budget.py`, its two test files, CI selector/workflow updates and
 shared records. `deepseek_price_contract` verified official provider semantics
