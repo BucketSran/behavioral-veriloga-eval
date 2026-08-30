@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from collections.abc import Callable
+import itertools
+import math
+import time
 
 from .budget import BudgetContractError, BudgetLedger, BudgetLimitExceeded
 from .contracts import Environment, FinalJudge, Policy, TrajectorySink
@@ -55,6 +59,8 @@ class EpisodeController:
         tool_registry: ToolRegistry,
         trajectory: TrajectorySink | None = None,
         public_validation_profile_sha256: str | None = None,
+        deadline_monotonic: float | None = None,
+        deadline_finalizer: Callable[[], str | None] | None = None,
     ) -> None:
         if not isinstance(tool_registry, ToolRegistry):
             raise TypeError("tool_registry must be a ToolRegistry")
@@ -77,6 +83,14 @@ class EpisodeController:
         self._public_validation_profile_sha256 = (
             public_validation_profile_sha256
         )
+        if (deadline_monotonic is None) != (deadline_finalizer is None):
+            raise ValueError("deadline and trusted finalizer must be supplied together")
+        if deadline_monotonic is not None and (
+            not math.isfinite(deadline_monotonic) or not callable(deadline_finalizer)
+        ):
+            raise ValueError("deadline must be finite and finalizer callable")
+        self._deadline = deadline_monotonic
+        self._deadline_finalizer = deadline_finalizer
 
     def _record(
         self,
@@ -153,7 +167,107 @@ class EpisodeController:
         submission = None
         budget_ledger = BudgetLedger(context.budget_limits)
         phase = "tool_authority_resolution"
+
+        def score_submission(expected_sha256, terminal_reason, capability=None):
+            nonlocal phase, submission
+            phase = "submission_freeze"
+            frozen_submission = self._environment.freeze_submission()
+            if (
+                frozen_submission.tree_sha256
+                != expected_sha256
+            ):
+                self._record(
+                    context,
+                    actor="controller",
+                    event_type="submission_freeze_rejected",
+                    visibility="harness",
+                    payload={
+                        "tool_name": capability.tool_name if capability else None,
+                        "tool_id": capability.tool_id if capability else None,
+                        "candidate_tree_sha256": (
+                            expected_sha256
+                        ),
+                        "submission_tree_sha256": (
+                            frozen_submission.tree_sha256
+                        ),
+                    },
+                )
+                raise _ProtocolFailure(
+                    category="submission_freeze_mismatch",
+                    phase="submission_freeze",
+                    message=(
+                        "frozen submission does not match the terminal "
+                        "candidate observation"
+                    ),
+                )
+            submission = frozen_submission
+            self._record(
+                context,
+                actor="environment",
+                event_type="submission_frozen",
+                visibility="harness",
+                payload={
+                    "tree_sha256": submission.tree_sha256,
+                    "artifacts": list(submission.artifacts),
+                },
+            )
+            phase = "final_judge"
+            final_judgment = self._final_judge.judge(submission)
+            if final_judgment.submission_tree_sha256 != submission.tree_sha256:
+                raise _ProtocolFailure(
+                    category="final_judgment_submission_mismatch",
+                    phase="final_judge",
+                    message=(
+                        "final judgment is not bound to the frozen submission"
+                    ),
+                )
+            self._record(
+                context,
+                actor="final_judge",
+                event_type="final_judgment_completed",
+                visibility="trusted",
+                payload={
+                    "status": final_judgment.status,
+                    "judge_engine": final_judgment.judge_engine,
+                    "score": final_judgment.score,
+                    "submission_tree_sha256": (
+                        final_judgment.submission_tree_sha256
+                    ),
+                },
+            )
+            return EpisodeResult(
+                context=context,
+                primary_outcome=final_judgment.status,
+                terminal_reason=terminal_reason,
+                submission=submission,
+                final_judgment=final_judgment,
+                incidents=(),
+            )
+
+        def deadline_expired():
+            return self._deadline is not None and time.monotonic() >= self._deadline
+
+        def finalize_deadline():
+            nonlocal phase
+            phase = "deadline_finalization"
+            self._record(
+                context, actor="controller", event_type="deadline_reached",
+                visibility="harness", payload={"terminal_reason": "agent_timeout"},
+            )
+            # Trusted runtime quiesces writers and gates the current tree.
+            # None means incomplete; no model action or ordinary tool is invented.
+            candidate = self._deadline_finalizer()
+            if candidate is None:
+                raise _ControllerFailure(
+                    category="deadline_without_submission", phase=phase,
+                    message="deadline reached without a complete declared submission",
+                    primary_outcome="agent_timeout", terminal_reason="agent_timeout",
+                )
+            return score_submission(candidate, "agent_timeout")
+
         try:
+            if context.max_steps is None and self._deadline is None:
+                raise ValueError("unlimited steps require a trusted deadline")
             effective_toolset = self._tool_registry.resolve(
                 condition_id=context.condition,
                 model_visible=True,
@@ -178,9 +292,26 @@ class EpisodeController:
             )
             phase = "environment_start"
             observation = self._environment.start(context)
-            for _ in range(context.max_steps):
+            steps = range(context.max_steps) if context.max_steps is not None else itertools.count()
+            for _ in steps:
+                if deadline_expired():
+                    result = finalize_deadline()
+                    break
                 phase = "policy_action"
-                action = self._policy.act(observation)
+                try:
+                    action = self._policy.act(observation)
+                except Exception as exc:
+                    if not deadline_expired():
+                        raise
+                    self._record(
+                        context, actor="policy", event_type="deadline_interruption",
+                        visibility="harness", payload={"error_type": type(exc).__name__},
+                    )
+                    result = finalize_deadline()
+                    break
+                if deadline_expired():
+                    result = finalize_deadline()
+                    break
                 self._record(
                     context,
                     actor="policy",
@@ -352,6 +483,19 @@ class EpisodeController:
                         ),
                     },
                 )
+                if deadline_expired():
+                    self._record(
+                        context, actor="controller", event_type="action_rejected",
+                        visibility="harness", payload={
+                            "action_id": action.action_id,
+                            "tool_name": capability.tool_name,
+                            "tool_id": capability.tool_id,
+                            "rejection_code": "deadline_expired",
+                            "candidate_tree_sha256": observation.candidate_tree_sha256,
+                        },
+                    )
+                    result = finalize_deadline()
+                    break
                 phase = "environment_step"
                 step = self._environment.step(action, capability)
                 if isinstance(step, ToolExecutionRejection):
@@ -476,6 +620,9 @@ class EpisodeController:
                     },
                 )
                 observation = step.observation
+                if deadline_expired():
+                    result = finalize_deadline()
+                    break
                 if not step.done:
                     continue
 
@@ -487,78 +634,8 @@ class EpisodeController:
                         message=f"unsupported terminal reason: {terminal_reason}",
                     )
 
-                phase = "submission_freeze"
-                frozen_submission = self._environment.freeze_submission()
-                if (
-                    frozen_submission.tree_sha256
-                    != observation.candidate_tree_sha256
-                ):
-                    self._record(
-                        context,
-                        actor="controller",
-                        event_type="submission_freeze_rejected",
-                        visibility="harness",
-                        payload={
-                            "tool_name": capability.tool_name,
-                            "tool_id": capability.tool_id,
-                            "candidate_tree_sha256": (
-                                observation.candidate_tree_sha256
-                            ),
-                            "submission_tree_sha256": (
-                                frozen_submission.tree_sha256
-                            ),
-                        },
-                    )
-                    raise _ProtocolFailure(
-                        category="submission_freeze_mismatch",
-                        phase="submission_freeze",
-                        message=(
-                            "frozen submission does not match the terminal "
-                            "candidate observation"
-                        ),
-                    )
-                submission = frozen_submission
-                self._record(
-                    context,
-                    actor="environment",
-                    event_type="submission_frozen",
-                    visibility="harness",
-                    payload={
-                        "tree_sha256": submission.tree_sha256,
-                        "artifacts": list(submission.artifacts),
-                    },
-                )
-                phase = "final_judge"
-                final_judgment = self._final_judge.judge(submission)
-                if final_judgment.submission_tree_sha256 != submission.tree_sha256:
-                    raise _ProtocolFailure(
-                        category="final_judgment_submission_mismatch",
-                        phase="final_judge",
-                        message=(
-                            "final judgment is not bound to the frozen submission"
-                        ),
-                    )
-                self._record(
-                    context,
-                    actor="final_judge",
-                    event_type="final_judgment_completed",
-                    visibility="trusted",
-                    payload={
-                        "status": final_judgment.status,
-                        "judge_engine": final_judgment.judge_engine,
-                        "score": final_judgment.score,
-                        "submission_tree_sha256": (
-                            final_judgment.submission_tree_sha256
-                        ),
-                    },
-                )
-                result = EpisodeResult(
-                    context=context,
-                    primary_outcome=final_judgment.status,
-                    terminal_reason=terminal_reason,
-                    submission=submission,
-                    final_judgment=final_judgment,
-                    incidents=(),
+                result = score_submission(
+                    observation.candidate_tree_sha256, terminal_reason, capability,
                 )
                 break
             if result is None:

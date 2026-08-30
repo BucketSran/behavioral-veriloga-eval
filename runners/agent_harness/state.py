@@ -83,7 +83,7 @@ class EpisodeContext:
     attempt_id: str
     task_id: str
     condition: str
-    max_steps: int
+    max_steps: int | None
     budget_limits: Mapping[str, int] = field(default_factory=dict)
     parent_attempt_id: str | None = None
     retry_index: int = 0
@@ -92,7 +92,7 @@ class EpisodeContext:
     def __post_init__(self) -> None:
         for field_name in ("episode_id", "attempt_id", "task_id", "condition"):
             _require_identity(getattr(self, field_name), field_name=field_name)
-        if self.max_steps <= 0:
+        if self.max_steps is not None and self.max_steps <= 0:
             raise ValueError("max_steps must be positive")
         frozen_budget_limits = _freeze_json_object(
             self.budget_limits,

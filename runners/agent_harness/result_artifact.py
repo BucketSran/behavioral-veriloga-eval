@@ -130,7 +130,7 @@ def build_scored_result_artifact(
     judgment = result.final_judgment
     if result.primary_outcome != judgment.status:
         raise ValueError("episode outcome does not match final judgment")
-    if result.terminal_reason != "submitted":
+    if result.terminal_reason not in {"submitted", "agent_timeout"}:
         raise ValueError("scored episode must terminate through submission")
     sidecar = validate_score_sidecar_authority(
         score_sidecar=score_sidecar,
@@ -305,7 +305,9 @@ def validate_scored_result_artifact(
             return False
         if episode["primary_outcome"] != judgment["status"]:
             return False
-        if episode["terminal_reason"] != "submitted":
+        if episode["terminal_reason"] not in {"submitted", "agent_timeout"}:
+            return False
+        if trajectory_events[-1]["payload"].get("terminal_reason") != episode["terminal_reason"]:
             return False
         sidecar = _validate_score_sidecar(score_sidecar)
         sidecar_ref = _require_mapping(

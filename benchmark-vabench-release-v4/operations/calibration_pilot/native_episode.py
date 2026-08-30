@@ -16,6 +16,7 @@ import os
 from pathlib import Path
 import re
 from typing import Any
+from collections.abc import Callable
 
 import run_campaign as runner
 
@@ -140,6 +141,8 @@ def run_native_episode(
     command: str,
     timeout_s: int,
     evas_command: str,
+    deadline_monotonic: float | None = None,
+    deadline_finalizer: Callable[[], str | None] | None = None,
 ) -> NativeEpisodeRun:
     """Run once, then publish a scored join only if terminal evidence validates.
 
@@ -208,6 +211,7 @@ def run_native_episode(
             "task_id": context.task_id,
             "condition": context.condition,
             "max_steps": context.max_steps,
+            "deadline_monotonic": deadline_monotonic,
             "budget_limits": dict(context.budget_limits),
             "parent_attempt_id": context.parent_attempt_id,
             "retry_index": context.retry_index,
@@ -237,6 +241,8 @@ def run_native_episode(
         tool_registry=tool_registry,
         trajectory=JsonlTrajectoryRecorder(trajectory_path),
         public_validation_profile_sha256=public_sha,
+        deadline_monotonic=deadline_monotonic,
+        deadline_finalizer=deadline_finalizer,
     ).run(context)
     with trajectory_path.open("rb") as handle:
         os.fsync(handle.fileno())

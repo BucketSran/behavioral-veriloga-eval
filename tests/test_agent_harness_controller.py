@@ -226,6 +226,119 @@ class TerminalFinalJudge:
         )
 
 
+def test_deadline_scores_complete_workspace_without_inventing_a_model_action(tmp_path):
+    boundary_log = []
+    policy = PublicFeedbackPolicy()
+    path = tmp_path / "deadline.jsonl"
+    controller = EpisodeController(
+        policy=policy,
+        environment=PublicValidationEnvironment(boundary_log, FakePublicValidator(boundary_log)),
+        final_judge=TerminalFinalJudge(boundary_log),
+        tool_registry=_controller_registry("public_validate", "submit"),
+        trajectory=JsonlTrajectoryRecorder(path),
+        deadline_monotonic=0.0,
+        deadline_finalizer=lambda: "a" * 64,
+    )
+    result = controller.run(EpisodeContext("cell", "attempt", "v4-001", "Agentic+EVAS", None))
+    assert result.terminal_reason == "agent_timeout"
+    assert result.final_judgment.score == 1.0
+    assert policy.seen == []
+    assert boundary_log == ["start:attempt", "freeze", "final_judge", "close"]
+    events = read_trajectory(path)
+    assert validate_trajectory_semantics(events)
+    assert not project_model_visible_events(events)
+
+
+@pytest.mark.parametrize("backend_raises", [False, True])
+def test_deadline_discards_late_provider_action_before_dispatch(tmp_path, monkeypatch, backend_raises):
+    import runners.agent_harness.controller as module
+
+    clock = [1.0]
+    monkeypatch.setattr(module.time, "monotonic", lambda: clock[0])
+    log = []
+
+    class LatePolicy(PublicFeedbackPolicy):
+        def act(self, observation):
+            clock[0] = 6.0
+            if backend_raises:
+                raise TimeoutError("provider timeout")
+            return super().act(observation)
+
+    path = tmp_path / "late.jsonl"
+    result = EpisodeController(
+        policy=LatePolicy(),
+        environment=PublicValidationEnvironment(log, FakePublicValidator(log)),
+        final_judge=TerminalFinalJudge(log),
+        tool_registry=_controller_registry("public_validate", "submit"),
+        trajectory=JsonlTrajectoryRecorder(path),
+        deadline_monotonic=5.0, deadline_finalizer=lambda: "a" * 64,
+    ).run(EpisodeContext("cell", "attempt", "v4-001", "Agentic+EVAS", None))
+    assert result.terminal_reason == "agent_timeout"
+    assert result.final_judgment.score == 1.0
+    assert not any(row.startswith("step:") for row in log)
+    assert validate_trajectory_semantics(read_trajectory(path))
+
+
+def test_deadline_without_complete_workspace_is_unscored(tmp_path):
+    log = []
+    path = tmp_path / "incomplete.jsonl"
+    result = EpisodeController(
+        policy=PublicFeedbackPolicy(),
+        environment=PublicValidationEnvironment(log, FakePublicValidator(log)),
+        final_judge=TerminalFinalJudge(log),
+        tool_registry=_controller_registry("public_validate", "submit"),
+        trajectory=JsonlTrajectoryRecorder(path),
+        deadline_monotonic=0.0, deadline_finalizer=lambda: None,
+    ).run(EpisodeContext("cell", "attempt", "v4-001", "Agentic+EVAS", None))
+    assert result.primary_outcome == result.terminal_reason == "agent_timeout"
+    assert result.submission is result.final_judgment is None
+    assert log == ["start:attempt", "close"]
+    assert validate_trajectory_semantics(read_trajectory(path))
+
+
+def test_deadline_expiring_during_authorization_prevents_tool_dispatch(tmp_path, monkeypatch):
+    import runners.agent_harness.controller as module
+
+    clock = iter([1.0, 2.0, 6.0])
+    monkeypatch.setattr(module.time, "monotonic", lambda: next(clock))
+    log = []
+    path = tmp_path / "authorization-deadline.jsonl"
+    result = EpisodeController(
+        policy=PublicFeedbackPolicy(),
+        environment=PublicValidationEnvironment(log, FakePublicValidator(log)),
+        final_judge=TerminalFinalJudge(log),
+        tool_registry=_controller_registry("public_validate", "submit"),
+        public_validation_profile_sha256="b" * 64,
+        trajectory=JsonlTrajectoryRecorder(path),
+        deadline_monotonic=5.0, deadline_finalizer=lambda: "a" * 64,
+    ).run(EpisodeContext("cell", "attempt", "v4-001", "Agentic+EVAS", None))
+    assert result.terminal_reason == "agent_timeout"
+    assert log == ["start:attempt", "freeze", "final_judge", "close"]
+    events = read_trajectory(path)
+    assert any(event["payload"].get("rejection_code") == "deadline_expired" for event in events)
+    assert validate_trajectory_semantics(events)
+
+
+def test_deadline_judge_failure_still_has_valid_unscored_trajectory(tmp_path):
+    class BrokenJudge:
+        def judge(self, submission):
+            raise RuntimeError("judge unavailable")
+
+    log = []
+    path = tmp_path / "deadline-judge-failure.jsonl"
+    result = EpisodeController(
+        policy=PublicFeedbackPolicy(),
+        environment=PublicValidationEnvironment(log, FakePublicValidator(log)),
+        final_judge=BrokenJudge(),
+        tool_registry=_controller_registry("public_validate", "submit"),
+        trajectory=JsonlTrajectoryRecorder(path),
+        deadline_monotonic=0.0, deadline_finalizer=lambda: "a" * 64,
+    ).run(EpisodeContext("cell", "attempt", "v4-001", "Agentic+EVAS", None))
+    assert result.final_judgment is None
+    assert result.primary_outcome == "infrastructure_failure"
+    assert validate_trajectory_semantics(read_trajectory(path))
+
+
 def test_public_feedback_can_continue_but_final_judgment_cannot() -> None:
     boundary_log: list[str] = []
     policy = PublicFeedbackPolicy()

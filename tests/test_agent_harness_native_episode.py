@@ -157,6 +157,21 @@ def test_native_episode_joins_real_freeze_replay_and_immutable_result(native_cas
     assert run.trajectory_path.stat().st_mode & 0o222 == 0
 
 
+def test_native_deadline_result_retains_timeout_and_real_score(native_case):
+    import native_episode
+
+    arguments, seen, adapter = native_case
+    run = native_episode.run_native_episode(
+        **arguments, deadline_monotonic=0.0,
+        deadline_finalizer=adapter.candidate_tree_sha256,
+    )
+    assert seen == []
+    assert run.result.terminal_reason == "agent_timeout"
+    assert run.result.final_judgment.status == "behavior_failure"
+    artifact = json.loads(run.artifact_path.read_text())
+    assert artifact["episode"]["terminal_reason"] == "agent_timeout"
+
+
 def test_failed_native_attempt_blocks_both_native_and_legacy_reentry(native_case):
     import native_episode
 

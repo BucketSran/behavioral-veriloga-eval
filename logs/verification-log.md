@@ -1,5 +1,21 @@
 # Verification Log
 
+## 2026-08-30 - Native deadline contract (AA-VAE-037 prerequisite)
+
+- RED: deadline constructor arguments were absent; native result publishing
+  rejected a scored timeout. Independent review reproduced post-authorization
+  late dispatch. Added RED cases also caught invalid trajectory classification
+  when final judgment failed after deadline freezing.
+- GREEN: `uv run --locked --extra agentic python -m pytest -q
+  tests/test_agent_harness_controller.py tests/test_agent_harness_native_episode.py
+  tests/test_agent_harness_result_artifact.py tests/test_agent_harness_trajectory.py`
+  reports **81 passed, 1 skipped in 12.73s**.
+- Independent code review: initial REQUEST CHANGES, then APPROVE/zero findings
+  after late-dispatch repair. Independent architect: WATCH, no blocker; runtime
+  owns quiescence of in-flight work. No full CLI or model-quality claim follows
+  from these controller tests. Docker launcher validation is a separate gate.
+
+
 ## 2026-08-30 - Native result join fork publication and hosted confirmation
 
 - Published three reviewable commits only to BucketSran `origin/main`:

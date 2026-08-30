@@ -1,5 +1,19 @@
 # Decision Log
 
+## 2026-08-30 - Native controller deadline finalization
+
+- Permit unlimited turns only with a paired trusted monotonic deadline and
+  finalizer. Token counts remain telemetry, not a new stopping criterion.
+- Recheck before policy, after policy, and immediately before tool dispatch;
+  reject an authorized but late action without executing it. At deadline,
+  the runtime must quiesce writers and gate the current workspace. Complete
+  workspaces use the existing single freeze/judge path; incomplete workspaces
+  remain unscored. Preserve `agent_timeout` on a scored deadline result.
+- Keep execution interruption/quiescence a runtime obligation: this synchronous
+  controller is not a hard real-time process supervisor. No legacy defaults,
+  r53 bytes, EVAS version, or final-score authority changed.
+
+
 ## 2026-08-30 - Native episode result join and failure boundary
 
 - The native entry accepts trusted policy/environment components and frozen

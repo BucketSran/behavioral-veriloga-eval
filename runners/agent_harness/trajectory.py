@@ -28,6 +28,8 @@ _REQUIRED_EVENT_VISIBILITY = {
     "cleanup_failed": "harness",
     "cleanup_completed": "harness",
     "episode_completed": "harness",
+    "deadline_reached": "harness",
+    "deadline_interruption": "harness",
 }
 
 
@@ -155,6 +157,23 @@ def validate_trajectory_semantics(events: list[dict[str, Any]]) -> bool:
         return False
     if event_types.count("submission_frozen") > 1:
         return False
+    deadline_count = event_types.count("deadline_reached")
+    if deadline_count > 1:
+        return False
+    if not isinstance(events[-1].get("payload"), Mapping):
+        return False
+    terminal_reason = events[-1]["payload"].get("terminal_reason")
+    if terminal_reason == "agent_timeout" and deadline_count != 1:
+        return False
+    if deadline_count:
+        deadline_index = event_types.index("deadline_reached")
+        if any(event.get("visibility") == "model" for event in events[deadline_index + 1:]):
+            return False
+        if "submission_frozen" in event_types and (
+            deadline_index > event_types.index("submission_frozen")
+            or ("final_judgment_completed" in event_types and terminal_reason != "agent_timeout")
+        ):
+            return False
     if "final_judgment_completed" in event_types and not (
         "submission_frozen" in event_types
         and event_types.index("submission_frozen")
