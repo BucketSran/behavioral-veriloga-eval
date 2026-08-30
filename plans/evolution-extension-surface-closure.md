@@ -66,3 +66,14 @@ API until its Evolution selection/feedback contract is independently specified;
 adding waveform to shared selection without that contract is outside this slice.
 Real matched RAG/waveform campaigns, semantic trajectory exports, SFT/RL trainers
 and new spending need external data/policy decisions and are recorded as such.
+
+## Execution disposition
+
+All three runtime slices are independently reviewed and published to fork/main:
+AA-VAE-064 `9e98100cd1`, AA-VAE-065 `72a9f8614d`, AA-VAE-066 `8d782880c7`.
+Final source passes 1013 harness tests / 25 opt-in skips and 12 real Docker
+integrations / 45 deselected, including the final environment-factory repair and
+two-model/two-round docs path. Hosted results are recorded by source SHA in the
+[verification log](../logs/verification-log.md). No runtime assignment remains
+open under this plan; the external data/experiment/protocol boundaries above
+remain explicit and are not waived by synthetic tests.

@@ -20,10 +20,17 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
-N4/N5 main-only slice: follow `evolution-extension-surface-closure.md` for exact
-runtime/test leaves. All delegated writers are closed; native advisers/reviewers
-are read-only. Main owns the branch export repair, synthetic Evolution docs,
-declared surface/failure reporting, CI, records and fork publication.
+N1–N5 implementation assignments are closed and returned to main. Published
+AA-VAE-061–066 end at `8d782880c7`; independent reviews and final local tests
+are complete (1013 harness passes / 25 skips; 12 real Docker passes). No
+delegated writer remains active. Main alone owns N6 documentation/navigation
+tests, hosted verification, final audit records and fork publication. Any final
+documentation reviewer is read-only. The assignment details below are historical
+scope records, not authorization to resume a writer.
+
+N4/N5 main-only slice followed `evolution-extension-surface-closure.md` for exact
+runtime/test leaves. Branch export repair `9e98100cd1`, synthetic Evolution docs
+`72a9f8614d` and surface/failure reporting `8d782880c7` are published.
 
 `paired_report_impl` (N2 / AA-VAE-063) handed back calibration-pilot
 `result_ledger.py` and `tests/test_agent_harness_result_ledger.py` and stopped

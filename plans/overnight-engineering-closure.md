@@ -32,12 +32,12 @@ external inputs do not block unrelated engineering items.
 
 | Item | Required outcome | Current disposition |
 | --- | --- | --- |
-| N1 / AA-VAE-061 | Native public waveform feedback, shared request budget, quiescence, recoverable incomplete candidates, exact score reconstruction | Locally verified and independently reviewed; publication gate |
-| N2 / AA-VAE-063 | Reviewer-safe result/case-study reporting and matched-condition checks, derived only from validated immutable evidence | Implemented; production evidence-path repair in final review |
+| N1 / AA-VAE-061 | Native public waveform feedback, shared request budget, quiescence, recoverable incomplete candidates, exact score reconstruction | Published `240b381e23`, three hosted workflows green |
+| N2 / AA-VAE-063 | Reviewer-safe result/case-study reporting and matched-condition checks, derived only from validated immutable evidence | Published `8774850d1d`, both triggered hosted workflows green |
 | N3 / AA-VAE-062 | Synthetic native-trajectory-to-SFT/RL adapter with explicit source/split/public-reward boundaries | Published `811d82e806`; metadata/hash fixture adapter, not semantic training samples |
-| N4 | Frozen synthetic extension integration for remaining campaign/Evolution interfaces, separate intervention evidence/aggregation | Read-only code audit; no real RAG rollout or ordinary-row pooling |
-| N5 | Coding-agent interface/fairness audit; repair demonstrated information/contract reporting gaps | Reuse current Bash unless a specific structured-helper contract/test justifies a separate opt-in |
-| N6 | Reconcile active docs/entrypoints, CI and morning audit index against completed code | Continuous closeout; retain dated history without treating it as current status |
+| N4 / AA-VAE-065 | Frozen synthetic Evolution docs API and separate intervention evidence/aggregation guard | Published `72a9f8614d`; real two-model/two-round smoke green; no real RAG/CLI rollout |
+| N5 / AA-VAE-064/066 | Coding-agent interface/fairness audit and demonstrated reporting repairs | NoEVAS branch export repair `9e98100cd1`; declared surface/failure projection `8d782880c7`. Existing Bash retained |
+| N6 | Reconcile active docs/entrypoints, CI and morning audit index against completed code | Final full harness 1013 passed / 25 opt-in skips; 41 active-entry/CI tests pass; final Docker/hosted closeout tracked in log |
 
 No item promises a default switch or an invented benchmark condition. A new
 comparison/intervention contract is frozen and reviewed before its runtime
@@ -70,14 +70,16 @@ when the user requests a pause/review. Do not claim all research work complete.
 
 ## Execution record
 
-- N1: 80 focused passes / 5 opt-in skips; three real Docker format paths pass;
-  final execution-metadata repair independently approved. Full shared snapshot:
-  994 passes / 24 opt-in skips. Hosted results are recorded separately by SHA.
-- N2: delegated leaves handed back, main owns final production-path repair;
-  32 focused reporting/integration passes. No raw trajectory text in case index.
-- N3: published after 41 adapter/export passes and independent review.
-- N4/N5: read-only audit confirms an Evolution generation-surface mismatch:
-  branch sandbox is NoEVAS but its export still uses the logical Evolution arm.
-  Separate branch/public-checker/final runtimes permit a bounded repair first.
-- N6: this queue replaces the old two-slice automation stopping rule. The global
-  roadmap remains the cross-cutting source; per-feature notes record exact code.
+- N1: published `240b381e23` after 80 focused passes / 5 opt-in skips, three
+  real Docker formats and independent review of execution-metadata failures.
+- N2: published `8774850d1d` after both production evidence-path layouts passed
+  regression (33 reporting/integration passes). No raw trace text in case index.
+- N3: published `811d82e806` after 41 adapter/export passes and independent review.
+- N4/N5: published NoEVAS generation export/environment repair `9e98100cd1`,
+  branch-local synthetic docs `72a9f8614d`, and declared surface/failure
+  projection `8d782880c7`, each with independent review and behavioral tests.
+- N6: final source `8d782880c7` passes 1013 harness tests / 25 opt-in skips,
+  plus 12 real Docker integrations / 45 deselected (323.30 s). Active-entry/CI
+  checks pass 41 tests. Exact hosted status belongs in the verification log;
+  the [morning audit](../docs/alphaapollo-migration/04_夜间工程闭环审计_2026-08-31.md)
+  distinguishes implemented software from remaining data/experiment decisions.

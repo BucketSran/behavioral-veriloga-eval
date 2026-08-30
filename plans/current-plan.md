@@ -20,11 +20,14 @@ implementation and does not change the phase statuses below.
 - Active overnight request: [engineering closure queue](overnight-engineering-closure.md).
   The user authorized completing current free engineering gaps, not only the
   two waveform slices. Preserve separate gates for real data, paid experiments,
-  training and benchmark changes. AA-VAE-061 native waveform integration is
-  locally verified (three real Docker format paths); AA-VAE-062 synthetic native
-  training-format adapter is published as `811d82e806`. Reviewer-safe paired/case
-  reporting is in final review. Next: repair the demonstrated Evolution branch
-  generation-surface mismatch, then synthetic extension/fairness closeout.
+  training and benchmark changes. AA-VAE-061–066 implement native waveform
+  feedback, synthetic training metadata conversion, paired/case reports,
+  Evolution generation-surface repair, branch-local synthetic docs and declared
+  information-surface/failure reporting. Each is independently reviewed and
+  separately committed. Full final harness gate: 1013 passed / 25 opt-in skips;
+  final real Docker/hosted evidence is recorded by source SHA in the log.
+  Read the [morning audit](../docs/alphaapollo-migration/04_夜间工程闭环审计_2026-08-31.md)
+  for commits/code maps and external data/experiment/protocol gates. No new paid run.
 
 - Implemented bounded follow-up: [trusted public waveform executor](trusted-public-waveform-executor.md)
   ([AA-VAE-060](../docs/alphaapollo-migration/features/AA-VAE-060-isolated-public-waveform.md)).
@@ -42,8 +45,9 @@ implementation and does not change the phase statuses below.
 - Implemented bounded slice: [synthetic extension implementation](rag-waveform-training-implementation.md).
   [AA-VAE-057](../docs/alphaapollo-migration/features/AA-VAE-057-synthetic-offline-docs.md)
   adds explicit synthetic docs to native mini-swe/Reasoning through a Python API,
-  shared budgets and trajectory/freeze/score identity. No default/CLI/Evolution
-  activation; ordinary aggregate rejects extensions until a matched protocol is frozen.
+  shared budgets and trajectory/freeze/score identity. That slice did not activate
+  Evolution; AA-VAE-065 subsequently adds its explicit synthetic Python API.
+  No default/CLI activation; ordinary aggregate rejects extensions until a matched protocol is frozen.
   [AA-VAE-058](../docs/alphaapollo-migration/features/AA-VAE-058-bounded-waveform-parser.md)
   is a verified standalone CSV parser (12 tests), not a model-visible waveform tool.
   [AA-VAE-059](../docs/alphaapollo-migration/features/AA-VAE-059-synthetic-training-export.md)
@@ -57,8 +61,9 @@ implementation and does not change the phase statuses below.
 
 - Remaining extension gates, from [AA-VAE-056](../docs/alphaapollo-migration/features/AA-VAE-056-rag-waveform-training-design.md):
   approve/license/decontaminate an actual public corpus and freeze matched RAG
-  conditions before CLI/Evolution/aggregation; wire AA-VAE-060's isolated public
-  receipts into explicit native waveform feedback with budgets and evidence joins;
+  conditions before real-corpus/CLI/aggregation rollout. Native waveform feedback
+  and synthetic Evolution docs are now implemented; extending waveform into
+  Evolution selection/shared feedback requires a separately defined protocol;
   separately authorize actual trajectory export, splits/provider use and training.
   These are explicit follow-ups, not evidence from synthetic tests. r53/EVAS and
   stopped live evidence stay unchanged; no automatic paid rerun.
@@ -142,7 +147,8 @@ implementation and does not change the phase statuses below.
   are verified through deterministic integration gates.
 - Phase 6 is runtime-integrated and deterministically verified (AA-VAE-046),
   with real-model evidence still pending. Phase 7/8 runtime integration is
-  implemented; Phase 9 now has an authorized bounded DeepSeek pilot. Phase 10
+  implemented; Phase 9's authorized bounded DeepSeek pilot ran and safely stopped,
+  without a scored submission or authorization for a new paid run. Phase 10
   runtime closeout is verified and fork-published.
 - Legacy mini-swe remains default. Native format recovery, multi-action and
   deadline behavior intentionally differ; see [AA-VAE-038](../docs/alphaapollo-migration/features/AA-VAE-038-mini-swe-behavior-differential.md).

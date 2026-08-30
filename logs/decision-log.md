@@ -1,5 +1,21 @@
 # Decision Log
 
+## 2026-08-31 - Close free engineering work with an explicit morning audit
+
+- Treat AA-VAE-061–066 as six independently reviewable software slices, not a
+  new benchmark release or proof of model improvement. Preserve the underlying
+  r53/EVAS baseline and legacy default. Current navigation now points to the
+  dated morning audit instead of repeating earlier completed integration gaps.
+- Close all delegated writing assignments; main owns final docs, CI verification
+  and fork-only publication. Record final full-suite and real Docker evidence
+  against the source commit, not a previous green workflow.
+- Keep real-corpus rights/decontamination, matched extension/selection protocols,
+  additional domain tools, semantic training data and paid experiments as named
+  follow-ups requiring their inputs/decisions. Synthetic metadata conversion is
+  not semantic SFT data; fixed-tool execution counting is not global Bash metering.
+- Pause the existing overnight heartbeat only after this safe queue is verified
+  and published. Do not repeatedly wake to invent new scope or spend a new budget.
+
 ## 2026-08-31 - Disclose expected surfaces without claiming environment parity (AA-VAE-066)
 
 - Put pure declared access/difference metadata into native/Evolution config

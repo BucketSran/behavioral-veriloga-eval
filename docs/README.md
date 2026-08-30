@@ -1,6 +1,6 @@
 # Documentation Index
 
-Updated: 2026-08-30
+Updated: 2026-08-31
 
 ## Current Instructions
 
@@ -17,10 +17,11 @@ Read these for new work, in this order:
    including the [feature ledger](alphaapollo-migration/01_功能迁移台账.md).
 6. [Repository layout policy](REPO_LAYOUT_POLICY.md).
 
-Current gaps remain visible in the plan: full native campaign/form/retry/result
-integration and AlphaApollo Reasoning/Evolution are not complete. Domain tools
-are reserved, not approved implementations. EVAS-backed evidence does not
-imply Spectre equivalence.
+Start the morning review with the [overnight engineering audit](alphaapollo-migration/04_夜间工程闭环审计_2026-08-31.md).
+Native campaign/form/retry/result integration and Reasoning/Evolution have
+deterministic evidence. Opt-in waveform feedback, synthetic docs and training
+format adapters do not establish model quality, real-data rights or Spectre
+equivalence. Unspecified domain tools and real experiments remain separate gates.
 
 ## Dated Evidence
 

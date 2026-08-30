@@ -139,7 +139,13 @@ tool capability, observations, launcher configuration and final evidence joins;
 the controller still owns admission and `tool_call` charging. Single-cell reading
 can verify this intervention, but ordinary aggregation and paired result ledgers
 reject extension rows pending a separately frozen comparison protocol. There is
-no RAG CLI/Evolution integration, real corpus or automatic online retrieval.
+no RAG CLI integration, real corpus or automatic online retrieval.
+The separate `run_native_evolution(..., docs_corpus=corpus)` API now supports the
+exact `AlphaApollo-Evolution+EVAS` condition ([AA-VAE-065](../../../docs/alphaapollo-migration/features/AA-VAE-065-synthetic-evolution-docs.md)).
+Each NoEVAS generation branch has its own docs tool wrapper. Initial prompts
+carry only profile identity; retrieved observations stay branch-local and use
+the shared tool budget. Config/final result retain the frozen intervention;
+ordinary single-trajectory aggregation still rejects Evolution, with or without docs.
 See [AA-VAE-057](../../../docs/alphaapollo-migration/features/AA-VAE-057-synthetic-offline-docs.md).
 The separate waveform parser and synthetic training projection are not activated
 by this API and do not confer public/final authority or authorize paid runs.

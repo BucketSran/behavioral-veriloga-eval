@@ -15,14 +15,21 @@ AI-native benchmark、agent harness、trajectory、评分与结果生成链路�
 ## 阅读顺序
 
 重新梳理当前项目时，先看
-[2026-08-30 项目现状与九组功能缺口快照](02_项目现状与功能缺口_2026-08-30.md)。
-它固定提交基线，区分已完成、部分接通、未实现与暂缓，不把历史缺口重复计数。
+[夜间工程闭环审计](04_夜间工程闭环审计_2026-08-31.md)。
+[2026-08-30 快照](02_项目现状与功能缺口_2026-08-30.md)只描述其固定旧提交，
+不覆盖后续已完成的实现；当前跨领域边界见 [全局路线](03_全局后续路线_2026-08-31.md)。
 
 1. [00_迁移主线.md](00_迁移主线.md)：理解迁移目标、系统主链和不迁移的内容。
 2. [01_功能迁移台账.md](01_功能迁移台账.md)：查看每项能力的代码落点、证据与缺口。
 3. [features/README.md](features/README.md)：新增功能时按模板建立独立记录。
 
 最新修复与扩展：
+
+- AA-VAE-060/061：独立公开波形执行器和 native 显式工具，预算/候选/回执 join。
+- AA-VAE-062/063：synthetic native metadata adapter、配对报告与安全 case 索引。
+- AA-VAE-064/065：Evolution 生成信息面修复、synthetic docs 的分支本地接线。
+- AA-VAE-066：config-hashed 预期信息面和证据支持的失败责任分类。
+  各项代码、提交与边界统一列在最新审计页；以下保留前序独立切片说明。
 
 - [AA-VAE-055：公开 EVAS 分层诊断](features/AA-VAE-055-public-evas-process-feedback.md)：
   已实现并免费验证；sandbox 标记明确不具备可信执行/预算/评分权限。
@@ -31,7 +38,7 @@ AI-native benchmark、agent harness、trajectory、评分与结果生成链路�
 - [AA-VAE-057：合成离线检索](features/AA-VAE-057-synthetic-offline-docs.md)：
   native mini-swe/Reasoning 的显式开发 API；接通反馈、预算与评分身份，不自动启用。
 - [AA-VAE-058：有界波形 parser](features/AA-VAE-058-bounded-waveform-parser.md)：
-  独立模块已验证；等待同次公开调用的可信输出绑定，尚未接入模型。
+  独立模块已验证；后续公开输出绑定/模型接线已由 AA-VAE-060/061 完成。
 - [AA-VAE-059：合成训练导出契约](features/AA-VAE-059-synthetic-training-export.md)：
   独立 SFT/RL fixture 校验，不是实际轨迹导出或训练流水线。
 

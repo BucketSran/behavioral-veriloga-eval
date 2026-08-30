@@ -1,5 +1,42 @@
 # Verification Log
 
+## 2026-08-31 - Overnight N1–N6 final local integration and baseline audit
+
+- Final runtime source: `8d782880c72b861822983befc30188165072d78e`.
+  `uv run --locked --extra agentic python -m pytest -q tests/test_agent_harness_*.py --tb=short`:
+  **1013 passed, 25 skipped, 196.84 s**. Skips require explicit opt-in;
+  this is the current harness gate, not a claim that all historical tests pass.
+- `VABENCH_TEST_DOCKER_RUNTIME=1 uv run --locked --extra agentic python -m pytest -q tests/test_agent_harness_native_campaign_smoke.py tests/test_agent_harness_evolution_campaign.py tests/test_agent_harness_waveform_integration.py tests/test_agent_harness_docs_integration.py -k 'r53_docker or real_waveform' --basetemp=benchmark-vabench-release-v4/reports/overnight-final-integration-01 --tb=short`:
+  **12 passed, 45 deselected, 323.30 s**. Covers the final native campaign,
+  three-form Evolution, synthetic Evolution docs, native docs and three-format
+  waveform path on a stable source tree. Providers are free scripted fixtures;
+  EVAS/Docker execute for real. No paid model or effectiveness claim.
+- N6 documentation regression first failed on the stale current-capability
+  statement, then passed after navigation/status repairs. Final
+  `tests/test_v4_r53_active_entrypoints.py tests/test_agent_harness_ci_gate.py`:
+  **41 passed, 0.12 s**. Ruff and diff checks pass; no dedicated LSP/typecheck
+  available. Earlier compact-checkout/legacy timeout limitations remain recorded.
+- Independent N6 documentation review: APPROVE, zero required corrections;
+  reviewer separately ran 24 navigation tests successfully. Main's UTF-8-safe
+  link audit checked all 12 changed/new Markdown documents and 97 local links,
+  with no broken target. No runtime source changed during this documentation pass.
+- Read-only remote audit: behavioral fork/main equals source `8d782880c7`;
+  Arcadia-1 upstream/main is `7b5616dc52195ec275ec6d21c71d7763613702cd` and
+  remains an ancestor. Sealed r53 has no diff from `2f2c159fc4`.
+  EVAS checkout is clean and HEAD/fork main/upstream main all equal
+  `6cb6fa7a7dac70fc0d4120126d8cf74258e6637b` (0.8.7). No EVAS/old-tree writes.
+- One source push failed with an HTTP/2 framing error. Same-commit retry using
+  invocation-local HTTP/1.1 succeeded; remote SHA was independently checked.
+  No force push, global network configuration or upstream write.
+- AA-VAE-064 `9e98100cd18d248fd13e3869c05145e6bf905e31` hosted gates pass:
+  [Evaluator Closure](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33329906165),
+  [Runner Smoke](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33329906172).
+  AA-VAE-065 `72a9f8614d300e7363d64558876f9bcfaa1cad76` all three pass:
+  [Evaluator Closure](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33330066384),
+  [Public Agent Runtime](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33330066382),
+  [Runner Smoke](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33330066388).
+  Final source hosted status is recorded separately after completion.
+
 ## 2026-08-31 - Declared information surface and Evolution failure projection (AA-VAE-066)
 
 - Four helper REDs, missing native manifest binding RED, and missing Evolution

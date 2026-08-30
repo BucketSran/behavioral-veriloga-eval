@@ -79,6 +79,18 @@ def test_operator_docs_name_r53_as_the_active_default() -> None:
         assert "benchmarkv4-r53" in text, document
 
 
+def test_current_docs_point_to_overnight_audit_not_completed_integration_gaps():
+    index = (ROOT / "docs/README.md").read_text()
+    notebook = (ROOT / "docs/alphaapollo-migration/README.md").read_text()
+    assert "AlphaApollo Reasoning/Evolution are not complete" not in index
+    audit = "04_夜间工程闭环审计_2026-08-31.md"
+    assert audit in index and audit in notebook
+    assert (ROOT / "docs/alphaapollo-migration" / audit).is_file()
+    guide = (PACKAGE / "operations/calibration_pilot/README.md").read_text()
+    assert "no RAG CLI/Evolution integration" not in guide
+    assert "AA-VAE-065" in guide
+
+
 @pytest.mark.parametrize("relative_path", ("README.md", "docs/REPO_LAYOUT_POLICY.md"))
 def test_primary_documented_release_is_r53(relative_path: str) -> None:
     text = (ROOT / relative_path).read_text(encoding="utf-8")
