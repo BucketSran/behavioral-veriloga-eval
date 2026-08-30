@@ -13,6 +13,14 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
+- Next extension queue: [AA-VAE-056 RAG/waveform/training design](../docs/alphaapollo-migration/features/AA-VAE-056-rag-waveform-training-design.md).
+  Read-only advisers returned three independent designs; main synthesized them.
+  Small future leaves are synthetic offline retrieval, bounded CSV parsing and
+  public-only training-export/split validation. Shared registry/profile/result
+  interfaces stay main-owned. Real corpus licenses, waveform caps/activation
+  and training split/use authority must be frozen before real-data activation.
+  No tool/schema/handler/corpus/export/training has been activated by these notes.
+
 - Implemented follow-up: [public EVAS feedback and extension design](public-evas-feedback-and-extension-design.md).
   [AA-VAE-055](../docs/alphaapollo-migration/features/AA-VAE-055-public-evas-process-feedback.md)
   adds native layered Bash/EVAS reports and reported-operation diagnostics.
@@ -23,6 +31,7 @@ implementation and does not change the phase statuses below.
   Final local gate: 849 harness passes / 17 opt-in skips; 2 real Docker/free-HTTP
   smoke passes. Independent scoped review approves; historical compact-checkout
   missing-script test limitation is retained in the verification log.
+  Runtime repair published separately as `9da787b638` to fork/main.
 
 - Implemented authorized repair: [native operational contract and optional call budget](native-operational-contract-and-call-budget.md).
   [AA-VAE-053](../docs/alphaapollo-migration/features/AA-VAE-053-public-operational-contract.md)

@@ -1,5 +1,18 @@
 # Decision Log
 
+## 2026-08-31 - Parallel extension designs remain separate from activation (AA-VAE-056)
+
+- RAG first freezes offline corpus identity/license/exclusions and matched
+  conditions; reuse tool_call budget, no new service/dependency by default.
+- Waveform first targets bounded public CSV summaries, no task verdict or hidden
+  threshold; same-invocation source binding is required. A validator-only change
+  does not automatically integrate arbitrary native Bash calls.
+- SFT/RL first needs a separate export/split/usage contract. Reviewer exports and
+  r53 final-test artifacts are not training data; public reward and held-out
+  score remain separate. No real export/training or stack choice in this slice.
+- All three advisers were read-only; main writes the synthesis and owns future
+  shared integration. Runtime AA-VAE-055 is separately published as `9da787b638`.
+
 ## 2026-08-31 - Public EVAS process observations are not Bash or task verdicts (AA-VAE-055)
 
 - Preserve Bash pipeline semantics. Native Agentic adds bounded current-action

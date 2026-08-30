@@ -31,6 +31,9 @@ The three read-only designs have returned. `public_feedback_review` owns only
 independent review; its marker-forgery finding is addressed by explicit
 unauthenticated diagnostic quarantine, not a new isolated executor. No delegate
 has source, index or publication authority. Main owns final tests and commits.
+Runtime repair is committed as `9da787b638`. The separate AA-VAE-056 design note
+consolidates all three advisers; they are closed/read-only, not active feature
+implementers. Future leaf implementation needs an exact file assignment here.
 
 AA-VAE-053/054 (base `32b63963bd`): main owns native operational-contract
 and optional model-call-budget implementation, existing controller/budget/state,

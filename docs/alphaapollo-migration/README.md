@@ -22,6 +22,13 @@ AI-native benchmark、agent harness、trajectory、评分与结果生成链路�
 2. [01_功能迁移台账.md](01_功能迁移台账.md)：查看每项能力的代码落点、证据与缺口。
 3. [features/README.md](features/README.md)：新增功能时按模板建立独立记录。
 
+最新修复与后续设计：
+
+- [AA-VAE-055：公开 EVAS 分层诊断](features/AA-VAE-055-public-evas-process-feedback.md)：
+  已实现并免费验证；sandbox 标记明确不具备可信执行/预算/评分权限。
+- [AA-VAE-056：RAG、波形、SFT/RL 并行设计](features/AA-VAE-056-rag-waveform-training-design.md)：
+  设计完成、未实施；包含各方向的现有代码、拟改落点、测试和启用条件。
+
 ## 证据边界
 
 允许使用的来源：
