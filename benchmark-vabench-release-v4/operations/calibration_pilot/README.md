@@ -498,3 +498,40 @@ pass@k opportunity.
 Independent cells may run concurrently with `--workers N`. Each worker writes
 only its own cell runtime; keep `--workers 1` when diagnosing provider rate
 limits or simulator resource contention.
+
+## Opt-in native mini-swe single-cell launcher
+
+`run_native_mini_swe.py` is a separate, development-only entry point for a
+G2 Agentic DUT/bugfix cell from `build_campaign.py`. It does not replace the
+legacy runner or reinterpret `--agent-scaffold native`.
+
+```bash
+uv run --locked --extra agentic python \
+  benchmark-vabench-release-v4/operations/calibration_pilot/run_native_mini_swe.py \
+  --campaign /absolute/path/campaign.json \
+  --cell v4-001-G2-r00-agentic \
+  --output /absolute/path/new-native-attempt \
+  --dry-run
+```
+
+Dry-run only exports a fresh runtime: no credentials, Docker, model, or scoring.
+For a separately authorized executable run, omit `--dry-run` and provide
+`--base-url`, `--api-key-env` (default `VABENCH_API_KEY`) or `--api-key-file`, and
+an absolute pinned `--evas-command`. The runtime requires the existing pinned
+public Docker image. Legacy `execution_config` overrides are rejected; this
+launcher currently fixes its own documented runtime/watchdog defaults.
+
+Every invocation requires a new output directory, including after dry-run or
+failure. There is no resume, automatic episode retry, or campaign aggregation.
+Canonical wall time applies; complete timeout workspaces remain score-eligible
+with `terminal_reason=agent_timeout`. Request/command timeouts plus verified
+Docker pause before freeze are not an asynchronous hard real-time guarantee.
+
+Private decoded provider exchanges and bounded Bash observations are kept in
+`runtime/evidence/native-launcher/`; controller trajectory and the immutable
+scored artifact remain in `runtime/evidence/native-episode/`. Final EVAS output
+never becomes the next model observation. Raw transport retries/SSE frames and
+untruncated tool logs are not archived. Strict single-action parsing differs
+from legacy recovery/multi-action handling, so this is not a parity claim.
+See `docs/alphaapollo-migration/features/AA-VAE-037-native-mini-swe-launcher.md`
+for code mapping, evidence and remaining gates.

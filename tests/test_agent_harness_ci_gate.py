@@ -57,3 +57,10 @@ def test_evaluator_closure_runs_native_episode_result_join() -> None:
     assert (
         "tests/test_agent_harness_native_episode.py::test_r53_docker_native_episode_result_join"
     ) in workflow
+
+
+def test_evaluator_closure_runs_native_launcher_provider_to_score() -> None:
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    prefix = '"benchmark-vabench-release-v4/operations/calibration_pilot/'
+    assert workflow.count(prefix + 'run_native_mini_swe.py"') == 2
+    assert "tests/test_agent_harness_native_launcher.py::test_r53_docker_native_launcher_provider_to_score" in workflow

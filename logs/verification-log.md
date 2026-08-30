@@ -1,5 +1,54 @@
 # Verification Log
 
+## 2026-08-30 - Native mini-swe launcher local evidence (AA-VAE-037)
+
+- Baseline was behavioral main/origin `bbb76139ee`, read-only upstream
+  `7b5616dc52` (0 upstream-only / 67 fork-only); EVAS main/fork/upstream
+  `6cb6fa7a7d`. Fetches did not change these baselines. Only the coordinator
+  wrote files; parallel mapping and independent reviews were read-only.
+- Vertical RED/GREEN caught missing CLI composition, legacy bypass of launcher
+  reservation, absent CI selection, a wrong EVAS helper call, missing required
+  backend-profile declarations, and credential-bearing provider exceptions
+  escaping private-trace redaction into native outcome files.
+- `uv run --locked --extra agentic python -m pytest -q
+  tests/test_agent_harness_native_launcher.py tests/test_agent_harness_ci_gate.py`
+  reports **14 passed, 1 skipped in 4.54s**; the skip is the opt-in Docker case.
+- `VABENCH_TEST_DOCKER_RUNTIME=1 uv run --locked --extra agentic python -m pytest -q
+  tests/test_agent_harness_native_launcher.py::test_r53_docker_native_launcher_provider_to_score
+  --basetemp /Users/bucketsran/Documents/TsingProject/vaEVAS-next/behavioral-veriloga-eval/tmp/native-launcher-20260830-reviewed`
+  reports **1 passed in 10.88s**. Public-contract fixture writes its candidate,
+  invokes public EVAS, submits, pauses Docker, freezes and receives expected
+  final `behavior_failure`. No model API/network request was made.
+- Private report:
+  `tmp/native-launcher-20260830-reviewed/test_r53_docker_native_launche0/native-launcher-smoke.json`.
+  Manifest file SHA `dd8e38a1439346262328328820727f4dd10043c709e69d5f6046ac848da928c1`;
+  private-events file SHA `c486c1f84bc134502d588754ad2a13dc56fc2735123d8b6442c70b73cb86df88`;
+  controller trajectory file SHA `4d5e1119e0c9550bec719c7171c44067b12761611f182aaf3131f9895a2884c8`;
+  artifact file SHA `f4c5bed09b93a10d5468177b351a472fb166c0f3f74a88e5bde904ab71133cfc`.
+- Initial full regression: **604 passed, 6 skipped, 1 failed in 206.86s**.
+  The failure was the unchanged legacy 1-second direct-EVAS timeout telemetry
+  test; isolated replay passed **1 passed in 1.15s**. It is recorded rather than
+  erased. Stable-tree full rerun passed **607 passed, 6 skipped in 174.86s**
+  (includes the subsequently added redaction/profile tests). Command for both:
+  `uv run --locked --extra agentic python -m pytest -q tests/test_agent_harness_*.py
+  tests/test_evaluator_environment_contract.py tests/test_v3_clean_room_smoke.py
+  tests/test_v3_model_eval_claim_gate.py
+  benchmark-vabench-release-v4/scripts/tests/test_v4_experiment_result_protocol.py
+  tests/test_benchmarkv4_calibration_pilot.py tests/test_score_campaign_reuse.py
+  tests/test_mini_swe_vabench.py tests/test_v4_r53_active_entrypoints.py
+  tests/test_v4_r53_clean_room_smoke.py`.
+- Scoped Ruff 0.12.12, Python compilation and diff whitespace checks passed.
+  No mypy/pyright installation exists; no new type-check dependency was added.
+- Independent launcher code review: REQUEST CHANGES for credential propagation,
+  then APPROVE/zero findings after repair; final reviewer run reports **8 passed,
+  1 skipped** and combined controller/native/launcher reports **67 passed,
+  2 skipped**. Architect: WATCH/no blocker for runtime-specific quiescence,
+  private Docker field coupling and prepared-API provenance limitations.
+- Claims exclude hosted model quality, exact legacy parity, all forms/conditions,
+  full transport/SSE/untruncated archives, hard real-time deadline, aggregate
+  ledgers, reasoning/evolution, Spectre or formal score authority.
+
+
 ## 2026-08-30 - Native deadline contract (AA-VAE-037 prerequisite)
 
 - RED: deadline constructor arguments were absent; native result publishing

@@ -808,7 +808,7 @@ Testbench, retry, memory/lineage and complete campaign ledgers remain open.
 Verification, the relative-runtime-path RED/GREEN repair and review limitations
 are recorded in `logs/verification-log.md`.
 
-#### Active slice - opt-in mini-swe single-cell launcher (2026-08-30)
+#### Verified local slice - opt-in mini-swe single-cell launcher (2026-08-30)
 
 Brief: expose the native episode composition through a separate single-cell
 entry point, reusing the existing provider, mini-swe messages/Bash environment,
@@ -824,8 +824,9 @@ Scope / acceptance / KPIs:
   EVAS output, submission freeze, final replay, and immutable result;
 - preserve the canonical wall-time/deadline-finalization rule and token-as-
   telemetry policy; do not invent an extra silent turn cutoff or model action;
-- keep complete provider exchanges and tool observations in private evidence,
-  with join keys/hashes; do not call hashes alone a replayable raw archive;
+- keep decoded provider exchanges and existing bounded tool observations in
+  private evidence, with join keys/hashes; do not call hashes alone a complete
+  replayable raw archive or imply untruncated tool/SSE/transport-retry capture;
 - reject reuse, classify failures, keep cleanup separate, and never expose
   final output to another provider turn;
 - retain legacy regression coverage and add a Docker launcher smoke to CI.
@@ -844,6 +845,20 @@ or a material protocol decision not covered by the approved plan.
 Required evidence: exact RED/GREEN and regression commands, private output
 paths, final artifact/profile/trace hashes, independent review, CI status, and
 explicit unverified claims in the decision/verification logs and AA-VAE-037.
+
+Local outcome: independent deadline code review cleared the late-dispatch fix;
+the native launcher reuses mini-swe 2.4.5 and the existing exporter/provider/Bash
+runtime. Offline CLI/composition and real Docker r53 DUT provider-to-score
+smokes pass. The provider is a deterministic fixture, not a hosted model run.
+Private decoded exchanges and a file-hash result index are now retained.
+Publication/hosted status is recorded separately in the verification log.
+
+Remaining boundary: strict single-action native parsing is not equivalent to
+legacy multi-action/FormatError recovery; deadline handling is request/command
+timeouts plus pause-before-freeze, not hard real-time interruption. Before a
+matched model comparison, freeze these protocol differences and verify the
+chosen comparison conditions. Full campaign/form/aggregate/retry work remains
+open; AlphaApollo reasoning/evolution has not been silently added by this slice.
 
 ### Phase 6 - Add the AlphaApollo single-trajectory reasoning backend
 

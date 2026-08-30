@@ -89,20 +89,23 @@ Integration sequence:
 
 ## Immediate Follow-up
 
-Active bounded slice (base `bbb76139ee`): main coordinator owns new
+Locally verified bounded slice (base `bbb76139ee`): main coordinator owns new
 `operations/calibration_pilot/run_native_mini_swe.py` (under
 `benchmark-vabench-release-v4/`), `tests/test_agent_harness_native_launcher.py`,
 and any necessary deadline contract changes in
-`runners/agent_harness/{controller,contracts,state,trajectory}.py`,
+`runners/agent_harness/{controller,state,trajectory,result_artifact}.py`,
 `native_episode.py`, and their focused tests. Main also owns CI, README,
 AA-VAE-037 and shared records. The `native_launcher_map`,
 `native_launcher_test_design`, and `native_deadline_design` native children
 are read-only advisers with no file/index/history authority. They must hand
 back findings rather than widen scope or start another writing lane.
+The `native_deadline_code_review` and `native_deadline_arch_review` children
+also reviewed deadline and launcher slices independently, without write rights.
 
 The public-validation adapter and opt-in native episode / production final
-result join are verified. Complete production tool/CLI integration, Testbench,
-retry, raw trace archives and aggregate ledgers remain follow-ups under the
+result join and opt-in single-cell mini-swe launcher are verified locally.
+Complete campaign/form integration, Testbench, retry, full transport/tool
+archives and aggregate ledgers remain follow-ups under the
 current plan. The coordinator defines the next bounded files/tests before
 implementation; mapping/review stays read-only and no delegated writing lane
 is opened by this document.

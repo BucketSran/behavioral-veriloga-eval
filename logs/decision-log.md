@@ -1,5 +1,25 @@
 # Decision Log
 
+## 2026-08-30 - Native mini-swe launcher and private exchange boundary
+
+- Use a separate G2 Agentic DUT/bugfix CLI. Reuse existing provider, mini-swe
+  formatter/Bash schema/environment, exporter, artifact gate and final replay.
+  Do not reinterpret the old native flag or change the legacy default agent.
+- Reserve fresh output/evidence; reject native/legacy reentry, including after
+  pre-final failures. No automatic episode retry or paid experiment is enabled.
+- Record decoded provider exchanges and bounded tool observations separately
+  from typed controller trajectory. Join through attempt/action IDs and an
+  explicit file-byte hash index, without confusing semantic artifact hashes.
+- Redact credential-bearing exception messages before the controller receives
+  them, not just inside the private trace writer. This closes a test-reproduced
+  leak into native outcome/trajectory evidence.
+- Verify Docker pause before freeze; retain the architecture WATCH that this
+  is not asynchronous hard deadline preemption. Strict single-action parsing
+  and absent legacy format recovery remain declared differential conditions.
+- Keep Bash EVAS feedback distinct from typed validation and final correctness.
+  Final EVAS remains development-only. No release/evaluator/default tool changes.
+
+
 ## 2026-08-30 - Native controller deadline finalization
 
 - Permit unlimited turns only with a paired trusted monotonic deadline and
