@@ -237,6 +237,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="Use pinned mini-SWE-agent for G2-G5; native is a legacy sensitivity path.",
     )
     parser.add_argument(
+        "--episode-backend",
+        choices=("legacy", "native-mini-swe"),
+        default="legacy",
+        help=(
+            "Episode implementation. native-mini-swe is the opt-in native "
+            "harness path; --agent-scaffold native keeps its legacy sensitivity "
+            "meaning."
+        ),
+    )
+    parser.add_argument(
         "--mini-swe-sandbox",
         choices=("auto", "docker", "sandbox-exec", "bubblewrap", "none"),
         default="auto",
@@ -289,6 +299,18 @@ def main() -> int:
         raise SystemExit(
             f"{args.comparison_profile} requires --agent-scaffold mini-swe"
         )
+    if args.episode_backend == "native-mini-swe":
+        if args.agent_scaffold != "mini-swe":
+            raise SystemExit("native-mini-swe requires --agent-scaffold mini-swe")
+        if args.resume:
+            raise SystemExit("native-mini-swe does not support --resume")
+        if args.limit is not None:
+            raise SystemExit(
+                "native-mini-swe does not support --limit; freeze the intended "
+                "selection with task/family filters"
+            )
+        if args.form and "testbench" in args.form:
+            raise SystemExit("native-mini-swe currently supports DUT/bugfix only")
     evas_identity = None
     if args.evas_command:
         args.evas_command, evas_identity = resolve_evas_command(args.evas_command)
@@ -367,6 +389,7 @@ def main() -> int:
         "judge_timeout_s": args.judge_timeout_s,
         "per_turn_max_tokens": args.per_turn_max_tokens,
         "token_accounting": "telemetry_only",
+        "episode_backend": args.episode_backend,
         "agent_scaffold": args.agent_scaffold,
         "mini_swe_sandbox": args.mini_swe_sandbox,
         "mini_swe_image": args.mini_swe_image,
@@ -406,6 +429,8 @@ def main() -> int:
         str(args.temperature),
         "--agent-scaffold",
         args.agent_scaffold,
+        "--episode-backend",
+        args.episode_backend,
         "--mini-swe-sandbox",
         args.mini_swe_sandbox,
         "--docker-command",

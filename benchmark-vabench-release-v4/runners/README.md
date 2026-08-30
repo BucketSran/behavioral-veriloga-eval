@@ -136,3 +136,14 @@ python3 benchmark-vabench-release-v4/operations/calibration_pilot/score_campaign
   --judge-command \
     "python3 /path/to/trusted_replay_adapter.py"
 ```
+
+For the opt-in native DUT/bugfix three-condition path, add
+`--episode-backend native-mini-swe --comparison-profile executable-feedback-control`
+when creating the campaign and select supported forms explicitly. Keep the
+default `--agent-scaffold mini-swe`; `--agent-scaffold native` is a different,
+legacy sensitivity path. Native runs require fresh outputs and do not support
+Testbench, resume or post-freeze limit selection. Native score aggregation uses
+`--episode-backend native-mini-swe --campaign /absolute/path/campaign.json
+--judge-kind final_trusted_replay` and reads existing terminal evidence instead
+of invoking a judge. See `operations/calibration_pilot/README.md` for commands
+and the deterministic smoke/claim boundary.

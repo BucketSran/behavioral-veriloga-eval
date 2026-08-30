@@ -14,16 +14,17 @@ implementation and does not change the phase statuses below.
 ## Current Status
 
 - Active authorized milestone: [native DUT/bugfix three-arm campaign](native-three-arm-campaign.md).
-  Implement absent public authority, the remaining native conditions and minimal
+  Implemented absent public authority, native conditions and minimal
   existing-campaign dispatch/accounting. Native Testbench and automatic retries
   remain deferred; legacy defaults and all frozen evaluation assets are unchanged.
   Shared absent-authority contract is locally verified in
   [AA-VAE-040](../docs/alphaapollo-migration/features/AA-VAE-040-absent-public-authority.md);
-  launcher/campaign integration and real six-cell smoke remain in progress.
+  launcher/campaign integration and real six-cell smoke are locally verified
+  in [AA-VAE-042](../docs/alphaapollo-migration/features/AA-VAE-042-native-three-arm-campaign.md).
 
 - Phase 0/1/3/4 bounded contracts and compatibility work are complete.
 - Phase 2/5 are **in progress**: the opt-in native single-cell path works,
-  with a verified mixed-backend evidence bridge; full campaign/form/retry/
+  with a verified all-native DUT/bugfix three-arm campaign; full form/retry/
   content/ledger closure remains open.
 - Phase 6-10 are **pending**. Reasoning/Evolution are not implemented.
 - Legacy mini-swe remains default. Native format recovery, multi-action and
@@ -32,7 +33,21 @@ implementation and does not change the phase statuses below.
   (the legacy one-second timeout case). Hosted CI success is separate evidence,
   not a replacement for that failure. Exact results: [verification log](../logs/verification-log.md).
 
-## Latest bounded slice: native campaign evidence bridge (AA-VAE-039)
+## Latest bounded slice: all-native DUT/bugfix campaign (AA-VAE-040–042)
+
+Native OneShot uses one logical output-only generation; No-EVAS uses explicit
+authority absence and the paired no-EVAS runtime; Agentic keeps public EVAS.
+The existing campaign wrapper now has a distinct native opt-in and the scorer
+requires the frozen schedule, preserving null-score infrastructure failures.
+Six deterministic Docker/EVAS cells pass, with immutable evidence joins and
+read-only aggregation. Relevant local suite: 492 passed / 5 skipped.
+Broad historical suite is not green on the compact checkout (34 failed,
+657 passed, 8 skipped, 12 errors); absent V3/r45/r52/provenance/runtime assets
+are an explicit validation limitation, not permission to restore history.
+Independent review has no substantive blocker; LSP diagnostics were unavailable.
+No paid model experiment or full closure is claimed.
+
+### Previous bridge checkpoint (AA-VAE-039)
 
 Implemented, fork-published and hosted-verified: a deterministic one-task/three-arm gate
 reuses the campaign manifest, legacy OneShot / Agent-No-EVAS, and opt-in native
@@ -44,10 +59,9 @@ WATCH for private-path coupling). Hosted regression: 660 passed / 10 skipped;
 both mixed-native and legacy Docker smokes pass. Exact evidence is in the log.
 
 This is explicitly mixed-backend connectivity, not parity or model quality.
-The next prerequisite for matched native arms is an absent-public-authority
-contract for native No-EVAS/OneShot; do not fake an enabled EVAS profile or turn
-OneShot into a Bash agent. Full campaign CLI, retry and Testbench remain separate
-slices. Keep legacy defaults, r53 and EVAS unchanged; no API experiment yet.
+Its absent-authority and bounded campaign CLI follow-ups are now implemented
+above. Retry, Testbench and broader experiment coverage remain separate slices.
+Keep legacy defaults, r53 and EVAS unchanged; no API experiment yet.
 
 ## Objective
 
@@ -212,8 +226,8 @@ Remaining Phase 2 gaps:
 - candidate lineage events still need production candidate-store/runtime joins;
 - the immutable trajectory/submission/authority/score-sidecar artifact now
   has an opt-in native episode / production replay writer and r53 smoke;
-  AA-VAE-039 adds a read-only mixed-backend summary bridge with an exact scheduled
-  denominator. Complete campaign CLI, raw-content archives and aggregate
+  AA-VAE-042 extends the read-only bridge to native DUT/bugfix three-arm campaign
+  CLI with an exact scheduled denominator. Broader forms, raw-content archives and aggregate
   ledgers remain open.
 
 Required event types include:
@@ -320,12 +334,12 @@ Still required before Phase 5 completion:
 
 - Testbench reference-only support and campaign integration beyond the bounded
   DUT/bugfix public-simulation adapter;
-- full campaign CLI authority/profile distribution beyond the new opt-in
-  Python scoring API, plus explicit infrastructure-only retry orchestration;
+- authority/profile distribution beyond the bounded DUT/bugfix three-arm
+  native CLI, plus explicit infrastructure-only retry orchestration;
 - clean-room evidence that final outputs never enter generation, candidate
   selection, or shared memory;
-- native authority absence for No-EVAS/OneShot, then broader campaign result
-  joins beyond the AA-VAE-039 mixed-backend smoke; never fabricate conversions
+- broader campaign result joins beyond AA-VAE-042 (native authority absence
+  for No-EVAS/OneShot is implemented); never fabricate conversions
   from incomplete legacy traces.
 
 Recommended execution order after the generic store:

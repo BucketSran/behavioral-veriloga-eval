@@ -1,7 +1,8 @@
 # Native DUT/bugfix three-arm campaign
 
 Date: 2026-08-30. Base: `24f2b834b012271af8d05221cc6e4855e2488f72`.
-Status: implementation authorized after the human scope discussion.
+Status: bounded implementation and local verification complete; fork publication
+is recorded in the verification log. No full evaluation closure is claimed.
 
 ## Brief
 

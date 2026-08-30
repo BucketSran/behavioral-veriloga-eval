@@ -102,6 +102,11 @@ FILENAME_TOKEN_RE = re.compile(
     re.IGNORECASE,
 )
 AGENTIC = {"G2", "G3", "G4", "G5"}
+NATIVE_MINI_SWE_ARM_CONTRACT = {
+    "OneShot": ("G0", False),
+    "Agent-No-EVAS": ("G2", False),
+    "Agentic": ("G2", True),
+}
 MAX_ONESHOT_TRANSPORT_FAILURES = 2
 RESUMABLE_TERMINAL_STATUSES = {
     "submitted",
@@ -185,6 +190,47 @@ def read_json(path: Path) -> dict[str, Any]:
 def write_json(path: Path, value: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def run_prepared_native_mini_swe(**kwargs: Any) -> Any:
+    """Lazy native launcher import so legacy campaign startup stays unchanged."""
+    from run_native_mini_swe import run_prepared_native_mini_swe as launch
+
+    return launch(**kwargs)
+
+
+def validate_native_mini_swe_cell(cell: dict[str, Any]) -> None:
+    if cell.get("form") not in {"dut", "bugfix"}:
+        raise ValueError("native-mini-swe currently supports DUT/bugfix cells only")
+    arm = cell.get("experimental_arm")
+    if arm not in NATIVE_MINI_SWE_ARM_CONTRACT:
+        raise ValueError("native-mini-swe requires a supported experimental arm")
+    expected_mode, expected_feedback = NATIVE_MINI_SWE_ARM_CONTRACT[arm]
+    if (
+        cell.get("mode") != expected_mode
+        or cell.get("base_mode") != expected_mode
+        or cell.get("executable_feedback") is not expected_feedback
+    ):
+        raise ValueError("native-mini-swe experimental arm contract mismatch")
+
+
+def write_native_dispatch_result(
+    runtime: Path,
+    payload: dict[str, Any],
+) -> dict[str, Any]:
+    path = runtime / "evidence/native-dispatch/result.json"
+    if path.exists() or path.is_symlink() or path.parent.is_symlink():
+        raise RuntimeError("native dispatch result already exists")
+    document = {
+        "schema_version": "v4-native-dispatch-result-v1",
+        "backend": "native-mini-swe",
+        **payload,
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("x", encoding="utf-8") as handle:
+        json.dump(document, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+    return document
 
 
 def summarize_public_agent_images(results: list[dict[str, Any]]) -> dict[str, Any]:
@@ -2576,6 +2622,12 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
         if native_reservation.exists() or native_reservation.is_symlink():
             raise FinalReplayReservedError("native episode already reserved; legacy model reentry is forbidden")
     result_path = runtime / "evidence" / "campaign_result.json"
+    if getattr(args, "episode_backend", "legacy") == "native-mini-swe":
+        if runtime.exists() or runtime.is_symlink():
+            raise FinalReplayReservedError("native cell requires a fresh runtime; reentry forbidden")
+        if getattr(args, "resume", False):
+            raise ValueError("native-mini-swe campaign cells cannot be resumed in place")
+        validate_native_mini_swe_cell(cell)
     if args.resume and result_path.is_file():
         previous = read_json(result_path)
         if previous.get("status") in RESUMABLE_TERMINAL_STATUSES:
@@ -2603,6 +2655,75 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
     conversation_path = runtime / "evidence" / "conversation_checkpoint.json"
     if not (args.resume and conversation_path.is_file()):
         export_runtime(cell, args.release, runtime, timeout_s=args.setup_timeout_s)
+    if getattr(args, "episode_backend", "legacy") == "native-mini-swe":
+        if args.dry_run:
+            result = {
+                "cell": cell,
+                "started_at": now(),
+                "runtime": str(runtime),
+                "status": "prepared",
+                "termination_policy": "wall_time",
+                "agent_timeout_s": args.agent_timeout_s,
+                "backend": "native-mini-swe",
+                "finished_at": now(),
+            }
+            return result
+        assert client is not None
+        attempt_id = f"{cell['cell_id']}-attempt-0001"
+        run = run_prepared_native_mini_swe(
+            runtime=runtime,
+            cell=cell,
+            client=client,
+            attempt_id=attempt_id,
+            evas_command=args.evas_command,
+            release=args.release,
+            final_judge_command=getattr(args, "final_judge_command", None),
+            request_timeout_s=args.request_timeout_s,
+            tool_timeout_s=args.tool_timeout_s,
+            judge_timeout_s=args.judge_timeout_s,
+            docker_image=(
+                None
+                if cell.get("experimental_arm") == "OneShot"
+                else getattr(args, "mini_swe_image", DEFAULT_DOCKER_IMAGE)
+                if bool(cell.get("executable_feedback", True))
+                else getattr(
+                    args,
+                    "mini_swe_no_evas_image",
+                    DEFAULT_NO_EVAS_DOCKER_IMAGE,
+                )
+            ),
+            allow_insecure_test_sandbox=bool(
+                getattr(args, "allow_insecure_test_sandbox", False)
+                or getattr(args, "mini_swe_sandbox", None) == "none"
+            ),
+            campaign_file_sha256=getattr(args, "campaign_file_sha256", None),
+        )
+        result = {
+            "cell": cell,
+            "started_at": now(),
+            "runtime": str(runtime),
+            "status": run.result.primary_outcome,
+            "termination_reason": run.result.terminal_reason,
+            "termination_policy": "wall_time",
+            "agent_timeout_s": args.agent_timeout_s,
+            "backend": "native-mini-swe",
+            "artifact_path": (
+                str(run.artifact_path.relative_to(runtime))
+                if run.artifact_path is not None
+                else None
+            ),
+            "score_sidecar_receipt": run.score_sidecar_receipt,
+            "finished_at": now(),
+        }
+        write_native_dispatch_result(
+            runtime,
+            {
+                **result,
+                "attempt_id": attempt_id,
+                "campaign_file_sha256": getattr(args, "campaign_file_sha256", None),
+            },
+        )
+        return result
     prompt_path = runtime / ("agent_prompt.txt" if cell["mode"] in AGENTIC else "direct_prompt.txt")
     prompt = prompt_path.read_text(encoding="utf-8")
     agent_scaffold = getattr(args, "agent_scaffold", "native")
@@ -3110,10 +3231,25 @@ def run_cell_preserving_failure(
         runtime = args.output / cell["cell_id"]
         error = str(exc)[:4000]
         trace = traceback.format_exc()[-12000:]
-        if client is not None:
+        if client is not None and hasattr(client, "_redact"):
             error = client._redact(error)
             trace = client._redact(trace)
         classification = classify_execution_exception(exc)
+        if getattr(args, "episode_backend", "legacy") == "native-mini-swe":
+            failure = {
+                "cell": cell,
+                "runtime": str(runtime),
+                "status": classification["status"],
+                "termination_reason": classification["termination_reason"],
+                "error_type": type(exc).__name__,
+                "error": error,
+                "traceback": trace,
+                "incidents": [classification["incident"]],
+                "finished_at": now(),
+                "attempt_id": f"{cell['cell_id']}-attempt-0001",
+                "campaign_file_sha256": getattr(args, "campaign_file_sha256", None),
+            }
+            return write_native_dispatch_result(runtime, failure)
         failure = {
             "cell": cell,
             "status": classification["status"],
@@ -3161,6 +3297,12 @@ def main() -> int:
         choices=("mini-swe", "native"),
         default="mini-swe",
         help="Agent controller for G2-G5. G0/G1 remain direct-generation conditions.",
+    )
+    parser.add_argument(
+        "--episode-backend",
+        choices=("legacy", "native-mini-swe"),
+        default="legacy",
+        help="Opt-in episode implementation; legacy preserves the historical path.",
     )
     parser.add_argument(
         "--mini-swe-sandbox",
@@ -3249,6 +3391,36 @@ def main() -> int:
             f"expected={expected_no_evas_image} "
             f"observed={args.mini_swe_no_evas_image}"
         )
+    execution_config = campaign.get("execution_config") or {}
+    expected_agent_scaffold = execution_config.get("agent_scaffold")
+    if expected_agent_scaffold and args.agent_scaffold != expected_agent_scaffold:
+        raise SystemExit(
+            "campaign agent scaffold does not match --agent-scaffold: "
+            f"expected={expected_agent_scaffold} observed={args.agent_scaffold}"
+        )
+    expected_episode_backend = execution_config.get(
+        "episode_backend", "legacy"
+    )
+    if args.episode_backend != expected_episode_backend:
+        raise SystemExit(
+            "campaign episode backend does not match --episode-backend: "
+            f"expected={expected_episode_backend} observed={args.episode_backend}"
+        )
+    for field, observed in (
+        ("setup_timeout_s", args.setup_timeout_s),
+        ("request_timeout_s", args.request_timeout_s),
+        ("tool_timeout_s", args.tool_timeout_s),
+        ("judge_timeout_s", args.judge_timeout_s),
+        ("per_turn_max_tokens", None),
+        ("temperature", args.temperature),
+        ("stream", args.stream),
+    ):
+        expected = execution_config.get(field)
+        if expected is not None and observed is not None and observed != expected:
+            raise SystemExit(
+                f"campaign {field} does not match CLI: "
+                f"expected={expected} observed={observed}"
+            )
     expected_evas_identity = (campaign.get("execution_config") or {}).get(
         "evas_identity"
     )
@@ -3267,17 +3439,43 @@ def main() -> int:
         )
     cells = list(campaign["cells"])
     validate_campaign_cells(cells, args.release)
+    args.campaign_file_sha256 = hashlib.sha256(args.campaign.read_bytes()).hexdigest()
+    if args.episode_backend == "native-mini-swe" and (
+        args.cell or args.limit is not None
+    ):
+        raise SystemExit(
+            "native-mini-swe executes the frozen campaign schedule; "
+            "--cell and --limit are not supported"
+        )
     if args.cell:
         cells = [row for row in cells if row["cell_id"] == args.cell]
     if args.limit is not None:
         cells = cells[:args.limit]
     if not cells:
         raise SystemExit("no matching campaign cells")
+    if args.episode_backend == "native-mini-swe":
+        if args.agent_scaffold != "mini-swe":
+            raise SystemExit("native-mini-swe requires --agent-scaffold mini-swe")
+        if args.resume:
+            raise SystemExit("native-mini-swe does not support --resume")
+        if args.limit is not None:
+            raise SystemExit(
+                "native-mini-swe does not support --limit; freeze the intended "
+                "selection before execution"
+            )
+        for cell in cells:
+            try:
+                validate_native_mini_swe_cell(cell)
+            except ValueError as exc:
+                raise SystemExit(str(exc)) from exc
     requires_evas = any(
         bool(cell.get("executable_feedback", cell.get("evas_cli_available")))
         for cell in cells
     )
-    if not args.dry_run and requires_evas and not args.evas_command:
+    if not args.dry_run and (
+        (requires_evas and not args.evas_command)
+        or (args.episode_backend == "native-mini-swe" and not args.evas_command)
+    ):
         raise SystemExit("--evas-command is required for executable campaigns")
     uses_mini_swe = args.agent_scaffold == "mini-swe" and any(
         cell["mode"] in AGENTIC for cell in cells
@@ -3329,7 +3527,11 @@ def main() -> int:
     else:
         with ThreadPoolExecutor(max_workers=args.workers) as pool:
             results = list(pool.map(lambda cell: run_cell_preserving_failure(cell, args, client), cells))
-    all_results = stored_results(args.output)
+    all_results = (
+        results
+        if args.episode_backend == "native-mini-swe"
+        else stored_results(args.output)
+    )
     image_summary = summarize_public_agent_images(all_results)
     summary = {
         "schema_version": "v4-calibration-run-summary-v1",

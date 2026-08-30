@@ -19,6 +19,12 @@ def test_evaluator_closure_tracks_absent_public_authority_schema() -> None:
     assert workflow.count('"schemas/vaevas-result-artifact-v2.schema.json"') == 2
 
 
+def test_evaluator_closure_gates_all_native_three_arm_campaign() -> None:
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    assert "tests/test_agent_harness_native_campaign_smoke.py::test_r53_docker_all_native_three_arm_campaign" in workflow
+    assert workflow.count('"benchmark-vabench-release-v4/runners/run_benchmarkv4_campaign.py"') == 2
+
+
 def test_evaluator_closure_runs_bound_production_replay_smoke() -> None:
     workflow = WORKFLOW.read_text(encoding="utf-8")
     prefix = '"benchmark-vabench-release-v4/operations/calibration_pilot/'

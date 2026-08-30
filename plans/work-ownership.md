@@ -91,7 +91,10 @@ Integration sequence:
 
 ### Native DUT/bugfix three-arm campaign (2026-08-30)
 
-Status: `active`; base `24f2b834b012271af8d05221cc6e4855e2488f72`.
+Status: `closed`; base `24f2b834b012271af8d05221cc6e4855e2488f72`.
+Both leaf writers handed back and stopped. Main integrated their changes,
+repaired review/integration findings and ran the six-cell real Docker gate.
+Independent reviews have no substantive blocker; diagnostic gaps are logged.
 Scope/KPIs/stop conditions: [controlled plan](native-three-arm-campaign.md).
 The main coordinator owns all shared contracts/schemas/exports, native episode
 composition, CI, smoke integration, plans/logs and migration notes. Main-owned

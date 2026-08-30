@@ -1,5 +1,20 @@
 # Decision Log
 
+## 2026-08-30 - Native campaign integration stays opt-in and read-only at score time
+
+- Reuse existing campaign build/export/dispatch and score summary. Add a
+  distinct episode-backend flag; keep the historical agent-scaffold flag and
+  legacy default intact. Unsupported forms and post-freeze selection fail closed.
+- Record native dispatch separately, preserve every planned cell, and require
+  new runtime directories. Infrastructure failure receipts are not synthetic
+  legacy generation records and never become candidate zeroes.
+- Consume immutable native final evidence without a second judge invocation.
+  Complete deterministic DUT/bugfix connectivity is narrower than full-r53
+  model evaluation, Testbench/retry support, or formal/Spectre authority.
+- Do not repopulate historical assets removed for the user's compact checkout
+  just to hide local broad-test failures; report them and obtain independent
+  hosted full-checkout evidence separately.
+
 ## 2026-08-30 - Public authority absence is not a disabled fake profile
 
 - Use required explicit null profile/hash for OneShot and Agent-No-EVAS;

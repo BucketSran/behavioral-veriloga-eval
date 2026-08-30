@@ -14,10 +14,14 @@ from pathlib import Path
 import re
 import shlex
 import statistics
+import sys
 from typing import Any
 
 
 HERE = Path(__file__).resolve().parent
+REPOSITORY_ROOT = HERE.parents[2]
+if str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
 RUNNER_PATH = HERE / "run_campaign.py"
 SPEC = importlib.util.spec_from_file_location("v4_calibration_runner", RUNNER_PATH)
 assert SPEC and SPEC.loader
@@ -51,6 +55,13 @@ def canonical_sha256(value: Any) -> str:
         separators=(",", ":"),
     ).encode("utf-8")
     return hashlib.sha256(encoded).hexdigest()
+
+
+def native_launcher_profile_config_sha256(manifest: dict[str, Any]) -> str:
+    """Return the manifest identity used before profile receipt fields are added."""
+    profile_bound_manifest = dict(manifest)
+    profile_bound_manifest.pop("public_validation_profile_sha256", None)
+    return RUNNER.RESULT_PROTOCOL.canonical_sha256(profile_bound_manifest)
 
 
 def resolve_cli_path(path: Path) -> Path:
@@ -460,7 +471,14 @@ def read_native_cell(
         backend_profile_sha256, read_trajectory,
         validate_scored_result_artifact, validate_trajectory_semantics,
     )
-    from runners.agent_harness.trajectory import validate_trajectory
+    from runners.agent_harness.authority_profiles import (
+        episode_public_profile_sha256,
+        final_test_profile_sha256,
+    )
+    from runners.agent_harness.trajectory import (
+        validate_absent_public_authority,
+        validate_trajectory,
+    )
 
     if not isinstance(campaign_file_sha256, str) or not re.fullmatch(r"[0-9a-f]{64}", campaign_file_sha256):
         raise ValueError("expected campaign identity must be a SHA-256")
@@ -482,6 +500,62 @@ def read_native_cell(
         return path
 
     prefix = "evidence/native-launcher/"
+    if not (runtime / (prefix + "result.json")).is_file():
+        dispatch = read_json(evidence("evidence/native-dispatch/result.json"))
+        if (
+            dispatch.get("schema_version") != "v4-native-dispatch-result-v1"
+            or dispatch.get("backend") != "native-mini-swe"
+            or dispatch.get("cell") != cell
+            or dispatch.get("campaign_file_sha256") != campaign_file_sha256
+        ):
+            raise ValueError(
+                "native dispatch evidence differs from scheduled campaign/cell"
+            )
+        status = dispatch.get("status")
+        if status not in {
+            "infrastructure_failure",
+            "runner_error",
+            "provider_error",
+            "provider_timeout",
+        }:
+            raise ValueError("native dispatch receipt is not a terminal failure")
+        row = {
+            **{
+                key: cell[key]
+                for key in (
+                    "cell_id",
+                    "task_id",
+                    "family_id",
+                    "form",
+                    "mode",
+                    "experimental_arm",
+                )
+            },
+            "backend": "native-mini-swe",
+            "attempt_id": dispatch.get("attempt_id"),
+            "submission_status": "not_submitted",
+            "terminal_reason": dispatch["termination_reason"],
+            "termination_reason": dispatch["termination_reason"],
+            "judge_status": "infrastructure_failure",
+            "outcome": "infrastructure_failure",
+            "score": None,
+            "output_tokens": 0,
+            "telemetry": event_telemetry([]),
+            "evas_usage": RUNNER.summarize_evas_invocations([]),
+            "incidents": [
+                {"category": incident["category"]}
+                for incident in dispatch.get("incidents") or []
+                if isinstance(incident, dict) and incident.get("category")
+            ],
+            "native_evidence": {"files": hashes},
+        }
+        attach_failure_taxonomy(
+            row,
+            {},
+            fallback_model_status="runner_failure",
+            artifact_gate={"passed": False},
+        )
+        return row
     result = read_json(evidence(prefix + "result.json"))
     manifest = read_json(evidence(prefix + "manifest.json", result["manifest_sha256"]))
     if manifest["cell"] != cell or manifest["campaign_file_sha256"] != campaign_file_sha256:
@@ -489,6 +563,18 @@ def read_native_cell(
     request = read_json(evidence("evidence/native-episode/request.json"))
     if request["backend_profile_sha256"] != backend_profile_sha256(manifest["backend_profile"]):
         raise ValueError("native backend identity mismatch")
+    public_profile = request["public_validation_profile"]
+    final_profile = request["final_test_profile"]
+    expected_public_sha = episode_public_profile_sha256(
+        public_validation_profile=public_profile,
+        final_test_profile=final_profile,
+        condition=cell["experimental_arm"],
+    )
+    if (
+        request["public_validation_profile_sha256"] != expected_public_sha
+        or request["final_test_profile_sha256"] != final_test_profile_sha256(final_profile)
+    ):
+        raise ValueError("native authority/config mismatch")
     outcome = read_json(evidence("evidence/native-episode/outcome.json"))
     events = read_trajectory(evidence(
         "evidence/native-episode/trajectory.jsonl", result["trajectory_sha256"],
@@ -503,15 +589,18 @@ def read_native_cell(
     if (
         not validate_trajectory_semantics(events) or not validate_trajectory(private)
         or not private or private[-1]["event_sha256"] != result["private_events_tail_sha256"]
-        or any(request.get(key) != value for key, value in identity.items())
+        or any(request[key] != value for key, value in identity.items())
         or any(event.get(key) != value for event in events + private for key, value in identity.items())
         or outcome["trajectory_tail_sha256"] != events[-1]["event_sha256"]
         or any(outcome[key] != result[key] or outcome[key] != events[-1]["payload"][key]
                for key in ("primary_outcome", "terminal_reason"))
     ):
         raise ValueError("native trajectory/terminal identity mismatch")
-    for profile in (request["public_validation_profile"], request["final_test_profile"]):
-        if profile["campaign_config_sha256"] != RUNNER.RESULT_PROTOCOL.canonical_sha256(manifest):
+    if expected_public_sha is None and not validate_absent_public_authority(events):
+        raise ValueError("native absent-public-authority trajectory mismatch")
+    expected_config_sha = native_launcher_profile_config_sha256(manifest)
+    for profile in [candidate for candidate in (public_profile, final_profile) if candidate is not None]:
+        if profile["campaign_config_sha256"] != expected_config_sha:
             raise ValueError("native authority/config mismatch")
     row = {
         **{key: cell[key] for key in ("cell_id", "task_id", "family_id", "form", "mode", "experimental_arm")},
@@ -568,8 +657,8 @@ def read_native_cell(
     sidecar = read_json(evidence(sidecar_path, sidecar_sha))
     if not validate_scored_result_artifact(
         artifact, trajectory_events=events, score_sidecar=sidecar,
-        public_validation_profile=request["public_validation_profile"],
-        final_test_profile=request["final_test_profile"],
+        public_validation_profile=public_profile,
+        final_test_profile=final_profile,
     ):
         raise ValueError("native scored evidence join mismatch")
     frozen_root = runtime / "evidence/final_submission"
@@ -585,7 +674,7 @@ def read_native_cell(
         "trusted_replay": {
             "status": outcome["primary_outcome"],
             "submission_tree_sha256": frozen["tree_sha256"],
-            "final_test_profile": request["final_test_profile"],
+            "final_test_profile": final_profile,
             "derived_score_sidecar_reference": {"path": sidecar_path, "sha256": sidecar_sha},
         },
     })
@@ -835,6 +924,16 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--campaign-output", type=Path, required=True)
     parser.add_argument(
+        "--campaign",
+        type=Path,
+        help="Frozen campaign manifest. Required for native-mini-swe scoring.",
+    )
+    parser.add_argument(
+        "--episode-backend",
+        choices=("legacy", "native-mini-swe"),
+        default="legacy",
+    )
+    parser.add_argument(
         "--judge-kind",
         choices=("legacy_feedback_evas", "final_trusted_replay", "final_spectre"),
         required=True,
@@ -873,16 +972,68 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     args.campaign_output = resolve_cli_path(args.campaign_output)
+    args.campaign = resolve_cli_path(args.campaign) if args.campaign else None
     args.output = resolve_cli_path(args.output) if args.output else None
     args.judge_command = normalize_judge_command(args.judge_command)
     if args.workers < 1:
         raise SystemExit("--workers must be at least 1")
     if args.timeout_s < 1 or args.testbench_timeout_s < 1:
         raise SystemExit("replay timeouts must be positive")
-    if args.judge_kind in {"final_trusted_replay", "final_spectre"} and not args.judge_command:
+    if args.episode_backend == "native-mini-swe" and args.resume:
+        raise SystemExit("native-mini-swe scoring is read-only and does not resume")
+    if args.episode_backend == "native-mini-swe" and args.campaign is None:
+        raise SystemExit("--campaign is required for native-mini-swe scoring")
+    if (
+        args.episode_backend == "native-mini-swe"
+        and args.judge_kind != "final_trusted_replay"
+    ):
+        raise SystemExit("native-mini-swe scoring reports final_trusted_replay only")
+    if (
+        args.judge_kind in {"final_trusted_replay", "final_spectre"}
+        and not args.judge_command
+        and args.episode_backend != "native-mini-swe"
+    ):
         raise SystemExit(f"--judge-kind {args.judge_kind} requires --judge-command")
     if args.judge_command and not args.evas_command:
         raise SystemExit("--evas-command is required when replay executes")
+    if args.episode_backend == "native-mini-swe":
+        assert args.campaign is not None
+        campaign = read_json(args.campaign)
+        scheduled_cells = list(campaign["cells"])
+        campaign_file_sha256 = hashlib.sha256(args.campaign.read_bytes()).hexdigest()
+        if args.workers == 1:
+            rows = [
+                read_native_cell(
+                    args.campaign_output / cell["cell_id"],
+                    cell,
+                    campaign_file_sha256=campaign_file_sha256,
+                )
+                for cell in scheduled_cells
+            ]
+        else:
+            with ThreadPoolExecutor(max_workers=args.workers) as pool:
+                rows = list(
+                    pool.map(
+                        lambda cell: read_native_cell(
+                            args.campaign_output / cell["cell_id"],
+                            cell,
+                            campaign_file_sha256=campaign_file_sha256,
+                        ),
+                        scheduled_cells,
+                    )
+                )
+        report = summarize(
+            rows, args.judge_kind, scheduled_cells=scheduled_cells
+        )
+        output = (
+            args.output
+            or args.campaign_output / f"SCORE_{args.judge_kind.upper()}.json"
+        )
+        write_json(output, report)
+        print(json.dumps({key: report[key] for key in (
+            "judge_kind", "score_authority", "cell_count", "submission_statuses", "judge_statuses"
+        )}, indent=2, sort_keys=True))
+        return 0
     result_paths = sorted(args.campaign_output.glob("v4-*/evidence/campaign_result.json"))
     if not result_paths:
         raise SystemExit(f"no campaign results under {args.campaign_output}")

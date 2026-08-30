@@ -504,7 +504,7 @@ limits or simulator resource contention.
 ## Opt-in native mini-swe single-cell launcher
 
 `run_native_mini_swe.py` is a separate, development-only entry point for a
-G2 Agentic DUT/bugfix cell from `build_campaign.py`. It does not replace the
+OneShot, Agent-No-EVAS or Agentic DUT/bugfix cell from `build_campaign.py`. It does not replace the
 legacy runner or reinterpret `--agent-scaffold native`.
 
 ```bash
@@ -524,7 +524,8 @@ public Docker image. Legacy `execution_config` overrides are rejected; this
 launcher currently fixes its own documented runtime/watchdog defaults.
 
 Every invocation requires a new output directory, including after dry-run or
-failure. There is no resume, automatic episode retry, or campaign aggregation.
+failure. There is no resume or automatic episode retry. Campaign integration
+uses the explicit backend option described below, not this single-cell CLI.
 Canonical wall time applies; complete timeout workspaces remain score-eligible
 with `terminal_reason=agent_timeout`. Request/command timeouts plus verified
 Docker pause before freeze are not an asynchronous hard real-time guarantee.
@@ -566,5 +567,48 @@ or mismatched identities before aggregation. The legacy scorer CLI does not
 automatically discover or rescore native runtimes.
 
 See `docs/alphaapollo-migration/features/AA-VAE-039-native-campaign-evidence-bridge.md`.
-Full native No-EVAS/OneShot authority, campaign CLI, retries and real model
-comparisons remain separate work; r53 and EVAS 0.8.7 are unchanged.
+That dated mixed-backend slice is preserved as regression evidence. Native
+three-condition support is now available via the separate opt-in below;
+retries and real-model comparisons remain open. R53 and EVAS 0.8.7 are unchanged.
+
+### Opt-in all-native DUT/bugfix campaign
+
+The existing wrapper accepts `--episode-backend native-mini-swe` with
+`--comparison-profile executable-feedback-control`. Select DUT and/or bugfix
+explicitly; Testbench, in-place resume and post-freeze `--cell`/`--limit`
+selection are unsupported. Keep `--agent-scaffold mini-swe` (default): the old
+`--agent-scaffold native` flag still means the legacy sensitivity controller.
+
+```bash
+uv run --locked --extra agentic python \
+  benchmark-vabench-release-v4/runners/run_benchmarkv4_campaign.py \
+  --output-root /absolute/path/fresh-native-campaign \
+  --model MODEL_ID --task-id v4-001 --form dut \
+  --comparison-profile executable-feedback-control \
+  --episode-backend native-mini-swe --dry-run
+```
+
+An executable run needs another fresh output root, declared provider credentials
+and endpoint, and `--evas-command /absolute/path/to/evas`. OneShot is one logical
+generation using output-only `submit_artifacts`; No-EVAS uses the paired
+no-EVAS image and absent public profile; Agentic retains public EVAS access.
+All conditions use the same native freeze/final sidecar path. No automatic
+episode retry is enabled; existing low-level provider transport retry remains.
+
+Native scoring reads the full frozen schedule and existing evidence, without
+calling EVAS again or requiring `--judge-command`:
+
+```bash
+uv run --locked --extra agentic python \
+  benchmark-vabench-release-v4/operations/calibration_pilot/score_campaign.py \
+  --episode-backend native-mini-swe \
+  --campaign /absolute/path/fresh-native-campaign/campaign.json \
+  --campaign-output /absolute/path/fresh-native-campaign/run \
+  --judge-kind final_trusted_replay
+```
+
+Missing/corrupt evidence blocks the report; valid infrastructure failure
+receipts remain in the denominator with null scores. The score authority is
+`development_only`, never Spectre-backed implicitly. The six-cell Docker gate
+uses deterministic public-contract candidates, not a model benchmark result.
+See migration notes AA-VAE-040, AA-VAE-041 and AA-VAE-042 for code/evidence maps.

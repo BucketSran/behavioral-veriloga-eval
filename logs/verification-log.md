@@ -1,5 +1,37 @@
 # Verification Log
 
+## 2026-08-30 - All-native campaign integration (AA-VAE-042)
+
+- Leaf writers handed back exact files; main integrated and independently
+  reviewed the stable tree. Campaign review found no substantive blocker;
+  remaining comments concern broader style/LSP diagnostics, not runtime safety.
+- Integration RED/GREEN: OneShot received an unwanted Bash image; No-EVAS had
+  the wrong environment feedback default (fixed in AA-VAE-041); the scorer
+  CLI failed in a clean subprocess with `ModuleNotFoundError: runners`; an
+  existing failed runtime could reach the force exporter. Dedicated condition,
+  real subprocess smoke and reservation regressions now cover the repairs.
+- Six cells (v4-001 DUT, v4-1001 bugfix; all three conditions; workers=2), real
+  Docker 29.5.2 and EVAS 0.8.7: **2 passed in 19.91s**. All six intentionally
+  incomplete public-contract candidates yielded structured behavior_failure;
+  no model-quality conclusion follows. Scorer read-only hash invariance passes.
+- Evidence index under ignored
+  `benchmark-vabench-release-v4/reports/native-three-arm-20260830-p90roF/green3-pytest/test_r53_docker_all_native_thr0/`:
+  `smoke-evidence-index.json` SHA-256
+  `a89227b666c29d1f798fb446cdeecfb377bf1515ef62642a810aa005714abe02`.
+  Earlier failed test roots are preserved, not overwritten. No raw evidence is staged.
+- Fresh relevant harness, score-reuse, r53 entrypoint and smoke regression:
+  **492 passed, 5 skipped in 52.12s**. Campaign/reuse subset **40 passed,
+  1 skipped in 17.05s**; documentation/CI selection **31 passed in 0.30s**.
+- Broad workflow-equivalent local attempt: **34 failed, 657 passed, 8 skipped,
+  12 errors in 104.98s**. Missing compact-checkout V3/r45/r52/provenance assets
+  and skip-worktree `public-agent-runtime/run.sh` prevent historical tests;
+  confirmed run.sh still exists in HEAD. No historical assets were restored,
+  tests deleted, or failure gates relaxed. This is not a full-suite GREEN claim.
+- Ruff 0.12.12 passes exact changed Python files; AST/compile and whitespace
+  checks pass. LSP was unavailable; no claim of LSP or hosted CI execution yet.
+  R53 tracked bytes and EVAS checkout remain unchanged. Native Testbench,
+  automatic episode retry, real model runs and full result/claim export remain open.
+
 ## 2026-08-30 - Native three-condition launcher (AA-VAE-041)
 
 - Delegated writer returned only the launcher and its new condition tests,

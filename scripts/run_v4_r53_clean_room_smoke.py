@@ -203,8 +203,8 @@ def verilog_number(value: Any) -> str:
 
 
 def public_stub_artifacts(contract: dict[str, Any]) -> dict[str, str]:
-    if contract.get("form") != "dut":
-        raise ValueError("the deterministic closure fixture currently supports DUT tasks")
+    if contract.get("form") not in {"dut", "bugfix"}:
+        raise ValueError("the deterministic closure fixture supports DUT/bugfix tasks")
     files = (contract.get("artifact_contract") or {}).get("files") or []
     artifacts: dict[str, str] = {}
     for file_row in files:
