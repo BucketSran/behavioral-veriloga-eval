@@ -1,5 +1,35 @@
 # Verification Log
 
+## 2026-08-30 - Documentation snapshot publication preflight
+
+- The user authorized publishing the five documentation files from the review
+  checkpoint below to BucketSran fork main. A fresh remote audit found local
+  main and origin/main at `f1a2a06db7`; EVAS remained clean and unchanged.
+- Independent read-only review found no blocking content, scope, link or
+  sensitive-data issue. Reused `test_current_navigation_links_resolve` for the
+  snapshot, migration README and current plan: all local links resolve.
+- Fresh `tests/test_v4_r53_active_entrypoints.py` regression:
+  **23 passed in 0.09s**. `git diff --check` passed. These are documentation and
+  active-entrypoint checks, not new model, evaluator, Docker or hosted CI runs.
+- The original checkpoint's no-publication statement describes its creation;
+  this follow-up authorizes publication without starting new implementation or
+  changing the fixed r53 / EVAS 0.8.7 baseline.
+
+## 2026-08-30 - Documentation-only capability/gap review checkpoint
+
+- Recorded nine current gap groups at main/origin baseline `f1a2a06db7`, with
+  existing capabilities, code links, deferred work and evidence limitations.
+  Added navigation from the current plan and migration notebook; phase statuses
+  and historical feature records are unchanged. No new implementation started.
+- Reused `test_current_navigation_links_resolve` against the snapshot, notebook
+  README and current plan: all local links resolve. Existing active-entrypoint
+  suite: **23 passed in 0.22s**, using fresh ignored output root
+  `benchmark-vabench-release-v4/reports/gap-snapshot-20260830-docs`.
+- This local documentation check is not a new evaluator/model run. The prior
+  hosted 660/10 and local 636/7/1 results remain dated evidence, not tests rerun
+  by this snapshot. No runtime, r53, EVAS, private material or Git publication
+  changes are part of this checkpoint.
+
 ## 2026-08-30 - Native campaign bridge fork publication and hosted confirmation
 
 - Published only to BucketSran `origin/main`: `3cfab02e68` scope,

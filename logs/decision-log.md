@@ -1,5 +1,16 @@
 # Decision Log
 
+## 2026-08-30 - Human review checkpoint: current capabilities and gaps
+
+- Record the user-requested project snapshot at fork main `f1a2a06db7` before
+  further implementation. Nine gap groups distinguish missing runtime features
+  from existing contracts/adapters that still need integration or evidence.
+- Preserve completed feature history, current phase statuses, the fixed r53 /
+  EVAS 0.8.7 scope and deferred domain tools. Do not count stale historical
+  next-gap text as new work or silently start Reasoning/Evolution development.
+- Add links from the current plan and migration notebook. This slice changes
+  documentation only and makes no new experiment or runtime-completion claim.
+
 ## 2026-08-30 - Native campaign evidence bridge scope (AA-VAE-039)
 
 - Reuse the existing three-arm manifest, native single-cell executor and score

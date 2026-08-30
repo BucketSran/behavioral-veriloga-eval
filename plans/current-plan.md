@@ -6,6 +6,11 @@ Completed detail and the original design matrix are preserved in the
 [dated plan snapshot](archive/2026-08-30-harness-plan-snapshot.md).
 This file is the active queue, not a cumulative execution log.
 
+Human review checkpoint (2026-08-30): the user requested a current-state record
+before reorganizing the project. Read the [capability and gap snapshot](../docs/alphaapollo-migration/02_项目现状与功能缺口_2026-08-30.md)
+at baseline `f1a2a06db7`. This documentation-only checkpoint starts no new
+implementation and does not change the phase statuses below.
+
 ## Current Status
 
 - Phase 0/1/3/4 bounded contracts and compatibility work are complete.
