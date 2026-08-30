@@ -1,5 +1,25 @@
 # Verification Log
 
+## 2026-08-30 - Fork publication and hosted confirmation
+
+- Published focused commits to BucketSran `origin/main` only:
+  `f2075ed43d` scope plan, `439b97f7a5` production receipt bridge,
+  `4445f99f00` bound smoke/CI gate, and `5e3cfa2251` locked agentic CI fix.
+- At code commit `5e3cfa2251e22f4ab6802cdbc75b3f59c2ab42a1`,
+  [Evaluator Closure run 33289146077](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33289146077)
+  completed successfully: `546 passed, 6 skipped in 32.41s`; installed evaluator
+  identity, pinned public/no-EVAS image builds, and the bound-final three-arm
+  clean-room smoke all passed in the configured Python 3.11.13 hosted job.
+- [Public Agent Runtime run 33289146738](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33289146738)
+  and [Runner Smoke run 33289146074](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33289146074)
+  also completed successfully on the same code commit.
+- This supersedes the missing-agentic-extra hosted failures, not the earlier
+  smoke claim boundary: no model-quality, paper-score, native typed trajectory,
+  or full Phase 5 completion claim follows from these checks.
+- Behavioral worktree was clean and local/origin main agreed after publication.
+  r53, dependency manifest, and lockfile have no diff from the starting commit;
+  the EVAS audit worktree remains clean. No upstream push occurred.
+
 ## 2026-08-30 - Hosted CI agentic environment correction
 
 - Post-push inspection of baseline GitHub run `33273921948` at `7c49bb95a6`
