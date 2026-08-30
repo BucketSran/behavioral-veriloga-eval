@@ -148,3 +148,17 @@ Native score aggregation uses
 --judge-kind final_trusted_replay` and reads existing terminal evidence instead
 of invoking a judge. See `operations/calibration_pilot/README.md` for commands
 and the deterministic smoke/claim boundary.
+
+`--episode-backend native-reasoning` selects the distinct structured Reasoning
+policy through the same native controller/runtime. Freeze the same backend
+and `--reasoning-proposal-format` again at score time. Fresh-attempt recovery
+uses `--native-max-attempts` (default one), never score-driven retries.
+`score_campaign.py --ledger-output /absolute/new-ledger.json` optionally writes
+a separate safe record/paired-coverage/claim ledger outside generation evidence.
+
+Multi-model Evolution has a separate one-cell entrypoint,
+`operations/calibration_pilot/run_evolution_campaign.py`; it is not another
+single-trajectory backend flag. Its roster, round limits, public validation and
+selection are frozen separately, and its final result must not be folded into
+the single-trajectory ledger. See the calibration README for dry-run and roster
+examples. Domain tools and real model quality experiments remain separate gates.

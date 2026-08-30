@@ -5,6 +5,14 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "evaluator-closure.yml"
 
 
+def test_evaluator_closure_tracks_recovery_ledger_and_real_evolution():
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    prefix = '"benchmark-vabench-release-v4/operations/calibration_pilot/'
+    for name in ("run_native_attempts.py", "result_ledger.py", "run_native_evolution.py", "run_evolution_campaign.py"):
+        assert workflow.count(prefix + name + '"') == 2
+    assert "tests/test_agent_harness_evolution_campaign.py::test_r53_docker_native_evolution_selected_final_only" in workflow
+
+
 def test_evaluator_closure_gates_generic_agent_harness_contracts() -> None:
     workflow = WORKFLOW.read_text(encoding="utf-8")
 

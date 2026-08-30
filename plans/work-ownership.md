@@ -32,7 +32,7 @@ and recorded here before the new coordinator starts writing.
 | Shared harness contracts/state/controller/tool registry, package exports, and their tests | main coordinator | none; old dispatch task is closed |
 | `runners/agent_harness/result_store.py` and `tests/test_agent_harness_result_store.py` | main coordinator | none; historical store slice is integrated |
 | Production opt-in final replay/scorer receipt path and its tests | main coordinator | none; the bounded receipt integration is verified |
-| Production public-validation adapter and campaign wiring | main coordinator | none; bounded native three-form three-condition campaign locally verified; retry remains pending |
+| Production public-validation adapter and campaign wiring | main coordinator | none; native three-form/three-condition campaign, fresh attempts and Evolution composition integrated |
 | Trajectory/result joins, backend adapters, evolution/memory/lineage, and their tests | main coordinator | none; assign exact leaf files before parallel implementation |
 | All other tracked files not explicitly assigned below | main coordinator | none |
 
@@ -88,6 +88,21 @@ Integration sequence:
 6. Record evidence and close the assignment before reallocating its files.
 
 ## Immediate Follow-up
+
+Current closeout: all delegated implementation lanes are handed back and stopped.
+The coordinator owns the complete tree, final verification, documentation and
+fork publication. AA-VAE-049 includes the bounded candidate-store helper lane
+and `tests/test_agent_harness_evolution_candidate_store.py` handed back by
+`alpha_public_reference`; main owns subsequent integration repairs. Independent
+boundary and result/cost reviewers are read-only. The entries below are dated
+assignment history, not active permission to restart a writer.
+
+On `c313ba679a`, `alpha_public_reference` reopens only its Evolution composition
+module and original test file for production-default repairs (actual profile
+bootstrap, public-only branch memory, shared capture, budgets and cleanup).
+Main owns new `run_evolution_campaign.py` under calibration and new
+`tests/test_agent_harness_evolution_campaign.py`, providing real provider CLI
+composition and real Docker coverage. Neither writer touches the other's files.
 
 On `4460b9f7b4`, all previous leaves are handed back. Main retains shared
 launcher/campaign/scorer wiring. `alpha_public_reference` owns only new

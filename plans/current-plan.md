@@ -25,11 +25,14 @@ implementation and does not change the phase statuses below.
   [AA-VAE-046](../docs/alphaapollo-migration/features/AA-VAE-046-reasoning-runtime.md).
   The native result ledger is integrated in
   [AA-VAE-048](../docs/alphaapollo-migration/features/AA-VAE-048-native-result-ledger.md).
-  Evolution remains an active follow-up;
-  implementation and experimental evidence remain separate gates.
+  Evolution is runtime-integrated in
+  [AA-VAE-049](../docs/alphaapollo-migration/features/AA-VAE-049-production-evolution.md),
+  with real Docker two-model/two-round connectivity across all three forms.
+  Final closeout verification is active; implementation and real-model
+  experimental evidence remain separate gates.
   Paid model pilot awaits a named model/service and budget.
 
-- Latest completed milestone: [native DUT/bugfix three-arm campaign](native-three-arm-campaign.md).
+- Earlier completed milestone: [native DUT/bugfix three-arm campaign](native-three-arm-campaign.md).
   Implemented absent public authority, native conditions and minimal
   existing-campaign dispatch/accounting. Testbench is extended by AA-VAE-043;
   opt-in infrastructure retries are added by AA-VAE-045. Legacy defaults and frozen assets are unchanged.
@@ -41,12 +44,13 @@ implementation and does not change the phase statuses below.
   triggered by it passed. No new implementation slice is opened by this closeout.
 
 - Phase 0/1/3/4 bounded contracts and compatibility work are complete.
-- Phase 2/5 are **in progress**: the opt-in native single-cell path works,
-  with a locally verified all-native three-form three-arm campaign; retry/
-  content/ledger closure remains open.
+- Phase 2/5 native integration is implemented: all three forms/arms,
+  fresh-attempt recovery, private capture, safe ledgers and Evolution composition
+  are verified through deterministic integration gates.
 - Phase 6 is runtime-integrated and deterministically verified (AA-VAE-046),
-  with real-model evidence still pending. Phase 7-10 remain in progress/pending;
-  Evolution production wiring and real-model evidence are not yet complete.
+  with real-model evidence still pending. Phase 7/8 runtime integration is
+  implemented; Phase 9 experiments need named model/service/budget, and Phase 10
+  final closeout remains active.
 - Legacy mini-swe remains default. Native format recovery, multi-action and
   deadline behavior intentionally differ; see [AA-VAE-038](../docs/alphaapollo-migration/features/AA-VAE-038-mini-swe-behavior-differential.md).
 - Earlier local broad regression retained **636 passed / 7 skipped / 1 failed**
@@ -54,7 +58,7 @@ implementation and does not change the phase statuses below.
   not a replacement for that failure. The newer compact-checkout result below
   has additional missing-asset failures. Exact results: [verification log](../logs/verification-log.md).
 
-## Latest bounded slice: all-native DUT/bugfix campaign (AA-VAE-040–042)
+## Earlier bounded slice: all-native DUT/bugfix campaign (AA-VAE-040–042)
 
 Native OneShot uses one logical output-only generation; No-EVAS uses explicit
 authority absence and the paired no-EVAS runtime; Agentic keeps public EVAS.
@@ -124,8 +128,9 @@ non-overlapping files in [work-ownership.md](work-ownership.md). The native
 condition and campaign leaf lanes are closed there; shared contracts remain
 coordinator-owned. The historical result-store task is complete;
 the unfinished dispatch task's interface question is reassigned to the main
-coordinator for review, not automatic implementation. This workflow change
-does not alter benchmark model/evolution concurrency or complete Phase 5.
+coordinator for review, not automatic implementation. This ownership register
+does not alter benchmark model/evolution concurrency; current runtime closure
+is recorded separately in the phase statuses and verification log.
 
 ## Approved architecture decisions
 
@@ -217,7 +222,7 @@ Contract/reducer tests do not constitute an operational evolution backend.
 
 ### Phase 2 - Build the common controller, state, and event core
 
-Status: `in_progress`
+Status: `implemented / deterministically verified` for the opt-in native paths.
 
 Goal: one controller contract serves mini-swe and AlphaApollo without changing
 the evaluator authority.
@@ -238,21 +243,15 @@ CI selection (AA-VAE-023 through AA-VAE-026). Deadline finalization and decoded
 provider evidence have an opt-in launcher implementation (AA-VAE-037), not
 complete campaign coverage. Detailed contracts remain in the migration notes.
 
-Remaining Phase 2 gaps:
-
-- model request/response identity and model token accounting need a backend
-  adapter source of truth;
-- wall-time, disk, and evaluator-runtime budgets need trusted runtime meters,
-  not model- or tool-reported values;
-- postcondition checks detect an incorrect environment mutation but cannot
-  roll it back; production adapters need transactional candidate snapshots or
-  fresh-workspace discard semantics;
-- candidate lineage events still need production candidate-store/runtime joins;
-- the immutable trajectory/submission/authority/score-sidecar artifact now
-  has an opt-in native episode / production replay writer and r53 smoke;
-  AA-VAE-042 extends the read-only bridge to native DUT/bugfix three-arm campaign
-  CLI with an exact scheduled denominator. Broader forms, raw-content archives and aggregate
-  ledgers remain open.
+Phase 2 closure update (AA-VAE-043–048): native model/private transport/tool
+events, reported token accounting, runtime wall/disk limits, fresh-workspace
+attempt discard and all-form scheduled ledgers are integrated. Token values
+remain unknown when a provider does not report them; token telemetry does not
+replace r53's wall-clock stopping rule. Captures are bounded decoded evidence,
+not an unlimited wire archive. Candidate-only controller snapshots and the
+sealed-round core and production Evolution joins are verified in AA-VAE-049.
+This is neither in-place transactional rollback nor a hard-real-time
+guarantee for arbitrary callbacks.
 
 Required event types include:
 
@@ -300,7 +299,7 @@ acceptance. A reserved name does not promise its future API or implementation.
 
 ### Phase 5 - Implement public validation / final test separation
 
-Status: `in_progress`
+Status: `implemented / deterministically verified` within immutable r53 authority.
 
 Goal: allow strong iterative feedback without converting the terminal judge
 into an adaptive oracle.
@@ -354,32 +353,18 @@ The current score contract labels EVAS replay `development_only`; formal
 authority is not inferred from terminal position. DUT/bugfix public simulation
 remains the existing Bash capability, not activation of a reserved domain tool.
 
-Still required before Phase 5 completion:
-
-- Testbench reference-only support and campaign integration beyond the bounded
-  DUT/bugfix public-simulation adapter;
-- authority/profile distribution beyond the bounded DUT/bugfix three-arm
-  native CLI, plus explicit infrastructure-only retry orchestration;
-- clean-room evidence that final outputs never enter generation, candidate
-  selection, or shared memory;
-- broader campaign result joins beyond AA-VAE-042 (native authority absence
-  for No-EVAS/OneShot is implemented); never fabricate conversions
-  from incomplete legacy traces.
-
-Recommended execution order after the generic store:
-
-1. production final executor + receipt integration (opt-in slice verified);
-2. production public-validation adapter (opt-in DUT slice verified);
-3. broader resume/checkpoint/retry lineage verification (bound runtime's
-   persistent no-reentry gate implemented);
-4. native typed campaign result join (episode writer and mixed-backend evidence
-   bridge verified; matched native arms, full campaign launch/distribution and
-   aggregate ledger still pending);
-5. only then start the AlphaApollo reasoning/evolution backend comparison.
+AA-VAE-043–048 close Testbench reference-only support, all-form profile
+distribution, infrastructure-only fresh attempts and native result ledgers.
+Single-trajectory clean-room gates pass with deterministic providers. The
+Evolution public-feedback/candidate-store composition and selected-only final
+replay are now verified in AA-VAE-049. Never fabricate native evidence
+from incomplete legacy traces or classify a connectivity smoke as a model
+comparison.
 
 ### Phase 6 - Add the AlphaApollo single-trajectory reasoning backend
 
-Status: `pending`
+Status: `implemented / deterministically verified` (AA-VAE-046); real-model
+matched comparison awaits named model/service and budget.
 
 Goal: compare AlphaApollo-style reasoning with mini-swe under matched task
 capability and budget.
@@ -419,7 +404,9 @@ Tests first:
 
 ### Phase 7 - Add round-based multi-model evolution
 
-Status: `pending`
+Status: `implemented / deterministically verified`; AA-VAE-047 supplies the
+core and AA-VAE-049 supplies real provider CLI, production composition,
+three-form Docker gate and separate terminal result index.
 
 Goal: implement the first explicitly named AlphaApollo-Evolution+EVAS
 condition without scheduling-dependent feedback exposure.
@@ -465,7 +452,10 @@ Tests first:
 
 ### Phase 8 - Complete trajectory, evidence, and result generation
 
-Status: `pending`
+Status: `implemented / deterministically verified`; private capture/reviewer
+export (AA-VAE-044), single-trajectory result/paired/claim ledger (AA-VAE-048)
+and separate Evolution terminal index/all-branch costs (AA-VAE-049) are present.
+Tables for actual model claims still require real experiments, not smoke rows.
 
 Goal: make every model result derivable from raw trajectory through frozen
 submission and final score.
@@ -500,7 +490,9 @@ Tests first:
 
 ### Phase 9 - Define experimental conditions and ablations
 
-Status: `pending`
+Status: `protocol defined / experiments pending`. Conditions and runtime
+entrypoints are distinct; no paid experiment is authorized without model,
+service and budget. Deferred domain tools are not required closure work.
 
 Primary conditions:
 
@@ -532,7 +524,9 @@ Reporting rules:
 
 ### Phase 10 - CI, clean-room smoke, documentation, and merge gates
 
-Status: `pending`
+Status: `in_progress`; AA-VAE-043–048 have focused tests and all triggered
+hosted gates green. AA-VAE-049 local integration passes; its final stable-tree
+and hosted verification are recorded separately in the verification log.
 
 CI layers:
 

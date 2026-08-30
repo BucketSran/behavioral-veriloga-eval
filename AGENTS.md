@@ -129,6 +129,26 @@ model call.
 
 ## AI-Native Trajectory Contract
 
+### Implemented opt-in entrypoints
+
+Legacy mini-swe remains the default. `--episode-backend native-mini-swe` and
+`native-reasoning` share native controller/Bash/freeze/score contracts across
+DUT, bugfix and Testbench. Freeze native retry limits and Reasoning proposal
+format in the campaign; the older `--agent-scaffold native` is not this path.
+Native score reading verifies existing evidence and may emit a separate safe
+ledger with `--ledger-output`; it must not run a second final judge.
+
+`run_evolution_campaign.py` provides the separately budgeted
+`AlphaApollo-Evolution+EVAS` condition. Branch generation uses no-EVAS sandboxes;
+the coordinator runs fixed public validation and shares only sealed candidate
+code and bound public feedback between rounds. Only the selected candidate is
+finally frozen/scored. Preserve all-branch costs and failure denominators in
+its separate result index; never pool it into single-trajectory results.
+These paths have deterministic integration evidence, not real-model quality
+claims. Domain tools remain reserved and paid pilots need named service/model
+and budget. Details: `docs/alphaapollo-migration/features/AA-VAE-043` through
+`AA-VAE-049` and the calibration README.
+
 AlphaApollo models a turn as prompt, model output, and environment feedback.
 vaEVAS adopts that separation but strengthens it for auditable evaluation.
 Every formal episode must produce an append-only, machine-readable event stream
@@ -173,8 +193,10 @@ event and success as causal attribution.
 - Pin and record the container image digest, Python/runtime dependencies,
   harness source revision, prompt/tool schema, model endpoint identity, model
   snapshot, and provider response metadata available at runtime.
-- Enforce turn, token, wall-clock, output-size, tool-call, EVAS-call, and disk
-  budgets in code. Do not rely on prompts for enforcement.
+- Enforce declared turn, per-call token, wall-clock, output-size, tool-call,
+  EVAS-call and disk safety limits in code. R53's experimental stopping rule
+  remains wall-clock time; token telemetry is not a new cumulative stopping
+  budget. Missing provider usage remains unknown, not estimated as measured.
 - Parse actions and tool results structurally. Malformed or missing structured
   output must fail closed in formal mode.
 - Preserve the primary episode outcome when cleanup also fails. Record cleanup

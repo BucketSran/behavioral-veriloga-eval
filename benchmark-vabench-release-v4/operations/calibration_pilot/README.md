@@ -28,6 +28,64 @@ The selection does not modify task assets, existing EVAS/Spectre evidence, or
 the sealed 1,200-task release. A later campaign manifest must reference this
 file by SHA-256 and record the frozen parameters produced by the pilot.
 
+## Native backend and Evolution entrypoints
+
+Legacy mini-swe remains the default. The opt-in `--episode-backend`
+selection is distinct from the older `--agent-scaffold native` sensitivity
+option. `native-mini-swe` and `native-reasoning` share the controller, sandbox,
+submission freeze and final replay; they select different model policies.
+Reasoning defaults to native tool calls; freeze `--reasoning-proposal-format
+strict_json` explicitly to study that protocol. Run separate matched campaigns,
+not a mixture of backend identities in one result table. Native fresh-attempt
+recovery is opt-in with `--native-max-attempts` (default one): it recovers only
+eligible infrastructure failures before terminal activity, not wrong answers.
+
+For native campaigns, `score_campaign.py --ledger-output /absolute/new-ledger.json`
+adds a write-once reviewer-safe ledger outside the generation directory. It
+preserves all scheduled cells, null infrastructure scores, all-attempt costs,
+source hashes and unmatched pairs. The ordinary private score report remains
+available. Missing provider token counts remain unknown, not zero.
+
+`run_evolution_campaign.py` is a separate one-cell entrypoint for the explicitly
+budgeted `AlphaApollo-Evolution+EVAS` condition. Select an original Agentic cell
+from a valid r53 campaign and supply a JSON branch roster, for example:
+
+```json
+[
+  {"branch_id": "local", "model": "YOUR_LOCAL_MODEL", "base_url": "http://127.0.0.1:8000/v1"},
+  {"branch_id": "api", "model": "YOUR_API_MODEL", "base_url": "https://YOUR_PROVIDER/v1", "api_key_env": "EVOLUTION_API_KEY"}
+]
+```
+
+```bash
+python3 benchmark-vabench-release-v4/operations/calibration_pilot/run_evolution_campaign.py \
+  --campaign /absolute/source-campaign.json --cell ORIGINAL_AGENTIC_CELL_ID \
+  --branches-json /absolute/branches.json --output-root /absolute/new-evolution-run \
+  --rounds 2 --model-calls 8 --tool-calls 8 --public-validation-calls 1 --dry-run
+```
+
+Dry-run freezes provenance and budgets without reading credentials, starting
+EVAS or contacting a provider. For an authorized real run, choose a fresh output
+root, remove `--dry-run` and provide `--evas-command /absolute/path/to/evas`.
+The CLI reads named API keys into the host-side clients and removes those names
+from process environment before sandbox creation; callers importing `main()`
+should account for this process-global security behavior. Never put credential
+values or credential-bearing URLs in the roster. Endpoint URLs are represented
+by hashes in the frozen campaign.
+
+Each branch generates in a fresh no-EVAS sandbox. The coordinator alone runs
+the fixed public validator on its candidate, so public validation is metered and
+profile-bound. Next-round branches receive the same sealed public feedback and
+candidate code; no in-flight peer state or final verdict is shared. A deterministic
+public-only reducer selects one candidate for final freeze/replay. This is a
+different information schedule and compute budget from single-trajectory
+Agentic, not an equal-budget replacement. The output has its own final result
+index; the single-trajectory ledger intentionally rejects Evolution records.
+
+Deterministic providers test connectivity, not model quality. Actual model
+experiments require a named model/service, explicit budget and frozen controls.
+No domain/RAG/waveform tools, SFT/RL or Spectre path are activated here.
+
 ## Opt-in public validation observations
 
 `public_validation.py` adapts the existing sandbox EVAS execution to the generic

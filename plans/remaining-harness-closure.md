@@ -1,7 +1,8 @@
 # Remaining native harness functionality
 
 Date: 2026-08-30. Base: `0f014c39e1016e8c6877ff7c48dbddb2733d8f93`.
-Status: approved implementation in progress; no completion claim yet.
+Status: approved runtime scope implemented; final verification/publication active.
+Real-model experimental evidence is a separate unfulfilled gate.
 
 Progress: AA-VAE-043 native Testbench authority and three-form nine-cell
 connectivity are locally verified (2026-08-30). The stronger invocation identity
@@ -11,7 +12,9 @@ locally verified. AA-VAE-045 now integrates opt-in infrastructure retry with
 all-attempt costs and nine-cell Docker verification. AA-VAE-046 integrates
 Reasoning into the shared launcher, campaign and score path. AA-VAE-047 supplies
 the reviewed candidate-only/round runtime; AA-VAE-048 integrates the separate
-safe single-trajectory ledger. Evolution production integration remains active.
+safe single-trajectory ledger. AA-VAE-049 integrates actual Evolution provider
+entrypoints, candidate/public-feedback rounds, selected-only final replay and
+all-branch evidence/costs; three-form real Docker connectivity passes.
 
 ## Brief and scope
 
@@ -74,6 +77,12 @@ Each slice follows one behavioral RED test -> minimal GREEN implementation ->
 next behavior -> review/refinement -> focused commit -> fork-only publication.
 Independent leaf modules may be implemented in parallel only after exact file
 ownership is recorded; shared runtime wiring and all publication stay with main.
+
+Here, the single-trajectory pilot entrypoint means the existing campaign wrapper
+plus `run_campaign.py` / `score_campaign.py --ledger-output`, using the new native
+backend options. It does not require another duplicate runner. Evolution has
+its own separately budgeted `run_evolution_campaign.py` entrypoint. Neither
+entrypoint authorizes paid execution without the named model/service/budget.
 
 ## Risks and stop conditions
 

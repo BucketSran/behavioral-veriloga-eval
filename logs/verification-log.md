@@ -1,5 +1,67 @@
 # Verification Log
 
+## 2026-08-30 - Production Evolution integration (AA-VAE-049)
+
+- Final stable-tree command `uv run --locked --extra agentic python -m pytest
+  tests/test_agent_harness_*.py -q --tb=short`: **702 passed, 11 skipped in
+  64.10s** after the image-receipt addition. Ruff 0.12.12, bytecode compilation,
+  workflow parsing and staged whitespace checks passed. Publication/hosted
+  confirmation is recorded separately after this coherent slice is committed.
+- Final image-receipt RED/GREEN now binds the actual preflight-resolved Docker
+  image ID before branch generation. Latest scoped Evolution/CLI/candidate-store
+  and CI-selector gate: **33 passed, 3 skipped in 0.75s**; Ruff 0.12.12 passed.
+  Latest real two-branch/two-round gate, including observed image IDs, passed
+  all three forms: **3 passed in 80.16s**. Evidence indexes under
+  `benchmark-vabench-release-v4/reports/evolution-final-gate-02/`:
+  - `test_r53_docker_native_evoluti0/evolution-smoke-index.json`:
+    `d49095bcbcdb128780297589ebdddfd4db1a3c560b91b296fa3af421a3f243f0`;
+  - `test_r53_docker_native_evoluti1/evolution-smoke-index.json`:
+    `409bf3f2c2e175c854c2faa046bf9b13ca812f8c9358fd38e7edf427ec8d5d44`;
+  - `test_r53_docker_native_evoluti2/evolution-smoke-index.json`:
+    `4227c72277fb3715ac0b963889b0eaf6e519088983486f1e9c92d45cebbf6215`.
+- Fresh whole-harness checkpoint after failure-record repairs: **702 passed,
+  11 skipped in 60.33s**. The final image-receipt assertion was added afterward
+  and is covered by the final whole-harness rerun recorded above.
+- Vertical RED/GREEN repaired redundant client creation, frozen tuple memory
+  ignored, candidate/feedback bytes unbound, unsafe candidate paths, clamped
+  overrun costs, accepted cleanup failures and missing setup/final-failure rows.
+  Earlier scoped native-Evolution/candidate-store/CLI suite: **24 passed, 3 skipped
+  in 1.65s**. Separate CI selector gate passed; Ruff 0.12.12, bytecode compilation,
+  workflow YAML parsing and whitespace checks passed.
+- Real Docker/EVAS two-branch/two-round DUT, bugfix and Testbench gate:
+  **3 passed in 95.00s** before the final image-receipt addition. No paid provider
+  was contacted. Evidence indexes under
+  `benchmark-vabench-release-v4/reports/evolution-final-gate-01/`:
+  - `test_r53_docker_native_evoluti0/evolution-smoke-index.json`:
+    `ac4419fee8961498da6e0b5bfc8a671681fc61e1ade0e0246b86340b180490d6`;
+  - `test_r53_docker_native_evoluti1/evolution-smoke-index.json`:
+    `a7793a4077c52fd2aea02251099e501cfbeaa6978505afd49a17b07432955553`;
+  - `test_r53_docker_native_evoluti2/evolution-smoke-index.json`:
+    `896aeef2b259873a302de98e08dde67a7956dc76b01746484f947aac4a04ab32`.
+  Earlier real REDs caught extra client initialization and absent next-round
+  candidate code, despite successful final replay. These were not called passed.
+- Independent final boundary review: **16 passed in 1.06s**, no scoped blocker.
+  Independent result/cost review found no blocker; it verified full schedule,
+  null unknown costs, failure records and final-result exclusion from memory.
+- Whole harness checkpoint before last failure-record additions: **702 passed,
+  11 skipped in 76.07s**. A fresh stable-tree gate follows separately below.
+  This does not repair or supersede the compact historical-asset test limitation
+  recorded earlier. LSP remains unavailable.
+- r53 has no diff from starting `0f014c39e1016e8c6877ff7c48dbddb2733d8f93`.
+  EVAS is clean at `6cb6fa7a7dac70fc0d4120126d8cf74258e6637b`, equal to its
+  origin/main and upstream/main. Neither EVAS nor old worktrees were modified.
+
+## 2026-08-30 - AA-VAE-046–048 hosted confirmation
+
+- Reasoning `dd3aca108e69b498d539ee1860155b67a52833f3`: Evaluator Closure
+  33314401827 and Runner Smoke 33314401846 passed.
+- Candidate/round core `5e063d7d281a0e9dd92561189e6a485f6085ab56`:
+  Evaluator Closure 33314495309 and Runner Smoke 33314495306 passed.
+- Ledger `c313ba679a01c5630efd058dbdeee15e55c12d5e`: Evaluator Closure
+  33314542251 and Runner Smoke 33314542283 passed.
+  These were all triggered workflows for each commit; untriggered workflows
+  are not represented as newly verified.
+
 ## 2026-08-30 - Native result ledger integration (AA-VAE-048)
 
 - CLI RED: **4 failed** before ledger export/path protection existed; GREEN

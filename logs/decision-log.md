@@ -1,5 +1,24 @@
 # Decision Log
 
+## 2026-08-30 - Evolution is separate inference, not another single-run label
+
+- Reuse the existing Reasoning policy, controller, Bash environment, transport,
+  public validator and final replay. A real roster CLI replaces the temporary
+  scripted-only prototype entrypoint; no new dependency or parallel controller.
+- Generate in no-EVAS branch sandboxes and run fixed public validation through
+  the coordinator. This freezes/meters executable feedback and is explicitly
+  a different information schedule from ordinary Agentic direct-EVAS Bash.
+- Share only previous sealed candidates and hash-bound public Observation
+  feedback. Recompute actual candidate bytes, preserve identical candidates
+  across distinct branches and never inspect in-flight peer/final evidence.
+- Freeze/score only the selected terminal candidate. Keep canonical private
+  capture and separate reviewer branch audits; failed/no-candidate/setup/final
+  paths retain one cell, every planned branch and all observed/unknown costs.
+- Keep runtime completion separate from real-model experimental evidence.
+  Existing wrapper/scorer/ledger is the single-trajectory pilot entrypoint;
+  Evolution uses its separate CLI/index. Paid service/model/budget, domain
+  tools, SFT/RL and Spectre remain outside this implementation authorization.
+
 ## 2026-08-30 - Safe ledger is an explicit read-only report export
 
 - Preserve the private score report and offer a separate fresh external ledger
