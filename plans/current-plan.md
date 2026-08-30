@@ -13,6 +13,11 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
+- Active authorized milestone: [native DUT/bugfix three-arm campaign](native-three-arm-campaign.md).
+  Implement absent public authority, the remaining native conditions and minimal
+  existing-campaign dispatch/accounting. Native Testbench and automatic retries
+  remain deferred; legacy defaults and all frozen evaluation assets are unchanged.
+
 - Phase 0/1/3/4 bounded contracts and compatibility work are complete.
 - Phase 2/5 are **in progress**: the opt-in native single-cell path works,
   with a verified mixed-backend evidence bridge; full campaign/form/retry/
@@ -74,8 +79,9 @@ reasoning backend, and a separately named AlphaApollo evolution condition.
 
 The main coordinator owns shared interfaces, plans/logs, integration, and all
 Git publication. Delegated tasks are read-only unless assigned exact,
-non-overlapping files in [work-ownership.md](work-ownership.md). No delegated
-writing lane is currently active. The historical result-store task is complete;
+non-overlapping files in [work-ownership.md](work-ownership.md). The native
+condition and campaign leaf lanes are assigned there; shared contracts remain
+coordinator-owned. The historical result-store task is complete;
 the unfinished dispatch task's interface question is reassigned to the main
 coordinator for review, not automatic implementation. This workflow change
 does not alter benchmark model/evolution concurrency or complete Phase 5.

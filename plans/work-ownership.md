@@ -36,7 +36,7 @@ and recorded here before the new coordinator starts writing.
 | Trajectory/result joins, backend adapters, evolution/memory/lineage, and their tests | main coordinator | none; assign exact leaf files before parallel implementation |
 | All other tracked files not explicitly assigned below | main coordinator | none |
 
-There are currently **no active delegated write assignments**. Independent
+Independent
 review/advice may run in parallel on explicitly scoped reads. Shared-interface
 and documentation suggestions are returned to the coordinator, not written by
 reviewers. File ownership may be split for later bounded leaf implementations;
@@ -88,6 +88,43 @@ Integration sequence:
 6. Record evidence and close the assignment before reallocating its files.
 
 ## Immediate Follow-up
+
+### Native DUT/bugfix three-arm campaign (2026-08-30)
+
+Status: `active`; base `24f2b834b012271af8d05221cc6e4855e2488f72`.
+Scope/KPIs/stop conditions: [controlled plan](native-three-arm-campaign.md).
+The main coordinator owns all shared contracts/schemas/exports, native episode
+composition, CI, smoke integration, plans/logs and migration notes. Main-owned
+runtime/test files for this slice: `runners/agent_harness/result_artifact.py`,
+`result_store.py`, `controller.py`, `trajectory.py` (under that package),
+`operations/calibration_pilot/native_episode.py` (under v4),
+`schemas/vaevas-result-artifact-v2.schema.json`,
+`tests/test_agent_harness_absent_public_authority.py`, and existing shared
+contract/CI tests as required. No evaluator or sealed-release writes.
+
+Delegated leaf assignments (only the named files; paths beginning operations or
+runners/run_benchmark are under `benchmark-vabench-release-v4/`):
+
+- `native_conditions_impl`: `active`; owns
+  `operations/calibration_pilot/run_native_mini_swe.py` and
+  `tests/test_agent_harness_native_conditions.py` (new). Implement/test OneShot
+  and No-EVAS with the existing Agentic path preserved. No shared contract,
+  schema, campaign, legacy runtime, documentation or Git writes.
+- `native_campaign_impl`: `active`; owns
+  `runners/run_benchmarkv4_campaign.py`,
+  `operations/calibration_pilot/run_campaign.py`,
+  `operations/calibration_pilot/score_campaign.py`, and
+  `tests/test_agent_harness_native_campaign_dispatch.py` (new). Add explicit
+  native routing, frozen campaign identity, terminal accounting and read-only
+  strict native summary. Preserve default legacy and do not edit launcher/shared
+  contracts/schema/docs/Git. Coordinate the absent-profile reader contract.
+
+Each owner uses vertical RED/GREEN, only isolated test output under a fresh
+temporary directory or existing ignored reports root, and returns changed files,
+exact tests/results, external edits, remaining risks and a stopped-writing
+confirmation. No index/commit/push authority is delegated. Read-only advisers
+`docs_publication_review` and `native_absence_contract_review` have no writes.
+Main integrates only after handoff and independent review of the stable tree.
 
 ### Native campaign evidence bridge (2026-08-30)
 

@@ -1,5 +1,18 @@
 # Decision Log
 
+## 2026-08-30 - Native three-arm bounded implementation approved
+
+- After clarifying the scope, the user authorized DUT/bugfix native OneShot,
+  Agent-No-EVAS and Agentic plus minimal existing-campaign integration. Native
+  Testbench and automatic episode retry are deferred, not removed from r53 or
+  legacy support. Reasoning/Evolution and paid model runs are not this slice.
+- Reuse current campaign manifests/exporters/scoring and explicitly represent
+  absent public authority. No-EVAS applies to generation, not terminal EVAS
+  scoring. OneShot must remain a single generation with output-only transport.
+- Preserve old CLI sensitivity semantics; use a distinct native opt-in. The
+  coordinator owns shared contracts, integration and fork-only publication;
+  exact leaf assignments and test KPIs are recorded before implementation.
+
 ## 2026-08-30 - Human review checkpoint: current capabilities and gaps
 
 - Record the user-requested project snapshot at fork main `f1a2a06db7` before
