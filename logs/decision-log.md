@@ -1,5 +1,19 @@
 # Decision Log
 
+## 2026-08-31 - Bind fixed waveform requests without inventing execution totals (AA-VAE-061)
+
+- Reuse controller public-validation admission and the isolated executor;
+  expose one zero-argument tool only through explicit native Agentic API.
+  Pause the generation container before candidate inspection/snapshot and
+  verify resume. Missing files are recoverable; unsafe trees fail closed.
+- Distinguish admitted requests, receipt-confirmed executions and unknown
+  post-entry execution outcomes. Preserve a completed receipt through resume
+  failure, and require explicit zero metadata for pre-execution rejection.
+  Do not add a second subprocess loop or imply all Bash EVAS is hard-metered.
+- Public receipts remain process diagnostics, never final correctness or shared
+  Evolution memory in this slice. Ordinary aggregates reject intervention rows.
+  Legacy defaults, benchmark/evaluator versions and score authority stay fixed.
+
 ## 2026-08-31 - Keep synthetic training format wiring distinct from training (AA-VAE-062)
 
 - Reuse native lifecycle/hash validation and the existing training export builder.

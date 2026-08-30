@@ -179,6 +179,14 @@ jobs:
             tests/test_agent_harness_public_waveform.py::test_r53_docker_fresh_waveform_receipt \
             --basetemp "$RUNNER_TEMP/r53-public-waveform"
 
+      - name: Run r53 native waveform feedback freeze-and-score smoke
+        env:
+          VABENCH_TEST_DOCKER_RUNTIME: '1'
+        run: |
+          uv run --locked --extra agentic python -m pytest -q \
+            tests/test_agent_harness_waveform_integration.py::test_real_waveform_feedback_freeze_final_score \
+            --basetemp "$RUNNER_TEMP/r53-native-waveform"
+
       - name: Run r53 mixed native campaign evidence bridge
         env:
           VABENCH_TEST_DOCKER_RUNTIME: '1'

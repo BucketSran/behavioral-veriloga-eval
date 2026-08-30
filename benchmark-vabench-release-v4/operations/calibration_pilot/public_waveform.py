@@ -34,6 +34,105 @@ MAX_FILES = 256
 MAX_FILE_BYTES = 1_000_000
 MAX_TREE_BYTES = 16 * 1024 * 1024
 
+
+def read_native_waveform_evidence(*, runtime, manifest, profile, events, private):
+    """Read-only joins for the explicit intervention; never run a checker here."""
+    from run_campaign import expected_candidate_artifacts
+    from runners.agent_harness.tools.public_waveform_tool import (
+        INTERVENTION, TOOL_NAME, validate_waveform_observation,
+    )
+
+    extension = manifest["extensions"]["public_waveform"]
+    if (not isinstance(extension, dict) or set(extension) != {
+            "intervention", "tool_name", "max_public_validation_calls"}
+            or extension["intervention"] != INTERVENTION or extension["tool_name"] != TOOL_NAME
+            or type(extension["max_public_validation_calls"]) is not int or extension["max_public_validation_calls"] <= 0
+            or manifest["condition"] != "Agentic" or manifest["environment"]["sandbox_backend"] != "docker"):
+        raise ValueError("native public waveform extension mismatch")
+    task = _read_tree(runtime / "public/task")
+    command, scope = public_execution_contract(json.loads(task["evas_runtime.json"]))
+    command = command.replace("evas simulate ", "/usr/local/bin/evas simulate ")
+    image_id = manifest["environment"]["image_id"]
+    expected_checker = canonical_sha256({"scope": scope, "public_tree_sha256": _tree_sha256(task),
+        "command": command, "candidate_artifacts": expected_candidate_artifacts(runtime)})
+    sources = manifest["source_sha256"]
+    expected_runtime = canonical_sha256({
+        "source_sha256": sources["public_waveform.py"], "environment_sha256": sources["mini_swe_vabench.py"],
+        "parser_sha256": sources["waveform_summary.py"],
+        "contract_sources": {name: sources[name] for name in ("public_validation.py", "run_campaign.py")},
+        "waveform_policy_sha256": waveform.waveform_policy_sha256(),
+        "timeout_s": min(manifest["tool_timeout_s"], 120), "submission_read_only": True,
+        "max_entries": MAX_FILES, "max_file_bytes": MAX_FILE_BYTES, "max_tree_bytes": MAX_TREE_BYTES,
+    })
+    if (profile["profile_id"] != "r53/evas-0.8.7-isolated-public-waveform"
+            or profile["allowed_feedback"] != ["runtime", "waveform_summary"]
+            or profile["checker_identity_sha256"] != expected_checker
+            or profile["runtime_identity_sha256"] != expected_runtime
+            or profile["evaluator_identity_sha256"] != canonical_sha256({
+                "image_id": image_id, "executable": "/usr/local/bin/evas", "version": "0.8.7"})
+            or manifest["public_validation_profile_sha256"] != public_validation_profile_sha256(profile)):
+        raise ValueError("native public waveform profile mismatch")
+    requests = [event["payload"] for event in private if event["event_type"] == "tool_request"
+                and event["payload"]["tool_name"] == TOOL_NAME]
+    authorized = [event["payload"]["action_id"] for event in events if event["event_type"] == "action_authorized"
+                  and event["payload"]["tool_name"] == TOOL_NAME]
+    deadline_rejected = {event["payload"]["action_id"] for event in events
+                         if event["event_type"] == "action_rejected" and event["payload"].get("rejection_code") == "deadline_expired"}
+    request_ids = [request["action_id"] for request in requests]
+    if (request_ids != [action_id for action_id in authorized if action_id not in deadline_rejected]
+            or len(set(request_ids)) != len(request_ids) or len(requests) > extension["max_public_validation_calls"]):
+        raise ValueError("native public waveform request accounting mismatch")
+    responses = [event["payload"] for event in private if event["event_type"] in {"tool_result", "tool_failure"}
+                 and event["payload"]["action_id"] in request_ids]
+    if len({response["action_id"] for response in responses}) != len(responses):
+        raise ValueError("duplicate native public waveform response")
+    outcomes = {response["action_id"]: response for response in responses}
+    if any(event["event_type"] == "tool_result" and event["payload"]["observation"]["tool_name"] == TOOL_NAME
+           and event["payload"]["action_id"] not in request_ids for event in private):
+        raise ValueError("orphan native public waveform response")
+    seen_invocations = set()
+    complete = True
+    for request in requests:
+        response = outcomes.get(request["action_id"], {})
+        observation = response.get("observation")
+        if observation is None:
+            state = response.get("execution_count_status")
+            receipt = response.get("execution_receipt")
+            if response and ("execution_receipt" not in response or state not in {
+                    "confirmed_zero_preflight", "unknown_after_executor_entered", "confirmed_one_receipt"}):
+                raise ValueError("native public waveform failure count metadata missing or invalid")
+            if state != "confirmed_one_receipt":
+                if receipt is not None or state not in (None, "confirmed_zero_preflight", "unknown_after_executor_entered"):
+                    raise ValueError("native public waveform failure count contradicts receipt")
+                complete = complete and state == "confirmed_zero_preflight"
+                continue
+            if not isinstance(receipt, dict):
+                raise ValueError("native public waveform confirmed receipt missing")
+            from runners.agent_harness import Observation
+            observation = Observation(request["action_id"] + "/private-receipt", TOOL_NAME,
+                receipt["status"] if receipt["usable_feedback"] else "unusable",
+                {"schema_version": "vaevas-public-waveform-observation-v1", "authority": "public_diagnostic",
+                 "task_correctness": "not_evaluated", "rejection_kind": None, "usable_feedback": receipt["usable_feedback"],
+                 "evas_invocation_executed": True, "receipt": receipt},
+                candidate_tree_sha256=request["candidate_tree_sha256"],
+                validation_profile_sha256=public_validation_profile_sha256(profile)).to_document()
+        if request["arguments"] or request["candidate_tree_sha256"] != observation["candidate_tree_sha256"]:
+            raise ValueError("native public waveform action/observation mismatch")
+        validate_waveform_observation(observation, profile=profile, attempt_id=manifest["attempt_id"],
+                                     task_id=manifest["cell"]["task_id"])
+        receipt = observation["payload"]["receipt"]
+        if receipt is None:
+            continue
+        if (receipt["image_id"] != image_id or receipt["command_sha256"] != hashlib.sha256(command.encode()).hexdigest()
+                or receipt["public_task_tree_sha256"] != _tree_sha256(task) or receipt["feedback_scope"] != scope
+                or receipt["invocation_id"] in seen_invocations):
+            raise ValueError("native public waveform receipt/input mismatch")
+        seen_invocations.add(receipt["invocation_id"])
+    return {"public_validation_calls": len(requests),
+            "public_waveform_evas_invocations_executed": len(seen_invocations) if complete else None,
+            "public_waveform_evas_invocations_confirmed": len(seen_invocations),
+            "public_waveform_execution_count_complete": complete}
+
 # Fixed code and fixed output-root argument, run with isolated Python imports.
 # Directory descriptors reject links in every component, including the CSV root.
 OUTPUT_READER = r'''
@@ -145,6 +244,7 @@ class IsolatedPublicWaveformExecutor:
         candidate_artifacts: tuple[str, ...], release: Path,
         campaign_config_sha256: str, docker_image_id: str,
         timeout_s: float = 60, docker_command: str = "docker",
+        deadline_monotonic: float | None = None,
     ) -> None:
         if context.condition != "Agentic":
             raise ValueError("public waveform execution requires Agentic")
@@ -157,6 +257,9 @@ class IsolatedPublicWaveformExecutor:
         self.names = tuple(candidate_artifacts)
         self.image_id = docker_image_id
         self.timeout_s = timeout_s
+        if deadline_monotonic is not None and not math.isfinite(deadline_monotonic):
+            raise ValueError("public waveform deadline must be finite")
+        self.deadline_monotonic = deadline_monotonic
         self.docker_command = docker_command
         self._invalidated = False
         self._task = _read_tree(runtime / "public/task")
@@ -210,6 +313,20 @@ class IsolatedPublicWaveformExecutor:
     def candidate_tree_sha256(self) -> str:
         return _tree_sha256(_read_tree(self.runtime / "public/submission", self.names))
 
+    def inspect_candidate(self) -> tuple[str, tuple[str, ...]]:
+        """Inspect a quiesced source; only absent declared files are recoverable."""
+        from run_campaign import submission_source_diagnostics
+
+        if self._invalidated:
+            raise ValueError("public waveform executor invalidated; discard this attempt")
+        self._check_authority()
+        files = _read_tree(self.runtime / "public/submission")
+        if not self.names or len(set(self.names)) != len(self.names) or not set(files) <= set(self.names):
+            raise ValueError("candidate declarations do not match public input files")
+        if submission_source_diagnostics(self.runtime):
+            raise ValueError("unsafe public candidate source")
+        return _tree_sha256(files), tuple(sorted(set(self.names) - set(files)))
+
     def _settings_identity(self) -> str:
         return canonical_sha256({
             "runtime": str(self.runtime), "names": self.names, "image": self.image_id,
@@ -217,9 +334,10 @@ class IsolatedPublicWaveformExecutor:
             "command": self.command, "scope": self.scope, "output_root": self.output_root,
             "attempt": self.context.attempt_id, "task": self.context.task_id,
             "condition": self.context.condition,
+            "deadline_monotonic": self.deadline_monotonic,
         })
 
-    def _check_source(self, candidate: str) -> None:
+    def _check_authority(self) -> None:
         if self._settings_identity() != self._settings_sha256 or public_validation_profile_sha256(self._profile) != self.profile_sha256:
             raise ValueError("public waveform authority drift")
         for relative in (
@@ -231,6 +349,9 @@ class IsolatedPublicWaveformExecutor:
                 raise ValueError("public waveform forbidden after terminal freeze")
         if _read_tree(self.runtime / "public/task") != self._task:
             raise ValueError("public waveform task drift")
+
+    def _check_source(self, candidate: str) -> None:
+        self._check_authority()
         if self.candidate_tree_sha256() != candidate:
             raise ValueError("public waveform candidate drift")
 
@@ -266,6 +387,10 @@ class IsolatedPublicWaveformExecutor:
                 from run_campaign import validate_public_testbench
                 validate_public_testbench(fresh / "public/submission/testbench.scs")
             deadline = time.monotonic() + self.timeout_s
+            if self.deadline_monotonic is not None:
+                deadline = min(deadline, self.deadline_monotonic)
+            if deadline <= time.monotonic():
+                raise TimeoutError("public waveform episode deadline exhausted")
             environment = _FreshEnvironment(
                 fresh, timeout_s=self.timeout_s, deadline_monotonic=deadline,
                 sandbox_backend="docker", evas_command="evas",

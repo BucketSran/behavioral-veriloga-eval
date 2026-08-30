@@ -100,6 +100,43 @@ def test_waveform_profile_freezes_public_inputs_and_uses_canonical_candidate_has
     assert "final_score" not in executor.profile["allowed_feedback"]
 
 
+def test_partial_candidate_inspection_is_recoverable_and_binds_real_tree(public_case):  # noqa: F811
+    from result_protocol import canonical_sha256
+    executor = make_executor(public_case)
+    candidate = public_case[0].workspace / "submission/model.va"
+    saved = candidate.read_bytes()
+    candidate.unlink()
+    assert executor.inspect_candidate() == (canonical_sha256([]), ("model.va",))
+    candidate.write_bytes(saved)
+    assert executor.inspect_candidate() == (executor.candidate_tree_sha256(), ())
+
+
+@pytest.mark.parametrize("kind", ["symlink", "fifo", "extra", "include", "terminal"])
+def test_partial_candidate_inspection_does_not_hide_unsafe_inputs(public_case, kind):  # noqa: F811
+    executor = make_executor(public_case)
+    root = public_case[0].workspace / "submission"
+    (root / "model.va").unlink()
+    if kind == "symlink":
+        (root / "bad.va").symlink_to(root / "absent")
+    elif kind == "fifo":
+        os.mkfifo(root / "bad.va")
+    elif kind == "extra":
+        (root / "extra.va").write_text("extra")
+    elif kind == "include":
+        (root / "model.va").write_text('`include "../private.va"')
+    else:
+        (public_case[0].runtime / "evidence/final_submission").mkdir(parents=True)
+    with pytest.raises(ValueError):
+        executor.inspect_candidate()
+
+
+def test_expired_episode_deadline_starts_no_simulation(public_case, docker_processes):  # noqa: F811
+    executor = make_executor(public_case, deadline_monotonic=0.0)
+    with pytest.raises(RuntimeError, match="deadline"):
+        executor.validate(candidate_tree_sha256=executor.candidate_tree_sha256())
+    assert not docker_processes["simulations"]
+
+
 @pytest.fixture
 def docker_processes(monkeypatch):
     """Fake only Docker's process boundary; real executor/environment code runs."""

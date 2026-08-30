@@ -1,5 +1,33 @@
 # Verification Log
 
+## 2026-08-31 - Native public waveform feedback (AA-VAE-061)
+
+- Main-only runtime integration under the independently accepted plan. REDs
+  covered missing API/tool, incomplete candidates, request admission, receipt
+  joins, resume-failure accounting and missing private rejection metadata.
+  Final independent review: OKAY; no remaining scoped blocker.
+- Final focused waveform/executor/CI gate: **80 passed, 5 skipped, 4.78 s**.
+  Full harness snapshot: **994 passed, 24 skipped, 158.63 s**; that snapshot
+  includes the reporting handback but predates its final production-path repair.
+  The reporting repair separately passes 32 focused tests; do not conflate
+  these snapshots with a final all-items gate.
+- Three-format real Docker smoke: **3 passed, 27 deselected, 39.65 s** using
+  `VABENCH_TEST_DOCKER_RUNTIME=1` and
+  `tests/test_agent_harness_waveform_integration.py -k real_waveform`, fresh
+  basetemp `benchmark-vabench-release-v4/reports/aa061-waveform-reviewed-01`.
+  mini-swe and Reasoning tool-call/JSON each recover from incomplete submission,
+  receive public simulation feedback, freeze and obtain exactly one final score.
+- Active entrypoints/CI tests: **39 passed**. Ruff, bytecode compilation and
+  diff checks pass. Dedicated LSP/typecheck remains unavailable, not passed.
+  An earlier invocation named a nonexistent entrypoint test and was corrected;
+  no runtime defect was inferred from that command error.
+- Unknown post-executor failures produce null total executions plus the known
+  receipt subtotal. Pre-execution argument rejection explicitly records zero;
+  malformed private failure metadata now rejects during read-only scoring.
+  Ordinary Bash executions are not included in this fixed-tool hard budget.
+- Source/CI publication and hosted outcomes are recorded separately after push.
+  No r53/EVAS change, paid call, corpus ingestion, real export or training.
+
 ## 2026-08-31 - Synthetic native training adapter (AA-VAE-062)
 
 - Exact two-file delegated implementation; no shared schema/export changes or

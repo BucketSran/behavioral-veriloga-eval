@@ -1,9 +1,10 @@
 # Native public waveform feedback — next bounded slice
 
 Updated: 2026-08-31. Prerequisite: verified AA-VAE-060 executor.
-Status: implementation-ready design; independent read-only review ACCEPT on
-2026-08-31 after the incomplete-candidate/request-accounting repair. Runtime
-integration has not started; register exact leaf ownership before opening writes.
+Status: implemented and independently reviewed on 2026-08-31. Native integration,
+request/confirmed/unknown execution accounting and three real Docker format
+paths are verified. See AA-VAE-061 and the verification log for exact evidence;
+campaign/Evolution activation and matched experimental claims remain separate.
 
 ## Goal and non-goals
 

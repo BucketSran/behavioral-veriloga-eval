@@ -250,10 +250,11 @@ class _RecordedClient:
 
 
 class _RecordedEnvironment(MiniSweBashEnvironmentBridge):
-    def __init__(self, *, record, docs_tool=None, **kwargs):
+    def __init__(self, *, record, docs_tool=None, waveform_tool=None, **kwargs):
         super().__init__(**kwargs)
         self.record = record
         self.docs_tool = docs_tool
+        self.waveform_tool = waveform_tool
 
     def step(self, action, capability):
         self.record("tool_request", action.to_document())
@@ -265,11 +266,20 @@ class _RecordedEnvironment(MiniSweBashEnvironmentBridge):
                 if self._attempt_id is None or self._closed:
                     raise RuntimeError("docs dispatch requires a live environment")
                 result = self.docs_tool.step(action, capability, candidate_sha256=self._candidate_tree_sha256())
+            elif self.waveform_tool is not None and action.tool_name == "vaevas_public_simulate":
+                if self._attempt_id is None or self._closed:
+                    raise RuntimeError("waveform dispatch requires a live environment")
+                result = self.waveform_tool.step(action, capability)
             else:
                 result = super().step(action, capability)
         except Exception as exc:
             self.record("tool_failure", {
                 "action_id": action.action_id, "error_type": type(exc).__name__,
+                **({"cleanup_incidents": exc.cleanup_incidents} if hasattr(exc, "cleanup_incidents") else {}),
+                **({"execution_count_status": exc.execution_count_status, "execution_receipt": exc.execution_receipt}
+                   if hasattr(exc, "execution_count_status") else
+                   {"execution_count_status": "unknown_after_executor_entered", "execution_receipt": None}
+                   if action.tool_name == "vaevas_public_simulate" else {}),
             })
             raise
         finally:
@@ -285,6 +295,8 @@ class _RecordedEnvironment(MiniSweBashEnvironmentBridge):
         else:
             self.record("tool_failure", {
                 "action_id": action.action_id, "error_type": type(result).__name__,
+                **({"execution_count_status": "confirmed_zero_preflight", "execution_receipt": None}
+                   if action.tool_name == "vaevas_public_simulate" and isinstance(result, ToolExecutionRejection) else {}),
             })
         return result
 
@@ -559,6 +571,7 @@ def run_prepared_native_mini_swe(
     reasoning_proposal_format: str = "native_tool_calls",
     model_call_limit: int | None = None,
     docs_corpus=None,
+    public_waveform_max_calls: int | None = None,
 ) -> native_episode.NativeEpisodeRun:
     """Run an exclusively owned fresh exported native tri-form cell.
 
@@ -569,6 +582,14 @@ def run_prepared_native_mini_swe(
     docs_tool = None
     tools = [mini.BASH_TOOL]
     descriptors = [mini_swe_bash_tool_descriptor(allowed_conditions=[condition])]
+    if public_waveform_max_calls is not None:
+        if type(public_waveform_max_calls) is not int or public_waveform_max_calls <= 0:
+            raise ValueError("public waveform request limit must be a positive integer")
+        if condition != "Agentic" or allow_insecure_test_sandbox:
+            raise ValueError("public waveform requires isolated Docker Agentic execution")
+        from runners.agent_harness.tools.public_waveform_tool import waveform_provider_tool, waveform_tool_descriptor
+        tools.append(waveform_provider_tool())
+        descriptors.append(waveform_tool_descriptor())
     if docs_corpus is not None:
         from runners.agent_harness.tools.offline_docs_tool import OfflineDocsTool, docs_provider_tool
         docs_tool = OfflineDocsTool(docs_corpus, condition=condition)
@@ -577,6 +598,8 @@ def run_prepared_native_mini_swe(
     accepted_tools = frozenset(tool["function"]["name"] for tool in tools)
     validate_model_call_limit(model_call_limit)
     budget_limits = {} if model_call_limit is None else {"model_calls": model_call_limit}
+    if public_waveform_max_calls is not None:
+        budget_limits["public_validation_calls"] = public_waveform_max_calls
     backend = _backend_profile(episode_backend, reasoning_proposal_format)
     docker_image = _select_docker_image(condition, docker_image)
     if min(request_timeout_s, tool_timeout_s, judge_timeout_s) <= 0:
@@ -659,6 +682,9 @@ def run_prepared_native_mini_swe(
         if docs_tool is not None:
             from runners.agent_harness.tools.offline_docs_tool import docs_prompt
             prompt += docs_prompt(docs_tool.profile)
+        if public_waveform_max_calls is not None:
+            from runners.agent_harness.tools.public_waveform_tool import PROMPT
+            prompt += PROMPT + f"Fixed public-simulation request limit: {public_waveform_max_calls}.\n"
         manifest = {
             "schema_version": "vaevas-native-launcher-manifest-v1",
             "cell": deepcopy(cell),
@@ -722,10 +748,31 @@ def run_prepared_native_mini_swe(
             }}
             for name in ("offline_docs.py", "offline_docs_tool.py"):
                 manifest["source_sha256"][name] = _sha_file(REPO / "runners/agent_harness/tools" / name)
+        if public_waveform_max_calls is not None:
+            from runners.agent_harness.tools.public_waveform_tool import INTERVENTION, TOOL_NAME
+            manifest.setdefault("extensions", {})["public_waveform"] = {
+                "intervention": INTERVENTION, "tool_name": TOOL_NAME,
+                "max_public_validation_calls": public_waveform_max_calls,
+            }
+            for name in ("public_waveform.py", "public_validation.py", "run_campaign.py"):
+                manifest["source_sha256"][name] = _sha_file(HERE / name)
+            for name in ("public_waveform_tool.py", "waveform_summary.py"):
+                manifest["source_sha256"][name] = _sha_file(REPO / "runners/agent_harness/tools" / name)
         config_sha = runner.RESULT_PROTOCOL.canonical_sha256(manifest)
         public_profile = None
         public_profile_sha256 = None
-        if condition == "Agentic":
+        waveform_executor = None
+        if public_waveform_max_calls is not None:
+            from public_waveform import IsolatedPublicWaveformExecutor
+            waveform_executor = IsolatedPublicWaveformExecutor(
+                runtime=runtime, context=context, candidate_artifacts=runner.expected_candidate_artifacts(runtime),
+                release=release, campaign_config_sha256=config_sha, docker_image_id=environment.docker_image_id,
+                timeout_s=min(tool_timeout_s, 120),
+                deadline_monotonic=deadline,
+            )
+            public_profile = waveform_executor.profile
+            public_profile_sha256 = waveform_executor.profile_sha256
+        elif condition == "Agentic":
             public_profile = public_validation.build_public_validation_profile(
                 environment=environment,
                 release=release,
@@ -765,6 +812,7 @@ def run_prepared_native_mini_swe(
                 capture_output=True,
                 timeout=30,
             )
+            paused = True
             observed = subprocess.run(
                 ["docker", "inspect", "--format", "{{.State.Paused}}", container],
                 check=True,
@@ -774,8 +822,32 @@ def run_prepared_native_mini_swe(
             )
             if observed.stdout.strip() != "true":
                 raise RuntimeError("native sandbox writers were not quiesced")
-            paused = True
             record("workspace_quiesced", {"method": "verified_docker_pause"})
+
+        def resume():
+            nonlocal paused
+            container = environment._docker_container
+            if not container:
+                raise RuntimeError("native sandbox unavailable at resume")
+            observed = subprocess.run(
+                ["docker", "inspect", "--format", "{{.State.Paused}}", container],
+                check=True, capture_output=True, text=True, timeout=30,
+            )
+            if observed.stdout.strip() == "true":
+                subprocess.run(["docker", "unpause", container], check=True, capture_output=True, timeout=30)
+            observed = subprocess.run(
+                ["docker", "inspect", "--format", "{{.State.Paused}}", container],
+                check=True, capture_output=True, text=True, timeout=30,
+            )
+            if observed.stdout.strip() != "false":
+                raise RuntimeError("native sandbox writers were not resumed")
+            paused = False
+            record("workspace_resumed", {"method": "verified_docker_unpause"})
+
+        waveform_tool = None
+        if waveform_executor is not None:
+            from runners.agent_harness.tools.public_waveform_tool import PublicWaveformTool
+            waveform_tool = PublicWaveformTool(executor=waveform_executor, quiesce=quiesce, resume=resume)
 
         def candidate_hash():
             root = runtime / "public/submission"
@@ -828,7 +900,7 @@ def run_prepared_native_mini_swe(
                 deadline_monotonic=deadline,
                 usage_parser=runner.provider_output_usage,
                 response_metadata=runner.provider_response_metadata,
-                **({"tools": tools} if docs_tool is not None else {}),
+                **({"tools": tools} if docs_tool is not None or waveform_tool is not None else {}),
             )
             if episode_backend == "native-reasoning":
                 from runners.agent_harness.backends.reasoning import ReasoningPolicy
@@ -850,6 +922,7 @@ def run_prepared_native_mini_swe(
             bridge = _RecordedEnvironment(
                 record=record,
                 docs_tool=docs_tool,
+                waveform_tool=waveform_tool,
                 legacy_environment=environment,
                 task_payload={"prompt": _tool_prompt(prompt, condition, accepted_tools)},
                 candidate_tree_sha256=candidate_hash,

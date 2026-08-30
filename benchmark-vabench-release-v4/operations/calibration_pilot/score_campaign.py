@@ -663,11 +663,12 @@ def read_native_cell(
         else [mini_swe_bash_tool_descriptor(allowed_conditions=[condition])]
     )
     extensions = manifest.get("extensions")
-    if extensions is not None:
+    if extensions is not None and (not isinstance(extensions, dict) or not extensions
+                                  or not set(extensions) <= {"offline_docs", "public_waveform"}):
+        raise ValueError("unsupported native extension manifest")
+    if extensions and "offline_docs" in extensions:
         from runners.agent_harness.tools.offline_docs_tool import docs_tool_descriptor
         from runners.agent_harness.tools.offline_docs import corpus_profile_sha256
-        if not isinstance(extensions, dict) or set(extensions) != {"offline_docs"}:
-            raise ValueError("unsupported native extension manifest")
         docs = extensions["offline_docs"]
         if (not isinstance(docs, dict)
                 or set(docs) != {"profile", "profile_sha256", "intervention", "tool_name"}
@@ -691,6 +692,21 @@ def read_native_cell(
         for event in private
     ):
         raise ValueError("undeclared native docs capability")
+    waveform_counts = {}
+    expected_budgets = {}
+    if extensions and "public_waveform" in extensions:
+        from public_waveform import read_native_waveform_evidence
+        from runners.agent_harness.tools.public_waveform_tool import waveform_tool_descriptor
+        waveform_counts = read_native_waveform_evidence(
+            runtime=runtime, manifest=manifest, profile=public_profile, events=events, private=private,
+        )
+        expected_budgets["public_validation_calls"] = extensions["public_waveform"]["max_public_validation_calls"]
+        descriptors.append(waveform_tool_descriptor())
+    elif any(event["payload"].get("tool_name") == "vaevas_public_simulate" for event in events) or any(
+        event["payload"].get("tool_name") == "vaevas_public_simulate"
+        or event["payload"].get("observation", {}).get("tool_name") == "vaevas_public_simulate" for event in private
+    ):
+        raise ValueError("undeclared native waveform capability")
     registry = ToolRegistry(descriptors)
     if (request["registry_sha256"] != registry.registry_sha256
             or request["effective_capability_sha256"] != registry.resolve(
@@ -718,17 +734,18 @@ def read_native_cell(
             "artifact_file_sha256": result["artifact_file_sha256"], "artifact_sha256": None,
         },
         **({"extensions": extensions} if extensions is not None else {}),
+        **waveform_counts,
     }
     artifact_path = result["artifact_path"]
     if "model_call_limit" in manifest:
         from runners.agent_harness.budget import validate_model_call_limit
         limit = validate_model_call_limit(manifest["model_call_limit"])
+        expected_budgets["model_calls"] = limit
         budget = outcome.get("model_call_budget")
         if (
             limit is None or not isinstance(budget, dict)
             or budget != events[-1]["payload"].get("model_call_budget")
             or budget["limit"] != limit
-            or request["budget_limits"] != {"model_calls": limit}
             or request.get("model_calls_before_attempt") != manifest.get("model_calls_before_attempt")
             or budget["used_before_attempt"] != manifest.get("model_calls_before_attempt")
             or metering["provider"]["requests"] > budget["admitted_in_attempt"]
@@ -736,8 +753,10 @@ def read_native_cell(
             raise ValueError("native model-call budget evidence mismatch")
         row["model_call_budget"] = budget
         row["model_call_limit"] = limit
-    elif request.get("budget_limits") or outcome.get("model_call_budget") is not None:
+    elif outcome.get("model_call_budget") is not None:
         raise ValueError("native model-call budget missing from manifest")
+    if request.get("budget_limits") != expected_budgets:
+        raise ValueError("native model-call budget or public waveform budget mismatch")
     if artifact_path is None:
         failure = outcome["failure"]
         failed = [event["payload"] for event in events if event["event_type"] == "episode_failed"]

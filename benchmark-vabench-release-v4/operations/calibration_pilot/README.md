@@ -144,6 +144,24 @@ See [AA-VAE-057](../../../docs/alphaapollo-migration/features/AA-VAE-057-synthet
 The separate waveform parser and synthetic training projection are not activated
 by this API and do not confer public/final authority or authorize paid runs.
 
+## Isolated waveform development API (not a campaign flag)
+
+`run_prepared_native_mini_swe(..., public_waveform_max_calls=2)` explicitly adds
+zero-argument `vaevas_public_simulate` for Docker Agentic only. `None` leaves it
+disabled. It works with native mini-swe and Reasoning (tool calls or strict JSON).
+The controller charges each admitted request; missing candidate files return
+recoverable feedback without execution. The source container is paused during
+snapshot/validation and resumed before model reentry. Fresh EVAS execution and
+bounded waveform summaries are diagnostic, never a final correctness verdict.
+
+The manifest freezes the extension and limit. Score reading reconstructs public
+receipt/profile/candidate joins, request counts and confirmed execution counts;
+unknown post-executor failures yield a null total and incomplete-count flag.
+This is not a global cap on ordinary Bash EVAS processes. Final replay remains
+post-freeze and never feeds the model. Ordinary aggregation rejects intervention
+rows; campaign/Evolution activation requires a separate matched protocol.
+See [AA-VAE-061](../../../docs/alphaapollo-migration/features/AA-VAE-061-native-public-waveform-feedback.md).
+
 ## Opt-in public validation observations
 
 Native single-trajectory Agentic Bash observations also carry `public_evas`

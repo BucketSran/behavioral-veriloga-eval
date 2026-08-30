@@ -20,20 +20,13 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
-`paired_report_impl` (N2 / AA-VAE-063) owns only calibration-pilot
-`result_ledger.py` and `tests/test_agent_harness_result_ledger.py`, following
-`paired-report-case-study.md`. No other files or Git; main integrates/reviews.
-The N3 synthetic adapter writer has handed back its two leaves and stopped;
-main owns their integration, with independent read-only review completed.
-
-`synthetic_training_adapter_impl` (N3 / AA-VAE-062), active assignment from
-`961fa99fdc`: exclusively owns new `runners/agent_harness/training_trace_adapter.py`
-and `tests/test_agent_harness_training_trace_adapter.py`. Follow
-`synthetic-native-training-adapter.md`; vertical TDD through the existing export
-contract. No other files, package exports, shared modules, documentation, Git,
-credentials, real data or training. Main owns N1 concurrently and all integration.
-The executor must preserve others' edits, report conflicts and hand back unstaged
-changes plus exact tests before stopping writes; no recursive delegation.
+`paired_report_impl` (N2 / AA-VAE-063) handed back calibration-pilot
+`result_ledger.py` and `tests/test_agent_harness_result_ledger.py` and stopped
+writing. Main owns their final production-path repairs, integration and Git.
+`synthetic_training_adapter_impl` (N3 / AA-VAE-062) handed back
+`runners/agent_harness/training_trace_adapter.py` and its test, now published as
+`811d82e806`. Both old writer assignments are closed. Current N4/N5 advice and
+N1/N2 re-review are read-only; no delegate has file, index or push authority.
 
 Overnight closure on `961fa99fdc`: main owns N1 / AA-VAE-061 native waveform
 wiring. Exact writable runtime/test files: calibration-pilot

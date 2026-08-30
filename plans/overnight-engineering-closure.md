@@ -32,9 +32,9 @@ external inputs do not block unrelated engineering items.
 
 | Item | Required outcome | Current disposition |
 | --- | --- | --- |
-| N1 / AA-VAE-061 | Native public waveform feedback, shared request budget, quiescence, recoverable incomplete candidates, exact score reconstruction | Implementation starts from accepted `native-public-waveform-feedback.md` |
-| N2 | Reviewer-safe result/case-study reporting and matched-condition checks, derived only from validated immutable evidence | Read-only code audit; freeze smallest missing behavior before writes |
-| N3 | Synthetic native-trajectory-to-SFT/RL adapter with explicit source/split/public-reward boundaries | Read-only code audit; no real trace export or trainer |
+| N1 / AA-VAE-061 | Native public waveform feedback, shared request budget, quiescence, recoverable incomplete candidates, exact score reconstruction | Locally verified and independently reviewed; publication gate |
+| N2 / AA-VAE-063 | Reviewer-safe result/case-study reporting and matched-condition checks, derived only from validated immutable evidence | Implemented; production evidence-path repair in final review |
+| N3 / AA-VAE-062 | Synthetic native-trajectory-to-SFT/RL adapter with explicit source/split/public-reward boundaries | Published `811d82e806`; metadata/hash fixture adapter, not semantic training samples |
 | N4 | Frozen synthetic extension integration for remaining campaign/Evolution interfaces, separate intervention evidence/aggregation | Read-only code audit; no real RAG rollout or ordinary-row pooling |
 | N5 | Coding-agent interface/fairness audit; repair demonstrated information/contract reporting gaps | Reuse current Bash unless a specific structured-helper contract/test justifies a separate opt-in |
 | N6 | Reconcile active docs/entrypoints, CI and morning audit index against completed code | Continuous closeout; retain dated history without treating it as current status |
@@ -70,8 +70,14 @@ when the user requests a pause/review. Do not claim all research work complete.
 
 ## Execution record
 
-- N1: pending implementation; prior standalone executor AA-VAE-060 is published
-  and hosted-green. The accepted N1 design is not runtime evidence.
-- N2–N5: discovery only; no delegated writers yet.
+- N1: 80 focused passes / 5 opt-in skips; three real Docker format paths pass;
+  final execution-metadata repair independently approved. Full shared snapshot:
+  994 passes / 24 opt-in skips. Hosted results are recorded separately by SHA.
+- N2: delegated leaves handed back, main owns final production-path repair;
+  32 focused reporting/integration passes. No raw trajectory text in case index.
+- N3: published after 41 adapter/export passes and independent review.
+- N4/N5: read-only audit confirms an Evolution generation-surface mismatch:
+  branch sandbox is NoEVAS but its export still uses the logical Evolution arm.
+  Separate branch/public-checker/final runtimes permit a bounded repair first.
 - N6: this queue replaces the old two-slice automation stopping rule. The global
   roadmap remains the cross-cutting source; per-feature notes record exact code.

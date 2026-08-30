@@ -20,8 +20,11 @@ implementation and does not change the phase statuses below.
 - Active overnight request: [engineering closure queue](overnight-engineering-closure.md).
   The user authorized completing current free engineering gaps, not only the
   two waveform slices. Preserve separate gates for real data, paid experiments,
-  training and benchmark changes. N1 starts from the accepted native waveform
-  plan; independent advisers inventory remaining synthetic/reporting work.
+  training and benchmark changes. AA-VAE-061 native waveform integration is
+  locally verified (three real Docker format paths); AA-VAE-062 synthetic native
+  training-format adapter is published as `811d82e806`. Reviewer-safe paired/case
+  reporting is in final review. Next: repair the demonstrated Evolution branch
+  generation-surface mismatch, then synthetic extension/fairness closeout.
 
 - Implemented bounded follow-up: [trusted public waveform executor](trusted-public-waveform-executor.md)
   ([AA-VAE-060](../docs/alphaapollo-migration/features/AA-VAE-060-isolated-public-waveform.md)).
@@ -31,10 +34,10 @@ implementation and does not change the phase statuses below.
   LSP/typecheck was unavailable, with Ruff/AST/compilation checks recorded instead.
   Published source/CI head `cfd11121a0`: all three triggered hosted workflows
   passed; exact source-bound links are recorded in the verification log.
-  No model tool activation or paid run. Next: implement the independently
-  reviewed [explicit native feedback slice](native-public-waveform-feedback.md),
-  including source-container pause/resume, recoverable incomplete candidates,
-  budget admission and score identity joins.
+  AA-VAE-060 itself did not activate a model tool. The separately reviewed
+  [explicit native feedback slice](native-public-waveform-feedback.md) now adds
+  opt-in tool activation, source-container pause/resume, incomplete-candidate
+  recovery, budget admission and score identity joins. No paid run.
 
 - Implemented bounded slice: [synthetic extension implementation](rag-waveform-training-implementation.md).
   [AA-VAE-057](../docs/alphaapollo-migration/features/AA-VAE-057-synthetic-offline-docs.md)
