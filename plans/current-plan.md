@@ -860,7 +860,7 @@ matched model comparison, freeze these protocol differences and verify the
 chosen comparison conditions. Full campaign/form/aggregate/retry work remains
 open; AlphaApollo reasoning/evolution has not been silently added by this slice.
 
-#### Active slice - legacy/native mini-swe behavior differential (2026-08-30)
+#### Bounded closure - legacy/native mini-swe behavior differential (2026-08-30)
 
 Brief: before implementing another backend, compare deterministic provider
 transcripts through the real legacy mini-swe loop and opt-in native launcher.
@@ -883,6 +883,15 @@ reviewed commits to the BucketSran fork only.
 Non-goals: changing legacy defaults, r53, EVAS 0.8.7, stopping policy, domain
 tools, paid model calls, all-form campaigns, AlphaApollo reasoning/evolution,
 retry orchestration, aggregate ledgers or Spectre.
+
+Outcome: 14 differential and 5 controller cases added; malformed native
+proposals now produce protocol failure without retry/dispatch/scoring. Focused
+suite and real Docker launcher smoke pass; independent reviews have no blocker.
+The local full suite retains the pre-existing one-second legacy EVAS telemetry
+test failure (625 passed / 6 skipped / 1 failed), reproduced independently.
+Do not call it all-green or weaken that test. Exact evidence and hosted status
+live in the verification log. Protocol differences and coarse provider taxonomy
+remain explicit preconditions for any later matched model comparison.
 
 ### Phase 6 - Add the AlphaApollo single-trajectory reasoning backend
 

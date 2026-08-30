@@ -1,5 +1,24 @@
 # Decision Log
 
+## 2026-08-30 - Freeze legacy/native mini-swe differential behavior (AA-VAE-038)
+
+- Keep the legacy DefaultAgent and native strict-single-action condition
+  separate. Deterministic successful single-action parity does not authorize
+  default replacement or attribution of model score changes to architecture.
+- Classify mini-swe FormatError and the existing typed proposal-normalization
+  rejection as protocol failure in the native policy phase. Do not retry,
+  execute, or score a rejected proposal. Persist a stable error code, not the
+  untrusted detail; deadline finalization retains priority when time expires.
+- Keep normal provider exceptions and normalization errors from non-policy
+  phases on the infrastructure path. Native timeout/API/context result
+  taxonomy remains coarse; the private error type is not a completed public
+  incident/aggregate contract. Defer that separate result-classification slice.
+- Freeze the observed output-cap behavior rather than invent another stopping
+  rule: both mini-swe loops execute a valid complete Bash call with
+  `finish_reason=length`. Correct the README's overly broad direct-mode claim.
+- Reuse the existing CI test glob and Docker launcher smoke. No dependency,
+  schema, legacy source/default, r53/EVAS, domain tool or Spectre change.
+
 ## 2026-08-30 - Native mini-swe launcher and private exchange boundary
 
 - Use a separate G2 Agentic DUT/bugfix CLI. Reuse existing provider, mini-swe

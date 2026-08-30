@@ -65,10 +65,12 @@ completion, and feedback-delivered text are recorded as telemetry and must be
 reported separately from functional score.
 
 If a model/provider rejects the next turn because the conversation exceeds its
-native context window, the runner records `context_window_exceeded` separately.
-If a single call stops at the provider output cap, the runner records
-`termination_reason=model_output_limit`; it does not treat accumulated tokens as
-the experimental ability budget. If wall time expires, the latest valid
+native context window, the legacy campaign wrapper records
+`context_window_exceeded` separately. Direct-mode responses at the provider
+output cap record `termination_reason=model_output_limit`. Both mini-swe loops
+currently retain `finish_reason=length` as telemetry and execute a complete
+valid Bash call; they do not add an output-cap stopping rule. Accumulated tokens
+are not the experimental ability budget. If wall time expires, the latest valid
 workspace artifact is still eligible for judging, and otherwise the cell is
 reported as `agent_timeout`.
 
@@ -535,3 +537,12 @@ untruncated tool logs are not archived. Strict single-action parsing differs
 from legacy recovery/multi-action handling, so this is not a parity claim.
 See `docs/alphaapollo-migration/features/AA-VAE-037-native-mini-swe-launcher.md`
 for code mapping, evidence and remaining gates.
+
+The executable legacy/native behavior matrix is documented in
+`docs/alphaapollo-migration/features/AA-VAE-038-mini-swe-behavior-differential.md`.
+Native model-format rejections now terminate as `protocol_failure`, not a
+provider/infrastructure outage. Provider timeout/API/context exceptions remain
+coarse `backend_failure` in the native result, with the original type retained
+in private events; the legacy campaign's finer taxonomy is not yet integrated.
+Normal scripted single-action request/feedback/candidate parity does not imply
+equivalence of recovery, multi-action, deadline, or full campaign behavior.
