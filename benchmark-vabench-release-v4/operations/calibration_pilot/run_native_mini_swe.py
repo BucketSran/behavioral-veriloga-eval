@@ -731,6 +731,7 @@ def run_prepared_native_mini_swe(
                     "run_native_mini_swe.py",
                     "native_episode.py",
                     "mini_swe_vabench.py",
+                    "run_campaign.py",
                 )
             },
             "claim_scope": "development_only_opt_in_single_cell",
@@ -758,6 +759,9 @@ def run_prepared_native_mini_swe(
                 manifest["source_sha256"][name] = _sha_file(HERE / name)
             for name in ("public_waveform_tool.py", "waveform_summary.py"):
                 manifest["source_sha256"][name] = _sha_file(REPO / "runners/agent_harness/tools" / name)
+        manifest["declared_information_surface"] = runner.declared_information_surface(
+            condition, extensions=manifest.get("extensions"),
+        )
         config_sha = runner.RESULT_PROTOCOL.canonical_sha256(manifest)
         public_profile = None
         public_profile_sha256 = None

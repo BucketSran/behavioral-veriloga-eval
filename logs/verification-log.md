@@ -1,5 +1,21 @@
 # Verification Log
 
+## 2026-08-31 - Declared information surface and Evolution failure projection (AA-VAE-066)
+
+- Four helper REDs, missing native manifest binding RED, and missing Evolution
+  taxonomy REDs preceded implementation. Corrected one fixture-path collision
+  before observing the native missing-field RED; did not treat setup error as
+  evidence of runtime behavior.
+- Native conditions/Evolution/extensions: **46 passed, 4.53 s**. Independent
+  read-only reviewer: **12 focused passes**, APPROVE, zero issues. Ruff,
+  py_compile and diff checks pass. Dedicated LSP/typecheck unavailable.
+- Expected-policy disclosure is config-hashed, not an image inventory or parity
+  proof. Scorer accepts older manifests without it and checks new declarations.
+  Selection without a known cause remains undetermined; completed final
+  candidate compile failure is not infrastructure. No retry/default changes.
+- Final combined harness/Docker and new-source hosted gates are running; their
+  exact results will be recorded separately, not inferred from these focused tests.
+
 ## 2026-08-31 - Synthetic docs Evolution integration (AA-VAE-065)
 
 - Six REDs covered missing API/exact-condition guard and ordinary Evolution

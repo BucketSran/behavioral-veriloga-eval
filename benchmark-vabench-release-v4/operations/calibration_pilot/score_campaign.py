@@ -707,6 +707,11 @@ def read_native_cell(
         or event["payload"].get("observation", {}).get("tool_name") == "vaevas_public_simulate" for event in private
     ):
         raise ValueError("undeclared native waveform capability")
+    declared_surface = manifest.get("declared_information_surface")
+    if declared_surface is not None and declared_surface != RUNNER.declared_information_surface(
+        condition, extensions=extensions,
+    ):
+        raise ValueError("native declared information surface differs from supported policy")
     registry = ToolRegistry(descriptors)
     if (request["registry_sha256"] != registry.registry_sha256
             or request["effective_capability_sha256"] != registry.resolve(
@@ -734,6 +739,7 @@ def read_native_cell(
             "artifact_file_sha256": result["artifact_file_sha256"], "artifact_sha256": None,
         },
         **({"extensions": extensions} if extensions is not None else {}),
+        **({"declared_information_surface": declared_surface} if declared_surface is not None else {}),
         **waveform_counts,
     }
     artifact_path = result["artifact_path"]

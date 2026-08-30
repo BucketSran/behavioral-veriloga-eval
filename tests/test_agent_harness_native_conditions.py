@@ -18,6 +18,48 @@ sys.path.insert(0, str(CALIBRATION))
 import mini_swe_vabench as mini  # noqa: E402
 
 
+@pytest.mark.parametrize("condition,is_evolution,bash,evas,validation", [
+    ("OneShot", False, False, False, "none"),
+    ("Agent-No-EVAS", False, True, False, "none"),
+    ("Agentic", False, True, True, "in_episode"),
+    ("AlphaApollo-Evolution+EVAS", True, True, False, "coordinator_after_branch"),
+])
+def test_declared_information_surface_is_policy_not_parity_evidence(condition, is_evolution, bash, evas, validation):
+    import run_campaign
+    policy = run_campaign.declared_information_surface(condition, evolution=is_evolution)
+    assert policy["evidence_kind"] == "declared_expected_policy"
+    assert policy["logical_condition"] == condition
+    assert policy["generation_bash_available"] is bash
+    assert policy["generation_evas_available"] is evas
+    assert policy["public_validation_access"] == validation
+    assert policy["final_feedback_may_reenter_generation"] is False
+    assert policy["information_parity_established"] is False
+    assert "installed_runtime_examples_may_differ" in policy["uncontrolled_or_intentional_differences"]
+    assert policy["observed_image_audit"] is False
+
+
+def test_native_information_surface_is_hash_bound_and_preserved_in_score_row(native_case, tmp_path):  # noqa: F811
+    import run_native_mini_swe as launcher
+    import score_campaign
+    from test_agent_harness_native_launcher import Provider as BashProvider
+
+    arguments, _, _ = native_case
+    runtime = _native_runtime(native_case, tmp_path, name="surface-runtime")
+    cell = {**_cell(arm="Agent-No-EVAS"), "family_id": "001"}
+    launcher.run_prepared_native_mini_swe(
+        runtime=runtime, cell=cell, client=BashProvider(["pwd"]), attempt_id="surface",
+        evas_command=arguments["evas_command"], allow_insecure_test_sandbox=True,
+        model_call_limit=1, campaign_file_sha256="c" * 64,
+    )
+    manifest = json.loads((runtime / "evidence/native-launcher/manifest.json").read_text())
+    policy = manifest["declared_information_surface"]
+    assert policy == launcher.runner.declared_information_surface("Agent-No-EVAS")
+    row = score_campaign.read_native_cell(runtime, cell, campaign_file_sha256="c" * 64)
+    assert row["declared_information_surface"] == policy
+    request = json.loads((runtime / "evidence/native-episode/request.json").read_text())
+    assert request["final_test_profile"]["campaign_config_sha256"] == score_campaign.native_launcher_profile_config_sha256(manifest)
+
+
 class Provider:
     model = "fixture-model"
     endpoint = "https://provider.invalid/v1/chat/completions"

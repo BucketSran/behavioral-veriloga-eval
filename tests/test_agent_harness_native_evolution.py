@@ -484,6 +484,9 @@ def test_final_failure_keeps_denominator_all_costs_and_no_second_judge(tmp_path)
     assert doc["selected_candidate"]["candidate_tree_sha256"] == calls[0]
     assert doc["all_branch_costs"]["model_calls"]["total"] == 2
     assert len(doc["branch_evidence"]) == 1 and len(calls) == 1
+    assert doc["failure_taxonomy"]["primary_class"] == "infrastructure"
+    assert doc["failure_taxonomy"]["responsibility"] == "system"
+    assert doc["failure_phase"] == "final_replay"
 
 
 def test_all_failed_branches_still_have_audit_and_actual_costs(tmp_path):
@@ -492,6 +495,8 @@ def test_all_failed_branches_still_have_audit_and_actual_costs(tmp_path):
     doc = json.loads((tmp_path / "run/final-result.json").read_text())
     assert doc["denominator"]["observed_branches"] == 1
     assert doc["all_branch_costs"]["model_calls"]["total"] == 1
+    assert doc["failure_taxonomy"]["responsibility"] == "undetermined"
+    assert doc["failure_taxonomy"]["primary_class"] is None
     branch = tmp_path / "run/evolution/branches/round-0000/branch-good"
     audit = json.loads((branch / "branch-audit.json").read_text())
     assert audit["evidence"]["private-events.jsonl"]["sha256"] == evolution.hashlib.sha256((branch / "private-events.jsonl").read_bytes()).hexdigest()
@@ -549,6 +554,9 @@ def test_bootstrap_failure_closes_public_environment(tmp_path, phase):
     assert doc["status"] == "setup_failed"
     assert doc["denominator"]["scheduled_cells"] == 1
     assert doc["denominator"]["observed_branches"] == 0
+    assert doc["failure_taxonomy"]["primary_class"] == "infrastructure"
+    assert doc["failure_taxonomy"]["responsibility"] == "system"
+    assert doc["failure_phase"] == "setup"
 
 
 def test_public_cleanup_failure_preserves_null_terminal_record(tmp_path):
@@ -567,6 +575,27 @@ def test_public_cleanup_failure_preserves_null_terminal_record(tmp_path):
     assert doc["status"] == "public_cleanup_failed" and doc["final_judgment"] is None
     assert doc["all_branch_costs"]["model_calls"]["total"] == 2
     assert not final_calls
+    assert doc["failure_taxonomy"]["primary_class"] == "infrastructure"
+    assert doc["failure_phase"] == "public_cleanup"
+
+
+def test_completed_evolution_keeps_candidate_verdict_and_declared_surface(tmp_path):
+    ops, *_ = _fake_ops(tmp_path)
+    class CandidateFailureJudge:
+        def __init__(self, **kwargs):
+            self.receipt = None
+        def judge(self, submission):
+            return FinalJudgment("compile_failure", "evas", 0.0, submission.tree_sha256)
+    _run_small(tmp_path, ops=replace(ops, make_final_judge=CandidateFailureJudge))
+    doc = json.loads((tmp_path / "run/final-result.json").read_text())
+    config = json.loads((tmp_path / "run/request.json").read_text())["config"]
+    assert doc["status"] == "completed" and doc["final_judgment"]["status"] == "compile_failure"
+    assert doc["failure_taxonomy"]["primary_class"] == "compile"
+    assert doc["failure_taxonomy"]["responsibility"] == "candidate"
+    assert doc["failure_phase"] == "final_replay"
+    assert doc["declared_information_surface"] == config["declared_information_surface"]
+    assert doc["declared_information_surface"]["generation_export_arm"] == "Agent-No-EVAS"
+    assert doc["declared_information_surface"]["information_parity_established"] is False
 
 
 def test_missing_production_container_cannot_be_quiesced():

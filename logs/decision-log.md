@@ -1,5 +1,16 @@
 # Decision Log
 
+## 2026-08-31 - Disclose expected surfaces without claiming environment parity (AA-VAE-066)
+
+- Put pure declared access/difference metadata into native/Evolution config
+  before hashing; keep expected policy distinct from observed image contents.
+  Explicitly retain possible installed-example differences and separate matching
+  requirements for model/backend/budgets/extensions.
+- Reuse common failure taxonomy. Report infrastructure execution exceptions by
+  phase, preserve actual final candidate verdicts, and keep unknown selection
+  failures undetermined. This reporting work neither changes score semantics nor
+  creates an automatic retry or a new coding-tool framework.
+
 ## 2026-08-31 - Explicit branch-local synthetic retrieval, separate Evolution reports (AA-VAE-065)
 
 - Reuse the native tool bridge and budgets. Enable only the exact Evolution

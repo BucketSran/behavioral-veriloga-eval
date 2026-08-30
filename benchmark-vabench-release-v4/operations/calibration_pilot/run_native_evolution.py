@@ -486,6 +486,9 @@ def run_native_evolution(
             "profile": docs_tool.profile, "profile_sha256": docs_corpus.profile_sha256,
             "intervention": "synthetic-frozen-docs-v1", "tool_name": "vaevas_docs_search",
         }}
+    config_doc["declared_information_surface"] = runner.declared_information_surface(
+        condition, evolution=True, extensions=config_doc.get("extensions"),
+    )
     campaign_config_sha = _canonical_sha256(config_doc)
     _write_once_json(output_dir / "setup-request.json", {
         "schema_version": "vaevas-native-evolution-setup-v1", "config": config_doc,
@@ -694,6 +697,7 @@ def run_native_evolution(
             "branch_usage": _json_ready(evolution_result.usage),
             "branch_record_count": len(evolution_result.branch_records),
             "final_elapsed_s": time.monotonic() - final_started,
+            **_terminal_failure_fields("completed", final_judgment=final_judgment),
             **_evolution_evidence_summary(output_dir),
         },
     )
@@ -1405,6 +1409,31 @@ def _write_branch_audit_sidecar(
     )
 
 
+def _terminal_failure_fields(status: str, *, final_judgment: FinalJudgment | None = None) -> dict[str, Any]:
+    """Reuse the common taxonomy; execution status is not a candidate verdict."""
+    phase = {
+        "setup_failed": "setup", "public_cleanup_failed": "public_cleanup",
+        "final_failed": "final_replay", "completed": "final_replay",
+    }.get(status, "evolution_selection")
+    protocol = runner.RESULT_PROTOCOL
+    if final_judgment is not None and final_judgment.status in protocol.REPLAY_STATUSES:
+        taxonomy = protocol.replay_failure_taxonomy(final_judgment.status, None, None)
+    elif status in {"setup_failed", "public_cleanup_failed", "final_failed"}:
+        taxonomy = protocol.normalize_failure_taxonomy(
+            {}, primary_class="infrastructure", stage="infrastructure",
+            responsibility="system", retryable=True,
+        )
+    else:
+        taxonomy = protocol.normalize_failure_taxonomy(
+            {}, primary_class=None, stage="not_scored", responsibility="undetermined", retryable=False,
+        )
+    return {
+        "failure_taxonomy": taxonomy, "failure_phase": phase,
+        "failure_class": taxonomy["primary_class"], "failure_stage": taxonomy["stage"],
+        "failure_responsibility": taxonomy["responsibility"], "failure_retryable": taxonomy["retryable"],
+    }
+
+
 def _write_failure_final_result(
     *,
     output_dir: Path,
@@ -1434,6 +1463,7 @@ def _write_failure_final_result(
                 "type": type(error).__name__,
                 "message_sha256": hashlib.sha256(str(error).encode()).hexdigest(),
             },
+            **_terminal_failure_fields(status),
             **_evolution_evidence_summary(output_dir),
         },
     )
@@ -1493,6 +1523,8 @@ def _evolution_evidence_summary(output_dir: Path) -> dict[str, Any]:
                         "observed_branches": sum(record["started"] for record in records)},
         "all_branch_costs": totals, "branch_evidence": records,
         **({"extensions": config["extensions"]} if "extensions" in config else {}),
+        **({"declared_information_surface": config["declared_information_surface"]}
+           if "declared_information_surface" in config else {}),
         "source": {"request_sha256": hashlib.sha256(request_path.read_bytes()).hexdigest(),
                    "campaign_file_sha256": request.get("campaign_file_sha256")},
         "claim_boundary": {"condition": config["condition"], "score_authority": "development_only",

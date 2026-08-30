@@ -164,6 +164,35 @@ reveal diagnostics, or provide checker feedback.
 """
 
 
+def declared_information_surface(
+    condition: str, *, evolution: bool = False, extensions: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Disclose expected access, not observed image contents or a fairness proof."""
+    return {
+        "schema_version": "vaevas-declared-information-surface-v1",
+        "evidence_kind": "declared_expected_policy",
+        "logical_condition": condition,
+        "generation_export_arm": "Agent-No-EVAS" if evolution else condition,
+        "generation_bash_available": condition != "OneShot",
+        "generation_evas_available": condition == "Agentic" and not evolution,
+        "public_validation_access": (
+            "coordinator_after_branch" if evolution else "in_episode" if condition == "Agentic" else "none"
+        ),
+        "extension_interventions": {
+            name: profile["intervention"] for name, profile in sorted((extensions or {}).items())
+        },
+        "final_feedback_may_reenter_generation": False,
+        "information_parity_established": False,
+        "observed_image_audit": False,
+        "uncontrolled_or_intentional_differences": [
+            "condition_specific_prompt_and_tool_guidance",
+            "installed_runtime_examples_may_differ",
+            "model_backend_and_budget_require_separate_matching",
+            "extensions_require_separate_comparison_protocol",
+        ],
+    }
+
+
 class ProviderRequestTimeout(TimeoutError):
     """One provider request exhausted its infrastructure timeout."""
 
