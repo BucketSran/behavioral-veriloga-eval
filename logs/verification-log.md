@@ -1,5 +1,82 @@
 # Verification Log
 
+## 2026-08-30 - Native campaign evidence bridge (AA-VAE-039)
+
+- Baseline main/origin `7425d70b728be41f15235f896a5e5be87b31747e` was clean;
+  fetched fork/upstream main, upstream remains `7b5616dc52` with no missing
+  upstream commits. Scope commit: `3cfab02e68`. EVAS checkout/origin/upstream
+  remain `6cb6fa7a7d`; its stale historical local main was not used or changed.
+- Vertical TDD: missing scheduled-row support **1 failed -> 1 passed**;
+  missing native reader **1 failed -> 2 passed**; unscored protocol/provider
+  results **2 failed -> 16 passed** including broken-join cases. Native backend
+  CLI flag and CI gate were separately RED, then GREEN. Request/backend journal
+  drift was accepted in an intermediate reader; added exact request/manifest/
+  artifact contract joins. Scheduled `not_run` rows were also RED, then rejected.
+- Frozen symlink fixture initially failed to arrange a mutation because the
+  snapshot directory was read-only. After explicit test-only chmod, the reader
+  already rejected it through tree hashing; added an explicit symlink check.
+  This is not reported as an originally accepted corrupt snapshot.
+- First focused reader/smoke run: **22 passed, 1 skipped in 26.52s**.
+  Later native-reader group: **22 passed, 1 skipped in 27.74s**.
+  External judge missing structured JSON and provider failure denominator:
+  **2 passed** (with the separately RED CI selector in the same invocation).
+  CI-selector group after wiring: **7 passed, 20 deselected in 0.96s**.
+- Real Docker command: `VABENCH_TEST_DOCKER_RUNTIME=1 uv run --locked --extra
+  agentic python -m pytest -q tests/test_agent_harness_native_campaign.py::test_r53_docker_mixed_native_campaign
+  --basetemp /Users/bucketsran/Documents/TsingProject/vaEVAS-next/behavioral-veriloga-eval/benchmark-vabench-release-v4/reports/native-campaign-20260830-docker1`
+  -> **1 passed in 36.89s**. All three fixture candidates have expected
+  `behavior_failure`; native Agentic has one public EVAS invocation and one
+  final score sidecar; No-EVAS has zero EVAS calls. No native legacy
+  `campaign_result.json` is fabricated. This is mixed-backend connectivity,
+  not model performance, parity, or an all-native campaign.
+- Private report: `benchmark-vabench-release-v4/reports/native-campaign-20260830-docker1/test_r53_docker_mixed_native_c0/mixed-native-smoke.json`.
+  Aggregate file SHA-256:
+  `7b33d5ee02539eb8daf37fd2f86b3c6151d0aa695d309da3e32a6f8454593ac4`.
+- Broad regression during integration: **636 passed, 7 skipped, 1 failed in
+  554.97s**. The sole failure remains unchanged legacy
+  `tests/test_mini_swe_vabench.py::test_direct_evas_timeout_is_recorded_without_leaking_control_markers`
+  (zero START records under a one-second watchdog). No old runtime/test was
+  modified. Command covered `tests/test_agent_harness_*.py`, evaluator contract,
+  V3 clean-room/claim gates, v4 result protocol, calibration pilot, score reuse,
+  v4 smoke and mini-swe tests; output root `reports/native-campaign-20260830-regression1`
+  under v4. This run preceded the final reader hardening; final focused checks
+  are recorded separately. Do not claim the local full suite is green.
+- Layout/runtime-contract subset: **48 passed in 2.18s**. Dedicated
+  `scripts/check_repo_layout.py` is absent; the existing tests are the fallback.
+  Scoped Ruff 0.12.12 and bytecode compilation pass. Ruff is not installed in
+  the project venv; used existing `uvx ruff==0.12.12`, without changing deps.
+- Independent architecture review: **WATCH**, no blocker; keep the reader's
+  knowledge of native private evidence paths bounded to this bridge. Native
+  No-EVAS/OneShot authority absence, full CLI, retries, Testbench and real model
+  comparisons remain deferred.
+- Code-review repair: new test/note are tracked; partial producer-receipt naming
+  changed to `derived_score_sidecar_reference`, with attempt/artifact identity
+  retained. RED **2 failed**, GREEN **2 passed, 22 deselected in 6.28s**.
+  A rename left a stale local variable in the smoke report; Ruff and an
+  intermediate Docker run caught it (**1 failed in 53.71s**). Corrected it;
+  no failed report is used as completion evidence.
+- Final focused suite: **61 passed, 3 skipped in 91.36s**, covering native
+  campaign/launcher/episode, CI gate, score reuse and r53 smoke under
+  `reports/native-campaign-20260830-review-focused`. Additional derived-reference
+  authority/artifact-path assertions: **1 passed, 23 deselected in 3.91s**.
+  Scoped Ruff 0.12.12, py_compile and staged/unstaged whitespace checks pass.
+- Final real Docker selector above, fresh basetemp
+  `reports/native-campaign-20260830-review-docker-fixed`: **1 passed in 57.60s**.
+  Report at `test_r53_docker_mixed_native_c0/mixed-native-smoke.json` is PASS,
+  SHA-256 `dd3d4a00a5ed40a8a8dd5c5619542e047fc2a68b0eb41ea842eed5b625ccc03c`.
+  Three-row aggregate SHA-256:
+  `d055e18c9eee35aee48f453315955b9ddd2cfdb06229f7208f98d5e8d9def3b7`.
+  Expected fixture behavior failures, no-EVAS zero calls/native one public
+  call, no duplicated native final score, and unchanged evidence all verified.
+- Independent final code/spec/security review **APPROVE** (0 remaining issues);
+  architecture **WATCH**, no BLOCK. Combined review is **COMMENT**, not an
+  unconditional approval. Reviewers were read-only; coordinator owns all
+  changes and Git. Fork publication and fresh hosted CI are pending.
+- Implementation/test/CI/feature-note commit: `6fe964838b`. The separate
+  documentation closeout records plan, ownership, decisions, README and ledger.
+  After those updates the entrypoint/layout subset is **48 passed in 9.72s**;
+  no historical documents, raw reports, r53 or EVAS files were removed.
+
 ## 2026-08-30 - Recoverable branch and documentation hygiene
 
 - Fork publication: `5299b1e1c3` records the cleanup scope; `4ad7b61c1e` publishes

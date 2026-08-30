@@ -546,3 +546,25 @@ coarse `backend_failure` in the native result, with the original type retained
 in private events; the legacy campaign's finer taxonomy is not yet integrated.
 Normal scripted single-action request/feedback/candidate parity does not imply
 equivalence of recovery, multi-action, deadline, or full campaign behavior.
+
+### Mixed-backend campaign evidence bridge
+
+The existing `scripts/run_v4_r53_clean_room_smoke.py` now accepts
+`--agentic-backend native-mini-swe --bound-final-authority` for DUT/bugfix.
+OneShot stays legacy direct and Agent-No-EVAS stays legacy mini-swe. The
+pre-generation campaign file and report explicitly name this routing as
+`mixed-backend-connectivity-v1`; it cannot support a matched backend or EVAS
+effect comparison. Without the new option the legacy smoke is unchanged.
+
+`score_campaign.read_native_cell(runtime, cell, campaign_file_sha256=...)`
+validates and reads already-terminal native evidence without executing a judge,
+refreezing a candidate, or writing a fake legacy generation record. Unscored
+protocol/provider failures retain null scores. Corrupt or missing evidence
+blocks reading; the smoke retains the affected native cell as an infrastructure
+failure. `summarize(..., scheduled_cells=cells)` rejects missing/duplicate/extra
+or mismatched identities before aggregation. The legacy scorer CLI does not
+automatically discover or rescore native runtimes.
+
+See `docs/alphaapollo-migration/features/AA-VAE-039-native-campaign-evidence-bridge.md`.
+Full native No-EVAS/OneShot authority, campaign CLI, retries and real model
+comparisons remain separate work; r53 and EVAS 0.8.7 are unchanged.

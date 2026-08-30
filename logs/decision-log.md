@@ -14,6 +14,12 @@
   Keep unscored failures explicit and require exact scheduled-row identity
   before aggregation. Missing/corrupt evidence blocks the report.
 - No r53, EVAS, legacy default, paid provider, retry or new domain tool change.
+- Review refinement: a derived path/hash reference is not a producer receipt.
+  Name it explicitly in score rows; preserve the real receipt returned by the
+  launcher in the smoke report. Retain attempt and artifact identity for joins.
+- Keep the scorer's private-layout dependency as a bounded architectural WATCH.
+  Introduce a typed attempt reader only when another real consumer requires it;
+  do not add a premature campaign abstraction to close this smoke slice.
 
 ## 2026-08-30 - Bounded local branch and documentation hygiene
 

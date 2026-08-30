@@ -10,31 +10,32 @@ This file is the active queue, not a cumulative execution log.
 
 - Phase 0/1/3/4 bounded contracts and compatibility work are complete.
 - Phase 2/5 are **in progress**: the opt-in native single-cell path works,
-  but campaign/form/retry/content/ledger closure remains open.
+  with a verified mixed-backend evidence bridge; full campaign/form/retry/
+  content/ledger closure remains open.
 - Phase 6-10 are **pending**. Reasoning/Evolution are not implemented.
 - Legacy mini-swe remains default. Native format recovery, multi-action and
   deadline behavior intentionally differ; see [AA-VAE-038](../docs/alphaapollo-migration/features/AA-VAE-038-mini-swe-behavior-differential.md).
-- Last local full regression retains **625 passed / 6 skipped / 1 failed**
+- Last local broad regression retains **636 passed / 7 skipped / 1 failed**
   (the legacy one-second timeout case). Hosted CI success is separate evidence,
   not a replacement for that failure. Exact results: [verification log](../logs/verification-log.md).
 
+## Latest bounded slice: native campaign evidence bridge (AA-VAE-039)
+
+Implemented and locally verified: a deterministic one-task/three-arm gate
+reuses the campaign manifest, legacy OneShot / Agent-No-EVAS, and opt-in native
+Agentic. The read-only native evidence projection checks trajectory, freeze,
+profile and sidecar joins, preserves null-score failures, and gates aggregation
+on the exact scheduled cells. No fake legacy record or repeated final scoring.
+Real Docker passes; independent review is COMMENT (code APPROVE, architecture
+WATCH for private-path coupling). Publication/hosted evidence is in the log.
+
+This is explicitly mixed-backend connectivity, not parity or model quality.
+The next prerequisite for matched native arms is an absent-public-authority
+contract for native No-EVAS/OneShot; do not fake an enabled EVAS profile or turn
+OneShot into a Bash agent. Full campaign CLI, retry and Testbench remain separate
+slices. Keep legacy defaults, r53 and EVAS unchanged; no API experiment yet.
+
 ## Objective
-
-### Immediate slice: native campaign evidence bridge (AA-VAE-039)
-
-Build a deterministic one-task/three-arm integration gate using the existing
-campaign manifest, legacy OneShot / Agent-No-EVAS execution, and opt-in native
-Agentic launcher. This is an explicitly mixed-backend connectivity check, not
-a matched backend comparison or an all-native campaign. Native No-EVAS needs
-an absent-public-authority contract; do not fake an enabled EVAS profile.
-
-Tests first: consume native terminal evidence without another judge/model call;
-verify trajectory/freeze/profile/sidecar joins; preserve unscored protocol and
-infrastructure failures; reject missing, duplicate, extra, or mismatched rows
-against the frozen scheduled cells. Then connect the existing three-arm smoke,
-freeze backend routing before generation, and run real Docker / EVAS 0.8.7.
-Keep legacy defaults, r53 and EVAS unchanged; no API experiment or retry.
-Commit scope, verified implementation, and integration evidence separately.
 
 Evolve the current VABench r53 evaluation harness into a reusable AI-native
 agent harness by combining:
@@ -196,7 +197,9 @@ Remaining Phase 2 gaps:
 - candidate lineage events still need production candidate-store/runtime joins;
 - the immutable trajectory/submission/authority/score-sidecar artifact now
   has an opt-in native episode / production replay writer and r53 smoke;
-  complete campaign CLI, raw-content archives and aggregate ledgers remain open.
+  AA-VAE-039 adds a read-only mixed-backend summary bridge with an exact scheduled
+  denominator. Complete campaign CLI, raw-content archives and aggregate
+  ledgers remain open.
 
 Required event types include:
 
@@ -289,9 +292,9 @@ Tests first:
 
 Implemented bounded slices: public/final authority profiles, immutable sidecar
 store, production final replay receipt, candidate-bound public simulation,
-native result join, single-cell mini-swe launcher, and behavior differential
-(AA-VAE-029 through AA-VAE-038). Real r53 Docker smokes verify the composed path
-with deterministic providers; they are not model-quality or full-campaign
+native result join, single-cell mini-swe launcher, behavior differential and
+mixed-backend evidence bridge (AA-VAE-029 through AA-VAE-039). Real r53 Docker
+smokes verify the composed path with deterministic providers; they are not model-quality or full-campaign
 experiments. Legacy defaults and r53/EVAS bytes remain unchanged.
 
 The current score contract labels EVAS replay `development_only`; formal
@@ -306,8 +309,9 @@ Still required before Phase 5 completion:
   Python scoring API, plus explicit infrastructure-only retry orchestration;
 - clean-room evidence that final outputs never enter generation, candidate
   selection, or shared memory;
-- a real campaign result join using native typed trajectory evidence rather
-  than a fabricated conversion from incomplete legacy traces.
+- native authority absence for No-EVAS/OneShot, then broader campaign result
+  joins beyond the AA-VAE-039 mixed-backend smoke; never fabricate conversions
+  from incomplete legacy traces.
 
 Recommended execution order after the generic store:
 
@@ -315,8 +319,9 @@ Recommended execution order after the generic store:
 2. production public-validation adapter (opt-in DUT slice verified);
 3. broader resume/checkpoint/retry lineage verification (bound runtime's
    persistent no-reentry gate implemented);
-4. native typed campaign result join (opt-in episode writer verified; full
-   campaign launch/distribution and aggregate ledger still pending);
+4. native typed campaign result join (episode writer and mixed-backend evidence
+   bridge verified; matched native arms, full campaign launch/distribution and
+   aggregate ledger still pending);
 5. only then start the AlphaApollo reasoning/evolution backend comparison.
 
 ### Phase 6 - Add the AlphaApollo single-trajectory reasoning backend

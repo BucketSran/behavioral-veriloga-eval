@@ -91,7 +91,7 @@ Integration sequence:
 
 ### Native campaign evidence bridge (2026-08-30)
 
-Status: `active`; base `7425d70b728be41f15235f896a5e5be87b31747e`.
+Status: `active` (publication only); base `7425d70b728be41f15235f896a5e5be87b31747e`.
 Main owns `operations/calibration_pilot/score_campaign.py` (under v4),
 `scripts/run_v4_r53_clean_room_smoke.py`, new
 `tests/test_agent_harness_native_campaign.py`, smoke/CI tests,
@@ -112,6 +112,13 @@ Plan: scope commit; vertical RED/GREEN result join and denominator checks;
 smoke wiring; independent code/architecture reviews; focused and real Docker
 verification; separate verified commits and fork-only push. Use fresh test
 outputs under existing ignored `benchmark-vabench-release-v4/reports/`.
+
+Implementation and read-only reviews are complete: code APPROVE, architecture
+WATCH for the bounded private-path reader dependency; combined COMMENT, no
+blocker. Final local focused checks are 61 passed / 3 skipped, plus the
+derived-reference authority check and real Docker three-arm PASS. The broad
+legacy one-second timeout failure remains recorded. Only coordinator commits,
+fork publication and hosted evidence remain; no delegated writer is active.
 
 ### Repository hygiene slice (2026-08-30)
 
