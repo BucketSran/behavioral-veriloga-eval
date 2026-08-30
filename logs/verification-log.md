@@ -1,5 +1,25 @@
 # Verification Log
 
+## 2026-08-31 - AA-VAE-060 fork publication and hosted gates
+
+- Source/CI head `cfd11121a03dc596e94155fa2c2ef6c8d9dc3ceb` is published to
+  BucketSran fork/main. Plan, runtime and CI/records are separate commits:
+  `ee13be755e`, `8b747e977c`, and `cfd11121a0`. This closeout changes docs only.
+- All three triggered workflows passed for that exact source head:
+  [Evaluator Closure](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33327948300),
+  [Public Agent Runtime](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33327948293),
+  [Runner Smoke](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33327948272).
+  Evaluator Closure includes the new isolated public-waveform receipt smoke,
+  existing native nine-cell campaign, free HTTP fixture, Evolution and clean-room
+  final-scoring checks. These do not imply native waveform tool activation.
+- The next native integration design is independently accepted, including
+  recoverable incomplete candidates and distinct admitted-request/actual-execution
+  counts. Its counters cover the fixed-action path, not all EVAS processes that
+  unchanged ordinary Bash may launch. Implementation remains the next slice.
+- Frozen r53, read-only EVAS 0.8.7, legacy defaults, old worktrees and stopped
+  paid-run evidence remain unchanged. No provider expense, new dependency,
+  real-corpus ingestion or training was introduced.
+
 ## 2026-08-31 - Fresh public waveform executor (AA-VAE-060)
 
 - Plan commit `ee13be755e`; implementation commit `8b747e977c`. Main owns all
@@ -32,6 +52,10 @@
 - Native tool/profile/budget/scorer integration is a separately reviewed next
   slice. Host/Docker/coordinator ownership is trusted; receipts are not signatures.
   This is connectivity/provenance evidence, not model-quality or Spectre parity.
+- Next native-integration plan received independent read-only **ACCEPT** after
+  specifying recoverable incomplete candidates, request-versus-execution counts,
+  fail-closed unsafe trees, pause/resume and scorer contradictions. This is design
+  acceptance only; native waveform feedback is not implemented by AA-VAE-060.
 
 ## 2026-08-31 - Fork publication and hosted extension verification
 

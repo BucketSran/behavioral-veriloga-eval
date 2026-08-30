@@ -23,9 +23,12 @@ implementation and does not change the phase statuses below.
   Final local gate: 939 harness passes / 21 opt-in skips; two real DUT/Testbench
   Docker tests (two fresh executions each). Independent review found no code issue;
   LSP/typecheck was unavailable, with Ruff/AST/compilation checks recorded instead.
-  No model tool activation or paid run. Next: review and implement the
-  [explicit native feedback slice](native-public-waveform-feedback.md), including
-  source-container pause/resume, budget admission and score identity joins.
+  Published source/CI head `cfd11121a0`: all three triggered hosted workflows
+  passed; exact source-bound links are recorded in the verification log.
+  No model tool activation or paid run. Next: implement the independently
+  reviewed [explicit native feedback slice](native-public-waveform-feedback.md),
+  including source-container pause/resume, recoverable incomplete candidates,
+  budget admission and score identity joins.
 
 - Implemented bounded slice: [synthetic extension implementation](rag-waveform-training-implementation.md).
   [AA-VAE-057](../docs/alphaapollo-migration/features/AA-VAE-057-synthetic-offline-docs.md)

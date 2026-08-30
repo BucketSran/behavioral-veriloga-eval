@@ -1,7 +1,9 @@
 # Native public waveform feedback — next bounded slice
 
 Updated: 2026-08-31. Prerequisite: verified AA-VAE-060 executor.
-Status: implementation design; review before opening writes.
+Status: implementation-ready design; independent read-only review ACCEPT on
+2026-08-31 after the incomplete-candidate/request-accounting repair. Runtime
+integration has not started; register exact leaf ownership before opening writes.
 
 ## Goal and non-goals
 
@@ -11,7 +13,7 @@ Reuse the common controller's `public_validation` budget class, typed observatio
 and frozen authority/result joins. No new evaluator, raw-path waveform reader,
 campaign CLI, Evolution activation, real corpus, provider expense or training.
 
-## Proposed interface / boundaries to review
+## Reviewed interface / boundaries
 
 - A distinct zero-argument fixed public-simulation action (provider name
   `vaevas_public_simulate`) avoids overloading legacy `run_evas` command semantics.
@@ -44,6 +46,9 @@ campaign CLI, Evolution activation, real corpus, provider expense or training.
   `public_waveform_evas_invocations_executed` counts actual fixed simulation
   launches only (including launched failures/timeouts, not preflight probes).
   It is not a second budget and never counts marker-reported Bash operations.
+  Neither counter is a global cap on all EVAS processes: unchanged ordinary Bash
+  may still invoke EVAS outside this fixed-action path. Report that scope rather
+  than claiming all simulator usage is authoritatively metered.
 - Controller serialization alone does not stop background Bash children. The
   generation Docker container must be paused while its candidate is snapshotted
   and verified; always attempt resume, preserve resume/cleanup incidents, and
