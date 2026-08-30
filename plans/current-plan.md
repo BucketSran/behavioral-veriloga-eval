@@ -656,12 +656,19 @@ Completed authority-binding slice:
 - production score reports now label EVAS trusted replay as
   `development_only` and reserve `formal` for the explicit `final_spectre`
   judge kind; terminal position no longer implies formal authority.
+- the opt-in production EVAS executor now joins the generic authority adapter
+  and immutable writer, returning a typed receipt without generation write-back;
+  it rejects pre/post-execution identity drift and reserves terminal execution
+  persistently, including failures and legacy rerun/model-resume attempts;
+- a deterministic one-task three-arm Docker smoke exercises this bound path
+  with unchanged generation evidence. It is not a native typed trajectory,
+  model-quality comparison, or complete memory/lineage closure.
 
 Still required before Phase 5 completion:
 
 - a production EVAS 0.8.7 public-validation adapter that emits this binding;
-- a production EVAS 0.8.7 final executor that invokes the generic immutable
-  sidecar writer and records its receipt;
+- full campaign CLI authority/profile distribution beyond the new opt-in
+  Python scoring API, plus explicit infrastructure-only retry orchestration;
 - clean-room evidence that final outputs never enter generation, candidate
   selection, or shared memory;
 - a real campaign result join using native typed trajectory evidence rather
@@ -669,13 +676,14 @@ Still required before Phase 5 completion:
 
 Recommended execution order after the generic store:
 
-1. production final executor + receipt integration;
+1. production final executor + receipt integration (opt-in slice verified);
 2. production public-validation adapter;
-3. production resume/checkpoint no-reentry gate;
+3. broader resume/checkpoint/retry lineage verification (bound runtime's
+   persistent no-reentry gate implemented);
 4. native typed campaign result join;
 5. only then start the AlphaApollo reasoning/evolution backend comparison.
 
-#### Active slice - production final replay receipt (2026-08-30)
+#### Verified slice - production final replay receipt (2026-08-30)
 
 Brief: connect the existing trusted replay executor to the typed final-authority
 adapter and immutable sidecar store through an opt-in production scoring path.
@@ -697,6 +705,10 @@ Independent review precedes fork-only publication. No new dependencies, domain
 tools, r53 edits, EVAS edits, or model API experiments are in this slice.
 Explicit infrastructure retry orchestration and native typed campaign ledgers
 remain separate follow-ups; do not fabricate them from legacy messages.
+
+Implemented and verified as AA-VAE-033/034. Detailed RED/GREEN, independent
+review, clean-room evidence, and validation limitations are recorded in
+`logs/verification-log.md`. Phase 5 remains `in_progress`.
 
 ### Phase 6 - Add the AlphaApollo single-trajectory reasoning backend
 

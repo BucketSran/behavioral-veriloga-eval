@@ -1,5 +1,59 @@
 # Verification Log
 
+## 2026-08-30 - Bound-final three-arm smoke and CI gate
+
+- Smoke RED rejected the missing `--bound-final-authority` option; GREEN now
+  exercises the opt-in production scorer and verifies actual receipt bytes.
+  CI RED detected missing trigger paths/reuse coverage; GREEN explicitly runs
+  the bound smoke and checks receipt integrity and no generation write-back.
+- Combined affected regression (generic harness, meta-schema, replay reuse,
+  calibration pilot, result protocol, active entrypoints, smoke, and mini-swe)
+  reports `532 passed, 3 skipped in 104.79s`.
+- After the last workflow-only coverage change, focused CI/smoke/reuse tests
+  report `9 passed`. Ruff 0.12.12, Python compilation of nine changed files,
+  workflow YAML parsing, and `git diff --check` pass, subject to the baseline
+  runner F841 warning recorded below. Hosted GitHub CI is not inferred from
+  these local checks.
+- Final actual smoke: `v4-001`, three independent runtimes, Docker agent
+  conditions, explicit installed EVAS 0.8.7, no model API calls. Command:
+
+  ```sh
+  PYTHONDONTWRITEBYTECODE=1 ./.venv/bin/python scripts/run_v4_r53_clean_room_smoke.py \
+    --task-id v4-001 --bound-final-authority \
+    --evas-command /Users/bucketsran/Documents/TsingProject/vaEVAS-next/behavioral-veriloga-eval/.venv/bin/evas \
+    --output-root /Users/bucketsran/Documents/TsingProject/vaEVAS-next/.bound-final-smoke.XnY3S9/output \
+    --out /Users/bucketsran/Documents/TsingProject/vaEVAS-next/.bound-final-smoke.XnY3S9/smoke.json
+  ```
+
+- Result: `PASS`, no blockers; smoke document SHA-256
+  `26d2045b63b9d1113ead2f83bc2c4bce08d2d26ac361a1b0124f83ea8bf3a397`.
+  All three intentionally incomplete public fixtures receive the expected
+  `behavior_failure`, not a model baseline score.
+- Each runtime's generic receipt binds submission
+  `ed247e3e8f80ac258bb3e1c07330af63399241af519a679121b31c3e82ab8a67`,
+  final profile
+  `daaa26064999ad5c9845d154aaf019e64571f4acf07a2dee29585c49761c1b6a`,
+  and sidecar byte hash
+  `d7406fc1a87b9be1b76e22063f96214a5b7b86441e44d4fc3624919e97869e1d`.
+  Attempt/input identities differ across cells despite identical sidecar bytes.
+- OneShot / Agent-No-EVAS / Agentic public EVAS calls are 0 / 0 / 1. Recorded
+  campaign-result, conversation-checkpoint, and existing mini-swe-trajectory
+  bytes remain unchanged during scoring. Independent read-only verification
+  rehashed all three generic sidecar files and confirmed submission binding,
+  development-only authority, claim limits, and workflow coverage: bounded PASS.
+- Local scoring host is Python 3.11.15, with `evas-sim 0.8.7 (rust-core 0.2.4,
+  ABI 20260718, revision unknown, loadable)`. This is not exact-Python-3.11.13
+  formal runtime evidence. OneShot remains provider transport; the two agent
+  conditions use Docker. Native typed trajectory/result ledger is still absent.
+- An earlier `/tmp` run failed because the local Docker VM could not see the
+  bind source. Using an isolated output directory under shared `/Users` resolved
+  this without changing Docker configuration or EVAS. Failed artifacts remain
+  available locally; no failure was reclassified as candidate success.
+- r53 release diff remains empty and the EVAS audit worktree is clean. No
+  Spectre gate, release edit, or evaluator edit was activated. Phase 5 remains
+  in progress: public-validation adapter, full campaign profile distribution,
+  explicit retry lineage, native result ledger, and denominator closure remain.
+
 ## 2026-08-30 - Opt-in production final replay receipt
 
 - TDD RED/GREEN covered the missing bridge, identity drift, repeated execution,

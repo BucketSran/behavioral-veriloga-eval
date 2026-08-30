@@ -16,6 +16,8 @@ on:
       - "schemas/vabench-experiment-result.schema.json"
       - "schemas/vaevas-*-v1.schema.json"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/result_protocol.py"
+      - "benchmark-vabench-release-v4/operations/calibration_pilot/final_replay.py"
+      - "benchmark-vabench-release-v4/operations/calibration_pilot/run_campaign.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/score_campaign.py"
       - "benchmark-vabench-release-v4/scripts/tests/test_v4_experiment_result_protocol.py"
       - "benchmark-vabench-release-v4/public-agent-runtime/**"
@@ -23,6 +25,7 @@ on:
       - "tests/test_v3_clean_room_smoke.py"
       - "tests/test_v3_model_eval_claim_gate.py"
       - "tests/test_v4_r53_clean_room_smoke.py"
+      - "tests/test_score_campaign_reuse.py"
       - "tests/test_agent_harness_*.py"
   push:
     branches: [main]
@@ -40,6 +43,8 @@ on:
       - "schemas/vabench-experiment-result.schema.json"
       - "schemas/vaevas-*-v1.schema.json"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/result_protocol.py"
+      - "benchmark-vabench-release-v4/operations/calibration_pilot/final_replay.py"
+      - "benchmark-vabench-release-v4/operations/calibration_pilot/run_campaign.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/score_campaign.py"
       - "benchmark-vabench-release-v4/scripts/tests/test_v4_experiment_result_protocol.py"
       - "benchmark-vabench-release-v4/public-agent-runtime/**"
@@ -47,6 +52,7 @@ on:
       - "tests/test_v3_clean_room_smoke.py"
       - "tests/test_v3_model_eval_claim_gate.py"
       - "tests/test_v4_r53_clean_room_smoke.py"
+      - "tests/test_score_campaign_reuse.py"
       - "tests/test_agent_harness_*.py"
 
 permissions:
@@ -96,6 +102,7 @@ jobs:
             tests/test_v3_model_eval_claim_gate.py \
             benchmark-vabench-release-v4/scripts/tests/test_v4_experiment_result_protocol.py \
             tests/test_benchmarkv4_calibration_pilot.py \
+            tests/test_score_campaign_reuse.py \
             tests/test_mini_swe_vabench.py \
             tests/test_v4_r53_active_entrypoints.py \
             tests/test_v4_r53_clean_room_smoke.py
@@ -108,6 +115,7 @@ jobs:
         run: |
           uv run python scripts/run_v4_r53_clean_room_smoke.py \
             --task-id v4-001 \
+            --bound-final-authority \
             --evas-command "$(pwd)/.venv/bin/evas" \
             --output-root "$RUNNER_TEMP/r53-clean-room-output" \
             --out "$RUNNER_TEMP/r53-clean-room-smoke.json" \
@@ -137,6 +145,8 @@ jobs:
               and cell["final_submission"]["immutable"] is True
               and cell["score_sidecar"]["judge_runtime"] == "evas-sim==0.8.7"
               and cell["score_sidecar"]["score_authority"] == "development_only"
+              and cell["bound_final_test"]["sidecar_hash_verified"]
+              and cell["bound_final_test"]["generation_evidence_unchanged"]
               for cell in smoke["cells"]
           ), smoke
           assert sum(smoke["score_report"]["judge_statuses"].values()) == 3, smoke

@@ -519,6 +519,17 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
     cells = three_arm_cells(args.release, args.task_id, args.model)
     run_root = args.output_root / "run"
     configure_runner_args(args, run_root, evas_identity)
+    campaign_config = {
+        "schema_version": "r53-clean-room-smoke-campaign-v1",
+        "release_manifest_sha256": release["manifest_sha256"], "cells": cells,
+        "sandbox": args.sandbox, "evas_image": args.mini_swe_image,
+        "no_evas_image": args.mini_swe_no_evas_image,
+        "experiment_policy_sha256": sha256_file(PACKAGE / "EXPERIMENT_POLICY.json"),
+        "judge_command": args.judge_command, "judge_timeout_s": args.judge_timeout_s,
+        "testbench_timeout_s": args.testbench_timeout_s,
+    }
+    if args.bound_final_authority:
+        write_immutable_json(args.output_root / "campaign.json", campaign_config)
 
     rows: list[dict[str, Any]] = []
     cell_reports: list[dict[str, Any]] = []
@@ -541,6 +552,31 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
         write_json(result_path, result)
 
         clean_room = public_clean_room_manifest(runtime, result, arm, args.sandbox)
+        authority = {}
+        generation_paths = [
+            runtime / "evidence" / name for name in (
+                "campaign_result.json", "conversation_checkpoint.json", "mini_swe_trajectory.json",
+            ) if (runtime / "evidence" / name).is_file()
+        ]
+        before_generation = {str(path): sha256_file(path) for path in generation_paths}
+        if args.bound_final_authority:
+            from final_replay import EpisodeContext, build_final_test_profile
+
+            authority = {
+                "final_test_profile": build_final_test_profile(
+                    runtime=runtime, release=args.release,
+                    campaign_config_sha256=result_protocol.canonical_sha256(campaign_config),
+                    command=args.judge_command,
+                    timeout_s=score_campaign.trusted_replay_timeout_s(
+                        cell, args.judge_timeout_s, args.testbench_timeout_s,
+                    ),
+                    evas_command=args.evas_command,
+                ),
+                "episode_context": EpisodeContext(
+                    episode_id=cell["cell_id"], attempt_id=f"{cell['cell_id']}:smoke-1",
+                    task_id=cell["task_id"], condition=arm, max_steps=1,
+                ),
+            }
         row = score_campaign.evaluate_cell(
             result_path,
             args.judge_command,
@@ -549,7 +585,23 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
             False,
             args.testbench_timeout_s,
             write_back=False,
+            **authority,
         )
+        bound_final_test = None
+        if args.bound_final_authority:
+            receipt = row["trusted_replay"]["score_sidecar_receipt"]
+            bound_final_test = {
+                "receipt": receipt,
+                "final_test_profile": row["trusted_replay"]["final_test_profile"],
+                "generation_evidence_unchanged": before_generation == {
+                    str(path): sha256_file(path) for path in generation_paths
+                },
+                "sidecar_hash_verified": sha256_file(runtime / receipt["path"]) == receipt["sha256"],
+            }
+            if not bound_final_test["generation_evidence_unchanged"]:
+                blockers.append(f"generation_evidence_changed:{cell['cell_id']}")
+            if not bound_final_test["sidecar_hash_verified"]:
+                blockers.append(f"bound_sidecar_hash_mismatch:{cell['cell_id']}")
         rows.append(row)
         sidecar = write_score_sidecar(runtime, row, cell, release)
         evas_usage = result.get("evas_usage") or run_campaign.summarize_evas_invocations(
@@ -570,6 +622,7 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
                 "final_submission": final_submission,
                 "evas_usage": evas_usage,
                 "score_sidecar": sidecar,
+                "bound_final_test": bound_final_test,
             }
         )
 
@@ -666,6 +719,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--sandbox", choices=("docker", "none"), default="docker")
     parser.add_argument("--allow-insecure-test-sandbox", action="store_true")
+    parser.add_argument("--bound-final-authority", action="store_true",
+                        help="Exercise the opt-in production final profile/immutable receipt boundary.")
     parser.add_argument("--docker-command", default="docker")
     parser.add_argument("--mini-swe-image", default=DEFAULT_EVAS_IMAGE)
     parser.add_argument("--mini-swe-no-evas-image", default=DEFAULT_NO_EVAS_IMAGE)

@@ -176,6 +176,27 @@ def test_r53_smoke_rejects_wrong_evas_version(tmp_path: Path) -> None:
         smoke.resolve_evas_command(str(executable))
 
 
+def test_r53_smoke_exercises_bound_production_final_receipts(tmp_path: Path) -> None:
+    smoke = load_smoke_module()
+    adapter = tmp_path / "judge.py"
+    adapter.write_text(
+        "import os, json\nfrom pathlib import Path\n"
+        "Path(os.environ['VABENCH_TRUSTED_REPLAY_RESULT']).write_text(json.dumps({'status': 'behavior_failure'}))\n"
+    )
+    args = smoke.parse_args([
+        "--output-root", str(tmp_path / "smoke"), "--evas-command", str(fake_evas_087(tmp_path)),
+        "--judge-command", f"{sys.executable} {adapter}",
+        "--sandbox", "none", "--allow-insecure-test-sandbox", "--bound-final-authority",
+    ])
+    payload = smoke.run_smoke(args)
+    assert payload["claim_gate"]["blocking_reasons"] == ["clean_room_requires_docker"]
+    for cell in payload["cells"]:
+        bound = cell["bound_final_test"]
+        assert bound["generation_evidence_unchanged"] is True
+        assert bound["sidecar_hash_verified"] is True
+        assert bound["receipt"]["submission_tree_sha256"] == cell["final_submission"]["tree_sha256"]
+
+
 def test_submission_freeze_is_idempotent_and_rejects_source_drift(
     tmp_path: Path,
 ) -> None:

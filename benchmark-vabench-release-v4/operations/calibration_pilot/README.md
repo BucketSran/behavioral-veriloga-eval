@@ -304,10 +304,41 @@ must write JSON to `VABENCH_TRUSTED_REPLAY_RESULT` with one of these statuses:
 ```
 
 Allowed terminal replay statuses are `passed`, `compile_failure`,
-`runtime_failure`, `behavior_failure`, and `infrastructure_failure`. A legacy
-adapter returning zero without JSON is accepted as `passed` with a compatibility
-diagnostic. A nonzero return without JSON is an infrastructure failure because
-the runner cannot safely infer its failure stage.
+`runtime_failure`, `behavior_failure`, and `infrastructure_failure`. Missing or
+malformed structured JSON is an infrastructure failure, even when the adapter
+exits zero; process success is not a candidate verdict.
+
+### Opt-in profile-bound final evidence
+
+The trusted Python scoring API now accepts `final_test_profile` and
+`episode_context` together. Build the profile with
+`final_replay.build_final_test_profile(...)` using the exported evaluator,
+r53 release, frozen campaign-config hash, exact judge command/watchdog, and
+explicit EVAS 0.8.7 command. Supply that profile and an `EpisodeContext` matching
+the cell's episode/task/condition to `score_campaign.evaluate_cell(...)` with
+`write_back=False` and `reuse_existing=False`. The campaign CLI's default
+generation/scoring route is unchanged; full CLI profile distribution is pending.
+
+The bound path verifies submission and authority identities before and after
+replay, writes an immutable content-addressed sidecar, and returns
+`row["trusted_replay"]["score_sidecar_receipt"]`. It does not update the original
+generation result, checkpoint, or model trajectory. The receipt adds attempt
+identity to the sidecar/profile/submission hashes; identical sidecar content in
+different runtimes does not mean the attempts are identical.
+
+`evidence/bound-final-test/` reserves terminal execution before the judge starts.
+Once reserved, scoring and generation entrypoints reject in-place retry/reentry,
+including after an infrastructure failure. Do not remove this directory to
+resume a run. An explicit infrastructure-retry coordinator is a future slice.
+The score is `development_only`; no Spectre equivalence, model-quality claim,
+complete dependency fingerprint, or native typed trajectory is implied.
+
+For a deterministic three-arm integration check, run
+`scripts/run_v4_r53_clean_room_smoke.py --bound-final-authority` with the existing
+explicit `--evas-command`, `--output-root`, and `--out` options. On local Docker
+VMs, use an output root shared with the daemon. See
+`docs/alphaapollo-migration/features/AA-VAE-033-production-final-replay-receipt.md`
+and `AA-VAE-034-bound-final-clean-room-ci.md` for exact scope and evidence.
 
 Experiment-result schema v2 adds a required `failure_taxonomy` object to both
 the replay and terminal episode record without changing `status`, `outcome`, or
