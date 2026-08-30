@@ -1,5 +1,9 @@
 # vaEVAS Validation Pipeline
 
+> **Historical document — not a current operating guide.**
+> Use the [current documentation](README.md) for VABench r53 + EVAS 0.8.7.
+> All recipes and the V3 evaluator-contract reference below are historical; current Spectre/score authority follows the agent contract.
+
 Date: 2026-05-13
 
 ## Purpose

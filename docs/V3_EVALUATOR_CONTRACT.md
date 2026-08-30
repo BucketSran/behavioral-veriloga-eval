@@ -1,5 +1,9 @@
 # vaBench v3 Evaluator Contract
 
+> **Historical document — not a current operating guide.**
+> Use the [current documentation](README.md) for VABench r53 + EVAS 0.8.7.
+> This is the V3 protocol only; it does not define current r53 judge authority or runtime requirements.
+
 Updated: 2026-08-29
 
 This document is the executable boundary for v3 generation, private hidden

@@ -1,5 +1,9 @@
 # Experiment Asset Policy
 
+> **Historical document — not a current operating guide.**
+> Use the [current documentation](README.md) for VABench r53 + EVAS 0.8.7.
+> The old directories and referenced files below may no longer exist; use the current layout/evidence policy.
+
 This file defines what to keep after each experiment and what to upload to
 remote to keep the repo small and easy to navigate.
 

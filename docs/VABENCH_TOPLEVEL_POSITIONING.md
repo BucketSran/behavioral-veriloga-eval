@@ -1,5 +1,9 @@
 # vaBench Top-Level Positioning
 
+> **Historical document — not a current operating guide.**
+> Use the [current documentation](README.md) for VABench r53 + EVAS 0.8.7.
+> Retained earlier paper/release wording; current scope follows the r53 manifest and agent contract.
+
 Date: 2026-05-15
 
 This is the current top-level wording for vaBench after reviewing duplicate

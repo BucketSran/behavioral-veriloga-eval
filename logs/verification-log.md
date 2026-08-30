@@ -1,5 +1,41 @@
 # Verification Log
 
+## 2026-08-30 - Recoverable branch and documentation hygiene
+
+- Behavioral baseline `892ada7cf1` matched `origin/main`; fetched origin/upstream
+  main, with upstream still `7b5616dc52`. The next workspace is a linked worktree
+  sharing historical refs with the protected old workspace: no bulk cleanup.
+- Removed only local `audit/vaevas-eval-closure`, after ancestor and worktree
+  checks. Its tip `03cf89415e9a69c6bf94e49ebb1b1a6deb9f3626` remains reachable
+  from main and the unchanged fork remote branch. Recover with
+  `git branch audit/vaevas-eval-closure 03cf89415e9a69c6bf94e49ebb1b1a6deb9f3626`.
+  No worktree, experiment file, remote ref, other historical branch, or Git
+  object history was deleted. No meaningful RAM/disk saving is claimed.
+- Scoped disk inventory: `.venv` 401M, v4 `reports/` 172M, `docs/` 6.9M,
+  `plans/` 72K, `logs/` 124K before cleanup. All environments/reports retained;
+  ignored does not mean disposable evidence.
+- Before edits, entrypoint/layout subset: **34 passed in 4.22s**. Added 14
+  documentation checks; RED: **13 failed, 1 passed, 9 deselected in 0.33s**
+  (v3 primary paths, missing historical banners/navigation). After repair:
+  `uv run --locked --extra agentic python -m pytest -q
+  tests/test_v4_r53_active_entrypoints.py tests/test_evas_output_cleanup.py
+  tests/test_task_count_filters.py` -> **48 passed in 3.89s**.
+- Current README/layout point to r53 + EVAS 0.8.7; `docs/README.md` separates
+  active instructions from nine historical guides. Each historical body is
+  exactly preserved after removing its new banner; paths are unchanged.
+- Active plan reduced **1,141 -> 552 lines**. The dated snapshot reconstructs
+  the original exactly after reversing its one ownership-link rebase. Phase
+  6-10 acceptance sections are byte-identical; Phase 2/5 gaps and the prior
+  local legacy timeout failure remain explicit. Domain tools remain deferred.
+- Independent read-only plan and final review: no blocker; reviewer ran the
+  entrypoint/navigation suite (**23 passed**) and whitespace checks. Scoped
+  Ruff 0.12.12, py_compile and `git diff --check` pass. No new dependency,
+  all-project type-check or full evaluation rerun is claimed for this docs slice.
+- EVAS checkout remains clean at `6cb6fa7a7d` on its audit branch. Its historical
+  local `main` ref is stale (`e428608`), unlike fork/upstream main; it was not
+  used or changed. No business runtime, r53, scoring, CI workflow, paid API,
+  private AlphaApollo content, or old worktree change.
+
 ## 2026-08-30 - Mini-swe differential fork publication and hosted confirmation
 
 - Published only to BucketSran `origin/main`: `375c941fa9` scope,

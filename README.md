@@ -1,93 +1,77 @@
 # behavioral-veriloga-eval
 
-This repository holds the public vaBench / behavioral Verilog-A benchmark
-source, EVAS/Spectre validation runners, schemas, examples, and compact public
-evidence.
+vaEVAS combines VABench, an AI-native agent harness, public EVAS feedback,
+trusted replay, and reproducible evaluation evidence.
 
 ## Current Benchmark Entrypoint
 
-The active task release is:
+The active, immutable release is:
 
 ```text
-benchmark-vabench-release-v3/
+benchmark-vabench-release-v4/release/benchmarkv4-r53/
 ```
 
-Use `benchmark-vabench-release-v3/tasks/` as the authoritative public task
-root for new evaluation work. Tasks `001`-`300` are the original certified
-full-300 surface; tasks `301`-`340` are Verilog-A language-semantics extension
-candidates and tasks `341`-`360` are Verilog-AMS mixed-signal extension
-candidates, and tasks `361` and above are noise/analysis extension candidates that must be certified separately before being included in full-suite
-claims. The release-level indexes are:
+Its [canonical manifest](benchmark-vabench-release-v4/release/benchmarkv4-r53/MANIFEST.json)
+defines the denominator: 400 matched families, 1,200 tasks, and 2,000 certified
+faults. The pinned evaluator is **EVAS 0.8.7** (`evas-sim==0.8.7`).
+See the [r53 release certification](benchmark-vabench-release-v4/R53_RELEASE_CERTIFICATION.md).
 
-- `benchmark-vabench-release-v3/TASKS.json`: canonical task metadata and target
-  artifacts.
-- `benchmark-vabench-release-v3/CHECKS.yaml`: canonical checker configuration.
+Do not repair sealed task bytes in place or use a previous release as the
+default for new experiments. A release change requires an explicitly approved
+successor revision and provenance.
 
-Each v3 task is self-contained under `tasks/NNN-name/` with:
+## Start Here
 
-- `instruction.md`: agent-facing problem statement.
-- `starter/`: files the agent edits.
-- `test_visible/`: public smoke material.
-- `test_hidden/`, `test_harness/`, `solution/`, `negative_variants/`:
-  evaluator-side material.
+- [Agent contract](AGENTS.md): authority, isolation, evaluator and claim boundaries.
+- [Documentation index](docs/README.md): current guides versus historical records.
+- [Current plan](plans/current-plan.md): implemented scope and remaining work.
+- [Campaign runners](benchmark-vabench-release-v4/runners/README.md) and
+  [calibration / mini-swe operations](benchmark-vabench-release-v4/operations/calibration_pilot/README.md):
+  executable operator entrypoints.
+- [AlphaApollo migration notes](docs/alphaapollo-migration/README.md):
+  ideas, exact code changes, tests, and known differences.
+- [Verification log](logs/verification-log.md): dated local and hosted evidence.
 
-Do not use old release roots as current evaluation inputs.
+The legacy mini-swe backend remains the default. The native single-cell launcher
+is opt-in; AlphaApollo Reasoning/Evolution and complete native campaign coverage
+remain unfinished. Connectivity smokes do not establish model performance.
 
-## Historical Surfaces
+## Evaluation And Visibility
 
-`benchmark-vabench-release-v1/` remains in the repository as the legacy
-paper/evidence surface for the earlier vaBench release and website exports.
-It is not the active task-authoring root for new v3 work.
+Public EVAS feedback may guide generation. A model-invisible final checker
+runs only after submission freeze and writes a hash-bound score sidecar.
+Current trusted replay uses EVAS 0.8.7; its terminal position does not by itself
+grant formal or Spectre-backed score authority.
 
-`benchmark-vabench-release-v2/` has been retired. Its five candidate tasks were
-absorbed into v3 as tasks `283` through `287`, and the v2 tree was removed from
-the public repository so it cannot be mistaken for an active release.
+Spectre is not a routine development requirement. It is a conditional audit
+when EVAS changes or an explicitly named external/final protocol requires it.
+Report the actual judge and evidence scope; never infer simulator equivalence.
 
-## Public/Private Boundary
-
-This public repository may contain benchmark tasks, prompts, gold/reference
-artifacts, public runners, schemas, examples, documentation, and compact public
-evidence.
-
-Private execution state belongs outside this repository, including Vela
-submission JSONL, process snippets, internal model IDs, Harbor image tags,
-tokens, raw run logs, and cost/accounting reports.
+The source repository can contain evaluator-side assets, but an agent sandbox
+receives only the declared public package and writable submission surface.
+Never mount private checkers, certified faults or final scores into generation.
+Credentials, raw provider payloads, waveforms, and unrestricted trajectories
+stay out of Git. See the [layout policy](docs/REPO_LAYOUT_POLICY.md).
 
 ## Repository Map
 
-- `benchmark-vabench-release-v3/`: active v3 benchmark task release.
-- `benchmark-vabench-release-v1/`: legacy vaBench release/evidence surface.
-- `runners/`: reusable public evaluator and report-generation code.
-- `schemas/`: public schemas.
-- `examples/`: non-scored examples.
-- `docs/`: stable public documentation and website data exports.
-- `scripts/`: repository maintenance scripts.
-- `tests/`: regression and policy checks.
+- `benchmark-vabench-release-v4/`: sealed releases, provenance, operations and runners.
+- `runners/agent_harness/`: common controller, contracts and evidence components.
+- `runners/`, `schemas/`, `environment/`: shared execution and contract surfaces.
+- `docs/`, `plans/`, `logs/`: guides, current work and dated evidence.
+- `tests/`, `scripts/`, `examples/`: regressions, maintenance and non-scored examples.
+- `benchmark-vabench-release-v3/` and `benchmark-vabench-release-v1/`:
+  historical source/evidence, not current defaults. V2 is retired.
+- Earlier v4 revisions: retained for explicit historical reproduction, not new runs.
 
-Generated raw results, logs, scratch outputs, and private Vela state should not
-be committed.
-
-## Validation
-
-Use pinned strict EVAS as the formal evaluator for gold promotion and scoring.
-Spectre may be used for optional paper-facing parity studies, but it is not a
-benchmark certification or release requirement.
-
-For benchmark changes, prefer:
-
-1. static/source integrity checks;
-2. EVAS AHDL-like lint preflight for changed v3 tasks;
-3. EVAS gold validation for changed tasks;
-4. optional EVAS/Spectre validation when making a simulator-parity claim.
-
-For a quick repository sanity check:
+## Quick Repository Check
 
 ```bash
-python3 -m py_compile runners/simulate_evas.py
-python3 scripts/run_v3_evas_lint_preflight.py --tasks 049 --out scratch/v3_lint_049.json
-PYTHONPATH=runners python3 -m pytest -q tests/test_evas_output_cleanup.py
-python3 -m pytest -q tests/test_task_count_filters.py
+uv run --locked --extra agentic python -m pytest -q \
+  tests/test_v4_r53_active_entrypoints.py \
+  tests/test_evas_output_cleanup.py tests/test_task_count_filters.py
 ```
 
-Keep EVAS lint JSON output under scratch/generated paths. It is a review
-preflight artifact, not public certification evidence.
+This is an entrypoint/layout check, not a complete evaluation gate. Follow the
+operator guides and verification log for focused harness tests and real
+clean-room scoring checks. Do not create top-level scratch/results directories.

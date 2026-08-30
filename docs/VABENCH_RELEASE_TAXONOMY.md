@@ -1,5 +1,9 @@
 # vaBench Release Taxonomy
 
+> **Historical document — not a current operating guide.**
+> Use the [current documentation](README.md) for VABench r53 + EVAS 0.8.7.
+> Retained earlier-release taxonomy and script input; its counts are not the current r53 denominator.
+
 Date: 2026-05-26
 
 This is the clean release-facing taxonomy for the current 79-entry

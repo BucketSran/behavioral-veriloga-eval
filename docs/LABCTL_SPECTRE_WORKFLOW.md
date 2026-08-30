@@ -1,5 +1,9 @@
 # Labctl Spectre Workflow
 
+> **Historical document — not a current operating guide.**
+> Use the [current documentation](README.md) for VABench r53 + EVAS 0.8.7.
+> Spectre is conditional on an EVAS change or an explicitly named external protocol, not routine development scoring.
+
 This is the distilled remote Spectre path for vaBench validation. The older
 `bridge` and `sui-direct` backends remain in the repository for compatibility,
 but new v3 Spectre audits should use `labctl`.

@@ -1,5 +1,9 @@
 # Task Authoring Checklist
 
+> **Historical document — not a current operating guide.**
+> Use the [current documentation](README.md) for VABench r53 + EVAS 0.8.7.
+> The old task layout and referenced files below do not define sealed r53 authoring or evaluation.
+
 ## 任务 ID: ___________
 
 ### 1. 目录结构

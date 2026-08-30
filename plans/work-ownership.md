@@ -122,6 +122,13 @@ historical refs, every worktree, EVAS's current audit branch and its old dirty
 checkout. Deletion is a metadata tidy-up, not a meaningful RAM/disk saving;
 the local ref can be recreated from its recorded SHA or retained remote.
 
+Local outcome: the single local ref was removed; current entrypoints/navigation
+and nine historical banners pass the 48-test layout subset. The active plan is
+552 lines with a reconstructable old snapshot and unchanged Phase 6-10
+acceptance. Independent read-only final review has no blocker. No worktree or
+evidence files were removed. Exact verification and publication status belong
+in the verification log; this slice grants no runtime or EVAS follow-up work.
+
 ### Closed implementation slices
 
 The following assignments are closed; their files are back with the main

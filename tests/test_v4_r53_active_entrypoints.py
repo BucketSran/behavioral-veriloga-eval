@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import re
 from pathlib import Path
 
 import pytest
@@ -25,6 +26,17 @@ ACTIVE_ENTRYPOINTS = (
     / "operations"
     / "tri_form_derivation_prep"
     / "run_v4_profile_parity_smoke.py",
+)
+HISTORICAL_GUIDES = (
+    "BENCHMARKV4_REPO_SLIMMING_PLAN.md",
+    "EXPERIMENT_ASSET_POLICY.md",
+    "LABCTL_SPECTRE_WORKFLOW.md",
+    "TASK_AUTHORING_CHECKLIST.md",
+    "V3_EVALUATOR_CONTRACT.md",
+    "V3_SOURCE_IMPORT_AUDIT.md",
+    "VABENCH_RELEASE_TAXONOMY.md",
+    "VABENCH_TOPLEVEL_POSITIONING.md",
+    "VAEVAS_VALIDATION_PIPELINE.md",
 )
 
 
@@ -65,6 +77,39 @@ def test_operator_docs_name_r53_as_the_active_default() -> None:
     for document in documents:
         text = document.read_text(encoding="utf-8")
         assert "benchmarkv4-r53" in text, document
+
+
+@pytest.mark.parametrize("relative_path", ("README.md", "docs/REPO_LAYOUT_POLICY.md"))
+def test_primary_documented_release_is_r53(relative_path: str) -> None:
+    text = (ROOT / relative_path).read_text(encoding="utf-8")
+    first_path_block = re.search(r"```text\n([^`]+)```", text)
+    assert first_path_block is not None
+    assert first_path_block.group(1).strip() == (
+        "benchmark-vabench-release-v4/release/benchmarkv4-r53/"
+    )
+    assert "0.8.7" in text
+
+
+@pytest.mark.parametrize("name", HISTORICAL_GUIDES)
+def test_historical_guides_redirect_current_work(name: str) -> None:
+    text = (ROOT / "docs" / name).read_text(encoding="utf-8")
+    banner = text.split("\n## ", 1)[0]
+    assert "**Historical document" in banner
+    assert "not a current operating guide" in banner
+    assert "[current documentation](README.md)" in banner
+
+
+@pytest.mark.parametrize("relative_path", ("README.md", "docs/README.md", "plans/current-plan.md"))
+def test_current_navigation_links_resolve(relative_path: str) -> None:
+    document = ROOT / relative_path
+    text = document.read_text(encoding="utf-8")
+    links = re.findall(r"\[[^\]]+\]\(([^\s)]+)\)", text)
+    assert links, document
+    for link in links:
+        if "://" in link or link.startswith("#"):
+            continue
+        target = document.parent / link.split("#", 1)[0]
+        assert target.exists(), (document, link)
 
 
 def test_active_metamorphic_evidence_defaults_to_r53() -> None:

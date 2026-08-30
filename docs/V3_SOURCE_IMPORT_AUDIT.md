@@ -1,5 +1,9 @@
 # V3 Source Import Audit
 
+> **Historical document — not a current operating guide.**
+> Use the [current documentation](README.md) for VABench r53 + EVAS 0.8.7.
+> Retained source/certification provenance; its counts are not the current r53 denominator.
+
 This note records the first certified import from the deduplicated historical
 Verilog-A corpus into `benchmark-vabench-release-v3`.
 

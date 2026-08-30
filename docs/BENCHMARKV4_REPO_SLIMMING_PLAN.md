@@ -1,5 +1,9 @@
 # benchmarkv4 repository slimming plan
 
+> **Historical document — not a current operating guide.**
+> Use the [current documentation](README.md) for VABench r53 + EVAS 0.8.7.
+> This pre-r53 proposal is retained as history, not as proof that every step was completed.
+
 This note records the intended follow-up cleanup now that the benchmarkv4
 release package has landed. It is deliberately a plan, not a deletion PR: the
 repository should keep benchmark review, runner updates, and historical cleanup

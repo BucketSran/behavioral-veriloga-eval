@@ -1,100 +1,87 @@
 # Repository Layout Policy
 
-This repository should read as a public benchmark repository, not as private
-Vela infrastructure or a raw experiment workspace.
+This policy follows the [agent contract](../AGENTS.md). Use the
+[documentation index](README.md) to distinguish active instructions from history.
 
 ## Active Public Surface
 
-The active benchmark task root is:
+The active immutable benchmark release is:
 
 ```text
-benchmark-vabench-release-v3/tasks/
+benchmark-vabench-release-v4/release/benchmarkv4-r53/
 ```
 
-New tasks, task-quality fixes, and current benchmark-facing documentation should
-target `benchmark-vabench-release-v3/`.
+Its [manifest](../benchmark-vabench-release-v4/release/benchmarkv4-r53/MANIFEST.json)
+and [certification](../benchmark-vabench-release-v4/R53_RELEASE_CERTIFICATION.md)
+define release identity and evidence. EVAS 0.8.7 is pinned for current work.
+The package is not an authoring workspace: task, fixture or manifest changes
+require a separately approved successor revision. Harness/evaluation work
+belongs in the v4 operations/runners or shared harness layers.
 
-`benchmark-vabench-release-v1/` is retained only as a legacy release/evidence
-surface for older vaBench reports, website exports, and historical paper-facing
-artifacts. Do not add new v3 tasks there.
-
-`benchmark-vabench-release-v2/` is retired and should not be recreated. Its
-five candidate tasks have been absorbed into v3.
-
-The active benchmarkv4 release package lives at
-`benchmark-vabench-release-v4/release/benchmarkv4-r53/`. It is the immutable
-EVAS 0.8.7 release used by the operator-facing experiment entrypoints. The
-canonical source certifications are reused by hash; the deployed runtime is
-qualified by pushed-image and Vela smoke.
-The frozen r44 package remains at
-`benchmark-vabench-release-v4/release/benchmarkv4/`, and the other revisioned
-predecessors remain available only for explicit historical reproduction and
-immutable release verification.
+V3 and V1 remain historical source/evidence surfaces. V2 is retired and must not
+be recreated. The unversioned `release/benchmarkv4/` is frozen r44; other
+predecessors are retained only for explicit reproduction and provenance.
+None is the current default.
 
 ## Stable Top-Level Directories
 
-Use these directories for durable public work:
-
-- `benchmark-vabench-release-v3/` - active benchmark task release.
-- `benchmark-vabench-release-v1/` - legacy release/evidence surface.
-- `docs/` - stable public documentation, policies, and website data exports.
-- `environment/` - shared Harbor-compatible agent environment build source.
-- `examples/` - runnable non-scored examples.
-- `runners/` - reusable public benchmark and simulator harnesses.
-- `schemas/` - public task/result schemas.
-- `scripts/` - repository maintenance scripts.
-- `skills/` - public reusable skill documentation for this repo.
-- `tests/` - regression tests and policy checks.
+- `benchmark-vabench-release-v4/`: active release, provenance, operations and runners.
+- `benchmark-vabench-release-v3/`, `benchmark-vabench-release-v1/`: historical assets.
+- `docs/`: public documentation, migration notes and compact evidence indexes.
+- `plans/`: active plan and clearly labeled historical snapshots.
+- `logs/`: dated decisions and verification; not timeless operating instructions.
+- `environment/`: shared agent-environment build source.
+- `examples/`: runnable non-scored examples.
+- `runners/`: reusable benchmark, harness and simulator adapters.
+- `schemas/`: task, harness and result schemas.
+- `scripts/`: repository maintenance scripts.
+- `skills/`: optional reusable guidance, not implicit model-visible release content.
+- `tests/`: regression and policy checks.
 
 ## Private And Transient State
 
-Do not commit:
+Do not commit credentials, private endpoint/service identities, submission
+records, raw provider payloads, unrestricted trajectories, waveform dumps,
+simulator work roots or licensed judge artifacts. Public evidence must be
+intentional, sanitized and reviewable.
 
-- Vela submission records, process snippets, private model IDs, private result
-  logs, tokens, Harbor image tags, or private cost/accounting reports.
-- Raw waveform dumps, transient simulator output directories, ad hoc run logs,
-  or scratch/generated workspaces.
-
-Raw local outputs may exist under ignored local directories while debugging,
-but public claims should be represented only by compact, intentionally reviewed
-reports or task-local audit notes.
+Use an explicitly selected external output directory or the existing ignored
+`benchmark-vabench-release-v4/reports/` subtree for local verification.
+Use a fresh run directory; do not overwrite evidence or reuse a pytest basetemp
+that contains an earlier run. Inspect any output before intentional publication.
 
 ## Forbidden Root Patterns
 
-Do not create new top-level directories matching these patterns:
+Do not create new top-level directories matching:
 
 - `benchmark-vabench-release-v2/`
-- `generated-*`
-- `generated/`
-- `results-*`
-- `results_*/`
-- `runlogs/`
-- `experiment-logs/`
-- `refine-logs/`
-- `scratch/`
-- `tmp/`
+- `generated-*` or `generated/`
+- `results-*` or `results_*/`
+- `runlogs/`, `experiment-logs/`, `refine-logs/`
+- `scratch/` or `tmp/`
 
-## Adding Or Updating Tasks
+Existing ignored data is not automatically disposable. Check evidence links
+and obtain a bounded deletion scope before removing experiments or worktrees.
 
-For active v3 work, each task should remain self-contained under
-`benchmark-vabench-release-v3/tasks/NNN-name/` and preserve the public/private
-boundary:
+## Historical Documentation
 
-- agent-visible: `instruction.md`, `starter/`, and `test_visible/`;
-- evaluator-side: `solution/`, `test_hidden/`, `test_harness/`, and
-  `negative_variants/`;
-- tooling index: `task.toml`.
-
-Do not add `meta.json` for v3 tasks unless the repository adopts a new
-generator that requires it.
+Keep old protocol, taxonomy and audit records when they support provenance.
+Label them as historical at the top and route readers to current documentation.
+An old date alone is insufficient: legacy commands and counts must not look
+like current instructions. Preserve referenced paths and bodies unless all
+consumers have been audited. Do not mass-rewrite dated decision/verification logs.
 
 ## Checks
 
-Before committing layout or task-surface changes, run a relevant subset of:
+Run the current entrypoint/navigation and cleanup/count checks:
 
 ```bash
 git diff --check
-python3 -m py_compile runners/simulate_evas.py
-PYTHONPATH=runners python3 -m pytest -q tests/test_evas_output_cleanup.py
-python3 -m pytest -q tests/test_task_count_filters.py
+uv run --locked --extra agentic python -m pytest -q \
+  tests/test_v4_r53_active_entrypoints.py \
+  tests/test_evas_output_cleanup.py tests/test_task_count_filters.py
 ```
+
+No dedicated `scripts/check_repo_layout.py` is currently present. For runtime
+or scoring changes, also run the owning layer's regressions and the required
+clean-room gate; this documentation check does not replace them.
