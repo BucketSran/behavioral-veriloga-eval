@@ -808,6 +808,43 @@ Testbench, retry, memory/lineage and complete campaign ledgers remain open.
 Verification, the relative-runtime-path RED/GREEN repair and review limitations
 are recorded in `logs/verification-log.md`.
 
+#### Active slice - opt-in mini-swe single-cell launcher (2026-08-30)
+
+Brief: expose the native episode composition through a separate single-cell
+entry point, reusing the existing provider, mini-swe messages/Bash environment,
+runtime exporter, artifact gate, and final executor. Do not reinterpret the
+legacy `--agent-scaffold native` switch or change existing campaign defaults.
+
+Scope / acceptance / KPIs:
+
+- a fresh r53 G2 DUT/bugfix Agentic cell runs from one opt-in CLI;
+- Docker preflight and frozen release/config/public/final identities precede
+  the first provider request; credentials never enter persisted metadata;
+- provider-boundary fixtures exercise the actual model adapter, Bash, public
+  EVAS output, submission freeze, final replay, and immutable result;
+- preserve the canonical wall-time/deadline-finalization rule and token-as-
+  telemetry policy; do not invent an extra silent turn cutoff or model action;
+- keep complete provider exchanges and tool observations in private evidence,
+  with join keys/hashes; do not call hashes alone a replayable raw archive;
+- reject reuse, classify failures, keep cleanup separate, and never expose
+  final output to another provider turn;
+- retain legacy regression coverage and add a Docker launcher smoke to CI.
+
+Non-goals: a paid hosted-model campaign, all conditions/forms, aggregate ledger,
+automatic infrastructure retries, AlphaApollo reasoning/evolution, new domain
+tools, r53/EVAS changes, or Spectre. Public EVAS remains ordinary Bash; the
+test-only `run_evas` dispatcher is not activated.
+
+Execution: main owns runtime/tests/shared documents; parallel children map and
+review read-only. Define one failing behavior, implement its smallest repair,
+then repeat. Publish separate reviewed GREEN slices for the required stopping
+contract, launcher, and CI/evidence. Stop for ownership drift, evaluator defects,
+or a material protocol decision not covered by the approved plan.
+
+Required evidence: exact RED/GREEN and regression commands, private output
+paths, final artifact/profile/trace hashes, independent review, CI status, and
+explicit unverified claims in the decision/verification logs and AA-VAE-037.
+
 ### Phase 6 - Add the AlphaApollo single-trajectory reasoning backend
 
 Status: `pending`
