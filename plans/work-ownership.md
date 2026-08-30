@@ -89,6 +89,39 @@ Integration sequence:
 
 ## Immediate Follow-up
 
+### Remaining harness functionality (2026-08-30)
+
+Status: `active`; base `0f014c39e1016e8c6877ff7c48dbddb2733d8f93`.
+Scope/KPIs: [controlled plan](remaining-harness-closure.md). This newer user
+authorization supersedes the earlier slice's no-further-implementation closeout.
+Main owns native Testbench integration in calibration `public_validation.py`,
+`run_native_mini_swe.py`, `run_campaign.py`, the v4 campaign wrapper, related
+existing tests, new `tests/test_agent_harness_native_testbench.py`, the nine-cell
+smoke, all shared contracts/schemas, CI, docs/logs and Git operations.
+
+Read-only advisers: `tb_surface_map`, `retry_evidence_map`,
+`reasoning_evolution_map`, `alpha_public_reference`. No write/Git authority.
+
+Leaf assignment `reasoning_policy_impl`: exact ownership of new
+`runners/agent_harness/backends/reasoning.py` and new
+`tests/test_agent_harness_reasoning_backend.py` only. Implement a single-action
+episode-local policy through existing client.complete and proposal contracts;
+no model transport dependency, tool activation, package export or launcher edit.
+Accept native calls/strict JSON under a frozen format, preserve request/output
+metadata and explicit missing usage, and test public-only history/failure.
+
+Leaf assignment `evidence_export_impl`: exact ownership of new
+`runners/agent_harness/evidence_export.py` and new
+`tests/test_agent_harness_evidence_export.py` only. Implement validated trajectory
+and launcher-event safe export plus runtime usage normalization; preserve source
+hashes and identity, exclude all raw content by allowlist, report unknown metrics.
+Do not change schemas, stores, launcher, controller, scorer or shared docs.
+
+Both leaf assignments are `active` only when dispatched by main. Follow vertical
+TDD; no index/history/push, no other file writes, no old-worktree/private reads,
+no EVAS/r53 changes, no dependencies. Return changed files, RED/GREEN evidence,
+risks and stopped-writing confirmation. Main integrates after handback/review.
+
 ### Native DUT/bugfix three-arm campaign (2026-08-30)
 
 Status: `closed`; base `24f2b834b012271af8d05221cc6e4855e2488f72`.

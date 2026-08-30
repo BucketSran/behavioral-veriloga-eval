@@ -1,5 +1,17 @@
 # Decision Log
 
+## 2026-08-30 - Remaining native functionality authorized
+
+- The user approved the seven remaining work groups after AA-VAE-042. Deliver
+  them as reviewed vertical slices, starting with native Testbench; preserve
+  r53, EVAS 0.8.7, default legacy and deferred domain/training features.
+- Reuse existing inference transport and runtime contracts. Reasoning/Evolution
+  must be working inference paths, not labels or schema-only completion.
+- Real-model pilot requires a named model/service and approved budget; that
+  pending input does not block deterministic implementation and Docker tests.
+- Main owns shared integration/publication; exact independent leaf assignments
+  are recorded in work-ownership before dispatch. No delegation grants Git writes.
+
 ## 2026-08-30 - Native campaign integration stays opt-in and read-only at score time
 
 - Reuse existing campaign build/export/dispatch and score summary. Add a

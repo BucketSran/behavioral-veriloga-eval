@@ -13,6 +13,11 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
+- Active authorized follow-up: [remaining harness closure](remaining-harness-closure.md).
+  The user approved completing the remaining functionality. Start with native
+  Testbench; implementation and experimental evidence remain separate gates.
+  Paid model pilot awaits a named model/service and budget.
+
 - Latest completed milestone: [native DUT/bugfix three-arm campaign](native-three-arm-campaign.md).
   Implemented absent public authority, native conditions and minimal
   existing-campaign dispatch/accounting. Native Testbench and automatic retries
