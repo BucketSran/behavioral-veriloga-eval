@@ -1,5 +1,31 @@
 # Verification Log
 
+## 2026-08-30 - Opt-in production final replay receipt
+
+- TDD RED/GREEN covered the missing bridge, identity drift, repeated execution,
+  watchdog attribution, persistent model-resume rejection, experiment schema,
+  scorer integration, relative-command hashing, and report-authority mismatch.
+- Production replay tests use real subprocess fixtures and additionally reject
+  post-execution candidate/checker/command drift without publishing a sidecar.
+  Infrastructure outcomes retain null scores and cannot trigger in-place retry.
+- Focused production-replay/reuse invocation reports `18 passed`.
+- Independent review found a HIGH defect in the shared legacy watchdog stage:
+  `trusted_replay_watchdog` was outside both Python and JSON schema enums. RED
+  reproduced the invalid stage; the helper now uses `infrastructure` and keeps
+  watchdog specificity in diagnostics and the `timeout` secondary class.
+  Complete result-document schema and Python taxonomy validation now pass.
+- Reviewer follow-up reports no remaining blocking finding in the watchdog
+  fix, with `17 passed` in its targeted invocation and compilation passing.
+  It records `COMMENT`, not formal `APPROVE`, because LSP diagnostics are
+  unavailable; leader validation uses Ruff, compilation, schemas, and pytest.
+- Ruff 0.12.12 passes for the new bridge and changed scorer/protocol/tests.
+  `run_campaign.py` has one pre-existing F841 unused `results` assignment:
+  reproduced on both HEAD and the working tree, with no other Ruff finding.
+  This unrelated warning is preserved, not suppressed in source/configuration.
+- Scope: opt-in API only; legacy generation remains available. Declared runtime
+  fingerprinting is not full dependency closure, and the trusted caller still
+  owns campaign freeze provenance. No native typed trajectory is fabricated.
+
 ## 2026-08-30 - Production final integration baseline
 
 - Fresh fetch/audit: behavioral fork main and origin/main agree at

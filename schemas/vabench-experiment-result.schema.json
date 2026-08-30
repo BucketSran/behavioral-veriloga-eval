@@ -117,7 +117,32 @@
         "command": {"type": ["object", "null"]},
         "adapter_result": {"type": ["object", "null"]},
         "diagnostics": {"type": "array", "items": {"type": "string"}},
-        "failure_taxonomy": {"$ref": "#/definitions/failureTaxonomy"}
+        "failure_taxonomy": {"$ref": "#/definitions/failureTaxonomy"},
+        "final_test_profile": {
+          "type": "object",
+          "description": "Optional typed authority; validated by final_test_profile_sha256 before execution.",
+          "required": ["schema_version"],
+          "properties": {"schema_version": {"const": "vaevas-final-test-profile-v1"}}
+        },
+        "score_sidecar_receipt": {
+          "type": "object",
+          "required": ["path", "sha256", "submission_tree_sha256", "final_profile_sha256", "final_profile_input_identity_sha256", "episode_id", "attempt_id", "task_id"],
+          "properties": {
+            "path": {"type": "string", "pattern": "^evidence/score-sidecars/[0-9a-f]{64}\\.json$"},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "submission_tree_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "final_profile_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "final_profile_input_identity_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "episode_id": {"type": "string", "minLength": 1},
+            "attempt_id": {"type": "string", "minLength": 1},
+            "task_id": {"type": "string", "minLength": 1}
+          },
+          "additionalProperties": false
+        }
+      },
+      "dependentRequired": {
+        "final_test_profile": ["score_sidecar_receipt"],
+        "score_sidecar_receipt": ["final_test_profile"]
       },
       "additionalProperties": false
     },

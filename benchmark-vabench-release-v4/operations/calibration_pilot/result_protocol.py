@@ -439,6 +439,24 @@ def trusted_replay(
     }
 
 
+def normalize_trusted_replay_watchdog(replay: dict[str, Any]) -> None:
+    """The outer judge watchdog is infrastructure, not candidate runtime."""
+    command = replay.get("command")
+    if not isinstance(command, dict) or command.get("execution_status") != "timeout":
+        return
+    replay["status"] = "infrastructure_failure"
+    replay["diagnostics"] = ["trusted_replay_watchdog_timeout"]
+    replay["failure_taxonomy"] = {
+        "schema_version": "vabench-failure-taxonomy-v1",
+        "primary_class": "infrastructure",
+        "secondary_classes": ["timeout"],
+        "stage": "infrastructure",
+        "responsibility": "system",
+        "retryable": True,
+        "case_ids": [], "property_ids": [], "mutation_ids": [],
+    }
+
+
 def terminal_outcome(
     model_status: str,
     submission: dict[str, Any],

@@ -1210,11 +1210,42 @@ def load_trusted_replay_adapter_result(runtime: Path) -> dict[str, Any] | None:
     return value
 
 
+class FinalReplayReservedError(RuntimeError):
+    """A terminal scoring runtime cannot reenter generation or final judging."""
+
+
+def assert_final_replay_not_started(runtime: Path) -> None:
+    reservation = runtime / "evidence/bound-final-test"
+    if reservation.exists() or reservation.is_symlink():
+        raise FinalReplayReservedError("final replay already reserved; model reentry and in-place retry are forbidden")
+
+
 def run_trusted_replay(
     runtime: Path,
     command: str | None,
     timeout_s: int,
     evas_command: str,
+    final_submission: dict[str, Any] | None = None,
+    *,
+    final_test_profile: dict[str, Any] | None = None,
+    episode_context: Any = None,
+) -> dict[str, Any]:
+    assert_final_replay_not_started(runtime)
+    if final_test_profile is not None or episode_context is not None:
+        if final_test_profile is None or episode_context is None or not command or final_submission is None:
+            raise ValueError("bound replay requires profile, context, command and frozen submission")
+        from final_replay import execute_bound_replay
+
+        return execute_bound_replay(
+            runtime=runtime, command=command, timeout_s=timeout_s, evas_command=evas_command,
+            final_submission=final_submission, final_test_profile=final_test_profile,
+            context=episode_context, execute=_run_trusted_replay,
+        )
+    return _run_trusted_replay(runtime, command, timeout_s, evas_command, final_submission)
+
+
+def _run_trusted_replay(
+    runtime: Path, command: str | None, timeout_s: int, evas_command: str,
     final_submission: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     result_path = runtime / "evidence" / "trusted_replay_result.json"
@@ -2539,6 +2570,7 @@ def run_mini_swe_agentic_cell(
 
 def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompatible | None) -> dict[str, Any]:
     runtime = args.output / cell["cell_id"]
+    assert_final_replay_not_started(runtime)
     result_path = runtime / "evidence" / "campaign_result.json"
     if args.resume and result_path.is_file():
         previous = read_json(result_path)
@@ -3067,6 +3099,9 @@ def run_cell_preserving_failure(
 ) -> dict[str, Any]:
     try:
         return run_cell(cell, args, client)
+    except FinalReplayReservedError:
+        # Do not attach a new result or modify a terminal scoring runtime.
+        raise
     except Exception as exc:  # Preserve failed paid episodes for audit and resume diagnosis.
         runtime = args.output / cell["cell_id"]
         error = str(exc)[:4000]

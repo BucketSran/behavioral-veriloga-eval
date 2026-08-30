@@ -56,6 +56,8 @@ def test_outer_trusted_replay_watchdog_is_retryable_infrastructure() -> None:
     scorer.normalize_trusted_replay_watchdog(replay)
 
     assert replay["status"] == "infrastructure_failure"
-    assert replay["failure_taxonomy"]["stage"] == "trusted_replay_watchdog"
+    assert replay["failure_taxonomy"]["stage"] == "infrastructure"
+    assert replay["diagnostics"] == ["trusted_replay_watchdog_timeout"]
+    assert replay["failure_taxonomy"]["secondary_classes"] == ["timeout"]
     assert replay["failure_taxonomy"]["responsibility"] == "system"
     assert replay["failure_taxonomy"]["retryable"] is True

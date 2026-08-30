@@ -1,5 +1,22 @@
 # Decision Log
 
+## 2026-08-30 - Bound final replay implementation decisions
+
+- Reuse `ProfileBoundFinalJudge` and the existing immutable sidecar writer;
+  the bridge adds production execution/identity checks rather than another
+  controller, tool, memory, or store implementation.
+- Keep legacy scoring opt-in compatible. New bound scoring requires matching
+  profile/context and disables generation write-back and legacy score reuse.
+  A bound EVAS row cannot be relabeled as a formal Spectre report.
+- Use an exclusive persistent final reservation before judge execution. A
+  failed run remains reserved; infrastructure retry coordination is not inferred
+  from a retryable classification and is not implemented in this slice.
+- Share outer-watchdog normalization before sidecar publication. Use the
+  existing schema-valid infrastructure stage and preserve timeout diagnostics.
+- Record only the declared runtime/command fingerprints. Do not claim arbitrary
+  imported dependency closure or that a supplied campaign hash alone proves
+  pre-generation freezing.
+
 ## 2026-08-30 - Opt-in production final replay integration scope
 
 - Connect the existing production executor to the generic authority adapter and

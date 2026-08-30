@@ -281,22 +281,7 @@ def trusted_replay_is_exactly_reusable(
 
 def normalize_trusted_replay_watchdog(replay: dict[str, Any]) -> None:
     """The outer judge watchdog is evaluator infrastructure, not DUT runtime."""
-    command = replay.get("command")
-    if not isinstance(command, dict) or command.get("execution_status") != "timeout":
-        return
-    replay["status"] = "infrastructure_failure"
-    replay["diagnostics"] = ["trusted_replay_watchdog_timeout"]
-    replay["failure_taxonomy"] = {
-        "schema_version": "vabench-failure-taxonomy-v1",
-        "primary_class": "infrastructure",
-        "secondary_classes": ["timeout"],
-        "stage": "trusted_replay_watchdog",
-        "responsibility": "system",
-        "retryable": True,
-        "case_ids": [],
-        "property_ids": [],
-        "mutation_ids": [],
-    }
+    RUNNER.RESULT_PROTOCOL.normalize_trusted_replay_watchdog(replay)
 
 
 def evaluate_cell(
@@ -307,9 +292,24 @@ def evaluate_cell(
     reuse_existing: bool = False,
     testbench_timeout_s: int = DEFAULT_TESTBENCH_TIMEOUT_S,
     write_back: bool = True,
+    *,
+    final_test_profile: dict[str, Any] | None = None,
+    episode_context: Any = None,
 ) -> dict[str, Any]:
+    bound = final_test_profile is not None or episode_context is not None
+    if bound and (write_back or reuse_existing):
+        raise ValueError("bound scoring forbids generation write-back and legacy replay reuse")
+    if bound and (final_test_profile is None or episode_context is None):
+        raise ValueError("bound scoring requires both final profile and episode context")
     result = read_json(result_path)
     cell = result["cell"]
+    if bound:
+        if (episode_context.episode_id != cell["cell_id"] or episode_context.task_id != cell["task_id"]
+                or episode_context.condition != (cell.get("experimental_arm") or cell["mode"])):
+            raise ValueError("bound scoring context does not match the campaign cell")
+        prior = (result.get("experiment_result") or {}).get("final_trusted_replay") or {}
+        if prior.get("executed") or result.get("final_judge") is not None:
+            raise ValueError("final judge already executed; bound scoring cannot promote or rerun legacy evidence")
     runtime = result_path.parents[1].resolve()
     telemetry = event_telemetry(result.get("events") or [])
     artifact_gate = RUNNER.submission_artifact_gate(runtime)
@@ -408,8 +408,10 @@ def evaluate_cell(
             final_submission = RUNNER.RESULT_PROTOCOL.snapshot_submission(
                 runtime, artifact_gate
             )
+        authority = ({"final_test_profile": final_test_profile, "episode_context": episode_context}
+                     if bound else {})
         replay = RUNNER.run_trusted_replay(
-            runtime, command, replay_timeout_s, evas_command, final_submission
+            runtime, command, replay_timeout_s, evas_command, final_submission, **authority
         )
         normalize_trusted_replay_watchdog(replay)
         replay["input_signature"] = replay_signature
@@ -445,6 +447,13 @@ def evaluate_cell(
 
 
 def summarize(rows: list[dict[str, Any]], judge_kind: str) -> dict[str, Any]:
+    for row in rows:
+        replay = row.get("trusted_replay") or {}
+        if "score_sidecar_receipt" in replay:
+            profile = replay.get("final_test_profile") or {}
+            authority = (profile.get("score_sidecar_contract") or {}).get("score_authority")
+            if authority != SCORE_AUTHORITY_BY_JUDGE_KIND[judge_kind]:
+                raise ValueError("bound sidecar authority does not match report judge kind")
     grouped: dict[str, Counter[str]] = defaultdict(Counter)
     failure_grouped: dict[str, Counter[str]] = defaultdict(Counter)
     failure_classes: Counter[str] = Counter()
