@@ -13,6 +13,17 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
+- Implemented follow-up: [public EVAS feedback and extension design](public-evas-feedback-and-extension-design.md).
+  [AA-VAE-055](../docs/alphaapollo-migration/features/AA-VAE-055-public-evas-process-feedback.md)
+  adds native layered Bash/EVAS reports and reported-operation diagnostics.
+  Review identified forgeable sandbox markers: data is explicitly unauthenticated,
+  not hard-budget/validator/final authority. Trusted per-process accounting needs
+  a separate isolated executor. Three read-only extension designs are complete;
+  no RAG/waveform tool activation, corpus ingestion, training or paid run.
+  Final local gate: 849 harness passes / 17 opt-in skips; 2 real Docker/free-HTTP
+  smoke passes. Independent scoped review approves; historical compact-checkout
+  missing-script test limitation is retained in the verification log.
+
 - Implemented authorized repair: [native operational contract and optional call budget](native-operational-contract-and-call-budget.md).
   [AA-VAE-053](../docs/alphaapollo-migration/features/AA-VAE-053-public-operational-contract.md)
   repairs Reasoning's condition-appropriate Bash/submit guidance, independently

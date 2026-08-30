@@ -37,6 +37,8 @@ COMMAND_OUTPUT_CAPTURE_BYTES = 1 * 1024 * 1024
 COMMAND_OUTPUT_HEAD_BYTES = 64 * 1024
 MODEL_OUTPUT_BYTES = 12_000
 MODEL_OUTPUT_HEAD_BYTES = 4_000
+PUBLIC_EVAS_FEEDBACK_SCHEMA_VERSION = "vaevas-public-evas-feedback-v1"
+PUBLIC_EVAS_MAX_INVOCATIONS = 16
 SUBMISSION_QUOTA_BYTES = 64 * 1024 * 1024
 WORK_QUOTA_BYTES = 512 * 1024 * 1024
 # Bash reports file-size limits in 1024-byte blocks on the supported hosts.
@@ -536,6 +538,32 @@ class BashEnvironmentConfig:
     sandbox_backend: str
 
 
+def summarize_evas_operations(invocations: list[dict[str, Any]]) -> dict[str, Any]:
+    """Summarize sandbox-reported markers, not authenticated process execution."""
+    operations = [row.get("operation", "unknown") for row in invocations]
+    simulation_statuses = [
+        row.get("status", "unknown") for row in invocations
+        if row.get("operation") == "simulate"
+    ]
+    statuses = ("succeeded", "failed", "timed_out", "interrupted", "unknown")
+    return {
+        "schema_version": "vaevas-public-evas-operations-v1",
+        "scope": "captured_sandbox_markers",
+        "authenticated": False,
+        "authority": "diagnostic_only",
+        "reported_calls": len(invocations),
+        "reported_help_calls": operations.count("help"),
+        "reported_version_calls": operations.count("version"),
+        "reported_other_calls": operations.count("other"),
+        "unclassified_markers": sum(op not in {"help", "version", "other", "simulate"} for op in operations),
+        "reported_simulation_calls": len(simulation_statuses),
+        "reported_simulation_status_counts": {
+            status: sum((value if value in statuses else "unknown") == status for value in simulation_statuses)
+            for status in statuses
+        },
+    }
+
+
 class VaBenchBashEnvironment:
     """One bash tool over the model-visible public workspace.
 
@@ -551,6 +579,7 @@ class VaBenchBashEnvironment:
         sandbox_backend: str,
         evas_command: str,
         executable_feedback: bool = True,
+        structured_evas_feedback: bool = False,
         docker_command: str = "docker",
         docker_image: str = "",
         preflight_timeout_s: float = 60.0,
@@ -583,6 +612,7 @@ class VaBenchBashEnvironment:
         self.submit_sentinel = scratch_root / ".tmp" / "submission-request"
         self.evas_command = evas_command
         self.executable_feedback = bool(executable_feedback)
+        self.structured_evas_feedback = bool(structured_evas_feedback and executable_feedback)
         self.docker_command = docker_command
         self.docker_image = docker_image
         if preflight_timeout_s <= 0:
@@ -649,6 +679,23 @@ class VaBenchBashEnvironment:
         candidate_tree_hasher.chmod(0o444)
         telemetry_prefix = f"VABENCH_EVAS:{self._evas_telemetry_token}"
         output_remap = ""
+        operation_telemetry = ""
+        if self.structured_evas_feedback:
+            operation_telemetry = (
+                "operation=other\n"
+                "[[ ${args[0]-} == simulate ]] && operation=simulate\n"
+                "skip_output=0\n"
+                "for arg in \"${args[@]}\"; do\n"
+                "  if ((skip_output)); then skip_output=0; continue; fi\n"
+                "  case $arg in\n"
+                "    --) break ;;\n"
+                "    -o) skip_output=1 ;;\n"
+                "    --help|-h) operation=help; break ;;\n"
+                "    --version) operation=version; break ;;\n"
+                "  esac\n"
+                "done\n"
+                "printf '\\036%s:%s:OP:%s\\n' \"$telemetry_prefix\" \"$invocation_id\" \"$operation\" >&9\n"
+            )
         if self.config.sandbox_backend != "docker":
             output_remap = (
                 "    if [[ $output == /tmp/vabench-visible/evas-output* ]]; then\n"
@@ -698,6 +745,8 @@ class VaBenchBashEnvironment:
             "fi\n"
             "printf '\\036%s:%s:START:%s\\n' \"$telemetry_prefix\" \"$invocation_id\" "
             "\"$candidate_tree_sha256\" >&9\n"
+            + operation_telemetry
+            +
             "trap finish_telemetry EXIT\n"
             "set +e\n"
             f"{shlex.join(base)} \"${{args[@]}}\"\n"
@@ -779,6 +828,8 @@ class VaBenchBashEnvironment:
                         "network": False,
                         "evaluator_mounted": False,
                         "executable_feedback": self.executable_feedback,
+                        **({"public_evas_feedback_schema_version": PUBLIC_EVAS_FEEDBACK_SCHEMA_VERSION}
+                           if self.structured_evas_feedback else {}),
                         "preflight_timeout_s": self.preflight_timeout_s,
                         "preflight_attempts": self.preflight_attempts,
                         "preflight_attempts_used": self.preflight_attempts_used,
@@ -1182,11 +1233,17 @@ class VaBenchBashEnvironment:
         command_timed_out = host_timed_out or (
             self.config.sandbox_backend == "docker" and returncode == 124
         )
+        first_invocation = len(self.evas_invocations)
+        telemetry_capture_complete = (
+            capture.eof and not capture.read_error and not reader.is_alive()
+            and capture.truncated_bytes == 0
+        )
         output = self._record_evas_invocations(
             capture.text(),
             command=command,
             elapsed_s=elapsed_s,
             command_timed_out=command_timed_out,
+            capture_complete=telemetry_capture_complete if self.structured_evas_feedback else True,
         )
         resources = self._resource_usage()
         self._emit_private_output_capture(
@@ -1222,6 +1279,43 @@ class VaBenchBashEnvironment:
             ),
             "output_truncated_bytes": capture.truncated_bytes,
             "resources": resources,
+            **({"public_evas": self._public_evas_feedback(
+                self.evas_invocations[first_invocation:],
+                capture_complete=telemetry_capture_complete,
+            )} if self.structured_evas_feedback else {}),
+        }
+
+    @staticmethod
+    def _public_evas_feedback(
+        invocations: list[dict[str, Any]], *, capture_complete: bool
+    ) -> dict[str, Any]:
+        # Arbitrary Bash can read/forge wrapper markers; never promote to authority.
+        return {
+            "schema_version": PUBLIC_EVAS_FEEDBACK_SCHEMA_VERSION,
+            "scope": "captured_sandbox_markers",
+            "authenticated": False,
+            "authority": "diagnostic_only",
+            "capture_complete": capture_complete,
+            "task_correctness": "not_evaluated",
+            "invocations": [
+                {
+                    "invocation_id": row["invocation_id"][:128],
+                    "authenticated": False,
+                    "evidence_kind": "sandbox_reported_markers",
+                    "operation": row["operation"],
+                    "status": row["status"],
+                    "returncode": row["returncode"],
+                    "candidate_tree_schema_version": row["candidate_tree_schema_version"],
+                    "candidate_tree_sha256": (
+                        row["candidate_tree_sha256"]
+                        if re.fullmatch(r"[0-9a-f]{64}", row["candidate_tree_sha256"] or "")
+                        else None
+                    ),
+                }
+                for row in invocations[-PUBLIC_EVAS_MAX_INVOCATIONS:]
+            ],
+            "omitted_invocations": max(0, len(invocations) - PUBLIC_EVAS_MAX_INVOCATIONS),
+            "untrusted_operation_summary": summarize_evas_operations(invocations),
         }
 
     def _emit_private_output_capture(
@@ -1263,10 +1357,12 @@ class VaBenchBashEnvironment:
         command: str,
         elapsed_s: float,
         command_timed_out: bool,
+        capture_complete: bool = True,
     ) -> str:
+        events = "START|END|OP" if self.structured_evas_feedback else "START|END"
         marker = re.compile(
             rf"\x1eVABENCH_EVAS:{re.escape(self._evas_telemetry_token)}:"
-            r"(?P<invocation_id>[^:\r\n]+):(?P<event>START|END)"
+            rf"(?P<invocation_id>[^:\r\n]+):(?P<event>{events})"
             r"(?::(?P<payload>[^:\r\n]+))?\r?\n?"
         )
         active: dict[str, dict[str, Any]] = {}
@@ -1281,11 +1377,26 @@ class VaBenchBashEnvironment:
                         "shell_elapsed_s": elapsed_s,
                         "candidate_tree_schema_version": CANDIDATE_TREE_SCHEMA_VERSION,
                         "candidate_tree_sha256": match.group("payload"),
+                        **({"operation": "unknown", "authenticated": False,
+                            "evidence_kind": "sandbox_reported_markers"}
+                           if self.structured_evas_feedback else {}),
                     }
                     order.append(invocation_id)
                 continue
             row = active.get(invocation_id)
             if row is None:
+                continue
+            if match.group("event") == "OP":
+                operation = match.group("payload")
+                row["operation"] = operation if operation in {"simulate", "help", "version", "other"} else "unknown"
+                continue
+            raw_returncode = match.group("payload") or ""
+            if self.structured_evas_feedback and (
+                re.fullmatch(r"[0-9]{1,3}", raw_returncode) is None
+                or int(raw_returncode) > 255
+            ):
+                row["returncode"] = None
+                row["status"] = "unknown"
                 continue
             returncode = int(match.group("payload") or 0)
             row["returncode"] = returncode
@@ -1294,7 +1405,10 @@ class VaBenchBashEnvironment:
             row = active[invocation_id]
             if "status" not in row:
                 row["returncode"] = None
-                row["status"] = "timed_out" if command_timed_out else "interrupted"
+                row["status"] = (
+                    "unknown" if not capture_complete
+                    else "timed_out" if command_timed_out else "interrupted"
+                )
             self.evas_invocations.append(row)
         return marker.sub("", output)
 

@@ -629,6 +629,7 @@ def run_prepared_native_mini_swe(
                 submission_gate=runner.submission_artifact_gate,
                 candidate_artifacts=runner.expected_candidate_artifacts(runtime),
                 executable_feedback=(condition == "Agentic"),
+                structured_evas_feedback=True,
             )
             try:
                 environment.preflight()
@@ -913,10 +914,20 @@ class NativeMiniSwePolicy:
 
     def _propose(self, observation):
         if self._last_message is not None:
+            payload = observation.to_document()["payload"]
+            public_evas = payload.get("public_evas")
+            if public_evas and (
+                public_evas["invocations"] or not public_evas["capture_complete"]
+            ):
+                # The legacy formatter consumes only output/returncode. Render the
+                # native structured feedback without changing the canonical event.
+                payload["output"] = payload.get("output", "") + "\npublic_evas: " + json.dumps(
+                    public_evas, sort_keys=True, allow_nan=False,
+                )
             self.messages.extend(
                 self.model.format_observation_messages(
                     self._last_message,
-                    [observation.to_document()["payload"]],
+                    [payload],
                 )
             )
         budget_text = model_call_budget_text(observation.payload)

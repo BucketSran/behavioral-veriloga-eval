@@ -343,6 +343,7 @@ def _legacy_output_payload(raw_output: Mapping[str, Any]) -> dict[str, Any]:
         "output_captured_bytes",
         "output_truncated_bytes",
         "resources",
+        "public_evas",
     )
     for field_name in optional_fields:
         if field_name in raw_output:

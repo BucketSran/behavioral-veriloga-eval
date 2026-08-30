@@ -1,5 +1,23 @@
 # Decision Log
 
+## 2026-08-31 - Public EVAS process observations are not Bash or task verdicts (AA-VAE-055)
+
+- Preserve Bash pipeline semantics. Native Agentic adds bounded current-action
+  wrapper telemetry, with argv-derived help/version/simulate classification and
+  explicit capture/omission/unknown states. Zero process exit is not correctness.
+- Reuse the typed observation and next-request adapters. Freeze the feedback
+  version in native environment configuration. Legacy default, No-EVAS and
+  OneShot remain unchanged; historical unknown operations are not inferred.
+- Review reproduced forged markers without EVAS execution. Use the bounded
+  downgrade: scope=captured_sandbox_markers, authenticated=false, diagnostic_only;
+  reported_* counters stay in untrusted_operation_summary. No new authority,
+  hard-budget input, validator verdict or final-score evidence. Historical
+  all-marker counters retain their schema and are also unauthenticated; new
+  diagnostics are per-cell selected-attempt, not all-attempt execution totals.
+- User-approved parallel RAG/waveform/SFT-RL lanes are read-only design advisers.
+  Main owns all edits and Git. No corpus/tool activation, training/data export,
+  r53/EVAS changes, credential reads, paid calls or stopped-evidence mutation.
+
 ## 2026-08-31 - Optional model-call budget is operational configuration (AA-VAE-054)
 
 - Normal native campaigns may freeze any positive integer N; omission adds no

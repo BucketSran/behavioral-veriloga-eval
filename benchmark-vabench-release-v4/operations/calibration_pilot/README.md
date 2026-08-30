@@ -128,6 +128,17 @@ No domain/RAG/waveform tools, SFT/RL or Spectre path are activated here.
 
 ## Opt-in public validation observations
 
+Native single-trajectory Agentic Bash observations also carry `public_evas`
+diagnostics (AA-VAE-055). Bash's pipeline returncode remains unchanged; the
+bounded marker reports distinguish help/version from simulate and expose
+reported EVAS failures to the next mini-swe/Reasoning request. All new records
+are explicitly unauthenticated (`captured_sandbox_markers`, `diagnostic_only`):
+arbitrary Bash can forge or bypass the public wrapper. Per-cell score rows keep
+the new reported counters in `untrusted_operation_summary`, never as a budget,
+validator or final verdict. Historical all-marker counters remain unchanged.
+This diagnostic surface is distinct from the profile-bound validator below.
+Legacy default and No-EVAS/OneShot capabilities are unchanged.
+
 `public_validation.py` adapts the existing sandbox EVAS execution to the generic
 candidate/profile-bound `Observation` contract. Trusted callers first build a
 public profile with `build_public_validation_profile`, then construct

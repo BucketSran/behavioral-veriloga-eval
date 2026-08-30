@@ -21,6 +21,68 @@ from test_agent_harness_native_conditions import _cell, _native_runtime
     ("native-reasoning", "native_tool_calls"),
     ("native-reasoning", "strict_json"),
 ])
+def test_public_evas_process_failure_reaches_next_native_request(
+    native_case, tmp_path, backend, proposal_format,  # noqa: F811
+):
+    from pathlib import Path
+    from run_native_mini_swe import run_prepared_native_mini_swe
+
+    arguments, _, _ = native_case
+    executable = Path(arguments["evas_command"])
+    executable.write_text(
+        "#!/bin/bash\n"
+        "if [[ $1 == --version ]]; then echo 'evas-sim 0.8.7 (test double)'; exit; fi\n"
+        "echo 'public simulator failure'; exit 7\n"
+    )
+    runtime = _native_runtime(native_case, tmp_path, name="public-feedback-runtime")
+    client = Provider(["evas simulate public/task/visible_test.scs 2>&1 | tail -20", "true"])
+    original = client.complete
+
+    def complete(*args, **kwargs):
+        response = original(*args, **kwargs)
+        if proposal_format == "strict_json":
+            message = response["choices"][0]["message"]
+            call = message.pop("tool_calls")[0]["function"]
+            message["content"] = json.dumps({
+                "tool_name": call["name"], "arguments": json.loads(call["arguments"]),
+            })
+        return response
+
+    client.complete = complete
+    cell = {**_cell(arm="Agentic"), "family_id": "001"}
+    run = run_prepared_native_mini_swe(
+        runtime=runtime, cell=cell, client=client, attempt_id="feedback",
+        evas_command=str(executable), final_judge_command=arguments["command"],
+        allow_insecure_test_sandbox=True, episode_backend=backend,
+        reasoning_proposal_format=proposal_format, model_call_limit=2,
+        campaign_file_sha256="c" * 64,
+    )
+    assert len(client.requests) == 2
+    visible = "\n".join(str(message["content"]) for message in client.requests[1])
+    assert "vaevas-public-evas-feedback-v1" in visible
+    assert '"operation": "simulate"' in visible
+    assert '"status": "failed"' in visible
+    assert '"returncode": 7' in visible
+    assert '"task_correctness": "not_evaluated"' in visible
+    assert '"authenticated": false' in visible
+    assert '"authority": "diagnostic_only"' in visible
+    assert "FINAL_JUDGE_SENTINEL" not in visible
+    assert "VABENCH_EVAS:" not in visible
+    assert run.artifact_path is None
+    manifest = runner.read_json(runtime / "evidence/native-launcher/manifest.json")
+    assert manifest["environment"]["public_evas_feedback_schema_version"] == "vaevas-public-evas-feedback-v1"
+    row = scorer.read_native_cell(runtime, cell, campaign_file_sha256="c" * 64)
+    usage = row["evas_usage"]["untrusted_operation_summary"]
+    assert usage["reported_simulation_calls"] == 1
+    assert usage["reported_simulation_status_counts"]["failed"] == 1
+    assert usage["authenticated"] is False
+
+
+@pytest.mark.parametrize("backend,proposal_format", [
+    ("native-mini-swe", "native_tool_calls"),
+    ("native-reasoning", "native_tool_calls"),
+    ("native-reasoning", "strict_json"),
+])
 @pytest.mark.parametrize("limit,submit", [(1, False), (1, True), (3, False), (3, True)])
 @pytest.mark.parametrize("arm", ["Agentic", "Agent-No-EVAS"])
 def test_native_call_horizon_reaches_real_requests_and_frozen_evidence(

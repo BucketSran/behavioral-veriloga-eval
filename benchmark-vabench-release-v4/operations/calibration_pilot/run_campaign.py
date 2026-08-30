@@ -38,6 +38,7 @@ from mini_swe_vabench import (  # noqa: E402
     MINI_SWE_SCAFFOLD_ID,
     default_sandbox_backend,
     run_mini_swe_episode,
+    summarize_evas_operations,
 )
 
 EXPORTER = PACKAGE / "operations" / "tri_form_derivation_prep" / "export_tri_form_runtime.py"
@@ -422,6 +423,8 @@ def summarize_evas_invocations(invocations: list[dict[str, Any]]) -> dict[str, A
         "candidate_tree_hash_call_counts": candidate_tree_hash_call_counts,
         "modified_rerun_count": modified_rerun_count,
         "unchanged_repeat_count": unchanged_repeat_count,
+        **({"untrusted_operation_summary": summarize_evas_operations(invocations)}
+           if any("operation" in row for row in invocations) else {}),
     }
 
 

@@ -1,5 +1,54 @@
 # Verification Log
 
+## 2026-08-31 - Native public EVAS diagnostics and quarantine (AA-VAE-055)
+
+- Base `8467af3d38d2ffc43361790e27367e57db091755`. Vertical test-first evidence:
+  missing opt-in feedback (1 RED), missing next-request delivery (3 RED across
+  mini-swe / Reasoning tool-call / strict-JSON), missing operation summary,
+  incomplete capture wrongly called interrupted, and malformed END raising or
+  being treated as success. A test-only run_campaign import issue was corrected
+  separately and is not evidence of a runtime defect.
+- Independent review reproduced model-authored valid markers without EVAS.
+  The scoped fix is honest downgrade, not an authentication claim: every new
+  report/counter is marked unauthenticated; new counters are reported_* under
+  untrusted_operation_summary. A real wrapper-reading forgery regression had
+  one RED for missing per-invocation trust metadata, then passed. Final scoped
+  re-review APPROVE, no actionable issues (14 passes/1 skip and 90 passes/1 skip,
+  overlapping). No new budget, permission, validator or final verdict uses these
+  markers. True isolated per-process metering remains a separate future gap.
+- Initial full regression exposed three unnecessary empty-feedback text deltas;
+  native mini-swe now omits empty complete diagnostic rendering, preserving the
+  existing differential assertions without weakening them. Three added scorer
+  checks initially lacked fixture family_id; fixed the fixture, not production.
+  Final focused feedback/request/differential/CI gate: **88 passed, 1 skipped**.
+- Final stable-runtime full command:
+  `uv run --locked --extra agentic python -m pytest -q tests/test_agent_harness_*.py --tb=short`:
+  **849 passed, 17 skipped in 115.08s**. The earlier 847-pass run predates the
+  trust-quarantine/CI additions and is not final evidence or an additive count.
+  CI/active-entrypoint gate: **36 passed in 0.13s**. Ruff 0.12.12, staged Python
+  compile, workflow YAML parse, whitespace and staged secret-pattern checks pass.
+  No LSP/typecheck service is available; no claim of a dedicated typecheck pass.
+- Final real Docker/EVAS + free HTTP gate:
+  `VABENCH_TEST_DOCKER_RUNTIME=1 uv run --locked --extra agentic python -m pytest -q
+  tests/test_agent_harness_public_evas_feedback.py::test_real_docker_evas_failure_remains_visible_after_tail
+  tests/test_agent_harness_deepseek_pilot.py -k 'real_docker and (none or tail)'
+  --basetemp=benchmark-vabench-release-v4/reports/aa055-final-free-smoke-20260831-01 --tb=short`:
+  **2 passed, 13 deselected in 52.16s**. Covers real failed EVAS behind a successful
+  pipeline and six-cell DUT/bugfix/Testbench × two-backend freeze/score connectivity.
+  First standalone Docker fixture lacked required instruction.md and stopped at
+  preflight; corrected before claiming simulation evidence. No image/EVAS fix.
+  New Docker case is included in evaluator-closure CI; hosted results are separate.
+- Broader legacy/entrypoint check: **52 passed, 3 skipped, 1 failed in 13.33s**.
+  The failure is missing `benchmark-vabench-release-v4/public-agent-runtime/run.sh`
+  in the compact checkout (`git ls-files -v` confirms skip-worktree `S`), in
+  `test_public_runtime_mounts_a_spaced_skill_path_as_one_readonly_argument`.
+  It is not a new harness regression; do not claim the whole historical suite is
+  green or restore intentionally excluded assets as part of this task.
+- Scope: main-only edits/publication, three read-only design advisers. No paid
+  requests, credentials, r53/EVAS bytes, old worktrees or stopped live evidence
+  touched. New reports stay ignored/private. Tests prove bounded diagnostics and
+  protocol connectivity, not model quality or authenticated process accounting.
+
 ## 2026-08-31 - Optional model-call budget (AA-VAE-054)
 
 - Base `ad40f11496` after the independent AA-VAE-053 commit. Test-first slices

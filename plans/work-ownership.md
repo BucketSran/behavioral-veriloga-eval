@@ -20,6 +20,18 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
+AA-VAE-055 follow-up on `8467af3d38`: main alone writes public EVAS feedback,
+native bridge/launcher, operation-aware summary tests and shared records.
+Scope/KPIs: `public-evas-feedback-and-extension-design.md`. Three advisers
+(`rag_design`, `waveform_design`, `training_design`) read current public harness
+code and return designs only. They have no source/Git/data-export/credential/
+provider/training authority. Main integrates their suggestions into separate
+reviewable notes; no reserved tool becomes callable in this slice.
+The three read-only designs have returned. `public_feedback_review` owns only
+independent review; its marker-forgery finding is addressed by explicit
+unauthenticated diagnostic quarantine, not a new isolated executor. No delegate
+has source, index or publication authority. Main owns final tests and commits.
+
 AA-VAE-053/054 (base `32b63963bd`): main owns native operational-contract
 and optional model-call-budget implementation, existing controller/budget/state,
 launcher/campaign/pilot/scorer seams, related tests and shared records listed in
