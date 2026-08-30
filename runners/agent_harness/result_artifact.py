@@ -9,12 +9,12 @@ import math
 from typing import Any
 
 from .authority_profiles import (
+    episode_public_profile_sha256,
     final_test_profile_sha256,
     profile_input_identity_sha256,
-    public_validation_profile_sha256,
 )
 from .state import EpisodeResult, FinalJudgment, FrozenSubmission
-from .trajectory import validate_trajectory_semantics
+from .trajectory import validate_absent_public_authority, validate_trajectory_semantics
 
 
 _ARTIFACT_FIELDS = {
@@ -93,7 +93,7 @@ def build_scored_result_artifact(
     backend_profile_sha256: str,
     registry_sha256: str,
     effective_capability_sha256: str,
-    public_validation_profile: Mapping[str, Any],
+    public_validation_profile: Mapping[str, Any] | None,
     final_test_profile: Mapping[str, Any],
     score_sidecar: Mapping[str, Any],
 ) -> dict[str, Any]:
@@ -113,19 +113,12 @@ def build_scored_result_artifact(
         effective_capability_sha256,
         field_name="effective_capability_sha256",
     )
-    public_profile_sha256 = public_validation_profile_sha256(
-        public_validation_profile
+    public_profile_sha256 = episode_public_profile_sha256(
+        public_validation_profile=public_validation_profile,
+        final_test_profile=final_test_profile,
+        condition=result.context.condition,
     )
     final_profile_sha256 = final_test_profile_sha256(final_test_profile)
-    for field_name in (
-        "benchmark_release",
-        "benchmark_manifest_sha256",
-        "campaign_config_sha256",
-    ):
-        if public_validation_profile[field_name] != final_test_profile[field_name]:
-            raise ValueError(
-                f"public and final authority disagree on {field_name}"
-            )
     submission = result.submission
     judgment = result.final_judgment
     if result.primary_outcome != judgment.status:
@@ -146,7 +139,11 @@ def build_scored_result_artifact(
         task_id=result.context.task_id,
     )
     artifact: dict[str, Any] = {
-        "schema_version": "vaevas-result-artifact-v1",
+        "schema_version": (
+            "vaevas-result-artifact-v1"
+            if public_profile_sha256 is not None
+            else "vaevas-result-artifact-v2"
+        ),
         "episode": {
             "episode_id": result.context.episode_id,
             "attempt_id": result.context.attempt_id,
@@ -203,18 +200,28 @@ def validate_scored_result_artifact(
     *,
     trajectory_events: list[dict[str, Any]],
     score_sidecar: Mapping[str, Any],
-    public_validation_profile: Mapping[str, Any],
+    public_validation_profile: Mapping[str, Any] | None,
     final_test_profile: Mapping[str, Any],
 ) -> bool:
     """Validate cryptographic and semantic joins for a scored result."""
     try:
         document = _require_mapping(artifact, field_name="result artifact")
         _require_exact_fields(document, _ARTIFACT_FIELDS, field_name="artifact")
-        if document["schema_version"] != "vaevas-result-artifact-v1":
+        expected_schema = (
+            "vaevas-result-artifact-v1"
+            if public_validation_profile is not None
+            else "vaevas-result-artifact-v2"
+        )
+        if document["schema_version"] != expected_schema:
             return False
         if document["artifact_sha256"] != result_artifact_sha256(document):
             return False
         if not validate_trajectory_semantics(trajectory_events):
+            return False
+        if (
+            public_validation_profile is None
+            and not validate_absent_public_authority(trajectory_events)
+        ):
             return False
         episode = _require_mapping(document["episode"], field_name="episode")
         _require_exact_fields(
@@ -261,23 +268,18 @@ def validate_scored_result_artifact(
             contract_fields,
             field_name="contract_identity",
         )
-        for field_name in contract_fields:
+        for field_name in contract_fields - {"public_validation_profile_sha256"}:
             _require_sha256(contracts[field_name], field_name=field_name)
-        public_profile_sha256 = public_validation_profile_sha256(
-            public_validation_profile
+        public_profile_sha256 = episode_public_profile_sha256(
+            public_validation_profile=public_validation_profile,
+            final_test_profile=final_test_profile,
+            condition=episode["condition"],
         )
         final_profile_sha256 = final_test_profile_sha256(final_test_profile)
         if contracts["public_validation_profile_sha256"] != public_profile_sha256:
             return False
         if contracts["final_test_profile_sha256"] != final_profile_sha256:
             return False
-        for field_name in (
-            "benchmark_release",
-            "benchmark_manifest_sha256",
-            "campaign_config_sha256",
-        ):
-            if public_validation_profile[field_name] != final_test_profile[field_name]:
-                return False
         submission = _require_mapping(
             document["submission"], field_name="submission"
         )

@@ -87,6 +87,32 @@ def final_test_profile_sha256(profile: Mapping[str, Any]) -> str:
     return _canonical_profile_sha256(profile)
 
 
+def episode_public_profile_sha256(
+    *,
+    public_validation_profile: Mapping[str, Any] | None,
+    final_test_profile: Mapping[str, Any],
+    condition: str,
+) -> str | None:
+    """Bind optional public authority to a condition and mandatory final profile.
+
+    None is an explicit absence, never a disabled or invented evaluator profile.
+    Runtime capability/image isolation must still be enforced by the launcher.
+    """
+    final_test_profile_sha256(final_test_profile)
+    no_feedback = condition in {"OneShot", "Agent-No-EVAS"}
+    if public_validation_profile is None:
+        if not no_feedback:
+            raise ValueError("public authority is required for this condition")
+        return None
+    if no_feedback:
+        raise ValueError("public authority is forbidden for this condition")
+    digest = public_validation_profile_sha256(public_validation_profile)
+    for field in ("benchmark_release", "benchmark_manifest_sha256", "campaign_config_sha256"):
+        if public_validation_profile[field] != final_test_profile[field]:
+            raise ValueError(f"public/final authority mismatch: {field}")
+    return digest
+
+
 def profile_input_identity_sha256(
     *,
     profile_sha256: str,

@@ -14,6 +14,11 @@ def test_evaluator_closure_gates_generic_agent_harness_contracts() -> None:
     assert "tests/test_agent_harness_*.py \\" in workflow
 
 
+def test_evaluator_closure_tracks_absent_public_authority_schema() -> None:
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    assert workflow.count('"schemas/vaevas-result-artifact-v2.schema.json"') == 2
+
+
 def test_evaluator_closure_runs_bound_production_replay_smoke() -> None:
     workflow = WORKFLOW.read_text(encoding="utf-8")
     prefix = '"benchmark-vabench-release-v4/operations/calibration_pilot/'

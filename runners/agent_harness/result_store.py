@@ -90,7 +90,7 @@ def write_immutable_scored_result(
     artifact: Mapping[str, Any],
     trajectory_events: list[dict[str, Any]],
     score_sidecar: Mapping[str, Any],
-    public_validation_profile: Mapping[str, Any],
+    public_validation_profile: Mapping[str, Any] | None,
     final_test_profile: Mapping[str, Any],
 ) -> Path:
     """Validate protocol joins, then publish under the artifact's self-hash.

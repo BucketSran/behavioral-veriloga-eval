@@ -169,6 +169,30 @@ class EpisodeController:
         budget_ledger = BudgetLedger(context.budget_limits)
         phase = "tool_authority_resolution"
 
+        def require_observation_authority(observation, action=None):
+            if self._public_validation_profile_sha256 is not None or (
+                observation.validation_profile_sha256 is None
+                and (
+                    action is not None
+                    or observation.budget_delta.get("public_validation_calls", 0) == 0
+                )
+            ):
+                return
+            if action is not None:
+                self._record(
+                    context, actor="controller", event_type="action_rejected",
+                    visibility="harness", payload={
+                        "action_id": action.action_id,
+                        "tool_name": action.tool_name,
+                        "rejection_code": "public_validation_profile_unbound",
+                    },
+                )
+            raise _ProtocolFailure(
+                category="public_validation_profile_unbound",
+                phase="public_validation_authority",
+                message="observation carries undeclared public-validation authority",
+            )
+
         def score_submission(expected_sha256, terminal_reason, capability=None):
             nonlocal phase, submission
             phase = "submission_freeze"
@@ -281,6 +305,7 @@ class EpisodeController:
                 payload={
                     "max_steps": context.max_steps,
                     "budget_limits": dict(context.budget_limits),
+                    "public_validation_profile_sha256": self._public_validation_profile_sha256,
                     "effective_capability_sha256": (
                         effective_toolset.effective_capability_sha256
                     ),
@@ -293,6 +318,7 @@ class EpisodeController:
             )
             phase = "environment_start"
             observation = self._environment.start(context)
+            require_observation_authority(observation)
             steps = range(context.max_steps) if context.max_steps is not None else itertools.count()
             for _ in steps:
                 if deadline_expired():
@@ -538,6 +564,7 @@ class EpisodeController:
                         primary_outcome=step.primary_outcome,
                         terminal_reason="tool_execution_rejected",
                     )
+                require_observation_authority(step.observation, action)
                 self._enforce_candidate_effect(
                     context,
                     action=action,

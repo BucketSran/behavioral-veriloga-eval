@@ -1,5 +1,16 @@
 # Decision Log
 
+## 2026-08-30 - Public authority absence is not a disabled fake profile
+
+- Use required explicit null profile/hash for OneShot and Agent-No-EVAS;
+  require a real profile for Agentic. The final profile remains mandatory.
+- Preserve profile-present v1 records and add absence-only request/artifact v2.
+  Missing fields and contradictory feedback evidence fail closed. A schema
+  version change is preferable to weakening historical v1 hash fields.
+- Keep execution semantics separate: absence alone does not prove one-shot
+  transport or a no-EVAS Bash sandbox. Launcher and clean-room integration own
+  those claims; generic controller evidence cannot attest host isolation.
+
 ## 2026-08-30 - Native three-arm bounded implementation approved
 
 - After clarifying the scope, the user authorized DUT/bugfix native OneShot,

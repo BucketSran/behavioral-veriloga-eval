@@ -17,6 +17,9 @@ implementation and does not change the phase statuses below.
   Implement absent public authority, the remaining native conditions and minimal
   existing-campaign dispatch/accounting. Native Testbench and automatic retries
   remain deferred; legacy defaults and all frozen evaluation assets are unchanged.
+  Shared absent-authority contract is locally verified in
+  [AA-VAE-040](../docs/alphaapollo-migration/features/AA-VAE-040-absent-public-authority.md);
+  launcher/campaign integration and real six-cell smoke remain in progress.
 
 - Phase 0/1/3/4 bounded contracts and compatibility work are complete.
 - Phase 2/5 are **in progress**: the opt-in native single-cell path works,

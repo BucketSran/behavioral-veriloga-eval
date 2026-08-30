@@ -31,11 +31,11 @@ from runners.agent_harness import (
     build_scored_result_artifact,
     final_test_profile_sha256,
     profile_input_identity_sha256,
-    public_validation_profile_sha256,
     read_trajectory,
     validate_score_sidecar_authority,
 )
 from runners.agent_harness.contracts import Environment, Policy
+from runners.agent_harness.authority_profiles import episode_public_profile_sha256
 from runners.agent_harness.result_store import write_immutable_scored_result
 
 
@@ -136,7 +136,7 @@ def run_native_episode(
     environment: Environment,
     tool_registry: ToolRegistry,
     backend_profile_sha256: str,
-    public_validation_profile: dict[str, Any],
+    public_validation_profile: dict[str, Any] | None,
     final_test_profile: dict[str, Any],
     command: str,
     timeout_s: int,
@@ -157,26 +157,27 @@ def run_native_episode(
     runtime = runtime.resolve()
     public_profile = deepcopy(public_validation_profile)
     final_profile = deepcopy(final_test_profile)
-    public_sha = public_validation_profile_sha256(public_profile)
+    public_sha = episode_public_profile_sha256(
+        public_validation_profile=public_profile,
+        final_test_profile=final_profile,
+        condition=context.condition,
+    )
     final_sha = final_test_profile_sha256(final_profile)
     if not isinstance(backend_profile_sha256, str) or not re.fullmatch(
         r"[0-9a-f]{64}", backend_profile_sha256
     ):
         raise ValueError("backend_profile_sha256 must be a lowercase SHA-256")
-    for field in (
-        "benchmark_release",
-        "benchmark_manifest_sha256",
-        "campaign_config_sha256",
-    ):
-        if public_profile[field] != final_profile[field]:
-            raise ValueError(f"public/final authority mismatch: {field}")
     if (
-        public_profile["benchmark_release"] != "benchmarkv4-r53"
-        or public_profile["evaluator"] != {"engine": "evas", "version": "0.8.7"}
+        final_profile["benchmark_release"] != "benchmarkv4-r53"
+        or (public_profile is not None and public_profile["evaluator"] != {"engine": "evas", "version": "0.8.7"})
         or final_profile["judge"] != {"engine": "evas", "version": "0.8.7"}
     ):
         raise ValueError("native production join requires r53 + EVAS 0.8.7")
     toolset = tool_registry.resolve(condition_id=context.condition, model_visible=True)
+    if public_sha is None and any(
+        capability.budget_class == "public_validation" for capability in toolset.capabilities
+    ):
+        raise ValueError("absent public authority cannot expose a public-validation capability")
     runner.assert_final_replay_not_started(runtime)
     evidence = runtime / "evidence"
     if runtime.is_symlink() or evidence.is_symlink():
@@ -205,7 +206,11 @@ def run_native_episode(
     _write_once(
         directory / "request.json",
         {
-            "schema_version": "vaevas-native-episode-request-v1",
+            "schema_version": (
+                "vaevas-native-episode-request-v1"
+                if public_sha is not None
+                else "vaevas-native-episode-request-v2"
+            ),
             "episode_id": context.episode_id,
             "attempt_id": context.attempt_id,
             "task_id": context.task_id,

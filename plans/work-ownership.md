@@ -96,21 +96,24 @@ Scope/KPIs/stop conditions: [controlled plan](native-three-arm-campaign.md).
 The main coordinator owns all shared contracts/schemas/exports, native episode
 composition, CI, smoke integration, plans/logs and migration notes. Main-owned
 runtime/test files for this slice: `runners/agent_harness/result_artifact.py`,
+`authority_profiles.py`,
 `result_store.py`, `controller.py`, `trajectory.py` (under that package),
 `operations/calibration_pilot/native_episode.py` (under v4),
 `schemas/vaevas-result-artifact-v2.schema.json`,
-`tests/test_agent_harness_absent_public_authority.py`, and existing shared
+`tests/test_agent_harness_absent_public_authority.py`,
+`tests/test_agent_harness_native_campaign_smoke.py` (new),
+`scripts/run_v4_r53_clean_room_smoke.py` (public fixture extension), and existing shared
 contract/CI tests as required. No evaluator or sealed-release writes.
 
 Delegated leaf assignments (only the named files; paths beginning operations or
 runners/run_benchmark are under `benchmark-vabench-release-v4/`):
 
-- `native_conditions_impl`: `active`; owns
+- `native_conditions_impl`: `handed_back`; owns
   `operations/calibration_pilot/run_native_mini_swe.py` and
   `tests/test_agent_harness_native_conditions.py` (new). Implement/test OneShot
   and No-EVAS with the existing Agentic path preserved. No shared contract,
   schema, campaign, legacy runtime, documentation or Git writes.
-- `native_campaign_impl`: `active`; owns
+- `native_campaign_impl`: `handed_back`; owns
   `runners/run_benchmarkv4_campaign.py`,
   `operations/calibration_pilot/run_campaign.py`,
   `operations/calibration_pilot/score_campaign.py`, and

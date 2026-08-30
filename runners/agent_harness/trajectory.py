@@ -234,3 +234,37 @@ def project_model_visible_events(
     """Return only events explicitly admitted to model-visible memory."""
 
     return [event for event in events if event.get("visibility") == "model"]
+
+
+def validate_absent_public_authority(events: list[dict[str, Any]]) -> bool:
+    """Check an absence declaration and reject contradictory execution evidence.
+
+    This complements lifecycle/hash validation; it cannot attest shell isolation.
+    A missing declaration is not equivalent to an explicit null authority.
+    """
+    if not events:
+        return False
+    started = events[0].get("payload", {})
+    if (
+        not isinstance(started, Mapping)
+        or "public_validation_profile_sha256" not in started
+        or started["public_validation_profile_sha256"] is not None
+    ):
+        return False
+    for event in events:
+        payload = event.get("payload", {})
+        if not isinstance(payload, Mapping):
+            return False
+        if (
+            payload.get("validation_profile_sha256") is not None
+            or payload.get("budget_class") == "public_validation"
+        ):
+            return False
+        for key in ("delta", "consumed", "budget_delta"):
+            counters = payload.get(key, {})
+            if (
+                not isinstance(counters, Mapping)
+                or counters.get("public_validation_calls", 0) != 0
+            ):
+                return False
+    return True

@@ -1,5 +1,29 @@
 # Verification Log
 
+## 2026-08-30 - Explicit absent public authority (AA-VAE-040)
+
+- Baseline audit: eval main/origin `24f2b834b0`; upstream `7b5616dc` is contained.
+  EVAS checkout/origin/upstream stay `6cb6fa7a7d`, clean. The scope checkpoint
+  `1e5092e7bd` was pushed to BucketSran only after 23 entrypoint tests passed.
+- Vertical RED/GREEN: missing public profile initially raised TypeError;
+  absent-result schema initially missing; three rehashed public-feedback
+  injections initially accepted; start/step undeclared feedback initially
+  reached the next stage. Negative guards now reject them before model exposure.
+- A first guard changed an existing budget-failure classification; its failing
+  regression was preserved and the implementation repaired, not the test relaxed.
+  Malformed start payload: 1 failed / 2 passed -> all pass. CI v2 path trigger:
+  1 failed -> 7 passed.
+- Fresh shared focused suite (absence, profiles, runtime authority, controller,
+  trajectory, native episode, artifact, store, CI): **163 passed, 1 skipped in
+  14.36s**. The skip is the opt-in Docker case, not a production-isolation proof.
+- Ruff 0.12.12 passes on the exact shared files; `git diff --check` passes.
+  An exploratory Ruff 0.16.5 invocation enabled broader style rules and reported
+  existing style warnings; no unrelated mass-formatting was applied.
+- Independent read-only absence review: no blocker, WATCH for separate OneShot
+  toolset semantics owned by the launcher. Core API absence does not attest Bash
+  isolation or one-call condition policy. No r53, EVAS, legacy defaults, paid
+  model run or Spectre change.
+
 ## 2026-08-30 - Documentation snapshot publication preflight
 
 - The user authorized publishing the five documentation files from the review
