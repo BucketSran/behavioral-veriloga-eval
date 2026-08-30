@@ -260,6 +260,10 @@ def public_stub_artifacts(contract: dict[str, Any]) -> dict[str, str]:
 class ScriptedClient:
     """OpenAI-compatible deterministic client used only by this integration smoke."""
 
+    endpoint = "fixture://r53-smoke"
+    temperature = 0.0
+    stream = False
+
     def __init__(self, model: str, responses: list[dict[str, Any]]) -> None:
         self.model = model
         self._responses = list(responses)
@@ -498,8 +502,94 @@ def configure_runner_args(args: argparse.Namespace, output: Path, identity: dict
     args.evas_identity = identity
 
 
+def run_native_smoke_cell(args, cell, client):
+    """Bridge the already-scored native result, never synthesize legacy evidence."""
+    from run_native_mini_swe import run_prepared_native_mini_swe
+
+    runtime = args.output / cell["cell_id"]
+    report = {**cell, "backend": "native-mini-swe", "runtime": str(runtime)}
+    try:
+        run_campaign.export_runtime(cell, args.release, runtime, timeout_s=args.setup_timeout_s)
+        run = run_prepared_native_mini_swe(
+            runtime=runtime, cell=cell, client=client,
+            attempt_id=f"{cell['cell_id']}:smoke-native-1",
+            evas_command=args.evas_command, release=args.release,
+            final_judge_command=args.judge_command,
+            request_timeout_s=args.request_timeout_s, tool_timeout_s=args.tool_timeout_s,
+            judge_timeout_s=args.judge_timeout_s, docker_image=args.mini_swe_image,
+            allow_insecure_test_sandbox=args.allow_insecure_test_sandbox and args.sandbox == "none",
+            campaign_file_sha256=sha256_file(args.output_root / "campaign.json"),
+        )
+        before = {
+            str(path.relative_to(runtime)): sha256_file(path)
+            for path in (runtime / "evidence").rglob("*") if path.is_file()
+        }
+        row = score_campaign.read_native_cell(
+            runtime, cell, campaign_file_sha256=sha256_file(args.output_root / "campaign.json"),
+        )
+        unchanged = before == {
+            str(path.relative_to(runtime)): sha256_file(path)
+            for path in (runtime / "evidence").rglob("*") if path.is_file()
+        }
+        report.update({"status": row["outcome"], "evas_usage": row["evas_usage"]})
+        if run.artifact_path is None:
+            return row, report, [f"native_unscored:{cell['cell_id']}"]
+        artifact = read_json(run.artifact_path)
+        manifest = read_json(runtime / "evidence/native-launcher/manifest.json")
+        sidecar_reference = row["trusted_replay"]["derived_score_sidecar_reference"]
+        sidecar = read_json(runtime / sidecar_reference["path"])
+        clean_room = public_clean_room_manifest(
+            runtime, {"agent_scaffold": manifest["environment"]}, "Agentic", args.sandbox,
+        )
+        report.update({
+            "clean_room_contract": clean_room,
+            "trajectory": {
+                "path": str(run.trajectory_path), "sha256": sha256_file(run.trajectory_path),
+                "chain_verified": True, "chain_head_sha256": artifact["trajectory"]["tail_sha256"],
+            },
+            "final_submission": {"status": "available", "immutable": True, **artifact["submission"]},
+            "score_sidecar": {
+                **sidecar_reference, "path": str(runtime / sidecar_reference["path"]),
+                "judge_engine": sidecar["judge"]["engine"], "judge_runtime": "evas-sim==0.8.7",
+                "score_authority": sidecar["score_authority"], "judge_status": row["judge_status"],
+                "submission_tree_sha256": sidecar["submission_tree_sha256"],
+            },
+            "bound_final_test": {
+                "receipt": run.score_sidecar_receipt,
+                "sidecar_hash_verified": True, "generation_evidence_unchanged": unchanged,
+            },
+        })
+        blockers = []
+        if not unchanged or not clean_room["isolation_contract_satisfied"]:
+            blockers.append(f"native_evidence_or_clean_room_failed:{cell['cell_id']}")
+        if row["judge_status"] not in STRUCTURED_SCORE_STATUSES:
+            blockers.append(f"native_structured_score_failed:{cell['cell_id']}")
+        if row["evas_usage"]["calls_executed"] < 1:
+            blockers.append(f"agentic_arm_did_not_invoke_evas:{cell['cell_id']}")
+        return row, report, blockers
+    except Exception as exc:
+        # Missing/corrupt evidence or failed setup is a coordinator incident,
+        # not a candidate zero. Preserve this scheduled cell; never rerun it.
+        row = {
+            **{key: cell[key] for key in ("cell_id", "task_id", "family_id", "form", "mode", "experimental_arm")},
+            "backend": "native-mini-swe", "submission_status": "unknown",
+            "judge_status": "infrastructure_failure", "outcome": "infrastructure_failure",
+            "score": None, "evidence_error_type": type(exc).__name__,
+        }
+        score_campaign.attach_failure_taxonomy(
+            row, {}, fallback_model_status="runner_failure", artifact_gate={"passed": False},
+        )
+        report.update({"status": "infrastructure_failure", "evidence_error_type": type(exc).__name__})
+        return row, report, [f"native_evidence_failure:{cell['cell_id']}"]
+
+
 def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
     started = time.perf_counter()
+    native = args.agentic_backend == "native-mini-swe"
+    if native and not args.bound_final_authority:
+        raise ValueError("native smoke requires --bound-final-authority")
+    if native and (args.docker_command != "docker" or args.preflight_timeout_s != 60 or args.preflight_attempts != 2):
+        raise ValueError("native smoke requires default Docker/preflight settings")
     args.release = args.release.expanduser().resolve()
     args.output_root = args.output_root.expanduser().resolve()
     if args.output_root.exists() and any(args.output_root.iterdir()):
@@ -517,6 +607,12 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
     evas_command, evas_identity = resolve_evas_command(args.evas_command)
     args.evas_command = evas_command
     cells = three_arm_cells(args.release, args.task_id, args.model)
+    if native and any(cell["form"] not in {"dut", "bugfix"} for cell in cells):
+        raise ValueError("native smoke supports DUT/bugfix only")
+    backend_by_arm = {
+        "OneShot": "legacy-direct", "Agent-No-EVAS": "legacy-mini-swe",
+        "Agentic": args.agentic_backend,
+    }
     run_root = args.output_root / "run"
     configure_runner_args(args, run_root, evas_identity)
     campaign_config = {
@@ -527,6 +623,10 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
         "experiment_policy_sha256": sha256_file(PACKAGE / "EXPERIMENT_POLICY.json"),
         "judge_command": args.judge_command, "judge_timeout_s": args.judge_timeout_s,
         "testbench_timeout_s": args.testbench_timeout_s,
+        "backend_by_arm": backend_by_arm,
+        "model": args.model, "provider": "deterministic_public_contract_fixture",
+        "request_timeout_s": args.request_timeout_s, "tool_timeout_s": args.tool_timeout_s,
+        "temperature": 0.0, "stream": False, "workers": 1, "automatic_cell_retry": False,
     }
     if args.bound_final_authority:
         write_immutable_json(args.output_root / "campaign.json", campaign_config)
@@ -538,6 +638,13 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
     for cell in cells:
         arm = str(cell["experimental_arm"])
         client = client_for_arm(arm, artifacts, args.model, public_evas_command)
+        if native and arm == "Agentic":
+            row, report, reasons = run_native_smoke_cell(args, cell, client)
+            rows.append(row)
+            cell_reports.append(report)
+            runtime_paths.add(str(args.output / cell["cell_id"]))
+            blockers.extend(reasons)
+            continue
         result = run_campaign.run_cell(cell, args, client)
         runtime = Path(result["runtime"]).resolve()
         runtime_paths.add(str(runtime))
@@ -646,7 +753,7 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
     if args.sandbox != "docker":
         blockers.append("clean_room_requires_docker")
 
-    score_report = score_campaign.summarize(rows, "final_trusted_replay")
+    score_report = score_campaign.summarize(rows, "final_trusted_replay", scheduled_cells=cells)
     score_report["score_authority"] = "development_only_evas_0.8.7"
     score_report["paper_result_authority"] = False
     score_report_path = args.output_root / "SCORE_EVAS_0_8_7.json"
@@ -661,7 +768,8 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
         "benchmark_release": release,
         "task_id": args.task_id,
         "model": args.model,
-        "comparison_profile": "executable-feedback-control-v1",
+        "comparison_profile": "mixed-backend-connectivity-v1" if native else "executable-feedback-control-v1",
+        "backend_by_arm": backend_by_arm,
         "cells": cell_reports,
         "score_report": {
             "path": str(score_report_path),
@@ -693,6 +801,8 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
             "spectre_required": False,
             "paper_result_requires_spectre": True,
             "supports": (
+                "one r53 task across explicitly mixed backends; no matched backend/EVAS-effect claim"
+                if native else
                 "one r53 task across matched OneShot, Agent-No-EVAS, and Agentic "
                 "harness/evaluator connectivity only"
             ),
@@ -710,6 +820,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--release", type=Path, default=DEFAULT_RELEASE)
     parser.add_argument("--task-id", default=DEFAULT_TASK_ID)
     parser.add_argument("--model", default=DEFAULT_MODEL)
+    parser.add_argument("--agentic-backend", choices=("legacy-mini-swe", "native-mini-swe"),
+                        default="legacy-mini-swe", help="Native Agentic only; other arms remain legacy.")
     parser.add_argument("--output-root", type=Path, required=True)
     parser.add_argument("--out", type=Path)
     parser.add_argument("--evas-command", default="evas")

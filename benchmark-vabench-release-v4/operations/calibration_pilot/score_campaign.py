@@ -11,6 +11,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import re
 import shlex
 import statistics
 from typing import Any
@@ -446,10 +447,184 @@ def evaluate_cell(
     return row
 
 
-def summarize(rows: list[dict[str, Any]], judge_kind: str) -> dict[str, Any]:
+def read_native_cell(
+    runtime: Path, cell: dict[str, Any], *, campaign_file_sha256: str,
+) -> dict[str, Any]:
+    """Read a terminal native launcher attempt; never execute or refreeze it.
+
+    The caller supplies the frozen scheduled cell and campaign file digest.
+    Evidence corruption/incompletion raises, rather than becoming a model zero.
+    This trusted report projection is not a public raw-trajectory export.
+    """
+    from runners.agent_harness import (
+        backend_profile_sha256, read_trajectory,
+        validate_scored_result_artifact, validate_trajectory_semantics,
+    )
+    from runners.agent_harness.trajectory import validate_trajectory
+
+    if not isinstance(campaign_file_sha256, str) or not re.fullmatch(r"[0-9a-f]{64}", campaign_file_sha256):
+        raise ValueError("expected campaign identity must be a SHA-256")
+    if runtime.is_symlink():
+        raise ValueError("native evidence must not use symlinks")
+    runtime = runtime.resolve()
+    hashes: dict[str, str] = {}
+
+    def evidence(relative: str, expected: str | None = None) -> Path:
+        path = runtime / relative
+        if Path(relative).is_absolute() or ".." in Path(relative).parts:
+            raise ValueError("unsafe native evidence path")
+        if any(p.is_symlink() for p in (path, *path.parents) if p != runtime.parent):
+            raise ValueError("native evidence must not use symlinks")
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        if expected is not None and digest != expected:
+            raise ValueError("native evidence digest mismatch")
+        hashes[relative] = digest
+        return path
+
+    prefix = "evidence/native-launcher/"
+    result = read_json(evidence(prefix + "result.json"))
+    manifest = read_json(evidence(prefix + "manifest.json", result["manifest_sha256"]))
+    if manifest["cell"] != cell or manifest["campaign_file_sha256"] != campaign_file_sha256:
+        raise ValueError("native evidence differs from scheduled campaign/cell")
+    request = read_json(evidence("evidence/native-episode/request.json"))
+    if request["backend_profile_sha256"] != backend_profile_sha256(manifest["backend_profile"]):
+        raise ValueError("native backend identity mismatch")
+    outcome = read_json(evidence("evidence/native-episode/outcome.json"))
+    events = read_trajectory(evidence(
+        "evidence/native-episode/trajectory.jsonl", result["trajectory_sha256"],
+    ))
+    private = read_trajectory(evidence(
+        prefix + "private-events.jsonl", result["private_events_sha256"],
+    ))
+    identity = {
+        "episode_id": cell["cell_id"], "task_id": cell["task_id"],
+        "condition": cell["experimental_arm"], "attempt_id": manifest["attempt_id"],
+    }
+    if (
+        not validate_trajectory_semantics(events) or not validate_trajectory(private)
+        or not private or private[-1]["event_sha256"] != result["private_events_tail_sha256"]
+        or any(request.get(key) != value for key, value in identity.items())
+        or any(event.get(key) != value for event in events + private for key, value in identity.items())
+        or outcome["trajectory_tail_sha256"] != events[-1]["event_sha256"]
+        or any(outcome[key] != result[key] or outcome[key] != events[-1]["payload"][key]
+               for key in ("primary_outcome", "terminal_reason"))
+    ):
+        raise ValueError("native trajectory/terminal identity mismatch")
+    for profile in (request["public_validation_profile"], request["final_test_profile"]):
+        if profile["campaign_config_sha256"] != RUNNER.RESULT_PROTOCOL.canonical_sha256(manifest):
+            raise ValueError("native authority/config mismatch")
+    row = {
+        **{key: cell[key] for key in ("cell_id", "task_id", "family_id", "form", "mode", "experimental_arm")},
+        "backend": "native-mini-swe",
+        "attempt_id": manifest["attempt_id"],
+        "submission_status": "not_submitted",
+        "terminal_reason": outcome["terminal_reason"],
+        "termination_reason": outcome["terminal_reason"],
+        "judge_status": outcome["primary_outcome"], "outcome": outcome["primary_outcome"],
+        "score": None,
+        "output_tokens": result["model_telemetry"]["provider_output_tokens"],
+        "telemetry": event_telemetry(result["model_telemetry"]["provider_events"]),
+        "evas_usage": RUNNER.summarize_evas_invocations(result["evas_invocations"]),
+        "incidents": [{"category": incident["category"]} for incident in outcome["incidents"]],
+        "native_evidence": {
+            "files": hashes, "artifact_path": result["artifact_path"],
+            "artifact_file_sha256": result["artifact_file_sha256"], "artifact_sha256": None,
+        },
+    }
+    artifact_path = result["artifact_path"]
+    if artifact_path is None:
+        failure = outcome["failure"]
+        failed = [event["payload"] for event in events if event["event_type"] == "episode_failed"]
+        if (
+            result["artifact_file_sha256"] is not None or not failure or not failed
+            or any(failed[-1].get(key) != failure[key] for key in ("category", "phase", "message"))
+            or any(event["event_type"] == "final_judgment_completed" for event in events)
+        ):
+            raise ValueError("native unscored failure evidence mismatch")
+        status = outcome["primary_outcome"]
+        if status not in {"protocol_failure", "infrastructure_failure", "budget_exhausted", "agent_timeout"}:
+            raise ValueError("unsupported native unscored terminal status")
+        model_status = "runner_failure" if status == "infrastructure_failure" else status
+        attach_failure_taxonomy(
+            row, {}, fallback_model_status=model_status, artifact_gate={"passed": False},
+        )
+        return row
+    if not isinstance(artifact_path, str) or not artifact_path.startswith(
+        "evidence/native-episode/scored-results/"
+    ):
+        raise ValueError("native scored artifact is missing")
+    artifact = read_json(evidence(artifact_path, result["artifact_file_sha256"]))
+    if (
+        artifact_path != f"evidence/native-episode/scored-results/{artifact['artifact_sha256']}.json"
+        or any(artifact["contract_identity"][key] != request[key] for key in (
+            "backend_profile_sha256", "registry_sha256", "effective_capability_sha256",
+        ))
+        or outcome["failure"] is not None
+        or outcome["incidents"] != artifact["episode"]["incidents"]
+    ):
+        raise ValueError("native artifact/request identity mismatch")
+    sidecar_sha = artifact["score_sidecar"]["sha256"]
+    sidecar_path = f"evidence/score-sidecars/{sidecar_sha}.json"
+    sidecar = read_json(evidence(sidecar_path, sidecar_sha))
+    if not validate_scored_result_artifact(
+        artifact, trajectory_events=events, score_sidecar=sidecar,
+        public_validation_profile=request["public_validation_profile"],
+        final_test_profile=request["final_test_profile"],
+    ):
+        raise ValueError("native scored evidence join mismatch")
+    frozen_root = runtime / "evidence/final_submission"
+    if frozen_root.is_symlink() or any(path.is_symlink() for path in frozen_root.rglob("*")):
+        raise ValueError("native frozen submission must not use symlinks")
+    frozen = RUNNER.RESULT_PROTOCOL.hash_test_tree(frozen_root)
+    if frozen["tree_sha256"] != artifact["submission"]["tree_sha256"]:
+        raise ValueError("native frozen submission mismatch")
+    row["native_evidence"]["artifact_sha256"] = artifact["artifact_sha256"]
+    row.update({
+        "submission_status": "submitted",
+        "score": sidecar["structured_result"]["score"],
+        "trusted_replay": {
+            "status": outcome["primary_outcome"],
+            "submission_tree_sha256": frozen["tree_sha256"],
+            "final_test_profile": request["final_test_profile"],
+            "derived_score_sidecar_reference": {"path": sidecar_path, "sha256": sidecar_sha},
+        },
+    })
+    attach_failure_taxonomy(
+        row, {"final_submission": {"status": "available"}, "final_trusted_replay": row["trusted_replay"]},
+        fallback_model_status="completed", artifact_gate={"passed": True},
+    )
+    return row
+
+
+def summarize(
+    rows: list[dict[str, Any]], judge_kind: str, *,
+    scheduled_cells: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    if scheduled_cells is not None:
+        scheduled = {cell["cell_id"]: cell for cell in scheduled_cells}
+        observed = {row["cell_id"]: row for row in rows}
+        if (
+            not scheduled
+            or len(scheduled) != len(scheduled_cells)
+            or len(observed) != len(rows)
+            or scheduled.keys() != observed.keys()
+        ):
+            raise ValueError("rows must cover every scheduled cell exactly once")
+        for cell_id, cell in scheduled.items():
+            row = observed[cell_id]
+            if row.get("judge_status") not in {
+                "passed", "compile_failure", "runtime_failure", "behavior_failure",
+                "infrastructure_failure", "agent_timeout", "agent_resource_exhausted",
+                "no_submission", "protocol_failure", "budget_exhausted",
+            }:
+                raise ValueError("scheduled row must have a terminal disposition")
+            if any(row.get(key) != cell.get(key) for key in (
+                "task_id", "family_id", "form", "mode", "experimental_arm",
+            )):
+                raise ValueError("row identity differs from scheduled cell")
     for row in rows:
         replay = row.get("trusted_replay") or {}
-        if "score_sidecar_receipt" in replay:
+        if "score_sidecar_receipt" in replay or "derived_score_sidecar_reference" in replay:
             profile = replay.get("final_test_profile") or {}
             authority = (profile.get("score_sidecar_contract") or {}).get("score_authority")
             if authority != SCORE_AUTHORITY_BY_JUDGE_KIND[judge_kind]:
