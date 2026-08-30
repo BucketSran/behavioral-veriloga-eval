@@ -48,3 +48,10 @@ identity、campaign hash 与发布 manifest。它不是抵御同用户恶意主�
 固定 r53 + EVAS 0.8.7；不改 legacy、训练、Evolution、Spectre 或任务内容。
 free fixture 验证工程连通，不证明真实模型效果；live 结果另记，始终仅为
 development-only 小样本工程试跑，不是 baseline 复现或优劣结论。
+
+## 真实调用结果（同日，独立于免费 fixture）
+
+已执行一次：[脱敏审计](../experiments/deepseek-pilot-20260830.md)。16次 HTTP，
+两个 DUT 单元分别因八次上限、SSL 握手失败后的未知费用保护而中止，后四项
+未启动；零项最终评分。费用保守上界 ¥3.420315，不是账单。证明真实 API
+接通和预算失败关闭，不证明六单元已评分或任一 backend 更好；没有自动重跑。

@@ -13,16 +13,17 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
-- Authorized next experiment: [budget-controlled DeepSeek pilot](deepseek-budget-pilot.md).
+- Bounded experiment executed and safely stopped: [DeepSeek pilot audit](../docs/alphaapollo-migration/experiments/deepseek-pilot-20260830.md).
   The user confirmed GLM Coding Plan only, then explicitly chose DeepSeek API.
   Use the saved DeepSeek key and `deepseek-v4-flash`; do not call GLM.
   Keep one seeded family, three forms, two Agentic backends, one repetition
   and the CNY 5.00 ceiling. Safe local credential parsing is verified (AA-VAE-051);
   the earlier DeepSeek-only guard remains verified separately (AA-VAE-050).
-  Provider metadata preflight passed (model available, CNY account). The serial
-  driver and full censored-result index are implemented in AA-VAE-052; free
-  Docker/EVAS and regression gates precede the fresh live manifest/run. No paid
-  generation at this implementation checkpoint. This
+  Driver/free Docker/EVAS gates passed (AA-VAE-052). Live run: 16 HTTP attempts,
+  2 censored DUT cells and 4 unstarted cells; no scored submission. An SSL
+  handshake failure stopped the shared budget. CNY3.420315 is the conservative
+  committed/reserved upper bound, not an invoice. No automatic paid rerun.
+  Offline trajectory review and a new explicit experiment decision are next. This
   development pilot does not change r53's normal wall-time policy or authorize
   full-r53/Evolution execution.
 
@@ -44,8 +45,8 @@ implementation and does not change the phase statuses below.
   Final runtime commit `164131a8a4` is published to fork/main; all three triggered
   hosted workflows passed. Local final harness gate: 702 passed / 11 skipped.
   Implementation and real-model experimental evidence remain separate gates.
-  The pilot budget/design and DeepSeek service are selected above; verified
-  frozen guarded execution remain the live-execution gates.
+  The bounded DeepSeek pilot above is complete as a stopped operational run,
+  not as a scored six-cell experiment; broader real-model evidence remains open.
 
 - Earlier completed milestone: [native DUT/bugfix three-arm campaign](native-three-arm-campaign.md).
   Implemented absent public authority, native conditions and minimal
@@ -505,8 +506,8 @@ Tests first:
 
 ### Phase 9 - Define experimental conditions and ablations
 
-Status: `bounded DeepSeek pilot authorized / execution pending`. The selected
-model/service/budget and live gates are frozen in `deepseek-budget-pilot.md`.
+Status: `bounded DeepSeek pilot stopped / no scored result`. Frozen design is
+in `deepseek-budget-pilot.md`; execution audit is linked in Current Status above.
 Conditions and runtime entrypoints remain distinct; no broader paid experiment
 is authorized. Deferred domain tools are not required closure work.
 

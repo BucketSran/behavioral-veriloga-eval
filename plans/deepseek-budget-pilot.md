@@ -21,10 +21,11 @@ the six-cell live run. Request metadata to confirm model/currency/access but
 do not issue a separate diagnostic generation or spend outside the journal.
 
 Date: 2026-08-30. Base: `38375909aee7103df154c72b2c3d7f3fbb3dee1c`.
-Status: authorized pilot; metadata access passed for the selected model and CNY
-account. The guarded serial driver and complete pilot index are implemented
-(AA-VAE-052); verify and commit them before freezing the live schedule.
-No paid generation at this implementation checkpoint.
+Status: executed once and safely stopped. See
+[sanitized live audit](../docs/alphaapollo-migration/experiments/deepseek-pilot-20260830.md): 16 HTTP attempts,
+2 censored cells, 4 unstarted cells, zero final scores. CNY3.420315 is the
+committed/reserved upper bound, not billed cost. No automatic rerun or budget
+reset is authorized. Preparation statements below retain their historical context.
 
 ## Brief and KPI
 

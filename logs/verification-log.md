@@ -1,5 +1,34 @@
 # Verification Log
 
+## 2026-08-30 - Real DeepSeek pilot stopped within the shared cap
+
+- Source/fork main `f3e12ac82672d7b27dd3accf01176aaa5f67e4fd`; clean source
+  at launch. Used the committed opt-in driver and existing external credential
+  file, no raw-key export. Frozen image and evidence hashes:
+  [sanitized pilot audit](../docs/alphaapollo-migration/experiments/deepseek-pilot-20260830.md).
+- 6 scheduled / 2 started / 2 censored / 4 unstarted / 0 final scores.
+  16 HTTP attempts: 15 valid terminal usage; last curl35 SSL handshake failure,
+  zero response body, ~20.43s. No retry after uncertainty. Both observed model
+  response identities use alias `deepseek-v4-flash`, not an immutable snapshot.
+- Reconciled peak/miss upper bound CNY0.237723 plus uncertain reservation
+  CNY3.182592 = **CNY3.420315**, below CNY5.00. Not a billed-cost estimate.
+- Offline verification validated both native terminal results/trajectories via
+  `read_native_cell`, exact index/journal/manifest hashes, 16 captured transport
+  attempts, six-row coverage and absence of all four unstarted runtimes.
+  No final replay or additional provider calls during verification.
+- Live run observed guarded connectivity and stop accounting; the free fixture
+  remains the evidence for six-cell EVAS completion. No paper result, pass rate,
+  backend ranking or successful scored live smoke is claimed.
+- Independent read-only audit matched all six dispositions, accounting math
+  and four evidence hashes against the allowed private index/journals; no
+  publication blocker. Final documentation layout gate: 48 passed in 0.96s;
+  new audit links and diff whitespace checks pass. No code changed after launch.
+- Hosted runtime commit `f3e12ac826` is now fully green:
+  [Evaluator Closure 33319203526](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33319203526),
+  [Runner Smoke 33319203528](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33319203528),
+  [Public Agent Runtime 33319203529](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33319203529).
+  This includes the new real-Docker/free-HTTP six-cell and censoring gates.
+
 ## 2026-08-30 - Guarded six-cell DeepSeek driver (AA-VAE-052)
 
 - Base `42f35332aa`. No default runner/scorer, r53, EVAS or dependency changes.

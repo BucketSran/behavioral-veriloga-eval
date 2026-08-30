@@ -1,5 +1,16 @@
 # Decision Log
 
+## 2026-08-30 - Preserve stopped live pilot; no score-driven or cost-unknown rerun
+
+- Live source `f3e12ac82672d7b27dd3accf01176aaa5f67e4fd`: first DUT hit the
+  eight-call cap; second DUT's eighth HTTP attempt failed SSL handshaking
+  (curl35, no response body/usage). Stop shared budget; retain four unstarted.
+- Keep CNY3.182592 uncertain-attempt reservation, even though evidence suggests
+  an early connection failure. Total CNY3.420315 is an upper bound, not invoice.
+- No final score exists. Do not turn operational censoring into failure rate,
+  compare backend quality, repeat final judging or launch a replacement budget.
+  Next work is offline trace review; any wider paid run needs a new decision.
+
 ## 2026-08-30 - Reuse native execution; separate six-cell pilot projection (AA-VAE-052)
 
 - The new opt-in driver freezes identical Agentic cells and alternates backend
