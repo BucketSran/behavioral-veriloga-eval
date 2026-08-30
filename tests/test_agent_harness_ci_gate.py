@@ -24,3 +24,11 @@ def test_evaluator_closure_runs_bound_production_replay_smoke() -> None:
     assert "--bound-final-authority" in workflow
     assert 'cell["bound_final_test"]["sidecar_hash_verified"]' in workflow
     assert 'cell["bound_final_test"]["generation_evidence_unchanged"]' in workflow
+
+
+def test_evaluator_closure_installs_and_runs_locked_agentic_extra() -> None:
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    assert "uv sync --locked --group dev --extra agentic --python 3.11.13" in workflow
+    runs = [line.strip() for line in workflow.splitlines() if line.strip().startswith("uv run ")]
+    assert runs
+    assert all(line.startswith("uv run --locked --extra agentic ") for line in runs)

@@ -36,3 +36,7 @@ CI 外的实际运行记录、Python/EVAS 身份和文件 hash 位于 `logs/veri
 本机 Docker 使用 VM 时，`/tmp` 可能不在 daemon 的共享目录内。先前该路径下的运行因
 bind mount 不可见而失败；换到允许的 `/Users/.../vaEVAS-next/` 隔离产物目录后通过。
 这是部署路径限制，不是 EVAS 缺陷，未修改 EVAS、r53 或 Docker 全局配置。
+
+推送后复核发现旧 GitHub run `33273921948` 有 7 项因缺少 `minisweagent` 失败：工作流
+运行 agent 测试但安装时遗漏了已有的 `agentic` extra。单独 follow-up commit 为 sync 和
+run 显式加上 locked agentic 环境，并用 CI 配置回归测试约束它；不增加依赖或修改锁文件。

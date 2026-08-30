@@ -74,16 +74,16 @@ jobs:
       - name: Install locked runtime and test environment
         run: |
           python -m pip install "uv==0.11.7"
-          uv sync --locked --group dev --python 3.11.13
+          uv sync --locked --group dev --extra agentic --python 3.11.13
 
       - name: Verify installed evaluator identity
         run: |
-          uv run python scripts/verify_evaluator_environment.py \
+          uv run --locked --extra agentic python scripts/verify_evaluator_environment.py \
             --run-evas \
             --evas-command evas \
             --json \
             > "$RUNNER_TEMP/evaluator-environment.json"
-          uv run python - "$RUNNER_TEMP/evaluator-environment.json" <<'PY'
+          uv run --locked --extra agentic python - "$RUNNER_TEMP/evaluator-environment.json" <<'PY'
           import json
           import pathlib
           import sys
@@ -95,7 +95,7 @@ jobs:
 
       - name: Run evaluator closure tests
         run: |
-          uv run python -m pytest -q \
+          uv run --locked --extra agentic python -m pytest -q \
             tests/test_agent_harness_*.py \
             tests/test_evaluator_environment_contract.py \
             tests/test_v3_clean_room_smoke.py \
@@ -113,14 +113,14 @@ jobs:
 
       - name: Run r53 three-arm clean-room hidden-scoring smoke
         run: |
-          uv run python scripts/run_v4_r53_clean_room_smoke.py \
+          uv run --locked --extra agentic python scripts/run_v4_r53_clean_room_smoke.py \
             --task-id v4-001 \
             --bound-final-authority \
             --evas-command "$(pwd)/.venv/bin/evas" \
             --output-root "$RUNNER_TEMP/r53-clean-room-output" \
             --out "$RUNNER_TEMP/r53-clean-room-smoke.json" \
             --json
-          uv run python - "$RUNNER_TEMP/r53-clean-room-smoke.json" <<'PY'
+          uv run --locked --extra agentic python - "$RUNNER_TEMP/r53-clean-room-smoke.json" <<'PY'
           import json
           import pathlib
           import sys

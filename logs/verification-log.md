@@ -1,5 +1,23 @@
 # Verification Log
 
+## 2026-08-30 - Hosted CI agentic environment correction
+
+- Post-push inspection of baseline GitHub run `33273921948` at `7c49bb95a6`
+  found `7 failed, 518 passed, 6 skipped`; all seven failures report missing
+  `minisweagent`. The workflow ran mini-swe tests/smoke but did not install the
+  already-declared pinned `agentic` extra.
+- Added a RED configuration test requiring the locked agentic extra for sync
+  and every workflow `uv run` command; fixed the workflow without changing
+  `pyproject.toml` or `uv.lock`.
+- Local `uv run --locked --extra agentic` successfully imports the real
+  `DefaultAgent` and `Submitted`; distribution identities are
+  `mini-swe-agent==2.4.5` and `evas-sim==0.8.7`.
+- Focused CI/environment contract tests report `9 passed`; independent
+  read-only workflow review reports PASS with no blocking finding.
+- Ruff, workflow YAML parsing, and `git diff --check` pass. Hosted CI status
+  after this correction must be observed separately, not inferred from the
+  earlier local smoke or the failed baseline job.
+
 ## 2026-08-30 - Bound-final three-arm smoke and CI gate
 
 - Smoke RED rejected the missing `--bound-final-authority` option; GREEN now
