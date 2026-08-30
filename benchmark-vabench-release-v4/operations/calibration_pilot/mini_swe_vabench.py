@@ -581,6 +581,7 @@ class VaBenchBashEnvironment:
         evas_command: str,
         executable_feedback: bool = True,
         structured_evas_feedback: bool = False,
+        submission_read_only: bool = False,
         docker_command: str = "docker",
         docker_image: str = "",
         preflight_timeout_s: float = 60.0,
@@ -591,6 +592,8 @@ class VaBenchBashEnvironment:
         candidate_artifacts: list[str] | tuple[str, ...] = (),
         private_output_sink: Callable[[dict[str, Any]], None] | None = None,
     ) -> None:
+        if submission_read_only and sandbox_backend != "docker":
+            raise ValueError("read-only submission requires Docker")
         self.runtime = runtime.resolve()
         self.workspace = (self.runtime / "public").resolve()
         self.available_skills = available_skills(self.runtime)
@@ -613,6 +616,7 @@ class VaBenchBashEnvironment:
         self.submit_sentinel = scratch_root / ".tmp" / "submission-request"
         self.evas_command = evas_command
         self.executable_feedback = bool(executable_feedback)
+        self.submission_read_only = bool(submission_read_only)
         self.structured_evas_feedback = bool(structured_evas_feedback and executable_feedback)
         self.docker_command = docker_command
         self.docker_image = docker_image
@@ -829,6 +833,7 @@ class VaBenchBashEnvironment:
                         "network": False,
                         "evaluator_mounted": False,
                         "executable_feedback": self.executable_feedback,
+                        **({"submission_read_only": True} if self.submission_read_only else {}),
                         **({"public_evas_feedback_schema_version": PUBLIC_EVAS_FEEDBACK_SCHEMA_VERSION}
                            if self.structured_evas_feedback else {}),
                         "preflight_timeout_s": self.preflight_timeout_s,
@@ -1044,7 +1049,8 @@ class VaBenchBashEnvironment:
                 f"type=bind,src={self.workspace / 'task'},dst=/workspace/public/task,readonly",
                 *skill_mount,
                 "--mount",
-                f"type=bind,src={self.workspace / 'submission'},dst=/workspace/public/submission",
+                f"type=bind,src={self.workspace / 'submission'},dst=/workspace/public/submission"
+                + (",readonly" if self.submission_read_only else ""),
                 "--mount",
                 f"type=bind,src={self.work_dir},dst=/workspace/work",
                 "--workdir",

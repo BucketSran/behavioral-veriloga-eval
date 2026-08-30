@@ -76,6 +76,22 @@ def summarize_waveform(output_root: Path) -> dict[str, Any]:
         if root_fd is not None:
             os.close(root_fd)
 
+    return _summarize_bytes(base, raw_bytes)
+
+
+def summarize_waveform_bytes(raw_bytes: bytes) -> dict[str, Any]:
+    """Parse captured bytes; provenance still belongs to the trusted caller."""
+    if not isinstance(raw_bytes, bytes):
+        raise TypeError("waveform input must be immutable bytes")
+    base = _base_summary()
+    base["file_size_bytes"] = len(raw_bytes)
+    if len(raw_bytes) > MAX_BYTES:
+        base["status"] = "too_large"
+        return base
+    return _summarize_bytes(base, raw_bytes)
+
+
+def _summarize_bytes(base: dict[str, Any], raw_bytes: bytes) -> dict[str, Any]:
     base["accepted_bytes"] = len(raw_bytes)
     base["source_sha256"] = hashlib.sha256(raw_bytes).hexdigest()
 
