@@ -1,5 +1,26 @@
 # Verification Log
 
+## 2026-08-30 - Reasoning runtime integration (AA-VAE-046)
+
+- Initial production RED: **3 failed** (backend absent/unsupported in runner
+  and wrapper). Both native-tool and strict-JSON production controller/Bash/
+  freeze/score tests are now green. Additional RED exposed absent frozen-format
+  enforcement during score reading; the reader now verifies actual backend,
+  proposal format and model against the frozen campaign.
+- Final targeted policy/runtime/dispatch/attempt/conditions/differential suite:
+  **111 passed, 1 skipped in 34.43s**. Independent read-only follow-up:
+  **55 passed in 5.93s**, no remaining scoped blocker. Ruff 0.12.12 and
+  whitespace checks passed; LSP remains unavailable.
+- Fresh post-review real Docker Reasoning nine-cell campaign: **1 passed in
+  33.26s**. Evidence index:
+  `benchmark-vabench-release-v4/reports/reasoning-native-gate-02/test_r53_docker_all_native_thr0/smoke-evidence-index.json`,
+  SHA-256 `063570baa59ba40ecb8b66856066b20aea6191294bedb2e1e70f4c68f4531708`.
+  It proves all-three-form/arm pipeline connectivity with deliberately
+  incomplete public candidates, not model superiority or a paper baseline.
+- Previous retry commit `5d3e555a2b8a8f72b3bbdbdb3f8cf10fddced430` passed all
+  triggered hosted gates: Evaluator Closure 33314194428 and Runner Smoke
+  33314194426. Reasoning hosted confirmation follows publication separately.
+
 ## 2026-08-30 - Streaming compatibility repair hosted confirmation
 
 - Exact repair commit `4460b9f7b4668d40c14c4d92055ec38188a4c694` passed

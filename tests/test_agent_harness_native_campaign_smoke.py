@@ -32,8 +32,10 @@ def test_public_testbench_stub_uses_declared_binding_and_no_fault_knowledge(tmp_
     smoke.run_campaign.validate_public_testbench(candidate)
 
 
-@pytest.mark.parametrize("native_max_attempts", [1, 2])
-def test_r53_docker_all_native_three_arm_campaign(tmp_path, native_max_attempts):
+@pytest.mark.parametrize("episode_backend,native_max_attempts", [
+    ("native-mini-swe", 1), ("native-mini-swe", 2), ("native-reasoning", 1),
+])
+def test_r53_docker_all_native_three_arm_campaign(tmp_path, native_max_attempts, episode_backend):
     if os.environ.get("VABENCH_TEST_DOCKER_RUNTIME") != "1":
         pytest.skip("opt-in real Docker/EVAS three-form three-arm campaign")
 
@@ -50,7 +52,7 @@ def test_r53_docker_all_native_three_arm_campaign(tmp_path, native_max_attempts)
     assert len(cells) == 9
     campaign["cells"] = cells
     campaign["execution_config"] = {
-        "episode_backend": "native-mini-swe", "workers": 2,
+        "episode_backend": episode_backend, "workers": 2,
         "automatic_cell_retry": native_max_attempts > 1,
         "evidence_scope": "deterministic_connectivity_not_model_quality",
     }
@@ -65,7 +67,7 @@ def test_r53_docker_all_native_three_arm_campaign(tmp_path, native_max_attempts)
     ])
     args.evas_command, identity = smoke.resolve_evas_command(args.evas_command)
     smoke.configure_runner_args(args, tmp_path / "run", identity)
-    args.episode_backend = "native-mini-swe"
+    args.episode_backend = episode_backend
     args.campaign_file_sha256 = campaign_sha
     args.native_max_attempts = native_max_attempts
 
@@ -109,7 +111,7 @@ def test_r53_docker_all_native_three_arm_campaign(tmp_path, native_max_attempts)
     completed = subprocess.run([
         sys.executable, str(smoke.CALIBRATION / "score_campaign.py"),
         "--campaign-output", str(args.output), "--campaign", str(campaign_path),
-        "--episode-backend", "native-mini-swe", "--workers", "2",
+        "--episode-backend", episode_backend, "--workers", "2",
         "--judge-kind", "final_trusted_replay",
         "--output", str(report_path),
     ], text=True, capture_output=True, timeout=60, check=False)
@@ -137,6 +139,7 @@ def test_r53_docker_all_native_three_arm_campaign(tmp_path, native_max_attempts)
         row = smoke.score_campaign.read_native_cell(
             runtime, cell, campaign_file_sha256=campaign_sha,
         )
+        assert row["backend"] == episode_backend
         manifest = smoke.read_json(runtime / "evidence/native-launcher/manifest.json")
         result = smoke.read_json(runtime / "evidence/native-launcher/result.json")
         request = smoke.read_json(runtime / "evidence/native-episode/request.json")

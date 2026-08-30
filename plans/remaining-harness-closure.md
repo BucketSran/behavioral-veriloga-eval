@@ -8,8 +8,9 @@ connectivity are locally verified (2026-08-30). The stronger invocation identity
 gate also fixed cwd-dependent telemetry hashing. Remaining items below are not
 implicitly completed. AA-VAE-044 evidence/metering is now runtime-integrated and
 locally verified. AA-VAE-045 now integrates opt-in infrastructure retry with
-all-attempt costs and nine-cell Docker verification. Reasoning and Evolution
-still require shared wiring.
+all-attempt costs and nine-cell Docker verification. AA-VAE-046 integrates
+Reasoning into the shared launcher, campaign and score path; Evolution and
+result-ledger production integration remain active.
 
 ## Brief and scope
 

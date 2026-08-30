@@ -1,5 +1,16 @@
 # Decision Log
 
+## 2026-08-30 - Reasoning is a policy replacement, not a second harness
+
+- Keep controller, Bash environment, capture, authority and scoring shared.
+  Select a distinct episode-local ReasoningPolicy for tool-bearing arms;
+  OneShot retains the common one-output artifact transport.
+- Preserve native tool calls as default, allow explicitly frozen strict JSON,
+  and verify backend/model/proposal format again during read-only scoring.
+  Retain source identity and no-reentry/unknown-cost/retry behavior.
+- Compare separate backend campaigns. Deterministic nine-cell connectivity
+  does not establish model quality or replace a budget-authorized pilot.
+
 ## 2026-08-30 - Fresh attempts are infrastructure recovery, not answer search
 
 - Freeze `native_retry_policy` in the campaign; default one attempt preserves

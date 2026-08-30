@@ -71,8 +71,14 @@ def _redact(value, credential):
     return value
 
 
-def _backend_profile():
-    return {
+def _backend_profile(episode_backend="native-mini-swe", proposal_format="native_tool_calls"):
+    if episode_backend not in {"native-mini-swe", "native-reasoning"}:
+        raise ValueError("unsupported native backend")
+    if proposal_format not in {"native_tool_calls", "strict_json"}:
+        raise ValueError("unsupported proposal format")
+    if episode_backend != "native-reasoning" and proposal_format != "native_tool_calls":
+        raise ValueError("strict_json requires native-reasoning")
+    profile = {
         "schema_version": "vaevas-backend-profile-v1",
         "backend_profile_id": "mini-swe/native-single-cell-v1",
         "backend_family": "mini_swe",
@@ -110,6 +116,15 @@ def _backend_profile():
             "final_judge",
         ],
     }
+    if episode_backend == "native-reasoning":
+        profile.update({
+            "backend_profile_id": "alphaapollo/reasoning-single-cell-v1",
+            "backend_family": "alphaapollo_reasoning", "backend_version": "1",
+            "supported_proposal_formats": ["native_tool_calls", "strict_json"],
+            "preferred_proposal_format": proposal_format,
+        })
+        profile["model_interface"]["supports_strict_json"] = True
+    return profile
 
 
 def validate_native_cell(cell: dict) -> str:
@@ -515,6 +530,8 @@ def run_prepared_native_mini_swe(
     allow_insecure_test_sandbox: bool = False,
     campaign_file_sha256: str | None = None,
     episode_context: EpisodeContext | None = None,
+    episode_backend: str = "native-mini-swe",
+    reasoning_proposal_format: str = "native_tool_calls",
 ) -> native_episode.NativeEpisodeRun:
     """Run an exclusively owned fresh exported native tri-form cell.
 
@@ -522,6 +539,7 @@ def run_prepared_native_mini_swe(
     Use the CLI for exporter/config composition. No resume or automatic retry.
     """
     condition = validate_native_cell(cell)
+    backend = _backend_profile(episode_backend, reasoning_proposal_format)
     docker_image = _select_docker_image(condition, docker_image)
     if min(request_timeout_s, tool_timeout_s, judge_timeout_s) <= 0:
         raise ValueError("infrastructure watchdogs must be positive")
@@ -598,7 +616,6 @@ def run_prepared_native_mini_swe(
             _, submitted, _, _ = mini.load_mini_swe()
             environment.bind_submitted_exception(submitted)
         prompt = _native_prompt_path(runtime, condition).read_text()
-        backend = _backend_profile()
         manifest = {
             "schema_version": "vaevas-native-launcher-manifest-v1",
             "cell": deepcopy(cell),
@@ -648,6 +665,10 @@ def run_prepared_native_mini_swe(
             "raw_trace_scope": "decoded_provider_exchanges_bounded_transport_and_tool_capture_v1",
             "reviewer_export_contract": "vaevas-reviewer-evidence-export-v1",
         }
+        if episode_backend == "native-reasoning":
+            manifest["source_sha256"]["reasoning_policy.py"] = _sha_file(
+                REPO / "runners/agent_harness/backends/reasoning.py"
+            )
         config_sha = runner.RESULT_PROTOCOL.canonical_sha256(manifest)
         public_profile = None
         public_profile_sha256 = None
@@ -755,9 +776,21 @@ def run_prepared_native_mini_swe(
                 usage_parser=runner.provider_output_usage,
                 response_metadata=runner.provider_response_metadata,
             )
-            policy = NativeMiniSwePolicy(
-                model=model, prompt=prompt, action_id_prefix=attempt_id
-            )
+            if episode_backend == "native-reasoning":
+                from runners.agent_harness.backends.reasoning import ReasoningPolicy
+
+                model = ReasoningPolicy(
+                    client=_RecordedClient(client, record, context), context=context,
+                    proposal_format=reasoning_proposal_format, tools=[mini.BASH_TOOL],
+                    accepted_tool_names=frozenset({"bash"}),
+                    max_tokens=runner.cell_per_turn_max_tokens(cell),
+                    timeout_s=request_timeout_s, deadline_monotonic=deadline,
+                )
+                policy = model
+            else:
+                policy = NativeMiniSwePolicy(
+                    model=model, prompt=prompt, action_id_prefix=attempt_id
+                )
             bridge = _RecordedEnvironment(
                 record=record,
                 legacy_environment=environment,

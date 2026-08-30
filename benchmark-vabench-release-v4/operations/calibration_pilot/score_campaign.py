@@ -505,7 +505,7 @@ def read_native_cell(
         dispatch = read_json(evidence("evidence/native-dispatch/result.json"))
         if (
             dispatch.get("schema_version") != "v4-native-dispatch-result-v1"
-            or dispatch.get("backend") != "native-mini-swe"
+            or dispatch.get("backend") not in {"native-mini-swe", "native-reasoning"}
             or dispatch.get("cell") != cell
             or dispatch.get("campaign_file_sha256") != campaign_file_sha256
         ):
@@ -532,7 +532,8 @@ def read_native_cell(
                     "experimental_arm",
                 )
             },
-            "backend": "native-mini-swe",
+            "backend": dispatch["backend"],
+            "proposal_format": dispatch.get("proposal_format", "native_tool_calls"),
             "attempt_id": dispatch.get("attempt_id"),
             "submission_status": "not_submitted",
             "terminal_reason": dispatch["termination_reason"],
@@ -564,6 +565,14 @@ def read_native_cell(
     request = read_json(evidence("evidence/native-episode/request.json"))
     if request["backend_profile_sha256"] != backend_profile_sha256(manifest["backend_profile"]):
         raise ValueError("native backend identity mismatch")
+    from run_native_mini_swe import _backend_profile
+    backend_profile = manifest["backend_profile"]
+    family = backend_profile.get("backend_family")
+    if family not in {"mini_swe", "alphaapollo_reasoning"}:
+        raise ValueError("unsupported native backend profile")
+    backend = "native-reasoning" if family == "alphaapollo_reasoning" else "native-mini-swe"
+    if backend_profile != _backend_profile(backend, backend_profile.get("preferred_proposal_format")):
+        raise ValueError("native backend profile differs from supported contract")
     public_profile = request["public_validation_profile"]
     final_profile = request["final_test_profile"]
     expected_public_sha = episode_public_profile_sha256(
@@ -627,7 +636,9 @@ def read_native_cell(
             raise ValueError("native authority/config mismatch")
     row = {
         **{key: cell[key] for key in ("cell_id", "task_id", "family_id", "form", "mode", "experimental_arm")},
-        "backend": "native-mini-swe",
+        "backend": backend,
+        "proposal_format": backend_profile["preferred_proposal_format"],
+        "model": manifest["model"],
         "attempt_id": manifest["attempt_id"],
         "submission_status": "not_submitted",
         "terminal_reason": outcome["terminal_reason"],
@@ -971,7 +982,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--episode-backend",
-        choices=("legacy", "native-mini-swe"),
+        choices=("legacy", "native-mini-swe", "native-reasoning"),
         default="legacy",
     )
     parser.add_argument(
@@ -1020,26 +1031,29 @@ def main() -> int:
         raise SystemExit("--workers must be at least 1")
     if args.timeout_s < 1 or args.testbench_timeout_s < 1:
         raise SystemExit("replay timeouts must be positive")
-    if args.episode_backend == "native-mini-swe" and args.resume:
+    if args.episode_backend in {"native-mini-swe", "native-reasoning"} and args.resume:
         raise SystemExit("native-mini-swe scoring is read-only and does not resume")
-    if args.episode_backend == "native-mini-swe" and args.campaign is None:
+    if args.episode_backend in {"native-mini-swe", "native-reasoning"} and args.campaign is None:
         raise SystemExit("--campaign is required for native-mini-swe scoring")
     if (
-        args.episode_backend == "native-mini-swe"
+        args.episode_backend in {"native-mini-swe", "native-reasoning"}
         and args.judge_kind != "final_trusted_replay"
     ):
         raise SystemExit("native-mini-swe scoring reports final_trusted_replay only")
     if (
         args.judge_kind in {"final_trusted_replay", "final_spectre"}
         and not args.judge_command
-        and args.episode_backend != "native-mini-swe"
+        and args.episode_backend not in {"native-mini-swe", "native-reasoning"}
     ):
         raise SystemExit(f"--judge-kind {args.judge_kind} requires --judge-command")
     if args.judge_command and not args.evas_command:
         raise SystemExit("--evas-command is required when replay executes")
-    if args.episode_backend == "native-mini-swe":
+    if args.episode_backend in {"native-mini-swe", "native-reasoning"}:
         assert args.campaign is not None
         campaign = read_json(args.campaign)
+        expected_backend = (campaign.get("execution_config") or {}).get("episode_backend", args.episode_backend)
+        if expected_backend != args.episode_backend:
+            raise ValueError("native score backend differs from frozen campaign")
         scheduled_cells = list(campaign["cells"])
         campaign_file_sha256 = hashlib.sha256(args.campaign.read_bytes()).hexdigest()
         from run_native_attempts import read_native_attempt_sequence, retry_policy
@@ -1067,6 +1081,13 @@ def main() -> int:
         report = summarize(
             rows, args.judge_kind, scheduled_cells=scheduled_cells
         )
+        if any(row.get("backend") != expected_backend for row in rows):
+            raise ValueError("native row backend differs from frozen campaign")
+        expected_format = (campaign.get("execution_config") or {}).get("reasoning_proposal_format", "native_tool_calls")
+        if any(row.get("proposal_format", "native_tool_calls") != expected_format for row in rows):
+            raise ValueError("native row proposal format differs from frozen campaign")
+        if campaign.get("model") and any(row.get("model", campaign["model"]) != campaign["model"] for row in rows):
+            raise ValueError("native row model differs from frozen campaign")
         output = (
             args.output
             or args.campaign_output / f"SCORE_{args.judge_kind.upper()}.json"

@@ -596,6 +596,12 @@ generation using output-only `submit_artifacts`; No-EVAS uses the paired
 no-EVAS image and absent public profile; Agentic retains public EVAS access.
 All conditions use the same native freeze/final sidecar path. No automatic
 episode retry is enabled by default; existing low-level provider transport retry remains.
+For Reasoning, use `--episode-backend native-reasoning` in both wrapper and
+score command. Freeze `--reasoning-proposal-format native_tool_calls` (default)
+or `strict_json` before generation; scoring rejects mismatches. The two Bash
+arms use the distinct Reasoning policy; OneShot keeps the common output-only
+artifact submission transport. Use separate roots for backend comparisons.
+
 For fresh-attempt infrastructure recovery, set `--native-max-attempts N` on the
 campaign wrapper before freezing the campaign. Only typed pre-final transport
 or sandbox-startup failure can retry, never cleanup/protocol/deadline/final

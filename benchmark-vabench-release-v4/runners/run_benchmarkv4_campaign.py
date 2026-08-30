@@ -238,7 +238,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--episode-backend",
-        choices=("legacy", "native-mini-swe"),
+        choices=("legacy", "native-mini-swe", "native-reasoning"),
         default="legacy",
         help=(
             "Episode implementation. native-mini-swe is the opt-in native "
@@ -248,6 +248,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--native-max-attempts", type=int, default=1,
                         help="Frozen fresh-attempt cap for native infrastructure failures.")
+    parser.add_argument("--reasoning-proposal-format", default="native_tool_calls",
+                        choices=("native_tool_calls", "strict_json"))
     parser.add_argument(
         "--mini-swe-sandbox",
         choices=("auto", "docker", "sandbox-exec", "bubblewrap", "none"),
@@ -302,13 +304,15 @@ def main() -> int:
             f"{args.comparison_profile} requires --agent-scaffold mini-swe"
         )
     from run_native_attempts import retry_policy
+    if args.episode_backend != "native-reasoning" and args.reasoning_proposal_format != "native_tool_calls":
+        raise SystemExit("strict_json requires native-reasoning")
     try:
         native_retry_policy = retry_policy(args.native_max_attempts)
     except (TypeError, ValueError) as exc:
         raise SystemExit(str(exc)) from exc
     if args.episode_backend == "legacy" and args.native_max_attempts != 1:
         raise SystemExit("native retries require a native episode backend")
-    if args.episode_backend == "native-mini-swe":
+    if args.episode_backend in {"native-mini-swe", "native-reasoning"}:
         if args.agent_scaffold != "mini-swe":
             raise SystemExit("native-mini-swe requires --agent-scaffold mini-swe")
         if args.resume:
@@ -364,7 +368,7 @@ def main() -> int:
     output_root = args.output_root.expanduser().resolve()
     try:
         output_root.mkdir(
-            parents=True, exist_ok=args.episode_backend != "native-mini-swe"
+            parents=True, exist_ok=args.episode_backend not in {"native-mini-swe", "native-reasoning"}
         )
     except FileExistsError as exc:
         raise SystemExit("native-mini-swe requires a fresh campaign output root") from exc
@@ -402,6 +406,7 @@ def main() -> int:
         "per_turn_max_tokens": args.per_turn_max_tokens,
         "token_accounting": "telemetry_only",
         "episode_backend": args.episode_backend,
+        "reasoning_proposal_format": args.reasoning_proposal_format,
         "native_retry_policy": native_retry_policy.to_document(),
         "agent_scaffold": args.agent_scaffold,
         "mini_swe_sandbox": args.mini_swe_sandbox,
@@ -446,6 +451,8 @@ def main() -> int:
         args.episode_backend,
         "--native-max-attempts",
         str(args.native_max_attempts),
+        "--reasoning-proposal-format",
+        args.reasoning_proposal_format,
         "--mini-swe-sandbox",
         args.mini_swe_sandbox,
         "--docker-command",

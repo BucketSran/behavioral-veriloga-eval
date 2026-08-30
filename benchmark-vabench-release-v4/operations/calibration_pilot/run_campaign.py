@@ -2690,7 +2690,7 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
         if native_reservation.exists() or native_reservation.is_symlink():
             raise FinalReplayReservedError("native episode already reserved; legacy model reentry is forbidden")
     result_path = runtime / "evidence" / "campaign_result.json"
-    if getattr(args, "episode_backend", "legacy") == "native-mini-swe":
+    if getattr(args, "episode_backend", "legacy") in {"native-mini-swe", "native-reasoning"}:
         if runtime.exists() or runtime.is_symlink():
             raise FinalReplayReservedError("native cell requires a fresh runtime; reentry forbidden")
         if getattr(args, "resume", False):
@@ -2723,7 +2723,7 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
     conversation_path = runtime / "evidence" / "conversation_checkpoint.json"
     if not (args.resume and conversation_path.is_file()):
         export_runtime(cell, args.release, runtime, timeout_s=args.setup_timeout_s)
-    if getattr(args, "episode_backend", "legacy") == "native-mini-swe":
+    if getattr(args, "episode_backend", "legacy") in {"native-mini-swe", "native-reasoning"}:
         if args.dry_run:
             result = {
                 "cell": cell,
@@ -2732,7 +2732,7 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
                 "status": "prepared",
                 "termination_policy": "wall_time",
                 "agent_timeout_s": args.agent_timeout_s,
-                "backend": "native-mini-swe",
+                "backend": args.episode_backend,
                 "finished_at": now(),
             }
             return result
@@ -2768,6 +2768,8 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
             ),
             campaign_file_sha256=getattr(args, "campaign_file_sha256", None),
             episode_context=attempt_context,
+            episode_backend=args.episode_backend,
+            reasoning_proposal_format=getattr(args, "reasoning_proposal_format", "native_tool_calls"),
         )
         result = {
             "cell": cell,
@@ -2777,7 +2779,7 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
             "termination_reason": run.result.terminal_reason,
             "termination_policy": "wall_time",
             "agent_timeout_s": args.agent_timeout_s,
-            "backend": "native-mini-swe",
+            "backend": args.episode_backend,
             "artifact_path": (
                 str(run.artifact_path.relative_to(runtime))
                 if run.artifact_path is not None
@@ -3294,7 +3296,7 @@ def run_cell_preserving_failure(
     cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompatible | None,
     *, client_factory=None,
 ) -> dict[str, Any]:
-    if (getattr(args, "episode_backend", "legacy") == "native-mini-swe"
+    if (getattr(args, "episode_backend", "legacy") in {"native-mini-swe", "native-reasoning"}
             and getattr(args, "native_max_attempts", 1) > 1 and not args.dry_run):
         from run_native_attempts import run_native_attempt_sequence, retry_policy
 
@@ -3327,8 +3329,10 @@ def run_cell_preserving_failure(
             error = client._redact(error)
             trace = client._redact(trace)
         classification = classify_execution_exception(exc)
-        if getattr(args, "episode_backend", "legacy") == "native-mini-swe":
+        if getattr(args, "episode_backend", "legacy") in {"native-mini-swe", "native-reasoning"}:
             failure = {
+                "backend": args.episode_backend,
+                "proposal_format": getattr(args, "reasoning_proposal_format", "native_tool_calls"),
                 "cell": cell,
                 "runtime": str(runtime),
                 "status": classification["status"],
@@ -3396,11 +3400,13 @@ def main() -> int:
     )
     parser.add_argument(
         "--episode-backend",
-        choices=("legacy", "native-mini-swe"),
+        choices=("legacy", "native-mini-swe", "native-reasoning"),
         default="legacy",
         help="Opt-in episode implementation; legacy preserves the historical path.",
     )
     parser.add_argument("--native-max-attempts", type=int, default=1)
+    parser.add_argument("--reasoning-proposal-format", default="native_tool_calls",
+                        choices=("native_tool_calls", "strict_json"))
     parser.add_argument(
         "--mini-swe-sandbox",
         choices=("auto", "docker", "sandbox-exec", "bubblewrap", "none"),
@@ -3489,6 +3495,10 @@ def main() -> int:
             f"observed={args.mini_swe_no_evas_image}"
         )
     execution_config = campaign.get("execution_config") or {}
+    if args.reasoning_proposal_format != execution_config.get("reasoning_proposal_format", "native_tool_calls"):
+        raise SystemExit("campaign frozen reasoning proposal format differs from CLI")
+    if args.episode_backend != "native-reasoning" and args.reasoning_proposal_format != "native_tool_calls":
+        raise SystemExit("strict_json requires native-reasoning")
     from run_native_attempts import retry_policy
     try:
         native_retry_policy = retry_policy(args.native_max_attempts).to_document()
@@ -3547,7 +3557,7 @@ def main() -> int:
     cells = list(campaign["cells"])
     validate_campaign_cells(cells, args.release)
     args.campaign_file_sha256 = hashlib.sha256(args.campaign.read_bytes()).hexdigest()
-    if args.episode_backend == "native-mini-swe" and (
+    if args.episode_backend in {"native-mini-swe", "native-reasoning"} and (
         args.cell or args.limit is not None
     ):
         raise SystemExit(
@@ -3560,7 +3570,7 @@ def main() -> int:
         cells = cells[:args.limit]
     if not cells:
         raise SystemExit("no matching campaign cells")
-    if args.episode_backend == "native-mini-swe":
+    if args.episode_backend in {"native-mini-swe", "native-reasoning"}:
         if args.agent_scaffold != "mini-swe":
             raise SystemExit("native-mini-swe requires --agent-scaffold mini-swe")
         if args.resume:
@@ -3581,7 +3591,7 @@ def main() -> int:
     )
     if not args.dry_run and (
         (requires_evas and not args.evas_command)
-        or (args.episode_backend == "native-mini-swe" and not args.evas_command)
+        or (args.episode_backend in {"native-mini-swe", "native-reasoning"} and not args.evas_command)
     ):
         raise SystemExit("--evas-command is required for executable campaigns")
     uses_mini_swe = args.agent_scaffold == "mini-swe" and any(
@@ -3636,7 +3646,7 @@ def main() -> int:
             results = list(pool.map(lambda cell: run_cell_preserving_failure(cell, args, client), cells))
     all_results = (
         results
-        if args.episode_backend == "native-mini-swe"
+        if args.episode_backend in {"native-mini-swe", "native-reasoning"}
         else stored_results(args.output)
     )
     image_summary = summarize_public_agent_images(all_results)

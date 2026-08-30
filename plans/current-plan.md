@@ -21,7 +21,9 @@ implementation and does not change the phase statuses below.
   in [AA-VAE-044](../docs/alphaapollo-migration/features/AA-VAE-044-native-evidence-metering.md).
   Fresh-attempt recovery is runtime-integrated in
   [AA-VAE-045](../docs/alphaapollo-migration/features/AA-VAE-045-native-fresh-attempt-recovery.md).
-  Reasoning/Evolution remain active follow-ups;
+  Reasoning is runtime-integrated in
+  [AA-VAE-046](../docs/alphaapollo-migration/features/AA-VAE-046-reasoning-runtime.md).
+  Evolution remains an active follow-up;
   implementation and experimental evidence remain separate gates.
   Paid model pilot awaits a named model/service and budget.
 
@@ -40,7 +42,9 @@ implementation and does not change the phase statuses below.
 - Phase 2/5 are **in progress**: the opt-in native single-cell path works,
   with a locally verified all-native three-form three-arm campaign; retry/
   content/ledger closure remains open.
-- Phase 6-10 are **pending**. Reasoning/Evolution are not implemented.
+- Phase 6 is runtime-integrated and deterministically verified (AA-VAE-046),
+  with real-model evidence still pending. Phase 7-10 remain in progress/pending;
+  Evolution production wiring and aggregate ledger are not yet complete.
 - Legacy mini-swe remains default. Native format recovery, multi-action and
   deadline behavior intentionally differ; see [AA-VAE-038](../docs/alphaapollo-migration/features/AA-VAE-038-mini-swe-behavior-differential.md).
 - Earlier local broad regression retained **636 passed / 7 skipped / 1 failed**
