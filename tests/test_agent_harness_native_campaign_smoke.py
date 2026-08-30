@@ -114,12 +114,16 @@ def test_r53_docker_all_native_three_arm_campaign(tmp_path, native_max_attempts,
         "--episode-backend", episode_backend, "--workers", "2",
         "--judge-kind", "final_trusted_replay",
         "--output", str(report_path),
+        "--ledger-output", str(tmp_path / "reviewer-ledger.json"),
     ], text=True, capture_output=True, timeout=60, check=False)
     assert completed.returncode == 0, completed.stdout + completed.stderr
     report = smoke.read_json(report_path)
     assert report["cell_count"] == 9
     assert report["score_authority"] == "development_only"
     assert report["judge_statuses"] == {"behavior_failure": 9}
+    ledger = smoke.read_json(tmp_path / "reviewer-ledger.json")
+    assert ledger["denominator"]["scheduled_cells"] == 9
+    assert report["result_ledger"]["ledger_sha256"] == ledger["ledger_sha256"]
     assert evidence_hashes() == before
     assert smoke.sha256_file(campaign_path) == campaign_sha
 

@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-08-30 - Safe ledger is an explicit read-only report export
+
+- Preserve the private score report and offer a separate fresh external ledger
+  through `--ledger-output`. Do not change immutable generation evidence.
+- Gate record identity, authority and complete denominator before paired
+  comparisons. Missing model/repetition cannot silently form pairs; derive
+  available identity from the frozen campaign with explicit provenance.
+- Keep Evolution/candidate-only records outside single-trajectory comparisons.
+  Neither numeric scores nor smoke success automatically authorize model claims.
+
 ## 2026-08-30 - Candidate snapshots are not final submissions
 
 - Use a distinct candidate terminal type/handler on the existing controller,

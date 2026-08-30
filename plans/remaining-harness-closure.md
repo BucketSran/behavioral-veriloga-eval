@@ -9,8 +9,9 @@ gate also fixed cwd-dependent telemetry hashing. Remaining items below are not
 implicitly completed. AA-VAE-044 evidence/metering is now runtime-integrated and
 locally verified. AA-VAE-045 now integrates opt-in infrastructure retry with
 all-attempt costs and nine-cell Docker verification. AA-VAE-046 integrates
-Reasoning into the shared launcher, campaign and score path; Evolution and
-result-ledger production integration remain active.
+Reasoning into the shared launcher, campaign and score path. AA-VAE-047 supplies
+the reviewed candidate-only/round runtime; AA-VAE-048 integrates the separate
+safe single-trajectory ledger. Evolution production integration remains active.
 
 ## Brief and scope
 

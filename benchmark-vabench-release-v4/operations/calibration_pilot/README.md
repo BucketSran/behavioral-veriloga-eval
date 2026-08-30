@@ -602,6 +602,13 @@ or `strict_json` before generation; scoring rejects mismatches. The two Bash
 arms use the distinct Reasoning policy; OneShot keeps the common output-only
 artifact submission transport. Use separate roots for backend comparisons.
 
+For a reviewer-safe record ledger, add `--ledger-output /absolute/path/new-ledger.json`
+to native scoring. Keep this new file outside the generation output root. It
+contains complete schedule/attempt identity, paired coverage, all-attempt costs,
+deadline analysis and a bounded claim index, not prompts or hidden diagnostics.
+The private score report references the ledger hashes. Evolution cannot be
+pooled into this single-trajectory ledger.
+
 For fresh-attempt infrastructure recovery, set `--native-max-attempts N` on the
 campaign wrapper before freezing the campaign. Only typed pre-final transport
 or sandbox-startup failure can retry, never cleanup/protocol/deadline/final

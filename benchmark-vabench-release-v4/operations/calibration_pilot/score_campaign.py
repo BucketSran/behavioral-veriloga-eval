@@ -1013,6 +1013,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--workers", type=int, default=1)
     parser.add_argument("--evas-command")
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--ledger-output", type=Path,
+                        help="New reviewer-safe native ledger outside generation evidence.")
     parser.add_argument(
         "--resume",
         action="store_true",
@@ -1023,6 +1025,15 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    if args.ledger_output is not None:
+        ledger_path = args.ledger_output.resolve()
+        report_path = (args.output or args.campaign_output / f"SCORE_{args.judge_kind.upper()}.json").resolve()
+        if (args.episode_backend == "legacy" or args.campaign is None
+                or args.ledger_output.exists() or args.ledger_output.is_symlink()
+                or args.ledger_output.parent.is_symlink()
+                or ledger_path == args.campaign.resolve() or ledger_path == report_path
+                or ledger_path.is_relative_to(args.campaign_output.resolve())):
+            raise ValueError("ledger output requires a fresh external native report path")
     args.campaign_output = resolve_cli_path(args.campaign_output)
     args.campaign = resolve_cli_path(args.campaign) if args.campaign else None
     args.output = resolve_cli_path(args.output) if args.output else None
@@ -1092,6 +1103,20 @@ def main() -> int:
             args.output
             or args.campaign_output / f"SCORE_{args.judge_kind.upper()}.json"
         )
+        if args.ledger_output is not None:
+            from result_ledger import build_native_campaign_ledger
+            from native_episode import _write_once
+            ledger = build_native_campaign_ledger(
+                campaign, rows, campaign_file_sha256=campaign_file_sha256,
+            )
+            args.ledger_output.parent.mkdir(parents=True, exist_ok=True)
+            _write_once(args.ledger_output, ledger)
+            report["result_ledger"] = {
+                "schema_version": ledger["schema_version"],
+                "path": str(args.ledger_output),
+                "ledger_sha256": ledger["ledger_sha256"],
+                "file_sha256": hashlib.sha256(args.ledger_output.read_bytes()).hexdigest(),
+            }
         write_json(output, report)
         print(json.dumps({key: report[key] for key in (
             "judge_kind", "score_authority", "cell_count", "submission_statuses", "judge_statuses"

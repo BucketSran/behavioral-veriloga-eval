@@ -1,5 +1,23 @@
 # Verification Log
 
+## 2026-08-30 - Native result ledger integration (AA-VAE-048)
+
+- CLI RED: **4 failed** before ledger export/path protection existed; GREEN
+  leaf + CLI suite **27 passed**. Final ledger/native/attempt/score-reuse gate:
+  **90 passed, 1 skipped in 14.09s**. Ruff 0.12.12 passed.
+- Fresh real Docker mini-swe retry and Reasoning nine-cell campaigns, including
+  actual ledger generation and source-hash invariance: **2 passed, 3 deselected
+  in 62.21s**. Evidence indexes under
+  `benchmark-vabench-release-v4/reports/ledger-native-gate-01/`:
+  `test_r53_docker_all_native_thr0/smoke-evidence-index.json` SHA-256
+  `ac8a4a0f82580dfa083793eeb9efdc851e2a2495b314131fd04ccc4963cca428`;
+  `test_r53_docker_all_native_thr1/smoke-evidence-index.json` SHA-256
+  `8e9de5b90641a96b85eb2bb228f173c0e169d5c04ebe1961159536b3030abd5f`.
+- Independent review found no integration blocker. Leaf review prompted explicit
+  single-trajectory backend/arm gates and real-builder identity regression.
+  Numeric score without trusted authority remains ineligible; no formal model
+  result or completed Evolution report is claimed.
+
 ## 2026-08-30 - Candidate-only and round runtime (AA-VAE-047)
 
 - Candidate-only controller + existing final controller/trajectory + round
