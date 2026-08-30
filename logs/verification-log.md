@@ -1,5 +1,25 @@
 # Verification Log
 
+## 2026-08-30 - Native three-condition launcher (AA-VAE-041)
+
+- Delegated writer returned only the launcher and its new condition tests,
+  stopped editing, and performed no Git publication. Main owns integration.
+- Initial condition tests failed on the Agentic-only guard. Independent review
+  then found no-EVAS environment still defaulted executable feedback to true
+  despite image selection; the new manifest assertion failed, and the first
+  real Docker six-cell run also failed. Passing the actual condition flag fixes
+  the runtime boundary instead of suppressing the preflight.
+- A symlink-parent regression initially wrote outside the submission root;
+  pre-write candidate-tree validation now rejects it before writing.
+- Fresh launcher/condition/absence/native-episode suite: **49 passed, 2 skipped
+  in 19.51s**. Follow-up reviewer suite **19 passed, 1 skipped**; Ruff 0.12.12,
+  py_compile and whitespace pass. No remaining code/spec/security finding;
+  LSP diagnostics were unavailable, so review disposition is COMMENT rather
+  than a claim that unavailable diagnostics ran.
+- OneShot means one logical provider call with no corrective reprompt, not one
+  HTTP transport attempt. Native Testbench/retry/Reasoning/Evolution are not
+  implemented here; no paid model run, r53 change, or EVAS change.
+
 ## 2026-08-30 - Explicit absent public authority (AA-VAE-040)
 
 - Baseline audit: eval main/origin `24f2b834b0`; upstream `7b5616dc` is contained.

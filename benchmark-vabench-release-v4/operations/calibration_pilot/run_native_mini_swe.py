@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from copy import deepcopy
+from collections.abc import Mapping
 import argparse
 import hashlib
 import json
@@ -25,12 +26,20 @@ import native_episode  # noqa: E402
 import public_validation  # noqa: E402
 import final_replay  # noqa: E402
 from runners.agent_harness import (  # noqa: E402
+    AgentAction,
     EpisodeContext,
+    EnvironmentStep,
     FrozenSubmission,
     JsonlTrajectoryRecorder,
+    Observation,
     ProposalNormalizationError,
+    ToolExecutionRejection,
     ToolRegistry,
     backend_profile_sha256,
+)
+from runners.agent_harness.proposals import (  # noqa: E402
+    ProposalEnvelope,
+    normalize_proposal,
 )
 from runners.agent_harness.backends.mini_swe import (  # noqa: E402
     MiniSwePolicyBridge,
@@ -101,6 +110,62 @@ def _backend_profile():
     }
 
 
+def validate_native_cell(cell: dict) -> str:
+    """Return the supported native condition name or fail before model use."""
+    condition = str(cell.get("experimental_arm") or "")
+    if cell.get("form") not in {"dut", "bugfix"}:
+        raise ValueError("native launcher supports DUT/bugfix forms only")
+    if condition == "Agentic":
+        if (
+            cell.get("mode") != "G2"
+            or cell.get("executable_feedback") is not True
+        ):
+            raise ValueError("native Agentic requires G2 executable feedback")
+        return condition
+    if condition == "Agent-No-EVAS":
+        if (
+            cell.get("mode") != "G2"
+            or cell.get("executable_feedback") is not False
+        ):
+            raise ValueError("native Agent-No-EVAS requires G2 without feedback")
+        return condition
+    if condition == "OneShot":
+        if (
+            cell.get("mode") != "G0"
+            or cell.get("process") != "direct_one_shot"
+            or cell.get("executable_feedback") is not False
+        ):
+            raise ValueError("native OneShot requires G0 direct one-shot transport")
+        return condition
+    raise ValueError(
+        "native launcher supports OneShot, Agent-No-EVAS, and Agentic only"
+    )
+
+
+def _native_prompt_path(runtime: Path, condition: str) -> Path:
+    prompt_name = "direct_prompt.txt" if condition == "OneShot" else "agent_prompt.txt"
+    return runtime / prompt_name
+
+
+def _select_docker_image(condition: str, docker_image: str | None) -> str | None:
+    if condition == "OneShot":
+        if docker_image not in {None, ""}:
+            raise ValueError("native OneShot does not use a Bash runtime image")
+        return None
+    expected = (
+        mini.DEFAULT_NO_EVAS_DOCKER_IMAGE
+        if condition == "Agent-No-EVAS"
+        else mini.DEFAULT_DOCKER_IMAGE
+    )
+    if docker_image in {None, ""}:
+        return expected
+    if condition == "Agent-No-EVAS" and docker_image != expected:
+        raise ValueError(
+            "native Agent-No-EVAS requires the paired no-EVAS Docker image"
+        )
+    return docker_image
+
+
 class _RecordedClient:
     """Record decoded API exchanges, never auth headers or provider credentials."""
 
@@ -158,6 +223,282 @@ class _RecordedEnvironment(MiniSweBashEnvironmentBridge):
         return result
 
 
+class _OneShotModel:
+    """Single provider call using only the output submission transport."""
+
+    def __init__(
+        self,
+        *,
+        client,
+        prompt: str,
+        tools: list[dict],
+        record,
+        context: EpisodeContext,
+        per_turn_max_tokens: int,
+        request_timeout_s: int,
+        deadline_monotonic: float,
+    ) -> None:
+        self.client = client
+        self.prompt = prompt
+        self.tools = deepcopy(tools)
+        self.record = record
+        self.context = context
+        self.per_turn_max_tokens = per_turn_max_tokens
+        self.request_timeout_s = request_timeout_s
+        self.deadline_monotonic = deadline_monotonic
+        self.events: list[dict] = []
+        self.total_output_tokens = 0
+        self.calls = 0
+
+    def submit_once(self) -> dict:
+        if self.calls:
+            raise ProposalNormalizationError(
+                "oneshot_reprompt_forbidden",
+                "native OneShot allows exactly one model request",
+            )
+        self.calls += 1
+        messages = [
+            {"role": "system", "content": runner.ONESHOT_TRANSPORT_INSTRUCTION},
+            {"role": "user", "content": self.prompt},
+        ]
+        timeout_s = min(
+            float(self.request_timeout_s),
+            max(0.1, self.deadline_monotonic - time.monotonic()),
+        )
+        identity = {
+            "request_id": f"{self.context.attempt_id}/request-0001",
+            "action_id": f"{self.context.attempt_id}-0001",
+        }
+        self.record(
+            "provider_request",
+            {
+                **identity,
+                "messages": deepcopy(messages),
+                "max_tokens": self.per_turn_max_tokens,
+                "tools": deepcopy(self.tools),
+                "timeout_s": timeout_s,
+            },
+        )
+        started = time.monotonic()
+        try:
+            response = self.client.complete(
+                messages,
+                self.per_turn_max_tokens,
+                self.tools,
+                timeout_s=timeout_s,
+            )
+        except Exception as exc:
+            self.record(
+                "provider_failure", {**identity, "error_type": type(exc).__name__}
+            )
+            message = _redact(str(exc), getattr(self.client, "api_key", ""))
+            raise RuntimeError(f"provider {type(exc).__name__}: {message}") from None
+        response = _redact(response, getattr(self.client, "api_key", ""))
+        self.record("provider_response", {**identity, "response": deepcopy(response)})
+        choice_row = response["choices"][0]
+        choice = dict(choice_row["message"])
+        content = str(choice.get("content") or "")
+        calls = list(choice.get("tool_calls") or [])
+        usage = runner.provider_output_usage(
+            response.get("usage"),
+            content,
+            reasoning_text=str(choice.get("reasoning_content") or ""),
+            tool_text=json.dumps(calls, sort_keys=True) if calls else "",
+        )
+        self.total_output_tokens += int(usage["output_tokens"])
+        self.events.append({
+            "type": "model",
+            "elapsed_s": time.monotonic() - started,
+            "requested_max_tokens": self.per_turn_max_tokens,
+            "finish_reason": choice_row.get("finish_reason"),
+            "provider_output_tokens": usage["output_tokens"],
+            "provider_reasoning_tokens": usage["reasoning_tokens"],
+            "provider_visible_tokens": usage["visible_tokens"],
+            "provider_token_source": usage["source"],
+            "provider_usage": response.get("usage"),
+            "provider_response": runner.provider_response_metadata(response),
+        })
+        return choice
+
+    def serialize(self) -> dict:
+        return {
+            "info": {
+                "model": self.client.model,
+                "call_count": self.calls,
+                "provider_output_tokens": self.total_output_tokens,
+                "provider_events": self.events,
+            }
+        }
+
+
+class _OneShotPolicy:
+    def __init__(self, *, model: _OneShotModel, action_id_prefix: str) -> None:
+        self.model = model
+        self._action_id_prefix = action_id_prefix
+        self._used = False
+
+    def act(self, observation: Observation) -> AgentAction:
+        if self._used:
+            raise ProposalNormalizationError(
+                "oneshot_reprompt_forbidden",
+                "native OneShot allows exactly one model request",
+            )
+        self._used = True
+        if observation.candidate_tree_sha256 is None:
+            raise ValueError("candidate_tree_sha256 is required for OneShot")
+        proposal = self.model.submit_once()
+        return normalize_proposal(
+            ProposalEnvelope(
+                action_id=f"{self._action_id_prefix}-0001",
+                source_backend="native-oneshot",
+                accepted_tool_names=frozenset({"submit_artifacts"}),
+                proposal_format="native_tool_calls",
+                candidate_tree_sha256=observation.candidate_tree_sha256,
+            ),
+            proposal.get("tool_calls") or [],
+        )
+
+
+class _OneShotSubmissionEnvironment:
+    def __init__(self, *, runtime: Path, task_payload: Mapping[str, object]) -> None:
+        self.runtime = runtime
+        self._task_payload = dict(task_payload)
+        self._attempt_id: str | None = None
+        self._closed = False
+
+    def start(self, context: EpisodeContext) -> Observation:
+        if self._attempt_id is not None:
+            raise RuntimeError("OneShot environment is already started")
+        if self._closed:
+            raise RuntimeError("OneShot environment is closed")
+        self._attempt_id = context.attempt_id
+        return Observation(
+            observation_id=f"{context.attempt_id}/observation-0000",
+            tool_name="task",
+            status="ready",
+            payload=self._task_payload,
+            candidate_tree_sha256=self._candidate_hash(),
+        )
+
+    def step(
+        self,
+        action: AgentAction,
+        capability,
+    ) -> EnvironmentStep | ToolExecutionRejection:
+        if self._attempt_id is None:
+            raise RuntimeError("OneShot environment must be started")
+        if self._closed:
+            raise RuntimeError("OneShot environment is closed")
+        if (
+            action.tool_name != "submit_artifacts"
+            or capability.tool_name != "submit_artifacts"
+        ):
+            return ToolExecutionRejection(
+                code="unsupported_dispatch",
+                failure_category="tool_contract_rejected",
+                primary_outcome="protocol_failure",
+                message="OneShot accepts only submit_artifacts",
+                candidate_tree_sha256=self._candidate_hash(),
+            )
+        try:
+            self._write_submission(action.arguments)
+        except (TypeError, ValueError) as exc:
+            return ToolExecutionRejection(
+                code="invalid_submit_artifacts",
+                failure_category="tool_contract_rejected",
+                primary_outcome="protocol_failure",
+                message=str(exc),
+                candidate_tree_sha256=self._candidate_hash(),
+            )
+        candidate_sha256 = self._candidate_hash()
+        return EnvironmentStep(
+            observation=Observation(
+                observation_id=f"{self._attempt_id}/observation-0001",
+                tool_name="submit_artifacts",
+                status="submitted",
+                payload={"output": "submission accepted"},
+                candidate_tree_sha256=candidate_sha256,
+            ),
+            done=True,
+            terminal_reason="submitted",
+        )
+
+    def freeze_submission(self) -> FrozenSubmission:
+        gate = runner.submission_artifact_gate(self.runtime)
+        if not gate["passed"]:
+            raise ValueError("native OneShot submission gate rejected the candidate")
+        manifest = runner.RESULT_PROTOCOL.snapshot_submission(self.runtime, gate)
+        return FrozenSubmission(
+            manifest["tree_sha256"], tuple(sorted(gate["expected_artifacts"]))
+        )
+
+    def close(self) -> None:
+        self._closed = True
+
+    def _write_submission(self, arguments: Mapping[str, object]) -> None:
+        if set(arguments) != {"artifacts"} or not isinstance(
+            arguments.get("artifacts"), Mapping
+        ):
+            raise ValueError("submit_artifacts requires an artifacts object")
+        expected = runner.expected_candidate_artifacts(self.runtime)
+        artifacts = arguments["artifacts"]
+        assert isinstance(artifacts, Mapping)
+        if set(artifacts) != set(expected):
+            raise ValueError("submit_artifacts must provide exactly declared artifacts")
+        root = self.runtime / "public/submission"
+        if root.is_symlink():
+            raise ValueError("submission root cannot be a symlink")
+        # Recheck immediately before writes, including intermediate directories.
+        self._candidate_hash()
+        for relative, content in artifacts.items():
+            path = runner.safe_relative(str(relative))
+            if path.as_posix() not in expected:
+                raise ValueError("undeclared submit_artifacts path")
+            if not isinstance(content, str):
+                raise TypeError("submit_artifacts content must be strings")
+            target = root / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            if target.exists() and target.is_symlink():
+                raise ValueError("submission artifact cannot be a symlink")
+            target.write_text(content, encoding="utf-8")
+
+    def _candidate_hash(self) -> str:
+        root = self.runtime / "public/submission"
+        if root.is_symlink() or any(path.is_symlink() for path in root.rglob("*")):
+            raise ValueError("candidate tree cannot contain symlinks")
+        return runner.RESULT_PROTOCOL.hash_test_tree(root)["tree_sha256"]
+
+
+def _submit_artifacts_tool_descriptor(runtime: Path) -> dict:
+    schema = runner.submit_artifacts_tool_schema(runtime)["function"]["parameters"]
+    return {
+        "schema_version": "vaevas-tool-descriptor-v1",
+        "tool_id": "native/submit-artifacts-v1",
+        "tool_name": "submit_artifacts",
+        "tool_version": "1",
+        "lifecycle": "active",
+        "model_visibility": "model_visible",
+        "allowed_conditions": ["OneShot"],
+        "budget_class": "submission",
+        "state_effect": "terminal_submission",
+        "candidate_effect": "freeze",
+        "argument_schema": schema,
+        "observation_schema": {
+            "type": "object",
+            "properties": {"output": {"type": "string"}},
+            "required": ["output"],
+            "additionalProperties": False,
+        },
+        "evidence_policy": {
+            "records_private_evidence": False,
+            "may_enter_model_observation": True,
+            "may_enter_shared_memory": False,
+            "requires_candidate_binding": True,
+        },
+        "handler_id": "native.submit_artifacts",
+    }
+
+
 def run_prepared_native_mini_swe(
     *,
     runtime: Path,
@@ -170,24 +511,17 @@ def run_prepared_native_mini_swe(
     request_timeout_s: int = runner.DEFAULT_REQUEST_TIMEOUT_S,
     tool_timeout_s: int = runner.DEFAULT_TOOL_TIMEOUT_S,
     judge_timeout_s: int = runner.DEFAULT_JUDGE_TIMEOUT_S,
-    docker_image: str = mini.DEFAULT_DOCKER_IMAGE,
+    docker_image: str | None = None,
     allow_insecure_test_sandbox: bool = False,
     campaign_file_sha256: str | None = None,
 ) -> native_episode.NativeEpisodeRun:
-    """Run an exclusively owned fresh exported G2 Agentic DUT/bugfix cell.
+    """Run an exclusively owned fresh exported native DUT/bugfix cell.
 
     This API does not attest that a caller's export came from the sealed release.
     Use the CLI for exporter/config composition. No resume or automatic retry.
     """
-    if (
-        cell.get("mode") != "G2"
-        or cell.get("form") not in {"dut", "bugfix"}
-        or cell.get("experimental_arm") != "Agentic"
-        or cell.get("executable_feedback") is not True
-    ):
-        raise ValueError(
-            "native launcher currently supports G2 Agentic DUT/bugfix only"
-        )
+    condition = validate_native_cell(cell)
+    docker_image = _select_docker_image(condition, docker_image)
     if min(request_timeout_s, tool_timeout_s, judge_timeout_s) <= 0:
         raise ValueError("infrastructure watchdogs must be positive")
     if runtime.is_symlink() or (runtime / "evidence").is_symlink():
@@ -211,7 +545,7 @@ def run_prepared_native_mini_swe(
             )
     policy_config = runner.load_experiment_policy()
     context = EpisodeContext(
-        cell["cell_id"], attempt_id, cell["task_id"], "Agentic", None
+        cell["cell_id"], attempt_id, cell["task_id"], condition, None
     )
     directory = runtime / "evidence/native-launcher"
     directory.parent.mkdir(parents=True, exist_ok=True)
@@ -234,24 +568,29 @@ def run_prepared_native_mini_swe(
     run = None
     try:
         deadline = time.monotonic() + policy_config["agent_wall_time_seconds"]
-        environment = mini.VaBenchBashEnvironment(
-            runtime,
-            timeout_s=tool_timeout_s,
-            sandbox_backend="none" if allow_insecure_test_sandbox else "docker",
-            evas_command=evas_command,
-            docker_image=docker_image,
-            deadline_monotonic=deadline,
-            submission_gate=runner.submission_artifact_gate,
-            candidate_artifacts=runner.expected_candidate_artifacts(runtime),
-        )
-        environment.preflight()
-        _, submitted, _, _ = mini.load_mini_swe()
-        environment.bind_submitted_exception(submitted)
-        prompt = (runtime / "agent_prompt.txt").read_text()
+        submitted = None
+        if condition != "OneShot":
+            assert docker_image is not None
+            environment = mini.VaBenchBashEnvironment(
+                runtime,
+                timeout_s=tool_timeout_s,
+                sandbox_backend="none" if allow_insecure_test_sandbox else "docker",
+                evas_command=evas_command,
+                docker_image=docker_image,
+                deadline_monotonic=deadline,
+                submission_gate=runner.submission_artifact_gate,
+                candidate_artifacts=runner.expected_candidate_artifacts(runtime),
+                executable_feedback=(condition == "Agentic"),
+            )
+            environment.preflight()
+            _, submitted, _, _ = mini.load_mini_swe()
+            environment.bind_submitted_exception(submitted)
+        prompt = _native_prompt_path(runtime, condition).read_text()
         backend = _backend_profile()
         manifest = {
             "schema_version": "vaevas-native-launcher-manifest-v1",
             "cell": deepcopy(cell),
+            "condition": condition,
             "attempt_id": attempt_id,
             "backend_profile": backend,
             "campaign_file_sha256": campaign_file_sha256,
@@ -266,7 +605,19 @@ def run_prepared_native_mini_swe(
             "request_timeout_s": request_timeout_s,
             "tool_timeout_s": tool_timeout_s,
             "judge_timeout_s": judge_timeout_s,
-            "environment": environment.serialize()["info"]["config"]["environment"],
+            "environment": (
+                {
+                    **environment.serialize()["info"]["config"]["environment"],
+                    "docker_image": docker_image,
+                }
+                if environment is not None
+                else {
+                    "sandbox_backend": "controller_managed_output_transport",
+                    "docker_image": None,
+                    "network": False,
+                    "evaluator_mounted": False,
+                }
+            ),
             "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),
             "source_sha256": {
                 name: _sha_file(HERE / name)
@@ -280,12 +631,19 @@ def run_prepared_native_mini_swe(
             "raw_trace_scope": "decoded_provider_exchanges_and_bounded_tool_observations",
         }
         config_sha = runner.RESULT_PROTOCOL.canonical_sha256(manifest)
-        public_profile = public_validation.build_public_validation_profile(
-            environment=environment,
-            release=release,
-            campaign_config_sha256=config_sha,
-            allow_insecure_test_sandbox=allow_insecure_test_sandbox,
-        )
+        public_profile = None
+        public_profile_sha256 = None
+        if condition == "Agentic":
+            public_profile = public_validation.build_public_validation_profile(
+                environment=environment,
+                release=release,
+                campaign_config_sha256=config_sha,
+                allow_insecure_test_sandbox=allow_insecure_test_sandbox,
+            )
+            public_profile_sha256 = public_validation.public_validation_profile_sha256(
+                public_profile
+            )
+        manifest["public_validation_profile_sha256"] = public_profile_sha256
         command = final_judge_command or shlex.join(
             [sys.executable, str(HERE / "trusted_replay_adapter.py")]
         )
@@ -298,22 +656,13 @@ def run_prepared_native_mini_swe(
             evas_command=evas_command,
         )
         native_episode._write_once(directory / "manifest.json", manifest)
-        model = mini.VaBenchMiniModel(
-            _RecordedClient(client, record, context),
-            per_turn_max_tokens=runner.cell_per_turn_max_tokens(cell),
-            request_timeout_s=request_timeout_s,
-            deadline_monotonic=deadline,
-            usage_parser=runner.provider_output_usage,
-            response_metadata=runner.provider_response_metadata,
-        )
-        policy = NativeMiniSwePolicy(
-            model=model, prompt=prompt, action_id_prefix=attempt_id
-        )
         paused = False
 
         def quiesce():
             nonlocal paused
             if paused or allow_insecure_test_sandbox:
+                return
+            if environment is None:
                 return
             container = environment._docker_container
             if not container:
@@ -360,22 +709,54 @@ def run_prepared_native_mini_swe(
                 else None
             )
 
-        bridge = _RecordedEnvironment(
-            record=record,
-            legacy_environment=environment,
-            task_payload={"prompt": prompt},
-            candidate_tree_sha256=candidate_hash,
-            freeze_submission=freeze,
-            submitted_exception_types=(submitted,),
-        )
+        if condition == "OneShot":
+            tools = [runner.submit_artifacts_tool_schema(runtime)]
+            model = _OneShotModel(
+                client=client,
+                prompt=prompt,
+                tools=tools,
+                record=record,
+                context=context,
+                per_turn_max_tokens=runner.cell_per_turn_max_tokens(cell),
+                request_timeout_s=request_timeout_s,
+                deadline_monotonic=deadline,
+            )
+            policy = _OneShotPolicy(model=model, action_id_prefix=attempt_id)
+            bridge = _OneShotSubmissionEnvironment(
+                runtime=runtime,
+                task_payload={"prompt": prompt},
+            )
+            tool_registry = ToolRegistry([_submit_artifacts_tool_descriptor(runtime)])
+        else:
+            assert environment is not None and submitted is not None
+            model = mini.VaBenchMiniModel(
+                _RecordedClient(client, record, context),
+                per_turn_max_tokens=runner.cell_per_turn_max_tokens(cell),
+                request_timeout_s=request_timeout_s,
+                deadline_monotonic=deadline,
+                usage_parser=runner.provider_output_usage,
+                response_metadata=runner.provider_response_metadata,
+            )
+            policy = NativeMiniSwePolicy(
+                model=model, prompt=prompt, action_id_prefix=attempt_id
+            )
+            bridge = _RecordedEnvironment(
+                record=record,
+                legacy_environment=environment,
+                task_payload={"prompt": prompt},
+                candidate_tree_sha256=candidate_hash,
+                freeze_submission=freeze,
+                submitted_exception_types=(submitted,),
+            )
+            tool_registry = ToolRegistry(
+                [mini_swe_bash_tool_descriptor(allowed_conditions=[condition])]
+            )
         run = native_episode.run_native_episode(
             runtime=runtime,
             context=context,
             policy=policy,
             environment=bridge,
-            tool_registry=ToolRegistry(
-                [mini_swe_bash_tool_descriptor(allowed_conditions=["Agentic"])]
-            ),
+            tool_registry=tool_registry,
             backend_profile_sha256=backend_profile_sha256(backend),
             public_validation_profile=public_profile,
             final_test_profile=final_profile,
@@ -400,7 +781,9 @@ def run_prepared_native_mini_swe(
                 if run.artifact_path
                 else None,
                 "model_telemetry": model.serialize()["info"],
-                "evas_invocations": environment.evas_invocations,
+                "evas_invocations": (
+                    environment.evas_invocations if environment is not None else []
+                ),
                 "primary_outcome": run.result.primary_outcome,
                 "terminal_reason": run.result.terminal_reason,
             },
@@ -503,11 +886,10 @@ def main(argv=None) -> int:
     if len(cells) != 1:
         parser.error("select exactly one campaign cell")
     cell = cells[0]
-    if cell.get("experimental_arm") != "Agentic" or cell["form"] not in {
-        "dut",
-        "bugfix",
-    }:
-        parser.error("native launcher currently supports G2 Agentic DUT/bugfix only")
+    try:
+        condition = validate_native_cell(cell)
+    except ValueError as exc:
+        parser.error(str(exc))
     if campaign.get("execution_config"):
         parser.error(
             "native launcher requires a campaign without legacy execution_config overrides"
@@ -552,6 +934,7 @@ def main(argv=None) -> int:
         client=client,
         attempt_id=cell["cell_id"] + "-native-0001",
         evas_command=args.evas_command,
+        docker_image=_select_docker_image(condition, None),
         campaign_file_sha256=prepared["campaign_file_sha256"],
     )
     print(
