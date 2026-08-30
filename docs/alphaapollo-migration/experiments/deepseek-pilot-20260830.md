@@ -67,8 +67,10 @@ stopping are observed. No final-score, model-quality, backend superiority,
 baseline reproduction or six-cell completion claim is supported. Free fixture
 tests separately cover six-cell freeze/EVAS and stop behavior (AA-VAE-052).
 
-Next: offline trajectory review can examine why no submission was reached in
-eight calls, separating task work from tool/protocol friction. A larger call
+The [offline trajectory diagnosis](deepseek-pilot-20260830-diagnosis.md) is now
+complete: it identifies a missing Reasoning Bash/submit contract, an invisible
+pilot call horizon, path friction and layered exit-status semantics. No runtime
+repair or new generation is included in that diagnosis. A larger call
 allowance or paid rerun requires a newly explicit design/budget decision; do
 not silently loosen this run or merge a replacement into its denominator.
 Family029 remains development exposure for subsequent study design.

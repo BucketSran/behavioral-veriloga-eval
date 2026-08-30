@@ -1,5 +1,20 @@
 # Decision Log
 
+## 2026-08-30 - Diagnose model-visible contract parity before another pilot
+
+- Offline replay confirms native Reasoning never received the Bash contract or
+  `vabench-submit` instruction; mini-swe did. Shared executor/freeze semantics do
+  not imply equal operational guidance. Existing scripted integration fixtures
+  know the submit command independently of the prompt and missed this defect.
+- Prioritize a separate test-first contract repair; do not attribute censored
+  cells to backend/model quality. Neither backend saw the eight-call horizon.
+- Keep pipeline return codes distinct from EVAS process outcomes. Record the
+  readable installed-example surface before any Agentic/no-EVAS causal study.
+- This slice records diagnosis only: no runtime/r53/EVAS changes, credentials,
+  paid requests, budget reset, candidate resubmission or final judging.
+  Detailed evidence and acceptance proposals:
+  [offline case study](../docs/alphaapollo-migration/experiments/deepseek-pilot-20260830-diagnosis.md).
+
 ## 2026-08-30 - Preserve stopped live pilot; no score-driven or cost-unknown rerun
 
 - Live source `f3e12ac82672d7b27dd3accf01176aaa5f67e4fd`: first DUT hit the

@@ -1,5 +1,31 @@
 # Verification Log
 
+## 2026-08-30 - Offline diagnosis of the stopped DeepSeek DUT trajectories
+
+- Analysis base `34823a7dfca6ff3385b6ad274741ecaa218766a7`. Both strict native
+  reads match frozen index rows; four root hashes match; four unstarted runtimes
+  remain absent. No provider, simulator or final judge called by the diagnosis.
+- Inspected all model-visible requests and 15 completed tool actions: Reasoning
+  lacks Bash/submit instructions throughout; no malformed/multiple-action or
+  output-cap termination is observed. Mini-swe publicly simulated candidate v2
+  at calls 7/8, then hit the call cap without submitting; no final score exists.
+- Main free focused gate: **81 passed, 3 opt-in skipped in 0.25s**. Independent
+  read-only backend/controller slice: **56 passed, 42 deselected in 0.63s**;
+  suites overlap and should not be summed as unique coverage.
+- Pinned-image read-only probes reproduce both wrong-cwd lookups and normal
+  pipeline exit-status masking. Filename inventory: 15 installed `.va` examples
+  at the scoped EVAS package directory in Agentic image, zero there in paired
+  no-EVAS image. No package/source/image or live evidence was modified.
+- Findings, sequence/hash references, counter interpretation and unimplemented
+  repair proposals: [case study](../docs/alphaapollo-migration/experiments/deepseek-pilot-20260830-diagnosis.md).
+- Documentation gate: **23 active-entrypoint/navigation tests passed in 0.09s**;
+  all links in the case study, audit and current plan resolve. Diff whitespace
+  and secret-pattern checks pass. No dedicated `scripts/check_repo_layout.py`
+  exists; the current entrypoint/navigation tests are the available local gate.
+- Independent read-only document/code review found no publication blocker;
+  corrected one function-name reference. Private raw-evidence verification
+  remains main-owned; the reviewer did not reopen private reports or credentials.
+
 ## 2026-08-30 - Real DeepSeek pilot stopped within the shared cap
 
 - Source/fork main `f3e12ac82672d7b27dd3accf01176aaa5f67e4fd`; clean source

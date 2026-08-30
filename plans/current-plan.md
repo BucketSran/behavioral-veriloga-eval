@@ -23,7 +23,11 @@ implementation and does not change the phase statuses below.
   2 censored DUT cells and 4 unstarted cells; no scored submission. An SSL
   handshake failure stopped the shared budget. CNY3.420315 is the conservative
   committed/reserved upper bound, not an invoice. No automatic paid rerun.
-  Offline trajectory review and a new explicit experiment decision are next. This
+  [Offline trajectory diagnosis](../docs/alphaapollo-migration/experiments/deepseek-pilot-20260830-diagnosis.md)
+  is complete: Reasoning omits the public Bash/submit contract; neither backend
+  sees the pilot call horizon. Path/status and installed-example boundaries are
+  also recorded. Next is a focused, test-first operational-contract repair, not
+  a paid rerun; runtime code is unchanged in this diagnosis slice. This
   development pilot does not change r53's normal wall-time policy or authorize
   full-r53/Evolution execution.
 
