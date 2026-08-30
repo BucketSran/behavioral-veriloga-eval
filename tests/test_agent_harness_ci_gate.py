@@ -29,6 +29,22 @@ def test_evaluator_closure_runs_bound_production_replay_smoke() -> None:
 def test_evaluator_closure_installs_and_runs_locked_agentic_extra() -> None:
     workflow = WORKFLOW.read_text(encoding="utf-8")
     assert "uv sync --locked --group dev --extra agentic --python 3.11.13" in workflow
-    runs = [line.strip() for line in workflow.splitlines() if line.strip().startswith("uv run ")]
+    runs = [
+        line.strip()
+        for line in workflow.splitlines()
+        if line.strip().startswith("uv run ")
+    ]
     assert runs
     assert all(line.startswith("uv run --locked --extra agentic ") for line in runs)
+
+
+def test_evaluator_closure_runs_public_validation_docker_native_trajectory() -> None:
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    prefix = '"benchmark-vabench-release-v4/operations/calibration_pilot/'
+    assert workflow.count(prefix + 'public_validation.py"') == 2
+    assert workflow.count(prefix + 'mini_swe_vabench.py"') == 2
+    assert "VABENCH_TEST_DOCKER_RUNTIME: '1'" in workflow
+    assert (
+        "tests/test_agent_harness_production_public_validation.py::"
+        "test_r53_docker_public_validation_native_trajectory_smoke"
+    ) in workflow

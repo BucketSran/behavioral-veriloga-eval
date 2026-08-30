@@ -28,6 +28,29 @@ The selection does not modify task assets, existing EVAS/Spectre evidence, or
 the sealed 1,200-task release. A later campaign manifest must reference this
 file by SHA-256 and record the frozen parameters produced by the pilot.
 
+## Opt-in public validation observations
+
+`public_validation.py` adapts the existing sandbox EVAS execution to the generic
+candidate/profile-bound `Observation` contract. Trusted callers first build a
+public profile with `build_public_validation_profile`, then construct
+`PublicEvasValidator` with the same environment and `EpisodeContext`. Call
+`validate(candidate_tree_sha256=...)` only through the owning controller's
+capability and budget checks; the adapter does not maintain another budget ledger.
+
+The initial contract supports only the fixed r53 DUT/bugfix public simulation
+command in Docker. It rejects unsupported Testbench contracts, undeclared
+submission files, authority/candidate drift, incomplete invocation evidence,
+resource overflow, and validation after submission/final reservation. A contract
+failure invalidates the adapter; discard the attempt rather than reconstructing
+it to retry. Cross-process recovery remains unimplemented.
+
+Feedback is public process diagnostics, not a task pass/score. Profiles fingerprint
+observed runtime inputs; the coordinator still owns sealed-release provenance,
+pre-generation campaign freezing, and exclusive environment use. This does not
+activate a new domain tool or change default mini-swe Bash/campaign execution.
+See [AA-VAE-035](../../../docs/alphaapollo-migration/features/AA-VAE-035-production-public-validation-observation.md)
+for exact code mappings, tests, and remaining boundaries.
+
 ## Build The Campaign
 
 The calibrated primary episode limit is wall-clock time. Its only authoritative

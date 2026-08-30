@@ -1,5 +1,78 @@
 # Verification Log
 
+## 2026-08-30 - Production public EVAS observation and native smoke
+
+- Starting fork audit (`--fetch`) found behavioral main/origin at
+  `3b0a62a9e6ee7330922c140bbbcc6f62abb63ff9`, clean, containing upstream main
+  `7b5616dc52195ec275ec6d21c71d7763613702cd` (0 behind, 59 ahead).
+  EVAS HEAD/origin/upstream remained
+  `6cb6fa7a7dac70fc0d4120126d8cf74258e6637b`, clean.
+- TDD began with a missing adapter import. Subsequent RED tests exposed
+  terminal/profile acceptance, unsupported-contract fallback, reuse after
+  execution-time candidate drift, resource overflow reported as success,
+  undeclared candidate dependencies, and telemetry hash-error/schema acceptance.
+  Each was fixed before adding the next behavior. The helper-file gap came from
+  independent read-only review; no evaluator or legacy checker was modified.
+- The focused adapter suite reached `20 passed`, followed by successful native
+  controller/CI checks. One first controller fixture omitted required `done`;
+  correcting that test-only construction yielded `5 passed` for controller/CI.
+- First broad run: `1 failed, 542 passed, 4 skipped`. The new 1-second timeout
+  fixture sometimes expired before the wrapper emitted START; the adapter
+  correctly refused missing invocation evidence. Isolated repeat passed.
+  Increased only the test startup allowance to 5 seconds, with a 30-second
+  sleeper; production timeout and missing-evidence guards were not relaxed.
+- Final affected regression (all `test_agent_harness_*`, meta-schema, mini-swe,
+  calibration pilot, score reuse, r53 smoke, v4 result protocol):
+  **`547 passed, 4 skipped in 106.56s`**. The new Docker test is opt-in in this
+  invocation and was separately executed below. JUnit evidence is retained at
+  `/Users/bucketsran/Documents/TsingProject/vaEVAS-next/public-validation-smoke-P4FwFw/regression.xml`.
+  An earlier command named a nonexistent meta-schema test and collected nothing;
+  the final invocation uses the actual `tests/test_meta_schema.py`.
+- Actual r53 `v4-001` public-only Docker smoke passed twice; final formatted tree
+  reports `1 passed in 13.97s`. It uses public-contract-derived incomplete DUT
+  bytes, no model API, no private evaluator export, and no final judge invocation.
+  It verifies canonical profile/candidate/observation trajectory bindings,
+  one-call budget rejection before a second execution, existing freeze-format
+  agreement, and post-freeze public-validation rejection.
+- Final smoke command:
+
+  ```sh
+  VABENCH_TEST_DOCKER_RUNTIME=1 PYTHONDONTWRITEBYTECODE=1 ./.venv/bin/python -m pytest -q -p no:cacheprovider \
+    tests/test_agent_harness_production_public_validation.py::test_r53_docker_public_validation_native_trajectory_smoke \
+    --basetemp /Users/bucketsran/Documents/TsingProject/vaEVAS-next/public-validation-smoke-P4FwFw/pytest-final
+  ```
+
+- Smoke document:
+  `/Users/bucketsran/Documents/TsingProject/vaEVAS-next/public-validation-smoke-P4FwFw/pytest-final/test_r53_docker_public_validat0/public-validation-smoke.json`;
+  SHA-256 `7a9cdc591fe39693019513fdc9f233e5c0b2aadeb41cb2e2573ea6e322531b94`.
+  Candidate/freeze SHA-256
+  `ed247e3e8f80ac258bb3e1c07330af63399241af519a679121b31c3e82ab8a67`;
+  public profile SHA-256
+  `dbaf3189c0d0e8fd77b6013e6efecf68ce6fadc192279609e489b142642ea046`;
+  trajectory tail
+  `609750128f43f8890a16d0ddcc2d3a817b39e5c401efba8db216a2408022d170`.
+  Actual image `sha256:fe44bb54370160ee99bef939ae67a0ab1f51fb3b9a41d3d0c4cf29e7ea38115b`;
+  no network / no evaluator mount, EVAS 0.8.7.
+- Ruff 0.12.12, Python compilation of four changed Python files, workflow YAML
+  parsing, and `git diff --check` pass. No configured mypy/pyright gate exists;
+  no external typechecker or dependency was added.
+- Additional environment / v3 claim-gate / r53 entrypoint regressions report
+  `29 passed in 63.32s`. Hosted CI is checked separately after fork publication;
+  these local results are not evidence of a hosted job succeeding.
+- Independent read-only follow-up reviewed 12 files and found zero code
+  blockers. Its recommendation is COMMENT rather than formal APPROVE because
+  LSP/AST-specific tools were unavailable; that limitation is not hidden behind
+  the passing tests. Main integration relies on the concrete regression,
+  sandbox, static, and compilation evidence above. Staged source secret scans
+  found no matches.
+- r53, `pyproject.toml`, and `uv.lock` have no diff from starting main. EVAS
+  remains unchanged and clean. All raw smoke artifacts stay outside the repo.
+- Claim boundary: opt-in DUT/bugfix simulation adapter and single-task native
+  observation integration only. The smoke descriptor is test-only. Public and
+  final smoke chains are still separate; no complete campaign switch, Testbench
+  support, typed result ledger, persistent retry coordination, model-quality,
+  paper-score, Spectre equivalence, or full Phase 5 completion is claimed.
+
 ## 2026-08-30 - Development ownership and centralized integration
 
 - Fresh bundled fork audit with `--fetch`: behavioral `main` and EVAS audit

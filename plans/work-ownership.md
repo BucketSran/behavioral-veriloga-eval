@@ -32,7 +32,7 @@ and recorded here before the new coordinator starts writing.
 | Shared harness contracts/state/controller/tool registry, package exports, and their tests | main coordinator | none; old dispatch task is closed |
 | `runners/agent_harness/result_store.py` and `tests/test_agent_harness_result_store.py` | main coordinator | none; historical store slice is integrated |
 | Production opt-in final replay/scorer receipt path and its tests | main coordinator | none; the bounded receipt integration is verified |
-| Production public-validation adapter and complete campaign wiring | main coordinator | none; implementation remains pending |
+| Production public-validation adapter and complete campaign wiring | main coordinator | none; opt-in public-simulation slice verified, complete campaign wiring still pending |
 | Trajectory/result joins, backend adapters, evolution/memory/lineage, and their tests | main coordinator | none; assign exact leaf files before parallel implementation |
 | All other tracked files not explicitly assigned below | main coordinator | none |
 

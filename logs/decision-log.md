@@ -1,5 +1,28 @@
 # Decision Log
 
+## 2026-08-30 - Public simulation feedback binding and claim boundary
+
+- Bind actual sandbox EVAS version/image, public task bytes, fixed command,
+  candidate declarations, runtime limits/source fingerprints, and campaign
+  identity before public validation. Require Docker outside explicit tests.
+- Preserve canonical freeze-compatible candidate hashing; reject undeclared
+  submission files. Retain legacy telemetry hash under its own schema rather
+  than equating the two digest formats.
+- Refuse feedback after candidate/authority drift, resource overflow, missing
+  invocation evidence, or terminal submission/final reservation. Contract
+  failure poisons the adapter instance; the coordinator must discard the
+  attempt. Cross-process retry/recovery is not implemented.
+- Keep the adapter budget-free internally: trusted controller capability costs
+  own accounting. The native smoke proves the second call is rejected before
+  execution when the public-validation budget is one.
+- Process success is not task correctness. No private checker, score, new
+  model-facing domain tool, Testbench fallback, campaign default switch, or
+  final-result feedback is added. Public and final integration smokes remain
+  separate; the complete typed campaign chain is still pending.
+- Hash checks assume exclusive runtime use and coordinator-owned provenance.
+  They are not hostile concurrent-mutation/rollback or hermetic dependency
+  closure guarantees. No r53/EVAS/Spectre change is authorized by this slice.
+
 ## 2026-08-30 - Public EVAS observation integration scope
 
 - Reuse the current mini-swe sandbox execution, not the historical

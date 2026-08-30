@@ -673,10 +673,15 @@ Completed authority-binding slice:
 - a deterministic one-task three-arm Docker smoke exercises this bound path
   with unchanged generation evidence. It is not a native typed trajectory,
   model-quality comparison, or complete memory/lineage closure.
+- the opt-in public EVAS adapter now emits candidate/attempt/profile-bound
+  simulation observations through the existing Docker runtime. A separate
+  r53 DUT smoke verifies native controller trajectory and pre-dispatch budget
+  enforcement; it neither executes final scoring nor switches campaign routing.
 
 Still required before Phase 5 completion:
 
-- a production EVAS 0.8.7 public-validation adapter that emits this binding;
+- Testbench reference-only support and campaign integration beyond the bounded
+  DUT/bugfix public-simulation adapter;
 - full campaign CLI authority/profile distribution beyond the new opt-in
   Python scoring API, plus explicit infrastructure-only retry orchestration;
 - clean-room evidence that final outputs never enter generation, candidate
@@ -687,7 +692,7 @@ Still required before Phase 5 completion:
 Recommended execution order after the generic store:
 
 1. production final executor + receipt integration (opt-in slice verified);
-2. production public-validation adapter;
+2. production public-validation adapter (opt-in DUT slice verified);
 3. broader resume/checkpoint/retry lineage verification (bound runtime's
    persistent no-reentry gate implemented);
 4. native typed campaign result join;
@@ -720,7 +725,7 @@ Implemented and verified as AA-VAE-033/034. Detailed RED/GREEN, independent
 review, clean-room evidence, and validation limitations are recorded in
 `logs/verification-log.md`. Phase 5 remains `in_progress`.
 
-#### Active slice - production public EVAS observation (2026-08-30)
+#### Verified slice - production public EVAS observation (2026-08-30)
 
 Brief: adapt the existing sandboxed public EVAS execution into canonical,
 candidate/profile-bound observations. Preserve mini-swe's default Bash surface;
@@ -753,6 +758,14 @@ conversion of legacy traces. Pre/post hashes detect drift but do not prove
 transactional rollback or a hostile concurrent-process security boundary.
 Stop if execution requires private fixtures, changes scoring semantics, or
 cannot preserve the existing isolation/capability contract.
+
+Implemented as AA-VAE-035. The canonical trajectory test uses an explicit
+test-only routing seam, not a new production model tool. The real Docker smoke
+checks the public adapter, one-call budget, and matching freeze hash; the
+existing bound-final smoke remains a separate chain. Full campaign wiring,
+complete trajectory content/typed result joins, Testbench support, and retry
+lineage remain open. Phase 5 stays `in_progress`; no reasoning/evolution
+backend implementation or baseline-quality claim is implied.
 
 ### Phase 6 - Add the AlphaApollo single-trajectory reasoning backend
 
