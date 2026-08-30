@@ -1,5 +1,28 @@
 # Verification Log
 
+## 2026-08-30 - Native launcher fork publication and hosted confirmation
+
+- Published only to BucketSran `origin/main`: `c3e0dd6fc3` scope,
+  `3de324aa3c` deadline contract, `d96d306a00` launcher/tests/migration note,
+  `17c88b1222` CI and shared evidence. Both scoped worktrees were clean after
+  push. Behavioral main/origin matched; upstream had zero unique commits
+  missing from the fork. EVAS stayed at `6cb6fa7a7d`; r53 bytes unchanged.
+- [Evaluator Closure run 33294511853](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33294511853)
+  succeeded in 2m10s on code/CI SHA
+  `17c88b12220397e377f82ccbc5583a897d90895b`. Hosted regression:
+  **604 passed, 9 skipped in 33.23s**. Separately enabled Docker public
+  validation smoke: **1 passed in 3.29s**; native episode result join:
+  **1 passed in 4.87s**; new native launcher provider-to-score smoke:
+  **1 passed in 4.07s**. Three-arm bound-final clean-room smoke also passed.
+- [Public Agent Runtime run 33294511856](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33294511856)
+  and [Runner Smoke run 33294511865](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33294511865)
+  succeeded on the same SHA. CI's Node-action deprecation warning is
+  non-blocking and left for a separate workflow-maintenance slice.
+- This follow-up changes only the verification log. It does not promote the
+  scripted single-task smoke to model-quality, legacy-parity, formal/Spectre,
+  reasoning/evolution, or complete campaign evidence.
+
+
 ## 2026-08-30 - Native mini-swe launcher local evidence (AA-VAE-037)
 
 - Baseline was behavioral main/origin `bbb76139ee`, read-only upstream
