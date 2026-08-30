@@ -16,8 +16,9 @@ implementation and does not change the phase statuses below.
 - Authorized next experiment: [budget-controlled DeepSeek pilot](deepseek-budget-pilot.md).
   Select official `deepseek-v4-flash`; one seeded family, three forms, two
   Agentic backends, one repetition. CNY 5.00 cap (USD 0.70 only for a USD account).
-  Credentials are currently absent. Free preparation may proceed; paid execution
-  requires a tested per-HTTP spend guard and explicit provider mode. This
+  Credentials are currently absent. Free preparation and the pilot-only
+  per-HTTP spending guard/explicit non-thinking client are verified (AA-VAE-050).
+  A fresh live manifest, serial driver and censored-result index remain gated. This
   development pilot does not change r53's normal wall-time policy or authorize
   full-r53/Evolution execution.
 
@@ -40,7 +41,7 @@ implementation and does not change the phase statuses below.
   hosted workflows passed. Local final harness gate: 702 passed / 11 skipped.
   Implementation and real-model experimental evidence remain separate gates.
   Model/service/budget are now selected in the pilot plan above; credentials
-  and verified operational spending protection remain the live-execution gates.
+  and frozen guarded execution remain the live-execution gates.
 
 - Earlier completed milestone: [native DUT/bugfix three-arm campaign](native-three-arm-campaign.md).
   Implemented absent public authority, native conditions and minimal

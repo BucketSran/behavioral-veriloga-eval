@@ -1,5 +1,25 @@
 # Decision Log
 
+## 2026-08-30 - Pilot spending authority is an opt-in transport guard (AA-VAE-050)
+
+- Keep the usual CLI and sealed r53 stopping rule unchanged. Add a separately
+  constructed official Flash client using existing SSE/private-capture seams.
+  Its actual payload disables thinking and requests final streaming usage.
+- Share one CNY 5.00 / USD 0.70 budget across up to six frozen cell IDs, with
+  eight logical calls per cell even across fresh clients. No parallel HTTP.
+  Reserve full conservative context plus capped output at peak/miss prices,
+  durably before each network attempt; reconcile only valid terminal usage.
+- Unknown/failed/partial accounting retains the whole reservation and stops
+  the shared budget before retry. This deliberately strengthens the original
+  "every retry reserves" plan by refusing paid retries after unknown cost.
+- The journal is private, exclusive-create and non-resumable. Recorded cost
+  is a conservative upper bound, not an actual bill or an account-wide quota.
+  Trusted host construction and documented provider rates/token bounds are
+  assumptions; unrelated spending and deliberate client bypass are outside it.
+- Fee safety can be verified without credentials. Real live manifest/serial
+  dispatch and censored-result indexing remain pending credential availability.
+  `PilotBudgetStop` is not an ordinary benchmark zero; no paid call is claimed.
+
 ## 2026-08-30 - Lowest-price DeepSeek pilot with a separate spending gate
 
 - The user authorized the cheapest available DeepSeek model and delegated

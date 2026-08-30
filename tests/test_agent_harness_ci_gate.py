@@ -5,6 +5,12 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "evaluator-closure.yml"
 
 
+def test_budgeted_pilot_client_changes_trigger_free_native_integration():
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    assert workflow.count('"benchmark-vabench-release-v4/operations/calibration_pilot/deepseek_budget.py"') == 2
+    assert "tests/test_agent_harness_deepseek_budget_smoke.py::test_budgeted_client_reaches_native_freeze_and_evas_sidecar" in workflow
+
+
 def test_evaluator_closure_tracks_recovery_ledger_and_real_evolution():
     workflow = WORKFLOW.read_text(encoding="utf-8")
     prefix = '"benchmark-vabench-release-v4/operations/calibration_pilot/'

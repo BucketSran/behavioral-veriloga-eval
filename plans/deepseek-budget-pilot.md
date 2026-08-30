@@ -1,8 +1,9 @@
 # Budget-controlled DeepSeek pilot
 
 Date: 2026-08-30. Base: `38375909aee7103df154c72b2c3d7f3fbb3dee1c`.
-Status: authorized pilot; preparation only until credentials and tested
-pre-request spend protection are available. No paid request has been made.
+Status: authorized pilot; free preparation and the opt-in budgeted client are
+verified. Credentials and a fresh live schedule/driver remain launch gates.
+No paid request has been made.
 
 ## Brief and KPI
 
@@ -78,8 +79,9 @@ spending by unrelated processes on the account.
 
 ## Mandatory live-execution gates
 
-The current CLI has no fiat-cost cap and no explicit DeepSeek thinking option.
-Its transport may make up to three HTTP attempts per logical call. Existing
+The normal CLI has no fiat-cost cap and no explicit DeepSeek thinking option.
+The pilot-only `deepseek_budget.py` client now supplies both through the existing
+client-factory seam; it does not alter default CLI construction. Existing
 dry-run manifests therefore verify selection/runtime preparation only: **do not
 turn them into live runs merely by removing `--dry-run`.**
 
@@ -89,21 +91,28 @@ Before paid execution:
    private projects for credentials or publish key values/paths.
 2. Verify official model availability, account currency and service usability
    with metadata endpoints; do not recharge or print account balances publicly.
-3. Add/test a pilot-only pre-HTTP spend guard and explicit provider parameters
-   through existing transport/client seams. Avoid another controller or proxy.
-   Assert the actual outbound request contains `thinking: {type: "disabled"}`;
-   a manifest label alone is insufficient. DeepSeek defaults to thinking mode,
-   where sampling controls such as temperature do not have the same effect.
+3. Use the verified pilot-only `BudgetedDeepSeekClient` with one shared
+   `DeepSeekPilotBudget` for all six backend-qualified cell IDs. Both were added
+   through existing SSE/capture seams without another controller or proxy.
+   Tests assert the outbound request contains `thinking: {type: "disabled"}`;
+   the normal client still omits provider-specific options. DeepSeek defaults
+   to thinking mode, where temperature does not have the same effect.
 4. Reserve each request's worst-case charge before network execution, using a
    conservative provider context bound and capped output at peak/miss prices.
-   Reconcile only validated provider usage; missing/failed/ambiguous requests
-   retain their full reservation. Retries must pass the same gate individually.
+   Reconcile only validated final SSE usage. Missing/failed/ambiguous requests
+   retain their full reservation and stop the shared budget before another
+   HTTP attempt, including inherited transport retry. No automatic paid retry
+   is allowed after unknown cost. The guard uses 1,048,576 as a conservative
+   interpretation of documented `1M`, not an official request acceptance limit.
    Do not rely on rough text/token estimates as a billing guarantee.
 5. Bind provider mode, rates, currency, cap, request limits, code/image hashes,
    selection and execution order in a fresh immutable pilot manifest. No
    in-place resume after failure or process loss.
-6. Prove zero network calls after a refused reservation, retry charging,
-   missing-usage handling and unchanged default runner behavior using tests.
+6. The free tests now prove refused reservations send no HTTP, unknown transport
+   costs stop retry, and fresh clients cannot reset the eight-call cell limit.
+   Preserve `PilotBudgetStop` and journal stop reasons as operationally censored
+   dispositions in the live pilot index, including all not-started cells.
+   The existing general native scorer is not that separate pilot index.
    Then execute the six-cell schedule within the shared cap, retaining stops.
 
 The guard is a separate operational safety layer, not a silent change to the
@@ -156,6 +165,31 @@ uv run --locked --extra agentic python \
 The Reasoning invocation additionally fixed
 `--reasoning-proposal-format native_tool_calls`. Both report `prepared: 3`,
 null EVAS identity and no observed container IDs; these are not live execution
-or billing-protection evidence. Provider thinking mode and spend guard remain
-unimplemented in this preparation. No credentials were read and no paid calls
-were made. The active-entrypoint/layout regression gate passed 48 tests.
+or billing-protection evidence. At preparation commit `306eb45c9b`, provider
+mode and spend guard were not yet implemented. No credentials were read and no
+paid calls were made. The active-entrypoint/layout regression gate passed 48 tests.
+
+## Budgeted-client evidence (AA-VAE-050)
+
+`deepseek_budget.py` provides a separately constructed client, not a live CLI or
+an account-wide quota. The journal is exclusive-create, private mode 0600 and
+fsynced before HTTP. Accounting is Decimal-valued, conservative at peak/miss
+rates, and is **not an actual provider invoice**. A whole-context reservation
+at 4096 output tokens is CNY 3.182592; a complete valid response releases the
+unused reservation. Missing/invalid usage retains it and stops the pilot.
+Unrelated account activity and provider behavior outside the documented rate/
+token contract are not controlled by this in-process guard.
+
+Tests cover outbound mode, shared caps, eight calls per cell, fresh-client
+non-reset, invalid/partial usage, retry stop, existing-journal refusal and disk
+failure. A free HTTP-boundary fixture also reaches real Docker/EVAS freeze and
+verified sidecar through both native backends (2 passed). It uses deliberately
+incomplete public candidates and establishes no DeepSeek quality result.
+Commands and evidence hashes: `logs/verification-log.md` and
+`docs/alphaapollo-migration/features/AA-VAE-050-budgeted-deepseek-client.md`.
+
+Live schedule/driver construction remains credential-gated. It must interleave
+the six cells, inject this exact shared budget (never the general CLI's plain
+client), freeze rates/mode/code/image identity, retain operationally censored
+rows and remove the API key from inherited sandbox environment. No prior
+dry-run directory or budget journal may be reused as a resumed paid run.

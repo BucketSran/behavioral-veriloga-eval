@@ -1,5 +1,43 @@
 # Verification Log
 
+## 2026-08-30 - Budgeted DeepSeek client, free boundary and real EVAS tests
+
+- Base: `306eb45c9b70d4e1f49a3ca4b6a3198c4a46c5f0`. That earlier docs commit's
+  [Runner Smoke 33316460244](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33316460244)
+  passed. Hosted results for the new runtime are recorded separately after push.
+- TDD RED/GREEN: missing module; missing downward reconciliation; four invalid
+  usage/terminal cases accepted; absent eight-call limit; missing CI path gate.
+  Each failed before its owning implementation change, then passed.
+- `uv run --locked --extra agentic python -m pytest
+  tests/test_agent_harness_deepseek_budget.py
+  tests/test_agent_harness_private_provider_capture.py
+  tests/test_agent_harness_ci_gate.py -q --tb=short`: **35 passed in 0.18s**.
+- `VABENCH_TEST_DOCKER_RUNTIME=1 uv run --locked --extra agentic python -m pytest
+  tests/test_agent_harness_deepseek_budget_smoke.py -q --tb=short
+  --basetemp=benchmark-vabench-release-v4/reports/deepseek-budget-smoke-01`:
+  **2 passed in 20.31s**. HTTP is a free fixture; native mini-swe/Reasoning each
+  reaches real Docker, frozen public incomplete submission, strict EVAS 0.8.7
+  sidecar and read-only score validation. Expected `behavior_failure` is a
+  connectivity assertion, not real DeepSeek performance.
+  Index hashes under that ignored output directory:
+  - `test_budgeted_client_reaches_n0/budget-smoke-index.json`:
+    `ee755b8763925e1f4154ff4d2ce4d014ec0d245e33e1e0193d526a93a1c3092e`;
+  - `test_budgeted_client_reaches_n1/budget-smoke-index.json`:
+    `cf6bdba35c35722c2f34e5da726f875c3a6808778bbb37f771cb88e9ebdf9762`.
+- Full harness: `uv run --locked --extra agentic python -m pytest
+  tests/test_agent_harness_*.py -q --tb=short`: **724 passed / 13 skipped in
+  64.24s**. Docker cases are separately opt-in as above; skipped is not passed.
+  Ruff 0.12.12 on changed Python, bytecode compilation, workflow YAML parsing
+  and whitespace checks passed. No dependency added, no r53 byte changes.
+- Independent official-doc review confirmed streaming final usage, default
+  thinking caveat and conservative (not officially numeric) `1M` context bound.
+  Independent code review found no scoped blocker and reran **21 passed**.
+- Credentials remain absent; no model/metadata API endpoint was contacted.
+  Actual paid requests/spend: **0 / 0**. The normal CLI has no monetary guard;
+  only the new explicitly constructed client is protected. Live schedule,
+  code/image/rate binding and operationally censored-result index remain gated.
+  No whole-benchmark, backend-quality, Spectre or completed live-pilot claim.
+
 ## 2026-08-30 - Free DeepSeek pilot preparation (no paid model run)
 
 - Baseline fork main is `38375909aee7103df154c72b2c3d7f3fbb3dee1c`, matching

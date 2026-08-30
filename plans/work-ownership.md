@@ -89,6 +89,13 @@ Integration sequence:
 
 ## Immediate Follow-up
 
+Budgeted DeepSeek pilot on `306eb45c9b`: main owns all new
+`deepseek_budget.py`, its two test files, CI selector/workflow updates and
+shared records. `deepseek_price_contract` verified official provider semantics
+read-only; `pilot_budget_surface` reviewed the guard read-only. No delegated
+writing lane was opened. Real paid execution still awaits credentials and a
+fresh guarded live schedule; free fixtures are not model experiments.
+
 Current closeout: all delegated implementation lanes are handed back and stopped.
 The coordinator verified and published the integrated runtime as `164131a8a4`;
 all three triggered hosted workflows passed. No writing lane remains open.
