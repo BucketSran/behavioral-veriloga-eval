@@ -31,6 +31,16 @@ reasoning backend, and a separately named AlphaApollo evolution condition.
 - Use only public AlphaApollo and public coding-agent implementations and
   documentation. Do not read or copy private AlphaApollo project material.
 
+## Development ownership and integration
+
+The main coordinator owns shared interfaces, plans/logs, integration, and all
+Git publication. Delegated tasks are read-only unless assigned exact,
+non-overlapping files in [work-ownership.md](work-ownership.md). No delegated
+writing lane is currently active. The historical result-store task is complete;
+the unfinished dispatch task's interface question is reassigned to the main
+coordinator for review, not automatic implementation. This workflow change
+does not alter benchmark model/evolution concurrency or complete Phase 5.
+
 ## Approved architecture decisions
 
 1. Keep mini-swe as a supported backend and regression baseline.

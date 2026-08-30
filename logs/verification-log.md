@@ -1,5 +1,29 @@
 # Verification Log
 
+## 2026-08-30 - Development ownership and centralized integration
+
+- Fresh bundled fork audit with `--fetch`: behavioral `main` and EVAS audit
+  branch both clean and tracking-synced. Behavioral HEAD/origin main was
+  `1c7a05f263cdad8f2e5dfb085a3ff2c98276e397`; upstream remained
+  `7b5616dc52195ec275ec6d21c71d7763613702cd`.
+- The two user-specified local task records still end in `task_complete`.
+  `git merge-base --is-ancestor` confirms both store commits `a8fa0aba2a` and
+  `fdea07dc41` are already in main. No historical task was resumed or remotely
+  controlled; direct desktop task-management tools were unavailable.
+- Ownership checks pass for AGENTS/plan links, both historical task IDs,
+  referenced implementation paths, no active delegated write assignments,
+  sole coordinator Git ownership, and the explicit non-lock limitation.
+- Independent read-only review reports PASS, no blockers. Its wording
+  suggestion was applied: verified opt-in final replay and pending full
+  campaign/public-validation wiring have separate ownership rows.
+- `git diff --check` passes. Only AGENTS, ownership/plan, and dated logs change;
+  runtime tests, lint/type checks, and Docker smoke are not rerun for this
+  documentation-only slice. Earlier code CI evidence is not relabeled as a
+  fresh functional verification.
+- KPIs met for recorded ownership and handoff rules. Enforcement remains a
+  coordination agreement: it cannot stop an independent task that ignores the
+  register. Future delegated writes require a fresh exact-file assignment.
+
 ## 2026-08-30 - Fork publication and hosted confirmation
 
 - Published focused commits to BucketSran `origin/main` only:

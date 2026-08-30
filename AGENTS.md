@@ -314,6 +314,37 @@ failures or removed from the scheduled set.
   practical. Update the decision and verification logs in the commit that
   establishes the corresponding evidence so history remains reconstructable.
 
+### Development Task Ownership And Integration
+
+These rules govern coding tasks, not benchmark model/candidate concurrency.
+The user-facing main coordinator is the sole integration and publication
+owner. Read `plans/work-ownership.md` before resuming or delegating work.
+
+- Delegated tasks are read-only by default. Before any delegated edit, the
+  coordinator records the task/owner, exact files, base commit, forbidden
+  surfaces, acceptance tests, and handoff in the ownership register. Only one
+  active writer may own a file; a component label alone is not write authority.
+- Only the coordinator may stage, commit, amend, merge, cherry-pick, rebase,
+  switch branches, push, or otherwise mutate the shared Git index/history.
+  Delegates return unstaged changes and evidence; they do not publish commits.
+- The coordinator owns shared interfaces/exports, schemas, CI, `AGENTS.md`,
+  plans, decision/verification logs, and migration ledgers. Delegates propose
+  changes to these surfaces in their handoff instead of editing them.
+- Do not start a second writer on a task's files until the previous owner has
+  ended or explicitly handed them back. A resumed historical task must obtain
+  a fresh assignment; old delegation text does not override this contract.
+- On unexpected edits, index changes, or base drift, stop the affected writes
+  and report the conflict. Never revert another task's work or apply a stale
+  patch to recover ownership. Do not run repository-wide formatting or cleanup
+  from a delegated task.
+- Before integration, all delegated writers hand back their files and stop
+  editing. The coordinator inspects the exact diff, runs focused and applicable
+  integration checks on a stable tree, obtains independent read-only review,
+  updates shared records, and publishes one reviewable slice to the fork.
+- This is a workflow agreement, not an OS lock or proof that an independent
+  Codex task was stopped. Record tool/status uncertainty rather than claiming
+  that changing this file terminates another task.
+
 ## Implementation And Verification Workflow
 
 1. State the exact claim or contract being changed and its stop condition.

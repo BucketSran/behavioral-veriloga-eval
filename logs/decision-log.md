@@ -1,5 +1,21 @@
 # Decision Log
 
+## 2026-08-30 - Main-coordinator integration and file ownership
+
+- User approved explicit ownership and centralized integration/publication.
+  `AGENTS.md` now requires exact, non-overlapping file assignments before a
+  delegated edit; shared contracts, schemas, CI, docs/logs, and Git mutations
+  remain main-coordinator responsibilities.
+- Record current ownership and historical handoffs in `plans/work-ownership.md`.
+  The store closeout is complete and reused; the old dispatch task is not
+  resumed, and its interface question is reassessed against current main.
+- Keep independent review parallel and read-only. Leaf-file implementation
+  may be delegated later, but all writers must hand back before integration
+  tests, central documentation updates, staging, and fork publication.
+- This is documentation/process coordination, not an interprocess lock or a
+  claim that editing instructions stops independent tasks. No harness behavior,
+  benchmark release, evaluator, dependency, or model experiment changes here.
+
 ## 2026-08-30 - Bound final replay implementation decisions
 
 - Reuse `ProfileBoundFinalJudge` and the existing immutable sidecar writer;
