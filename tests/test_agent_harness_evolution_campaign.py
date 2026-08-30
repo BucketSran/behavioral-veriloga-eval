@@ -106,6 +106,14 @@ def test_evolution_cli_rejects_credentials_in_roster(tmp_path):
 
 @pytest.mark.parametrize("form", ["dut", "bugfix", "testbench"])
 def test_r53_docker_native_evolution_selected_final_only(tmp_path, form):
+    _run_r53_evolution(tmp_path, form)
+
+
+def test_r53_docker_synthetic_docs_evolution(tmp_path):
+    _run_r53_evolution(tmp_path, "dut", docs_enabled=True)
+
+
+def _run_r53_evolution(tmp_path, form, *, docs_enabled=False):
     if os.environ.get("VABENCH_TEST_DOCKER_RUNTIME") != "1":
         pytest.skip("opt-in real Docker/EVAS Evolution integration")
     import run_native_evolution as evolution
@@ -117,6 +125,10 @@ def test_r53_docker_native_evolution_selected_final_only(tmp_path, form):
     cell = {**original, "experimental_arm": "AlphaApollo-Evolution+EVAS"}
     artifacts = smoke.public_stub_artifacts(smoke.public_contract(smoke.DEFAULT_RELEASE, cell["task_id"]))
     clients = []
+    corpus = None
+    if docs_enabled:
+        from test_agent_harness_docs_integration import synthetic_corpus
+        corpus = synthetic_corpus(tmp_path / "corpus")
 
     def factory(model):
         commands = [
@@ -125,7 +137,20 @@ def test_r53_docker_native_evolution_selected_final_only(tmp_path, form):
               for name, content in artifacts.items()],
             "vabench-submit",
         ]
+        if docs_enabled:
+            commands.insert(0, "unused")
         client = Provider(commands)
+        original_complete = client.complete
+
+        def complete(*args, **kwargs):
+            response = original_complete(*args, **kwargs)
+            if docs_enabled and len(client.requests) == 1:
+                response["choices"][0]["message"]["tool_calls"][0]["function"] = {
+                    "name": "vaevas_docs_search", "arguments": json.dumps({"query": "resistor"}),
+                }
+            return response
+
+        client.complete = complete
         client.model = model
         clients.append(client)
         return client
@@ -143,6 +168,7 @@ def test_r53_docker_native_evolution_selected_final_only(tmp_path, form):
         rounds=2, max_steps=5, budgets={"model_calls": 5, "tool_calls": 5, "public_validation_calls": 1},
         request_timeout_s=15, timeout_s=120, deadline_monotonic=time.monotonic() + 120,
         campaign_file_sha256="c" * 64,
+        docs_corpus=corpus,
     )
     assert len(clients) == 4
     assert len(run.evolution_result.round_snapshots) == 2
@@ -158,6 +184,11 @@ def test_r53_docker_native_evolution_selected_final_only(tmp_path, form):
                for request in round_one_requests)
     assert "final_judgment" not in json.dumps(deepcopy(run.evolution_result.memory_snapshots), default=dict)
     result = json.loads((tmp_path / "run/final-result.json").read_text())
+    if docs_enabled:
+        assert result["extensions"]["offline_docs"]["profile_sha256"] == corpus.profile_sha256
+        assert all("SYNTHETIC_DOC" not in json.dumps(client.requests[0])
+                   and "SYNTHETIC_DOC" in json.dumps(client.requests[1]) for client in clients)
+        assert "SYNTHETIC_DOC" not in json.dumps(run.evolution_result.memory_snapshots, default=dict)
     assert result["denominator"] == {"scheduled_cells": 1, "scheduled_branches": 4, "observed_branches": 4}
     assert result["all_branch_costs"]["model_calls"]["total"] == sum(len(client.requests) for client in clients)
     assert result["all_branch_costs"]["public_validation_calls"]["total"] == 4

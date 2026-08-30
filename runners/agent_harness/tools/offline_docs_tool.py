@@ -51,7 +51,7 @@ def _observation_schema(profile):
 
 def docs_tool_descriptor(profile, *, condition):
     validate_corpus_profile(profile)
-    if condition not in {"Agentic", "Agent-No-EVAS"}:
+    if condition not in {"Agentic", "Agent-No-EVAS", "AlphaApollo-Evolution+EVAS"}:
         raise ValueError("interactive docs are unavailable for OneShot or unknown conditions")
     return {
         "schema_version": "vaevas-tool-descriptor-v1", "tool_id": "vaevas/docs-search-v1",
@@ -69,7 +69,7 @@ def docs_tool_descriptor(profile, *, condition):
         "observation_schema": _observation_schema(profile),
         "evidence_policy": {
             "records_private_evidence": False, "may_enter_model_observation": True,
-            "may_enter_shared_memory": True, "requires_candidate_binding": True,
+            "may_enter_shared_memory": condition != "AlphaApollo-Evolution+EVAS", "requires_candidate_binding": True,
         },
         "handler_id": HANDLER_ID,
     }

@@ -64,6 +64,7 @@ from runners.agent_harness.state import (  # noqa: E402
     Observation,
 )
 from runners.agent_harness.tool_registry import ToolRegistry  # noqa: E402
+from runners.agent_harness.tools.offline_docs_tool import OfflineDocsTool, docs_prompt  # noqa: E402
 from runners.agent_harness.trajectory import (  # noqa: E402
     JsonlTrajectoryRecorder,
     read_trajectory,
@@ -441,18 +442,27 @@ def run_native_evolution(
     deadline_monotonic: float | None = None,
     campaign_file_sha256: str | None = None,
     max_workers: int | None = None,
+    docs_corpus: Any | None = None,
     ops: NativeEvolutionOps | None = None,
 ) -> NativeEvolutionRun:
     """Run candidate-only Evolution and final-score the selected candidate once."""
     ops = ops or NativeEvolutionOps()
+    condition = str(cell.get("experimental_arm") or "Evolution+EVAS")
+    docs_tool = None
+    if docs_corpus is not None:
+        if condition != "AlphaApollo-Evolution+EVAS":
+            raise ValueError("synthetic Evolution docs require AlphaApollo-Evolution+EVAS")
+        docs_tool = OfflineDocsTool(docs_corpus, condition=condition)
     output_dir = output_dir.resolve()
     if output_dir.exists() or output_dir.is_symlink():
         raise RuntimeError("native evolution output_dir must be fresh")
     output_dir.mkdir(mode=0o700, parents=True)
     if not branches:
         raise ValueError("branches must not be empty")
-    condition = str(cell.get("experimental_arm") or "Evolution+EVAS")
-    tool_registry = ToolRegistry([mini_swe_bash_tool_descriptor(allowed_conditions=[condition])])
+    descriptors = [mini_swe_bash_tool_descriptor(allowed_conditions=[condition])]
+    if docs_tool is not None:
+        descriptors.append(docs_tool.descriptor)
+    tool_registry = ToolRegistry(descriptors)
     _validate_branch_contracts(branches)
     config_doc = _native_evolution_config_document(
         cell=cell,
@@ -471,6 +481,11 @@ def run_native_evolution(
         evas_command=evas_command,
         campaign_file_sha256=campaign_file_sha256,
     )
+    if docs_tool is not None:
+        config_doc["extensions"] = {"offline_docs": {
+            "profile": docs_tool.profile, "profile_sha256": docs_corpus.profile_sha256,
+            "intervention": "synthetic-frozen-docs-v1", "tool_name": "vaevas_docs_search",
+        }}
     campaign_config_sha = _canonical_sha256(config_doc)
     _write_once_json(output_dir / "setup-request.json", {
         "schema_version": "vaevas-native-evolution-setup-v1", "config": config_doc,
@@ -597,6 +612,7 @@ def run_native_evolution(
             branch_docker_image=branch_docker_image,
             allow_insecure_test_sandbox=allow_insecure_test_sandbox,
             max_steps=max_steps,
+            docs_corpus=docs_corpus,
             ops=ops,
         )
 
@@ -709,6 +725,7 @@ def _run_branch(
     branch_docker_image: str | None,
     allow_insecure_test_sandbox: bool,
     max_steps: int,
+    docs_corpus: Any | None,
     ops: NativeEvolutionOps,
 ) -> Mapping[str, Any]:
     runtime = request.output_path / "runtime"
@@ -727,6 +744,7 @@ def _run_branch(
     controller_closed_environment = False
     started = time.monotonic()
     try:
+        docs_tool = OfflineDocsTool(docs_corpus, condition=condition) if docs_corpus is not None else None
         generation_cell = _branch_generation_cell(cell)
         _export_runtime(ops, generation_cell, release, runtime, timeout_s)
         make_environment = ops.make_branch_environment or _default_make_branch_environment
@@ -781,7 +799,9 @@ def _run_branch(
                 runtime=runtime,
                 context=context,
                 request=request,
+                docs_profile=docs_tool.profile if docs_tool is not None else None,
             ),
+            docs_tool=docs_tool,
             candidate_tree_sha256=candidate_hash,
             freeze_submission=_final_freeze_forbidden,
             submitted_exception_types=(_Submitted,),
@@ -1144,6 +1164,7 @@ def _branch_task_payload(
     runtime: Path,
     context: EpisodeContext,
     request: EvolutionBranchRequest,
+    docs_profile: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "task_id": context.task_id,
@@ -1157,6 +1178,8 @@ def _branch_task_payload(
         "public_snapshot": _json_ready(request.public_snapshot),
         "prior_candidates": _prior_candidate_payloads(request),
     }
+    if docs_profile is not None:
+        payload["generation_contract"] += docs_prompt(docs_profile)
     return payload
 
 
@@ -1469,6 +1492,7 @@ def _evolution_evidence_summary(output_dir: Path) -> dict[str, Any]:
         "denominator": {"scheduled_cells": 1, "scheduled_branches": len(records),
                         "observed_branches": sum(record["started"] for record in records)},
         "all_branch_costs": totals, "branch_evidence": records,
+        **({"extensions": config["extensions"]} if "extensions" in config else {}),
         "source": {"request_sha256": hashlib.sha256(request_path.read_bytes()).hexdigest(),
                    "campaign_file_sha256": request.get("campaign_file_sha256")},
         "claim_boundary": {"condition": config["condition"], "score_authority": "development_only",

@@ -1,5 +1,27 @@
 # Verification Log
 
+## 2026-08-31 - Synthetic docs Evolution integration (AA-VAE-065)
+
+- Six REDs covered missing API/exact-condition guard and ordinary Evolution
+  pooling rejection. GREEN then adds wrong-input/shared-tool-budget tests.
+  CI selector had its own RED before workflow registration.
+- Related Evolution/docs/ledger/CI gate: **88 passed, 6 skipped, 10.31 s**.
+  Scripted-provider real Docker double-model/double-round docs smoke:
+  **1 passed, 6 deselected, 38.63 s**; fresh basetemp
+  `benchmark-vabench-release-v4/reports/aa065-evolution-docs-01`.
+  Public feedback precedes freeze and exactly one final evaluation; no final
+  outcome or direct retrieval observation enters shared memory.
+- Ruff and diff checks pass. Independent scoped code review ACCEPT, no blocker.
+  Source hashes are integrity joins under a trusted coordinator, not resistance
+  to hostile monkeypatching of in-process corpus objects or real-data attestation.
+- Earlier source-specific hosted gates are green: AA-VAE-061 `240b381e232d527eaad280159a2bcd04e332749b`
+  [Evaluator Closure](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33329573535),
+  [Public Agent Runtime](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33329573542),
+  [Runner Smoke](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33329573504);
+  AA-VAE-063 `8774850d1d59f74b455af9b5bd08302428585bf2`
+  [Evaluator Closure](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33329638422),
+  [Runner Smoke](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33329638423).
+
 ## 2026-08-31 - Evolution generation surface repair (AA-VAE-064)
 
 - New export/runtime-surface tests: 2 REDs, then GREEN; independent review

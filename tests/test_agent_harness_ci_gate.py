@@ -5,6 +5,10 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "evaluator-closure.yml"
 
 
+def test_evaluator_closure_gates_synthetic_evolution_docs():
+    assert "tests/test_agent_harness_evolution_campaign.py::test_r53_docker_synthetic_docs_evolution" in WORKFLOW.read_text()
+
+
 def test_evaluator_closure_gates_native_waveform_feedback_to_final_score():
     assert "tests/test_agent_harness_waveform_integration.py::test_real_waveform_feedback_freeze_final_score" in WORKFLOW.read_text()
 

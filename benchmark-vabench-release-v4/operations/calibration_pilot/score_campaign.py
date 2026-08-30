@@ -825,6 +825,11 @@ def summarize(
     rows: list[dict[str, Any]], judge_kind: str, *,
     scheduled_cells: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
+    if any(row.get("experimental_arm") in {"AlphaApollo-Evolution+EVAS", "Evolution+EVAS"}
+           or (isinstance(row.get("claim_boundary"), dict)
+               and row["claim_boundary"].get("single_trajectory_pooling_allowed") is False)
+           for row in rows):
+        raise ValueError("Evolution rows require their separate multi-branch result protocol")
     if any("extensions" in row for row in rows):
         raise ValueError("synthetic extension rows require a separately frozen comparison protocol")
     if scheduled_cells is not None:

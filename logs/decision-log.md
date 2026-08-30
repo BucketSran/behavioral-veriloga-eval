@@ -1,5 +1,16 @@
 # Decision Log
 
+## 2026-08-31 - Explicit branch-local synthetic retrieval, separate Evolution reports (AA-VAE-065)
+
+- Reuse the native tool bridge and budgets. Enable only the exact Evolution
+  condition through the Python API; validate corpus before reserving output.
+  Freeze profile/intervention before config hash; do not inject corpus text
+  into the initial prompt or direct retrieval events into cross-branch memory.
+- Preserve prior candidate/public-validation sharing and final non-reentry.
+  Reject ordinary summary pooling even for Evolution without extensions.
+  Real corpus approval, matched experimental rollout and quality claims remain
+  external gates; no new CLI, provider expense, training or evaluator change.
+
 ## 2026-08-31 - Separate Evolution logical identity from its generation surface (AA-VAE-064)
 
 - Keep the logical Evolution condition in controller/context, but give branch
