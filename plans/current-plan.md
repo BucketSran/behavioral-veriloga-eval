@@ -17,6 +17,12 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
+- Active overnight request: [engineering closure queue](overnight-engineering-closure.md).
+  The user authorized completing current free engineering gaps, not only the
+  two waveform slices. Preserve separate gates for real data, paid experiments,
+  training and benchmark changes. N1 starts from the accepted native waveform
+  plan; independent advisers inventory remaining synthetic/reporting work.
+
 - Implemented bounded follow-up: [trusted public waveform executor](trusted-public-waveform-executor.md)
   ([AA-VAE-060](../docs/alphaapollo-migration/features/AA-VAE-060-isolated-public-waveform.md)).
   Fresh public-only execution binds candidate/profile/invocation/output receipts.

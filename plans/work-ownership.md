@@ -20,6 +20,28 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
+`synthetic_training_adapter_impl` (N3 / AA-VAE-062), active assignment from
+`961fa99fdc`: exclusively owns new `runners/agent_harness/training_trace_adapter.py`
+and `tests/test_agent_harness_training_trace_adapter.py`. Follow
+`synthetic-native-training-adapter.md`; vertical TDD through the existing export
+contract. No other files, package exports, shared modules, documentation, Git,
+credentials, real data or training. Main owns N1 concurrently and all integration.
+The executor must preserve others' edits, report conflicts and hand back unstaged
+changes plus exact tests before stopping writes; no recursive delegation.
+
+Overnight closure on `961fa99fdc`: main owns N1 / AA-VAE-061 native waveform
+wiring. Exact writable runtime/test files: calibration-pilot
+`run_native_mini_swe.py`, `public_waveform.py`, `score_campaign.py`;
+`runners/agent_harness/tools/public_waveform_tool.py` (new);
+`tests/test_agent_harness_public_waveform.py`,
+`tests/test_agent_harness_waveform_integration.py` (new),
+`tests/test_agent_harness_ci_gate.py`; applicable runner README, CI and shared
+plans/logs/migration docs. Existing controller/budget APIs are reused unchanged
+unless a separately reviewed amendment is required. The three `waveform_*`
+advisers inventory N2–N5 read-only; no delegated writes or Git authority.
+Follow `overnight-engineering-closure.md` and the accepted N1 plan. Main alone
+integrates, verifies and publishes; all historical writer assignments stay closed.
+
 AA-VAE-057–059: the three exact synthetic module/test leaves below have handed
 back and stopped writing. Main owns all remaining shared integration, review
 repairs, documentation and Git. `docs_runtime_review` and

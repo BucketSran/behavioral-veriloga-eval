@@ -1,5 +1,19 @@
 # Decision Log
 
+## 2026-08-31 - Extend overnight work to the current engineering queue
+
+- The user asked to complete current functional gaps for morning audit. Extend
+  the heartbeat beyond the two waveform slices using the bounded overnight plan,
+  not a new duplicate automation. No routine edit/test/publication permission
+  handoffs; no new spending, real data export/training or evaluator changes.
+- Main starts accepted native-waveform wiring (AA-VAE-061). A separately owned
+  pure synthetic training trace adapter (AA-VAE-062) may proceed in parallel;
+  read-only audits cover current reporting and RAG/Evolution seams. Preserve
+  one writer per file and coordinator-only integration/Git.
+- Distinguish missing software from missing source rights, real-model evidence
+  and experimental policy. Implement safe adapters/tests while recording external
+  gates; synthetic connectivity never upgrades a model-quality claim.
+
 ## 2026-08-31 - Publish isolated execution before native waveform activation (AA-VAE-060)
 
 - Reuse the existing Docker sandbox, adding only a default-false read-only
