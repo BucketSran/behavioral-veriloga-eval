@@ -101,10 +101,10 @@ def test_native_policy_reuses_real_mini_swe_messages_and_public_feedback():
     )
     action = policy.act(feedback)
     assert action.candidate_tree_sha256 == "b" * 64
-    assert provider.requests[0] == [
-        {"role": "system", "content": mini.SYSTEM_PROMPT},
-        {"role": "user", "content": "public task\n\n" + mini.BASH_CONTRACT},
-    ]
+    assert provider.requests[0][0] == {"role": "system", "content": mini.SYSTEM_PROMPT}
+    assert provider.requests[0][1]["role"] == "user"
+    assert provider.requests[0][1]["content"].startswith("public task\n\n<vabench_bash_contract>")
+    assert "vabench-submit" in provider.requests[0][1]["content"]
     assert provider.requests[1][-1]["role"] == "tool"
     assert provider.requests[1][-1]["tool_call_id"] == "call-1"
     assert "PUBLIC_DIAGNOSTIC" in provider.requests[1][-1]["content"]

@@ -13,6 +13,58 @@ from test_agent_harness_native_launcher import Provider
 from test_agent_harness_native_campaign_dispatch import WRAPPER
 import run_campaign as runner
 import score_campaign as scorer
+from test_agent_harness_native_conditions import _cell, _native_runtime
+
+
+@pytest.mark.parametrize("backend,proposal_format", [
+    ("native-mini-swe", "native_tool_calls"),
+    ("native-reasoning", "native_tool_calls"),
+    ("native-reasoning", "strict_json"),
+])
+@pytest.mark.parametrize("arm", ["Agentic", "Agent-No-EVAS"])
+def test_interactive_request_explains_actual_shell_authority(
+    native_case, tmp_path, backend, proposal_format, arm,  # noqa: F811
+):
+    from run_native_mini_swe import run_prepared_native_mini_swe
+
+    arguments, _, _ = native_case
+    runtime = _native_runtime(native_case, tmp_path, name="contract-runtime")
+    client = Provider(["true"])
+    original = client.complete
+
+    def complete(messages, max_tokens, tools, **kwargs):
+        response = original(messages, max_tokens, tools, **kwargs)
+        if proposal_format == "strict_json":
+            message = response["choices"][0]["message"]
+            call = message.pop("tool_calls")[0]["function"]
+            message["content"] = json.dumps({
+                "tool_name": call["name"], "arguments": json.loads(call["arguments"]),
+            })
+        return response
+
+    client.complete = complete
+    run_prepared_native_mini_swe(
+        runtime=runtime, cell=_cell(arm=arm), client=client, attempt_id="contract",
+        evas_command=arguments["evas_command"], final_judge_command=arguments["command"],
+        allow_insecure_test_sandbox=True, episode_backend=backend,
+        reasoning_proposal_format=proposal_format,
+    )
+    initial = json.dumps(client.requests[0])
+    assert "vabench_bash_contract" in initial
+    assert "vabench-submit" in initial
+    assert "public/submission/" in initial
+    assert "/workspace" in initial
+    assert "Each command starts" in initial
+    assert "exactly one bash action" in initial
+    assert "at least one bash tool call" not in initial
+    assert "FINAL_JUDGE_SENTINEL" not in json.dumps(client.requests)
+    if arm == "Agent-No-EVAS":
+        assert "EVAS execution is not available" in initial
+        assert "real, pinned executable" not in initial
+        assert "evas_runtime.json" not in initial
+    else:
+        assert "evas_runtime.json" in initial
+        assert "real, pinned executable" in initial
 
 
 @pytest.mark.parametrize("proposal_format", ["native_tool_calls", "strict_json"])
@@ -45,6 +97,10 @@ def test_reasoning_runs_real_native_pipeline_and_readonly_score(attempt_case, pr
     assert result["status"] == "behavior_failure"
     assert len(requests) == 2
     assert "reasoning backend" in requests[0][0][0]["content"]
+    initial_request = json.dumps(requests[0][0])
+    assert "vabench_bash_contract" in initial_request
+    assert "vabench-submit" in initial_request
+    assert "public/submission/" in initial_request
     assert bool(requests[0][1]) == (proposal_format == "native_tool_calls")
     runtime = args.output / cell["cell_id"]
     row = scorer.read_native_cell(runtime, cell, campaign_file_sha256="c" * 64)

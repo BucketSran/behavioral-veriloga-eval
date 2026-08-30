@@ -14,6 +14,10 @@ provider 和最终 checker 是测试替身，不是 hosted model / 模型能力�
 
 ## 行为差分矩阵
 
+2026-08-31 更新：AA-VAE-053 为 native 增加固定 cwd / fresh-shell 说明，并将
+操作数量说明改为单动作、格式无关。下表历史“相同请求”现在指除这两处
+明确断言的初始提示词变化外，其余请求历史相同；不宣称 prompt parity。
+
 以下测试名均位于 `tests/test_agent_harness_mini_swe_differential.py`。
 
 | 场景 | 旧路径 | 新路径 | 结论 / 验证入口 |

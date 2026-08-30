@@ -164,6 +164,22 @@ def _native_prompt_path(runtime: Path, condition: str) -> Path:
     return runtime / prompt_name
 
 
+def _interactive_prompt(prompt: str, condition: str) -> str:
+    """Reuse the public shell contract without imposing a provider wire format."""
+    contract = (
+        mini.BASH_CONTRACT if condition == "Agentic" else mini.NO_EVAS_BASH_CONTRACT
+    )
+    contract = contract.replace(
+        "Every assistant turn must contain at\nleast one bash tool call.",
+        "Choose exactly one bash action per turn in the configured response format.",
+    ).replace(
+        "Workspace:\n",
+        "Workspace:\n- Each command starts in /workspace in a fresh shell; cd does not persist\n"
+        "  across calls. Relative public/ paths are resolved from /workspace.\n",
+    )
+    return prompt.rstrip() + "\n\n" + contract
+
+
 def _select_docker_image(condition: str, docker_image: str | None) -> str | None:
     if condition == "OneShot":
         if docker_image not in {None, ""}:
@@ -789,12 +805,13 @@ def run_prepared_native_mini_swe(
                 policy = model
             else:
                 policy = NativeMiniSwePolicy(
-                    model=model, prompt=prompt, action_id_prefix=attempt_id
+                    model=model, prompt=prompt, action_id_prefix=attempt_id,
+                    condition=condition,
                 )
             bridge = _RecordedEnvironment(
                 record=record,
                 legacy_environment=environment,
-                task_payload={"prompt": prompt},
+                task_payload={"prompt": _interactive_prompt(prompt, condition)},
                 candidate_tree_sha256=candidate_hash,
                 freeze_submission=freeze,
                 submitted_exception_types=(submitted,),
@@ -865,15 +882,17 @@ def run_prepared_native_mini_swe(
 class NativeMiniSwePolicy:
     """Reuse the pinned mini-swe prompt and observation formatter, not its loop."""
 
-    def __init__(self, *, model, prompt: str, action_id_prefix: str):
+    def __init__(self, *, model, prompt: str, action_id_prefix: str, condition="Agentic"):
         _, _, format_error, formatter = mini.load_mini_swe()
         model.bind_mini_swe_protocol(formatter, format_error)
         self._format_error = format_error
         self.model = model
         self.messages = [
-            model.format_message(role="system", content=mini.SYSTEM_PROMPT),
+            model.format_message(role="system", content=(
+                mini.SYSTEM_PROMPT if condition == "Agentic" else mini.NO_EVAS_SYSTEM_PROMPT
+            )),
             model.format_message(
-                role="user", content=prompt.rstrip() + "\n\n" + mini.BASH_CONTRACT
+                role="user", content=_interactive_prompt(prompt, condition)
             ),
         ]
         self._last_message = None

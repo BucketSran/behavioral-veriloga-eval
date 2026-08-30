@@ -13,6 +13,13 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
+- Active authorized repair: [native operational contract and optional call budget](native-operational-contract-and-call-budget.md).
+  First repair Reasoning's missing condition-appropriate Bash/submit guidance;
+  then implement an optional positive call limit with trusted remaining-budget
+  observations and explicit unscored exhaustion. Eight is a pilot parameter,
+  not a general harness/r53 rule. Use test-first independent commits and free
+  fixtures only; no paid rerun is authorized by this implementation task.
+
 - Bounded experiment executed and safely stopped: [DeepSeek pilot audit](../docs/alphaapollo-migration/experiments/deepseek-pilot-20260830.md).
   The user confirmed GLM Coding Plan only, then explicitly chose DeepSeek API.
   Use the saved DeepSeek key and `deepseek-v4-flash`; do not call GLM.

@@ -26,6 +26,21 @@ WRITE = "printf 'module model; endmodule\\n' > public/submission/model.va"
 SUBMIT = "vabench-submit"
 
 
+def assert_operational_guidance_is_only_message_delta(legacy, native):
+    """AA-VAE-053 names the initial guidance delta; all later feedback is equal."""
+    expected = deepcopy(legacy)
+    for request in expected:
+        request[1]["content"] = request[1]["content"].replace(
+            "Every assistant turn must contain at\nleast one bash tool call.",
+            "Choose exactly one bash action per turn in the configured response format.",
+        ).replace(
+            "Workspace:\n",
+            "Workspace:\n- Each command starts in /workspace in a fresh shell; cd does not persist\n"
+            "  across calls. Relative public/ paths are resolved from /workspace.\n",
+        )
+    assert expected == native
+
+
 def reply(*commands, finish_reason="tool_calls"):
     return {
         "choices": [{
@@ -156,7 +171,7 @@ def test_single_action_feedback_submission_and_candidate_bytes_match(execute_pat
     new, new_provider, runtime = execute_path("native", responses)
     assert old["submitted"] and new.result.terminal_reason == "submitted"
     assert new.result.primary_outcome == "behavior_failure"  # fixture judge, not model quality
-    assert old_provider.requests == new_provider.requests
+    assert_operational_guidance_is_only_message_delta(old_provider.requests, new_provider.requests)
     assert old_provider.request_contracts == new_provider.request_contracts
     assert len(new_provider.requests) == len(commands) - 1
     assert "PUBLIC_DIAGNOSTIC" in json.dumps(new_provider.requests)
@@ -195,7 +210,7 @@ def test_valid_bash_at_provider_output_cap_remains_telemetry_in_both_loops(execu
     old, old_provider, _ = execute_path("legacy", responses)
     new, new_provider, runtime = execute_path("native", responses)
     assert old["submitted"] and new.result.terminal_reason == "submitted"
-    assert old_provider.requests == new_provider.requests
+    assert_operational_guidance_is_only_message_delta(old_provider.requests, new_provider.requests)
     assert old["events"][0]["finish_reason"] == "length"
     metadata = json.loads((runtime / "evidence/native-launcher/result.json").read_text())
     assert metadata["model_telemetry"]["provider_events"][0]["finish_reason"] == "length"

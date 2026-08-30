@@ -1,5 +1,16 @@
 # Decision Log
 
+## 2026-08-31 - Repair public operational guidance independently (AA-VAE-053)
+
+- Reuse the existing condition-specific Bash contract for both native interactive
+  policies. State fresh-shell cwd and exactly one format-neutral action; do not
+  tell strict-JSON Reasoning to emit native tool calls or No-EVAS to run EVAS.
+- Legacy source/defaults remain unchanged. Name the two native initial-message
+  changes in differential tests; preserve exact equality of all other messages.
+- Optional call-count limits are separately approved operational configuration,
+  not sealed r53 policy or a fixed eight-call rule. Implementation plan:
+  `plans/native-operational-contract-and-call-budget.md`. No paid rerun.
+
 ## 2026-08-30 - Diagnose model-visible contract parity before another pilot
 
 - Offline replay confirms native Reasoning never received the Bash contract or

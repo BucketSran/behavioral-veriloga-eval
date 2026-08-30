@@ -20,6 +20,13 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
+Active AA-VAE-053/054 on `32b63963bd`: main owns native operational-contract
+and optional model-call-budget implementation, existing controller/budget/state,
+launcher/campaign/pilot/scorer seams, related tests and shared records listed in
+`native-operational-contract-and-call-budget.md`. `native_campaign_impl` maps
+budget/retry/evidence integration read-only. All old writers remain closed;
+no delegated write/Git/credential/provider authority is granted.
+
 AA-VAE-052 implementation is owned and verified by main. `pilot_budget_surface`
 and `deepseek_driver_review` completed independent read-only reviews; no blocker
 and no delegated writes. Main alone commits and launches the bounded live run.

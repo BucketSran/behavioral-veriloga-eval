@@ -1,5 +1,26 @@
 # Verification Log
 
+## 2026-08-31 - Public operational contract repair (AA-VAE-053)
+
+- Base `32b63963bd`; first real outbound-request RED: 2 failures for the missing
+  Reasoning contract, followed by 2 passes after minimal repair. Condition matrix
+  initially failed on a fixture-directory collision, not contract behavior;
+  corrected its fresh-runtime name before evaluating the matrix.
+- Focused Reasoning/native launcher/conditions/legacy-native differential gate:
+  **44 passed, 1 opt-in skipped in 13.37s**. Three old exact-message assertions
+  exposed the intended native prompt delta; tests now allow exactly those two
+  edits and still require every other message/feedback byte to match.
+- Free real-Docker/EVAS six-cell fixture (DUT/bugfix/Testbench × two native
+  backends): **1 passed, 11 deselected in 30.17s**. Fresh ignored evidence root
+  `benchmark-vabench-release-v4/reports/aa053-free-smoke-20260831-01`;
+  selector `tests/test_agent_harness_deepseek_pilot.py -k 'real_docker and none'`
+  with `VABENCH_TEST_DOCKER_RUNTIME=1`. HTTP responses are local fixtures;
+  no provider credentials or paid generation, no old evidence touched.
+- Independent read-only scoped review found no blockers (32 passed, 1 skipped;
+  overlapping coverage, not additive). Main Ruff 0.12.12 and whitespace checks
+  pass; active-entrypoint/navigation gate: 23 passed in 0.09s. No LSP/typecheck
+  service is available; syntax and executable regressions are the checked gates.
+
 ## 2026-08-30 - Offline diagnosis of the stopped DeepSeek DUT trajectories
 
 - Analysis base `34823a7dfca6ff3385b6ad274741ecaa218766a7`. Both strict native
