@@ -89,6 +89,44 @@ Integration sequence:
 
 ## Immediate Follow-up
 
+### Repository hygiene slice (2026-08-30)
+
+Brief: make current documentation unambiguous and retire only this coordinator's
+unused, merged local branch. This is documentation/metadata maintenance, not a
+runtime, evaluator, release, or experiment cleanup.
+
+Main owns `README.md`, `docs/README.md`, `docs/REPO_LAYOUT_POLICY.md`, historical
+banners in the nine top-level legacy guides, `plans/current-plan.md`, its dated
+snapshot under `plans/archive/`, this register, the decision/verification logs,
+and `tests/test_v4_r53_active_entrypoints.py`. Base: `892ada7cf1`.
+The `docs_hygiene_inventory` child performed read-only inventory and plan review;
+no delegated writer or Git authority is granted.
+
+Acceptance/KPIs: current entrypoints use immutable r53 + EVAS 0.8.7; every new
+navigation link resolves; legacy guides explicitly prohibit use as current
+instructions while retaining their bodies and paths; the shortened plan keeps
+all open Phase 2/5 gaps, future Phase 6-10 acceptance, and the legacy local test
+failure. No runtime, sealed release, raw evidence, or old worktree is changed.
+
+Plan: run existing entrypoint/layout tests; add failing documentation navigation
+checks; correct current entrypoints; label historical guides; snapshot the old
+plan before compacting completed records; independently review and rerun the
+focused gates; publish small commits only to the fork. No fallback/runtime
+refactor or new dependency is in scope. Stop on concurrent edits, unique branch
+commits, broken provenance, or an unresolved current-policy decision.
+
+Local branch target only: `audit/vaevas-eval-closure` at
+`03cf89415e9a69c6bf94e49ebb1b1a6deb9f3626`, verified merged into `origin/main`
+and absent from `git worktree list`. Retain the fork's remote branch, all other
+historical refs, every worktree, EVAS's current audit branch and its old dirty
+checkout. Deletion is a metadata tidy-up, not a meaningful RAM/disk saving;
+the local ref can be recreated from its recorded SHA or retained remote.
+
+### Closed implementation slices
+
+The following assignments are closed; their files are back with the main
+coordinator. They record completed scope, not instructions to resume a writer.
+
 Bounded differential slice (base `bc7a36b8b9`): the main coordinator owns
 `tests/test_agent_harness_mini_swe_differential.py`, minimal repairs in
 `runners/agent_harness/controller.py` and

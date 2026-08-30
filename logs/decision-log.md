@@ -1,5 +1,21 @@
 # Decision Log
 
+## 2026-08-30 - Bounded local branch and documentation hygiene
+
+- Separate RAM, disk use, and navigation clutter. Git branches are shared refs,
+  not independent working copies. Do not bulk-delete historical branches or
+  protected worktrees to claim storage savings.
+- Retire only the unused, ancestor-verified local `audit/vaevas-eval-closure`
+  ref; retain its remote ref and recovery SHA in the ownership register.
+- Correct README/layout authority to r53 + EVAS 0.8.7. Keep nine legacy guide
+  bodies at existing paths with explicit historical banners, because scripts,
+  old reports and external links may still depend on them.
+- Snapshot the full old plan before reducing completed repetition in the active
+  plan. Preserve open work and failed-test evidence. Migration feature notes,
+  release certifications, logs, raw reports and EVAS are not garbage targets.
+- Read-only inventory/plan review found no blocker with these boundaries;
+  documentation navigation regression and independent final review are required.
+
 ## 2026-08-30 - Freeze legacy/native mini-swe differential behavior (AA-VAE-038)
 
 - Keep the legacy DefaultAgent and native strict-single-action condition
