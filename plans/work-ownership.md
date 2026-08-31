@@ -20,6 +20,14 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
+Active main-only follow-up on `e5f2e9dcec`: follow
+`legacy-native-r53-contract-compatibility.md` for exact scope and KPIs.
+Main owns the legacy public tool, regression tests, records and Git publication.
+`portable_contract_review` supplies read-only advice; `portable_fix_review`
+reviews independently, without source/Git/provider/private-content authority.
+This explicitly opens the old sensitivity residual, not the prior completed
+AA-VAE-067 assignment or any other historical writer assignment.
+
 Completed main-only repair on `1c73e519bd`: follow
 `r53-public-contract-compatibility.md` for exact runtime/test/document ownership,
 acceptance and forbidden surfaces. Source `2e1ec6ba32` is published to fork/main;

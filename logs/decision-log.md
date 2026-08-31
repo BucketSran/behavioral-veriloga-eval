@@ -1,5 +1,18 @@
 # Decision Log
 
+## 2026-08-31 - Close the separate legacy native r53 contract residual
+
+- User continuation opens the bounded AA-VAE-067 residual: legacy sensitivity
+  `execute_tool -> run_public_evas`, not a backend replacement or new checker.
+- Reuse canonical r53 validation before fixed argv dispatch, including explicit
+  portable reference-v1. Preserve supported r45-r52 semantics and public-only
+  reference scope; never run metadata command strings.
+- Main owns edits and fork-only commits. No benchmark/EVAS change, paid call,
+  new behavioral metric, selection policy, real corpus or training work.
+- Follow `plans/legacy-native-r53-contract-compatibility.md`; test the actual
+  legacy tool boundary, reject malformed contracts before execution, and keep
+  fake dispatch evidence distinct from real simulation and model-quality claims.
+
 ## 2026-08-31 - Keep portable execution failures visible (AA-VAE-067)
 
 - Real Docker integration now reaches the pinned public command. v4-102 DUT

@@ -17,6 +17,12 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
+- Active bounded follow-up: [legacy native r53 compatibility](legacy-native-r53-contract-compatibility.md).
+  Repair the separate `--agent-scaffold native` sensitivity public tool using
+  the canonical r53 selector, while preserving historical supported behavior.
+  Main-only writes; RED/GREEN, independent review and source-bound CI required.
+  No release/evaluator, default backend, score, selection or paid-run change.
+
 - Implemented bounded repair: [r53 public contract compatibility](r53-public-contract-compatibility.md)
   ([AA-VAE-067](../docs/alphaapollo-migration/features/AA-VAE-067-r53-portable-public-contracts.md)).
   The six released portable contracts are accepted by the fixed public adapter;

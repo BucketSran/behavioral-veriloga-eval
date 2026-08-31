@@ -1,5 +1,17 @@
 # Verification Log
 
+## 2026-08-31 - Legacy native compatibility intake baseline
+
+- Behavioral clean `main` and fetched BucketSran `origin/main` both at
+  `e5f2e9dceccf3435768ce4af5753c4b268d650fc`; divergence 0/0.
+  Fetched Arcadia-1 upstream/main divergence is 0/137 (no missing upstream
+  commit). Push target remains BucketSran only.
+- EVAS clean `audit/evas-evaluator-compat`; live origin/main and upstream/main
+  both `6cb6fa7a7dac70fc0d4120126d8cf74258e6637b`. No evaluator writes.
+- Read-only consumer advice confirms separate legacy native-v4-loop dispatch
+  and r53 schema / reference-v1 portable defects. Plan and ownership recorded;
+  no source modification or test-success claim at intake.
+
 ## 2026-08-31 - Portable repair published and hosted GREEN
 
 - Runtime source `2e1ec6ba3288b76c9345f38f37f45f086a089f99` is published to
