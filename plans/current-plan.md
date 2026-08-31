@@ -22,8 +22,11 @@ implementation and does not change the phase statuses below.
   manifest/cap launch assertion; prepare/inspect/run/report remain separate.
   Runtime `00eb11e7c1`, CI wiring `39123500cc`: real Docker/EVAS with synthetic
   external HTTP **62 passed**; active regression **1,398 passed / 50 optional
-  skips**; independent review found no required correction. Hosted exact-source
-  checks follow publication. No actual key, provider request or paid run was used.
+  skips**; independent review found no required correction. Four focused commits
+  are on fork main through `58829c7172`; all three exact-source hosted workflows
+  passed (**1,500 full-checkout regression passes / 53 optional skips**, new live
+  stage **21 passes**, all existing Docker stages). No actual key, provider
+  request or paid run was used.
   A real comparison still needs fresh dated preparation and new fee authority;
   implemented launch controls do not constitute model-performance evidence.
 

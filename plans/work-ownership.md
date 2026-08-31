@@ -28,9 +28,10 @@ logs and Git. Follow `legacy-native-live-entrypoint.md`. No delegated writing
 lane: `live_provider_contract_review` is read-only official documentation
 research; the final reviewer is also read-only. No actual keys, paid generation,
 provider metadata calls, old-tree writes, r53/EVAS edits or historical-run reuse.
-Implementation and independent read-only review are complete; main is closing
-documentation, fork publication and exact-source hosted verification. No
-delegated writer is active, and this handoff opens no paid execution lane.
+Implementation, independent read-only review and source publication are complete.
+All three exact-source hosted workflows passed at `58829c7172`. Main closes the
+evidence-only documentation follow-up; no delegated writer is active, and this
+handoff opens no paid execution lane.
 All earlier assignments below remain closed historical records.
 
 Current follow-up starts at `e2498952bb25d46d28b97765df9963a113113cde`:

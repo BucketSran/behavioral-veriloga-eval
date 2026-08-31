@@ -102,9 +102,11 @@ synthetic; active harness/r53 regression **1,398 passed / 50 optional skips**;
 workflow contracts **20 passed**. Independent read-only source review found no
 required correction. Test-first implementation also caught and repaired the
 new CLI's incorrect tuple unpacking of the existing EVAS identity dictionary.
-Runtime commit `00eb11e7c1` and CI commit `39123500cc` are separate review units;
-exact-source hosted evidence is recorded in `logs/verification-log.md` after
-publication. These local checks do not claim a full typecheck or paid run.
+Runtime commit `00eb11e7c1` and CI commit `39123500cc` are separate review units.
+All three hosted workflows passed at published source `58829c7172`: **1,500
+regression passes / 53 optional skips**, **21 live-entrypoint fixture passes**,
+and all prior Docker stages. Exact run links and committed-source local hashes
+are recorded in `logs/verification-log.md`. No full typecheck or paid run is claimed.
 
 No r53 or EVAS 0.8.7 change; no default legacy switch, new controller,
 cross-cell memory, training or Spectre path. Alias drift, a conservative guard

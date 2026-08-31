@@ -1,5 +1,46 @@
 # Verification Log
 
+## 2026-08-31 - AA-VAE-072 fork publication and exact-source hosted GREEN
+
+- Four focused commits are published to BucketSran main: `304db929b1` scope,
+  `00eb11e7c1` runtime/tests, `39123500cc` CI, and
+  `58829c7172ca42c09d19899cdab7b0928f25e923` engineering documentation.
+  Exact-source workflows all succeeded:
+  [Evaluator Closure](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33399679231),
+  [Runner Smoke](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33399679160),
+  [Public Agent Runtime](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33399679158).
+- Hosted full-checkout regression: **1,500 passed / 53 optional skips, 67.96 s**.
+  New live-entrypoint stage: **21 passed, 26.09 s**; free comparison/cost stops:
+  **3 passed, 24.37 s**. All existing Docker stages, Evolution/recovery checks
+  and final three-arm clean-room checks passed. Full checkout verifies the
+  historical compatibility fixtures intentionally excluded from local storage.
+- Log retrieval first hit a TLS handshake timeout; read-only retry using the
+  job log succeeded. CI itself passed without rerun. The existing Node action
+  runtime deprecation warning remains non-blocking and outside this slice.
+- Both repositories were clean and 0/0 versus their fork tracking branches
+  after source publication. Evaluation fork contains all fetched upstream main
+  commits (ahead 163); EVAS is unchanged at `6cb6fa7`. No upstream push,
+  benchmark/evaluator edit, actual key, paid call or raw evidence publication.
+- This final follow-up only records evidence and closes documentation status;
+  it does not alter executed source. Real-model comparison remains unstarted
+  and requires fresh reviewed preparation and separate fee authority.
+
+## 2026-08-31 - AA-VAE-072 committed-source local replay
+
+- Repeated the combined live-entrypoint, free workflow and public-surface
+  integration selection after publication of
+  `58829c7172ca42c09d19899cdab7b0928f25e923`: **62 passed, 112.80 s**.
+  Actual Docker/EVAS, synthetic external metadata/HTTP, zero real provider calls.
+- Ignored local fixture root:
+  `benchmark-vabench-release-v4/reports/comparison-live-committed-ZAOJmC/pytest`.
+  The six-cell live fixture binds this Git label and the executed source bytes.
+  Report SHA-256:
+  `7fb4eb38e9dd253273fa857428df380b58310b80fdd8977ed71756b9845a9c30`;
+  manifest SHA-256:
+  `ea7a9eb3af355e24a490d8871f5c772f2a64776610885fd3e265d08a53e072c1`.
+- Final documentation/active-entrypoint/CI/result-protocol checks: **97 passed**.
+  Raw runtime artifacts remain ignored and are not published.
+
 ## 2026-08-31 - AA-VAE-072 credential-free CI wiring
 
 - Add the live adapter to both evaluator-closure path filters and exercise its
