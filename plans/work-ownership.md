@@ -20,6 +20,23 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
+2026-09-01, base `c4f2f93e89dddf3cf91ec7716872c5554524921a`: main owns
+`plans/adversarial-and-result-adapter.md`, the new read-only Inspect adapter and
+its tests, adversarial integration tests, shared docs/logs/CI and Git. The
+`adversarial_test_map` and `adapter_framework_research` advisers are read-only.
+No evaluator/release/old-tree writes, paid calls or external framework scheduler
+activation. Exact delegated leaves, if any, must be recorded before handoff.
+Acceptance is the linked plan's KPI; all previous assignments below are closed.
+
+`adversarial_e2e_impl` owns only new
+`tests/test_agent_harness_adversarial_e2e.py`, based on `c4f2f93e89` plus the
+main-owned plan. Reuse active r53 Docker/native launcher fixtures, no source
+runtime edits. Cover forged success diagnostics, forbidden private/sibling reads,
+and frozen-evidence tamper/no replay with a real selected final EVAS path; add
+Testbench bypass if supported by existing fixtures. Main owns CI and docs.
+Delegate returns unstaged tests plus exact commands/results and stops editing;
+no Git, release/EVAS/old-tree mutation, paid models or broad cleanup.
+
 Current activation at `30d1efa956`: main owns the static corpus manifest,
 authorization/usage notes, its regression tests and shared records/Git under
 `plans/veriloga-corpus-activation.md`. `corpus_source_review` is a read-only

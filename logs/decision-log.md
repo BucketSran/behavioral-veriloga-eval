@@ -1,5 +1,16 @@
 # Decision Log
 
+## 2026-09-01 - Separate adversarial coverage from framework efficiency
+
+- The user approved adversarial end-to-end tests and a read-only results adapter,
+  and clarified that framework adoption serves evaluation efficiency/concurrency,
+  not anti-hack protection. Keep the two acceptance claims separate.
+- Reuse existing bounded native/legacy workers and native score readers. First
+  integrate official Inspect log APIs as an optional reporting surface; do not
+  create a second scheduler, scorer, retry owner or claim model-quality speedup.
+- Frozen boundaries: r53, EVAS 0.8.7, legacy default, no paid calls. Full brief,
+  KPIs, ownership and stop criteria: `plans/adversarial-and-result-adapter.md`.
+
 ## 2026-09-01 - Activate expressly authorized skill references
 
 - The user states they contributed to veriloga-skills and expressly permits

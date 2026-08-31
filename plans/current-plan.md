@@ -17,6 +17,11 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
+- Active: [adversarial acceptance and read-only framework adapter](adversarial-and-result-adapter.md).
+  These are separate goals: runtime/checker boundary regressions versus framework
+  interoperability and execution-efficiency groundwork. Preserve r53/EVAS and
+  existing scheduling/retry ownership; no paid run. Main integrates both slices.
+
 - Activated: [authorized Verilog-A reference corpus](veriloga-corpus-activation.md),
   an AA-VAE-074 follow-up. User contributor authorization resolves project use.
   Four general files at `7c5d3f03a162ee8131103e9551eee842424360bb` are present
