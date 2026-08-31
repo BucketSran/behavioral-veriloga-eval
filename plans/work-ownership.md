@@ -20,6 +20,31 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
+Current follow-up starts at `e2498952bb25d46d28b97765df9963a113113cde`:
+follow `legacy-native-comparison-engineering.md`. Main owns all shared
+contracts/orchestration, optional budget parameters, runner hooks, integration
+tests, CI, docs/logs/plan/ledger and Git. Prior assignments remain closed.
+Prospective independent leaf ownership is reserved for `comparison_results.py`
+and its exact test file, and `comparison_surface.py` and its exact test file
+(all runtime leaves under calibration_pilot). Writers need an explicit new
+assignment before editing. No delegated shared-file/Git/paid/private-evidence
+authority. Main will publish GREEN slices only to BucketSran origin/main.
+
+Active bounded writer `comparison_surface_impl` owns only
+`benchmark-vabench-release-v4/operations/calibration_pilot/comparison_surface.py`
+and `tests/test_agent_harness_comparison_surface.py`, on intake `e2498952bb`.
+Implement vertical RED/GREEN for public-tree/request fingerprints and actual
+Docker mount/security/image observations; return unstaged edits and commands.
+APIs are `snapshot_public_runtime(runtime)`, `observe_environment(env)`,
+`snapshot_request(payload, timeout_s=...)`, and `compare_surfaces(left, right)`.
+Only safe public content hashes and observed metadata; never read private tree
+contents or environment secret values. No shared files, runner hooks, Git,
+credentials, paid execution, or other writer files. Main wires these APIs.
+Read-only adviser `comparison_runner_design` owns no files.
+
+The AA-VAE-070 and cap-fix local-only handoffs below are historical: publication
+through `e2498952bb` and all three exact-source hosted gates are now complete.
+
 AA-VAE-070 integration on `e46a9d6719893d500071f6cf5ce744d4dc7f439a`:
 main owns `runners/agent_harness/batch_resume.py`,
 calibration-pilot `run_native_batch.py`,

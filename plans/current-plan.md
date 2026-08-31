@@ -17,6 +17,20 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
+- Active free follow-up: [legacy/native comparison engineering gates](legacy-native-comparison-engineering.md).
+  Archive the [independent native coverage audit](../docs/alphaapollo-migration/experiments/native-toolchain-coverage-20260831.md),
+  then implement common spending admission, read-only cross-backend joins and
+  observed public-input/environment audits with existing components. No paid
+  launch, benchmark/evaluator change or historical budget reuse. The audit has
+  one real native DUT submission/score out of six native combinations; it is
+  distinct from the unstarted six-cell legacy/native comparison and from the
+  earlier stopped family029 pilot. Main owns integration and fork publication.
+
+- Publication correction: all nine commits through `e2498952bb` are on
+  BucketSran main. Exact-source Evaluator Closure, Runner Smoke and Public Agent
+  Runtime workflows passed. Dated local-only entries below describe the earlier
+  handoff, not the current publication state; their historical evidence is kept.
+
 - Implemented: [batch-level recovery](batch-resume.md), AA-VAE-070. Add verified
   terminal-cell reuse and missing-cell scheduling to native/Evolution; preserve
   frozen configuration, attempt/call accounting and final no-reentry. Main owns

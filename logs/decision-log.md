@@ -1,5 +1,20 @@
 # Decision Log
 
+## 2026-08-31 - Open free legacy/native comparison launch gates
+
+- User accepted the next-step scope: archive the independent audit, reuse the
+  existing spending guard, join existing backend results read-only, and audit
+  full public exports/actual environments. No new agent framework or dependency.
+- Distinguish native coverage (one historical scored combination out of six)
+  from the unstarted legacy/native comparison. Do not pool sources or budgets,
+  reread raw private evidence, promote stopped rows to zero scores, or launch a
+  paid experiment. The historical cap fix is already fork-published.
+- Preserve AA-VAE-069's original blueprint. Optional fee-guard parameters must
+  preserve old pilot defaults and match both workflows; no hidden eight-call
+  limit or 120-second-only watchdog in an otherwise wall-time comparison.
+- Main owns focused commits and publication. Brief/KPIs and ownership precede
+  code; use vertical RED/GREEN, independent review and real free integration.
+
 ## 2026-08-31 - Close local batch recovery with existing authority readers
 
 - Adopt Inspect's persistent batch completion boundary and Harbor's job/trial

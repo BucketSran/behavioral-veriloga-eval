@@ -1,5 +1,27 @@
 # Verification Log
 
+## 2026-08-31 - Comparison engineering intake and prior publication reconciliation
+
+- Intake main is clean at `e2498952bb25d46d28b97765df9963a113113cde`, matching
+  BucketSran origin/main; upstream main is `7b5616dc52195ec275ec6d21c71d7763613702cd`
+  (fork ahead 152, zero missing). EVAS remains clean/read-only at `6cb6fa7a7d`.
+- The previous nine pending commits were pushed to BucketSran main. Exact-source
+  hosted workflows passed: [Evaluator Closure](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33384206156),
+  [Runner Smoke](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33384206147),
+  [Public Agent Runtime](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33384206307).
+  This entry supersedes earlier local-only status, not their dated test results.
+- Read the independent audit's sanitized coverage report and final-verification
+  summary; recomputed report/coverage/final-verification SHA-256 values in the
+  archived summary. Original audit reports 284 free tests and one scored native
+  combination out of six. No private raw trace/journal or fresh paid/judge run
+  was used to re-verify those historical claims in this intake.
+- Fresh archive/protocol/navigation/layout selection: **55 passed / 2 optional
+  Docker skips**. `git diff --check` passes. The dedicated
+  `scripts/check_repo_layout.py` is absent; existing active-entrypoint,
+  output-cleanup and task-count/layout tests supplied the repository checks.
+- Fetch initially failed with HTTP/2 framing; one command-local HTTP/1.1 retry
+  succeeded for both remotes. No persistent Git/network configuration changed.
+
 ## 2026-08-31 - AA-VAE-070 local integration and independent review closure
 
 - Focused local history starts with plan `04ced7379c`, shared journal
