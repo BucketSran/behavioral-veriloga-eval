@@ -1,5 +1,34 @@
 # Verification Log
 
+## 2026-09-01 - AA-VAE-077 official Inspect read-only result adapter
+
+- Intake: fetched fork main `c4f2f93e89` matches local main (0/0) and contains
+  Arcadia upstream (174/0). EVAS fork/upstream main both remain
+  `6cb6fa7a7dac70fc0d4120126d8cf74258e6637b`; an initial upstream TLS failure
+  succeeded on read-only retry. No evaluator/release/old-tree changes.
+- Reader TDD RED: missing `result_adapter` import (1 failure). GREEN with
+  existing native campaign/ledger tests: **56 passed / 1 optional Docker skip**.
+- Official API RED: missing log builder/export (2 failures / 10 passes).
+  GREEN: `uv run --locked --extra agentic --with-requirements
+  environment/requirements-inspect-reporting.txt python -m pytest -q
+  tests/test_agent_harness_result_adapter.py` -> **13 passed**. The same
+  version-pinned optional tests plus CI assertions report **35 passed**.
+- Tests cover complete failure denominators, serial/parallel equality, null
+  costs, missing/corrupt/unsafe paths, official EvalLog read/write round-trip,
+  write-once export, external-execution/network tripwires, and a separate-process
+  import of scored fixture evidence with unchanged source bytes/mtimes and no
+  private judge sentinel. The latter uses a synthetic external judge, not EVAS
+  conformance evidence. Actual adversarial EVAS checks are a separate slice.
+- Adjacent CLI/campaign/scoring tests: **45 passed / 2 optional Docker skips**.
+  Navigation/output hygiene: **49 passed**. Ruff 0.12.12 via uvx, py_compile,
+  and diff checks pass. No dedicated typecheck/LSP result is claimed.
+- Independent read-only adapter review found no actionable findings and repeated
+  the official 13-test gate successfully. Ordinary environment reports **10
+  passed / 3 explicit Inspect skips**; Inspect remains an optional overlay.
+- This delivers report interoperability, not Inspect Task/Solver registration,
+  distributed scheduling, model-evaluation speedup or model-quality evidence.
+  Import timings are explicitly separate from execution latency. No paid calls.
+
 ## 2026-09-01 - Authorized four-file corpus activation
 
 - Intake main `30d1efa956` is 0/0 against fetched BucketSran origin/main and

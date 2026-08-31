@@ -1148,6 +1148,57 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def read_native_campaign_rows(
+    campaign: dict[str, Any], campaign_output: Path, *,
+    campaign_file_sha256: str, workers: int = 1,
+) -> list[dict[str, Any]]:
+    """Read a complete frozen native campaign without invoking any executor."""
+    from run_native_attempts import read_native_attempt_sequence, retry_policy
+
+    if type(workers) is not int or workers < 1:
+        raise ValueError("workers must be a positive integer")
+    config = campaign.get("execution_config") or {}
+    backend = config.get("episode_backend")
+    if backend not in {"native-mini-swe", "native-reasoning"}:
+        raise ValueError("read-only campaign import requires a frozen native backend")
+    cells = campaign["cells"]
+    ids = [cell["cell_id"] for cell in cells]
+    if not ids or len(set(ids)) != len(ids):
+        raise ValueError("scheduled cells must be nonempty and unique")
+    if any(not isinstance(key, str) or key in {".", ".."}
+           or not re.fullmatch(r"[A-Za-z0-9_.-]+", key) for key in ids):
+        raise ValueError("unsafe scheduled cell path")
+    policy_document = config.get("native_retry_policy", retry_policy(1).to_document())
+    policy = retry_policy(policy_document.get("max_attempts"))
+    if policy.to_document() != policy_document:
+        raise ValueError("invalid frozen native retry policy")
+
+    def read_scheduled(cell):
+        runtime = campaign_output / cell["cell_id"]
+        if policy.max_attempts > 1:
+            return read_native_attempt_sequence(
+                runtime, cell, campaign_file_sha256=campaign_file_sha256,
+                expected_retry_policy=policy,
+            )
+        return read_native_cell(runtime, cell, campaign_file_sha256=campaign_file_sha256)
+
+    if workers == 1:
+        rows = [read_scheduled(cell) for cell in cells]
+    else:
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            rows = list(pool.map(read_scheduled, cells))
+    if any(row.get("backend") != backend for row in rows):
+        raise ValueError("native row backend differs from frozen campaign")
+    expected_format = config.get("reasoning_proposal_format", "native_tool_calls")
+    if any(row.get("proposal_format", "native_tool_calls") != expected_format for row in rows):
+        raise ValueError("native row proposal format differs from frozen campaign")
+    if any(row.get("model_call_limit") != config.get("native_model_call_limit") for row in rows):
+        raise ValueError("native row model-call limit differs from frozen campaign")
+    if campaign.get("model") and any(row.get("model", campaign["model"]) != campaign["model"] for row in rows):
+        raise ValueError("native row model differs from frozen campaign")
+    return rows
+
+
 def main() -> int:
     args = parse_args()
     if args.ledger_output is not None:
@@ -1192,41 +1243,18 @@ def main() -> int:
             raise ValueError("native score backend differs from frozen campaign")
         scheduled_cells = list(campaign["cells"])
         campaign_file_sha256 = hashlib.sha256(args.campaign.read_bytes()).hexdigest()
-        from run_native_attempts import read_native_attempt_sequence, retry_policy
-        policy_document = (campaign.get("execution_config") or {}).get(
-            "native_retry_policy", retry_policy(1).to_document()
+        # Keep the legacy CLI fallback for old native campaigns; the standalone
+        # adapter requires an explicit frozen backend.
+        read_campaign = {**campaign, "execution_config": {
+            **(campaign.get("execution_config") or {}), "episode_backend": expected_backend,
+        }}
+        rows = read_native_campaign_rows(
+            read_campaign, args.campaign_output,
+            campaign_file_sha256=campaign_file_sha256, workers=args.workers,
         )
-        policy = retry_policy(policy_document.get("max_attempts"))
-        if policy.to_document() != policy_document:
-            raise ValueError("invalid frozen native retry policy")
-
-        def read_scheduled(cell):
-            runtime = args.campaign_output / cell["cell_id"]
-            if policy.max_attempts > 1:
-                return read_native_attempt_sequence(
-                    runtime, cell, campaign_file_sha256=campaign_file_sha256,
-                    expected_retry_policy=policy,
-                )
-            return read_native_cell(runtime, cell, campaign_file_sha256=campaign_file_sha256)
-
-        if args.workers == 1:
-            rows = [read_scheduled(cell) for cell in scheduled_cells]
-        else:
-            with ThreadPoolExecutor(max_workers=args.workers) as pool:
-                rows = list(pool.map(read_scheduled, scheduled_cells))
         report = summarize(
             rows, args.judge_kind, scheduled_cells=scheduled_cells
         )
-        if any(row.get("backend") != expected_backend for row in rows):
-            raise ValueError("native row backend differs from frozen campaign")
-        expected_format = (campaign.get("execution_config") or {}).get("reasoning_proposal_format", "native_tool_calls")
-        if any(row.get("proposal_format", "native_tool_calls") != expected_format for row in rows):
-            raise ValueError("native row proposal format differs from frozen campaign")
-        expected_limit = (campaign.get("execution_config") or {}).get("native_model_call_limit")
-        if any(row.get("model_call_limit") != expected_limit for row in rows):
-            raise ValueError("native row model-call limit differs from frozen campaign")
-        if campaign.get("model") and any(row.get("model", campaign["model"]) != campaign["model"] for row in rows):
-            raise ValueError("native row model differs from frozen campaign")
         output = (
             args.output
             or args.campaign_output / f"SCORE_{args.judge_kind.upper()}.json"

@@ -1,5 +1,29 @@
 # V4 Calibration Pilot
 
+## Read-only Inspect results export
+
+`result_adapter.py` imports an existing explicitly frozen native-mini-swe or
+native-reasoning campaign through the same verified readers used by
+`score_campaign.py`. Its optional Inspect 0.3.261 log writer never runs a model,
+tool, freeze, repair or final judge. Use a fresh output directory outside the
+source run tree; incomplete/mismatched evidence is an error, not a model zero.
+
+```sh
+uv run --locked --extra agentic \
+  --with-requirements environment/requirements-inspect-reporting.txt \
+  python benchmark-vabench-release-v4/operations/calibration_pilot/result_adapter.py \
+  --campaign /absolute/campaign.json --run-root /absolute/run \
+  --output-dir /absolute/new-export --workers 4
+```
+
+Output: `results.eval` for the Inspect viewer, the original safe `ledger.json`,
+and a hash-bound export receipt. All scheduled records, eligibility/exclusions,
+unknown costs and per-condition denominators remain visible. Import timing is
+not evaluation latency; `--workers` parallelizes only evidence reads. Default
+runner/environment dependencies are unchanged. Legacy/Evolution/combined results
+are not silently converted into this ordinary native ledger. Code map and
+execution-performance follow-up: [AA-VAE-077](../../../docs/alphaapollo-migration/features/AA-VAE-077-inspect-readonly-results.md).
+
 ## Explicit live legacy/native comparison
 
 `comparison_live.py` adds separate `prepare`, `inspect`, `run`, and read-only
