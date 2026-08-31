@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-08-31 - AA-VAE-071 explicit guard controls
+
+- Preserve old pilot defaults (eight logical calls, 120-second request watchdog).
+  Explicit `None` disables only the per-cell call ceiling; the common monetary
+  reservation and unknown-cost stop remain mandatory for a budgeted client.
+- Add an explicit finite positive client watchdog for the matched 1800-second
+  comparison. This is an opt-in reuse seam, not an ordinary CLI default change.
+  Independent review found no required correction; also covered its optional
+  integer-overflow validation case. No new rate/model/fee authority is implied.
+
 ## 2026-08-31 - Open free legacy/native comparison launch gates
 
 - User accepted the next-step scope: archive the independent audit, reuse the

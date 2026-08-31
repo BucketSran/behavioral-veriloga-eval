@@ -1,5 +1,16 @@
 # Verification Log
 
+## 2026-08-31 - AA-VAE-071 optional guard controls RED/GREEN
+
+- Explicit no-call-cap tracer: RED **1 failed**, then budget suite **25 passed**.
+  1800-second transport watchdog: RED **1 failed / 1 passed**; invalid watchdog
+  validation: RED **6 failed**; independent review's huge-int case: RED **1 failed**.
+- Final budget/pilot selection: **48 passed / 3 optional Docker skips**.
+  Independent read-only review: zero required corrections; Ruff 0.12.12,
+  compilation and diff checks pass. No installed pyright/mypy/LSP gate was
+  available; do not imply static typecheck approval. All HTTP responses were
+  synthetic; no paid call, old journal mutation or default runner change.
+
 ## 2026-08-31 - Comparison engineering intake and prior publication reconciliation
 
 - Intake main is clean at `e2498952bb25d46d28b97765df9963a113113cde`, matching

@@ -8,6 +8,7 @@ cell, keep its private journal, and never resume by creating a new budget.
 from decimal import Decimal, InvalidOperation
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -32,8 +33,8 @@ class PilotBudgetStop(RuntimeError):
 class DeepSeekPilotBudget:
     def __init__(self, journal: Path, *, cell_ids: list[str], currency="CNY", cap=None,
                  model_call_limit=8):
-        if type(model_call_limit) is not int or model_call_limit <= 0:
-            raise ValueError("pilot model-call limit must be a positive integer")
+        if model_call_limit is not None and (type(model_call_limit) is not int or model_call_limit <= 0):
+            raise ValueError("pilot model-call limit must be a positive integer or None")
         self.model_call_limit = model_call_limit
         if currency not in RATES:
             raise ValueError("pilot currency must be CNY or USD")
@@ -88,7 +89,7 @@ class DeepSeekPilotBudget:
     def begin_call(self, cell_id):
         with self.lock:
             self._check_active_cell(cell_id)
-            if self.model_calls[cell_id] >= self.model_call_limit:
+            if self.model_call_limit is not None and self.model_calls[cell_id] >= self.model_call_limit:
                 self._record("cell_stopped", reason="model_call_limit", cell_id=cell_id)
                 raise PilotBudgetStop("pilot model-call ceiling reached for this cell")
             self.model_calls[cell_id] += 1
@@ -167,9 +168,16 @@ class DeepSeekPilotBudget:
 class BudgetedDeepSeekClient(OpenAICompatible):
     """Reuse the existing SSE transport/capture; keep pilot knobs out of defaults."""
 
-    def __init__(self, *, budget: DeepSeekPilotBudget, cell_id: str, api_key: str):
+    def __init__(self, *, budget: DeepSeekPilotBudget, cell_id: str, api_key: str, timeout_s=120):
+        try:
+            valid_timeout = (type(timeout_s) in (int, float)
+                             and math.isfinite(timeout_s) and timeout_s > 0)
+        except OverflowError:
+            valid_timeout = False
+        if not valid_timeout:
+            raise ValueError("request timeout must be a finite positive number")
         super().__init__(base_url="https://api.deepseek.com", model=MODEL,
-                         api_key=api_key, timeout_s=120, temperature=0, stream=True)
+                         api_key=api_key, timeout_s=timeout_s, temperature=0, stream=True)
         self.budget = budget
         self.cell_id = cell_id
         self._call_lock = RLock()

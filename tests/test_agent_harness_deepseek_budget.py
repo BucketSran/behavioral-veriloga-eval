@@ -172,3 +172,57 @@ def test_reservation_persistence_failure_prevents_http(tmp_path, monkeypatch):
         with pytest.raises(pilot.PilotBudgetStop):
             client.complete([], 4096, [])
     assert not sent
+
+
+def test_explicit_unlimited_calls_keeps_shared_spending_admission(tmp_path, monkeypatch):
+    pilot = importlib.import_module("deepseek_budget")
+    sent = []
+    replies = iter([_stream({"prompt_tokens": 10, "completion_tokens": 1,
+                              "total_tokens": 11})] * 9 + [_stream(None)])
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k:
+        (sent.append(a) or subprocess.CompletedProcess([], 0, next(replies), "")))
+    path = tmp_path / "spend.jsonl"
+    with pilot.DeepSeekPilotBudget(path, cell_ids=["legacy", "native"],
+                                  model_call_limit=None) as budget:
+        client = pilot.BudgetedDeepSeekClient(budget=budget, cell_id="legacy", api_key="fixture")
+        for _ in range(9):
+            client.complete([], 4096, [])
+        other = pilot.BudgetedDeepSeekClient(budget=budget, cell_id="native", api_key="fixture")
+        with pytest.raises(pilot.PilotBudgetStop, match="unknown"):
+            other.complete([], 4096, [])
+        with pytest.raises(pilot.PilotBudgetStop):
+            client.complete([], 4096, [])
+        assert budget.model_calls == {"legacy": 9, "native": 1}
+        assert budget.committed == Decimal("3.182943")
+    assert len(sent) == 10
+    assert json.loads(path.read_text().splitlines()[0])["model_call_limit_per_cell"] is None
+
+
+@pytest.mark.parametrize("watchdog", [120, 1800])
+def test_comparison_watchdog_reaches_transport_without_changing_pilot_default(tmp_path, monkeypatch, watchdog):
+    pilot = importlib.import_module("deepseek_budget")
+    observed = []
+
+    def http(argv, **kwargs):
+        observed.append(float(argv[argv.index("--max-time") + 1]))
+        return subprocess.CompletedProcess(argv, 0, _stream({
+            "prompt_tokens": 10, "completion_tokens": 1, "total_tokens": 11,
+        }), "")
+
+    monkeypatch.setattr(subprocess, "run", http)
+    with pilot.DeepSeekPilotBudget(tmp_path / "spend.jsonl", cell_ids=["a"]) as budget:
+        options = {} if watchdog == 120 else {"timeout_s": watchdog}
+        client = pilot.BudgetedDeepSeekClient(budget=budget, cell_id="a", api_key="fixture", **options)
+        assert client.timeout_s == watchdog
+        client.complete([], 4096, [])
+    assert observed == [watchdog]
+
+
+@pytest.mark.parametrize("watchdog", [True, 0, -1, float("nan"), float("inf"), "1800",
+                                      pytest.param(10**1000, id="overflow")])
+def test_invalid_watchdog_is_rejected_before_any_call(tmp_path, watchdog):
+    pilot = importlib.import_module("deepseek_budget")
+    with pilot.DeepSeekPilotBudget(tmp_path / "spend.jsonl", cell_ids=["a"]) as budget:
+        with pytest.raises(ValueError, match="timeout"):
+            pilot.BudgetedDeepSeekClient(budget=budget, cell_id="a", api_key="fixture", timeout_s=watchdog)
+        assert budget.model_calls == {"a": 0}
