@@ -79,10 +79,12 @@ def test_operator_docs_name_r53_as_the_active_default() -> None:
         assert "benchmarkv4-r53" in text, document
 
 
-def test_current_docs_point_to_overnight_audit_not_completed_integration_gaps():
+def test_current_docs_point_to_active_plan_not_completed_integration_gaps():
     index = (ROOT / "docs/README.md").read_text()
     notebook = (ROOT / "docs/alphaapollo-migration/README.md").read_text()
     assert "AlphaApollo Reasoning/Evolution are not complete" not in index
+    assert "(../plans/current-plan.md)" in index
+    assert "(../../plans/current-plan.md)" in notebook
     audit = "04_夜间工程闭环审计_2026-08-31.md"
     assert audit in index and audit in notebook
     assert (ROOT / "docs/alphaapollo-migration" / audit).is_file()
@@ -111,7 +113,22 @@ def test_historical_guides_redirect_current_work(name: str) -> None:
     assert "[current documentation](README.md)" in banner
 
 
-@pytest.mark.parametrize("relative_path", ("README.md", "docs/README.md", "plans/current-plan.md"))
+@pytest.mark.parametrize(
+    "relative_path",
+    (
+        "README.md",
+        "docs/README.md",
+        "plans/current-plan.md",
+        "benchmark-vabench-release-v4/runners/README.md",
+        "benchmark-vabench-release-v4/operations/calibration_pilot/README.md",
+        "docs/alphaapollo-migration/README.md",
+        "docs/alphaapollo-migration/00_迁移主线.md",
+        "docs/alphaapollo-migration/01_功能迁移台账.md",
+        "docs/alphaapollo-migration/03_全局后续路线_2026-08-31.md",
+        "docs/alphaapollo-migration/features/AA-VAE-059-synthetic-training-export.md",
+        "docs/alphaapollo-migration/features/AA-VAE-062-synthetic-native-training-adapter.md",
+    ),
+)
 def test_current_navigation_links_resolve(relative_path: str) -> None:
     document = ROOT / relative_path
     text = document.read_text(encoding="utf-8")

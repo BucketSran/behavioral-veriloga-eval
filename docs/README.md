@@ -1,6 +1,6 @@
 # Documentation Index
 
-Updated: 2026-08-31
+Updated: 2026-09-01
 
 ## Current Instructions
 
@@ -17,11 +17,14 @@ Read these for new work, in this order:
    including the [feature ledger](alphaapollo-migration/01_功能迁移台账.md).
 6. [Repository layout policy](REPO_LAYOUT_POLICY.md).
 
-Start the morning review with the [overnight engineering audit](alphaapollo-migration/04_夜间工程闭环审计_2026-08-31.md).
+Start current work with the [active plan](../plans/current-plan.md).
+The [overnight engineering audit](alphaapollo-migration/04_夜间工程闭环审计_2026-08-31.md)
+is a dated baseline, not the current backlog.
 Native campaign/form/retry/result integration and Reasoning/Evolution have
-deterministic evidence. Opt-in waveform feedback, synthetic docs and training
-format adapters do not establish model quality, real-data rights or Spectre
-equivalence. Unspecified domain tools and real experiments remain separate gates.
+deterministic evidence. Opt-in waveform/docs and reviewed source activation do
+not establish model quality or Spectre equivalence. Synthetic training-format
+prototypes are retired; their feature notes retain Git recovery points. Actual
+training and new domain tools require separate scope, not blanket gap filling.
 
 ## Dated Evidence
 

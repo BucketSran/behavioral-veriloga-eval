@@ -19,7 +19,9 @@ AI-native benchmark、agent harness、trajectory、评分与结果生成链路�
 四轮免费 fixture，公开模拟成功而终评 0 分，对照五个组件的代码和旧/新差异。
 
 重新梳理当前项目时，先看
-[夜间工程闭环审计](04_夜间工程闭环审计_2026-08-31.md)。
+[当前计划](../../plans/current-plan.md)和
+[运行入口](../../benchmark-vabench-release-v4/runners/README.md)。
+[夜间工程闭环审计](04_夜间工程闭环审计_2026-08-31.md)是固定旧基线记录。
 [2026-08-30 快照](02_项目现状与功能缺口_2026-08-30.md)只描述其固定旧提交，
 不覆盖后续已完成的实现；当前跨领域边界见 [全局路线](03_全局后续路线_2026-08-31.md)。
 
@@ -37,13 +39,15 @@ AI-native benchmark、agent harness、trajectory、评分与结果生成链路�
 - [AA-VAE-073：Evolution 波形共享](features/AA-VAE-073-evolution-waveform-sharing.md)、
   [AA-VAE-074：受控真实语料契约](features/AA-VAE-074-reviewed-local-docs.md)、
   [AA-VAE-075：联合验收/live 入口](features/AA-VAE-075-combined-tools-live-entrypoint.md)：
-  接通现有工具与引擎，记录实际调用/下一轮反馈；尚未导入第三方正文或运行付费实验。
+  接通现有工具与引擎，记录实际调用/下一轮反馈；该切片没有付费实验。
+  后续已按用户授权接入四份固定版本的公开资料，原文只留本地 ignored 目录；
+  见 [语料激活记录](../../plans/veriloga-corpus-activation.md)。不代表已证明检索收益。
 
 - [AA-VAE-069：旧/新 mini-swe 对照协议](features/AA-VAE-069-legacy-native-comparison-protocol.md)：
   六单元 blueprint、信息面审计与预算/结果验收；只有免费证据，真实实验尚未启动。
 
 - AA-VAE-060/061：独立公开波形执行器和 native 显式工具，预算/候选/回执 join。
-- AA-VAE-062/063：synthetic native metadata adapter、配对报告与安全 case 索引。
+- AA-VAE-063：保留配对报告与安全 case 索引；AA-VAE-062 合成训练 adapter 已退役。
 - AA-VAE-064/065：Evolution 生成信息面修复、synthetic docs 的分支本地接线。
 - AA-VAE-066：config-hashed 预期信息面和证据支持的失败责任分类。
   各项代码、提交与边界统一列在最新审计页；以下保留前序独立切片说明。
@@ -57,7 +61,8 @@ AI-native benchmark、agent harness、trajectory、评分与结果生成链路�
 - [AA-VAE-058：有界波形 parser](features/AA-VAE-058-bounded-waveform-parser.md)：
   独立模块已验证；后续公开输出绑定/模型接线已由 AA-VAE-060/061 完成。
 - [AA-VAE-059：合成训练导出契约](features/AA-VAE-059-synthetic-training-export.md)：
-  独立 SFT/RL fixture 校验，不是实际轨迹导出或训练流水线。
+  2026-09-01 与 AA-VAE-062 一起退役，仅保留历史思想/验证和 Git 恢复点。
+  当前私有 trajectory 捕获与安全导出不受影响，真实 SFT/RL 不在当前主线。
 
 ## 证据边界
 
@@ -79,6 +84,7 @@ AI-native benchmark、agent harness、trajectory、评分与结果生成链路�
 - `已验证`：有对应测试、smoke 或冻结证据；
 - `暂不迁移`：明确不属于当前 vaEVAS 主线；
 - `条件启用`：只有满足特定触发条件时进入主线。
+- `已退役`：实现已移出当前工作树；历史验证保留，可按记录从 Git 恢复。
 
 严禁把“写进 AGENTS.md”记成“功能已实现”。契约、代码、测试和实验证据必须
 分别记录。

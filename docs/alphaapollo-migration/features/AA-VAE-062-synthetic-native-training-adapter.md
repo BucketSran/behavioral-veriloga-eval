@@ -1,5 +1,12 @@
 # AA-VAE-062：合成 native 轨迹到训练格式的适配
 
+> **2026-09-01 已退役**：metadata/hash 适配原型及专属测试已移出当前主线，
+> 未接入真实训练。下文是历史设计与验证；当前 trajectory 捕获/安全导出不受影响。
+> [删除前源码](https://github.com/BucketSran/behavioral-veriloga-eval/blob/5d2a39fe0dde076654e362716456b1a8cedc1547/runners/agent_harness/training_trace_adapter.py)
+> 及同一提交中的 `tests/test_agent_harness_training_trace_adapter.py` 可从 Git 恢复，
+> 同时需要恢复 [AA-VAE-059](AA-VAE-059-synthetic-training-export.md)。
+> [清理范围](../../../plans/mainline-scope-cleanup.md)；真实训练另行立项。
+
 日期：2026-08-31。状态：合成契约接线已验证；不导出真实数据，不启动训练。
 
 ## 思想与代码

@@ -1,5 +1,48 @@
 # Verification Log
 
+## 2026-09-01 - Synthetic retirement and active-scope navigation
+
+- Independent plan review: OKAY. Removed exactly two unused training modules
+  (1,034 lines) and their two exclusive test files (932 lines / 41 tests).
+  Recovery source: `5d2a39fe0dde076654e362716456b1a8cedc1547`; feature notes and
+  dated plans retain history with retirement banners. No production consumer,
+  schema, shared fixture or explicit CI reference was found before/after removal.
+- Current-plan shrank from 891 to 103 lines; the old roadmap redirects to it.
+  Fixed stale corpus/training status, retained historical audits, and documented
+  existing default/experiment/diagnostic entrypoints without runtime wrappers.
+- Navigation regression RED: four missing active-queue/source/runner links;
+  after documentation repair, retained pre-delete coverage plus eight new
+  navigation cases: **153 passed / 11 optional skips**. Layout/navigation
+  repeat: **57 passed**. No behavior test was removed except the 41 tests
+  exclusively belonging to the retired prototypes.
+- All seven documented CLI `--help` invocations exit 0: normal campaign,
+  score reader, Evolution, live comparison, combined tools, Inspect adapter,
+  fixed profiler. No key, provider, tool or final-judge execution was requested.
+- Ruff 0.12.12, changed-test bytecode compilation and diff checks pass. Active
+  runtime diff contains only the two deletions; no release, schema, dependency,
+  scheduler, tool, recovery, scorer or CI configuration changed. There is no
+  dedicated repository layout script/typecheck configured; existing layout
+  tests and Ruff are the applicable checks, not claims of full type coverage.
+- Expanded active gate: **1,461 passed / 68 optional skips / 1 explicit
+  absent-historical-fixture deselection**, 198.01 s. Command:
+  `.venv/bin/python -m pytest -q tests/test_agent_harness_*.py
+  tests/test_evaluator_environment_contract.py
+  benchmark-vabench-release-v4/scripts/tests/test_v4_experiment_result_protocol.py
+  tests/test_score_campaign_reuse.py tests/test_mini_swe_vabench.py
+  tests/test_v4_r53_active_entrypoints.py tests/test_v4_r53_clean_room_smoke.py
+  tests/test_evas_output_cleanup.py tests/test_task_count_filters.py
+  -k 'not test_single_task_hidden_scoring_smoke_binds_claim_boundary' --tb=short`.
+  Accounting against the prior 1,469-pass gate: -41 retired fixture tests,
+  +8 navigation cases, +25 already-existing layout/cleanup/count tests included
+  in this invocation = 1,461. Optional/historical limitations remain explicit.
+- Stable-diff independent review: **OKAY**, no blocker in exact deletions,
+  import/CI/schema closure, retirement claims or current navigation. This was
+  a source/document review; the reviewer's test rerun was not completed
+  (interpreter lacked pytest). Test evidence above is the main-owned run.
+- Baseline `5d2a39fe0d` hosted Evaluator Closure, Public Agent Runtime and Runner
+  Smoke all succeeded. New cleanup-source hosted CI is separate and will only
+  run after publication; no fresh Docker, paid-model or Spectre result claimed.
+
 ## 2026-09-01 - Cleanup baseline before retiring synthetic training
 
 - Clean main equals origin/main at `5d2a39fe0dde076654e362716456b1a8cedc1547`;

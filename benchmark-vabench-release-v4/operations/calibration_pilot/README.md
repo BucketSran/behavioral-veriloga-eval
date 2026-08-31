@@ -1,5 +1,22 @@
 # V4 Calibration Pilot
 
+## Start here
+
+This is a command/protocol reference, not a feature checklist. Use the
+[runner guide](../../runners/README.md) to choose an existing default, opt-in
+experiment or diagnostic entrypoint; use the
+[current plan](../../../plans/current-plan.md) for active work.
+
+- Normal generation and final evaluation: [general campaign tools](#general-campaign-tools)
+  and [native backend / Evolution](#native-backend-and-evolution-entrypoints).
+- Named experiments: [legacy/native comparison](#explicit-live-legacynative-comparison)
+  or [combined tools](#opt-in-combined-public-tool-acceptance-aa-vae-075).
+- Analysis only: [Inspect export](#read-only-inspect-results-export) and the
+  separate fixed-workload profiler described there.
+
+Examples below do not grant paid-run authority. Historical pilot contracts and
+their dated provider profiles are not current default launch instructions.
+
 ## Read-only Inspect results export
 
 `result_adapter.py` imports an existing explicitly frozen native-mini-swe or
@@ -277,7 +294,10 @@ index; the single-trajectory ledger intentionally rejects Evolution records.
 
 Deterministic providers test connectivity, not model quality. Actual model
 experiments require a named model/service, explicit budget and frozen controls.
-No domain/RAG/waveform tools, SFT/RL or Spectre path are activated here.
+The plain Evolution example does not enable docs/waveform. Their explicit
+APIs and combined entrypoint are documented below. Synthetic training prototypes
+are retired; real SFT/RL remains deferred. Spectre is conditional, not part of
+this example.
 
 ## Offline docs development API
 
@@ -302,8 +322,8 @@ carry only profile identity; retrieved observations stay branch-local and use
 the shared tool budget. Config/final result retain the frozen intervention;
 ordinary single-trajectory aggregation still rejects Evolution, with or without docs.
 See [AA-VAE-057](../../../docs/alphaapollo-migration/features/AA-VAE-057-synthetic-offline-docs.md).
-The separate waveform parser and synthetic training projection are not activated
-by this API and do not confer public/final authority or authorize paid runs.
+This API does not activate the separate waveform tool or authorize paid runs.
+Synthetic training projection was retired; it is not part of docs retrieval.
 
 ## Isolated waveform development API (not a campaign flag)
 

@@ -1,5 +1,10 @@
 # Synthetic native training adapter (AA-VAE-062)
 
+> Historical plan; implementation retired on 2026-09-01. No active write grant
+> remains. The module/tests are recoverable at `5d2a39fe0d`; see the
+> [retirement note](../docs/alphaapollo-migration/features/AA-VAE-062-synthetic-native-training-adapter.md).
+> Current work is governed by [current-plan](current-plan.md), not this plan.
+
 Updated: 2026-08-31. Approved overnight queue N3; independent read-only design
 audit recommends this leaf. Main retains final review and publication.
 

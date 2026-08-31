@@ -1,5 +1,11 @@
 # AA-VAE-059：独立的合成训练样本契约
 
+> **2026-09-01 已退役**：仅供合成 fixture 的模块及专属测试已移出当前主线，
+> 没有生产调用方。下文保留当时设计与验证，不代表当前可用功能。
+> [删除前源码](https://github.com/BucketSran/behavioral-veriloga-eval/blob/5d2a39fe0dde076654e362716456b1a8cedc1547/runners/agent_harness/training_export.py)
+> 及同一提交中的 `tests/test_agent_harness_training_export.py` 可从 Git 恢复。
+> [清理范围](../../../plans/mainline-scope-cleanup.md)；真实训练另行立项。
+
 日期：2026-08-31。状态：synthetic projection/validator；不导出真实轨迹、不训练。
 实现提交：`eb0f04d140`（fork/main）。
 

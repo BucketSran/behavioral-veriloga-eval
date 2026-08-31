@@ -4,6 +4,29 @@ This directory contains public runtime tooling for
 `benchmark-vabench-release-v4/release/benchmarkv4-r53`, pinned to the
 `vabench-agent-runtime:0.8.7` image.
 
+## Choose an existing entrypoint
+
+Legacy mini-swe remains the default. The optional paths below are separate
+experimental or diagnostic surfaces, not steps every benchmark must execute.
+
+| Purpose | Entrypoint | Default / authority |
+| --- | --- | --- |
+| Generate a normal campaign | [run_benchmarkv4_campaign.py](run_benchmarkv4_campaign.py) | Default legacy; native-mini-swe / native-reasoning require explicit `--episode-backend` |
+| Final score / verified native aggregation | [score_campaign.py](../operations/calibration_pilot/score_campaign.py) | Legacy trusted replay; native reads existing terminal evidence, never rejudges |
+| Multi-branch Evolution | [run_evolution_campaign.py](../operations/calibration_pilot/run_evolution_campaign.py) | Opt-in condition with separate roster, budget, memory and result denominator |
+| Legacy/native live comparison | [comparison_live.py](../operations/calibration_pilot/comparison_live.py) | Opt-in prepare/inspect/run/report; dated service profile and fee authority required |
+| Docs/waveform combined acceptance | [run_combined_tools.py](../operations/calibration_pilot/run_combined_tools.py) | Opt-in experiment; preserves actual tool usage and separate result protocol |
+| Inspect viewer export | [result_adapter.py](../operations/calibration_pilot/result_adapter.py) | Optional read-only adapter; no model, tool, freeze or final-judge execution |
+| Fixed-workload diagnostics | [profile_native_execution.py](../../scripts/profile_native_execution.py) | Optional scripted workload; reuses native execution, does not replace scheduling |
+
+Start with one generation path and its matching score reader. Add an experiment
+or diagnostic only for the question being studied; do not pool their different
+estimands. Commands and restrictions live in the
+[calibration reference](../operations/calibration_pilot/README.md); active work
+is tracked in the [current plan](../../plans/current-plan.md).
+
+## Default campaign reference
+
 Implemented:
 
 - `run_benchmarkv4_campaign.py` is the unified experiment entry point for
@@ -171,4 +194,6 @@ examples. Its explicit `--batch` path accepts repeated `--cell` selections and
 partial Evolution rounds. Both batch paths retain `.batch/` manifests, receipts
 and append-only full-denominator indexes under their run root; they require a
 local POSIX filesystem. Historical outputs without this contract cannot be
-adopted. Domain tools and real model quality experiments remain separate gates.
+adopted. Optional docs/waveform are available through the explicit APIs and
+combined protocol in the calibration reference; they are not defaults. Real
+model quality experiments still require frozen controls and explicit budgets.

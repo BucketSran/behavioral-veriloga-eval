@@ -1,5 +1,11 @@
 # Synthetic extension implementation
 
+> Historical implementation plan. Docs and waveform have since been integrated;
+> the synthetic-only training module/tests were retired on 2026-09-01. See
+> [current-plan](current-plan.md) for active scope and the
+> [AA-VAE-059 retirement note](../docs/alphaapollo-migration/features/AA-VAE-059-synthetic-training-export.md)
+> for Git recovery. No historical ownership grant below is active.
+
 Updated: 2026-08-31. Base: `7004ee095fb1e5c21dd4751a2a1ff613c343f32a`.
 
 ## Brief and boundaries
