@@ -229,6 +229,7 @@ class _SharedPublicValidator:
         allow_insecure_test_sandbox: bool,
         ops: NativeEvolutionOps,
         environment: Any | None = None,
+        docker_image: str = mini.DEFAULT_DOCKER_IMAGE,
     ) -> None:
         self.cell = dict(cell)
         self.release = release
@@ -240,6 +241,7 @@ class _SharedPublicValidator:
         self.ops = ops
         self.lock = threading.Lock()
         self.environment: Any | None = environment
+        self.docker_image = docker_image
         self._invalidated = False
 
     def validate(
@@ -288,7 +290,7 @@ class _SharedPublicValidator:
                         timeout_s=self.timeout_s,
                         evas_command=self.evas_command,
                         sandbox_backend="docker",
-                        docker_image=mini.DEFAULT_DOCKER_IMAGE,
+                        docker_image=self.docker_image,
                         executable_feedback=True,
                         deadline_monotonic=request.deadline_monotonic,
                         submitted_exception=_Submitted,
@@ -438,6 +440,7 @@ def run_native_evolution(
     request_timeout_s: float | None = None,
     branch_sandbox_backend: str = "docker",
     branch_docker_image: str | None = None,
+    public_validation_docker_image: str | None = None,
     allow_insecure_test_sandbox: bool = False,
     deadline_monotonic: float | None = None,
     campaign_file_sha256: str | None = None,
@@ -447,6 +450,7 @@ def run_native_evolution(
 ) -> NativeEvolutionRun:
     """Run candidate-only Evolution and final-score the selected candidate once."""
     ops = ops or NativeEvolutionOps()
+    public_image = public_validation_docker_image or mini.DEFAULT_DOCKER_IMAGE
     condition = str(cell.get("experimental_arm") or "Evolution+EVAS")
     docs_tool = None
     if docs_corpus is not None:
@@ -480,6 +484,7 @@ def run_native_evolution(
         command=command,
         evas_command=evas_command,
         campaign_file_sha256=campaign_file_sha256,
+        public_validation_docker_image=public_image,
     )
     if docs_tool is not None:
         config_doc["extensions"] = {"offline_docs": {
@@ -507,6 +512,7 @@ def run_native_evolution(
                 evas_command=evas_command,
                 deadline_monotonic=deadline_monotonic,
                 allow_insecure_test_sandbox=allow_insecure_test_sandbox,
+                docker_image=public_image,
             )
             builder = ops.build_public_validation_profile or public_validation.build_public_validation_profile
             public_validation_profile = builder(
@@ -581,6 +587,7 @@ def run_native_evolution(
             allow_insecure_test_sandbox=allow_insecure_test_sandbox,
             ops=ops,
             environment=prepared_public_environment,
+            docker_image=public_image,
         )
     except BaseException as exc:
         if prepared_public_environment is not None:
@@ -1014,6 +1021,7 @@ def _prepare_public_validation_environment(
     evas_command: str,
     deadline_monotonic: float | None,
     allow_insecure_test_sandbox: bool,
+    docker_image: str = mini.DEFAULT_DOCKER_IMAGE,
 ) -> Any:
     _export_runtime(ops, cell, release, runtime, timeout_s)
     make_environment = ops.make_branch_environment or _default_make_branch_environment
@@ -1032,7 +1040,7 @@ def _prepare_public_validation_environment(
         timeout_s=timeout_s,
         evas_command=evas_command,
         sandbox_backend="docker",
-        docker_image=mini.DEFAULT_DOCKER_IMAGE,
+        docker_image=docker_image,
         executable_feedback=True,
         deadline_monotonic=deadline_monotonic,
         submitted_exception=_Submitted,
@@ -1096,6 +1104,7 @@ def _native_evolution_config_document(
     command: str,
     evas_command: str,
     campaign_file_sha256: str | None,
+    public_validation_docker_image: str = mini.DEFAULT_DOCKER_IMAGE,
 ) -> dict[str, Any]:
     if campaign_file_sha256 is not None and not SHA256_RE.fullmatch(campaign_file_sha256):
         raise ValueError("campaign_file_sha256 must be a SHA-256 digest")
@@ -1121,6 +1130,7 @@ def _native_evolution_config_document(
             "executable_feedback": False,
             "exported_experimental_arm": "Agent-No-EVAS",
         },
+        "public_validation": {"docker_image": public_validation_docker_image},
         "branch_roster": [
             {
                 "branch_id": branch.branch_id,
