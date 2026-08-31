@@ -1,5 +1,34 @@
 # Verification Log
 
+## 2026-08-31 - AA-VAE-069 published and source-bound hosted GREEN
+
+- Intake `412f15f7c8` and protocol/test source
+  `8ccb616fe7a5cb947073b3a24b44ad83f52d0f49` are published to BucketSran
+  origin/main. Both exact-source workflows pass:
+  [Evaluator Closure](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33353838284)
+  (6m44s) and [Runner Smoke](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33353838313)
+  (smoke 1m23s, Linux sandbox 44s). No Public Agent Runtime workflow triggered.
+- Hosted full-checkout regression: **1,348 passed / 42 skipped, 54.77 s**.
+  This includes six new offline tests; the two new optional mount tests are
+  skipped there and have separate local Docker evidence below.
+- All existing source-bound Docker groups pass: public validation 6; native
+  episode 1; launcher 1; synthetic native docs 2; isolated waveform 2; waveform
+  feedback/freeze/score 5; mixed campaign 1; nine-cell/three-form campaign 3;
+  free-HTTP budget/pilot 6; multi-model Evolution 6; synthetic Evolution docs 1.
+  The final three-arm clean-room scoring script passes. These 34 pytest cases
+  and the script are mainline regressions, not the proposed live six-cell study.
+- Independent source and closeout-document reviews found no required change;
+  static-tool limitations remain explicit. Staged diff and credential-pattern
+  checks passed. Only protocol/docs/tests changed; r53, EVAS and production
+  harness/scoring code remain untouched. Existing Node-action warnings do not
+  fail either workflow. Local main matched origin/main after the source push.
+- Advisory assignments and this offline protocol slice are closed. Five live
+  prerequisites remain in the blueprint; no paid experiment, new default,
+  real data/training or follow-up runtime implementation is started by closeout.
+- Final documentation-closeout protocol/navigation/CI selection: **47 passed /
+  2 optional Docker skips, 0.38 s**; diff check passed. This last slice changes
+  records only, not the already verified protocol/test source.
+
 ## 2026-08-31 - AA-VAE-069 offline protocol and actual mount audit
 
 - Intake committed separately as `412f15f7c8`. First new blueprint test RED:

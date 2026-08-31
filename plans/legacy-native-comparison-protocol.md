@@ -69,3 +69,9 @@ budget/client and scorer readers in the next free implementation slice to
 close matched spending admission and cross-backend result joins. Complete
 export/helper/image audit and fresh model/decoding/fee authorization remain
 required before a real run. All six blueprint cells remain not_started.
+
+Publication: intake `412f15f7c8`, protocol/test source `8ccb616fe7` on fork/main.
+Both exact-source hosted workflows pass; full regression is 1,348 passed /
+42 skipped, followed by all existing Docker/clean-room stages. The two new
+mount audits have separate local evidence, not a new hosted Docker stage.
+Exact workflow links are in verification-log. This offline slice is closed.

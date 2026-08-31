@@ -23,6 +23,9 @@ implementation and does not change the phase statuses below.
   snapshots and synthetic request differences are separate from full export
   audit. Focused gate: 115 passes / 3 skips; real common-environment Docker
   mount audit: 2 passes. No model call or production/r53/EVAS change.
+  Source `8ccb616fe7` is published to fork/main; both exact-source hosted
+  workflows pass (1,348 regression passes / 42 skips and all existing Docker
+  stages). Protocol preparation is closed; the live-study gates below stay open.
   Before live launch: shared legacy/native spending-guard integration, read-only
   cross-backend result join, complete exported/public image audit and new frozen
   model/decoding/fee authorization. Blueprint is not an executable campaign;
