@@ -5,6 +5,14 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "evaluator-closure.yml"
 
 
+def test_evaluator_closure_gates_batch_resume_without_provider_reentry():
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    for name in ("run_native_batch.py", "evolution_batch.py"):
+        assert workflow.count(f'"benchmark-vabench-release-v4/operations/calibration_pilot/{name}"') == 2
+    assert "tests/test_agent_harness_native_campaign_dispatch.py::test_r53_docker_native_batch_reuses_scored_cell_without_provider" in workflow
+    assert "tests/test_agent_harness_evolution_batch.py::test_r53_docker_evolution_batch_resume" in workflow
+
+
 def test_evaluator_closure_gates_synthetic_evolution_docs():
     assert "tests/test_agent_harness_evolution_campaign.py::test_r53_docker_synthetic_docs_evolution" in WORKFLOW.read_text()
 
