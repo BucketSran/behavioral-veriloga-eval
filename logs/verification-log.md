@@ -1,5 +1,22 @@
 # Verification Log
 
+## 2026-09-01 - AA-VAE-074 reviewed corpus leaf and independent repair
+
+- RED: reviewed manifest rejected the new `review` field. The existing lexical
+  retriever now supports explicit reviewed v2 without a new dependency or
+  automatic download. No third-party corpus text or credentials were accessed
+  by the implementation tests or committed.
+- Independent review found v2 payload/schema version disagreement and unintended
+  v1 descriptor/prompt drift. Both reproduced as two RED tests and were repaired;
+  exact v1 descriptor hash/prompt and full v2 observation schema are now tested.
+- Leaf plus docs/Evolution extension tests: **38 passed / 2 optional skips**.
+  Independent re-review: **35 passed / 2 skips**, APPROVE; scoped compile and
+  diff checks passed. Real combined Docker integration is recorded separately.
+- Suggested veriloga-skills source is pinned in AA-VAE-074 with exact file hashes;
+  no explicit license was found. Cadence source was not located in current
+  checkout filename checks. Corpus activation remains conditional on source/
+  permission review; operator metadata does not itself prove authorization.
+
 ## 2026-08-31 - AA-VAE-072 fork publication and exact-source hosted GREEN
 
 - Four focused commits are published to BucketSran main: `304db929b1` scope,
