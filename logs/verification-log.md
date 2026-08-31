@@ -1,5 +1,36 @@
 # Verification Log
 
+## 2026-08-31 - Portable repair published and hosted GREEN
+
+- Runtime source `2e1ec6ba3288b76c9345f38f37f45f086a089f99` is published to
+  BucketSran fork/main, after plan commit `9d5b5fafdd`. Both exact-source runs
+  pass: [Evaluator Closure](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33348237957)
+  (7m40s) and [Runner Smoke](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33348237965)
+  (smoke 1m23s; Linux sandbox 45s). This is new source-bound evidence, not a
+  previous green run. No Public Agent Runtime workflow was triggered by this diff.
+- Hosted full-checkout regression selection: **1,287 passed, 40 skipped,
+  71.87 s**. It supplies the broader gate unavailable in the compact local
+  checkout; the local failed selection below remains recorded, not relabeled.
+- Exact-source Docker stages all pass: public validation **6 / 20.04 s**;
+  native episode **1 / 5.59 s**; launcher **1 / 4.89 s**; synthetic docs native
+  **2 / 8.70 s**; isolated waveform **2 / 6.71 s**; waveform feedback/freeze/score
+  **5 / 21.82 s**; mixed campaign **1 / 8.47 s**; nine-cell three-form campaign
+  **3 / 48.03 s**; free-HTTP budget/pilot **6 / 50.83 s**; multi-model Evolution
+  **6 / 79.62 s**; synthetic docs Evolution **1 / 14.15 s**. The concluding
+  three-arm clean-room hidden-scoring script also passes. Counts are pytest
+  cases, not model successes or number of benchmark tasks/campaign cells.
+- Source and documentation reviews report no blocking code/evidence finding.
+  Documentation review independently checks all three local JUnit artifacts
+  and the 17-case composition; publication-state wording is updated here.
+  Staged credential-pattern and diff checks pass; final navigation gate before
+  the runtime commit was **41 passed, 0.25 s**. Existing Node-action deprecation
+  annotations are nonblocking and outside this repair.
+- Repair/advisory assignments are closed. EVAS/r53, default routing, scoring
+  semantics and stopped paid evidence remain unchanged. The documented public
+  dynamic-array limitation, old sensitivity consumer and broader feedback/
+  selection research questions are not declared fixed by these green gates.
+  This final closeout changes documentation only, not the verified runtime.
+
 ## 2026-08-31 - Portable public-contract compatibility (AA-VAE-067)
 
 - Plan was committed separately as `9d5b5fafdd`. The only production Python
@@ -70,7 +101,8 @@
   old sensitivity `run_campaign.run_public_evas` compatibility remain open.
   Contract coverage is not full-release simulation success, behavioral
   feedback, quality improvement or Spectre parity. Raw evidence stays local;
-  source-bound hosted verification/publication is still pending.
+  source `2e1ec6ba3288b76c9345f38f37f45f086a089f99` is published to fork/main.
+  Source-bound hosted verification is green; exact links/counts are above.
 
 ## 2026-08-31 - Portable public-contract repair intake
 

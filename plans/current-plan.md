@@ -23,7 +23,9 @@ implementation and does not change the phase statuses below.
   all 1,200 contracts preserve command/scope and invalid combinations fail closed.
   Focused gate: 192 passed / 20 skips; three Docker groups cover 17 passing cases,
   including explicit negative simulation/verdict checks. No blocking review
-  finding; fork publication/hosted verification remains in progress.
+  finding; source `2e1ec6ba32` is published to fork/main. Both exact-source hosted
+  workflows pass; broader CI regression is 1,287 passed / 40 skips, followed by
+  all real Docker stages. Exact evidence is in the verification log.
   Known residuals: EVAS 0.8.7 rejects v4-102 public dynamic-array support, and
   the separate old native sensitivity consumer still lacks r53 compatibility.
   No r53/EVAS, candidate ranking, behavioral scoring or paid-run change.

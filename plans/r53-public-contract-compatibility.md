@@ -76,7 +76,9 @@ Implementation and independent read-only review are complete with no blocking
 finding. Final focused gate: 192 passes / 20 opt-in skips. Three real Docker
 groups cover 17 passing cases (including explicit failed-execution/verdict
 expectations); exact invocations and the initial failed run remain in the log.
-Fork publication and source-bound hosted verification are still in progress.
+Source `2e1ec6ba32` is published to fork/main; both source-bound hosted workflows
+pass, including 1,287 regression passes / 40 skips and every real Docker stage.
+Exact links/counts are in the verification log. The bounded repair is closed.
 LSP/typecheck is unavailable, so record Ruff/compilation/AST as narrower evidence.
 This work repairs contract coverage; it does not establish full-1,200 simulation
 success or model-quality gains. The legacy sensitivity consumer and pinned

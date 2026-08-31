@@ -20,10 +20,11 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
-Implemented main-only repair on `1c73e519bd`: follow
+Completed main-only repair on `1c73e519bd`: follow
 `r53-public-contract-compatibility.md` for exact runtime/test/document ownership,
-acceptance and forbidden surfaces. Focused/real Docker verification is complete;
-main owns final records, fork publication and source-bound hosted verification.
+acceptance and forbidden surfaces. Source `2e1ec6ba32` is published to fork/main;
+focused/real Docker verification and both exact-source hosted workflows pass.
+The repair and advisory assignments are closed; main owns this final record.
 `portable_contract_review` and `portable_fix_review` have returned their read-only
 advice/review (no blocking finding). No delegate has write, provider,
 private-content or publication authority. Historical assignments remain closed.

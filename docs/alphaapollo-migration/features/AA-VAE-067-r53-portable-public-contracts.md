@@ -2,7 +2,8 @@
 
 ## 功能标识与来源
 
-- 日期：2026-08-31；负责人：主线程；状态：已实现并通过本地集成，发布验证中。
+- 日期：2026-08-31；负责人：主线程；状态：`2e1ec6ba32` 已发布 fork/main，
+  本地集成及两条源绑定 hosted CI 通过。
 - 来源：本仓库已封存的 r53 公开运行契约及反馈链路审查，不是 AlphaApollo
   新代码移植。延续迁移原则：environment/tool 的可执行契约必须由代码约束，
   并与真实任务包一致，不能只靠单题成功推断整个 benchmark 可用。
@@ -45,6 +46,8 @@ portable 各 2 题。静态、独立审查、真实 Docker 证据与精确计数
 最终 focused 回归 192 通过 / 20 个 opt-in 跳过；三组 Docker 覆盖 17 个用例，
 其中包含必须保留失败的负例。较大的历史本地套件缺少精简掉的历史资产，不能
 宣称本地全仓库全绿；独立审查无阻断项，LSP/typecheck 不可用另行披露。
+该源码在 GitHub 完整 checkout 的回归为 1,287 通过 / 40 跳过，随后所有真实
+Docker 阶段通过；源绑定链接与计数见 verification log，不覆盖下面的能力限制。
 
 未改变的限制：公开仿真成功不等于行为正确；波形摘要还不是任务指标；
 Evolution 模型可收到公开日志，但 reducer 仍仅按 `sim_success` 和确定性
@@ -59,6 +62,7 @@ Evolution 的 family 102 DUT/Testbench 脚本候选终评实测为 `compile_fail
 因此用例明确检查该分类，而不是套用 family 001 的 `behavior_failure`。
 smoke index 同时记录 family 和真实 final status；链路通过不代表候选通过。
 这些终态来自 trusted sidecar，只核对结构化状态，不读取或发布 hidden 诊断。
+终态分类本身不证明失败应归因于模型能力；本轮不据此调整评分或分母。
 
 另有旧 `--agent-scaffold native` sensitivity 入口 `run_campaign.run_public_evas`
 未注册 r53 schema，且 Testbench portable 判定需要审计；它不是默认 mini-swe
