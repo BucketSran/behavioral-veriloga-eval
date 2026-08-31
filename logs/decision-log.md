@@ -1,5 +1,21 @@
 # Decision Log
 
+## 2026-09-01 - Activate expressly authorized skill references
+
+- The user states they contributed to veriloga-skills and expressly permits
+  project use. Record that as project-specific user authorization, including
+  local/API reference context; no public license or paid-run grant is inferred.
+- Reuse reviewed-v2 with a static four-file pinned manifest, actual permission
+  record hash and ordinary curl acquisition. Do not introduce a crawler,
+  embedding dependency, new retriever or whole-skill execution.
+- Keep source text in ignored reports; publish only provenance/configuration,
+  authorization record, regressions and usage notes. Source text is untrusted
+  reference data and does not expand EVAS support or tool authority.
+- Cadence is absent from the scoped recognizable filename search, so omit it
+  as requested. No archive restoration, private AlphaApollo access or old-tree
+  write. Existing prefix retrieval limits are explicit; quality is unmeasured.
+
+
 ## 2026-08-31 - Compose public tools without changing score authority
 
 - AA-VAE-073/074/075 follows the user's combined acceptance request. Evolution

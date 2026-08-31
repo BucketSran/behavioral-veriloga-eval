@@ -1,5 +1,48 @@
 # Verification Log
 
+## 2026-09-01 - Authorized four-file corpus activation
+
+- Intake main `30d1efa956` is 0/0 against fetched BucketSran origin/main and
+  172/0 against fetched Arcadia-1 upstream/main: upstream is fully contained.
+  EVAS checkout and both remote main refs remain
+  `6cb6fa7a7dac70fc0d4120126d8cf74258e6637b`, clean and read-only.
+- Read all four pinned raw files at skill commit
+  `7c5d3f03a162ee8131103e9551eee842424360bb`; independent public-source review
+  found general reference material and no obvious benchmark answer contamination.
+  This is bounded manual review, not proof of zero overlap or language validity.
+- Downloaded 6,357 bytes into ignored
+  `benchmark-vabench-release-v4/reports/veriloga-skills-7c5d3f03-v4dFU2/`.
+  `shasum -a 256` matched all four existing source pins. Filename-only read of
+  current/old vaEVAS folders found no recognizable Cadence manual; no archives
+  restored and no Cadence text ingested.
+- TDD RED: missing published manifest produced **3 failures / 4 skips**;
+  metadata GREEN **3 passes / 4 explicit real-source skips**. Corpus-only CI
+  trigger regression then RED **1 failure**, repaired by two existing workflow
+  path-filter entries, without a new CI stage or network acquisition.
+- Final command: `VAEVAS_VERILOGA_DOCS_ROOT=benchmark-vabench-release-v4/reports/veriloga-skills-7c5d3f03-v4dFU2 .venv/bin/python -m pytest -q`
+  followed by `tests/test_agent_harness_{veriloga_corpus,reviewed_docs,offline_docs,docs_integration,combined_tools,combined_tool_evidence,ci_gate}.py`
+  and `tests/test_v4_r53_active_entrypoints.py tests/test_evas_output_cleanup.py tests/test_task_count_filters.py`:
+  **146 passed / 5 optional Docker skips, 13.07 s**. Four unfiltered real-source
+  queries select expected top documents deterministically. No API or judge run.
+- Manifest bytes SHA-256:
+  `c86e80346846ca9b94194882f7f0726cfcd4cd449ac33f070386046ca28f4feb`;
+  corpus profile:
+  `cab9aae2f52c0308fdafad357a5e4186d9dc36a395d59b57b2b73dba01d26fe9`;
+  source tree:
+  `65504cbfc5ed0e02ebe42ab5b8ad5ed718e275b949e7d56551421884314db97c`.
+  Authorization evidence hashes the adjacent real `authorization.md`, not an
+  invented license string. External-context gate accepts this declared scope.
+- Bytecode compilation and `git diff --check` pass. No new runtime code or
+  dependency; full Docker/end-to-end score on real text, typecheck, paid quality
+  experiments and Spectre parity are not claimed by these checks.
+- Standalone real-source activation gate: **8 passed**; default offline
+  manifest/CI/navigation gate: **49 passed / 4 explicit real-source skips**.
+  Updated local feature-note links resolve. Downloaded source files are ignored.
+- Independent scoped source review: zero actionable findings; repeated default
+  activation tests **4 passed / 4 skipped**, actual-source tests **8 passed**,
+  source/authorization hashes, JSON, bytecode and staged diff checks pass.
+  LSP/ast-grep diagnostics are unavailable; review does not claim those checks.
+
 ## 2026-09-01 - AA-VAE-073–075 fork publication and hosted GREEN
 
 - Seven focused commits through `6ac7482d4b49d7e2a71d844390765f91143eeb0e`
