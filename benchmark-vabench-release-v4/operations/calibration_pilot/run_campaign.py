@@ -3632,8 +3632,6 @@ def main() -> int:
     if args.episode_backend in {"native-mini-swe", "native-reasoning"}:
         if args.agent_scaffold != "mini-swe":
             raise SystemExit("native-mini-swe requires --agent-scaffold mini-swe")
-        if args.resume:
-            raise SystemExit("native-mini-swe does not support --resume")
         if args.limit is not None:
             raise SystemExit(
                 "native-mini-swe does not support --limit; freeze the intended "
@@ -3690,19 +3688,34 @@ def main() -> int:
     args._mini_swe_startup_limiter = threading.BoundedSemaphore(
         args.mini_swe_startup_workers
     )
-    key = "" if args.dry_run else load_key(args.api_key_file, args.api_key_env)
-    if not args.dry_run:
-        os.environ.pop(args.api_key_env, None)
-    client = None if args.dry_run else OpenAICompatible(
-        base_url=args.base_url, model=campaign["model"], api_key=key,
-        timeout_s=args.request_timeout_s, temperature=args.temperature, stream=args.stream,
-    )
-    args.output.mkdir(parents=True, exist_ok=True)
-    if args.workers == 1:
-        results = [run_cell_preserving_failure(cell, args, client) for cell in cells]
+    if args.episode_backend in {"native-mini-swe", "native-reasoning"}:
+        from run_native_batch import run_native_batch
+        key_cache = []
+        key_lock = threading.Lock()
+
+        def client_factory():
+            with key_lock:
+                if not key_cache:
+                    key_cache.append(load_key(args.api_key_file, args.api_key_env))
+                    os.environ.pop(args.api_key_env, None)
+            return OpenAICompatible(
+                base_url=args.base_url, model=campaign["model"], api_key=key_cache[0],
+                timeout_s=args.request_timeout_s, temperature=args.temperature, stream=args.stream)
+
+        results = run_native_batch(campaign, args, client_factory)
     else:
-        with ThreadPoolExecutor(max_workers=args.workers) as pool:
-            results = list(pool.map(lambda cell: run_cell_preserving_failure(cell, args, client), cells))
+        key = "" if args.dry_run else load_key(args.api_key_file, args.api_key_env)
+        if not args.dry_run:
+            os.environ.pop(args.api_key_env, None)
+        client = None if args.dry_run else OpenAICompatible(
+            base_url=args.base_url, model=campaign["model"], api_key=key,
+            timeout_s=args.request_timeout_s, temperature=args.temperature, stream=args.stream)
+        args.output.mkdir(parents=True, exist_ok=True)
+        if args.workers == 1:
+            results = [run_cell_preserving_failure(cell, args, client) for cell in cells]
+        else:
+            with ThreadPoolExecutor(max_workers=args.workers) as pool:
+                results = list(pool.map(lambda cell: run_cell_preserving_failure(cell, args, client), cells))
     all_results = (
         results
         if args.episode_backend in {"native-mini-swe", "native-reasoning"}

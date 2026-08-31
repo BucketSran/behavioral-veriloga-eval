@@ -321,8 +321,6 @@ def main() -> int:
     if args.episode_backend in {"native-mini-swe", "native-reasoning"}:
         if args.agent_scaffold != "mini-swe":
             raise SystemExit("native-mini-swe requires --agent-scaffold mini-swe")
-        if args.resume:
-            raise SystemExit("native-mini-swe does not support --resume")
         if args.limit is not None:
             raise SystemExit(
                 "native-mini-swe does not support --limit; freeze the intended "
@@ -372,9 +370,12 @@ def main() -> int:
         )
     release = args.release.expanduser().resolve()
     output_root = args.output_root.expanduser().resolve()
+    native_resume = args.resume and args.episode_backend in {"native-mini-swe", "native-reasoning"}
+    if native_resume and not (output_root / "run/.batch/manifest.json").is_file():
+        raise SystemExit("native resume requires an existing frozen batch manifest")
     try:
         output_root.mkdir(
-            parents=True, exist_ok=args.episode_backend not in {"native-mini-swe", "native-reasoning"}
+            parents=True, exist_ok=native_resume or args.episode_backend not in {"native-mini-swe", "native-reasoning"}
         )
     except FileExistsError as exc:
         raise SystemExit("native-mini-swe requires a fresh campaign output root") from exc
@@ -437,7 +438,11 @@ def main() -> int:
         "evas_identity": evas_identity,
     }
     campaign_path = output_root / "campaign.json"
-    write_json(campaign_path, campaign)
+    if native_resume:
+        if read_json(campaign_path) != campaign:
+            raise SystemExit("native resume campaign/config differs from frozen manifest")
+    else:
+        write_json(campaign_path, campaign)
     command = [
         sys.executable,
         str(CALIBRATION / "run_campaign.py"),
@@ -514,13 +519,15 @@ def main() -> int:
         "dry_run": args.dry_run,
         "command": command_for_metadata(command),
     }
-    write_json(output_root / "wrapper_summary.json", metadata)
+    if not native_resume:
+        write_json(output_root / "wrapper_summary.json", metadata)
     completed = subprocess.run(command, cwd=REPO, check=False)
     metadata["returncode"] = completed.returncode
     run_summary = output_root / "run" / "SUMMARY.json"
     if run_summary.is_file():
         metadata["run_summary"] = read_json(run_summary)
-    write_json(output_root / "wrapper_summary.json", metadata)
+    if not native_resume:
+        write_json(output_root / "wrapper_summary.json", metadata)
     return completed.returncode
 
 

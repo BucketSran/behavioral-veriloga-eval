@@ -455,3 +455,171 @@ def test_native_wrapper_preserves_existing_campaign_before_dispatch(tmp_path):
     assert completed.returncode != 0
     assert manifest.read_text() == "frozen original manifest"
     assert not (output / "run").exists()
+
+
+def test_native_wrapper_resume_reuses_prepared_cells_in_another_process(tmp_path):
+    output = tmp_path / "durable"
+    command = [sys.executable, str(WRAPPER), "--output-root", str(output),
+               "--model", "fixture-model", "--task-id", "v4-001", "--form", "dut",
+               "--comparison-profile", "executable-feedback-control",
+               "--episode-backend", "native-mini-swe", "--dry-run"]
+    first = subprocess.run(command, text=True, capture_output=True, timeout=60)
+    assert first.returncode == 0, first.stderr
+    campaign_bytes = (output / "campaign.json").read_bytes()
+    paths = [path for path in (output / "run").glob("v4-*/**/*") if path.is_file()]
+    before = {path: path.read_bytes() for path in paths}
+    second = subprocess.run([*command, "--resume"], text=True, capture_output=True, timeout=60)
+    assert second.returncode == 0, second.stderr
+    assert (output / "campaign.json").read_bytes() == campaign_bytes
+    assert all(path.read_bytes() == value for path, value in before.items())
+    index = read_json(sorted((output / "run/.batch").glob("index-*.json"))[-1])
+    assert len(index["rows"]) == 3
+    assert all(row["disposition"] == "reused" for row in index["rows"])
+
+
+@pytest.mark.parametrize("interrupt_inside_cell", [False, True])
+def test_native_batch_missing_only_and_interrupted_cell_fail_closed(tmp_path, monkeypatch, interrupt_inside_cell):
+    from run_native_batch import run_native_batch, runner as batch_runner
+    from scripts import run_v4_r53_clean_room_smoke as smoke
+    campaign = smoke.campaign_builder.build_campaign(
+        runner.DEFAULT_RELEASE, family_ids=["001"], model_provider="fixture",
+        model="fixture", per_turn_max_tokens=64, repetitions=1, three_arm_g0_g2=True)
+    campaign["cells"] = [cell for cell in campaign["cells"] if cell["form"] == "dut"]
+    path = tmp_path / "campaign.json"
+    path.write_text(json.dumps(campaign))
+    args = Namespace(output=tmp_path / "run", dry_run=True, resume=False, workers=1,
+                     native_max_attempts=1, campaign_file_sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
+                     release=runner.DEFAULT_RELEASE, setup_timeout_s=30,
+                     episode_backend="native-mini-swe", agent_timeout_s=1800)
+    def no_client():
+        pytest.fail("dry-run/reuse must not create a provider")
+    # Real export completes the first cell, then interruption happens before
+    # the second cell has any side effect. Keep the first terminal receipt.
+    # Other integration fixtures reload the runner module. Patch the actual
+    # dependency held by this batch instance, not an earlier imported alias.
+    original_export = batch_runner.export_runtime
+    exported = []
+    def export(cell, *a, **kw):
+        if exported:
+            if interrupt_inside_cell:
+                runtime = args.output / cell["cell_id"]
+                runtime.mkdir()
+                (runtime / "partial-export.json").write_text("{}")
+            raise KeyboardInterrupt("fixture process interruption between cells")
+        exported.append(cell["cell_id"])
+        return original_export(cell, *a, **kw)
+    monkeypatch.setattr(batch_runner, "export_runtime", export)
+    with pytest.raises(KeyboardInterrupt):
+        run_native_batch(campaign, args, no_client)
+    assert len(exported) == 1
+    first = args.output / exported[0]
+    before = {p: p.read_bytes() for p in first.rglob("*") if p.is_file()}
+    args.resume = True
+    monkeypatch.setattr(batch_runner, "export_runtime", original_export)
+    if interrupt_inside_cell:
+        with pytest.raises(ValueError, match="interrupted dry-run"):
+            run_native_batch(campaign, args, no_client)
+        index = read_json(sorted((args.output / ".batch").glob("index-*.json"))[-1])
+        assert [r["disposition"] for r in index["rows"]] == ["reused", "blocked", "not_started"]
+        assert not (args.output / campaign["cells"][2]["cell_id"]).exists()
+        assert all(p.read_bytes() == content for p, content in before.items())
+        return
+    rows = run_native_batch(campaign, args, no_client)
+    assert len(rows) == 3
+    assert all(p.read_bytes() == content for p, content in before.items())
+    indexes = sorted((args.output / ".batch").glob("index-*.json"))
+    dispositions = [r["disposition"] for r in read_json(indexes[-1])["rows"]]
+    assert dispositions == ["reused", "executed", "executed"]
+
+
+@pytest.mark.parametrize("workers", [1, 3])
+def test_native_batch_missing_cells_execute_once_in_roster_order(tmp_path, monkeypatch, workers):
+    from run_native_batch import run_native_batch, runner as batch_runner
+    campaign = {"cells": [{"cell_id": f"c-{i}"} for i in range(3)]}
+    args = Namespace(output=tmp_path / "run", dry_run=True, resume=False, workers=workers,
+                     native_max_attempts=1, campaign_file_sha256="a" * 64)
+    called = []
+
+    def execute(cell, args, _client, **kwargs):
+        called.append(cell["cell_id"])
+        runtime = args.output / cell["cell_id"]
+        runtime.mkdir()
+        (runtime / "evidence").write_text("fixture")
+        return {"cell_id": cell["cell_id"], "status": "prepared"}
+
+    monkeypatch.setattr(batch_runner, "run_cell_preserving_failure", execute)
+    first = run_native_batch(campaign, args, lambda: pytest.fail("no provider"))
+    assert sorted(called) == ["c-0", "c-1", "c-2"]
+    assert [row["cell_id"] for row in first] == ["c-0", "c-1", "c-2"]
+    args.resume = True
+    assert run_native_batch(campaign, args, lambda: pytest.fail("no provider")) == first
+    assert len(called) == 3
+
+
+@pytest.mark.parametrize("backend", ["native-mini-swe", "native-reasoning"])
+def test_r53_docker_native_batch_reuses_scored_cell_without_provider(tmp_path, backend):
+    import os
+    if os.environ.get("VABENCH_TEST_DOCKER_RUNTIME") != "1":
+        pytest.skip("opt-in real Docker/EVAS batch resume")
+    from run_native_batch import run_native_batch
+    from scripts import run_v4_r53_clean_room_smoke as smoke
+    campaign = smoke.campaign_builder.build_campaign(
+        runner.DEFAULT_RELEASE, family_ids=["001"], model_provider="fixture",
+        model=smoke.DEFAULT_MODEL, per_turn_max_tokens=4096, repetitions=1, three_arm_g0_g2=True)
+    cell = next(c for c in campaign["cells"]
+                if c["form"] == "dut" and c["experimental_arm"] == "Agentic")
+    campaign["cells"] = [cell]
+    path = tmp_path / "campaign.json"
+    path.write_text(json.dumps(campaign))
+    args = smoke.parse_args(["--output-root", str(tmp_path),
+                            "--evas-command", str(ROOT / ".venv/bin/evas")])
+    args.evas_command, identity = smoke.resolve_evas_command(args.evas_command)
+    smoke.configure_runner_args(args, tmp_path / "run", identity)
+    args.episode_backend = backend
+    args.native_max_attempts = 1
+    args.workers = 1
+    args.campaign_file_sha256 = smoke.sha256_file(path)
+    contract = smoke.public_contract(runner.DEFAULT_RELEASE, cell["task_id"])
+    from public_validation import public_execution_contract
+    task_root = runner.DEFAULT_RELEASE / smoke.task_index_row(
+        runner.DEFAULT_RELEASE, cell["task_id"])["public_contract"]
+    public_command, _ = public_execution_contract(read_json(task_root.parent / "public/evas_runtime.json"))
+    calls = []
+    def factory():
+        calls.append(1)
+        return smoke.client_for_arm("Agentic", smoke.public_stub_artifacts(contract),
+                                    smoke.DEFAULT_MODEL, public_command)
+    first = run_native_batch(campaign, args, factory)
+    assert first[0]["score"] == 0
+    assert len(calls) == 1
+    runtime = args.output / cell["cell_id"]
+    before = {p: p.read_bytes() for p in runtime.rglob("*") if p.is_file()}
+    args.resume = True
+    # A new interpreter has no client, runner object or completion cache from
+    # the first invocation. Only the on-disk batch/terminal evidence survives.
+    code = """
+import json, sys
+from pathlib import Path
+from argparse import Namespace
+sys.path.insert(0, sys.argv[1])
+import run_native_batch as batch
+payload = json.loads(sys.stdin.read())
+args = Namespace(**payload['args'])
+args.output = Path(args.output)
+args.release = Path(args.release)
+def forbidden(*a, **kw):
+    raise AssertionError('completed batch reentered provider, cell or judge')
+batch.runner.load_key = forbidden
+batch.runner.run_cell_preserving_failure = forbidden
+batch.runner.run_trusted_replay = forbidden
+print(json.dumps(batch.run_native_batch(payload['campaign'], args, forbidden)))
+"""
+    payload = {"campaign": campaign, "args": {k: v for k, v in vars(args).items()
+                                              if not k.startswith("_")}}
+    completed = subprocess.run([sys.executable, "-c", code, str(CALIBRATION)],
+                               input=json.dumps(payload, default=str), text=True,
+                               capture_output=True, timeout=60)
+    assert completed.returncode == 0, completed.stderr
+    second = json.loads(completed.stdout)
+    assert first == second
+    assert all(p.read_bytes() == content for p, content in before.items())
