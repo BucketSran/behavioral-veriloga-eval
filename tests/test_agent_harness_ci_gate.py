@@ -5,6 +5,14 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "evaluator-closure.yml"
 
 
+def test_adversarial_and_official_inspect_import_have_explicit_gates():
+    workflow = WORKFLOW.read_text()
+    assert workflow.count('"benchmark-vabench-release-v4/operations/calibration_pilot/result_adapter.py"') == 2
+    assert "tests/test_agent_harness_adversarial_e2e.py" in workflow
+    assert "tests/test_agent_harness_result_adapter.py" in workflow
+    assert "--with-requirements environment/requirements-inspect-reporting.txt" in workflow
+
+
 def test_evaluator_closure_gates_combined_tools_with_synthetic_http_only():
     workflow = WORKFLOW.read_text()
     for name in ("run_combined_tools.py", "combined_tool_evidence.py"):

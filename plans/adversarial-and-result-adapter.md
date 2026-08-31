@@ -56,3 +56,15 @@ to benchmark/evaluator semantics or paid-run scope needs a separate decision.
 Commands, results, RED/GREEN observations and remaining coverage gaps are recorded
 in `logs/verification-log.md`; design choices in `logs/decision-log.md`.
 Feature notes map the implementation to the underlying ideas and official APIs.
+
+## Delivery checkpoint
+
+Implementation and independent reviews are complete: official read-only Inspect
+adapter `61e5605593`, strengthened adversarial tests `b430f87590`. CI now runs
+the optional official SDK round-trip and, after image build, explicitly enables
+the five real Docker adversarial cases. Local acceptance is green for the active
+r53 scope; historical sparse-checkout gaps are recorded in the verification log.
+Fork publication and exact-source hosted results are checked separately; do not
+infer hosted success from these local records. No delegated writer remains open.
+Execution throughput profiling and Task/Solver integration remain follow-ups,
+not hidden completion requirements for this bounded read-only adapter.

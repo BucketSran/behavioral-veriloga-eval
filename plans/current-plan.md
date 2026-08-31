@@ -17,10 +17,16 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
-- Active: [adversarial acceptance and read-only framework adapter](adversarial-and-result-adapter.md).
+- Implemented locally: [adversarial acceptance and read-only framework adapter](adversarial-and-result-adapter.md).
   These are separate goals: runtime/checker boundary regressions versus framework
   interoperability and execution-efficiency groundwork. Preserve r53/EVAS and
-  existing scheduling/retry ownership; no paid run. Main integrates both slices.
+  existing scheduling/retry ownership; no paid run. Five real Docker/EVAS attack
+  and control cases pass; the optional Inspect adapter passes its 13 official
+  API tests. Active regression: 1,450 passed / 65 optional skips / one absent
+  historical fixture deselected. Historical-inclusive sparse checkout failures
+  are recorded, not hidden. Main closes review and fork publication separately.
+  Next performance work is measured workers=1/2/4 execution profiling and a
+  bounded execution-adapter design, not relabeling result-import timing.
 
 - Activated: [authorized Verilog-A reference corpus](veriloga-corpus-activation.md),
   an AA-VAE-074 follow-up. User contributor authorization resolves project use.

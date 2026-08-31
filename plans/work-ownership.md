@@ -28,7 +28,8 @@ No evaluator/release/old-tree writes, paid calls or external framework scheduler
 activation. Exact delegated leaves, if any, must be recorded before handoff.
 Acceptance is the linked plan's KPI; all previous assignments below are closed.
 
-`adversarial_e2e_impl` owns only new
+`adversarial_e2e_impl` handed back its only new leaf;
+main now owns final test corrections and publication:
 `tests/test_agent_harness_adversarial_e2e.py`, based on `c4f2f93e89` plus the
 main-owned plan. Reuse active r53 Docker/native launcher fixtures, no source
 runtime edits. Cover forged success diagnostics, forbidden private/sibling reads,
@@ -36,6 +37,10 @@ and frozen-evidence tamper/no replay with a real selected final EVAS path; add
 Testbench bypass if supported by existing fixtures. Main owns CI and docs.
 Delegate returns unstaged tests plus exact commands/results and stops editing;
 no Git, release/EVAS/old-tree mutation, paid models or broad cleanup.
+
+The delegated writing lane is closed. `result_adapter_review` is read-only for
+both implementation slices; main owns non-vacuity fixes, final verification,
+shared records and fork-only Git. No additional writer is active for this slice.
 
 Current activation at `30d1efa956`: main owns the static corpus manifest,
 authorization/usage notes, its regression tests and shared records/Git under

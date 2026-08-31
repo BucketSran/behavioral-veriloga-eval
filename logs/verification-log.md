@@ -1,5 +1,15 @@
 # Verification Log
 
+## 2026-09-01 - AA-VAE-076/077 CI integration checkpoint
+
+- Evaluator Closure adds the result adapter to both source trigger lists, runs
+  all 13 adapter tests with the optional pinned Inspect overlay, and explicitly
+  enables the five adversarial cases after building the public Docker images.
+- Independent review approved CI ordering/optional skips. Latest local CI plus
+  SDK gate: **35 passed**; static/diff/bytecode checks pass. Full hosted checkout
+  is required to close the historical sparse-fixture gap; hosted status is not
+  inferred from this commit. Feature sources: `61e5605593`, `b430f87590`.
+
 ## 2026-09-01 - AA-VAE-076 bounded adversarial Docker acceptance
 
 - Final strengthened test source: `VABENCH_TEST_DOCKER_RUNTIME=1
