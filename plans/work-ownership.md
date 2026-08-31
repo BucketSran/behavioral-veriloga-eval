@@ -20,6 +20,12 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
+Current documentation-only assignment: `single-task-harness-case-study.md`
+on `87c10cb65e`. Main owns only its listed notebook/navigation/plan/log files
+and publication. `case_study_code_map` provides read-only code comparison;
+all runtime implementation assignments remain closed. No raw evidence edits,
+paid execution, hidden checker/gold inspection or delegated Git authority.
+
 N1–N5 implementation assignments are closed and returned to main. Published
 AA-VAE-061–066 end at `8d782880c7`; independent reviews and final local tests
 are complete (1013 harness passes / 25 skips; 12 real Docker passes). No
