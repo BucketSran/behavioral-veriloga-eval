@@ -1,5 +1,40 @@
 # Verification Log
 
+## 2026-09-01 - AA-VAE-076 bounded adversarial Docker acceptance
+
+- Final strengthened test source: `VABENCH_TEST_DOCKER_RUNTIME=1
+  .venv/bin/python -m pytest -q tests/test_agent_harness_adversarial_e2e.py`
+  -> **5 passed in 34.25s**, real Docker and pinned EVAS, scripted model only.
+- Covers submitted neutral DUT reaching behavior failure/zero; actually seeded
+  host evaluator and sibling secrets inaccessible in model tool observations;
+  forged parseable EVAS telemetry remaining untrusted while final score stays
+  zero; frozen-byte corruption rejected without overwriting scores/reentry;
+  and frozen Testbench rejected specifically for `direct_dut_output_drive`.
+  The same Testbench without the attack passes the security policy check.
+- Integration-test review strengthened non-vacuity: the first draft did not
+  seed the evaluator sentinel. A stricter final-diagnostic assertion then failed
+  because safe sidecars deliberately omit diagnostics. The final test checks
+  the private trusted replay record and separately asserts no model exposure;
+  no production authority or sanitization change was needed.
+- Active r53/harness regression: **1,450 passed / 65 optional skips / 1
+  deselected in 200.00s**. Command includes `tests/test_agent_harness_*.py`,
+  evaluator environment, V4 result protocol, score reuse, mini-swe, and active
+  r53 entrypoint/smoke tests; deselects the historical
+  `test_single_task_hidden_scoring_smoke_binds_claim_boundary` fixture.
+- A historical-inclusive run was NOT green: **32 failed / 1,530 passed / 65
+  skipped / 1 deselected / 12 errors**. Isolated rerun confirms absent sparse
+  V3 and r45/r49/r52 task/index/provenance assets in the three historical
+  `test_v3_clean_room_smoke`, `test_v3_model_eval_claim_gate`, and
+  `test_benchmarkv4_calibration_pilot` modules. No restoration, test removal,
+  or production workaround was made. Full-checkout hosted CI remains separate.
+- Ruff 0.12.12 passes for both feature sources/tests and CI assertions. No
+  paid model, Spectre, release/evaluator mutation, comprehensive attack-proof
+  claim, or execution-throughput improvement is claimed.
+- Independent read-only review: APPROVE, no actionable findings; reviewer
+  repeated **5 Docker passes in 36.92s**, **5 default skips**, py_compile and
+  diff checks. Official Inspect plus CI gate rerun: **35 passed in 5.70s**;
+  output hygiene/task-count/CI checks: **47 passed in 5.53s**.
+
 ## 2026-09-01 - AA-VAE-077 official Inspect read-only result adapter
 
 - Intake: fetched fork main `c4f2f93e89` matches local main (0/0) and contains
