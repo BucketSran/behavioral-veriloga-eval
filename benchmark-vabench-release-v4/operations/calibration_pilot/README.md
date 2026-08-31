@@ -394,11 +394,18 @@ includes that can escape the declared artifact set.
 
 G0/G1 parse exact artifact blocks into the submission directory. In the
 mini-SWE path, the model controls direct EVAS invocations over the public
-runtime package. DUT/bugfix tasks expose their visible deck. For r52 testbench
+runtime package. DUT/bugfix tasks expose their visible deck. For r52/r53 testbench
 tasks, the public runtime exposes only the reference DUT; the five scored
 faults remain evaluator-only and are used only during trusted replay.
 The legacy native scaffold retains its restricted `run_evas` tool only as a
 sensitivity path and is not the default G2--G5 agent.
+Its r53 dispatch reuses the canonical public contract selector before executing
+fixed argv: runtime-v2 is strict, runtime-v3 is explicitly portable, and
+reference-v1 Testbench follows its validated strict/portable mode. Testbench
+accepts only the public reference, never a scored mutation. Historical r45-r52
+paths keep their existing behavior. This compatibility repair adds no new
+trajectory protocol, isolation guarantee, behavioral metric or final feedback.
+See [AA-VAE-068](../../../docs/alphaapollo-migration/features/AA-VAE-068-legacy-native-r53-contracts.md).
 
 Direct responses must use the exact artifact envelope contract. The live runner
 rejects filename-only markers, input-artifact markers, Markdown fences,

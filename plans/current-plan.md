@@ -17,10 +17,13 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
-- Active bounded follow-up: [legacy native r53 compatibility](legacy-native-r53-contract-compatibility.md).
-  Repair the separate `--agent-scaffold native` sensitivity public tool using
+- Implemented, pending source-bound hosted gate: [legacy native r53 compatibility](legacy-native-r53-contract-compatibility.md)
+  ([AA-VAE-068](../docs/alphaapollo-migration/features/AA-VAE-068-legacy-native-r53-contracts.md)).
+  Repaired the separate `--agent-scaffold native` sensitivity public tool using
   the canonical r53 selector, while preserving historical supported behavior.
-  Main-only writes; RED/GREEN, independent review and source-bound CI required.
+  New tool-boundary tests: 55 passes; local harness/entrypoint gate: 1,125 passes
+  / 34 opt-in skips. Independent review found no required correction. Main
+  owns fork publication and the exact-source hosted full-checkout/Docker gate.
   No release/evaluator, default backend, score, selection or paid-run change.
 
 - Implemented bounded repair: [r53 public contract compatibility](r53-public-contract-compatibility.md)
@@ -32,8 +35,9 @@ implementation and does not change the phase statuses below.
   finding; source `2e1ec6ba32` is published to fork/main. Both exact-source hosted
   workflows pass; broader CI regression is 1,287 passed / 40 skips, followed by
   all real Docker stages. Exact evidence is in the verification log.
-  Known residuals: EVAS 0.8.7 rejects v4-102 public dynamic-array support, and
-  the separate old native sensitivity consumer still lacks r53 compatibility.
+  EVAS 0.8.7 still rejects v4-102 public dynamic-array support. The separately
+  identified old native sensitivity compatibility gap is handled by AA-VAE-068
+  above; it was not part of AA-VAE-067's implementation or verification.
   No r53/EVAS, candidate ranking, behavioral scoring or paid-run change.
 
 - Completed human-review preparation: [single-task case study plan](single-task-harness-case-study.md)

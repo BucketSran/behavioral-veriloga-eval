@@ -1,5 +1,43 @@
 # Verification Log
 
+## 2026-08-31 - Legacy native r53 repair: local RED/GREEN and review
+
+- Intake commit `0feb9b77ec` is separate from runtime changes. Plan/navigation
+  gate: `uv run --locked --extra agentic python -m pytest -q
+  tests/test_v4_r53_active_entrypoints.py tests/test_agent_harness_ci_gate.py
+  --tb=short`: **41 passed, 0.33 s**; diff check passed.
+- RED at actual legacy `execute_tool("run_evas")`: strict r53 DUT **1 failed**
+  (unrecognized runtime-v2); after its fix **1 passed**. Extend to DUT/bugfix:
+  **4 failed / 2 passed** (portable runtime-v3); after registration **6 passed**.
+  Add strict/portable reference Testbench: **3 failed / 6 passed** (wrong working
+  directory); after reference schema/explicit mode handling **9 passed**.
+- Final new boundary file covers nine released strict/portable examples, exact
+  argv/cwd, public reference copy, malformed contracts/binding/case rejection,
+  nonzero process failure and synthetic r52 compatibility: **55 tests**.
+  Combined with `test_agent_harness_public_execution_contract.py`: **86 passed,
+  3.91 s**. Fake subprocesses prove dispatch, not candidate/simulator success.
+- Existing synthetic historical regression: `uv run --locked --extra agentic
+  python -m pytest -q tests/test_benchmarkv4_calibration_pilot.py -k
+  'run_evas and not published_r52' --tb=short`: **14 passed / 96 deselected,
+  1.59 s**. Published r52 assets are absent in the compact local checkout;
+  reviewer also confirms that selection cannot run locally. No asset restoration
+  or hidden inspection; hosted full-checkout gate remains required.
+- Broad local gate: `uv run --locked --extra agentic python -m pytest -q
+  tests/test_agent_harness_*.py tests/test_v4_r53_active_entrypoints.py
+  --tb=short`: **1,125 passed / 34 skipped, 169.95 s**. Opt-in Docker tests
+  are not counted as executed here. Exact-source hosted stages remain pending.
+- Independent read-only reviewer ran the 55 new cases plus historical synthetic
+  checks and found no required correction, import cycle or new dependency
+  blocker. Main keeps the historical-asset and missing-LSP/typecheck limitations
+  explicit. No delegated edits, Git operations or paid/model/evaluator calls.
+- Pinned `uvx --from ruff==0.12.12 ruff check` on both changed Python files
+  passed, as did isolated E4/E7/E9/F, py_compile and diff checks. Initial
+  unpinned Ruff 0.16.5 reported 28 findings: the new test import ordering was
+  corrected; the remaining 27 runtime diagnostics have identical rule counts
+  on committed baseline and working tree. No broad unrelated lint rewrite.
+  This is narrower evidence than a full typecheck, not a claim that every
+  Ruff version or all repository files are clean.
+
 ## 2026-08-31 - Legacy native compatibility intake baseline
 
 - Behavioral clean `main` and fetched BucketSran `origin/main` both at

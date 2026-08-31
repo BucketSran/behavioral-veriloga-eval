@@ -64,6 +64,12 @@ DIRECT_DUT_RUNTIME_SCHEMAS = {
     "r51-direct-evas-runtime-v3",
     "r52-direct-evas-runtime-v2",
     "r52-direct-evas-runtime-v3",
+    "r53-direct-evas-runtime-v2",
+    "r53-direct-evas-runtime-v3",
+}
+REFERENCE_TESTBENCH_RUNTIME_SCHEMAS = {
+    "r52-direct-evas-testbench-reference-v1",
+    "r53-direct-evas-testbench-reference-v1",
 }
 DIRECT_TESTBENCH_RUNTIME_SCHEMAS = {
     "r45-direct-evas-testbench-suite-v1",
@@ -74,7 +80,7 @@ DIRECT_TESTBENCH_RUNTIME_SCHEMAS = {
     "r50-direct-evas-testbench-suite-v2",
     "r51-direct-evas-testbench-suite-v2",
     "r51-direct-evas-testbench-suite-v3",
-    "r52-direct-evas-testbench-reference-v1",
+    *REFERENCE_TESTBENCH_RUNTIME_SCHEMAS,
 }
 ARTIFACT_RE = re.compile(
     r'(?m)^<<<VABENCH_ARTIFACT path="([^"\r\n]+)">>>\r?\n'
@@ -1192,9 +1198,15 @@ def run_public_evas(
         return {"status": "unavailable", "reason": "public EVAS runtime contract is missing"}
     contract = read_json(contract_path)
     schema_version = str(contract.get("schema_version") or "")
+    is_r53 = schema_version.startswith("r53-")
+    if is_r53:
+        # Share the pinned contract gate; execution below still uses fixed argv.
+        from public_validation import public_execution_contract
+
+        public_execution_contract(contract)
     expected_working_directory = (
         "public_root"
-        if schema_version == "r52-direct-evas-testbench-reference-v1"
+        if schema_version in REFERENCE_TESTBENCH_RUNTIME_SCHEMAS
         else "runtime_package_root"
     )
     if contract.get("working_directory") != expected_working_directory:
@@ -1204,7 +1216,10 @@ def run_public_evas(
         raise ValueError("empty EVAS executable command")
 
     runtime_version = schema_version.rsplit("-v", 1)[-1]
-    portable_runtime = runtime_version == "3"
+    portable_runtime = (
+        contract.get("compatibility_mode") == "portable"
+        if is_r53 else runtime_version == "3"
+    )
     if portable_runtime:
         if contract.get("compatibility_mode") != "portable":
             raise ValueError("v3 public EVAS runtimes must declare portable compatibility mode")
@@ -1242,7 +1257,7 @@ def run_public_evas(
 
     if schema_version not in DIRECT_TESTBENCH_RUNTIME_SCHEMAS:
         raise ValueError(f"unsupported public EVAS runtime schema: {schema_version!r}")
-    if schema_version == "r52-direct-evas-testbench-reference-v1":
+    if schema_version in REFERENCE_TESTBENCH_RUNTIME_SCHEMAS:
         if requested_case not in (None, "", "reference"):
             raise ValueError("public Testbench EVAS feedback is reference-only")
         if contract.get("feedback_scope") != "reference_dut_only":

@@ -53,3 +53,13 @@ do not describe them as a new legacy Docker or model-quality experiment.
 Stop if a fix requires benchmark/evaluator/scoring changes, broader feedback,
 credentials or paid calls. No dependency addition. LSP/typecheck unavailable
 must be disclosed separately from Ruff/compilation/AST evidence.
+
+## Implementation review
+
+Main-only implementation and independent read-only review found no required
+correction. New boundary tests: 55 passes; combined with the shared selector:
+86 passes. Existing synthetic legacy selection: 14 passes / 96 deselected.
+Full local harness plus active-entrypoint selection: 1,125 passes / 34 opt-in
+skips. Historical published r52 assets remain absent locally; exact-source
+hosted verification is still required before final closure. No simulator or
+model-quality claim is inferred from fake-EVAS dispatch tests.
