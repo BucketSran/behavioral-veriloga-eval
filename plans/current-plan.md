@@ -17,6 +17,11 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
+- In progress: [explicit live comparison entrypoint](legacy-native-live-entrypoint.md),
+  AA-VAE-072. Reuse AA-VAE-071 with a frozen provider profile and explicit
+  manifest/cap launch assertion. This turn uses synthetic transport/free Docker
+  only; no paid call or new fee authority. Main owns integration and publication.
+
 - Implemented free [legacy/native comparison engineering gates](legacy-native-comparison-engineering.md),
   AA-VAE-071: shared spending admission, immutable six-cell schedule, observed
   public-input/environment/request audit, and read-only cross-backend joins.

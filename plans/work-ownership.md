@@ -20,6 +20,16 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
+AA-VAE-072 starts at `f1c78b3dd7b9b0913a626661158c816c55091667`.
+Main exclusively owns calibration-pilot `comparison_live.py`,
+`run_legacy_native_comparison.py`, `tests/test_agent_harness_comparison_live.py`,
+related comparison/CI regression tests, CI, README, feature note, ledger, plans,
+logs and Git. Follow `legacy-native-live-entrypoint.md`. No delegated writing
+lane: `live_provider_contract_review` is read-only official documentation
+research; the final reviewer is also read-only. No actual keys, paid generation,
+provider metadata calls, old-tree writes, r53/EVAS edits or historical-run reuse.
+All earlier assignments below remain closed historical records.
+
 Current follow-up starts at `e2498952bb25d46d28b97765df9963a113113cde`:
 follow `legacy-native-comparison-engineering.md`. Main owns all shared
 contracts/orchestration, optional budget parameters, runner hooks, integration

@@ -1,5 +1,21 @@
 # Decision Log
 
+## 2026-08-31 - Separate live preparation, operator assertion and observed cost
+
+- AA-VAE-072 reuses the existing DeepSeek guard/SSE client, literal credential
+  loader, metadata preflight, AA-VAE-071 schedule and existing final readers.
+  No new controller, dependency, paid execution or historical-budget authority.
+- Freeze an explicit reviewed profile with same-day UTC expiry. Official Aug31
+  documents confirm the old peak rates; request the alias, record the documented
+  version without claiming an immutable provider snapshot. The guard journal's
+  Aug30 label remains historical, not a new official effective date.
+- Preparation remains unauthorized. An exact manifest hash/cap/currency operator
+  assertion reserves launch once before credential/metadata access. This is an
+  accidental-start gate, not authenticated human identity or an account-wide cap.
+- Bind authorization and sanitized metadata receipts into read-only results.
+  Live potentially-billable reservations are distinct from paid invoice counts;
+  unknown cost stops later cells and no ordinary failure disappears from roster.
+
 ## 2026-08-31 - Compose a free six-cell coordinator before a live adapter
 
 - AA-VAE-071 exposes scripted responses only; its transport subclass never
