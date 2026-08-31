@@ -17,6 +17,7 @@ import os
 from pathlib import Path, PurePosixPath
 import re
 import shutil
+import subprocess
 import sys
 import threading
 import time
@@ -31,6 +32,7 @@ import mini_swe_vabench as mini  # noqa: E402
 import final_replay  # noqa: E402
 import native_episode  # noqa: E402
 import public_validation  # noqa: E402
+import public_waveform as public_waveform_runtime  # noqa: E402
 import run_campaign as runner  # noqa: E402
 from run_native_mini_swe import _RecordedClient, _RecordedEnvironment, _backend_profile, _redact  # noqa: E402
 
@@ -65,6 +67,11 @@ from runners.agent_harness.state import (  # noqa: E402
 )
 from runners.agent_harness.tool_registry import ToolRegistry  # noqa: E402
 from runners.agent_harness.tools.offline_docs_tool import OfflineDocsTool, docs_prompt  # noqa: E402
+from runners.agent_harness.tools.public_waveform_tool import (  # noqa: E402
+    INTERVENTION as PUBLIC_WAVEFORM_INTERVENTION,
+    TOOL_NAME as PUBLIC_WAVEFORM_TOOL_NAME,
+    validate_waveform_observation,
+)
 from runners.agent_harness.trajectory import (  # noqa: E402
     JsonlTrajectoryRecorder,
     read_trajectory,
@@ -230,6 +237,8 @@ class _SharedPublicValidator:
         ops: NativeEvolutionOps,
         environment: Any | None = None,
         docker_image: str = mini.DEFAULT_DOCKER_IMAGE,
+        waveform_enabled: bool = False,
+        waveform_docker_image_id: str | None = None,
     ) -> None:
         self.cell = dict(cell)
         self.release = release
@@ -242,6 +251,8 @@ class _SharedPublicValidator:
         self.lock = threading.Lock()
         self.environment: Any | None = environment
         self.docker_image = docker_image
+        self.waveform_enabled = bool(waveform_enabled)
+        self.waveform_docker_image_id = waveform_docker_image_id
         self._invalidated = False
 
     def validate(
@@ -256,6 +267,22 @@ class _SharedPublicValidator:
             if self._invalidated:
                 raise ValueError("public validation authority is invalidated")
             try:
+                if self.waveform_enabled:
+                    result, observation = self._validate_with_public_waveform(
+                        request=request,
+                        snapshot=snapshot,
+                        candidate_store=candidate_store,
+                        context=context,
+                    )
+                    self._archive_public_receipt(
+                        request=request,
+                        snapshot=snapshot,
+                        candidate_store=candidate_store,
+                        context=context,
+                        result=result,
+                        observation=observation,
+                    )
+                    return result
                 validate = self.ops.validate_public_candidate
                 if validate is not None:
                     try:
@@ -329,6 +356,82 @@ class _SharedPublicValidator:
             except Exception:
                 self._invalidated = True
                 raise
+
+    def _validate_with_public_waveform(
+        self,
+        *,
+        request: EvolutionBranchRequest,
+        snapshot: CandidateSnapshot,
+        candidate_store: Path,
+        context: EpisodeContext,
+    ) -> tuple[PublicValidationResult, Observation]:
+        if self.waveform_docker_image_id is None:
+            raise ValueError("public waveform Docker image identity is missing")
+        if self.ops.validate_public_candidate is not None:
+            raise ValueError("public waveform mode cannot use a custom public validator")
+        if not self.runtime.exists():
+            _export_runtime(
+                self.ops,
+                _coordinator_public_validation_cell(self.cell),
+                self.release,
+                self.runtime,
+                self.timeout_s,
+            )
+        _replace_submission_from_store(
+            source=candidate_store / "submission",
+            runtime=self.runtime,
+            artifacts=snapshot.artifacts,
+        )
+        waveform_context = EpisodeContext(
+            episode_id=f"{request.manifest_sha256}/public-waveform",
+            attempt_id=context.attempt_id,
+            task_id=context.task_id,
+            condition="Agentic",
+            max_steps=None,
+            budget_limits={"public_validation_calls": 1},
+        )
+        executor = public_waveform_runtime.IsolatedPublicWaveformExecutor(
+            runtime=self.runtime,
+            context=waveform_context,
+            candidate_artifacts=tuple(runner.expected_candidate_artifacts(self.runtime)),
+            release=self.release,
+            campaign_config_sha256=str(self.profile["campaign_config_sha256"]),
+            docker_image_id=self.waveform_docker_image_id,
+            timeout_s=min(self.timeout_s, 120),
+            deadline_monotonic=request.deadline_monotonic,
+        )
+        if executor.profile != self.profile:
+            raise ValueError("public waveform profile drift")
+        receipt = executor.validate(candidate_tree_sha256=snapshot.tree_sha256)
+        payload = {
+            "schema_version": "vaevas-public-waveform-observation-v1",
+            "authority": "public_diagnostic",
+            "task_correctness": "not_evaluated",
+            "rejection_kind": None,
+            "usable_feedback": receipt["usable_feedback"],
+            "evas_invocation_executed": True,
+            "receipt": receipt,
+        }
+        observation = Observation(
+            f"{context.attempt_id}/public-waveform",
+            PUBLIC_WAVEFORM_TOOL_NAME,
+            receipt["status"] if receipt["usable_feedback"] else "unusable",
+            payload,
+            candidate_tree_sha256=snapshot.tree_sha256,
+            validation_profile_sha256=executor.profile_sha256,
+        )
+        validate_waveform_observation(
+            observation.to_document(),
+            profile=executor.profile,
+            attempt_id=waveform_context.attempt_id,
+            task_id=waveform_context.task_id,
+        )
+        result = PublicValidationResult(
+            status=observation.status,
+            sim_success=1.0 if receipt["status"] == "succeeded" else 0.0,
+            event_sha256=_canonical_sha256(observation.to_document()),
+        )
+        return result, observation
 
     def close(self) -> None:
         if self.environment is not None:
@@ -423,6 +526,33 @@ def build_native_evolution_manifest(
     return manifest
 
 
+def evolution_extension_config(
+    *,
+    docs_corpus: Any | None = None,
+    public_waveform: bool = False,
+    public_waveform_max_calls: int | None = None,
+) -> dict[str, Any]:
+    """Freeze opt-in Evolution extension metadata before profile generation."""
+    extensions: dict[str, Any] = {}
+    if docs_corpus is not None:
+        profile = docs_corpus.profile
+        extensions["offline_docs"] = {
+            "profile": profile,
+            "profile_sha256": docs_corpus.profile_sha256,
+            "intervention": docs_corpus.intervention,
+            "tool_name": "vaevas_docs_search",
+        }
+    if public_waveform:
+        if type(public_waveform_max_calls) is not int or public_waveform_max_calls <= 0:
+            raise ValueError("public waveform requires a positive public validation budget")
+        extensions["public_waveform"] = {
+            "intervention": PUBLIC_WAVEFORM_INTERVENTION,
+            "tool_name": PUBLIC_WAVEFORM_TOOL_NAME,
+            "max_public_validation_calls": public_waveform_max_calls,
+        }
+    return extensions
+
+
 def run_native_evolution(
     *,
     cell: Mapping[str, Any],
@@ -446,6 +576,7 @@ def run_native_evolution(
     campaign_file_sha256: str | None = None,
     max_workers: int | None = None,
     docs_corpus: Any | None = None,
+    public_waveform: bool = False,
     ops: NativeEvolutionOps | None = None,
 ) -> NativeEvolutionRun:
     """Run candidate-only Evolution and final-score the selected candidate once."""
@@ -468,6 +599,12 @@ def run_native_evolution(
         descriptors.append(docs_tool.descriptor)
     tool_registry = ToolRegistry(descriptors)
     _validate_branch_contracts(branches)
+    budgets_map = _budget_map(budgets)
+    extensions = evolution_extension_config(
+        docs_corpus=docs_corpus,
+        public_waveform=public_waveform,
+        public_waveform_max_calls=budgets_map["public_validation_calls"] if public_waveform else None,
+    )
     config_doc = _native_evolution_config_document(
         cell=cell,
         release=release,
@@ -486,11 +623,11 @@ def run_native_evolution(
         campaign_file_sha256=campaign_file_sha256,
         public_validation_docker_image=public_image,
     )
-    if docs_tool is not None:
-        config_doc["extensions"] = {"offline_docs": {
-            "profile": docs_tool.profile, "profile_sha256": docs_corpus.profile_sha256,
-            "intervention": "synthetic-frozen-docs-v1", "tool_name": "vaevas_docs_search",
-        }}
+    if extensions:
+        config_doc["extensions"] = extensions
+    if public_waveform:
+        config_doc["public_validation"]["mode"] = "isolated_public_waveform"
+        config_doc["public_validation"]["legacy_public_validator_also_runs"] = False
     config_doc["declared_information_surface"] = runner.declared_information_surface(
         condition, evolution=True, extensions=config_doc.get("extensions"),
     )
@@ -500,27 +637,42 @@ def run_native_evolution(
         "campaign_file_sha256": campaign_file_sha256,
     })
     prepared_public_environment: Any | None = None
+    waveform_docker_image_id: str | None = None
     prepared_final_runtime = False
     try:
         if public_validation_profile is None:
-            prepared_public_environment = _prepare_public_validation_environment(
-                ops=ops,
-                cell=cell,
-                release=release,
-                runtime=output_dir / "public-validation-runtime",
-                timeout_s=timeout_s,
-                evas_command=evas_command,
-                deadline_monotonic=deadline_monotonic,
-                allow_insecure_test_sandbox=allow_insecure_test_sandbox,
-                docker_image=public_image,
-            )
-            builder = ops.build_public_validation_profile or public_validation.build_public_validation_profile
-            public_validation_profile = builder(
-                environment=prepared_public_environment,
-                release=release,
-                campaign_config_sha256=campaign_config_sha,
-                allow_insecure_test_sandbox=allow_insecure_test_sandbox,
-            )
+            if public_waveform:
+                public_validation_profile, waveform_docker_image_id = _prepare_public_waveform_profile(
+                    ops=ops,
+                    cell=cell,
+                    release=release,
+                    runtime=output_dir / "public-validation-runtime",
+                    timeout_s=timeout_s,
+                    campaign_config_sha256=campaign_config_sha,
+                    docker_image=public_image,
+                    deadline_monotonic=deadline_monotonic,
+                )
+            else:
+                prepared_public_environment = _prepare_public_validation_environment(
+                    ops=ops,
+                    cell=cell,
+                    release=release,
+                    runtime=output_dir / "public-validation-runtime",
+                    timeout_s=timeout_s,
+                    evas_command=evas_command,
+                    deadline_monotonic=deadline_monotonic,
+                    allow_insecure_test_sandbox=allow_insecure_test_sandbox,
+                    docker_image=public_image,
+                )
+                builder = ops.build_public_validation_profile or public_validation.build_public_validation_profile
+                public_validation_profile = builder(
+                    environment=prepared_public_environment,
+                    release=release,
+                    campaign_config_sha256=campaign_config_sha,
+                    allow_insecure_test_sandbox=allow_insecure_test_sandbox,
+                )
+        elif public_waveform:
+            waveform_docker_image_id = _docker_image_id(public_image)
         if final_test_profile is None:
             final_runtime = output_dir / "final-runtime"
             _export_runtime(ops, cell, release, final_runtime, timeout_s)
@@ -588,6 +740,8 @@ def run_native_evolution(
             ops=ops,
             environment=prepared_public_environment,
             docker_image=public_image,
+            waveform_enabled=public_waveform,
+            waveform_docker_image_id=waveform_docker_image_id,
         )
     except BaseException as exc:
         if prepared_public_environment is not None:
@@ -1053,6 +1207,69 @@ def _prepare_public_validation_environment(
     return environment
 
 
+def _prepare_public_waveform_profile(
+    *,
+    ops: NativeEvolutionOps,
+    cell: Mapping[str, Any],
+    release: Path,
+    runtime: Path,
+    timeout_s: int,
+    campaign_config_sha256: str,
+    docker_image: str,
+    deadline_monotonic: float | None,
+) -> tuple[Mapping[str, Any], str]:
+    _export_runtime(
+        ops,
+        _coordinator_public_validation_cell(cell),
+        release,
+        runtime,
+        timeout_s,
+    )
+    image_id = _docker_image_id(docker_image)
+    context = EpisodeContext(
+        episode_id=f"{str(cell.get('cell_id') or cell.get('task_id') or 'native-evolution')}/public-waveform",
+        attempt_id="public-validation-profile-freeze",
+        task_id=str(cell.get("task_id") or ""),
+        condition="Agentic",
+        max_steps=None,
+    )
+    executor = public_waveform_runtime.IsolatedPublicWaveformExecutor(
+        runtime=runtime,
+        context=context,
+        candidate_artifacts=tuple(runner.expected_candidate_artifacts(runtime)),
+        release=release,
+        campaign_config_sha256=campaign_config_sha256,
+        docker_image_id=image_id,
+        timeout_s=min(timeout_s, 120),
+        deadline_monotonic=deadline_monotonic,
+    )
+    return executor.profile, image_id
+
+
+def _coordinator_public_validation_cell(cell: Mapping[str, Any]) -> dict[str, Any]:
+    """Coordinator checker export keeps public EVAS authority outside branches."""
+    return {**dict(cell), "experimental_arm": "Agentic", "executable_feedback": True}
+
+
+def _docker_image_id(image: str) -> str:
+    if re.fullmatch(r"sha256:[0-9a-f]{64}", image):
+        return image
+    try:
+        observed = subprocess.run(
+            ["docker", "image", "inspect", "--format", "{{.Id}}", image],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+    except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
+        raise RuntimeError("failed to resolve public waveform Docker image identity") from exc
+    image_id = observed.stdout.strip()
+    if not re.fullmatch(r"sha256:[0-9a-f]{64}", image_id):
+        raise ValueError("Docker returned an invalid public waveform image identity")
+    return image_id
+
+
 def _validate_branch_contracts(branches: Sequence[NativeEvolutionBranch]) -> None:
     expected_backend_sha = backend_profile_sha256(
         _backend_profile("native-reasoning", "native_tool_calls")
@@ -1155,6 +1372,7 @@ def _source_identity() -> dict[str, str]:
         "run_native_mini_swe.py",
         "native_episode.py",
         "public_validation.py",
+        "public_waveform.py",
         "final_replay.py",
         "mini_swe_vabench.py",
     ):
@@ -1164,6 +1382,9 @@ def _source_identity() -> dict[str, str]:
         sources[str(path.relative_to(REPO))] = hashlib.sha256(path.read_bytes()).hexdigest()
     for name in ("run_campaign.py", "result_protocol.py"):
         sources[name] = hashlib.sha256((HERE / name).read_bytes()).hexdigest()
+    for name in ("public_waveform_tool.py", "waveform_summary.py"):
+        path = REPO / "runners" / "agent_harness" / "tools" / name
+        sources[name] = hashlib.sha256(path.read_bytes()).hexdigest()
     return sources
 
 
@@ -1350,6 +1571,72 @@ def _public_feedback_for_prior_candidate(
         validation_profile_sha = observation.get("validation_profile_sha256")
         if validation_profile_sha is not None and not SHA256_RE.fullmatch(str(validation_profile_sha)):
             raise ValueError("public validation observation profile hash is invalid")
+        if observation.get("tool_name") == PUBLIC_WAVEFORM_TOOL_NAME:
+            run_root = store.parents[5]
+            request_path = run_root / "request.json"
+            if not request_path.is_file() or request_path.is_symlink():
+                raise ValueError("public waveform request evidence is missing")
+            request_doc = json.loads(request_path.read_text(encoding="utf-8"))
+            extensions = request_doc.get("config", {}).get("extensions", {})
+            if extensions.get("public_waveform") != evolution_extension_config(
+                public_waveform=True,
+                public_waveform_max_calls=extensions.get("public_waveform", {}).get("max_public_validation_calls"),
+            ).get("public_waveform"):
+                raise ValueError("public waveform extension mismatch")
+            public_validation_config = request_doc.get("config", {}).get("public_validation", {})
+            if (
+                public_validation_config.get("mode") != "isolated_public_waveform"
+                or public_validation_config.get("legacy_public_validator_also_runs") is not False
+            ):
+                raise ValueError("public waveform config mismatch")
+            profile_path = run_root / "public-validation-profile.json"
+            if not profile_path.is_file() or profile_path.is_symlink():
+                raise ValueError("public waveform profile evidence is missing")
+            profile = json.loads(profile_path.read_text(encoding="utf-8"))
+            if public_validation_profile_sha256(profile) != validation_profile_sha:
+                raise ValueError("public waveform profile hash mismatch")
+            if profile.get("campaign_config_sha256") != request_doc.get("campaign_config_sha256"):
+                raise ValueError("public waveform profile config mismatch")
+            context = receipt.get("context")
+            if not isinstance(context, Mapping):
+                raise ValueError("public waveform receipt context missing")
+            validate_waveform_observation(
+                observation,
+                profile=profile,
+                attempt_id=str(context.get("attempt_id") or ""),
+                task_id=str(context.get("task_id") or ""),
+            )
+            nested = observation["payload"]["receipt"]
+            task = public_waveform_runtime._read_tree(run_root / "public-validation-runtime" / "public" / "task")
+            command, feedback_scope = public_validation.public_execution_contract(
+                json.loads(task["evas_runtime.json"])
+            )
+            command = command.replace("evas simulate ", "/usr/local/bin/evas simulate ")
+            public_task_sha = public_waveform_runtime._tree_sha256(task)
+            image_id = nested["image_id"]
+            expected_checker = _canonical_sha256({
+                "scope": feedback_scope,
+                "public_tree_sha256": public_task_sha,
+                "command": command,
+                "candidate_artifacts": runner.expected_candidate_artifacts(
+                    run_root / "public-validation-runtime"
+                ),
+            })
+            expected_evaluator = _canonical_sha256({
+                "image_id": image_id,
+                "executable": "/usr/local/bin/evas",
+                "version": "0.8.7",
+            })
+            if (
+                profile.get("profile_id") != "r53/evas-0.8.7-isolated-public-waveform"
+                or profile.get("allowed_feedback") != ["runtime", "waveform_summary"]
+                or profile.get("checker_identity_sha256") != expected_checker
+                or profile.get("evaluator_identity_sha256") != expected_evaluator
+                or nested["command_sha256"] != hashlib.sha256(command.encode()).hexdigest()
+                or nested["public_task_tree_sha256"] != public_task_sha
+                or nested["feedback_scope"] != feedback_scope
+            ):
+                raise ValueError("public waveform receipt/input mismatch")
     return {
         "summary": summary,
         "result": _json_ready(result),

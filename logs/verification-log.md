@@ -1,5 +1,19 @@
 # Verification Log
 
+## 2026-09-01 - AA-VAE-073 coordinator waveform and receipt repair
+
+- Added the explicit Evolution waveform option using the existing isolated
+  executor; branch export remains NoEVAS, each public check is charged once,
+  and the old validator does not also execute. Extensions stay in config/request/
+  final evidence, not the closed generic Evolution reducer manifest.
+- Independent read-only review reproduced rehashed receipt command/task/image/
+  scope tampering accepted by prior-feedback hydration. Four adversarial tests
+  were RED; binding actual public runtime/profile inputs makes all four GREEN.
+- Scoped waveform tests: **8 passed**; existing Evolution/extension/batch tests:
+  **57 passed / 1 skip**. The combined local gate is **65 passed / 1 skip**;
+  syntax and diff checks passed. Separate combined Docker evidence follows in
+  AA-VAE-075; no paid calls, EVAS edits, final feedback sharing or quality claim.
+
 ## 2026-09-01 - AA-VAE-074 reviewed corpus leaf and independent repair
 
 - RED: reviewed manifest rejected the new `review` field. The existing lexical
