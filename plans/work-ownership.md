@@ -20,6 +20,13 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
+Active main-only repair on `1c73e519bd`: follow
+`r53-public-contract-compatibility.md` for exact runtime/test/document ownership,
+acceptance and forbidden surfaces. Main owns all edits, integration and Git.
+`portable_contract_review` provides read-only test/consumer advice; no delegate
+has write, provider, private-content or publication authority. Historical
+assignments below remain closed.
+
 Completed documentation-only assignment: `single-task-harness-case-study.md`
 on `87c10cb65e`. Plan `21159e3c09` and notebook `6063cfc5ca` are published;
 their exact hosted gates pass. Main owns only final verification-record closure.

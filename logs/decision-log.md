@@ -1,5 +1,20 @@
 # Decision Log
 
+## 2026-08-31 - Repair released portable public contracts without changing scoring
+
+- The user accepted the feedback-path analysis and requested a fix. Repair the
+  proven six-task adapter rejection, not the separately gated behavioral
+  checker, waveform metrics or Evolution selection design.
+- Accept only explicitly matched schema/mode/fixed-command combinations from
+  sealed r53 public contracts. Portable does not mean arbitrary metadata
+  execution or fallback on a strict simulation failure.
+- Preserve public/final authority separation. DUT/bugfix reuse visible stimulus
+  bytes with held-out checker authority; Testbench public reference execution
+  is not fault-detection scoring. Neither is changed by contract compatibility.
+- Main alone implements and publishes; independent advisers are read-only.
+  Follow `plans/r53-public-contract-compatibility.md` and record RED/GREEN plus
+  source-bound smoke evidence before closing the repair.
+
 ## 2026-08-31 - Explain one existing failure before opening the next experiment
 
 - Accept the first follow-up as a documentation/evidence case study, not new

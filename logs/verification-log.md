@@ -1,5 +1,19 @@
 # Verification Log
 
+## 2026-08-31 - Portable public-contract repair intake
+
+- Clean behavioral baseline `1c73e519bdaf2a3a3a62953fbc0472ff33a39f6c` equals
+  fetched origin/main; upstream/main `7b5616dc52` is an ancestor (134 fork-only
+  commits, zero missing upstream commits). Writable remote is BucketSran only.
+- EVAS checkout remains clean at `6cb6fa7a7d` on its audit branch. Read-only live
+  remote checks show both fork/main and upstream/main at that SHA. Its unused
+  local main ref is older (`e428608ab8`); no EVAS ref/worktree was modified.
+- Plan-only gate: `uv run --locked --extra agentic python -m pytest -q
+  tests/test_v4_r53_active_entrypoints.py tests/test_agent_harness_ci_gate.py
+  --tb=short`: **41 passed, 0.11 s**. `git diff --check` passed.
+- Runtime repair, all-release regression, Docker verification and final review
+  are pending; this entry does not claim the six rejected contracts are fixed.
+
 ## 2026-08-31 - Single-task notebook publication verified
 
 - Notebook/navigation/audit commit `6063cfc5ca4732366d587465fc7364a0e66f89af`

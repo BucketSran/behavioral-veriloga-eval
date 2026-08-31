@@ -17,6 +17,11 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
+- Active bounded repair: [r53 public contract compatibility](r53-public-contract-compatibility.md).
+  Support the six already-released portable contracts through the fixed public
+  adapter; add full-1,200 contract coverage and preserve fail-closed command
+  selection. No r53/EVAS, candidate ranking, behavioral scoring or paid-run change.
+
 - Completed human-review preparation: [single-task case study plan](single-task-harness-case-study.md)
   and [Chinese code/evidence walkthrough](../docs/alphaapollo-migration/05_单任务代码与轨迹案例_2026-08-31.md).
   Existing scripted-provider waveform smoke validated read-only; code boundaries,
