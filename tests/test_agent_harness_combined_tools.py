@@ -296,6 +296,10 @@ def test_combined_budget_failure_stops_before_extra_transport(tmp_path, monkeypa
 
 @pytest.mark.parametrize("backend,live", [("native-reasoning", False), ("evolution", False), ("evolution", True)])
 def test_real_docker_combined_tools_and_readonly_report(tmp_path, monkeypatch, backend, live):
+    _exercise_real_combined(tmp_path, monkeypatch, backend, live)
+
+
+def _exercise_real_combined(tmp_path, monkeypatch, backend, live, verify_completed=None):
     if os.environ.get("VABENCH_TEST_DOCKER_RUNTIME") != "1":
         pytest.skip("opt-in actual Docker/EVAS with synthetic model replies only")
     module = importlib.import_module("run_combined_tools")
@@ -372,6 +376,8 @@ def test_real_docker_combined_tools_and_readonly_report(tmp_path, monkeypatch, b
         assert use["public_waveform"]["feedback_exposed_requests"] > 0
     monkeypatch.setattr(module, "_execute", lambda *a, **k: pytest.fail("report executed engine"))
     assert module.read_combined(root) == report
+    if verify_completed is not None:
+        verify_completed(root, report)
     with pytest.raises(ValueError, match="resume|fixture entry"):
         module.execute_fixture(root, docs_corpus=docs, evas_command=evas, scripted_response=response)
     evidence = root / "run" / ("final-result.json" if backend == "evolution"

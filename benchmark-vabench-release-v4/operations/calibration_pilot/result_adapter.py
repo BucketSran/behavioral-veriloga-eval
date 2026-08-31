@@ -79,8 +79,10 @@ def build_inspect_log(ledger: dict):
         eval=EvalSpec(
             eval_id=str(uuid.uuid4()), run_id=str(uuid.uuid4()), created=created,
             task="vaevas_readonly_import", task_id=ledger["ledger_sha256"],
-            task_version="native-ledger-v1", model="vaevas-readonly-import",
-            dataset=EvalDataset(name="vaEVAS imported native results", samples=len(samples),
+            task_version=(ledger["schema_version"] if "source_kind" in ledger else "native-ledger-v1"),
+            model="vaevas-readonly-import",
+            dataset=EvalDataset(name=("vaEVAS imported results" if "source_kind" in ledger
+                                      else "vaEVAS imported native results"), samples=len(samples),
                                 sample_ids=[sample.id for sample in samples], shuffled=False),
             config=EvalConfig(epochs=1, log_samples=True),
             metadata={
@@ -104,7 +106,8 @@ def build_inspect_log(ledger: dict):
 
 
 def export_inspect(
-    campaign_path: Path, run_root: Path, output_dir: Path, *, workers: int = 1,
+    campaign_path: Path | None, run_root: Path, output_dir: Path, *, workers: int = 1,
+    source_kind: str = "native-campaign",
 ) -> dict:
     """Write a new local export directory; inputs are never modified/rejudged."""
     if any(part.is_symlink() for part in (output_dir, *output_dir.parents)):
@@ -112,13 +115,24 @@ def export_inspect(
     destination = output_dir.resolve()
     source_root = run_root.resolve()
     if (destination == source_root or source_root in destination.parents
-            or destination == campaign_path.resolve()
-            or destination in campaign_path.resolve().parents):
+            or destination in source_root.parents
+            or (campaign_path is not None and (
+                destination == campaign_path.resolve()
+                or destination in campaign_path.resolve().parents))):
         raise ValueError("export must be outside source evidence")
     if output_dir.exists():
         raise FileExistsError(output_dir)
     started = time.perf_counter()
-    ledger = read_campaign_ledger(campaign_path, run_root, workers=workers)
+    if source_kind == "native-campaign":
+        if campaign_path is None:
+            raise ValueError("native-campaign requires --campaign")
+        ledger = read_campaign_ledger(campaign_path, run_root, workers=workers)
+    else:
+        from reporting_sources import read_reporting_ledger
+
+        if campaign_path is not None or workers != 1:
+            raise ValueError("multipath sources use their own manifest and one evidence reader")
+        ledger = read_reporting_ledger(source_kind, run_root)
     read_elapsed_s = time.perf_counter() - started
     log = build_inspect_log(ledger)
     from inspect_ai.log import write_eval_log
@@ -135,6 +149,7 @@ def export_inspect(
         "scheduled_cells": ledger["denominator"]["scheduled_cells"],
         "read_workers": workers, "read_elapsed_s": read_elapsed_s,
         "execution_performed": False, "claim_scope": "result_interoperability_only",
+        "source_kind": source_kind,
         "files": {name: hashlib.sha256((output_dir / name).read_bytes()).hexdigest()
                   for name in ("ledger.json", "results.eval")},
     }
@@ -144,12 +159,16 @@ def export_inspect(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--campaign", type=Path, required=True)
+    from reporting_sources import SOURCE_KINDS
+
+    parser.add_argument("--source-kind", choices=("native-campaign", *SOURCE_KINDS), default="native-campaign")
+    parser.add_argument("--campaign", type=Path)
     parser.add_argument("--run-root", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--workers", type=int, default=1, help="Parallel evidence readers, not model workers")
     args = parser.parse_args()
-    print(json.dumps(export_inspect(args.campaign, args.run_root, args.output_dir, workers=args.workers),
+    print(json.dumps(export_inspect(args.campaign, args.run_root, args.output_dir, workers=args.workers,
+                                   source_kind=args.source_kind),
                      sort_keys=True, indent=2))
     return 0
 
