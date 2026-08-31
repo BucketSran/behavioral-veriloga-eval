@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-08-31 - Bind the pilot guard to the frozen manifest cap
+
+- Audit-task handoff requests one precise driver fix and a local commit only.
+  Reuse the existing guard's validation, reservation and unknown-cost behavior;
+  do not silently substitute its default cap for the manifest's smaller cap.
+- Main retains exact file/Git ownership. Free tests cover actual client HTTP
+  admission and both in-memory/on-disk cap drift; raw credentials/evidence,
+  paid execution, r53/EVAS, guard algorithm and publication remain out of scope.
+  This handoff neither resumes nor resets any historical pilot budget.
+
 ## 2026-08-31 - Prepare a bounded legacy/native workflow comparison
 
 - User acceptance opens protocol, public-information audit and free checks,

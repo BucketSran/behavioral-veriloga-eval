@@ -17,6 +17,20 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
+- Completed bounded repair (audit-task handoff, base `dee9ccfeb0`): pass the frozen
+  pilot manifest's `cap` into the existing `DeepSeekPilotBudget`. Main owns only
+  the exact leaves in `work-ownership.md`. Acceptance/KPIs: a CNY 0.01 fixture
+  opens journal/index at that cap and admits no HTTP; manifest-cap drift rejects
+  before native execution; six-row, unknown-cost and no-resume behavior stays
+  intact. Plan: regression RED, minimal parameter binding, drift regressions,
+  focused/static checks, independent review, local commit and handoff. Stop on
+  ownership drift or a required guard/scoring redesign. No paid run, credentials,
+  private trace access, r53/EVAS edit or push is authorized by this repair.
+  KPIs met: focused 119 passes / 5 optional Docker skips; layout/navigation
+  64 passes; independent read-only review found no required correction. Local
+  commit only; full typechecking, fresh Docker/final scoring and hosted CI are
+  not claimed. Main returns the exact commit to the requesting audit task.
+
 - Prepared: [legacy/native mini-swe comparison protocol](legacy-native-comparison-protocol.md)
   ([AA-VAE-069](../docs/alphaapollo-migration/features/AA-VAE-069-legacy-native-comparison-protocol.md)).
   Six planned Agentic cells cover family001 DUT/bugfix/Testbench; public source

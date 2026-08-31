@@ -149,7 +149,8 @@ def execute_pilot(root: Path, manifest: dict, *, api_key: str, evas_command: str
 
         with DeepSeekPilotBudget(journal_path, cell_ids=[
             row["pilot_cell_id"] for row in manifest["schedule"]
-        ], currency=manifest["currency"], model_call_limit=manifest["model_calls_per_cell"]) as budget:
+        ], currency=manifest["currency"], cap=manifest["cap"],
+                model_call_limit=manifest["model_calls_per_cell"]) as budget:
             for scheduled in manifest["schedule"]:
                 row = {key: scheduled[key] for key in (
                     "pilot_cell_id", "cell_id", "task_id", "family_id", "form", "backend", "runtime")}

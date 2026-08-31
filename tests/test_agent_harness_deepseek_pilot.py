@@ -111,6 +111,72 @@ def test_freeze_keeps_six_cells_order_bindings_and_refuses_resume(tmp_path, limi
     assert Path(root / "pilot-manifest.json").stat().st_mode & 0o777 == 0o600
 
 
+def test_smaller_manifest_cap_stops_before_http_and_keeps_six_rows(tmp_path, monkeypatch):
+    pilot = importlib.import_module("run_deepseek_pilot")
+    root = tmp_path / "pilot"
+    manifest = pilot.freeze_pilot(root, preflight={"currency": "CNY", "model_available": True},
+                                 image_id="sha256:" + "a" * 64, code_commit="b" * 40,
+                                 evas_identity={"available": True})
+    # Configure synthetic frozen input before execution; never edit live evidence.
+    manifest["cap"] = "0.01"
+    (root / "pilot-manifest.json").write_text(json.dumps(manifest))
+    native_calls, http_calls = [], []
+
+    def native_dispatch(cell, args, client):
+        native_calls.append(cell["cell_id"])
+        client.complete([{"role": "user", "content": "fixture"}], 4096, [])
+
+    def fake_http(argv, **kwargs):
+        http_calls.append(argv)
+        return subprocess.CompletedProcess(argv, 28, "", "fixture unexpected HTTP")
+
+    monkeypatch.setattr(pilot, "run_cell_preserving_failure", native_dispatch)
+    monkeypatch.setattr(subprocess, "run", fake_http)
+    result = pilot.execute_pilot(root, manifest, api_key="fixture-key", evas_command="unused")
+    events = [json.loads(line) for line in (root / "budget.jsonl").read_text().splitlines()]
+    assert http_calls == []
+    assert native_calls == [manifest["schedule"][0]["cell_id"]]
+    assert events[0]["event"] == "opened" and events[0]["cap"] == "0.01"
+    assert not any(event["event"] == "reserved" for event in events)
+    assert result["cap"] == "0.01"
+    assert json.loads((root / "pilot-index.json").read_text()) == result
+    assert result["scheduled_count"] == len(result["rows"]) == 6
+    assert result["started_count"] == 1 and result["http_attempts"] == 0
+    assert result["committed_upper_bound"] == "0"
+    assert result["dispositions"] == {"operationally_censored": 1, "not_started": 5}
+    assert result["rows"][0]["reason"] == "insufficient_reservation"
+    assert [row["model_calls"] for row in result["rows"]] == [1, 0, 0, 0, 0, 0]
+    assert all(row["score"] is None and row["native_evidence"] is None for row in result["rows"])
+    assert all(not (root / row["runtime"]).exists() for row in result["rows"][1:])
+
+
+@pytest.mark.parametrize("drift_target", ["argument", "file"])
+def test_manifest_cap_drift_rejects_before_native_or_http(tmp_path, monkeypatch, drift_target):
+    pilot = importlib.import_module("run_deepseek_pilot")
+    root = tmp_path / "pilot"
+    manifest = pilot.freeze_pilot(root, preflight={"currency": "CNY", "model_available": True},
+                                 image_id="sha256:" + "a" * 64, code_commit="b" * 40,
+                                 evas_identity={"available": True})
+    if drift_target == "argument":
+        manifest["cap"] = "0.01"
+    else:
+        (root / "pilot-manifest.json").write_text(json.dumps({**manifest, "cap": "0.01"}))
+    calls = []
+
+    def forbidden(*args, **kwargs):
+        calls.append(True)
+        pytest.fail("manifest cap drift must reject before native execution or HTTP")
+
+    monkeypatch.setattr(pilot, "run_cell_preserving_failure", forbidden)
+    monkeypatch.setattr(subprocess, "run", forbidden)
+    with pytest.raises(ValueError, match="frozen pilot manifest mismatch"):
+        pilot.execute_pilot(root, manifest, api_key="fixture-key", evas_command="unused")
+    assert calls == []
+    assert all(not (root / name).exists()
+               for name in ("execution.jsonl", "budget.jsonl", "pilot-index.json"))
+    assert all(not (root / row["runtime"]).exists() for row in manifest["schedule"])
+
+
 def test_campaign_drift_keeps_six_unstarted_without_any_provider_or_native_call(tmp_path, monkeypatch):
     pilot = importlib.import_module("run_deepseek_pilot")
     root = tmp_path / "pilot"

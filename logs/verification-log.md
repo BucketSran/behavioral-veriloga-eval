@@ -1,5 +1,46 @@
 # Verification Log
 
+## 2026-08-31 - Pilot manifest-cap binding: free RED/GREEN
+
+- Intake: clean behavioral main and live BucketSran origin/main both at
+  `dee9ccfeb09cc41baf1982d1ee7882f92aef5d72`; live upstream/main remains
+  `7b5616dc52195ec275ec6d21c71d7763613702cd` (143 fork commits ahead, none
+  missing). EVAS checkout and live fork/upstream main all remain
+  `6cb6fa7a7dac70fc0d4120126d8cf74258e6637b`, clean and read-only.
+- Tracer regression command: `uv run --locked --extra agentic python -m pytest -q
+  tests/test_agent_harness_deepseek_pilot.py::test_smaller_manifest_cap_stops_before_http_and_keeps_six_rows
+  --tb=short`. RED: **1 failed, 0.30 s**; old driver sent one stub HTTP despite
+  manifest cap `0.01`. After passing `cap=manifest["cap"]` into the existing
+  guard: **1 passed, 0.13 s**. Journal/index both use `0.01`, no HTTP/reservation
+  is admitted, six rows remain, and all scores stay null.
+- Added cap-drift cases for the argument and on-disk manifest. Both reject via
+  the existing manifest equality check before native/HTTP or execution/budget
+  journal creation; no second runtime change was needed.
+- `uv run --locked --extra agentic python -m pytest -q
+  tests/test_agent_harness_deepseek_pilot.py tests/test_agent_harness_deepseek_budget.py
+  tests/test_agent_harness_deepseek_budget_smoke.py tests/test_agent_harness_pilot_credentials.py
+  tests/test_agent_harness_model_call_budget.py tests/test_agent_harness_ci_gate.py
+  tests/test_v4_r53_active_entrypoints.py --tb=short`:
+  **119 passed / 5 optional Docker skips, 0.84 s**. Existing free unknown-cost,
+  call-limit and no-resume guard checks pass. No provider or credential access.
+- Layout/navigation selection (same pytest flags; `tests/test_evas_output_cleanup.py`,
+  `tests/test_v4_r53_active_entrypoints.py`, `tests/test_agent_harness_ci_gate.py`):
+  **64 passed, 1.78 s**. No dedicated `scripts/check_repo_layout.py` is present.
+- `uvx --offline --from ruff==0.12.12 ruff check` and
+  `uv run --locked --extra agentic python -m py_compile` on both changed Python
+  files pass, as does `git diff --check`. No configured/installed project
+  mypy/pyright check was available; compilation/lint are not full typechecking.
+- Runtime delta is only guard parameter binding. Default CLI/freeze values,
+  guard algorithm, r53/EVAS and historical experiment evidence are unchanged.
+  This slice does not rerun Docker/final scoring or a live model; previous
+  end-to-end evidence is not represented as fresh coverage of this commit.
+  Local-only commit requested; no push or source-bound hosted CI is claimed.
+- Independent `cap_binding_review`: **0 required corrections**, verdict
+  `COMMENT`; independently reran 119/5 and 64-test gates, Ruff, compilation,
+  diff and static-pattern checks. LSP/ast-grep and full typechecking were not
+  available, so no broader static or merge-readiness claim is inferred.
+  Review assignment closed; main owns the local commit/handoff only.
+
 ## 2026-08-31 - AA-VAE-069 published and source-bound hosted GREEN
 
 - Intake `412f15f7c8` and protocol/test source

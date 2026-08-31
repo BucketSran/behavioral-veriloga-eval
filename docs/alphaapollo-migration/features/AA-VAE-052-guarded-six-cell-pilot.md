@@ -49,7 +49,19 @@ identity、campaign hash 与发布 manifest。它不是抵御同用户恶意主�
 free fixture 验证工程连通，不证明真实模型效果；live 结果另记，始终仅为
 development-only 小样本工程试跑，不是 baseline 复现或优劣结论。
 
-## 真实调用结果（同日，独立于免费 fixture）
+## 2026-08-31：冻结费用上限接线修复
+
+`execute_pilot` 现在把 manifest 的 `cap` 显式传给已有
+`DeepSeekPilotBudget`，避免较小冻结额度被 guard 的默认额度替代。
+guard 算法、CLI 默认额度和 `freeze_pilot` 参数均未改变；没有新增 cap CLI。
+同一测试先证明旧路径会放行 stub HTTP，再验证 CNY 0.01 时零 HTTP、
+journal/index 同额度、六行分母与未启动记录保留。新增两种 cap 漂移回归
+确认参数与文件不一致时在 native/HTTP 和运行日志创建前拒绝；这是已有校验，
+不是第二项运行时修复。仅合成 fixture 修改测试输入，不允许修改已运行的
+冻结 manifest 或重置历史预算。本切片不读取凭据、不调用真实服务；
+精确免费验证与本地提交状态见 verification log。
+
+## 2026-08-30：真实调用结果（独立于免费 fixture）
 
 已执行一次：[脱敏审计](../experiments/deepseek-pilot-20260830.md)。16次 HTTP，
 两个 DUT 单元分别因八次上限、SSL 握手失败后的未知费用保护而中止，后四项

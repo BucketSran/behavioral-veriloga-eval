@@ -20,6 +20,24 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
+Closed bounded integration request from audit task
+`01a05640-c83b-7223-8da0-738af106d023`, base
+`dee9ccfeb09cc41baf1982d1ee7882f92aef5d72`: main alone owns
+`benchmark-vabench-release-v4/operations/calibration_pilot/run_deepseek_pilot.py`,
+`tests/test_agent_harness_deepseek_pilot.py`, `plans/current-plan.md`, this
+register, both decision/verification logs,
+`docs/alphaapollo-migration/features/AA-VAE-052-guarded-six-cell-pilot.md` and
+`docs/alphaapollo-migration/01_功能迁移台账.md`. Bind the frozen manifest cap
+to the existing guard; prove smaller-cap HTTP rejection and manifest-cap drift
+rejection with free fixtures. No guard algorithm, r53/EVAS, credentials, raw
+private evidence, paid calls or push. Audit task remains shared-source read-only;
+`cap_binding_review` owns only independent read-only review of these changes
+and the existing guard/client context. Return a clean local commit and test evidence;
+no coordinator transfer or historical writer reactivation.
+Implementation and free verification are complete; `cap_binding_review` has
+returned no required corrections and its read-only assignment is closed.
+Main owns only local commit/handoff; no further source or paid-run lane opens here.
+
 Closed protocol preparation on `2c07dca529`: follow
 `legacy-native-comparison-protocol.md` for exact ownership and acceptance.
 Main owns documentation and bounded offline evidence tests, not production
