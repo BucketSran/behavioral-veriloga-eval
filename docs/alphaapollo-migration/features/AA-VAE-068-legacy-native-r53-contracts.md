@@ -2,7 +2,8 @@
 
 ## 功能标识与来源
 
-- 日期：2026-08-31；负责人：主线程；状态：本地验证与独立审查通过，待同源 CI。
+- 日期：2026-08-31；负责人：主线程；状态：`08f2c9310f` 已发布 fork/main，
+  本地验证、独立审查及两条同源 CI 通过。
 - 来源：AA-VAE-067 审查留下的独立调用方缺口，不是新的 AlphaApollo 代码移植。
   继续采用代码约束工具契约、复用共同校验、明确 backend 边界的工程思想。
 - 原问题：旧 `--agent-scaffold native` 的 schema 白名单只到 r52；即便补上
@@ -40,6 +41,9 @@ argv/cwd，检查公开 reference 拷贝与结果 JSON；故障进程必须仍�
 通过；完整本地 harness/导航选择 1,125 通过、34 个 opt-in 跳过。独立审查无
 必修项。缺失的历史 r52 资产由 hosted full checkout 验证，不宣称本地全仓库
 全绿。Ruff 0.12.12 和编译检查通过；LSP/typecheck 不可用，不用 lint 冒充类型证明。
+该源提交的 hosted 完整 checkout 回归为 1,342 通过、40 跳过，随后全部真实
+Docker/clean-room 阶段通过；这补齐了历史资产环境的回归证据。不是新增模型
+实验，也不把已有 mainline Docker 阶段说成旧 sensitivity 的硬隔离证明。
 
 不改变 r53、EVAS 0.8.7、模型预算、工具集、trajectory schema、候选排名、
 评分或 final non-reentry。family 102 已知动态数组能力限制不变。公开进程

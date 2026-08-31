@@ -17,13 +17,14 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
-- Implemented, pending source-bound hosted gate: [legacy native r53 compatibility](legacy-native-r53-contract-compatibility.md)
+- Completed bounded repair: [legacy native r53 compatibility](legacy-native-r53-contract-compatibility.md)
   ([AA-VAE-068](../docs/alphaapollo-migration/features/AA-VAE-068-legacy-native-r53-contracts.md)).
   Repaired the separate `--agent-scaffold native` sensitivity public tool using
   the canonical r53 selector, while preserving historical supported behavior.
   New tool-boundary tests: 55 passes; local harness/entrypoint gate: 1,125 passes
-  / 34 opt-in skips. Independent review found no required correction. Main
-  owns fork publication and the exact-source hosted full-checkout/Docker gate.
+  / 34 opt-in skips. Independent code/document review found no required correction.
+  Source `08f2c9310f` is published to fork/main; both exact-source hosted gates
+  pass, including 1,342 regression passes / 40 skips and all Docker stages.
   No release/evaluator, default backend, score, selection or paid-run change.
 
 - Implemented bounded repair: [r53 public contract compatibility](r53-public-contract-compatibility.md)

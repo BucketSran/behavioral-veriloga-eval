@@ -1,5 +1,33 @@
 # Verification Log
 
+## 2026-08-31 - Legacy native r53 repair published and hosted GREEN
+
+- Runtime source `08f2c9310fab510aaec84b7cdb6920db28be89df` is published to
+  BucketSran fork/main after separate intake `0feb9b77ec`. Both exact-source
+  workflows pass: [Evaluator Closure](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33350339909)
+  (6m23s) and [Runner Smoke](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33350339825)
+  (smoke 1m21s, Linux sandbox 55s). No Public Agent Runtime workflow triggered.
+- Hosted full-checkout regression: **1,342 passed / 40 skipped, 54.32 s**.
+  This includes the historical published-asset selection absent locally; it
+  does not erase that local environmental limitation or count skips as passes.
+- All exact-source Docker stages pass: public validation **6 / 17.99 s**;
+  native episode **1 / 5.19 s**; native launcher **1 / 4.11 s**; synthetic native
+  docs **2 / 8.12 s**; isolated waveform **2 / 6.65 s**; waveform feedback/freeze/
+  score **5 / 20.07 s**; mixed campaign **1 / 8.45 s**; nine-cell/three-form
+  campaign **3 / 42.71 s**; free-HTTP budget/pilot **6 / 40.77 s**; multi-model
+  Evolution **6 / 70.81 s**; synthetic Evolution docs **1 / 12.16 s**. The final
+  three-arm clean-room hidden-scoring script passes too. These are existing
+  mainline regressions, not new legacy-native isolation or model-quality claims.
+- Final pre-publication navigation/CI/new-boundary selection: **96 passed,
+  6.19 s**. Independent code and document reviews found no required correction.
+  Staged diff/credential-pattern checks passed. Changed paths exclude r53/EVAS;
+  EVAS remains clean. No raw private evidence, credentials or hidden diagnostics
+  were published. Existing Node-action deprecation warnings are nonblocking.
+- Repair/advisory assignments are closed; main owns this documentation
+  closeout. Scope does not include public behavioral metrics, waveform selection
+  protocol, real data/training or paid experiments. Dynamic-array support
+  limitation in pinned EVAS remains unchanged.
+
 ## 2026-08-31 - Legacy native r53 repair: local RED/GREEN and review
 
 - Intake commit `0feb9b77ec` is separate from runtime changes. Plan/navigation

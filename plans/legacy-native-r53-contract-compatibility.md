@@ -61,5 +61,8 @@ correction. New boundary tests: 55 passes; combined with the shared selector:
 86 passes. Existing synthetic legacy selection: 14 passes / 96 deselected.
 Full local harness plus active-entrypoint selection: 1,125 passes / 34 opt-in
 skips. Historical published r52 assets remain absent locally; exact-source
-hosted verification is still required before final closure. No simulator or
-model-quality claim is inferred from fake-EVAS dispatch tests.
+hosted full-checkout verification now passes (1,342 passes / 40 skips) and all
+existing Docker/clean-room stages pass. Source `08f2c9310f` is published to
+fork/main; both hosted workflows are GREEN. Exact links/counts are in the
+verification log. This bounded repair is closed. No simulator or model-quality
+claim is inferred from fake-EVAS dispatch tests.
