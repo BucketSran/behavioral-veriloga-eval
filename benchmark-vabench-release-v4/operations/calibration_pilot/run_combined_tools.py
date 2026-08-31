@@ -36,6 +36,8 @@ from runners.agent_harness.tools.offline_docs import (  # noqa: E402
 )
 
 BACKENDS = ("native-reasoning", "evolution")
+EVIDENCE_SCOPES = {False: "synthetic_provider_integration", True: "real_model_combined_acceptance"}
+CLAIM_SCOPE = "combined_connectivity_not_individual_effect_or_model_quality"
 JUDGE_COMMAND = shlex.join([sys.executable, str(HERE / "trusted_replay_adapter.py")])
 
 
@@ -90,7 +92,7 @@ def freeze_combined(root: Path, *, backend: str, family_id: str, form: str,
     manifest = {
         "schema_version": "vaevas-combined-tools-v1", "backend": backend,
         "live": live, "live_authorized": False,
-        "evidence_scope": "real_model_combined_acceptance" if live else "synthetic_provider_integration",
+        "evidence_scope": EVIDENCE_SCOPES[live],
         "family_id": family_id, "form": form, "source_cell": cell,
         "controls": controls, "budget_ids": budget_ids,
         "image_id": image_id, "branch_image_id": branch_image_id,
@@ -101,7 +103,7 @@ def freeze_combined(root: Path, *, backend: str, family_id: str, form: str,
         "experiment_policy_sha256": runner.experiment_policy_sha256(),
         "source_identity": source_identity(ROOT),
         "code_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
-        "claim_scope": "combined_connectivity_not_individual_effect_or_model_quality",
+        "claim_scope": CLAIM_SCOPE,
     }
     root.mkdir(parents=True, mode=0o700, exist_ok=False)
     _atomic_once(root / "combined-manifest.json", manifest)
@@ -119,6 +121,8 @@ def _validate_frozen(root, *, current_source):
         raise ValueError("invalid combined manifest")
     if type(value.get("live")) is not bool or value.get("public_waveform") is not True:
         raise ValueError("combined intervention mismatch")
+    if value.get("evidence_scope") != EVIDENCE_SCOPES[value["live"]] or value.get("claim_scope") != CLAIM_SCOPE:
+        raise ValueError("combined evidence/claim scope mismatch")
     controls = value["controls"]
     expected = _controls(value["backend"], rounds=controls["rounds"], branch_count=controls["branch_count"],
                          model_calls=controls["model_calls"], tool_calls=controls["tool_calls"],

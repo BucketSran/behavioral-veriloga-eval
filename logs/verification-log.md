@@ -1,5 +1,21 @@
 # Verification Log
 
+## 2026-09-01 - Combined claim label hardening and active local GREEN
+
+- Active local regression on source `18bcd2a547` with CI `73b6a4aa8f`:
+  **1,380 passed / 53 optional skips / 1 explicitly deselected V3 case,
+  204.64 s**. The named deselection is
+  `test_single_task_hidden_scoring_smoke_binds_claim_boundary`; its historical
+  V3 source is intentionally sparse, and hosted checkout still runs it.
+- Final report review added two RED regressions: a free preparation could
+  relabel its evidence/claim scope. Scope now derives from the boolean live
+  mode and the fixed integration-only claim contract, and readback verifies it.
+  This does not certify remote provenance or turn caller assertions into an
+  authenticated identity; it prevents unsupported report labels.
+- Scope regression **2 passed** in independent re-review, no actionable finding;
+  combined/evidence/CI selection **52 passed / 5 name-filter deselections**.
+  Compile and diff checks passed. Full combined Docker recheck follows.
+
 ## 2026-09-01 - AA-VAE-075 credential-free combined CI gate
 
 - Runtime/evidence integration is committed as `18bcd2a547`. Add both new

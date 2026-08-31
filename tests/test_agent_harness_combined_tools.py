@@ -71,6 +71,20 @@ def test_prepare_freezes_all_extensions_without_spending(tmp_path):
     assert not (root / "live-authorization.json").exists()
 
 
+@pytest.mark.parametrize("field,value", [
+    ("evidence_scope", "real_model_combined_acceptance"),
+    ("claim_scope", "formal_model_quality"),
+])
+def test_free_manifest_cannot_relabel_its_claim_boundary(tmp_path, field, value):
+    module, root, manifest, _ = prepared(tmp_path)
+    manifest[field] = value
+    path = root / "combined-manifest.json"
+    path.chmod(0o600)
+    path.write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="scope"):
+        module.read_combined(root)
+
+
 def test_prepared_native_enforces_declared_tool_limit(native_case, tmp_path):  # noqa: F811
     from run_native_mini_swe import run_prepared_native_mini_swe
     from test_agent_harness_native_conditions import _cell, _native_runtime
