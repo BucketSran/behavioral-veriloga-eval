@@ -17,6 +17,13 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
+- In progress: [legacy/native mini-swe comparison protocol](legacy-native-comparison-protocol.md).
+  Prepare a small workflow comparison, actual public/request-surface audit and
+  acceptance tracker using free checks. No model call, new fee authorization,
+  production behavior change or r53/EVAS change. Prompt/recovery/deadline and
+  budget-admission differences must remain visible; this is not pure controller
+  attribution or a paper-baseline reproduction.
+
 - Completed bounded repair: [legacy native r53 compatibility](legacy-native-r53-contract-compatibility.md)
   ([AA-VAE-068](../docs/alphaapollo-migration/features/AA-VAE-068-legacy-native-r53-contracts.md)).
   Repaired the separate `--agent-scaffold native` sensitivity public tool using

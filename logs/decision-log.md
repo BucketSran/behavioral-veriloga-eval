@@ -1,5 +1,20 @@
 # Decision Log
 
+## 2026-08-31 - Prepare a bounded legacy/native workflow comparison
+
+- User acceptance opens protocol, public-information audit and free checks,
+  not a paid baseline run. Compare legacy mini-swe and native-mini-swe while
+  preserving default behavior, r53 and EVAS 0.8.7.
+- Explicitly disclose operational prompt, parsing/recovery, public feedback,
+  deadlines and budget-admission differences. Do not call this architecture-only
+  causal evidence. Keep extensions and other backends outside the first pair.
+- Model/service identity and a fresh fee cap are not frozen. Do not reuse the
+  stopped DeepSeek pilot's budget or mistake native-only safeguards for matched
+  legacy/native admission. Follow `plans/legacy-native-comparison-protocol.md`.
+- Main owns all edits/Git; advisers are read-only. Use existing project plan/log
+  conventions because experiment-plan's shared templates are absent and its
+  default `refine-logs/` location conflicts with repository layout policy.
+
 ## 2026-08-31 - Close the separate legacy native r53 contract residual
 
 - User continuation opens the bounded AA-VAE-067 residual: legacy sensitivity

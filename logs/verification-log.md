@@ -1,5 +1,19 @@
 # Verification Log
 
+## 2026-08-31 - Legacy/native comparison intake baseline
+
+- Clean behavioral main and fetched origin/main both at
+  `2c07dca529277a103fe08f8854fe3957ddc29a6a`; divergence 0/0.
+  Fetched upstream/main divergence 0/140: no missing upstream commit.
+  Publication remains BucketSran origin only.
+- EVAS clean `audit/evas-evaluator-compat`; checkout and live fork/upstream main
+  are `6cb6fa7a7dac70fc0d4120126d8cf74258e6637b`. Read-only throughout.
+- Intake declares protocol/offline evidence scope and sole main ownership.
+  No API call, new runtime feature or performance evidence at intake.
+- Intake navigation/CI selection (`tests/test_v4_r53_active_entrypoints.py`
+  and `tests/test_agent_harness_ci_gate.py`): **41 passed, 0.24 s**;
+  `git diff --check` passed.
+
 ## 2026-08-31 - Legacy native r53 repair published and hosted GREEN
 
 - Runtime source `08f2c9310fab510aaec84b7cdb6920db28be89df` is published to
