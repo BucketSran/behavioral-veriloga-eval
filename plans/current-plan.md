@@ -17,12 +17,16 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
-- In progress: [legacy/native mini-swe comparison protocol](legacy-native-comparison-protocol.md).
-  Prepare a small workflow comparison, actual public/request-surface audit and
-  acceptance tracker using free checks. No model call, new fee authorization,
-  production behavior change or r53/EVAS change. Prompt/recovery/deadline and
-  budget-admission differences must remain visible; this is not pure controller
-  attribution or a paper-baseline reproduction.
+- Prepared: [legacy/native mini-swe comparison protocol](legacy-native-comparison-protocol.md)
+  ([AA-VAE-069](../docs/alphaapollo-migration/features/AA-VAE-069-legacy-native-comparison-protocol.md)).
+  Six planned Agentic cells cover family001 DUT/bugfix/Testbench; public source
+  snapshots and synthetic request differences are separate from full export
+  audit. Focused gate: 115 passes / 3 skips; real common-environment Docker
+  mount audit: 2 passes. No model call or production/r53/EVAS change.
+  Before live launch: shared legacy/native spending-guard integration, read-only
+  cross-backend result join, complete exported/public image audit and new frozen
+  model/decoding/fee authorization. Blueprint is not an executable campaign;
+  all six cells are not_started. This is workflow, not pure-controller attribution.
 
 - Completed bounded repair: [legacy native r53 compatibility](legacy-native-r53-contract-compatibility.md)
   ([AA-VAE-068](../docs/alphaapollo-migration/features/AA-VAE-068-legacy-native-r53-contracts.md)).

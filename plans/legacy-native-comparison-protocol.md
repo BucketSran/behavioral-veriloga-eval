@@ -54,3 +54,18 @@ unmatched budget admission, missing evidence or incomplete denominator blocks
 the affected comparison. Tests use synthetic providers/public inputs and are
 engineering evidence only. A missing image is an audit gap, not permission to
 silently substitute another image or claim isolation.
+
+## Offline delivery and next gate
+
+The [protocol](../docs/alphaapollo-migration/experiments/legacy-native-comparison-20260831.md)
+and adjacent JSON blueprint freeze six family001 Agentic cells. The new test
+checks six offline invariants/snapshots and two opt-in actual Docker environments.
+Focused regression: 115 passed / 3 skipped; new Docker audits separately:
+2 passed / 6 deselected. Independent review found no required correction
+(`COMMENT`; unavailable LSP/ast-grep are not represented as completed checks).
+
+This protocol slice does not implement the live launcher. Reuse existing
+budget/client and scorer readers in the next free implementation slice to
+close matched spending admission and cross-backend result joins. Complete
+export/helper/image audit and fresh model/decoding/fee authorization remain
+required before a real run. All six blueprint cells remain not_started.

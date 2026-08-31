@@ -1,0 +1,77 @@
+{
+  "schema_version": "vaevas-comparison-blueprint-v1",
+  "status": "offline_protocol_only",
+  "live_authorized": false,
+  "claim_scope": "small_sample_workflow_comparison",
+  "source_baseline": "2c07dca529277a103fe08f8854fe3957ddc29a6a",
+  "release": "benchmarkv4-r53",
+  "release_manifest_sha256": "ef390362d7d503134f0b8723b4d6d6753e158127abbb22d4e9ca4cbc507132c6",
+  "model_contract": null,
+  "fee_cap": null,
+  "live_blockers": [
+    "model_and_decoding_identity",
+    "fresh_fee_authorization",
+    "matched_spending_guard_integration",
+    "complete_export_and_image_audit",
+    "cross_backend_result_join"
+  ],
+  "controls": {
+    "agent_scaffold": "mini-swe",
+    "experimental_arm": "Agentic",
+    "mode": "G2",
+    "agent_wall_time_seconds": 1800,
+    "per_turn_max_tokens": 4096,
+    "request_timeout_s": 1800,
+    "tool_timeout_s": 1800,
+    "judge_timeout_s": 1800,
+    "model_call_limit": null,
+    "max_attempts": 1,
+    "workers": 1,
+    "resume": false,
+    "extensions": [],
+    "cross_cell_memory": false,
+    "sandbox": "docker",
+    "network": false,
+    "image_id_for_live_run": null
+  },
+  "judge": {
+    "engine": "evas",
+    "version": "0.8.7",
+    "kind": "final_trusted_replay",
+    "authority": "development_only"
+  },
+  "schedule": [
+    {"order": 1, "cell_id": "ln001-dut-legacy", "task_id": "v4-001", "episode_backend": "legacy", "state": "not_started"},
+    {"order": 2, "cell_id": "ln001-dut-native", "task_id": "v4-001", "episode_backend": "native-mini-swe", "state": "not_started"},
+    {"order": 3, "cell_id": "ln001-bugfix-native", "task_id": "v4-1001", "episode_backend": "native-mini-swe", "state": "not_started"},
+    {"order": 4, "cell_id": "ln001-bugfix-legacy", "task_id": "v4-1001", "episode_backend": "legacy", "state": "not_started"},
+    {"order": 5, "cell_id": "ln001-testbench-legacy", "task_id": "v4-501", "episode_backend": "legacy", "state": "not_started"},
+    {"order": 6, "cell_id": "ln001-testbench-native", "task_id": "v4-501", "episode_backend": "native-mini-swe", "state": "not_started"}
+  ],
+  "public_source_snapshots": [
+    {
+      "task_id": "v4-001",
+      "family_id": "001",
+      "form": "dut",
+      "public_contract_sha256": "390fac62db5fcd5c8c715e860c5ff1b1595d6bcc762da42a4445b7e50c5781d1",
+      "public_files_sha256": "5dcd520233f2e137b853535ba829ef1e1f8c7f89c458d8245d74d7d1efe25aa1",
+      "public_file_count": 3
+    },
+    {
+      "task_id": "v4-1001",
+      "family_id": "001",
+      "form": "bugfix",
+      "public_contract_sha256": "f8c64907cbf53ea2cfe2fb90ef9644f571d16492662c43eedb7ae17dac9f3c4d",
+      "public_files_sha256": "9e2c7a300e810855d0d0d1a847365f25704fe0120d3d5eade01efbe1bcc68666",
+      "public_file_count": 4
+    },
+    {
+      "task_id": "v4-501",
+      "family_id": "001",
+      "form": "testbench",
+      "public_contract_sha256": "0255398fb963d4d4994ab5f5dc9ee333ace87ef42e390a4e2ccfceed79b4e14f",
+      "public_files_sha256": "fdac2a4cddd506e88fccb8bf735dc96db033d36400bd0678e1a82dea2a9a1ad4",
+      "public_file_count": 3
+    }
+  ]
+}

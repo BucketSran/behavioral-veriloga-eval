@@ -29,6 +29,9 @@ AI-native benchmark、agent harness、trajectory、评分与结果生成链路�
 
 最新修复与扩展：
 
+- [AA-VAE-069：旧/新 mini-swe 对照协议](features/AA-VAE-069-legacy-native-comparison-protocol.md)：
+  六单元 blueprint、信息面审计与预算/结果验收；只有免费证据，真实实验尚未启动。
+
 - AA-VAE-060/061：独立公开波形执行器和 native 显式工具，预算/候选/回执 join。
 - AA-VAE-062/063：synthetic native metadata adapter、配对报告与安全 case 索引。
 - AA-VAE-064/065：Evolution 生成信息面修复、synthetic docs 的分支本地接线。

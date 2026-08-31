@@ -1,5 +1,47 @@
 # Verification Log
 
+## 2026-08-31 - AA-VAE-069 offline protocol and actual mount audit
+
+- Intake committed separately as `412f15f7c8`. First new blueprint test RED:
+  **1 failed** because the protocol file did not exist. Added the offline JSON;
+  new non-Docker protocol/source-snapshot checks: **6 passed** in combined runs.
+  This is test-first protocol data, not a repaired production runtime bug.
+- First combined command named nonexistent `test_agent_harness_native_operational_contract.py`:
+  **no tests ran**. Corrected selection (new protocol, mini-swe differential and
+  DeepSeek budget): **44 passed, 13.72 s**. Final expanded selection below
+  supersedes this count; do not add overlapping coverage totals.
+- `uv run --locked --extra agentic python -m pytest -q
+  tests/test_agent_harness_comparison_protocol.py
+  tests/test_agent_harness_mini_swe_differential.py
+  tests/test_agent_harness_deepseek_budget.py
+  tests/test_agent_harness_public_evas_feedback.py
+  tests/test_agent_harness_model_call_budget.py
+  tests/test_v4_r53_active_entrypoints.py tests/test_agent_harness_ci_gate.py
+  --tb=short`: **115 passed / 3 skipped, 26.65 s**. Skips: two new optional Docker
+  mount audits and existing public-feedback Docker test. Fixtures are not models.
+- New actual Docker audit with `VABENCH_TEST_DOCKER_RUNTIME=1`, same new file,
+  `-k observed_docker --basetemp benchmark-vabench-release-v4/reports/aa069-mount-audit-20260831a`:
+  **2 passed / 6 deselected, 6.19 s**. It observes actual mounts/security/image
+  and synthetic sibling invisibility for both structured-feedback settings of
+  the common environment. No complete campaign export, model, simulator or judge.
+- Cached image `sha256:fe44bb54370160ee99bef939ae67a0ab1f51fb3b9a41d3d0c4cf29e7ea38115b`
+  inspected as linux/amd64. An isolated read-only/no-network container reports
+  `evas-sim=0.8.7`, 78 installed examples, compact path/hash-manifest digest
+  `90f9719c68d0a76350e017955ef586a63d55686cd3fd05cee243987b0d67d0ec`.
+  Package examples only, not a full filesystem audit. Docker emitted an expected
+  amd64-on-arm64 warning; no credentials/env values/private payloads inspected.
+- Protocol retains five explicit live blockers. No paid call, production code,
+  release/evaluator mutation, final scoring or old-worktree edit. Actual export
+  helper coverage and cross-backend scoring join are not claimed by source hashes.
+- Independent read-only review found **zero required corrections**, verdict
+  `COMMENT`. Reviewer verified all six offline checks (6 passed / 2 deselected,
+  0.06 s), JSON, local links/fences, diff, manifest binding and secret patterns.
+  No blanket `APPROVE` or full typecheck is inferred: callable LSP/ast-grep were
+  unavailable. Main's pinned Ruff 0.12.12, py_compile and diff checks pass.
+- Final navigation/layout/source-snapshot selection (active entrypoints,
+  output cleanup, task-count filters and new protocol): **55 passed / 2 skipped,
+  1.62 s**. Separate closeout-document review reports no material wording issue.
+
 ## 2026-08-31 - Legacy/native comparison intake baseline
 
 - Clean behavioral main and fetched origin/main both at

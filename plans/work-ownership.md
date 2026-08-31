@@ -20,13 +20,15 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
-Active main-only protocol preparation on `2c07dca529`: follow
+Completed local protocol preparation on `2c07dca529`: follow
 `legacy-native-comparison-protocol.md` for exact ownership and acceptance.
 Main owns documentation and bounded offline evidence tests, not production
 runtime changes or a paid experiment. `case_study_code_map` and
-`portable_contract_review` provide read-only advice; `case_study_review` performs
-independent final review. Historical assignments remain closed. No delegated
-writes, Git operations, provider/credential or hidden-content access.
+`portable_contract_review` have returned their read-only advice; independent
+`case_study_review` reports no required correction (`COMMENT`, static tooling
+limitations explicit). Main owns final record checks/publication. Historical
+assignments remain closed. No delegated writes, Git operations, provider/
+credential or hidden-content access. Live-run implementation is not opened here.
 
 Completed main-only follow-up on `e5f2e9dcec`: follow
 `legacy-native-r53-contract-compatibility.md` for exact scope and KPIs.
