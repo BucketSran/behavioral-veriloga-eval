@@ -58,6 +58,7 @@ real-Docker cases deselected; navigation/CI contract tests: 41 passed.
 Independent notebook review found zero required changes. Its verdict is COMMENT
 because LSP/AST tools are unavailable; Markdown/link/secret/diff and structured
 evidence checks substitute for this documentation-only slice.
-Both advisory lanes have returned and have no write assignment. Main owns the
-bounded fork publication and its source-specific hosted verification record.
+Both advisory lanes have returned and have no write assignment. Plan
+`21159e3c09` and notebook `6063cfc5ca` are published to fork/main; both exact
+hosted Runner Smoke gates pass. Main records final publication verification.
 No additional runtime or experiment scope is opened by this completed plan.

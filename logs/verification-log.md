@@ -1,5 +1,25 @@
 # Verification Log
 
+## 2026-08-31 - Single-task notebook publication verified
+
+- Notebook/navigation/audit commit `6063cfc5ca4732366d587465fc7364a0e66f89af`
+  is published to BucketSran fork/main and passed its exact
+  [Runner Smoke](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33345021704):
+  smoke job 1m24s; Linux sandbox job 48s. No Evaluator Closure/Public Agent
+  Runtime run was triggered by this Markdown-only diff; do not infer one.
+- Final staged review: seven Markdown files, 75 valid local links, balanced
+  fences, zero credential-pattern hits and clean diff checks. The final
+  navigation/CI contract rerun reports **41 passed, 0.20 s**, supplementing—not
+  adding distinct cases to—the earlier 41-case navigation invocation.
+- Read-only post-push audit: behavioral main is clean and synced with
+  origin/main; EVAS remains clean on `audit/evas-evaluator-compat`, synced with
+  its tracking branch. Live upstream/main remains `7b5616dc52`. Ignored raw
+  case files remain local; no raw evidence or credentials were uploaded.
+- The case-study work and advisory assignments are closed. This final record
+  changes only publication/ownership documentation; it opens no runtime,
+  provider, data or training work. Existing Node-action deprecation annotations
+  remain nonblocking and are not mixed into this documentation slice.
+
 ## 2026-08-31 - Read-only single-task code and trajectory case study
 
 - Scope baseline `87c10cb65e4bd90f95ba9d1e07492e862d3ad6b6`; plan/ownership

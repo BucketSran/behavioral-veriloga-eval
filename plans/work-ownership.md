@@ -20,9 +20,9 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
-Current documentation-only assignment: `single-task-harness-case-study.md`
-on `87c10cb65e`. Local work and independent review are complete; main owns
-publication of only its listed notebook/navigation/plan/log files.
+Completed documentation-only assignment: `single-task-harness-case-study.md`
+on `87c10cb65e`. Plan `21159e3c09` and notebook `6063cfc5ca` are published;
+their exact hosted gates pass. Main owns only final verification-record closure.
 `case_study_code_map` and `case_study_review` have returned and stopped their
 read-only advisory work; all runtime implementation assignments remain closed.
 No raw evidence edits,
