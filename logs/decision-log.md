@@ -1,5 +1,18 @@
 # Decision Log
 
+## 2026-09-01 - Retire synthetic training; narrow the active surface
+
+- User approved conservative slimming after the feature-value review. Remove
+  only the isolated AA-VAE-059/062 modules and their two exclusive test files;
+  retain dated notes and exact recovery base `5d2a39fe0d`. Their fixture-format
+  evidence remains historical, not a current training capability.
+- Current-plan becomes the sole active queue; completed implementation details
+  stay in existing feature notes/logs and Git. Correct stale corpus status and
+  document existing entrypoint tiers without creating a new launcher.
+- Preserve all supported evaluation, capture/export, recovery and optional tool
+  behavior. No paid calls, dependencies, release/evaluator or old-tree changes.
+  Scope, KPI and review sequence: `plans/mainline-scope-cleanup.md`.
+
 ## 2026-09-01 - Measure native execution; keep report protocols separate
 
 - AA-VAE-079 reuses the existing clean-room stub/production native execution and

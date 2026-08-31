@@ -1,5 +1,21 @@
 # Verification Log
 
+## 2026-09-01 - Cleanup baseline before retiring synthetic training
+
+- Clean main equals origin/main at `5d2a39fe0dde076654e362716456b1a8cedc1547`;
+  refreshed upstream is contained (183/0). No r53, EVAS or old-tree writes.
+- Independent read-only dependency mapping finds a closed subgraph: two
+  training modules and two exclusive tests; no production caller, package
+  export, external schema, shared fixture or explicit CI reference.
+- Before deletion: `.venv/bin/python -m pytest -q` on both training test files
+  plus native_campaign_dispatch, native_launcher, native_episode,
+  native_evolution, evolution_runtime, evolution_campaign, batch_resume,
+  ci_gate (all `tests/test_agent_harness_*.py`) and
+  `tests/test_v4_r53_active_entrypoints.py`: **186 passed / 11 optional skips**.
+  The prototypes account for 41 passes; retained paths account for 145 passes.
+  Existing behavioral coverage is used before cleanup; no artificial RED is
+  claimed for deletion of unused code. No fresh Docker or paid model execution.
+
 ## 2026-09-01 - AA-VAE-079/080 profiling and multi-path reporting
 
 - Profiler RED: missing module. Independent review then found unbound identities,
