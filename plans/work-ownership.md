@@ -20,6 +20,19 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
+2026-09-01 execution profiling/reporting, base `3aa5129a112c220c546dd1e2004d22903860ba30`:
+main owns phase-timing runtime integration, new profiler/tests, CI and all
+plans/logs/migration docs/Git under `execution-profiling-and-reporting.md`.
+`multi_path_export` may edit only calibration-pilot `result_adapter.py`, new
+`reporting_sources.py`, and `tests/test_agent_harness_reporting_sources.py`
+(calibration-pilot is `benchmark-vabench-release-v4/operations/calibration_pilot`).
+Reuse verified comparison/Evolution/combined readers and optional official log
+API; preserve native behavior, source immutability and separate estimands.
+Delegate returns unstaged code/tests and commands, stops writing, and has no
+Git/shared-schema/source-reader/paid/release/evaluator/private-project authority.
+Read-only mapping and review advisers have no write authority. Prior grants
+remain closed; only this paragraph activates a new delegated leaf assignment.
+
 2026-09-01, base `c4f2f93e89dddf3cf91ec7716872c5554524921a`: main owns
 `plans/adversarial-and-result-adapter.md`, the new read-only Inspect adapter and
 its tests, adversarial integration tests, shared docs/logs/CI and Git. The

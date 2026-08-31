@@ -17,6 +17,11 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
+- Active: [execution profiling and multi-path reporting](execution-profiling-and-reporting.md).
+  Approved phase telemetry, fixed workers=1/2/4 scripted Docker workload and
+  read-only legacy/Evolution/combined export. No paid runs or Inspect execution
+  migration; resource scheduling changes remain conditional on measurements.
+
 - Implemented locally: [adversarial acceptance and read-only framework adapter](adversarial-and-result-adapter.md).
   These are separate goals: runtime/checker boundary regressions versus framework
   interoperability and execution-efficiency groundwork. Preserve r53/EVAS and
